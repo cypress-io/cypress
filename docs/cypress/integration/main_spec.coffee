@@ -165,21 +165,21 @@ describe "Documentation", ->
           @nextPage = "installing-cypress.html"
 
         it "does not display Prev link on first page", ->
-          cy.get(".article-footer").should("not.contain", "Prev")
+          cy.get(".article-footer-prev").should("not.exist")
 
         it "displays Next link", ->
-          cy.get(".article-footer").contains("Next").should("have.attr", "href").and("include", @nextPage)
+          cy.get(".article-footer-next").should("have.attr", "href").and("include", @nextPage)
 
         describe "click on Next page", ->
           beforeEach ->
-            cy.get(".article-footer").contains("Next").click()
+            cy.get(".article-footer-next").click()
             cy.url().should("contain", @nextPage)
 
           it "should display Prev link", ->
-            cy.get(".article-footer").should("contain", "Prev")
+            cy.get(".article-footer-prev").should("be.visible")
 
           it "clicking on Prev link should go back to original page", ->
-            cy.get(".article-footer").contains("Prev").click()
+            cy.get(".article-footer-prev").click()
             cy.url().should("contain", @firstPage)
 
       context "Comments", ->
