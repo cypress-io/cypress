@@ -11,13 +11,9 @@ This does not set a `debugger` in your code, unlike [`cy.debug`](https://on.cypr
 | **Returns** | the subject from the previous command for further chaining |
 | **Timeout** | *cannot timeout* |
 
-***
-
 # [cy.pause()](#section-usage)
 
 Stop command execution at the current command.
-
-***
 
 # Options
 
@@ -29,8 +25,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ```javascript
@@ -39,8 +33,6 @@ cy
   .pause()
   .get("button").should("not.be.disabled")
 ```
-
-***
 
 # Related
 

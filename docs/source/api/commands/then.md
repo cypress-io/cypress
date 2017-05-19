@@ -15,13 +15,9 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 | **Returns** | the return of the callback function |
 | **Timeout** | `cy.then` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
-***
-
 # [cy.then( *function* )](#section-usage)
 
 Yield the current subject as the first argument.
-
-***
 
 # Usage
 
@@ -41,8 +37,6 @@ cy.get("form").find("input").then(function($input){
 })
 ```
 
-***
-
 # Options
 
 Pass in an options object to change the default behavior of `cy.then`.
@@ -52,8 +46,6 @@ Pass in an options object to change the default behavior of `cy.then`.
 Option | Default | Notes
 --- | --- | ---
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the click
-
-***
 
 # Usage
 
@@ -82,8 +74,6 @@ Normally you'd use implicit subject assertions via [should](https://on.cypress.i
 Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
 {% endnote %}
 
-***
-
 ## The subject is changed by returning `{foo: 'bar'}`
 
 ```javascript
@@ -94,8 +84,6 @@ cy.then(function(){
   expect(obj).to.deep.eq({foo: "bar"}) // true
 })
 ```
-
-***
 
 ## Cypress waits for the Promise to resolve before continuing
 
@@ -128,8 +116,6 @@ cy.get("button").click().then(function($button){
 })
 ```
 
-***
-
 ## Returning `null` or `undefined` will not modify the subject
 
 ```javascript
@@ -146,8 +132,6 @@ cy
   })
 ```
 
-***
-
 # Options Usage
 
 ```javascript
@@ -155,8 +139,6 @@ cy.then({timeout: 7000}, function(){
   // code here
 })
 ```
-
-***
 
 # Related
 

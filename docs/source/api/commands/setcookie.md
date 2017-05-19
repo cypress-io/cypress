@@ -9,13 +9,9 @@ Set a browser cookie.
 | **Returns** | a cookie object |
 | **Timeout** | `cy.setCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
 
-***
-
 # [cy.setCookie( *name*, *value* )](#section-usage)
 
 Sets a browser cookie.
-
-***
 
 # Options
 
@@ -33,8 +29,6 @@ Option | Default | Notes
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.setCookie` command to be processed
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ## Set a cookie
@@ -45,8 +39,6 @@ cy
   .setCookie('session_id', '189jd09sufh33aaiidhf99d09')
   .getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
 ```
-
-***
 
 # Command Log
 
@@ -66,8 +58,6 @@ The commands above will display in the command log as:
 When clicking on `setCookie` within the command log, the console outputs the following:
 
 ![screen shot 2016-05-10 at 12 16 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153886/00b41782-16a9-11e6-99db-bc085c3513b3.png)
-
-***
 
 # Related
 

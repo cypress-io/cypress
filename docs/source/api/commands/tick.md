@@ -12,13 +12,9 @@ It moves the clock the specified number of `milliseconds`. Any timers within the
 |--- | --- |
 | **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#section-clock-api) |
 
-***
-
 # [cy.tick( *milliseconds* )](#section-usage)
 
 Moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
-
-***
 
 # Usage
 
@@ -42,15 +38,11 @@ cy
     .should("have.text", "Foo")
 ```
 
-***
-
 ## Example Recipe
 
 {% note info Using cy.clock and cy.tick %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
-
-***
 
 # Command Log
 
@@ -69,8 +61,6 @@ The command above will display in the command log as:
 When clicking on the `tick` command within the command log, the console outputs the following:
 
 <img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22438009/504fecd8-e6f8-11e6-8ef1-4d7cb0b5594c.png">
-
-***
 
 # Related
 

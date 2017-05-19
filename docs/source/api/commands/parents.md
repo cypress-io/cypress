@@ -9,19 +9,13 @@ Get the parents DOM elements of the DOM elements.
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | `cy.parents` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.parents()](#section-usage)
 
 Get the ancestors of each element in the current set of matched elements.
 
-***
-
 # [cy.parents( *selector* )](#section-selector-usage)
 
 Get the ancestors of each element in the current set of matched elements filtered by selector
-
-***
 
 # Options
 
@@ -35,8 +29,6 @@ Option | Default | Notes
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
-***
-
 # Usage
 
 ## Get the parents of the active `li`
@@ -45,8 +37,6 @@ Option | Default | Notes
 cy.get("li.active").parents()
 ```
 
-***
-
 # Selector Usage
 
 ## Get the parents with class `nav` of the active `li`
@@ -54,8 +44,6 @@ cy.get("li.active").parents()
 ```javascript
 cy.get("li.active").parents(".nav")
 ```
-
-***
 
 # Command Log
 
@@ -70,8 +58,6 @@ cy.get("li.active").parents()
 When clicking on the `parents` command within the command log, the console outputs the following:
 
 <img width="537" alt="screen shot 2015-11-27 at 2 03 32 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447171/c1ba5ef8-950f-11e5-9f2d-7fbd0b142649.png">
-
-***
 
 # Related
 

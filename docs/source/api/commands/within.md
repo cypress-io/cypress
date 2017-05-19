@@ -9,13 +9,9 @@ Reset the root scope to the current subject and pass that as an argument to the 
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | *cannot timeout* |
 
-***
-
 # [cy.within( *function* )](#section-usage)
 
 Set the root scope to the current subject
-
-***
 
 # Options
 
@@ -26,8 +22,6 @@ Pass in an options object to change the default behavior of `cy.within`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `false` | Display command in command log
-
-***
 
 # Usage
 
@@ -49,8 +43,6 @@ cy.get("form").within(function(){
     .root().submit()
 })
 ```
-
-***
 
 # Related
 

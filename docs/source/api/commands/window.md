@@ -9,13 +9,9 @@ Get the global `window` object of the remote application [visited](https://on.cy
 | **Returns** | the `window` object |
 | **Timeout** | `cy.window` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.window()](#section-usage)
 
 Get the global window object of the remote application you've visited.
-
-***
 
 # Options
 
@@ -26,8 +22,6 @@ Pass in an options object to change the default behavior of `cy.window`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -42,8 +36,6 @@ cy
   })
 ```
 
-***
-
 # Options Usage
 
 ## Passes timeout through to `cy.should` assertion
@@ -51,8 +43,6 @@ cy
 ```javascript
 cy.window({timeout: 10000}).should("have.property", "foo")
 ```
-
-***
 
 # Command Log
 
@@ -69,8 +59,6 @@ The commands above will display in the command log as:
 When clicking on `window` within the command log, the console outputs the following:
 
 <img width="758" alt="screen shot 2015-11-29 at 2 16 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459398/d0e6f4be-96a3-11e5-8583-69dcffef9cd3.png">
-
-***
 
 # Related
 

@@ -9,13 +9,9 @@ Ends the Cypress command chain and returns `null`. This is equivalent to the jQu
 | **Returns** | `null` |
 | **Timeout** | cannot timeout |
 
-***
-
 # [cy.end()](#section-usage)
 
 End the command chain.
-
-***
 
 # Usage
 
@@ -28,8 +24,6 @@ cy
   // queries the entire document again
   .contains("User: Charles").click()
 ```
-
-***
 
 # Command Log
 
@@ -44,8 +38,6 @@ cy
 The commands above will display in the command log as:
 
 ![screen shot 2016-01-21 at 11 28 39 am](https://cloud.githubusercontent.com/assets/1271364/12486875/8aa69ff0-c032-11e5-815d-b29a5020271a.png)
-
-***
 
 # Related
 

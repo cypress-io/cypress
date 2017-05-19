@@ -9,19 +9,13 @@ Get the immediately following sibling of each DOM element in the set of matched 
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | `cy.next` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.next()](#section-usage)
 
 Get the next sibling of the elements.
 
-***
-
 # [cy.next( *selector* )](#section-selector-usage)
 
 When a selector is provided, it retrieves the next sibling only if it matches that selector.
-
-***
 
 # Options
 
@@ -34,8 +28,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
 
 # Usage
 
@@ -53,8 +45,6 @@ Option | Default | Notes
 //returns <li>bananas</li>
 cy.get(".second").next()
 ```
-
-***
 
 # Selector Usage
 
@@ -74,8 +64,6 @@ cy.get(".second").next()
 cy.get("li").next(".selected")
 ```
 
-***
-
 # Command Log
 
 ## Find the element next to the active li
@@ -91,8 +79,6 @@ The commands above will display in the command log as:
 When clicking on `next` within the command log, the console outputs the following:
 
 <img width="547" alt="screen shot 2015-11-29 at 12 42 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png">
-
-***
 
 # Related
 

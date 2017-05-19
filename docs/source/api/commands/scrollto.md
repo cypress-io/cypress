@@ -9,27 +9,19 @@ Scroll to a specific position in the window or in the element found in the previ
 | **Returns** | the window or DOM element that was scrolled  |
 | **Timeout** | `cy.scrollTo` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
 # [cy.scrollTo( *position* )](#section-position-usage)
 
 Scroll to a specific position in the window or in the element found in the previous command. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
 ![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
 
-***
-
 # [cy.scrollTo( *x*, *y* )](#section-coordinate-usage)
 
 You can pass an `x` and `y` coordinate in pixels which will calculate the distance from the top left corner of the element and scroll to the calculated coordinate. The coordinates can be a number or a string with 'px'.
 
-***
-
 # [cy.scrollTo( *width %*, *height %* )](#section-percentage-usage)
 
 You can pass a string with the percentage of the element's width and height to scroll to that position.
-
-***
 
 # Options
 
@@ -46,8 +38,6 @@ Option | Default | Notes
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the scroll
 `log` | `true` | whether to display command in command log
 
-***
-
 # Position Usage
 
 ## Scroll to the bottom of the window
@@ -61,8 +51,6 @@ cy.scrollTo("bottom")
 ```javascript
 cy.get("#movies-list").scrollTo('center')
 ```
-
-***
 
 # Coordinate Usage
 
@@ -78,8 +66,6 @@ cy.get("#infinite-scroll-list").scrollTo(0, 500)
 cy.scrollTo("500px")
 ```
 
-***
-
 # Percentage Usage
 
 ## Scroll 25% down the element
@@ -87,8 +73,6 @@ cy.scrollTo("500px")
 ```javascript
  cy.get(".user-photo").scrollTo('0%', '25%')
 ```
-
-***
 
 # Options Usage
 
@@ -104,15 +88,11 @@ cy.get(".documentation").scrollTo('top', { easing: 'linear'} )
 cy.get("#slider").scrollTo('right', { duration: 2000} )
 ```
 
-***
-
 # Notes
 
 ## Snapshots
 
 **Cypress does not reflect the accurate scroll positions of any elements within snapshots.** If you want to see the actual scrolling behavior in action, we recommend using [`cy.pause()`](https://on.cypress.io/api/pause) to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#section-videos).
-
-***
 
 # Command Log
 
@@ -130,8 +110,6 @@ The commands above will display in the command log as:
 When clicking on `scrollTo` within the command log, the console outputs the following:
 
 <img width="788" alt="screen shot 2017-04-14 at 12 32 16 pm" src="https://cloud.githubusercontent.com/assets/1271364/25049182/6e07211a-210e-11e7-9419-b57f3e08a608.png">
-
-***
 
 # Related
 

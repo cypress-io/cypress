@@ -9,31 +9,21 @@ Use `cy.request` to make HTTP requests. Great for talking to an external endpoin
 | **Returns** | the `response` as an object literal. |
 | **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the [`timeout`](#section-options) passed in the options object of the command. |
 
-***
-
 # [cy.request( *url* )](#section-url-usage)
 
 Makes a `GET` request using the specified url.
-
-***
 
 # [cy.request( *url*, *body* )](#section-url-and-body-usage)
 
 Make a `GET` request to the provided url with the provided body.
 
-***
-
 # [cy.request( *method*, *url* )](#section-method-and-url-usage)
 
 Make a request using the provided method to the specified url.
 
-***
-
 # [cy.request( *method*, *url*, *body* )](#section-method-and-url-and-body-usage)
 
 Additionally pass in the request `body` as a `String` or `Object Literal`. Cypress will set the `Accepts` request header and serialize the response body by its `Content-Type`.
-
-***
 
 # Options
 
@@ -58,8 +48,6 @@ Option | Default | Notes
 
 You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
 
-***
-
 # URL Usage
 
 ## Make a `GET` request
@@ -83,8 +71,6 @@ cy
   .should("include", "<h2>admin.html</h2>")
 ```
 
-***
-
 ## Send the new subject to an HTTP's response on request
 
 ```javascript
@@ -101,8 +87,6 @@ cy.request("http://dev.local/users").then(function(response){
 })
 ```
 
-***
-
 # Method and URL Usage
 
 ## Send a `DELETE` request
@@ -111,8 +95,6 @@ cy.request("http://dev.local/users").then(function(response){
 // Delete a user
 cy.request("DELETE", "http://localhost:8888/users/827")
 ```
-
-***
 
 # Method and URL and Body Usage
 
@@ -128,8 +110,6 @@ cy
     expect(response.body).to.have.property("name", "Jane") // true
 })
 ```
-
-***
 
 # Options Usage
 
@@ -155,8 +135,6 @@ cy.request({
   expect(resp.redirectedToUrl).to.eq("http://localhost:8082/unauthorized")
 })
 ```
-
-***
 
 ## HTML form submissions using form option
 
@@ -190,8 +168,6 @@ cy
 [Check out our example recipe using cy.request for HTML form submissions](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 {% endnote %}
 
-***
-
 # Notes
 
 ## Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?
@@ -199,8 +175,6 @@ cy
 Cypress does not actually make an XHR request out of the browser. Under the hood we are making the HTTP request from the desktop application (in node). Therefore you will not see the request inside of the Chrome Dev Tools.
 
 Note that we automatically set both Cookies + User Agent headers correctly as if the request was really coming from the browser.
-
-***
 
 ## CORS is bypassed
 
@@ -214,15 +188,11 @@ cy
     .should("include", "Testing, the way it should be") // true
 ```
 
-***
-
 ## Cookies are automatically sent and received
 
 Before sending the HTTP request, we will automatically attach cookies that would have otherwise been attached had the request come from the browser. Additionally, if a response has a `Set-Cookie` header, these are automatically set back on the browser cookies.
 
 In other words, `cy.request` transparently performs all of the underlying functions as if it came from the browser.
-
-***
 
 ## Rules for resolving a relative request url
 
@@ -250,8 +220,6 @@ cy.request("seed/admin") //<-- url is http://localhost:1234/seed/admin
 ```
 
 If Cypress cannot determine the host it will throw an explicit error.
-
-***
 
 # Related
 

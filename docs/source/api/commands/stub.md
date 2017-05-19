@@ -16,25 +16,17 @@ Unlike most Cypress commands, `cy.stub` is *synchronous* and returns a value (th
 |--- | --- |
 | **Returns** | the stub |
 
-***
-
 # [cy.stub()](#section-usage)
 
 Creates and returns a stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
-
-***
 
 # [cy.stub( *object*, *"method"* )](#section-replace-a-method-with-a-stub)
 
 Replaces the `method` on the `object` with a stub and returns the stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
 
-***
-
 # [cy.stub( *object*, *"method"*, replacerFn )](#section-replace-a-method-with-a-function)
 
 Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for methods on the spy.
-
-***
 
 # Usage
 
@@ -47,8 +39,6 @@ App.start()
 expect(util.addListeners).to.be.called
 ```
 
-***
-
 ## Replace a method with a stub
 
 ```javascript
@@ -57,8 +47,6 @@ cy.stub(util, "addListeners")
 App.start()
 expect(util.addListeners).to.be.called
 ```
-
-***
 
 ## Replace a method with a function
 
@@ -72,8 +60,6 @@ App.start()
 expect(listenersAdded).to.be.true
 ```
 
-***
-
 ## Specify the return value of a stubbed method
 
 ```javascript
@@ -86,15 +72,11 @@ App.stop()
 expect(removeStub).to.be.called
 ```
 
-***
-
 ## Example Recipe
 
 {% note info Using cy.stub %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
-
-***
 
 ## Alias a stub
 
@@ -114,8 +96,6 @@ expect(withFoo).to.be.called // purposefully failing assertion
 You will see the following in the command log:
 
 ![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22437243/4cc778a4-e6f5-11e6-8f07-e601d3438c4f.png)
-
-***
 
 # Command Log
 
@@ -137,8 +117,6 @@ The command above will display in the command log as:
 When clicking on the `(stub-1)` event within the command log, the console outputs the following:
 
 <img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437546/6b01e574-e6f6-11e6-878f-e10c2316d213.png">
-
-***
 
 # Related
 

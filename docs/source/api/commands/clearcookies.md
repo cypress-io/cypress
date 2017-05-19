@@ -11,13 +11,9 @@ Cypress automatically invokes this command **before** each test to prevent state
 | **Returns** | `null` |
 | **Timeout** | `cy.clearCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command.|
 
-***
-
 # [cy.clearCookies()](#section-usage)
 
 Clears all the browser cookies.
-
-***
 
 # Options
 
@@ -29,8 +25,6 @@ Option | Default | Notes
 --- | --- | ---
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.clearCookies` command to be processed
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -45,8 +39,6 @@ cy
   .visit("/dashboard")                  // we should be redirected back to login
   .url().should("eq", "login")
 ```
-
-***
 
 # Command Log
 
@@ -66,8 +58,6 @@ The commands above will display in the command log as:
 When clicking on `clearCookies` within the command log, the console outputs the following:
 
 ![screen shot 2016-05-10 at 12 02 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153392/1afb086e-16a7-11e6-9541-1b1794e14705.png)
-
-***
 
 # Related
 

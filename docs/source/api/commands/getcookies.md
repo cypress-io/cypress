@@ -9,8 +9,6 @@ Gets all of the browser cookies.
 | **Returns** | an array of cookie objects |
 | **Timeout** | `cy.getCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command.  |
 
-***
-
 # [cy.getCookies()](#section-usage)
 
 Gets the browser cookies.
@@ -27,8 +25,6 @@ Each cookie object will have the following properties:
 | `secure` |
 | `expiry` |
 
-***
-
 # Options
 
 Pass in an options object to change the default behavior of `cy.getCookies`.
@@ -39,8 +35,6 @@ Option | Default | Notes
 --- | --- | ---
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.getCookies` command to be processed
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -57,8 +51,6 @@ cy
       expect(cookies[0]).to.have.property('name', 'session_id')
     })
 ```
-
-***
 
 # Command Log
 
@@ -86,8 +78,6 @@ The commands above will display in the command log as:
 When clicking on `getCookies` within the command log, the console outputs the following:
 
 ![screen shot 2016-05-10 at 12 07 00 pm](https://cloud.githubusercontent.com/assets/1271364/15153583/bc374300-16a7-11e6-8e40-2cba54b95a5a.png)
-
-***
 
 # Related
 

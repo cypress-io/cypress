@@ -9,13 +9,9 @@ Scroll an element into view.
 | **Returns** | the element that was scrolled into view  |
 | **Timeout** | `cy.scrollIntoView` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
 # [cy.scrollIntoView()](#section-usage)
 
 Scroll to the element found in the previous command into view.
-
-***
 
 # Options
 
@@ -31,25 +27,15 @@ Option | Default | Notes
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the scroll
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
-***
-
 # Options Usage
-
-***
 
 # Notes
 
 ## Snapshots
 
-***
-
 # Command Log
-
-***
 
 # Related
 
