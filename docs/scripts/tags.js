@@ -1,7 +1,8 @@
 'use strict'
 
-hexo.extend.tag.register('note', function(args, content){
+/* global hexo */
 
+hexo.extend.tag.register('note', function (args, content) {
   // WHAT IT IS YO
   // [block:callout]
   // {
@@ -25,10 +26,10 @@ hexo.extend.tag.register('note', function(args, content){
   // </blockquote>
 
   const iconLookup = {
-    info: "info",
-    warning: "exclamation",
-    success: "check",
-    danger: "times",
+    info: 'info',
+    warning: 'exclamation',
+    success: 'check',
+    danger: 'times'
   }
 
   var className = args.shift()
@@ -36,10 +37,9 @@ hexo.extend.tag.register('note', function(args, content){
   var result = ''
   var icon = iconLookup[className]
 
-
-  if (args.length){
+  if (args.length) {
     header += `<strong class="note-title foo">
-      ${icon ? `<i class="fa fa-${icon}"></i>` : ""}
+      ${icon ? `<i class="fa fa-${icon}"></i>` : ''}
       ${args.join(' ')}
     </strong>`
   }
@@ -51,8 +51,7 @@ hexo.extend.tag.register('note', function(args, content){
   return result
 }, true)
 
-
-hexo.extend.tag.register('fa', function(args, content){
+hexo.extend.tag.register('fa', function (args, content) {
   // WHAT IT IS YO
   // :fa-angle-right:
 

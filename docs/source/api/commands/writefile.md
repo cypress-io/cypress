@@ -1,5 +1,8 @@
+---
+---
 title: writefile
 comments: true
+description: ''
 ---
 
 Writes to a file with the specified contents. JavaScript arrays and objects are stringified and formatted into text. If the path to the file does not exist, the file and it's path will be created. If the file already exists, it will be over-written.
@@ -7,21 +10,15 @@ Writes to a file with the specified contents. JavaScript arrays and objects are 
 | | |
 |--- | --- |
 | **Returns** | the contents written to the file |
-| **Timeout** | `cy.writeFile` will wait for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to write the file. |
+| **Timeout** | `cy.writeFile` will wait for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to write the file. |
 
-***
-
-# [cy.writeFile( *filePath*, *contents* )](#section-usage)
+# [cy.writeFile( *filePath*, *contents* )](#usage)
 
 Writes to the `filePath` with the `contents`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
 
-***
-
-# [cy.writeFile( *filePath*, *contents*, *encoding* )](#section-specify-encoding)
+# [cy.writeFile( *filePath*, *contents*, *encoding* )](#specify-encoding)
 
 Writes to the `filePath` with the `contents` using the `encoding`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
-
-***
 
 # Options
 
@@ -33,9 +30,7 @@ Pass in an options object to change the default behavior of `cy.writeFile`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.writeFile` command to be processed
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.writeFile` command to be processed
 
 # Usage
 
@@ -111,8 +106,6 @@ The following encodings are supported:
 * `ucs-2`
 * `utf16le`
 * `utf-16le`
-
-***
 
 # Command Log
 

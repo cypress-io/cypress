@@ -1,5 +1,7 @@
+---
 title: readfile
 comments: true
+description: ''
 ---
 
 Reads a file and returns its contents. JSON is automatically parsed into JavaScript.
@@ -7,21 +9,15 @@ Reads a file and returns its contents. JSON is automatically parsed into JavaScr
 | | |
 |--- | --- |
 | **Returns** | the contents of the file |
-| **Timeout** | `cy.readFile` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.readFile` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.readFile( *filePath* )](#section-usage)
+# [cy.readFile( *filePath* )](#usage)
 
 Reads the file at the `filePath`. The `filePath` is relative to the project's root.
 
-***
-
-# [cy.readFile( *filePath*, *encoding* )](#section-specify-encoding)
+# [cy.readFile( *filePath*, *encoding* )](#specify-encoding)
 
 Reads the file at the `filePath` with the `encoding`. The `filePath` is relative to the project's root.
-
-***
 
 # Options
 
@@ -33,9 +29,7 @@ Pass in an options object to change the default behavior of `cy.readFile`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.readFile` command to be processed
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.readFile` command to be processed
 
 # Usage
 
@@ -99,8 +93,6 @@ The following encodings are supported:
 * `utf16le`
 * `utf-16le`
 
-***
-
 # Notes
 
 ## Implicit assertion
@@ -121,8 +113,6 @@ You can assert that a file does not exist like so:
 cy.readFile('does-not-exist.yaml').should("not.exist")
 ```
 
-***
-
 # Command Log
 
 ## List the contents of cypress.json
@@ -138,8 +128,6 @@ The command above will display in the command log as:
 When clicking on the `readFile` command within the command log, the console outputs the following:
 
 <img width="689" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17934460/089e0652-69e6-11e6-9f00-7eb282be0d27.png">
-
-***
 
 # Related
 

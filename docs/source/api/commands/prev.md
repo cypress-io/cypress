@@ -1,5 +1,7 @@
+---
 title: prev
 comments: true
+description: ''
 ---
 
 Get the immediately preceding sibling of each element in the set of the elements.
@@ -7,21 +9,15 @@ Get the immediately preceding sibling of each element in the set of the elements
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prev` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.prev` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.prev()](#section-usage)
+# [cy.prev()](#usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements.
 
-***
-
-# [cy.prev( *selector* )](#section-selector-usage)
+# [cy.prev( *selector* )](#selector-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
-
-***
 
 # Options
 
@@ -33,9 +29,7 @@ Pass in an options object to change the default behavior of `cy.prev`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Usage
 
@@ -56,8 +50,6 @@ Option | Default | Notes
 cy.get(".active").prev()
 ```
 
-***
-
 # Selector Usage
 
 ## Find the previous element with a class of `active`
@@ -77,8 +69,6 @@ cy.get(".active").prev()
 cy.get("li").prev(".active")
 ```
 
-***
-
 # Command Log
 
 ## Find the previous element of the active `li`
@@ -94,8 +84,6 @@ The commands above will display in the command log as:
 When clicking on `prev` within the command log, the console outputs the following:
 
 <img width="446" alt="screen shot 2015-11-29 at 12 47 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458886/5e20c63c-9697-11e5-9167-1b81f96e1906.png">
-
-***
 
 # Related
 

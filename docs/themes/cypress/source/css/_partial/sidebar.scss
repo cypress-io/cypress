@@ -5,11 +5,12 @@
   opacity: 0.8;
   margin-left: -$sidebar-width;
   display: none;
+  background-color: #f5f5f5;
 }
 .sidebar-title {
-  margin-top: 20px;
-  font-size: 0.75;
-  padding: 10px 7px;
+  margin-top: 1.5em;
+  font-size: 1.1em;
+  padding: 10px 20px;
   font-family: $font-title;
   font-weight: 600;
   color: $color-default;
@@ -17,8 +18,13 @@
   line-height: 1;
 }
 
-#article-toc .sidebar-title {
-  padding: 10px 0;
+#sidebar .sidebar-title:first-child {
+  margin-top: 10px;
+}
+
+.sidebar-li {
+  text-indent: -15px;
+  line-height: 1.5;
 }
 
 .sidebar-link {
@@ -27,22 +33,24 @@
   display: block;
   color: $color-link;
   text-decoration: none;
-  padding: 7px;
-  line-height: 1;
+  padding: 3px 10px 3px 35px;
   position: relative;
   width: 100%;
   font-weight: 400;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  overflow: auto;
+  white-space: normal;
+
+
   &.current {
-    color: $color-link;
+    color: white;
     font-weight: 500;
-    background-color: #f1f4f7;
+    background-color: $color-link;
     &:hover {
-      color: $color-link;
+      color: white;
+      background-color: $color-link;
     }
   }
+
   &:hover {
     color: $color-link-hover;
   }

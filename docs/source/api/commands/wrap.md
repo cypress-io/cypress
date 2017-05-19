@@ -1,5 +1,7 @@
+---
 title: wrap
 comments: true
+description: ''
 ---
 
 Return the object passed into `cy.wrap`.
@@ -9,13 +11,9 @@ Return the object passed into `cy.wrap`.
 | **Returns** | the object passed into `cy.wrap` |
 | **Timeout** | *cannot timeout* |
 
-***
-
-# [cy.wrap( *object* )](#section-usage)
+# [cy.wrap( *object* )](#usage)
 
 Return the object passed into `cy.wrap`.
-
-***
 
 # Options
 
@@ -26,8 +24,6 @@ Pass in an options object to change the default behavior of `cy.wrap`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -40,8 +36,6 @@ var fn = function(){
 
 cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 ```
-
-***
 
 # Related
 

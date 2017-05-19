@@ -1,5 +1,7 @@
+---
 title: focus
 comments: true
+description: ''
 ---
 
 Focus on a DOM element. If there is currently a different DOM element currently with focus, Cypress will issue a `blur` event to that element first.
@@ -9,15 +11,11 @@ Focus on a DOM element. If there is currently a different DOM element currently 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.focus` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.focus` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.focus()](#section-usage)
+# [cy.focus()](#usage)
 
 Focus on the DOM element found in the previous command.
-
-***
 
 # Options
 
@@ -28,8 +26,6 @@ Pass in an options object to change the default behavior of `cy.focus`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -46,8 +42,6 @@ Focus, type, and blur the current subject.
 cy.get("[name='comment']").focus().type("Nice Product!").blur()
 ```
 
-***
-
 # Command Log
 
 ## Focus the textarea.
@@ -63,8 +57,6 @@ The commands above will display in the command log as:
 When clicking on the `focus` command within the command log, the console outputs the following:
 
 <img width="526" alt="screen shot 2015-11-27 at 1 33 00 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446857/703fa6c2-950b-11e5-9686-ce6b558cfd92.png">
-
-***
 
 # Errors
 

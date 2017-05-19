@@ -1,95 +1,187 @@
-machine:
-  node:
-    version: 6.5.0
+version: 2
 
-dependencies:
-  # CircleCI caching
-  # https://circleci.com/docs/1.0/how-cache-works/
-  cache_directories:
-    # downloaded Electron binary
-    - "~/.electron"
-    # could not use wildcard format, so list every subfolder
-    - packages/coffee/node_modules
-    - packages/desktop-gui/node_modules
-    - packages/driver/node_modules
-    - packages/electron/node_modules
-    - packages/example/node_modules
-    - packages/extension/node_modules
-    - packages/https-proxy/node_modules
-    - packages/launcher/node_modules
-    - packages/reporter/node_modules
-    - packages/runner/node_modules
-    - packages/server/node_modules
-    - packages/socket/node_modules
-    - packages/static/node_modules
+jobs:
+  build:
+    docker:
+      # the Docker image with Node and XVFB
+      - image: beneaththeink/node-xvfb:6
+      # - image: node:6.5.0
+    working_directory: ~/cypress-monorepo
+    parallelism: 3
+    steps:
+      - checkout
 
-test:
-  ## e2e (1)
-  ## desktop-gui (2)
-  ## driver (3)
-  ## example (4)
-  ## cli (5)
-  ## extension (5)
-  ## https-proxy (5)
-  ## launcher (5)
-  ## reporter (5)
-  ## runner (5)
-  ## server (5, 6)
-  override:
-    #
-    # things to run in the 1st CI container
-    #
-    # run unit tests (fast)
-    # separate commands for better GUI view
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package coffee; fi:
-        parallel: true
+      # need to restore a separate cache for each package.json
+      - restore_cache:
+          key: v1-root-deps
+      - restore_cache:
+          key: v1-deps-coffee
+      - restore_cache:
+          key: v1-deps-desktop-gui
+      - restore_cache:
+          key: v1-deps-driver
+      - restore_cache:
+          key: v1-deps-example
+      - restore_cache:
+          key: v1-deps-electron
+      - restore_cache:
+          key: v1-deps-extension
+      - restore_cache:
+          key: v1-deps-https-proxy
+      - restore_cache:
+          key: v1-deps-launcher
+      - restore_cache:
+          key: v1-deps-reporter
+      - restore_cache:
+          key: v1-deps-runner
+      - restore_cache:
+          key: v1-deps-server
+      - restore_cache:
+          key: v1-deps-socket
+      - restore_cache:
+          key: v1-deps-static
+      - restore_cache:
+          key: v1-deps-ts
+      - restore_cache:
+          key: v1-deps-docs
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package desktop-gui; fi:
-        parallel: true
+      # why is the `npm install` on CircleCI so verbose?
+      - run: echo 'loglevel=warn' >> ~/.npmrc
+      - run: npm install
+      - run: npm run all install
+      - run: cd docs && npm install
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package electron; fi:
-        parallel: true
+      # save each node_modules folder per package
+      - save_cache:
+          key: v1-root-deps-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - save_cache:
+          key: v1-deps-coffee-{{ checksum "packages/coffee/package.json" }}
+          paths:
+            - packages/coffee/node_modules
+      - save_cache:
+          key: v1-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
+          paths:
+            - packages/desktop-gui/node_modules
+      - save_cache:
+          key: v1-deps-driver-{{ checksum "packages/driver/package.json" }}
+          paths:
+            - packages/driver/node_modules
+      - save_cache:
+          key: v1-deps-example-{{ checksum "packages/example/package.json" }}
+          paths:
+            - packages/example/node_modules
+      - save_cache:
+          key: v1-deps-electron-{{ checksum "packages/electron/package.json" }}
+          paths:
+            - packages/electron/node_modules
+      - save_cache:
+          key: v1-deps-extension-{{ checksum "packages/extension/package.json" }}
+          paths:
+            - packages/extension/node_modules
+      - save_cache:
+          key: v1-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
+          paths:
+            - packages/https-proxy/node_modules
+      - save_cache:
+          key: v1-deps-launcher-{{ checksum "packages/launcher/package.json" }}
+          paths:
+            - packages/launcher/node_modules
+      - save_cache:
+          key: v1-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          paths:
+            - packages/reporter/node_modules
+      - save_cache:
+          key: v1-deps-runner-{{ checksum "packages/runner/package.json" }}
+          paths:
+            - packages/runner/node_modules
+      - save_cache:
+          key: v1-deps-server-{{ checksum "packages/server/package.json" }}
+          paths:
+            - packages/server/node_modules
+      - save_cache:
+          key: v1-deps-socket-{{ checksum "packages/socket/package.json" }}
+          paths:
+            - packages/socket/node_modules
+      - save_cache:
+          key: v1-deps-static-{{ checksum "packages/static/package.json" }}
+          paths:
+            - packages/static/node_modules
+      - save_cache:
+          key: v1-deps-ts-{{ checksum "packages/ts/package.json" }}
+          paths:
+            - packages/ts/node_modules
+      - save_cache:
+          key: v1-deps-docs-{{ checksum "docs/package.json" }}
+          paths:
+            - docs/node_modules
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package extension; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package https-proxy; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package launcher; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package reporter; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package runner; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package server; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package socket; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package static; fi:
-        parallel: true
-
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test-integration-once -- --package server; fi:
-        parallel: true
-
-    #
-    # things to run in the 2nd CI container
-    #
-    - if [ $CIRCLE_NODE_INDEX == 1 ]; then npm run all test -- --package driver; fi:
-        parallel: true
-
-    #
-    # things to run in the 3rd CI container
-    #
-    - if [ $CIRCLE_NODE_INDEX == 2 ]; then npm run all test-e2e-once -- --package server; fi:
-        parallel: true
-
-    # Example project E2E tests
-    # Hanging now, so commented out
-    # - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm start -- --project ../example/; fi:
-    #     parallel: true
+      #
+      # things to run in the 1st CI container
+      #
+      - run:
+          name: Running linters
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm run all lint
+            fi
+      - run:
+          name: Fast unit tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm run all test -- --package coffee
+              npm run all test -- --package desktop-gui
+              npm run all test -- --package electron
+              npm run all test -- --package extension
+              npm run all test -- --package https-proxy
+              npm run all test -- --package launcher
+              npm run all test -- --package reporter
+              npm run all test -- --package runner
+              npm run all test -- --package socket
+              npm run all test -- --package static
+            fi
+      - run:
+          name: Server unit tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm run all test -- --package server
+            fi
+      #
+      # things to run in the 2nd CI container
+      #
+      - run:
+          name: Docs - innstalling dependencies
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 1 ]; then
+              cd docs
+              npm install
+              npm run build
+            fi
+      - run:
+          name: Docs - verifying Cypress
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 1 ]; then
+              set -o xtrace
+              cd docs
+              npm run precypress
+              $(npm bin)/cypress --help
+              $(npm bin)/cypress --version
+              $(npm bin)/cypress verify
+            fi
+      - run:
+          name: Docs - running E2E tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 1 ]; then
+              cd docs
+              npm run test-e2e
+            fi
+      #
+      # things to run in the 3rd CI container
+      #
+      - run:
+          name: Driver unit tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 2 ]; then
+              npm run all test -- --package driver
+            fi
