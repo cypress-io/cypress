@@ -6,6 +6,8 @@ $Cypress = require("../cypress")
 
 charsBetweenCurlyBraces = /({.+?})/
 
+TYPES_WHICH_REQUIRE_CHANGE = "number email".split(" ")
+
 $Keyboard = {
   charCodeMap: {
     33:  49,  ## ! --- 1
@@ -237,6 +239,15 @@ $Keyboard = {
 
     el = options.$el.get(0)
 
+    ## newer versions of Chrome incorrectly report the selection
+    ## for number and email types, so we change it to type=text
+    ## and blur it (then set it back and focus it further down
+    ## after the selection algorithm has taken place)
+    if shouldChangeType = el.type in TYPES_WHICH_REQUIRE_CHANGE
+      originalType = el.type
+      el.blur()
+      el.type = "text"
+
     ## if el does not have this property
     bililiteRangeSelection = el.bililiteRangeSelection
     rng = bililiteRange(el).bounds("selection")
@@ -302,6 +313,10 @@ $Keyboard = {
             resetBounds()
         catch
           resetBounds()
+
+    if shouldChangeType
+      el.type = originalType
+      el.focus()
 
     keys = options.chars.split(charsBetweenCurlyBraces).map (chars) ->
       if charsBetweenCurlyBraces.test(chars)
