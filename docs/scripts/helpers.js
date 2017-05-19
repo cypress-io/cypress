@@ -22,7 +22,7 @@ hexo.extend.helper.register('page_nav', function () {
 
   for (var i in sidebar) {
     for (var j in sidebar[i]) {
-      list[sidebar[i][j]] = j
+      list[sidebar[i][j]] = { 'group': i, 'title': j }
     }
   }
 
@@ -31,11 +31,21 @@ hexo.extend.helper.register('page_nav', function () {
   var result = ''
 
   if (index > 0) {
-    result += `<a href="${keys[index - 1]}" title="Prev Article" class="article-footer-prev"><i class="fa fa-chevron-left"></i><span>${this.__(prefix + list[keys[index - 1]])}</span></a>`
+    var group = list[keys[index - 1]].group
+    var page = keys[index - 1]
+    var title = list[keys[index - 1]].title
+    var href = [type, group, page].join('/')
+
+    result += `<a href="${this.config.root + href}" title="Prev Article" class="article-footer-prev"><i class="fa fa-chevron-left"></i><span>${this.__(prefix + title)}</span></a>`
   }
 
   if (index < keys.length - 1) {
-    result += `<a href="${keys[index + 1]}" title="Next Article" class="article-footer-next"><span>${this.__(prefix + list[keys[index + 1]])}</span><i class="fa fa-chevron-right"></i></a>`
+    var group = list[keys[index + 1]].group
+    var page = keys[index + 1]
+    var title = list[keys[index + 1]].title
+    var href = [type, group, page].join('/')
+
+    result += `<a href="${this.config.root + href}" title="Next Article" class="article-footer-next"><span>${this.__(prefix + title)}</span><i class="fa fa-chevron-right"></i></a>`
   }
 
   return result
