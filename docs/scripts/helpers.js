@@ -31,19 +31,19 @@ hexo.extend.helper.register('page_nav', function () {
   var result = ''
 
   if (index > 0) {
-    var group = list[keys[index - 1]].group
-    var page = keys[index - 1]
-    var title = list[keys[index - 1]].title
-    var href = [type, group, page].join('/')
+    const group = list[keys[index - 1]].group
+    const page = keys[index - 1]
+    const title = list[keys[index - 1]].title
+    const href = [type, group, page].join('/')
 
     result += `<a href="${this.config.root + href}" title="Prev Article" class="article-footer-prev"><i class="fa fa-chevron-left"></i><span>${this.__(prefix + title)}</span></a>`
   }
 
   if (index < keys.length - 1) {
-    var group = list[keys[index + 1]].group
-    var page = keys[index + 1]
-    var title = list[keys[index + 1]].title
-    var href = [type, group, page].join('/')
+    const group = list[keys[index + 1]].group
+    const page = keys[index + 1]
+    const title = list[keys[index + 1]].title
+    const href = [type, group, page].join('/')
 
     result += `<a href="${this.config.root + href}" title="Next Article" class="article-footer-next"><span>${this.__(prefix + title)}</span><i class="fa fa-chevron-right"></i></a>`
   }
