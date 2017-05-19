@@ -1,26 +1,27 @@
 'use strict'
 
+/* global hexo */
+
 var pathFn = require('path')
 var _ = require('lodash')
-var url = require('url')
 var cheerio = require('cheerio')
 var lunr = require('lunr')
 
 var localizedPath = ['guides', 'api']
 
-function startsWith(str, start){
+function startsWith (str, start) {
   return str.substring(0, start.length) === start
 }
 
-hexo.extend.helper.register('page_nav', function(){
+hexo.extend.helper.register('page_nav', function () {
   var type = this.page.canonical_path.split('/')[0]
   var sidebar = this.site.data.sidebar[type]
   var path = pathFn.basename(this.path)
   var list = {}
   var prefix = 'sidebar.' + type + '.'
 
-  for (var i in sidebar){
-    for (var j in sidebar[i]){
+  for (var i in sidebar) {
+    for (var j in sidebar[i]) {
       list[sidebar[i][j]] = j
     }
   }
@@ -29,12 +30,12 @@ hexo.extend.helper.register('page_nav', function(){
   var index = keys.indexOf(path)
   var result = ''
 
-  if (index > 0){
+  if (index > 0) {
     result += '<a href="' + keys[index - 1] + '" class="article-footer-prev" title="' + this.__(prefix + list[keys[index - 1]]) + '">' +
       '<i class="fa fa-chevron-left"></i><span>' + this.__('page.prev') + '</span></a>'
   }
 
-  if (index < keys.length - 1){
+  if (index < keys.length - 1) {
     result += '<a href="' + keys[index + 1] + '" class="article-footer-next" title="' + this.__(prefix + list[keys[index + 1]]) + '">' +
       '<span>' + this.__('page.next') + '</span><i class="fa fa-chevron-right"></i></a>'
   }
@@ -42,7 +43,7 @@ hexo.extend.helper.register('page_nav', function(){
   return result
 })
 
-hexo.extend.helper.register('doc_sidebar', function(className){
+hexo.extend.helper.register('doc_sidebar', function (className) {
   var type = this.page.canonical_path.split('/')[0]
   var sidebar = this.site.data.sidebar[type]
   var path = pathFn.basename(this.path)
@@ -50,10 +51,10 @@ hexo.extend.helper.register('doc_sidebar', function(className){
   var self = this
   var prefix = 'sidebar.' + type + '.'
 
-  _.each(sidebar, function(menu, title){
+  _.each(sidebar, function (menu, title) {
     result += '<strong class="' + className + '-title">' + self.__(prefix + title) + '</strong>'
 
-    _.each(menu, function(link, text){
+    _.each(menu, function (link, text) {
       var href = [type, title, link].join('/')
       var itemClass = className + '-link'
       if (link === path) itemClass += ' current'
@@ -66,7 +67,7 @@ hexo.extend.helper.register('doc_sidebar', function(className){
   return result
 })
 
-hexo.extend.helper.register('menu', function(type){
+hexo.extend.helper.register('menu', function (type) {
   var file = type + '-menu'
   var menu = this.site.data[file]
   var self = this
@@ -74,23 +75,23 @@ hexo.extend.helper.register('menu', function(type){
   var isEnglish = lang === 'en'
   var currentPathFolder = this.path.split('/')[0]
 
-  return _.reduce(menu, function(result, menuPath, title){
+  return _.reduce(menu, function (result, menuPath, title) {
     if (!isEnglish && ~localizedPath.indexOf(title)) {
       menuPath = lang + menuPath
     }
     // Sees if our current path is part of the menu's path
     // Capture the first folder
     // /guides/welcome/foo.html captures 'guides'
-    var firstPathName = menuPath.split("/")[1]
+    var firstPathName = menuPath.split('/')[1]
 
     // Does our current path match our menu?
     var isCurrent = currentPathFolder === firstPathName
 
-    return result += `<a href="${self.url_for(menuPath)}" class="${type}-nav-link ${isCurrent ? 'active' : ''}"> ${self.__('menu.' + title)}</a>`
+    return result + `<a href="${self.url_for(menuPath)}" class="${type}-nav-link ${isCurrent ? 'active' : ''}"> ${self.__('menu.' + title)}</a>`
   }, '')
 })
 
-hexo.extend.helper.register('canonical_url', function(lang){
+hexo.extend.helper.register('canonical_url', function (lang) {
   var path = this.page.canonical_path
 
   if (lang && lang !== 'en') path = lang + '/' + path
@@ -98,7 +99,7 @@ hexo.extend.helper.register('canonical_url', function(lang){
   return this.config.url + '/' + path
 })
 
-hexo.extend.helper.register('url_for_lang', function(path){
+hexo.extend.helper.register('url_for_lang', function (path) {
   var lang = this.page.lang
   var url = this.url_for(path)
 
@@ -107,17 +108,17 @@ hexo.extend.helper.register('url_for_lang', function(path){
   return url
 })
 
-hexo.extend.helper.register('raw_link', function(path){
+hexo.extend.helper.register('raw_link', function (path) {
   return 'https://github.com/cypress-io/cypress-documentation/edit/master/source/' + path
 })
 
-hexo.extend.helper.register('page_anchor', function(str){
+hexo.extend.helper.register('page_anchor', function (str) {
   var $ = cheerio.load(str, {decodeEntities: false})
   var headings = $('h1, h2, h3, h4, h5, h6')
 
   if (!headings.length) return str
 
-  headings.each(function(){
+  headings.each(function () {
     var id = $(this).attr('id')
 
     $(this)
@@ -128,37 +129,37 @@ hexo.extend.helper.register('page_anchor', function(str){
   return $.html()
 })
 
-hexo.extend.helper.register('lunr_index', function(data){
-  var index = lunr(function(){
+hexo.extend.helper.register('lunr_index', function (data) {
+  var index = lunr(function () {
     this.field('name', {boost: 10})
     this.field('tags', {boost: 50})
     this.field('description')
     this.ref('id')
   })
 
-  _.sortBy(data, 'name').forEach(function(item, i){
+  _.sortBy(data, 'name').forEach(function (item, i) {
     index.add(_.assign({id: i}, item))
   })
 
   return JSON.stringify(index.toJSON())
 })
 
-hexo.extend.helper.register('canonical_path_for_nav', function(){
+hexo.extend.helper.register('canonical_path_for_nav', function () {
   var path = this.page.canonical_path
 
-  if (startsWith(path, 'guides/') || startsWith(path, 'api/')){
+  if (startsWith(path, 'guides/') || startsWith(path, 'api/')) {
     return path
   } else {
     return ''
   }
 })
 
-hexo.extend.helper.register('lang_name', function(lang){
+hexo.extend.helper.register('lang_name', function (lang) {
   var data = this.site.data.languages[lang]
   return data.name || data
 })
 
-hexo.extend.helper.register('disqus_lang', function(){
+hexo.extend.helper.register('disqus_lang', function () {
   var lang = this.page.lang
   var data = this.site.data.languages[lang]
 
