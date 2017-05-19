@@ -1,5 +1,7 @@
+---
 title: clock
 comments: true
+description: ''
 ---
 
 `cy.clock` overrides native global functions related to time, so you can test code using those functions in an easier, synchronous way. This includes the `setTimeout`, `clearTimeout`, `setInterval`, and `clearInterval` functions as well as controlling `Date` objects. Note that this only applies to the `top` window on a web page. It will not override the time functions on any iframes embedded on the web page.
@@ -14,29 +16,21 @@ If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypre
 
 | | |
 |--- | --- |
-| **Returns** | a `clock` object. See [clock API](#section-clock-api) |
+| **Returns** | a `clock` object. See [clock API](#clock-api) |
 
-***
+# [cy.clock()](#usage)
 
-# [cy.clock()](#section-usage)
-
-Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#section-clock-api)).
+Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#clock-api)).
 
 The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate `new Date` in your application, it will have a time of `January 1st, 1970`.
 
-***
-
-# [cy.clock( *now* )](#section-specify-the-now-timestamp)
+# [cy.clock( *now* )](#specify-the-now-timestamp)
 
 Same as above, but starts the clock at the specified timestamp.
 
-***
-
-# [cy.clock( *now*, *functionNames* )](#section-specify-which-functions-to-override)
+# [cy.clock( *now*, *functionNames* )](#specify-which-functions-to-override)
 
 Same as above, but only overrides the functions in the array `functionNames`.
-
-***
 
 # clock API
 
@@ -49,8 +43,6 @@ Move the clock the specified number of `milliseconds`. Any timers within the aff
 ## clock.restore()
 
 Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
-
-***
 
 # Options
 
@@ -65,8 +57,6 @@ Pass in an options object to change the default behavior of `cy.clock`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -94,8 +84,6 @@ cy
     .should("have.text", "2 seconds")
 ```
 
-***
-
 ## Specify the now timestamp
 
 ```javascript
@@ -114,8 +102,6 @@ cy
     .contains("2017-03-14")
 ```
 
-***
-
 ## Specify which functions to override
 
 This will only override `setTimeout` and `clearTimeout` and leave the other time-related functions as they are.
@@ -123,8 +109,6 @@ This will only override `setTimeout` and `clearTimeout` and leave the other time
 ```javascript
 cy.clock(null, ["setTimeout", "clearTimeout"])
 ```
-
-***
 
 ## Access the clock object to synchronously move time
 
@@ -159,8 +143,6 @@ cy
   })
 ```
 
-***
-
 ## Access the clock object to restore native functions
 
 In general, it should not be necessary to manually restore the native functions that `cy.clock` overrides, since this is done automatically between tests. But if you need to, the `clock` object yielded has `.restore` method.
@@ -182,15 +164,11 @@ cy
   })
 ```
 
-***
-
 ## Example Recipe
 
 {% note info Using cy.clock and cy.tick %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
-
-***
 
 # Command Log
 
@@ -209,8 +187,6 @@ The command above will display in the command log as:
 When clicking on the `clock` command within the command log, the console outputs the following:
 
 <img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437920/0786f9d8-e6f8-11e6-9e77-926b15aa8dae.png">
-
-***
 
 # Related
 

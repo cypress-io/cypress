@@ -1,5 +1,7 @@
+---
 title: type
 comments: true
+description: ''
 ---
 
 Types into the DOM element found in the previous command.
@@ -33,15 +35,11 @@ Sequence | Notes
 | | |
 |--- | --- |
 | **Returns** | the DOM element that was typed into |
-| **Timeout** | `cy.type` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.type` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
 
-***
-
-# [cy.type( *text* )](#section-usage)
+# [cy.type( *text* )](#usage)
 
 Types the text provided into the current DOM subject.
-
-***
 
 # Options
 
@@ -55,10 +53,8 @@ Option | Default | Notes
 `force` | `false` | Forces type, disables error checking prior to type
 `release` | `true` | Keep a modifier activated between commands
 `interval` | `16` | Interval to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -69,8 +65,6 @@ Option | Default | Notes
 // and returns <textarea> for further chaining
 cy.get("textarea").type("Hello world")
 ```
-
-***
 
 ## Type into a non-text or non-textarea element with `tabindex`
 
@@ -89,8 +83,6 @@ cy.get("textarea").type("Hello world")
 cy.get("#el").type("foo")
 ```
 
-***
-
 # Options Usage
 
 ## Force a click to happen prior to type
@@ -108,11 +100,9 @@ cy.get("input[type=text]").type("Test all the things", {force: true})
 Be careful with the `force` option because it allows the type to happen where it might actually be impossible for a real user to type.
 {% endnote %}
 
-***
-
 # Key combinations / Modifiers
 
-When using special character sequences (see table at top of page), it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `cy.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#section-options) is passed as an [option](https://on.cypress.io/v1.0/api/type#section-release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
+When using special character sequences (see table at top of page), it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `cy.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/v1.0/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
 
 ## Type a key combination
 
@@ -125,16 +115,12 @@ cy.get("input").type("{shift}{alt}Q")
 [Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 {% endnote %}
 
-***
-
 ## Hold down modifier key and type a word
 
 ```javascript
 // all characters after {ctrl} will have 'ctrlKey' set to 'true' on their key events
 cy.get("input").type("{ctrl}test")
 ```
-
-***
 
 ## Release behavior
 
@@ -182,8 +168,6 @@ cy.get("input").type("{alt}")
 cy.get("button").click()
 ```
 
-***
-
 ## Global shortcuts / modifiers
 
 `cy.type()` requires a focusable element as the subject, since it's usually unintended to type into something that's not a text field or textarea! Although there *are* a few cases where it's valid to "type" into something other than a text field or textarea:
@@ -206,27 +190,19 @@ cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightar
 cy.get("body").type("{shift}", {release: false}).get("li:first").click()
 ```
 
-***
-
 # Known Issues
 
 ## Native `input[type=date,datetime,datetime-local,month,year,color]`
 
 Special input types are *not* supported yet because browsers implement these input types outside of what is accessible to JavaScript. They also depend on OS regional settings.  The fix however is relatively simple - Cypress will require you to type the final *formatted* value that the input will be set to - and then all will work. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
-***
-
 ## Typing `tab` key does not work
 
 Tabbing will be implemented as a separate command as `cy.tab` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
-***
-
 ## Preventing mousedown does not prevent typing
 
 In a real browser, preventing mousedown on a form field will prevent it from receiving focus and thus prevent it from being able to be typed into. Currently, Cypress does not factor this in. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
-
-***
 
 ## Modifier effects
 
@@ -250,8 +226,6 @@ This holds true for other special key combinations as well (that may be OS-speci
 
 [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need modifier effects to be implemented.
 
-***
-
 # Notes
 
 ## Mimic user typing behavior
@@ -261,8 +235,6 @@ This holds true for other special key combinations as well (that may be OS-speci
 // which simulates how a very fast user types!
 cy.get("[contenteditable]").type("some text!")
 ```
-
-***
 
 ## Events that fire
 
@@ -282,8 +254,6 @@ Additionally `change` events will be fired either when the `{enter}` key is pres
 
 Events that should not fire on non input types such as elements with `tabindex` do not fire their `textInput` or `input` events. Only typing into elements which cause the actual value or text to change will fire those events.
 
-***
-
 ## Event Firing
 
 The following rules have been implemented that match real browser behavior (and the spec):
@@ -292,8 +262,6 @@ The following rules have been implemented that match real browser behavior (and 
 2. Cypress will fire `keypress` *only* if that key is supposed to actually fire `keypress`.
 3. Cypress will fire `textInput` *only* if typing that key would have inserted an actual character.
 4. Cypress will fire `input` *only* if typing that key modifies or changes the value of the element.
-
-***
 
 ## Event Cancellation
 
@@ -310,8 +278,6 @@ $("#username").on("keydown", function(e){
 // are cancelled - which matches the default browser behavior
 cy.get("#username").type("bob@gmail.com").should("have.value", "") // true
 ```
-
-***
 
 ## Implicit form submission behavior
 
@@ -348,11 +314,9 @@ Additionally Cypress handles these 4 other situations as defined in the spec:
 
 Of course if the form's `submit` event is `preventedDefault` the form will not actually be submitted.
 
-***
-
 ## Key Events Table
 
-Cypress will print out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#section-command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
+Cypress will print out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
 
 Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
 
@@ -361,8 +325,6 @@ Additionally, events that cause a `change` event to fire (such as typing `{enter
 Any modifiers activated for the event are also listed in a `modifiers` column.
 
 ![Cypress cy.type key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
-
-***
 
 ## Simulated Events vs Native Events
 
@@ -375,8 +337,6 @@ However, when Cypress is run in `cross browser mode`, Cypress uses the actual `O
 This strategy works well because when you are in development you are working in Chrome.  Using simulated events is extremely fast, the browser window does *not* need to be in focus. Because we simulate events identically to their native counterpart, your application code won't be able to tell the difference.
 
 In other words, you get the best of both worlds: simulated when its practical to do so, and native when it needs to run across browsers.
-
-***
 
 # Command Log
 
@@ -393,8 +353,6 @@ The commands above will display in the command log as:
 When clicking on `type` within the command log, the console outputs the following:
 
 <img width="637" alt="screen shot 2015-11-29 at 1 26 24 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459106/f14f3308-969c-11e5-8352-f96744bbd713.png">
-
-***
 
 # Related
 

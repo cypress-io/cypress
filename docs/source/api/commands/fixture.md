@@ -1,5 +1,7 @@
+---
 title: fixture
 comments: true
+description: ''
 ---
 
 {% note info New to Cypress? %}
@@ -27,21 +29,15 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 | | |
 |--- | --- |
 | **Returns** | the contents of the file, formatted by file extension |
-| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to process this command. |
+| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process this command. |
 
-***
+# [cy.fixture( *fixture* )](#single-fixture-usage)
 
-# [cy.fixture( *fixture* )](#section-single-fixture-usage)
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`.
 
-Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`.
+# [cy.fixture( *fixture*, *encoding* )](#encoding)
 
-***
-
-# [cy.fixture( *fixture*, *encoding* )](#section-encoding)
-
-Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
-
-***
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
 
 # Options
 
@@ -53,9 +49,7 @@ Pass in an options object to change the default behavior of `cy.fixture`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.fixture` command to be processed
-
-***
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.fixture` command to be processed
 
 # Single Fixture Usage
 
@@ -65,15 +59,13 @@ Option | Default | Notes
 cy.fixture("users.json")
 ```
 
-***
-
 ## Omit the fixture file's extension
 
 ```javascript
 cy.fixture("admin")
 ```
 
-When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
+When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
 
 1. `{fixturesFolder}/admin.json`
 2. `{fixturesFolder}/admin.js`
@@ -89,8 +81,6 @@ When no extension is passed to `cy.fixture`, Cypress will search for files with 
 12. `{fixturesFolder}/admin.tiff`
 13. `{fixturesFolder}/admin.zip`
 
-***
-
 ## Image fixtures will be sent by default as `base64`
 
 ```javascript
@@ -101,8 +91,6 @@ cy.fixture("images/logo.png").then(function(logo){
 })
 ```
 
-***
-
 ## Change encoding of Image fixture
 
 ```javascript
@@ -112,8 +100,6 @@ cy.fixture("images/logo.png", "binary").then(function(logo){
   // 000000000000000000000000000000000000000000...
 })
 ```
-
-***
 
 # Notes
 
@@ -127,19 +113,13 @@ You can nest fixtures within folders and reference them by defining the path to 
 cy.fixture("users/admin.json")
 ```
 
-***
-
 ## Validation
 
 Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee` files contain syntax errors, they will automatically be shown in the Command Log.
 
-***
-
 ## Formatting
 
 Cypress automatically formats your fixture files. That means you can paste in a single line of `json` and the next time Cypress serves this fixture, it will format / indent the `json`, which makes it easier to read and debug.
-
-***
 
 ## Encoding
 
@@ -159,7 +139,7 @@ Cypress automatically determines the encoding for the following file types:
 * `.tiff`
 * `.zip`
 
-For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#section--cy-fixture-fixture-encoding-section-encoding-).
+For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#-cy-fixture-fixture-encoding-section-encoding-).
 
 ```javascript
 cy.fixture("foo.bmp", "base64")
@@ -179,8 +159,6 @@ The following encodings are supported:
 * `utf16le`
 * `utf-16le`
 
-***
-
 # Usage with `cy.route()`
 
 ## Using fixture or fx shortcuts
@@ -194,7 +172,7 @@ cy.route("GET", /users/, "fixture:users") // this works
 cy.route("GET", /users/, "fx:users")      // this also works
 ```
 
-This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#section-using-cy-then-to-access-fixture-data)).
+This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data)).
 
 ## Using cy.then to access fixture data
 
@@ -211,7 +189,7 @@ cy
 
 ## Using an alias to access a fixture
 
-However if you still need access to the fixture data, instead of [yielding the fixture's data](https://on.cypress.io/api/fixture#section-using-cy-then-to-access-fixture-data), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+However if you still need access to the fixture data, instead of [yielding the fixture's data](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
 
 Using an alias provides the benefit of terseness and readability.
 
@@ -244,13 +222,9 @@ cy
 })
 ```
 
-***
-
 # Command Log
 
 ## `fixture` does *not* log in the command log
-
-***
 
 # Related
 

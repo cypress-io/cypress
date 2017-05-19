@@ -1,29 +1,25 @@
+---
 title: screenshot
 comments: true
+description: ''
 ---
 
 Take a screenshot of the Command Log and the test runner (the app being tested). The screenshot will be stored in `cypress/screenshots` by default.
 
-You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#section-folders).
+You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#folders).
 
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | `cy.screenshot` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
+| **Timeout** | `cy.screenshot` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command. |
 
-***
-
-# [cy.screenshot()](#section-usage)
+# [cy.screenshot()](#usage)
 
 Take a screenshot of the screen and save as a `.png` in `cypress/screenshots`. By default the filename will be the title of the test.
 
-***
-
-# [cy.screenshot( *filename* )](#section-filename-usage)
+# [cy.screenshot( *filename* )](#filename-usage)
 
 Take a screenshot of the screen and save as a `.png` in `cypress/screenshots`. The filename will be the filename passed in as the argument.
-
-***
 
 # Options
 
@@ -35,9 +31,7 @@ Pass in an options object to change the default behavior of `cy.screenshot`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the automation server to process this command.
-
-***
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the automation server to process this command.
 
 # Usage
 
@@ -52,8 +46,6 @@ it("takes a screenshot", function(){
 })
 ```
 
-***
-
 # Filename Usage
 
 ## Take a screenshot and save as specific filename
@@ -64,29 +56,21 @@ it("takes a screenshot", function(){
 cy.screenshot("clickingOnNav")
 ```
 
-***
-
 # Notes
 
 ## Automatic screenshots on test failure
 
 When running headlessly or in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), Cypress will automatically take a screenshot when a test fails. You can optionally turn this off by setting `screenshotOnHeadlessFailure` to `false` in your [configuration](https://on.cypress.io/guides/configuration).
 
-***
-
 ## Default screenshots folder
 
-By default, screenshots will be saved in `cypress/screenshots`. You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#section-folders).
-
-***
+By default, screenshots will be saved in `cypress/screenshots`. You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#folders).
 
 ## Screenshots in CI
 
 When running in [Circle CI](https://circleci.com/), we will automatically export screenshots as artifacts. This makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything.
 
 If you're using Travis, you'll need to upload artifacts to an s3 bucket as per their [uploading artifacts doc](https://docs.travis-ci.com/user/uploading-artifacts/).
-
-***
 
 ## Understanding when a screenshot happens
 
@@ -97,8 +81,6 @@ For example - say this command times outs `cy.get("#element")`. This causes your
 ## No Command Log scrolling during screenshots
 
  Currently you may not be able to see the Command Log at the exact test you took the screenshot due to the view not scrolling when the screenshot is taken.
-
-***
 
 # Command Log
 
