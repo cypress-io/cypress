@@ -1,5 +1,7 @@
+---
 title: spy
 comments: true
+description: ''
 ---
 
 Wrap a method in a spy in order to record calls to the functions and what arguments the function was called with.
@@ -16,13 +18,9 @@ Unlike most Cypress commands, `cy.spy` is *synchronous* and returns a value (the
 |--- | --- |
 | **Returns** | the spy |
 
-***
-
-# [cy.spy( *object*, *"method"* )](#section-usage)
+# [cy.spy( *object*, *"method"* )](#usage)
 
 Wraps the `method` on the `object` with a spy and returns the spy. See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for [methods](http://sinonjs.org/docs/#spies-api) on the spy.
-
-***
 
 # Usage
 
@@ -36,15 +34,11 @@ expect(util.addListeners).to.be.called
 
 ```
 
-***
-
 ## Example Recipe
 
 {% note info Using cy.spy %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
-
-***
 
 ## Alias a spy
 
@@ -64,8 +58,6 @@ expect(withFoo).to.be.called // purposefully failing assertion
 You will see the following in the command log:
 
 ![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22437291/805bd0d4-e6f5-11e6-99c5-bded81b9c42b.png)
-
-***
 
 # Command Log
 
@@ -87,8 +79,6 @@ The command above will display in the command log as:
 When clicking on the `spy-1` event within the command log, the console outputs the following:
 
 <img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437712/1d5ed1e6-e6f7-11e6-9808-e61936b1d75f.png">
-
-***
 
 # Related
 

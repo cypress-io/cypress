@@ -1,5 +1,7 @@
+---
 title: filter
 comments: true
+description: ''
 ---
 
 Get DOM elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)
@@ -7,15 +9,11 @@ Get DOM elements that match a specific selector. Opposite of [`cy.not()`](https:
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.filter( *selector* )](#section-selector-usage)
+# [cy.filter( *selector* )](#selector-usage)
 
 Reduce the set of matched DOM elements to those that match the selector.
-
-***
 
 # Options
 
@@ -26,9 +24,7 @@ Pass in an options object to change the default behavior of `cy.filter`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Selector Usage
 
@@ -48,8 +44,6 @@ Option | Default | Notes
 // returns <li>About</li>
 cy.get("ul").find(">li").filter(".active")
 ```
-
-***
 
 # Command Log
 

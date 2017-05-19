@@ -1,5 +1,7 @@
+---
 title: go
 comments: true
+description: ''
 ---
 
 Navigate back or forward to the previous or next URL in the browser's history. If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
@@ -7,21 +9,15 @@ Navigate back or forward to the previous or next URL in the browser's history. I
 | | |
 |--- | --- |
 | **Returns** | the `window` object |
-| **Timeout** | `cy.go` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options).  |
+| **Timeout** | `cy.go` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).  |
 
-***
-
-# [cy.go( *direction* )](#section-direction-usage)
+# [cy.go( *direction* )](#direction-usage)
 
 Navigate back or forward to the URL in a specific direction (`back` or `forward`).
 
-***
-
-# [cy.go( *number* )](#section-number-usage)
+# [cy.go( *number* )](#number-usage)
 
 Navigate back or forward going to the URL within a specific history position (-1 goes back one page, 1 goes forward one page).
-
-***
 
 # Options
 
@@ -32,10 +28,8 @@ Pass in an options object to change the default behavior of `cy.go`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the visit
+`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the visit
 `log` | `true` | whether to display command in command log
-
-***
 
 # Direction Usage
 
@@ -45,15 +39,11 @@ Option | Default | Notes
 cy.go("back")   // equivalent to clicking back button
 ```
 
-***
-
 ## Go forward in browser's history
 
 ```javascript
 cy.go("forward") // equivalent to clicking forward button
 ```
-
-***
 
 # Number Usage
 
@@ -63,15 +53,11 @@ cy.go("forward") // equivalent to clicking forward button
 cy.go(-1)       // equivalent to clicking back button
 ```
 
-***
-
 ## Go forward in browser's history
 
 ```javascript
 cy.go(1)        // equivalent to clicking forward button
 ```
-
-***
 
 # Command Log
 
@@ -91,8 +77,6 @@ When clicking on the `get` command within the command log, the console outputs t
 
 ![screen shot 2016-01-21 at 1 46 02 pm](https://cloud.githubusercontent.com/assets/1271364/12491359/b22e569c-c048-11e5-8ec3-f46217a19fc1.png)
 
-***
-
 # Errors
 
 ## cy.go() accepts only a string or number argument
@@ -102,8 +86,6 @@ When clicking on the `get` command within the command log, the console outputs t
 ## cy.go() cannot accept '0'. The number must be greater or less than '0'.
 
 Ensure the number passed to `cy.go()` navigates forward or backward in history. For example, -1 goes back one page, 1 goes forward one page.
-
-***
 
 # Related
 
