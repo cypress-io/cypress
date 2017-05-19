@@ -29,6 +29,7 @@ guides:
     talking-to-your-backend: talking-to-your-backend.html
     spawning-processes: spawning-processes.html
   appendices:
+    configuration: configuration.html
     error-messages: error-messages.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
