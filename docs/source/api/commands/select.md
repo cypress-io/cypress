@@ -11,31 +11,21 @@ Select an option within a `<select>` DOM element.
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | `cy.select` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
-***
-
 # [cy.select( *text* )](#section-text-usage)
 
 Select an option within a `<select>` element based on the text content of the option.
-
-***
 
 # [cy.select( *value* )](#section-value-usage)
 
 Select an option within a `<select>` element based on the value of the option.
 
-***
-
 # [cy.select( *texts* )](#section-texts-usage)
 
 Select multiple options within a `<select>` element based on the text of the option.
 
-***
-
 # [cy.select( *values* )](#section-values-usage)
 
 Select multiple options within a `<select>` element based on the value of the option.
-
-***
 
 # Options
 
@@ -51,8 +41,6 @@ Option | Default | Notes
 `interval` | `50` | Interval which to retry a select
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the select
 `log` | `true` | whether to display command in command log
-
-***
 
 # Text Usage
 
@@ -71,8 +59,6 @@ Option | Default | Notes
 cy.get("select").select("apples")
 ```
 
-***
-
 # Value Usage
 
 ## Select the option with the value "456"
@@ -90,8 +76,6 @@ cy.get("select").select("apples")
 cy.get("select").select("456")
 ```
 
-***
-
 # Texts Usage
 
 ## Select the options with the texts "apples" and "bananas"
@@ -107,8 +91,6 @@ cy.get("select").select("456")
 ```javascript
 cy.get("select").select(["apples", "bananas"])
 ```
-
-***
 
 # Values Usage
 
@@ -126,8 +108,6 @@ cy.get("select").select(["apples", "bananas"])
 cy.get("select").select(["456", "457"])
 ```
 
-***
-
 # Command Log
 
 ## Select the option with the text "Homer Simpson"
@@ -143,8 +123,6 @@ The commands above will display in the command log as:
 When clicking on `select` within the command log, the console outputs the following:
 
 <img width="560" alt="screen shot 2015-11-29 at 1 17 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459045/a6b3bde2-969b-11e5-9357-272ea9684987.png">
-
-***
 
 # Related
 

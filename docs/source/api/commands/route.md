@@ -13,39 +13,27 @@ Use `cy.route` to manage the behavior of network requests.
 | **Returns** | `null` |
 | **Timeout** | *cannot timeout* |
 
-***
-
 # [cy.route( *url* )](#section-url-usage)
 
 Set a route matching the specific `url` which is not stubbed but can be waited on later. This will match `GET` request methods.
-
-***
 
 # [cy.route( *url*, *response* )](#section-url-and-response-usage)
 
 Set a route matching the `url` stubbed with the supplied `response`. This will match `GET` request methods.
 
-***
-
 # [cy.route( *method*, *url* )](#section-method-and-url-usage)
 
 Set a route matching the specific `method` and `url` which is not stubbed but can be waited on later.
 
-***
-
 # [cy.route( *method*, *url*, *response* )](#section-method-url-and-response-usage)
 
 Set a route matching the `method` and `url` stubbed with the supplied `response`.
-
-***
 
 # [cy.route( *function* )](#section-function-usage)
 
 Set a route by returning an object literal from your callback function.
 
 Functions which return a promise will automatically be awaited.
-
-***
 
 # Options
 
@@ -68,8 +56,6 @@ Option | Default | Notes
 
 You can also set options for all [cy.wait](https://on.cypress.io/api/wait) `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration) to control how long to wait for the request and response of the supplied route.
 
-***
-
 # Url Usage
 
 ## Wait on non-stubbed XHR's by url
@@ -85,8 +71,6 @@ cy
   .visit("/users")
   .wait("@getUsers")
 ```
-
-***
 
 # Method and Url Usage
 
@@ -109,8 +93,6 @@ cy
 [Check out our example recipe using cy.route to POST for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 {% endnote %}
 
-***
-
 # Url and Response Usage
 
 ## Url as a string
@@ -122,8 +104,6 @@ cy
   .server()
   .route("/users", [{id: 1, name: "Pat"}])
 ```
-
-***
 
 ## Url as a string glob
 
@@ -152,8 +132,6 @@ cy
   .route("/posts/**")
 ```
 
-***
-
 ## Override Url options
 
 When we check `glob` patterns with `minimatch` by default we use `{ matchBase: true}`.
@@ -169,8 +147,6 @@ cy
   })
   .route(...)
 ```
-
-***
 
 ## Url as a RegExp
 
@@ -189,8 +165,6 @@ $.get("/users/1337", function(data){
   console.log(data) // => {id: 1, name: "Phoebe"}
 })
 ```
-
-***
 
 ## Matching requests and routes
 
@@ -228,8 +202,6 @@ $("form").submit(function(){
 2. The `POST /messages` will match our 2nd route and respond with a 200 status code with the message object.
 3. The `GET /updates` did not match any routes and its response automatically sent back a 404 status code with an empty response body.
 
-***
-
 ## Matching origins and non origin URL's
 
 When Cypress matches up an outgoing XHR request to a `cy.route` it actually attempts to match it against both the fully qualified URL and then additionally without the URL's origin.
@@ -249,8 +221,6 @@ The following XHR's which were `xhr.open(...)` with these URLs would:
 - /users/4/foo
 - http://localhost:2020/users/5/foo
 
-***
-
 # Method, Url, and Response Usage
 
 ## Specify the method
@@ -263,8 +233,6 @@ cy
   // and respond with an empty JSON object
   .route("DELETE", "/users", {})
 ```
-
-***
 
 # Options Usage
 
@@ -317,8 +285,6 @@ cy
 [Check out our example recipe using cy.route to simulate a 503 on POST to login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 {% endnote %}
 
-***
-
 ## Use headers and fixtures for image route
 
 ```javascript
@@ -330,8 +296,6 @@ cy.route({
   }
 })
 ```
-
-***
 
 ## Setting a delay for a specific route
 
@@ -345,8 +309,6 @@ cy.route({
   delay: 3000
 })
 ```
-
-***
 
 # Function Usage
 
@@ -364,8 +326,6 @@ cy.route(function(){
   }
 })
 ```
-
-***
 
 ## Functions which return promises are awaited
 
@@ -385,8 +345,6 @@ cy.route(function(){
 })
 ```
 
-***
-
 # Notes
 
 ## Understanding Stubbed vs Regular XHR's
@@ -405,8 +363,6 @@ Cypress also logs whether the XHR was stubbed or not to the console when you cli
 
 Even the `Initiator` is included, which is a stack trace to what caused the XHR to be sent.
 
-***
-
 ## Requests that don't match a route
 
 You can force routes that do not match a route to return 404:
@@ -422,8 +378,6 @@ cy.server({force404: true})
 ```
 
 You can [read more about this here.](https://on.cypress.io/api/server#prevent-sending-404s-to-unmatched-requests)
-
-***
 
 ## Using Fixtures as Responses
 
@@ -465,8 +419,6 @@ cy
 
 You can [read more about fixtures here.](https://on.cypress.io/api/fixture)
 
-***
-
 ## Using Response Functions
 
 You can also use a function as a response which enables you to add logic surrounding the response.
@@ -485,15 +437,11 @@ var commentsResponse = function(routeData){
 cy.route("POST", "/comments/**", commentsResponse)
 ```
 
-***
-
 ## Response Headers are automatically set
 
 By default, Cypress will automatically set `Content-Type` and `Content-Length` based on what your `response body` looks like.
 
 If you'd like to override this, explicitly pass in `headers` as an `object literal`.
-
-***
 
 # Command Log
 
@@ -516,8 +464,6 @@ When XHR's are made, Cypress will log them in the Command Log and indicate wheth
 When clicking on `XHR Stub` within the Command Log, the console outputs the following:
 
 ![screen shot 2015-12-21 at 7 22 23 pm copy](https://cloud.githubusercontent.com/assets/1268976/11944950/711af9e6-a818-11e5-86b6-d17554403355.png)
-
-***
 
 # Related
 

@@ -9,13 +9,9 @@ Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/
 | **Returns** | the current URL as a string |
 | **Timeout** | *cannot timeout* |
 
-***
-
 # [cy.url()](#section-usage)
 
 Get the current URL.
-
-***
 
 # Options
 
@@ -26,8 +22,6 @@ Pass in an options object to change the default behavior of `cy.url`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -40,8 +34,6 @@ cy
   .url().should("eq", "http://localhost:8000/users/1/edit") // => true
 ```
 
-***
-
 ## URL is a shortcut for `cy.location().href`
 
 `cy.url()` uses `href` under the hood.
@@ -50,8 +42,6 @@ cy
 cy.url()                  // these return the same string
 cy.location().its("href") // these return the same string
 ```
-
-***
 
 # Notes
 
@@ -73,8 +63,6 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 `cy.url()` exists because it's what most developers naturally assume would return them the full current URL.  We almost never refer to the URL as an `href`.
 
-***
-
 # Command Log
 
 ## Assert that the url contains "#users/new"
@@ -90,8 +78,6 @@ The commands above will display in the command log as:
 When clicking on `url` within the command log, the console outputs the following:
 
 <img width="440" alt="screen shot 2015-11-29 at 1 42 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459197/229e2552-969f-11e5-80a9-eeaf3221a178.png">
-
-***
 
 # Related
 

@@ -13,31 +13,21 @@ comments: true
 | **Returns** | the current subject but (in some cases) a new subject |
 | **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.should( *chainers* )](#section-chainers-usage)
 
 Implicitly assert about the current subject.
-
-***
 
 # [cy.should( *chainers*, *value* )](#section-chainers-with-value-usage)
 
 Implicitly assert a value about the current subject. Returns the existing current subject (usually). Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
 
-***
-
 # [cy.should( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
 Implicitly assert about the subject by calling a method and providing a value to that method.
 
-***
-
 # [cy.should( *function* )](#section-function-usage)
 
 Pass a function that can have any number of explicit assertions within it. Does not change the subject. Whatever was passed to the function is what is returned.
-
-***
 
 # Chainers Usage
 
@@ -47,8 +37,6 @@ Pass a function that can have any number of explicit assertions within it. Does 
 cy.get(":checkbox").should("be.disabled")
 ```
 
-***
-
 ## The current subject is returned
 
 ```javascript
@@ -56,8 +44,6 @@ cy.get("option:first").should("be.selected").then(function($option)){
   // $option is still the current subject
 })
 ```
-
-***
 
 # Chainers with Value Usage
 
@@ -67,15 +53,11 @@ cy.get("option:first").should("be.selected").then(function($option)){
 cy.get("form").should("have.class", "form-horizontal")
 ```
 
-***
-
 ## Assert the value is not 'foo'
 
 ```javascript
 cy.get("input").should("not.have.value", "foo")
 ```
-
-***
 
 ## The current subject is returned
 
@@ -85,8 +67,6 @@ cy.get("button").should("have.id", "new-user").then(function($button){
 })
 ```
 
-***
-
 # Chainers with Method and Value Usage
 
 ## Assert the href is equal to '/users'
@@ -95,8 +75,6 @@ cy.get("button").should("have.id", "new-user").then(function($button){
 // have.attr comes from chai-jquery
 cy.get("#header a").should("have.attr", "href", "/users")
 ```
-
-***
 
 # Function Usage
 
@@ -141,8 +119,6 @@ cy
   })
 ```
 
-***
-
 ## Using a callback function will not change the subject
 
 ```javascript
@@ -165,8 +141,6 @@ cy
   })
 ```
 
-***
-
 # Multiple Assertions
 
 ## Chaining multiple assertions
@@ -180,8 +154,6 @@ In this example we use [`cy.and`](https://on.cypress.io/api/and) which is identi
 // so we can continue to use DOM based assertions
 cy.get("option:first").should("be.selected").and("have.value", "Metallica")
 ```
-
-***
 
 ## Assertions that change the subject
 
@@ -218,8 +190,6 @@ cy
   .should("have.attr", "href", "/users")
 ```
 
-***
-
 # Automatic Retry Support
 
 Cypress won't resolve your commands until all of its assertions pass.
@@ -247,8 +217,6 @@ cy
 
 You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#section-resolving-assertions) here.
 
-***
-
 # Notes
 
 ## What assertions and chainers can I use?
@@ -260,8 +228,6 @@ The chainers that `cy.should` accepts come from:
 
 A [list of these](https://on.cypress.io/guides/making-assertions#available-assertions) can be found here.
 
-***
-
 ## How do I know which assertions change the subject and which keep it the same?
 
 The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
@@ -269,8 +235,6 @@ The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#se
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
-
-***
 
 ## Can I pass options to cy.should()?
 
@@ -296,8 +260,6 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
       // be retried for up to 10 seconds
 ```
 
-***
-
 # Command Log
 
 ## Assert that there should be 8 children in a nav
@@ -317,8 +279,6 @@ The commands above will display in the command log as:
 When clicking on `assert` within the command log, the console outputs the following:
 
 <img width="768" alt="screen shot 2015-11-29 at 12 08 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458633/08a7b238-9692-11e5-9d5d-620122436bc0.png">
-
-***
 
 # Related
 

@@ -9,13 +9,9 @@ Get the DOM element that is currently focused.
 | **Returns** | the current DOM element that is focused or `null` |
 | **Timeout** | `cy.focused` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.focused()](#section-usage)
 
 Get the focused DOM element.
-
-***
 
 # Options
 
@@ -27,8 +23,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ## Get the element that is focused.
@@ -37,15 +31,11 @@ Option | Default | Notes
 cy.focused()
 ```
 
-***
-
 ## Make an assertion on the focused element.
 
 ```javascript
 cy.focused().should("have.attr", "name", "username")
 ```
-
-***
 
 # Command Log
 
@@ -62,8 +52,6 @@ The commands above will display in the command log as:
 When clicking on the `focused` command within the command log, the console outputs the following:
 
 <img width="407" alt="screen shot 2015-11-27 at 1 02 02 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446771/d104a6d0-9509-11e5-9464-2e397cb1eb24.png">
-
-***
 
 # Related
 

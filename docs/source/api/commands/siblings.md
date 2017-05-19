@@ -9,19 +9,13 @@ Get the siblings DOM elements of each element in the set of matched DOM elements
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | `cy.siblings` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.siblings()](#section-usage)
 
 Get the siblings of each DOM element in the set of matched DOM elements.
 
-***
-
 # [cy.siblings( *selector* )](#section-selector-usage)
 
 Get the siblings of each DOM element in the set of matched DOM elements filtered by a selector.
-
-***
 
 # Options
 
@@ -34,8 +28,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
 
 # Usage
 
@@ -55,8 +47,6 @@ Option | Default | Notes
 cy.get(".active").siblings()
 ```
 
-***
-
 # Selector Usage
 
 ## Get siblings of element with class `active`.
@@ -65,8 +55,6 @@ cy.get(".active").siblings()
 // returns <li class="active">Services</li>
 cy.get("li").siblings(".active")
 ```
-
-***
 
 # Command Log
 
@@ -83,8 +71,6 @@ The commands above will display in the command log as:
 When clicking on `siblings` within the command log, the console outputs the following:
 
 <img width="429" alt="screen shot 2015-11-29 at 12 49 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458898/ab940fd2-9697-11e5-96ab-a4c34efa3431.png">
-
-***
 
 # Related
 

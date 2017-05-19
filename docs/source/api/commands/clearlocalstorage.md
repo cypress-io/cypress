@@ -11,25 +11,17 @@ Cypress automatically invokes this command **before** each test to prevent state
 | **Returns** | the remote local storage object |
 | **Timeout** | *cannot timeout* |
 
-***
-
 # [cy.clearLocalStorage()](#section-usage)
 
 Clear all data in local storage.
-
-***
 
 # [cy.clearLocalStorage( *string* )](#section-usage)
 
 Clears all keys in local storage matching the string.
 
-***
-
 # [cy.clearLocalStorage( *RegExp* )](#section-usage)
 
 Clears all keys in local storage matching the RegExp.
-
-***
 
 # Usage
 

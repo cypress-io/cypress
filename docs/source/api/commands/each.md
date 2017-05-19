@@ -15,13 +15,9 @@ You can stop the loop early by returning `false` in the callback function.
 | **Returns** | the original array subject given to `cy.each()` |
 | **Timeout** | `cy.each` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.each( *function* )](#section-usage)
 
 Iterate over an array-like structure.
-
-***
 
 # Usage
 
@@ -41,8 +37,6 @@ cy
     }
   })
 ```
-
-***
 
 ## Promises are awaited
 
@@ -81,8 +75,6 @@ cy
 ## cy.each() can only operate on an array like subject.
 
 This error occurs when the subject passed to `cy.each()` does not have a `length` property. Ensure the subject passed to `cy.each()` is an array-like structure.
-
-***
 
 # Related
 

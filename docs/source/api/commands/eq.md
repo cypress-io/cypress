@@ -9,19 +9,13 @@ Get a DOM element in an array of elements at the specific index.
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | `cy.eq` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
-***
-
 # [cy.eq( *index* )](#section-index-usage)
 
 Reduce the set of matched DOM elements to the one at the specified index.
 
-***
-
 # [cy.eq( *indexFromEnd* )](#section-index-from-end-usage)
 
 Providing a negative number indicates a position starting from the end of the set, rather than the beginning.
-
-***
 
 # Options
 
@@ -34,8 +28,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
 
 # Index Usage
 
@@ -55,8 +47,6 @@ Option | Default | Notes
 cy.get("li").eq(1).should("contain", "siamese") // true
 ```
 
-***
-
 # Index Form End Usage
 
 ## Find the 2nd from the last element within the elements
@@ -75,8 +65,6 @@ cy.get("li").eq(1).should("contain", "siamese") // true
 cy.get("li").eq(-2).should("contain", "sphynx") // true
 ```
 
-***
-
 # Command Log
 
 ## Find the 4th `li` in the navigation
@@ -92,8 +80,6 @@ The commands above will display in the command log as:
 When clicking on the `eq` command within the command log, the console outputs the following:
 
 <img width="569" alt="screen shot 2015-11-27 at 2 12 03 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447234/e594ce52-9510-11e5-8794-712a7dbeae55.png">
-
-***
 
 # Related
 

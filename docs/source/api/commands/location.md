@@ -26,13 +26,9 @@ Key | Type | Returns
 `search` | string | ?q=brian
 `toString` | function | http://localhost:8000/app/index.html?q=brian#/users/123/edit
 
-***
-
 # [cy.location( *key* )](#section-key-usage)
 
 Get the specific value by key of the location object above.
-
-***
 
 # Options
 
@@ -44,8 +40,6 @@ Pass in an options object to change the default behavior of `cy.location`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -63,8 +57,6 @@ cy
   })
 ```
 
-***
-
 # Key Usage
 
 ## Assert that a redirect works
@@ -75,8 +67,6 @@ cy
   .visit("http://localhost:3000/admin")
   .location("pathname").should("eq", "/login")
 ```
-
-***
 
 # Notes
 
@@ -104,8 +94,6 @@ Cypress automatically normalizes the `cy.location()` command and strips out extr
 
 When changing properties on the real `window.location` object, it will force the browser to navigate away. In Cypress, the object we returned is a plain object, and changing or affecting its properties will have no effect on navigation.
 
-***
-
 # Command Log
 
 ## Assert on the location's href
@@ -123,8 +111,6 @@ The commands above will display in the command log as:
 When clicking on `location` within the command log, the console outputs the following:
 
 ![screen shot 2017-03-09 at 1 54 58 pm](https://cloud.githubusercontent.com/assets/1268976/23765706/089375e0-04d0-11e7-8344-5872c6f270b2.png)
-
-***
 
 # Related
 
