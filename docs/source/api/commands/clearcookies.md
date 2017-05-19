@@ -1,5 +1,7 @@
+---
 title: clearcookies
 comments: true
+description: ''
 ---
 
 Clears all of the browser cookies.

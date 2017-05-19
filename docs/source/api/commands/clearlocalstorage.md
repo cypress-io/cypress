@@ -1,5 +1,7 @@
+---
 title: clearlocalstorage
 comments: true
+description: ''
 ---
 
 Clears all data in local storage.

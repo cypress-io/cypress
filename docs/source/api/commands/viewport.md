@@ -1,5 +1,7 @@
+---
 title: viewport
 comments: true
+description: ''
 ---
 
 Use `cy.viewport` to control the screen size and orientation of your application. This command is useful for when you need to test your application in a specific width or height, such as responsive applications or applications utilizing media queries. `cy.viewport` width and height must be between 200px and 3000px.

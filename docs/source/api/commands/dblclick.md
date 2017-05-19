@@ -1,5 +1,7 @@
+---
 title: dblclick
 comments: true
+description: ''
 ---
 
 Double-click on the DOM element in the previous command.

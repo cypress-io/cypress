@@ -1,5 +1,7 @@
+---
 title: trigger
 comments: true
+description: ''
 ---
 
 `cy.trigger` is used to trigger an arbitrary event (e.g. mouseover, contextmenu) on the DOM element found in the previous command.  The DOM element must be in an "interactable" state prior to the triggered event happening (it must be visible and not disabled).

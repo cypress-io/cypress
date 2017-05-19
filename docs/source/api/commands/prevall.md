@@ -1,5 +1,7 @@
+---
 title: prevall
 comments: true
+description: ''
 ---
 
 Get all previous siblings of each DOM element in the set of matched DOM elements.

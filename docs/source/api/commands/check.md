@@ -1,5 +1,7 @@
+---
 title: check
 comments: true
+description: ''
 ---
 
 Check the checkboxes or radios within the current subject.

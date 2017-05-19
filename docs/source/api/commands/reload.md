@@ -1,5 +1,7 @@
+---
 title: reload
 comments: true
+description: ''
 ---
 
 Reload the page.

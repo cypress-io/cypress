@@ -1,5 +1,7 @@
+---
 title: getcookie
 comments: true
+description: ''
 ---
 
 Get a browser cookie.

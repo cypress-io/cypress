@@ -1,5 +1,7 @@
+---
 title: screenshot
 comments: true
+description: ''
 ---
 
 Take a screenshot of the Command Log and the test runner (the app being tested). The screenshot will be stored in `cypress/screenshots` by default.

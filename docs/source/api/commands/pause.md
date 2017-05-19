@@ -1,5 +1,7 @@
+---
 title: pause
 comments: true
+description: ''
 ---
 
 `cy.pause` will stop command execution and allow you to interact with your app, resume commands when you're ready, or choose when to run the next command.

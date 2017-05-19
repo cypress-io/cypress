@@ -1,5 +1,7 @@
+---
 title: nextall
 comments: true
+description: ''
 ---
 
 Get all following siblings of each DOM element in the set of matched DOM elements.

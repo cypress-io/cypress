@@ -1,5 +1,7 @@
+---
 title: readfile
 comments: true
+description: ''
 ---
 
 Reads a file and returns its contents. JSON is automatically parsed into JavaScript.

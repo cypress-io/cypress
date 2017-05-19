@@ -1,5 +1,7 @@
+---
 title: blur
 comments: true
+description: ''
 ---
 
 Make the DOM element found in the previous command lose focus.

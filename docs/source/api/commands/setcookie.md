@@ -1,5 +1,7 @@
+---
 title: setcookie
 comments: true
+description: ''
 ---
 
 Set a browser cookie.
