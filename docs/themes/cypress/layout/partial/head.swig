@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
   <!-- CSS -->
-  <!-- build:css build/css/cypress.css -->
+  <!-- build:css /css/style.css -->
   {{ css('css/docsearch') }}
   {{ css('css/cypress') }}
   <!-- endbuild -->

@@ -66,20 +66,28 @@ hexo.extend.helper.register('doc_sidebar', function(className){
   return result
 })
 
-hexo.extend.helper.register('header_menu', function(className){
-  var menu = this.site.data.menu
-  var result = ''
+hexo.extend.helper.register('menu', function(type){
+  var file = type + '-menu'
+  var menu = this.site.data[file]
   var self = this
   var lang = this.page.lang
   var isEnglish = lang === 'en'
+  var currentPathFolder = this.path.split('/')[0]
 
-  _.each(menu, function(path, title){
-    if (!isEnglish && ~localizedPath.indexOf(title)) path = lang + path
+  return _.reduce(menu, function(result, menuPath, title){
+    if (!isEnglish && ~localizedPath.indexOf(title)) {
+      menuPath = lang + menuPath
+    }
+    // Sees if our current path is part of the menu's path
+    // Capture the first folder
+    // /guides/welcome/foo.html captures 'guides'
+    var firstPathName = menuPath.split("/")[1]
 
-    result += '<a href="' + self.url_for(path) + '" class="' + className + '-link">' + self.__('menu.' + title) + '</a>'
-  })
+    // Does our current path match our menu?
+    var isCurrent = currentPathFolder === firstPathName
 
-  return result
+    return result += `<a href="${self.url_for(menuPath)}" class="${type}-nav-link ${isCurrent ? 'active' : ''}"> ${self.__('menu.' + title)}</a>`
+  }, '')
 })
 
 hexo.extend.helper.register('canonical_url', function(lang){
