@@ -40,9 +40,13 @@ post_asset_folder: false
 relative_link: false
 future: true
 highlight:
-  enable: true
-  line_number: false
-  auto_detect: true
+  enable: false
+
+# https://github.com/ele828/hexo-prism-plugin
+prism_plugin:
+  mode: 'preprocess'    # realtime/preprocess
+  theme: 'coy'
+  line_number: false    # default false
 
 # Category & Tag
 default_category: uncategorized
@@ -111,7 +115,7 @@ hfc_html:
   enable: true
   exclude:
 hfc_css:
-  enable: true
+  enable: false
   exclude:
     - '*.min.css'
 hfc_js:

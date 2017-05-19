@@ -5,6 +5,9 @@ describe "Documentation", ->
   beforeEach ->
     cy.server()
     @mainGuides = "/guides/getting-started/why-cypress"
+    @mainAPI = "/api/welcome/api"
+    @mainEco = "/ecosystem/index"
+    @mainFAQ = "/faq/index"
 
   context "Pages", ->
     describe "404", ->
@@ -24,24 +27,52 @@ describe "Documentation", ->
       beforeEach ->
         cy.visit("/")
 
-      it "displays links to guides and api", ->
-        cy
-          .contains(".main-nav-link", "Guides")
-            .should("have.attr", "href")
-              .and("include", @mainGuides)
-        cy
-          .contains(".main-nav-link", "API")
-            .should("have.attr", "href")
-              .and("include", "/api/welcome/api.html")
+      it "displays links to pages", ->
+        cy.contains(".main-nav-link", "Guides")
+          .should("have.attr", "href").and("include", @mainGuides)
+
+        cy.contains(".main-nav-link", "API")
+          .should("have.attr", "href").and("include", @mainAPI)
+
+        cy.contains(".main-nav-link", "Ecosystem")
+          .should("have.attr", "href").and("include", @mainEco)
+
+        cy.contains(".main-nav-link", "FAQ")
+          .should("have.attr", "href").and("include", @mainFAQ)
 
       it "displays link to github repo", ->
         cy
-          .get(".main-nav-link").find(".fa-github").parent()
-            .should("have.attr", "href")
-              .and("eq", "https://github.com/cypress-io/cypress")
+        .get(".main-nav-link").find(".fa-github").parent()
+        .should("have.attr", "href")
+        .and("eq", "https://github.com/cypress-io/cypress")
 
-      it "displays language dropdown", ->
-        cy.contains("select", "English").find("option").contains("English")
+        it "displays language dropdown", ->
+          cy.contains("select", "English").find("option").contains("English")
+
+      describe "active nav", ->
+        it "higlights guides when on a guides page", ->
+          cy
+            .visit(@mainGuides + ".html")
+              .contains(".main-nav-link", "Guides")
+                .should("have.class", "active")
+
+        it "higlights api when on a api page", ->
+          cy
+            .visit(@mainAPI + ".html")
+              .contains(".main-nav-link", "API")
+                .should("have.class", "active")
+
+        it "higlights eco when on a eco page", ->
+          cy
+            .visit(@mainEco + ".html")
+              .contains(".main-nav-link", "Ecosystem")
+                .should("have.class", "active")
+
+        it "higlights FAQ when on a FAQ page", ->
+          cy
+            .visit(@mainFAQ + ".html")
+              .contains(".main-nav-link", "FAQ")
+                .should("have.class", "active")
 
     describe "Search", ->
       beforeEach ->
@@ -63,7 +94,7 @@ describe "Documentation", ->
           .get("#search-input").type("g")
           .get(".ds-dropdown-menu").should("be.visible")
 
-    describe "Guides & API", ->
+    describe "Guides", ->
       beforeEach ->
         cy.visit(@mainGuides + ".html")
 
