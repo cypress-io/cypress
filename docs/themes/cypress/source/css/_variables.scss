@@ -17,28 +17,28 @@ $color-background: #24262F;
 $highlight-background:    #f7f7f7;
 $highlight-current-line:  #efefef;
 $highlight-selection:     #d6d6d6;
-$highlight-foreground:    #4d4d4c;
-$highlight-comment:       #8e908c;
-$highlight-red:           #c82829;
-$highlight-orange:        #f5871f;
+$highlight-foreground:    #43474a;
+$highlight-comment:       #999;
+$highlight-red:           #c92c2c;
+$highlight-orange:        #cc8300;
 $highlight-yellow:        #eab700;
 $highlight-green:         #718c00;
-$highlight-aqua:          #3e999f;
-$highlight-blue:          #4271ae;
-$highlight-purple:        #8959a8;
+$highlight-aqua:          #1d75b3;
+$highlight-blue:          #183691;
+$highlight-purple:        #795da3;
 
 // Typography
 $font-sans: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 $font-serif: Garamond, Georgia, "Times New Roman", serif;
-$font-mono: Consolas, Monaco, 'Andale Mono', monospace;
+$font-mono: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 $font-title: "Fira Sans", font-sans;
 $font-size: 16px;
 $line-height: 1.7em;
 
 // Layout
-$max-width: 1400px;
+$max-width: 1300px;
 $gutter-width: 30px;
-$sidebar-width: 260px;
+$sidebar-width: 240px;
 $mobile-nav-width: 260px;
 
 // Media queries
