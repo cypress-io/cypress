@@ -56,8 +56,14 @@ specRunnerOptions = {
 
 server = { runSpec: -> }
 
+srcDir = path.join(__dirname, "src")
+testDir = path.join(__dirname, "test")
+
 matchingSpecFile = (filePath) ->
-  specPath = filePath.replace(path.join(__dirname, "src"), path.join(__dirname, "test/unit"))
+  ## only files in src/ having matching spec files
+  return false if not _.includes(filePath, srcDir)
+
+  specPath = filePath.replace(srcDir, path.join(__dirname, "test/unit"))
   specPath = specPath.replace(".coffee", "_spec.coffee")
   try
     fs.statSync(specPath)

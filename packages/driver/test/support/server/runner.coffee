@@ -130,7 +130,7 @@ module.exports = class Runner
 
   run: (specPath) ->
     specPath = specPath
-    .replace(path.join(__dirname, "../.."), "specs/")
+    .replace(path.join(__dirname, "../.."), "specs")
     .replace(path.extname(specPath), "")
 
     for id, client of @_clients
