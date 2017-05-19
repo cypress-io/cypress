@@ -8,8 +8,8 @@
   background-color: #f5f5f5;
 }
 .sidebar-title {
-  margin-top: 0;
-  font-size: 0.75;
+  margin-top: 1.5em;
+  font-size: 1.1em;
   padding: 10px 20px;
   font-family: $font-title;
   font-weight: 600;
@@ -22,20 +22,24 @@
   margin-top: 10px;
 }
 
+.sidebar-li {
+  text-indent: -15px;
+  line-height: 1.5;
+}
+
 .sidebar-link {
   font-family: $font-sans;
   font-size: 0.9em;
   display: block;
   color: $color-link;
   text-decoration: none;
-  padding: 4px 20px;
-  line-height: 1.6;
+  padding: 3px 10px 3px 35px;
   position: relative;
   width: 100%;
   font-weight: 400;
-  text-overflow: ellipsis;
   overflow: auto;
   white-space: normal;
+
 
   &.current {
     color: white;
