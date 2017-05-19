@@ -6,16 +6,16 @@ description: ''
 
 Visit a remote url. This will most likely be the first command you run. `cy.visit` resolves when the remote page fires its `load` event.
 
-Visit is prefixed with the `baseUrl` configured in the [Network Options](https://on.cypress.io/guides/configuration#section-global).
+Visit is prefixed with the `baseUrl` configured in the [Network Options](https://on.cypress.io/guides/configuration#global).
 
 Using `baseUrl` is a great way to prevent repeating yourself in every `cy.visit`.
 
 | | |
 |--- | --- |
 | **Returns** | the remote page's window object |
-| **Timeout** | `cy.visit` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.visit` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
 
-# [cy.visit( *url* )](#section-usage)
+# [cy.visit( *url* )](#usage)
 
 Visit the specified url passed as a string.
 
@@ -23,13 +23,13 @@ Visit the specified url passed as a string.
 
 Pass in an options object to change the default behavior of `cy.visit`.
 
-**[cy.visit( *url*, *options* )](#section-options-usage)**
+**[cy.visit( *url*, *options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait until `cy.visit` resolves
+`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait until `cy.visit` resolves
 `log` | `true` | whether to display command in command log
 
 You can also set options for all `cy.visit` `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).

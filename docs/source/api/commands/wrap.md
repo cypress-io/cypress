@@ -11,7 +11,7 @@ Return the object passed into `cy.wrap`.
 | **Returns** | the object passed into `cy.wrap` |
 | **Timeout** | *cannot timeout* |
 
-# [cy.wrap( *object* )](#section-usage)
+# [cy.wrap( *object* )](#usage)
 
 Return the object passed into `cy.wrap`.
 

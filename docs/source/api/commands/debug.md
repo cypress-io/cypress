@@ -13,7 +13,7 @@ Make sure you have your Developer Tools open for `cy.debug` to hit the breakpoin
 | **Returns** | the subject from the previous command for further chaining. |
 | **Timeout** | *cannot timeout* |
 
-# [cy.debug()](#section-usage)
+# [cy.debug()](#usage)
 
 Debug the previous command.
 

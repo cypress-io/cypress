@@ -18,7 +18,7 @@ Unlike most Cypress commands, `cy.spy` is *synchronous* and returns a value (the
 |--- | --- |
 | **Returns** | the spy |
 
-# [cy.spy( *object*, *"method"* )](#section-usage)
+# [cy.spy( *object*, *"method"* )](#usage)
 
 Wraps the `method` on the `object` with a spy and returns the spy. See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for [methods](http://sinonjs.org/docs/#spies-api) on the spy.
 

@@ -11,11 +11,11 @@ Use `cy.viewport` to control the screen size and orientation of your application
 | **Returns** | `null` |
 | **Timeout** | *cannot timeout* |
 
-# [cy.viewport( *width*, *height* )](#section-usage)
+# [cy.viewport( *width*, *height* )](#usage)
 
 Resize the viewport to the specified dimensions in pixels.
 
-# [cy.viewport( *preset*, *orientation* )](#section-preset-usage)
+# [cy.viewport( *preset*, *orientation* )](#preset-usage)
 
 Resize the viewport to a preset dimension. Viewport supports the following presets (in pixels):
 

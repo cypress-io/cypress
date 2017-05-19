@@ -11,7 +11,7 @@ Scroll an element into view.
 | **Returns** | the element that was scrolled into view  |
 | **Timeout** | `cy.scrollIntoView` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-# [cy.scrollIntoView()](#section-usage)
+# [cy.scrollIntoView()](#usage)
 
 Scroll to the element found in the previous command into view.
 
@@ -26,7 +26,7 @@ Option | Default | Notes
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
 `offset` | `{top: 0, left: 0}` | Amount to scroll after the element has been scrolled into view
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the scroll
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the scroll
 `log` | `true` | whether to display command in command log
 
 # Usage

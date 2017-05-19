@@ -10,7 +10,7 @@ description: ''
 
 Use `cy.server` to control the behavior of requests and responses.
 
-# [cy.server()](#section-default-usage)
+# [cy.server()](#default-usage)
 
 Start a server to begin routing responses to your requests.
 

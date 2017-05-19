@@ -13,7 +13,7 @@ This does not set a `debugger` in your code, unlike [`cy.debug`](https://on.cypr
 | **Returns** | the subject from the previous command for further chaining |
 | **Timeout** | *cannot timeout* |
 
-# [cy.pause()](#section-usage)
+# [cy.pause()](#usage)
 
 Stop command execution at the current command.
 

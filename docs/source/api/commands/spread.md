@@ -11,7 +11,7 @@ The spread command allows an expression to be expanded in places where multiple 
 | **Returns** | the value of the spread |
 | **Timeout** | *cannot timeout* |
 
-# [cy.spread( *fn* )](#section-usage)
+# [cy.spread( *fn* )](#usage)
 
 Expand an array of arguments.
 
