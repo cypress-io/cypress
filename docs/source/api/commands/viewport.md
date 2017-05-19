@@ -70,6 +70,7 @@ describe("Nav Menus", function(){
         .get("nav .desktop-menu").should("be.visible")
         .get("nav .mobile-menu").should("not.be.visible")
     })
+  })
 
   context("iphone-5 resolution", function(){
     beforeEach(function(){

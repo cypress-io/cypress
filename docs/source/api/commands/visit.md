@@ -130,7 +130,7 @@ cy.visit("http://localhost:3000/#/users", {
 ```javascript
 cy.visit("index.html").then(function(contentWindow)){
   // contentWindow is the remote page's window object
-}
+})
 ```
 
 ## Visit will automatically follow redirects
