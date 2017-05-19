@@ -11,7 +11,7 @@ Ends the Cypress command chain and returns `null`. This is equivalent to the jQu
 | **Returns** | `null` |
 | **Timeout** | cannot timeout |
 
-# [cy.end()](#section-usage)
+# [cy.end()](#usage)
 
 End the command chain.
 

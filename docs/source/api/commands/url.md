@@ -11,7 +11,7 @@ Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/
 | **Returns** | the current URL as a string |
 | **Timeout** | *cannot timeout* |
 
-# [cy.url()](#section-usage)
+# [cy.url()](#usage)
 
 Get the current URL.
 

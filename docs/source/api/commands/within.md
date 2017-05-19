@@ -11,7 +11,7 @@ Reset the root scope to the current subject and pass that as an argument to the 
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | *cannot timeout* |
 
-# [cy.within( *function* )](#section-usage)
+# [cy.within( *function* )](#usage)
 
 Set the root scope to the current subject
 

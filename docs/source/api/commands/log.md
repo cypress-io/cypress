@@ -11,11 +11,11 @@ Print a message to the Command Log within Cypress.
 | **Returns** | null |
 | **Timeout** | *cannot timeout* |
 
-# [cy.log( *message* )](#section-usage)
+# [cy.log( *message* )](#usage)
 
 Print the message to the Command Log.
 
-# [cy.log( *message*, *arguments* )](#section-arguments-usage)
+# [cy.log( *message*, *arguments* )](#arguments-usage)
 
 Print the message to the Command Log, along with any arguments.
 

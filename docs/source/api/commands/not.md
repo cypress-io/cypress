@@ -9,9 +9,9 @@ Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](ht
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.not` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.not` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-# [cy.not( *selector* )](#section-selector-usage)
+# [cy.not( *selector* )](#selector-usage)
 
 Remove the element(s) by it's selector from the elements
 
@@ -24,7 +24,7 @@ Pass in an options object to change the default behavior of `cy.not`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Selector Usage
 
