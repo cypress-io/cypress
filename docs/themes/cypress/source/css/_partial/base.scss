@@ -17,10 +17,10 @@ body {
   line-height: $line-height;
   background: $color-background;
   font-size: $font-size;
-  font-weight: 300;
+  font-weight: normal;
   font-family: $font-sans;
   color: $color-default;
-  text-rendering: optimizeLegibility;
+  text-size-adjust: 100%;
   overflow-x: hidden;
 }
 
