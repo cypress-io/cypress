@@ -1,12 +1,10 @@
 var _ = require('lodash')
-var fs = require('fs-extra')
 var str = require('underscore.string')
 var path = require('path')
-var glob = require('glob')
 var Promise = require('bluebird')
 
-var fs = Promise.promisifyAll(fs)
-var glob = Promise.promisify(glob)
+var fs = Promise.promisifyAll(require('fs-extra'))
+var glob = Promise.promisify(require('glob'))
 
 var startsWithNumberAndDashRe = /(\d+-)/
 var excerptRe = /excerpt:.+/
@@ -17,20 +15,20 @@ var underscoreRe = /_.md/
 
 var LOOKUP = {
   guides: 'v0.0',
-  api: 'v1.0',
+  api: 'v1.0'
 }
 
-getFolderFromFile = function(file) {
+const getFolderFromFile = function (file) {
   return path.basename(path.resolve(file, '..'))
 }
 
-getNameFromFile = function(file) {
+const getNameFromFile = function (file) {
   return path.basename(file)
 }
 
-normalize = function(string) {
+const normalize = function (string) {
   // Remove '2-' from '2-Getting-Started.md'
-  var string = string.replace(startsWithNumberAndDashRe, '').toLowerCase()
+  string = string.replace(startsWithNumberAndDashRe, '').toLowerCase()
 
   // Don't dasherize our '_.md' file
   if (string.match(underscoreRe)) {
@@ -40,7 +38,7 @@ normalize = function(string) {
   return str.dasherize(string)
 }
 
-find = function(type) {
+const find = function (type) {
   var folder = LOOKUP[type]
   var globstar = path.join('old_docs', folder, 'documentation', '**', '*.md')
 
@@ -49,21 +47,19 @@ find = function(type) {
   })
 }
 
-transfer = function(type) {
-  return find(type).then(function(files = []) {
-
+const transfer = function (type) {
+  return find(type).then(function (files = []) {
     return _.filter(files, fileStartsWithNumberAndDash)
-  }).map(function(file) {
-
+  }).map(function (file) {
     var name = normalize(getNameFromFile(file))
     var folder = normalize(getFolderFromFile(file))
     var dest = path.join('source', type, folder, name)
 
     return copy(file, dest)
-    .then(function() {
+    .then(function () {
       return fs.readFileAsync(dest, 'utf8')
     })
-    .then(function(string) {
+    .then(function (string) {
       // slug: foo-bar
       // excerpt: this is our doc on foo bar
       // >> becomes >>
@@ -75,7 +71,7 @@ transfer = function(type) {
         .replace('slug:', 'title:')
         .replace(excerptRe, 'comments: true\n---')
     })
-    .then(function(string) {
+    .then(function (string) {
       // Remove
       // # Contents
       // - :fa-angle-right: Welcome
@@ -91,21 +87,21 @@ transfer = function(type) {
       .split(newLinesRe)
       .join('\n\n')
     })
-    .then(function(string) {
+    .then(function (string) {
       // :fa-cog:
       // >> becomes >>
       // {% fa fa-cog %}
 
-      function replace(s, icon) {
+      function replace (s, icon) {
         return s
-        .replace(":fa-" + icon + ":", "{% fa fa-" + icon + " %}")
+        .replace(':fa-' + icon + ':', '{% fa fa-' + icon + ' %}')
       }
 
-      return ["cog", "plus"].reduce(function(memo, icon) {
+      return ['cog', 'plus'].reduce(function (memo, icon) {
         return replace(memo, icon)
       }, string)
     })
-    .then(function(string) {
+    .then(function (string) {
       // Content with {{ }} or {% %} get parsed & cause problems
       // {{
       // >> becomes >>
@@ -114,7 +110,7 @@ transfer = function(type) {
       return string
         .replace('{{', '{% raw %}{{{% endraw %}')
     })
-    .then(function(string) {
+    .then(function (string) {
       // [block:callout]
       // {
       //   "type": "info",
@@ -147,30 +143,30 @@ transfer = function(type) {
 
       return string
     })
-    .then(function(string) {
+    .then(function (string) {
       return fs.writeFileAsync(dest, string)
     })
   })
 }
 
-copy = function(src, dest) {
+const copy = function (src, dest) {
   return fs.copyAsync(src, dest, {
     overwrite: true
   })
 }
 
-fileStartsWithNumberAndDash = function(file) {
+function fileStartsWithNumberAndDash (file) {
   var name = getNameFromFile(file)
   return startsWithNumberAndDashRe.test(name)
 }
 
-transferIncomplete = function() {
-  return find('guides').then(function(files) {
+const transferIncomplete = function () {
+  return find('guides').then(function (files) {
     if (files == null) {
       files = []
     }
     return _.reject(files, fileStartsWithNumberAndDash)
-  }).map(function(file) {
+  }).map(function (file) {
     var dest, folder, name
     name = getNameFromFile(file)
     folder = getFolderFromFile(file)
@@ -179,6 +175,6 @@ transferIncomplete = function() {
   })
 }
 
-transferIncomplete().then(function() {
+transferIncomplete().then(function () {
   return Promise.all([transfer('api'), transfer('guides')])
 })

@@ -8,7 +8,7 @@ const revisionOpts = {
   dontRenameFile: ['.html', 'CNAME'],
   dontUpdateReference: ['.html'],
   dontSearchFile: ['.js'],
-  debug: true,
+  debug: true
 }
 
 function remove (folder) {
