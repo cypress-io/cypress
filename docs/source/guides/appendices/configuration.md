@@ -1,4 +1,4 @@
-title: configuration
+title: Configuration
 comments: true
 ---
 
