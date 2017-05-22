@@ -12,5 +12,8 @@
   "devDependencies": {
     "ts-node": "^3.0.4",
     "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "debug": "^2.6.8"
   }
 }
