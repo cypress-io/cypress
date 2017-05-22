@@ -474,7 +474,18 @@ InputRange.prototype._nativeSelect = function (rng){
   this._el.setSelectionRange(rng[0], rng[1]);
 };
 InputRange.prototype._nativeSelection = function(){
-  return [this._el.selectionStart, this._el.selectionEnd];
+  var start = this._el.selectionStart
+  var end = this._el.selectionEnd
+
+  //// HACK: selection start and end don't report correctly when input
+  //// already has a value set, so if there's a value and there is no
+  //// native selection, force it to be at the end of the text
+  if (this._el.value && !start && !end) {
+    var length = this._el.value.length
+    return [length, length]
+  }
+
+  return [start, end]
 };
 InputRange.prototype._nativeGetText = function(rng){
   return this._el.value.substring(rng[0], rng[1]);
