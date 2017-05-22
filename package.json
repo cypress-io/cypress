@@ -13,7 +13,7 @@
     "test": "echo 'This runs just the CLI tests' && mocha",
     "test-watch": "mocha --watch",
     "test-e2e": "blah",
-    "postinstall": "npm run all install -- --serial"
+    "postinstall": "npm run all install"
   },
   "author": "",
   "license": "MIT",
