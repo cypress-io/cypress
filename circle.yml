@@ -5,6 +5,8 @@ jobs:
     docker:
       # the Docker image with Cypress dependencies and Chrome browser
       - image: cypress/internal:chrome58
+        environment:
+          npm_config_loglevel: warn
     working_directory: ~/cypress-monorepo
     parallelism: 3
     steps:
