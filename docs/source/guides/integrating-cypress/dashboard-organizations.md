@@ -1,4 +1,4 @@
-title: organizations
+title: Dashboard&#58; Organizations
 comments: true
 ---
 

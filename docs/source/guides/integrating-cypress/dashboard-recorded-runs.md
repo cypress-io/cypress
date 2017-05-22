@@ -1,4 +1,4 @@
-title: runs
+title: Dashboard&#58; Recorded Runs
 comments: true
 ---
 
