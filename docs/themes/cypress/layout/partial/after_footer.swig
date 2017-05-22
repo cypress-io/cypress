@@ -1,13 +1,13 @@
 <!-- Scripts -->
 <!-- build:js /js/application.js -->
 {{ js('js/lang_select') }}
-{{ js('js/scrollingelement') }}
-{{ js('js/menuspy') }}
+{{ js('js/vendor/scrollingelement') }}
+{{ js('js/vendor/menuspy') }}
 {{ js('js/toc') }}
 {{ js('js/mobile_nav') }}
 {% if config.algolia[page.lang] %}
   <!-- Algolia -->
-  {{ js('js/docsearch') }}
+  {{ js('js/vendor/docsearch') }}
 {% endif %}
 <!-- endbuild -->
 
