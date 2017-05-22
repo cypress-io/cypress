@@ -7,3 +7,6 @@ db.json
 .deploy*/
 cypress/screenshots
 cypress/videos
+themes/cypress/source/css/vendor
+themes/cypress/source/js/vendor
+themes/cypress/source/fonts/vendor

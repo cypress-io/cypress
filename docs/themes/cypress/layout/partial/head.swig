@@ -17,13 +17,12 @@
   <!-- Icon -->
   <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="16x16" />
 
-  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  {{ css('fonts/vendor/fira/fira') }}
+  {{ css('fonts/vendor/font-awesome/css/font-awesome') }}
 
   <!-- CSS -->
   <!-- build:css /css/style.css -->
-  {{ css('css/docsearch') }}
+  {{ css('css/vendor/docsearch') }}
   {{ css('css/cypress') }}
   <!-- endbuild -->
 
