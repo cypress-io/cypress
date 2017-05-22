@@ -27,6 +27,7 @@
     "coffeeify": "^2.1.0",
     "compression": "^1.1.0",
     "cors": "^2.7.1",
+    "debug": "^2.6.8",
     "errorhandler": "^1.1.1",
     "express": "^4.12.3",
     "fs-extra": "^3.0.0",
