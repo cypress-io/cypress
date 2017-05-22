@@ -431,8 +431,7 @@ describe "$Cypress.Cy Text Commands", ->
           expect($text).to.have.value("1234")
 
       it "overwrites text when currently has selection", ->
-        ## when the text is clicked we want to
-        ## select everything in it
+        ## when the text is clicked we want to select everything in it
         @cy.$$(":text:first").val("0").click ->
           $(@).select()
 
@@ -440,13 +439,20 @@ describe "$Cypress.Cy Text Commands", ->
           expect($input).to.have.value("50")
 
       it "overwrites text on input[type=number] when input has existing text selected", ->
-        ## when the text is clicked we want to
-        ## select everything in it
+        ## when the text is clicked we want to select everything in it
         @cy.$$("#input-types [type=number]").val("0").click ->
           $(@).select()
 
         @cy.get("#input-types [type=number]").type("50").then ($input) ->
           expect($input).to.have.value("50")
+
+      it "overwrites text on input[type=email] when input has existing text selected", ->
+        ## when the text is clicked we want to select everything in it
+        @cy.$$("#input-types [type=email]").val("foo@bar.com").click ->
+          $(@).select()
+
+        @cy.get("#input-types [type=email]").type("bar@foo.com").then ($input) ->
+          expect($input).to.have.value("bar@foo.com")
 
       it "can change input[type=email] values", ->
         @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
