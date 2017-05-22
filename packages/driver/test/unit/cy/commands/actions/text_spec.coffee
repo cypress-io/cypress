@@ -414,8 +414,7 @@ describe "$Cypress.Cy Text Commands", ->
         @cy.get("#input-types [type=number]").type("12").then ($text) ->
           expect($text).to.have.value("12")
 
-      ## FIXME: legitimate bug
-      it.skip "inserts text after existing text", ->
+      it "inserts text after existing text", ->
         @cy.get("#input-with-value").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
@@ -423,8 +422,7 @@ describe "$Cypress.Cy Text Commands", ->
         @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
-      ## FIXME: legitimate bug
-      it.skip "inserts text after existing text on input[type=number]", ->
+      it "inserts text after existing text on input[type=number]", ->
         @cy.get("#number-with-value").type("34").then ($text) ->
           expect($text).to.have.value("1234")
 
@@ -441,7 +439,7 @@ describe "$Cypress.Cy Text Commands", ->
         @cy.get(":text:first").type("50").then ($input) ->
           expect($input).to.have.value("50")
 
-      it "overwrites text on input[type=number] when input has existing text", ->
+      it "overwrites text on input[type=number] when input has existing text selected", ->
         ## when the text is clicked we want to
         ## select everything in it
         @cy.$$("#input-types [type=number]").val("0").click ->
@@ -454,8 +452,7 @@ describe "$Cypress.Cy Text Commands", ->
         @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
           expect($text).to.have.value("brian@foo.com")
 
-      ## FIXME: legitimate bug
-      it.skip "inserts text after existing text on input[type=email]", ->
+      it "inserts text after existing text on input[type=email]", ->
         @cy.get("#email-with-value").type("om").then ($text) ->
           expect($text).to.have.value("brian@foo.com")
 
@@ -950,6 +947,11 @@ describe "$Cypress.Cy Text Commands", ->
         it "can select all [contenteditable] and delete", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($div) ->
             expect($div).to.have.text("foo")
+
+      context "{selectall} then type something", ->
+        it "replaces the text", ->
+          @cy.get("#input-with-value").type("{selectall}new").then ($text) ->
+            expect($text).to.have.value("new")
 
       context "{enter}", ->
         it "sets which and keyCode to 13 and prevents EOL insertion", (done) ->
@@ -2015,7 +2017,8 @@ describe "$Cypress.Cy Text Commands", ->
 
       it "throws when type is cancelled by preventingDefault mousedown"
 
-      it "throws when element animation exceeds timeout", (done) ->
+      ## FIXME: flaky due to animation
+      it.skip "throws when element animation exceeds timeout", (done) ->
         @cy._timeout(100)
 
         @Cypress.config("animationDistanceThreshold", 1)
