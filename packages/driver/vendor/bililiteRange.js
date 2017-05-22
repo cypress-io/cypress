@@ -474,10 +474,24 @@ InputRange.prototype._nativeSelect = function (rng){
   this._el.setSelectionRange(rng[0], rng[1]);
 };
 InputRange.prototype._nativeSelection = function(){
+  var originalType = this._el.type
+
+  //// HACK:
+  //// newer versions of Chrome incorrectly report the selection
+  //// for number and email types, so we change it to type=text
+  //// and blur it (then set it back and focus it further down
+  //// after the selection algorithm has taken place)
+  var shouldChangeType = originalType === 'email' || originalType === 'number'
+  if (shouldChangeType) {
+    this._el.blur()
+    this._el.type = 'text'
+  }
+
   var start = this._el.selectionStart
   var end = this._el.selectionEnd
 
-  //// HACK: selection start and end don't report correctly when input
+  //// HACK:
+  //// selection start and end don't report correctly when input
   //// already has a value set, so if there's a value and there is no
   //// native selection, force it to be at the end of the text
   if (this._el.value && !start && !end) {
@@ -485,6 +499,10 @@ InputRange.prototype._nativeSelection = function(){
     return [length, length]
   }
 
+  if (shouldChangeType) {
+    this._el.type = originalType
+    this._el.focus()
+  }
   return [start, end]
 };
 InputRange.prototype._nativeGetText = function(rng){
