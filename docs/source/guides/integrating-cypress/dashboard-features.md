@@ -1,4 +1,4 @@
-title: dashboard-features
+title: The Cypress Dashboard
 comments: true
 ---
 
