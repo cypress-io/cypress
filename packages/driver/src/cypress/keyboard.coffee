@@ -475,9 +475,6 @@ $Keyboard = {
 
     return dispatched
 
-  updateValue: (rng, key) ->
-    rng.text(key, "end")
-
   typeKey: (el, key, options) ->
     ## if we have an afterKey value it means
     ## we've typed in prior to this
@@ -489,7 +486,7 @@ $Keyboard = {
         @moveCaretToEnd(options.rng)
 
     @ensureKey el, key, options, ->
-      @updateValue(options.rng, key)
+      options.updateValue(options.rng, key)
 
   ensureKey: (el, key, options, fn) ->
     options.id        = _.uniqueId("char")
