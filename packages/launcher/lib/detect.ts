@@ -8,7 +8,7 @@ import _ = require('lodash')
 import os = require('os')
 // import Promise = require('bluebird')
 
-const browsers:Browser[] = [
+const browsers: Browser[] = [
   {
     name: 'chrome',
     re: /Google Chrome (\S+)/,
@@ -30,7 +30,7 @@ const browsers:Browser[] = [
   }
 ]
 
-const setMajorVersion = (obj:Browser) => {
+const setMajorVersion = (obj: Browser) => {
   if (obj.version) {
     obj.majorVersion = obj.version.split('.')[0]
     log('browser %s version %s major version %s',
@@ -41,11 +41,11 @@ const setMajorVersion = (obj:Browser) => {
 
 type MacBrowserName = 'chrome' | 'chromium' | 'canary'
 
-function lookup (platform:string, obj:Browser):Promise<Object> {
+function lookup (platform: string, obj: Browser): Promise<Object> {
   log('looking up %s on %s platform', obj.name, platform)
   switch (platform) {
     case 'darwin':
-      const browserName:MacBrowserName = obj.name as MacBrowserName
+      const browserName: MacBrowserName = obj.name as MacBrowserName
       const fn = darwin[browserName]
       if (fn) {
         return fn.get(obj.executable) as any as Promise<Object>
@@ -61,10 +61,10 @@ function lookup (platform:string, obj:Browser):Promise<Object> {
   }
 }
 
-function checkOneBrowser(browser:Browser) {
+function checkOneBrowser (browser: Browser) {
   const platform = os.platform()
   return lookup(platform, browser)
-    .then((props:object) => {
+    .then((props: object) => {
       return _.chain({})
         .extend(browser, props)
         .pick('name', 'type', 'version', 'path')

@@ -6,7 +6,7 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo 'This project needs: npm run build'",
     "prebuild": "npm run clean",
     "build": "hexo generate",
     "postbuild": "gulp post:build",

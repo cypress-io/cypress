@@ -8,7 +8,8 @@
     "pretest": "npm run lint",
     "test": "mocha",
     "clean-deps": "rm -rf node_modules",
-    "lint": "tslint --type-check --project .. --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts"
+    "clean": "rm lib/*.js lib/**/*.js || true",
+    "lint": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -31,9 +32,9 @@
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "tslint": "^5.2.0",
-    "tslint-config-standard": "^5.0.2",
-    "typescript": "^2.3.2"
+    "tslint": "5.2.0",
+    "tslint-config-standard": "5.0.2",
+    "typescript": "2.3.2"
   },
   "dependencies": {
     "bluebird": "^3.3.5",

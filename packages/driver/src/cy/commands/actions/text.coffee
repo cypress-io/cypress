@@ -1,6 +1,7 @@
 _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
+moment = require("moment")
 
 { delay, waitForAnimations } = require("./utils")
 $Log = require("../../../cypress/log")
@@ -9,6 +10,7 @@ utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
 textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
+dateRegex = /\d{4}-\d{2}-\d{2}/
 
 module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
@@ -73,6 +75,7 @@ module.exports = (Cypress, Commands) ->
 
       isBody      = options.$el.is("body")
       isTextLike  = options.$el.is(textLike)
+      isDate      = options.$el.is("[type=date]")
       hasTabIndex = options.$el.is("[tabindex]")
 
       ## TODO: tabindex can't be -1
@@ -101,6 +104,16 @@ module.exports = (Cypress, Commands) ->
 
       if _.isBlank(chars)
         utils.throwErrByPath("type.empty_string", { onFail: options._log })
+
+      if isDate and (
+        not _.isString(chars) or
+        not dateRegex.test(chars) or
+        not moment(chars).isValid()
+      )
+        utils.throwErrByPath("type.invalid_date", {
+          onFail: options._log
+          args: { chars }
+        })
 
       options.chars = "" + chars
 
@@ -166,12 +179,26 @@ module.exports = (Cypress, Commands) ->
 
           return dispatched
 
+        typed = ""
+        charsToType = if isDate
+          options.chars.replace("-", "")
+        else
+          options.chars
+
         $Keyboard.type({
           $el:     options.$el
-          chars:   options.chars
+          chars:   charsToType
           delay:   options.delay
           release: options.release
           window:  @privateState("window")
+
+          updateValue: (rng, key) ->
+            if isDate
+              typed += key
+              if typed is charsToType
+                options.$el.val(options.chars)
+            else
+              rng.text(key, "end")
 
           onBeforeType: (totalKeys) =>
             ## for the total number of keys we're about to
