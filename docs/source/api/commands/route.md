@@ -78,9 +78,9 @@ If you do not pass a `response` to a route, Cypress will pass this request throu
 ```javascript
 cy
   .server()
-  .route(/users/).as("getUsers")
-  .visit("/users")
-  .wait("@getUsers")
+  .route('/users/**').as('getUsers')
+  .visit('/users')
+  .wait('@getUsers')
 ```
 
 **Wait on XHR's matching `method` and `url`**
@@ -88,10 +88,10 @@ cy
 ```javascript
 cy
   .server()
-  .route("POST", /users/).as("postUser")
-  .visit("/users")
-  .get("#first-name").type("Julius{enter}")
-  .wait("@postUser")
+  .route('POST', /users/).as('postUser')
+  .visit('/users')
+  .get('#first-name').type('Julius{enter}')
+  .wait('@postUser')
 ```
 
 {% note info Setup route to POST to login %}
@@ -113,7 +113,7 @@ We expose [`Cypress.minimatch`](https://on.cypress.io/api/cypress-minimatch) as 
 // /users/123/comments/465 <-- not matches
 cy
   .server()
-  .route("/users/*/comments")
+  .route('/users/*/comments')
 ```
 
 ***Use glob to match all segments***
@@ -124,7 +124,7 @@ cy
 // /posts/quuz?a=b&1=2 <-- matches
 cy
   .server()
-  .route("/posts/**")
+  .route('/posts/**')
 ```
 
 **Override `url` glob matching options**
@@ -154,7 +154,7 @@ When passing a `string` as the `url`, the XHR's URL must match *exactly* what yo
 ```javascript
 cy
   .server()
-  .route("/users", [{id: 1, name: "Pat"}])
+  .route('/users', [{id: 1, name: 'Pat'}])
 ```
 
 **`url` as a RegExp**
@@ -164,13 +164,13 @@ When passing a RegExp as the `url`, the XHR's url will be tested against the reg
 ```javascript
 cy
   .server()
-  .route(/users\/\d+/, {id: 1, name: "Phoebe"})
+  .route(/users\/\d+/, {id: 1, name: 'Phoebe'})
 ```
 
 ```javascript
 // Application Code
 
-$.get("/users/1337", function(data){
+$.get('/users/1337', function(data){
   console.log(data) // => {id: 1, name: "Phoebe"}
 })
 ```
@@ -190,7 +190,7 @@ var commentsResponse = function(routeData){
   }
 }
 
-cy.route("POST", "/comments/**", commentsResponse)
+cy.route('POST', '/comments/**', commentsResponse)
 ```
 
 **Matching requests and routes**
@@ -202,24 +202,27 @@ If a request doesn't match any route, [it will automatically receive a 404](#not
 ```javascript
 cy
   .server()
-  .route(/users/, [{id: 19, name: "Laura"}, {id: 20, name: "Jamie"}])
-  .route("POST", /messages/, {id: 123, message: "Hi There!"})
-  .get("form").submit()
+  .route(/users/, [
+    {id: 19, name: 'Laura'},
+    {id: 20, name: 'Jamie'}
+  ])
+  .route('POST', /messages/, {id: 123, message: 'Hi There!'})
+  .get('form').submit()
 ```
 
 ```javascript
 // Application Code
 
 // when our form is submitted
-$("form").submit(function(){
+$('form').submit(function(){
   // send an AJAX to: GET /users
-  $.get("/users" )
+  $.get('/users' )
 
   // send an AJAX to: POST /messages
-  $.post("/messages", {some: "data"})
+  $.post('/messages', {some: 'data'})
 
   // send an AJAX to: GET /updates
-  $.get("/updates")
+  $.get('/updates')
 })
 ```
 
@@ -236,7 +239,7 @@ The below example matches all `DELETE` requests to "/users" and stubs a response
 ```javascript
 cy
   .server()
-  .route("DELETE", "/users", {})
+  .route('DELETE', '/users', {})
 ```
 
 ## Using Fixtures as Responses
@@ -246,31 +249,31 @@ Instead of writing a response inline you can automatically connect a response wi
 ```javascript
 cy
   .server()
-  .route(/posts/, "fixture:logo.png").as("getLogo")
-  .route(/users/, "fixture:users/all.json").as("getUsers")
-  .route(/admin/, "fixtures:users/admin.json").as("getAdmin")
+  .route('/posts/*', 'fixture:logo.png').as('getLogo')
+  .route('/users/*', 'fixture:users/all.json').as('getUsers')
+  .route('/admin/*', 'fixtures:users/admin.json').as('getAdmin')
 ```
 
 You may want to define the `cy.route()` after receiving the fixture and working with it's data.
 
 ```javascript
 cy
-  .fixture("user").then(function(user){
-    user.firstName = "Jane"
+  .fixture('user').then(function(user){
+    user.firstName = 'Jane'
     // work with the users array here
 
-    cy.route("GET", "user/123", user)
+    cy.route('GET', 'user/123', user)
   })
-  .visit("/users")
-  .get(".user").should("include", "Jane")
+  .visit('/users')
+  .get('.user').should('include', 'Jane')
 ```
 
 You can also reference fixtures as strings directly in the response by passing the fixture string with an `@` just like how aliases work.
 
 ```javascript
 cy
-  .fixture("user").as("fxUser")
-  .route("POST", "/users/*", "@fxUser")
+  .fixture('user').as('fxUser')
+  .route('POST', '/users/*', '@fxUser')
 ```
 
 ## Options
@@ -281,15 +284,15 @@ cy
 cy
   .server()
   .route({
-    method: "DELETE",
-    url: /user\/\d+/,
+    method: 'DELETE',
+    url: '/user/*',
     status: 412,
     response: {
       rolesCount: 2
     },
     delay: 500,
     headers: {
-      "X-Token": null
+      'X-Token': null
     },
     onRequest: function(xhr) {
       // do something with the
@@ -332,11 +335,11 @@ If you'd like to override this, explicitly pass in `headers` as an `object liter
 
 ```javascript
 cy.route({
-  url: "image.png",
-  response: "fx:logo.png,binary" // binary encoding
+  url: 'image.png',
+  response: 'fx:logo.png,binary' // binary encoding
   headers: {
     // set content-type headers
-    "content-type": "binary/octet-stream"
+    'content-type': 'binary/octet-stream'
   }
 })
 ```
@@ -347,8 +350,8 @@ You can pass in a `delay` option that causes a delay (in ms) to the `response` f
 
 ```javascript
 cy.route({
-  method: "PATCH",
-  url: /activities\/\d+/,
+  method: 'PATCH',
+  url: '/activities/*',
   response: {},
   delay: 3000
 })
@@ -364,8 +367,8 @@ cy.route(function(){
 
   // and return an appropriate routing object here
   return {
-    method: "POST",
-    url: "/users/*/comments",
+    method: 'POST',
+    url: '/users/*/comments',
     response: this.commentsFixture
   }
 })
@@ -380,9 +383,9 @@ cy.route(function(){
     // resolve this promise after 1 second
     setTimeout(function(){
       resolve({
-        method: "PUT"
-        url: "/posts/**"
-        response: "@postFixture"
+        method: 'PUT'
+        url: '/posts/**'
+        response: '@postFixture'
       })
     }, 1000)
   })
@@ -412,7 +415,7 @@ Even the `Initiator` is included, which is a stack trace to what caused the XHR 
 When Cypress matches up an outgoing XHR request to a `cy.route`, it actually attempts to match it against both the fully qualified URL and then additionally without the URL's origin.
 
 ```javascript
-cy.route("/users/*")
+cy.route('/users/*')
 ```
 
 The following XHR's which were `xhr.open(...)` with these URLs would:
@@ -442,17 +445,14 @@ cy.server({force404: true})
 
 You can [read more about this here.](https://on.cypress.io/api/server#prevent-sending-404s-to-unmatched-requests)
 
-
-
-
 # Command Log
 
 ```javascript
 cy
   .server()
-  .route(/accounts/).as("accountsGet")
-  .route(/company/, "fixtures:company").as("companyGet")
-  .route(/teams/,   "fixtures:teams").as("teamsGet")
+  .route(/accounts/).as('accountsGet')
+  .route(/company/, 'fixtures:company').as('companyGet')
+  .route(/teams/,   'fixtures:teams').as('teamsGet')
 ```
 
 Whenever you start a server and add routes, Cypress will display a new Instrument Log called **Routes**. It will list the routing table in the Instrument Log, including the `method`, `url`, `stubbed`, `alias` and number of matched requests:
