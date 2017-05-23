@@ -41,7 +41,7 @@ Option | Default | Notes
 
 ```javascript
 // returns <li class="four">Knick knack on my door</li>
-cy.get("ul").last()
+cy.get('ul').last()
 ```
 
 # Command Log
@@ -49,7 +49,7 @@ cy.get("ul").last()
 ## Find the last button in the form
 
 ```javascript
-cy.get("form").find("button").last()
+cy.get('form').find('button').last()
 ```
 
 The commands above will display in the command log as:

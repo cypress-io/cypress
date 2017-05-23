@@ -63,7 +63,7 @@ Option | Default | Notes
 ```javascript
 // issues all keyboard events
 // and returns <textarea> for further chaining
-cy.get("textarea").type("Hello world")
+cy.get('textarea').type('Hello world')
 ```
 
 ## Type into a non-text or non-textarea element with `tabindex`
@@ -80,7 +80,7 @@ cy.get("textarea").type("Hello world")
 // this element will receive all of the appropriate
 // key events and focus / blur events but will not
 // have its value or text contents altered in any way
-cy.get("#el").type("foo")
+cy.get('#el').type('foo')
 ```
 
 # Options Usage
@@ -93,7 +93,7 @@ Type issues a [`click`](https://on.cypress.io/api/click) prior to typing (only i
 // this will disable the built-in logic for ensuring
 // the element is visible, and is physically clickable
 // prior to typing into it
-cy.get("input[type=text]").type("Test all the things", {force: true})
+cy.get('input[type=text]').type('Test all the things', {force: true})
 ```
 
 {% note warning  %}
@@ -108,7 +108,7 @@ When using special character sequences (see table at top of page), it's possible
 
 ```javascript
 // this is the same as a user holding down SHIFT and ALT, then pressing Q
-cy.get("input").type("{shift}{alt}Q")
+cy.get('input').type('{shift}{alt}Q')
 ```
 
 {% note info Typing into a login form %}
@@ -119,7 +119,7 @@ cy.get("input").type("{shift}{alt}Q")
 
 ```javascript
 // all characters after {ctrl} will have 'ctrlKey' set to 'true' on their key events
-cy.get("input").type("{ctrl}test")
+cy.get('input').type('{ctrl}test')
 ```
 
 ## Release behavior
@@ -129,29 +129,29 @@ By default, modifiers are released after each type command.
 ```javascript
 // 'ctrlKey' will be true for each event while 'test' is typed
 // but false while 'everything' is typed
-cy.get("input").type("{ctrl}test").type("everything")
+cy.get('input').type('{ctrl}test').type('everything')
 ```
 
 To keep a modifier activated between commands, specify `{release: false}` in the options.
 
 ```javascript
 // 'altKey' will be true while typing 'foo'
-cy.get("input").type("{alt}foo", {release: false})
+cy.get('input').type('{alt}foo', {release: false})
 // 'altKey' will also be true during 'get' and 'click' commands
-cy.get("button").click()
+cy.get('button').click()
 ```
 
 Modifiers are automatically released between tests, even with `{release: false}`.
 
 ```javascript
-it("has modifiers activated", function () {
+it('has modifiers activated', function () {
   // 'altKey' will be true while typing 'foo'
-  cy.get("input").type("{alt}foo", {release: false})
+  cy.get('input').type('{alt}foo', {release: false})
 })
 
-it("does not have modifiers activated", function () {
+it('does not have modifiers activated', function () {
   // 'altKey' will be false while typing 'bar'
-  cy.get("input").type("bar")
+  cy.get('input').type('bar')
 })
 ```
 
@@ -159,13 +159,13 @@ To manually release modifiers within a test after using `{release: false}`, use 
 
 ```javascript
 // 'altKey' will be true while typing 'foo'
-cy.get("input").type("{alt}foo", {release: false})
+cy.get('input').type('{alt}foo', {release: false})
 // 'altKey' will be true during the 'get' and 'click' commands
-cy.get("button").click()
+cy.get('button').click()
 // 'altKey' will be released after this command
-cy.get("input").type("{alt}")
+cy.get('input').type('{alt}')
 // 'altKey' will be false during the 'get' and 'click' commands
-cy.get("button").click()
+cy.get('button').click()
 ```
 
 ## Global shortcuts / modifiers
@@ -179,7 +179,7 @@ To support this, the `body` can be used as the subject (even though it's *not* a
 
 ```javascript
 // all of the type events will be fired on the body
-cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba")
+cy.get('body').type('{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba')
 
 ```
 
@@ -187,7 +187,7 @@ cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightar
 // execute a SHIFT + click on the first <li>
 // {release: false} is necessary so that
 // SHIFT will not be released after the type command
-cy.get("body").type("{shift}", {release: false}).get("li:first").click()
+cy.get('body').type('{shift}', {release: false}).get('li:first').click()
 ```
 
 # Date inputs
@@ -216,15 +216,15 @@ Modifiers are simulated by setting their corresponding values to `true` for key 
 
 ```javascript
 // app code
-document.querySelector("input:first").addEventListener("keydown", function (e) {
+document.querySelector('input:first').addEventListener('keydown', function (e) {
   // e.shiftKey will be true
 })
 
 // in test
-cy.get("input:first").type("{shift}a")
+cy.get('input:first').type('{shift}a')
 ```
 
-In the example above, a lowercase `a` will be typed, because that's the literal character specified. To type a capital `A`, you can use `cy.type("{shift}A")` (or simply `cy.type("A")` if you don't care about the `shiftKey` property on any key events).
+In the example above, a lowercase `a` will be typed, because that's the literal character specified. To type a capital `A`, you can use `cy.type('{shift}A')` (or simply `cy.type('A')` if you don't care about the `shiftKey` property on any key events).
 
 This holds true for other special key combinations as well (that may be OS-specific). For example, on OSX, typing `ALT + SHIFT + K` creates the special character ``. Like with capitalization, `cy.type()` will not output ``, but simply the letter `k`.
 
@@ -237,7 +237,7 @@ This holds true for other special key combinations as well (that may be OS-speci
 ```javascript
 // each keypress is delayed 10ms by default
 // which simulates how a very fast user types!
-cy.get("[contenteditable]").type("some text!")
+cy.get('[contenteditable]').type('some text!')
 ```
 
 ## Events that fire
@@ -274,13 +274,13 @@ Cypress respects all default browser behavior when events are cancelled.
 ```javascript
 // prevent the characters from being inserted
 // by canceling keydown, keypress, or textInput
-$("#username").on("keydown", function(e){
+$('#username').on('keydown', function(e){
   e.preventDefault();
 })
 
 // Cypress will not insert any characters if keydown, keypress, or textInput
 // are cancelled - which matches the default browser behavior
-cy.get("#username").type("bob@gmail.com").should("have.value", "") // true
+cy.get('#username').type('bob@gmail.com').should('have.value', '') // true
 ```
 
 ## Implicit form submission behavior
@@ -301,8 +301,8 @@ For instance the following will submit the form.
 
 ```javascript
 cy
-  .get("#username").type("bob@burgers.com")
-  .get("#password").type("password123{enter}")
+  .get('#username').type('bob@burgers.com')
+  .get('#password').type('password123{enter}')
 ```
 
 Because there are multiple `inputs` and one `submit` button, Cypress submits the form (and fires submit events) as well as a synthetic `click` event to the `button`.
@@ -324,7 +324,7 @@ Cypress will print out a table of key events that detail the keys that were pres
 
 Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
 
-Additionally, events that cause a `change` event to fire (such as typing `{enter}`) will display with the `change` event column as `true.
+Additionally, events that cause a `change` event to fire (such as typing `{enter}`) will display with the `change` event column as `true`.
 
 Any modifiers activated for the event are also listed in a `modifiers` column.
 
@@ -347,7 +347,7 @@ In other words, you get the best of both worlds: simulated when its practical to
 ## Type into the input
 
 ```javascript
-cy.get("input[name=firstName]").type("Jane Lane")
+cy.get('input[name=firstName]').type('Jane Lane')
 ```
 
 The commands above will display in the command log as:

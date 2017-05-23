@@ -34,7 +34,7 @@ Option | Default | Notes
 ```javascript
 // Cypress will log out the current subject and other
 // useful debugging information to your console
-cy.get("a").debug().should("have.attr", "href")
+cy.get('a').debug().should('have.attr', 'href')
 ```
 
 # Related

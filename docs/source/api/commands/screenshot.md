@@ -40,7 +40,7 @@ Option | Default | Notes
 ```javascript
 // screenshot will be saved at
 // cypress/sreenshots/takes a screenshot.png
-it("takes a screenshot", function(){
+it('takes a screenshot', function(){
   // returns null
   cy.screenshot()
 })
@@ -53,7 +53,7 @@ it("takes a screenshot", function(){
 ```javascript
 // screenshot will be saved at
 // cypress/sreenshots/clickingOnNav.png
-cy.screenshot("clickingOnNav")
+cy.screenshot('clickingOnNav')
 ```
 
 # Notes
@@ -76,7 +76,7 @@ If you're using Travis, you'll need to upload artifacts to an s3 bucket as per t
 
 Taking a screenshot is an asynchronous action which takes around `100ms` to complete. By the time the screenshot is taken it's possible something in your application may have changed. It's important to realize that the screenshot may not reflect 100% of what your application looked like when the command was issued.
 
-For example - say this command times outs `cy.get("#element")`. This causes your test to fail. We'll then take a screenshot when the test fails but it's possible something in your application changes within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely but theoretically possible.
+For example - say this command times outs `cy.get('#element')`. This causes your test to fail. We'll then take a screenshot when the test fails but it's possible something in your application changes within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely but theoretically possible.
 
 ## No Command Log scrolling during screenshots
 
@@ -87,7 +87,7 @@ For example - say this command times outs `cy.get("#element")`. This causes your
 ## Take a screenshot with a specific filename
 
 ```javascript
-cy.screenshot("my-image")
+cy.screenshot('my-image')
 ```
 
 The commands above will display in the command log as:

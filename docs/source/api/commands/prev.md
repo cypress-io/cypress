@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ```javascript
 // returns <li>Lorikeets</li>
-cy.get(".active").prev()
+cy.get('.active').prev()
 ```
 
 # Selector Usage
@@ -66,7 +66,7 @@ cy.get(".active").prev()
 
 ```javascript
 // returns <li>Cockatoos</li>
-cy.get("li").prev(".active")
+cy.get('li').prev('.active')
 ```
 
 # Command Log
@@ -74,7 +74,7 @@ cy.get("li").prev(".active")
 ## Find the previous element of the active `li`
 
 ```javascript
-cy.get(".left-nav").find("li.active").prev()
+cy.get('.left-nav').find('li.active').prev()
 ```
 
 The commands above will display in the command log as:

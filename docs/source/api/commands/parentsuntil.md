@@ -63,7 +63,7 @@ Option | Default | Notes
 
 ```javascript
 //returns [ul.menu, li]
-cy.get(".active").parentsUntil(".nav")
+cy.get('.active').parentsUntil('.nav')
 ```
 
 # Command Log
@@ -71,7 +71,7 @@ cy.get(".active").parentsUntil(".nav")
 ## Find all of the `.active` element's ancestors until `.nav`
 
 ```javascript
-cy.get(".active").parentsUntil(".nav")
+cy.get('.active').parentsUntil('.nav')
 ```
 
 The commands above will display in the command log as:

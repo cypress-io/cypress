@@ -56,13 +56,13 @@ Option | Default | Notes
 ## Load the `users.json` fixture
 
 ```javascript
-cy.fixture("users.json")
+cy.fixture('users.json')
 ```
 
 ## Omit the fixture file's extension
 
 ```javascript
-cy.fixture("admin")
+cy.fixture('admin')
 ```
 
 When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
@@ -84,7 +84,7 @@ When no extension is passed to `cy.fixture`, Cypress will search for files with 
 ## Image fixtures will be sent by default as `base64`
 
 ```javascript
-cy.fixture("images/logo.png").then(function(logo){
+cy.fixture('images/logo.png').then(function(logo){
   // logo will be encoded as base64
   // and should look something like this:
   // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==...
@@ -94,7 +94,7 @@ cy.fixture("images/logo.png").then(function(logo){
 ## Change encoding of Image fixture
 
 ```javascript
-cy.fixture("images/logo.png", "binary").then(function(logo){
+cy.fixture('images/logo.png', 'binary').then(function(logo){
   // logo will be encoded as binary
   // and should look something like this:
   // 000000000000000000000000000000000000000000...
@@ -110,7 +110,7 @@ You can nest fixtures within folders and reference them by defining the path to 
 `{fixturesFolder}/users/admin.json`
 
 ```javascript
-cy.fixture("users/admin.json")
+cy.fixture('users/admin.json')
 ```
 
 ## Validation
@@ -142,7 +142,7 @@ Cypress automatically determines the encoding for the following file types:
 For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#-cy-fixture-fixture-encoding-section-encoding-).
 
 ```javascript
-cy.fixture("foo.bmp", "base64")
+cy.fixture('foo.bmp', 'base64')
 ```
 
 The following encodings are supported:
@@ -168,8 +168,8 @@ Fixtures can be referenced directly by the special keywords: `fixture:` or `fx:`
 This enables you to set a fixture as the response for a route without having to first use the `cy.fixture` command.
 
 ```javascript
-cy.route("GET", /users/, "fixture:users") // this works
-cy.route("GET", /users/, "fx:users")      // this also works
+cy.route('GET', '/users/**', 'fixture:users') // this works
+cy.route('GET', '/users/**', 'fx:users')      // this also works
 ```
 
 This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data)).
@@ -178,8 +178,8 @@ This saves you from having to explicitly load the fixture first (like [below](ht
 
 ```javascript
 cy
-  .fixture("users").then(function(json){
-    cy.route("GET", /users/, json)
+  .fixture('users').then(function(json){
+    cy.route('GET', '/users/**', json)
   })
 ```
 
@@ -195,8 +195,8 @@ Using an alias provides the benefit of terseness and readability.
 
 ```javascript
 cy
-  .fixture("users").as("usersJSON")
-  .route("GET", /users/, "@usersJSON")
+  .fixture('users').as('usersJSON')
+  .route('GET', '/users/**', '@usersJSON')
 
   // ...later on...
 
@@ -212,13 +212,13 @@ You can also modify fixture data directly before passing it along to the route.
 
 ```javascript
 cy
-  .fixture("user").then(function(user){
-    user.firstName = "Jane"
+  .fixture('user').then(function(user){
+    user.firstName = 'Jane'
 
-    cy.route("GET", "/users/1", user)
+    cy.route('GET', '/users/1', user)
   })
-  .visit("/users")
-  .get(".user").should("include", "Jane")
+  .visit('/users')
+  .get('.user').should('include', 'Jane')
 })
 ```
 

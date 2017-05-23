@@ -36,10 +36,10 @@ In this example, on first login our server sends us back a session cookie. After
 
 ```javascript
 cy
-  .login("bob@example.com", "p@ssw0rd") // example of custom command
+  .login('bob@example.com', 'p@ssw0rd') // example of custom command
   .clearCookies()
-  .visit("/dashboard")                  // we should be redirected back to login
-  .url().should("eq", "login")
+  .visit('/dashboard')                  // we should be redirected back to login
+  .url().should('eq', 'login')
 ```
 
 # Command Log

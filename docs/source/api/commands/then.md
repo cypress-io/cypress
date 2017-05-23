@@ -32,7 +32,7 @@ Yield the current subject as the first argument.
 ```
 
 ```javascript
-cy.get("form").find("input").then(function($input){
+cy.get('form').find('input').then(function($input){
   // work with $input subject here
   // we can potentially use it within an assertion
   // or just call some methods on it and return a new subject
@@ -80,10 +80,10 @@ Any errors raised by failed assertions will immediately bubble up and cause the 
 
 ```javascript
 cy.then(function(){
-  return {foo: "bar"}
+  return {foo: 'bar'}
 }).then(function(obj){
-  // subject is now the obj {foo: "bar"}
-  expect(obj).to.deep.eq({foo: "bar"}) // true
+  // subject is now the obj {foo: 'bar'}
+  expect(obj).to.deep.eq({foo: 'bar'}) // true
 })
 ```
 
@@ -91,7 +91,7 @@ cy.then(function(){
 
 ```javascript
 // if using Q
-cy.get("button").click().then(function($button){
+cy.get('button').click().then(function($button){
   var p = Q.defer()
 
   setTimeout(function(){
@@ -102,12 +102,12 @@ cy.get("button").click().then(function($button){
 })
 
 // if using bluebird
-cy.get("button").click().then(function($button){
+cy.get('button').click().then(function($button){
   return Promise.delay(5000)
 })
 
 // if using jQuery deferred's
-cy.get("button").click().then(function($button){
+cy.get('button').click().then(function($button){
   var df = $.Deferred()
 
   setTimeout(function(){
@@ -122,12 +122,12 @@ cy.get("button").click().then(function($button){
 
 ```javascript
 cy
-  .get("form").then(function($form){
-    console.log("form is:", $form)
+  .get('form').then(function($form){
+    console.log('form is:', $form)
     // undefined is returned here, therefore
     // the $form subject will automatically
     // carry over and allow for continued chaining
-  }).find("input").then(function($input){
+  }).find('input').then(function($input){
     // we have our real $input element here since
     // our form element carried over and we called
     // .find("input") on it

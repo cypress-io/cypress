@@ -38,10 +38,10 @@ Option | Default | Notes
 ```
 
 ```javascript
-cy.get("form").within(function(){
+cy.get('form').within(function(){
   cy
-    .get("input[name='email']").type("john.doe@email.com")
-    .get("input[name='password']").type("password")
+    .get('input[name="email"]').type('john.doe@email.com')
+    .get('input[name="password"]').type('password')
     .root().submit()
 })
 ```

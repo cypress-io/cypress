@@ -33,11 +33,11 @@ window.foo = () => {
 // test
 cy
   .clock()
-  .visit("/index.html")
-  .window().invoke("foo")
+  .visit('/index.html')
+  .window().invoke('foo')
   .tick(500)
-  .get("#foo")
-    .should("have.text", "Foo")
+  .get('#foo')
+    .should('have.text', 'Foo')
 ```
 
 ## Example Recipe

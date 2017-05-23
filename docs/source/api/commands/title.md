@@ -30,15 +30,15 @@ Option | Default | Notes
 ## Assert that the document's title contains "New User"
 
 ```javascript
-cy.title().should("contain", "New User")
+cy.title().should('contain', 'New User')
 ```
 
 # Command Log
 
-## Assert that the document's title contains "New User"
+## Assert that the document's title contains 'New User'
 
 ```javascript
-cy.title().should("contain", "New User")
+cy.title().should('contain', 'New User')
 ```
 
 The commands above will display in the command log as:

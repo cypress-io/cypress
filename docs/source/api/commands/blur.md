@@ -34,7 +34,7 @@ Option | Default | Notes
 
 ```javascript
 // returns the same <textarea> for further chaining
-cy.get("[name='comment']").type("Nice Product!").blur()
+cy.get('[name='comment']').type('Nice Product!').blur()
 ```
 
 # Options Usage
@@ -43,7 +43,7 @@ cy.get("[name='comment']").type("Nice Product!").blur()
 
 ```javascript
 // returns the same <input> for further chaining
-cy.get("input:first").blur({force: true})
+cy.get('input:first').blur({force: true})
 ```
 
 # Command Log
@@ -51,7 +51,7 @@ cy.get("input:first").blur({force: true})
 ## Blur a textarea after typing.
 
 ```javascript
-cy.get("[name='comment']").type("Nice Product!").blur()
+cy.get('[name='comment']').type('Nice Product!').blur()
 ```
 
 The commands above will display in the command log as:

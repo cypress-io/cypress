@@ -36,7 +36,7 @@ cy.focused()
 ## Make an assertion on the focused element.
 
 ```javascript
-cy.focused().should("have.attr", "name", "username")
+cy.focused().should('have.attr', 'name', 'username')
 ```
 
 # Command Log
@@ -44,7 +44,7 @@ cy.focused().should("have.attr", "name", "username")
 ## Make an assertion on the focused element.
 
 ```javascript
-cy.focused().should("have.attr", "name").and("eq", "num")
+cy.focused().should('have.attr', 'name').and('eq', 'num')
 ```
 
 The commands above will display in the command log as:

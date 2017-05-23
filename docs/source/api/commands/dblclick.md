@@ -32,12 +32,12 @@ Option | Default | Notes
 ## Double click an anchor link
 
 ```html
-<a href='#nav1'>Menu</a>
+<a href="#nav1">Menu</a>
 ```
 
 ```javascript
 // returns the <a> for further chaining
-cy.get("#nav1").dblclick()
+cy.get('#nav1').dblclick()
 ```
 
 # Command Log
@@ -45,7 +45,7 @@ cy.get("#nav1").dblclick()
 ## Double click on a calendar schedule
 
 ```javascript
-cy.get("[data-schedule-id='4529114']:first").dblclick()
+cy.get('[data-schedule-id="4529114"]:first').dblclick()
 ```
 
 The commands above will display in the command log as:

@@ -32,14 +32,14 @@ Option | Default | Notes
 ## Focus on the current subject.
 
 ```javascript
-cy.get("[name='comment']").focus()
+cy.get('[name="comment"]').focus()
 ```
 
 Focus, type, and blur the current subject.
 
 ```javascript
 // returns the <textarea> for further chaining
-cy.get("[name='comment']").focus().type("Nice Product!").blur()
+cy.get('[name="comment"]').focus().type('Nice Product!').blur()
 ```
 
 # Command Log
@@ -47,7 +47,7 @@ cy.get("[name='comment']").focus().type("Nice Product!").blur()
 ## Focus the textarea.
 
 ```javascript
-cy.get("[name='comment']").focus()
+cy.get('[name="comment"]').focus()
 ```
 
 The commands above will display in the command log as:

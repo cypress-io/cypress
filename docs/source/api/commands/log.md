@@ -24,7 +24,7 @@ Print the message to the Command Log, along with any arguments.
 ## Log a message to the Command Log.
 
 ```javascript
-cy.log("Login successful")
+cy.log('Login successful')
 ```
 
 # Arguments Usage
@@ -33,7 +33,7 @@ cy.log("Login successful")
 
 ```javascript
 // print previously saved variable 'events' to the Command Log.
-cy.log("events triggered", events)
+cy.log('events triggered', events)
 ```
 
 # Command Log
@@ -42,8 +42,8 @@ cy.log("events triggered", events)
 
 ```javascript
 cy
-  .log("log out any message we want here")
-  .log("another message", ["one", "two", "three"])
+  .log('log out any message we want here')
+  .log('another message', ['one', 'two', 'three'])
 ```
 
 The commands above will display in the command log as:

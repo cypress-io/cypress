@@ -31,7 +31,7 @@ Option | Default | Notes
 ## Filter the current subject to the elements that do not have class `active`.
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li").not(".active")
+cy.get('.left-nav>.nav').find('>li').not('.active')
 ```
 
 # Command Log
@@ -39,7 +39,7 @@ cy.get(".left-nav>.nav").find(">li").not(".active")
 ## Find all buttons that are not of type submit
 
 ```javascript
-cy.get("form").find("button").not("[type='submit']")
+cy.get('form').find('button').not('[type="submit"]')
 ```
 
 The commands above will display in the command log as:

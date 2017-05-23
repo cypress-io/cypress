@@ -31,9 +31,9 @@ Option | Default | Notes
 
 ```javascript
 cy
-  .get("a").should("have.attr", "href").and("match", /dashboard/)
+  .get('a').should('have.attr', 'href').and('match', /dashboard/)
   .pause()
-  .get("button").should("not.be.disabled")
+  .get('button').should('not.be.disabled')
 ```
 
 # Related

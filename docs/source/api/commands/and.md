@@ -42,7 +42,7 @@ Does not change the subject. Whatever was passed to the function is what is retu
 ## Chain assertions on the same subject
 
 ```javascript
-cy.get("button").should("have.class", "active").and("not.be.disabled")
+cy.get('button').should('have.class', 'active').and('not.be.disabled')
 ```
 
 # Chainers with Value Usage
@@ -61,24 +61,24 @@ cy.get("button").should("have.class", "active").and("not.be.disabled")
 ```javascript
 cy
   // subject is now <a>
-  .get("a")
+  .get('a')
 
   // assert <a> contains text: "Edit User"
   // subject is still the <a>
-  .should("contain", "Edit User")
+  .should('contain', 'Edit User')
 
   // assert subject has 'href' attribute
   // subject now changes to return value from the 'href' attribute
-  .and("have.attr", "href")
+  .and('have.attr', 'href')
 
   // assert that the string returned from 'href'
   // matches the RegExp /users/
   // the subject is still the same string
-  .and("match", /users/)
+  .and('match', /users/)
 
   // assert that the string does not
   // have a '#' character within it
-  .and("not.include", "#")
+  .and('not.include', '#')
 ```
 
 # Chainers with Method and Value Usage
@@ -88,9 +88,9 @@ cy
 ```javascript
 // have.attr comes from chai-jquery
 cy
-  .get("#header a")
-  .should("have.class", "active")
-  .and("have.attr", "href", "/users")
+  .get('#header a')
+  .should('have.class', 'active')
+  .and('have.attr', 'href', '/users')
 ```
 
 # Function Usage
@@ -113,26 +113,26 @@ The callback function will be retried over and over again until no assertions wi
 
 ```javascript
 cy
-  .get("p")
-  .should("not.be.empty")
+  .get('p')
+  .should('not.be.empty')
   .and(function($p){
     // should have found 3 elements
     expect($p).to.have.length(3)
 
     // make sure the first contains some text content
-    expect($p.first()).to.contain("Hello World")
+    expect($p.first()).to.contain('Hello World')
 
     // use jquery's map to grab all of their classes
     // jquery's map returns a new jquery object
     var classes = $p.map(function(i, el){
-      return cy.$(el).attr("class")
+      return cy.$(el).attr('class')
     })
 
     // call classes.get() to make this a plain array
     expect(classes.get()).to.deep.eq([
-      "text-primary",
-      "text-danger",
-      "text-default"
+      'text-primary',
+      'text-danger',
+      'text-default'
     ])
   })
 ```
@@ -141,18 +141,18 @@ cy
 
 ```javascript
 cy
-  .get("button")
-  .should("be.active")
+  .get('button')
+  .should('be.active')
   .and(function($button){
     // whatever we return here is ignored
     // as Cypress will always force the return
     // value for future commands to be the same
     // as the previous subject which is <button>
 
-    expect({foo: "bar"}).to.deep.eq({foo: "bar"})
+    expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
 
     // whatever the return value (if any) is ignored
-    return {foo: "bar"}
+    return {foo: 'bar'}
   })
 
   .then(function($button){
@@ -176,13 +176,13 @@ This allows you to utilize other `chainer` methods such as `match` when making a
 // have.css("font-family") returned a string instead of the <body> element
 cy
   // subject is <body>
-  .get("body")
+  .get('body')
 
   // subject changes to the string return value of 'font-family'
-  .should("have.css", "font-family")
+  .should('have.css', 'font-family')
 
   // use match to assert the string matches a regular expression
-  .and("match", /sans-serif/)
+  .and('match', /sans-serif/)
 ```
 
 ```javascript
@@ -190,10 +190,10 @@ cy
 // have.attr, href, /users returned a string instead of the <a> element
 cy
   // subject is <a>
-  .get("a")
+  .get('a')
 
   // subject changes to the string 'users'
-  .should("have.attr", "href", "/users")
+  .should('have.attr', 'href', '/users')
 ```
 
 # Notes
@@ -205,7 +205,7 @@ If you've worked in [Chai](http://chaijs.com/) before, you will recognize that `
 Take this *explicit* assertion for example:
 
 ```javascript
-expect({foo: "bar"}).to.have.property("foo").and.eq("bar")
+expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 ```
 
 `cy.and` reproduces this same assertion behavior.
@@ -218,13 +218,13 @@ The following example is an example of increasing the `timeout` of the `cy.and`:
 
 ```javascript
 cy
-  .get("input", {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
-    .should("have.value", "foo")   // <-- and to have the value 'foo'
-    .and("have.class", "radio")    // <-- and to have the class 'radio'
+  .get('input', {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
+    .should('have.value', 'foo')   // <-- and to have the value 'foo'
+    .and('have.class', 'radio')    // <-- and to have the class 'radio'
 ```
 
 ```javascript
-cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class", "radio")
+cy.find('input', {timeout: 10000}).should('have.value', 'foo').and('have.class', 'radio')
                          ↲
       // adding the timeout here will automatically
       // flow down to the assertions, and they will
@@ -244,9 +244,9 @@ You can [read more about debugging assertions](https://on.cypress.io/guides/maki
 ## Chain assertions on the same subject
 
 ```javascript
-  .find("input[type='checkbox']")
-    .should("be.checked")
-    .and("not.be.disabled")
+  .find('input[type='checkbox']')
+    .should('be.checked')
+    .and('not.be.disabled')
 ```
 
 The commands above will display in the command log as:

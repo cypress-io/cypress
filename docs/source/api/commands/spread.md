@@ -22,10 +22,10 @@ Expand an array of arguments.
 ```javascript
 cy
   .server()
-  .route(/users/).as("getUsers")
-  .route(/activities/).as("getActivities")
-  .route(/comments/).as("getComments")
-  .wait(["@getUsers", "@getActivities", "@getComments"])
+  .route('/users/').as('getUsers')
+  .route('/activities/').as('getActivities')
+  .route('/comments/').as('getComments')
+  .wait(['@getUsers', '@getActivities', '@getComments'])
   .spread(function(getUsers, getActivities, getComments){
     // each XHR is now an individual argument
   })

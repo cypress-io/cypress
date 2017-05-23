@@ -7,7 +7,7 @@ description: ''
 Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
 
 ```javascript
-cy.type("{selectall}{backspace}")
+cy.type('{selectall}{backspace}')
 ```
 
 Prior to clearing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
@@ -48,7 +48,7 @@ Option | Default | Notes
 
 ```javascript
 // clears the existing value first before typing
-cy.get("input[name='name']").clear().type("Jane Lane")
+cy.get('input[name="name"]').clear().type('Jane Lane')
 ```
 
 # Command Log
@@ -56,7 +56,7 @@ cy.get("input[name='name']").clear().type("Jane Lane")
 ## Clear the input and type a new value
 
 ```javascript
-cy.get("input[name='name']").clear().type("Jane Lane")
+cy.get('input[name="name"]').clear().type('Jane Lane')
 ```
 
 The commands above will display in the command log as:

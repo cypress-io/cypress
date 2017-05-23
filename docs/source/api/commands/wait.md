@@ -58,9 +58,9 @@ cy.wait(500)
 // without changing or stubbing its response
 cy
   .server()
-  .route(/accounts\/d+/).as("getAccount")
-  .visit("/accounts/123")
-  .wait("@getAccount").then(function(xhr){
+  .route('/accounts/*').as('getAccount')
+  .visit('/accounts/123')
+  .wait('@getAccount').then(function(xhr){
     // we can now access the low level xhr
     // that contains the request body,
     // response body, status, etc
@@ -74,29 +74,29 @@ cy
 // wait for the next nth matching request
 cy
   .server()
-  .route(/books/, []).as("getBooks")
-  .get("#search").type("Grendel")
+  .route('/books', []).as('getBooks')
+  .get('#search').type('Grendel')
 
   // wait for the first response to finish
-  .wait("@getBooks")
+  .wait('@getBooks')
 
   // the results should be empty because we
   // responded with an empty array first
-  .get("#book-results").should("be.empty")
+  .get('#book-results').should('be.empty')
 
   // now re-route the books endpoint and force it to
   // have a response this time
-  .route(/books/, [{name: "Emperor of all maladies"}])
+  .route('/books', [{name: 'Emperor of all maladies'}])
 
-  .get("#search").type("Emperor of")
+  .get('#search').type('Emperor of')
 
   // now when we wait for 'getBooks' again, Cypress will
   // automatically know to wait for the 2nd response
-  .wait("@getBooks")
+  .wait('@getBooks')
 
   // we responded with 1 book item so now we should
   // have one result
-  .get("#book-results").should("have.length", 1)
+  .get('#book-results').should('have.length', 1)
 ```
 
 # Alias Array Usage
@@ -106,12 +106,12 @@ cy
 ```javascript
 cy
   .server()
-  .route(/users/).as("getUsers")
-  .route(/activities/).as("getActivities")
-  .route(/comments/).as("getComments")
-  .visit("/dashboard")
+  .route(/users/).as('getUsers')
+  .route(/activities/).as('getActivities')
+  .route(/comments/).as('getComments')
+  .visit('/dashboard')
 
-  .wait(["@getUsers", "@getActivities", "getComments"])
+  .wait(['@getUsers', '@getActivities', 'getComments'])
   .then(function(xhrs){
     // xhrs will now be an array of matching XHR's
     // xhrs[0] <-- getUsers
@@ -125,10 +125,10 @@ cy
 ```javascript
 cy
   .server()
-  .route(/users/).as("getUsers")
-  .route(/activities/).as("getActivities")
-  .route(/comments/).as("getComments")
-  .wait(["@getUsers", "@getActivities", "getComments"])
+  .route(/users/).as('getUsers')
+  .route(/activities/).as('getActivities')
+  .route(/comments/).as('getComments')
+  .wait(['@getUsers', '@getActivities', 'getComments'])
   .spread(function(getUsers, getActivities, getComments){
     // each XHR is now an individual argument
   })
@@ -161,10 +161,10 @@ This gives you the best of both worlds - a fast error feedback loop when request
 ```javascript
 cy
   .server()
-  .route("PUT", /users/, {}).as("userPut")
-  .get("form").submit()
-  .wait("@userPut")
-    .its("url").should("include", "users")
+  .route('PUT', /users/, {}).as('userPut')
+  .get('form').submit()
+  .wait('@userPut')
+    .its('url').should('include', 'users')
 ```
 
 The commands above will display in the command log as:

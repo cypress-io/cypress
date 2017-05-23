@@ -51,11 +51,11 @@ Option | Default | Notes
 // we can yield the location subject and work with
 // it directly as an object
 cy
-  .get("#search").type("brian{enter}")
+  .get('#search').type('brian{enter}')
   .location().should(function(location){
-    expect(location.search).to.eq("?search=brian")
-    expect(location.pathname).to.eq("/users")
-    expect(location.toString()).to.eq("http://localhost:8000/users?search=brian")
+    expect(location.search).to.eq('?search=brian')
+    expect(location.pathname).to.eq('/users')
+    expect(location.toString()).to.eq('http://localhost:8000/users?search=brian')
   })
 ```
 
@@ -66,8 +66,8 @@ cy
 ```javascript
 // we should be redirected to the login page
 cy
-  .visit("http://localhost:3000/admin")
-  .location("pathname").should("eq", "/login")
+  .visit('http://localhost:3000/admin')
+  .location('pathname').should('eq', '/login')
 ```
 
 # Notes
@@ -102,7 +102,7 @@ When changing properties on the real `window.location` object, it will force the
 
 ```javascript
 cy.location().should(function(location){
-  expect(location.href).to.include("commands/querying")
+  expect(location.href).to.include('commands/querying')
 })
 ```
 

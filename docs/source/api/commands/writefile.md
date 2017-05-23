@@ -39,9 +39,9 @@ Option | Default | Notes
 ```javascript
 // {projectRoot}/path/to/message.txt will be created with the contents "Hello World"
 cy
-  .writeFile("path/to/message.txt", "Hello World")
+  .writeFile('path/to/message.txt', 'Hello World')
   .then(function (text) {
-    expect(text).to.equal("Hello World") // true
+    expect(text).to.equal('Hello World') // true
   })
 ```
 
@@ -57,14 +57,14 @@ JavaScript arrays and objects are stringified and formatted into text.
 // }
 
 cy
-  .writeFile("path/to/data.json", { name: "Eliza", email: "eliza@example.com" })
+  .writeFile('path/to/data.json', { name: 'Eliza', email: 'eliza@example.com' })
   .then(function (user) {
     // user will equal:
     // {
-    //   name: "Eliza",
-    //   email: "eliza@example.com"
+    //   name: 'Eliza',
+    //   email: 'eliza@example.com'
     // }
-    expect(user.name).to.equal("Eliza")
+    expect(user.name).to.equal('Eliza')
   })
 ```
 
@@ -90,7 +90,7 @@ Specify the encoding with the third argument.
 ```javascript
 // {projectRoot}/path/to/message.txt will be created with the contents "Hello World"
 // the encoding will be "ascii"
-cy.writeFile("path/to/ascii.txt", "Hello World", "ascii"))
+cy.writeFile('path/to/ascii.txt', 'Hello World', 'ascii'))
 ```
 
 The following encodings are supported:
@@ -112,7 +112,7 @@ The following encodings are supported:
 ## Write an array to a file
 
 ```javascript
-cy.writeFile("info.log", ["foo", "bar", "baz"])
+cy.writeFile('info.log', ['foo', 'bar', 'baz'])
 ```
 
 The command above will display in the command log as:

@@ -36,7 +36,7 @@ Option | Default | Notes
 
 ```javascript
 cy
-  .visit("http://localhost:3000/admin")
+  .visit('http://localhost:3000/admin')
   .reload()
 ```
 
@@ -46,7 +46,7 @@ cy
 
 ```javascript
 cy
-  .visit("http://localhost:3000/admin")
+  .visit('http://localhost:3000/admin')
   .reload(true)
 ```
 

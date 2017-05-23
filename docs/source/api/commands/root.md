@@ -45,10 +45,10 @@ cy.root()
 ```
 
 ```javascript
-cy.get("form").within(function(){
+cy.get('form').within(function(){
   cy
-    .get("input[name='email']").type("john.doe@email.com")
-    .get("input[name='password']").type("password")
+    .get('input[name="email"]').type('john.doe@email.com')
+    .get('input[name="password"]').type('password')
 
     // the root element in a within is the previous
     // commands subject, in this case <form>

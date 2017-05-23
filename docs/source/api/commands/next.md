@@ -45,7 +45,7 @@ Option | Default | Notes
 
 ```javascript
 //returns <li>bananas</li>
-cy.get(".second").next()
+cy.get('.second').next()
 ```
 
 # Selector Usage
@@ -63,7 +63,7 @@ cy.get(".second").next()
 
 ```javascript
 //returns <li>pineapples</li>
-cy.get("li").next(".selected")
+cy.get('li').next('.selected')
 ```
 
 # Command Log
@@ -71,7 +71,7 @@ cy.get("li").next(".selected")
 ## Find the element next to the active li
 
 ```javascript
-cy.get(".left-nav").find("li.active").next()
+cy.get('.left-nav').find('li.active').next()
 ```
 
 The commands above will display in the command log as:

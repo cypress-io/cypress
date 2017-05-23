@@ -27,10 +27,10 @@ Iterate over an array-like structure.
 
 ```javascript
 cy
-  .get("ul>li")
+  .get('ul>li')
   .each(function($el, index, $list){
     // $el is wrapped jquery element
-    if ($el.someMethod() === "something") {
+    if ($el.someMethod() === 'something') {
       // wrap this element so we can
       // use cypress commands on it
       cy.wrap($el).click()
@@ -60,12 +60,12 @@ cy
 
 ```javascript
 cy
-  .get("li").should("have.length", 3)
+  .get('li').should('have.length', 3)
   .each(function($li, index, $lis){
     // no matter what we return here
     // the next subject will still
     // be the collection of <li>
-    return "something else"
+    return 'something else'
   })
   .then(function($lis){
     expect($lis).to.have.length(3) // true

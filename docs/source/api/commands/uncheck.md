@@ -40,27 +40,27 @@ Option | Default | Notes
 ## Uncheck all checkboxes
 
 ```javascript
-cy.get(":checkbox").uncheck()
+cy.get(':checkbox').uncheck()
 ```
 
 ## Uncheck all radios
 
 ```javascript
-cy.get("[type='checkbox']").uncheck()
+cy.get('[type="checkbox"]').uncheck()
 ```
 
 ## Uncheck element with the id `saveUserName`
 
 ```javascript
-cy.get("#saveUserName").uncheck()
+cy.get('#saveUserName').uncheck()
 ```
 
 # Values Usage
 
-## Uncheck the checkbox with the value of "ga"
+## Uncheck the checkbox with the value of 'ga'
 
 ```javascript
-cy.get("input[type='checkbox']").uncheck(["ga"])
+cy.get('input[type="checkbox"]').uncheck(['ga'])
 ```
 
 # Command Log
@@ -69,8 +69,8 @@ cy.get("input[type='checkbox']").uncheck(["ga"])
 
 ```javascript
 cy
-  .get("[data-js='choose-all']").click()
-  .find("input[type='checkbox']").first().uncheck()
+  .get('[data-js="choose-all"]').click()
+  .find('input[type="checkbox"]').first().uncheck()
 ```
 
 The commands above will display in the command log as:

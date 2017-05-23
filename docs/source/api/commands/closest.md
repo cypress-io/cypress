@@ -31,7 +31,7 @@ Option | Default | Notes
 ## Find the closest element of the current subject with the class `nav`
 
 ```javascript
-cy.get("li.active").closest(".nav")
+cy.get('li.active').closest('.nav')
 ```
 
 # Command Log
@@ -39,7 +39,7 @@ cy.get("li.active").closest(".nav")
 ## Find the closest element of the current subject with the class `nav`
 
 ```javascript
-cy.get("li.active").closest(".nav")
+cy.get('li.active').closest('.nav')
 ```
 
 The commands above will display in the command log as:

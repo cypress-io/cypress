@@ -31,7 +31,7 @@ Option | Default | Notes
 
 ```javascript
 cy
-  .visit("http://localhost:8080/app")
+  .visit('http://localhost:8080/app')
   .window().then(function(win){
     // win is the remote window
     // of the page at: http://localhost:8080/app
@@ -43,7 +43,7 @@ cy
 ## Passes timeout through to `cy.should` assertion
 
 ```javascript
-cy.window({timeout: 10000}).should("have.property", "foo")
+cy.window({timeout: 10000}).should('have.property', 'foo')
 ```
 
 # Command Log

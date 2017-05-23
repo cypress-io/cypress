@@ -28,7 +28,7 @@ Wraps the `method` on the `object` with a spy and returns the spy. See the [sino
 
 ```javascript
 // assume App.start calls util.addListeners
-cy.spy(util, "addListeners")
+cy.spy(util, 'addListeners')
 App.start()
 expect(util.addListeners).to.be.called
 
@@ -48,8 +48,8 @@ Adding an alias using [`cy.as`](https://on.cypress.io/api/as) to spies makes the
 const obj = {
   foo () {}
 }
-const spy = cy.spy(obj, "foo").as("anyArgs")
-const withFoo = spy.withArgs("foo").as("withFoo")
+const spy = cy.spy(obj, 'foo').as('anyArgs')
+const withFoo = spy.withArgs('foo').as('withFoo')
 obj.foo()
 expect(spy).to.be.called
 expect(withFoo).to.be.called // purposefully failing assertion
@@ -67,8 +67,8 @@ You will see the following in the command log:
 const obj = {
   foo () {}
 }
-const spy = cy.spy(obj, "foo").as("foo")
-obj.foo("foo", "bar")
+const spy = cy.spy(obj, 'foo').as('foo')
+obj.foo('foo', 'bar')
 expect(spy).to.be.called
 ```
 

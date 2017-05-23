@@ -31,10 +31,10 @@ Option | Default | Notes
 
 ```javascript
 var fn = function(){
-  return "bar"
+  return 'bar'
 }
 
-cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
+cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 ```
 
 # Related

@@ -36,7 +36,7 @@ Option | Default | Notes
 ## Get the parents of the active `li`
 
 ```javascript
-cy.get("li.active").parents()
+cy.get('li.active').parents()
 ```
 
 # Selector Usage
@@ -44,7 +44,7 @@ cy.get("li.active").parents()
 ## Get the parents with class `nav` of the active `li`
 
 ```javascript
-cy.get("li.active").parents(".nav")
+cy.get('li.active').parents('.nav')
 ```
 
 # Command Log
@@ -52,7 +52,7 @@ cy.get("li.active").parents(".nav")
 ## Get the parents of the active `li`
 
 ```javascript
-cy.get("li.active").parents()
+cy.get('li.active').parents()
 ```
 
 <img width="531" alt="screen shot 2015-11-27 at 2 02 59 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447168/be286244-950f-11e5-82e8-9a2a6d1d08e8.png">

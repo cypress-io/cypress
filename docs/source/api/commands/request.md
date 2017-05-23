@@ -57,7 +57,7 @@ You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` 
 ```javascript
 // make a request to seed the database prior to running each test
 beforeEach(function(){
-  cy.request("http://localhost:8080/db/seed")
+  cy.request('http://localhost:8080/db/seed')
 })
 ```
 
@@ -68,9 +68,9 @@ cy
   // dont visit this page and load the resources
   // instead let's just issue a simple HTTP request
   // so we can make an assertion about its body
-  .request("/admin")
-  .its("body")
-  .should("include", "<h2>admin.html</h2>")
+  .request('/admin')
+  .its('body')
+  .should('include', '<h2>admin.html</h2>')
 ```
 
 ## Send the new subject to an HTTP's response on request
@@ -78,7 +78,7 @@ cy
 ```javascript
 // the response object is an object literal
 // containing status, body, headers, and duration
-cy.request("http://dev.local/users").then(function(response){
+cy.request('http://dev.local/users').then(function(response){
   // subject is now the response object
   // {
   //   status: 200,
@@ -95,7 +95,7 @@ cy.request("http://dev.local/users").then(function(response){
 
 ```javascript
 // Delete a user
-cy.request("DELETE", "http://localhost:8888/users/827")
+cy.request('DELETE', 'http://localhost:8888/users/827')
 ```
 
 # Method and URL and Body Usage
@@ -106,10 +106,10 @@ cy.request("DELETE", "http://localhost:8888/users/827")
 // the Accepts Request Header is automatically set based
 // on the type of body you supply
 cy
-  .request("POST", "http://localhost:8888/users/admin", {name: "Jane"})
+  .request('POST', 'http://localhost:8888/users/admin', {name: 'Jane'})
   .then(function(response){
     // response.body would automatically be serialized into JSON
-    expect(response.body).to.have.property("name", "Jane") // true
+    expect(response.body).to.have.property('name', 'Jane') // true
 })
 ```
 
@@ -134,7 +134,7 @@ cy.request({
 
   // when we turn off following redirects, Cypress will also send us
   // a 'redirectedToUrl' property with the fully qualified URL that we were redirected to.
-  expect(resp.redirectedToUrl).to.eq("http://localhost:8082/unauthorized")
+  expect(resp.redirectedToUrl).to.eq('http://localhost:8082/unauthorized')
 })
 ```
 
@@ -163,7 +163,7 @@ cy
   })
 
   // just to prove we have a session
-  cy.getCookie("cypress-session-cookie").should('exist')
+  cy.getCookie('cypress-session-cookie').should('exist')
 ```
 
 {% note info Using cy.request for HTML Forms %}
@@ -185,9 +185,9 @@ Normally when the browser detects a cross-origin HTTP request, it will send an `
 ```javascript
 // we can make requests to any external server, no problem.
 cy
-  .request("https://www.google.com/webhp?#q=cypress.io+cors")
-    .its("body")
-    .should("include", "Testing, the way it should be") // true
+  .request('https://www.google.com/webhp?#q=cypress.io+cors')
+    .its('body')
+    .should('include', 'Testing, the way it should be') // true
 ```
 
 ## Cookies are automatically sent and received
@@ -203,8 +203,8 @@ If you provide a non fully qualified domain name (FQDN), Cypress will make its b
 ```javascript
 cy
   // after you visit somewhere, Cypress will assume this is the host
-  .visit("http://localhost:8080/app")
-  .request("users/1.json") // <-- url is http://localhost:8080/users/1.json
+  .visit('http://localhost:8080/app')
+  .request('users/1.json') // <-- url is http://localhost:8080/users/1.json
 ```
 
 If you make the `cy.request` prior to visiting a page, Cypress will use the host configured as the `baseUrl` property inside of `cypress.json`.
@@ -212,13 +212,13 @@ If you make the `cy.request` prior to visiting a page, Cypress will use the host
 ```javascript
 // cypress.json
 {
-  baseUrl: "http://localhost:1234"
+  baseUrl: 'http://localhost:1234'
 }
 ```
 
 ```javascript
 // inside of your tests
-cy.request("seed/admin") //<-- url is http://localhost:1234/seed/admin
+cy.request('seed/admin') //<-- url is http://localhost:1234/seed/admin
 ```
 
 If Cypress cannot determine the host it will throw an explicit error.

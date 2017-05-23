@@ -41,8 +41,8 @@ For any file other than JSON, the contents of the file are returned.
 // message.txt contains:
 // Hello World
 
-cy.readFile("path/to/message.txt").then(function (text) {
-  expect(text).to.equal("Hello World")   // true
+cy.readFile('path/to/message.txt').then(function (text) {
+  expect(text).to.equal('Hello World')   // true
 })
 ```
 
@@ -57,13 +57,13 @@ For JSON, the contents are parsed into JavaScript and returned.
 //   "email": "eliza@example.com"
 // }
 
-cy.readFile("path/to/data.json").then(function (user) {
+cy.readFile('path/to/data.json').then(function (user) {
   // user will equal:
   // {
   //   name: "Eliza",
   //   email: "eliza@example.com"
   // }
-  expect(user.name).to.equal("Eliza")
+  expect(user.name).to.equal('Eliza')
 })
 ```
 
@@ -72,7 +72,7 @@ cy.readFile("path/to/data.json").then(function (user) {
 Specify the encoding with the second argument.
 
 ```javascript
-cy.readFile("path/to/logo.png", "base64").then(function (logo) {
+cy.readFile('path/to/logo.png', 'base64').then(function (logo) {
   // logo will be encoded as base64
   // and should look something like this:
   // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==...
@@ -118,7 +118,7 @@ cy.readFile('does-not-exist.yaml').should("not.exist")
 ## List the contents of cypress.json
 
 ```javascript
-cy.readFile("cypress.json")
+cy.readFile('cypress.json')
 ```
 
 The command above will display in the command log as:

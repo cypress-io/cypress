@@ -44,36 +44,36 @@ Option | Default | Notes
 ## Find the element with an id of main
 
 ```javascript
-cy.get("#main")
+cy.get('#main')
 ```
 
 ## Find the first `li` descendent within a `ul`
 
 ```javascript
-cy.get("ul li:first")
+cy.get('ul li:first')
 ```
 
 ## Find the element with class dropdown-menu and click it.
 
 ```javascript
 cy
-  .get(".dropdown-menu").click()
+  .get('.dropdown-menu').click()
 
   // Break out of the previous command chain and
   // query for #search from the root document.
-  .get("#search").type("mogwai")
+  .get('#search').type('mogwai')
 ```
 
 ## Reset the current scope in a [`cy.within`](https://on.cypress.io/api/within)
 
 ```javascript
 // Find form and scope all new queries to within form.
-cy.get("form").within(function(){
+cy.get('form').within(function(){
   cy
     // Find the input within form and type Pamela
-    .get("input").type("Pamela")
+    .get('input').type('Pamela')
     // Find the element textarea within form and type in it
-    .get("textarea").type("is a developer")
+    .get('textarea').type('is a developer')
 })
 ```
 
@@ -84,23 +84,23 @@ For a detailed explanation of aliasing, [read more about aliasing here](https://
 ## Retrieve aliased `todos` elements
 
 ```javascript
-cy.get("ul#todos").as("todos")
+cy.get('ul#todos').as('todos')
 
 //...hack hack hack...
 
 //later retrieve the todos
-cy.get("@todos")
+cy.get('@todos')
 ```
 
 ## Alias the `submitBtn` in a `beforeEach`
 
 ```javascript
 beforeEach(function(){
-  cy.get("button[type=submit]").as("submitBtn")
+  cy.get('button[type=submit]').as('submitBtn')
 })
 
-it("disables on click", function(){
-  cy.get("@submitBtn").should("be.disabled")
+it('disables on click', function(){
+  cy.get('@submitBtn').should('be.disabled')
 })
 ```
 
@@ -110,8 +110,8 @@ it("disables on click", function(){
 
 ```javascript
 cy
-  .get("input[name='firstName']")
-  .should("have.value", "Homer")
+  .get('input[name='firstName']')
+  .should('have.value', 'Homer')
 ```
 
 The commands above will display in the command log as:

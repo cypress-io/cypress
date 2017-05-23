@@ -61,7 +61,7 @@ Option | Default | Notes
 //  <li class="services-2"></li>,
 //  <li class="services-3"></li>
 // ]
-cy.get("ul.secondary-nav").children()
+cy.get('ul.secondary-nav').children()
 ```
 
 # Selector Usage
@@ -79,7 +79,7 @@ cy.get("ul.secondary-nav").children()
 
 ```javascript
 // returns [<li class="active">Unit Testing</li>]
-cy.get("ul").children(".active")
+cy.get('ul').children('.active')
 ```
 
 # Command Log
@@ -87,7 +87,7 @@ cy.get("ul").children(".active")
 ## Assert that there should be 8 children elements in a nav
 
 ```javascript
-cy.get(".left-nav>.nav").children().should("have.length", 8)
+cy.get('.left-nav>.nav').children().should('have.length', 8)
 ```
 
 The commands above will display in the command log as:

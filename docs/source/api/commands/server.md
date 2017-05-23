@@ -78,7 +78,7 @@ By default [`cy.route`](https://on.cypress.io/api/route) inherits its options fr
 ```javascript
 cy
   .server({
-    method: "POST",
+    method: 'POST',
     delay: 1000,
     status: 422,
     response: {}
@@ -91,7 +91,7 @@ cy
   // in this example our matching requests will
   // be delayed 1000ms and have a status of 422
   // but its response will be what we set in route
-  .route(/users/, {errors: "Name cannot be blank"})
+  .route('/users/', {errors: 'Name cannot be blank'})
 
 ```
 
@@ -117,7 +117,7 @@ Simply set `{force404: true}`
 ```javascript
 cy
   .server({force404: true})
-  .route(/activities/, "fixture:activities.json")
+  .route('/activities/**', 'fixture:activities.json')
 ```
 
 ```javascript
@@ -125,11 +125,11 @@ cy
 // Application Code
 
 $(function(){
-  $.get("/activities")
+  $.get('/activities')
 
   // this will be sent back 404 since it
   // does not match any of the cy.routes
-  $.getJSON("/users.json")
+  $.getJSON('/users.json')
 })
 ```
 
@@ -147,14 +147,14 @@ This is useful when you want to send back meta data in the headers, such as **pa
 cy
   .server({
     headers: {
-      "x-token": "abc-123-foo-bar"
+      'x-token': 'abc-123-foo-bar'
     }
   })
-  .route("GET", "/users/1", {id: 1, name: "Amanda"}).as("getUser")
-  .visit("/users/1/profile")
-  .wait("@getUser")
-    .its("responseHeaders")
-    .should("have.property", "x-token", "abc-123-foo-bar") // true
+  .route('GET', '/users/1', {id: 1, name: 'Amanda'}).as('getUser')
+  .visit('/users/1/profile')
+  .wait('@getUser')
+    .its('responseHeaders')
+    .should('have.property', 'x-token', 'abc-123-foo-bar') // true
 ```
 
 ```javascript
@@ -163,10 +163,10 @@ cy
 // lets use the native XHR object
 var xhr = new XMLHttpRequest
 
-xhr.open("GET", "/users/1")
+xhr.open('GET', '/users/1')
 
 xhr.onload = function(){
-  var token = this.getResponseHeader("x-token")
+  var token = this.getResponseHeader('x-token')
   console.log(token) // => abc-123-foo-bar
 }
 
@@ -188,7 +188,7 @@ The default whitelist function is:
 var whitelist = function(xhr){
   // this function receives the xhr object in question and
   // will whitelist if its a GET that appears to be a static resource
-  xhr.method === "GET" && /\.(jsx?|html|css)(\?.*)?$/.test(xhr.url)
+  xhr.method === 'GET' && /\.(jsx?|html|css)(\?.*)?$/.test(xhr.url)
 }
 ```
 
@@ -213,7 +213,7 @@ You can disable all stubbing and its effects and restore to the default behavior
 ```javascript
 cy
   .server()
-  .route("POST", /users/, {}).as("createUser")
+  .route('POST', '/users', {}).as('createUser')
 
   ...
 

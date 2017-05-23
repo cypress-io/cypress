@@ -46,7 +46,7 @@ Option | Default | Notes
 ```
 
 ```javascript
-cy.get("li").eq(1).should("contain", "siamese") // true
+cy.get('li').eq(1).should('contain', 'siamese') // true
 ```
 
 # Index Form End Usage
@@ -64,7 +64,7 @@ cy.get("li").eq(1).should("contain", "siamese") // true
 ```
 
 ```javascript
-cy.get("li").eq(-2).should("contain", "sphynx") // true
+cy.get('li').eq(-2).should('contain', 'sphynx') // true
 ```
 
 # Command Log
@@ -72,7 +72,7 @@ cy.get("li").eq(-2).should("contain", "sphynx") // true
 ## Find the 4th `li` in the navigation
 
 ```javascript
-cy.get(".left-nav.nav").find(">li").eq(3)
+cy.get('.left-nav.nav').find('>li').eq(3)
 ```
 
 The commands above will display in the command log as:

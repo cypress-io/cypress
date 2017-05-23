@@ -42,7 +42,7 @@ Option | Default | Notes
 
 ```javascript
 // returns <li>About</li>
-cy.get("ul").find(">li").filter(".active")
+cy.get('ul').find('>li').filter('.active')
 ```
 
 # Command Log
@@ -50,7 +50,7 @@ cy.get("ul").find(">li").filter(".active")
 ## Filter the `li`'s to the `li` with the class `active`.
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li").filter(".active")
+cy.get('.left-nav>.nav').find('>li').filter('.active')
 ```
 
 The commands above will display in the command log as:

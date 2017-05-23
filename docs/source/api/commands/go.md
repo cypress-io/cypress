@@ -36,13 +36,13 @@ Option | Default | Notes
 ## Go back in browser's history
 
 ```javascript
-cy.go("back")   // equivalent to clicking back button
+cy.go('back')   // equivalent to clicking back button
 ```
 
 ## Go forward in browser's history
 
 ```javascript
-cy.go("forward") // equivalent to clicking forward button
+cy.go('forward') // equivalent to clicking forward button
 ```
 
 # Number Usage
@@ -65,8 +65,8 @@ cy.go(1)        // equivalent to clicking forward button
 
 ```javascript
 cy
-  .visit("http://localhost:8000/folders")
-  .go("back")
+  .visit('http://localhost:8000/folders')
+  .go('back')
 ```
 
 The commands above will display in the command log as:

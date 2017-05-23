@@ -64,7 +64,7 @@ Option | Default | Notes
 
 ```javascript
 //returns [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
-cy.get("#nuts").nextUntil("#veggies")
+cy.get('#nuts').nextUntil('#veggies')
 ```
 
 # Command Log
@@ -72,7 +72,7 @@ cy.get("#nuts").nextUntil("#veggies")
 ## Find all of the element's siblings before `#nuts` until `#veggies`
 
 ```javascript
-cy.get("#nuts").nextUntil("#veggies")
+cy.get('#nuts').nextUntil('#veggies')
 ```
 
 The commands above will display in the command log as:

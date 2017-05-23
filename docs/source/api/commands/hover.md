@@ -16,7 +16,7 @@ Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.w
 
 **Example of showing an element in order to perform action**
 ```javascript
-cy.get(".content").invoke("show").click()
+cy.get('.content').invoke('show').click()
 ```
 
 {% note info Dealing with hover and hidden elements %}
@@ -27,19 +27,19 @@ You can also force the action to be performed on the element regardless of wheth
 
 **Example of clicking on a hidden element**
 ```javascript
-cy.get(".content").click({force: true})
+cy.get('.content').click({force: true})
 ```
 
 **Example of checking a hidden element**
 ```javascript
-cy.get(".checkbox").check({force: true})
+cy.get('.checkbox').check({force: true})
 ```
 
 If the hover behavior depends on a JavaScript event like `mouseover`, you can trigger the event to achieve that behavior.
 
 **Example of triggering a mouseover event**
 ```javascript
-cy.get(".content").trigger("mouseover")
+cy.get('.content').trigger('mouseover')
 ```
 
 # Related

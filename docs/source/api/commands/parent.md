@@ -36,7 +36,7 @@ Option | Default | Notes
 ## Get the parent of the active `li`
 
 ```javascript
-cy.get("li.active").parent()
+cy.get('li.active').parent()
 ```
 
 # Selector Usage
@@ -44,7 +44,7 @@ cy.get("li.active").parent()
 ## Get the parent with class `nav` of the active `li`
 
 ```javascript
-cy.get("li.active").parent(".nav")
+cy.get('li.active').parent('.nav')
 ```
 
 # Command Log
@@ -52,7 +52,7 @@ cy.get("li.active").parent(".nav")
 ## Assert on the parent of the active li
 
 ```javascript
-cy.get("li.active").parent().should("have.class", "nav")
+cy.get('li.active').parent().should('have.class', 'nav')
 ```
 
 The commands above will display in the command log as:

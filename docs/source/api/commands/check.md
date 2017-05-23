@@ -44,19 +44,19 @@ Option | Default | Notes
 ## Check all checkboxes
 
 ```javascript
-cy.get("[type='checkbox']").check()
+cy.get('[type='checkbox']').check()
 ```
 
 ## Check all radios
 
 ```javascript
-cy.get("[type='radio']").check()
+cy.get('[type='radio']').check()
 ```
 
 ## Check the element with id of `saveUserName` and check it
 
 ```javascript
-cy.get("#saveUserName").check()
+cy.get('#saveUserName').check()
 ```
 
 # Value Usage
@@ -64,7 +64,7 @@ cy.get("#saveUserName").check()
 ## Check the checkbox with the value of "US"
 
 ```javascript
-cy.get("input[type='checkbox']").check("US")
+cy.get('input[type='checkbox']').check('US')
 ```
 
 # Values Usage
@@ -72,7 +72,7 @@ cy.get("input[type='checkbox']").check("US")
 ## Check the checkbox with the value of "ga" and "ca"
 
 ```javascript
-cy.get("input[type='checkbox']").check(["ga", "ca"])
+cy.get('input[type='checkbox']').check(['ga', 'ca'])
 ```
 
 # Command Log
@@ -80,7 +80,7 @@ cy.get("input[type='checkbox']").check(["ga", "ca"])
 ## check the element with name of emailUser
 
 ```javascript
-cy.get("form").find("[name='emailUser']").check()
+cy.get('form').find('[name='emailUser']').check()
 ```
 
 The commands above will display in the command log as:

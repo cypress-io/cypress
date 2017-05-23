@@ -32,7 +32,7 @@ Option | Default | Notes
 
 ```javascript
 // Hash returns #/users/1
-cy.hash().should("eq", "#/users/1") // => true
+cy.hash().should('eq', '#/users/1') // => true
 ```
 
 ## Assert that the hash matches via RegExp
@@ -47,8 +47,8 @@ cy.hash().should("eq", "#/users/1") // => true
 
 ```javascript
 cy
-  .get("#users li").find("a")
-  .hash().should("match", /users\/.+$/) // => true
+  .get('#users li').find('a')
+  .hash().should('match', /users\/.+$/) // => true
 ```
 
 # Notes
@@ -60,14 +60,14 @@ These 3 assertions are all the same.
 ```javascript
 // 1. verbose
 cy.location().then(function(location){
-  expect(location.hash).to.eq("#/users/1")
+  expect(location.hash).to.eq('#/users/1')
 })
 
 // 2. better
-cy.location().its("hash").should("eq", "#/users/1")
+cy.location().its('hash').should('eq', '#/users/1')
 
 // 3. best
-cy.hash().should("eq", "#/users/1")
+cy.hash().should('eq', '#/users/1')
 ```
 
 # Command Log
@@ -75,7 +75,7 @@ cy.hash().should("eq", "#/users/1")
 ## Assert that the hash matches `#users/new`
 
 ```javascript
-cy.hash().should("eq", "#users/new")
+cy.hash().should('eq', '#users/new')
 ```
 
 The commands above will display in the command log as:

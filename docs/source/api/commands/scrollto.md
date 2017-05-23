@@ -45,13 +45,13 @@ Option | Default | Notes
 ## Scroll to the bottom of the window
 
 ```javascript
-cy.scrollTo("bottom")
+cy.scrollTo('bottom')
 ```
 
 ## Scroll to the center of the list
 
 ```javascript
-cy.get("#movies-list").scrollTo('center')
+cy.get('#movies-list').scrollTo('center')
 ```
 
 # Coordinate Usage
@@ -59,13 +59,13 @@ cy.get("#movies-list").scrollTo('center')
 ## Scroll 500px down the list
 
 ```javascript
-cy.get("#infinite-scroll-list").scrollTo(0, 500)
+cy.get('#infinite-scroll-list').scrollTo(0, 500)
 ```
 
 ## Scroll the window 500px to the right
 
 ```javascript
-cy.scrollTo("500px")
+cy.scrollTo('500px')
 ```
 
 # Percentage Usage
@@ -73,7 +73,7 @@ cy.scrollTo("500px")
 ## Scroll 25% down the element
 
 ```javascript
- cy.get(".user-photo").scrollTo('0%', '25%')
+ cy.get('.user-photo').scrollTo('0%', '25%')
 ```
 
 # Options Usage
@@ -81,13 +81,13 @@ cy.scrollTo("500px")
 ## Use linear easing animation to scroll
 
 ```javascript
-cy.get(".documentation").scrollTo('top', { easing: 'linear'} )
+cy.get('.documentation').scrollTo('top', { easing: 'linear'} )
 ```
 
 ## Scroll to the right over 2000ms
 
 ```javascript
-cy.get("#slider").scrollTo('right', { duration: 2000} )
+cy.get('#slider').scrollTo('right', { duration: 2000} )
 ```
 
 # Notes
@@ -101,8 +101,8 @@ cy.get("#slider").scrollTo('right', { duration: 2000} )
 ## Scroll to the bottom of the window then scroll the element to the "right"
 
 ```javascript
-cy.scrollTo("bottom")
-cy.get("#scrollable-horizontal").scrollTo("right")
+cy.scrollTo('bottom')
+cy.get('#scrollable-horizontal').scrollTo('right')
 ```
 
 The commands above will display in the command log as:

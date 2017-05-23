@@ -32,8 +32,8 @@ Option | Default | Notes
 ```javascript
 // clicking the anchor causes the browser to follow the link
 cy
-  .get("#user-edit a").click()
-  .url().should("eq", "http://localhost:8000/users/1/edit") // => true
+  .get('#user-edit a').click()
+  .url().should('eq', 'http://localhost:8000/users/1/edit') // => true
 ```
 
 ## URL is a shortcut for `cy.location().href`
@@ -42,7 +42,7 @@ cy
 
 ```javascript
 cy.url()                  // these return the same string
-cy.location().its("href") // these return the same string
+cy.location().its('href') // these return the same string
 ```
 
 # Notes
@@ -52,11 +52,11 @@ cy.location().its("href") // these return the same string
 Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
 ```javascript
-cy.location().its("href").should("eq", "http://localhost:8000/index.html")
+cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
 
-cy.location().invoke("toString").should("eq", "http://localhost:8000/index.html")
+cy.location().invoke('toString').should('eq', 'http://localhost:8000/index.html')
 
-cy.url().should("eq", "http://localhost:8000/index.html")
+cy.url().should('eq', 'http://localhost:8000/index.html')
 ```
 
 `href` and `toString` come from the `window.location` spec.
@@ -70,7 +70,7 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 ## Assert that the url contains "#users/new"
 
 ```javascript
-cy.url().should("contain", "#users/new")
+cy.url().should('contain', '#users/new')
 ```
 
 The commands above will display in the command log as:

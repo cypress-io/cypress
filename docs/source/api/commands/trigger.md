@@ -63,7 +63,7 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 ```javascript
 // returns <button>Save</button>
-cy.get("button").trigger("mouseover")
+cy.get('button').trigger('mouseover')
 ```
 
 # Position Usage
@@ -72,7 +72,7 @@ cy.get("button").trigger("mouseover")
 
 ```javascript
 // mousedown is issued in the top right corner of the element
-cy.get("button").trigger("mousedown", "topRight")
+cy.get('button').trigger('mousedown', 'topRight')
 ```
 
 # Coordinates Usage
@@ -83,7 +83,7 @@ cy.get("button").trigger("mousedown", "topRight")
 // the contextmenu event will be issued inside of the element
 // 15px from the left and
 // 40px from the top
-cy.get("button").trigger("contextmenu", 15, 40)
+cy.get('button').trigger('contextmenu', 15, 40)
 ```
 
 # Options Usage
@@ -93,7 +93,7 @@ cy.get("button").trigger("contextmenu", 15, 40)
 By default, the event will bubble up the DOM tree. This will prevent the event from bubbling.
 
 ```javascript
-cy.get("button").trigger("mouseover", {bubbles: false})
+cy.get('button').trigger('mouseover', {bubbles: false})
 ```
 
 ## Specify the exact clientX and clientY the event should have
@@ -101,7 +101,7 @@ cy.get("button").trigger("mouseover", {bubbles: false})
 This overrides the default auto-positioning based on the element itself. Useful for events like `mousemove` where you need the position to be outside the element itself.
 
 ```javascript
-cy.get("button").trigger("mousemove", {clientX: 200, clientY: 300})
+cy.get('button').trigger('mousemove', {clientX: 200, clientY: 300})
 ```
 
 # Command Log
@@ -109,7 +109,7 @@ cy.get("button").trigger("mousemove", {clientX: 200, clientY: 300})
 ## Trigger a mouseover event on the first button
 
 ```javascript
-cy.get("button").first().trigger("mouseover")
+cy.get('button').first().trigger('mouseover')
 ```
 
 The commands above will display in the command log as:

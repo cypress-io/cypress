@@ -27,10 +27,10 @@ Invokes the function with the specified name and forwards any additional argumen
 
 ```javascript
 var fn = function(){
-  return "bar"
+  return 'bar'
 }
 
-cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
+cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 ```
 
 {% note info Using cy.invoke('text') %}
@@ -43,11 +43,11 @@ cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 // force a hidden div to be 'display: block'
 // so we can interact with its children elements
 cy
-  .get("div.container").should("be.hidden") // true
+  .get('div.container').should('be.hidden') // true
 
-  .invoke("show") // call the jquery method 'show' on the 'div.container'
-    .should("be.visible") // true
-    .find("input").type("Cypress is great")
+  .invoke('show') // call the jquery method 'show' on the 'div.container'
+    .should('be.visible') // true
+    .find('input').type('Cypress is great')
 ```
 
 {% note info Using cy.invoke('show') and cy.invoke('trigger') %}
@@ -58,11 +58,11 @@ cy
 
 ```javascript
 // as a slightly verbose approach
-cy.get("input").invoke("getKendoDropDownList").then(function(dropDownList){
+cy.get('input').invoke('getKendoDropDownList').then(function(dropDownList){
   // the return of $input.getKendoDropDownList() has now become the new subject
 
   // whatever the select method returns becomes the next subject after this
-  return dropDownList.select("apples")
+  return dropDownList.select('apples')
 })
 ```
 
@@ -70,10 +70,10 @@ cy.get("input").invoke("getKendoDropDownList").then(function(dropDownList){
 
 ```javascript
 cy
-  .get("input")
-    .invoke("getKendoDropDownList")
-    .invoke("select", "apples")
-  .its("val").should("match", /apples/)
+  .get('input')
+    .invoke('getKendoDropDownList')
+    .invoke('select', 'apples')
+  .its('val').should('match', /apples/)
 ```
 
 # Function with Arguments Usage
@@ -87,9 +87,9 @@ var fn = function(a, b, c){
 
 cy
   .wrap({sum: fn})
-  .invoke("sum", 2, 4, 6)
-    .should("be.gt", 10) // true
-    .and("be.lt", 20) // true
+  .invoke('sum', 2, 4, 6)
+    .should('be.gt', 10) // true
+    .and('be.lt', 20) // true
 ```
 
 {% note info Using cy.invoke('removeAttr', 'target') %}
@@ -100,8 +100,8 @@ cy
 
 ```javascript
 cy
-  .get("img").invoke("attr", "src")
-    .should("include", "myLogo")
+  .get('img').invoke('attr', 'src')
+    .should('include', 'myLogo')
 ```
 
 # Related

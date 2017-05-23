@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ```javascript
 //returns [<li>apples</li>, <li>oranges</li>]
-cy.get(".third").prevAll()
+cy.get('.third').prevAll()
 ```
 
 # Selector Usage
@@ -66,7 +66,7 @@ cy.get(".third").prevAll()
 
 ```javascript
 //returns <li>pineapples</li>
-cy.get("li").prevAll(".selected")
+cy.get('li').prevAll('.selected')
 ```
 
 # Command Log
@@ -74,7 +74,7 @@ cy.get("li").prevAll(".selected")
 ## Find all elements before the active li
 
 ```javascript
-cy.get(".left-nav").find("li.active").prevAll()
+cy.get('.left-nav').find('li.active').prevAll()
 ```
 
 The commands above will display in the command log as:

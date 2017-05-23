@@ -75,13 +75,13 @@ setInterval(function(){
 // test code
 cy
   .clock()
-  .visit("/index.html")
+  .visit('/index.html')
   .tick(1000)
-  .get("#seconds-elapsed")
-    .should("have.text", "1 seconds")
+  .get('#seconds-elapsed')
+    .should('have.text', '1 seconds')
   .tick(1000)
-  .get("#seconds-elapsed")
-    .should("have.text", "2 seconds")
+  .get('#seconds-elapsed')
+    .should('have.text', '2 seconds')
 ```
 
 ## Specify the now timestamp
@@ -97,9 +97,9 @@ const now = new Date(2017, 2, 14).getTime() // March 14, 2017 timestamp
 
 cy
   .clock(now)
-  .visit("/index.html")
-  .get("#date")
-    .contains("2017-03-14")
+  .visit('/index.html')
+  .get('#date')
+    .contains('2017-03-14')
 ```
 
 ## Specify which functions to override
@@ -107,7 +107,7 @@ cy
 This will only override `setTimeout` and `clearTimeout` and leave the other time-related functions as they are.
 
 ```javascript
-cy.clock(null, ["setTimeout", "clearTimeout"])
+cy.clock(null, ['setTimeout', 'clearTimeout'])
 ```
 
 ## Access the clock object to synchronously move time
@@ -125,8 +125,8 @@ You can call `cy.clock` again for this purpose later in a chain if necessary.
 ```javascript
 cy
   .clock()
-  .get("#foo")
-  .type("Foo")
+  .get('#foo')
+  .type('Foo')
   .clock().then(function (clock) {
     clock.tick(1000)
   })
@@ -137,7 +137,7 @@ The clock object is also available via `this.clock` in any `.then` callback.
 ```javascript
 cy
   .clock()
-  .get("#foo").then(function ($foo) {
+  .get('#foo').then(function ($foo) {
     this.clock.tick(1000)
     // do something with $foo ...
   })
@@ -158,7 +158,7 @@ Or via `this.clock`:
 ```javascript
 cy
   .clock()
-  .get("#foo").then(function ($foo) {
+  .get('#foo').then(function ($foo) {
     this.clock.restore()
     // do something with $foo ...
   })

@@ -58,7 +58,7 @@ Option | Default | Notes
 
 ```javascript
 // returns <option value="456">apples</option>
-cy.get("select").select("apples")
+cy.get('select').select('apples')
 ```
 
 # Value Usage
@@ -75,7 +75,7 @@ cy.get("select").select("apples")
 
 ```javascript
 // returns <option value="456">apples</option>
-cy.get("select").select("456")
+cy.get('select').select('456')
 ```
 
 # Texts Usage
@@ -91,7 +91,7 @@ cy.get("select").select("456")
 ```
 
 ```javascript
-cy.get("select").select(["apples", "bananas"])
+cy.get('select').select(['apples', 'bananas'])
 ```
 
 # Values Usage
@@ -107,7 +107,7 @@ cy.get("select").select(["apples", "bananas"])
 ```
 
 ```javascript
-cy.get("select").select(["456", "457"])
+cy.get('select').select(['456', '457'])
 ```
 
 # Command Log
@@ -115,7 +115,7 @@ cy.get("select").select(["456", "457"])
 ## Select the option with the text "Homer Simpson"
 
 ```javascript
-cy.get("select").select("Homer Simpson")
+cy.get('select').select('Homer Simpson')
 ```
 
 The commands above will display in the command log as:

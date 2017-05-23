@@ -46,7 +46,7 @@ In this example, on first login our server sends us back a session cookie.
 
 ```javascript
 cy
-  .login("bob@example.com", "p@ssw0rd") // example of a custom command
+  .login('bob@example.com', 'p@ssw0rd') // example of a custom command
   .getCookies()
     .should('have.length', 1)
     .then(function(cookies) {

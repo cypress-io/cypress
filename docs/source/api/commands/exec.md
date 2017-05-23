@@ -42,7 +42,7 @@ Option | Default | Notes
 
 ```javascript
 cy
-  .exec("npm run build")
+  .exec('npm run build')
   .then(function (result) {
     // subject is now the result object
     // {
@@ -56,49 +56,49 @@ cy
 ## Seed the database and assert it was successful
 
 ```javascript
-cy.exec("rake db:seed").its("code").should("eq", 0)
+cy.exec('rake db:seed').its('code').should('eq', 0)
 ```
 
 ## Run an arbitrary script and assert its output
 
 ```javascript
-cy.exec("npm run my-script").its("stdout").should("contain", "Done running the script")
+cy.exec('npm run my-script').its('stdout').should('contain', 'Done running the script')
 ```
 
 ## Change the timeout
 
 ```javascript
 // will fail if script takes longer than 20 seconds to finish
-cy.exec("npm run build", { timeout: 20000 });
+cy.exec('npm run build', { timeout: 20000 });
 ```
 
 ## Choose not to fail on non-zero exit and assert on code and stderr
 
 ```javascript
 cy
-  .exec("man bear pig", { failOnNonZeroExit: false })
-  .its("code").should("eq", 1)
-  .its("stderr").should("contain", "No manual entry for bear")
+  .exec('man bear pig', { failOnNonZeroExit: false })
+  .its('code').should('eq', 1)
+  .its('stderr').should('contain', 'No manual entry for bear')
 ```
 
 ## Specify environment variables
 
 ```javascript
 cy
-  .exec("echo $USERNAME", { env: { USERNAME: "johndoe" } })
-  .its("stdout").should("contain", "johndoe")
+  .exec('echo $USERNAME', { env: { USERNAME: 'johndoe' } })
+  .its('stdout').should('contain', 'johndoe')
 ```
 
 ## Write to a file to create a fixture from response body
 ```javascript
 cy
   .server()
-  .route("POST", "/comments").as("postComment")
-  .get(".add-comment").click()
-  .wait("@postComment").then(function(xhr){
+  .route('POST', '/comments').as('postComment')
+  .get('.add-comment').click()
+  .wait('@postComment').then(function(xhr){
     cy
-      .exec("echo '" + JSON.stringify(xhr.responseBody) + "'>cypress/fixtures/comment.json")
-      .fixture("comment.json").should("deep.eq", xhr.responseBody)
+      .exec(`echo ${JSON.stringify(xhr.responseBody)} >cypress/fixtures/comment.json`)
+      .fixture('comment.json').should('deep.eq', xhr.responseBody)
   })
 ```
 
@@ -107,7 +107,7 @@ cy
 ## List the contents of cypress.json
 
 ```javascript
-cy.exec("cat cypress.json")
+cy.exec('cat cypress.json')
 ```
 
 The command above will display in the command log as:

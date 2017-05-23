@@ -21,10 +21,10 @@ End the command chain.
 // cy.end is useful when you want to end a chain of commands
 // and force Cypress to re-query from the root element
 cy
-  .contains("User: Cheryl").click().end() // ends the current chain and returns null
+  .contains('User: Cheryl').click().end() // ends the current chain and returns null
 
   // queries the entire document again
-  .contains("User: Charles").click()
+  .contains('User: Charles').click()
 ```
 
 # Command Log
@@ -33,8 +33,8 @@ cy
 
 ```javascript
 cy
-  .contains(".modal-title", "Select Folder Type").end()
-  .contains("li", "Maintenance").should("have.class", "active")
+  .contains('.modal-title', 'Select Folder Type').end()
+  .contains('li', 'Maintenance').should('have.class', 'active')
 ```
 
 The commands above will display in the command log as:

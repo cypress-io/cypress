@@ -36,13 +36,13 @@ Pass a function that can have any number of explicit assertions within it. Does 
 ## Assert the checkbox is disabled
 
 ```javascript
-cy.get(":checkbox").should("be.disabled")
+cy.get(':checkbox').should('be.disabled')
 ```
 
 ## The current subject is returned
 
 ```javascript
-cy.get("option:first").should("be.selected").then(function($option)){
+cy.get('option:first').should('be.selected').then(function($option)){
   // $option is still the current subject
 })
 ```
@@ -52,19 +52,19 @@ cy.get("option:first").should("be.selected").then(function($option)){
 ## Assert the class is 'form-horizontal'
 
 ```javascript
-cy.get("form").should("have.class", "form-horizontal")
+cy.get('form').should('have.class', 'form-horizontal')
 ```
 
 ## Assert the value is not 'foo'
 
 ```javascript
-cy.get("input").should("not.have.value", "foo")
+cy.get('input').should('not.have.value', 'foo')
 ```
 
 ## The current subject is returned
 
 ```javascript
-cy.get("button").should("have.id", "new-user").then(function($button){
+cy.get('button').should('have.id', 'new-user').then(function($button){
   // $button is still the current subject
 })
 ```
@@ -75,7 +75,7 @@ cy.get("button").should("have.id", "new-user").then(function($button){
 
 ```javascript
 // have.attr comes from chai-jquery
-cy.get("#header a").should("have.attr", "href", "/users")
+cy.get('#header a').should('have.attr', 'href', '/users')
 ```
 
 # Function Usage
@@ -98,25 +98,25 @@ The callback function will be retried over and over again until no assertions wi
 
 ```javascript
 cy
-  .get("p")
+  .get('p')
   .should(function($p){
     // should have found 3 elements
     expect($p).to.have.length(3)
 
     // make sure the first contains some text content
-    expect($p.first()).to.contain("Hello World")
+    expect($p.first()).to.contain('Hello World')
 
     // use jquery's map to grab all of their classes
     // jquery's map returns a new jquery object
     var classes = $p.map(function(i, el){
-      return cy.$(el).attr("class")
+      return cy.$(el).attr('class')
     })
 
     // call classes.get() to make this a plain array
     expect(classes.get()).to.deep.eq([
-      "text-primary",
-      "text-danger",
-      "text-default"
+      'text-primary',
+      'text-danger',
+      'text-default'
     ])
   })
 ```
@@ -125,16 +125,16 @@ cy
 
 ```javascript
 cy
-  .get("button").should(function($button){
+  .get('button').should(function($button){
     // whatever we return here is ignored
     // as Cypress will always force the return
     // value for future commands to be the same
     // as the previous subject which is <button>
 
-    expect({foo: "bar"}).to.deep.eq({foo: "bar"})
+    expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
 
     // whatever the return value (if any) is ignored
-    return {foo: "bar"}
+    return {foo: 'bar'}
   })
 
   .then(function($button){
@@ -154,7 +154,7 @@ In this example we use [`cy.and`](https://on.cypress.io/api/and) which is identi
 ```javascript
 // our subject is not changed by our first assertion,
 // so we can continue to use DOM based assertions
-cy.get("option:first").should("be.selected").and("have.value", "Metallica")
+cy.get('option:first').should('be.selected').and('have.value', 'Metallica')
 ```
 
 ## Assertions that change the subject
@@ -172,13 +172,13 @@ This allows you to utilize other `chainer` methods such as `match` when making a
 // have.css("font-family") returned a string instead of the <body> element
 cy
   // subject is <body>
-  .get("body")
+  .get('body')
 
   // subject changes to the string return value of 'font-family'
-  .should("have.css", "font-family")
+  .should('have.css', 'font-family')
 
   // use match to assert the string matches a regular expression
-  .and("match", /sans-serif/)
+  .and('match', /sans-serif/)
 ```
 
 ```javascript
@@ -186,10 +186,10 @@ cy
 // have.attr, href, /users returned a string instead of the <a> element
 cy
   // subject is <a>
-  .get("a")
+  .get('a')
 
   // subject changes to the string 'users'
-  .should("have.attr", "href", "/users")
+  .should('have.attr', 'href', '/users')
 ```
 
 # Automatic Retry Support
@@ -200,21 +200,21 @@ Cypress won't resolve your commands until all of its assertions pass.
 
 ```javascript
 // Application Code
-$("button").click(function(){
+$('button').click(function(){
   $button = $(this)
 
   setTimeout(function(){
-    $button.removeClass("inactive").addClass("active")
+    $button.removeClass('inactive').addClass('active')
   }, 1000)
 })
 ```
 
 ```javascript
 cy
-  .get("button")
+  .get('button')
     .click()
-    .should("have.class", "active")
-    .and("not.have.class", "inactive")
+    .should('have.class', 'active')
+    .and('not.have.class', 'inactive')
 ```
 
 You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) here.
@@ -246,16 +246,16 @@ The following example is an example of increasing the `timeout` of the `cy.shoul
 
 ```javascript
 cy
-  .get("input", {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
-    .should("have.value", "foo")   // <-- and to have the value 'foo'
-    .and("have.class", "radio")    // <-- and to have the class 'radio'
+  .get('input', {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
+    .should('have.value', 'foo')   // <-- and to have the value 'foo'
+    .and('have.class', 'radio')    // <-- and to have the class 'radio'
 
-  .parents("#foo", {timeout: 2000}) // <--
-    .should("not.exist")            // <-- wait up to 2 seconds for this element NOT to be found
+  .parents('#foo', {timeout: 2000}) // <--
+    .should('not.exist')            // <-- wait up to 2 seconds for this element NOT to be found
 ```
 
 ```javascript
-cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class", "radio")
+cy.find('input', {timeout: 10000}).should('have.value', 'foo').and('have.class', 'radio')
                          ↲
       // adding the timeout here will automatically
       // flow down to the assertions, and they will
@@ -269,9 +269,9 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
 ```javascript
 //
 cy
-  .get(".left-nav>.nav")
+  .get('.left-nav>.nav')
     .children()
-      .should("have.length", 8)
+      .should('have.length', 8)
 ```
 
 The commands above will display in the command log as:

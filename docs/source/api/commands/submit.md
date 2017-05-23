@@ -41,7 +41,7 @@ Option | Default | Notes
 ```javascript
 // submits the form and performs all default actions
 // returns <form> for further chaining
-cy.get("#contact").submit()
+cy.get('#contact').submit()
 ```
 
 # Command Log
@@ -49,8 +49,8 @@ cy.get("#contact").submit()
 ## Submit a form
 
 ```javascript
-cy.route("POST", /users/, "fixture:user").as("userSuccess")
-cy.get("form").submit()
+cy.route('POST', '/users', 'fixture:user').as('userSuccess')
+cy.get('form').submit()
 ```
 
 The commands above will display in the command log as:

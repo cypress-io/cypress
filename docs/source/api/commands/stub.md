@@ -45,7 +45,7 @@ expect(util.addListeners).to.be.called
 
 ```javascript
 // assume App.start calls util.addListeners
-cy.stub(util, "addListeners")
+cy.stub(util, 'addListeners')
 App.start()
 expect(util.addListeners).to.be.called
 ```
@@ -55,7 +55,7 @@ expect(util.addListeners).to.be.called
 ```javascript
 // assume App.start calls util.addListeners
 let listenersAdded = false
-cy.stub(util, "addListeners", function () {
+cy.stub(util, 'addListeners', function () {
   listenersAdded = true
 })
 App.start()
@@ -68,7 +68,7 @@ expect(listenersAdded).to.be.true
 // assume App.start calls util.addListeners, which returns a function
 // that removes the listeners
 const removeStub = cy.stub()
-cy.stub(util, "addListeners").returns(removeStub)
+cy.stub(util, 'addListeners').returns(removeStub)
 App.start()
 App.stop()
 expect(removeStub).to.be.called
@@ -88,8 +88,8 @@ Adding an alias using [`cy.as`](https://on.cypress.io/api/as) to stubs makes the
 const obj = {
   foo () {}
 }
-const stub = cy.stub(obj, "foo").as("anyArgs")
-const withFoo = stub.withArgs("foo").as("withFoo")
+const stub = cy.stub(obj, 'foo').as('anyArgs')
+const withFoo = stub.withArgs('foo').as('withFoo')
 obj.foo()
 expect(stub).to.be.called
 expect(withFoo).to.be.called // purposefully failing assertion
@@ -107,8 +107,8 @@ You will see the following in the command log:
 const obj = {
   foo () {}
 }
-const stub = cy.stub(obj, "foo").as("foo")
-obj.foo("foo", "bar")
+const stub = cy.stub(obj, 'foo').as('foo')
+obj.foo('foo', 'bar')
 expect(stub).to.be.called
 ```
 

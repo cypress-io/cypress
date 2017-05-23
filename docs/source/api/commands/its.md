@@ -24,16 +24,16 @@ You can also access multiple nested properties with **dot notation**.
 ## Access properties
 
 ```javascript
-cy.wrap({foo: "bar"}).its("foo").should("eq", "bar") // true
+cy.wrap({foo: 'bar'}).its('foo').should('eq', 'bar') // true
 ```
 
 Call the `length` property on the current subject
 
 ```javascript
 cy
-  .get("ul li") // this returns us the jquery object
-  .its("length") // calls the 'length' property returning that value
-  .should("be.gt", 2) // ensure this length is greater than 2
+  .get('ul li') // this returns us the jquery object
+  .its('length') // calls the 'length' property returning that value
+  .should('be.gt', 2) // ensure this length is greater than 2
 })
 ```
 
@@ -60,8 +60,8 @@ window.Factory = Factory
 ```javascript
 cy
   .window() // get the window object
-  .its("Factory") // now we are on the Factory function
-  .invoke("create", "arg") // and now we can invoke properties on it
+  .its('Factory') // now we are on the Factory function
+  .invoke('create', 'arg') // and now we can invoke properties on it
 
 ```
 
@@ -77,12 +77,12 @@ You can additionally automatically drill into nested properties by using **dot n
 var obj = {
   foo: {
     bar: {
-      baz: "quux"
+      baz: 'quux'
     }
   }
 }
 
-cy.wrap(obj).its("foo.bar.baz").should("eq", "quux") // true
+cy.wrap(obj).its('foo.bar.baz').should('eq', 'quux') // true
 ```
 
 # Command Log

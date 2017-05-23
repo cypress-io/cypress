@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ```javascript
 //returns [<li>bananas</li>, <li>pineapples</li>, <li>grapes</li>]
-cy.get(".second").nextAll()
+cy.get('.second').nextAll()
 ```
 
 # Selector Usage
@@ -66,7 +66,7 @@ cy.get(".second").nextAll()
 
 ```javascript
 //returns <li>pineapples</li>
-cy.get("li").nextAll(".selected")
+cy.get('li').nextAll('.selected')
 ```
 
 # Command Log
@@ -74,7 +74,7 @@ cy.get("li").nextAll(".selected")
 ## Find all elements following the active li
 
 ```javascript
-cy.get(".left-nav").find("li.active").nextAll()
+cy.get('.left-nav').find('li.active').nextAll()
 ```
 
 The commands above will display in the command log as:

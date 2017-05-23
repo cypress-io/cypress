@@ -59,35 +59,35 @@ cy.viewport(1024, 768)
 ## Organize desktop vs mobile tests separately
 
 ```javascript
-describe("Nav Menus", function(){
-  context("720p resolution", function(){
+describe('Nav Menus', function(){
+  context('720p resolution', function(){
     beforeEach(function(){
       // run these tests in a desktop browser
       // with a 720p monitor
       cy.viewport(1280, 720)
     })
 
-    it("displays full header", function(){
+    it('displays full header', function(){
       cy
-        .get("nav .desktop-menu").should("be.visible")
-        .get("nav .mobile-menu").should("not.be.visible")
+        .get('nav .desktop-menu').should('be.visible')
+        .get('nav .mobile-menu').should('not.be.visible')
     })
   })
 
-  context("iphone-5 resolution", function(){
+  context('iphone-5 resolution', function(){
     beforeEach(function(){
       // run these tests in a mobile browser
       // and ensure our responsive UI is correct
-      cy.viewport("iphone-5")
+      cy.viewport('iphone-5')
     })
 
-    it("displays mobile menu on click", function(){
+    it('displays mobile menu on click', function(){
       cy
-        .get("nav .desktop-menu").should("not.be.visible")
-        .get("nav .mobile-menu")
-          .should("be.visible")
-          .find("i.hamburger").click()
-        .get("ul.slideout-menu").should("be.visible")
+        .get('nav .desktop-menu').should('not.be.visible')
+        .get('nav .mobile-menu')
+          .should('be.visible')
+          .find('i.hamburger').click()
+        .get('ul.slideout-menu').should('be.visible')
     })
   })
 })
@@ -99,7 +99,7 @@ describe("Nav Menus", function(){
 
 ```javascript
 // the viewport will now be changed to 414x736
-cy.viewport("iphone-6")
+cy.viewport('iphone-6')
 ```
 
 ## Change the orientation to landscape
@@ -107,7 +107,7 @@ cy.viewport("iphone-6")
 ```javascript
 // the viewport will now be changed to 736x414
 // which simulates the user holding the iPhone in lanscape
-cy.viewport("iphone-6", "landscape")
+cy.viewport('iphone-6', 'landscape')
 ```
 
 # Known Issues

@@ -46,7 +46,7 @@ Option | Default | Notes
 
 ```javascript
 // returns all other li's in list
-cy.get(".active").siblings()
+cy.get('.active').siblings()
 ```
 
 # Selector Usage
@@ -55,7 +55,7 @@ cy.get(".active").siblings()
 
 ```javascript
 // returns <li class="active">Services</li>
-cy.get("li").siblings(".active")
+cy.get('li').siblings('.active')
 ```
 
 # Command Log
@@ -63,7 +63,7 @@ cy.get("li").siblings(".active")
 ## Get the siblings of element with class `active`
 
 ```javascript
-cy.get(".left-nav").find("li.active").siblings()
+cy.get('.left-nav').find('li.active').siblings()
 ```
 
 The commands above will display in the command log as:

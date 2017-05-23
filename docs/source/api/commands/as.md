@@ -25,10 +25,10 @@ Create an alias to be used later, passing the name of the alias as a parameter.
 
 ```javascript
 cy
-  .route("PUT", /^\/users\/\d+/, "fixture:user").as("userPut")
-  .get("form").submit()
-  .wait("@userPut")
-    .its("url").should("contain", "users")
+  .route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
+  .get('form').submit()
+  .wait('@userPut')
+    .its('url').should('contain', 'users')
 
 ```
 
@@ -38,11 +38,11 @@ cy
 
 ```javascript
 cy
-  .route(/company/, "fixture:company").as("companyGet")
-  .route(/roles/, "fixture:roles").as("rolesGet")
-  .route(/teams/, "fixture:teams").as("teamsGet")
-  .route(/users\/\d+/, "fixture:user").as("userGet")
-  .route("PUT", /^\/users\/\d+/, "fixture:user").as("userPut")
+  .route(/company/, 'fixture:company').as('companyGet')
+  .route(/roles/, 'fixture:roles').as('rolesGet')
+  .route(/teams/, 'fixture:teams').as('teamsGet')
+  .route(/users\/\d+/, 'fixture:user').as('userGet')
+  .route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
 ```
 
 Aliases of routes display in the routes instrument panel:

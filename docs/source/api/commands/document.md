@@ -38,7 +38,7 @@ cy.document().then(function(document) {
 ## Make an assertion about the document
 
 ```javascript
-cy.document().its("contentType").should("eq", "text/html")
+cy.document().its('contentType').should('eq', 'text/html')
 ```
 
 # Command Log
