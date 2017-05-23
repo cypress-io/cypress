@@ -35,5 +35,6 @@ export function launch (browsers:FoundBrowser[],
     args = [url].concat(args)
   }
 
+  log('spawning browser %s with args %s', browser.path, args.join(' '))
   return cp.spawn(browser.path, args, {stdio: 'ignore'})
 }

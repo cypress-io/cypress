@@ -6,14 +6,14 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo 'This project needs: npm run build'",
     "prebuild": "npm run clean",
     "build": "hexo generate",
     "postbuild": "gulp post:build",
     "clean": "hexo clean",
     "clean-deps": "rm -rf node_modules",
     "convert": "node ./cy_scripts/convert.js",
-    "deploy": "npm run build && hexo deploy",
+    "deploy": "NODE_ENV=production npm run build && hexo deploy",
     "start": "hexo server --port 2222",
     "precypress": "npm install cypress-cli && cypress install",
     "cypress": "cypress run --record --key $DOCS_RECORD_KEY",
@@ -39,6 +39,8 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "docsearch.js": "^2.3.3",
+    "fira": "github:cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
+    "font-awesome": "^4.7.0",
     "hexo": "3.3.1",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",

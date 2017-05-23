@@ -3,9 +3,13 @@ version: 2
 jobs:
   build:
     docker:
-      # the Docker image with Node and XVFB
-      - image: beneaththeink/node-xvfb:6
-      # - image: node:6.5.0
+      # the Docker image with Cypress dependencies and Chrome browser
+      - image: cypress/internal:chrome58
+        environment:
+          npm_config_loglevel: warn
+          # even when running as non-root user
+          # need to set unsafe perm to be able to do `npm postinstall`
+          npm_config_unsafe-perm: true
     working_directory: ~/cypress-monorepo
     parallelism: 3
     steps:
@@ -13,109 +17,110 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v1-root-deps
+          key: v3-{{ .Branch }}-root-deps
       - restore_cache:
-          key: v1-deps-coffee
+          key: v3-{{ .Branch }}-deps-coffee
       - restore_cache:
-          key: v1-deps-desktop-gui
+          key: v3-{{ .Branch }}-deps-desktop-gui
       - restore_cache:
-          key: v1-deps-driver
+          key: v3-{{ .Branch }}-deps-driver
       - restore_cache:
-          key: v1-deps-example
+          key: v3-{{ .Branch }}-deps-example
       - restore_cache:
-          key: v1-deps-electron
+          key: v3-{{ .Branch }}-deps-electron
       - restore_cache:
-          key: v1-deps-extension
+          key: v3-{{ .Branch }}-deps-extension
       - restore_cache:
-          key: v1-deps-https-proxy
+          key: v3-{{ .Branch }}-deps-https-proxy
       - restore_cache:
-          key: v1-deps-launcher
+          key: v3-{{ .Branch }}-deps-launcher
       - restore_cache:
-          key: v1-deps-reporter
+          key: v3-{{ .Branch }}-deps-reporter
       - restore_cache:
-          key: v1-deps-runner
+          key: v3-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v1-deps-server
+          key: v3-{{ .Branch }}-deps-server
       - restore_cache:
-          key: v1-deps-socket
+          key: v3-{{ .Branch }}-deps-socket
       - restore_cache:
-          key: v1-deps-static
+          key: v3-{{ .Branch }}-deps-static
       - restore_cache:
-          key: v1-deps-ts
+          key: v3-{{ .Branch }}-deps-ts
       - restore_cache:
-          key: v1-deps-docs
+          key: v3-{{ .Branch }}-deps-docs
 
-      # why is the `npm install` on CircleCI so verbose?
-      - run: echo 'loglevel=warn' >> ~/.npmrc
-      - run: npm install
-      - run: npm run all install
-      - run: cd docs && npm install
+      # only installs the root dependencies, without going into packages
+      # via postinstall script
+      - run: npm install --ignore-scripts
+      - run: npm run install-packages-serial
 
       # save each node_modules folder per package
       - save_cache:
-          key: v1-root-deps-{{ checksum "package.json" }}
+          key: v3-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
       - save_cache:
-          key: v1-deps-coffee-{{ checksum "packages/coffee/package.json" }}
+          key: v3-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
           paths:
             - packages/coffee/node_modules
       - save_cache:
-          key: v1-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
+          key: v3-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
           paths:
             - packages/desktop-gui/node_modules
       - save_cache:
-          key: v1-deps-driver-{{ checksum "packages/driver/package.json" }}
+          key: v3-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
           paths:
             - packages/driver/node_modules
       - save_cache:
-          key: v1-deps-example-{{ checksum "packages/example/package.json" }}
+          key: v3-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
           paths:
             - packages/example/node_modules
       - save_cache:
-          key: v1-deps-electron-{{ checksum "packages/electron/package.json" }}
+          key: v3-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
           paths:
             - packages/electron/node_modules
       - save_cache:
-          key: v1-deps-extension-{{ checksum "packages/extension/package.json" }}
+          key: v3-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
           paths:
             - packages/extension/node_modules
       - save_cache:
-          key: v1-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
+          key: v3-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
           paths:
             - packages/https-proxy/node_modules
       - save_cache:
-          key: v1-deps-launcher-{{ checksum "packages/launcher/package.json" }}
+          key: v3-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
           paths:
             - packages/launcher/node_modules
       - save_cache:
-          key: v1-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          key: v3-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
       - save_cache:
-          key: v1-deps-runner-{{ checksum "packages/runner/package.json" }}
+          key: v3-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v1-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v3-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
-          key: v1-deps-socket-{{ checksum "packages/socket/package.json" }}
+          key: v3-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
           paths:
             - packages/socket/node_modules
       - save_cache:
-          key: v1-deps-static-{{ checksum "packages/static/package.json" }}
+          key: v3-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
           paths:
             - packages/static/node_modules
       - save_cache:
-          key: v1-deps-ts-{{ checksum "packages/ts/package.json" }}
+          key: v3-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
           paths:
             - packages/ts/node_modules
       - save_cache:
-          key: v1-deps-docs-{{ checksum "docs/package.json" }}
+          key: v3-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
           paths:
             - docs/node_modules
+
+      - run: npm run build
 
       #
       # things to run in the 1st CI container
@@ -151,25 +156,6 @@ jobs:
       # things to run in the 2nd CI container
       #
       - run:
-          name: Docs - innstalling dependencies
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 1 ]; then
-              cd docs
-              npm install
-              npm run build
-            fi
-      - run:
-          name: Docs - verifying Cypress
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 1 ]; then
-              set -o xtrace
-              cd docs
-              npm run precypress
-              $(npm bin)/cypress --help
-              $(npm bin)/cypress --version
-              $(npm bin)/cypress verify
-            fi
-      - run:
           name: Docs - running E2E tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 1 ]; then
@@ -183,5 +169,16 @@ jobs:
           name: Driver unit tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 2 ]; then
-              npm run all test -- --package driver
+              chrome --version
+              xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
             fi
+      #
+      # things to run in the 4th CI container
+      #
+      # - run:
+      #     name: Example e2e tests
+      #     command: |
+      #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
+      #         # ./bin/cypress --project=./packages/example --path-to-cypress
+      #         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+      #       fi
