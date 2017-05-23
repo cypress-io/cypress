@@ -11,6 +11,7 @@ utils = require("../../../cypress/utils")
 inputEvents = "textInput input".split(" ")
 textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
 dateRegex = /\d{4}-\d{2}-\d{2}/
+timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
@@ -76,6 +77,7 @@ module.exports = (Cypress, Commands) ->
       isBody      = options.$el.is("body")
       isTextLike  = options.$el.is(textLike)
       isDate      = options.$el.is("[type=date]")
+      isTime      = options.$el.is("[type=time]")
       hasTabIndex = options.$el.is("[tabindex]")
 
       ## TODO: tabindex can't be -1
@@ -111,6 +113,15 @@ module.exports = (Cypress, Commands) ->
         not moment(chars).isValid()
       )
         utils.throwErrByPath("type.invalid_date", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isTime and (
+        not _.isString(chars) or
+        not timeRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_time", {
           onFail: options._log
           args: { chars }
         })
@@ -179,6 +190,7 @@ module.exports = (Cypress, Commands) ->
 
           return dispatched
 
+        ## see comment in updateValue below
         typed = ""
         charsToType = if isDate
           options.chars.replace("-", "")
@@ -193,7 +205,11 @@ module.exports = (Cypress, Commands) ->
           window:  @privateState("window")
 
           updateValue: (rng, key) ->
-            if isDate
+            ## date and time inputs need to only have their value updated
+            ## once after all the characters are input because attemping
+            ## to set a partial/invalid value results in the value being
+            ## set  to an empty string
+            if isDate or isTime
               typed += key
               if typed is charsToType
                 options.$el.val(options.chars)

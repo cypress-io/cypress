@@ -194,6 +194,14 @@ cy.get("body").type("{shift}", {release: false}).get("li:first").click()
 
 Using `cy.type()` on a date input (`<input type="date">`) requires specifying a valid date in the format `yyyy-MM-dd`, e.g. `"1999-12-31"`. This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by [the W3 spec](https://www.w3.org/TR/html5/forms.html#date-state-(type=date)) and is what the input's `value` will be set to regardless of browser or locale.
 
+# Time inputs
+
+Using `cy.type()` on a time input (`<input type="time">`) requires specifying a valid time in the format `HH:mm`, `HH:mm:ss`, or `HH:mm:ss.SSS`, where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted. The following are examples of valid times:
+
+* 01:30
+* 23:15
+* 12:00:00.384
+
 # Known Issues
 
 ## Native `input[type=date,datetime,datetime-local,month,year,color]`
