@@ -4,10 +4,12 @@ comments: true
 
 # What You'll Learn
 
-- how XHRs fit into modern web development
-- how tests are thwarted by an unstable network environment (intervals, polling, cascading effects)
-- how Cypress allows you to completely isolate your front-end with `cy.server` and `cy.route`
+- how Cypress enables you to isolate any or all of your front-end with `cy.server` and `cy.route`
 - what tradeoffs we make when we stub our network requests
+- how Cypress visualizes network management in the Command Log
+- how to use Fixtures to reuse XHR responses
+- how to use Aliases to refer back to XHR requests and wait on them
+- how to write declarative tests that resist flake
 
 # Strategy
 
