@@ -403,34 +403,30 @@ describe "$Cypress.Cy Text Commands", ->
 
     describe "value changing", ->
       it "changes the elements value", ->
-        @cy.get(":text:first").type("a").then ($text) ->
+        @cy.get("#input-without-value").type("a").then ($text) ->
           expect($text).to.have.value("a")
 
       it "changes the elements value for multiple keys", ->
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("foo")
-
-      it "can change input[type=number] values", ->
-        @cy.get("#input-types [type=number]").type("12").then ($text) ->
-          expect($text).to.have.value("12")
 
       it "inserts text after existing text", ->
         @cy.get("#input-with-value").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
       it "inserts text after existing text input by invoking val", ->
-        @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
+        @cy.get("#input-without-value").invoke("val", "foo").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
       it "overwrites text when currently has selection", ->
-        @cy.$$(":text:first").val("0").click ->
+        @cy.$$("#input-without-value").val("0").click ->
           $(@).select()
 
-        @cy.get(":text:first").type("50").then ($input) ->
+        @cy.get("#input-without-value").type("50").then ($input) ->
           expect($input).to.have.value("50")
 
       it "automatically moves the caret to the end if value is changed manually", ->
-        @cy.$$(":text:first").keypress (e) ->
+        @cy.$$("#input-without-value").keypress (e) ->
           e.preventDefault()
 
           key = String.fromCharCode(e.which)
@@ -441,11 +437,11 @@ describe "$Cypress.Cy Text Commands", ->
 
           $input.val(val + key + "-")
 
-        @cy.get(":text:first").type("foo").then ($input) ->
+        @cy.get("#input-without-value").type("foo").then ($input) ->
           expect($input).to.have.value("f-o-o-")
 
       it "automatically moves the caret to the end if value is changed manually asynchronously", ->
-        @cy.$$(":text:first").keypress (e) ->
+        @cy.$$("#input-without-value").keypress (e) ->
           key = String.fromCharCode(e.which)
 
           $input = $(e.target)
@@ -454,67 +450,67 @@ describe "$Cypress.Cy Text Commands", ->
             val = $input.val()
             $input.val(val + "-")
 
-        @cy.get(":text:first").type("foo").then ($input) ->
+        @cy.get("#input-without-value").type("foo").then ($input) ->
           expect($input).to.have.value("f-o-o-")
 
       it "does not fire keypress when keydown is preventedDefault", (done) ->
-        @cy.$$(":text:first").get(0).addEventListener "keypress", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
           done("should not have received keypress event")
 
-        @cy.$$(":text:first").get(0).addEventListener "keydown", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keydown", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then -> done()
+        @cy.get("#input-without-value").type("foo").then -> done()
 
       it "does not insert key when keydown is preventedDefault", ->
-        @cy.$$(":text:first").get(0).addEventListener "keydown", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keydown", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
       it "does not insert key when keypress is preventedDefault", ->
-        @cy.$$(":text:first").get(0).addEventListener "keypress", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
       it "does not fire textInput when keypress is preventedDefault", (done) ->
-        @cy.$$(":text:first").get(0).addEventListener "textInput", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
           done("should not have received textInput event")
 
-        @cy.$$(":text:first").get(0).addEventListener "keypress", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then -> done()
+        @cy.get("#input-without-value").type("foo").then -> done()
 
       it "does not insert key when textInput is preventedDefault", ->
-        @cy.$$(":text:first").get(0).addEventListener "textInput", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
       it "does not fire input when textInput is preventedDefault", (done) ->
-        @cy.$$(":text:first").get(0).addEventListener "input", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "input", (e) ->
           done("should not have received input event")
 
-        @cy.$$(":text:first").get(0).addEventListener "textInput", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then -> done()
+        @cy.get("#input-without-value").type("foo").then -> done()
 
       it "preventing default to input event should not affect anything", ->
-        @cy.$$(":text:first").get(0).addEventListener "input", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "input", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($input) ->
+        @cy.get("#input-without-value").type("foo").then ($input) ->
           expect($input).to.have.value("foo")
 
       describe "input[type=number]", ->
         it "can change values", ->
-          @cy.get("#input-types [type=number]").type("42").then ($text) ->
+          @cy.get("#number-without-value").type("42").then ($text) ->
             expect($text).to.have.value("42")
 
         it "inserts text after existing text ", ->
@@ -522,19 +518,19 @@ describe "$Cypress.Cy Text Commands", ->
             expect($text).to.have.value("1234")
 
         it "inserts text after existing text input by invoking val", ->
-          @cy.get("#input-types [type=number]").invoke("val", "12").type("34").then ($text) ->
+          @cy.get("#number-without-value").invoke("val", "12").type("34").then ($text) ->
             expect($text).to.have.value("1234")
 
         it "overwrites text on input[type=number] when input has existing text selected", ->
-          @cy.$$("#input-types [type=number]").val("0").click ->
+          @cy.$$("#number-without-value").val("0").click ->
             $(@).select()
 
-          @cy.get("#input-types [type=number]").type("50").then ($input) ->
+          @cy.get("#number-without-value").type("50").then ($input) ->
             expect($input).to.have.value("50")
 
       describe "input[type=email]", ->
         it "can change values", ->
-          @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
+          @cy.get("#email-without-value").type("brian@foo.com").then ($text) ->
             expect($text).to.have.value("brian@foo.com")
 
         it "inserts text after existing text", ->
@@ -542,34 +538,34 @@ describe "$Cypress.Cy Text Commands", ->
             expect($text).to.have.value("brian@foo.com")
 
         it "inserts text after existing text input by invoking val", ->
-          @cy.get("#input-types [type=email]").invoke("val", "brian@foo.c").type("om").then ($text) ->
+          @cy.get("#email-without-value").invoke("val", "brian@foo.c").type("om").then ($text) ->
             expect($text).to.have.value("brian@foo.com")
 
         it "overwrites text when input has existing text selected", ->
-          @cy.$$("#input-types [type=email]").val("foo@bar.com").click ->
+          @cy.$$("#email-without-value").val("foo@bar.com").click ->
             $(@).select()
 
-          @cy.get("#input-types [type=email]").type("bar@foo.com").then ($input) ->
+          @cy.get("#email-without-value").type("bar@foo.com").then ($input) ->
             expect($input).to.have.value("bar@foo.com")
 
       describe "input[type=password]", ->
         it "can change values", ->
-          @cy.get("#input-types [type=password]").type("password").then ($text) ->
+          @cy.get("#password-without-value").type("password").then ($text) ->
             expect($text).to.have.value("password")
 
         it "inserts text after existing text", ->
-          @cy.get("#input-types [type=password]").invoke("val", "pass").type("word").then ($text) ->
+          @cy.get("#password-with-value").type("word").then ($text) ->
             expect($text).to.have.value("password")
 
         it "inserts text after existing text input by invoking val", ->
-          @cy.get("#input-types [type=password]").invoke("val", "secr").type("et").then ($text) ->
+          @cy.get("#password-without-value").invoke("val", "secr").type("et").then ($text) ->
             expect($text).to.have.value("secret")
 
         it "overwrites text when input has existing text selected", ->
-          @cy.$$("#input-types [type=password]").val("secret").click ->
+          @cy.$$("#password-without-value").val("secret").click ->
             $(@).select()
 
-          @cy.get("#input-types [type=password]").type("agent").then ($input) ->
+          @cy.get("#password-without-value").type("agent").then ($input) ->
             expect($input).to.have.value("agent")
 
       describe "[contenteditable]", ->
