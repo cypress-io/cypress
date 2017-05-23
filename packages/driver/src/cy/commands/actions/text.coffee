@@ -10,7 +10,7 @@ utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
 textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
-dateRegex = /\d{4}-\d{2}-\d{2}/
+dateRegex = /^\d{4}-\d{2}-\d{2}$/
 timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Cypress, Commands) ->
@@ -192,14 +192,10 @@ module.exports = (Cypress, Commands) ->
 
         ## see comment in updateValue below
         typed = ""
-        charsToType = if isDate
-          options.chars.replace("-", "")
-        else
-          options.chars
 
         $Keyboard.type({
           $el:     options.$el
-          chars:   charsToType
+          chars:   options.chars
           delay:   options.delay
           release: options.release
           window:  @privateState("window")
@@ -211,7 +207,7 @@ module.exports = (Cypress, Commands) ->
             ## set  to an empty string
             if isDate or isTime
               typed += key
-              if typed is charsToType
+              if typed is options.chars
                 options.$el.val(options.chars)
             else
               rng.text(key, "end")
