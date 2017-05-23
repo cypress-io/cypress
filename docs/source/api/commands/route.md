@@ -21,7 +21,7 @@ cy.route(function() {})
 cy.route(options)
 ```
 
-## Parameters
+## Arguments
 
 **url**
 

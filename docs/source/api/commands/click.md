@@ -17,7 +17,7 @@ Click a DOM element.  The DOM element must be in a "clickable" state prior to th
 .click(x, y, options)
 ```
 
-## Parameters
+## Arguments
 
 **position**
 
