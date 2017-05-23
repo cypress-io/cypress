@@ -3,18 +3,12 @@ const RevAll = require('gulp-rev-all')
 const clean = require('gulp-clean')
 const runSequence = require('run-sequence')
 
-let debugRev = true
-
-if (process.env.NODE_ENV !== 'production') {
-  debugRev = false
-}
-
 const revisionOpts = {
   dontGlobal: ['.ico', 'sitemap.xml', 'sitemap.xsl', 'logo.png'],
   dontRenameFile: ['.html', 'CNAME'],
   dontUpdateReference: ['.html'],
   dontSearchFile: ['.js'],
-  debug: debugRev
+  debug: process.env.NODE_ENV === 'production'
 }
 
 function remove (folder) {
