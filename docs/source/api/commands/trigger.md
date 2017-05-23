@@ -39,7 +39,7 @@ Position | Default | Notes
 
 You can pass a relative `x` and `y` coordinate which will calculate distance in pixels from the top left corner of the element and triggers the event with the calculated coordinates.
 
-`x` and `y` must both be `Numbers`. Currently you cannot use `%` based arguments. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you'd like this functionality.
+`x` and `y` must both be `Numbers`. Currently you cannot use `%` based arguments. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you'd like this functionality.
 
 # Options
 
@@ -124,7 +124,7 @@ When clicking on `trigger` within the command log, the console outputs the follo
 
 ## cy.trigger() can only be called on a single element.
 
-`cy.trigger()` only works on a single element. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you'd like to be able to trigger an event serially on multiple elements.
+`cy.trigger()` only works on a single element. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you'd like to be able to trigger an event serially on multiple elements.
 
 # Related
 
