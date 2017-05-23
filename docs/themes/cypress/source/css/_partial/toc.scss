@@ -47,6 +47,10 @@
   padding: 0 20px;
   width: $sidebar-width;
 
+  .sidebar-title {
+    margin-top: 0; 
+  }
+
   &:before {
     content: "";
     display: table;
@@ -64,7 +68,7 @@
   display: block;
   color: #999;
   text-decoration: none;
-  padding: 3px 0 3px 5px;
+  padding: 5px 0 5px 5px;
   line-height: 1.2;
   font-size: 0.95em;
   position: relative;

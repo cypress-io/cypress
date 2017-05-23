@@ -4,14 +4,17 @@ comments: true
 description: ''
 ---
 
-`cy.click` is used to click a DOM element found in the previous command.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).
+Click a DOM element.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).
 
 # Syntax
 
 ```javascript
-cy.click([options])
-cy.click(position[, options])
-cy.click(x, y[, options])
+.click()
+.click(options)
+.click(position)
+.click(position, options)
+.click(x, y)
+.click(x, y, options)
 ```
 
 ## Parameters
@@ -30,7 +33,7 @@ You can pass a relative `x` and `y` coordinate which will calculate distance in 
 
 **options** *(optional)*
 
-Pass in an options object to change the default behavior of `cy.click`.
+Pass in an options object to change the default behavior of `.click`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -42,63 +45,68 @@ Option | Default | Notes
 
 ## Yields
 
-cy.click() yields the DOM subject chained from the previous command.
+`.click()` yields the DOM subject chained from the previous command.
 
 ## Timeout
 
-`cy.click` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options)
+`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options)
 
 # Examples
+
+## Click
 
 **Click the button**
 
 ```javascript
-// returns <button>Save</button>
-cy.get("button").click()
+// yields <button>Save</button>
+cy.get('button').click()
 ```
+
+## Position
 
 **Specify a corner of the element to click**
 
+Click the top right corner of the button.
+
 ```javascript
-// click is issued in the top right corner of the element
-cy.get("button").click("topRight")
+cy.get('button').click('topRight')
 ```
+
+## Coordinates
 
 **Specify explicit coordinates relative to the top left corner**
 
+The click below will be issued inside of the element (15px from the left and 40px from the top).
+
 ```javascript
-// the click will be issued inside of the element
-// 15px from the left and
-// 40px from the top
-cy.get("button").click(15, 40)
+cy.get('button').click(15, 40)
 ```
+
+## Options
 
 **Force a click regardless of visibility or other elements in front of the element**
 
-This is useful when you want the click issued no matter what. Forcing a click disables the error checking that happens prior to a click.
-
+Forcing a click is useful when you want the click issued no matter what. Forcing a click disables checking that this element is visible and in a clickable state before clicking.
 
 ```javascript
-// this will disable the built-in logic for ensuring
-// the element is visible, and is physically clickable
-cy.get("button").click({force: true})
+
+cy.get('button').click({ force: true })
 ```
 
-
 {% note warning  %}
-Be careful with this option because it allows the click to happen when it might actually be impossible for a real user to click.
+Be careful with this option! It may allow the click to happen when it would be impossible for a real user to click.
 {% endnote %}
 
 **Force a click with position argument**
 
 ```javascript
-cy.get("button").click("bottomLeft", {force: true})
+cy.get('button').click('bottomLeft', { force: true })
 ```
 
 **Force a click with relative coordinates**
 
 ```javascript
-cy.get("button").click(5, 60, {force: true})
+cy.get('button').click(5, 60, { force: true })
 ```
 **Hover and clicking hidden elements**
 
@@ -109,7 +117,7 @@ cy.get("button").click(5, 60, {force: true})
 **Click all buttons found on the page**
 
 ```javascript
-cy.get("button").click({multiple: true})
+cy.get('button').click({ multiple: true })
 ```
 
 # Notes
@@ -117,7 +125,7 @@ cy.get("button").click({multiple: true})
 **Events that are fired**
 
 ```javascript
-cy.get("button").click()
+cy.get('button').click()
 // mousedown
 // focus
 // mouseup
@@ -167,7 +175,7 @@ So far the only library we've seen cause issues with is animating KendoUI's `dro
 **Click the button in the form that has text "Create User"**
 
 ```javascript
-cy.get("form").find("button").contains("Create User").click()
+cy.get('form').find('button').contains('Create User').click()
 ```
 
 The commands above will display in the command log as:

@@ -50,6 +50,13 @@
 .article-content {
   line-height: $line-height;
 
+  hr {
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
   p {
     margin-bottom: 15px;
     word-wrap: break-word;
@@ -249,9 +256,17 @@
   strong {
     font-weight: bold;
   }
+
   em {
     font-style: italic;
   }
+
+  strong>em {
+    font-style: normal;
+    font-weight: 500;
+    border-bottom: 1px solid #ccc;
+  }
+
   li {
     margin: 0;
 
