@@ -8,7 +8,8 @@
     "pretest": "npm run lint",
     "test": "mocha",
     "clean-deps": "rm -rf node_modules",
-    "lint": "tslint --type-check --project .. --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts"
+    "clean": "rm lib/*.js lib/**/*.js || true",
+    "lint": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts"
   },
   "repository": {
     "type": "git",

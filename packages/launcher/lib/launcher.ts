@@ -8,12 +8,12 @@ const Promise = require('bluebird')
 const missingConfig = () =>
   Promise.reject(new Error('You must provide a path to a config file.'))
 
-const wrap = (all:Browser[]) => ({
-  launch: (name:string, url:string, args = []) =>
+const wrap = (all: Browser[]) => ({
+  launch: (name: string, url: string, args = []) =>
       launch(all, name, url, args)
 })
 
-const init = (browsers:Browser[]) =>
+const init = (browsers: Browser[]) =>
   browsers ? wrap(browsers) : detect().then(wrap)
 
 const api: LauncherApi = init as any as LauncherApi
@@ -24,7 +24,7 @@ const update = (pathToConfig?: string) => {
   }
 
   // detect the browsers and set the config
-  const saveBrowsers = (browers:Browser[]) =>
+  const saveBrowsers = (browers: Browser[]) =>
     writeJson(pathToConfig, browers, {spaces: 2})
 
   return detect()
