@@ -13,7 +13,9 @@
     "test": "echo 'This runs just the CLI tests' && mocha",
     "test-watch": "mocha --watch",
     "test-e2e": "blah",
-    "postinstall": "npm run all install"
+    "install-packages": "npm run all install",
+    "postinstall": "npm run install-packages && npm run build",
+    "clean-deps": "npm run all clean-deps"
   },
   "author": "",
   "license": "MIT",

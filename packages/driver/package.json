@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo 'This project needs: npm run build'",
     "build": "gulp build",
     "watch": "gulp watch",
     "clean-deps": "rm -rf node_modules",
