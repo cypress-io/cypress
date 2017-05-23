@@ -7,6 +7,9 @@ jobs:
       - image: cypress/internal:chrome58
         environment:
           npm_config_loglevel: warn
+          # even when running as non-root user
+          # need to set unsafe perm to be able to do `npm postinstall`
+          npm_config_unsafe-perm: true
     working_directory: ~/cypress-monorepo
     parallelism: 3
     steps:
@@ -46,10 +49,7 @@ jobs:
       - restore_cache:
           key: v1-deps-docs
 
-      # why is the `npm install` on CircleCI so verbose?
-      - run: echo 'loglevel=warn' >> ~/.npmrc
       - run: npm install
-      - run: npm run all install
 
       # save each node_modules folder per package
       - save_cache:
