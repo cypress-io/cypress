@@ -22,13 +22,13 @@ Get the deepest DOM element containing the content. Content can be a:
 
 - *string*
 - *number*
-- *regular expression*
+- *RegExp*
 
-**selector**
+**selector** *(optional)*
 
 Specify a selector to filter DOM elements containing the text. Cypress will *ignore* it's [default preference order](#notes) for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
 
-**options**
+**options** *(optional)*
 
 Pass in an options object to change the default behavior of `cy.contains`.
 
