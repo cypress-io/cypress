@@ -49,7 +49,11 @@ jobs:
       - restore_cache:
           key: v3-{{ .Branch }}-deps-docs
 
-      - run: npm install
+      # only installs the root dependencies, without going into packages
+      # via postinstall script
+      - run: npm install --ignore-scripts
+      - run: npm run install-packages
+      - run: npm run build
 
       # save each node_modules folder per package
       - save_cache:
