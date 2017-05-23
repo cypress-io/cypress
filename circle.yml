@@ -53,7 +53,6 @@ jobs:
       # via postinstall script
       - run: npm install --ignore-scripts
       - run: npm run install-packages
-      - run: npm run build
 
       # save each node_modules folder per package
       - save_cache:
@@ -120,6 +119,8 @@ jobs:
           key: v3-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
           paths:
             - docs/node_modules
+
+      - run: npm run build
 
       #
       # things to run in the 1st CI container
