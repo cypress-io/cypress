@@ -62,7 +62,7 @@ When clicking on `window` within the command log, the console outputs the follow
 
 <img width="758" alt="screen shot 2015-11-29 at 2 16 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459398/d0e6f4be-96a3-11e5-8583-69dcffef9cd3.png">
 
-# Related
+# See also
 
 - [visit](https://on.cypress.io/api/visit)
 - [document](https://on.cypress.io/api/document)

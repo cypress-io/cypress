@@ -87,6 +87,6 @@ When clicking on the `get` command within the command log, the console outputs t
 
 Ensure the number passed to `cy.go()` navigates forward or backward in history. For example, -1 goes back one page, 1 goes forward one page.
 
-# Related
+# See also
 
 - [visit](https://on.cypress.io/api/visit)

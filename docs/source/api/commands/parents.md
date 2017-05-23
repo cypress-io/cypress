@@ -61,7 +61,7 @@ When clicking on the `parents` command within the command log, the console outpu
 
 <img width="537" alt="screen shot 2015-11-27 at 2 03 32 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447171/c1ba5ef8-950f-11e5-9f2d-7fbd0b142649.png">
 
-# Related
+# See also
 
 - [parent](https://on.cypress.io/api/parent)
 - [children](https://on.cypress.io/api/children)

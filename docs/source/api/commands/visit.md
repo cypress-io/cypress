@@ -193,7 +193,7 @@ cy
 
 Cypress will automatically apply the server and routes to the very next `visit` and does so immediately before any of your application code runs.
 
-# Related
+# See also
 
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)

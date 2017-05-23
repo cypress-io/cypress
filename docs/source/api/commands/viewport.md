@@ -145,6 +145,6 @@ Scaling the app should not affect any calculations or behavior of your applicati
 
 The upsides to this is that tests should consistently pass or fail regardless of each of your developers' screen sizes. Tests will also consistently run in `CI` because all of the viewports will be the same no matter what machine Cypress runs on.
 
-# Related
+# See also
 
 - [Configuration](https://on.cypress.io/guides/configuration)

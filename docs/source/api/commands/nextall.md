@@ -85,7 +85,7 @@ When clicking on `nextAll` within the command log, the console outputs the follo
 
 <img width="567" alt="screen shot 2017-03-23 at 2 05 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/24262907/f2b7fe78-0fd1-11e7-921c-6eabf6e32abb.png">
 
-# Related
+# See also
 
 - [next](https://on.cypress.io/api/next)
 - [nextUntil](https://on.cypress.io/api/nextuntil)

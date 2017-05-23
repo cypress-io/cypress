@@ -42,7 +42,7 @@ If the hover behavior depends on a JavaScript event like `mouseover`, you can tr
 cy.get('.content').trigger('mouseover')
 ```
 
-# Related
+# See also
 
 - [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
 - [invoke](https://on.cypress.io/api/invoke)

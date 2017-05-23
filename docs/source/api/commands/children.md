@@ -98,7 +98,7 @@ When clicking on the `children` command within the command log, the console outp
 
 <img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
 
-# Related
+# See also
 
 - [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)

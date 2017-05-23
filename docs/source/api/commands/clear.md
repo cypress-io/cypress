@@ -67,6 +67,6 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 <img width="511" alt="screen shot 2015-11-29 at 12 57 07 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458940/bdc93a50-9698-11e5-8be7-ef6a0470c3ae.png">
 
-# Related
+# See also
 
 - [type](https://on.cypress.io/api/type)

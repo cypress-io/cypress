@@ -66,6 +66,6 @@ When clicking on `cy.reload` within the command log, the console outputs the fol
 
 ![screen shot 2016-01-27 at 2 50 01 pm](https://cloud.githubusercontent.com/assets/1271364/12626199/71a62ea8-c505-11e5-97cf-e7e4b92015e3.png)
 
-# Related
+# See also
 
 - [location](https://on.cypress.io/api/location)

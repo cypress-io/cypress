@@ -358,7 +358,7 @@ When clicking on `type` within the command log, the console outputs the followin
 
 <img width="637" alt="screen shot 2015-11-29 at 1 26 24 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459106/f14f3308-969c-11e5-8352-f96744bbd713.png">
 
-# Related
+# See also
 
 - [clear](https://on.cypress.io/api/clear)
 - [click](https://on.cypress.io/api/click)

@@ -81,7 +81,7 @@ When clicking on `url` within the command log, the console outputs the following
 
 <img width="440" alt="screen shot 2015-11-29 at 1 42 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459197/229e2552-969f-11e5-80a9-eeaf3221a178.png">
 
-# Related
+# See also
 
 - [hash](https://on.cypress.io/api/hash)
 - [location](https://on.cypress.io/api/location)

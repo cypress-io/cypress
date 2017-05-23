@@ -76,7 +76,7 @@ If you see this error, you may want to ensure that the main browser window is cu
 
 If you want to ensure focus on a specific element before blurring, try using `cy.focus()` on the element before `cy.blur()`
 
-# Related
+# See also
 
 - [focused](https://on.cypress.io/api/focused)
 - [focus](https://on.cypress.io/api/focus)

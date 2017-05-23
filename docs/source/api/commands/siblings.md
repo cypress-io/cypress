@@ -74,7 +74,7 @@ When clicking on `siblings` within the command log, the console outputs the foll
 
 <img width="429" alt="screen shot 2015-11-29 at 12 49 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458898/ab940fd2-9697-11e5-96ab-a4c34efa3431.png">
 
-# Related
+# See also
 
 - [prev](https://on.cypress.io/api/prev)
 - [next](https://on.cypress.io/api/next)

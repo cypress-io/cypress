@@ -46,6 +46,6 @@ cy.get('form').within(function(){
 })
 ```
 
-# Related
+# See also
 
 - [root](https://on.cypress.io/api/root)

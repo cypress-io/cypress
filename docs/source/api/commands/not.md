@@ -50,6 +50,6 @@ When clicking on `not` within the command log, the console outputs the following
 
 <img width="689" alt="screen shot 2015-11-29 at 12 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458819/0d6870f6-9696-11e5-9364-2685b8ffc71b.png">
 
-# Related
+# See also
 
 - [filter](https://on.cypress.io/api/filter)

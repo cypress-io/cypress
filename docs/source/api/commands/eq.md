@@ -83,7 +83,7 @@ When clicking on the `eq` command within the command log, the console outputs th
 
 <img width="569" alt="screen shot 2015-11-27 at 2 12 03 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447234/e594ce52-9510-11e5-8794-712a7dbeae55.png">
 
-# Related
+# See also
 
 - [first](https://on.cypress.io/api/first)
 - [last](https://on.cypress.io/api/last)

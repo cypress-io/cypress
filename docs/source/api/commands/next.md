@@ -82,6 +82,6 @@ When clicking on `next` within the command log, the console outputs the followin
 
 <img width="547" alt="screen shot 2015-11-29 at 12 42 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png">
 
-# Related
+# See also
 
 - [prev](https://on.cypress.io/api/prev)

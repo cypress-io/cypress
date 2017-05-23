@@ -55,7 +55,7 @@ When clicking on the `focused` command within the command log, the console outpu
 
 <img width="407" alt="screen shot 2015-11-27 at 1 02 02 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446771/d104a6d0-9509-11e5-9464-2e397cb1eb24.png">
 
-# Related
+# See also
 
 - [focus](https://on.cypress.io/api/focus)
 - [blur](https://on.cypress.io/api/blur)

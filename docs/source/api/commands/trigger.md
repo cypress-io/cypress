@@ -126,7 +126,7 @@ When clicking on `trigger` within the command log, the console outputs the follo
 
 `cy.trigger()` only works on a single element. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you'd like to be able to trigger an event serially on multiple elements.
 
-# Related
+# See also
 
 - [hover](https://on.cypress.io/api/hover)
 - [click](https://on.cypress.io/api/click)

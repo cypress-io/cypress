@@ -57,6 +57,6 @@ When clicking on `document` within the command log, the console outputs the foll
 
 <img width="491" alt="screen shot 2015-11-29 at 2 00 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459314/ad27d7e8-96a1-11e5-8d1c-9c4ede6c54aa.png">
 
-# Related
+# See also
 
 - [window](https://on.cypress.io/api/window)

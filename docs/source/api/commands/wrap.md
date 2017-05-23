@@ -37,7 +37,7 @@ var fn = function(){
 cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 ```
 
-# Related
+# See also
 
 - [invoke](https://on.cypress.io/api/invoke)
 - [its](https://on.cypress.io/api/its)

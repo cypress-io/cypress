@@ -129,7 +129,7 @@ When clicking on the `readFile` command within the command log, the console outp
 
 <img width="689" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17934460/089e0652-69e6-11e6-9f00-7eb282be0d27.png">
 
-# Related
+# See also
 
 - [writeFile](https://on.cypress.io/api/writeFile)
 - [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)

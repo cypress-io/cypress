@@ -104,7 +104,7 @@ cy
     .should('include', 'myLogo')
 ```
 
-# Related
+# See also
 
 - [its](https://on.cypress.io/api/its)
 - [wrap](https://on.cypress.io/api/wrap)

@@ -113,6 +113,6 @@ When clicking on `scrollTo` within the command log, the console outputs the foll
 
 <img width="788" alt="screen shot 2017-04-14 at 12 32 16 pm" src="https://cloud.githubusercontent.com/assets/1271364/25049182/6e07211a-210e-11e7-9419-b57f3e08a608.png">
 
-# Related
+# See also
 
 - [scrollIntoView](https://on.cypress.io/api/scrollintoview)

@@ -82,7 +82,7 @@ When clicking on `parentsUntil` within the command log, the console outputs the 
 
 <img width="523" alt="screen shot 2017-03-23 at 2 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264309/60cc75de-0fd6-11e7-97b4-d0aa184b0ba6.png">
 
-# Related
+# See also
 
 - [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)

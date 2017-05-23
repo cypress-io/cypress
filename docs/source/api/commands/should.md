@@ -282,7 +282,7 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 <img width="768" alt="screen shot 2015-11-29 at 12 08 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458633/08a7b238-9692-11e5-9d5d-620122436bc0.png">
 
-# Related
+# See also
 
 - [and](https://on.cypress.io/api/and)
 - [Assertions](https://on.cypress.io/guides/making-assertions)

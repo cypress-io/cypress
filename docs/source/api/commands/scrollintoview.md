@@ -39,6 +39,6 @@ Option | Default | Notes
 
 # Command Log
 
-# Related
+# See also
 
 - [scrollTo](https://on.cypress.io/api/scrollto)

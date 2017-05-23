@@ -226,7 +226,7 @@ cy
 
 ## `fixture` does *not* log in the command log
 
-# Related
+# See also
 
 - [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)

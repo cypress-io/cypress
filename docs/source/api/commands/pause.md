@@ -36,6 +36,6 @@ cy
   .get('button').should('not.be.disabled')
 ```
 
-# Related
+# See also
 
 - [debug](https://on.cypress.io/api/debug)

@@ -56,6 +56,6 @@ When clicking on `dblclick` within the command log, the console outputs the foll
 
 <img width="836" alt="screen shot 2015-11-29 at 1 12 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459015/0755e216-969b-11e5-9f7e-ed04245d75ef.png">
 
-# Related
+# See also
 
 - [click](https://on.cypress.io/api/click)

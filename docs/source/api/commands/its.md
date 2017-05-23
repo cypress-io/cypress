@@ -110,7 +110,7 @@ When clicking on `its` within the command log, the console outputs the following
 
 ![screen shot 2016-05-24 at 12 40 17 pm](https://cloud.githubusercontent.com/assets/1268976/15512225/d14723cc-21ac-11e6-88d5-39ffe6c0a195.png)
 
-# Related
+# See also
 
 - [invoke](https://on.cypress.io/api/invoke)
 - [wrap](https://on.cypress.io/api/wrap)

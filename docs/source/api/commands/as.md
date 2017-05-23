@@ -55,7 +55,7 @@ Aliases of routes display in the routes instrument panel:
 
 Some strings are not allowed as aliases since they are reserved words in Cypress. These words include: test, runnable, timeout, slow, skip, and inspect.
 
-# Related
+# See also
 
 - [get](https://on.cypress.io/api/get)
 - [wait](https://on.cypress.io/api/wait)

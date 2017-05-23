@@ -175,7 +175,7 @@ When clicking on `wait` within the command log, the console outputs the followin
 
 <img width="952" alt="screen shot 2015-11-29 at 2 21 11 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459434/81132966-96a4-11e5-962f-41718b49b142.png">
 
-# Related
+# See also
 
 - [server](https://on.cypress.io/api/server)
 - [route](https://on.cypress.io/api/route)

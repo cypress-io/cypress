@@ -58,6 +58,6 @@ When clicking on the `find` command within the command log, the console outputs 
 
 <img width="516" alt="screen shot 2015-11-27 at 2 19 54 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447312/fa3679cc-9511-11e5-9bea-904f8c70063d.png">
 
-# Related
+# See also
 
 - [get](https://on.cypress.io/api/get)

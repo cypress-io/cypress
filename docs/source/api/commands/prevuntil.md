@@ -83,7 +83,7 @@ When clicking on `prevUntil` within the command log, the console outputs the fol
 
 <img width="560" alt="screen shot 2017-03-23 at 2 45 36 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264632/7743f57a-0fd7-11e7-99f8-c148acd17459.png">
 
-# Related
+# See also
 
 - [prev](https://on.cypress.io/api/prev)
 - [prevAll](https://on.cypress.io/api/prevall)

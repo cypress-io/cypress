@@ -61,7 +61,7 @@ When clicking on `clearCookies` within the command log, the console outputs the 
 
 ![screen shot 2016-05-10 at 12 02 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153392/1afb086e-16a7-11e6-9541-1b1794e14705.png)
 
-# Related
+# See also
 
 - [clearCookie](https://on.cypress.io/api/clearcookie)
 - [getCookie](https://on.cypress.io/api/getcookie)

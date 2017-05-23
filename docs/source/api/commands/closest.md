@@ -50,7 +50,7 @@ When clicking on the `closest` command within the command log, the console outpu
 
 <img width="478" alt="screen shot 2015-11-27 at 2 07 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png">
 
-# Related
+# See also
 
 - [parents](https://on.cypress.io/api/parents)
 - [next](https://on.cypress.io/api/next)

@@ -37,6 +37,6 @@ Option | Default | Notes
 cy.get('a').debug().should('have.attr', 'href')
 ```
 
-# Related
+# See also
 
 - [pause](https://on.cypress.io/api/pause)

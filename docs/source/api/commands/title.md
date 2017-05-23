@@ -49,6 +49,6 @@ When clicking on `title` within the command log, the console outputs the followi
 
 <img width="437" alt="screen shot 2015-11-29 at 2 13 06 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459377/5b8110e2-96a3-11e5-97e6-fbeb80f83277.png">
 
-# Related
+# See also
 
 - [document](https://on.cypress.io/api/document)

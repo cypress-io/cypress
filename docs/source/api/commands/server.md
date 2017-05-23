@@ -243,7 +243,7 @@ Oftentimes your application may make initial requests immediately when it loads 
 
 You can [read more about XHR strategy here](https://on.cypress.io/guides/network-requests-xhr).
 
-# Related
+# See also
 
 - [route](https://on.cypress.io/api/route)
 - [wait](https://on.cypress.io/api/wait)

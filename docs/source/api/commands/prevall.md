@@ -85,7 +85,7 @@ When clicking on `prevAll` within the command log, the console outputs the follo
 
 <img width="539" alt="screen shot 2017-03-23 at 2 50 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264898/2219d1a4-0fd8-11e7-9e8b-6b2d97166d6a.png">
 
-# Related
+# See also
 
 - [prev](https://on.cypress.io/api/prev)
 - [prevUntil](https://on.cypress.io/api/prevuntil)

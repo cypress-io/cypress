@@ -86,7 +86,7 @@ When clicking on `hash` within the command log, the console outputs the followin
 
 <img width="472" alt="screen shot 2015-11-29 at 1 34 17 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459153/f0aa6476-969d-11e5-9851-302957f9eb0f.png">
 
-# Related
+# See also
 
 - [location](https://on.cypress.io/api/location)
 - [url](https://on.cypress.io/api/url)

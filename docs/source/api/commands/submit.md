@@ -61,6 +61,6 @@ When clicking on `submit` within the command log, the console outputs the follow
 
 ![cy.submit console log](https://cloud.githubusercontent.com/assets/1271364/12888878/222f5522-ce4a-11e5-9edd-f67be2ebce40.png)
 
-# Related
+# See also
 
 - [click](https://on.cypress.io/api/click)

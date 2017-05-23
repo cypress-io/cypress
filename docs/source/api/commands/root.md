@@ -56,7 +56,7 @@ cy.get('form').within(function(){
 })
 ```
 
-# Related
+# See also
 
 - [get](https://on.cypress.io/api/get)
 - [within](https://on.cypress.io/api/within)

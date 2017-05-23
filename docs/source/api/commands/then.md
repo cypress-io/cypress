@@ -142,7 +142,7 @@ cy.then({timeout: 7000}, function(){
 })
 ```
 
-# Related
+# See also
 
 - [its](https://on.cypress.io/api/its)
 - [invoke](https://on.cypress.io/api/invoke)

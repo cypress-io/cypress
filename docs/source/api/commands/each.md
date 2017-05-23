@@ -78,7 +78,7 @@ cy
 
 This error occurs when the subject passed to `cy.each()` does not have a `length` property. Ensure the subject passed to `cy.each()` is an array-like structure.
 
-# Related
+# See also
 
 - [spread](https://on.cypress.io/api/spread)
 - [then](https://on.cypress.io/api/then)

@@ -223,7 +223,7 @@ cy.request('seed/admin') //<-- url is http://localhost:1234/seed/admin
 
 If Cypress cannot determine the host it will throw an explicit error.
 
-# Related
+# See also
 
 - [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 - [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)

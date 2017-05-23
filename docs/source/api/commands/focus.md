@@ -68,7 +68,7 @@ Ensure the element you are trying to call `cy.focus()` on is a [focusable elemen
 
 If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is executed.
 
-# Related
+# See also
 
 - [focused](https://on.cypress.io/api/focused)
 - [blur](https://on.cypress.io/api/blur)

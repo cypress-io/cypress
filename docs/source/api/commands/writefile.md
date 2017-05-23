@@ -123,7 +123,7 @@ When clicking on the `writeFile` command within the command log, the console out
 
 <img width="452" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17936161/df7e6bf8-69eb-11e6-8ef2-a90113dece9b.png">
 
-# Related
+# See also
 
 - [readFile](https://on.cypress.io/api/readFile)
 - [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)

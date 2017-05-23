@@ -126,6 +126,6 @@ When clicking on `select` within the command log, the console outputs the follow
 
 <img width="560" alt="screen shot 2015-11-29 at 1 17 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459045/a6b3bde2-969b-11e5-9357-272ea9684987.png">
 
-# Related
+# See also
 
 - [click](https://on.cypress.io/api/click)

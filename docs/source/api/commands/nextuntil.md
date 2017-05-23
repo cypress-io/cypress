@@ -83,7 +83,7 @@ When clicking on `nextUntil` within the command log, the console outputs the fol
 
 <img width="514" alt="screen shot 2017-03-23 at 2 18 01 pm" src="https://cloud.githubusercontent.com/assets/1271364/24263481/a20ce2f2-0fd3-11e7-881c-f6bf8d652263.png">
 
-# Related
+# See also
 
 - [next](https://on.cypress.io/api/next)
 - [nextAll](https://on.cypress.io/api/nextall)

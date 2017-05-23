@@ -122,7 +122,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 <img width="543" alt="screen shot 2015-11-27 at 1 24 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png">
 
-# Related
+# See also
 
 - [contains](https://on.cypress.io/api/contains)
 - [within](https://on.cypress.io/api/within)

@@ -81,7 +81,7 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 
 <img width="601" alt="screen shot 2015-11-29 at 1 31 04 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459134/7f29dea8-969d-11e5-9843-dfd07dfe888f.png">
 
-# Related
+# See also
 
 - [check](https://on.cypress.io/api/check)
 - [click](https://on.cypress.io/api/click)

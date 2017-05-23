@@ -31,7 +31,7 @@ cy
   })
 ```
 
-# Related
+# See also
 
 - [then](https://on.cypress.io/api/then)
 - [wait](https://on.cypress.io/api/wait)
