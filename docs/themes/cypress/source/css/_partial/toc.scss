@@ -15,6 +15,10 @@
   }
 }
 
+.toc {
+  list-style: none;
+}
+
 #article-toc {
   display: none;
   float: right;
@@ -34,6 +38,7 @@
   padding-left: 1em;
   font-size: 0.85em;
   line-height: 1.5;
+  list-style: none;
 }
 
 #article-toc-inner {
