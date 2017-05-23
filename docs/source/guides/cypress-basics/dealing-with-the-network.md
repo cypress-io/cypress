@@ -2,6 +2,13 @@ title: Dealing with the Network
 comments: true
 ---
 
+# What You'll Learn
+
+- how XHRs fit into modern web development
+- how tests are thwarted by an unstable network environment (intervals, polling, cascading effects)
+- how Cypress allows you to completely isolate your front-end with `cy.server` and `cy.route`
+- what tradeoffs we make when we stub our network requests
+
 # Strategy
 
 Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests within your application. Cypress provides you direct access to the XHR objects, enabling you to make assertions about its properties. Additionally you can even stub and mock a request's response.
