@@ -568,6 +568,19 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#password-without-value").type("agent").then ($input) ->
             expect($input).to.have.value("agent")
 
+      describe "input[type=date]", ->
+        it "can change values", ->
+          @cy.get("#date-without-value").type("1959-09-13").then ($text) ->
+            expect($text).to.have.value("1959-09-13")
+
+        it "overwrites existing value", ->
+          @cy.get("#date-with-value").type("1959-09-13").then ($text) ->
+            expect($text).to.have.value("1959-09-13")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#date-without-value").invoke("val", "2016-01-01").type("1959-09-13").then ($text) ->
+            expect($text).to.have.value("1959-09-13")
+
       describe "[contenteditable]", ->
         it "can change values", ->
           @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
@@ -576,14 +589,6 @@ describe "$Cypress.Cy Text Commands", ->
         it "inserts text after existing text", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
             expect($text).to.have.text("foo bar")
-
-      # it "can change input[type=date] values", ->
-      #   @cy.get("#input-types [type=date").type("1986-03-14").then ($text) ->
-      #     expect($text).to.have.value("1986-03-14")
-
-      # it "inserts text after existing text on input[type=date]", ->
-      #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
-      #     expect($text).to.have.value("date")
 
     describe "specialChars", ->
       context "{{}", ->
@@ -2018,6 +2023,45 @@ describe "$Cypress.Cy Text Commands", ->
           done()
 
         @cy.get(":text:first").type("")
+
+      it "throws when type=date and chars is not a string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq "Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989"
+          done()
+
+        @cy.get("#date-without-value").type(1989)
+
+      it "throws when type=date and chars is invalid format", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq "Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989"
+          done()
+
+        @cy.get("#date-without-value").type("01-01-1989")
+
+      it "throws when type=date and chars is invalid date", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq "Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31"
+          done()
+
+        @cy.get("#date-without-value").type("1989-04-31")
 
       _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
         it "throws when trying to type: #{val}", (done) ->
