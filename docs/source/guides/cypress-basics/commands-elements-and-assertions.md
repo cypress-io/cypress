@@ -149,3 +149,34 @@ The Cypress Command driver also does things one after the other. Each `cy.` meth
 - returns immediately
 
 So a test function made up entirely of Cypress commands will itself execute quite fast: all it really does is enqueue a bunch of actions. Once your function exits, Cypress is ready to kick off and start executing those actions, first-in-first-out. One. Action. At. A. Time.
+
+# To Assert, or Not To Assert?
+
+Cypress makes dozens of assertions available to you via its included libraries, but sometimes the best test may make no assertions at all! What do we mean by this? Let's look at an example:
+
+```js
+cy.visit("/home")
+
+cy.get(".main-menu")
+  .contains("New Project")
+  .click()
+
+cy.get(".title")
+  .type("My Awesome Project")
+
+cy.get("form")
+  .submit()
+```
+
+Without a single explicit assertion, there are dozens of ways this test can fail! Here's a few:
+
+- the initial visit url could respond with something other than success
+- any of the `cy.get()` Commands could fail to find their elements
+- form submission could result in a non-success HTTP
+- the in-page JS (the application under test) could throw an error
+
+Can you think of any more?
+
+Cypress expects this veritable minefield of modern web development and seeks to visualize all this chaos in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
+
+As such, it may be beneficial to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, and call it a day. You can rest assured that _so many things **must** be working_ in order for you to be able to navigate from Page A to Page B without error. If anything is fishy, Cypress will tell you about it with laser focus.
