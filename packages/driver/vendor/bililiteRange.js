@@ -471,7 +471,15 @@ InputRange.prototype._nativeRange = function(bounds) {
   return bounds || [0, this.length()];
 };
 InputRange.prototype._nativeSelect = function (rng){
-  this._el.setSelectionRange(rng[0], rng[1]);
+  try {
+    this._el.setSelectionRange(rng[0], rng[1]);
+  } catch (e) {
+    if (typeof this._el.select === 'function') {
+      this._el.select()
+    } else {
+      console.error('Failed to select text on', this._el)
+    }
+  }
 };
 InputRange.prototype._nativeSelection = function(){
   var originalType = this._el.type
