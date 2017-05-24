@@ -212,10 +212,6 @@ Using `cy.type()` on a time input (`<input type="time">`) requires specifying a 
 
 # Known Issues
 
-## Native `input[type=date,datetime,datetime-local,month,year,color]`
-
-Special input types are *not* supported yet because browsers implement these input types outside of what is accessible to JavaScript. They also depend on OS regional settings.  The fix however is relatively simple - Cypress will require you to type the final *formatted* value that the input will be set to - and then all will work. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
-
 ## Typing `tab` key does not work
 
 Tabbing will be implemented as a separate command as `cy.tab` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
