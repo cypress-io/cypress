@@ -4,50 +4,101 @@ comments: true
 description: ''
 ---
 
+`.and` is an alias of [`.should`](https://on.cypress.io/api/should) and is used in making assertions.
+
+You'd typically use `cy.and` when you are making multiple assertions about the same subject.
+
 {% note info New to Cypress? %}
 [Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)
 {% endnote %}
 
-`cy.and` makes chaining together assertions easy.
+# Syntax
 
-You'd typically use `cy.and` when you are making multiple assertions about the same subject.
+```javascript
+.and(chainers)
+.and(chainers, value)
+.and(chainers, method, value)
+.and(function() {})
+```
 
-| | |
-|--- | --- |
-| **Returns** | the current subject but (in some cases) a new subject  |
-| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+## Usage
 
-# [cy.and( *chainers* )](#chainers-usage)
+`.and()` requires being chained off another cy command.
 
-Make an assertion about the current subject using assertion chainers.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# [cy.and( *chainers*, *value* )](#chainers-with-value-usage)
+```javascript
+cy.get('.error').should('be.empty').and('be.hidden') // Yields '.error' el
+cy.contains('Login').and('be.visible')               // Yields el containing Login
+```
 
-Make an assertion about the value of the current subject.
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
+```javascript
+cy.and('eq', '42')   // Errors, cannot be chained off 'cy'
+```
 
-# [cy.and( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
+## Arguments
 
-Make an assertion about the subject by calling a method and providing a value to that method.
+**{% fa fa-angle-right %} chainers** ***(String)***
 
-# [cy.and( *function* )](#function-usage)
+Chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery)
 
-Pass a function that can have any number of explicit assertions written within it.
+**{% fa fa-angle-right %} value** ***(String)***
 
-Does not change the subject. Whatever was passed to the function is what is returned.
+Value to assert against chainer.
 
-# Chainers Usage
+**{% fa fa-angle-right %} method** ***(String)***
 
-## Chain assertions on the same subject
+A method to be called on the chainer.
+
+**{% fa fa-angle-right %} function** ***(Function)***
+
+Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
+
+## Yields
+
+In most cases, `.and()` yields the previous cy command's yield.
+
+```javascript
+cy
+  .get('nav')                       // yields <nav>
+  .should('be.visible')             // yields <nav>
+  .and('have.class', 'open')        // yields <nav>
+```
+Although some chainers change what is yielded. In the example below, `.and()` yields the String 'sans-serif' because the chainer `have.css, 'font-family'` yields a string.
+
+```javascript
+cy
+  .get('nav')                       // yields <nav>
+  .should('be.visible')             // yields <nav>
+  .and('have.css', 'font-family')   // yields 'sans-serif'
+```
+
+## Timeout
+
+`.and` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+```javascript
+cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', 'error')
+                         ↲
+      // timeout here will be passed down to the '.and()'
+      // and it will retry for up to 10 secs
+```
+
+# Examples
+
+## Chainers
+
+**Chain assertions on the same subject**
 
 ```javascript
 cy.get('button').should('have.class', 'active').and('not.be.disabled')
 ```
 
-# Chainers with Value Usage
+## Chainers with Value
 
-## Chain assertions on subject change
+**Chain assertions when yield changes**
 
 ```html
 <!-- App Code -->
@@ -60,44 +111,29 @@ cy.get('button').should('have.class', 'active').and('not.be.disabled')
 
 ```javascript
 cy
-  // subject is now <a>
   .get('a')
-
-  // assert <a> contains text: "Edit User"
-  // subject is still the <a>
-  .should('contain', 'Edit User')
-
-  // assert subject has 'href' attribute
-  // subject now changes to return value from the 'href' attribute
-  .and('have.attr', 'href')
-
-  // assert that the string returned from 'href'
-  // matches the RegExp /users/
-  // the subject is still the same string
-  .and('match', /users/)
-
-  // assert that the string does not
-  // have a '#' character within it
-  .and('not.include', '#')
+  .should('contain', 'Edit User') // yields <a>
+  .and('have.attr', 'href')       // yields string value of href
+  .and('match', /users/)          // yields string value of href
+  .and('not.include', '#')        // yields string value of href
 ```
 
-# Chainers with Method and Value Usage
+## Chainers with Method and Value
 
-## Assert the href is equal to '/users'
+**Assert the href is equal to '/users'**
 
 ```javascript
-// have.attr comes from chai-jquery
 cy
   .get('#header a')
   .should('have.class', 'active')
   .and('have.attr', 'href', '/users')
 ```
 
-# Function Usage
+## Function
 
-## Verify length, content, and classes from multiple `<p>`
+**Verify length, content, and classes from multiple `<p>`**
 
-Passing a function to `cy.and` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert on.
+Passing a function to `cy.and` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert.
 
 Just be sure *not* to include any code that has side effects in your callback function.
 
@@ -116,10 +152,7 @@ cy
   .get('p')
   .should('not.be.empty')
   .and(function($p){
-    // should have found 3 elements
     expect($p).to.have.length(3)
-
-    // make sure the first contains some text content
     expect($p.first()).to.contain('Hello World')
 
     // use jquery's map to grab all of their classes
@@ -137,70 +170,28 @@ cy
   })
 ```
 
-## Using a callback function will not change the subject
+**Using a callback function will not change what is yielded**
+
+Whatever is returned in the function is ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)
 
 ```javascript
 cy
   .get('button')
   .should('be.active')
   .and(function($button){
-    // whatever we return here is ignored
-    // as Cypress will always force the return
-    // value for future commands to be the same
-    // as the previous subject which is <button>
-
     expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
-
-    // whatever the return value (if any) is ignored
-    return {foo: 'bar'}
+    return {foo: 'bar'} // return is ignored, .and() yields <button>
   })
-
   .then(function($button){
-    // $button === <button>
-    // the subject is unchanged no matter what was returned
+    // do anything we want with <button>
   })
-```
-
-## Assertions that change the subject
-
-Sometimes using a specific chainer will automatically change the assertion subject.
-
-For instance in `chai`, the method [`have.property("...")`](http://chaijs.com/api/bdd/) will automatically change the subject.
-
-Additionally in [`Chai-jQuery`](https://github.com/chaijs/chai-jquery#attrname-value), the methods: `attr`, `prop`, `css`, and `data` also change the subject.
-
-This allows you to utilize other `chainer` methods such as `match` when making assertions about values.
-
-```javascript
-// in this example our subject changed to the string 'sans-serif' because
-// have.css("font-family") returned a string instead of the <body> element
-cy
-  // subject is <body>
-  .get('body')
-
-  // subject changes to the string return value of 'font-family'
-  .should('have.css', 'font-family')
-
-  // use match to assert the string matches a regular expression
-  .and('match', /sans-serif/)
-```
-
-```javascript
-// in this example our subject changed to the string '/users' because
-// have.attr, href, /users returned a string instead of the <a> element
-cy
-  // subject is <a>
-  .get('a')
-
-  // subject changes to the string 'users'
-  .should('have.attr', 'href', '/users')
 ```
 
 # Notes
 
-## Similarities to Chai
+**Similarities to Chai**
 
-If you've worked in [Chai](http://chaijs.com/) before, you will recognize that `cy.and` matches the same fluent assertion syntax.
+If you've worked in [Chai](http://chaijs.com/) before, you will recognize that `.and()` matches the same fluent assertion syntax.
 
 Take this *explicit* assertion for example:
 
@@ -210,28 +201,7 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 
 `cy.and` reproduces this same assertion behavior.
 
-## Can I pass options to cy.and()?
-
-Options passed to the preceding command will be passed through to `cy.and`.
-
-The following example is an example of increasing the `timeout` of the `cy.and`:
-
-```javascript
-cy
-  .get('input', {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
-    .should('have.value', 'foo')   // <-- and to have the value 'foo'
-    .and('have.class', 'radio')    // <-- and to have the class 'radio'
-```
-
-```javascript
-cy.find('input', {timeout: 10000}).should('have.value', 'foo').and('have.class', 'radio')
-                         ↲
-      // adding the timeout here will automatically
-      // flow down to the assertions, and they will
-      // be retried for up to 10 seconds
-```
-
-## How do I know which assertions change the subject and which keep it the same?
+**How do I know which assertions change the subject and which keep it the same?**
 
 The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
@@ -241,10 +211,12 @@ You can [read more about debugging assertions](https://on.cypress.io/guides/maki
 
 # Command Log
 
-## Chain assertions on the same subject
+**Chain assertions on the same subject**
 
 ```javascript
-  .find('input[type='checkbox']')
+cy
+  .get('.list')
+  .find('input[type="checkbox"]')
     .should('be.checked')
     .and('not.be.disabled')
 ```
