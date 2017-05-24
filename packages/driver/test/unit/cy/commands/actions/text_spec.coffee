@@ -2378,6 +2378,10 @@ describe "$Cypress.Cy Text Commands", ->
 
       @cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
+    it "works on input[type=number]", ->
+      @cy.get("#number-with-value").clear().then ($input) ->
+        expect($input.val()).to.equal("")
+
     describe "assertion verification", ->
       beforeEach ->
         @allowErrors()
