@@ -100,3 +100,21 @@ cy.get('.my-slow-selector', { timeout: 10000 })
 You can also set the timeout globally via the configuration setting `defaultCommandTimeout`.
 
 There is a performance tradeoff here: essentially, tests that have longer timeout periods take longer to fail. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means you want to increase your timeout period to suit your app, but you probably don't want to make it "extra long, just in case".
+
+# Chaining Commands
+
+It's crucially important to understand the mechanism by which Cypress Commands chain together, an asynchronous-yet-serial process of doing work on a subject yielded to the Command and yielding a subject to the next Command.
+
+## Subjects
+
+## Asynchronous, Yet Serial
+
+We've said multiple times now that all Cypress Commands are asynchronous, but this can be misleading. Normally in JavaScript, when we say things are asynchronous you can go ahead an assume that means lots of things can happen meanwhile. For instance, animations don't freeze while an XHR is in flight, nor does the XHR block other events from firing.
+
+But that's JavaScript land. What Cypress is emulating is _a human being interacting with a web site_. Human beings do things serially: one after the other.
+
+The Cypress Command driver also does things one after the other. Each `cy.` method:
+- enqueues an action to be taken later
+- returns immediately
+
+So a test function made up entirely of Cypress commands will itself execute quite fast: all it really does is enqueue a bunch of actions. Once your function exits, Cypress is ready to kick off and start executing those actions, first-in-first-out. One. Action. At. A. Time.
