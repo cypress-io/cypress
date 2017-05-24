@@ -4,54 +4,84 @@ comments: true
 description: ''
 ---
 
-Make the DOM element found in the previous command lose focus.
+Make a focused DOM element blur.
 
-**The following events are fired during blur:** `focusout`, `blur`
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.blur` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+```javascript
+.blur()
+.blur(options)
+```
 
-# [cy.blur()](#usage)
+## Usage
 
-Blur the DOM element from the previous command.
+`.blur()` requires being chained off another cy command that *yields* a DOM element that is currently in focus.
 
-# Options
+If you want to ensure an element is focused before blurring, try using [`.focus()`](https://on.cypress.io/focus) before `.blur()`
 
-Pass in an options object to change the default behavior of `cy.blur`.
+**{% fa fa-check-circle green %} Valid Usage**
 
-**[cy.blur( *options* )](#options-usage)**
+```javascript
+cy.get('[type="email"]').type('me@email.com').blur() // Blurs email input
+cy.get('[tabindex="1"]').focus().blur()              // Blurs el with tabindex
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.blur('input')              // Errors, cannot be chained off 'cy'
+cy.window().blur()            // Errors, 'window' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.blur`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Forces blur, disables error checking prior to blur
+`force` | `false` | Forces blur, disables checking if el is focusable or focused
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Blur the comment input.
+`.blur()` yields the DOM element from the previous command.
+
+## Timeout
+
+`.blur()` will continue to look for the focusable element to blur for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Blur
+
+**Blur the comment input.**
 
 ```javascript
-// returns the same <textarea> for further chaining
-cy.get('[name='comment']').type('Nice Product!').blur()
+cy.get('[name="comment"]').type('Nice Product!').blur()
 ```
 
-# Options Usage
+# Options
 
-## Blur the first input, ignoring whether the input is currently focused.
+**Blur the first input, ignoring whether the input is currently focused.**
 
 ```javascript
-// returns the same <input> for further chaining
-cy.get('input:first').blur({force: true})
+cy.get('input:first').blur({ force: true })
 ```
+
+# Notes
+
+**`.blur()` can time out because your browser did not receive any blur events.**
+
+If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
 
 # Command Log
 
-## Blur a textarea after typing.
+**Blur a textarea after typing.**
 
 ```javascript
-cy.get('[name='comment']').type('Nice Product!').blur()
+cy.get('[name="comment"]').focus().type('Nice Product!').blur()
 ```
 
 The commands above will display in the command log as:
@@ -61,20 +91,6 @@ The commands above will display in the command log as:
 When clicking on the `blur` command within the command log, the console outputs the following:
 
 <img width="525" alt="screen shot 2015-11-27 at 1 37 53 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446923/5c44a2ca-950c-11e5-8080-0dc108bc4959.png">
-
-# Errors
-
-## cy.blur() can only be called when there is a currently focused element.
-
-There is currently no specific element that has focus. If you want to ensure focus before blurring, try using `cy.focus()` on the element before `cy.blur()`
-
-## cy.blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.
-
-If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is executed.
-
-## cy.blur() can only be called on the focused element.
-
-If you want to ensure focus on a specific element before blurring, try using `cy.focus()` on the element before `cy.blur()`
 
 # See also
 

@@ -44,7 +44,7 @@ Option | Default | Notes
 
 ## Yields
 
-`.first()` yields the new DOM element(s) found by the command.
+`.first()` yields the new DOM element found by the command.
 
 ## Timeout
 
