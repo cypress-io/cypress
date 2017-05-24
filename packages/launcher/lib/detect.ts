@@ -3,6 +3,7 @@ import darwin from './darwin'
 import {log} from './log'
 import {Browser, NotInstalledError} from './types'
 import * as Bluebird from 'bluebird'
+import {merge, pick, tap} from 'ramda'
 
 import _ = require('lodash')
 import os = require('os')
@@ -63,21 +64,26 @@ function lookup (platform: string, obj: Browser): Promise<Object> {
 
 function checkOneBrowser (browser: Browser) {
   const platform = os.platform()
+  const pickBrowserProps = pick(['name', 'type', 'version', 'path'])
+
+  const logBrowser = (props: object) => {
+    log('setting major version for %j', props)
+  }
+
+  const failed = (err: NotInstalledError) => {
+    if (err.notInstalled) {
+      log('browser %s not installed', browser.name)
+      return false
+    }
+    throw err
+  }
+
   return lookup(platform, browser)
-    .then((props: object) => {
-      return _.chain({})
-        .extend(browser, props)
-        .pick('name', 'type', 'version', 'path')
-        .value()
-    })
+    .then(merge(browser))
+    .then(pickBrowserProps)
+    .then(tap(logBrowser))
     .then(setMajorVersion)
-    .catch(err => {
-      if (err.notInstalled) {
-        log('browser %s not installed', browser.name)
-        return false
-      }
-      throw err
-    })
+    .catch(failed)
 }
 
 /** returns list of detected browsers */
