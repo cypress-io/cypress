@@ -83,8 +83,8 @@ module.exports = {
     .on "error", (err, stdout, stderr) ->
       ## if we're supposed log errors then
       ## bubble them up
-      # if logErrors
-      options.onError(err, stdout, stderr)
+      if logErrors
+        options.onError(err, stdout, stderr)
 
       err.recordingVideoFailed = true
 

@@ -246,6 +246,9 @@ module.exports = {
 
   listenForProjectEnd: (project) ->
     new Promise (resolve) ->
+      ## dont ever end if we're in 'gui' debugging mode
+      return if gui
+
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
         ## early too: (Ended Early: true)
@@ -320,9 +323,6 @@ module.exports = {
 
   waitForTestsToFinishRunning: (options = {}) ->
     { project, gui, screenshots, started, end, name, cname, videoCompression } = options
-
-    ## dont ever end if we're in 'gui' debugging mode
-    return Promise.resolve() if gui
 
     @listenForProjectEnd(project)
     .then (obj) =>

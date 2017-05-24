@@ -234,7 +234,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      headless.waitForTestsToFinishRunning.resolves({failures: 10})
+      headless.listenForProjectEnd.resolves({failures: 10})
 
       Project.add(@todosPath)
       .then =>
@@ -609,7 +609,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        headless.waitForTestsToFinishRunning.resolves({failures: 0})
+        headless.listenForProjectEnd.resolves({failures: 0})
 
         Project.add(@todosPath)
 
@@ -641,7 +641,7 @@ describe "lib/cypress", ->
 
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
-        headless.waitForTestsToFinishRunning.resolves({failures: 0})
+        headless.listenForProjectEnd.resolves({failures: 0})
 
         Project.add(@todosPath)
 
