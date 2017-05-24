@@ -244,6 +244,32 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
+  listenForProjectEnd: (project) ->
+    new Promise (resolve) ->
+      onEarlyExit = (errMsg) ->
+        ## probably should say we ended
+        ## early too: (Ended Early: true)
+        ## in the stats
+        obj = {
+          error:        errors.stripAnsi(errMsg)
+          failures:     1
+          tests:        0
+          passes:       0
+          pending:      0
+          duration:     0
+          failingTests: []
+        }
+
+        resolve(obj)
+
+      onEnd = (obj) =>
+        resolve(obj)
+
+      ## when our project fires its end event
+      ## resolve the promise
+      project.once("end", onEnd)
+      project.once("exitEarlyWithErr", onEarlyExit)
+
   waitForBrowserToConnect: (options = {}) ->
     { project, id, timeout } = options
 
@@ -295,65 +321,40 @@ module.exports = {
   waitForTestsToFinishRunning: (options = {}) ->
     { project, gui, screenshots, started, end, name, cname, videoCompression } = options
 
-    new Promise (resolve, reject) =>
-      ## dont ever end if we're in 'gui' debugging mode
-      return if gui
+    ## dont ever end if we're in 'gui' debugging mode
+    return Promise.resolve() if gui
 
-      onFinish = (obj) =>
-        finish = ->
-          project
-          .getConfig()
-          .then (cfg) ->
-            obj.config = cfg
-          .finally ->
-            resolve(obj)
+    @listenForProjectEnd(project)
+    .then (obj) =>
+      finish = ->
+        project
+        .getConfig()
+        .then (cfg) ->
+          obj.config = cfg
+        .return(obj)
 
-        if end
-          obj.video = name
+      if end
+        obj.video = name
 
-        if screenshots
-          obj.screenshots = screenshots
+      if screenshots
+        obj.screenshots = screenshots
 
-        @displayStats(obj)
+      @displayStats(obj)
 
-        if screenshots and screenshots.length
-          @displayScreenshots(screenshots)
+      if screenshots and screenshots.length
+        @displayScreenshots(screenshots)
 
-        ft = obj.failingTests
+      ft = obj.failingTests
 
-        if ft and ft.length
-          obj.failingTests = Reporter.setVideoTimestamp(started, ft)
+      if ft and ft.length
+        obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
-        if end
-          @postProcessRecording(end, name, cname, videoCompression)
-          .then(finish)
-          ## TODO: add a catch here
-        else
-          finish()
-
-      onEarlyExit = (errMsg) ->
-        ## probably should say we ended
-        ## early too: (Ended Early: true)
-        ## in the stats
-        obj = {
-          error:        errors.stripAnsi(errMsg)
-          failures:     1
-          tests:        0
-          passes:       0
-          pending:      0
-          duration:     0
-          failingTests: []
-        }
-
-        onFinish(obj)
-
-      onEnd = (obj) =>
-        onFinish(obj)
-
-      ## when our project fires its end event
-      ## resolve the promise
-      project.once("end", onEnd)
-      project.once("exitEarlyWithErr", onEarlyExit)
+      if end
+        @postProcessRecording(end, name, cname, videoCompression)
+        .then(finish)
+        ## TODO: add a catch here
+      else
+        finish()
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true

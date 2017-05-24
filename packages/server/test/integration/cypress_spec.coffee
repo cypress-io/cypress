@@ -199,7 +199,7 @@ describe "lib/cypress", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
+      @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
       @sandbox.stub(browsers, "open")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
 
