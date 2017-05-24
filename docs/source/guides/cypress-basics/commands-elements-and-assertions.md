@@ -107,6 +107,37 @@ It's crucially important to understand the mechanism by which Cypress Commands c
 
 ## Subjects
 
+Subjects are the unseen context of a `cy.` chain, the flow of current pushing energy from one Command to the next. Because Cypress is built upon the Promise pattern, that "pushing of energy" is called "yielding" instead of "returning": Cypress Commands do not return useful values, but rather a Promise chain to build upon.
+
+Cypress Commands must be executed against an appropriate subject. For instance, you can't call `cy.should("equal", 7)` directly: what should equal 7? `.should()` requires a subject!
+
+### Using `cy.wrap` To Inject A Custom Subject
+
+Want to bring in a value from outside of the Command flow? You can quickly achieve that with `cy.wrap()`. To rewrite the incorrect usage of `.should` above, let's push the number 7 into Cypress land:
+
+```js
+cy.wrap(7).should("equal", 7)
+```
+
+`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple!
+
+### Using `.then` To Act Synchronously On A Subject
+
+Want to jump into the Command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { /* act here */ })` to your Command chain. When Cypress finishes the previous Command, it will yield control to your custom function, passing in the current subject as the first argument.
+
+If you have more Commands to add after your `.then()`, you'll need to maintain the subject chain by synchronously returning the new subject.
+
+Let's look at an example:
+
+```js
+cy.get('a.some-link').first().then(function(myElement) {
+  // Do something with the given subject, which happens to be a link element
+  let linkDestination = myElement.attr('href')
+  // Causes the next Command to be executed with this String as subject
+  return linkDestination
+}).should('equal', 'http://example.com') // .should works against Strings!
+```
+
 ## Asynchronous, Yet Serial
 
 We've said multiple times now that all Cypress Commands are asynchronous, but this can be misleading. Normally in JavaScript, when we say things are asynchronous you can go ahead an assume that means lots of things can happen meanwhile. For instance, animations don't freeze while an XHR is in flight, nor does the XHR block other events from firing.
