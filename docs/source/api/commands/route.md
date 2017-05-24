@@ -21,7 +21,6 @@ cy.route(function() {})
 cy.route(options)
 ```
 
-
 ## Usage
 
 `.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.

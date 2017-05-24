@@ -4,47 +4,69 @@ comments: true
 description: ''
 ---
 
-Clears all of the browser cookies.
+Clear all browser cookies.
 
-Cypress automatically invokes this command **before** each test to prevent state from building up. You shouldn't need to invoke this command unless you're using it to clear cookies inside a single test.
+{% note warning %}
+Cypress automatically clears all cookies *before* each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | `null` |
-| **Timeout** | `cy.clearCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.|
+# Syntax
 
-# [cy.clearCookies()](#usage)
+```javascript
+.clearCookies()
+.clearCookies(options)
+```
 
-Clears all the browser cookies.
+## Usage
 
-# Options
+`.clearCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.clearCookies()
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.clearCookies`.
 
-**[cy.clearCookies(*options* )](#options-usage)**
-
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.clearCookies` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `.clearCookies()` command to be processed
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Clear cookies after logging in
+`.clearCookies()` yields `null`
+
+## Timeout
+
+`.clearCookies()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+
+# Examples
+
+## Clear Cookies
+
+**Clear all cookies after logging in**
 
 In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
 
 ```javascript
 cy
-  .login('bob@example.com', 'p@ssw0rd') // example of custom command
+  // assume we just logged in
+  .contains('Login').click()
+  .url().should('include', 'profile')
   .clearCookies()
-  .visit('/dashboard')                  // we should be redirected back to login
-  .url().should('eq', 'login')
+  .visit('/dashboard') // we should be redirected back to login
+  .url().should('include', 'login')
 ```
 
 # Command Log
 
-## Clear cookies after getting cookies
+**Clear cookies after getting cookies**
 
 ```javascript
 cy
