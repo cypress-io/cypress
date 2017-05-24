@@ -8,7 +8,8 @@
     "watch": "gulp watch",
     "clean-deps": "rm -rf node_modules",
     "test": "gulp test",
-    "test-watch": "gulp test:watch"
+    "test-watch": "gulp test:watch",
+    "watch-test": "gulp test:watch"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
