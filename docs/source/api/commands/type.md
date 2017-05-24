@@ -192,13 +192,25 @@ cy.get('body').type('{shift}', {release: false}).get('li:first').click()
 
 # Date inputs
 
-Using `cy.type()` on a date input (`<input type="date">`) requires specifying a valid date in the format `yyyy-MM-dd`, e.g. `"1999-12-31"`. This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by [the W3 spec](https://www.w3.org/TR/html5/forms.html#date-state-(type=date)) and is what the input's `value` will be set to regardless of browser or locale.
+Using `cy.type()` on a date input (`<input type="date">`) requires specifying a valid date in the format `yyyy-MM-dd`, e.g. `1999-12-31`. This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#sec-dates) and is what the input's `value` will be set to regardless of browser or locale. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+# Month inputs
+
+Using `cy.type()` on a month input (`<input type="month">`) requires specifying a valid month in the format `yyyy-MM`, e.g. `1999-12`. This isn't exactly how a user would type into a month input, but is a workaround since month input support varies between browsers and the format varies based on locale. `yyyy-MM` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#months) and is what the input's `value` will be set to regardless of browser or locale. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+# Week inputs
+
+Using `cy.type()` on a week input (`<input type="week">`) requires specifying a valid week in the format `yyyy-Www`, where `W` is the literal character 'W' and `ww` is the number of the week (01-53), e.g. `1999-W23` (23rd week of 1999). This isn't exactly how a user would type into a week input, but is a workaround since week input support varies between browsers and the format varies based on locale. `yyyy-Www` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#valid-week-string) and is what the input's `value` will be set to regardless of browser or locale. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+# Time inputs
+
+Using `cy.type()` on a time input (`<input type="time">`) requires specifying a valid time in the format `HH:mm`, `HH:mm:ss`, or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted. The following are examples of valid times:
+
+* 01:30
+* 23:15
+* 12:00:00.384
 
 # Known Issues
-
-## Native `input[type=date,datetime,datetime-local,month,year,color]`
-
-Special input types are *not* supported yet because browsers implement these input types outside of what is accessible to JavaScript. They also depend on OS regional settings.  The fix however is relatively simple - Cypress will require you to type the final *formatted* value that the input will be set to - and then all will work. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
 
 ## Typing `tab` key does not work
 

@@ -581,6 +581,65 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#date-without-value").invoke("val", "2016-01-01").type("1959-09-13").then ($text) ->
             expect($text).to.have.value("1959-09-13")
 
+      describe "input[type=month]", ->
+        it "can change values", ->
+          @cy.get("#month-without-value").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+        it "overwrites existing value", ->
+          @cy.get("#month-with-value").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#month-without-value").invoke("val", "2016-01").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+      describe "input[type=week]", ->
+        it "can change values", ->
+          @cy.get("#week-without-value").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+        it "overwrites existing value", ->
+          @cy.get("#week-with-value").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#week-without-value").invoke("val", "2016-W01").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+      describe "input[type=time]", ->
+        it "can change values", ->
+          @cy.get("#time-without-value").type("01:23:45").then ($text) ->
+            expect($text).to.have.value("01:23:45")
+
+        it "overwrites existing value", ->
+          @cy.get("#time-with-value").type("12:34:56").then ($text) ->
+            expect($text).to.have.value("12:34:56")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#time-without-value").invoke("val", "01:23:45").type("12:34:56").then ($text) ->
+            expect($text).to.have.value("12:34:56")
+
+        it "can be formatted HH:mm", ->
+          @cy.get("#time-without-value").type("01:23").then ($text) ->
+            expect($text).to.have.value("01:23")
+
+        it "can be formatted HH:mm:ss", ->
+          @cy.get("#time-without-value").type("01:23:45").then ($text) ->
+            expect($text).to.have.value("01:23:45")
+
+        it "can be formatted HH:mm:ss.S", ->
+          @cy.get("#time-without-value").type("01:23:45.9").then ($text) ->
+            expect($text).to.have.value("01:23:45.9")
+
+        it "can be formatted HH:mm:ss.SS", ->
+          @cy.get("#time-without-value").type("01:23:45.99").then ($text) ->
+            expect($text).to.have.value("01:23:45.99")
+
+        it "can be formatted HH:mm:ss.SSS", ->
+          @cy.get("#time-without-value").type("01:23:45.999").then ($text) ->
+            expect($text).to.have.value("01:23:45.999")
+
       describe "[contenteditable]", ->
         it "can change values", ->
           @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
@@ -2024,45 +2083,6 @@ describe "$Cypress.Cy Text Commands", ->
 
         @cy.get(":text:first").type("")
 
-      it "throws when type=date and chars is not a string", (done) ->
-        logs = []
-
-        @Cypress.on "log", (attrs, log) ->
-          logs.push(log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq 2
-          expect(err.message).to.eq "Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989"
-          done()
-
-        @cy.get("#date-without-value").type(1989)
-
-      it "throws when type=date and chars is invalid format", (done) ->
-        logs = []
-
-        @Cypress.on "log", (attrs, log) ->
-          logs.push(log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq 2
-          expect(err.message).to.eq "Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989"
-          done()
-
-        @cy.get("#date-without-value").type("01-01-1989")
-
-      it "throws when type=date and chars is invalid date", (done) ->
-        logs = []
-
-        @Cypress.on "log", (attrs, log) ->
-          logs.push(log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq 2
-          expect(err.message).to.eq "Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31"
-          done()
-
-        @cy.get("#date-without-value").type("1989-04-31")
-
       _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
         it "throws when trying to type: #{val}", (done) ->
           logs = []
@@ -2098,6 +2118,192 @@ describe "$Cypress.Cy Text Commands", ->
             @cy.get(".slidein").type("foo")
 
         @cy.$$("#animation-container").append(input)
+
+      context "[type=date]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989")
+            done()
+
+          @cy.get("#date-without-value").type(1989)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989")
+            done()
+
+          @cy.get("#date-without-value").type("01-01-1989")
+
+        it "throws when chars is invalid date", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31")
+            done()
+
+          @cy.get("#date-without-value").type("1989-04-31")
+
+      context "[type=month]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6")
+            done()
+
+          @cy.get("#month-without-value").type(6)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
+            done()
+
+          @cy.get("#month-without-value").type("01/2000")
+
+        it "throws when chars is invalid month", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
+            done()
+
+          @cy.get("#month-without-value").type("1989-13")
+
+      context "[type=week]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
+            done()
+
+          @cy.get("#week-without-value").type(23)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
+            done()
+
+          @cy.get("#week-without-value").type("2005/W18")
+
+        it "throws when chars is invalid week", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
+            done()
+
+          @cy.get("#week-without-value").type("1995-W60")
+
+      context "[type=time]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999")
+            done()
+
+          @cy.get("#time-without-value").type(9999)
+
+        it "throws when chars is invalid format (1:30)", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30")
+            done()
+
+          @cy.get("#time-without-value").type("1:30")
+
+        it "throws when chars is invalid format (01:30pm)", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm")
+            done()
+
+          @cy.get("#time-without-value").type("01:30pm")
+
+        it "throws when chars is invalid format (01:30:30.3333)", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333")
+            done()
+
+          @cy.get("#time-without-value").type("01:30:30.3333")
+
+        it "throws when chars is invalid time", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60")
+            done()
+
+          @cy.get("#time-without-value").type("01:60")
 
   context "#clear", ->
     it "does not change the subject", ->

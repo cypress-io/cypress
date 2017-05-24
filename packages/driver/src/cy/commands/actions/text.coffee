@@ -10,7 +10,10 @@ utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
 textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
-dateRegex = /\d{4}-\d{2}-\d{2}/
+dateRegex = /^\d{4}-\d{2}-\d{2}$/
+monthRegex = /^\d{4}-(0\d|1[0-2])$/
+weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
+timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
@@ -76,6 +79,9 @@ module.exports = (Cypress, Commands) ->
       isBody      = options.$el.is("body")
       isTextLike  = options.$el.is(textLike)
       isDate      = options.$el.is("[type=date]")
+      isTime      = options.$el.is("[type=time]")
+      isMonth     = options.$el.is("[type=month]")
+      isWeek      = options.$el.is("[type=week]")
       hasTabIndex = options.$el.is("[tabindex]")
 
       ## TODO: tabindex can't be -1
@@ -111,6 +117,33 @@ module.exports = (Cypress, Commands) ->
         not moment(chars).isValid()
       )
         utils.throwErrByPath("type.invalid_date", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isMonth and (
+        not _.isString(chars) or
+        not monthRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_month", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isWeek and (
+        not _.isString(chars) or
+        not weekRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_week", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isTime and (
+        not _.isString(chars) or
+        not timeRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_time", {
           onFail: options._log
           args: { chars }
         })
@@ -179,23 +212,24 @@ module.exports = (Cypress, Commands) ->
 
           return dispatched
 
+        ## see comment in updateValue below
         typed = ""
-        charsToType = if isDate
-          options.chars.replace("-", "")
-        else
-          options.chars
 
         $Keyboard.type({
           $el:     options.$el
-          chars:   charsToType
+          chars:   options.chars
           delay:   options.delay
           release: options.release
           window:  @privateState("window")
 
           updateValue: (rng, key) ->
-            if isDate
+            ## date/month/week/time inputs need to only have their value updated
+            ## once after all the characters are input because attemping
+            ## to set a partial/invalid value results in the value being
+            ## set to an empty string
+            if isDate or isMonth or isWeek or isTime
               typed += key
-              if typed is charsToType
+              if typed is options.chars
                 options.$el.val(options.chars)
             else
               rng.text(key, "end")
