@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Click a DOM element.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).
+Click a DOM element.
 
 # Syntax
 
@@ -70,7 +70,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options)
+`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options
 
 # Examples
 

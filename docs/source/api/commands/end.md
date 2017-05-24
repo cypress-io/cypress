@@ -4,32 +4,49 @@ comments: true
 description: ''
 ---
 
-Ends the Cypress command chain and returns `null`. This is equivalent to the jQuery `end()` method.
+End a chain of commands.
 
-| | |
-|--- | --- |
-| **Returns** | `null` |
-| **Timeout** | cannot timeout |
 
-# [cy.end()](#usage)
-
-End the command chain.
-
-# Usage
+# Syntax
 
 ```javascript
-// cy.end is useful when you want to end a chain of commands
-// and force Cypress to re-query from the root element
-cy
-  .contains('User: Cheryl').click().end() // ends the current chain and returns null
+.end()
+```
 
-  // queries the entire document again
-  .contains('User: Charles').click()
+## Usage
+
+`.end()` should be chained off another cy command.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.contains('ul').end()   // Yield 'null' instead of 'ul' element
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.end()                  // Does not make sense to chain off 'cy'
+```
+
+## Yields
+
+`.end()` yields `null`.
+
+
+# Examples
+
+`.end()` is useful when you want to end a chain of commands and force the next command to not receive what was yielded in the previous command.
+
+```javascript
+cy
+  .contains('User: Cheryl').click().end() // yield null
+  .contains('User: Charles').click()      // contains looks for content in document now
 ```
 
 # Command Log
 
-## `end` does *not* log in the command log
+**`end` does *not* log in the command log**
 
 ```javascript
 cy

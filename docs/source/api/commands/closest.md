@@ -4,31 +4,60 @@ comments: true
 description: ''
 ---
 
-Get the first DOM element that matches the selector whether it be itself or one of it's ancestors.
+Get the first DOM element that matches the selector (whether it be itself or one of it's ancestors).
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.closest( *selector* )](#selector-usage)
+```javascript
+.closest(selector)
+.closest(selector, options)
+```
 
-For each DOM element in the set, get the first DOM element that matches the selector by testing the DOM element itself and traversing up through its ancestors in the DOM tree.
+## Usage
 
-# Options
+`.closest()` requires being chained off another cy command that *yields* a DOM element.
 
-Pass in an options object to change the default behavior of `cy.closest`.
+**{% fa fa-check-circle green %} Valid Usage**
 
-**cy.closest( *selector*, *options* )**
+```javascript
+cy.get('td').closest('.filled') // Yield closest el with class '.filled'
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.closest('.active')  // Errors, cannot be chained off 'cy'
+cy.url().closest()     // Errors, 'url' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.closest()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Selector Usage
+## Yields
 
-## Find the closest element of the current subject with the class `nav`
+`.closest()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.closest()` will continue to look for the closest element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Closest
+
+**Find the closest element of the current subject with the class `nav`**
 
 ```javascript
 cy.get('li.active').closest('.nav')
@@ -36,7 +65,7 @@ cy.get('li.active').closest('.nav')
 
 # Command Log
 
-## Find the closest element of the current subject with the class `nav`
+**Find the closest element of the current subject with the class `nav`**
 
 ```javascript
 cy.get('li.active').closest('.nav')
@@ -52,6 +81,10 @@ When clicking on the `closest` command within the command log, the console outpu
 
 # See also
 
+- [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)
-- [next](https://on.cypress.io/api/next)
+- [parentsUntil](https://on.cypress.io/api/parentsUntil)
+- [prev](https://on.cypress.io/api/prev)
+- [prevAll](https://on.cypress.io/api/prevAll)
+- [prevUntil](https://on.cypress.io/api/prevUntil)
 - [first](https://on.cypress.io/api/first)

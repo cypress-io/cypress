@@ -4,32 +4,56 @@ comments: true
 description: ''
 ---
 
-The `cy.each()` will iterate through an array like structure (arrays and objects with a `length` property).
+Iterate through an array like structure (arrays or objects with a `length` property).
 
-Each time the callback function runs, it is invoked with three arguments: `value`, `index`, and `collection`.
+Each time the callback function runs, it is invoked with three arguments:
 
-If your callback function returns a `Promise` it will be awaited before iterating over the next element in the collection.
+- `value`
+- `index`
+- `collection`
 
-You can stop the loop early by returning `false` in the callback function.
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the original array subject given to `cy.each()` |
-| **Timeout** | `cy.each` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+```javascript
+.each(function(value, index, collection) {})
+```
 
-# [cy.each( *function* )](#usage)
+## Usage
 
-Iterate over an array-like structure.
+`.each()` requires being chained off another cy command that *yields* an array like structure (arrays or objects with a `length` property).
 
-# Usage
+**{% fa fa-check-circle green %} Valid Usage**
 
-## Iterate over an array of DOM elements
+```javascript
+cy.get('ul>li').each(function(){...}) // Iterate through each 'li'
+cy.getCookies().each(function(){...}) // Iterate through each cookie
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+
+cy.each(function(){...})            // Errors, cannot be chained off 'cy'
+cy.location().each(function(){...}) // Errors, 'location' doesn't yield an array
+```
+
+## Yields
+
+`.each()` yields the original array.
+
+## Timeout
+
+# Examples
+
+## DOM Elements
+
+**Iterate over an array of DOM elements**
 
 ```javascript
 cy
   .get('ul>li')
   .each(function($el, index, $list){
-    // $el is wrapped jquery element
+    // $el is a wrapped jQuery element
     if ($el.someMethod() === 'something') {
       // wrap this element so we can
       // use cypress commands on it
@@ -40,14 +64,31 @@ cy
   })
 ```
 
-## Promises are awaited
+**The original array is always yielded**
+
+No matter what is returned in the callback function, `.each()` will always yield the original array.
+
+```javascript
+cy
+  .get('li').should('have.length', 3)
+  .each(function($li, index, $lis){
+    return 'something else'
+  })
+  .then(function($lis){
+    expect($lis).to.have.length(3) // true
+  })
+```
+
+## Promises
+
+**Promises are awaited**
+
+If your callback function returns a `Promise` it will be awaited before iterating over the next element in the collection.
 
 ```javascript
 cy
   .wrap([1,2,3])
   .each(function(num, index, array){
-    // promises returned are automatically
-    // awaited on before calling the next item
     return new Cypress.Promise(function(resolve){
       setTimeout(function(){
         resolve()
@@ -56,27 +97,11 @@ cy
   })
 ```
 
-## The original subject is always returned
+# Notes
 
-```javascript
-cy
-  .get('li').should('have.length', 3)
-  .each(function($li, index, $lis){
-    // no matter what we return here
-    // the next subject will still
-    // be the collection of <li>
-    return 'something else'
-  })
-  .then(function($lis){
-    expect($lis).to.have.length(3) // true
-  })
-```
+**Stop `each` prematurely**
 
-# Errors
-
-## cy.each() can only operate on an array like subject.
-
-This error occurs when the subject passed to `cy.each()` does not have a `length` property. Ensure the subject passed to `cy.each()` is an array-like structure.
+You can stop the `.each()` loop early by returning `false` in the callback function.
 
 # See also
 
