@@ -17,21 +17,42 @@ Click a DOM element.  The DOM element must be in a "clickable" state prior to th
 .click(x, y, options)
 ```
 
+## Usage
+
+`.click()` requires being chained off another cy command that *yields* a DOM element.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('button').click()               // Clicks on button
+cy.focused().click()                   // Clicks on el with focus
+cy.contains('Welcome').first().click() // Clicks on first el containing 'Welcome'
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.click('button')          // Errors, cannot be chained off 'cy'
+cy.window().click()         // Errors, 'window' does not yield DOM element
+```
+
 ## Arguments
 
-**position**
+**{% fa fa-angle-right %} position** ***(String)***
 
 Clicks the element at the specified position. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
 ![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
 
-**x**, **y**
+**{% fa fa-angle-right %} x** ***(Number)***
 
-You can pass a relative `x` and `y` coordinate which will calculate distance in pixels from the top left corner of the element and issue the click at the calculated coordinate.
+The distance in pixels from element's left to issue the click.
 
-`x` and `y` must both be `Numbers`. Currently you cannot use `%` based arguments. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you'd like this functionality.
+**{% fa fa-angle-right %} y** ***(Number)***
 
-**options** *(optional)*
+The distance in pixels from element's top to issue the click.
+
+**{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `.click`.
 

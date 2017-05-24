@@ -14,21 +14,35 @@ cy.contains(selector, content)
 cy.contains(selector, content, options)
 ```
 
-## Parameters
+## Usage
 
-**content**
+`.contains()` can be chained off of `cy` to find content within the entire document or chained off another cy command that *yields* a DOM element - limiting it's search of content to within yielded element.
 
-Get the deepest DOM element containing the content. Content can be a:
+**{% fa fa-check-circle green %} Valid Usage**
 
-- *string*
-- *number*
-- *RegExp*
+```javascript
+cy.get('.nav').contains('About')  // Yields el in .nav containing 'About'
+cy.contains('Hello').first()      // Yields first el in document containing 'Hello'
+```
 
-**selector** *(optional)*
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.title().contains('My App')        // Errors, 'title' does not yield DOM element
+cy.getCookies().contains('_key')     // Errors, 'getCookies' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} content** ***(String, Number, RegExp)***
+
+Get the deepest DOM element containing the content.
+
+**{% fa fa-angle-right %} selector** ***(String selector)***
 
 Specify a selector to filter DOM elements containing the text. Cypress will *ignore* it's [default preference order](#notes) for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
 
-**options** *(optional)*
+**{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.contains`.
 

@@ -21,30 +21,38 @@ cy.route(function() {})
 cy.route(options)
 ```
 
+
+## Usage
+
+`.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.route('/users/**')    
+```
+
 ## Arguments
 
-**url**
+**{% fa fa-angle-right %} url** ***(String, Glob, RegExp)***
 
-Set a route matching the specific `url` which is not stubbed but can be waited on later. `url` can be a:
+Set a route matching the specific `url` which is not stubbed but can be waited on later.
 
-- *string*
-- *RegExp*
-
-**response** *(optional)*
+**{% fa fa-angle-right %} response** ***(String, Object)***
 
 Supply a response body to *stub* in the matching route.
 
-**method** *(optional)*
+**{% fa fa-angle-right %} method** ***(String)***
 
 Match the route to a specific method (`GET`, `POST`, `PUT`...). If no method is defined, Cypress will match `GET` requests by default.
 
-**function**
+**{% fa fa-angle-right %} function** ***(Function)***
 
 Set a route by returning an object literal from a callback function.
 
 Functions which return a promise will automatically be awaited.
 
-**options**
+**{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.route`. By default `cy.route` inherits its options from [`cy.server`](https://on.cypress.io/api/server).
 

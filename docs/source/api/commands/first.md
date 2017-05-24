@@ -13,9 +13,27 @@ Get the first DOM element within a set of DOM elements.
 .first(options)
 ```
 
+## Usage
+
+`.first()` requires being chained off another cy command that *yields* a DOM element.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('nav a').first()       // Yield first link in nav
+cy.contains('Hello').first()  // Yield first el containing Hello
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.first()                  // Errors, cannot be chained off 'cy'
+cy.getCookies().first()     // Errors, 'getCookies' does not yield DOM element
+```
+
 ## Arguments
 
-**options**
+**{% fa fa-angle-right %} options**  ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.first`.
 

@@ -267,6 +267,11 @@
     border-bottom: 1px solid #ccc;
   }
 
+  strong + strong>em {
+    color: #bbb;
+    margin-left: 5px;
+  }
+
   li {
     margin: 0;
 
