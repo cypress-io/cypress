@@ -581,6 +581,19 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#date-without-value").invoke("val", "2016-01-01").type("1959-09-13").then ($text) ->
             expect($text).to.have.value("1959-09-13")
 
+      describe "input[type=month]", ->
+        it "can change values", ->
+          @cy.get("#month-without-value").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+        it "overwrites existing value", ->
+          @cy.get("#month-with-value").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#month-without-value").invoke("val", "2016-01").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
       describe "input[type=time]", ->
         it "can change values", ->
           @cy.get("#time-without-value").type("01:23:45").then ($text) ->
@@ -2132,6 +2145,46 @@ describe "$Cypress.Cy Text Commands", ->
             done()
 
           @cy.get("#date-without-value").type("1989-04-31")
+
+      context "[type=month]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6")
+            done()
+
+          @cy.get("#month-without-value").type(6)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
+            done()
+
+          @cy.get("#month-without-value").type("01/2000")
+
+        it "throws when chars is invalid month", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
+            done()
+
+          @cy.get("#month-without-value").type("1989-13")
 
       context "[type=time]", ->
         it "throws when chars is not a string", (done) ->

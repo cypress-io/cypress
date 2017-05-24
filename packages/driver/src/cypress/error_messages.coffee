@@ -589,6 +589,7 @@ module.exports = {
     empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
     invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
     invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
+    invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single textarea or :text. Your subject contained {{num}} elements."
     not_on_text_field: "#{cmd('type')} can only be called on textarea or :text. Your subject is a: {{node}}"
