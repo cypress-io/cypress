@@ -594,6 +594,19 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#month-without-value").invoke("val", "2016-01").type("1959-09").then ($text) ->
             expect($text).to.have.value("1959-09")
 
+      describe "input[type=week]", ->
+        it "can change values", ->
+          @cy.get("#week-without-value").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+        it "overwrites existing value", ->
+          @cy.get("#week-with-value").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#week-without-value").invoke("val", "2016-W01").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
       describe "input[type=time]", ->
         it "can change values", ->
           @cy.get("#time-without-value").type("01:23:45").then ($text) ->
@@ -2185,6 +2198,46 @@ describe "$Cypress.Cy Text Commands", ->
             done()
 
           @cy.get("#month-without-value").type("1989-13")
+
+      context "[type=week]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
+            done()
+
+          @cy.get("#week-without-value").type(23)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
+            done()
+
+          @cy.get("#week-without-value").type("2005/W18")
+
+        it "throws when chars is invalid week", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
+            done()
+
+          @cy.get("#week-without-value").type("1995-W60")
 
       context "[type=time]", ->
         it "throws when chars is not a string", (done) ->
