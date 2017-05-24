@@ -513,6 +513,10 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#number-without-value").type("42").then ($text) ->
             expect($text).to.have.value("42")
 
+        it "can input decimal", ->
+          @cy.get("#number-without-value").type("2.0").then ($input) ->
+            expect($input).to.have.value("2.0")
+
         it "can utilize {selectall}", ->
           @cy.get("#number-with-value").type("{selectall}99").then ($input) ->
             expect($input).to.have.value("99")
