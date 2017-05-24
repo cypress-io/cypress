@@ -22,7 +22,7 @@ cy.contains(selector, content, options)
 
 ```javascript
 cy.get('.nav').contains('About')  // Yields el in .nav containing 'About'
-cy.contains('Hello').first()      // Yields first el in document containing 'Hello'
+cy.contains('Hello')              // Yields first el in document containing 'Hello'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**

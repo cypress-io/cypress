@@ -24,9 +24,9 @@ Click a DOM element.  The DOM element must be in a "clickable" state prior to th
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('button').click()               // Clicks on button
-cy.focused().click()                   // Clicks on el with focus
-cy.contains('Welcome').first().click() // Clicks on first el containing 'Welcome'
+cy.get('button').click()          // Clicks on button
+cy.focused().click()              // Clicks on el with focus
+cy.contains('Welcome').click()    // Clicks on first el containing 'Welcome'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**

@@ -48,7 +48,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.first` will continue to look for the first element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.first()` will continue to look for the first element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
 
 # Examples
 
