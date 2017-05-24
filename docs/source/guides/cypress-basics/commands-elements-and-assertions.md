@@ -77,3 +77,26 @@ cy.get('.element-i-desire')
 That's it! If the element is not on that page, you'll get a failure. If it's there at any point during the timeout period, you'll go green.
 
 Don't write complicated tests until you've mastered the simple ones! Cypress is very powerful and expressive, you may well find that you never actually need complicated tests, or that you need drastically fewer than you expected. Remember: no code is faster than _no code_.
+
+### What About Non-Existence?
+
+Asserting that an element does _not_ exist does require an explicit assertion, as we expect this to be a rarer case. It's still simple:
+
+```js
+cy.get('.element-i-do-not-desire').should("not.exist")
+```
+
+This will use the same time-smear, timeout mechanism as before, retrying until either the element is not found, or the timeout is reached.
+
+## Command Timeouts
+
+Many Commands have configurable timeouts, enabling you to tune Cypress's behavior to your needs. These Commands will list a `timeout` option in their API documentation, allowing you to set the number of milliseconds you need.
+
+```js
+// Give this selector 10 seconds to appear
+cy.get('.my-slow-selector', { timeout: 10000 })
+```
+
+You can also set the timeout globally via the configuration setting `defaultCommandTimeout`.
+
+There is a performance tradeoff here: essentially, tests that have longer timeout periods take longer to fail. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means you want to increase your timeout period to suit your app, but you probably don't want to make it "extra long, just in case".
