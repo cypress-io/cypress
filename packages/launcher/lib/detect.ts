@@ -82,7 +82,7 @@ function checkOneBrowser (browser: Browser) {
 
 /** returns list of detected browsers */
 function detectBrowsers (): Bluebird<Browser[]> {
-  return Bluebird.map(browsers, checkOneBrowser)
+  return Bluebird.mapSeries(browsers, checkOneBrowser)
     .then(_.compact) as Bluebird<Browser[]>
 }
 

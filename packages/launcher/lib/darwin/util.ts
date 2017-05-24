@@ -16,6 +16,7 @@ export function parse (p: string, property: string) {
     ${e.message}`
     const err = new Error(msg) as NotInstalledError
     err.notInstalled = true
+    log('could not read Info.plist for %s', pl)
     throw err
   }
 
