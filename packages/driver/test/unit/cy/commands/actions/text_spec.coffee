@@ -513,6 +513,18 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#number-without-value").type("42").then ($text) ->
             expect($text).to.have.value("42")
 
+        it "can input decimal", ->
+          @cy.get("#number-without-value").type("2.0").then ($input) ->
+            expect($input).to.have.value("2.0")
+
+        it "can utilize {selectall}", ->
+          @cy.get("#number-with-value").type("{selectall}99").then ($input) ->
+            expect($input).to.have.value("99")
+
+        it "can utilize arrows", ->
+          @cy.get("#number-with-value").type("{leftarrow}{leftarrow}{rightarrow}9").then ($input) ->
+            expect($input).to.have.value("192")
+
         it "inserts text after existing text ", ->
           @cy.get("#number-with-value").type("34").then ($text) ->
             expect($text).to.have.value("1234")
@@ -531,6 +543,14 @@ describe "$Cypress.Cy Text Commands", ->
       describe "input[type=email]", ->
         it "can change values", ->
           @cy.get("#email-without-value").type("brian@foo.com").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "can utilize {selectall}", ->
+          @cy.get("#email-with-value").type("{selectall}brian@foo.com").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "can utilize arrows", ->
+          @cy.get("#email-with-value").type("{leftarrow}{rightarrow}om").then ($text) ->
             expect($text).to.have.value("brian@foo.com")
 
         it "inserts text after existing text", ->

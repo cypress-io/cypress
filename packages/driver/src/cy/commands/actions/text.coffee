@@ -212,6 +212,13 @@ module.exports = (Cypress, Commands) ->
 
           return dispatched
 
+        needSingleValueChange = ->
+          isDate or
+          isMonth or
+          isWeek or
+          isTime or 
+          (options.$el.is("[type=number]") and _.includes(options.chars, "."))
+
         ## see comment in updateValue below
         typed = ""
 
@@ -223,11 +230,11 @@ module.exports = (Cypress, Commands) ->
           window:  @privateState("window")
 
           updateValue: (rng, key) ->
-            ## date/month/week/time inputs need to only have their value updated
-            ## once after all the characters are input because attemping
-            ## to set a partial/invalid value results in the value being
-            ## set to an empty string
-            if isDate or isMonth or isWeek or isTime
+            if needSingleValueChange()
+              ## in these cases, the value must only be set after all
+              ## the characters are input because attemping to set
+              ## a partial/invalid value results in the value being
+              ## set to an empty string
               typed += key
               if typed is options.chars
                 options.$el.val(options.chars)
