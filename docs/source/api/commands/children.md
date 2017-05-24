@@ -4,36 +4,62 @@ comments: true
 description: ''
 ---
 
-Get the children of each DOM element in the set of matched DOM elements.
+Get the children of each DOM element within a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.children` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.children()](#usage)
+```javascript
+.children()
+.children(selector)
+.children(options)
+.children(selector, options)
+```
 
-Get the children of each DOM element in the set of matched DOM elements.
+## Usage
 
-# [cy.children( *selector* )](#selector-usage)
+`.children()` requires being chained off another cy command that *yields* a DOM element.
 
-The `.children()` method optionally accepts a selector expression. If the selector is supplied, the DOM elements will be filtered by testing whether they match it.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.get('nav').children()    // Yield children of nav
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.children()                // Errors, cannot be chained off 'cy'
+cy.location().children()     // Errors, 'location' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.children`.
-
-**cy.children( *options* )**
-**cy.children( *selector*, *options* )**
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
 
-# Usage
+## Yields
 
-## Get the children of the "secondary-nav"
+`.children()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.children()` will continue to look for the children elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Children
+
+**Get the children of the "secondary-nav"**
 
 ```html
 <ul class="primary-nav">
@@ -56,7 +82,7 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns [
+// yields [
 //  <li class="services-1"></li>,
 //  <li class="services-2"></li>,
 //  <li class="services-3"></li>
@@ -64,9 +90,9 @@ Option | Default | Notes
 cy.get('ul.secondary-nav').children()
 ```
 
-# Selector Usage
+## Selector
 
-## Get the children with class "active"
+**Get the children with class 'active'**
 
 ```html
 <div>
@@ -78,13 +104,13 @@ cy.get('ul.secondary-nav').children()
 ```
 
 ```javascript
-// returns [<li class="active">Unit Testing</li>]
+// yields [<li class="active">Unit Testing</li>]
 cy.get('ul').children('.active')
 ```
 
 # Command Log
 
-## Assert that there should be 8 children elements in a nav
+**Assert that there should be 8 children elements in a nav**
 
 ```javascript
 cy.get('.left-nav>.nav').children().should('have.length', 8)

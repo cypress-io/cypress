@@ -21,7 +21,6 @@ Get the first DOM element within a set of DOM elements.
 
 ```javascript
 cy.get('nav a').first()       // Yield first link in nav
-cy.contains('Hello').first()  // Yield first el containing Hello
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -35,7 +34,7 @@ cy.getCookies().first()     // Errors, 'getCookies' does not yield DOM element
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.first`.
+Pass in an options object to change the default behavior of `.first`.
 
 Option | Default | Notes
 --- | --- | ---

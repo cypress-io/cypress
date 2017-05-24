@@ -4,50 +4,69 @@ comments: true
 description: ''
 ---
 
-Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
+Clears the value of an `input` or `textarea`. An alias for `cy.type('{selectall}{backspace}')`
+
+# Syntax
 
 ```javascript
-cy.type('{selectall}{backspace}')
+.clear()
+.clear(options)
 ```
 
-Prior to clearing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
+## Usage
 
-**The following events are fired during clear:** `keydown`, `keypress`, `textInput`, `input`, `keyup`.
+`.clear()` requires being chained off another cy command that *yields* an `input` or `textarea`.
 
-`beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
+**{% fa fa-check-circle green %} Valid Usage**
 
-| | |
-|--- | --- |
-| **Returns** | the element that was typed into |
-| **Timeout** | `cy.clear` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).|
+```javascript
+cy.get('[type="text"]').clear()        // Clear text input
+cy.get('textarea').type('Hi!').clear() // Clear textarea
+cy.focused().clear()                   // Clear focused input/textarea
+```
 
-# [cy.clear()](#usage)
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-Clears the value of an `<input>` or `<textarea>`.
+```javascript
+cy.clear()                // Errors, cannot be chained off 'cy'
+cy.get('nav').clear()     // Errors, 'get' doesn't yield input or textarea
+cy.url().clear()          // Errors, 'url' doesn't yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.clear`.
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-**cy.clear( *options* )**
+Pass in an options object to change the default behavior of `.clear`.
 
 Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces clear, disables error checking prior to clear
-`interval` | `16` | Interval which to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
+`interval` | `16` | Interval which to retry clear
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the clear
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Clear the input and type a new value.
+`.clear()` yields the `input` or `textarea` that was cleared.
+
+## Timeout
+
+`.clear()` will continue to look for the `input` or `textarea` for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Clear
+
+**Clear the input and type a new value.**
+
+Prior to clearing, if the element isn't currently focused, Cypress issues a [.click()](https://on.cypress.io/api/click) on the element, which causes the element to receive focus.
 
 ```html
 <input name="name" value="John Doe" />
 ```
 
 ```javascript
-// clears the existing value first before typing
 cy.get('input[name="name"]').clear().type('Jane Lane')
 ```
 
@@ -69,4 +88,6 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 # See also
 
+- [blur](https://on.cypress.io/api/blur)
+- [focus](https://on.cypress.io/api/focus)
 - [type](https://on.cypress.io/api/type)
