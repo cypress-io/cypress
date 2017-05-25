@@ -225,7 +225,7 @@ expect(true).to.be.true
 Check out our example recipes for [unit testing](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_application_code_spec.js) and [unit testing React components](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_react_enzyme_spec.js)
 {% endnote %}
 
-Explicit assertions are great when you want to perform custom logic prior to making the assertion. The usual caveats apply if you want to do work against the Subject: you'll need to do it asynchronously! The `.should()` Command allows us to pass a function that will be yielded the Subject, much the way `.then()` works.
+Explicit assertions are great when you want to perform custom logic prior to making the assertion. The usual caveats apply if you want to do work against the Subject: you'll need to do it asynchronously! The `.should()` Command allows us to pass a function that will be yielded the Subject. This works just like `.then()`, except Cypress will apply its retry-until-timeout magic to the function passed to `.should()`.
 
 ```javascript
 cy
