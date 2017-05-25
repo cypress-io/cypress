@@ -1,3 +1,5 @@
+{ $ } = window.testUtils
+
 describe "$Cypress.Cy Snapshot Extension", ->
   enterCommandTestingMode()
 

@@ -360,13 +360,10 @@ class Project extends EE
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
   createCiProject: (projectDetails) ->
-    Promise.all([
-      user.ensureAuthToken()
-      @getConfig()
-    ])
-    .spread (authToken, cfg) ->
+    user.ensureAuthToken()
+    .then (authToken) =>
       git
-      .init(cfg.projectRoot)
+      .init(@projectRoot)
       .getRemoteOrigin()
       .then (remoteOrigin) ->
         api.createProject(projectDetails, remoteOrigin, authToken)

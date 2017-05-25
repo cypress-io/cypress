@@ -471,7 +471,15 @@ InputRange.prototype._nativeRange = function(bounds) {
   return bounds || [0, this.length()];
 };
 InputRange.prototype._nativeSelect = function (rng){
-  this._el.setSelectionRange(rng[0], rng[1]);
+  try {
+    this._el.setSelectionRange(rng[0], rng[1]);
+  } catch (e) {
+    if (typeof this._el.select === 'function') {
+      this._el.select()
+    } else {
+      console.error('Failed to select text on', this._el)
+    }
+  }
 };
 InputRange.prototype._nativeSelection = function(){
   var originalType = this._el.type
@@ -490,20 +498,23 @@ InputRange.prototype._nativeSelection = function(){
   var start = this._el.selectionStart
   var end = this._el.selectionEnd
 
+  var selection = [start, end]
+
   //// HACK:
   //// selection start and end don't report correctly when input
   //// already has a value set, so if there's a value and there is no
   //// native selection, force it to be at the end of the text
   if (this._el.value && !start && !end) {
     var length = this._el.value.length
-    return [length, length]
+    selection = [length, length]
   }
 
   if (shouldChangeType) {
     this._el.type = originalType
     this._el.focus()
   }
-  return [start, end]
+
+  return selection
 };
 InputRange.prototype._nativeGetText = function(rng){
   return this._el.value.substring(rng[0], rng[1]);

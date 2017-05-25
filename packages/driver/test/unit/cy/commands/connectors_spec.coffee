@@ -1,3 +1,5 @@
+{ $, _, Promise } = window.testUtils
+
 describe "$Cypress.Cy Connectors Commands", ->
   enterCommandTestingMode()
 
@@ -260,7 +262,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             return $input
           .then ($input) ->
             expectOriginal(@cy.state("subject")).not.to.be.instanceof @remoteWindow.$
-            expectOriginal(@cy.state("subject")).to.be.instanceof window.$
+            expectOriginal(@cy.state("subject")).to.be.instanceof $
 
       it "does not nuke selector properties", ->
         @cy

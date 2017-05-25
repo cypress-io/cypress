@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo 'This project needs: npm run build'",
     "build": "gulp build",
     "watch": "gulp watch",
     "clean-deps": "rm -rf node_modules",
     "test": "gulp test",
-    "test-watch": "gulp test:watch"
+    "test-watch": "gulp test:watch",
+    "watch-test": "gulp test:watch"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
@@ -27,6 +28,7 @@
     "coffeeify": "^2.1.0",
     "compression": "^1.1.0",
     "cors": "^2.7.1",
+    "debug": "^2.6.8",
     "errorhandler": "^1.1.1",
     "express": "^4.12.3",
     "fs-extra": "^3.0.0",

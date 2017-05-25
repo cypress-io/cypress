@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Scrolling Commands", ->
   enterCommandTestingMode("scrolling", {
     container: { height: 200 }

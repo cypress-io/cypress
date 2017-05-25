@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo 'This project needs: npm run build'",
     "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "watch": "node ./scripts/watch.js",

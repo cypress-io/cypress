@@ -6,14 +6,14 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo 'This project needs: npm run build'",
     "prebuild": "npm run clean",
     "build": "hexo generate",
     "postbuild": "gulp post:build",
     "clean": "hexo clean",
     "clean-deps": "rm -rf node_modules",
     "convert": "node ./cy_scripts/convert.js",
-    "deploy": "npm run build && hexo deploy",
+    "deploy": "NODE_ENV=production npm run build && hexo deploy",
     "start": "hexo server --port 2222",
     "precypress": "npm install cypress-cli && cypress install",
     "cypress": "cypress run --record --key $DOCS_RECORD_KEY",

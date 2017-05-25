@@ -1,3 +1,5 @@
+{ $, _, Promise, bililiteRange } = window.testUtils
+
 describe "$Cypress.Cy Text Commands", ->
   enterCommandTestingMode()
 
@@ -403,95 +405,30 @@ describe "$Cypress.Cy Text Commands", ->
 
     describe "value changing", ->
       it "changes the elements value", ->
-        @cy.get(":text:first").type("a").then ($text) ->
+        @cy.get("#input-without-value").type("a").then ($text) ->
           expect($text).to.have.value("a")
 
       it "changes the elements value for multiple keys", ->
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("foo")
-
-      it "can change input[type=number] values", ->
-        @cy.get("#input-types [type=number]").type("12").then ($text) ->
-          expect($text).to.have.value("12")
 
       it "inserts text after existing text", ->
         @cy.get("#input-with-value").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
       it "inserts text after existing text input by invoking val", ->
-        @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
+        @cy.get("#input-without-value").invoke("val", "foo").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
-      it "inserts text after existing text on input[type=number]", ->
-        @cy.get("#number-with-value").type("34").then ($text) ->
-          expect($text).to.have.value("1234")
-
-      it "inserts text after existing text on input[type=number] by invoking val", ->
-        @cy.get("#input-types [type=number]").invoke("val", "12").type("34").then ($text) ->
-          expect($text).to.have.value("1234")
-
       it "overwrites text when currently has selection", ->
-        ## when the text is clicked we want to select everything in it
-        @cy.$$(":text:first").val("0").click ->
+        @cy.$$("#input-without-value").val("0").click ->
           $(@).select()
 
-        @cy.get(":text:first").type("50").then ($input) ->
+        @cy.get("#input-without-value").type("50").then ($input) ->
           expect($input).to.have.value("50")
-
-      it "overwrites text on input[type=number] when input has existing text selected", ->
-        ## when the text is clicked we want to select everything in it
-        @cy.$$("#input-types [type=number]").val("0").click ->
-          $(@).select()
-
-        @cy.get("#input-types [type=number]").type("50").then ($input) ->
-          expect($input).to.have.value("50")
-
-      it "overwrites text on input[type=email] when input has existing text selected", ->
-        ## when the text is clicked we want to select everything in it
-        @cy.$$("#input-types [type=email]").val("foo@bar.com").click ->
-          $(@).select()
-
-        @cy.get("#input-types [type=email]").type("bar@foo.com").then ($input) ->
-          expect($input).to.have.value("bar@foo.com")
-
-      it "can change input[type=email] values", ->
-        @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
-          expect($text).to.have.value("brian@foo.com")
-
-      it "inserts text after existing text on input[type=email]", ->
-        @cy.get("#email-with-value").type("om").then ($text) ->
-          expect($text).to.have.value("brian@foo.com")
-
-      it "inserts text after existing text on input[type=email] by invoking val", ->
-        @cy.get("#input-types [type=email]").invoke("val", "brian@foo.c").type("om").then ($text) ->
-          expect($text).to.have.value("brian@foo.com")
-
-      it "can change input[type=password] values", ->
-        @cy.get("#input-types [type=password]").type("password").then ($text) ->
-          expect($text).to.have.value("password")
-
-      it "inserts text after existing text on input[type=password]", ->
-        @cy.get("#input-types [type=password]").invoke("val", "pass").type("word").then ($text) ->
-          expect($text).to.have.value("password")
-
-      it "can change [contenteditable] values", ->
-        @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
-          expect($div).to.have.text("foo")
-
-      it "inserts text after existing text on [contenteditable]", ->
-        @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
-          expect($text).to.have.text("foo bar")
-
-      # it "can change input[type=date] values", ->
-      #   @cy.get("#input-types [type=date").type("1986-03-14").then ($text) ->
-      #     expect($text).to.have.value("1986-03-14")
-
-      # it "inserts text after existing text on input[type=date]", ->
-      #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
-      #     expect($text).to.have.value("date")
 
       it "automatically moves the caret to the end if value is changed manually", ->
-        @cy.$$(":text:first").keypress (e) ->
+        @cy.$$("#input-without-value").keypress (e) ->
           e.preventDefault()
 
           key = String.fromCharCode(e.which)
@@ -502,11 +439,11 @@ describe "$Cypress.Cy Text Commands", ->
 
           $input.val(val + key + "-")
 
-        @cy.get(":text:first").type("foo").then ($input) ->
+        @cy.get("#input-without-value").type("foo").then ($input) ->
           expect($input).to.have.value("f-o-o-")
 
       it "automatically moves the caret to the end if value is changed manually asynchronously", ->
-        @cy.$$(":text:first").keypress (e) ->
+        @cy.$$("#input-without-value").keypress (e) ->
           key = String.fromCharCode(e.which)
 
           $input = $(e.target)
@@ -515,63 +452,224 @@ describe "$Cypress.Cy Text Commands", ->
             val = $input.val()
             $input.val(val + "-")
 
-        @cy.get(":text:first").type("foo").then ($input) ->
+        @cy.get("#input-without-value").type("foo").then ($input) ->
           expect($input).to.have.value("f-o-o-")
 
       it "does not fire keypress when keydown is preventedDefault", (done) ->
-        @cy.$$(":text:first").get(0).addEventListener "keypress", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
           done("should not have received keypress event")
 
-        @cy.$$(":text:first").get(0).addEventListener "keydown", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keydown", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then -> done()
+        @cy.get("#input-without-value").type("foo").then -> done()
 
       it "does not insert key when keydown is preventedDefault", ->
-        @cy.$$(":text:first").get(0).addEventListener "keydown", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keydown", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
       it "does not insert key when keypress is preventedDefault", ->
-        @cy.$$(":text:first").get(0).addEventListener "keypress", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
       it "does not fire textInput when keypress is preventedDefault", (done) ->
-        @cy.$$(":text:first").get(0).addEventListener "textInput", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
           done("should not have received textInput event")
 
-        @cy.$$(":text:first").get(0).addEventListener "keypress", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then -> done()
+        @cy.get("#input-without-value").type("foo").then -> done()
 
       it "does not insert key when textInput is preventedDefault", ->
-        @cy.$$(":text:first").get(0).addEventListener "textInput", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($text) ->
+        @cy.get("#input-without-value").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
       it "does not fire input when textInput is preventedDefault", (done) ->
-        @cy.$$(":text:first").get(0).addEventListener "input", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "input", (e) ->
           done("should not have received input event")
 
-        @cy.$$(":text:first").get(0).addEventListener "textInput", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then -> done()
+        @cy.get("#input-without-value").type("foo").then -> done()
 
       it "preventing default to input event should not affect anything", ->
-        @cy.$$(":text:first").get(0).addEventListener "input", (e) ->
+        @cy.$$("#input-without-value").get(0).addEventListener "input", (e) ->
           e.preventDefault()
 
-        @cy.get(":text:first").type("foo").then ($input) ->
+        @cy.get("#input-without-value").type("foo").then ($input) ->
           expect($input).to.have.value("foo")
+
+      describe "input[type=number]", ->
+        it "can change values", ->
+          @cy.get("#number-without-value").type("42").then ($text) ->
+            expect($text).to.have.value("42")
+
+        it "can input decimal", ->
+          @cy.get("#number-without-value").type("2.0").then ($input) ->
+            expect($input).to.have.value("2.0")
+
+        it "can utilize {selectall}", ->
+          @cy.get("#number-with-value").type("{selectall}99").then ($input) ->
+            expect($input).to.have.value("99")
+
+        it "can utilize arrows", ->
+          @cy.get("#number-with-value").type("{leftarrow}{leftarrow}{rightarrow}9").then ($input) ->
+            expect($input).to.have.value("192")
+
+        it "inserts text after existing text ", ->
+          @cy.get("#number-with-value").type("34").then ($text) ->
+            expect($text).to.have.value("1234")
+
+        it "inserts text after existing text input by invoking val", ->
+          @cy.get("#number-without-value").invoke("val", "12").type("34").then ($text) ->
+            expect($text).to.have.value("1234")
+
+        it "overwrites text on input[type=number] when input has existing text selected", ->
+          @cy.$$("#number-without-value").val("0").click ->
+            $(@).select()
+
+          @cy.get("#number-without-value").type("50").then ($input) ->
+            expect($input).to.have.value("50")
+
+      describe "input[type=email]", ->
+        it "can change values", ->
+          @cy.get("#email-without-value").type("brian@foo.com").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "can utilize {selectall}", ->
+          @cy.get("#email-with-value").type("{selectall}brian@foo.com").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "can utilize arrows", ->
+          @cy.get("#email-with-value").type("{leftarrow}{rightarrow}om").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "inserts text after existing text", ->
+          @cy.get("#email-with-value").type("om").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "inserts text after existing text input by invoking val", ->
+          @cy.get("#email-without-value").invoke("val", "brian@foo.c").type("om").then ($text) ->
+            expect($text).to.have.value("brian@foo.com")
+
+        it "overwrites text when input has existing text selected", ->
+          @cy.$$("#email-without-value").val("foo@bar.com").click ->
+            $(@).select()
+
+          @cy.get("#email-without-value").type("bar@foo.com").then ($input) ->
+            expect($input).to.have.value("bar@foo.com")
+
+      describe "input[type=password]", ->
+        it "can change values", ->
+          @cy.get("#password-without-value").type("password").then ($text) ->
+            expect($text).to.have.value("password")
+
+        it "inserts text after existing text", ->
+          @cy.get("#password-with-value").type("word").then ($text) ->
+            expect($text).to.have.value("password")
+
+        it "inserts text after existing text input by invoking val", ->
+          @cy.get("#password-without-value").invoke("val", "secr").type("et").then ($text) ->
+            expect($text).to.have.value("secret")
+
+        it "overwrites text when input has existing text selected", ->
+          @cy.$$("#password-without-value").val("secret").click ->
+            $(@).select()
+
+          @cy.get("#password-without-value").type("agent").then ($input) ->
+            expect($input).to.have.value("agent")
+
+      describe "input[type=date]", ->
+        it "can change values", ->
+          @cy.get("#date-without-value").type("1959-09-13").then ($text) ->
+            expect($text).to.have.value("1959-09-13")
+
+        it "overwrites existing value", ->
+          @cy.get("#date-with-value").type("1959-09-13").then ($text) ->
+            expect($text).to.have.value("1959-09-13")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#date-without-value").invoke("val", "2016-01-01").type("1959-09-13").then ($text) ->
+            expect($text).to.have.value("1959-09-13")
+
+      describe "input[type=month]", ->
+        it "can change values", ->
+          @cy.get("#month-without-value").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+        it "overwrites existing value", ->
+          @cy.get("#month-with-value").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#month-without-value").invoke("val", "2016-01").type("1959-09").then ($text) ->
+            expect($text).to.have.value("1959-09")
+
+      describe "input[type=week]", ->
+        it "can change values", ->
+          @cy.get("#week-without-value").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+        it "overwrites existing value", ->
+          @cy.get("#week-with-value").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#week-without-value").invoke("val", "2016-W01").type("1959-W09").then ($text) ->
+            expect($text).to.have.value("1959-W09")
+
+      describe "input[type=time]", ->
+        it "can change values", ->
+          @cy.get("#time-without-value").type("01:23:45").then ($text) ->
+            expect($text).to.have.value("01:23:45")
+
+        it "overwrites existing value", ->
+          @cy.get("#time-with-value").type("12:34:56").then ($text) ->
+            expect($text).to.have.value("12:34:56")
+
+        it "overwrites existing value input by invoking val", ->
+          @cy.get("#time-without-value").invoke("val", "01:23:45").type("12:34:56").then ($text) ->
+            expect($text).to.have.value("12:34:56")
+
+        it "can be formatted HH:mm", ->
+          @cy.get("#time-without-value").type("01:23").then ($text) ->
+            expect($text).to.have.value("01:23")
+
+        it "can be formatted HH:mm:ss", ->
+          @cy.get("#time-without-value").type("01:23:45").then ($text) ->
+            expect($text).to.have.value("01:23:45")
+
+        it "can be formatted HH:mm:ss.S", ->
+          @cy.get("#time-without-value").type("01:23:45.9").then ($text) ->
+            expect($text).to.have.value("01:23:45.9")
+
+        it "can be formatted HH:mm:ss.SS", ->
+          @cy.get("#time-without-value").type("01:23:45.99").then ($text) ->
+            expect($text).to.have.value("01:23:45.99")
+
+        it "can be formatted HH:mm:ss.SSS", ->
+          @cy.get("#time-without-value").type("01:23:45.999").then ($text) ->
+            expect($text).to.have.value("01:23:45.999")
+
+      describe "[contenteditable]", ->
+        it "can change values", ->
+          @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
+            expect($div).to.have.text("foo")
+
+        it "inserts text after existing text", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
+            expect($text).to.have.text("foo bar")
 
     describe "specialChars", ->
       context "{{}", ->
@@ -2043,6 +2141,192 @@ describe "$Cypress.Cy Text Commands", ->
 
         @cy.$$("#animation-container").append(input)
 
+      context "[type=date]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989")
+            done()
+
+          @cy.get("#date-without-value").type(1989)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989")
+            done()
+
+          @cy.get("#date-without-value").type("01-01-1989")
+
+        it "throws when chars is invalid date", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31")
+            done()
+
+          @cy.get("#date-without-value").type("1989-04-31")
+
+      context "[type=month]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6")
+            done()
+
+          @cy.get("#month-without-value").type(6)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
+            done()
+
+          @cy.get("#month-without-value").type("01/2000")
+
+        it "throws when chars is invalid month", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
+            done()
+
+          @cy.get("#month-without-value").type("1989-13")
+
+      context "[type=week]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
+            done()
+
+          @cy.get("#week-without-value").type(23)
+
+        it "throws when chars is invalid format", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
+            done()
+
+          @cy.get("#week-without-value").type("2005/W18")
+
+        it "throws when chars is invalid week", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(2)
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
+            done()
+
+          @cy.get("#week-without-value").type("1995-W60")
+
+      context "[type=time]", ->
+        it "throws when chars is not a string", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999")
+            done()
+
+          @cy.get("#time-without-value").type(9999)
+
+        it "throws when chars is invalid format (1:30)", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30")
+            done()
+
+          @cy.get("#time-without-value").type("1:30")
+
+        it "throws when chars is invalid format (01:30pm)", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm")
+            done()
+
+          @cy.get("#time-without-value").type("01:30pm")
+
+        it "throws when chars is invalid format (01:30:30.3333)", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333")
+            done()
+
+          @cy.get("#time-without-value").type("01:30:30.3333")
+
+        it "throws when chars is invalid time", (done) ->
+          logs = []
+
+          @Cypress.on "log", (attrs, log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.equal(2)
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60")
+            done()
+
+          @cy.get("#time-without-value").type("01:60")
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = @cy.$$("textarea")
@@ -2095,6 +2379,10 @@ describe "$Cypress.Cy Text Commands", ->
         done()
 
       @cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
+
+    it "works on input[type=number]", ->
+      @cy.get("#number-with-value").clear().then ($input) ->
+        expect($input.val()).to.equal("")
 
     describe "assertion verification", ->
       beforeEach ->

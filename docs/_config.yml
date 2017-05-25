@@ -110,7 +110,7 @@ hfc_html:
   enable: true
   exclude:
 hfc_css:
-  enable: false
+  enable: true
   exclude:
     - '*.min.css'
 hfc_js:
@@ -134,7 +134,7 @@ hfc_img:
   jpegrecompress: false
   jpegrecompressQuality: 'medium'
   optipng: true
-  svgo: true
+  svgo: false
 hfc_favicons:
   enable: false
 

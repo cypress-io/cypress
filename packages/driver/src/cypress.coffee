@@ -295,7 +295,7 @@ $Cypress.Commands = $Commands
 $Cypress.Config = $Config
 $Cypress.Cookies = $Cookies
 $Cypress.Cy = $Cy
-$Cypress.Dom = $Dom
+$Cypress.Dom = $Cypress.prototype.Dom = $Dom
 $Cypress.EnvironmentVariables = $EnvironmentVariables
 $Cypress.ErrorMessages = $ErrorMessages
 $Cypress.Keyboard = $Keyboard
@@ -304,7 +304,7 @@ $Cypress.Location = $Location
 $Cypress.LocalStorage = $LocalStorage
 $Cypress.Mocha = $Mocha
 $Cypress.Runner = $Runner
-$Cypress.Server = $Server
+$Cypress.Server = $Cypress.prototype.Server = $Server
 $Cypress.utils = utils
 
 ## expose globally (temporarily for the runner)
