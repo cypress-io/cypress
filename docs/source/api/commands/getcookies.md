@@ -4,50 +4,68 @@ comments: true
 description: ''
 ---
 
-Gets all of the browser cookies.
+Get all of the browser cookies.
 
-| | |
-|--- | --- |
-| **Returns** | an array of cookie objects |
-| **Timeout** | `cy.getCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.  |
+# Syntax
 
-# [cy.getCookies()](#usage)
+```javascript
+.getCookies()
+.getCookies(options)
+```
 
-Gets the browser cookies.
+## Usage
 
-Each cookie object will have the following properties:
+`.getCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-| Properties |
-| --- |
-| `name` |
-| `value` |
-| `path` |
-| `domain` |
-| `httpOnly` |
-| `secure` |
-| `expiry` |
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.getCookies()    
+```
 
-Pass in an options object to change the default behavior of `cy.getCookies`.
+## Arguments
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.getCookies()`.
 
 **[cy.getCookies(*options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.getCookies` command to be processed
 `log` | `true` | whether to display command in command log
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `.getCookies()` command to be processed
 
-# Usage
+## Yields
 
-## Get cookies after logging in
+`.getCookies()` yields an array cookie objects. Each cookie object has the following properties:
+
+- `name`
+- `value`
+- `path`
+- `domain`
+- `httpOnly`
+- `secure`
+- `expiry`
+
+
+## Timeout
+
+`.getCookies()` will continue to look for cookies for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Get Cookies
+
+**Get cookies after logging in**
 
 In this example, on first login our server sends us back a session cookie.
 
 ```javascript
-cy
-  .login('bob@example.com', 'p@ssw0rd') // example of a custom command
-  .getCookies()
+// assume we just logged in
+cy.contains('Login').click()
+cy.url().should('include', 'profile')
+cy.getCookies()
     .should('have.length', 1)
     .then(function(cookies) {
       expect(cookies[0]).to.have.property('name', 'session_id')
@@ -56,21 +74,17 @@ cy
 
 # Command Log
 
-## Get cookies
+**Get cookies**
 
 ```javascript
-cy
-  .getCookies()
-    .should('have.length', 1)
-    .then( function(cookies) {
-      // each cookie has these properties
-      expect(cookies[0]).to.have.property('name', 'fakeCookie1')
-      expect(cookies[0]).to.have.property('value', '123ABC')
-      expect(cookies[0]).to.have.property('domain')
-      expect(cookies[0]).to.have.property('httpOnly')
-      expect(cookies[0]).to.have.property('path')
-      expect(cookies[0]).to.have.property('secure')
-    })
+cy.getCookies().should('have.length', 1).then(function(cookies) {
+    expect(cookies[0]).to.have.property('name', 'fakeCookie1')
+    expect(cookies[0]).to.have.property('value', '123ABC')
+    expect(cookies[0]).to.have.property('domain')
+    expect(cookies[0]).to.have.property('httpOnly')
+    expect(cookies[0]).to.have.property('path')
+    expect(cookies[0]).to.have.property('secure')
+  })
 ```
 
 The commands above will display in the command log as:

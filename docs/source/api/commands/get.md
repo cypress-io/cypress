@@ -6,82 +6,97 @@ description: ''
 
 Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
 
-`cy.get` supports all CSS based selectors. It is analogous to jQuery's `$(...)` in that any selector you pass to jQuery you can also pass to `cy.get`.
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.get` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+```javascript
+.get(selector)
+.get(alias)
+.get(selector, options)
+```
 
-# [cy.get( *selector* )](#selector-usage)
+## Usage
 
-Finds one or more DOM elements based on the selector.
+`.get()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-# [cy.get( *alias* )](#alias-usage)
+**{% fa fa-check-circle green %} Valid Usage**
 
-{% note info New to Cypress? %}
-[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)
+```javascript
+cy.get('.list>li')  
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector** ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} alias** ***(String)***
+
+An alias is defined using the [`.as()`](https://on.cypress.io/api/as) command and can be referenced here with the `@` character and the name of the alias.
+
+Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before [`.as()`](https://on.cypress.io/api/as) to find it again.
+
+{% note info %}
+[Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
 {% endnote %}
 
-You can pass in the `@` character and the name of an alias as a parameter to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
+**{% fa fa-angle-right %} options** ***(Object)***
 
-Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.get`.
-
-**cy.get( *selector*, *options* )**
-**cy.get( *alias*, *options* )**
+Pass in an options object to change the default behavior of `.get()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Selector Usage
+## Yields
 
-## Find the element with an id of main
+`.get()` yields the new DOM element(s) found by the command.
+
+## Timeout
+
+`.get()` will continue to look for the elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Selector
+
+**Get the input element**
 
 ```javascript
-cy.get('#main')
+cy.get('input').should('be.disabled')
 ```
 
-## Find the first `li` descendent within a `ul`
+**Find the first `li` descendent within a `ul`**
 
 ```javascript
-cy.get('ul li:first')
+cy.get('ul li:first').should('have.class', 'active')
 ```
 
-## Find the element with class dropdown-menu and click it.
+**Find the `.dropdown-menu` and click it.**
 
 ```javascript
-cy
-  .get('.dropdown-menu').click()
-
-  // Break out of the previous command chain and
-  // query for #search from the root document.
-  .get('#search').type('mogwai')
+cy.get('.dropdown-menu').click()
 ```
 
-## Reset the current scope in a [`cy.within`](https://on.cypress.io/api/within)
+## Get Within
+
+**`.get()` in a  [`.within()`](https://on.cypress.io/api/within)**
+
+Since `.get()` is chained off of `cy`, it always looks for the selector within the entire `document`. The only exception is when used inside a [`.within()`]() command.
 
 ```javascript
-// Find form and scope all new queries to within form.
 cy.get('form').within(function(){
-  cy
-    // Find the input within form and type Pamela
-    .get('input').type('Pamela')
-    // Find the element textarea within form and type in it
-    .get('textarea').type('is a developer')
+  cy.get('input').type('Pamela') // Get the input within form
+  cy.get('textarea').type('is a developer') // Find the textarea within form
 })
 ```
 
-# Alias Usage
+## Alias
 
 For a detailed explanation of aliasing, [read more about aliasing here](https://on.cypress.io/guides/using-aliases).
 
-## Retrieve aliased `todos` elements
+**Retrieve aliased `todos` elements**
 
 ```javascript
 cy.get('ul#todos').as('todos')
@@ -92,7 +107,7 @@ cy.get('ul#todos').as('todos')
 cy.get('@todos')
 ```
 
-## Alias the `submitBtn` in a `beforeEach`
+**Get the `submitBtn`**
 
 ```javascript
 beforeEach(function(){
@@ -106,7 +121,7 @@ it('disables on click', function(){
 
 # Command Log
 
-## Get an input and assert on the value
+**Get an input and assert on the value**
 
 ```javascript
 cy
@@ -124,7 +139,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 # See also
 
+- [as](https://on.cypress.io/api/as)
 - [contains](https://on.cypress.io/api/contains)
-- [within](https://on.cypress.io/api/within)
 - [find](https://on.cypress.io/api/find)
-- [root](https://on.cypress.io/api/root)
+- [within](https://on.cypress.io/api/within)

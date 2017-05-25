@@ -6,34 +6,60 @@ description: ''
 
 Get the DOM element that is currently focused.
 
-| | |
-|--- | --- |
-| **Returns** | the current DOM element that is focused or `null` |
-| **Timeout** | `cy.focused` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.focused()](#usage)
+```javascript
+.focused()
+.focused(options)
+```
 
-Get the focused DOM element.
+## Usage
 
-# Options
+`.focused()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.focused()   
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Objecdt)***
 
 Pass in an options object to change the default behavior of `cy.focused`.
-
-**cy.focused( *options* )**
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Get the element that is focused.
+`.filter()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.filter()` will continue to look for the focuse element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Focused
+
+**Get the element that is focused.**
 
 ```javascript
-cy.focused()
+cy.focused().then(function($el) {
+  // do something with $el
+})
 ```
 
-## Make an assertion on the focused element.
+**Blur the element with focus.**
+
+```javascript
+cy.focused().blur()
+```
+
+**Make an assertion on the focused element.**
 
 ```javascript
 cy.focused().should('have.attr', 'name', 'username')
@@ -41,7 +67,7 @@ cy.focused().should('have.attr', 'name', 'username')
 
 # Command Log
 
-## Make an assertion on the focused element.
+**Make an assertion on the focused element.**
 
 ```javascript
 cy.focused().should('have.attr', 'name').and('eq', 'num')

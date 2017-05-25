@@ -60,12 +60,12 @@ In this example, on first login our server sends us back a session cookie. After
 
 ```javascript
 cy
-  // assume we just logged in
-  .contains('Login').click()
-  .url().should('include', 'profile')
-  .clearCookie('session_id')
-  .visit('/dashboard') // we should be redirected back to login
-  .url().should('include', 'login')
+// assume we just logged in
+cy.contains('Login').click()
+cy.url().should('include', 'profile')
+cy.clearCookie('session_id')
+cy.visit('/dashboard') // we should be redirected back to login
+cy.url().should('include', 'login')
 ```
 
 # Command Log

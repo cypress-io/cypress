@@ -4,38 +4,54 @@ comments: true
 description: ''
 ---
 
-Get the current URL hash. This is the same as [`cy.location().hash`](https://on.cypress.io/api/location)
+Get the current URL hash. This is the same as [`.location().hash`](https://on.cypress.io/api/location)
 
-| | |
-|--- | --- |
-| **Returns** | the current URL hash as a string, including the `#` character. If no `#` character is present, an empty string will be returned. |
-| **Timeout** | *cannot timeout* |
+# Syntax
 
-# [cy.hash()](#usage)
+```javascript
+.hash(options)
+```
 
-Get the current URL hash.
+## Usage
 
-# Options
+`.hash()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-Pass in an options object to change the default behavior of `cy.hash`.
+**{% fa fa-check-circle green %} Valid Usage**
 
-**cy.hash( *options* )**
+```javascript
+cy.hash()    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.hash()`.
+
 **cy.hash( *options* )**
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Assert that the hash is `#/users/1` given the remote URL: `http://localhost:8000/app/#/users/1`
+`.hash()` the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
+
+## Timeout
+
+# Examples
+
+## Hash
+
+**Assert that hash is `#/users/1` given remote URL: `http://localhost:8000/app/#/users/1`**
 
 ```javascript
 // Hash returns #/users/1
 cy.hash().should('eq', '#/users/1') // => true
 ```
 
-## Assert that the hash matches via RegExp
+**Assert that the hash matches via RegExp**
 
 ```html
 <ul id="users">
@@ -46,33 +62,13 @@ cy.hash().should('eq', '#/users/1') // => true
 ```
 
 ```javascript
-cy
-  .get('#users li').find('a')
-  .hash().should('match', /users\/.+$/) // => true
-```
-
-# Notes
-
-## Hash is a shortcut for `cy.location().hash`
-
-These 3 assertions are all the same.
-
-```javascript
-// 1. verbose
-cy.location().then(function(location){
-  expect(location.hash).to.eq('#/users/1')
-})
-
-// 2. better
-cy.location().its('hash').should('eq', '#/users/1')
-
-// 3. best
-cy.hash().should('eq', '#/users/1')
+cy.get('#users li').find('a').click()
+cy.hash().should('match', /users\/.+$/) // => true
 ```
 
 # Command Log
 
-## Assert that the hash matches `#users/new`
+**Assert that the hash matches `#users/new`**
 
 ```javascript
 cy.hash().should('eq', '#users/new')
