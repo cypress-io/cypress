@@ -258,15 +258,16 @@ You need to install all of the [linux dependencies](#section-dependencies).
 
 ## Docker
 
-We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#section-docker).
+We have [created](https://github.com/cypress-io/docker) an official [cypress/base](https://hub.docker.com/r/cypress/base/) container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete [cypress/internal:cy](https://hub.docker.com/r/cypress/internal/tags/) image with pre-installed Cypress; just call `cypress run`.
 
-If you don't use this image you must install all of the [linux dependencies](#section-dependencies).
+If you don't use this image you must install all of the [linux dependencies](https://on.cypress.io/continuous-integration#section-dependencies). See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
 
-See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
+If you are running long runs on Docker, you need to set the `ipc` to `host` mode. [This issue](https://github.com/cypress-io/cypress/issues/350) describes exactly what to do.
 
-If you are running **long** runs on Docker, you need to set the `ipc` to `host` mode.
+### Docker CI examples
 
-[This issue](https://github.com/cypress-io/cypress/issues/350) describes exactly what to do.
+* GitLab [https://gitlab.com/cypress-io/cypress-example-docker-gitlab](https://gitlab.com/cypress-io/cypress-example-docker-gitlab)
+* Codeship [https://github.com/cypress-io/cypress-example-docker-codeship](https://github.com/cypress-io/cypress-example-docker-codeship)
 
 ***
 
