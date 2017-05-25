@@ -120,7 +120,6 @@ module.exports = (Cypress, Commands) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        debugger
         utils.throwErrByPath("request.url_invalid")
 
       ## only set json to true if form isnt true

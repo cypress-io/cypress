@@ -1,3 +1,5 @@
+{ _, Promise } = window.testUtils
+
 describe "$Cypress.Cy Exec Command", ->
   enterCommandTestingMode()
 

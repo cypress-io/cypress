@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 m = window.mocha
 
 describe "$Cypress.Mocha API", ->

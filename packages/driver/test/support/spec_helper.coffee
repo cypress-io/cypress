@@ -3,19 +3,20 @@ lolex = require("lolex")
 sinon = require("sinon")
 sinonChai = require("sinon-chai")
 
-window.$Cypress = $Cypress = require("../../src/main")
+$Cypress = require("../../src/main")
+$ = $Cypress.$
+_ = $Cypress.prototype._
 
-$ = window.$ = $Cypress.$
-_ = window._ = $Cypress.prototype._
-window.moment = $Cypress.prototype.moment
-window.Promise = $Cypress.prototype.Promise
-window.Cookies = require("js-cookie")
+window.testUtils = {
+  $Cypress: $Cypress
+  $: $
+  _: _
+  moment: $Cypress.prototype.moment
+  Promise: $Cypress.prototype.Promise
+  Cookies: require("js-cookie")
+  bililiteRange: require("../../vendor/bililiteRange")
+}
 
-## TODO: move this as something we can grab
-## off of the driver
-require("sinon-as-promised")(Promise)
-
-window.bililiteRange = require("../../vendor/bililiteRange")
 $Cypress.Chai.use(sinonChai)
 
 uncaught = Mocha.Runner::uncaught

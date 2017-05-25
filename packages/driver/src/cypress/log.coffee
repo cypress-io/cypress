@@ -1,3 +1,4 @@
+$ = require("jquery")
 _ = require("lodash")
 Backbone = require("backbone")
 
