@@ -34,6 +34,7 @@ guides:
   appendices:
     configuration: configuration.html
     error-messages: error-messages.html
+    available-assertions: available-assertions.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
     all-videos: all-videos.html
