@@ -24,15 +24,15 @@ sidebar:
     writing-your-first-test: Writing Your First Test
     testing-your-app: Testing Your App
     next-steps: Next Steps
-    cypress-basics: Cypress Basics
+    cypress-basics: Basics
     overview-of-the-gui-tool: Overview of the GUI Tool
     commands-elements-and-assertions: Commands, Elements, and Assertions
     dead-simple-debugging: Dead Simple Debugging
     aliases-variables-in-an-async-world: Aliases&#58; Variables in an Async World
     stubs-spies-clocks: Stubs, Spies, and Clocks
-    dealing-with-the-network: Dealing with the Network
+    dealing-with-the-network: Controlling the Network
     taking-screenshots-and-recording-videos: Taking Screenshots and Recording Videos
-    integrating-cypress: Integrating Cypress
+    integrating-cypress: Integration
     cli-tool: CLI Tool
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
@@ -42,7 +42,7 @@ sidebar:
     dashboard-projects: Dashboard&#58; Projects
     dashboard-runs: Dashboard&#58; Recorded Runs
     dashboard-orgs: Dashboard&#58; Organizations
-    advanced-cypress: Advanced Cypress
+    advanced-cypress: Advanced
     the-cypress-workflow: The Cypress Workflow
     coming-from-selenium: Coming from Selenium?
     custom-commands: Custom Commands
@@ -55,11 +55,11 @@ sidebar:
     error-messages: Error Messages
     best-practices: Best Practices
     anti-patterns: Anti-patterns
-    all-videos: All Videos
     contributing: Contributing
     changelog: Changelog
     roadmap: Roadmap
-    cypress-api-design: Cypress API Design
+    cypress-api-design: API Design
+    all-videos: Videos
   api:
     welcome: Welcome
     api: api

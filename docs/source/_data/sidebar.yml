@@ -8,8 +8,8 @@ guides:
   cypress-basics:
     overview-of-the-gui-tool: overview-of-the-gui-tool.html
     commands-elements-and-assertions: commands-elements-and-assertions.html
-    dead-simple-debugging: dead-simple-debugging.html
     aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
+    dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
     dealing-with-the-network: dealing-with-the-network.html
     taking-screenshots-and-recording-videos: taking-screenshots-and-recording-videos.html
@@ -36,11 +36,11 @@ guides:
     error-messages: error-messages.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
-    all-videos: all-videos.html
+    cypress-api-design: cypress-api-design.html
     contributing: contributing.html
     changelog: changelog.html
     roadmap: roadmap.html
-    cypress-api-design: cypress-api-design.html
+    all-videos: all-videos.html
 
 api:
   welcome:
