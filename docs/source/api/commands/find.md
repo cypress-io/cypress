@@ -4,31 +4,60 @@ comments: true
 description: ''
 ---
 
-Get the descendents DOM elements of a specific selector.
+Get the descendent DOM elements of a specific selector.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.find` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.find( *selector* )](#selector-usage)
+```javascript
+.find(selector)
+.find(selector, options)
+```
 
-Get the descendants of each DOM element in the current set of matched DOM elements within the selector.
+## Usage
 
-# Options
+`.find()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
 
-Pass in an options object to change the default behavior of `cy.find`.
+**{% fa fa-check-circle green %} Valid Usage**
 
-**cy.find( *selector*, *options* )**
+```javascript
+cy.get('.article').find('footer') // Yields 'footer' within '.article'
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.find('.progress')          // Errors, cannot be chained off 'cy'
+cy.exec('node start').find()  // Errors, 'exec' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching descendent DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.find()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
 
-# Selector Usage
+## Yields
 
-## Get li's within parent
+`.find()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.find()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Selector
+
+**Get li's within parent**
 
 ```html
 <ul id="parent">
@@ -44,7 +73,7 @@ cy.get('#parent').find('li')
 
 # Command Log
 
-## Find the `li`'s within the nav
+**Find the `li`'s within the nav**
 
 ```javascript
 cy.get('.left-nav>.nav').find('>li')
