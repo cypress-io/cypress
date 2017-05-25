@@ -22,7 +22,8 @@ a code {
   }
 }
 
-.article pre, .article code {
+.article pre, .article code,
+.faq pre, .faq code {
   &[class*="language-"] {
     font-size: 0.9em;
     line-height: $line-height;
@@ -58,7 +59,7 @@ a code {
   }
 }
 
-.article pre {
+.article pre, .faq pre {
   &[class*="language-"] {
     border-left: 5px solid $color-border;
     padding: 0.5em 0.25em;
