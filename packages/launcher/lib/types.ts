@@ -1,12 +1,25 @@
+/** TODO this are typical browser names, not just Mac */
+export type MacBrowserName = 'chrome' | 'chromium' | 'canary' | string
+
+export type PlatformName = 'darwin' | 'linux'
+
 export type Browser = {
-  name: string,
-  re: RegExp,
+  /** short browser name */
+  name: MacBrowserName,
+  /** Optional display name */
+  displayName?: string,
+  /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
+  versionRegex: RegExp,
   profile: boolean,
   binary: string,
-  executable: string,
   version?: string,
   majorVersion?: string,
   page?: string
+}
+
+export type FoundBrowser = {
+  name: string,
+  path?: string
 }
 
 interface ExtraLauncherMethods {
