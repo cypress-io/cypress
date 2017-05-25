@@ -1,3 +1,5 @@
+{ $, _, Promise, bililiteRange } = window.testUtils
+
 describe "$Cypress.Cy Text Commands", ->
   enterCommandTestingMode()
 

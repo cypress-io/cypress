@@ -1,3 +1,5 @@
+{ $ } = window.testUtils
+
 describe "$Cypress.Cy Coordinates Extensions", ->
   enterCommandTestingMode()
 

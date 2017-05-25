@@ -1,3 +1,5 @@
+{ $ } = window.testUtils
+
 describe "$Cypress.Cy Listeners Extensions", ->
   context "iframe load", ->
     before ->

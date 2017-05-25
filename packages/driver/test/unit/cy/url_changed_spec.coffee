@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress Url:Changed Events", ->
   enterCommandTestingMode()
 

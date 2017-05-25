@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 ## FIXME: Needs re-write to test new interface
 describe.skip "$Cypress.Commands API", ->
   beforeEach ->

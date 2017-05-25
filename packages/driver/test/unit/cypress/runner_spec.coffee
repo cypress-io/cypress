@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress.Runner API", ->
   beforeEach ->
     @Cypress = $Cypress.create()

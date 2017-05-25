@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Form Commands", ->
   enterCommandTestingMode()
 

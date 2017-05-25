@@ -1,3 +1,5 @@
+{ $, _, Promise, Cookies } = window.testUtils
+
 describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 

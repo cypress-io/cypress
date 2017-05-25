@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress API", ->
   beforeEach ->
     @Cypress = $Cypress.create()
