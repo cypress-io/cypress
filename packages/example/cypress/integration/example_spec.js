@@ -1433,14 +1433,14 @@ describe('Kitchen Sink', function(){
     // that give you access to methods from other
     // commonly used libraries
 
-    it('Cypress._.method() - call an underscore method', function(){
+    it('Cypress._.method() - call a lodash method', function(){
 
       cy
-        // use the _.chain, _.pluck, _.first, and _.value functions
-        // https://on.cypress.io/api/cypress-underscore
+        // use the _.chain, _.map, _.take, and _.value functions
+        // https://on.cypress.io/api/cypress-lodash
         .request('https://jsonplaceholder.typicode.com/users').then(function(response){
           var _ = Cypress._
-          var ids = _.chain(response.body).pluck('id').first(3).value()
+          var ids = _.chain(response.body).map('id').take(3).value()
 
           expect(ids).to.deep.eq([1, 2, 3])
         })
