@@ -1,12 +1,12 @@
 <header id="header" class="wrapper">
   <div id="header-inner" class="inner">
     <h1 id="logo-wrap">
-      <a href="{{ url_for_lang('') }}" id="logo">
-        <img src="{{ url_for_lang('') }}{{ config.logo }}" alt="Cypress"/>
+      <a href="{{ site.data['main-menu'].guides }}" id="logo">
+        <img src="/{{ config.logo }}" alt="Cypress"/>
       </a>
     </h1>
     <nav id="main-nav">
-      {{ header_menu('main-nav') }}
+      {{ menu('main') }}
       <a href="https://github.com/{{ config.github_main_repo }}" class="main-nav-link"><i class="fa fa-github"></i></a>
       <div id="search-input-wrap">
         <div id="search-input-icon">

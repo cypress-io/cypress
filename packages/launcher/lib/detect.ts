@@ -2,12 +2,14 @@ import {linuxBrowser} from './linux'
 import darwin from './darwin'
 import {log} from './log'
 import {Browser, NotInstalledError} from './types'
+import * as Bluebird from 'bluebird'
+import {merge, pick, tap} from 'ramda'
 
 import _ = require('lodash')
 import os = require('os')
-import Promise = require('bluebird')
+// import Promise = require('bluebird')
 
-const browsers:Browser[] = [
+const browsers: Browser[] = [
   {
     name: 'chrome',
     re: /Google Chrome (\S+)/,
@@ -29,7 +31,7 @@ const browsers:Browser[] = [
   }
 ]
 
-const setMajorVersion = (obj:Browser) => {
+const setMajorVersion = (obj: Browser) => {
   if (obj.version) {
     obj.majorVersion = obj.version.split('.')[0]
     log('browser %s version %s major version %s',
@@ -40,49 +42,54 @@ const setMajorVersion = (obj:Browser) => {
 
 type MacBrowserName = 'chrome' | 'chromium' | 'canary'
 
-function lookup (platform:string, obj:Browser) {
+function lookup (platform: string, obj: Browser): Promise<Object> {
   log('looking up %s on %s platform', obj.name, platform)
   switch (platform) {
     case 'darwin':
-      const browserName:MacBrowserName = obj.name as MacBrowserName
+      const browserName: MacBrowserName = obj.name as MacBrowserName
       const fn = darwin[browserName]
       if (fn) {
-        return fn.get(obj.executable)
+        return fn.get(obj.executable) as any as Promise<Object>
       }
       const err: NotInstalledError =
         new Error(`Browser not installed: ${obj.name}`) as NotInstalledError
       err.notInstalled = true
-      return Promise.reject(err)
+      throw err
     case 'linux':
-      return linuxBrowser.get(obj.binary, obj.re)
+      return linuxBrowser.get(obj.binary, obj.re) as any as Promise<Object>
     default:
       throw new Error(`Cannot lookup browser ${obj.name} on ${platform}`)
   }
 }
 
-function checkOneBrowser(browser:Browser) {
+function checkOneBrowser (browser: Browser) {
   const platform = os.platform()
+  const pickBrowserProps = pick(['name', 'type', 'version', 'path'])
+
+  const logBrowser = (props: object) => {
+    log('setting major version for %j', props)
+  }
+
+  const failed = (err: NotInstalledError) => {
+    if (err.notInstalled) {
+      log('browser %s not installed', browser.name)
+      return false
+    }
+    throw err
+  }
+
   return lookup(platform, browser)
-    .then(props => {
-      return _.chain({})
-        .extend(browser, props)
-        .pick('name', 'type', 'version', 'path')
-        .value()
-    })
+    .then(merge(browser))
+    .then(pickBrowserProps)
+    .then(tap(logBrowser))
     .then(setMajorVersion)
-    .catch(err => {
-      if (err.notInstalled) {
-        log('browser %s not installed', browser.name)
-        return false
-      }
-      throw err
-    })
+    .catch(failed)
 }
 
 /** returns list of detected browsers */
-function detectBrowsers (): Promise<Browser[]> {
-  return Promise.map(browsers, checkOneBrowser)
-    .then(_.compact) as Promise<Browser[]>
+function detectBrowsers (): Bluebird<Browser[]> {
+  return Bluebird.mapSeries(browsers, checkOneBrowser)
+    .then(_.compact) as Bluebird<Browser[]>
 }
 
 export default detectBrowsers

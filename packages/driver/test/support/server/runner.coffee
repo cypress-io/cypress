@@ -4,6 +4,7 @@ chalk = require("chalk")
 EventEmitter = require("events").EventEmitter
 path = require("path")
 Promise = require("bluebird")
+log = require("debug")("cypress:driver")
 
 browser = require("./browser")
 SocketServer = require("socket.io")
@@ -83,6 +84,7 @@ module.exports = class Runner
         @_runnerBus.emit(event, info, err)
 
   runAllSpecsOnce: (specPaths) ->
+    log "running all specs once"
     @_start()
     .then =>
       new Promise (resolve, reject) =>
@@ -130,13 +132,14 @@ module.exports = class Runner
 
   run: (specPath) ->
     specPath = specPath
-    .replace(path.join(__dirname, "../.."), "specs/")
+    .replace(path.join(__dirname, "../.."), "specs")
     .replace(path.extname(specPath), "")
 
     for id, client of @_clients
       client.emit("run", specPath)
 
   _start: ->
+    log "Starting runner"
     io = new SocketServer(@_server)
     io.on "connection", (client) =>
       @_handleConnection(client)
@@ -156,6 +159,7 @@ module.exports = class Runner
       delete @_clients[client.id]
 
   _launchBrowser: ->
+    log "launching browser"
     theBrowser = getArg("browser") or "chrome"
     url = "http://localhost:#{@_config.port}?reporter=socket"
 

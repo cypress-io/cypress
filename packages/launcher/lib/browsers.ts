@@ -8,7 +8,7 @@ type FoundBrowser = {
   path?: string
 }
 
-const browserNotFoundErr = (browsers:FoundBrowser[], name: string): BrowserNotFoundError => {
+const browserNotFoundErr = (browsers: FoundBrowser[], name: string): BrowserNotFoundError => {
   const available = map(browsers, 'name').join(', ')
 
   const err: BrowserNotFoundError
@@ -18,8 +18,8 @@ const browserNotFoundErr = (browsers:FoundBrowser[], name: string): BrowserNotFo
 }
 
 /** starts a browser by name and opens URL if given one */
-export function launch (browsers:FoundBrowser[],
-  name:string, url?:string, args:string[] = []) {
+export function launch (browsers: FoundBrowser[],
+  name: string, url?: string, args: string[] = []) {
   log('launching browser %s to open %s', name, url)
   const browser = find(browsers, {name})
 
@@ -35,5 +35,6 @@ export function launch (browsers:FoundBrowser[],
     args = [url].concat(args)
   }
 
+  log('spawning browser %s with args %s', browser.path, args.join(' '))
   return cp.spawn(browser.path, args, {stdio: 'ignore'})
 }

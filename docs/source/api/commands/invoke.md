@@ -1,5 +1,7 @@
+---
 title: invoke
 comments: true
+description: ''
 ---
 
 `cy.invoke` invokes functions on the current subject.
@@ -9,21 +11,15 @@ If you want to call a regular property that is not a function on the current sub
 | | |
 |--- | --- |
 | **Returns** | the return value of the invoked property |
-| **Timeout** | `cy.invoke` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts)  |
+| **Timeout** | `cy.invoke` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)  |
 
-***
-
-# [cy.invoke( *functionName* )](#section-function-usage)
+# [cy.invoke( *functionName* )](#function-usage)
 
 Invokes the function with the specified name
 
-***
-
-# [cy.invoke( *functionName*, **arguments* )](#section-function-with-arguments-usage)
+# [cy.invoke( *functionName*, **arguments* )](#function-with-arguments-usage)
 
 Invokes the function with the specified name and forwards any additional arguments to the function call. There are no limits to the number of arguments.
-
-***
 
 # Function Usage
 
@@ -58,8 +54,6 @@ cy
 [Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
 {% endnote %}
 
-***
-
 ## Useful for 3rd party plugins
 
 ```javascript
@@ -72,8 +66,6 @@ cy.get("input").invoke("getKendoDropDownList").then(function(dropDownList){
 })
 ```
 
-***
-
 ## We can rewrite the previous example in a more terse way and add an assertion.
 
 ```javascript
@@ -83,8 +75,6 @@ cy
     .invoke("select", "apples")
   .its("val").should("match", /apples/)
 ```
-
-***
 
 # Function with Arguments Usage
 
@@ -113,8 +103,6 @@ cy
   .get("img").invoke("attr", "src")
     .should("include", "myLogo")
 ```
-
-***
 
 # Related
 

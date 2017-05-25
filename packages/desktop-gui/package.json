@@ -4,6 +4,7 @@
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "lib/gui.js",
   "scripts": {
+    "postinstall": "echo 'This project needs: npm run build'",
     "build": "zunder build-dev",
     "build-prod": "node ./scripts/build-prod.js",
     "run-prod": "npm run build-prod && npm run server",
@@ -12,7 +13,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
-    "test": "npm run build-dev",
+    "test": "echo 'No unit tests to run, but there are e2e tests'",
     "pretest": "npm run lint"
   },
   "repository": {

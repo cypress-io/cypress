@@ -1,3 +1,10 @@
+.article {
+  float: left;
+  width: 100%;
+  padding: 0px 80px;
+  border-right: 1px solid #eee;
+}
+
 .article-date {
   color: $color-gray;
   text-decoration: none;
@@ -23,6 +30,7 @@
 
 .article-heading:hover .article-anchor {
   display: inline-block;
+  border: 0;
 
   &:hover {
     text-decoration: none;
@@ -32,6 +40,8 @@
 .article-anchor {
   margin-left: 10px;
   display: none;
+  border: 0;
+
   &:before {
     content: "#";
   }
@@ -39,10 +49,11 @@
 }
 .article-content {
   line-height: $line-height;
-  color: $color-default;
 
   p {
-    margin: 1em 0;
+    margin-bottom: 15px;
+    word-wrap: break-word;
+    line-height: 1.5em;
   }
 
   ol {
@@ -103,27 +114,21 @@
   table {
     margin: 1em 0;
     width: 100%;
-    border: 1px solid $color-border;
-    border-bottom: 0;
+    border: 1px solid #e8e8e8;
+
     th {
       font-weight: bold;
       padding: 5px 15px;
       text-align: left;
-      border-bottom: 1px solid #ebeef1;
+      border-bottom: 1px solid #e8e8e8;
 
       &:empty {
-        border: 0;
         padding: 0;
       }
     }
+
     td {
       padding: 5px 15px;
-      border-bottom: 1px solid #ebeef1;
-      border-right: 1px solid #ebeef1;
-    }
-
-    tr>td:last-child {
-      border-right: 0;
     }
 
     tr:nth-child(2n) {
@@ -137,9 +142,11 @@
     position: relative;
     border: 1px solid $color-border;
     border-left: 5px solid $highlight-comment;
+
     footer {
       margin: 1em 0;
       font-style: italic;
+
       cite {
         &:before {
           content: "â€”";
@@ -160,58 +167,53 @@
     margin: 1em 0;
   }
 
-  hr {
-    border-color: #eee;
-    margin-top: 3em;
-    margin-bottom: 1em;
-    margin-left: 0;
-    border-width: 1px;
-    border-style: solid;
-    // display: none;
-  }
   h1 {
-    font-size: 1.7em;
-    line-height: 1em;
-    font-weight: 700;
-    margin: 2em 0 0 0;
+    font-size: 1.6em;
+    line-height: 1.5em;
+    font-weight: 500;
+    margin: 1.5em 0 0.5em 0;
     padding: 0;
     font-family: $font-title;
 
-    &:first-of-type {
-      margin-top: 0.5em;
-    }
-
     &>a {
-      font-family: $font-mono;
-      letter-spacing: -1.5px;
+      font-weight: 500;
     }
   }
+
   h2 {
-    font-size: 1.5em;
-    line-height: 1em;
-    font-weight: 700;
-    margin: 1em 0 0 0;
+    font-size: 1em;
+    line-height: 1.5em;
+    font-weight: 500;
+    margin: 1em 0 1em 0;
     font-family: $font-title;
+
+    code {
+      font-weight: bold;
+    }
   }
+
   h3 {
-    font-size: 1.3em;
+    font-size: 1em;
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
     font-family: $font-title;
   }
+
   h4 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
     font-family: $font-title;
   }
+
   h5 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
     font-family: $font-title;
   }
+
   h6 {
     line-height: 1em;
     font-weight: bold;
@@ -222,11 +224,13 @@
   a {
     color: $color-link;
     text-decoration: none;
-    font-weight: normal;
+    border-bottom: 1px dotted #bde1fd;
+
     &:hover {
       color: $color-link-hover;
-      text-decoration: underline;
+      border-bottom: 1px solid $color-link;
     }
+
   }
   strong {
     font-weight: bold;
@@ -255,6 +259,7 @@
   }
   img {
     max-width: 100%;
+    border: 1px solid #ddd;
   }
   video {
     max-width: 100%;
@@ -376,11 +381,12 @@
     clear: both;
   }
 }
+
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 2.5em;
-  font-weight: 900;
+  font-size: 2.4em;
+  font-weight: 500;
   text-decoration: none;
   color: $color-default;
   transition: 0.2s;
@@ -397,10 +403,4 @@
     display: table;
     clear: both;
   }
-}
-.article {
-  float: left;
-  width: 100%;
-  border: 1px solid #eee;
-  padding: 60px 30px;
 }

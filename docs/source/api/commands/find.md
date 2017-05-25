@@ -1,5 +1,7 @@
+---
 title: find
 comments: true
+description: ''
 ---
 
 Get the descendents DOM elements of a specific selector.
@@ -7,15 +9,11 @@ Get the descendents DOM elements of a specific selector.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.find` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.find` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.find( *selector* )](#section-selector-usage)
+# [cy.find( *selector* )](#selector-usage)
 
 Get the descendants of each DOM element in the current set of matched DOM elements within the selector.
-
-***
 
 # Options
 
@@ -26,9 +24,7 @@ Pass in an options object to change the default behavior of `cy.find`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Selector Usage
 
@@ -46,8 +42,6 @@ Option | Default | Notes
 cy.get("#parent").find("li")
 ```
 
-***
-
 # Command Log
 
 ## Find the `li`'s within the nav
@@ -63,8 +57,6 @@ The commands above will display in the command log as:
 When clicking on the `find` command within the command log, the console outputs the following:
 
 <img width="516" alt="screen shot 2015-11-27 at 2 19 54 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447312/fa3679cc-9511-11e5-9bea-904f8c70063d.png">
-
-***
 
 # Related
 

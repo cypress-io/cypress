@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Cross-broswer implementation of text ranges and selections
 // documentation: http://bililite.com/blog/2011/01/17/cross-browser-text-ranges-and-selections/
 // Version: 2.6
@@ -470,10 +471,50 @@ InputRange.prototype._nativeRange = function(bounds) {
   return bounds || [0, this.length()];
 };
 InputRange.prototype._nativeSelect = function (rng){
-  this._el.setSelectionRange(rng[0], rng[1]);
+  try {
+    this._el.setSelectionRange(rng[0], rng[1]);
+  } catch (e) {
+    if (typeof this._el.select === 'function') {
+      this._el.select()
+    } else {
+      console.error('Failed to select text on', this._el)
+    }
+  }
 };
 InputRange.prototype._nativeSelection = function(){
-  return [this._el.selectionStart, this._el.selectionEnd];
+  var originalType = this._el.type
+
+  //// HACK:
+  //// newer versions of Chrome incorrectly report the selection
+  //// for number and email types, so we change it to type=text
+  //// and blur it (then set it back and focus it further down
+  //// after the selection algorithm has taken place)
+  var shouldChangeType = originalType === 'email' || originalType === 'number'
+  if (shouldChangeType) {
+    this._el.blur()
+    this._el.type = 'text'
+  }
+
+  var start = this._el.selectionStart
+  var end = this._el.selectionEnd
+
+  var selection = [start, end]
+
+  //// HACK:
+  //// selection start and end don't report correctly when input
+  //// already has a value set, so if there's a value and there is no
+  //// native selection, force it to be at the end of the text
+  if (this._el.value && !start && !end) {
+    var length = this._el.value.length
+    selection = [length, length]
+  }
+
+  if (shouldChangeType) {
+    this._el.type = originalType
+    this._el.focus()
+  }
+
+  return selection
 };
 InputRange.prototype._nativeGetText = function(rng){
   return this._el.value.substring(rng[0], rng[1]);

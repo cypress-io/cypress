@@ -1,5 +1,7 @@
+---
 title: closest
 comments: true
+description: ''
 ---
 
 Get the first DOM element that matches the selector whether it be itself or one of it's ancestors.
@@ -7,15 +9,11 @@ Get the first DOM element that matches the selector whether it be itself or one 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.closest( *selector* )](#section-selector-usage)
+# [cy.closest( *selector* )](#selector-usage)
 
 For each DOM element in the set, get the first DOM element that matches the selector by testing the DOM element itself and traversing up through its ancestors in the DOM tree.
-
-***
 
 # Options
 
@@ -26,9 +24,7 @@ Pass in an options object to change the default behavior of `cy.closest`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Selector Usage
 
@@ -37,8 +33,6 @@ Option | Default | Notes
 ```javascript
 cy.get("li.active").closest(".nav")
 ```
-
-***
 
 # Command Log
 
@@ -55,8 +49,6 @@ The commands above will display in the command log as:
 When clicking on the `closest` command within the command log, the console outputs the following:
 
 <img width="478" alt="screen shot 2015-11-27 at 2 07 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png">
-
-***
 
 # Related
 

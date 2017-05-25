@@ -325,9 +325,9 @@ describe "$Cypress.Cy Focus Commands", ->
           expect($ce.get(0)).to.eq ce.get(0)
 
     it "can blur input[type=time]", (done) ->
-      @cy.$$("#input-types [type=time]").blur -> done()
+      @cy.$$("#time-without-value").blur -> done()
 
-      @cy.get("#input-types [type=time]").focus().invoke("val", "03:15:00").blur()
+      @cy.get("#time-without-value").focus().invoke("val", "03:15:00").blur()
 
     it "delays 50ms before resolving", (done) ->
       waited = false

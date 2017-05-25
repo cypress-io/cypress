@@ -440,7 +440,8 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
 
         @cy.get("button:first").ttrigger("mouseover", "foo")
 
-      ## FIXME: needs focus
+      ## FIXME: change to unit test that doesn't rely on real animation
+      ## write one test that integration tests animations
       it.skip "throws when element animation exceeds timeout", (done) ->
         @cy._timeout(100)
 
@@ -535,14 +536,13 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
           consoleProps = @log.attributes.consoleProps()
           coords       = @cy.getCoordinates($button)
           logCoords    = @log.get("coords")
+          eventOptions = consoleProps["Event options"]
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
           expect(consoleProps.Command).to.eq "ttrigger"
-          expect(consoleProps["Event options"]).to.eql({
-            bubbles: true
-            cancelable: true
-            clientX: 168
-            clientY: 9
-            pageX: 168
-            pageY: 548
-          })
+          expect(eventOptions.bubbles).to.be.true
+          expect(eventOptions.cancelable).to.be.true
+          expect(eventOptions.clientX).to.be.be.a("number")
+          expect(eventOptions.clientY).to.be.be.a("number")
+          expect(eventOptions.pageX).to.be.be.a("number")
+          expect(eventOptions.pageY).to.be.be.a("number")

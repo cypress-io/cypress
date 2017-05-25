@@ -1,5 +1,7 @@
+---
 title: get
 comments: true
+description: ''
 ---
 
 Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
@@ -9,17 +11,13 @@ Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.get` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.get` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.get( *selector* )](#section-selector-usage)
+# [cy.get( *selector* )](#selector-usage)
 
 Finds one or more DOM elements based on the selector.
 
-***
-
-# [cy.get( *alias* )](#section-alias-usage)
+# [cy.get( *alias* )](#alias-usage)
 
 {% note info New to Cypress? %}
 [Read about using aliases first.](https://on.cypress.io/guides/using-aliases)
@@ -28,8 +26,6 @@ Finds one or more DOM elements based on the selector.
 You can pass in the `@` character and the name of an alias as a parameter to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
 
 Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
-
-***
 
 # Options
 
@@ -41,9 +37,7 @@ Pass in an options object to change the default behavior of `cy.get`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Selector Usage
 
@@ -53,15 +47,11 @@ Option | Default | Notes
 cy.get("#main")
 ```
 
-***
-
 ## Find the first `li` descendent within a `ul`
 
 ```javascript
 cy.get("ul li:first")
 ```
-
-***
 
 ## Find the element with class dropdown-menu and click it.
 
@@ -73,8 +63,6 @@ cy
   // query for #search from the root document.
   .get("#search").type("mogwai")
 ```
-
-***
 
 ## Reset the current scope in a [`cy.within`](https://on.cypress.io/api/within)
 
@@ -88,8 +76,6 @@ cy.get("form").within(function(){
     .get("textarea").type("is a developer")
 })
 ```
-
-***
 
 # Alias Usage
 
@@ -106,8 +92,6 @@ cy.get("ul#todos").as("todos")
 cy.get("@todos")
 ```
 
-***
-
 ## Alias the `submitBtn` in a `beforeEach`
 
 ```javascript
@@ -119,8 +103,6 @@ it("disables on click", function(){
   cy.get("@submitBtn").should("be.disabled")
 })
 ```
-
-***
 
 # Command Log
 

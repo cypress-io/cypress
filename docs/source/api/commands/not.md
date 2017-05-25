@@ -1,5 +1,7 @@
+---
 title: not
 comments: true
+description: ''
 ---
 
 Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
@@ -7,15 +9,11 @@ Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](ht
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.not` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.not` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.not( *selector* )](#section-selector-usage)
+# [cy.not( *selector* )](#selector-usage)
 
 Remove the element(s) by it's selector from the elements
-
-***
 
 # Options
 
@@ -26,9 +24,7 @@ Pass in an options object to change the default behavior of `cy.not`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Selector Usage
 
@@ -37,8 +33,6 @@ Option | Default | Notes
 ```javascript
 cy.get(".left-nav>.nav").find(">li").not(".active")
 ```
-
-***
 
 # Command Log
 
@@ -56,7 +50,6 @@ When clicking on `not` within the command log, the console outputs the following
 
 <img width="689" alt="screen shot 2015-11-29 at 12 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458819/0d6870f6-9696-11e5-9364-2685b8ffc71b.png">
 
-***
 # Related
 
 - [filter](https://on.cypress.io/api/filter)

@@ -44,6 +44,10 @@ args = [
   "--disable-component-update"
   "--disable-default-apps"
 
+  # Run Chrome with options to work inside Docker container
+  "--no-sandbox"
+  "--disable-gpu"
+
   "--load-extension=#{themeDir}"
   "--user-data-dir=#{profileDir}"
 ]

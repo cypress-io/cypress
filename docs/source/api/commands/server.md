@@ -1,5 +1,7 @@
+---
 title: server
 comments: true
+description: ''
 ---
 
 {% note info New to Cypress? %}
@@ -8,13 +10,9 @@ comments: true
 
 Use `cy.server` to control the behavior of requests and responses.
 
-***
-
-# [cy.server()](#section-default-usage)
+# [cy.server()](#default-usage)
 
 Start a server to begin routing responses to your requests.
-
-***
 
 # Options
 
@@ -49,8 +47,6 @@ Option | Default | Notes
 `urlMatchingOptions` | `{ matchBase: true }` | The default options passed to `minimatch` when using glob strings to match URLs
 `whitelist` | function | Callback function that whitelists requests from ever being logged or stubbed. By default this matches against asset-like requests such as `.js`, `.jsx`, `.html`, and `.css`
 
-***
-
 # Default Usage
 
 ## Start a server
@@ -64,8 +60,6 @@ cy.server()
 - Any request that does not match a `cy.route` will be sent a `404` status code.
 - Any request that matches the `options.whitelist` function will **NOT** be logged or stubbed. In other words it is "whitelisted" and ignored.
 - You will see requests named as `(XHR Stub)` or `(XHR)` in the Command Log.
-
-***
 
 # Options Usage
 
@@ -101,8 +95,6 @@ cy
 
 ```
 
-***
-
 ## Change the default delay for all routes
 
 Adding delay can help simulate real world network latency. Normally stubbed responses return in under 20ms. Adding a delay can help you visualize how your application's state reacts to requests that are in flight.
@@ -111,8 +103,6 @@ Adding delay can help simulate real world network latency. Normally stubbed resp
 // delay each response 1500ms
 cy.server({delay: 1500})
 ```
-
-***
 
 ## Prevent sending 404's to unmatched requests
 
@@ -142,8 +132,6 @@ $(function(){
   $.getJSON("/users.json")
 })
 ```
-
-***
 
 ## Change the default response headers for all routes
 
@@ -186,8 +174,6 @@ xhr.send()
 
 ```
 
-***
-
 ## Change the default whitelisting
 
 Cypress comes with a `whitelist` function that will filter out any requests that are for static assets like `.html`, `.js`, `.jsx`, `.css`.
@@ -220,8 +206,6 @@ cy.server({
 
 If you would like to change the default option for **ALL** `cy.server` you [can change this option permanently](#permanently-override-default-server-options).
 
-***
-
 ## Turn off the server after you've started it
 
 You can disable all stubbing and its effects and restore to the default behavior as a test is running.
@@ -241,8 +225,6 @@ cy
   .server({enable: false})
 ```
 
-***
-
 # Notes
 
 ## Server persists until the next test runs
@@ -251,21 +233,15 @@ Cypress automatically continues to persist the server and routing configuration 
 
 However between tests, when a new test runs, the previous configuration is restored to a clean state. No configuration will leak between tests.
 
-***
-
 ## Outstanding requests are automatically aborted between tests
 
 When a new test runs, any oustanding requests still in flight are automatically aborted. In fact this happens by default whether or not you've even started a `cy.server`.
-
-***
 
 ## Server can be started before you `cy.visit`
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit`](https://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
 
 You can [read more about XHR strategy here](https://on.cypress.io/guides/network-requests-xhr).
-
-***
 
 # Related
 
