@@ -34,30 +34,36 @@ let myElement = cy.get('.my-selector')
 
 Not so fast...
 
-## Cypress is _Not Like_ jQuery
+## Cypress is _Not_ Like jQuery
 
 Cypress re-uses the selector search functionality of jQuery, but it does not share jQuery's execution model. Specifically, all Cypress commands are asynchronous and work more like Promises (more on this shortly).
 
 In jQuery, if you want to operate on an element, you might do this:
 
 ```js
+// $() returns immediately with an element collection
 let myElement = $('.my-selector').first()
+// Do work with it immediately
 doSomething(myElement)
 ```
 
-But in Cypress, calling `cy.get()` will not return anything. You'll need to call `.then` on your command chain in order to yield the actual element.
+But in Cypress, calling `cy.get()` will not return a value (it returns ). You'll need to call `.then` on your command chain in order to yield the actual element.
 
 ```js
-cy.get('.my-selector').then(function(myElement) {
-  doSomething(myElement)
-})
+// cy.get() returns a Cypress Chainer instance, not a value!
+cy.get('.my-selector')
+  // .then() is a Chainer method that accepts a function
+  .then(function(myElement) {
+    // the function receives the value and can now do work
+    doSomething(myElement)
+  })
 ```
 
 ## Why Complicate This?
 
 I hear you saying "Is it _really_ this complicated? I just want to get ahold of an element in the DOM! Shouldn't that be dead simple?" Of course! At first, it seems like you should be able to just reach out and grab the DOM. But you're forgetting something very important: the DOM is alive and ever-changing. What if the element isn't ready yet? Are you prepared to sprinkle wait-and-retry code throughout all your tests every time you select an element? No way! That's what we're trying to get away from!
 
-Cypress was built to work with the natural flow of the browser environment, instead of against it. All Cypress commands are asynchronous with automatic retry and timeout built right in. If you look for a DOM element that isn't there immediately (perhaps it is animating in?), Cypress won't fail immediately. Instead it watches that selector to see if anything appears for a smear of time. Modern web applications naturally deal in these smears of time due to network latency, DOM performance, events, intervals, and animations. Cypress _expects_ you to work this way, and it works this way as well.
+Cypress was built to work with the natural flow of the browser environment, instead of against it. All Cypress commands are asynchronous with automatic retry and timeout built right in. If you look for a DOM element that isn't there immediately (perhaps it is animating in?), Cypress won't fail immediately. Instead it watches that selector to see if anything appears for a smear of time. Modern web applications must naturally deal in these smears of time due to network latency, DOM performance, events, intervals, and animations. Cypress _expects_ you to work this way, and it works this way as well.
 
 ## Existence is Guaranteed
 
@@ -74,9 +80,9 @@ cy.visit('/path/to/page/under/test.html')
 cy.get('.element-i-desire')
 ```
 
-That's it! If the element is not on that page, you'll get a failure. If it's there at any point during the timeout period, you'll go green.
+That's it! If the element is not on that page, you'll get a failure. If it's there at any point during the timeout period, your test will go green.
 
-Don't write complicated tests until you've mastered the simple ones! Cypress is very powerful and expressive, you may well find that you never actually need complicated tests, or that you need drastically fewer than you expected. Remember: no code is faster than _no code_.
+Don't write complicated tests until you've mastered the simple ones! Cypress is very powerful and expressive, you may well find that you never actually need complicated tests, or that you need drastically fewer than you expected. Remember: _no code is faster than no code_.
 
 ### What About Non-Existence?
 
@@ -103,11 +109,11 @@ There is a performance tradeoff here: essentially, tests that have longer timeou
 
 # Chaining Commands
 
-It's crucially important to understand the mechanism by which Cypress Commands chain together, an asynchronous-yet-serial process of doing work on a subject yielded to the Command and yielding a subject to the next Command.
+It's crucially important to understand the mechanism by which Cypress Commands chain together: an asynchronous-yet-serial process of doing work on the Subject yielded to the Command, and yielding a Subject to the next Command.
 
 ## Subjects
 
-Subjects are the unseen context of a `cy.` chain, the flow of current pushing energy from one Command to the next. Because Cypress is built upon the Promise pattern, that "pushing of energy" is called "yielding" instead of "returning": Cypress Commands do not return useful values, but rather a Promise chain to build upon.
+Subjects are the unseen context of a `cy.` chain, the flow of current pushing energy from one Command to the next. Because Cypress is built upon the Promise pattern, that "pushing of energy" is called "yielding" instead of "returning": Cypress Commands do not return useful values, but rather a Cypress Chainer to continue building a sequence on Commands with.
 
 Cypress Commands must be executed against an appropriate subject. For instance, you can't call `cy.should("equal", 7)` directly: what should equal 7? `.should()` requires a subject!
 
@@ -172,11 +178,11 @@ Without a single explicit assertion, there are dozens of ways this test can fail
 
 - the initial visit url could respond with something other than success
 - any of the `cy.get()` Commands could fail to find their elements
-- form submission could result in a non-success HTTP
+- form submission could result in a non-success HTTP code
 - the in-page JS (the application under test) could throw an error
 
 Can you think of any more?
 
 Cypress expects this veritable minefield of modern web development and seeks to visualize all this chaos in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
 
-As such, it may be beneficial to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, and call it a day. You can rest assured that _so many things **must** be working_ in order for you to be able to navigate from Page A to Page B without error. If anything is fishy, Cypress will tell you about it with laser focus.
+As such, it may be beneficial to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, and call it a day. You can rest assured that _so many things **must** be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus.
