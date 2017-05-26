@@ -1,11 +1,6 @@
 title: Continuous Integration
 comments: true
 ---
-
-title: continuous-integration
-comments: true
----
-
 # What's Supported?
 
 Cypress should run on **all** CI providers. We currently have seen Cypress working on the following services / providers:
@@ -16,8 +11,6 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 - CodeShip
 - GitLab
 - Docker
-
-***
 
 # Running in CI
 
@@ -38,8 +31,6 @@ This will automatically go out and install Cypress, and then run all your tests.
 For a comprehensive list of all the options you can pass to `cypress run`, [refer to the CLI documentation](https://on.cypress.io/cli).
 
 ![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
-
-***
 
 ## Your CI Config File
 
@@ -78,8 +69,6 @@ test:
 
 For more example config files check out any of our [example apps](https://on.cypress.io/guides/all-example-apps).
 
-***
-
 ## Recording your runs
 
 You can automatically have Cypress record your runs and make them available in our Dashboard.
@@ -98,8 +87,6 @@ To record your runs:
 
 You can [read more about the Dashboard here](https://on.cypress.io/guides/dashboard-features).
 
-***
-
 # Using Environment Variables
 
 You can set various environment variables to modify how Cypress runs.
@@ -110,8 +97,6 @@ Typically you'd want to do this to:
 - [Install a specific version](#section-install-a-specific-version)
 - [Modify configuration settings](#section-modify-configuration-settings)
 - [Change environment variables in your tests](#section-change-environment-variables-in-your-tests)
-
-***
 
 ## Hide your Record Key
 
@@ -140,16 +125,12 @@ You can now omit the `--key` flag when recording.
 cypress run --record
 ```
 
-***
-
 ## Install a specific version
 
 You can install a specific version of Cypress by setting the environment variable: `CYPRESS_VERSION`.
 
 **Set the version to an older Cypress**
 ![screen shot 2016-03-28 at 11 28 26 am](https://cloud.githubusercontent.com/assets/1271364/14081365/601e2da4-f4d8-11e5-8ea8-0491ffcb0999.png)
-
-***
 
 ## Modify configuration settings
 
@@ -162,8 +143,6 @@ Typical use cases would be modifying things like:
 - `CYPRESS_REPORTER`
 
 Refer to the [configuration docs](https://on.cypress.io/guides/configuration#section-environment-variables) for more examples.
-
-***
 
 ## Change environment variables in your tests
 
@@ -191,8 +170,6 @@ cy
 
 Refer to the dedicated [Environment Variables Guide](https://on.cypress.io/guides/environment-variables) for more examples.
 
-***
-
 # Optimizing CI
 
 Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, therefore making the builds run faster.
@@ -207,8 +184,6 @@ cache:
     - /home/travis/.cypress/Cypress
 ```
 
-***
-
 ## Caching Cypress in CircleCI
 
 ```yaml
@@ -222,8 +197,6 @@ dependencies:
     - /home/ubuntu/.cypress/Cypress
 ```
 
-***
-
 # Dependencies
 
 If you're using a hosted CI service such as `Travis` or `CircleCI` then you don't have to install anything.
@@ -236,8 +209,6 @@ apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 
 If you run `cypress run` and see no output [see this section for troubleshooting this known issue](#section-no-output).
 
-***
-
 # Known Issues
 
 ## CircleCI
@@ -248,13 +219,9 @@ You need to select their [`Ubuntu 12.04` image](https://circleci.com/docs/build-
 
 The `Ubuntu 14.04` image does not have all of the required dependencies installed by default. You can likely install them yourself. [There is an open issue for this here.](https://github.com/cypress-io/cypress/issues/315)
 
-***
-
 ## Jenkins
 
 You need to install all of the [linux dependencies](#section-dependencies).
-
-***
 
 ## Docker
 
@@ -267,8 +234,6 @@ See [this issue](https://github.com/cypress-io/cypress/issues/165) for more info
 If you are running **long** runs on Docker, you need to set the `ipc` to `host` mode.
 
 [This issue](https://github.com/cypress-io/cypress/issues/350) describes exactly what to do.
-
-***
 
 # Troubleshooting
 
