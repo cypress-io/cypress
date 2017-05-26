@@ -268,6 +268,7 @@ If you are running long runs on Docker, you need to set the `ipc` to `host` mode
 
 * GitLab [https://gitlab.com/cypress-io/cypress-example-docker-gitlab](https://gitlab.com/cypress-io/cypress-example-docker-gitlab)
 * Codeship [https://github.com/cypress-io/cypress-example-docker-codeship](https://github.com/cypress-io/cypress-example-docker-codeship)
+* CircleCI [https://github.com/cypress-io/cypress-example-docker-circle](https://github.com/cypress-io/cypress-example-docker-circle)
 
 ***
 
