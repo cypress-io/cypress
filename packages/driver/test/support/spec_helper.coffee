@@ -1,11 +1,7 @@
-## do we need to require these or just use cypress?
-lolex = require("lolex")
-sinon = require("sinon")
-sinonChai = require("sinon-chai")
-
-$Cypress = require("../../src/main")
+$Cypress = window.$Cypress
 $ = $Cypress.$
 _ = $Cypress.prototype._
+sinon = $Cypress.prototype.sinon
 
 window.testUtils = {
   $Cypress: $Cypress
@@ -13,11 +9,9 @@ window.testUtils = {
   _: _
   moment: $Cypress.prototype.moment
   Promise: $Cypress.prototype.Promise
-  Cookies: require("js-cookie")
-  bililiteRange: require("../../vendor/bililiteRange")
+  Cookies: $Cypress.prototype.Cookies
+  bililiteRange: $Cypress.prototype.bililiteRange
 }
-
-$Cypress.Chai.use(sinonChai)
 
 uncaught = Mocha.Runner::uncaught
 
@@ -43,10 +37,9 @@ before ->
     else
       ct.skip()
 
-  # sinon.format = -> ""
   @sandbox = s = sinon.sandbox.create()
   @sandbox.useFakeTimers = ->
-    s.clock = lolex.install()
+    s.clock = $Cypress.prototype.lolex.install()
 
 beforeEach ->
   ## allow our own cypress errors to bubble up!

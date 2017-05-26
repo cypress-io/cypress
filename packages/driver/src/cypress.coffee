@@ -5,6 +5,10 @@ blobUtil = require("blob-util")
 minimatch = require("minimatch")
 moment = require("moment")
 Promise = require("bluebird")
+sinon = require("sinon")
+lolex = require("lolex")
+Cookies = require("js-cookie")
+bililiteRange = require("../vendor/bililiteRange")
 
 $Chai = require("./cypress/chai")
 $Chainer = require("./cypress/chainer")
@@ -269,6 +273,14 @@ class $Cypress
   Promise: Promise
 
   minimatch: minimatch
+
+  sinon: sinon
+
+  lolex: lolex
+
+  Cookies: Cookies
+
+  bililiteRange: bililiteRange
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
