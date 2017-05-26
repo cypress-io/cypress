@@ -90,6 +90,7 @@ api:
     parent: parent.html
     parents: parents.html
     parentsuntil: parentsuntil.html
+    pause: pause.html
     readfile: readfile.html
     reload: reload.html
     request: request.html

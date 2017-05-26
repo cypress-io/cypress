@@ -6,29 +6,54 @@ description: ''
 
 Get the last DOM element within a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.last` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.last()](#usage)
+```javascript
+.last()
+.last(options)
+```
 
-Reduce the set of matched DOM elements to the final one in the set.
+## Usage
 
-# Options
+`.last()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-Pass in an options object to change the default behavior of `cy.last`.
+**{% fa fa-check-circle green %} Valid Usage**
 
-**cy.last( *options* )**
+```javascript
+cy.get('nav a').last()       // Yield last link in nav
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.last()                  // Errors, cannot be chained off 'cy'
+cy.getCookies().last()     // Errors, 'getCookies' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.last`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+## Yields
 
-## Get the last list item in a list.
+`.last()` yields the new DOM element found by the command.
+
+## Timeout
+
+`.last()` will continue to look for the last element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Last element
+
+**Get the last list item in a list.**
 
 ```html
 <ul>
@@ -46,7 +71,7 @@ cy.get('ul').last()
 
 # Command Log
 
-## Find the last button in the form
+**Find the last button in the form**
 
 ```javascript
 cy.get('form').find('button').last()

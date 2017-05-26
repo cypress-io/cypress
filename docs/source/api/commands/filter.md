@@ -4,7 +4,11 @@ comments: true
 description: ''
 ---
 
-Get the DOM elements that match a specific selector. Opposite of [`.not()`](https://on.cypress.io/api/not)
+Get the DOM elements that match a specific selector.
+
+{% note info %}
+Opposite of [`.not()`](https://on.cypress.io/api/not)
+{% endnote %}
 
 # Syntax
 
@@ -51,7 +55,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.filter()` will continue to look for the filtered elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.filter()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
 
 # Examples
 

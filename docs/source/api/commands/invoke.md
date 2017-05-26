@@ -6,7 +6,9 @@ description: ''
 
 Invoke a function on the previously yielded subject.
 
-If you want to call a regular property that is not a function on the yielded subject, use [`.its()`](https://on.cypress.io/api/its).
+{% note info %}
+If you want to get a property that is not a function on the previously yielded subject, use [`.its()`](https://on.cypress.io/api/its).
+{% endnote %}
 
 # Syntax
 
@@ -17,7 +19,7 @@ If you want to call a regular property that is not a function on the yielded sub
 
 ## Usage
 
-`.invoke()` requires being chained off another cy command that *yields* an object with available functions.
+`.invoke()` requires being chained off another cy command that *yields* an object with function properties.
 
 **{% fa fa-check-circle green %} Valid Usage**
 

@@ -4,30 +4,61 @@ comments: true
 description: ''
 ---
 
-`cy.its` gets regular properties on the current subject.
+Get a property on the previously yielded subject.
 
-If you want to call a function on the current subject, use [`cy.invoke`](https://on.cypress.io/api/invoke).
+{% note info %}
+If you want to call a function on the previously yielded subject, use [`cy.invoke`](https://on.cypress.io/api/invoke).
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | the value of the property |
-| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.its( *propertyName* )](#usage)
+```javascript
+.its(propertyName)
+```
 
-Gets the property with the specified name.
+## Usage
 
-You can also access multiple nested properties with **dot notation**.
+`.its()` requires being chained off another cy command that *yields* an object with properties.
 
-# Usage
+**{% fa fa-check-circle green %} Valid Usage**
 
-## Access properties
+```javascript
+cy.wrap({width: '50'}).its('width') // Get the 'width' property
+cy.location().its('href')           // Get the 'href' property
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.its('window')                // Errors, cannot be chained off 'cy'
+cy.clearCookies().its('length') // Errors, 'clearCookies' does not yield Object
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} propertyName**  ***(String)***
+
+Name of property or nested properties (with dot notation) to get.
+
+## Yields
+
+`.invoke()` yields the value of the property.
+
+## Timeout
+
+# Examples
+
+## Plain Objects
+
+**Get property**
 
 ```javascript
 cy.wrap({foo: 'bar'}).its('foo').should('eq', 'bar') // true
 ```
 
-Call the `length` property on the current subject
+## DOM Elements
+
+**Get the `length` property of a DOM element**
 
 ```javascript
 cy
@@ -37,7 +68,28 @@ cy
 })
 ```
 
-## Access functions
+## Strings
+
+**Get `length` of title**
+
+```javascript
+cy.title().its('length').should('eq', 24)
+```
+
+
+## Functions
+
+**Get function property**
+
+```javascript
+var fn = function(){
+  return 'bar'
+}
+
+cy.wrap({foo: fn}).its('foo').should('be.a', 'function')
+```
+
+**Inspect function**
 
 You can access functions to then drill into their own properties instead of invoking them.
 
@@ -59,35 +111,34 @@ window.Factory = Factory
 
 ```javascript
 cy
-  .window() // get the window object
-  .its('Factory') // now we are on the Factory function
-  .invoke('create', 'arg') // and now we can invoke properties on it
-
+  .window()                 // yields window object
+  .its('Factory')           // yields Factory function
+  .invoke('create', 'arg')  // now invoke properties on it
 ```
 
-{% note info Testing cy.window().its('fetch') %}
-[Check out our example recipe on testing window.fetch using cy.its()](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% note info %}
+[Check out our example recipe on testing `window.fetch` using `.its()`](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
-## Drill into nested properties
+## Nested Properties
 
-You can additionally automatically drill into nested properties by using **dot notation**.
+You can drill into nested properties by using **dot notation**.
 
 ```javascript
-var obj = {
-  foo: {
-    bar: {
-      baz: 'quux'
+var user = {
+  contacts: {
+    work: {
+      name: 'Kamil'
     }
   }
 }
 
-cy.wrap(obj).its('foo.bar.baz').should('eq', 'quux') // true
+cy.wrap(user).its('contacts.work.name').should('eq', 'Kamil') // true
 ```
 
 # Command Log
 
-## Fetch 'comments' fixture
+**Get `responseBody` of aliased route**
 
 ```javascript
 cy

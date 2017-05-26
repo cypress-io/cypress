@@ -4,7 +4,11 @@ comments: true
 description: ''
 ---
 
-Sets a `debugger` and log what the previous command yields. You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
+Set a `debugger` and log what the previous command yields.
+
+{% note warning %}
+You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
+{% endnote %}
 
 # Syntax
 
@@ -33,6 +37,15 @@ Pass in an options object to change the default behavior of `.debug()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
+
+## Yields
+
+`.debug()` yields the previous command's yield for inspection.
+
+## Timeout
+
+`.debug()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
 
 # Examples
 

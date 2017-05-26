@@ -4,67 +4,98 @@ comments: true
 description: ''
 ---
 
-Get the remote `window.location` as a normalized object.
+Get the remote `window.location` as an object.
 
-| | |
-|--- | --- |
-| **Returns** | location object detailed below |
-| **Timeout** | *cannot timeout* |
+# Syntax
 
-# [cy.location()](#usage)
+```javascript
+.location()
+.location(key)
+.location(options)
+.location(key, options)
+```
 
-Given a remote URL of `http://localhost:8000/app/index.html?q=dan#/users/123/edit`, an object would be returned with the following properties:
+## Usage
 
-Key | Type | Returns
---- | --- | ----
-`hash` | string | #/users/123/edit
-`host` | string | localhost:8000
-`hostname` | string | localhost
-`href` | string | http://localhost:8000/app/index.html?q=brian#/users/123/edit
-`origin` | string | http://localhost:8000
-`pathname` | string | /app.index.html
-`port` | string | 8000
-`protocol` | string | http:
-`search` | string | ?q=brian
-`toString` | function | http://localhost:8000/app/index.html?q=brian#/users/123/edit
+`.location()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-# [cy.location( *key* )](#key-usage)
+**{% fa fa-check-circle green %} Valid Usage**
 
-Get the specific value by key of the location object above.
+```javascript
+cy.location()    
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.location`.
+**{% fa fa-angle-right %} key** ***(String)***
 
-**cy.location( *options* )**
-**cy.location( *key*, *options* )**
+A key on the location object.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.location()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Check location for query params and pathname
+`.location()` yields the location object with the following properties:
+
+- `hash`
+- `host`
+- `hostname`
+- `href`
+- `origin`
+- `pathname`
+- `port`
+- `protocol`
+- `search`
+- `toString`
+
+## Timeout
+
+# Examples
+
+## Location Properties
+
+**Make assertions about every location property**
+
+```javascript
+cy.visit('http://localhost:8000/app/index.html?q=dan#/users/123/edit')
+
+cy.location().should(function(location) {
+  expect(location.hash).to.eq('#/users/123/edit')
+  expect(location.host).to.eq('localhost:8000')
+  expect(location.hostname).to.eq('localhost')
+  expect(location.href).to.eq('http://localhost:8000/app/index.html?q=dan#/users/123/edit')
+  expect(location.origin).to.eq('http://localhost:8000')
+  expect(location.pathname).to.eq('/app.index.html')
+  expect(location.port).to.eq('8000')
+  expect(location.protocol).to.eq('http:')
+  expect(location.search).to.eq('?q=dan')
+  expect(location.toString()).to.eq('http://localhost:8000/app/index.html?q=brian#/users/123/edit')
+})
+```
+
+**Check location for query params and pathname**
 
 ```javascript
 // we can yield the location subject and work with
 // it directly as an object
-cy
-  .get('#search').type('brian{enter}')
-  .location().should(function(location){
-    expect(location.search).to.eq('?search=brian')
-    expect(location.pathname).to.eq('/users')
-    expect(location.toString()).to.eq('http://localhost:8000/users?search=brian')
-  })
+cy.get('#search').type('niklas{enter}')
+cy.location().should(function(location){
+  expect(location.search).to.eq('?search=niklas')
+  expect(location.pathname).to.eq('/users')
+})
 ```
 
-# Key Usage
+## Key
 
-## Assert that a redirect works
+**Assert that a redirect works**
 
 ```javascript
-// we should be redirected to the login page
 cy
   .visit('http://localhost:3000/admin')
   .location('pathname').should('eq', '/login')
@@ -72,33 +103,36 @@ cy
 
 # Notes
 
-## Do not use `window.location`
+**No need to use `window.location`**
 
-Let's examine the following scenario:
+Cypress automatically normalizes the `.location()` command and strips out extraneous values and properties found in `window.location`. Also, the object literal yielded by `.location()` is just a basic object literal, not the special `window.location` object.
+
+When changing properties on the real `window.location` object, it forces the browser to navigate away. In Cypress, the object yielded is a plain object, so changing its properties will have no effect on navigation.
+
+***Console output of `window.location`***
 
 ```javascript
-// get our remote window and log out
-// the window.location object
 cy.window().then(function(window){
   console.log(window.location)
 })
 ```
 
+<img width="422" alt="screen shot 2017-05-26 at 11 41 27 am" src="https://cloud.githubusercontent.com/assets/1271364/26501744/6f9b6188-4208-11e7-91ce-59dbb455b1fc.png">
+
+***Console output of `.location()`***
+
 ```javascript
-// go through the location command
-// and log out this object
 cy.location().then(function(location){
   console.log(location)
 })
 ```
 
-Cypress automatically normalizes the `cy.location()` command and strips out extrenuous values and properties found in `window.location`. Also the object literal returned by `cy.location()` is just a basic object literal, not the special `window.location` object.
+<img width="478" alt="screen shot 2017-05-26 at 11 42 11 am" src="https://cloud.githubusercontent.com/assets/1271364/26501743/6f8fcb84-4208-11e7-9f08-9c97592afc08.png">
 
-When changing properties on the real `window.location` object, it will force the browser to navigate away. In Cypress, the object we returned is a plain object, and changing or affecting its properties will have no effect on navigation.
 
 # Command Log
 
-## Assert on the location's href
+**Assert on the location's href**
 
 ```javascript
 cy.location().should(function(location){
@@ -118,3 +152,4 @@ When clicking on `location` within the command log, the console outputs the foll
 
 - [hash](https://on.cypress.io/api/hash)
 - [url](https://on.cypress.io/api/url)
+- [window](https://on.cypress.io/api/window)

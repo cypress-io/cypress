@@ -4,44 +4,72 @@ comments: true
 description: ''
 ---
 
-Get the parents DOM elements of the DOM elements.
+Get the parent DOM elements of a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parents` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-# [cy.parents()](#usage)
+# Syntax
 
-Get the ancestors of each element in the current set of matched elements.
+```javascript
+.parents()
+.parents(selector)
+.parents(options)
+.parents(selector, options)
+```
 
-# [cy.parents( *selector* )](#selector-usage)
+## Usage
 
-Get the ancestors of each element in the current set of matched elements filtered by selector
+`.parents()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-# Options
+**{% fa fa-check-circle green %} Valid Usage**
 
-Pass in an options object to change the default behavior of `cy.parents`.
+```javascript
+cy.get('aside').parents()  // Yield parents of aside
+```
 
-**cy.parents( *options* )**
-**cy.parents( *selector*, *options* )**
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.parents()              // Errors, cannot be chained off 'cy'
+cy.go('back').parents()   // Errors, 'go' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.parents()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the elements
 
-# Usage
 
-## Get the parents of the active `li`
+## Yields
+
+`.parents()` yields the new DOM element(s) found by the command.
+
+## Timeout
+
+`.parents()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Parents
+
+**Get the parents of the active `li`**
 
 ```javascript
 cy.get('li.active').parents()
 ```
 
-# Selector Usage
+## Selector
 
-## Get the parents with class `nav` of the active `li`
+**Get the parents with class `nav` of the active `li`**
 
 ```javascript
 cy.get('li.active').parents('.nav')
@@ -49,7 +77,7 @@ cy.get('li.active').parents('.nav')
 
 # Command Log
 
-## Get the parents of the active `li`
+**Get the parents of the active `li`**
 
 ```javascript
 cy.get('li.active').parents()
@@ -63,5 +91,6 @@ When clicking on the `parents` command within the command log, the console outpu
 
 # See also
 
-- [parent](https://on.cypress.io/api/parent)
 - [children](https://on.cypress.io/api/children)
+- [parent](https://on.cypress.io/api/parent)
+- [parentsUntil](https://on.cypress.io/api/parentsuntil)

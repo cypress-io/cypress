@@ -15,7 +15,7 @@ Get the first DOM element within a set of DOM elements.
 
 ## Usage
 
-`.first()` requires being chained off another cy command that *yields* a DOM element.
+`.first()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
