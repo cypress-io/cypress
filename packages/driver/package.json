@@ -7,9 +7,7 @@
     "build": "gulp build",
     "watch": "gulp watch",
     "clean-deps": "rm -rf node_modules",
-    "test": "gulp test",
-    "test-watch": "gulp test:watch",
-    "watch-test": "gulp test:watch"
+    "test": "gulp test"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",

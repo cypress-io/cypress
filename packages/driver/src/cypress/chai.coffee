@@ -3,6 +3,7 @@ $ = require("jquery")
 Backbone = require("backbone")
 chai = require("chai")
 chaijQuery = require("chai-jquery")
+sinonChai = require("sinon-chai")
 
 $Cypress = require("../cypress")
 $Dom = require("./dom")
@@ -23,6 +24,8 @@ allWordsBetweenCurlyBraces  = /(#{.+?})/g
 allQuadStars = /\*\*\*\*/g
 
 $ChaiRef = null
+
+chai.use(sinonChai)
 
 chai.use (chai, utils) ->
   chaijQuery(chai, utils, $)

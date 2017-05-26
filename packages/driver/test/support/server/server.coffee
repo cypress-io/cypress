@@ -90,12 +90,15 @@ app.get "/node_modules/*", (req, res) ->
     root: path.join(__dirname, "../../..")
   })
 
-app.get "/dist-test/*", (req, res) ->
-  filePath = path.join(__dirname, "../../../dist-test", req.params[0])
+sendDistFile = (dir) -> (req, res) ->
+  filePath = path.join(__dirname, "../../../#{dir}", req.params[0])
   if /\.js$/.test(filePath)
     sendJs(res, filePath)
   else
     res.sendFile(filePath)
+
+app.get "/dist/*", sendDistFile("dist")
+app.get "/dist-test/*", sendDistFile("dist-test")
 
 app.get "/fixtures/*", (req, res) ->
   res.sendFile("fixtures/#{req.params[0]}", {
@@ -117,6 +120,9 @@ app.get "/", (req, res) ->
   res.render(path.join(__dirname, "views/index.html"), {
     specs: getAllSpecs()
   })
+
+app.get "/spec_helper.js", (req, res) ->
+  sendJs(res, getSpec("support/spec_helper.coffee"), true)
 
 app.get "*", (req, res) ->
   filePath = req.params[0].replace(/\/+$/, "")

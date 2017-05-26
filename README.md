@@ -115,3 +115,37 @@ If you want to see log messages from all Cypress projects use wild card
 ```bash
 DEBUG=cypress:* ...
 ```
+
+### Docker
+
+Sometimes tests pass locally, but fail on CI. Our CI environment should be
+dockerized. In order to run the same image locally, there is script
+[dev/run-docker-local.sh](dev/run-docker-local.sh) that assumes that you
+have pulled the image `cypress/internal:chrome58` (see
+[circle.yml](circle.yml) for the current image name).
+
+The image will start and will map the root of the monorepo to
+`/cypress-monorepo` inside the image. Now you can modify the files using your
+favorite environment and rerun tests inside the docker environment.
+
+***hint** sometimes building inside the image has problems with `node-sass`
+library
+
+```
+Error: Missing binding /cypress-monorepo/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
+Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
+
+Found bindings for the following environments:
+  - OS X 64-bit with Node.js 6.x
+
+This usually happens because your environment has changed since running `npm install`.
+Run `npm rebuild node-sass` to build the binding for your current environment.
+```
+
+From the running container, go into that project and rebuild `node-sass`
+
+```
+$ ./dev/run-docker-local.sh
+cd packages/desktop-gui
+npm rebuild node-sass
+```
