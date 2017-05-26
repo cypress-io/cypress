@@ -53,7 +53,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.next()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.next()` will continue to look for the next element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
 
 # Examples
 

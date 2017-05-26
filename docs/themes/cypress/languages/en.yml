@@ -109,6 +109,9 @@ sidebar:
     parents: parents
     parentsuntil: parentsUntil
     pause: pause
+    prev: prev
+    prevall: prevAll
+    prevuntil: prevUntil
     readfile: readFile
     reload: reload
     request: request

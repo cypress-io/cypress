@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element matched by the selector.
+Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
 
 # Syntax
@@ -25,7 +25,7 @@ Get all following siblings of each DOM element in a set of matched DOM elements 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('p').nextUntil('.warning') // Yield siblings of 'p' until '.warning'
+cy.get('div').nextUntil('.warning') // Yield siblings after 'div' until '.warning'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**

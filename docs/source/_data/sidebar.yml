@@ -91,6 +91,9 @@ api:
     parents: parents.html
     parentsuntil: parentsuntil.html
     pause: pause.html
+    prev: prev.html
+    prevall: prevall.html
+    prevuntil: prevuntil.html
     readfile: readfile.html
     reload: reload.html
     request: request.html

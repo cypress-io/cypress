@@ -4,36 +4,62 @@ comments: true
 description: ''
 ---
 
-Get the immediately preceding sibling of each element in the set of the elements.
+Get the immediately preceding sibling of each element in a set of the elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prev` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.prev()](#usage)
+```javascript
+.prev()
+.prev(selector)
+.prev(options)
+.prev(selector, options)
+```
 
-Get the immediately preceding sibling of each element in the set of matched elements.
+## Usage
 
-# [cy.prev( *selector* )](#selector-usage)
+`.prev()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.get('tr.highlight').prev() // Yield previous 'tr'
+```
 
-Pass in an options object to change the default behavior of `cy.prev`.
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-**cy.prev( *options* )**
-**cy.prev( *selector*, *options* )**
+```javascript
+cy.prev()                // Errors, cannot be chained off 'cy'
+cy.getCookies().prev()   // Errors, 'getCookies' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.prev()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+## Yields
 
-## Find the previous element of the element with class of `active`
+`.prev()` yields the new DOM element(s) found by the command.
+
+## Timeout
+
+`.prev()` will continue to look for the previous element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Previous
+
+**Find the previous element of the element with class of `active`**
 
 ```html
 <ul>
@@ -46,13 +72,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <li>Lorikeets</li>
+// yields <li>Lorikeets</li>
 cy.get('.active').prev()
 ```
 
-# Selector Usage
+## Selector
 
-## Find the previous element with a class of `active`
+**Find the previous element with a class of `active`**
 
 ```html
 <ul>
@@ -65,13 +91,13 @@ cy.get('.active').prev()
 ```
 
 ```javascript
-// returns <li>Cockatoos</li>
+// yields <li>Cockatoos</li>
 cy.get('li').prev('.active')
 ```
 
 # Command Log
 
-## Find the previous element of the active `li`
+**Find the previous element of the active `li`**
 
 ```javascript
 cy.get('.left-nav').find('li.active').prev()
@@ -87,4 +113,6 @@ When clicking on `prev` within the command log, the console outputs the followin
 
 # See also
 
-1. [next](https://on.cypress.io/api/next)
+- [next](https://on.cypress.io/api/next)
+- [prevAll](https://on.cypress.io/api/prevall)
+- [prevUntil](https://on.cypress.io/api/prevuntil)

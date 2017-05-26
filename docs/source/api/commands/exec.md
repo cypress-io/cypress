@@ -9,8 +9,8 @@ Execute a system command.
 # Syntax
 
 ```javascript
-.exec(command)
-.exec(command, options)
+cy.exec(command)
+cy.exec(command, options)
 ```
 
 ## Usage

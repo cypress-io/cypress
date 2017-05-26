@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Get the root element. By default the root is `document`. When calling `cy.root` in a [`cy.within`](https://on.cypress.io/api/within), the root element will be the return of the within command.
+Get the root element.
 
 | | |
 |--- | --- |

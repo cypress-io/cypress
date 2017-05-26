@@ -13,10 +13,10 @@ Load a fixed set of data located in a file.
 # Syntax
 
 ```javascript
-.fixture(path)
-.fixture(path, encoding)
-.fixture(path, options)
-.fixture(path, encoding, options)
+.fixture(filePath)
+.fixture(filePath, encoding)
+.fixture(filePath, options)
+.fixture(filePath, encoding, options)
 ```
 
 ## Usage
@@ -34,9 +34,9 @@ cy.fixture('logo.png').then(function(logo){
 
 ## Arguments
 
-**{% fa fa-angle-right %} path**  ***(String)***
+**{% fa fa-angle-right %} filePath**  ***(String)***
 
-A filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) (which defaults to `cypress/fixtures`).
+A path to a file within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) (which defaults to `cypress/fixtures`).
 
 You can nest fixtures within folders and reference them by defining the path from the fixturesFolder:
 
@@ -66,7 +66,7 @@ Pass in an options object to change the default behavior of `.fixture()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `.fixture()` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the command to be processed
 
 ## Yields
 
@@ -227,5 +227,6 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 
 - [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+- [readFile](https://on.cypress.io/api/readfile)
 - [route](https://on.cypress.io/api/route)
 - [then](https://on.cypress.io/api/then)

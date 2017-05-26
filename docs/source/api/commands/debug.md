@@ -40,12 +40,9 @@ Option | Default | Notes
 
 ## Yields
 
-`.debug()` yields the previous command's yield for inspection.
+`.debug()` yields the previous command's yield.
 
 ## Timeout
-
-`.debug()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
-
 
 # Examples
 
