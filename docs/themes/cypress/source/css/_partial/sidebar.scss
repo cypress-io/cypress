@@ -28,8 +28,8 @@
 }
 
 .sidebar-li {
-  text-indent: -15px;
-  line-height: 1.5;
+  line-height: 1.3;
+  padding: 2px 0;
 }
 
 .sidebar-link {
@@ -38,7 +38,7 @@
   display: block;
   color: $color-link;
   text-decoration: none;
-  padding: 3px 10px 3px 35px;
+  padding: 3px 10px 3px 21px;
   position: relative;
   width: 100%;
   font-weight: 400;
