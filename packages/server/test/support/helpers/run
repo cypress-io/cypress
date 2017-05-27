@@ -1,7 +1,7 @@
 SPEC="$1"
 BROWSER="$2"
 
-if [ "$SPEC" == '' ]; then
+if [ "$SPEC" = '' ]; then
   echo 'Error: A path to a spec file must be specified!'
   echo ''
   echo 'It should look something like this:'
