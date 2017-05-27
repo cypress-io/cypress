@@ -17,6 +17,8 @@ jobs:
 
       - run: echo $TERM
 
+      - run: node -e 'console.log(process.env.TERM)'
+
       # need to restore a separate cache for each package.json
       - restore_cache:
           key: v3-{{ .Branch }}-root-deps
