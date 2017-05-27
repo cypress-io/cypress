@@ -244,7 +244,7 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project) ->
+  listenForProjectEnd: (project, gui) ->
     new Promise (resolve) ->
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
@@ -324,7 +324,7 @@ module.exports = {
   waitForTestsToFinishRunning: (options = {}) ->
     { project, gui, screenshots, started, end, name, cname, videoCompression } = options
 
-    @listenForProjectEnd(project)
+    @listenForProjectEnd(project, gui)
     .then (obj) =>
       finish = ->
         project
