@@ -159,7 +159,14 @@ jobs:
           name: Server unit tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run all test -- --package server
+              npm run all test-unit -- --package server
+            fi
+
+      - run:
+          name: Server integration tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm run all test-integration -- --package server
             fi
       #
       # things to run in the 2nd CI container
