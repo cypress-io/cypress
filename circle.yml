@@ -51,7 +51,7 @@ jobs:
       - restore_cache:
           key: v3-{{ .Branch }}-deps-ts
       - restore_cache:
-          key: v3-{{ .Branch }}-deps-docs
+          key: v4-{{ .Branch }}-deps-docs
 
       # only installs the root dependencies, without going into packages
       # via postinstall script
@@ -124,7 +124,7 @@ jobs:
           paths:
             - packages/ts/node_modules
       - save_cache:
-          key: v3-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
+          key: v4-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
           paths:
             - docs/node_modules
 
