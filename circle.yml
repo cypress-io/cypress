@@ -15,9 +15,9 @@ jobs:
     steps:
       - checkout
 
-      - run: echo $TERM
-
-      - run: node -e 'console.log(process.env.TERM)'
+      ## make sure the term is set to 'xterm' in node
+      ## else colors (and tests) will fail
+      - run: echo 'term env var is:' $TERM && node -e 'assert.equal(process.env.TERM, "xterm")'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
