@@ -52,7 +52,9 @@ jobs:
       # only installs the root dependencies, without going into packages
       # via postinstall script
       - run: npm install --ignore-scripts
-      - run: npm run install-packages-serial
+
+      ## now install all of the sub packages node_modules
+      - run: npm run all install -- --serial
 
       # save each node_modules folder per package
       - save_cache:
@@ -120,6 +122,7 @@ jobs:
           paths:
             - docs/node_modules
 
+      ## now go build all of subpackages
       - run: npm run build
 
       #
