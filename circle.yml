@@ -31,7 +31,7 @@ jobs:
       - restore_cache:
           key: v3-{{ .Branch }}-deps-example
       - restore_cache:
-          key: v3-{{ .Branch }}-deps-electron
+          key: v4-{{ .Branch }}-deps-electron
       - restore_cache:
           key: v3-{{ .Branch }}-deps-extension
       - restore_cache:
