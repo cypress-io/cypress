@@ -85,6 +85,7 @@ jobs:
           key: v3-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
           paths:
             - packages/electron/node_modules
+            - ~/.cache/electron
       - save_cache:
           key: v3-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
           paths:
