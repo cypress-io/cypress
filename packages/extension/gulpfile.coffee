@@ -7,10 +7,10 @@ clean      = require("gulp-clean")
 rename     = require("gulp-rename")
 runSeq     = require("run-sequence")
 source     = require("vinyl-source-stream")
-icons      = require("@cypress/icons")
 Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
 browserify = require("browserify")
+icons      = require("../icons")
 ext        = require("./")
 
 gulp.task "copy:socket:client", ->

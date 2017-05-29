@@ -31,7 +31,6 @@
   "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
   "devDependencies": {
     "@cypress/core-socket": "0.1.0",
-    "@cypress/icons": "0.5.2",
     "@cypress/releaser": "0.1.12",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
