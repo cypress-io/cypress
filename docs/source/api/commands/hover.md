@@ -20,7 +20,7 @@ cy.get(".content").invoke("show").click()
 ```
 
 {% note info Dealing with hover and hidden elements %}
-[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
+[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
 {% endnote %}
 
 You can also force the action to be performed on the element regardless of whether the element is visible or not.
