@@ -67,6 +67,9 @@ module.exports = {
 
     @automation(win)
 
+  _newBrowserWindow: (options) ->
+    new BrowserWindow(options)
+
   automation: (win) ->
     cookies = Promise.promisifyAll(win.webContents.session.cookies)
 
@@ -155,7 +158,7 @@ module.exports = {
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
 
-    win = new BrowserWindow(options)
+    win = @_newBrowserWindow(options)
 
     win.on "blur", ->
       options.onBlur.apply(win, arguments)
