@@ -556,7 +556,7 @@ describe "lib/cypress", ->
     ## for headed projects!
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
-    it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+    it.only "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
       permissionsPath = path.resolve("./permissions")
 
       fs.ensureDirAsync(permissionsPath)
@@ -564,10 +564,10 @@ describe "lib/cypress", ->
         fs.chmodAsync(permissionsPath, "111")
       .then =>
         cypress.start(["--project=#{permissionsPath}", "--cli-version"])
-      .then =>
-        fs.chmodAsync(permissionsPath, "644")
-      .then =>
-        fs.removeAsync(permissionsPath)
+      # .then =>
+      #   fs.chmodAsync(permissionsPath, "644")
+      # .then =>
+      #   fs.removeAsync(permissionsPath)
       .then =>
         @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
