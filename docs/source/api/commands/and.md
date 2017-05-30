@@ -4,9 +4,11 @@ comments: true
 description: ''
 ---
 
-`.and` is an alias of [`.should`](https://on.cypress.io/api/should) and is used in making assertions.
+Make an assertion.
 
-You'd typically use `cy.and` when you are making multiple assertions about the same subject.
+{% note info %}
+An alias of [`.should()`](https://on.cypress.io/api/and)
+{% endnote %}
 
 {% note info New to Cypress? %}
 [Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)
@@ -133,7 +135,7 @@ cy
 
 **Verify length, content, and classes from multiple `<p>`**
 
-Passing a function to `cy.and` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert.
+Passing a function to `.and()` enables you to assert on the yielded subject. This gives you the opportunity to *massage* what you'd like to assert.
 
 Just be sure *not* to include any code that has side effects in your callback function.
 
@@ -152,7 +154,10 @@ cy
   .get('p')
   .should('not.be.empty')
   .and(function($p){
+    // should have found 3 elements
     expect($p).to.have.length(3)
+
+    // make sure the first contains some text content
     expect($p.first()).to.contain('Hello World')
 
     // use jquery's map to grab all of their classes

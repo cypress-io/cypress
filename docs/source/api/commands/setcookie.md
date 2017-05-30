@@ -6,20 +6,37 @@ description: ''
 
 Set a browser cookie.
 
-| | |
-|--- | --- |
-| **Returns** | a cookie object |
-| **Timeout** | `cy.setCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command. |
 
-# [cy.setCookie( *name*, *value* )](#usage)
+# Syntax
 
-Sets a browser cookie.
+```javascript
+cy.setCookie(name, value)
+cy.setCookie(name, value, options)
+```
 
-# Options
+## Usage
 
-Pass in an options object to change the default behavior of `cy.setCookie`.
+`.setCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**[cy.setCookie( *name*, *value*, *options* )](#options-usage)**
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.setCookie('auth_key', '123key')    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} name** ***(String)***
+
+The name of the cookie to set.
+
+**{% fa fa-angle-right %} value** ***(String)***
+
+The value of the cookie to set.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.setCookie()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -28,12 +45,31 @@ Option | Default | Notes
 `secure` | `false` | whether the cookie is a secure cookie
 `httpOnly` | `false` | whether the cookie is an HTTP only cookie
 `expiry` | 20 years into the future | when the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.setCookie` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.setCookie()` command to be processed
 `log` | `true` | whether to display command in command log
 
-# Usage
 
-## Set a cookie
+## Yields
+
+`.setCookie()` yields a cookie object literal with the following properties:
+
+- `name`
+- `value`
+- `path`
+- `domain`
+- `httpOnly`
+- `secure`
+- `expiry`
+
+## Timeout
+
+`.setCookie()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+
+# Examples
+
+## Set Value
+
+**Set a cookie**
 
 ```javascript
 cy
@@ -44,7 +80,7 @@ cy
 
 # Command Log
 
-## Get cookie
+**Set a cookie**
 
 ```javascript
 cy

@@ -6,36 +6,46 @@ description: ''
 
 Select an option within a `<select>` DOM element.
 
-**The following events are fired during select:** `mousedown`, `focus`, `mouseup`, `click`
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.select` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
+```javascript
+.select(value)
+.select(values)
+.select(value, options)
+.select(values, options)
+```
 
-# [cy.select( *text* )](#text-usage)
+## Usage
 
-Select an option within a `<select>` element based on the text content of the option.
+`.select()` requires being chained off another cy command that *yields* a `<select>` DOM element.
 
-# [cy.select( *value* )](#value-usage)
+**{% fa fa-check-circle green %} Valid Usage**
 
-Select an option within a `<select>` element based on the value of the option.
+```javascript
+cy.get('select').select('user-1') // Select the 'user-1' option
+```
 
-# [cy.select( *texts* )](#texts-usage)
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-Select multiple options within a `<select>` element based on the text of the option.
+```javascript
+cy.select('John Adams')  // Errors, cannot be chained off 'cy'
+cy.location().select()   // Errors, 'location' does not yield <select> element
+```
 
-# [cy.select( *values* )](#values-usage)
 
-Select multiple options within a `<select>` element based on the value of the option.
+## Arguments
 
-# Options
+**{% fa fa-angle-right %} value**  ***(String)***
 
-Pass in an options object to change the default behavior of `cy.select`.
+The `value` or text content of the option to be selected.
 
-**cy.select( *text*, *options* )**
-**cy.select( *value*, *options* )**
-**cy.select( *array*, *options* )**
+**{% fa fa-angle-right %} values**  ***(Array)***
+
+An array of `values` or text contents of the options to be selected.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.select()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -44,9 +54,20 @@ Option | Default | Notes
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the select
 `log` | `true` | whether to display command in command log
 
-# Text Usage
 
-## Select the option with the text `apples`
+## Yields
+
+`.select()` yields the new DOM elements selected.
+
+## Timeout
+
+`.select()` will continue to select the options for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Text Content
+
+**Select the option with the text `apples`**
 
 ```html
 <select>
@@ -57,13 +78,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <option value="456">apples</option>
+// yields <option value="456">apples</option>
 cy.get('select').select('apples')
 ```
 
-# Value Usage
+## Value
 
-## Select the option with the value "456"
+**Select the option with the value "456"**
 
 ```html
 <select>
@@ -74,13 +95,13 @@ cy.get('select').select('apples')
 ```
 
 ```javascript
-// returns <option value="456">apples</option>
+// yields <option value="456">apples</option>
 cy.get('select').select('456')
 ```
 
-# Texts Usage
+## Select multiple options
 
-## Select the options with the texts "apples" and "bananas"
+**Select the options with the texts "apples" and "bananas"**
 
 ```html
 <select multiple>
@@ -94,9 +115,7 @@ cy.get('select').select('456')
 cy.get('select').select(['apples', 'bananas'])
 ```
 
-# Values Usage
-
-## Select the options with the values "456" and "457"
+**Select the options with the values "456" and "457"**
 
 ```html
 <select multiple>
@@ -112,7 +131,7 @@ cy.get('select').select(['456', '457'])
 
 # Command Log
 
-## Select the option with the text "Homer Simpson"
+**Select the option with the text "Homer Simpson"**
 
 ```javascript
 cy.get('select').select('Homer Simpson')
