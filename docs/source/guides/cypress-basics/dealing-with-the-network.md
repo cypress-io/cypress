@@ -2,6 +2,15 @@ title: Dealing with the Network
 comments: true
 ---
 
+# What You'll Learn
+
+- how Cypress enables you to isolate any or all of your front-end with `cy.server` and `cy.route`
+- what tradeoffs we make when we stub our network requests
+- how Cypress visualizes network management in the Command Log
+- how to use Fixtures to reuse XHR responses
+- how to use Aliases to refer back to XHR requests and wait on them
+- how to write declarative tests that resist flake
+
 # Strategy
 
 Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests within your application. Cypress provides you direct access to the XHR objects, enabling you to make assertions about its properties. Additionally you can even stub and mock a request's response.
@@ -133,7 +142,7 @@ Each [`cy.route`](https://on.cypress.io/api/route) you provide will automaticall
 
 When you start a server and provide a routing table, Cypress will display this under "Routes" in the Command Log.
 
-![Routing Table](https://cloud.githubusercontent.com/assets/1268976/10780221/91743ab8-7d11-11e5-9fe1-8bcbdf5e344c.png)
+{% img /img/guides/cypress-basics/dealing-with-the-network/server-routing-table.png Routing Table %}
 
 Once you start a server with [`cy.server`](https://on.cypress.io/api/server), all requests will be controllable for the remainder of the test. When a new test runs, Cypress will restore the default behavior and remove all routing and stubbing. For a complete reference of the API and options, refer to the documentation for each command.
 
@@ -240,7 +249,7 @@ In this example, there are many possible sources of failure. In most testing too
 
 With Cypress, by adding a [`cy.wait`](https://on.cypress.io/api/wait) guard, you can more easily pinpoint your specific problem. If the request never went out, you'll receive errors like this.
 
-![wait failure](https://cloud.githubusercontent.com/assets/1268976/10780062/a9c3245a-7d0f-11e5-9984-67d84650b0a0.png)
+{% img /img/guides/cypress-basics/dealing-with-the-network/clear-source-of-failure.png Wait Failure %}
 
 Now we know exactly why our test failed. It had nothing to do with the DOM. Instead we can see that either our request never went out or a request went out to the wrong URL.
 

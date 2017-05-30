@@ -53,6 +53,7 @@ sidebar:
     appendices: Appendices
     configuration: Configuration
     error-messages: Error Messages
+    available-assertions: Available Assertions
     best-practices: Best Practices
     anti-patterns: Anti-patterns
     contributing: Contributing

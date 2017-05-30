@@ -1,0 +1,10 @@
+{
+  "name": "icons",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo 'Nothing to test for the icons package'"
+  },
+  "dependencies": {
+    "@cypress/icons": "0.5.4"
+  }
+}

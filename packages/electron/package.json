@@ -7,6 +7,7 @@
   "scripts": {
     "start": "./bin/cypress-electron",
     "test": "mocha --compilers coffee:../coffee/register",
+    "preinstall": "cd ../icons; npm install",
     "postinstall": "./bin/cypress-electron --install",
     "clean-deps": "rm -rf node_modules"
   },
@@ -24,7 +25,6 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-electron#readme",
   "devDependencies": {
-    "@cypress/icons": "0.5.2",
     "@cypress/releaser": "0.1.12",
     "chai": "^3.5.0",
     "mocha": "^3.0.2"

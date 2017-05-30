@@ -6,6 +6,9 @@ jobs:
       # the Docker image with Cypress dependencies and Chrome browser
       - image: cypress/internal:chrome58
         environment:
+          ## this enables colors + fixes failing unit tests
+          TERM: xterm
+
           npm_config_loglevel: warn
           # even when running as non-root user
           # need to set unsafe perm to be able to do `npm postinstall`
@@ -14,6 +17,17 @@ jobs:
     parallelism: 3
     steps:
       - checkout
+
+      ## make sure the TERM is set to 'xterm' in node
+      ## else colors (and tests) will fail
+      ## See the following information
+      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      - run:
+          name: Checking TERM is set
+          command: |
+            echo 'term env var is:' $TERM
+            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
@@ -27,11 +41,13 @@ jobs:
       - restore_cache:
           key: v3-{{ .Branch }}-deps-example
       - restore_cache:
-          key: v3-{{ .Branch }}-deps-electron
+          key: v5-{{ .Branch }}-deps-electron
       - restore_cache:
           key: v3-{{ .Branch }}-deps-extension
       - restore_cache:
           key: v3-{{ .Branch }}-deps-https-proxy
+      - restore_cache:
+          key: v3-{{ .Branch }}-deps-icons
       - restore_cache:
           key: v3-{{ .Branch }}-deps-launcher
       - restore_cache:
@@ -47,12 +63,14 @@ jobs:
       - restore_cache:
           key: v3-{{ .Branch }}-deps-ts
       - restore_cache:
-          key: v3-{{ .Branch }}-deps-docs
+          key: v4-{{ .Branch }}-deps-docs
 
       # only installs the root dependencies, without going into packages
       # via postinstall script
       - run: npm install --ignore-scripts
-      - run: npm run install-packages-serial
+
+      ## now install all of the sub packages node_modules
+      - run: npm run all install -- --serial
 
       # save each node_modules folder per package
       - save_cache:
@@ -76,9 +94,11 @@ jobs:
           paths:
             - packages/example/node_modules
       - save_cache:
-          key: v3-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          key: v5-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
           paths:
             - packages/electron/node_modules
+            - ~/.cache/electron
+            - ~/.electron
       - save_cache:
           key: v3-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
           paths:
@@ -87,6 +107,10 @@ jobs:
           key: v3-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
           paths:
             - packages/https-proxy/node_modules
+      - save_cache:
+          key: v3-{{ .Branch }}-deps-icons-{{ checksum "packages/icons/package.json" }}
+          paths:
+            - packages/icons/node_modules
       - save_cache:
           key: v3-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
           paths:
@@ -116,10 +140,11 @@ jobs:
           paths:
             - packages/ts/node_modules
       - save_cache:
-          key: v3-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
+          key: v4-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
           paths:
             - docs/node_modules
 
+      ## now go build all of subpackages
       - run: npm run build
 
       #
@@ -150,7 +175,14 @@ jobs:
           name: Server unit tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run all test -- --package server
+              npm run all test-unit -- --package server
+            fi
+
+      - run:
+          name: Server integration tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm run all test-integration -- --package server
             fi
       #
       # things to run in the 2nd CI container
