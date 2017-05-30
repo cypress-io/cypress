@@ -2474,7 +2474,7 @@ describe "Routes", ->
             res.end()
 
           ## start the server listening on ipv6 only
-          server.listen 6565, "::1", =>
+          server.listen 6565, "::", =>
 
             @rp("http://localhost:6565/#/foo")
             .then (res) ->
