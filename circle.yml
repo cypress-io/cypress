@@ -158,18 +158,6 @@ jobs:
             fi
 
       - run:
-          name: Running any failing integration test by --frep
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              if [ "$FAILING_FGREP" != "" ]; then
-                cd packages/server; npm run test-integration
-              else
-                echo "FAILING_FGREP test name not set, skipping..."
-              fi
-            fi
-
-
-      - run:
           name: Fast unit tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 0 ]; then
