@@ -24,5 +24,6 @@ BLUEBIRD_DEBUG=1 \
 DEBUG=nock.*,-nock.common,-nock.scope,socket.io:*,xvfb-maybe \
 BROWSER=$BROWSER \
 xvfb-maybe --xvfb-run-args "-s \"-screen 0 1280x1024x8\"" mocha $SPEC \
+--fgrep "$FAILING_FGREP" \
 --recursive \
 --compilers ts:../ts/register,coffee:../coffee/register
