@@ -157,27 +157,27 @@ jobs:
               npm run all lint
             fi
 
-      - run:
-          name: Fast unit tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run all test -- --package coffee
-              npm run all test -- --package desktop-gui
-              npm run all test -- --package electron
-              npm run all test -- --package extension
-              npm run all test -- --package https-proxy
-              npm run all test -- --package launcher
-              npm run all test -- --package reporter
-              npm run all test -- --package runner
-              npm run all test -- --package socket
-              npm run all test -- --package static
-            fi
-      - run:
-          name: Server unit tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run all test-unit -- --package server
-            fi
+      # - run:
+      #     name: Fast unit tests
+      #     command: |
+      #       if [ $CIRCLE_NODE_INDEX == 0 ]; then
+      #         npm run all test -- --package coffee
+      #         npm run all test -- --package desktop-gui
+      #         npm run all test -- --package electron
+      #         npm run all test -- --package extension
+      #         npm run all test -- --package https-proxy
+      #         npm run all test -- --package launcher
+      #         npm run all test -- --package reporter
+      #         npm run all test -- --package runner
+      #         npm run all test -- --package socket
+      #         npm run all test -- --package static
+      #       fi
+      # - run:
+      #     name: Server unit tests
+      #     command: |
+      #       if [ $CIRCLE_NODE_INDEX == 0 ]; then
+      #         npm run all test-unit -- --package server
+      #       fi
 
       - run:
           name: Server integration tests
