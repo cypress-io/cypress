@@ -44,6 +44,8 @@ describe "lib/gui/windows", ->
       Windows.create({})
       expect(@win.webContents.openDevTools).not.to.be.calledTwice
 
+    ## TODO: test everything else going on in this method!
+
   context ".trackState", ->
     beforeEach ->
       @sandbox.stub(savedState, "set")
