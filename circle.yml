@@ -18,9 +18,16 @@ jobs:
     steps:
       - checkout
 
-      ## make sure the term is set to 'xterm' in node
+      ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
-      - run: echo 'term env var is:' $TERM && node -e 'assert.equal(process.env.TERM, "xterm")'
+      ## See the following information
+      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      - run:
+          name: Checking TERM is set
+          command: |
+            echo 'term env var is:' $TERM
+            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
