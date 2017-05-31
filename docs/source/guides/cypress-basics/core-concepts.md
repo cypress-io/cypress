@@ -57,20 +57,6 @@ Can you read this? If you did, it might sound something like this:
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
 
-- selector engine
-- wrapped jquery objects
-- finding by content
-- timeouts
-- clicking on things
-- asserting various things about elements
-- chai integration
-- subjects
-- rules
-- async/serial/promises+
-- aliases
-- retries
-- explicit/implicit subject assertions
-- default/automatic assertions
 
 # Finding Elements
 
