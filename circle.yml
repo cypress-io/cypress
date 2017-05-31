@@ -47,8 +47,6 @@ jobs:
       - restore_cache:
           key: v5-{{ .Branch }}-deps-https-proxy
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-icons
-      - restore_cache:
           key: v5-{{ .Branch }}-deps-launcher
       - restore_cache:
           key: v5-{{ .Branch }}-deps-reporter
@@ -107,10 +105,6 @@ jobs:
           key: v5-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
           paths:
             - packages/https-proxy/node_modules
-      - save_cache:
-          key: v5-{{ .Branch }}-deps-icons-{{ checksum "packages/icons/package.json" }}
-          paths:
-            - packages/icons/node_modules
       - save_cache:
           key: v5-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
           paths:
