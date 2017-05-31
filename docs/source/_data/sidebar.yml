@@ -7,7 +7,8 @@ guides:
     next-steps: next-steps.html
   cypress-basics:
     overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    commands-elements-and-assertions: commands-elements-and-assertions.html
+    core-concepts: core-concepts.html
+    organizing-tests: organizing-tests.html
     aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html

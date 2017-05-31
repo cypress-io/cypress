@@ -21,23 +21,23 @@ Expressivity is all about getting more done with less typing. Let's look at an e
 ```js
 describe("Post Resource", function() {
   it("Creating a new Post", function() {
-    cy.visit("/posts/new")
+    cy.visit("/posts/new") /* 1 */
 
-    cy.contains("Post Title")
+    cy.contains("Post Title") /* 2 */
       .click()
-      .type("My First Post")
+      .type("My First Post") /* 3 */
 
-    cy.contains("Post Body")
+    cy.contains("Post Body") /* 4 */
       .click()
-      .type("Hello, world!")
+      .type("Hello, world!") /* 5 */
 
-    cy.get('button[type="submit"]')
+    cy.get('button[type="submit"]') /* 6 */
       .click()
 
-    cy.url()
+    cy.url() /* 7 */
       .should("eq", "/posts/my-first-post")
 
-    cy.get('h1')
+    cy.get('h1') /* 8 */
       .its('value')
       .should("eq", "My First Post")
   })
@@ -46,6 +46,7 @@ describe("Post Resource", function() {
 
 Can you read this? If you did, it might sound something like this:
 
+{% note info %}
 1. Visit the page at `/posts/new`
 2. Find the element containing the text "Post Title", click it
 3. Type "My First Post"
@@ -55,8 +56,25 @@ Can you read this? If you did, it might sound something like this:
 7. Grab the browser URL, ensure it is `/posts/my-first-post`
 8. Select the `<h1>` tag, ensure it contains the text "My First Post"
 
+{% endnote %}
+
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
 
+For the remainder of this guide we'll go through the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
+
+- wrapped jquery objects
+- finding by content
+- timeouts
+- clicking on things
+- asserting various things about elements
+- chai integration
+- subjects
+- rules
+- async/serial/promises+
+- aliases
+- retries
+- explicit/implicit subject assertions
+- default/automatic assertions
 
 # Finding Elements
 
@@ -85,7 +103,7 @@ Not so fast...
 
 ## Cypress is _Not_ Like jQuery
 
-Cypress re-uses the selector search functionality of jQuery, but it does not share jQuery's execution model. Specifically, all Cypress commands are asynchronous and work more like Promises (more on this shortly).
+Cypress re-uses the selector search functionality of jQuery ...actually, jQuery **IS** inside of Cypress, and all element references are real jQuery element objects, but Cypress does not share jQuery's execution model. Specifically, all Cypress commands are asynchronous: they work more like Promises (more on this later.)
 
 In jQuery, if you want to operate on an element, you might do this:
 
@@ -96,7 +114,7 @@ let myElement = $('.my-selector').first()
 doSomething(myElement)
 ```
 
-But in Cypress, calling `cy.get()` will not return a value (it returns ). You'll need to call `.then` on your command chain in order to yield the actual element.
+But in Cypress, calling `cy.get()` will not return a value (actually, it returns a Cypress Chainer instance, but we aren't there yet.) You'll need to call `.then` on your command chain in order to yield the actual, jQuery-wrapped element.
 
 ```js
 // cy.get() returns a Cypress Chainer instance, not a value!
