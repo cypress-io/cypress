@@ -103,7 +103,7 @@ Not so fast...
 
 ## Cypress is _Not_ Like jQuery
 
-Cypress re-uses the selector search functionality of jQuery ...actually, jQuery **IS** inside of Cypress, and all element references are real jQuery element objects, but Cypress does not share jQuery's execution model. Specifically, all Cypress commands are asynchronous: they work more like Promises (more on this later.)
+Cypress re-uses the selector search functionality of jQuery ...actually, jQuery **IS** inside of Cypress, and all element references are real jQuery element objects, but Cypress does not share jQuery's execution model, it just wraps it. Specifically, all Cypress commands are asynchronous: they work more like Promises (more on this later.)
 
 In jQuery, if you want to operate on an element, you might do this:
 
@@ -121,16 +121,16 @@ But in Cypress, calling `cy.get()` will not return a value (actually, it returns
 cy.get('.my-selector')
   // .then() is a Chainer method that accepts a function
   .then(function(myElement) {
-    // the function receives the value and can now do work
+    // the function receives the value and can synchronously work with it
     doSomething(myElement)
   })
 ```
 
-## Why Complicate This?
+{% note info Why Complicate Element Selection? %}
 
-I hear you saying "Is it _really_ this complicated? I just want to get ahold of an element in the DOM! Shouldn't that be dead simple?" Of course! At first, it seems like you should be able to just reach out and grab the DOM. But you're forgetting something very important: the DOM is alive and ever-changing. What if the element isn't ready yet? Are you prepared to sprinkle wait-and-retry code throughout all your tests every time you select an element? No way! That's what we're trying to get away from!
+If this seems a bit strange, bear with us! This isn't needless complication of DOM queries, it's actually critically important to testing web applications. We'll address this fundamental shift by the end of this document, so stay tuned!
 
-Cypress was built to work with the natural flow of the browser environment, instead of against it. All Cypress commands are asynchronous with automatic retry and timeout built right in. If you look for a DOM element that isn't there immediately (perhaps it is animating in?), Cypress won't fail immediately. Instead it watches that selector to see if anything appears for a smear of time. Modern web applications must naturally deal in these smears of time due to network latency, DOM performance, events, intervals, and animations. Cypress _expects_ you to work this way, and it works this way as well.
+{% endnote %}
 
 ## Existence is Guaranteed
 
