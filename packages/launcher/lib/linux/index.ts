@@ -1,5 +1,5 @@
 import {log} from '../log'
-import {prop, trim} from 'ramda'
+import {prop, trim, tap} from 'ramda'
 import {FoundBrowser, Browser, NotInstalledError} from '../types'
 import execa = require('execa')
 
@@ -16,6 +16,12 @@ function getLinuxBrowser (name: string, binary: string, versionRegex: RegExp): P
     if (m) {
       return m[1]
     }
+    log('Could not extract version from %s using regex %s', stdout, versionRegex)
+    return notInstalledErr(binary)
+  }
+
+  const returnError = (err: Error) => {
+    log('Could not detect browser %s', err.message)
     return notInstalledErr(binary)
   }
 
@@ -24,6 +30,7 @@ function getLinuxBrowser (name: string, binary: string, versionRegex: RegExp): P
   return execa.shell(cmd)
     .then(prop('stdout'))
     .then(trim)
+    .then(tap(log))
     .then(getVersion)
     .then((version) => {
       return {
@@ -32,7 +39,7 @@ function getLinuxBrowser (name: string, binary: string, versionRegex: RegExp): P
         path: binary
       }
     })
-    .catch(() => notInstalledErr(binary))
+    .catch(returnError)
 }
 
 export function detectBrowserLinux (browser: Browser) {
