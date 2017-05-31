@@ -151,6 +151,7 @@ jobs:
           name: Running linters
           command: |
             if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm run lint
               npm run all lint
             fi
 

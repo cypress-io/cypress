@@ -29,6 +29,8 @@ npm run all build-dev
 npm start
 ```
 
+If there are errors building the packages, run with `DEBUG=cypress:run ...`
+option to see more details
 
 ### Tasks
 
