@@ -1,99 +1,43 @@
 ---
----
 title: writefile
 comments: true
 description: ''
 ---
 
-Writes to a file with the specified contents. JavaScript arrays and objects are stringified and formatted into text. If the path to the file does not exist, the file and it's path will be created. If the file already exists, it will be over-written.
+Write to a file with the specified contents.
 
-| | |
-|--- | --- |
-| **Returns** | the contents written to the file |
-| **Timeout** | `cy.writeFile` will wait for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to write the file. |
-
-# [cy.writeFile( *filePath*, *contents* )](#usage)
-
-Writes to the `filePath` with the `contents`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
-
-# [cy.writeFile( *filePath*, *contents*, *encoding* )](#specify-encoding)
-
-Writes to the `filePath` with the `contents` using the `encoding`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.writeFile`.
-
-**[cy.writeFile( *filePath*, *contents*, *options* )](#options-usage)**
-
-**[cy.writeFile( *filePath*, *contents*, *encoding*, *options* )](#options-usage)**
-
-Option | Default | Notes
---- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.writeFile` command to be processed
-
-# Usage
-
-## Write some text to a `txt` file
+# Syntax
 
 ```javascript
-// {projectRoot}/path/to/message.txt will be created with the contents "Hello World"
-cy
-  .writeFile('path/to/message.txt', 'Hello World')
-  .then(function (text) {
-    expect(text).to.equal('Hello World') // true
-  })
+cy.writeFile(filePath, contents)
+cy.writeFile(filePath, contents, encoding)
+cy.writeFile(filePath, contents, options)
+cy.writeFile(filePath, contents, encoding, options)
 ```
 
-## Write JSON to a file
+## Usage
 
-JavaScript arrays and objects are stringified and formatted into text.
+`cy.writeFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-// {projectRoot}/path/to/data.json will be created with the following:
-// {
-//   "name": "Eliza",
-//   "email": "eliza@example.com"
-// }
-
-cy
-  .writeFile('path/to/data.json', { name: 'Eliza', email: 'eliza@example.com' })
-  .then(function (user) {
-    // user will equal:
-    // {
-    //   name: 'Eliza',
-    //   email: 'eliza@example.com'
-    // }
-    expect(user.name).to.equal('Eliza')
-  })
+cy.writeFile('menu.json')    
 ```
 
-## Write response data to a fixture file
+## Arguments
 
-```javascript
-cy
-  .request('https://jsonplaceholder.typicode.com/users')
-  .then(function(response){
-    cy.writeFile('cypress/fixtures/users.json', response.body)
-  })
-  // our fixture file is now generated and can be used
-  .fixture('users')
-  .then(function(users){
-    expect(users[0].name).to.exist
-  })
-```
+**{% fa fa-angle-right %} filePath** ***(String)***
 
-## Specify encoding
+A path to a file within the project root (the directory that contains `cypress.json`).
 
-Specify the encoding with the third argument.
+**{% fa fa-angle-right %} contents** ***(String, Array, or Object)***
 
-```javascript
-// {projectRoot}/path/to/message.txt will be created with the contents "Hello World"
-// the encoding will be "ascii"
-cy.writeFile('path/to/ascii.txt', 'Hello World', 'ascii'))
-```
+The contents to be written to the file.
 
-The following encodings are supported:
+**{% fa fa-angle-right %} encoding**  ***(String)***
+
+The encoding to be used when writing to the file. The following encodings are supported:
 
 * `ascii`
 * `base64`
@@ -107,9 +51,97 @@ The following encodings are supported:
 * `utf16le`
 * `utf-16le`
 
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.writeFile()`.
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the command to be processed.
+
+## Yields
+
+`cy.writeFile()` yields the contents written to the file.
+
+## Timeout
+
+`cy.writeFile()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to write to the file.
+
+
+# Examples
+
+## Text
+
+**Write some text to a `txt` file**
+
+If the path to the file does not exist, the file and it's path will be created. If the file already exists, it will be over-written.
+
+```javascript
+cy
+  .writeFile('path/to/message.txt', 'Hello World')
+  .then(function (text) {
+    expect(text).to.equal('Hello World') // true
+  })
+```
+
+`{projectRoot}/path/to/message.txt` will be created with the following contents:
+
+```text
+ "Hello World"
+```
+
+## JSON
+
+**Write JSON to a file**
+
+JavaScript arrays and objects are stringified and formatted into text.
+
+```javascript
+cy.writeFile('path/to/data.json', { name: 'Eliza', email: 'eliza@example.com' })
+  .then(function (user) {
+    expect(user.name).to.equal('Eliza')
+  })
+```
+
+`{projectRoot}/path/to/data.json` will be created with the following contents:
+
+```json
+{
+  "name": "Eliza",
+  "email": "eliza@example.com"
+}
+```
+
+**Write response data to a fixture file**
+
+```javascript
+cy.request('https://jsonplaceholder.typicode.com/users').then(function(response){
+  cy.writeFile('cypress/fixtures/users.json', response.body)
+})
+
+// our fixture file is now generated and can be used
+cy.fixture('users').then(function(users){
+  expect(users[0].name).to.exist
+})
+```
+
+## Encoding
+
+**Specify the encoding with the third argument.**
+
+```javascript
+cy.writeFile('path/to/ascii.txt', 'Hello World', 'ascii'))
+```
+
+`{projectRoot}/path/to/message.txt` will be created with the following contents:
+
+```text
+Hello World
+```
+
 # Command Log
 
-## Write an array to a file
+**Write an array to a file**
 
 ```javascript
 cy.writeFile('info.log', ['foo', 'bar', 'baz'])

@@ -41,7 +41,7 @@ Option | Default | Notes
 
 ## Yields
 
-`.hash()` the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
+`.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
 
 ## Timeout
 
@@ -52,7 +52,7 @@ Option | Default | Notes
 **Assert that hash is `#/users/1` given remote URL: `http://localhost:8000/app/#/users/1`**
 
 ```javascript
-// Hash returns #/users/1
+// yields #/users/1
 cy.hash().should('eq', '#/users/1') // => true
 ```
 

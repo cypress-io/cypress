@@ -23,7 +23,7 @@ cy.route(options)
 
 ## Usage
 
-`.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 

@@ -9,15 +9,15 @@ Read a file and yield its contents.
 # Syntax
 
 ```javascript
-.next(filePath)
-.next(filePath, encoding)
-.next(filePath, options)
-.next(filePath, encoding, options)
+cy.readFile(filePath)
+cy.readFile(filePath, encoding)
+cy.readFile(filePath, options)
+cy.readFile(filePath, encoding, options)
 ```
 
 ## Usage
 
-`.readFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.readFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -49,7 +49,7 @@ The encoding to be used when reading the file. The following encodings are suppo
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `.readFile()`.
+Pass in an options object to change the default behavior of `cy.readFile()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -57,11 +57,11 @@ Option | Default | Notes
 
 ## Yields
 
-`.readFile()` yields the contents of the file.
+`cy.readFile()` yields the contents of the file.
 
 ## Timeout
 
-`.readFile` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process the command.
+`cy.readFile()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process the command.
 
 # Examples
 
@@ -99,6 +99,24 @@ For JSON, the contents yielded are parsed into JavaScript and returned.
 cy.readFile('path/to/data.json').then(function (user) {
   expect(user.name).to.equal('Eliza') // true
 })
+```
+
+## YAML
+
+**Get translation data from Yaml file**
+
+```javascript
+YAML = require('yamljs')
+
+cy.readFile("languages/en.yml").then(function (yamlString) {
+  this.english = YAML.parse(yamlString)
+})
+
+cy.get("#sidebar")
+  .find(".sidebar-title").each(function (displayedTitle, i) {
+    englishTitle = this.english.sidebar[@sidebarTitles[i]]
+    expect(displayedTitle.text()).to.eq(englishTitle)
+  })
 ```
 
 ## Encoding

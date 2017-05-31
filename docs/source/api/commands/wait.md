@@ -4,54 +4,123 @@ comments: true
 description: ''
 ---
 
-Use `cy.wait` to wait for a number of milliseconds or for a resource to resolve.
+Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
 
-| | |
-|--- | --- |
-| **Returns** | the current subject if waiting for number of milliseconds, the xhr object if waiting for a route |
-| **Timeout** | `cy.wait` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or it will wait for both the duration request and response for the `timeout` specified in the command's [options](#options).|
 
-# [cy.wait( *number* )](#number-usage)
+# Syntax
 
-Wait a specific amount of `ms` before resolving and continuing onto the next command.
+```javascript
+cy.wait(time)
+cy.wait(alias)
+cy.wait(aliases)
+cy.wait(time, options)
+cy.wait(alias, options)
+cy.wait(aliases, options)
+```
 
-# [cy.wait( *alias* )](#alias-usage)
+## Usage
 
-Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XHR has a response.
+`cy.wait()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-{% note info New to Cypress? %}
-Read about [Network Requests](https://on.cypress.io/guides/network-requests-xhr) and [Aliasing](https://on.cypress.io/guides/using-aliases) first.
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.wait(500)    
+cy.wait('@getProfile')    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} time** ***(Number)***
+
+The amount of time to wait in milliseconds.
+
+**{% fa fa-angle-right %} alias** ***(String)***
+
+An aliased route as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
+
+{% note info %}
+[Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
 {% endnote %}
 
-# [cy.wait( *\[alias1*, *alias2*, *alias3\]* )](#alias-array-usage)
+**{% fa fa-angle-right %} aliases** ***(Array)***
 
-Wait for an array of [aliases](https://on.cypress.io/guides/using-aliases) to have responses.
+An array of aliased routes as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
 
-# Options
+**{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.wait`.
-
-**[cy.wait( *text*, *options* )](#options-usage)**
+Pass in an options object to change the default behavior of `cy.wait()`.
 
 Option | Default | Notes
 --- | --- | ---
 `timeout` | [requestTimeout](https://on.cypress.io/guides/configuration#timeouts), [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) | Override the default requestTimeout and responseTimeout (in ms)
 `log` | `true` | whether to display command in command log
 
-You can also change the default `requestTimeout` and `responseTimeout` that all `cy.wait` use in [configuration](https://on.cypress.io/guides/configuration).
+You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the [configuration](https://on.cypress.io/guides/configuration).
 
-# Number Usage
+## Yields
 
-## Wait 500ms
+When given a `time` argument, `.wait()` yields the previous commands yield.
+
+When given an `alias` argument, `.wait()` yields the xhr object of the aliased route.
+
+## Timeout
+
+`cy.wait` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
+
+# Examples
+
+## Time
+
+In Cypress, you almost never need to use `cy.wait()` for an arbitrary amount of time. If you are finding yourself doing this, there is likely a much better, simpler way.
+
+**Let's imagine the following examples:**
+
+***Unnecessary wait for `cy.request`***
+
+Waiting here is unnecessary since the `cy.request` command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the `cy.request()` has already resolved.
 
 ```javascript
-// Wait 500ms before resolving
-cy.wait(500)
+cy.request("http://localhost:8080/db/seed")
+cy.wait(5000)     // <--- this is unnecessary
 ```
 
-# Alias Usage
+***Unnecessary wait for `cy.visit`***
 
-## Wait for a specific XHR to respond
+Waiting for this is unnecessary because the `cy.visit()` resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
+
+```javascript
+cy.visit("http://localhost/8080")
+cy.wait(5000)     // <--- this is unnecessary
+```
+
+***Unnecessary wait for `cy.get`***
+
+Waiting for the `cy.get()` below is unncessary because `cy.get()` automatically retries until the table's `tr` has a length of 2.
+
+Whenever commands have an assertion they will not resolve until their associated assertions pass. This enables you to simply describe the state of your application without having to worry about when it gets there.
+
+```javascript
+cy.server()
+cy.route("GET", /users/, [{"name": "Maggy"}, {"name": "Joan"}])
+cy.get("#fetch").click()
+cy.wait(4000)     // <--- this is unnecessary
+cy.get("table tr").should("have.length", 2)
+```
+
+Alternatively a better solution to this problem is by waiting explicitly for an aliased route.
+
+```javascript
+cy.server()
+cy.route("GET", /users/, [{"name": "Maggy"}, {"name": "Joan"}]).as("getUsers")
+cy.get("#fetch").click()
+cy.wait("@getUsers")     // <--- wait explicitly for this route to finish
+cy.get("table tr").should("have.length", 2)
+```
+
+## Alias
+
+**Wait for a specific XHR to respond**
 
 ```javascript
 // Wait for the route aliased as 'getAccount' to respond
@@ -67,68 +136,63 @@ cy
   })
 ```
 
-## Wait automatically increments responses
+**Wait automatically increments responses**
+
+Each time we use `cy.wait()` for an alias, Cypress waits for the next nth matching request.
 
 ```javascript
-// each time we cy.wait() for an alias, Cypress will
-// wait for the next nth matching request
-cy
-  .server()
-  .route('/books', []).as('getBooks')
-  .get('#search').type('Grendel')
+cy.server()
+cy.route('/books', []).as('getBooks')
+cy.get('#search').type('Grendel')
 
-  // wait for the first response to finish
-  .wait('@getBooks')
+// wait for the first response to finish
+cy.wait('@getBooks')
 
-  // the results should be empty because we
-  // responded with an empty array first
-  .get('#book-results').should('be.empty')
+// the results should be empty because we
+// responded with an empty array first
+cy.get('#book-results').should('be.empty')
 
-  // now re-route the books endpoint and force it to
-  // have a response this time
-  .route('/books', [{name: 'Emperor of all maladies'}])
+// now re-define the /books response
+cy.route('/books', [{name: 'Emperor of all maladies'}])
 
-  .get('#search').type('Emperor of')
+cy.get('#search').type('Emperor of')
 
-  // now when we wait for 'getBooks' again, Cypress will
-  // automatically know to wait for the 2nd response
-  .wait('@getBooks')
+// now when we wait for 'getBooks' again, Cypress will
+// automatically know to wait for the 2nd response
+cy.wait('@getBooks')
 
-  // we responded with 1 book item so now we should
-  // have one result
-  .get('#book-results').should('have.length', 1)
+// we responded with 1 book item so now we should
+// have one result
+cy.get('#book-results').should('have.length', 1)
 ```
 
-# Alias Array Usage
+## Aliases
 
-## You can pass an array of aliases that will be waited on before resolving.
+**You can pass an array of aliases that will be waited on before resolving.**
 
 ```javascript
-cy
-  .server()
-  .route(/users/).as('getUsers')
-  .route(/activities/).as('getActivities')
-  .route(/comments/).as('getComments')
-  .visit('/dashboard')
+cy.server()
+cy.route('users/*').as('getUsers')
+cy.route('activities/*').as('getActivities')
+cy.route('comments/*').as('getComments')
+cy.visit('/dashboard')
 
-  .wait(['@getUsers', '@getActivities', 'getComments'])
-  .then(function(xhrs){
-    // xhrs will now be an array of matching XHR's
-    // xhrs[0] <-- getUsers
-    // xhrs[1] <-- getActivities
-    // xhrs[2] <-- getComments
-  })
+cy.wait(['@getUsers', '@getActivities', 'getComments']).then(function(xhrs){
+  // xhrs will now be an array of matching XHR's
+  // xhrs[0] <-- getUsers
+  // xhrs[1] <-- getActivities
+  // xhrs[2] <-- getComments
+})
 ```
 
-## You could also use the [`cy.spread`](https://on.cypress.io/api/spread) command here to spread the array into multiple arguments.
+**Using [`cy.spread()`](https://on.cypress.io/api/spread) to spread the array into multiple arguments.**
 
 ```javascript
-cy
-  .server()
-  .route(/users/).as('getUsers')
-  .route(/activities/).as('getActivities')
-  .route(/comments/).as('getComments')
-  .wait(['@getUsers', '@getActivities', 'getComments'])
+cy.server()
+cy.route('users/*').as('getUsers')
+cy.route('activities/*').as('getActivities')
+cy.route('comments/*').as('getComments')
+cy.wait(['@getUsers', '@getActivities', 'getComments'])
   .spread(function(getUsers, getActivities, getComments){
     // each XHR is now an individual argument
   })
@@ -136,35 +200,33 @@ cy
 
 # Notes
 
-## requestTimeout and responseTimeout
+**requestTimeout and responseTimeout**
 
-`cy.wait` goes through two separate "waiting" periods for a matching XHR.
+When used with an alias, `cy.wait()` goes through two separate "waiting" periods.
 
 The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `5000` ms.
 
-This means that when you begin waiting for an XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
+This means that when you begin waiting for an aliased XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
 
 ![screen shot 2015-12-21 at 5 00 09 pm](https://cloud.githubusercontent.com/assets/1268976/11942578/8e7cba50-a805-11e5-805c-614f8640fbcc.png)
 
-Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `20000` ms.
+Once Cypress detects that a matching XHR has begun its request, it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `20000` ms.
 
 This means Cypress will now wait up to 20 seconds for the external server to respond to this XHR. If no response is detected, you will get an error message that looks like this:
 
 ![screen shot 2015-12-21 at 5 06 52 pm](https://cloud.githubusercontent.com/assets/1268976/11942577/8e7196e8-a805-11e5-97b1-8acdde27755d.png)
 
-This gives you the best of both worlds - a fast error feedback loop when requests never go out, and a much longer duration for the actual external response.
+This gives you the best of both worlds - a fast error feedback loop when requests never go out and a much longer duration for the actual external response.
 
 # Command Log
 
-## Wait for the put to user to resolve.
+**Wait for the PUT to users to resolve.**
 
 ```javascript
-cy
-  .server()
-  .route('PUT', /users/, {}).as('userPut')
-  .get('form').submit()
-  .wait('@userPut')
-    .its('url').should('include', 'users')
+cy.server()
+cy.route('PUT', /users/, {}).as('userPut')
+cy.get('form').submit()
+cy.wait('@userPut').its('url').should('include', 'users')
 ```
 
 The commands above will display in the command log as:
@@ -177,7 +239,7 @@ When clicking on `wait` within the command log, the console outputs the followin
 
 # See also
 
-- [server](https://on.cypress.io/api/server)
-- [route](https://on.cypress.io/api/route)
 - [as](https://on.cypress.io/api/as)
+- [route](https://on.cypress.io/api/route)
+- [server](https://on.cypress.io/api/server)
 - [spread](https://on.cypress.io/api/spread)

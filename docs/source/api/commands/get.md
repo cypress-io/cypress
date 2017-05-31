@@ -32,7 +32,7 @@ A selector used to filter matching DOM elements.
 
 **{% fa fa-angle-right %} alias** ***(String)***
 
-An alias is defined using the [`.as()`](https://on.cypress.io/api/as) command and can be referenced here with the `@` character and the name of the alias.
+An alias as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
 
 Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before [`.as()`](https://on.cypress.io/api/as) to find it again.
 
