@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+const log = require('debug')('cypress:run')
 const _ = require('lodash')
 const path = require('path')
 const AsciiTable = require('ascii-table')
@@ -8,6 +9,7 @@ const chalk = require('chalk')
 const Promise = require('bluebird')
 const runAll = require('@cypress/npm-run-all')
 const through = require('through')
+const fs = require('fs')
 
 const globAsync = Promise.promisify(glob)
 
@@ -20,7 +22,12 @@ const packageNameFromPath = (fullPath) => {
 const nonPackageDirs = ['docs/']
 
 const getDirs = () => {
+  const logDirs = (dirs) => {
+    log('found packages\n%s', dirs.join('\n'))
+    return dirs
+  }
   return globAsync('packages/*/')
+  .then(logDirs)
   .then((dirs) => dirs.concat(nonPackageDirs))
   .map((dir) => path.join(process.cwd(), dir).replace(/\/$/, ''))
 }
@@ -78,9 +85,9 @@ const mapTasks = (cmd, packages) => {
         cwd: dir,
         label: {
           name: `${packageName.replace(/\/$/, '')}:${cmd}`,
-          color: colors[index],
-        },
-      },
+          color: colors[index]
+        }
+      }
     }
   })
 }
@@ -98,10 +105,27 @@ const noPackagesError = (err) => err.noPackages
 const resultsError = (err) => Array.isArray(err.results)
 const failProcess = () => process.exit(1)
 
+const printOtherErrors = (err) => {
+  console.error(err.message)
+  console.error('run with DEBUG=cypress:run ... to see more details')
+  log(err.stack)
+  throw err
+}
+
+function hasPackageJson (dir) {
+  const packagePath = path.join(dir, 'package.json')
+  return fs.existsSync(packagePath)
+}
+
+function keepDirsWithPackageJson (dirs) {
+  return dirs.filter(hasPackageJson)
+}
+
 module.exports = (cmd, options) => {
   const packagesFilter = options.package || options.packages
 
   return getDirs()
+  .then(keepDirsWithPackageJson)
   .then((dirs) => filterDirsByPackage(dirs, packagesFilter))
   .then((dirs) => checkDirsLength(dirs, `No packages were found with the filter '${packagesFilter}'`))
   .then((dirs) => filterDirsByCmd(dirs, cmd))
@@ -115,10 +139,10 @@ module.exports = (cmd, options) => {
   .then((dirs) => mapTasks(cmd, dirs))
   .then((tasks) => {
     return runAll(tasks, {
-      parallel: options.serial ? false : true,
+      parallel: !options.serial,
       printLabel: tasks.length > 1,
       stdout: process.stdout,
-      stderr: collectStderr,
+      stderr: collectStderr
     })
   })
   .then(() => {
@@ -133,7 +157,7 @@ module.exports = (cmd, options) => {
   .catch(resultsError, (err) => {
     const results = AsciiTable.factory({
       heading: ['package', 'exit code'],
-      rows: err.results.map((result) => [result.name.replace(`:${cmd}`, ''), result.code]),
+      rows: err.results.map((result) => [result.name.replace(`:${cmd}`, ''), result.code])
     }).toString()
 
     console.error(chalk.red(`\nOne or more tasks failed running 'npm run all ${cmd}'.`))
@@ -145,5 +169,6 @@ module.exports = (cmd, options) => {
 
     return failProcess()
   })
+  .catch(printOtherErrors)
   .catch(failProcess)
 }

@@ -1,6 +1,6 @@
 # require("../../spec_helper")
 #
-# extension = require("#{root}../../../packages/extension")
+# extension = require("@packages/extension")
 # Fixtures = require("../../support/helpers/fixtures")
 # project  = require("#{root}../lib/open_project")
 # Project  = require("#{root}../lib/project")

@@ -26,7 +26,8 @@ sidebar:
     next-steps: Next Steps
     cypress-basics: Basics
     overview-of-the-gui-tool: Overview of the GUI Tool
-    commands-elements-and-assertions: Commands, Elements, and Assertions
+    core-concepts: Core Concepts
+    organizing-tests: Organizing Tests
     dead-simple-debugging: Dead Simple Debugging
     aliases-variables-in-an-async-world: Aliases&#58; Variables in an Async World
     stubs-spies-clocks: Stubs, Spies, and Clocks

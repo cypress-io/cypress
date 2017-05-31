@@ -6,7 +6,7 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
-import { Reporter } from '../../../reporter'
+import { Reporter } from '@packages/reporter'
 
 import errorMessages from '../errors/error-messages'
 import windowUtil from '../lib/window-util'

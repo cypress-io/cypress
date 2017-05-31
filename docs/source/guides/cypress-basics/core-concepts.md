@@ -1,13 +1,80 @@
-title: Commands, Elements, and Assertions
+title: Core Concepts
 comments: true
 ---
 
 # What You'll Learn
 
-- how Cypress wraps jQuery to look up elements by selector
-- what parent, child, and dual commands are, implicit subject management
-- how to make explicit assertions in Cypress
-- how Cypress asserts things automatically, freeing the developer to focus on features
+- what idiomatic Cypress looks like
+- how to work with web applications
+- how Cypress works like web apps: asynchronous and serial
+- how to assert things yourself, and how Cypress asserts things for you
+- the rules that make Cypress work, and how to follow them
+
+{% note info Important! %}
+**This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.
+{% endnote %}
+
+# Cypress Is Expressive
+
+Expressivity is all about getting more done with less typing. Let's look at an example:
+
+```js
+describe("Post Resource", function() {
+  it("Creating a new Post", function() {
+    cy.visit("/posts/new") /* 1 */
+
+    cy.contains("Post Title") /* 2 */
+      .click()
+      .type("My First Post") /* 3 */
+
+    cy.contains("Post Body") /* 4 */
+      .click()
+      .type("Hello, world!") /* 5 */
+
+    cy.get('button[type="submit"]') /* 6 */
+      .click()
+
+    cy.url() /* 7 */
+      .should("eq", "/posts/my-first-post")
+
+    cy.get('h1') /* 8 */
+      .its('value')
+      .should("eq", "My First Post")
+  })
+})
+```
+
+Can you read this? If you did, it might sound something like this:
+
+{% note info %}
+1. Visit the page at `/posts/new`
+2. Find the element containing the text "Post Title", click it
+3. Type "My First Post"
+4. Find the element containing the text "Post Body", click it
+5. Type "Hello, world!"
+6. Select the `<button>` tag with a type of `submit`, click it
+7. Grab the browser URL, ensure it is `/posts/my-first-post`
+8. Select the `<h1>` tag, ensure it contains the text "My First Post"
+
+{% endnote %}
+
+This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
+
+For the remainder of this guide we'll go through the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
+
+- wrapped jquery objects
+- finding by content
+- timeouts
+- clicking on things
+- asserting various things about elements
+- chai integration
+- subjects
+- rules
+- async/serial/promises+
+- aliases
+- retries
+- explicit/implicit subject assertions
+- default/automatic assertions
 
 # Finding Elements
 
@@ -36,7 +103,7 @@ Not so fast...
 
 ## Cypress is _Not_ Like jQuery
 
-Cypress re-uses the selector search functionality of jQuery, but it does not share jQuery's execution model. Specifically, all Cypress commands are asynchronous and work more like Promises (more on this shortly).
+Cypress re-uses the selector search functionality of jQuery ...actually, jQuery **IS** inside of Cypress, and all element references are real jQuery element objects, but Cypress does not share jQuery's execution model, it just wraps it. Specifically, all Cypress commands are asynchronous: they work more like Promises (more on this later.)
 
 In jQuery, if you want to operate on an element, you might do this:
 
@@ -47,23 +114,23 @@ let myElement = $('.my-selector').first()
 doSomething(myElement)
 ```
 
-But in Cypress, calling `cy.get()` will not return a value (it returns ). You'll need to call `.then` on your command chain in order to yield the actual element.
+But in Cypress, calling `cy.get()` will not return a value (actually, it returns a Cypress Chainer instance, but we aren't there yet.) You'll need to call `.then` on your command chain in order to yield the actual, jQuery-wrapped element.
 
 ```js
 // cy.get() returns a Cypress Chainer instance, not a value!
 cy.get('.my-selector')
   // .then() is a Chainer method that accepts a function
   .then(function(myElement) {
-    // the function receives the value and can now do work
+    // the function receives the value and can synchronously work with it
     doSomething(myElement)
   })
 ```
 
-## Why Complicate This?
+{% note info Why Complicate Element Selection? %}
 
-I hear you saying "Is it _really_ this complicated? I just want to get ahold of an element in the DOM! Shouldn't that be dead simple?" Of course! At first, it seems like you should be able to just reach out and grab the DOM. But you're forgetting something very important: the DOM is alive and ever-changing. What if the element isn't ready yet? Are you prepared to sprinkle wait-and-retry code throughout all your tests every time you select an element? No way! That's what we're trying to get away from!
+If this seems a bit strange, bear with us! This isn't needless complication of DOM queries, it's actually critically important to testing web applications. We'll address this fundamental shift by the end of this document, so stay tuned!
 
-Cypress was built to work with the natural flow of the browser environment, instead of against it. All Cypress commands are asynchronous with automatic retry and timeout built right in. If you look for a DOM element that isn't there immediately (perhaps it is animating in?), Cypress won't fail immediately. Instead it watches that selector to see if anything appears for a smear of time. Modern web applications must naturally deal in these smears of time due to network latency, DOM performance, events, intervals, and animations. Cypress _expects_ you to work this way, and it works this way as well.
+{% endnote %}
 
 ## Existence is Guaranteed
 

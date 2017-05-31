@@ -1,3 +1,3 @@
-require("../ts/register")
-require("../coffee/register")
+require("@packages/ts/register")
+require("@packages/coffee/register")
 require("./lib/repl")

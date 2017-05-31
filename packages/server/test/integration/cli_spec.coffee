@@ -40,7 +40,7 @@ describe "CLI Interface", ->
       done(err) if err
 
       pkg = JSON.parse(parse(stdout))
-      expect(pkg.name).to.eq("cypress")
+      expect(pkg.name).to.eq("@packages/server")
       expect(pkg.productName).to.eq("Cypress")
       done()
 
