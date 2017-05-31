@@ -4,36 +4,62 @@ comments: true
 description: ''
 ---
 
-Get all following siblings of each DOM element in the set of matched DOM elements.
+Get all following siblings of each DOM element in a set of matched DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.nextAll` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.nextAll()](#usage)
+```javascript
+.nextAll()
+.nextAll(selector)
+.nextAll(options)
+.nextAll(selector, options)
+```
 
-Get all of the next siblings of the elements.
+## Usage
 
-# [cy.nextAll( *selector* )](#selector-usage)
+`.nextAll()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-When a selector is provided, it retrieves all of the following siblings only if it matches that selector.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.get('.active').nextAll() // Yield all links next to `.active`
+```
 
-Pass in an options object to change the default behavior of `cy.nextAll`.
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-**cy.nextAll( *options* )**
-**cy.nextAll( *selector*, *options* )**
+```javascript
+cy.nextAll()                // Errors, cannot be chained off 'cy'
+cy.getCookies().nextAll()   // Errors, 'getCookies' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.nextAll()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+## Yields
 
-## Find all of the element's siblings following `.second`
+`.nextAll()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.nextAll()` will continue to look for all next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## All Next
+
+**Find all of the element's siblings following `.second`**
 
 ```html
 <ul>
@@ -46,13 +72,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns [<li>bananas</li>, <li>pineapples</li>, <li>grapes</li>]
-cy.get(".second").nextAll()
+// yields [<li>bananas</li>, <li>pineapples</li>, <li>grapes</li>]
+cy.get('.second').nextAll()
 ```
 
-# Selector Usage
+## Selector
 
-## Find all of the following siblings of each li. Keep only the ones with a class `selected`.
+**Find all of the following siblings of each li. Keep only the ones with a class `selected`.**
 
 ```html
 <ul>
@@ -65,16 +91,16 @@ cy.get(".second").nextAll()
 ```
 
 ```javascript
-//returns <li>pineapples</li>
-cy.get("li").nextAll(".selected")
+// yields <li>pineapples</li>
+cy.get('li').nextAll('.selected')
 ```
 
 # Command Log
 
-## Find all elements following the active li
+**Find all elements following the `.active` li**
 
 ```javascript
-cy.get(".left-nav").find("li.active").nextAll()
+cy.get('.left-nav').find('li.active').nextAll()
 ```
 
 The commands above will display in the command log as:
@@ -85,7 +111,7 @@ When clicking on `nextAll` within the command log, the console outputs the follo
 
 <img width="567" alt="screen shot 2017-03-23 at 2 05 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/24262907/f2b7fe78-0fd1-11e7-921c-6eabf6e32abb.png">
 
-# Related
+# See also
 
 - [next](https://on.cypress.io/api/next)
 - [nextUntil](https://on.cypress.io/api/nextuntil)

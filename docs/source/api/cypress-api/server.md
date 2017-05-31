@@ -1,26 +1,51 @@
-title: api-server
+---
+title: Cypress.Server
 comments: true
+description: ''
 ---
 
-Any configuration you pass to [`cy.server`](https://on.cypress.io/api/server) will only persist until the end of the test. If you find yourself passing the same configuration to each [`cy.server`](https://on.cypress.io/api/server), then you might want to permanently change the default options for all [`cy.server`](https://on.cypress.io/api/server) instances.
+Permanently change the default options for all [`cy.server()`](https://on.cypress.io/api/server) instances
 
-***
-
-# [Cypress.Server.defaults( *object* )](#section-usage)
-
-Change default configuration for [`cy.server`](https://on.cypress.io/api/server)
-
-{% note info  %}
-A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated.
+{% note info New to Cypress? %}
+Any configuration you pass to [`cy.server()`](https://on.cypress.io/api/server) will only persist until the end of the test.
 {% endnote %}
 
-***
-
-# Usage
+# Syntax
 
 ```javascript
-// pass anything here you'd normally pass
-// to cy.server(). These options will be the new defaults.
+Cypress.Server.defaults(options)
+```
+
+## Usage
+
+`Server.defaults()` requires being chained off `Cypress`.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+Cypress.Server.defaults({}) // Set server defaults
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.Server.defaults({})  // Errors, cannot be chained off 'cy'
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.filter()`.
+
+# Examples
+
+## Options
+
+**These options will be the new defaults.**
+
+```javascript
+// pass anything here you'd normally pass to cy.server().
 Cypress.Server.defaults({
   delay: 500,
   force404: false,
@@ -29,3 +54,13 @@ Cypress.Server.defaults({
   }
 })
 ```
+
+# Notes
+
+**Where to put server configuration**
+
+A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated.
+
+# See also
+
+- [server](https://on.cypress.io/api/server)

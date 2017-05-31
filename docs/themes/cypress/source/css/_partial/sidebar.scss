@@ -6,7 +6,12 @@
   margin-left: -$sidebar-width;
   display: none;
   background-color: #f5f5f5;
+
+  ul {
+    list-style: none;
+  }
 }
+
 .sidebar-title {
   margin-top: 1.5em;
   font-size: 1.1em;

@@ -110,6 +110,10 @@ sidebar:
     parent: parent
     parents: parents
     parentsuntil: parentsUntil
+    pause: pause
+    prev: prev
+    prevall: prevAll
+    prevuntil: prevUntil
     readfile: readFile
     reload: reload
     request: request
@@ -145,6 +149,7 @@ sidebar:
     _: _
     $: $
     minimatch: minimatch
+    moment: moment
     blob: blob
     promise: promise
     cypress-api: Cypress API

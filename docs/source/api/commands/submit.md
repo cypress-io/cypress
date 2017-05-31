@@ -4,32 +4,51 @@ comments: true
 description: ''
 ---
 
-Submits the DOM element from the previous command if it is a form. Submit can only be called on a single form.
-
-**The following events are fired during submit:** `submit`
-
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.submit` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts). |
-
-# [cy.submit()](#usage)
-
 Submit a form.
 
-# Options
+# Syntax
 
-Pass in an options object to change the default behavior of `cy.submit`.
+```javascript
+.submit()
+.submit(options)
+```
 
-**cy.submit( *options* )**
+## Usage
 
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
+`.submit()` requires being chained off another cy command that *yields* a form.
 
-# Usage
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('form').submit() // Submit a form
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.submit()               // Errors, cannot be chained off 'cy'
+cy.get('input').submit()  // Errors, 'input' does not yield a form
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.submit()`.
+
+## Yields
+
+`.submit()` yields the form that was submitted.
+
+## Timeout
+
+`.submit()` will continue to try to submit the form for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Example
 
 ## Submit a form
+
+**Submit can only be called on a single form.**
 
 ```html
 <form id="contact">
@@ -39,18 +58,16 @@ Option | Default | Notes
 ```
 
 ```javascript
-// submits the form and performs all default actions
-// returns <form> for further chaining
-cy.get("#contact").submit()
+cy.get('#contact').submit()
 ```
 
 # Command Log
 
-## Submit a form
+**Submit a form**
 
 ```javascript
-cy.route("POST", /users/, "fixture:user").as("userSuccess")
-cy.get("form").submit()
+cy.route('POST', '/users', 'fixture:user').as('userSuccess')
+cy.get('form').submit()
 ```
 
 The commands above will display in the command log as:
@@ -61,6 +78,6 @@ When clicking on `submit` within the command log, the console outputs the follow
 
 ![cy.submit console log](https://cloud.githubusercontent.com/assets/1271364/12888878/222f5522-ce4a-11e5-9edd-f67be2ebce40.png)
 
-# Related
+# See also
 
 - [click](https://on.cypress.io/api/click)

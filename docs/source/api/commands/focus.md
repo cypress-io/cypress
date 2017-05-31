@@ -4,50 +4,87 @@ comments: true
 description: ''
 ---
 
-Focus on a DOM element. If there is currently a different DOM element currently with focus, Cypress will issue a `blur` event to that element first.
+Focus on a DOM element.
 
-**The following events are fired during focus:** `focusin`, `focus`
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.focus` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+```javascript
+.focus()
+.focus(options)
+```
 
-# [cy.focus()](#usage)
+## Usage
 
-Focus on the DOM element found in the previous command.
+`.focus()` requires being chained off another cy command that *yields* a DOM element.
 
-# Options
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('input').first().focus() // Focus on the first input
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.focus('#search')  // Errors, cannot be chained off 'cy'
+cy.window().focus()  // Errors, 'window' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.focus`.
-
-**cy.focus( *options* )**
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Focus on the current subject.
+`.focus()` yields the new DOM element that was focused.
+
+## Timeout
+
+`.focus()` will continue to try to focus the element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Focus
+
+**Focus on an input**
 
 ```javascript
-cy.get("[name='comment']").focus()
+cy.get('[type="input"]').focus()
 ```
 
-Focus, type, and blur the current subject.
+**Focus, type, and blur a textarea**
 
 ```javascript
-// returns the <textarea> for further chaining
-cy.get("[name='comment']").focus().type("Nice Product!").blur()
+// yields the <textarea> for further chaining
+cy.get('textarea').focus().type('Nice Product!').blur()
 ```
+
+# Notes
+
+**Cypress blurs other focused elements first**
+
+If there is currently a different DOM element with focus, Cypress issues a `blur` event to that element before running the `.focus()` command.
+
+**`.focus()` can only be called on a valid focusable element.**
+
+Ensure the element you are trying to call `.focus()` on is a [focusable element](https://www.w3.org/TR/html5/editing.html#focusable). Most commonly, you'll want to ensure that the element is not disabled, although there are [other factors](https://www.w3.org/TR/html5/editing.html#focusable).
+
+**`.focus()` can time out because your browser did not receive any focus events.**
+
+If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
 
 # Command Log
 
-## Focus the textarea.
+**Focus the textarea**
 
 ```javascript
-cy.get("[name='comment']").focus()
+cy.get('[name="comment"]').focus()
 ```
 
 The commands above will display in the command log as:
@@ -58,17 +95,7 @@ When clicking on the `focus` command within the command log, the console outputs
 
 <img width="526" alt="screen shot 2015-11-27 at 1 33 00 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446857/703fa6c2-950b-11e5-9686-ce6b558cfd92.png">
 
-# Errors
-
-## cy.focus() can only be called on a valid focusable element.
-
-Ensure the element you are trying to call `cy.focus()` on is a [focusable element](https://www.w3.org/TR/html5/editing.html#focusable). Most commonly, you'll want to ensure that the element is not disabled although there are [other factors](https://www.w3.org/TR/html5/editing.html#focusable).
-
-## cy.focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.
-
-If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is executed.
-
-# Related
+# See also
 
 - [focused](https://on.cypress.io/api/focused)
 - [blur](https://on.cypress.io/api/blur)

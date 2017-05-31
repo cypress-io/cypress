@@ -50,6 +50,13 @@
 .article-content, .faq {
   line-height: $line-height;
 
+  hr {
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
   p {
     margin-bottom: 15px;
     word-wrap: break-word;
@@ -167,13 +174,17 @@
     margin: 1em 0;
   }
 
+
+
   h1 {
-    font-size: 1.6em;
+    font-size: 1.7em;
     line-height: 1.5em;
     font-weight: 500;
     margin: 1.5em 0 0.5em 0;
     padding: 0;
     font-family: $font-title;
+    border-top: 2px solid #eee;
+    padding-top: 1.5em;
 
     &>a {
       font-weight: 500;
@@ -181,10 +192,10 @@
   }
 
   h2 {
-    font-size: 1em;
+    font-size: 1.3em;
     line-height: 1.5em;
     font-weight: 500;
-    margin: 1em 0 1em 0;
+    margin: 2em 0 0.5em 0;
     font-family: $font-title;
 
     code {
@@ -221,6 +232,16 @@
     font-family: $font-title;
   }
 
+
+  &>p>strong {
+    display: inline-block;
+    margin-top: 1.5em;
+  }
+
+  &>h2+p>strong, &>h1+p>strong {
+    margin-top: 0;
+  }
+
   a {
     color: $color-link;
     text-decoration: none;
@@ -235,9 +256,22 @@
   strong {
     font-weight: bold;
   }
+
   em {
     font-style: italic;
   }
+
+  strong>em {
+    font-style: normal;
+    font-weight: 500;
+    border-bottom: 1px solid #ccc;
+  }
+
+  strong + strong>em {
+    color: #bbb;
+    margin-left: 5px;
+  }
+
   li {
     margin: 0;
 

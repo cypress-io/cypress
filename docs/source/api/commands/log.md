@@ -4,46 +4,71 @@ comments: true
 description: ''
 ---
 
-Print a message to the Command Log within Cypress.
+Print a message to the Cypress Command Log.
 
-| | |
-|--- | --- |
-| **Returns** | null |
-| **Timeout** | *cannot timeout* |
-
-# [cy.log( *message* )](#usage)
-
-Print the message to the Command Log.
-
-# [cy.log( *message*, *arguments* )](#arguments-usage)
-
-Print the message to the Command Log, along with any arguments.
-
-# Usage
-
-## Log a message to the Command Log.
+# Syntax
 
 ```javascript
-cy.log("Login successful")
+.log(message)
+.log(message, args...)
 ```
 
-# Arguments Usage
+## Usage
 
-## Log a message with arguments to the Command Log.
+`.log()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-// print previously saved variable 'events' to the Command Log.
-cy.log("events triggered", events)
+cy.log('created new user')    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} message** ***(String)***
+
+Message to be printed to Cypress Command Log.
+
+**{% fa fa-angle-right %} args...**
+
+Additional arguments to be printed to the Cypress Command Log. There is no limit to the number of arguments.
+
+
+## Yields
+
+`.log()` yields `null`.
+
+## Timeout
+
+
+# Examples
+
+## Message
+
+**Print a message to the Command Log.**
+
+```javascript
+cy.click('Login')
+cy.url().should('not.include', 'login')
+cy.log('Login successful')
+```
+
+# Arguments
+
+**Print a message with arguments to the Command Log.**
+
+```javascript
+cy.log('events triggered', events)
 ```
 
 # Command Log
 
-## Print messages with arguments to the Command Log.
+**Print messages with arguments to the Command Log.**
 
 ```javascript
 cy
-  .log("log out any message we want here")
-  .log("another message", ["one", "two", "three"])
+  .log('log out any message we want here')
+  .log('another message', ['one', 'two', 'three'])
 ```
 
 The commands above will display in the command log as:
@@ -53,3 +78,7 @@ The commands above will display in the command log as:
 When clicking on `log` within the command log, the console outputs the following:
 
 <img width="746" alt="console display of cy.log" src="https://cloud.githubusercontent.com/assets/1271364/21321324/4f616dec-c5e2-11e6-8c2f-924e7bfd6f87.png">
+
+# See also
+
+- [exec](https://on.cypress.io/api/exec)

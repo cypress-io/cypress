@@ -4,36 +4,62 @@ comments: true
 description: ''
 ---
 
-Get the immediately following sibling of each DOM element in the set of matched DOM elements.
+Get the immediately following sibling of each DOM element within a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.next` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.next()](#usage)
+```javascript
+.next()
+.next(selector)
+.next(options)
+.next(selector, options)
+```
 
-Get the next sibling of the elements.
+## Usage
 
-# [cy.next( *selector* )](#selector-usage)
+`.next()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-When a selector is provided, it retrieves the next sibling only if it matches that selector.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.get('nav a:first').next() // Yield next link in nav
+```
 
-Pass in an options object to change the default behavior of `cy.next`.
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-**cy.next( *options* )**
-**cy.next( *selector*, *options* )**
+```javascript
+cy.next()                // Errors, cannot be chained off 'cy'
+cy.getCookies().next()   // Errors, 'getCookies' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.next()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+## Yields
 
-## Find the element next to `.second`
+`.next()` yields the new DOM element(s) found by the command.
+
+## Timeout
+
+`.next()` will continue to look for the next element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Next
+
+**Find the element next to `.second`**
 
 ```html
 <ul>
@@ -44,13 +70,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns <li>bananas</li>
-cy.get(".second").next()
+// yields <li>bananas</li>
+cy.get('.second').next()
 ```
 
-# Selector Usage
+## Selector
 
-## Find the very next sibling of each li. Keep only the ones with a class `selected`.
+**Find the very next sibling of each li. Keep only the ones with a class `selected`.**
 
 ```html
 <ul>
@@ -62,16 +88,16 @@ cy.get(".second").next()
 ```
 
 ```javascript
-//returns <li>pineapples</li>
-cy.get("li").next(".selected")
+// yields <li>pineapples</li>
+cy.get('li').next('.selected')
 ```
 
 # Command Log
 
-## Find the element next to the active li
+**Find the element next to the `.active` li**
 
 ```javascript
-cy.get(".left-nav").find("li.active").next()
+cy.get('.left-nav').find('li.active').next()
 ```
 
 The commands above will display in the command log as:
@@ -82,6 +108,8 @@ When clicking on `next` within the command log, the console outputs the followin
 
 <img width="547" alt="screen shot 2015-11-29 at 12 42 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png">
 
-# Related
+# See also
 
+- [nextAll](https://on.cypress.io/api/nextAll)
+- [nextUntil](https://on.cypress.io/api/nextUntil)
 - [prev](https://on.cypress.io/api/prev)

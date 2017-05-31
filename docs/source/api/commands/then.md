@@ -4,26 +4,57 @@ comments: true
 description: ''
 ---
 
-`cy.then()` will yield you the current subject as the first argument.
+Yield the current yielded subject as the first argument of a function.
 
-`cy.then()` is modeled identically to the way Promises work in JavaScript.  Whatever is returned from the callback function becomes the new subject, and will flow into the next command, with the exception of `null` and `undefined`.
+# Syntax
+
+```javascript
+.spread(callbackFn)
+.spread(options, callbackFn)
+```
+
+## Usage
+
+`.then()` should be chained off another cy command.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('.nav').then(function(nav) {})  // Yields .nav as first arg
+cy.location().then(function(loc) {})   // Yields location object as first arg
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
+
+Pass a function that takes the current yielded subject as it's first argument.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.then()`.
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to yield the then
+
+## Yields
+
+`.then()` is modeled identically to the way Promises work in JavaScript.  Whatever is returned from the callback function becomes the new subject and will flow into the next command (with the exception of `null` and `undefined`).
 
 When `null` or `undefined` is returned by the callback function, the subject will not be modified and will instead carry over to the next command.
 
 Just like Promises, you can return any compatible "thenable" (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
 
-| | |
-|--- | --- |
-| **Returns** | the return of the callback function |
-| **Timeout** | `cy.then` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
+## Timeout
 
-# [cy.then( *function* )](#usage)
+`.then` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
 
-Yield the current subject as the first argument.
+# Examples
 
-# Usage
+## Work with DOM element
 
-## The element `input` is yielded
+**The element `input` is yielded**
 
 ```html
 <form id="todos">
@@ -32,66 +63,48 @@ Yield the current subject as the first argument.
 ```
 
 ```javascript
-cy.get("form").find("input").then(function($input){
-  // work with $input subject here
-  // we can potentially use it within an assertion
-  // or just call some methods on it and return a new subject
+cy.get('form').find('input').then(function($input){
+  // work with $input here
 })
 ```
 
-# Options
+## Change subject
 
-Pass in an options object to change the default behavior of `cy.then`.
-
-**[cy.click( *options*,  *function* )](#options-usage)**
-
-Option | Default | Notes
---- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
-
-# Usage
-
-## Assert explicitly about the subject `<li>`'s
-
-```html
-<div id="todos">
-  <li>Walk the dog</li>
-  <li>Feed the cat</li>
-  <li>Write JavaScript</li>
-</div>
-```
-
-```javascript
-cy.get("#todos li").then(function($lis){
-  expect($lis).to.have.length(3)
-  expect($lis.eq(0)).to.contain("Walk the dog")
-  expect($lis.eq(1)).to.contain("Feed the cat")
-  expect($lis.eq(2)).to.contain("Write JavaScript")
-})
-```
-
-Normally you'd use implicit subject assertions via [should](https://on.cypress.io/api/should) or [and](https://on.cypress.io/api/and), but it's sometimes it's more convenient to write explicit assertions about a given subject.
-
-{% note warning  %}
-Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
-{% endnote %}
-
-## The subject is changed by returning `{foo: 'bar'}`
+**The subject is changed by returning `{foo: 'bar'}`**
 
 ```javascript
 cy.then(function(){
-  return {foo: "bar"}
+  return {foo: 'bar'}
 }).then(function(obj){
-  // subject is now the obj {foo: "bar"}
-  expect(obj).to.deep.eq({foo: "bar"}) // true
+  // subject is now the obj {foo: 'bar'}
+  expect(obj).to.deep.eq({foo: 'bar'}) // true
 })
 ```
 
-## Cypress waits for the Promise to resolve before continuing
+**Returning `null` or `undefined` will not modify the subject**
 
 ```javascript
-// if using Q
-cy.get("button").click().then(function($button){
+cy
+  .get('form').then(function($form){
+    console.log('form is:', $form)
+    // undefined is returned here, therefore
+    // the $form subject will automatically
+    // carry over and allow for continued chaining
+  }).find('input').then(function($input){
+    // we have our real $input element here since
+    // our form element carried over and we called
+    // .find("input") on it
+  })
+```
+
+## Promises
+
+**Cypress waits for the Promise to resolve before continuing**
+
+***Example using Q***
+
+```javascript
+cy.get('button').click().then(function($button){
   var p = Q.defer()
 
   setTimeout(function(){
@@ -100,14 +113,20 @@ cy.get("button").click().then(function($button){
 
   return p.promise
 })
+```
 
-// if using bluebird
-cy.get("button").click().then(function($button){
+***Example using bluebird***
+
+```javascript
+cy.get('button').click().then(function($button){
   return Promise.delay(5000)
 })
+```
 
-// if using jQuery deferred's
-cy.get("button").click().then(function($button){
+***Example using jQuery deferred's***
+
+```javascript
+cy.get('button').click().then(function($button){
   var df = $.Deferred()
 
   setTimeout(function(){
@@ -118,32 +137,11 @@ cy.get("button").click().then(function($button){
 })
 ```
 
-## Returning `null` or `undefined` will not modify the subject
+# See also
 
-```javascript
-cy
-  .get("form").then(function($form){
-    console.log("form is:", $form)
-    // undefined is returned here, therefore
-    // the $form subject will automatically
-    // carry over and allow for continued chaining
-  }).find("input").then(function($input){
-    // we have our real $input element here since
-    // our form element carried over and we called
-    // .find("input") on it
-  })
-```
-
-# Options Usage
-
-```javascript
-cy.then({timeout: 7000}, function(){
-  // code here
-})
-```
-
-# Related
-
+- [and](https://on.cypress.io/api/and)
 - [its](https://on.cypress.io/api/its)
 - [invoke](https://on.cypress.io/api/invoke)
+- [should](https://on.cypress.io/api/should)
+- [spread](https://on.cypress.io/api/spread)
 - [Issuing Commands](https://on.cypress.io/guides/issuing-commands)

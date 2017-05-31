@@ -4,63 +4,76 @@ comments: true
 description: ''
 ---
 
-`cy.clock` overrides native global functions related to time, so you can test code using those functions in an easier, synchronous way. This includes the `setTimeout`, `clearTimeout`, `setInterval`, and `clearInterval` functions as well as controlling `Date` objects. Note that this only applies to the `top` window on a web page. It will not override the time functions on any iframes embedded on the web page.
+`.clock()` overrides native global functions related to time allowing them to be controlled synchronously via [`.tick()`](https://on.cypress.io/api/tick) or the yielded `clock` object. This includes controlling:
 
-`cy.clock` automatically restores the native functions in between tests without you having to explicitly restore them. You can still manually restore the functions within a test by calling `.restore()` on the `clock` object that `cy.clock` yields.
-
-`cy.clock` pairs with [`cy.tick`](https://on.cypress.io/api/tick), which moves the clock along a certain number of milliseconds.
-
-Subsequent calls to `cy.clock` will yield the `clock` object without re-overriding the native time functions.
-
-If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypress.io/api/visit), the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via [`cy.tick`](https://on.cypress.io/api/tick). This also applies if, during the course of a test, the page under test is reloaded or changed.
-
-| | |
-|--- | --- |
-| **Returns** | a `clock` object. See [clock API](#clock-api) |
-
-# [cy.clock()](#usage)
-
-Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#clock-api)).
+- `setTimeout`
+- `clearTimeout`
+- `setInterval`
+- `clearInterval`
+- `Date` Objects
 
 The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate `new Date` in your application, it will have a time of `January 1st, 1970`.
 
-# [cy.clock( *now* )](#specify-the-now-timestamp)
+# Syntax
 
-Same as above, but starts the clock at the specified timestamp.
+```javascript
+cy.clock()
+cy.clock(now)
+cy.clock(now, functionNames)
+cy.clock(options)
+cy.clock(now, options)
+cy.clock(now, functionNames, options)
+```
 
-# [cy.clock( *now*, *functionNames* )](#specify-which-functions-to-override)
+## Usage
 
-Same as above, but only overrides the functions in the array `functionNames`.
+`cy.clock()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-# clock API
+**{% fa fa-check-circle green %} Valid Usage**
 
-`cy.clock` yields a `clock` object with the following methods. You can also access the `clock` object via `this.clock` in a [`cy.then`](https://on.cypress.io/api/then) callback.
+```javascript
+cy.clock()
+```
 
-## clock.tick(*milliseconds*)
+## Arguments
 
-Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
+**{% fa fa-angle-right %} now** ***(Date)***
 
-## clock.restore()
+A timestamp specifying where the clock should start.
 
-Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+**{% fa fa-angle-right %} functionNames** ***(Array)***
 
-# Options
+Name of native functions that clock should override.
 
-Pass in an options object to change the default behavior of `cy.clock`.
+**{% fa fa-angle-right %} options** ***(Object)***
 
-**cy.clock( *options* )**
-
-**cy.clock( *now*,  *options* )**
-
-**cy.clock( *now*, *functionNames*,  *options* )**
+Pass in an options object to change the default behavior of `cy.clock()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Create a clock and use it to trigger a setInterval
+`cy.clock()` yields a `clock` object with the following methods.
+
+**`clock.tick(milliseconds)`**
+
+Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
+
+**`clock.restore()`**
+
+Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+
+You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
+
+## Timeout
+
+# Examples
+
+## Clock
+
+**Create a clock and use it to trigger a setInterval**
 
 ```javascript
 // your app code
@@ -72,47 +85,17 @@ setInterval(function(){
 ```
 
 ```javascript
-// test code
-cy
-  .clock()
-  .visit("/index.html")
-  .tick(1000)
-  .get("#seconds-elapsed")
-    .should("have.text", "1 seconds")
-  .tick(1000)
-  .get("#seconds-elapsed")
-    .should("have.text", "2 seconds")
+cy.clock()
+cy.visit('/index.html')
+cy.tick(1000)
+cy.get('#seconds-elapsed').should('have.text', '1 seconds')
+cy.tick(1000)
+cy.get('#seconds-elapsed').should('have.text', '2 seconds')
 ```
 
-## Specify the now timestamp
+**Access the clock object to synchronously move time**
 
-```javascript
-// your app code
-$('#date').text(new Date().toJSON())
-```
-
-```javascript
-// test code
-const now = new Date(2017, 2, 14).getTime() // March 14, 2017 timestamp
-
-cy
-  .clock(now)
-  .visit("/index.html")
-  .get("#date")
-    .contains("2017-03-14")
-```
-
-## Specify which functions to override
-
-This will only override `setTimeout` and `clearTimeout` and leave the other time-related functions as they are.
-
-```javascript
-cy.clock(null, ["setTimeout", "clearTimeout"])
-```
-
-## Access the clock object to synchronously move time
-
-In most cases, it's easier to [`cy.tick`](https://on.cypress.io/api/tick) to move time, but you can also use `clock` object yielded by `cy.clock`.
+In most cases, it's easier to [`.tick()`](https://on.cypress.io/api/tick) to move time, but you can also use the `clock` object yielded by `cy.clock()`.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -120,32 +103,29 @@ cy.clock().then(function (clock) {
 })
 ```
 
-You can call `cy.clock` again for this purpose later in a chain if necessary.
+You can call `.clock()` again for this purpose later in a chain if necessary.
 
 ```javascript
-cy
-  .clock()
-  .get("#foo")
-  .type("Foo")
-  .clock().then(function (clock) {
-    clock.tick(1000)
-  })
+cy.clock()
+cy.get('input').type('Jane Lane')
+cy.clock().then(function (clock) {
+  clock.tick(1000)
+})
 ```
 
 The clock object is also available via `this.clock` in any `.then` callback.
 
 ```javascript
-cy
-  .clock()
-  .get("#foo").then(function ($foo) {
-    this.clock.tick(1000)
-    // do something with $foo ...
-  })
+cy.clock()
+cy.get('form').then(function ($form) {
+  this.clock.tick(1000)
+  // do something with $form ...
+})
 ```
 
-## Access the clock object to restore native functions
+**Access the clock object to restore native functions**
 
-In general, it should not be necessary to manually restore the native functions that `cy.clock` overrides, since this is done automatically between tests. But if you need to, the `clock` object yielded has `.restore` method.
+In general, it should not be necessary to manually restore the native functions that `cy.clock()` overrides, since this is done automatically between tests. But if you need to, the `clock` object yielded has a `.restore` method.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -156,28 +136,61 @@ cy.clock().then(function (clock) {
 Or via `this.clock`:
 
 ```javascript
-cy
-  .clock()
-  .get("#foo").then(function ($foo) {
-    this.clock.restore()
-    // do something with $foo ...
-  })
+cy.clock()
+cy.get('.timer').then(function ($timer) {
+  this.clock.restore()
+  // do something with $timer ...
+})
 ```
 
-## Example Recipe
+## Now
+
+**Specify a now timestamp**
+
+```javascript
+// your app code
+$('#date').text(new Date().toJSON())
+```
+
+```javascript
+const now = new Date(2017, 2, 14).getTime() // March 14, 2017 timestamp
+
+cy.clock(now)
+cy.visit('/index.html')
+cy.get('#date').contains('2017-03-14')
+```
+
+## Function Names
+
+**Specify which functions to override**
+
+This example below will only override `setTimeout` and `clearTimeout` and leave the other time-related functions as they are.
+
+```javascript
+cy.clock(null, ['setTimeout', 'clearTimeout'])
+```
 
 {% note info Using cy.clock and cy.tick %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
+# Notes
+
+**iframes not supported**
+
+Note that this only applies to the `top` window on a web page. It will not override the time functions on any `iframe` embedded on the web page.
+
+**clock behavior before `.visit()`**
+
+If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypress.io/api/visit), the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via [`cy.tick`](https://on.cypress.io/api/tick). This also applies if, during the course of a test, the page under test is reloaded or changed.
+
 # Command Log
 
-## Create a clock and tick it 1 second
+**Create a clock and tick it 1 second**
 
 ```javascript
-cy
-  .clock()
-  .tick(1000)
+cy.clock()
+cy.tick(1000)
 ```
 
 The command above will display in the command log as:
@@ -188,7 +201,7 @@ When clicking on the `clock` command within the command log, the console outputs
 
 <img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437920/0786f9d8-e6f8-11e6-9e77-926b15aa8dae.png">
 
-# Related
+# See also
 
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)

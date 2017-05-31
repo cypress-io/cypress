@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Get the root element. By default the root is `document`. When calling `cy.root` in a [`cy.within`](https://on.cypress.io/api/within), the root element will be the return of the within command.
+Get the root element.
 
 | | |
 |--- | --- |
@@ -45,10 +45,10 @@ cy.root()
 ```
 
 ```javascript
-cy.get("form").within(function(){
+cy.get('form').within(function(){
   cy
-    .get("input[name='email']").type("john.doe@email.com")
-    .get("input[name='password']").type("password")
+    .get('input[name="email"]').type('john.doe@email.com')
+    .get('input[name="password"]').type('password')
 
     // the root element in a within is the previous
     // commands subject, in this case <form>
@@ -56,7 +56,7 @@ cy.get("form").within(function(){
 })
 ```
 
-# Related
+# See also
 
 - [get](https://on.cypress.io/api/get)
 - [within](https://on.cypress.io/api/within)

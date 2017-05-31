@@ -4,31 +4,64 @@ comments: true
 description: ''
 ---
 
-Get DOM elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)
+Get the DOM elements that match a specific selector.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+{% note info %}
+Opposite of [`.not()`](https://on.cypress.io/api/not)
+{% endnote %}
 
-# [cy.filter( *selector* )](#selector-usage)
+# Syntax
 
-Reduce the set of matched DOM elements to those that match the selector.
+```javascript
+.filter(selector)
+.filter(selector, options)
+```
 
-# Options
+## Usage
 
-Pass in an options object to change the default behavior of `cy.filter`.
+`.filter()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
 
-**cy.filter( *selector*, *options* )**
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('td').filter('.users') // Yield all el's with class '.users'
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.filter('.animated')  // Errors, cannot be chained off 'cy'
+cy.location().filter()  // Errors, 'location' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.filter()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Selector Usage
+## Yields
 
-## Filter the current subject to the element with the class `active`.
+`.filter()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.filter()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Selector
+
+**Filter the current subject to the elements with the class `active`.**
 
 ```html
 <ul>
@@ -41,16 +74,16 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <li>About</li>
-cy.get("ul").find(">li").filter(".active")
+// yields <li>About</li>
+cy.get('ul').find('>li').filter('.active')
 ```
 
 # Command Log
 
-## Filter the `li`'s to the `li` with the class `active`.
+**Filter the `li`'s to the `li` with the class `active`.**
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li").filter(".active")
+cy.get('.left-nav>.nav').find('>li').filter('.active')
 ```
 
 The commands above will display in the command log as:
@@ -61,6 +94,6 @@ When clicking on the `filter` command within the command log, the console output
 
 <img width="503" alt="screen shot 2015-11-27 at 2 16 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447266/74b643a4-9511-11e5-8b42-6f6dfbdfb2a8.png">
 
-# Related
+# See also
 
 - [not](https://on.cypress.io/api/not)

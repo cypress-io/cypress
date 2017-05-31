@@ -4,36 +4,55 @@ comments: true
 description: ''
 ---
 
-Get all previous siblings of each DOM element in the set of matched DOM elements.
+Get all previous siblings of each DOM element in a set of matched DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prevAll` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.prevAll()](#usage)
+```javascript
+.prevAll()
+.prevAll(selector)
+.prevAll(options)
+.prevAll(selector, options)
+```
 
-Get all of the next siblings of the elements.
+## Usage
 
-# [cy.prevAll( *selector* )](#selector-usage)
+`.prevAll()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-When a selector is provided, it retrieves all of the previous siblings only if it matches that selector.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.get('.active').prevAll() // Yield all links previous to `.active`
+```
 
-Pass in an options object to change the default behavior of `cy.prevAll`.
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-**cy.prevAll( *options* )**
-**cy.prevAll( *selector*, *options* )**
+```javascript
+cy.prevAll()                // Errors, cannot be chained off 'cy'
+cy.getCookies().prevAll()   // Errors, 'getCookies' does not yield DOM element
+```
+
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.prevAll()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+# Examples
 
-## Find all of the element's siblings before `.third`
+## All Previous
+
+**Find all of the element's siblings before `.third`**
 
 ```html
 <ul>
@@ -46,13 +65,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns [<li>apples</li>, <li>oranges</li>]
-cy.get(".third").prevAll()
+// yields [<li>apples</li>, <li>oranges</li>]
+cy.get('.third').prevAll()
 ```
 
-# Selector Usage
+## Selector
 
-## Find all of the previous siblings of each li. Keep only the ones with a class `selected`.
+**Find all of the previous siblings of each li. Keep only the ones with a class `selected`.**
 
 ```html
 <ul>
@@ -65,16 +84,16 @@ cy.get(".third").prevAll()
 ```
 
 ```javascript
-//returns <li>pineapples</li>
-cy.get("li").prevAll(".selected")
+// yields <li>pineapples</li>
+cy.get('li').prevAll('.selected')
 ```
 
 # Command Log
 
-## Find all elements before the active li
+**Find all elements before the `.active` li**
 
 ```javascript
-cy.get(".left-nav").find("li.active").prevAll()
+cy.get('.left-nav').find('li.active').prevAll()
 ```
 
 The commands above will display in the command log as:
@@ -85,8 +104,9 @@ When clicking on `prevAll` within the command log, the console outputs the follo
 
 <img width="539" alt="screen shot 2017-03-23 at 2 50 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264898/2219d1a4-0fd8-11e7-9e8b-6b2d97166d6a.png">
 
-# Related
+# See also
 
+- [nextAll](https://on.cypress.io/api/nextall)
+- [parentsAll](https://on.cypress.io/api/parentsall)
 - [prev](https://on.cypress.io/api/prev)
 - [prevUntil](https://on.cypress.io/api/prevuntil)
-- [nextAll](https://on.cypress.io/api/nextall)
