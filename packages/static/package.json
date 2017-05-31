@@ -1,5 +1,5 @@
 {
-  "name": "static",
+  "name": "@packages/static",
   "main": "index.js",
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",
@@ -7,7 +7,7 @@
     "test": "echo 'Nothing to test yet'"
   },
   "devDependencies": {
+    "@cypress/icons": "0.5.4",
     "gulp": "^3.9.1"
-  },
-  "dependencies": {}
+  }
 }

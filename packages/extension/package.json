@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-extension",
+  "name": "@packages/extension",
   "version": "0.4.2",
   "description": "Cypress Chrome Extension",
   "main": "index.js",
@@ -46,6 +46,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "@cypress/icons": "0.5.4",
     "bluebird": "^3.3.5",
     "lodash": "^4.11.2"
   }

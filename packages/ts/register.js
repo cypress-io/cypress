@@ -15,4 +15,4 @@ require('ts-node').register({
 })
 
 // do we need to prevent any other TypeScript hooks?
-// like ../coffee/register.js does?
+// like @packages/coffee/register.js does?

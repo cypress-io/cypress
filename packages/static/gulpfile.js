@@ -1,5 +1,5 @@
 const gulp  = require("gulp")
-const icons = require("../icons")
+const icons = require("@cypress/icons")
 
 gulp.task("favicon", () => {
   return gulp.src(icons.getPathToFavicon("**/**"))

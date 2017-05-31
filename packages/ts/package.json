@@ -1,5 +1,5 @@
 {
-  "name": "ts",
+  "name": "@packages/ts",
   "version": "1.0.0",
   "description": "TypeScript runtime Node hook",
   "main": "index.js",

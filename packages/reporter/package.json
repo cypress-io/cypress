@@ -1,16 +1,22 @@
 {
-  "name": "@cypress/core-reporter",
+  "name": "@packages/reporter",
   "version": "0.3.4",
   "main": "lib/reporter",
   "browser": "src/main",
   "scripts": {
-    "postinstall": "echo 'This project needs: npm run build'",
+    "postinstall": "echo '@packages/reporter needs: npm run build'",
     "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "watch": "node ./scripts/watch.js",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "test": "node ./scripts/test.js"
+  },
+  "browserify": {
+    "transform": [["babelify", {
+      "presets": ["es2015", "react", "stage-1"],
+      "plugins": ["add-module-exports", "transform-decorators-legacy"] }
+    ]]
   },
   "repository": {
     "type": "git",

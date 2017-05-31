@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-desktop-gui",
+  "name": "@packages/desktop-gui",
   "version": "0.4.9",
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "lib/gui.js",
@@ -31,6 +31,7 @@
     "lib"
   ],
   "devDependencies": {
+    "@cypress/icons": "0.5.4",
     "@cypress/react-tooltip": "^0.2.2",
     "@cypress/releaser": "0.1.12",
     "babel-eslint": "^6.0.4",

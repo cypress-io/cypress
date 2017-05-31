@@ -1,7 +1,7 @@
 require("../../spec_helper")
 
 _        = require("lodash")
-extension = require("#{root}../../../packages/extension")
+extension = require("@packages/extension")
 electron = require("electron")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")

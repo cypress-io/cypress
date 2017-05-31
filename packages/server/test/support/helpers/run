@@ -26,4 +26,4 @@ BROWSER=$BROWSER \
 xvfb-maybe --xvfb-run-args "-s \"-screen 0 1280x1024x8\"" mocha $SPEC \
 --fgrep "$FGREP" \
 --recursive \
---compilers ts:../ts/register,coffee:../coffee/register
+--compilers ts:@packages/ts/register,coffee:@packages/coffee/register

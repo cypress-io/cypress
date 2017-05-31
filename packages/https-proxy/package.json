@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-https-proxy",
+  "name": "@packages/https-proxy",
   "version": "0.1.5",
   "description": "",
   "main": "index.js",

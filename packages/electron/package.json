@@ -1,14 +1,14 @@
 {
-  "name": "@cypress/core-electron",
+  "name": "@packages/electron",
   "version": "0.3.4",
   "electronVersion": "1.4.6",
   "description": "Cypress electron wrapper shell",
   "main": "index.js",
   "scripts": {
+    "postinstall": "echo '@packages/electron needs: npm run build'",
     "start": "./bin/cypress-electron",
-    "test": "mocha --compilers coffee:../coffee/register",
-    "preinstall": "cd ../icons; npm install",
-    "postinstall": "./bin/cypress-electron --install",
+    "test": "mocha --compilers coffee:@packages/coffee/register",
+    "build": "./bin/cypress-electron --install",
     "clean-deps": "rm -rf node_modules"
   },
   "bin": {
@@ -30,6 +30,7 @@
     "mocha": "^3.0.2"
   },
   "dependencies": {
+    "@cypress/icons": "^0.5.4",
     "bluebird": "^3.4.1",
     "electron-packager": "^7.2.0",
     "fs-extra": "^0.30.0",
