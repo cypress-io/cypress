@@ -699,11 +699,11 @@ describe "lib/cypress", ->
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(git, "_getSha").resolves("sha-123")
-      @sandbox.stub(git, "_getBranch").resolves("bem/ci")
       @sandbox.stub(git, "_getAuthor").resolves("brian")
       @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
       @sandbox.stub(git, "_getMessage").resolves("foo")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
+      @sandbox.stub(record, "getBranch").resolves("bem/ci")
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
