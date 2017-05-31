@@ -1,4 +1,4 @@
-const cyIcons = require('../../icons')
+const cyIcons = require('@cypress/icons')
 
 module.exports = function (zunder) {
   const staticGlobs = {

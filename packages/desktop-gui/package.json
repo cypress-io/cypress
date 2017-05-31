@@ -31,6 +31,7 @@
     "lib"
   ],
   "devDependencies": {
+    "@cypress/icons": "0.5.4",
     "@cypress/react-tooltip": "^0.2.2",
     "@cypress/releaser": "0.1.12",
     "babel-eslint": "^6.0.4",
