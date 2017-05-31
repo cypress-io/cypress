@@ -14,6 +14,31 @@ comments: true
 **This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.
 {% endnote %}
 
+# Cypress Is Expressive
+
+Expressivity is all about getting more done with less typing. Let's look at an example:
+
+```js
+describe("", function() {
+  it("", function() {
+
+  })
+})
+```
+
+Can you read this? If you did, it might sound something like this:
+
+1. Visit the page at `/posts/new`
+2. Find the element containing the text "Post Title", click it
+3. Type "My First Post"
+4. Find the element containing the text "Post Body", click it
+5. Type "Hello, world!"
+6. Select the `<button>` tag with a type of `submit`, click it
+7. Grab the browser URL, ensure it is `/posts/my-first-post`
+8. Select the `<h1>` tag, ensure it contains the text "My First Post"
+
+This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
+
 # Finding Elements
 
 ## Cypress is Like jQuery
