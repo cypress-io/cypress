@@ -4,7 +4,7 @@
   "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo 'This project needs: npm run build'",
+    "postinstall": "echo '@packages/example needs: npm run build'",
     "clean-deps": "rm -rf node_modules",
     "test": "NODE_ENV=test mocha",
     "test-e2e": "cypress run",

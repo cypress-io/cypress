@@ -4,7 +4,7 @@
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo 'This project needs: npm run build'",
+    "postinstall": "echo '@packages/extension needs: npm run build'",
     "watch": "gulp watch",
     "build": "gulp build",
     "build-prod": "gulp build",
