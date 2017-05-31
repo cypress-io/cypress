@@ -1,13 +1,18 @@
-title: Commands, Elements, and Assertions
+title: Core Concepts
 comments: true
 ---
 
 # What You'll Learn
 
-- how Cypress wraps jQuery to look up elements by selector
-- what parent, child, and dual commands are, implicit subject management
-- how to make explicit assertions in Cypress
-- how Cypress asserts things automatically, freeing the developer to focus on features
+- what idiomatic Cypress looks like
+- how to work with web applications
+- how Cypress works like web apps: asynchronous and serial
+- how to assert things yourself, and how Cypress asserts things for you
+- the rules that make Cypress work, and how to follow them
+
+{% note info Important! %}
+**This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.
+{% endnote %}
 
 # Finding Elements
 
