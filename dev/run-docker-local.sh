@@ -11,7 +11,7 @@ echo "Starting Docker image with monorepo volume attached"
 echo "You should be able to edit files locally"
 echo "but execute the code in the container"
 
-docker run -v $PWD:/cypress-monorepo \
-  -w /cypress-monorepo \
+docker run -v $PWD:/home/person/cypress-monorepo \
+  -w /home/person/cypress-monorepo \
   -it $name \
   /bin/bash

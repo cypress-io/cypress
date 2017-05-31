@@ -2,6 +2,14 @@ title: Stubs, Spies, Clocks
 comments: true
 ---
 
+# What You'll Learn
+
+- which libraries Cypress includes to provide typical testing functionality
+- how to use stubs for asserting that code was called but preventing it from executing
+- how to use spies for asserting that code was called without interfering with its execution
+- how to control time for deterministically testing code that is time-dependent
+- how Cypress improves and extends the included libraries
+
 # Capabilities
 
 Cypress comes built in with the ability to [`stub`](https://on.cypress.io/api/stub), [`spy`](https://on.cypress.io/api/spy) or modify your applications [`clock`](https://on.cypress.io/api/clock) - such as controlling `Date`, `setTimeout`, and `setInterval`.

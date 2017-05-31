@@ -2474,6 +2474,8 @@ describe "Routes", ->
             res.end()
 
           ## start the server listening on ipv6 only
+          ## for demo how to bind to localhost via ipv6 see project
+          ## https://github.com/bahmutov/docker-ip6
           server.listen 6565, "::", =>
 
             @rp("http://localhost:6565/#/foo")

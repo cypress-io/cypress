@@ -4,6 +4,8 @@ glob     = require("glob")
 Promise  = require("bluebird")
 inquirer = require("inquirer")
 
+throw new Error("TODO: upgrade inquirer to promise interface")
+
 fs = Promise.promisifyAll(fs)
 
 module.exports = {
