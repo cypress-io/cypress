@@ -19,9 +19,27 @@ comments: true
 Expressivity is all about getting more done with less typing. Let's look at an example:
 
 ```js
-describe("", function() {
-  it("", function() {
+describe("Post Resource", function() {
+  it("Creating a new Post", function() {
+    cy.visit("/posts/new")
 
+    cy.contains("Post Title")
+      .click()
+      .type("My First Post")
+
+    cy.contains("Post Body")
+      .click()
+      .type("Hello, world!")
+
+    cy.get('button[type="submit"]')
+      .click()
+
+    cy.url()
+      .should("eq", "/posts/my-first-post")
+
+    cy.get('h1')
+      .its('value')
+      .should("eq", "My First Post")
   })
 })
 ```
@@ -38,6 +56,21 @@ Can you read this? If you did, it might sound something like this:
 8. Select the `<h1>` tag, ensure it contains the text "My First Post"
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
+
+- selector engine
+- wrapped jquery objects
+- finding by content
+- timeouts
+- clicking on things
+- asserting various things about elements
+- chai integration
+- subjects
+- rules
+- async/serial/promises+
+- aliases
+- retries
+- explicit/implicit subject assertions
+- default/automatic assertions
 
 # Finding Elements
 
