@@ -14,7 +14,7 @@ jobs:
           # need to set unsafe perm to be able to do `npm postinstall`
           npm_config_unsafe-perm: true
     working_directory: ~/cypress-monorepo
-    parallelism: 3
+    parallelism: 4
     steps:
       - checkout
 
