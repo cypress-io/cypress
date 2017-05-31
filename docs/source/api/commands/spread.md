@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Expand an expression into multiple arguments.
+Expand an array into multiple arguments.
 
 {% note info %}
 Similar of [`.then()`](https://on.cypress.io/api/then), but always expects an array as it's subject.
@@ -13,7 +13,7 @@ Similar of [`.then()`](https://on.cypress.io/api/then), but always expects an ar
 # Syntax
 
 ```javascript
-.spread(function() {})
+.spread(fn)
 ```
 
 ## Usage
@@ -35,11 +35,13 @@ cy.location().spread()   // Errors, 'location' does not yield an array
 
 ## Arguments
 
-**{% fa fa-angle-right %} function** ***(Function)***
+**{% fa fa-angle-right %} fn** ***(Function)***
 
-Pass a function that expands the array into it's arguments. Whatever was passed to the function is what is yielded.
+Pass a function that expands the array into it's arguments.
 
 ## Yields
+
+Whatever was passed to the function is what is yielded.
 
 ## Timeout
 

@@ -4,11 +4,40 @@ comments: true
 description: ''
 ---
 
-Types into the DOM element found in the previous command.
+Type into a DOM element.
 
-Prior to typing, if the DOM element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
 
-Text passed to `cy.type` may include any of these special character sequences:
+# Syntax
+
+```javascript
+.type(text)
+.type(text, options)
+```
+
+## Usage
+
+`.type()` requires being chained off another cy command that *yields* a DOM element.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('input').type('Hello, World') // Type 'Hello, World' into the 'input'
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.type('Welcome')               // Errors, cannot be chained off 'cy'
+cy.url().type('www.cypress.io')  // Errors, 'url' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} text**  ***(String)***
+
+The text to be typed into the DOM element.
+
+Text passed to `.type()` may include any of these special character sequences:
 
 Sequence | Notes
 --- | ---
@@ -32,20 +61,9 @@ Sequence | Notes
 `{meta}` | Activates the `metaKey` modifier. Aliases: `{command}`, `{cmd}`
 `{shift}` | Activates the `shiftKey` modifier.
 
-| | |
-|--- | --- |
-| **Returns** | the DOM element that was typed into |
-| **Timeout** | `cy.type` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-# [cy.type( *text* )](#usage)
-
-Types the text provided into the current DOM subject.
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.type`.
-
-**[cy.type( *text*, *options* )](#options-usage)**
+Pass in an options object to change the default behavior of `.type()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -53,76 +71,137 @@ Option | Default | Notes
 `force` | `false` | Forces type, disables error checking prior to type
 `release` | `true` | Keep a modifier activated between commands
 `interval` | `16` | Interval to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 
-# Usage
+## Yields
 
-## Type into a textarea.
+`.type()` yields the DOM element that was typed into.
+
+## Timeout
+
+`.type()` will continue to retry typing for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Input/Textarea
+
+**Type into a textarea.**
 
 ```javascript
-// issues all keyboard events
-// and returns <textarea> for further chaining
-cy.get('textarea').type('Hello world')
+cy.get('textarea').type('Hello world') //yields <textarea>
 ```
 
-## Type into a non-text or non-textarea element with `tabindex`
+**Type into a login form**
+
+{% note info %}
+[Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
+{% endnote %}
+
+**Mimic user typing behavior**
+
+```javascript
+// each keypress is delayed 10ms by default
+// which simulates how a very fast user types!
+cy.get('[contenteditable]').type('some text!')
+```
+
+## Not Input/Textarea
+
+**Type into a non-input or non-textarea element with `tabindex`**
 
 ```html
 <body>
   <div id="el" tabindex="1">
-    this div can receive focus
+    This div can receive focus!
   </div>
 </body>
 ```
 
 ```javascript
-// this element will receive all of the appropriate
-// key events and focus / blur events but will not
-// have its value or text contents altered in any way
-cy.get('#el').type('foo')
+cy.get('#el').type('supercalifragilisticexpialidocious')
 ```
 
-# Options Usage
+## Date Inputs
 
-## Force a click to happen prior to type
+Using `.type()` on a date input (`<input type="date">`) requires specifying a valid date in the format:
 
-Type issues a [`click`](https://on.cypress.io/api/click) prior to typing (only if the element is not currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
+- `yyyy-MM-dd` (e.g. `1999-12-31`)
+
+This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#sec-dates) and is what the input's `value` will be set to regardless of browser or locale.
+
+Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+## Month Inputs
+
+Using `.type()` on a month input (`<input type="month">`) requires specifying a valid month in the format:
+
+- `yyyy-MM` (e.g. `1999-12`)
+
+This isn't exactly how a user would type into a month input, but is a workaround since month input support varies between browsers and the format varies based on locale. `yyyy-MM` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#months) and is what the input's `value` will be set to regardless of browser or locale.
+
+Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+## Week Inputs
+
+Using `.type()` on a week input (`<input type="week">`) requires specifying a valid week in the format:
+
+- `yyyy-Www` (e.g. `1999-W23`)
+
+Where `W` is the literal character 'W' and `ww` is the number of the week (01-53).
+
+This isn't exactly how a user would type into a week input, but is a workaround since week input support varies between browsers and the format varies based on locale. `yyyy-Www` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#valid-week-string) and is what the input's `value` will be set to regardless of browser or locale.
+
+Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+## Time Inputs
+
+Using `.type()` on a time input (`<input type="time">`) requires specifying a valid time in the format:
+
+- `HH:mm` (e.g. `01:30` or `23:15`)
+- `HH:mm:ss` (e.g. `10:00:30`)
+- `HH:mm:ss.SSS` (e.g. `12:00:00.384`)
+
+Where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999.
+
+Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
+
+## Options
+
+**Force a click to happen prior to type**
+
+Prior to typing, if the DOM element isn't currently focused, Cypress issues a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
+
+Sometimes it is useful to force the click to happen in order to disables error checking, like whether the element is currently visible.
 
 ```javascript
-// this will disable the built-in logic for ensuring
-// the element is visible, and is physically clickable
-// prior to typing into it
-cy.get('input[type=text]').type('Test all the things', {force: true})
+cy.get('input[type=text]').type('Test all the things', { force: true })
 ```
 
-{% note warning  %}
+{% note warning %}
 Be careful with the `force` option because it allows the type to happen where it might actually be impossible for a real user to type.
 {% endnote %}
 
-# Key combinations / Modifiers
+## Key Combinations
 
-When using special character sequences (see table at top of page), it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `cy.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/v1.0/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
+When using special character sequences, it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `.type()` command, and are released when all subsequent characters are typed, unless [`{ release: false }`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
 
-## Type a key combination
+**Type a key combination**
 
 ```javascript
 // this is the same as a user holding down SHIFT and ALT, then pressing Q
 cy.get('input').type('{shift}{alt}Q')
 ```
 
-{% note info Typing into a login form %}
-[Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
-{% endnote %}
-
-## Hold down modifier key and type a word
+**Hold down modifier key and type a word**
 
 ```javascript
-// all characters after {ctrl} will have 'ctrlKey' set to 'true' on their key events
+// all characters after {ctrl} will have 'ctrlKey'
+// set to 'true' on their key events
 cy.get('input').type('{ctrl}test')
 ```
 
-## Release behavior
+**Release behavior**
 
 By default, modifiers are released after each type command.
 
@@ -136,7 +215,7 @@ To keep a modifier activated between commands, specify `{release: false}` in the
 
 ```javascript
 // 'altKey' will be true while typing 'foo'
-cy.get('input').type('{alt}foo', {release: false})
+cy.get('input').type('{alt}foo', { release: false })
 // 'altKey' will also be true during 'get' and 'click' commands
 cy.get('button').click()
 ```
@@ -168,20 +247,23 @@ cy.get('input').type('{alt}')
 cy.get('button').click()
 ```
 
-## Global shortcuts / modifiers
+## Global Shortcuts
 
-`cy.type()` requires a focusable element as the subject, since it's usually unintended to type into something that's not a text field or textarea! Although there *are* a few cases where it's valid to "type" into something other than a text field or textarea:
+`.type()` requires a focusable element as the subject, since it's usually intended to type into something that's an input or textarea. Although there *are* a few cases where it's valid to "type" into something other than an input or textarea:
 
 * Keyboard shortcuts where the listener is on the `document` or `body`.
 * Holding modifier keys and clicking an arbitrary element.
 
-To support this, the `body` can be used as the subject (even though it's *not* a focusable element).
+To support this, the `body` can be used as the DOM element to type into (even though it's *not* a focusable element).
+
+**Use keyboard shortcuts in body**
 
 ```javascript
-// all of the type events will be fired on the body
+// all of the type events are fired on the body
 cy.get('body').type('{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba')
-
 ```
+
+**Do a shift + click**
 
 ```javascript
 // execute a SHIFT + click on the first <li>
@@ -190,37 +272,17 @@ cy.get('body').type('{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightar
 cy.get('body').type('{shift}', {release: false}).get('li:first').click()
 ```
 
-# Date inputs
+# Notes
 
-Using `cy.type()` on a date input (`<input type="date">`) requires specifying a valid date in the format `yyyy-MM-dd`, e.g. `1999-12-31`. This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#sec-dates) and is what the input's `value` will be set to regardless of browser or locale. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
-
-# Month inputs
-
-Using `cy.type()` on a month input (`<input type="month">`) requires specifying a valid month in the format `yyyy-MM`, e.g. `1999-12`. This isn't exactly how a user would type into a month input, but is a workaround since month input support varies between browsers and the format varies based on locale. `yyyy-MM` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#months) and is what the input's `value` will be set to regardless of browser or locale. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
-
-# Week inputs
-
-Using `cy.type()` on a week input (`<input type="week">`) requires specifying a valid week in the format `yyyy-Www`, where `W` is the literal character 'W' and `ww` is the number of the week (01-53), e.g. `1999-W23` (23rd week of 1999). This isn't exactly how a user would type into a week input, but is a workaround since week input support varies between browsers and the format varies based on locale. `yyyy-Www` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#valid-week-string) and is what the input's `value` will be set to regardless of browser or locale. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
-
-# Time inputs
-
-Using `cy.type()` on a time input (`<input type="time">`) requires specifying a valid time in the format `HH:mm`, `HH:mm:ss`, or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted. The following are examples of valid times:
-
-* 01:30
-* 23:15
-* 12:00:00.384
-
-# Known Issues
-
-## Typing `tab` key does not work
+**Typing `tab` key does not work**
 
 Tabbing will be implemented as a separate command as `cy.tab` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
 
-## Preventing mousedown does not prevent typing
+**Preventing `mousedown` does not prevent typing**
 
-In a real browser, preventing mousedown on a form field will prevent it from receiving focus and thus prevent it from being able to be typed into. Currently, Cypress does not factor this in. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
+In a real browser, preventing `mousedown` on a form field will prevent it from receiving focus and thus prevent it from being able to be typed into. Currently, Cypress does not factor this in. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
 
-## Modifier effects
+**Modifier effects**
 
 In a real browser, if a user holds `SHIFT` and types `a`, a capital `A` will be typed into the input. Currently, Cypress does not simulate that behavior.
 
@@ -242,17 +304,7 @@ This holds true for other special key combinations as well (that may be OS-speci
 
 [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need modifier effects to be implemented.
 
-# Notes
-
-## Mimic user typing behavior
-
-```javascript
-// each keypress is delayed 10ms by default
-// which simulates how a very fast user types!
-cy.get('[contenteditable]').type('some text!')
-```
-
-## Events that fire
+**Events that fire**
 
 Cypress implements all events that Chrome fires as part of typing in a real keyboard. Read the section: [Simulated Events vs Native Events](#simulated-events-vs-native-events) below for more information.
 
@@ -270,7 +322,7 @@ Additionally `change` events will be fired either when the `{enter}` key is pres
 
 Events that should not fire on non input types such as elements with `tabindex` do not fire their `textInput` or `input` events. Only typing into elements which cause the actual value or text to change will fire those events.
 
-## Event Firing
+**Event Firing**
 
 The following rules have been implemented that match real browser behavior (and the spec):
 
@@ -279,7 +331,7 @@ The following rules have been implemented that match real browser behavior (and 
 3. Cypress will fire `textInput` *only* if typing that key would have inserted an actual character.
 4. Cypress will fire `input` *only* if typing that key modifies or changes the value of the element.
 
-## Event Cancellation
+**Event Cancellation**
 
 Cypress respects all default browser behavior when events are cancelled.
 
@@ -295,7 +347,7 @@ $('#username').on('keydown', function(e){
 cy.get('#username').type('bob@gmail.com').should('have.value', '') // true
 ```
 
-## Implicit form submission behavior
+**Implicit form submission behavior**
 
 Cypress automatically matches the spec and browser behavior for pressing the `{enter}` key when the input belongs to a `<form>`.
 
@@ -312,9 +364,8 @@ For instance the following will submit the form.
 ```
 
 ```javascript
-cy
-  .get('#username').type('bob@burgers.com')
-  .get('#password').type('password123{enter}')
+cy.get('#username').type('bob@burgers.com')
+cy.get('#password').type('password123{enter}')
 ```
 
 Because there are multiple `inputs` and one `submit` button, Cypress submits the form (and fires submit events) as well as a synthetic `click` event to the `button`.
@@ -330,9 +381,9 @@ Additionally Cypress handles these 4 other situations as defined in the spec:
 
 Of course if the form's `submit` event is `preventedDefault` the form will not actually be submitted.
 
-## Key Events Table
+**Key Events Table**
 
-Cypress will print out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
+Cypress prints out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
 
 Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
 
@@ -342,7 +393,7 @@ Any modifiers activated for the event are also listed in a `modifiers` column.
 
 ![Cypress cy.type key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
 
-## Simulated Events vs Native Events
+**Simulated Events vs Native Events**
 
 When Cypress is running on your local computer, all events are simulated identically to real native events.
 
@@ -356,7 +407,7 @@ In other words, you get the best of both worlds: simulated when its practical to
 
 # Command Log
 
-## Type into the input
+**Type into the input**
 
 ```javascript
 cy.get('input[name=firstName]').type('Jane Lane')
@@ -372,6 +423,8 @@ When clicking on `type` within the command log, the console outputs the followin
 
 # See also
 
+- [blur](https://on.cypress.io/api/blur)
 - [clear](https://on.cypress.io/api/clear)
 - [click](https://on.cypress.io/api/click)
+- [focus](https://on.cypress.io/api/focus)
 - [submit](https://on.cypress.io/api/submit)

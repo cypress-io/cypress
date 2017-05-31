@@ -47,7 +47,7 @@ Values of checkboxes or radios that should be checked.
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `.check`.
+Pass in an options object to change the default behavior of `.check()`.
 
 Option | Default | Notes
 --- | --- | ---

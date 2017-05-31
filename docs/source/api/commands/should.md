@@ -182,6 +182,29 @@ cy
   })
 ```
 
+**Assert explicitly within `.should()`**
+
+```html
+<div id="todos">
+  <li>Walk the dog</li>
+  <li>Feed the cat</li>
+  <li>Write JavaScript</li>
+</div>
+```
+
+```javascript
+cy.get("#todos li").should(function($lis){
+  expect($lis).to.have.length(3)
+  expect($lis.eq(0)).to.contain("Walk the dog")
+  expect($lis.eq(1)).to.contain("Feed the cat")
+  expect($lis.eq(2)).to.contain("Write JavaScript")
+})
+```
+
+{% note warning %}
+Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
+{% endnote %}
+
 **Using a callback function will not change the subject**
 
 Whatever is returned in the function is ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)

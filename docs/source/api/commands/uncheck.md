@@ -4,68 +4,92 @@ comments: true
 description: ''
 ---
 
-Unchecks the checkboxes within the current subject.
+Uncheck checkbox(es).
 
-**The following events are fired during uncheck:** `mousedown`, `focus`, `mouseup`, `click`
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.uncheck` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the commands [options](#options). |
+```javascript
+.uncheck()
+.uncheck(value)
+.uncheck(values)
+.uncheck(options)
+.uncheck(value, options)
+.uncheck(values, options)
+```
 
-# [cy.uncheck()](#usage)
+## Usage
 
-Unchecks checkboxes. Triggers events associated with check.
+`.uncheck()` requires being chained off another cy command that *yields* a DOM element of type `checkbox`.
 
-# [cy.uncheck( *values* )](#values-usage)
+**{% fa fa-check-circle green %} Valid Usage**
 
-Unchecks the checkboxes matching the values. Triggers events associated with uncheck.
+```javascript
+cy.get('[type="checkbox"]').uncheck()       // Yields checkbox element
+```
 
-# Options
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-Pass in an options object to change the default behavior of `cy.uncheck`.
+```javascript
+cy.uncheck('[type="checkbox"]') // Errors, cannot be chained off 'cy'
+cy.get('p:first').uncheck()     // Errors, '.get()' does not yield checkbox
+```
 
-**cy.uncheck( *options* )**
+## Arguments
+
+**{% fa fa-angle-right %} value**  ***(String)***
+
+Value of checkbox that should be unchecked.
+
+**{% fa fa-angle-right %} values**  ***(Array)***
+
+Values of checkboxes that should be unchecked.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.uncheck()`.
 
 Option | Default | Notes
 --- | --- | ---
-`interval` | `16` | Interval which to retry a uncheck
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the uncheck
-`force` | `false` | Forces uncheck, disables error checking prior to uncheck
+`interval` | `16` | Interval which to retry a check
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
+`force` | `false` | Forces check, disables error checking prior to check
 `log` | `true` | whether to display command in command log
-`multiple` | `false` | Enables serially unchecking multiple elements
 
-# Usage
+# Examples
 
-## Uncheck all checkboxes
+## Uncheck
+
+**Uncheck all checkboxes**
 
 ```javascript
 cy.get(':checkbox').uncheck()
 ```
 
-## Uncheck all radios
-
-```javascript
-cy.get('[type="checkbox"]').uncheck()
-```
-
-## Uncheck element with the id `saveUserName`
+**Uncheck element with the id `saveUserName`**
 
 ```javascript
 cy.get('#saveUserName').uncheck()
 ```
 
-# Values Usage
+## Value
 
-## Uncheck the checkbox with the value of 'ga'
+**Uncheck the checkbox with the value of 'ga'**
 
 ```javascript
 cy.get('input[type="checkbox"]').uncheck(['ga'])
 ```
 
+## Values
+
+**Uncheck the checkboxes with the value of 'ga' and 'ca'**
+
+```javascript
+cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])
+```
+
 # Command Log
 
-## Uncheck the first checkbox
+**Uncheck the first checkbox**
 
 ```javascript
 cy

@@ -17,17 +17,17 @@ The clock starts at the unix epoch (timestamp of 0). This means that when you in
 # Syntax
 
 ```javascript
-.clock()
-.clock(now)
-.clock(now, functionNames)
-.clock(options)
-.clock(now, options)
-.clock(now, functionNames, options)
+cy.clock()
+cy.clock(now)
+cy.clock(now, functionNames)
+cy.clock(options)
+cy.clock(now, options)
+cy.clock(now, functionNames, options)
 ```
 
 ## Usage
 
-`.clock()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.clock()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -47,7 +47,7 @@ Name of native functions that clock should override.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.clock`.
+Pass in an options object to change the default behavior of `cy.clock()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -55,15 +55,17 @@ Option | Default | Notes
 
 ## Yields
 
-`.clock()` yields a `clock` object with the following methods. You can also access the `clock` object via `this.clock` in a [`cy.then`](https://on.cypress.io/api/then) callback.
+`cy.clock()` yields a `clock` object with the following methods.
 
-**clock.tick(*milliseconds*)**
+**`clock.tick(milliseconds)`**
 
 Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
 
-**clock.restore()**
+**`clock.restore()`**
 
-Restore all overridden native functions. This is automatically called between tests, so should generally not be needed.
+Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+
+You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
 
 ## Timeout
 
@@ -83,20 +85,17 @@ setInterval(function(){
 ```
 
 ```javascript
-cy
-  .clock()
-  .visit('/index.html')
-  .tick(1000)
-  .get('#seconds-elapsed')
-    .should('have.text', '1 seconds')
-  .tick(1000)
-  .get('#seconds-elapsed')
-    .should('have.text', '2 seconds')
+cy.clock()
+cy.visit('/index.html')
+cy.tick(1000)
+cy.get('#seconds-elapsed').should('have.text', '1 seconds')
+cy.tick(1000)
+cy.get('#seconds-elapsed').should('have.text', '2 seconds')
 ```
 
 **Access the clock object to synchronously move time**
 
-In most cases, it's easier to [`.tick()`](https://on.cypress.io/api/tick) to move time, but you can also use the `clock` object yielded by `.clock()`.
+In most cases, it's easier to [`.tick()`](https://on.cypress.io/api/tick) to move time, but you can also use the `clock` object yielded by `cy.clock()`.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -107,29 +106,26 @@ cy.clock().then(function (clock) {
 You can call `.clock()` again for this purpose later in a chain if necessary.
 
 ```javascript
-cy
-  .clock()
-  .get('#foo')
-  .type('Foo')
-  .clock().then(function (clock) {
-    clock.tick(1000)
-  })
+cy.clock()
+cy.get('input').type('Jane Lane')
+cy.clock().then(function (clock) {
+  clock.tick(1000)
+})
 ```
 
 The clock object is also available via `this.clock` in any `.then` callback.
 
 ```javascript
-cy
-  .clock()
-  .get('#foo').then(function ($foo) {
-    this.clock.tick(1000)
-    // do something with $foo ...
-  })
+cy.clock()
+cy.get('form').then(function ($form) {
+  this.clock.tick(1000)
+  // do something with $form ...
+})
 ```
 
 **Access the clock object to restore native functions**
 
-In general, it should not be necessary to manually restore the native functions that `.clock()` overrides, since this is done automatically between tests. But if you need to, the `clock` object yielded has a `.restore` method.
+In general, it should not be necessary to manually restore the native functions that `cy.clock()` overrides, since this is done automatically between tests. But if you need to, the `clock` object yielded has a `.restore` method.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -140,12 +136,11 @@ cy.clock().then(function (clock) {
 Or via `this.clock`:
 
 ```javascript
-cy
-  .clock()
-  .get('#foo').then(function ($foo) {
-    this.clock.restore()
-    // do something with $foo ...
-  })
+cy.clock()
+cy.get('.timer').then(function ($timer) {
+  this.clock.restore()
+  // do something with $timer ...
+})
 ```
 
 ## Now
@@ -160,11 +155,9 @@ $('#date').text(new Date().toJSON())
 ```javascript
 const now = new Date(2017, 2, 14).getTime() // March 14, 2017 timestamp
 
-cy
-  .clock(now)
-  .visit('/index.html')
-  .get('#date')
-    .contains('2017-03-14')
+cy.clock(now)
+cy.visit('/index.html')
+cy.get('#date').contains('2017-03-14')
 ```
 
 ## Function Names
@@ -196,9 +189,8 @@ If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypre
 **Create a clock and tick it 1 second**
 
 ```javascript
-cy
-  .clock()
-  .tick(1000)
+cy.clock()
+cy.tick(1000)
 ```
 
 The command above will display in the command log as:

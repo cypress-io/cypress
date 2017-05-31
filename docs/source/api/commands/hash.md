@@ -4,12 +4,17 @@ comments: true
 description: ''
 ---
 
-Get the current URL hash. This is the same as [`.location().hash`](https://on.cypress.io/api/location)
+Get the current URL hash.
+
+{% note info %}
+This is the same as [`cy.location().hash`](https://on.cypress.io/api/location)
+{% endnote %}
 
 # Syntax
 
 ```javascript
-.hash(options)
+cy.hash()
+cy.hash(options)
 ```
 
 ## Usage
@@ -26,7 +31,7 @@ cy.hash()
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.hash()`.
+Pass in an options object to change the default behavior of `cy.hash()`.
 
 **cy.hash( *options* )**
 

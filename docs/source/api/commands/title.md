@@ -6,39 +6,59 @@ description: ''
 
 Get the title of the document.
 
-| | |
-|--- | --- |
-| **Returns** | the `document` title as a string |
-| **Timeout** | `cy.title` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-# [cy.title()](#usage)
+# Syntax
 
-Get the title of the document.
+```javascript
+cy.title()
+cy.title(options)
+```
 
-# Options
+## Usage
 
-Pass in an options object to change the default behavior of `cy.click`.
+`cy.title()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**cy.title( *options* )**
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.title()    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.title`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
 
-## Assert that the document's title contains "New User"
+## Yields
+
+`cy.title()` yields the `document` title as a string.
+
+## Timeout
+
+`cy.title()` will continue to retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## Title
+
+**Assert that the document's title eq "My Awesome Application"**
 
 ```javascript
-cy.title().should('contain', 'New User')
+cy.title().should('eq', 'My Awesome Application')
 ```
 
 # Command Log
 
-## Assert that the document's title contains 'New User'
+**Assert that the document's title include 'New User'**
 
 ```javascript
-cy.title().should('contain', 'New User')
+cy.title().should('include', 'New User')
 ```
 
 The commands above will display in the command log as:

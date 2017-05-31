@@ -6,7 +6,6 @@ description: ''
 
 Wrap a method in a spy in order to record calls to and arguments of the function.
 
-
 # Syntax
 
 ```javascript
@@ -20,7 +19,7 @@ cy.spy(object, method)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.stub(user, 'addFriend')    
+cy.spy(user, 'addFriend')    
 ```
 
 ## Arguments
@@ -62,7 +61,7 @@ expect(util.addListeners).to.be.called
 
 ## Alias a spy
 
-Adding an alias using [`.as()`](https://on.cypress.io/api/as) to spies makes them easier to identify in error messages and Cypress's command log.
+Adding an alias using [`.as()`](https://on.cypress.io/api/as) to spies makes them easier to identify in error messages and Cypress' command log.
 
 ```javascript
 const obj = {

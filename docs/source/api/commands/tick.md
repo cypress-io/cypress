@@ -4,56 +4,85 @@ comments: true
 description: ''
 ---
 
-`cy.tick` is used to move time after overriding native time functions with [`cy.clock`](https://on.cypress.io/api/clock).
+Move time after overriding a native time function with [`cy.clock()`](https://on.cypress.io/api/clock).
 
-It moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
-
+{% note warning %}
 [`cy.clock`](https://on.cypress.io/api/clock) must be called before `cy.tick` in order to override native time functions first.
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#clock-api) |
+# Syntax
 
-# [cy.tick( *milliseconds* )](#usage)
+```javascript
+cy.tick(milliseconds)
+```
 
-Moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
+## Usage
 
-# Usage
+`cy.tick()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-## Create a clock and move time to trigger a setTimeout
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.tick(500)
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} milliseconds** ***(Number)***
+
+The number of `milliseconds` to move the clock. Any timers within the affected range of time will be called.
+
+## Yields
+
+`.tick()` yields a `clock` object with the following methods:
+
+**`clock.tick(milliseconds)`**
+
+Move the clock a number of milliseconds. Any timers within the affected range of time will be called.
+
+**`clock.restore()`**
+
+Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+
+You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
+
+
+# Examples
+
+## Move time
+
+**Create a clock and move time to trigger a `setTimeout`**
 
 ```javascript
 // app code loaded by index.html
-window.foo = () => {
+window.addIntro = () => {
   setTimeout(() => {
-    document.getElementById('#foo').textContent = 'Foo'
+    document.getElementById('#header').textContent = 'Hello, World'
   }, 500)
 }
-
-// test
-cy
-  .clock()
-  .visit('/index.html')
-  .window().invoke('foo')
-  .tick(500)
-  .get('#foo')
-    .should('have.text', 'Foo')
 ```
 
-## Example Recipe
+```javascript
+cy.clock()
+cy.visit('/index.html')
+cy.window().invoke('addIntro')
+cy.tick(500)
+cy.get('#header').should('have.text', 'Hello, World')
+```
 
-{% note info Using cy.clock and cy.tick %}
+**Using cy.clock and cy.tick**
+
+{% note info %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
 # Command Log
 
-## Create a clock and tick it 1 second
+**Create a clock and tick it 1 second**
 
 ```javascript
-cy
-  .clock()
-  .tick(1000)
+cy.clock()
+cy.tick(1000)
 ```
 
 The command above will display in the command log as:
@@ -66,8 +95,8 @@ When clicking on the `tick` command within the command log, the console outputs 
 
 # See also
 
+- [clock](https://on.cypress.io/api/clock)
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [clock](https://on.cypress.io/api/clock)
-- [stub](https://on.cypress.io/api/stub)
 - [spy](https://on.cypress.io/api/spy)
+- [stub](https://on.cypress.io/api/stub)
