@@ -5,7 +5,6 @@ chai = require("chai")
 chaijQuery = require("chai-jquery")
 sinonChai = require("sinon-chai")
 
-$Cypress = require("../cypress")
 $Dom = require("./dom")
 $Utils = require("./utils")
 

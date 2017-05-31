@@ -62,7 +62,7 @@ $Cy.extend({
 
 module.exports = (Cypress, Commands) ->
   Cypress.on "test:after:hooks", (test, runnable) ->
-    if test.err and $Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
+    if test.err and Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
       ## give the UI some time to render the error
       ## because we were noticing that errors were not
       ## yet displayed in the UI when running headlessly
