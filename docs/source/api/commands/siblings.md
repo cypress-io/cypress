@@ -4,36 +4,65 @@ comments: true
 description: ''
 ---
 
-Get the siblings DOM elements of each element in the set of matched DOM elements.
+Get sibling DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.siblings` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.siblings()](#usage)
+```javascript
+.siblings()
+.siblings(selector)
+.siblings(options)
+.siblings(selector, options)
+```
 
-Get the siblings of each DOM element in the set of matched DOM elements.
+## Usage
 
-# [cy.siblings( *selector* )](#selector-usage)
+`.siblings()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
 
-Get the siblings of each DOM element in the set of matched DOM elements filtered by a selector.
+**{% fa fa-check-circle green %} Valid Usage**
 
-# Options
+```javascript
+cy.get('td').siblings()           // Yield all td's siblings
+cy.get('li').siblings('.active')  // Yield all li's siblings with class '.active'
+```
 
-Pass in an options object to change the default behavior of `cy.siblings`.
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
 
-**cy.siblings( *options* )**
-**cy.siblings( *selector*, *options* )**
+```javascript
+cy.siblings('.error')     // Errors, cannot be chained off 'cy'
+cy.location().siblings()  // Errors, 'location' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.siblings()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+## Yields
 
-## Get the siblings of each li.
+`.siblings()` yields the new DOM elements found by the command.
+
+## Timeout
+
+`.siblings()` will continue to look for the sibling element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+
+
+# Examples
+
+## Siblings
+
+**Get the siblings of each li**
 
 ```html
 <ul>
@@ -45,22 +74,22 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns all other li's in list
+// yields all other li's in list
 cy.get('.active').siblings()
 ```
 
-# Selector Usage
+## Selector
 
-## Get siblings of element with class `active`.
+**Get siblings of element with class `active`**
 
 ```javascript
-// returns <li class="active">Services</li>
+// yields <li class="active">Services</li>
 cy.get('li').siblings('.active')
 ```
 
 # Command Log
 
-## Get the siblings of element with class `active`
+**Get the siblings of element with class `active`**
 
 ```javascript
 cy.get('.left-nav').find('li.active').siblings()

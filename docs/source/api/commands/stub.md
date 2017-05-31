@@ -4,7 +4,43 @@ comments: true
 description: ''
 ---
 
-A stub is used to replace a function, record its usage and control its behavior. You can track calls to the functions and what arguments the function was called with. You can also control what the function returns and even cause it to throw an exception.
+Replace a function, record its usage and control its behavior.
+
+# Syntax
+
+```javascript
+cy.stub()
+cy.stub(object, method)
+cy.stub(object, method, replacerFn)
+```
+
+## Usage
+
+`.stub()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.stub(user, 'addFriend')    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} object** ***(Object)***
+
+The object that has the `method` to be replaced.
+
+**{% fa fa-angle-right %} method** ***(String)***
+
+The name of the `method` on the `object` to be wrapped.
+
+**{% fa fa-angle-right %} replacerFn** ***(Function)***
+
+The function used to replaces the `method` on the `object`.
+
+
+
+You can track calls to the functions and what arguments the function was called with. You can also control what the function returns and even cause it to throw an exception.
 
 `cy.stub` returns a [sinon.js stub](http://sinonjs.org/docs/#stubs). All methods found on sinon.js spies and stubs are supported. `cy.stub` creates stubs in a [sandbox](http://sinonjs.org/docs/#sandbox), so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
@@ -28,7 +64,7 @@ Replaces the `method` on the `object` with a stub and returns the stub. See the 
 
 # [cy.stub( *object*, *"method"*, replacerFn )](#replace-a-method-with-a-function)
 
-Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for methods on the spy.
+Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy. See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for methods on the spy.
 
 # Usage
 

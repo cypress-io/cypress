@@ -81,7 +81,7 @@ cy.server()
 
 ## Options
 
-## Change the defaults for upcoming [`.route()`](https://on.cypress.io/api/route) commands
+## Change defaults for [`.route()`](https://on.cypress.io/api/route)
 
 By default [`cy.route`](https://on.cypress.io/api/route) inherits some of its options from `cy.server()`.
 
@@ -226,7 +226,7 @@ However between tests, when a new test runs, the previous configuration is resto
 
 When a new test runs, any outstanding requests still in flight are automatically aborted. In fact this happens by default whether or not you've even started a `cy.server()`.
 
-## Server can be started before you [`cy.visit`](https://on.cypress.io/api/visit)
+**Server can be started before you [`cy.visit`](https://on.cypress.io/api/visit)**
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit`](https://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
 

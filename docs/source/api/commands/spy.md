@@ -4,45 +4,65 @@ comments: true
 description: ''
 ---
 
-Wrap a method in a spy in order to record calls to the functions and what arguments the function was called with.
+Wrap a method in a spy in order to record calls to and arguments of the function.
 
-`cy.spy` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported. `cy.spy` creates spies in a [sandbox](http://sinonjs.org/docs/#sandbox), so all spies created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
-The main difference between `cy.spy` and [`cy.stub`](https://on.cypress.io/api/stub) is that `cy.spy` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
+# Syntax
 
-Cypress has also built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any [assertions](https://github.com/domenic/sinon-chai#assertions) supported by `sinon-chai` can be used without any configuration.
+```javascript
+cy.spy(object, method)
+```
+
+## Usage
+
+`.spy()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.stub(user, 'addFriend')    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} object** ***(Object)***
+
+The object that has the `method` to be wrapped.
+
+**{% fa fa-angle-right %} method** ***(String)***
+
+The name of the `method` on the `object` to be wrapped.
+
+## Yields
 
 Unlike most Cypress commands, `cy.spy` is *synchronous* and returns a value (the spy) instead of a Promise-like chain-able object.
 
-| | |
-|--- | --- |
-| **Returns** | the spy |
+`cy.spy` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported.
 
-# [cy.spy( *object*, *"method"* )](#usage)
+## Timeout
 
-Wraps the `method` on the `object` with a spy and returns the spy. See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for [methods](http://sinonjs.org/docs/#spies-api) on the spy.
+# Examples
 
-# Usage
+## Spy
 
-## Wrap a method with a spy
+**Wrap a method with a spy**
 
 ```javascript
 // assume App.start calls util.addListeners
 cy.spy(util, 'addListeners')
 App.start()
 expect(util.addListeners).to.be.called
-
 ```
 
-## Example Recipe
+**Using cy.spy()**
 
-{% note info Using cy.spy %}
+{% note info %}
 [Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
 ## Alias a spy
 
-Adding an alias using [`cy.as`](https://on.cypress.io/api/as) to spies makes them easier to identify in error messages and Cypress's command log.
+Adding an alias using [`.as()`](https://on.cypress.io/api/as) to spies makes them easier to identify in error messages and Cypress's command log.
 
 ```javascript
 const obj = {
@@ -59,9 +79,23 @@ You will see the following in the command log:
 
 ![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22437291/805bd0d4-e6f5-11e6-99c5-bded81b9c42b.png)
 
+# Notes
+
+**Automatic reset/restore between tests**
+
+`cy.spy` creates spies in a [sandbox](http://sinonjs.org/docs/#sandbox), so all spies created are automatically reset/restored between tests without you having to explicitly reset/restore them.
+
+**Difference between cy.spy() and cy.stub()**
+
+The main difference between `cy.spy` and [`cy.stub`](https://on.cypress.io/api/stub) is that `cy.spy` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
+
+**Assertion Support**
+
+Cypress has also built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any [assertions](https://github.com/domenic/sinon-chai#assertions) supported by `sinon-chai` can be used without any configuration.
+
 # Command Log
 
-## Create a spy, alias it, and call it
+**Create a spy, alias it, and call it**
 
 ```javascript
 const obj = {

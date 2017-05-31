@@ -4,20 +4,50 @@ comments: true
 description: ''
 ---
 
-The spread command allows an expression to be expanded in places where multiple arguments are expected. Similar to [`cy.then`](https://on.cypress.io/api/then), but always expects an array as it's subject.
+Expand an expression into multiple arguments.
 
-| | |
-|--- | --- |
-| **Returns** | the value of the spread |
-| **Timeout** | *cannot timeout* |
+{% note info %}
+Similar of [`.then()`](https://on.cypress.io/api/then), but always expects an array as it's subject.
+{% endnote %}
 
-# [cy.spread( *fn* )](#usage)
+# Syntax
 
-Expand an array of arguments.
+```javascript
+.spread(function() {})
+```
 
-# Usage
+## Usage
 
-## Expand the array of aliased routes
+`.spread()` requires being chained off another cy command that *yields* an array.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.getCookies.spread(function() {}) // Yield all el's with class '.users'
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.spread(function() {}) // Errors, cannot be chained off 'cy'
+cy.location().spread()   // Errors, 'location' does not yield an array
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} function** ***(Function)***
+
+Pass a function that expands the array into it's arguments. Whatever was passed to the function is what is yielded.
+
+## Yields
+
+## Timeout
+
+# Examples
+
+## Aliased Routes
+
+**Expand the array of aliased routes**
 
 ```javascript
 cy
@@ -30,6 +60,20 @@ cy
     // each XHR is now an individual argument
   })
 ```
+
+## Cookies
+
+**Expand the array of cookies**
+
+```javascript
+cy.getCookies().spread(function(cookie1, cookie2, cookie3){
+  // each cookie is now an individual argument
+})
+```
+
+# Command Log
+
+**`spread` does *not* log in the command log**
 
 # See also
 

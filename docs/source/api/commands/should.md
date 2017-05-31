@@ -239,7 +239,7 @@ You can [read more about how Cypress resolves your assertions](https://on.cypres
 
 # Notes
 
-## How do I know which assertions change the subject and which keep it the same?
+**How do I know which assertions change the subject and which keep it the same?**
 
 The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
