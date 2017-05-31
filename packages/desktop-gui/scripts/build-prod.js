@@ -1,7 +1,7 @@
-var z = require('zunder')
-var u = z.undertaker
-var copyScripts = require('./copy-scripts')
-var setZunderConfig = require('./set-zunder-config')
+const z = require('zunder')
+const u = z.undertaker
+const copyScripts = require('./copy-scripts')
+const setZunderConfig = require('./set-zunder-config')
 
 setZunderConfig(z)
 
