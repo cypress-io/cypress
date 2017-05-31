@@ -159,6 +159,7 @@ jobs:
           name: Fast unit tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 0 ]; then
+              npm test
               npm run all test -- --package coffee
               npm run all test -- --package desktop-gui
               npm run all test -- --package electron
@@ -183,24 +184,32 @@ jobs:
               whoami
               npm run all test-integration -- --package server
             fi
-
       #
       # things to run in the 2nd CI container
       #
       - run:
-          name: Docs - running E2E tests
+          name: Server E2E tests (electron)
           command: |
             if [ $CIRCLE_NODE_INDEX == 1 ]; then
-              cd docs
-              npm run test-e2e
+              npm run all test-e2e -- --package server
             fi
       #
       # things to run in the 3rd CI container
       #
       - run:
-          name: Driver unit tests
+          name: Docs - running E2E tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 2 ]; then
+              cd docs
+              npm run test-e2e
+            fi
+      #
+      # things to run in the 4th CI container
+      #
+      - run:
+          name: Driver unit tests
+          command: |
+            if [ $CIRCLE_NODE_INDEX == 3 ]; then
               chrome --version
               xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
             fi

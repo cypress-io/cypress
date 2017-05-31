@@ -12,6 +12,7 @@ if [ "$SPEC" = '' ]; then
   echo ''
   echo '  $ npm run test-unit'
   echo '  $ npm run test-integration'
+  echo '  $ npm run test-e2e'
   echo ''
   exit 1
 fi
