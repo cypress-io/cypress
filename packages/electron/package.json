@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./bin/cypress-electron",
-    "test": "mocha --compilers coffee:../coffee/register",
+    "test": "mocha --compilers coffee:@packages/coffee/register",
     "postinstall": "./bin/cypress-electron --install",
     "clean-deps": "rm -rf node_modules"
   },

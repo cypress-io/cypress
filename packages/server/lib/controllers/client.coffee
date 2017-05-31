@@ -1,4 +1,4 @@
-socketIo = require("../../../socket")
+socketIo = require("@packages/socket")
 
 ## hold onto the client source + version in memory
 clientSource  = socketIo.getClientSource()

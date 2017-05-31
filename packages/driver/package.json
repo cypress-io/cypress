@@ -1,5 +1,5 @@
 {
-  "name": "driver",
+  "name": "@packages/driver",
   "version": "1.0.0",
   "description": "",
   "scripts": {

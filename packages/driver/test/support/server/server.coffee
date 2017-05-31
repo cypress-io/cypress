@@ -9,7 +9,7 @@ glob      = require("glob")
 coffee    = require("../../../../coffee")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
-xhrs      = require("../../../../server/lib/controllers/xhrs")
+xhrs      = require("@packages/server/lib/controllers/xhrs")
 Runner    = require("./runner")
 
 args = require("minimist")(process.argv.slice(2))

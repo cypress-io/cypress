@@ -1,6 +1,6 @@
 _ = require("lodash")
 send = require("send")
-reporter = require("../../../reporter")
+reporter = require("@packages/reporter")
 
 module.exports = {
   handle: (req, res) ->

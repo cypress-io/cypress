@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-extension",
+  "name": "@packages/extension",
   "version": "0.4.2",
   "description": "Cypress Chrome Extension",
   "main": "index.js",

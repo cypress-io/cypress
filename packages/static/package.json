@@ -1,5 +1,5 @@
 {
-  "name": "static",
+  "name": "@packages/static",
   "main": "index.js",
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",

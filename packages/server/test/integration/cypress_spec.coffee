@@ -9,7 +9,7 @@ Promise    = require("bluebird")
 electron   = require("electron")
 inquirer   = require("inquirer")
 Fixtures   = require("../support/helpers/fixtures")
-extension  = require("#{root}../../packages/extension")
+extension  = require("@packages/extension")
 pkg        = require("#{root}package.json")
 git        = require("#{root}lib/util/git")
 bundle     = require("#{root}lib/util/bundle")
@@ -905,7 +905,7 @@ describe "lib/cypress", ->
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"])
       .then =>
-        expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
+        expect(console.log).to.be.calledWithMatch('{"name":"@packages/server"')
         @expectExitWith(0)
 
   context "--version", ->

@@ -1,8 +1,8 @@
 _             = require("lodash")
 uri           = require("url")
 Promise       = require("bluebird")
-cyDesktop     = require("../../../desktop-gui")
-extension     = require("../../../extension")
+cyDesktop     = require("@packages/desktop-gui")
+extension     = require("@packages/extension")
 contextMenu   = require("electron-context-menu")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../cwd")

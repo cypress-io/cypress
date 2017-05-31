@@ -1,7 +1,7 @@
 Promise = require("bluebird")
 fs = Promise.promisifyAll(require("fs-extra"))
 path = require("path")
-launcher = require("../../../../launcher")
+launcher = require("@packages/launcher")
 
 profileDir = path.join(__dirname, "../../../dist-test/browsers/chrome")
 themeDir = path.join(__dirname, "theme")

@@ -1,6 +1,6 @@
 _      = require("lodash")
 send   = require("send")
-runner = require("../../../runner")
+runner = require("@packages/runner")
 pkg    = require("../../package.json")
 
 module.exports = {

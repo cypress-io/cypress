@@ -2,7 +2,7 @@
 
 // compile TypeScript files on the fly using
 // Node require hook project
-require('../ts/register')
+require('@packages/ts/register')
 const launcher = require("./lib/launcher")
 module.exports = launcher
 

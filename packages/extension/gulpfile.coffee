@@ -10,7 +10,7 @@ source     = require("vinyl-source-stream")
 Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
 browserify = require("browserify")
-icons      = require("../icons")
+icons      = require("@cypress/icons")
 ext        = require("./")
 
 gulp.task "copy:socket:client", ->
