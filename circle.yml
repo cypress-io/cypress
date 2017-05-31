@@ -67,6 +67,9 @@ jobs:
       # via postinstall script
       - run: npm install --ignore-scripts
 
+      ## symlink all of our sub packages in node_modules
+      - run: npm run link
+
       ## now install all of the sub packages node_modules
       - run: npm run all install -- --serial
 
