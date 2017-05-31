@@ -1,5 +1,5 @@
 module.exports = function setZunderConfig (zunder) {
-  var commonScripts = ['@cypress/react-tooltip', 'react', 'react-dom', 'mobx', 'mobx-react', 'lodash']
+  const commonScripts = ['@cypress/react-tooltip', 'react', 'react-dom', 'mobx', 'mobx-react', 'lodash']
 
   zunder.setConfig({
     cacheBust: false,
@@ -7,7 +7,7 @@ module.exports = function setZunderConfig (zunder) {
       {
         scriptName: 'common.js',
         libs: commonScripts.map((file) => ({ file })),
-      }
+      },
     ],
     prodDir: 'dist',
     resolutions: commonScripts,
