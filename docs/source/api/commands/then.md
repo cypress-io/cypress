@@ -15,7 +15,7 @@ Yield the current yielded subject as the first argument of a function.
 
 ## Usage
 
-`.then()`  should be chained off another cy command.
+`.then()` should be chained off another cy command.
 
 **{% fa fa-check-circle green %} Valid Usage**
 

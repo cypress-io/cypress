@@ -1,45 +1,63 @@
+---
 title: config
 comments: true
+description: ''
 ---
 
-`Cypress.config` allows you to `get` and `set` your configuration options.
-
-This document covers the API for consuming your configuration options *in your tests*.
+`get` and `set` configuration options *in your tests*.
 
 {% note info New to Cypress? %}
 [Read about configuration first.](https://on.cypress.io/guides/configuration)
 {% endnote %}
 
-# [Cypress.config()](#section-no-arguments-usage)
-
-Returns all of your configuration options as an object literal.
-
-***
-
-# [Cypress.config( *key* )](#section-key-usage)
-
-Returns the value of a single configuration option by its key.
-
-***
-
-# [Cypress.config( *key*, *value* )](#section-key-value-usage)
-
-Sets a configuration option for a specific key.
-
-***
-
-# [Cypress.config( *object* )](#section-object-usage)
-
-Sets multiple configuration options.
-
-***
-
-# No Arguments Usage
-
-## Get all configuration options.
+# Syntax
 
 ```javascript
-// cypress.json
+Cypress.config()
+Cypress.config(name)
+Cypress.config(name, value)
+Cypress.config(object)
+```
+
+## Usage
+
+`.config()` requires being chained off `Cypress`.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+Cypress.config() // Get configuration options
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.config()  // Errors, cannot be chained off 'cy'
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} name**  ***(String)***
+
+The name of the configuration to get or set.
+
+**{% fa fa-angle-right %} value**  ***(String)***
+
+The value of the configuration to set.
+
+**{% fa fa-angle-right %} object**  ***(Object)***
+
+Set multiple configuration options with an object literal.
+
+# Examples
+
+## No Arguments
+
+**Get all configuration options.**
+
+***cypress.json***
+
+```json
 {
   "defaultCommandTimeout": 10000
 }
@@ -49,14 +67,13 @@ Sets multiple configuration options.
 Cypress.config() // => {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
 ```
 
-***
+## Key
 
-# Key Usage
+**Return just a single configuration option value.**
 
-## Return just a single configuration option value.
+***cypress.json***
 
-```javascript
-// cypress.json
+```json
 {
   "pageLoadTimeout": 60000
 }
@@ -66,18 +83,17 @@ Cypress.config() // => {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ..
 Cypress.config("pageLoadTimeout") // => 60000
 ```
 
-***
+## Key and Value
 
-# Key Value Usage
+**Cypress allows you to change the values of your configuration options from within your tests.**
 
-## Cypress allows you to change the values of your configuration options from within your tests.
-
-{% note warning  %}
+{% note warning %}
 Any value you change will be permanently changed for the remainder of your tests.
 {% endnote %}
 
-```javascript
-// cypress.json
+***cypress.json***
+
+```json
 {
   "viewportWidth": 1280,
   "viewportHeight": 720
@@ -90,18 +106,19 @@ Cypress.config("viewportWidth", 800)
 Cypress.config("viewportWidth") // => 800
 ```
 
-{% note info Using config to set baseUrl %}
+**Using config to set `baseUrl`**
+
+{% note info %}
 [Check out our example recipe where we reset our baseUrl using Cypress.config](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 {% endnote %}
 
-***
+## Object
 
-# Object Usage
+**You can set multiple values by passing an object literal.**
 
-## You can set multiple values by passing an object literal.
+***cypress.json***
 
-```javascript
-// cypress.json
+```json
 {
   "defaultCommandTimeout": 4000,
   "pageLoadTimeout": 30000,
@@ -117,18 +134,14 @@ Cypress.config({
 Cypress.config() // => {defaultCommandTimeout: 10000, viewportHeight: 900, ...}
 ```
 
-***
-
 # Notes
 
-## Why use `Cypress.config` instead of `cy.config`?
+**Why use `Cypress.config` instead of `cy.config`?**
 
 As a rule of thumb anything you call from `Cypress` affects global state. Anything you call from `cy` affects local state.
 
 Methods on `cy` are local and specific to a single test. Side effects from `cy` methods are restored between each test. We chose to use `Cypress` because changes to your configuration options take effect for the remainder of **ALL** tests.
 
-***
-
-# Related
+# See also
 
 - [Configuration](https://on.cypress.io/guides/configuration)

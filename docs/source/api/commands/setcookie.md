@@ -6,7 +6,6 @@ description: ''
 
 Set a browser cookie.
 
-
 # Syntax
 
 ```javascript
@@ -16,7 +15,7 @@ cy.setCookie(name, value, options)
 
 ## Usage
 
-`.setCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.setCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -36,7 +35,7 @@ The value of the cookie to set.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.setCookie()`.
+Pass in an options object to change the default behavior of `cy.setCookie()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -47,7 +46,6 @@ Option | Default | Notes
 `expiry` | 20 years into the future | when the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.setCookie()` command to be processed
 `log` | `true` | whether to display command in command log
-
 
 ## Yields
 
