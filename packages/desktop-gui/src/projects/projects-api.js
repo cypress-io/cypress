@@ -1,7 +1,7 @@
 import once from 'lodash/once'
 import { action } from 'mobx'
 import Promise from 'bluebird'
-import { hashHistory } from 'react-router'
+// import { hashHistory } from 'react-router'
 
 import ipc from '../lib/ipc'
 import projectsStore from '../projects/projects-store'
@@ -144,7 +144,8 @@ const openProject = (project) => {
       resolve = once(resolve)
 
       ipc.onFocusTests(() => {
-        hashHistory.push(`projects/${project.clientId}/specs`)
+        // TODO: fix this
+        // hashHistory.push(`projects/${project.clientId}/specs`)
       })
 
       ipc.openProject(project.path, (err, config = {}) => {

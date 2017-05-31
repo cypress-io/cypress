@@ -21,8 +21,12 @@ class Projects {
     return _.map(this.projects, (project) => _.pick(project, ['path', 'id']))
   }
 
-  getProjectByClientId (clientId) {
-    return _.find(this.projects, { clientId })
+  @action getProjectByPath (path) {
+    if (!this.projects.length) {
+      return new Project({ path })
+    }
+
+    return _.find(this.projects, { path })
   }
 
   addProject (path) {

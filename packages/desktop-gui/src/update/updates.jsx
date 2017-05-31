@@ -15,6 +15,10 @@ class Updates extends Component {
   constructor (props) {
     super(props)
 
+    // TODO: implement this:
+    // ipc.getOptions().then((options = {}) => {
+    // })
+
     updater.setVersion(props.options.version)
 
     ipc.updaterRun((err, data = {}) => {
@@ -78,7 +82,6 @@ class Updates extends Component {
   }
 
   _state = () => {
-
     let errClass
     if (updater.state === 'error') {
       errClass = 'text-danger'

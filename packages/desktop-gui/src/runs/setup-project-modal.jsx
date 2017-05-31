@@ -1,6 +1,7 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
@@ -13,8 +14,8 @@ import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizatio
 @observer
 class SetupProject extends Component {
   static propTypes = {
-    project: React.PropTypes.object,
-    onSetup: React.PropTypes.func.isRequired,
+    project: PropTypes.object,
+    onSetup: PropTypes.func.isRequired,
   }
 
   constructor (...args) {

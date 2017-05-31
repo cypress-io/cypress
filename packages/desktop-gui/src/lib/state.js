@@ -1,9 +1,11 @@
-import { computed, observable, action } from 'mobx'
+import { computed, observable } from 'mobx'
 
+import C from './constants'
 import User from '../lib/user-model'
 
 class State {
-  @observable userLoaded = false
+  @observable appState = C.LOADING_OPTIONS
+  @observable projectPath
   @observable user = null
   @observable updateAvailable = false
   @observable modalOpen = false
@@ -13,16 +15,14 @@ class State {
     return !!this.user && !!this.user.authToken
   }
 
-  @action setUser (user) {
-    this.user = user && user.authToken ? new User(user) : null
+  @computed get projectPathUri () {
+    return this.projectPath ? encodeURIComponent(this.projectPath) : ''
   }
 
-  @action setVersion (version) {
-    this.version = version
-  }
-
-  updatesAvailable (bool) {
-    this.updateAvailable = bool
+  setUser (user) {
+    const isValid = user && user.authToken
+    if (!isValid) this.appState = C.NO_USER
+    this.user = isValid ? new User(user) : null
   }
 
   openModal () {

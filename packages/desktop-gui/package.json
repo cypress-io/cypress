@@ -32,8 +32,8 @@
   ],
   "devDependencies": {
     "@cypress/icons": "0.5.2",
-    "@cypress/releaser": "0.1.12",
     "@cypress/react-tooltip": "^0.2.2",
+    "@cypress/releaser": "0.1.12",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
     "bootstrap-sass": "3.3.5",
@@ -55,13 +55,15 @@
     "mobx-react": "^3.3.1",
     "mobx-react-devtools": "^4.2.0",
     "moment": "^2.15.1",
+    "prop-types": "^15.5.10",
     "rc-collapse": "^1.6.11",
     "react": "^15.1.0",
     "react-bootstrap-modal": "3.0.1",
     "react-contextmenu": "^1.6.2",
     "react-dom": "^15.1.0",
     "react-loader": "^2.4.0",
-    "react-router": "^2.4.1",
+    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
     "zunder": "3.5.8"
   }
 }

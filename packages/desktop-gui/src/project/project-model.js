@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import md5 from 'md5'
 import { computed, observable, action, asReference } from 'mobx'
 import Browser from '../lib/browser-model'
 
@@ -65,7 +64,7 @@ export default class Project {
 
   constructor (props) {
     this.path = props.path
-    this.clientId = md5(props.path)
+    this.clientId = encodeURIComponent(props.path)
 
     this.update(props)
   }

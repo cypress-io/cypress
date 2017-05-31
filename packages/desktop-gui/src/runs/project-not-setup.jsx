@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
@@ -8,7 +9,7 @@ import SetupProject from "./setup-project-modal"
 @observer
 export default class ProjectNotSetup extends Component {
   static propTypes = {
-    project: React.PropTypes.object,
+    project: PropTypes.object,
   }
 
   constructor (props) {

@@ -1,6 +1,6 @@
 import moment from 'moment'
 
-export default () => {
+const configureMoment = () => {
   moment.updateLocale('en', {
     relativeTime: {
       future: "in %s",
@@ -19,3 +19,5 @@ export default () => {
     },
   })
 }
+
+export default configureMoment

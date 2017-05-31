@@ -8,14 +8,9 @@ import ipc from '../lib/ipc'
 
 @observer
 class UpdateBanner extends Component {
-  constructor (props) {
-    super(props)
-
-    this._checkForUpdate()
-  }
-
   componentDidMount () {
     this.checkId = setInterval(this._checkForUpdate, (5 * 60 * 1000))
+    this._checkForUpdate()
   }
 
   componentWillUnmount () {
@@ -45,7 +40,7 @@ class UpdateBanner extends Component {
     ipc.offUpdaterCheck()
     ipc.updaterCheck()
     .then(action('checked:updates', (version) => {
-      state.updatesAvailable(!!version)
+      state.updateAvailable = !!version
     }))
     .catch((error) => {
       console.warn('Error checking for updates:', error) // eslint-disable-line no-console

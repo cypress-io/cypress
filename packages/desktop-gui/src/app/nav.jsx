@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 
 import appApi from '../lib/app-api'
 import state from '../lib/state'
@@ -40,6 +40,8 @@ export default class Nav extends Component {
   }
 
   _leftNavButton = () => {
+    return <a href='#'>TBD</a>
+
     if (this.props.params.clientId) {
       return (
         <Link

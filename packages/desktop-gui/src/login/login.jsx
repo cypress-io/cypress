@@ -1,13 +1,11 @@
 import React, { Component } from 'react'
-import { withRouter } from 'react-router'
-import { action, autorun } from 'mobx'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
 
 import ipc from '../lib/ipc'
 import state from '../lib/state'
 
-@withRouter
 @observer
 class Login extends Component {
   constructor (props) {
@@ -17,12 +15,6 @@ class Login extends Component {
       isLoggingIn: false,
       error: null,
     }
-
-    autorun(() => {
-      if (state.hasUser) {
-        return this.props.router.push('/')
-      }
-    })
   }
 
   render () {

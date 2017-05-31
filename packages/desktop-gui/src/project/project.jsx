@@ -1,20 +1,25 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { withRouter, Link } from 'react-router'
+import { Redirect, Route, Link, Switch } from 'react-router-dom'
+import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
 import projectsStore from '../projects/projects-store'
-import ProjectNav from '../project-nav/project-nav'
 import { closeProject, openProject } from '../projects/projects-api'
-import OnBoarding from "./onboarding"
-import Loader from "react-loader"
 
-const NoBrowsers = ({ projectClientId }) => {
-  let _closeProject = () => {
-    closeProject(projectClientId)
+import Config from '../config/config'
+import OnBoarding from './onboarding'
+import ProjectNav from '../project-nav/project-nav'
+import Runs from '../runs/runs-list'
+import SpecsList from '../specs/specs-list'
+
+const NoBrowsers = ({ projectPath }) => {
+  function closeProject () {
+    closeProject(projectPath)
   }
+
+  // TODO: message, back button needs to be different if global
 
   return (
     <div className='full-alert alert alert-danger error'>
@@ -27,10 +32,10 @@ const NoBrowsers = ({ projectClientId }) => {
       </p>
       <Link
         to='/projects'
-        onClick={_closeProject}
+        onClick={closeProject}
         className='btn btn-default btn-sm'
       >
-        <i className="fa fa-chevron-left"></i>{' '}
+        <i className='fa fa-chevron-left'></i>{' '}
         Go Back to Projects
       </Link>
       <a onClick={downloadBrowser} className='btn btn-primary btn-sm'>
@@ -55,31 +60,16 @@ const PortInUse = () => {
   )
 }
 
-@withRouter
 @observer
 class Project extends Component {
-  constructor (props) {
-    super(props)
-
-    this.project = projectsStore.getProjectByClientId(props.params.clientId)
-
-    if (!this.project) {
-      return props.router.push('/projects')
-    }
+  componentWillMount () {
+    const path = decodeURIComponent(this.props.match.params.projectPath)
+    this.project = projectsStore.getProjectByPath(path)
 
     this.project.loading(true)
 
-  }
-
-  componentWillMount () {
-    // delay opening the project so
-    // we give the UI some time to render
-    // and not block due to sync require's
-    // in the main process
-    return Promise.delay(100)
-    .then(() => {
-      return openProject(this.project)
-    })
+    document.title = this._projectName()
+    openProject(this.project)
   }
 
   componentWillUnmount () {
@@ -87,18 +77,23 @@ class Project extends Component {
   }
 
   render () {
-    document.title = `${this._projectName()}`
+    if (this.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
+    if (this.project.error !== undefined) return this._error()
 
-    if (!(this.project.error === undefined)) return this._error()
+    if (!this.project.browsers.length) return <NoBrowsers projectPath={this.project.path}/>
 
-    if (!this.project.browsers.length) return <NoBrowsers projectClientId={this.project.clientId}/>
+    const basePath = this.props.match.url
 
     return (
       <div>
         <ProjectNav project={this.project}/>
-        { React.cloneElement(this.props.children, { project: this.project }) }
+        <Switch>
+          <Route path={`${basePath}/specs`} render={() => <SpecsList project={this.project} />} />
+          <Route path={`${basePath}/runs`} render={() => <Runs project={this.project} />} />
+          <Route path={`${basePath}/config`} render={() => <Config project={this.project} />} />
+          <Redirect from={basePath} to={`${basePath}/specs`} />
+        </Switch>
         <OnBoarding project={this.project}/>
       </div>
     )
@@ -108,7 +103,7 @@ class Project extends Component {
     let project = this.project
 
     if (project.name) {
-      return (project.name)
+      return project.name
     } else {
       let splitName = _.last(project.path.split('/'))
       return _.truncate(splitName, { length: 60 })
@@ -117,11 +112,6 @@ class Project extends Component {
 
   _error = () => {
     let err = this.project.error
-    let portInUse
-
-    if (err.portInUse) {
-      portInUse = <PortInUse />
-    }
 
     return (
       <div className='full-alert alert alert-danger error'>
@@ -132,13 +122,13 @@ class Project extends Component {
         <p>
           { this._errorMessage(err.message) }
         </p>
-        { portInUse }
+        {err.portInUse && <PortInUse />}
         <Link
           to='/projects'
           onClick={this._closeProject}
           className='btn btn-default btn-sm'
         >
-          <i className="fa fa-chevron-left"></i>{' '}
+          <i className='fa fa-chevron-left'></i>{' '}
           Go Back to Projects
         </Link>
       </div>
