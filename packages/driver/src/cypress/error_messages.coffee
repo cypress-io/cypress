@@ -1,10 +1,12 @@
+_ = require("lodash")
+
 divider = (num, char) ->
   Array(num).join(char)
 
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, 100)
+      _.truncate(data, { length: 100 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else

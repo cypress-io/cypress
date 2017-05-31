@@ -265,7 +265,7 @@ class $Log
   snapshot: (name, options = {}) ->
     ## bail early and dont snapshot
     ## if we're in headless mode
-    if $Cypress.isHeadless
+    if @Cypress.isHeadless
       return @
 
     _.defaults options,

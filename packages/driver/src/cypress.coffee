@@ -86,8 +86,7 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
-    if config.isHeadless
-      $Cypress.isHeadless = true
+    @isHeadless = !!config.isHeadless
 
     {environmentVariables, remote} = config
 
@@ -183,7 +182,7 @@ class $Cypress
     ## event here, so other commands can tap into that
     return if not @cy
 
-    @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
+    @cy.silenceConsole(contentWindow) if @isHeadless
     @cy.bindWindowListeners(contentWindow)
     @cy._setWindowDocumentProps(contentWindow)
 

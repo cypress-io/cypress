@@ -75,7 +75,6 @@ module.exports = {
     .videoCodec("libx264")
     .outputOptions("-preset ultrafast")
     .on "start", (line) ->
-      console.log "spawned ffmpeg", line
       started.resolve(new Date)
       # .on "codecData", (data) ->
       # console.log "codec data", data

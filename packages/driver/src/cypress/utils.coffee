@@ -229,7 +229,7 @@ module.exports = {
 
     switch form
       when "long"
-        text     = _.chain($el.text()).clean().truncate(10).value()
+        text     = _.chain($el.text()).clean().truncate({length: 10 }).value()
         children = $el.children().length
         str      = $el.clone().empty().prop("outerHTML")
         switch
