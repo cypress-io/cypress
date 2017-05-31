@@ -50,7 +50,7 @@ $Cookies = (namespace, domain) ->
 
       m = if removed then "warn" else "info"
 
-      args = [_.truncate(message, 50)]
+      args = [_.truncate(message, { length: 50 })]
 
       if isDebuggingVerbose
         args.push(cookie)
