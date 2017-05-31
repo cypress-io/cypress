@@ -1,5 +1,5 @@
 ---
-title: dom
+title: Cypress.Dom
 comments: true
 description: ''
 ---

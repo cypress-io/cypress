@@ -130,13 +130,14 @@ api:
   utilities:
     _: _.html
     $: $.html
-    minimatch: minimatch.html
     blob: blob.html
+    minimatch: minimatch.html
+    moment: moment.html
     promise: promise.html
   cypress-api:
-    config: config.html
-    env: env.html
     cypress-commands: commands.html
+    config: config.html
     cookies: cookies.html
     dom: dom.html
+    env: env.html
     cypress-server: server.html

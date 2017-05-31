@@ -1,5 +1,5 @@
 ---
-title: config
+title: Cypress.config
 comments: true
 description: ''
 ---
@@ -67,7 +67,7 @@ Set multiple configuration options with an object literal.
 Cypress.config() // => {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
 ```
 
-## Key
+## Name
 
 **Return just a single configuration option value.**
 
@@ -83,7 +83,7 @@ Cypress.config() // => {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ..
 Cypress.config("pageLoadTimeout") // => 60000
 ```
 
-## Key and Value
+## Name and Value
 
 **Cypress allows you to change the values of your configuration options from within your tests.**
 

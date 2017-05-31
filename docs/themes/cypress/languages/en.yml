@@ -149,6 +149,7 @@ sidebar:
     _: _
     $: $
     minimatch: minimatch
+    moment: moment
     blob: blob
     promise: promise
     cypress-api: Cypress API

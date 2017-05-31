@@ -1,5 +1,5 @@
 ---
-title: env
+title: Cypress.env
 comments: true
 description: ''
 ---

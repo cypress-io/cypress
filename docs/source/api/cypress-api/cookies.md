@@ -1,5 +1,5 @@
 ---
-title: cookies
+title: Cypress.Cookies
 comments: true
 description: ''
 ---
