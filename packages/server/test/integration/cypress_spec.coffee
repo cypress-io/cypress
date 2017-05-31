@@ -7,7 +7,6 @@ path       = require("path")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
-inquirer   = require("inquirer")
 Fixtures   = require("../support/helpers/fixtures")
 extension  = require("#{root}../../packages/extension")
 pkg        = require("#{root}package.json")
@@ -560,21 +559,17 @@ describe "lib/cypress", ->
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
       permissionsPath = path.resolve("./permissions")
 
-      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
-
-      user.set({authToken: "auth-token-123"})
-      .then =>
-        fs.ensureDirAsync(permissionsPath)
+      fs.ensureDirAsync(permissionsPath)
       .then =>
         fs.chmodAsync(permissionsPath, "111")
       .then =>
-        cypress.start(["--project=#{permissionsPath}"])
+        cypress.start(["--project=#{permissionsPath}", "--cli-version"])
       .then =>
         fs.chmodAsync(permissionsPath, "644")
-        .then =>
-          fs.removeAsync(permissionsPath)
-          .then =>
-            @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
+      .then =>
+        fs.removeAsync(permissionsPath)
+      .then =>
+        @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
     describe "morgan", ->
       it "sets morgan to false", ->
