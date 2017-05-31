@@ -62,14 +62,11 @@ This is a relatively simple, straightforward test, but consider how much code ha
 
 For the remainder of this guide we'll go through the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
 
-- wrapped jquery objects
-- finding by content
-- timeouts
+- rules
 - clicking on things
 - asserting various things about elements
 - chai integration
 - subjects
-- rules
 - async/serial/promises+
 - aliases
 - retries
@@ -128,42 +125,34 @@ cy.get('.my-selector')
 
 {% note info Why Complicate Element Selection? %}
 
-If this seems a bit strange, bear with us! This isn't needless complication of DOM queries, it's actually critically important to testing web applications. We'll address this fundamental shift by the end of this document, so stay tuned!
+If this seems a bit strange, bear with us a bit longer. This isn't needless complication of DOM queries, it's actually critically important to effectively testing web applications. We'll address this fundamental shift by the end of this document, stay tuned!
 
 {% endnote %}
 
-## Existence is Guaranteed
+## Finding Elements by Their Contents
 
-When you're first writing Cypress tests, you may be tempted to ensure elements exist, like this:
-
-```js
-cy.get('.my-selector').should("exist")
-```
-
-But this is almost never necessary! Cypress will automatically fail if a `cy.get()` command doesn't find any matching elements before its timeout. That means a smoke test might be implemented as simply as:
+Another way to locate things -- a more human way -- is to look them up by their contents. For this, we can use `cy.contains()`, for example:
 
 ```js
-cy.visit('/path/to/page/under/test.html')
-cy.get('.element-i-desire')
+// Finds a single element containing (at least) the text "New Post"
+cy.contains("New Post")
 ```
 
-That's it! If the element is not on that page, you'll get a failure. If it's there at any point during the timeout period, your test will go green.
+This is helpful when writing tests from the perspective of a user interacting with the app. They just know they want to click the button labeled "Submit", they have no idea that it has a `type` attribute of `submit`, or a CSS class of `my-submit-button`.
 
-Don't write complicated tests until you've mastered the simple ones! Cypress is very powerful and expressive, you may well find that you never actually need complicated tests, or that you need drastically fewer than you expected. Remember: _no code is faster than no code_.
-
-### What About Non-Existence?
-
-Asserting that an element does _not_ exist does require an explicit assertion, as we expect this to be a rarer case. It's still simple:
+`cy.contains()` is also a great example of a command that can start a chain, or continue a chain. For example, if we wanted to look for the text "New Post" _only inside of the `.main` element_, we could trivially achieve that like this:
 
 ```js
-cy.get('.element-i-do-not-desire').should("not.exist")
+// First finds the element with class "main",
+// then looks for children with the text "New Post"
+cy.get('.main').contains("New Post")
 ```
 
-This will use the same time-smear, timeout mechanism as before, retrying until either the element is not found, or the timeout is reached.
+## What If An Element Is Not Found?
 
-## Command Timeouts
+Great question! Cypress is smart about finding elements; it knows that the DOM is a dynamic place where things change from one moment to the next, so it doesn't fail immediately if something isn't found. Instead, Cypress gives your app a chance to finish whatever it may be doing!
 
-Many Commands have configurable timeouts, enabling you to tune Cypress's behavior to your needs. These Commands will list a `timeout` option in their API documentation, allowing you to set the number of milliseconds you need.
+This is known as a `timeout`, and most commands may be customized with specific timeout periods. (The default is 4 seconds.) These Commands will list a `timeout` option in their API documentation, allowing you to set the number of milliseconds you need.
 
 ```js
 // Give this selector 10 seconds to appear
@@ -172,7 +161,11 @@ cy.get('.my-slow-selector', { timeout: 10000 })
 
 You can also set the timeout globally via the configuration setting `defaultCommandTimeout`.
 
-There is a performance tradeoff here: essentially, tests that have longer timeout periods take longer to fail. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means you want to increase your timeout period to suit your app, but you probably don't want to make it "extra long, just in case".
+{% note info Timeouts and Test Performance %}
+
+There is a performance tradeoff here: essentially, **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means you want to increase your timeout period to suit your app, but you probably don't want to make it "extra long, just in case".
+
+{% endnote %}
 
 # Chaining Commands
 
