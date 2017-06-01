@@ -171,9 +171,35 @@ We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" o
 
 ## Subjects
 
-Subjects are the unseen context of a `cy.` chain, the flow of current pushing energy from one Command to the next. Because Cypress is built upon the Promise pattern, that "pushing of energy" is called "yielding" instead of "returning": Cypress Commands do not return useful values, but rather a Cypress Chainer to continue building a sequence on Commands with.
+A new Cypress chain always start with `cy.[something]`, where the `something` establishes what other methods can be called (chained) next. Some methods yield no subject and thus cannot be chained, such as `cy.clearCookies()` or `cy.screenshot()`. Some methods, such as `cy.get()` or `cy.contains()`, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like `.click()` or even `.contains()` again.
 
-Cypress Commands must be executed against an appropriate subject. For instance, you can't call `cy.should("equal", 7)` directly: what should equal 7? `.should()` requires a subject!
+{% note info %}
+**Some commands can be chained:**
+- ...only from `cy`, meaning they don't operate on a subject (`cy.clearCookies()`)
+- ...only from commands yielding particular kinds of subjects (`.type()`)
+- ...from `cy` *or* from a subject-yielding chain (`.contains()`)
+
+**Some commands yield:**
+- ...`null`, meaning they should not be chained against
+- ...the same subject they were chained from
+- ...a new subject as appropriate for the command
+
+{% endnote %}
+
+Examples:
+
+```js
+cy.clearCookies() // Done, no Subject, no chaining
+
+cy.get('.main-container') // Subject is array of matching DOM elements
+  .contains("Today's Headlines") // Subject is a DOM element
+  .click() // Subject did not change
+```
+
+{% note info Yield, Don't Return %}
+When discussing what Cypress commands do with subjects, we always say that they "yield" the subject, never that they "return" it. Remember: Cypress commands are asynchronous and get queued for execution at a later time! Subjects get yielded from command to command after lot of helpful framework code runs to ensure things are in order.
+
+{% endnote %}
 
 ### Using `cy.wrap` To Inject A Custom Subject
 
