@@ -24,11 +24,9 @@ describe("Post Resource", function() {
     cy.visit("/posts/new") /* 1 */
 
     cy.contains("Post Title") /* 2 */
-      .click()
       .type("My First Post") /* 3 */
 
     cy.contains("Post Body") /* 4 */
-      .click()
       .type("Hello, world!") /* 5 */
 
     cy.get('button[type="submit"]') /* 6 */
@@ -48,10 +46,10 @@ Can you read this? If you did, it might sound something like this:
 
 {% note info %}
 1. Visit the page at `/posts/new`
-2. Find the element containing the text "Post Title", click it
-3. Type "My First Post"
-4. Find the element containing the text "Post Body", click it
-5. Type "Hello, world!"
+2. Find the element containing the text "Post Title"
+3. Type "My First Post" into it
+4. Find the element containing the text "Post Body"
+5. Type "Hello, world!" into it
 6. Select the `<button>` tag with a type of `submit`, click it
 7. Grab the browser URL, ensure it is `/posts/my-first-post`
 8. Select the `<h1>` tag, ensure it contains the text "My First Post"
