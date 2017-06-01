@@ -9,36 +9,34 @@ Get all of the browser cookies.
 # Syntax
 
 ```javascript
-.getCookies()
-.getCookies(options)
+cy.getCookies()
+cy.getCookies(options)
 ```
 
 ## Usage
 
-`.getCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.getCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.getCookies()    
+cy.getCookies()    // Get all cookies
 ```
 
 ## Arguments
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.getCookies()`.
-
-**[cy.getCookies(*options* )](#options-usage)**
+Pass in an options object to change the default behavior of `cy.getCookies()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `.getCookies()` command to be processed
+`log` | `true` | Whether to display command in Command Log
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.getCookies()` command to be processed
 
 ## Yields
 
-`.getCookies()` yields an array cookie objects. Each cookie object has the following properties:
+`cy.getCookies()` yields an array cookie objects. Each cookie object has the following properties:
 
 - `name`
 - `value`
@@ -48,10 +46,9 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-
 ## Timeout
 
-`.getCookies()` will continue to look for cookies for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.getCookies()` will continue to look for cookies for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -99,6 +96,6 @@ When clicking on `getCookies` within the command log, the console outputs the fo
 
 - [clearCookie](https://on.cypress.io/api/clearcookie)
 - [clearCookies](https://on.cypress.io/api/clearcookies)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)

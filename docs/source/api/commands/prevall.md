@@ -32,7 +32,6 @@ cy.prevAll()                // Errors, cannot be chained off 'cy'
 cy.getCookies().prevAll()   // Errors, 'getCookies' does not yield DOM element
 ```
 
-
 ## Arguments
 
 **{% fa fa-angle-right %} selector**  ***(String selector)***
@@ -45,8 +44,16 @@ Pass in an options object to change the default behavior of `.prevAll()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+
+## Yields
+
+`.prevAll()` yields the new DOM element(s) found by the command.
+
+## Timeout
+
+`.prevAll()` will continue to look for the previous elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 

@@ -71,7 +71,7 @@ Option | Default | Notes
 `force` | `false` | Forces type, disables error checking prior to type
 `release` | `true` | Keep a modifier activated between commands
 `interval` | `16` | Interval to retry type
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 
 ## Yields

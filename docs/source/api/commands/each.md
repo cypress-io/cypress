@@ -90,15 +90,13 @@ cy
 If your callback function returns a `Promise`, it will be awaited before iterating over the next element in the collection.
 
 ```javascript
-cy
-  .wrap([1,2,3])
-  .each(function(num, index, array){
-    return new Cypress.Promise(function(resolve){
-      setTimeout(function(){
-        resolve()
-      }, num * 100)
-    })
+cy.wrap([1,2,3]).each(function(num, i, array){
+  return new Cypress.Promise(function(resolve){
+    setTimeout(function(){
+      resolve()
+    }, num * 100)
   })
+})
 ```
 
 # Notes

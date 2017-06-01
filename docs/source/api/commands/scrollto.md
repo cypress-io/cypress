@@ -17,7 +17,7 @@ cy.scrollTo(x, y, options)
 
 ## Usage
 
-`.scrollTo()` can be chained off of `cy` to scroll to a position in the window or chained off another cy command that *yields* a DOM element - limiting scrolling to it's yielded element.
+`cy.scrollTo()` can be chained off of `cy` to scroll to a position in the window or chained off another cy command that *yields* a DOM element - limiting scrolling to it's yielded element.
 
 ```javascript
 cy.scrollTo(0, 500)                     // Scroll the window 500px down
@@ -32,39 +32,38 @@ cy.title().scrollTo('My App')  // Errors, 'title' does not yield DOM element
 
 ## Arguments
 
-
 **{% fa fa-angle-right %} position** ***(String)***
 
-Scrolls the window or element to the specified position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
+A specified position to scroll the window or element to. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
 ![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
 
 **{% fa fa-angle-right %} x** ***(Number, String)***
 
-The distance in pixels from element's left or percentage of the element's width to scroll to.
+The distance in pixels from window/element's left or percentage of the window/element's width to scroll to.
 
 **{% fa fa-angle-right %} y** ***(Number, String)***
 
-The distance in pixels from element's top or percentage of the element's height to scroll to.
+The distance in pixels from window/element's top or percentage of the window/element's height to scroll to.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.scrollTo`.
+Pass in an options object to change the default behavior of `cy.scrollTo()`.
 
 Option | Default | Notes
 --- | --- | ---
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the scroll
-`log` | `true` | whether to display command in command log
 
 ## Yields
 
-`.scrollTo()` yields the window or DOM element that was scrolled.
+`cy.scrollTo()` yields the window or DOM element that was scrolled.
 
 ## Timeout
 
-`.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options
+`cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

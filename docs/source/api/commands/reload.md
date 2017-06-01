@@ -17,7 +17,7 @@ cy.reload(forceReload, options)
 
 ## Usage
 
-`.reload()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.reload()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -35,16 +35,16 @@ Whether to reload the current page without using the cache. `true` forces the re
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to reload the page
 
 ## Yields
 
-`.reload()` yields the `window` object of the newly loaded page.
+`cy.reload()` yields the `window` object of the newly loaded page.
 
 ## Timeout
 
-`.reload()` will wait for the load event of the newly loaded page for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`cy.reload()` will wait for the load event of the newly loaded page for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

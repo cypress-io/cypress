@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Get the DOM element at a specific index in an array of elements.
+Get A DOM element at a specific index in an array of elements.
 
 # Syntax
 
@@ -41,7 +41,7 @@ A number indicating the index to find the element at within an array of elements
 
 **{% fa fa-angle-right %} indexFromEnd**  ***(Number)***
 
-A negative number indicating the index position from the end of the index to find the element at within an array of elements.
+A negative number indicating the index position from the end to find the element at within an array of elements.
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
@@ -49,7 +49,7 @@ Pass in an options object to change the default behavior of `.eq()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -58,8 +58,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.eq()` will continue to look for the element at the specified index for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
-
+`.eq()` will continue to look for the element at the specified index for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -101,7 +100,7 @@ cy.get('li').eq(-2).should('contain', 'sphynx') // true
 
 # Command Log
 
-**Find the 4th `li` in the navigation**
+**Find the 4th `<li>` in the navigation**
 
 ```javascript
 cy.get('.left-nav.nav').find('>li').eq(3)

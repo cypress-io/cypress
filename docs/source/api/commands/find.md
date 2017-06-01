@@ -20,7 +20,7 @@ Get the descendent DOM elements of a specific selector.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.article').find('footer') // Yields 'footer' within '.article'
+cy.get('.article').find('footer') // Yield 'footer' within '.article'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -42,7 +42,7 @@ Pass in an options object to change the default behavior of `.find()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
 
 ## Yields
@@ -51,7 +51,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.find()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.find()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -67,13 +67,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns [<li class="first"></li>, <li class="second"></li>]
+// yields [<li class="first"></li>, <li class="second"></li>]
 cy.get('#parent').find('li')
 ```
 
 # Command Log
 
-**Find the `li`'s within the nav**
+**Find the li's within the nav**
 
 ```javascript
 cy.get('.left-nav>.nav').find('>li')

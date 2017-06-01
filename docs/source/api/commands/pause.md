@@ -25,7 +25,7 @@ This does not set a `debugger` in your code, unlike [`.debug()`](https://on.cypr
 
 ```javascript
 cy.pause().getCookie('app') // Pause at the beginning of commands
-cy.get('nav').pause()       // Pause after the `get` commands yield
+cy.get('nav').pause()       // Pause after the 'get' commands yield
 ```
 
 ## Arguments
@@ -36,7 +36,7 @@ Pass in an options object to change the default behavior of `.pause()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
@@ -103,4 +103,6 @@ When clicking on "Next: 'click'" at the top of the Command Log, the Command Log 
 
 # See also
 
+- [Cypress Dashboard](https://on.cypress.io/dashboard)
 - [debug](https://on.cypress.io/api/debug)
+- [screenshot](https://on.cypress.io/api/screenshot)

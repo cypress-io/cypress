@@ -6,18 +6,17 @@ description: ''
 
 Navigate back or forward to the previous or next URL in the browser's history.
 
-If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
 
 # Syntax
 
 ```javascript
-.go(direction)
-.go(direction, options)
+cy.go(direction)
+cy.go(direction, options)
 ```
 
 ## Usage
 
-`.go()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.go()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -35,26 +34,20 @@ You can use `back` or `forward` to go one step back or forward. You could also n
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.go`.
+Pass in an options object to change the default behavior of `cy.go()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the navigation
-
-
-| | |
-|--- | --- |
-| **Returns** | the `window` object |
-| **Timeout** | `cy.go` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).  |
 
 ## Yields
 
-`.go()` yields the `window` object.
+`cy.go()` yields the `window` object.
 
 ## Timeout
 
-`.go()` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
+`cy.go()` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
 
 # Examples
 
@@ -86,6 +79,12 @@ cy.go(-1)       // equivalent to clicking back button
 cy.go(1)        // equivalent to clicking forward button
 ```
 
+# Notes
+
+**Refreshing and loading the page**
+
+If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
+
 # Command Log
 
 **Go back in browser's history**
@@ -100,10 +99,11 @@ The commands above will display in the command log as:
 
 ![screen shot 2016-01-21 at 1 45 25 pm](https://cloud.githubusercontent.com/assets/1271364/12491029/c33087f0-c046-11e5-8475-4e6c35296085.png)
 
-When clicking on the `get` command within the command log, the console outputs the following:
+When clicking on the `go` command within the command log, the console outputs the following:
 
 ![screen shot 2016-01-21 at 1 46 02 pm](https://cloud.githubusercontent.com/assets/1271364/12491359/b22e569c-c048-11e5-8ec3-f46217a19fc1.png)
 
 # See also
 
+- [reload](https://on.cypress.io/api/reload)
 - [visit](https://on.cypress.io/api/visit)

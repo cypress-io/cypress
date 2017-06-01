@@ -37,7 +37,7 @@ Pass in an options object to change the default behavior of `cy.url()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 

@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Take a screenshot of the application under test with the Cypress Command Log.
+Take a screenshot of the application under test and the Cypress Command Log.
 
 # Syntax
 
@@ -17,7 +17,7 @@ cy.screenshot(fileName, options)
 
 ## Usage
 
-`.screenshot()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.screenshot()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -37,7 +37,7 @@ Pass in an options object to change the default behavior of `cy.screenshot()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the automation server to process the command.
 
 ## Yields
@@ -46,7 +46,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.screenshot` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+`cy.screenshot()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
 
 # Examples
 
@@ -114,4 +114,6 @@ When clicking on `screenshot` within the command log, the console outputs the fo
 
 # See also
 
+- [debug](https://on.cypress.io/api/debug)
 - [Cypress Dashboard](https://on.cypress.io/dashboard)
+- [pause](https://on.cypress.io/api/pause)

@@ -72,4 +72,6 @@ When clicking on the `debug` command within the command log, the console outputs
 
 # See also
 
+- [Cypress Dashboard](https://on.cypress.io/dashboard)
 - [pause](https://on.cypress.io/api/pause)
+- [screenshot](https://on.cypress.io/api/screenshot)

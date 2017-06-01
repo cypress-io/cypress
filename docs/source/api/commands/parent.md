@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `.parent()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -53,13 +53,13 @@ Option | Default | Notes
 
 ## Timeout
 
-`.parent()` will continue to look for the parent element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.parent()` will continue to look for the parent element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
 ## Parent
 
-**Get the parent of the active `li`**
+**Get the parent of the active li**
 
 ```javascript
 cy.get('li.active').parent()
@@ -67,7 +67,7 @@ cy.get('li.active').parent()
 
 ## Selector
 
-**Get the parent with class `nav` of the active `li`**
+**Get the parent with class `nav` of the active li**
 
 ```javascript
 cy.get('li.active').parent('.nav')

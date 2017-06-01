@@ -46,16 +46,16 @@ Pass in an options object to change the default behavior of `.not()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
 
-`.filter()` yields the new DOM element(s) without the selector provided in the command's argument.
+`.not()` yields the new DOM element(s) without the selector provided in the command's argument.
 
 ## Timeout
 
-`.filter()` will continue to look for the element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.not()` will continue to look for the element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -64,9 +64,7 @@ Option | Default | Notes
 **Yield the elements that do not have class `active`.**
 
 ```javascript
-cy.get('.left-nav>.nav')
-  .find('>li').not('.active')
-  .should('not.have.class', 'active') // true
+cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
 ```
 
 # Command Log

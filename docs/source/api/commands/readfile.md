@@ -76,6 +76,7 @@ For any file other than JSON, the contents of the file are returned.
 Hello World
 ```
 
+***test file***
 ```javascript
 cy.readFile('path/to/message.txt').then(function (text) {
   expect(text).to.equal('Hello World')   // true
@@ -95,6 +96,7 @@ For JSON, the contents yielded are parsed into JavaScript and returned.
 }
 ```
 
+***test file***
 ```javascript
 cy.readFile('path/to/data.json').then(function (user) {
   expect(user.name).to.equal('Eliza') // true
@@ -112,8 +114,8 @@ cy.readFile("languages/en.yml").then(function (yamlString) {
   this.english = YAML.parse(yamlString)
 })
 
-cy.get("#sidebar")
-  .find(".sidebar-title").each(function (displayedTitle, i) {
+cy.get("#sidebar").find(".sidebar-title")
+  .each(function (displayedTitle, i) {
     englishTitle = this.english.sidebar[@sidebarTitles[i]]
     expect(displayedTitle.text()).to.eq(englishTitle)
   })
@@ -135,7 +137,7 @@ cy.readFile('path/to/logo.png', 'base64').then(function (logo) {
 
 **Implicit file existence assertion**
 
-By default, `cy.readFile` asserts that the file exists and will fail if it does not exist. It will retry reading the file if it does not initially exist until the file exists or the command times out.
+By default, `cy.readFile()` asserts that the file exists and will fail if it does not exist. It will retry reading the file if it does not initially exist until the file exists or the command times out.
 
 ```javascript
 // will fail after the defaultCommandTimeout is reached
@@ -169,7 +171,7 @@ When clicking on the `readFile` command within the command log, the console outp
 
 # See also
 
+- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - [exec](https://on.cypress.io/api/exec)
 - [fixture](https://on.cypress.io/api/fixture)
-- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - [writeFile](https://on.cypress.io/api/writeFile)

@@ -4,7 +4,9 @@ comments: true
 description: ''
 ---
 
-**Cypress does not have a `cy.hover()` command.** See [Issue #10](https://github.com/cypress-io/cypress/issues/10).
+{% note danger %}
+Cypress does not have a **cy.hover()** command. See [Issue #10](https://github.com/cypress-io/cypress/issues/10).
+{% endnote %}
 
 If `cy.hover()` is used, an error will display and redirect you to this page.
 
@@ -44,7 +46,7 @@ cy.get('.content').trigger('mouseover')
 
 # See also
 
-- [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
 - [invoke](https://on.cypress.io/api/invoke)
+- [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
 - [trigger](https://on.cypress.io/api/trigger)
 - [wrap](https://on.cypress.io/api/wrap)

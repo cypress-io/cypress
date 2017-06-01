@@ -9,13 +9,13 @@ Get the DOM element that is currently focused.
 # Syntax
 
 ```javascript
-.focused()
-.focused(options)
+cy.focused()
+cy.focused(options)
 ```
 
 ## Usage
 
-`.focused()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.focused()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -25,27 +25,27 @@ cy.focused()
 
 ## Arguments
 
-**{% fa fa-angle-right %} options**  ***(Objecdt)***
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.focused`.
+Pass in an options object to change the default behavior of `cy.focused()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.filter()` yields the new DOM elements found by the command.
+`cy.focused()` yields the DOM element that is currently focused.
 
 ## Timeout
 
-`.filter()` will continue to look for the focuse element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.focused()` will continue to look for the focused element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
 ## Focused
 
-**Get the element that is focused.**
+**Get the element that is focused**
 
 ```javascript
 cy.focused().then(function($el) {
@@ -53,13 +53,13 @@ cy.focused().then(function($el) {
 })
 ```
 
-**Blur the element with focus.**
+**Blur the element with focus**
 
 ```javascript
 cy.focused().blur()
 ```
 
-**Make an assertion on the focused element.**
+**Make an assertion on the focused element**
 
 ```javascript
 cy.focused().should('have.attr', 'name', 'username')
@@ -67,7 +67,7 @@ cy.focused().should('have.attr', 'name', 'username')
 
 # Command Log
 
-**Make an assertion on the focused element.**
+**Make an assertion on the focused element**
 
 ```javascript
 cy.focused().should('have.attr', 'name').and('eq', 'num')
@@ -83,5 +83,5 @@ When clicking on the `focused` command within the command log, the console outpu
 
 # See also
 
-- [focus](https://on.cypress.io/api/focus)
 - [blur](https://on.cypress.io/api/blur)
+- [focus](https://on.cypress.io/api/focus)
