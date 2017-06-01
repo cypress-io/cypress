@@ -1,11 +1,12 @@
 log = require('../log')
 fs = require('fs')
-{ basename, join } = require('path')
+{ basename, join, isAbsolute } = require('path')
 md5 = require('md5')
 sanitize = require("sanitize-filename")
 
 toHashName = (projectPath) ->
   throw new Error("Missing project path") unless projectPath
+  throw new Error("Expected project absolute path, not just a name #{projectPath}") unless isAbsolute(projectPath)
   name = sanitize(basename(projectPath))
   hash = md5(projectPath)
   "#{name}-#{hash}"
@@ -23,6 +24,7 @@ formStatePath = (projectPath) ->
 
   statePath = "state.json"
   if projectPath
+    log "state path for project #{projectPath}"
     statePath = join(toHashName(projectPath), statePath)
 
   return statePath

@@ -25,16 +25,19 @@ module.exports = {
   reset: ->
     builtFiles = {}
 
-  outputPath: (projectName = "", filePath) ->
-    appData.path(toHashName(projectName), "bundles", filePath)
+  outputPath: (projectRoot = "", filePath) ->
+    appData.path(toHashName(projectRoot), "bundles", filePath)
 
   build: (filePath, config) ->
     if config.isHeadless and built = builtFiles[filePath]
       return built
 
+    log "bundler for project #{config.projectRoot}"
+
     emitter = new EE()
 
     absolutePath = path.join(config.projectRoot, filePath)
+    log "input absolute path #{absolutePath}"
 
     bundler = browserify({
       entries:      [absolutePath]
@@ -59,9 +62,8 @@ module.exports = {
 
     bundle = =>
       new Promise (resolve, reject) =>
-        outputPath = @outputPath(config.projectName, filePath)
-        log "making bundle to #{outputPath}"
-
+        outputPath = @outputPath(config.projectRoot, filePath)
+        log "making bundle #{outputPath}"
         ## TODO: only ensure directory when first run and not on updates?
         fs.ensureDirAsync(path.dirname(outputPath))
         .then =>
