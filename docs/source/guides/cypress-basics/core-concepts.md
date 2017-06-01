@@ -60,17 +60,6 @@ This is a relatively simple, straightforward test, but consider how much code ha
 
 For the remainder of this guide we'll go through the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
 
-- rules
-- clicking on things
-- asserting various things about elements
-- chai integration
-- subjects
-- async/serial/promises+
-- aliases
-- retries
-- explicit/implicit subject assertions
-- default/automatic assertions
-
 # Finding Elements
 
 ## Cypress is Like jQuery
