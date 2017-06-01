@@ -11,9 +11,10 @@ presetReact            = require("babel-preset-react")
 presetLatest           = require("babel-preset-latest")
 stringStream           = require("string-to-stream")
 pluginAddModuleExports = require("babel-plugin-add-module-exports")
-sanitize               = require("sanitize-filename")
 cjsxify                = require("./cjsxify")
 appData                = require("./app_data")
+{ toHashName }         = require('./saved_state')
+log                    = require('debug')('cypress:server:bundle')
 
 fs = Promise.promisifyAll(fs)
 
@@ -25,7 +26,7 @@ module.exports = {
     builtFiles = {}
 
   outputPath: (projectName = "", filePath) ->
-    appData.path("bundles", sanitize(projectName), filePath)
+    appData.path(toHashName(projectName), "bundles", filePath)
 
   build: (filePath, config) ->
     if config.isHeadless and built = builtFiles[filePath]
@@ -59,6 +60,8 @@ module.exports = {
     bundle = =>
       new Promise (resolve, reject) =>
         outputPath = @outputPath(config.projectName, filePath)
+        log "making bundle to #{outputPath}"
+
         ## TODO: only ensure directory when first run and not on updates?
         fs.ensureDirAsync(path.dirname(outputPath))
         .then =>
