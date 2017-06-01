@@ -44,11 +44,11 @@ describe "lib/saved_state", ->
     expect(statePath).to.equal(expected)
 
   it "caches state file instance per path", ->
-    a = savedState("foo/bar")
-    b = savedState("foo/bar")
+    a = savedState("/foo/bar")
+    b = savedState("/foo/bar")
     expect(a).to.equal(b)
 
   it "returns different state file for different path", ->
-    a = savedState("foo/bar")
-    b = savedState("foo/baz")
+    a = savedState("/foo/bar")
+    b = savedState("/foo/baz")
     expect(a).to.not.equal(b)
