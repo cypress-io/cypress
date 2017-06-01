@@ -169,6 +169,33 @@ cy.get('textarea.post-body')
 
 We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" of the `cy.get()` command, which will be a DOM element if it is found.
 
+## Asserting Things About Elements
+
+Oftentimes you just want to ensure an element exists, or has a particular attribute, CSS class, or child. Let's see assertions in action:
+
+```js
+cy.get(":checkbox").should("be.disabled")
+
+cy.get("form").should("have.class", "form-horizontal")
+
+cy.get("input").should("not.have.value", "foo")
+```
+
+You can also chain multiple assertions together using `.and()`, which is just another name for `.should()` that makes things more readable:
+
+```js
+cy.get("#header a")
+  .should("have.class", "active")
+  .and("have.attr", "href", "/users")
+```
+
+Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide these assertions. You can [learn more in the Available Assertions Appendix](/guides/appendices/available-assertions.html).
+
+{% note info Beware: Assertions That Change The Subject %}
+Some assertions may modify the current subject unexpectedly. Read the next section on how subjects flow through a Cypress chain, then you'll understand what is happening when `cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `a` element to the string `/users`.
+
+{% endnote %}
+
 ## Subjects
 
 A new Cypress chain always start with `cy.[something]`, where the `something` establishes what other methods can be called (chained) next. Some methods yield no subject and thus cannot be chained, such as `cy.clearCookies()` or `cy.screenshot()`. Some methods, such as `cy.get()` or `cy.contains()`, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like `.click()` or even `.contains()` again.
@@ -203,17 +230,17 @@ When discussing what Cypress commands do with subjects, we always say that they 
 
 ### Using `cy.wrap` To Inject A Custom Subject
 
-Want to bring in a value from outside of the Command flow? You can quickly achieve that with `cy.wrap()`. To rewrite the incorrect usage of `.should` above, let's push the number 7 into Cypress land:
+Want to bring in a value from outside of the Command flow? You can quickly achieve that with `cy.wrap()`.
 
 ```js
 cy.wrap(7).should("equal", 7)
 ```
 
-`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple!
+`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple! The above is the asynchronous equivalent to: `expect(7).to.equal(7)`
 
 ### Using `.then` To Act Synchronously On A Subject
 
-Want to jump into the Command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { /* act here */ })` to your Command chain. When Cypress finishes the previous Command, it will yield control to your custom function, passing in the current subject as the first argument.
+Want to jump into the Command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { })` to your Command chain. When the previous command resolves, it will call your custom function with the current subject as the first argument.
 
 If you have more Commands to add after your `.then()`, you'll need to maintain the subject chain by synchronously returning the new subject.
 
