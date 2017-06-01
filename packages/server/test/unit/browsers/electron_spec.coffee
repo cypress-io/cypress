@@ -31,7 +31,8 @@ describe "lib/browsers/electron", ->
   context ".open", ->
     beforeEach ->
       @sandbox.stub(electron, "_render").resolves(@win)
-      @sandbox.stub(savedState, "get").resolves(@state)
+      state = savedState()
+      @sandbox.stub(state, "get").resolves(@state)
 
     it "calls render with url, state, and options", ->
       electron.open("electron", @url, @options, @automation)

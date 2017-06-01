@@ -95,7 +95,9 @@ describe "gui/headed", ->
       @sandbox.stub(Updater, "install")
       @sandbox.stub(Windows, "open").resolves(@win)
       @sandbox.stub(Windows, "trackState")
-      @sandbox.stub(savedState, "get").resolves(@state)
+
+      state = savedState()
+      @sandbox.stub(state, "get").resolves(@state)
 
     it "calls Events.start with options", ->
       opts = {}

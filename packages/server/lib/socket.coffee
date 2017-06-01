@@ -356,7 +356,7 @@ class Socket
         })
 
       socket.on "save:app:state", (state) ->
-        savedState.set(state).then ->
+        savedState().set(state).then ->
           options.onSavedStateChanged()
 
       reporterEvents.forEach (event) =>

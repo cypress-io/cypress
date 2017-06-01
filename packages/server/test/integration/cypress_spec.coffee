@@ -4,6 +4,7 @@ _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
 path       = require("path")
+{ unlinkSync: rm, existsSync: exists } = require("fs")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
@@ -32,7 +33,9 @@ Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
 browsers   = require("#{root}lib/browsers")
 Watchers   = require("#{root}lib/watchers")
-openProject = require("#{root}lib/open_project")
+openProject   = require("#{root}lib/open_project")
+appData       = require("#{root}lib/util/app_data")
+formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -201,6 +204,26 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
       @sandbox.stub(browsers, "open")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+
+    context "state", ->
+      statePath = null
+      beforeEach ->
+        # TODO switch to async file system calls
+        statePath = appData.path(formStatePath(@todosPath))
+        rm(statePath) if exists(statePath)
+      afterEach ->
+        rm(statePath)
+
+      it "saves project state", ->
+        Project.add(@todosPath)
+        .then =>
+          cypress.start(["--project=#{@todosPath}", "--spec=tests/test2.coffee"])
+        .then =>
+          @expectExitWith(0)
+        .then ->
+          openProject.getProject().saveState()
+        .then (state) ->
+          expect(exists(statePath), "Finds saved stage file #{statePath}").to.be.true
 
     it "runs project headlessly and exits with exit code 0 and yells about old version of CLI", ->
       Project.add(@todosPath)

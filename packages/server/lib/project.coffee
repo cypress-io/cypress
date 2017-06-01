@@ -250,8 +250,15 @@ class Project extends EE
     getConfig().then (cfg) =>
       @_setSavedState(cfg)
 
+  # forces saving of project's state
+  saveState: () ->
+    throw new Error ("Missing project config") unless @cfg
+    savedState(@projectRoot).set(@cfg.state)
+    .then =>
+      @cfg.state
+
   _setSavedState: (cfg) ->
-    savedState.get()
+    savedState(@projectRoot).get()
     .then (state) ->
       cfg.state = state
       cfg

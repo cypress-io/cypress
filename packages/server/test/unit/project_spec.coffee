@@ -50,7 +50,8 @@ describe "lib/project", ->
       @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
-      @sandbox.stub(savedState, "get").returns(Promise.resolve({ reporterWidth: 225 }))
+      state = savedState(@todosPath)
+      @sandbox.stub(state, "get").returns(Promise.resolve({ reporterWidth: 225 }))
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
         expect(cfg).to.deep.eq({
@@ -97,7 +98,8 @@ describe "lib/project", ->
         expect(@project.getConfig).to.be.calledWith(opts)
 
     it "updates config.state when saved state changes", ->
-      getSavedState = @sandbox.stub(savedState, "get").returns(Promise.resolve({}))
+      state = savedState(@todosPath)
+      getSavedState = @sandbox.stub(state, "get").returns(Promise.resolve({}))
       options = {}
       @project.open(options)
       .then ->

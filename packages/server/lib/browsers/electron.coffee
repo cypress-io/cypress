@@ -85,7 +85,7 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    savedState.get()
+    savedState().get()
     .then (state) =>
       @_render(url, state, options)
       .then (win) =>

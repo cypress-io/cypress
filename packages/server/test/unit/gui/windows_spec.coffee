@@ -48,7 +48,8 @@ describe "lib/gui/windows", ->
 
   context ".trackState", ->
     beforeEach ->
-      @sandbox.stub(savedState, "set")
+      @state = savedState()
+      @sandbox.stub(@state, "set")
 
       @keys = {
         width: "theWidth"
@@ -67,7 +68,7 @@ describe "lib/gui/windows", ->
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
-      expect(savedState.set).to.be.calledWith({
+      expect(@state.set).to.be.calledWith({
         theWidth: 1
         someHeight: 2
         anX: 3
@@ -80,7 +81,7 @@ describe "lib/gui/windows", ->
       Windows.trackState(@win, @keys)
       @win.emit("resize")
 
-      expect(savedState.set).not.to.be.called
+      expect(@state.set).not.to.be.called
 
     it "saves position when window moves, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
@@ -89,7 +90,7 @@ describe "lib/gui/windows", ->
       Windows.trackState(@win, @keys)
       @win.emit("moved")
 
-      expect(savedState.set).to.be.calledWith({
+      expect(@state.set).to.be.calledWith({
         anX: 3
         aY: 4
       })
@@ -100,19 +101,19 @@ describe "lib/gui/windows", ->
       Windows.trackState(@win, @keys)
       @win.emit("moved")
 
-      expect(savedState.set).not.to.be.called
+      expect(@state.set).not.to.be.called
 
     it "saves dev tools state when opened", ->
       Windows.trackState(@win, @keys)
       @win.webContents.emit("devtools-opened")
 
-      expect(savedState.set).to.be.calledWith({whatsUpWithDevTools: true})
+      expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
 
     it "saves dev tools state when closed", ->
       Windows.trackState(@win, @keys)
       @win.webContents.emit("devtools-closed")
 
-      expect(savedState.set).to.be.calledWith({whatsUpWithDevTools: false})
+      expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})
 
   context ".automation", ->
     beforeEach ->
