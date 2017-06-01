@@ -9,25 +9,25 @@ Get the document.
 # Syntax
 
 ```javascript
-.document()
-.document(options)
+cy.document()
+cy.document(options)
 ```
 
 ## Usage
 
-`.document()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.document()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.document()    
+cy.document()     // yield the window.document object
 ```
 
 ## Arguments
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.document()`.
+Pass in an options object to change the default behavior of `cy.document()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -35,11 +35,11 @@ Option | Default | Notes
 
 ## Yields
 
-`.as()` yields the `window.document` object.
+`cy.document()` yields the `window.document` object.
 
 ## Timeout
 
-`.document()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.document()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -50,7 +50,7 @@ Option | Default | Notes
 ```javascript
 cy.document().then(function(document) {
   // work with document element
-});
+})
 ```
 
 **Make an assertion about the document**

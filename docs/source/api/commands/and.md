@@ -10,8 +10,8 @@ Make an assertion.
 An alias of [`.should()`](https://on.cypress.io/api/and)
 {% endnote %}
 
-{% note info New to Cypress? %}
-[Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)
+{% note info %}
+**Note:** `.and()` assumes you are already familiar with core concepts such as [assertions](https://on.cypress.io/guides/making-assertions)
 {% endnote %}
 
 # Syntax
@@ -20,7 +20,7 @@ An alias of [`.should()`](https://on.cypress.io/api/and)
 .and(chainers)
 .and(chainers, value)
 .and(chainers, method, value)
-.and(function() {})
+.and(callbackFn)
 ```
 
 ## Usage
@@ -30,8 +30,8 @@ An alias of [`.should()`](https://on.cypress.io/api/and)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty').and('be.hidden') // Yields '.error' el
-cy.contains('Login').and('be.visible')               // Yields el containing Login
+cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty & hidden
+cy.contains('Login').and('be.visible')               // Assert el is visible
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -54,7 +54,7 @@ Value to assert against chainer.
 
 A method to be called on the chainer.
 
-**{% fa fa-angle-right %} function** ***(Function)***
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 
@@ -236,5 +236,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # See also
 
-- [should](https://on.cypress.io/api/should)
 - [Making Assertions](https://on.cypress.io/guides/making-assertions)
+- [should](https://on.cypress.io/api/should)

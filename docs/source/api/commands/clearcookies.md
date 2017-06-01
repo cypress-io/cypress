@@ -13,38 +13,38 @@ Cypress automatically clears all cookies *before* each test to prevent state fro
 # Syntax
 
 ```javascript
-.clearCookies()
-.clearCookies(options)
+cy.clearCookies()
+cy.clearCookies(options)
 ```
 
 ## Usage
 
-`.clearCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.clearCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.clearCookies()
+cy.clearCookies()     // clear all cookies
 ```
 
 ## Arguments
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.clearCookies`.
+Pass in an options object to change the default behavior of `cy.clearCookies()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `.clearCookies()` command to be processed
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.clearCookies()` command to be processed
 
 ## Yields
 
-`.clearCookies()` yields `null`
+`cy.clearCookies()` yields `null`.
 
 ## Timeout
 
-`.clearCookies()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+`cy.clearCookies()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
 
 # Examples
 
@@ -52,16 +52,15 @@ Option | Default | Notes
 
 **Clear all cookies after logging in**
 
-In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
+In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies()` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
 
 ```javascript
-cy
-  // assume we just logged in
-  .contains('Login').click()
-  .url().should('include', 'profile')
-  .clearCookies()
-  .visit('/dashboard') // we should be redirected back to login
-  .url().should('include', 'login')
+// assume we just logged in
+cy.contains('Login').click()
+cy.url().should('include', 'profile')
+cy.clearCookies()
+cy.visit('/dashboard') // we should be redirected back to login
+cy.url().should('include', 'login')
 ```
 
 # Command Log
@@ -69,10 +68,9 @@ cy
 **Clear cookies after getting cookies**
 
 ```javascript
-cy
-  .getCookies().should('have.length', 1)
-  .clearCookies()
-  .getCookies().should('be.empty')
+cy.getCookies().should('have.length', 1)
+cy.clearCookies()
+cy.getCookies().should('be.empty')
 ```
 
 The commands above will display in the command log as:
@@ -86,7 +84,7 @@ When clicking on `clearCookies` within the command log, the console outputs the 
 # See also
 
 - [clearCookie](https://on.cypress.io/api/clearcookie)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [getCookies](https://on.cypress.io/api/getcookies)
 - [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)

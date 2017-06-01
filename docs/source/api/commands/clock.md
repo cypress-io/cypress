@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-`.clock()` overrides native global functions related to time allowing them to be controlled synchronously via [`.tick()`](https://on.cypress.io/api/tick) or the yielded `clock` object. This includes controlling:
+`cy.clock()` overrides native global functions related to time allowing them to be controlled synchronously via [`cy.tick()`](https://on.cypress.io/api/tick) or the yielded `clock` object. This includes controlling:
 
 - `setTimeout`
 - `clearTimeout`
@@ -51,19 +51,19 @@ Pass in an options object to change the default behavior of `cy.clock()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`cy.clock()` yields a `clock` object with the following methods.
+`cy.clock()` yields a `clock` object with the following methods:
 
-**`clock.tick(milliseconds)`**
+- **`clock.tick(milliseconds)`**
 
-Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
+  Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
 
-**`clock.restore()`**
+- **`clock.restore()`**
 
-Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+  Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
 You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
 
@@ -95,7 +95,7 @@ cy.get('#seconds-elapsed').should('have.text', '2 seconds')
 
 **Access the clock object to synchronously move time**
 
-In most cases, it's easier to [`.tick()`](https://on.cypress.io/api/tick) to move time, but you can also use the `clock` object yielded by `cy.clock()`.
+In most cases, it's easier to use [`cy.tick()`](https://on.cypress.io/api/tick) to move time, but you can also use the `clock` object yielded by `cy.clock()`.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -103,7 +103,7 @@ cy.clock().then(function (clock) {
 })
 ```
 
-You can call `.clock()` again for this purpose later in a chain if necessary.
+You can call `cy.clock()` again for this purpose later in a chain if necessary.
 
 ```javascript
 cy.clock()
@@ -113,7 +113,7 @@ cy.clock().then(function (clock) {
 })
 ```
 
-The clock object is also available via `this.clock` in any `.then` callback.
+The clock object is also available via `this.clock` in any [`.then()`](https://on.cypress.io/api/then) callback.
 
 ```javascript
 cy.clock()
@@ -125,7 +125,7 @@ cy.get('form').then(function ($form) {
 
 **Access the clock object to restore native functions**
 
-In general, it should not be necessary to manually restore the native functions that `cy.clock()` overrides, since this is done automatically between tests. But if you need to, the `clock` object yielded has a `.restore` method.
+In general, it should not be necessary to manually restore the native functions that `cy.clock()` overrides since this is done automatically between tests. But if you need to, the `clock` object yield has a `.restore()` method.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -170,19 +170,21 @@ This example below will only override `setTimeout` and `clearTimeout` and leave 
 cy.clock(null, ['setTimeout', 'clearTimeout'])
 ```
 
-{% note info Using cy.clock and cy.tick %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+**Using cy.clock() and cy.tick()**
+
+{% note info %}
+[Check out our example recipe testing spying, stubbing and time.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
 # Notes
 
 **iframes not supported**
 
-Note that this only applies to the `top` window on a web page. It will not override the time functions on any `iframe` embedded on the web page.
+Note that `cy.clock()` only applies to the `top` window on a web page. It will not override the time functions of any `iframe` embedded on the page.
 
-**clock behavior before `.visit()`**
+**clock behavior before `cy.visit()`**
 
-If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypress.io/api/visit), the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via [`cy.tick`](https://on.cypress.io/api/tick). This also applies if, during the course of a test, the page under test is reloaded or changed.
+If you call `cy.clock()` before visiting a page with [`cy.visit()`](https://on.cypress.io/api/visit), the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via [`cy.tick()`](https://on.cypress.io/api/tick). This also applies if, during the course of a test, the page under test is reloaded or changed.
 
 # Command Log
 
@@ -204,7 +206,7 @@ When clicking on the `clock` command within the command log, the console outputs
 # See also
 
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [tick](https://on.cypress.io/api/tick)
 - [spy](https://on.cypress.io/api/spy)
 - [stub](https://on.cypress.io/api/stub)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
+- [tick](https://on.cypress.io/api/tick)

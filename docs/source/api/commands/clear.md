@@ -4,7 +4,11 @@ comments: true
 description: ''
 ---
 
-Clears the value of an `input` or `textarea`. An alias for `cy.type('{selectall}{backspace}')`
+Clear the value of an `input` or `textarea`.
+
+{% note info %}
+An alias for [`cy.type('{selectall}{backspace}')`](https://on.cypress.io/api/type)
+{% endnote %}
 
 # Syntax
 
@@ -37,14 +41,14 @@ cy.url().clear()          // Errors, 'url' doesn't yield DOM element
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `.clear`.
+Pass in an options object to change the default behavior of `.clear()`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Forces clear, disables error checking prior to clear
+`force` | `false` | Force clear, disables error checking prior to clear
 `interval` | `16` | Interval which to retry clear
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the clear
-`log` | `true` | whether to display command in command log
 
 ## Yields
 
@@ -52,7 +56,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.clear()` will continue to look for the `input` or `textarea` for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.clear()` will continue to look for the `input` or `textarea` for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -62,17 +66,13 @@ Option | Default | Notes
 
 Prior to clearing, if the element isn't currently focused, Cypress issues a [.click()](https://on.cypress.io/api/click) on the element, which causes the element to receive focus.
 
-```html
-<input name="name" value="John Doe" />
-```
-
 ```javascript
-cy.get('input[name="name"]').clear().type('Jane Lane')
+cy.get('textarea').clear().type('Hello, World')
 ```
 
 # Command Log
 
-## Clear the input and type a new value
+**Clear the input and type a new value**
 
 ```javascript
 cy.get('input[name="name"]').clear().type('Jane Lane')

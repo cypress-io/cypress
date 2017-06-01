@@ -20,7 +20,7 @@ An alias of [`.and()`](https://on.cypress.io/api/and)
 .should(chainers)
 .should(chainers, value)
 .should(chainers, method, value)
-.should(function() {})
+.should(callbackFn)
 ```
 
 
@@ -31,8 +31,8 @@ An alias of [`.and()`](https://on.cypress.io/api/and)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty')        // Yields '.error' el
-cy.contains('Login').should('be.visible')  // Yields el containing Login
+cy.get('.error').should('be.empty')        // Assert that '.error' is empty
+cy.contains('Login').should('be.visible')  // Assert that el is visible
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -56,7 +56,7 @@ Value to assert against chainer.
 
 A method to be called on the chainer.
 
-**{% fa fa-angle-right %} function** ***(Function)***
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 

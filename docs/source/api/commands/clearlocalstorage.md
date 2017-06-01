@@ -13,18 +13,18 @@ Cypress automatically runs this command *before* each test to prevent state from
 # Syntax
 
 ```javascript
-.clearLocalStorage()
-.clearLocalStorage(keys)
+cy.clearLocalStorage()
+cy.clearLocalStorage(keys)
 ```
 
 ## Usage
 
-`.clearLocalStorage()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.clearLocalStorage()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.clearLocalStorage()
+cy.clearLocalStorage()  // clear all local storage
 ```
 
 ## Arguments
@@ -35,11 +35,11 @@ Specify keys to be cleared in local storage.
 
 ## Yields
 
-`.clearLocalStorage()` yields the remove local storage object.
+`cy.clearLocalStorage()` yields the remove local storage object.
 
 ## Timeout
 
-`.clearLocalStorage()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) to process this command.
+`cy.clearLocalStorage()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) to process this command.
 
 # Examples
 
@@ -64,7 +64,6 @@ cy.clearLocalStorage('appName')
 ```javascript
 cy.clearLocalStorage(/app-/)
 ```
-
 
 # Command Log
 

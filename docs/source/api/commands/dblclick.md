@@ -20,9 +20,9 @@ Double-click a DOM element.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('button').dblclick()          // Double clicks on button
-cy.focused().dblclick()              // Double clicks on el with focus
-cy.contains('Welcome').dblclick()    // Double clicks on first el containing 'Welcome'
+cy.get('button').dblclick()          // Double click on button
+cy.focused().dblclick()              // Double click on el with focus
+cy.contains('Welcome').dblclick()    // Double click on first el containing 'Welcome'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -36,21 +36,19 @@ cy.window().click()         // Errors, 'window' does not yield DOM element
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-
 Pass in an options object to change the default behavior of `.dblclick()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.dblclick()` yields the DOM subject chained from the previous command.
+`.dblclick()` yields the DOM element that was double clicked.
 
 ## Timeout
 
-`.dblclick()` will wait for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.dblclick()` will wait for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -58,12 +56,8 @@ Option | Default | Notes
 
 **Double click an anchor link**
 
-```html
-<a href="#nav1">Menu</a>
-```
-
 ```javascript
-cy.get('#nav1').dblclick() // yields the <a>
+cy.get('a#nav1').dblclick() // yields the <a>
 ```
 
 # Command Log

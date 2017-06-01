@@ -15,15 +15,13 @@ Make a focused DOM element blur.
 
 ## Usage
 
-`.blur()` requires being chained off another cy command that *yields* a DOM element that is currently in focus.
-
-If you want to ensure an element is focused before blurring, try using [`.focus()`](https://on.cypress.io/focus) before `.blur()`
+`.blur()` requires being chained off another cy command that *yields* a DOM element that is currently in focus. If you want to ensure an element is focused before blurring, try using [`.focus()`](https://on.cypress.io/focus) before `.blur()`.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('[type="email"]').type('me@email.com').blur() // Blurs email input
-cy.get('[tabindex="1"]').focus().blur()              // Blurs el with tabindex
+cy.get('[type="email"]').type('me@email.com').blur() // Blur email input
+cy.get('[tabindex="1"]').focus().blur()              // Blur el with tabindex
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -42,15 +40,15 @@ Pass in an options object to change the default behavior of `.blur`.
 Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces blur, disables checking if el is focusable or focused
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.blur()` yields the DOM element from the previous command.
+`.blur()` yields the DOM element that was blurred.
 
 ## Timeout
 
-`.blur()` will continue to look for the focusable element to blur for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.blur()` will continue to look for the focusable element to blur for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -62,9 +60,11 @@ Option | Default | Notes
 cy.get('[name="comment"]').type('Nice Product!').blur()
 ```
 
-# Options
+## Options
 
-**Blur the first input, ignoring whether the input is currently focused.**
+**Blur the first input**
+
+Setting `force` to `true` in the options disables checking whether the input is focusable or currently has focus.
 
 ```javascript
 cy.get('input:first').blur({ force: true })
@@ -94,5 +94,5 @@ When clicking on the `blur` command within the command log, the console outputs 
 
 # See also
 
-- [focused](https://on.cypress.io/api/focused)
 - [focus](https://on.cypress.io/api/focus)
+- [focused](https://on.cypress.io/api/focused)

@@ -25,7 +25,7 @@ You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
 
 ```javascript
 cy.debug().getCookie('app') // Pause to debug at beginning of commands
-cy.get('nav').debug()       // Debug the `get` commands yield
+cy.get('nav').debug()       // Debug the `get` command's yield
 ```
 
 ## Arguments
@@ -36,7 +36,7 @@ Pass in an options object to change the default behavior of `.debug()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
@@ -48,7 +48,7 @@ Option | Default | Notes
 
 ## Debug
 
-**Pause with debugger after `get()`**
+**Pause with debugger after `.get()`**
 
 ```javascript
 cy.get('a').debug().should('have.attr', 'href')
