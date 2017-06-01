@@ -1,10 +1,10 @@
 {
-  "name": "@cypress/core-desktop-gui",
+  "name": "@packages/desktop-gui",
   "version": "0.4.9",
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "lib/gui.js",
   "scripts": {
-    "postinstall": "echo 'This project needs: npm run build'",
+    "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
     "build": "zunder build-dev",
     "build-prod": "node ./scripts/build-prod.js",
     "run-prod": "npm run build-prod && npm run server",
@@ -31,7 +31,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/icons": "0.5.2",
+    "@cypress/icons": "0.5.4",
     "@cypress/react-tooltip": "^0.2.2",
     "@cypress/releaser": "0.1.12",
     "babel-eslint": "^6.0.4",
@@ -64,6 +64,6 @@
     "react-loader": "^2.4.0",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
-    "zunder": "3.5.8"
+    "zunder": "4.1.0"
   }
 }

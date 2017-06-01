@@ -6,29 +6,54 @@ description: ''
 
 Get the first DOM element within a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.first` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+# Syntax
 
-# [cy.first()](#usage)
+```javascript
+.first()
+.first(options)
+```
 
-Reduce the set of matched DOM elements to the first in the set.
+## Usage
 
-# Options
+`.first()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
 
-Pass in an options object to change the default behavior of `cy.first`.
+**{% fa fa-check-circle green %} Valid Usage**
 
-**cy.first(*options* )**
+```javascript
+cy.get('nav a').first()       // Yield first link in nav
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.first()                  // Errors, cannot be chained off 'cy'
+cy.getCookies().first()     // Errors, 'getCookies' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.first`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
-# Usage
+## Yields
 
-## Get the first list item in a list.
+`.first()` yields the new DOM element found by the command.
+
+## Timeout
+
+`.first()` will continue to look for the first element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
+
+## First element
+
+**Get the first list item in a list.**
 
 ```html
 <ul>
@@ -40,16 +65,16 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <li class="one">Knick knack on my thumb</li>
-cy.get("ul").first()
+// yields <li class="one">Knick knack on my thumb</li>
+cy.get('ul').first()
 ```
 
 # Command Log
 
-## Find the first `input` in the `form`
+**Find the first `input` in the `form`**
 
 ```javascript
-cy.get("form").find("input").first()
+cy.get('form').find('input').first()
 ```
 
 The commands above will display in the command log as:
@@ -60,6 +85,6 @@ When clicking on `first` within the command log, the console outputs the followi
 
 <img width="616" alt="screen shot 2015-11-29 at 12 28 23 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458771/db8cb516-9694-11e5-86c2-cf3bbb9a666d.png">
 
-# Related
+# See also
 
 - [last](https://on.cypress.io/api/last)

@@ -6,20 +6,36 @@ description: ''
 
 Scroll an element into view.
 
-| | |
-|--- | --- |
-| **Returns** | the element that was scrolled into view  |
-| **Timeout** | `cy.scrollIntoView` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-# [cy.scrollIntoView()](#usage)
+# Syntax
 
-Scroll to the element found in the previous command into view.
+```javascript
+.scrollIntoView()
+.scrollIntoView(options)
+```
 
-# Options
+## Usage
 
-Pass in an options object to change the default behavior of `cy.scrollIntoView`.
+`.scrollIntoView()` requires being chained off another cy command that *yields* a DOM element.
 
-**[cy.scrollIntoView( *options* )](#options-usage)**
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.get('footer').scrollIntoView() // Scrolls 'footer' into view
+```
+
+**{% fa fa-exclamation-triangle red %} Invalid Usage**
+
+```javascript
+cy.scrollIntoView('footer')  // Errors, cannot be chained off 'cy'
+cy.window().scrollIntoView()  // Errors, 'window' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.scrollIntoView`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -29,16 +45,25 @@ Option | Default | Notes
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the scroll
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-# Options Usage
+`.scrollIntoView()` yields the DOM element that was scrolled into view.
+
+## Timeout
+
+`.scrollIntoView()` will continue to scroll the element into view for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+
+# Examples
 
 # Notes
 
-## Snapshots
+**Snapshots do not reflect scroll behavior**
+
+*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using [`cy.pause()`](https://on.cypress.io/api/pause) to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#videos).
+
 
 # Command Log
 
-# Related
+# See also
 
 - [scrollTo](https://on.cypress.io/api/scrollto)

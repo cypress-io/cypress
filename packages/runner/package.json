@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-runner",
+  "name": "@packages/runner",
   "version": "0.3.11",
   "main": "lib/runner.js",
   "repository": {
@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
-    "postinstall": "echo 'This project needs: npm run build'",
+    "postinstall": "echo '@packages/runner needs: npm run build'",
     "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "watch": "node ./scripts/watch.js",
@@ -48,6 +48,6 @@
     "react-test-renderer": "^15.5.4",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "zunder": "^3.5.5"
+    "zunder": "4.1.0"
   }
 }

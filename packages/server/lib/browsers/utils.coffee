@@ -1,7 +1,7 @@
 fs       = require("fs-extra")
 path     = require("path")
 Promise  = require("bluebird")
-launcher = require("../../../launcher")
+launcher = require("@packages/launcher")
 appData  = require("../util/app_data")
 
 fs = Promise.promisifyAll(fs)

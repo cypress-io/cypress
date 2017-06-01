@@ -4,12 +4,12 @@ _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
 path       = require("path")
+{ unlinkSync: rm, existsSync: exists } = require("fs")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
-inquirer   = require("inquirer")
 Fixtures   = require("../support/helpers/fixtures")
-extension  = require("#{root}../../packages/extension")
+extension  = require("@packages/extension")
 pkg        = require("#{root}package.json")
 git        = require("#{root}lib/util/git")
 bundle     = require("#{root}lib/util/bundle")
@@ -33,7 +33,9 @@ Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
 browsers   = require("#{root}lib/browsers")
 Watchers   = require("#{root}lib/watchers")
-openProject = require("#{root}lib/open_project")
+openProject   = require("#{root}lib/open_project")
+appData       = require("#{root}lib/util/app_data")
+formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -202,6 +204,26 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
       @sandbox.stub(browsers, "open")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+
+    context "state", ->
+      statePath = null
+      beforeEach ->
+        # TODO switch to async file system calls
+        statePath = appData.path(formStatePath(@todosPath))
+        rm(statePath) if exists(statePath)
+      afterEach ->
+        rm(statePath)
+
+      it "saves project state", ->
+        Project.add(@todosPath)
+        .then =>
+          cypress.start(["--project=#{@todosPath}", "--spec=tests/test2.coffee"])
+        .then =>
+          @expectExitWith(0)
+        .then ->
+          openProject.getProject().saveState()
+        .then (state) ->
+          expect(exists(statePath), "Finds saved stage file #{statePath}").to.be.true
 
     it "runs project headlessly and exits with exit code 0 and yells about old version of CLI", ->
       Project.add(@todosPath)
@@ -560,21 +582,17 @@ describe "lib/cypress", ->
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
       permissionsPath = path.resolve("./permissions")
 
-      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
-
-      user.set({authToken: "auth-token-123"})
-      .then =>
-        fs.ensureDirAsync(permissionsPath)
+      fs.ensureDirAsync(permissionsPath)
       .then =>
         fs.chmodAsync(permissionsPath, "111")
       .then =>
-        cypress.start(["--project=#{permissionsPath}"])
+        cypress.start(["--project=#{permissionsPath}", "--cli-version"])
       .then =>
         fs.chmodAsync(permissionsPath, "644")
-        .then =>
-          fs.removeAsync(permissionsPath)
-          .then =>
-            @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
+      .then =>
+        fs.removeAsync(permissionsPath)
+      .then =>
+        @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
     describe "morgan", ->
       it "sets morgan to false", ->
@@ -699,11 +717,11 @@ describe "lib/cypress", ->
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(git, "_getSha").resolves("sha-123")
-      @sandbox.stub(git, "_getBranch").resolves("bem/ci")
       @sandbox.stub(git, "_getAuthor").resolves("brian")
       @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
       @sandbox.stub(git, "_getMessage").resolves("foo")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
+      @sandbox.stub(record, "getBranch").resolves("bem/ci")
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
@@ -905,7 +923,7 @@ describe "lib/cypress", ->
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"])
       .then =>
-        expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
+        expect(console.log).to.be.calledWithMatch('{"name":"@packages/server"')
         @expectExitWith(0)
 
   context "--version", ->

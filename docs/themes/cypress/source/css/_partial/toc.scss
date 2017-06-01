@@ -15,6 +15,10 @@
   }
 }
 
+.toc {
+  list-style: none;
+}
+
 #article-toc {
   display: none;
   float: right;
@@ -34,6 +38,7 @@
   padding-left: 1em;
   font-size: 0.85em;
   line-height: 1.5;
+  list-style: none;
 }
 
 #article-toc-inner {
@@ -41,6 +46,10 @@
   overflow-y: auto;
   padding: 0 20px;
   width: $sidebar-width;
+
+  .sidebar-title {
+    margin-top: 0; 
+  }
 
   &:before {
     content: "";
@@ -59,7 +68,7 @@
   display: block;
   color: #999;
   text-decoration: none;
-  padding: 3px 0 3px 5px;
+  padding: 5px 0 5px 5px;
   line-height: 1.2;
   font-size: 0.95em;
   position: relative;

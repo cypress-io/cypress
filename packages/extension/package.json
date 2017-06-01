@@ -1,10 +1,10 @@
 {
-  "name": "@cypress/core-extension",
+  "name": "@packages/extension",
   "version": "0.4.2",
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo 'This project needs: npm run build'",
+    "postinstall": "echo '@packages/extension needs: npm run build'",
     "watch": "gulp watch",
     "build": "gulp build",
     "build-prod": "gulp build",
@@ -31,7 +31,6 @@
   "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
   "devDependencies": {
     "@cypress/core-socket": "0.1.0",
-    "@cypress/icons": "0.5.2",
     "@cypress/releaser": "0.1.12",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
@@ -47,6 +46,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "@cypress/icons": "0.5.4",
     "bluebird": "^3.3.5",
     "lodash": "^4.11.2"
   }

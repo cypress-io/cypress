@@ -1,8 +1,6 @@
 _       = require("lodash")
-cp      = require("child_process")
 Promise = require("bluebird")
-
-exec = Promise.promisify(cp.exec)
+cp      = require("./util/child_process")
 
 profiles = {
   "~/.profile": /\/sh$/
@@ -14,33 +12,47 @@ profiles = {
 }
 
 sourced = false
+shell   = null
 
 getProfilePath = (shellPath) ->
   for profilePath, regex of profiles
     return profilePath if regex.test(shellPath)
 
-shell = null
+getShellObj = (pathToShell) ->
+  pathToShell = _.trim(pathToShell)
+
+  shell = {
+    shellPath: pathToShell
+    profilePath: getProfilePath(pathToShell)
+  }
+
+  Promise.resolve(shell)
 
 getShell = ->
   return Promise.resolve(shell) if shell
 
-  exec("echo $SHELL").then (shell) ->
-    path = _.trim(shell)
-    shell = {
-      shellPath: path
-      profilePath: getProfilePath(path)
-    }
-    return shell
+  ## if we didn't get a shell such
+  ## as when we're in docker
+  if not s = process.env.SHELL
+    cp.execAsync("which bash")
+    .then(getShellObj)
+    .catch ->
+      getShellObj("")
+  else
+    getShellObj(s)
 
 module.exports = {
+  reset: ->
+    ## for testing purposes
+    shell = null
+
   run: (projectRoot, options) ->
     child = null
 
     run = ->
-      getShell().then (shell) ->
-
+      getShell()
+      .then (shell) ->
         new Promise (resolve, reject) ->
-
           cmd = if shell.profilePath and not sourced
             ## we only need to source once
             sourced = true

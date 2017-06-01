@@ -6,6 +6,7 @@ errors    = require("./errors")
 cache     = require("./cache")
 Project   = require("./project")
 browsers  = require("./browsers")
+log       = require('./log')
 
 create = ->
   openProject     = null
@@ -37,6 +38,7 @@ create = ->
     getProject: -> openProject
 
     launch: (browserName, spec, options = {}) ->
+      log("launching browser %s spec %s", browserName, spec)
       @reboot()
       .then ->
         openProject.ensureSpecUrl(spec)
@@ -114,6 +116,7 @@ create = ->
         return null
 
     close:  ->
+      log "closing opened project"
       @clearSpecInterval()
       @closeOpenProjectAndBrowsers()
 
@@ -132,6 +135,7 @@ create = ->
       open = ->
         ## open the project and return
         ## the config for the project instance
+        log("opening project %s", path)
         openProject.open(options)
 
       @reboot = ->

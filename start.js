@@ -1,1 +1,1 @@
-require('./packages/server')
+require('@packages/server')

@@ -16,7 +16,7 @@ cjsxify       = require("cjsxify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
-httpsServer   = require("#{root}../../packages/https-proxy/test/helpers/https_server")
+httpsServer   = require("@packages/https-proxy/test/helpers/https_server")
 pkg           = require("#{root}package.json")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
@@ -2474,7 +2474,9 @@ describe "Routes", ->
             res.end()
 
           ## start the server listening on ipv6 only
-          server.listen 6565, "::1", =>
+          ## for demo how to bind to localhost via ipv6 see project
+          ## https://github.com/bahmutov/docker-ip6
+          server.listen 6565, "::", =>
 
             @rp("http://localhost:6565/#/foo")
             .then (res) ->

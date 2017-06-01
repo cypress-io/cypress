@@ -4,59 +4,78 @@ comments: true
 description: ''
 ---
 
-Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/api/location) under the hood.
-
-| | |
-|--- | --- |
-| **Returns** | the current URL as a string |
-| **Timeout** | *cannot timeout* |
-
-# [cy.url()](#usage)
-
 Get the current URL.
 
-# Options
+{% note info %}
+This is the same as [`cy.location.href`](https://on.cypress.io/api/location)
+{% endnote %}
 
-Pass in an options object to change the default behavior of `cy.url`.
+# Syntax
 
-**cy.url( *options* )**
+```javascript
+cy.url()
+cy.url(options)
+```
+
+## Usage
+
+`cy.url()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+
+**{% fa fa-check-circle green %} Valid Usage**
+
+```javascript
+cy.url()    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.url()`.
+
+**cy.hash( *options* )**
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-# Usage
+## Yields
 
-## Assert the URL is `http://localhost:8000/users/1/edit`
+`.url()` yields the current URL as a string.
+
+## Timeout
+
+# Examples
+
+## Url
+
+**Assert the URL is `http://localhost:8000/users/1/edit`**
 
 ```javascript
 // clicking the anchor causes the browser to follow the link
-cy
-  .get("#user-edit a").click()
-  .url().should("eq", "http://localhost:8000/users/1/edit") // => true
+cy.get('#user-edit a').click()
+cy.url().should('eq', 'http://localhost:8000/users/1/edit') // => true
 ```
 
-## URL is a shortcut for `cy.location().href`
+**Url is a shortcut for `cy.location().href`**
 
 `cy.url()` uses `href` under the hood.
 
 ```javascript
-cy.url()                  // these return the same string
-cy.location().its("href") // these return the same string
+cy.url()                  // these yield the same string
+cy.location().its('href') // these yield the same string
 ```
 
-# Notes
-
-## Why is this command called `url` instead of `href`?
+**Url versus href**
 
 Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
 ```javascript
-cy.location().its("href").should("eq", "http://localhost:8000/index.html")
+cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
 
-cy.location().invoke("toString").should("eq", "http://localhost:8000/index.html")
+cy.location().invoke('toString').should('eq', 'http://localhost:8000/index.html')
 
-cy.url().should("eq", "http://localhost:8000/index.html")
+cy.url().should('eq', 'http://localhost:8000/index.html')
 ```
 
 `href` and `toString` come from the `window.location` spec.
@@ -67,10 +86,10 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 # Command Log
 
-## Assert that the url contains "#users/new"
+**Assert that the url contains "#users/new"**
 
 ```javascript
-cy.url().should("contain", "#users/new")
+cy.url().should('contain', '#users/new')
 ```
 
 The commands above will display in the command log as:
@@ -81,7 +100,9 @@ When clicking on `url` within the command log, the console outputs the following
 
 <img width="440" alt="screen shot 2015-11-29 at 1 42 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459197/229e2552-969f-11e5-80a9-eeaf3221a178.png">
 
-# Related
+# See also
 
+- [document](https://on.cypress.io/api/document)
 - [hash](https://on.cypress.io/api/hash)
 - [location](https://on.cypress.io/api/location)
+- [window](https://on.cypress.io/api/window)

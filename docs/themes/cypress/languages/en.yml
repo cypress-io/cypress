@@ -26,7 +26,8 @@ sidebar:
     next-steps: Next Steps
     cypress-basics: Basics
     overview-of-the-gui-tool: Overview of the GUI Tool
-    commands-elements-and-assertions: Commands, Elements, and Assertions
+    core-concepts: Core Concepts
+    organizing-tests: Organizing Tests
     dead-simple-debugging: Dead Simple Debugging
     aliases-variables-in-an-async-world: Aliases&#58; Variables in an Async World
     stubs-spies-clocks: Stubs, Spies, and Clocks
@@ -53,6 +54,7 @@ sidebar:
     appendices: Appendices
     configuration: Configuration
     error-messages: Error Messages
+    available-assertions: Available Assertions
     best-practices: Best Practices
     anti-patterns: Anti-patterns
     contributing: Contributing
@@ -108,6 +110,10 @@ sidebar:
     parent: parent
     parents: parents
     parentsuntil: parentsUntil
+    pause: pause
+    prev: prev
+    prevall: prevAll
+    prevuntil: prevUntil
     readfile: readFile
     reload: reload
     request: request
@@ -143,6 +149,7 @@ sidebar:
     _: _
     $: $
     minimatch: minimatch
+    moment: moment
     blob: blob
     promise: promise
     cypress-api: Cypress API

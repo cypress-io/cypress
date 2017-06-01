@@ -268,25 +268,6 @@ describe "lib/modes/headless", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({})
 
-    it "resolves with end event + argument", ->
-      process.nextTick =>
-        @projectInstance.emit("end", {foo: "bar"})
-
-      headless.waitForTestsToFinishRunning({project: @projectInstance})
-      .then (obj) ->
-        expect(obj).to.deep.eq({
-          foo: "bar"
-          config: {}
-        })
-
-    it "stops listening to end event", ->
-      process.nextTick =>
-        expect(@projectInstance.listeners("end")).to.have.length(1)
-        @projectInstance.emit("end", {foo: "bar"})
-        expect(@projectInstance.listeners("end")).to.have.length(0)
-
-      headless.waitForTestsToFinishRunning({project: @projectInstance})
-
     it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
       started = new Date
       screenshots = [{}, {}, {}]
@@ -379,6 +360,25 @@ describe "lib/modes/headless", ->
           screenshots:  screenshots
           video:        "foo.mp4"
         })
+
+  context ".listenForProjectEnd", ->
+    it "resolves with end event + argument", ->
+      process.nextTick =>
+        @projectInstance.emit("end", {foo: "bar"})
+
+      headless.listenForProjectEnd(@projectInstance)
+      .then (obj) ->
+        expect(obj).to.deep.eq({
+          foo: "bar"
+        })
+
+    it "stops listening to end event", ->
+      process.nextTick =>
+        expect(@projectInstance.listeners("end")).to.have.length(1)
+        @projectInstance.emit("end", {foo: "bar"})
+        expect(@projectInstance.listeners("end")).to.have.length(0)
+
+      headless.listenForProjectEnd(@projectInstance)
 
   context ".run", ->
     beforeEach ->

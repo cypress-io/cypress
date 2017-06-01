@@ -11,6 +11,7 @@ user        = require("./user")
 cache       = require("./cache")
 config      = require("./config")
 logger      = require("./logger")
+debug       = require('./log')
 errors      = require("./errors")
 Server      = require("./server")
 scaffold    = require("./scaffold")
@@ -42,8 +43,10 @@ class Project extends EE
     @cfg         = null
     @memoryCheck = null
     @automation  = null
+    debug("Project created %s", @projectRoot)
 
   open: (options = {}) ->
+    debug("opening project instance %s", @projectRoot)
     @server = Server(@watchers)
 
     _.defaults options, {
@@ -99,6 +102,7 @@ class Project extends EE
       api.getProjectBuilds(projectId, authToken)
 
   close: ->
+    debug("closing project instance %s", @projectRoot)
     if @memoryCheck
       clearInterval(@memoryCheck)
 
@@ -246,8 +250,15 @@ class Project extends EE
     getConfig().then (cfg) =>
       @_setSavedState(cfg)
 
+  # forces saving of project's state
+  saveState: () ->
+    throw new Error ("Missing project config") unless @cfg
+    savedState(@projectRoot).set(@cfg.state)
+    .then =>
+      @cfg.state
+
   _setSavedState: (cfg) ->
-    savedState.get()
+    savedState(@projectRoot).get()
     .then (state) ->
       cfg.state = state
       cfg
@@ -302,6 +313,8 @@ class Project extends EE
     [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
+    debug("scaffolding project %s", @projectRoot)
+
     scaffolds = []
 
     push = scaffolds.push.bind(scaffolds)

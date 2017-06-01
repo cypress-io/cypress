@@ -181,7 +181,7 @@ module.exports = (Cypress, Commands) ->
             indicator ?= if options.response?.isOkStatusCode then "successful" else "bad"
 
             {
-              message: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
+              message: "#{options.method} #{status} #{_.truncate(options.url, { length: 25 })}"
               indicator: indicator
             }
         })

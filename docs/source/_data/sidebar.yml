@@ -7,7 +7,8 @@ guides:
     next-steps: next-steps.html
   cypress-basics:
     overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    commands-elements-and-assertions: commands-elements-and-assertions.html
+    core-concepts: core-concepts.html
+    organizing-tests: organizing-tests.html
     aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
@@ -34,6 +35,7 @@ guides:
   appendices:
     configuration: configuration.html
     error-messages: error-messages.html
+    available-assertions: available-assertions.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html
@@ -90,6 +92,10 @@ api:
     parent: parent.html
     parents: parents.html
     parentsuntil: parentsuntil.html
+    pause: pause.html
+    prev: prev.html
+    prevall: prevall.html
+    prevuntil: prevuntil.html
     readfile: readfile.html
     reload: reload.html
     request: request.html
@@ -124,13 +130,14 @@ api:
   utilities:
     _: _.html
     $: $.html
-    minimatch: minimatch.html
     blob: blob.html
+    minimatch: minimatch.html
+    moment: moment.html
     promise: promise.html
   cypress-api:
-    config: config.html
-    env: env.html
     cypress-commands: commands.html
+    config: config.html
     cookies: cookies.html
     dom: dom.html
+    env: env.html
     cypress-server: server.html

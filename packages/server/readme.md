@@ -86,6 +86,16 @@ gulp test
 
 Navigate to [http://localhost:3500](http://localhost:3500)
 
+## Debugging
+
+Using [debug](https://github.com/visionmedia/debug#readme) module under
+namespace `cypress:server`. There are a few places where low-level events are
+also written, for example `cypress:server:file`. To see debug messages
+
+```sh
+DEBUG=cypress:server npm start ...
+```
+
 ## Deploying
 
 ```bash

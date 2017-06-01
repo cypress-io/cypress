@@ -3,7 +3,7 @@ fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")
-socketIo      = require("../../socket")
+socketIo      = require("@packages/socket")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
@@ -356,7 +356,7 @@ class Socket
         })
 
       socket.on "save:app:state", (state) ->
-        savedState.set(state).then ->
+        savedState().set(state).then ->
           options.onSavedStateChanged()
 
       reporterEvents.forEach (event) =>

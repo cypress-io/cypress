@@ -172,3 +172,13 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
   line-height: 100px;
   margin: 100px 0;
 }
+
+i.fa {
+  &.red {
+    color: $color-red;
+  }
+
+  &.green {
+    color: $color-green;
+  }
+}
