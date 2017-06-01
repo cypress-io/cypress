@@ -40,7 +40,6 @@ cy.location().trigger('mouseleave')  // Errors, 'location' does not yield DOM el
 
 The name of the `event` to be triggered on the DOM element.
 
-
 **{% fa fa-angle-right %} position** ***(String)***
 
 The position where the event should be triggered. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
@@ -64,8 +63,8 @@ Option | Default | Notes
 `bubbles` | `true` | Whether the event bubbles
 `cancelable` | `true` | Whether the event is cancelable
 `interval` | `16` | Interval which to retry triggering the event
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry triggering the event
 `log` | `true` | Whether to display command in Command Log
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry triggering the event
 
 You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and they will be attached to the event. Passing in coordinate arguments (`clientX`, `pageX`, etc) will override the position coordinates.
 
@@ -75,20 +74,15 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 ## Timeout
 
-`.trigger()` will wait until the element is in an 'interactable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options
-
-
-The DOM element must be in an "interactable" state prior to the triggered event happening (it must be visible and not disabled).
-
-
-
-Cypress automatically scrolls the element into view prior to attempting to trigger the event.
+`.trigger()` will wait until the element is in an 'interactable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
 
 # Examples
 
 ## Mouse Events
 
 **Trigger a `mouseover` on the button**
+
+The DOM element must be in an "interactable" state prior to the triggered event happening (it must be visible and not disabled).
 
 ```javascript
 cy.get('button').trigger('mouseover') // yields 'button'
@@ -114,7 +108,8 @@ Note that some implementations may rely on the `input` event instead, which is f
 ```javascript
 cy.get('input[type=range]').as('range')
   .invoke('val', 25)
-  .ttrigger('change')
+  .trigger('change')
+  
 cy.get('@range').siblings('p').should('have.text', '25')
 ```
 

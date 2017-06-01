@@ -67,7 +67,6 @@ Option | Default | Notes
 
 `cy.writeFile()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to write to the file.
 
-
 # Examples
 
 ## Text

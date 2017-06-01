@@ -54,9 +54,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.siblings()` will continue to look for the sibling element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
-
-
+`.siblings()` will continue to look for the sibling element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 

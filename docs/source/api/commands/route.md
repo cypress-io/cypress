@@ -59,9 +59,9 @@ Option | Default | Notes
 `force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing [`cy.routes`](https://on.cypress.io/api/routes)
 `headers` | `null` | Response headers for stubbed routes
 `method` | `GET` | Method to match against requests
+`onAbort` | `null` | Callback function which fires anytime an XHR is aborted
 `onRequest` | `null` | Callback function when a request is sent
 `onResponse` | `null` | Callback function when a response is returned
-`onAbort` | `null` | Callback function which fires anytime an XHR is aborted
 `response` | `null` | Response body when stubbing routes
 `status` | `200` | Response status code when stubbing routes
 `url`    | `null` | String or RegExp url to match against request urls

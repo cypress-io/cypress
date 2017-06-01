@@ -6,7 +6,6 @@ description: ''
 
 Get the title of the document.
 
-
 # Syntax
 
 ```javascript
@@ -28,7 +27,7 @@ cy.title()
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.title`.
+Pass in an options object to change the default behavior of `cy.title()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -47,7 +46,7 @@ Option | Default | Notes
 
 ## Title
 
-**Assert that the document's title eq "My Awesome Application"**
+**Assert that the document's title is "My Awesome Application"**
 
 ```javascript
 cy.title().should('eq', 'My Awesome Application')
@@ -55,7 +54,7 @@ cy.title().should('eq', 'My Awesome Application')
 
 # Command Log
 
-**Assert that the document's title include 'New User'**
+**Assert that the document's title includes 'New User'**
 
 ```javascript
 cy.title().should('include', 'New User')

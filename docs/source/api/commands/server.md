@@ -4,11 +4,12 @@ comments: true
 description: ''
 ---
 
-Start a server to begin routing responses to `.route()` and `.request()`.
+Start a server to begin routing responses to `cy.route()` and `cy.request()`.
 
-{% note info New to Cypress? %}
-[Read about Network Requests first.](https://on.cypress.io/guides/network-requests-xhr)
+{% note info %}
+**Note:** `cy.server()` assumes you are already familiar with core concepts such as [network requests](https://on.cypress.io/guides/network-requests-xhr)
 {% endnote %}
+
 
 # Syntax
 
@@ -19,7 +20,7 @@ cy.server(options)
 
 ## Usage
 
-`.server()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.server()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -31,23 +32,24 @@ cy.server()
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.server()`. These options are used for 2 different purposes
+Pass in an options object to change the default behavior of `cy.server()`. These options are used for 2 different purposes:
 
-1. As defaults that are merged into [`.route()`](https://on.cypress.io/api/route).
-2. As configuration behavior for *all* requests.
+  - As defaults that are merged into [`cy.route()`](https://on.cypress.io/api/route).
+
+  - As configuration behavior for *all* requests.
 
 ***The following options are merged in as default options to [`.route()`](https://on.cypress.io/api/route)***
 
 Option | Default | Notes
 --- | --- | ---
-`method` | `"GET"` | method to match against requests
-`response` | `null` | response body when stubbing routes
-`status` | `200` | response status code when stubbing routes
 `delay` | `0` | delay for stubbed responses (in ms)
 `headers` | `null` | response headers for stubbed routes
+`method` | `"GET"` | method to match against requests
+`onAbort` | `undefined` | callback function which fires anytime an XHR is aborted
 `onRequest` | `undefined` | callback function when a request is sent
 `onResponse` | `undefined` | callback function when a response is returned
-`onAbort` | `undefined` | callback function which fires anytime an XHR is aborted
+`response` | `null` | response body when stubbing routes
+`status` | `200` | response status code when stubbing routes
 
 ***The following options control the behavior of the server affecting all requests:***
 
@@ -60,7 +62,7 @@ Option | Default | Notes
 
 ## Yields
 
-`.server()` yields the Cypress server instance.
+`cy.server()` yields the Cypress server instance.
 
 ## Timeout
 
@@ -71,7 +73,7 @@ Option | Default | Notes
 
 **After starting a server:**
 
-- Any request that does not match a [`.route()`](https://on.cypress.io/api/route) will be sent a `404` status code.
+- Any request that does not match a [`cy.route()`](https://on.cypress.io/api/route) will be sent a `404` status code.
 - Any request that matches the `options.whitelist` function will **NOT** be logged or stubbed. In other words it is "whitelisted" and ignored.
 - You will see requests named as `(XHR Stub)` or `(XHR)` in the Command Log.
 
@@ -81,11 +83,11 @@ cy.server()
 
 ## Options
 
-## Change defaults for [`.route()`](https://on.cypress.io/api/route)
+**Change defaults for [`.route()`](https://on.cypress.io/api/route)**
 
-By default [`cy.route`](https://on.cypress.io/api/route) inherits some of its options from `cy.server()`.
+By default [`cy.route()`](https://on.cypress.io/api/route) inherits some of its options from `cy.server()`.
 
-In this example, our matching requests will be delayed 1000ms and have a status of 422, but its response will be what was set in [`.route()`](https://on.cypress.io/api/route).
+In this example, our matching requests will be delayed 1000ms and have a status of `422`, but its `response` will be what was set in [`cy.route()`](https://on.cypress.io/api/route).
 
 ```javascript
 cy.server({
@@ -124,7 +126,6 @@ cy.route('/activities/**', 'fixture:activities.json')
 
 ```javascript
 // Application Code
-
 $(function(){
   $.get('/activities')
 
@@ -136,10 +137,10 @@ $(function(){
 
 **Change the default response headers for all routes**
 
-When you stub requests, you can automatically control their response headers. This is useful when you want to send back meta data in the headers, such as *pagination* or *token* information.
+When you stub requests, you can automatically control their response `headers`. This is useful when you want to send back meta data in the `headers`, such as *pagination* or *token* information.
 
 {% note info  %}
-Cypress automatically sets `Content-Length` and `Content-Type` based on the response body you stub.
+Cypress automatically sets `Content-Length` and `Content-Type` based on the response `body` you stub.
 {% endnote %}
 
 ```javascript
@@ -150,9 +151,8 @@ cy.server({
   })
 cy.route('GET', '/users/1', {id: 1, name: 'Amanda'}).as('getUser')
 cy.visit('/users/1/profile')
-cy.wait('@getUser')
-    .its('responseHeaders')
-    .should('have.property', 'x-token', 'abc-123-foo-bar') // true
+cy.wait('@getUser').its('responseHeaders')
+  .should('have.property', 'x-token', 'abc-123-foo-bar') // true
 ```
 
 ```javascript
@@ -173,13 +173,13 @@ xhr.send()
 
 **Change the default whitelisting**
 
-`.server()` comes with a `whitelist` function that will filter out any requests that are for static assets like `.html`, `.js`, `.jsx`, and `.css`.
+`cy.server()` comes with a `whitelist` function that by default filters out any requests that are for static assets like `.html`, `.js`, `.jsx`, and `.css`.
 
-Any request that passes the `whitelist` will be ignored - it will not be logged nor will it be stubbed in any way (even if it matches a specific [`.route()`](https://on.cypress.io/api/route)).
+Any request that passes the `whitelist` will be ignored - it will not be logged nor will it be stubbed in any way (even if it matches a specific [`cy.route()`](https://on.cypress.io/api/route)).
 
 The idea is that we never want to interfere with static assets that are fetched via AJAX.
 
-The default whitelist function in Cypress is:
+***The default whitelist function in Cypress is:***
 
 ```javascript
 var whitelist = function(xhr){
@@ -189,7 +189,7 @@ var whitelist = function(xhr){
 }
 ```
 
-You can override this function with your own specific logic.
+***You can override this function with your own specific logic:***
 
 ```javascript
 cy.server({
@@ -210,7 +210,6 @@ You can disable all stubbing and its effects and restore it to the default behav
 ```javascript
 cy.server()
 cy.route('POST', '/users', {}).as('createUser')
-
 cy.server({enable: false})
 ```
 
@@ -226,16 +225,16 @@ However between tests, when a new test runs, the previous configuration is resto
 
 When a new test runs, any outstanding requests still in flight are automatically aborted. In fact this happens by default whether or not you've even started a `cy.server()`.
 
-**Server can be started before you [`cy.visit`](https://on.cypress.io/api/visit)**
+**Server can be started before you [`cy.visit()`](https://on.cypress.io/api/visit)**
 
-Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit`](https://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
+Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit()`](https://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
 
 You can [read more about XHR strategy here](https://on.cypress.io/guides/network-requests-xhr).
 
 # See also
 
-- [route](https://on.cypress.io/api/route)
-- [wait](https://on.cypress.io/api/wait)
-- [request](https://on.cypress.io/api/request)
-- [visit](https://on.cypress.io/api/visit)
 - [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [request](https://on.cypress.io/api/request)
+- [route](https://on.cypress.io/api/route)
+- [visit](https://on.cypress.io/api/visit)
+- [wait](https://on.cypress.io/api/wait)

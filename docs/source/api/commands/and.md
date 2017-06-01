@@ -79,7 +79,7 @@ cy
 
 ## Timeout
 
-`.and` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.and()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', 'error')
@@ -204,13 +204,11 @@ Take this *explicit* assertion for example:
 expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 ```
 
-`cy.and` reproduces this same assertion behavior.
+`.and()` reproduces this same assertion behavior.
 
 **How do I know which assertions change the subject and which keep it the same?**
 
 The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
-
-Alternatively, it is very easy to use Cypress itself to figure this out.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 

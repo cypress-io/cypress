@@ -10,8 +10,8 @@ Make an assertion.
 An alias of [`.and()`](https://on.cypress.io/api/and)
 {% endnote %}
 
-{% note info New to Cypress? %}
-[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)
+{% note info %}
+**Note:** `.should()` assumes you are already familiar with core concepts such as [assertions](https://on.cypress.io/guides/making-assertions)
 {% endnote %}
 
 # Syntax
@@ -60,7 +60,6 @@ A method to be called on the chainer.
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 
-
 ## Yields
 
 In most cases, `.should()` yields the previous cy command's yield.
@@ -81,7 +80,7 @@ cy
 
 ## Timeout
 
-`.should` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.should()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10')
@@ -145,9 +144,7 @@ cy.get('#header a').should('have.attr', 'href', '/users')
 
 Passing a function to `.should()` enables you to assert on the yielded subject. This gives you the opportunity to *massage* what you'd like to assert on.
 
-Just be sure *not* to include any code that has side effects in your callback function.
-
-The callback function will be retried over and over again until no assertions within it throw.
+Just be sure *not* to include any code that has side effects in your callback function. The callback function will be retried over and over again until no assertions within it throw.
 
 ```html
 <div>
@@ -184,6 +181,8 @@ cy
 
 **Assert explicitly within `.should()`**
 
+Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
+
 ```html
 <div id="todos">
   <li>Walk the dog</li>
@@ -201,9 +200,6 @@ cy.get("#todos li").should(function($lis){
 })
 ```
 
-{% note warning %}
-Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
-{% endnote %}
 
 **Using a callback function will not change the subject**
 
@@ -234,7 +230,6 @@ In this example we use [`.and()`](https://on.cypress.io/api/and) which is identi
 cy.get('option:first').should('be.selected').and('have.value', 'Metallica')
 ```
 
-
 ## Wait until the assertions pass
 
 Cypress won't resolve your commands until all of its assertions pass.
@@ -251,11 +246,9 @@ $('button').click(function(){
 ```
 
 ```javascript
-cy
-  .get('button')
-    .click()
-    .should('have.class', 'active')
-    .and('not.have.class', 'inactive')
+cy.get('button').click()
+  .should('have.class', 'active')
+  .and('not.have.class', 'inactive')
 ```
 
 You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) here.
@@ -266,8 +259,6 @@ You can [read more about how Cypress resolves your assertions](https://on.cypres
 
 The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
-Alternatively, it is very easy to use Cypress itself to figure this out.
-
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 
 # Command Log
@@ -275,11 +266,7 @@ You can [read more about debugging assertions](https://on.cypress.io/guides/maki
 **Assert that there should be 8 children in a nav**
 
 ```javascript
-//
-cy
-  .get('.left-nav>.nav')
-    .children()
-      .should('have.length', 8)
+cy.get('.left-nav>.nav').children().should('have.length', 8)
 ```
 
 The commands above will display in the command log as:

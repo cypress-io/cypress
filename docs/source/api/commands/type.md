@@ -6,7 +6,6 @@ description: ''
 
 Type into a DOM element.
 
-
 # Syntax
 
 ```javascript
@@ -44,15 +43,15 @@ Sequence | Notes
 `{% raw %}{{{% endraw %}}`| Types the literal `{` key
 `{backspace}` | Deletes character to the left of the cursor
 `{del}` | Deletes character to the right of the cursor
+`{downarrow}` | Fires down event but does **not** move the cursor
 `{enter}` | Types the Enter key
 `{esc}` | Types the Escape key
 `{leftarrow}` | Moves cursor left
 `{rightarrow}` | Moves cursor right
-`{downarrow}` | Fires down event but does **not** move the cursor
-`{uparrow}` | Fires up event but does **not** move the cursor
 `{selectall}` | Selects all text by creating a `selection range`
+`{uparrow}` | Fires up event but does **not** move the cursor
 
-Text passed to `cy.type` may also include any of the these modifier character sequences:
+Text passed to `.type()` may also include any of the these modifier character sequences:
 
 Sequence | Notes
 --- | ---
@@ -69,9 +68,9 @@ Option | Default | Notes
 --- | --- | ---
 `delay` | `10` | Delay after each keypress
 `force` | `false` | Forces type, disables error checking prior to type
-`release` | `true` | Keep a modifier activated between commands
 `interval` | `16` | Interval to retry type
 `log` | `true` | Whether to display command in Command Log
+`release` | `true` | Keep a modifier activated between commands
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 
 ## Yields
@@ -80,7 +79,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.type()` will continue to retry typing for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.type()` will continue to retry typing for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -100,9 +99,9 @@ cy.get('textarea').type('Hello world') //yields <textarea>
 
 **Mimic user typing behavior**
 
+Each keypress is delayed 10ms by default in order to simulate how a very fast user types!
+
 ```javascript
-// each keypress is delayed 10ms by default
-// which simulates how a very fast user types!
 cy.get('[contenteditable]').type('some text!')
 ```
 
@@ -170,7 +169,7 @@ Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
 
 **Force a click to happen prior to type**
 
-Prior to typing, if the DOM element isn't currently focused, Cypress issues a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
+Prior to typing, if the DOM element isn't currently focused, Cypress issues a [.click()](https://on.cypress.io/api/click) on the element, which causes the element to receive focus.
 
 Sometimes it is useful to force the click to happen in order to disables error checking, like whether the element is currently visible.
 
@@ -184,7 +183,7 @@ Be careful with the `force` option because it allows the type to happen where it
 
 ## Key Combinations
 
-When using special character sequences, it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `.type()` command, and are released when all subsequent characters are typed, unless [`{ release: false }`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
+When using special character sequences, it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
 
 **Type a key combination**
 

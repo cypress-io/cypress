@@ -39,7 +39,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.window()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.window()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -57,7 +57,7 @@ cy.window().then(function(win){
 
 ## Options
 
-**Passes timeout through to `cy.should` assertion**
+**Passes timeout through to [`.should()`](https://on.cypress.io/should) assertion**
 
 ```javascript
 cy.window({ timeout: 10000 }).should('have.property', 'foo')

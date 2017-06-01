@@ -34,15 +34,15 @@ The number of `milliseconds` to move the clock. Any timers within the affected r
 
 ## Yields
 
-`.tick()` yields a `clock` object with the following methods:
+`cy.tick()` yields a `clock` object with the following methods:
 
-**`clock.tick(milliseconds)`**
+- **`clock.tick(milliseconds)`**
 
-Move the clock a number of milliseconds. Any timers within the affected range of time will be called.
+  Move the clock a number of milliseconds. Any timers within the affected range of time will be called.
 
-**`clock.restore()`**
+- **`clock.restore()`**
 
-Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+  Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
 You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
 
