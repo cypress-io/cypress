@@ -154,9 +154,20 @@ There is a performance tradeoff here: essentially, **tests that have longer time
 
 {% endnote %}
 
-# Chaining Commands
+# Chains of Commands
 
-It's crucially important to understand the mechanism by which Cypress Commands chain together: an asynchronous-yet-serial process of doing work on the Subject yielded to the Command, and yielding a Subject to the next Command.
+It's crucially important to understand the mechanism by which Cypress Commands chain together: a queue of work to be done on some subject that flows from one command to the next. It's like Promises, but different, so don't reach for your favorite Promise library until we finish laying it all out.
+
+## Interacting With Elements
+
+As we saw in the initial example, Cypress makes it easy to click on and type into elements on the page by adding `.click()` and `.type()` commands to a `cy.get()` or `.contains()` command. This is a great example of chaining in action. Let's see it again:
+
+```js
+cy.get('textarea.post-body')
+  .type("This is an excellent post.")
+```
+
+We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" of the `cy.get()` command, which will be a DOM element if it is found.
 
 ## Subjects
 
