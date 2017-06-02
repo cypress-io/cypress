@@ -1,30 +1,21 @@
-{deferred, stubIpc} = require("../support/util")
-
 describe "Navigation", ->
   beforeEach ->
-    cy
-      .fixture("user").as("user")
-      .visit("/")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
 
-        @getCurrentUser = deferred()
+    cy.visit("/").then (win) ->
+      { start, @ipc } = win.App
 
-        stubIpc(@App.ipc, {
-          "on:menu:clicked": ->
-          "close:browser": ->
-          "close:project": ->
-          "on:focus:tests": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
-          "get:projects": (stub) -> stub.resolves([])
-          "get:project:statuses": (stub) -> stub.resolves([])
-          "log:out": (stub) -> stub.resolves({})
-        })
+      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "getProjects").resolves([])
+      cy.stub(@ipc, "getProjectStatuses").resolves([])
+      cy.stub(@ipc, "logOut").resolves({})
+      cy.stub(@ipc, "externalOpen")
 
-        @App.start()
+      @getCurrentUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
+
+      start()
 
   context.skip "without a current user", ->
     beforeEach ->
@@ -37,7 +28,7 @@ describe "Navigation", ->
       it "opens link to docs on click", ->
         cy
           .get("nav").contains("Docs").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
 
       it "displays link to chat", ->
         cy.get("nav").contains("Chat")
@@ -45,7 +36,7 @@ describe "Navigation", ->
       it "opens link to chat on click", ->
         cy
           .get("nav").contains("Chat").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/chat")
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
 
       it "displays login button", ->
         cy
@@ -74,7 +65,7 @@ describe "Navigation", ->
       it "opens link to docs on click", ->
         cy
           .get("nav").contains("Docs").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
 
       it "displays link to chat", ->
         cy.get("nav").contains("Chat")
@@ -82,7 +73,7 @@ describe "Navigation", ->
       it "opens link to chat on click", ->
         cy
           .get("nav").contains("Chat").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/chat")
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
 
       it "displays user name", ->
         cy
@@ -98,7 +89,7 @@ describe "Navigation", ->
         it "triggers logout on click of logout", ->
           cy.contains("Jane Lane").click()
           cy.contains("a", "Log Out").click().then ->
-            expect(@App.ipc).to.be.calledWith("log:out")
+            expect(@ipc.logOut).to.be.called
 
         it.skip "displays login button", ->
           cy.contains("Jane Lane").click()
@@ -110,7 +101,7 @@ describe "Navigation", ->
         it "displays login screen", ->
           cy.contains("Jane Lane").click()
           cy.contains("a", "Log Out").click()
-          cy.contains(".btn", "Log In with GitHub")
+          cy.shouldBeOnLogin()
 
   context "when current user has no name", ->
     beforeEach ->

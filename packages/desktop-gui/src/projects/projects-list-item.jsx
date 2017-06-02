@@ -2,7 +2,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
 import { observer } from 'mobx-react'
 import { ContextMenuLayer } from 'react-contextmenu'
 

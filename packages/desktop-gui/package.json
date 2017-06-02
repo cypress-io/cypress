@@ -55,6 +55,7 @@
     "mobx-react-devtools": "^4.2.0",
     "moment": "^2.15.1",
     "prop-types": "^15.5.10",
+    "query-string": "^4.3.4",
     "rc-collapse": "^1.6.11",
     "react": "^15.1.0",
     "react-bootstrap-modal": "3.0.1",

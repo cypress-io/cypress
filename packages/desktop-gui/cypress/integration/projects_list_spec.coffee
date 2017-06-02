@@ -1,40 +1,35 @@
-{deferred, stubIpc} = require("../support/util")
-
 describe "Projects List", ->
   beforeEach ->
     @unauthError = {name: "", message: "", statusCode: 401}
 
-    cy
-      .fixture("user").as("user")
-      .fixture("projects").as("projects")
-      .fixture("projects_statuses").as("projectStatuses")
-      .fixture("config").as("config")
-      .fixture("specs").as("specs")
-      .visit("/#/projects")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
+    cy.fixture("projects").as("projects")
+    cy.fixture("projects_statuses").as("projectStatuses")
+    cy.fixture("config").as("config")
+    cy.fixture("specs").as("specs")
 
-        @getCurrentUser = deferred()
-        @getProjects = deferred()
-        @getProjectStatuses = deferred()
+    cy.visit("/").then (win) ->
+      { start, @ipc } = win.App
 
-        stubIpc(@App.ipc, {
-          "on:menu:clicked": ->
-          "close:browser": ->
-          "close:project": ->
-          "on:focus:tests": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
-          "get:projects": (stub) => stub.returns(@getProjects.promise)
-          "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
-          "remove:project": (stub) -> stub.resolves()
-          "open:project": (stub) => stub.yields(null, @config)
-          "get:specs": (stub) => stub.resolves(@specs)
-        })
+      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "logOut").resolves({})
+      cy.stub(@ipc, "removeProject").resolves()
+      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "getSpecs").resolves(@specs)
+      cy.stub(@ipc, "externalOpen")
+      cy.stub(@ipc, "showDirectoryDialog")
 
-        @App.start()
+      @getCurrentUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
+
+      @getProjects = @util.deferred()
+      cy.stub(@ipc, "getProjects").resolves(@getProjects.promise)
+
+      @getProjectStatuses = @util.deferred()
+      cy.stub(@ipc, "getProjectStatuses").resolves(@getProjectStatuses.promise)
+
+      start()
 
   context "with a current user", ->
     beforeEach ->
@@ -56,7 +51,7 @@ describe "Projects List", ->
 
       it "opens link to docs on click of help link", ->
         cy.contains("a", "Need help?").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/adding-new-project")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/adding-new-project")
 
     describe "project statuses from localStorage load", ->
       beforeEach ->
@@ -134,7 +129,7 @@ describe "Projects List", ->
               cy.get("@firstProject").should("not.exist")
 
             it "calls remove:project to ipc", ->
-              expect(@App.ipc).to.be.calledWith("remove:project", "/Users/Jane/Projects/My-Fake-Project")
+              expect(@ipc.removeProject).to.be.calledWith("/Users/Jane/Projects/My-Fake-Project")
 
             it "updates localStorage cache", ->
               expect(JSON.parse(localStorage.projects || "[]").length).to.equal(7)
@@ -176,8 +171,8 @@ describe "Projects List", ->
             ## in reality, both will get called 3 times, but since we don't
             ## handle the second call to get:projects, get:project:statuses
             ## only gets called 2 times in this test
-            expect(@App.ipc.withArgs("get:projects")).to.be.calledThrice
-            expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledThrice
+            expect(@ipc.getProjects).to.be.calledThrice
+            expect(@ipc.getProjectStatuses).to.be.calledThrice
 
         describe "when user is unauthorized for project", ->
 
@@ -239,18 +234,17 @@ describe "Projects List", ->
 
     describe "add project", ->
       beforeEach ->
-        @selectDirectory = deferred()
-        @addProject = deferred()
+        @selectDirectory = @util.deferred()
+        cy.stub(@ipc, "showDirectoryDialog").returns(@selectDirectory.promise)
 
-        stubIpc(@App.ipc, {
-          "show:directory:dialog": (stub) => stub.returns(@selectDirectory.promise)
-          "add:project": (stub) => stub.returns(@addProject.promise)
-          "get:project:status": (stub) -> stub.resolves({
-            id: "id-123"
-            path: "/Users/Jane/Projects/My-New-Project"
-            lastBuildStatus: "passed"
-            public: true
-          })
+        @addProject = @util.deferred()
+        cy.stub(@ipc, "addProject").returns(@addProject.promise)
+
+        cy.stub(@ipc, "getProjectStatus").resolves({
+          id: "id-123"
+          path: "/Users/Jane/Projects/My-New-Project"
+          lastBuildStatus: "passed"
+          public: true
         })
 
         @getProjects.resolve(@projects)
@@ -260,7 +254,7 @@ describe "Projects List", ->
 
       describe "any case / no project id", ->
         it "triggers ipc 'show:directory:dialog on nav +", ->
-          expect(@App.ipc).to.be.calledWith("show:directory:dialog")
+          expect(@ipc.showDirectoryDialog).to.be.called
 
         describe "error thrown", ->
           beforeEach ->
@@ -286,7 +280,7 @@ describe "Projects List", ->
 
           it "does no action", ->
             cy.get(".projects-list").should("exist").then ->
-                expect(@App.ipc).to.not.be.calledWith("add:project")
+                expect(@ipc.addProject).to.not.be.called
 
         describe "directory chosen", ->
           beforeEach ->
@@ -295,7 +289,7 @@ describe "Projects List", ->
             cy.wait(1000)
 
           it "triggers ipc 'add:project' with directory", ->
-            expect(@App.ipc).to.be.calledWith("add:project", @projectPath)
+            expect(@ipc.addProject).to.be.calledWith(@projectPath)
 
           it "displays new project in list", ->
             cy.get(".projects-list a:last").should("contain", "My-New-Project")
@@ -315,7 +309,7 @@ describe "Projects List", ->
             expect(JSON.parse(localStorage.projects || "[]").length).to.equal(9)
 
           it "does not call ipc 'get:project:status'", ->
-            expect(@App.ipc).not.to.be.calledWith("get:project:status")
+            expect(@ipc.getProjectStatus).not.to.be.called
 
       describe "with pre-existing project id", ->
         beforeEach ->
@@ -327,7 +321,7 @@ describe "Projects List", ->
           cy.wait(1000)
 
         it "calls ipc 'get:project:status'", ->
-          expect(@App.ipc).to.be.calledWith("get:project:status", {
+          expect(@ipc.getProjectStatus).to.be.called({
             id: "id-123"
             path: "/Users/Jane/Projects/My-New-Project"
           })
@@ -353,13 +347,13 @@ describe "Projects List", ->
         cy.shouldBeOnLogin()
 
       it "redirects to login when get:project:status returns 401", ->
+        cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
+        cy.stub(@ipc, "addProject").resolves({ id: "id-123" })
+        cy.stub(@ipc, "getProjectStatus").rejects(@unauthError)
+
         @getProjects.resolve([])
         @getProjectStatuses.resolve([])
-        stubIpc(@App.ipc, {
-          "show:directory:dialog": (stub) -> stub.resolves("/foo/bar")
-          "add:project": (stub) -> stub.resolves({ id: "id-123" })
-          "get:project:status": (stub) => stub.rejects(@unauthError)
-        })
+
         cy.get("nav").find(".fa-plus").click().wait(1000)
 
         cy.shouldBeOnLogin()

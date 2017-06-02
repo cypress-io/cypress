@@ -28,12 +28,8 @@
       __REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__
     }
 
-    // temporarily here for development purposes
-    // needs to be moved into server
-    window.projectPath = '/Users/chrisbreiding/Dev/cypress/_playground'
-
     if (!window.Cypress) {
-      App.start({ projectPath: window.projectPath })
+      App.start()
     }
   </script>
 </body>

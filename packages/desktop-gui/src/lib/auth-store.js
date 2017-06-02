@@ -1,4 +1,4 @@
-import { computed, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import User from '../lib/user-model'
 import viewStore from './view-store'
 
@@ -9,7 +9,7 @@ class AuthStore {
     return !!this.user && !!this.user.authToken
   }
 
-  setUser (user) {
+  @action setUser (user) {
     const isValid = user && user.authToken
     this.user = isValid ? new User(user) : null
 

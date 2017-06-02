@@ -12,14 +12,10 @@ const openChangelog = (e) => {
 
 @observer
 class Updates extends Component {
-  constructor (props) {
-    super(props)
-
-    // TODO: implement this:
-    // ipc.getOptions().then((options = {}) => {
-    // })
-
-    updater.setVersion(props.options.version)
+  componentDidMount () {
+    ipc.getOptions().then((options = {}) => {
+      updater.setVersion(options.version)
+    })
 
     ipc.updaterRun((err, data = {}) => {
       switch (data.event) {

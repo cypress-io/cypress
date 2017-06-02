@@ -62,30 +62,30 @@ export default class Nav extends Component {
   }
 
   _userStateButton = () => {
-    if (authStore.hasUser) {
-      return (
-        <li className='dropdown'>
-          <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
-            <img
-              className='user-avatar'
-              height='13'
-              width='13'
-              src={`${gravatarUrl(authStore.user.email)}`}
-            />
-          {' '}{ authStore.user.displayName }{' '}
-            <span className='caret'></span>
-          </a>
-          <ul className='dropdown-menu'>
-            <li>
-              <a href='#' onClick={this._logout}>
-                <i className="fa fa-sign-out"></i>{' '}
-                Log Out
-              </a>
-            </li>
-          </ul>
-        </li>
-      )
-    }
+    if (!authStore.isAuthenticated) return null
+
+    return (
+      <li className='dropdown'>
+        <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+          <img
+            className='user-avatar'
+            height='13'
+            width='13'
+            src={`${gravatarUrl(authStore.user.email)}`}
+          />
+        {' '}{ authStore.user.displayName }{' '}
+          <span className='caret'></span>
+        </a>
+        <ul className='dropdown-menu'>
+          <li>
+            <a href='#' onClick={this._logout}>
+              <i className="fa fa-sign-out"></i>{' '}
+              Log Out
+            </a>
+          </li>
+        </ul>
+      </li>
+    )
   }
 
   // _closeProject = () => {

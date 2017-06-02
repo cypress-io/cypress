@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import App from './app'
+import ipcBus from './ipc-bus'
 import errors from './errors'
 import authStore from './auth-store'
 
@@ -17,9 +17,12 @@ const ipc = {
 }
 
 const register = (eventName, isPromiseApi = true) => {
-  ipc[_.camelCase(eventName)] = (...args) => App.ipc(eventName, ...args)
+  ipc[_.camelCase(eventName)] = (...args) => {
+    // console.log('ipc', eventName, 'called with', args) // NOTE: uncomment to debug ipc
+    return ipcBus(eventName, ...args)
+  }
   if (!isPromiseApi) {
-    ipc[_.camelCase(`off:${eventName}`)] = () => App.ipc.off(eventName)
+    ipc[_.camelCase(`off:${eventName}`)] = () => ipcBus.off(eventName)
   }
 }
 

@@ -1,8 +1,9 @@
 import { useStrict, toJS } from 'mobx'
+import queryString from 'query-string'
 import React from 'react'
 import { render } from 'react-dom'
 
-import appGlobal from './lib/app'
+import ipc from './lib/ipc'
 import handleGlobalErrors from './lib/handle-global-errors'
 import momentOverrides from './lib/configure-moment'
 
@@ -18,10 +19,15 @@ if (window.env === 'test' || window.env === 'development') {
   window.toJS = toJS
 }
 
-appGlobal.start = ({ projectPath }) => {
-  render(<App projectPath={projectPath} />, document.getElementById('app'))
-}
+window.App = {
+  ipc, // for stubbing in tests
 
-appGlobal.startUpdateApp = () => {
-  render(<Updates />, document.getElementById('updates'))
+  start () {
+    const projectPath = queryString.parse(location.search).projectPath
+    render(<App projectPath={projectPath} />, document.getElementById('app'))
+  },
+
+  startUpdateApp () {
+    render(<Updates />, document.getElementById('updates'))
+  },
 }

@@ -1,42 +1,36 @@
-{deferred, stubIpc} = require("../support/util")
-
-describe "Projects Nav", ->
+describe "Project Nav", ->
   beforeEach ->
-    cy
-      .fixture("user").as("user")
-      .fixture("projects").as("projects")
-      .fixture("projects_statuses").as("projectStatuses")
-      .fixture("config").as("config")
-      .fixture("runs").as("runs")
-      .fixture("specs").as("specs")
-      .visit("/")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
-        @App.ipc.off = cy.stub().as("ipc.off")
+    cy.fixture("user").as("user")
+    cy.fixture("projects").as("projects")
+    cy.fixture("projects_statuses").as("projectStatuses")
+    cy.fixture("config").as("config")
+    cy.fixture("runs").as("runs")
+    cy.fixture("specs").as("specs")
 
-        stubIpc(@App.ipc, {
-          "on:menu:clicked": ->
-          "launch:browser": ->
-          "close:browser": (stub) -> stub.resolves(null)
-          "close:project": ->
-          "on:focus:tests": ->
-          "open:project": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.resolves(@user)
-          "get:projects": (stub) => stub.resolves(@projects)
-          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
-          "get:builds": (stub) => stub.resolves(@runs)
-          "get:specs": (stub) => stub.yields(null, @specs)
-          "get:record:keys": (stub) -> stub.resolves([])
-        })
+    cy.visit("/").then (win) ->
+      { start, @ipc } = win.App
 
-        @App.start()
+      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "getCurrentUser").resolves(@user)
+      cy.stub(@ipc, "getProjects").resolves(@projects)
+      cy.stub(@ipc, "getProjectStatuses").resolves(@projectStatuses)
+      cy.stub(@ipc, "getBuilds").resolves(@runs)
+      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      cy.stub(@ipc, "getRecordKeys").resolves([])
+      cy.stub(@ipc, "closeBrowser").resolves(null)
+      cy.stub(@ipc, "openProject")
+      cy.stub(@ipc, "closeProject")
+      cy.stub(@ipc, "externalOpen")
+      cy.stub(@ipc, "offOpenProject")
+      cy.stub(@ipc, "offGetSpecs")
+      cy.stub(@ipc, "offOnFocusTests")
+
+      start()
 
   context "project nav", ->
     beforeEach ->
-      @["open:project"].yields(null, @config)
+      @ipc.openProject.yields(null, @config)
 
       cy
         .get(".projects-list a")
@@ -124,7 +118,7 @@ describe "Projects Nav", ->
   context "browsers dropdown", ->
     describe "browsers available", ->
       beforeEach ->
-        @["open:project"].yields(null, @config)
+        @ipc.openProject.yields(null, @config)
 
         cy
           .get(".projects-list a")
@@ -217,7 +211,7 @@ describe "Projects Nav", ->
             cy.get(".close-browser").click()
 
           it "calls close:browser on click of stop button", ->
-            expect(@App.ipc).to.be.calledWith("close:browser")
+            expect(@ipc.closeBrowser).to.be.called
 
           it "hides close button on click of stop", ->
             cy.get(".close-browser").should("not.exist")
@@ -250,7 +244,7 @@ describe "Projects Nav", ->
     describe "local storage saved browser", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "chromium")
-        @["open:project"].yields(null, @config)
+        @ipc.openProject.yields(null, @config)
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
@@ -271,7 +265,7 @@ describe "Projects Nav", ->
     describe "when browser saved in local storage no longer exists", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "netscape-navigator")
-        @["open:project"].yields(null, @config)
+        @ipc.openProject.yields(null, @config)
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
@@ -291,7 +285,7 @@ describe "Projects Nav", ->
         }]
 
         @config.browsers = @oneBrowser
-        @["open:project"].yields(null, @config)
+        @ipc.openProject.yields(null, @config)
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
@@ -304,7 +298,7 @@ describe "Projects Nav", ->
     describe "no browsers available", ->
       beforeEach ->
         @config.browsers = []
-        @["open:project"].yields(null, @config)
+        @ipc.openProject.yields(null, @config)
 
         cy
           .get(".projects-list a")
@@ -322,7 +316,7 @@ describe "Projects Nav", ->
       it "closes project on click of 'go back to projects' button", ->
         cy
           .get(".error").contains("Go Back to Projects").click().then ->
-            expect(@App.ipc).to.be.calledWith("close:project")
+            expect(@ipc.closeProject).to.be.called
 
       it "sets project as browser closed on 'go back'", ->
 
@@ -330,7 +324,7 @@ describe "Projects Nav", ->
         it "triggers external:open on click", ->
           cy
             .contains(".btn", "Download Chrome").click().then ->
-              expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/desktop")
+              expect(@ipc.externalOpen).to.be.calledWith("https://www.google.com/chrome/browser/desktop")
 
     describe "browser with info", ->
       beforeEach ->
@@ -343,7 +337,7 @@ describe "Projects Nav", ->
           "info": @info
         }]
 
-        @["open:project"].yields(null, @config)
+        @ipc.openProject.yields(null, @config)
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
@@ -358,19 +352,19 @@ describe "Projects Nav", ->
 
   context "returning to projects list", ->
     beforeEach ->
-      @["open:project"].yields(null, @config)
+      @ipc.openProject.yields(null, @config)
 
       cy.get(".projects-list a")
         .contains("My-Fake-Project").click()
       cy.contains("Back to Projects").click({force: true})
 
     it "removes ipc listeners", ->
-      expect(@App.ipc.off).to.be.calledWith("open:project")
-      expect(@App.ipc.off).to.be.calledWith("get:specs")
-      expect(@App.ipc.off).to.be.calledWith("on:focus:tests")
+      expect(@ipc.offOpenProject).to.be.called
+      expect(@ipc.offGetSpecs).to.be.called
+      expect(@ipc.offOnFocusTests).to.be.called
 
     it "closes project", ->
-      expect(@App.ipc).to.be.calledWith("close:project")
+      expect(@ipc.closeProject).to.be.called
 
     describe "click on diff project", ->
       beforeEach ->
