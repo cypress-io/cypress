@@ -11,16 +11,32 @@ describe "Guides", ->
     cy.url()
       .should('match', new RegExp(GUIDES_PATH))
 
-  it "all section links work", ->
+  it "all section & body links work", ->
+    filterMailtos = (urlsToFilter) ->
+      Cypress._.filter(urlsToFilter, (url) -> not url.match(/mailto:/))
+
+    alreadySeen = []
+    cullAlreadySeenUrls = (urlsToCull) ->
+      # difference is what to return
+      urlsToVisit = Cypress._.difference(urlsToCull, alreadySeen)
+      # union is what to persist
+      alreadySeen = Cypress._.union(urlsToCull, alreadySeen)
+
+      return urlsToVisit
+
+    # SPIDER ALL THE THINGS
     cy.visit(GUIDES_PATH)
 
-    requestAllLinks = (selector) ->
-      cy.get(selector)
-        .each (element) ->
-          cy.request(element[0].href)
+    cy.get('.sidebar-link')
+      .each (linkElement) ->
+        # .first()
+        # .then (linkElement) ->
+        cy.visit linkElement[0].href
 
-    requestAllLinks('a[href^="/guides/getting-started/"]')
-    requestAllLinks('a[href^="/guides/cypress-basics/"]')
-    requestAllLinks('a[href^="/guides/integrating-cypress/"]')
-    requestAllLinks('a[href^="/guides/advanced-cypress/"]')
-    requestAllLinks('a[href^="/guides/appendices/"]')
+        cy.get('a')
+          .not('.sidebar-link, .toc-link, .main-nav-link, .mobile-nav-link, .article-edit-link, .article-anchor, #article-toc-top, #mobile-nav-toggle, .article-footer-next, .headerlink, #logo')
+          .then (elements) ->
+            withoutMailtos = filterMailtos(Cypress._.map(elements, "href"))
+            return cullAlreadySeenUrls(withoutMailtos)
+          .each (url) ->
+            cy.request(url)
