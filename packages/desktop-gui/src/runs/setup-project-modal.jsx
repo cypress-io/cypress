@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
-import state from '../lib/state'
+import authStore from '../lib/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
@@ -131,7 +131,7 @@ class SetupProject extends Component {
                     className='user-avatar'
                     height='13'
                     width='13'
-                    src={`${gravatarUrl(state.user && state.user.email)}`}
+                    src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
                   />
                   {' '}Me
               </label>

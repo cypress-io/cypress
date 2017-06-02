@@ -99,11 +99,10 @@ const runSpec = (project, spec, browser) => {
   .then(launchBrowser)
 }
 
-const closeBrowser = (clientId) => {
+const closeBrowser = (project) => {
   specsCollection.setChosenSpec('')
 
-  if (clientId) {
-    let project = projectsStore.getProjectByClientId(clientId)
+  if (project) {
     project.browserClosed()
   }
 
@@ -112,14 +111,14 @@ const closeBrowser = (clientId) => {
   return ipc.closeBrowser()
 }
 
-const closeProject = (clientId) => {
+const closeProject = (project) => {
   // unbind listeners
   ipc.offOpenProject()
   ipc.offGetSpecs()
   ipc.offOnFocusTests()
 
   return Promise.join(
-    closeBrowser(clientId),
+    closeBrowser(project),
     ipc.closeProject()
   )
 }

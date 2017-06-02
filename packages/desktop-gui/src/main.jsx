@@ -6,7 +6,7 @@ import appGlobal from './lib/app'
 import handleGlobalErrors from './lib/handle-global-errors'
 import momentOverrides from './lib/configure-moment'
 
-import Container from './app/container'
+import App from './app/app'
 import Updates from './update/updates'
 
 useStrict(true)
@@ -19,7 +19,7 @@ if (window.env === 'test' || window.env === 'development') {
 }
 
 appGlobal.start = ({ projectPath }) => {
-  render(<Container projectPath={projectPath} />, document.getElementById('app'))
+  render(<App projectPath={projectPath} />, document.getElementById('app'))
 }
 
 appGlobal.startUpdateApp = () => {

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import cs from 'classnames'
 
 import ipc from '../lib/ipc'
-import state from '../lib/state'
+import authStore from '../lib/auth-store'
 
 @observer
 class Login extends Component {
@@ -75,7 +75,7 @@ class Login extends Component {
       return ipc.logIn(code)
     })
     .then(action('logged:in', (user) => {
-      state.setUser(user)
+      authStore.setUser(user)
     }))
     .catch(alreadyOpen, () => {
       return // do nothing if we're already open!

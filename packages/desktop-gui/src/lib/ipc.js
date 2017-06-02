@@ -2,14 +2,14 @@ import _ from 'lodash'
 
 import App from './app'
 import errors from './errors'
-import state from './state'
+import authStore from './auth-store'
 
 const ipc = {
   isUnauthed (error) {
     return errors.isUnauthenticated(error)
   },
   handleUnauthed () {
-    state.setUser(null)
+    authStore.setUser(null)
 
     ipc.clearGithubCookies()
     ipc.logOut()

@@ -1,9 +1,8 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 
 import appApi from '../lib/app-api'
-import state from '../lib/state'
+import authStore from '../lib/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import projectsApi from '../projects/projects-api'
@@ -42,28 +41,28 @@ export default class Nav extends Component {
   _leftNavButton = () => {
     return <a href='#'>TBD</a>
 
-    if (this.props.params.clientId) {
-      return (
-        <Link
-          to="/projects"
-          onClick={this._closeProject.bind(this)}
-          >
-          <i className="fa fa-chevron-left"></i>{' '}
-          Back to Projects
-        </Link>
-      )
-    } else {
-      return (
-        <a onClick={this._addProject} href='#'>
-          <i className='fa fa-plus'></i>{' '}
-          Add Project
-        </a>
-      )
-    }
+    // if (this.props.params.clientId) {
+    //   return (
+    //     <Link
+    //       to="/projects"
+    //       onClick={this._closeProject.bind(this)}
+    //       >
+    //       <i className="fa fa-chevron-left"></i>{' '}
+    //       Back to Projects
+    //     </Link>
+    //   )
+    // } else {
+    //   return (
+    //     <a onClick={this._addProject} href='#'>
+    //       <i className='fa fa-plus'></i>{' '}
+    //       Add Project
+    //     </a>
+    //   )
+    // }
   }
 
   _userStateButton = () => {
-    if (state.hasUser) {
+    if (authStore.hasUser) {
       return (
         <li className='dropdown'>
           <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
@@ -71,9 +70,9 @@ export default class Nav extends Component {
               className='user-avatar'
               height='13'
               width='13'
-              src={`${gravatarUrl(state.user.email)}`}
+              src={`${gravatarUrl(authStore.user.email)}`}
             />
-            {' '}{ state.user.displayName }{' '}
+          {' '}{ authStore.user.displayName }{' '}
             <span className='caret'></span>
           </a>
           <ul className='dropdown-menu'>
@@ -89,9 +88,9 @@ export default class Nav extends Component {
     }
   }
 
-  _closeProject = () => {
-    closeProject(this.props.params.clientId)
-  }
+  // _closeProject = () => {
+  //   projectsApi.closeProject(this.props.params.clientId)
+  // }
 
   _openDocs (e) {
     e.preventDefault()

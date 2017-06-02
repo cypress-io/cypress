@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
-import state from '../lib/state'
+import authStore from '../lib/auth-store'
 import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
 import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
@@ -59,7 +59,7 @@ class Runs extends Component {
 
   _shouldPollRuns () {
     return (
-      state.hasUser &&
+      authStore.isAuthenticated &&
       !!this.props.project.id
     )
   }
@@ -85,7 +85,7 @@ class Runs extends Component {
   _needsKey () {
     return (
       !this.state.recordKey &&
-      state.hasUser &&
+      authStore.isAuthenticated &&
       !this.runsCollection.isLoading &&
       !this.runsCollection.error &&
       !this.runsCollection.runs.length &&
