@@ -7,7 +7,7 @@ title: Next Steps
 - how to write and organize simple tests
 
 # Next Steps:
-- **Want More Like This?** Move on to [Cypress Basics](/next)!
+- **Want More Like This?** Move on to Cypress Basics!
 - **Want to See Cypress in Action?** Check out examples, recipes, blog posts, and videos of Cypress in real world usage
 - **Configuration:** A cheatsheet on
 - **Is Cypress Open Source?** You bet it is!
