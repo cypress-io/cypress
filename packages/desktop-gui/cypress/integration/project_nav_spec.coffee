@@ -15,7 +15,7 @@ describe "Project Nav", ->
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "getProjects").resolves(@projects)
       cy.stub(@ipc, "getProjectStatuses").resolves(@projectStatuses)
-      cy.stub(@ipc, "getBuilds").resolves(@runs)
+      cy.stub(@ipc, "getRuns").resolves(@runs)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "getRecordKeys").resolves([])
       cy.stub(@ipc, "closeBrowser").resolves(null)

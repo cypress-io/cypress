@@ -33,7 +33,7 @@ describe "Setup Project", ->
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
           "open:project": (stub) => stub.yields(null, @config)
           "get:specs": (stub) => stub.resolves(@specs)
-          "get:builds": (stub) => stub.resolves([])
+          "get:runs": (stub) => stub.resolves([])
           "get:orgs": (stub) => stub.returns(@getOrgs.promise)
           "setup:dashboard:project": (stub) => stub.returns(@setupDashboardProject.promise)
           "get:record:keys": (stub) => stub.resolves(@keys)

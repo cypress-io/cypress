@@ -31,7 +31,7 @@ create = ->
 
     getRecordKeys: tryToCall("getRecordKeys")
 
-    getBuilds: tryToCall("getBuilds")
+    getRuns: tryToCall("getRuns")
 
     requestAccess: tryToCall("requestAccess")
 

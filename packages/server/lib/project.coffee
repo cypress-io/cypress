@@ -93,13 +93,13 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  getBuilds: ->
+  getRuns: ->
     Promise.all([
       @getProjectId(),
       user.ensureAuthToken()
     ])
     .spread (projectId, authToken) ->
-      api.getProjectBuilds(projectId, authToken)
+      api.getProjectRuns(projectId, authToken)
 
   close: ->
     debug("closing project instance %s", @projectRoot)

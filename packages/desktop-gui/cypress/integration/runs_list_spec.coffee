@@ -46,7 +46,7 @@ describe "Runs List", ->
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
           "open:project": (stub) => stub.yields(null, @config)
           "get:specs": (stub) => stub.resolves(@specs)
-          "get:builds": (stub) => stub.returns(@getRuns.promise)
+          "get:runs": (stub) => stub.returns(@getRuns.promise)
           "get:orgs": (stub) => stub.resolves(@orgs)
         })
 
@@ -114,7 +114,7 @@ describe "Runs List", ->
               cy.contains("Request Sent")
 
             it "'persists' request state (until app is reloaded at least)", ->
-              @App.ipc.withArgs("get:builds").onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
+              @App.ipc.withArgs("get:runs").onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
 
               cy
                 .contains("Back to Projects").click()
@@ -128,11 +128,11 @@ describe "Runs List", ->
             beforeEach ->
               @requestAccess.reject({name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
               @getRuns = deferred()
-              @App.ipc.withArgs("get:builds").onCall(1).returns(@getRuns.promise)
+              @App.ipc.withArgs("get:runs").onCall(1).returns(@getRuns.promise)
               cy.wait(1)
 
             it "retries getting runs", ->
-              expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
+              expect(@App.ipc.withArgs("get:runs").callCount).to.equal(2)
 
             it "shows loading spinner", ->
               cy.get(".loader")
@@ -364,7 +364,7 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @getRunsAgain = deferred()
-      @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
+      @App.ipc.withArgs("get:runs").onCall(1).returns(@getRunsAgain.promise)
 
       cy
         .clock()
@@ -378,7 +378,7 @@ describe "Runs List", ->
         .get(".runs-container") ## wait for original runs to show
         .clock().then (clock) =>
           @getRunsAgain = deferred()
-          @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
+          @App.ipc.withArgs("get:runs").onCall(1).returns(@getRunsAgain.promise)
         .tick(10000)
 
     it "has original state of runs", ->
@@ -387,7 +387,7 @@ describe "Runs List", ->
         .should("have.class", "running")
 
     it "sends get:runs ipc event", ->
-      expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+      expect(@App.ipc.withArgs("get:runs")).to.be.calledTwice
 
     it "disables refresh button", ->
       cy.get(".runs header button").should("be.disabled")
@@ -433,14 +433,14 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @getRunsAgain = deferred()
-      @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
+      @App.ipc.withArgs("get:runs").onCall(1).returns(@getRunsAgain.promise)
 
       @getRuns.resolve(@runs)
       @goToRuns().then ->
         cy.get(".runs header button").click()
 
     it "sends get:runs ipc event", ->
-      expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+      expect(@App.ipc.withArgs("get:runs")).to.be.calledTwice
 
     it "still shows list of runs", ->
       cy.get(".runs-container li").should("have.length", 4)

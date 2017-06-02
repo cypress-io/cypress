@@ -21,8 +21,8 @@ describe "lib/util/routes", ->
   it "signout", ->
     expect(Routes.signout()).to.eq "http://localhost:1234/signout"
 
-  it "builds", ->
-    expect(Routes.builds()).to.eq("http://localhost:1234/builds")
+  it "runs", ->
+    expect(Routes.runs()).to.eq("http://localhost:1234/builds")
 
   it "instances", ->
     expect(Routes.instances(123)).to.eq("http://localhost:1234/builds/123/instances")

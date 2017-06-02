@@ -690,7 +690,7 @@ describe "lib/cypress", ->
 
     beforeEach ->
       @setup = =>
-        @createBuild = @sandbox.stub(api, "createBuild").withArgs({
+        @createRun = @sandbox.stub(api, "createRun").withArgs({
           projectId:    @projectId
           recordKey:    "token-123"
           commitSha:    "sha-123"
@@ -750,7 +750,7 @@ describe "lib/cypress", ->
     it "runs project in ci and exits with number of failures", ->
       @setup()
 
-      @createBuild.resolves("build-id-123")
+      @createRun.resolves("build-id-123")
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
@@ -782,7 +782,7 @@ describe "lib/cypress", ->
     it "runs project by specific absolute spec and exits with status 3", ->
       @setup()
 
-      @createBuild.resolves("build-id-123")
+      @createRun.resolves("build-id-123")
 
       @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
@@ -803,7 +803,7 @@ describe "lib/cypress", ->
       ## we are running the prisine project
       process.env.CYPRESS_PROJECT_ID = @projectId
 
-      @createBuild.resolves()
+      @createRun.resolves()
       @sandbox.stub(api, "createInstance").resolves()
 
       cypress.start(["--project=#{@pristinePath}", "--cli-version=0.19.0", "--record", "--key=token-123"])
@@ -814,7 +814,7 @@ describe "lib/cypress", ->
     it "still records even with old --ci option", ->
       @setup()
 
-      @createBuild.resolves("build-id-123")
+      @createRun.resolves("build-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -825,7 +825,7 @@ describe "lib/cypress", ->
     it "logs warning when using deprecated --ci arg and no env var", ->
       @setup()
 
-      @createBuild.resolves("build-id-123")
+      @createRun.resolves("build-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -839,7 +839,7 @@ describe "lib/cypress", ->
     it "logs ONLY CLI warning when using older version of CLI when using deprecated --ci", ->
       @setup()
 
-      @createBuild.resolves("build-id-123")
+      @createRun.resolves("build-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -854,7 +854,7 @@ describe "lib/cypress", ->
 
       process.env.CYPRESS_CI_KEY = "asdf123foobarbaz"
 
-      @createBuild.resolves("build-id-123")
+      @createRun.resolves("build-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -880,7 +880,7 @@ describe "lib/cypress", ->
 
       err = new Error
       err.statusCode = 401
-      @createBuild.rejects(err)
+      @createRun.rejects(err)
 
       cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>
@@ -891,7 +891,7 @@ describe "lib/cypress", ->
 
       err = new Error
       err.statusCode = 404
-      @createBuild.rejects(err)
+      @createRun.rejects(err)
 
       cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>
@@ -902,7 +902,7 @@ describe "lib/cypress", ->
 
       err = new Error
       err.statusCode = 500
-      @createBuild.rejects(err)
+      @createRun.rejects(err)
 
       cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>

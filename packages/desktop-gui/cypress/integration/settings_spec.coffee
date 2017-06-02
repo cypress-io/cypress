@@ -29,7 +29,7 @@ describe "Settings", ->
           "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
           "open:project": (stub) => stub.yields(null, @config)
           "get:record:keys": (stub) => stub.returns(@getRecordKeys.promise)
-          "get:builds": (stub) => stub.resolves(@runs)
+          "get:runs": (stub) => stub.resolves(@runs)
           "get:orgs": (stub) => stub.resolves([])
         })
 

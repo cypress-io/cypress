@@ -7,7 +7,7 @@ let pollId
 const getRuns = (runsCollection) => {
   runsCollection.loading(true)
 
-  ipc.getBuilds()
+  ipc.getRuns()
   .then(action('got:runs', (runs) => {
     runsCollection.setRuns(runs)
     return null

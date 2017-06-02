@@ -44,7 +44,7 @@ module.exports = {
       message: repo.getMessage()
     })
     .then (git) ->
-      api.createBuild({
+      api.createRun({
         projectId:         projectId
         recordKey:         recordKey
         commitSha:         git.sha

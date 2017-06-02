@@ -472,52 +472,52 @@ describe "lib/gui/events", ->
 
             @expectSendCalledWith(null)
 
-    describe "get:builds", ->
-      it "calls openProject.getBuilds", ->
-        @sandbox.stub(openProject, "getBuilds").resolves([])
+    describe "get:runs", ->
+      it "calls openProject.getRuns", ->
+        @sandbox.stub(openProject, "getRuns").resolves([])
 
-        @handleEvent("get:builds").then =>
-          expect(openProject.getBuilds).to.be.called
+        @handleEvent("get:runs").then =>
+          expect(openProject.getRuns).to.be.called
 
-      it "returns array of builds", ->
-        @sandbox.stub(openProject, "getBuilds").resolves([])
+      it "returns array of runs", ->
+        @sandbox.stub(openProject, "getRuns").resolves([])
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           @expectSendCalledWith([])
 
       it "sends UNAUTHENTICATED when statusCode is 401", ->
         err = new Error("foo")
         err.statusCode = 401
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNAUTHENTICATED")
 
       it "sends TIMED_OUT when cause.code is ESOCKETTIMEDOUT", ->
         err = new Error("foo")
         err.cause = { code: "ESOCKETTIMEDOUT" }
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("TIMED_OUT")
 
       it "sends NO_CONNECTION when code is ENOTFOUND", ->
         err = new Error("foo")
         err.code = "ENOTFOUND"
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("NO_CONNECTION")
 
       it "sends type when if existing for other errors", ->
         err = new Error("foo")
         err.type = "NO_PROJECT_ID"
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("NO_PROJECT_ID")
 
@@ -526,9 +526,9 @@ describe "lib/gui/events", ->
         err.name = "name"
         err.message = "message"
         err.stack = "stack"
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")
 

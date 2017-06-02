@@ -227,8 +227,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onError: sendErr
       })
 
-    when "get:builds"
-      openProject.getBuilds()
+    when "get:runs"
+      openProject.getRuns()
       .then(send)
       .catch (err) ->
         err.type = if _.get(err, "statusCode") is 401
