@@ -1,13 +1,18 @@
+GUIDES_PATH = '/guides/getting-started/why-cypress.html'
+
 describe "Guides", ->
-  it "menu item goes straight to 'Why Cypress?'", ->
+  it "main menu item goes straight to 'Why Cypress?'", ->
     cy.visit('/')
 
     cy.contains('Guides')
       .click()
       .contains('h1', "Why Cypress?")
 
+    cy.url()
+      .should('match', new RegExp(GUIDES_PATH))
+
   it "all section links work", ->
-    cy.visit('/guides/getting-started/why-cypress.html')
+    cy.visit(GUIDES_PATH)
 
     requestAllLinks = (selector) ->
       cy.get(selector)
