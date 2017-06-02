@@ -136,6 +136,7 @@
     "p-queue": "^1.0.0",
     "parse-domain": "^0.2.1",
     "pluralize": "^3.0.0",
+    "pretty-error": "^2.1.0",
     "progress": "^1.1.8",
     "ramda": "^0.24.0",
     "randomstring": "^1.1.5",

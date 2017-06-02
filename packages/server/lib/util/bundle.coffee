@@ -15,6 +15,9 @@ cjsxify                = require("./cjsxify")
 appData                = require("./app_data")
 { toHashName }         = require('./saved_state')
 log                    = require('debug')('cypress:server:bundle')
+PrettyError            = require('pretty-error')
+pe = new PrettyError()
+pe.skipNodeFiles()
 
 fs = Promise.promisifyAll(fs)
 
@@ -132,6 +135,7 @@ module.exports = {
     .split("From previous event:").join("")
 
   clientSideError: (err) ->
+    console.error(pe.render(err))
     err = @errorMessage(err)
     ## \n doesn't come through properly so preserve it so the
     ## runner can do the right thing
