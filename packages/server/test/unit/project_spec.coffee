@@ -45,17 +45,18 @@ describe "lib/project", ->
     expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
 
   context "#getConfig", ->
+    integrationFolder = "foo/bar/baz"
     beforeEach ->
       @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
-      @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
+      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
       state = savedState(@todosPath)
-      @sandbox.stub(state, "get").returns(Promise.resolve({ reporterWidth: 225 }))
+      @sandbox.stub(state, "get").resolves({ reporterWidth: 225 })
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
         expect(cfg).to.deep.eq({
-          integrationFolder: "foo/bar/baz"
+          integrationFolder
           isNewProject: false
           baz: "quux"
           state: {
@@ -64,11 +65,33 @@ describe "lib/project", ->
         })
 
     it "resolves if cfg is already set", ->
-      @project.cfg = {foo: "bar"}
+      @project.cfg =
+        integrationFolder: integrationFolder
+        foo: "bar"
 
       @project.getConfig()
       .then (cfg) ->
-        expect(cfg).to.deep.eq({foo: "bar", state: {}})
+        expect(cfg).to.deep.eq(
+          integrationFolder: integrationFolder
+          foo: "bar"
+          isNewProject: false
+          state: {}
+        )
+
+    it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
+      state = savedState(@todosPath)
+      @sandbox.stub(state, "get").resolves({ showedOnBoardingModal: true })
+
+      @project.getConfig({foo: "bar"})
+      .then (cfg) ->
+        expect(cfg).to.deep.eq({
+          integrationFolder
+          isNewProject: false
+          baz: "quux"
+          state: {
+            showedOnBoardingModal: true
+          }
+        })
 
   context "#open", ->
     beforeEach ->
@@ -143,60 +166,6 @@ describe "lib/project", ->
 
     it "can close when server + watchers arent open", ->
       @project.close()
-
-  context "#determineIsNewProject", ->
-    it "is false when files.length isnt 1", ->
-      id = =>
-        @ids = Project(@idsPath)
-        @ids.getConfig()
-        .then (cfg) =>
-          @ids.scaffold(cfg).return(cfg)
-        .then (cfg) =>
-          @ids.determineIsNewProject(cfg.integrationFolder)
-        .then (ret) ->
-          expect(ret).to.be.false
-
-      todo = =>
-        @todos = Project(@todosPath)
-        @todos.getConfig()
-        .then (cfg) =>
-          @todos.scaffold(cfg).return(cfg)
-        .then (cfg) =>
-          @todos.determineIsNewProject(cfg.integrationFolder)
-        .then (ret) ->
-          expect(ret).to.be.false
-
-      Promise.join(id, todo)
-
-    it "is true when files, name + bytes match to scaffold", ->
-      pristine = Project(@pristinePath)
-      pristine.getConfig()
-      .then (cfg) ->
-        pristine.scaffold(cfg).return(cfg)
-      .then (cfg) ->
-        pristine.determineIsNewProject(cfg.integrationFolder)
-      .then (ret) ->
-        expect(ret).to.be.true
-
-    it "is false when bytes dont match scaffold", ->
-      pristine = Project(@pristinePath)
-      pristine.getConfig()
-      .then (cfg) ->
-        pristine.scaffold(cfg).return(cfg)
-      .then (cfg) ->
-        example = scaffold.integrationExampleName()
-        file    = path.join(cfg.integrationFolder, example)
-
-        ## write some data to the file so it is now
-        ## different in file size
-        fs.readFileAsync(file, "utf8")
-        .then (str) ->
-          str += "foo bar baz"
-          fs.writeFileAsync(file, str).return(cfg)
-      .then (cfg) ->
-        pristine.determineIsNewProject(cfg.integrationFolder)
-      .then (ret) ->
-        expect(ret).to.be.false
 
   context "#getBuilds", ->
     beforeEach ->

@@ -5,6 +5,7 @@ glob       = require("glob")
 Promise    = require("bluebird")
 cypressEx  = require("@packages/example")
 config     = require("#{root}lib/config")
+Project    = require("#{root}lib/project")
 scaffold   = require("#{root}lib/scaffold")
 Fixtures   = require("#{root}/test/support/helpers/fixtures")
 
@@ -22,6 +23,69 @@ describe "lib/scaffold", ->
   context ".integrationExampleName", ->
     it "returns example_spec.js", ->
       expect(scaffold.integrationExampleName()).to.eq("example_spec.js")
+
+  context.skip ".isNewProject", ->
+    beforeEach ->
+      todosPath = Fixtures.projectPath("todos")
+
+      config.get(todosPath)
+      .then (@cfg) =>
+        {@integrationFolder} = @cfg
+
+    it "is false when files.length isnt 1", ->
+      id = =>
+        @ids = Project(@idsPath)
+        @ids.getConfig()
+        .then (cfg) =>
+          @ids.scaffold(cfg).return(cfg)
+        .then (cfg) =>
+          @ids.determineIsNewProject(cfg.integrationFolder)
+        .then (ret) ->
+          expect(ret).to.be.false
+
+      todo = =>
+        @todos = Project(@todosPath)
+        @todos.getConfig()
+        .then (cfg) =>
+          @todos.scaffold(cfg).return(cfg)
+        .then (cfg) =>
+          @todos.determineIsNewProject(cfg.integrationFolder)
+        .then (ret) ->
+          expect(ret).to.be.false
+
+      Promise.join(id, todo)
+
+    it "is true when files, name + bytes match to scaffold", ->
+      ## TODO this test really can move to scaffold
+      pristine = Project(@pristinePath)
+      pristine.getConfig()
+      .then (cfg) ->
+        pristine.scaffold(cfg).return(cfg)
+      .then (cfg) ->
+        pristine.determineIsNewProject(cfg.integrationFolder)
+      .then (ret) ->
+        expect(ret).to.be.true
+
+    it "is false when bytes dont match scaffold", ->
+      ## TODO this test really can move to scaffold
+      pristine = Project(@pristinePath)
+      pristine.getConfig()
+      .then (cfg) ->
+        pristine.scaffold(cfg).return(cfg)
+      .then (cfg) ->
+        example = scaffold.integrationExampleName()
+        file    = path.join(cfg.integrationFolder, example)
+
+        ## write some data to the file so it is now
+        ## different in file size
+        fs.readFileAsync(file, "utf8")
+        .then (str) ->
+          str += "foo bar baz"
+          fs.writeFileAsync(file, str).return(cfg)
+      .then (cfg) ->
+        pristine.determineIsNewProject(cfg.integrationFolder)
+      .then (ret) ->
+        expect(ret).to.be.false
 
   context ".integration", ->
     beforeEach ->
