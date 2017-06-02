@@ -9,10 +9,10 @@ Get the remote `window.location` as an object.
 # Syntax
 
 ```javascript
-.location()
-.location(key)
-.location(options)
-.location(key, options)
+cy.location()
+cy.location(key)
+cy.location(options)
+cy.location(key, options)
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ Get the remote `window.location` as an object.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.location()    
+cy.location()       // Get location object
 ```
 
 ## Arguments
@@ -33,15 +33,15 @@ A key on the location object.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.location()`.
+Pass in an options object to change the default behavior of `cy.location()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.location()` yields the location object with the following properties:
+`cy.location()` yields the location object with the following properties:
 
 - `hash`
 - `host`
@@ -81,9 +81,9 @@ cy.location().should(function(location) {
 
 **Check location for query params and pathname**
 
+We can yield the location object within a [`.should()`](https://on.cypress.io/api/should) command and work with it directly.
+
 ```javascript
-// we can yield the location subject and work with
-// it directly as an object
 cy.get('#search').type('niklas{enter}')
 cy.location().should(function(location){
   expect(location.search).to.eq('?search=niklas')
@@ -96,16 +96,15 @@ cy.location().should(function(location){
 **Assert that a redirect works**
 
 ```javascript
-cy
-  .visit('http://localhost:3000/admin')
-  .location('pathname').should('eq', '/login')
+cy.visit('http://localhost:3000/admin')
+cy.location('pathname').should('eq', '/login')
 ```
 
 # Notes
 
 **No need to use `window.location`**
 
-Cypress automatically normalizes the `.location()` command and strips out extraneous values and properties found in `window.location`. Also, the object literal yielded by `.location()` is just a basic object literal, not the special `window.location` object.
+Cypress automatically normalizes the `cy.location()` command and strips out extraneous values and properties found in `window.location`. Also, the object literal yielded by `cy.location()` is just a basic object literal, not the special `window.location` object.
 
 When changing properties on the real `window.location` object, it forces the browser to navigate away. In Cypress, the object yielded is a plain object, so changing its properties will have no effect on navigation.
 
@@ -128,7 +127,6 @@ cy.location().then(function(location){
 ```
 
 <img width="478" alt="screen shot 2017-05-26 at 11 42 11 am" src="https://cloud.githubusercontent.com/assets/1271364/26501743/6f8fcb84-4208-11e7-9f08-9c97592afc08.png">
-
 
 # Command Log
 

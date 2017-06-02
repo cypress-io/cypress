@@ -7,7 +7,7 @@ description: ''
 Get the current URL.
 
 {% note info %}
-This is the same as [`cy.location.href`](https://on.cypress.io/api/location)
+This is an alias of [`cy.location.href`](https://on.cypress.io/api/location)
 {% endnote %}
 
 # Syntax
@@ -24,7 +24,7 @@ cy.url(options)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.url()    
+cy.url()    // Get url
 ```
 
 ## Arguments
@@ -37,11 +37,11 @@ Pass in an options object to change the default behavior of `cy.url()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.url()` yields the current URL as a string.
+`cy.url()` yields the current URL as a string.
 
 ## Timeout
 

@@ -9,18 +9,18 @@ Get a browser cookie by it's name.
 # Syntax
 
 ```javascript
-.getCookie(name)
-.getCookie(name, options)
+cy.getCookie(name)
+cy.getCookie(name, options)
 ```
 
 ## Usage
 
-`.getCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.getCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.getCookie('auth_key')    
+cy.getCookie('auth_key')     // Get cookie with name 'auth_key'
 ```
 
 ## Arguments
@@ -31,16 +31,16 @@ The name of the cookie to get.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.getCookie()`.
+Pass in an options object to change the default behavior of `cy.getCookie()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `.getCookie()` command to be processed
+`log` | `true` | Whether to display command in Command Log
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.getCookie()` command to be processed
 
 ## Yields
 
-`.getCookie()` yields a cookie object literal with the following properties:
+`cy.getCookie()` yields a cookie object literal with the following properties:
 
 - `name`
 - `value`
@@ -52,7 +52,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.getCookie()` will continue to look for the cookie for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.getCookie()` will continue to look for the cookie for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -70,8 +70,10 @@ cy.getCookie('session_id')
   .should('have.property', 'value', '189jd09su')
 ```
 
+**Using `cy.getCookie()` to test logging in**
+
 {% note info %}
-Check out our example recipes using cy.getCookie to test [logging in using HTML web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js), [logging in using XHR web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js) and [logging in with single sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+Check out our example recipes using `cy.getCookie()` to test [logging in using HTML web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js), [logging in using XHR web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js) and [logging in with single sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 {% endnote %}
 
 # Command Log
@@ -79,8 +81,7 @@ Check out our example recipes using cy.getCookie to test [logging in using HTML 
 **Get cookie**
 
 ```javascript
-cy.getCookie('fakeCookie1')
-    .should('have.property', 'value', '123ABC')
+cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 ```
 
 The commands above will display in the command log as:
@@ -95,6 +96,6 @@ When clicking on `getCookie` within the command log, the console outputs the fol
 
 - [clearCookie](https://on.cypress.io/api/clearcookie)
 - [clearCookies](https://on.cypress.io/api/clearcookies)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)
 - [getCookies](https://on.cypress.io/api/getcookies)
 - [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)

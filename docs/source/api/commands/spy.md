@@ -14,7 +14,7 @@ cy.spy(object, method)
 
 ## Usage
 
-`.spy()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.spy()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -26,7 +26,7 @@ cy.spy(user, 'addFriend')
 
 **{% fa fa-angle-right %} object** ***(Object)***
 
-The object that has the `method` to be wrapped.
+The `object` that has the `method` to be wrapped.
 
 **{% fa fa-angle-right %} method** ***(String)***
 
@@ -34,9 +34,9 @@ The name of the `method` on the `object` to be wrapped.
 
 ## Yields
 
-Unlike most Cypress commands, `cy.spy` is *synchronous* and returns a value (the spy) instead of a Promise-like chain-able object.
+Unlike most Cypress commands, `cy.spy()` is *synchronous* and returns a value (the spy) instead of a Promise-like chain-able object.
 
-`cy.spy` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported.
+`cy.spy()` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported.
 
 ## Timeout
 
@@ -82,11 +82,11 @@ You will see the following in the command log:
 
 **Automatic reset/restore between tests**
 
-`cy.spy` creates spies in a [sandbox](http://sinonjs.org/docs/#sandbox), so all spies created are automatically reset/restored between tests without you having to explicitly reset/restore them.
+`cy.spy()` creates spies in a [sandbox](http://sinonjs.org/docs/#sandbox), so all spies created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
 **Difference between cy.spy() and cy.stub()**
 
-The main difference between `cy.spy` and [`cy.stub`](https://on.cypress.io/api/stub) is that `cy.spy` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
+The main difference between `cy.spy()` and [`cy.stub()`](https://on.cypress.io/api/stub) is that `cy.spy()` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
 
 **Assertion Support**
 
@@ -115,7 +115,8 @@ When clicking on the `spy-1` event within the command log, the console outputs t
 
 # See also
 
+- [as](https://on.cypress.io/api/as)
+- [clock](https://on.cypress.io/api/clock)
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [stub](https://on.cypress.io/api/stub)
-- [clock](https://on.cypress.io/api/clock)

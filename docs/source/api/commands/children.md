@@ -22,7 +22,7 @@ Get the children of each DOM element within a set of DOM elements.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('nav').children()    // Yield children of nav
+cy.get('nav').children()     // Yield children of nav
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -40,20 +40,20 @@ A selector used to filter matching DOM elements.
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.children`.
+Pass in an options object to change the default behavior of `.children()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
 
 ## Yields
 
-`.children()` yields the new DOM elements found by the command.
+`.children()` yields the new DOM element(s) found by the command.
 
 ## Timeout
 
-`.children()` will continue to look for the children elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.children()` will continue to look for the children elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -126,7 +126,7 @@ When clicking on the `children` command within the command log, the console outp
 
 # See also
 
+- [next](https://on.cypress.io/api/next)
 - [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)
-- [next](https://on.cypress.io/api/next)
 - [siblings](https://on.cypress.io/api/siblings)

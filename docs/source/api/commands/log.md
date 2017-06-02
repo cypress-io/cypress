@@ -9,13 +9,13 @@ Print a message to the Cypress Command Log.
 # Syntax
 
 ```javascript
-.log(message)
-.log(message, args...)
+cy.log(message)
+cy.log(message, args...)
 ```
 
 ## Usage
 
-`.log()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.log()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -33,13 +33,11 @@ Message to be printed to Cypress Command Log.
 
 Additional arguments to be printed to the Cypress Command Log. There is no limit to the number of arguments.
 
-
 ## Yields
 
-`.log()` yields `null`.
+`cy.log()` yields `null`.
 
 ## Timeout
-
 
 # Examples
 
@@ -53,7 +51,7 @@ cy.url().should('not.include', 'login')
 cy.log('Login successful')
 ```
 
-# Arguments
+## Arguments
 
 **Print a message with arguments to the Command Log.**
 
@@ -66,9 +64,8 @@ cy.log('events triggered', events)
 **Print messages with arguments to the Command Log.**
 
 ```javascript
-cy
-  .log('log out any message we want here')
-  .log('another message', ['one', 'two', 'three'])
+cy.log('log out any message we want here')
+cy.log('another message', ['one', 'two', 'three'])
 ```
 
 The commands above will display in the command log as:

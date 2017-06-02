@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `.next()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -53,7 +53,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.next()` will continue to look for the next element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.next()` will continue to look for the next element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 

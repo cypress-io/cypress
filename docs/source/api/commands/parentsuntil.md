@@ -54,7 +54,7 @@ Pass in an options object to change the default behavior of `.parentsUntil()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
 
 ## Yields
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.parentsUntil()` will continue to look for the parent element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.parentsUntil()` will continue to look for the parent element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -94,7 +94,7 @@ cy.get('.active').parentsUntil('.nav')
 
 # Command Log
 
-**Find all of the `.active` element's ancestors until `.nav`**
+**Find all of the `active` element's ancestors until `.nav`**
 
 ```javascript
 cy.get('.active').parentsUntil('.nav')

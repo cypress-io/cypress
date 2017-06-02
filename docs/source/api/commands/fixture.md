@@ -6,22 +6,22 @@ description: ''
 
 Load a fixed set of data located in a file.
 
-{% note info New to Cypress? %}
-[Read about Creating Fixtures first.](https://on.cypress.io/guides/creating-fixtures)
+{% note info %}
+**Note:** `cy.fixture()` assumes you are already familiar with core concepts such as [fixtures](https://on.cypress.io/guides/creating-fixtures)
 {% endnote %}
 
 # Syntax
 
 ```javascript
-.fixture(filePath)
-.fixture(filePath, encoding)
-.fixture(filePath, options)
-.fixture(filePath, encoding, options)
+cy.fixture(filePath)
+cy.fixture(filePath, encoding)
+cy.fixture(filePath, options)
+cy.fixture(filePath, encoding, options)
 ```
 
 ## Usage
 
-`.fixture()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.fixture()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -36,7 +36,7 @@ cy.fixture('logo.png').then(function(logo){
 
 **{% fa fa-angle-right %} filePath**  ***(String)***
 
-A path to a file within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) (which defaults to `cypress/fixtures`).
+A path to a file within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) , which defaults to `cypress/fixtures`.
 
 You can nest fixtures within folders and reference them by defining the path from the fixturesFolder:
 
@@ -48,21 +48,21 @@ cy.fixture('users/admin.json') // Get data from {fixturesFolder}/users/admin.jso
 
 The encoding to be used when reading the file. The following encodings are supported:
 
-* `ascii`
-* `base64`
-* `binary`
-* `hex`
-* `latin1`
-* `utf8`
-* `utf-8`
-* `ucs2`
-* `ucs-2`
-* `utf16le`
-* `utf-16le`
+- `ascii`
+- `base64`
+- `binary`
+- `hex`
+- `latin1`
+- `utf8`
+- `utf-8`
+- `ucs2`
+- `ucs-2`
+- `utf16le`
+- `utf-16le`
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `.fixture()`.
+Pass in an options object to change the default behavior of `cy.fixture()`.
 
 Option | Default | Notes
 --- | --- | ---
@@ -70,11 +70,11 @@ Option | Default | Notes
 
 ## Yields
 
-`.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
+`cy.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
 
 ## Timeout
 
-`.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process the command.
+`cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process the command.
 
 # Examples
 
@@ -88,7 +88,7 @@ cy.fixture('users.json').as('usersData')
 
 **Omit the fixture file's extension**
 
-When no extension is passed to `.fixture()`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) (which defaults to `cypress/fixtures`) and resolve the first one.
+When no extension is passed to `cy.fixture()`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) (which defaults to `cypress/fixtures`) and resolve the first one.
 
 ```javascript
 cy.fixture('admin').as('adminJSON')
@@ -134,7 +134,7 @@ cy.fixture('images/logo.png', 'binary').then(function(logo){
 
 ## Accessing Fixture Data
 
-**Using cy.then to access fixture data**
+**Using .then() to access fixture data**
 
 ```javascript
 cy
@@ -143,27 +143,28 @@ cy
   })
 ```
 
+**Using fixtures to bootstrap data**
+
 {% note info %}
 [Check out our example recipe using cy.fixture to bootstrap data for our application.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 {% endnote %}
 
 **Using an alias to access a fixture**
 
-You can make use of aliasing, [.as()](https://on.cypress.io/api/as), instead of working directly with the yielded data.
+You can make use of aliasing, [`.as()`](https://on.cypress.io/api/as), instead of working directly with the yielded data.
 
 Using an alias provides the benefit of terseness and readability. It also makes it easier to access the data later in your tests.
 
 ```javascript
-cy
-  .fixture('users').as('usersJSON')
-  .route('GET', '/users/**', '@usersJSON')
+cy.fixture('users').as('usersJSON')
+cy.route('GET', '/users/**', '@usersJSON')
 
   // ...later on...
 
-  .then(function(){
-    // we have access to this.usersJSON since it was aliased
-    this.usersJSON
-  })
+cy.get('#email').then(function(){
+  // we have access to this.usersJSON since it was aliased
+  this.usersJSON
+})
 ```
 
 **Modifying fixture data before using it**
@@ -186,7 +187,7 @@ cy.wait('@getUser').then(function(xhr) {
 
 **Using `fixture` or `fx` shortcuts**
 
-Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within [`.route()`](https://on.cypress.io/api/route).
+Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within [`cy.route()`](https://on.cypress.io/api/route).
 
 ```javascript
 cy.route('GET', '/users/**', 'fixture:users') // this works
@@ -217,16 +218,16 @@ Cypress automatically determines the encoding for the following file types:
 * `.tiff`
 * `.zip`
 
-For other types of files, they will be read as `utf8` by default, unless specified in the second argument of `.fixture()`
+For other types of files, they will be read as `utf8` by default, unless specified in the second argument of `cy.fixture()`.
 
 # Command Log
 
-**`fixture` does *not* log in the command log**
+**`cy.fixture()` does *not* log in the command log**
 
 # See also
 
 - [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
-- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [readFile](https://on.cypress.io/api/readfile)
+- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [route](https://on.cypress.io/api/route)
 - [then](https://on.cypress.io/api/then)

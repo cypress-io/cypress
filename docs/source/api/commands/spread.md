@@ -7,7 +7,7 @@ description: ''
 Expand an array into multiple arguments.
 
 {% note info %}
-Similar of [`.then()`](https://on.cypress.io/api/then), but always expects an array as it's subject.
+Similar to [`.then()`](https://on.cypress.io/api/then), but always expects an array as it's subject.
 {% endnote %}
 
 # Syntax
@@ -23,7 +23,7 @@ Similar of [`.then()`](https://on.cypress.io/api/then), but always expects an ar
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.getCookies.spread(function() {}) // Yield all el's with class '.users'
+cy.getCookies.spread(function() {}) // Yield all cookies
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -52,12 +52,11 @@ Whatever was passed to the function is what is yielded.
 **Expand the array of aliased routes**
 
 ```javascript
-cy
-  .server()
-  .route('/users/').as('getUsers')
-  .route('/activities/').as('getActivities')
-  .route('/comments/').as('getComments')
-  .wait(['@getUsers', '@getActivities', '@getComments'])
+cy.server()
+cy.route('/users/').as('getUsers')
+cy.route('/activities/').as('getActivities')
+cy.route('/comments/').as('getComments')
+cy.wait(['@getUsers', '@getActivities', '@getComments'])
   .spread(function(getUsers, getActivities, getComments){
     // each XHR is now an individual argument
   })
@@ -79,5 +78,6 @@ cy.getCookies().spread(function(cookie1, cookie2, cookie3){
 
 # See also
 
+- [getCookies](https://on.cypress.io/api/getCookies)
 - [then](https://on.cypress.io/api/then)
 - [wait](https://on.cypress.io/api/wait)

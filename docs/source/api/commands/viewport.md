@@ -26,8 +26,8 @@ cy.viewport(preset, orientation, options)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.viewport(550, 750)    
-cy.viewport('iphone-6')    
+cy.viewport(550, 750)    // Set viewport to 550px x 750px
+cy.viewport('iphone-6')  // Set viewport to 357px x 667px
 ```
 
 ## Arguments
@@ -42,7 +42,7 @@ Height of viewport in pixels (must be between 200 and 3000).
 
 **{% fa fa-angle-right %} preset** ***(String)***
 
-A preset dimension (in pixels) to set the viewport. Preset supports the following options:
+A preset dimension to set the viewport. Preset supports the following options:
 
 | Preset | width | height |
 | ----------- | ----- | ------ |
@@ -63,15 +63,15 @@ The orientation of the screen. The *default orientation* is `portrait`. Pass `la
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.viewport`.
+Pass in an options object to change the default behavior of `cy.viewport()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.viewport()` yields `null`.
+`cy.viewport()` yields `null`.
 
 ## Timeout
 
@@ -125,7 +125,6 @@ describe('Nav Menus', function(){
 **Resize the viewport to iPhone 6 width and height**
 
 ```javascript
-
 cy.viewport('iphone-6') // viewport will change to 414px x 736px
 ```
 
@@ -153,7 +152,7 @@ When hovering over each command, Cypress will automatically display the snapshot
 
 By default, until you issue a `cy.viewport()` command, Cypress sets the width to `1000px` and the height to `660px` by default.
 
-You can [change these default dimensions](https://on.cypress.io/guides/configuration) by adding the following to your `cypress.json`
+You can [change these default dimensions](https://on.cypress.io/guides/configuration) by adding the following to your `cypress.json`:
 
 ```json
 {

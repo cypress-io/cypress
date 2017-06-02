@@ -20,7 +20,7 @@ Get the last DOM element within a set of DOM elements.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('nav a').last()       // Yield last link in nav
+cy.get('nav a').last()     // Yield last link in nav
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -34,11 +34,11 @@ cy.getCookies().last()     // Errors, 'getCookies' does not yield DOM element
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `.last`.
+Pass in an options object to change the default behavior of `.last()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.last()` will continue to look for the last element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.last()` will continue to look for the last element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -65,7 +65,7 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <li class="four">Knick knack on my door</li>
+// yields <li class="four">Knick knack on my door</li>
 cy.get('ul').last()
 ```
 

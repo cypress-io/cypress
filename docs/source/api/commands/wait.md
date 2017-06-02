@@ -6,7 +6,6 @@ description: ''
 
 Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
 
-
 # Syntax
 
 ```javascript
@@ -53,20 +52,20 @@ Pass in an options object to change the default behavior of `cy.wait()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [requestTimeout](https://on.cypress.io/guides/configuration#timeouts), [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) | Override the default requestTimeout and responseTimeout (in ms)
-`log` | `true` | whether to display command in command log
 
 You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the [configuration](https://on.cypress.io/guides/configuration).
 
 ## Yields
 
-When given a `time` argument, `.wait()` yields the previous commands yield.
+When given a `time` argument, `cy.wait()` yields the previous commands yield.
 
-When given an `alias` argument, `.wait()` yields the xhr object of the aliased route.
+When given an `alias` argument, `cy.wait()` yields the XHR object of the aliased route.
 
 ## Timeout
 
-`cy.wait` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
+`cy.wait()` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -76,27 +75,27 @@ In Cypress, you almost never need to use `cy.wait()` for an arbitrary amount of 
 
 **Let's imagine the following examples:**
 
-***Unnecessary wait for `cy.request`***
+***Unnecessary wait for `cy.request()`***
 
-Waiting here is unnecessary since the `cy.request` command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the `cy.request()` has already resolved.
+Waiting here is unnecessary since the [`cy.request()`](https://on.cypress.io/request) command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the [`cy.request()`](https://on.cypress.io/request) has already resolved.
 
 ```javascript
 cy.request("http://localhost:8080/db/seed")
 cy.wait(5000)     // <--- this is unnecessary
 ```
 
-***Unnecessary wait for `cy.visit`***
+***Unnecessary wait for `cy.visit()`***
 
-Waiting for this is unnecessary because the `cy.visit()` resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
+Waiting for this is unnecessary because the [`cy.visit()`](https://on.cypress.io/visit) resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
 
 ```javascript
 cy.visit("http://localhost/8080")
 cy.wait(5000)     // <--- this is unnecessary
 ```
 
-***Unnecessary wait for `cy.get`***
+***Unnecessary wait for `cy.get()`***
 
-Waiting for the `cy.get()` below is unncessary because `cy.get()` automatically retries until the table's `tr` has a length of 2.
+Waiting for the [`cy.get()`](https://on.cypress.io/get) below is unncessary because [`cy.get()`](https://on.cypress.io/get) automatically retries until the table's `tr` has a length of 2.
 
 Whenever commands have an assertion they will not resolve until their associated assertions pass. This enables you to simply describe the state of your application without having to worry about when it gets there.
 
@@ -125,15 +124,14 @@ cy.get("table tr").should("have.length", 2)
 ```javascript
 // Wait for the route aliased as 'getAccount' to respond
 // without changing or stubbing its response
-cy
-  .server()
-  .route('/accounts/*').as('getAccount')
-  .visit('/accounts/123')
-  .wait('@getAccount').then(function(xhr){
-    // we can now access the low level xhr
-    // that contains the request body,
-    // response body, status, etc
-  })
+cy.server()
+cy.route('/accounts/*').as('getAccount')
+cy.visit('/accounts/123')
+cy.wait('@getAccount').then(function(xhr){
+  // we can now access the low level xhr
+  // that contains the request body,
+  // response body, status, etc
+})
 ```
 
 **Wait automatically increments responses**

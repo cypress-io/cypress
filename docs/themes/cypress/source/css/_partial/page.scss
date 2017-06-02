@@ -83,7 +83,7 @@
 
   ul {
     margin: 1em 0;
-    margin-left: 20px;
+    margin-left: 40px;
     list-style: disc;
 
     ul {
@@ -124,10 +124,11 @@
     border: 1px solid #e8e8e8;
 
     th {
-      font-weight: bold;
-      padding: 5px 15px;
+      font-weight: 500;
+      padding: 2px 15px;
       text-align: left;
       border-bottom: 1px solid #e8e8e8;
+      font-size: 0.9em;
 
       &:empty {
         padding: 0;
@@ -136,6 +137,8 @@
 
     td {
       padding: 5px 15px;
+      font-size: 0.9em;
+      line-height: 1.5em;
     }
 
     tr:nth-child(2n) {
@@ -174,29 +177,35 @@
     margin: 1em 0;
   }
 
-
-
   h1 {
     font-size: 1.7em;
-    line-height: 1.5em;
+    line-height: 1em;
     font-weight: 500;
     margin: 1.5em 0 0.5em 0;
     padding: 0;
     font-family: $font-title;
-    border-top: 2px solid #eee;
-    padding-top: 1.5em;
+    border-top: 1px solid #eee;
+    padding-top: 1em;
 
     &>a {
       font-weight: 500;
+    }
+
+    &+h2 {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 0;
     }
   }
 
   h2 {
     font-size: 1.3em;
-    line-height: 1.5em;
+    line-height: 1em;
     font-weight: 500;
-    margin: 2em 0 0.5em 0;
+    margin: 1.5em 0 0.5em 0;
+    padding-top: 1.5em;
     font-family: $font-title;
+    border-top: 1px solid #eee;
 
     code {
       font-weight: bold;
@@ -235,7 +244,7 @@
 
   &>p>strong {
     display: inline-block;
-    margin-top: 1.5em;
+    margin-top: 1em;
   }
 
   &>h2+p>strong, &>h1+p>strong {
@@ -254,7 +263,7 @@
 
   }
   strong {
-    font-weight: bold;
+    font-weight: 500;
   }
 
   em {
@@ -303,6 +312,10 @@
     border: 0;
     padding: 1em;
     border-left: 4px solid #999;
+
+    strong {
+      font-weight: 500;
+    }
 
     &.warning {
       border-left-color: #f0ad4e;
@@ -404,7 +417,7 @@
 }
 
 .article-header {
-  padding-bottom: 20px;
+  padding: 20px 0;
   &:before {
     content: "";
     display: table;

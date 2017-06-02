@@ -18,7 +18,7 @@ cy.request(options)
 
 ## Usage
 
-`.request()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.request()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -32,20 +32,18 @@ cy.request('http://dev.local/seed')
 
 The `url` to make the request to.
 
-If you provide a non fully qualified domain name (FQDN), Cypress will make its best guess as to which host you want the `.request()` to use in the url.
+If you provide a non fully qualified domain name (FQDN), Cypress will make its best guess as to which host you want `cy.request()` to use in the url.
 
-1. If you make a `.request()` after  visiting a page, Cypress assumes the url used for the `.visit()` is the host.
+1. If you make a `cy.request()` after  visiting a page, Cypress assumes the url used for the `cy.visit()` is the host.
 
   ```javascript
-  cy
-    .visit('http://localhost:8080/app')
-    .request('users/1.json') // <-- url is  http://localhost:8080/users/1.json
-    ```
+  cy.visit('http://localhost:8080/app')
+  cy.request('users/1.json') //  url is  http://localhost:8080/users/1.json
+  ```
 
-2. If you make a `.request()` prior to visiting a page, Cypress uses the host configured as the `baseUrl` property inside of `cypress.json`.
+2. If you make a `cy.request()` prior to visiting a page, Cypress uses the host configured as the `baseUrl` property inside of `cypress.json`.
 
   ***cypress.json***
-
   ```json
   {
     "baseUrl": "http://localhost:1234"
@@ -53,11 +51,10 @@ If you provide a non fully qualified domain name (FQDN), Cypress will make its b
   ```
 
   ```javascript
-  cy.request('seed/admin') //<-- url is   http://localhost:1234/seed/admin
+  cy.request('seed/admin') // url is http://localhost:1234/seed/admin
   ```
 
 3. If Cypress cannot determine the host it will throw an error.
-
 
 **{% fa fa-angle-right %} body** ***(String, Object)***
 
@@ -65,7 +62,7 @@ A request `body` to be sent in the request. Cypress sets the `Accepts` request h
 
 **{% fa fa-angle-right %} method** ***(String)***
 
-Make a request using the specific method (`GET`, `POST`, `PUT`...). If no method is defined, Cypress will do a `GET` request by default.
+Make a request using a specific method (`GET`, `POST`, `PUT`, etc). If no method is defined, Cypress uses the `GET` method by default.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
@@ -87,15 +84,20 @@ Option | Default | Notes
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for a response (in ms)
 `url` | `null` | The URL to make the request to
 
-You can also set options for the `.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ## Yields
 
-`.request()` yields the `response` as an object literal containing properties such as `status`, `body`, `headers`, and `duration`.
+`cy.request()` yields the `response` as an object literal containing properties such as:
+
+- `status`
+- `body`
+- `headers`
+- `duration`.
 
 ## Timeout
 
-`.request()` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or the `timeout` passed in the options object of the command.
+`cy.request()` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or the `timeout` passed in the options object of the command.
 
 # Examples
 
@@ -103,7 +105,7 @@ You can also set options for the `.request`'s `baseUrl` and `responseTimeout` gl
 
 **Make a `GET` request**
 
-`.request()` is great for talking to an external endpoint before your tests to seed a database.
+`cy.request()` is great for talking to an external endpoint before your tests to seed a database.
 
 ```javascript
 beforeEach(function(){
@@ -113,7 +115,7 @@ beforeEach(function(){
 
 **Issue a simple HTTP request**
 
-Sometimes it is quicker to simply test the contents of a page rather than `.visit()` and wait for the entire page and all of it's resource to load.
+Sometimes it is quicker to simply test the contents of a page rather than [`cy.visit()`](https://on.cypress.io/api/visit) and wait for the entire page and all of it's resource to load.
 
 ```javascript
 cy.request('/admin').its('body').should('include', '<h1>Admin</h1>')
@@ -124,7 +126,6 @@ cy.request('/admin').its('body').should('include', '<h1>Admin</h1>')
 **Send a `DELETE` request**
 
 ```javascript
-// Delete a user
 cy.request('DELETE', 'http://localhost:8888/users/827')
 ```
 
@@ -144,7 +145,7 @@ cy.request('POST', 'http://localhost:8888/users/admin', {name: 'Jane'})
 
 **Request a page while disabling auto redirect**
 
-To test the redirection behavior of a login without a session, `.request` can be used to check the `status` and `redirectedToUrl` property.
+To test the redirection behavior of a login without a session, `cy.request` can be used to check the `status` and `redirectedToUrl` property.
 
 The `redirectedToUrl` property is a special Cypress property that normalizes the `url` the browser would normally follow during a redirect.
 
@@ -162,13 +163,12 @@ cy.request({
 
 **HTML form submissions using form option**
 
-Oftentimes, once we have a proper e2e test around logging in, there's no reason to continue going through the application's UI to log in users. `.visit()` waits for the entire page to load all associated resources before running any other commands. That would mean we'd have to wait before filling in and submitting the login form. Doing so slows down our entire test suite.
+Oftentimes, once you have a proper e2e test around logging in, there's no reason to continue to `cy.visit()` the login and wait for the entire page to load all associated resources before running any other commands. Doing so can slow down our entire test suite.
 
-Using `.request()`, we can bypass all of this because it automatically gets and sets cookies just as if the requests had come from the browser.
+Using `cy.request()`, we can bypass all of this because it automatically gets and sets cookies just as if the requests had come from the browser.
 
 ```javascript
-cy
-  .request({
+cy.request({
     method: 'POST',
     url: '/login_with_form', // baseUrl is prepended to url
     form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
@@ -178,8 +178,8 @@ cy
     }
   })
 
-  // just to prove we have a session
-  cy.getCookie('cypress-session-cookie').should('exist')
+// just to prove we have a session
+cy.getCookie('cypress-session-cookie').should('exist')
 ```
 
 **Using cy.request for HTML Forms**
@@ -190,32 +190,31 @@ cy
 
 # Notes
 
-**Request is not displayed in the Network Tab of Dev Tools?**
+**Request is not displayed in the Network Tab of Developer Tools**
 
-Cypress does not *actually* make an XHR request from the browser. We are actually making the HTTP request from the Cypress desktop application (in Node.js). So, you won't see the request inside of the Dev Tools.
+Cypress does not *actually* make an XHR request from the browser. We are actually making the HTTP request from the Cypress desktop application (in Node.js). So, you won't see the request inside of your Developer Tools.
 
 **CORS is bypassed**
 
-Normally when the browser detects a cross-origin HTTP request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests, but `.request()` bypasses CORS entirely.
+Normally when the browser detects a cross-origin HTTP request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests, but `cy.request()` bypasses CORS entirely.
 
 ```javascript
 // we can make requests to any external server, no problem.
-cy
-  .request('https://www.google.com/webhp?#q=cypress.io+cors')
-    .its('body')
-    .should('include', 'Testing, the way it should be') // true
+cy.request('https://www.google.com/webhp?#q=cypress.io+cors')
+  .its('body').should('include', 'Testing, the way it should be') // true
 ```
 
 **Cookies are automatically sent and received**
 
 Before sending the HTTP request, we automatically attach cookies that would have otherwise been attached had the request come from the browser. Additionally, if a response has a `Set-Cookie` header, these are automatically set back on the browser cookies.
 
-In other words, `.request()` transparently performs all of the underlying functions as if it came from the browser.
+In other words, `cy.request()` transparently performs all of the underlying functions as if it came from the browser.
 
 # See also
 
-- [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
-- [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+- [exec](https://on.cypress.io/api/exec)
 - [Recipe: Logging In - CSRF Tokens](https://github.com/cypress-io/cypress-example-recipes#logging-in---csrf-tokens)
+- [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+- [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 - [visit](https://on.cypress.io/api/visit)

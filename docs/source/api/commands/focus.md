@@ -34,11 +34,11 @@ cy.window().focus()  // Errors, 'window' does not yield DOM element
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.focus`.
+Pass in an options object to change the default behavior of `.focus()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
@@ -46,7 +46,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.focus()` will continue to try to focus the element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.focus()` will continue to try to focus the element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -71,11 +71,11 @@ cy.get('textarea').focus().type('Nice Product!').blur()
 
 If there is currently a different DOM element with focus, Cypress issues a `blur` event to that element before running the `.focus()` command.
 
-**`.focus()` can only be called on a valid focusable element.**
+**Can only be called on a valid focusable element.**
 
 Ensure the element you are trying to call `.focus()` on is a [focusable element](https://www.w3.org/TR/html5/editing.html#focusable). Most commonly, you'll want to ensure that the element is not disabled, although there are [other factors](https://www.w3.org/TR/html5/editing.html#focusable).
 
-**`.focus()` can time out because your browser did not receive any focus events.**
+**Can time out because your browser did not receive any focus events.**
 
 If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
 
@@ -97,6 +97,7 @@ When clicking on the `focus` command within the command log, the console outputs
 
 # See also
 
-- [focused](https://on.cypress.io/api/focused)
 - [blur](https://on.cypress.io/api/blur)
 - [click](https://on.cypress.io/api/click)
+- [focused](https://on.cypress.io/api/focused)
+- [type](https://on.cypress.io/api/type)

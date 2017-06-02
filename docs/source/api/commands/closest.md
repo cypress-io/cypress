@@ -42,7 +42,7 @@ Pass in an options object to change the default behavior of `.closest()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -51,21 +51,21 @@ Option | Default | Notes
 
 ## Timeout
 
-`.closest()` will continue to look for the closest element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.closest()` will continue to look for the closest element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
 ## Closest
 
-**Find the closest element of the current subject with the class `nav`**
+**Find the closest element of the 'error' with the class 'banner'**
 
 ```javascript
-cy.get('li.active').closest('.nav')
+cy.get('p.error').closest('.banner')
 ```
 
 # Command Log
 
-**Find the closest element of the current subject with the class `nav`**
+**Find the closest element of 'active li' with the class 'nav'**
 
 ```javascript
 cy.get('li.active').closest('.nav')
@@ -81,10 +81,10 @@ When clicking on the `closest` command within the command log, the console outpu
 
 # See also
 
+- [first](https://on.cypress.io/api/first)
 - [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)
 - [parentsUntil](https://on.cypress.io/api/parentsUntil)
 - [prev](https://on.cypress.io/api/prev)
 - [prevAll](https://on.cypress.io/api/prevAll)
 - [prevUntil](https://on.cypress.io/api/prevUntil)
-- [first](https://on.cypress.io/api/first)

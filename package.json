@@ -15,7 +15,8 @@
     "link": "node ./dev/link-packages.js",
     "postinstall": "npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
-    "lint": "standard --verbose --fix dev/*.js"
+    "lint": "standard --verbose --fix dev/*.js",
+    "commit": "commit-wizard"
   },
   "author": "",
   "license": "MIT",
@@ -27,6 +28,7 @@
     "eslint-plugin-mocha": "^4.9.0",
     "mocha": "^3.2.0",
     "nock": "^9.0.9",
+    "pre-git": "^3.14.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0",
     "standard": "^10.0.2"
@@ -49,5 +51,17 @@
     "tmp": "0.0.31",
     "url": "^0.11.0",
     "xvfb": "cypress-io/node-xvfb"
+  },
+  "config": {
+    "pre-git": {
+      "pre-commit": [
+        "npm run lint",
+        "npm run all lint"
+      ],
+      "pre-push": [],
+      "post-commit": [],
+      "post-checkout": [],
+      "post-merge": []
+    }
   }
 }

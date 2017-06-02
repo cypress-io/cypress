@@ -24,9 +24,9 @@ Click a DOM element.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('button').click()          // Clicks on button
-cy.focused().click()              // Clicks on el with focus
-cy.contains('Welcome').click()    // Clicks on first el containing 'Welcome'
+cy.get('button').click()          // Click on button
+cy.focused().click()              // Click on el with focus
+cy.contains('Welcome').click()    // Click on first el containing 'Welcome'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -40,37 +40,37 @@ cy.window().click()         // Errors, 'window' does not yield DOM element
 
 **{% fa fa-angle-right %} position** ***(String)***
 
-Clicks the element at the specified position. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
+The position where the click should be issued. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
 ![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
 
 **{% fa fa-angle-right %} x** ***(Number)***
 
-The distance in pixels from element's left to issue the click.
+The distance in pixels from the element's left to issue the click.
 
 **{% fa fa-angle-right %} y** ***(Number)***
 
-The distance in pixels from element's top to issue the click.
+The distance in pixels from the element's top to issue the click.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.click`.
+Pass in an options object to change the default behavior of `.click()`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Forces click, disables error checking prior to click
-`multiple` | `false` | Enables serially clicking multiple elements
+`force` | `false` | Force click, disables error checking prior to click
 `interval` | `16` | Interval which to retry a click
+`log` | `true` | Whether to display command in Command Log
+`multiple` | `false` | Enable serially clicking multiple elements
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
-`log` | `true` | whether to display command in command log
 
 ## Yields
 
-`.click()` yields the DOM subject chained from the previous command.
+`.click()` yields the element that was clicked.
 
 ## Timeout
 
-`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options
+`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
 
 # Examples
 
@@ -79,7 +79,6 @@ Option | Default | Notes
 **Click the button**
 
 ```javascript
-// yields <button>Save</button>
 cy.get('button').click()
 ```
 
@@ -110,7 +109,6 @@ cy.get('button').click(15, 40)
 Forcing a click is useful when you want the click issued no matter what. Forcing a click disables checking that this element is visible and in a clickable state before clicking.
 
 ```javascript
-
 cy.get('button').click({ force: true })
 ```
 
@@ -132,7 +130,7 @@ cy.get('button').click(5, 60, { force: true })
 **Hover and clicking hidden elements**
 
 {% note info %}
-[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
+[Check out our example recipe on testing hover and working with hidden elements.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
 {% endnote %}
 
 **Click all buttons found on the page**
@@ -155,15 +153,15 @@ cy.get('button').click()
 
 The events are fired to spec, including the coordinates of where the event took place.
 
-At the moment, `mouseover` and `mouseout` events are *not* fired but this will be done soon.
+At the moment, `mouseover` and `mouseout` events are *not* fired. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
 
-Additionally if the `mousedown` event causes the element to be removed from the DOM, the remaining events should continue to be fired, but to the resulting element left below the removed element.  This has also not been implemented but will be implemented at some point.
+Additionally if the `mousedown` event causes the element to be removed from the DOM, the remaining events should continue to be fired, but to the resulting element left below the removed element. This has also not been implemented. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
 
 **Focus is given to the first focusable element**
 
-Just like real browsers, clicking a `<span>`, for example, inside of a `<button>` will properly give the focus to the button, since that's what would happen in a real user scenario.
+Clicking a `<span>`, for example, inside of a `<button>` gives the focus to the button, since that's what would happen in a real user scenario.
 
-However, Cypress additionally handles situations where a child descendent is clicked inside of a focusable parent, but actually isn't visually inside the parent (per the CSS Object Model). In those cases if no focusable parent is found the window is given focus instead (which matches a real browser).
+However, Cypress additionally handles situations where a child descendent is clicked inside of a focusable parent, but actually isn't visually inside the parent (per the CSS Object Model). In those cases if no focusable parent is found the window is given focus instead (which matches real browser behavior).
 
 **Mousedown cancellation will not cause focus**
 
@@ -171,7 +169,7 @@ If the mousedown event has its default action prevented (`e.preventDefault()`) t
 
 **Coordinates of a click**
 
-The coordinates of the click will be recorded the exact moment the click happens. When hovering over the `click` command, Cypress will display a red "hitbox" indicator on the snapshot showing you where the click event occurred on the page.
+The coordinates of the click will be recorded the exact moment the click happens. When hovering over the `click` command, Cypress displays a red "hitbox" indicator on the snapshot showing you where the click event occurred on the page.
 
 **pointer-events: none**
 
@@ -183,13 +181,13 @@ The spec states what should happen if the element clicked is removed from the DO
 
 **Animations**
 
-Unlike other testing frameworks, like Selenium, Cypress has built in logic for dealing with both CSS and JavaScript animations. Cypress will detect if an element is animating and will wait until the element reaches a clickable state. You will never deal with a situation where Cypress accidentally clicks the *wrong* element.
+Unlike most testing frameworks, Cypress has built in logic for dealing with CSS and JavaScript animations. Cypress detects if an element is animating and waits until the element reaches a clickable state. You will never deal with a situation where Cypress accidentally clicks the *wrong* element.
 
-However, sometimes when dealing with 3rd party plugins that animate using JavaScript, Cypress logic to scroll an element into view can be affected. Cypress (acting like a real user) will attempt to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event. Cypress is so fast that sometimes there are timing issues where 3rd party plugins have incorrectly calculated animations and sometimes even prevent an element from displaying altogether.
+However, sometimes when dealing with 3rd party plugins that animate, Cypress' logic to scroll an element into view can be affected.
 
-These situations are rare, but if you're having a difficult time getting an element to click or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with [`cy.wait(ms)`](https://on.cypress.io/api/wait). It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
+Cypress attempts to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event.
 
-So far the only library we've seen cause issues with is animating KendoUI's `dropdownlist`. By using `{force: true}` or inserting a small `wait` prior to a click, these issues completely go away.
+These situations are rare, but if you're having a difficult time clicking an element or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with [`cy.wait(ms)`](https://on.cypress.io/api/wait). It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
 
 # Command Log
 
@@ -209,7 +207,7 @@ When clicking on `click` within the command log, the console outputs the followi
 
 # See also
 
-- [dblclick](https://on.cypress.io/api/dblclick)
 - [check](https://on.cypress.io/api/check)
+- [dblclick](https://on.cypress.io/api/dblclick)
 - [select](https://on.cypress.io/api/select)
 - [submit](https://on.cypress.io/api/submit)

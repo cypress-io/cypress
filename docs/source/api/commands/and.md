@@ -10,8 +10,8 @@ Make an assertion.
 An alias of [`.should()`](https://on.cypress.io/api/and)
 {% endnote %}
 
-{% note info New to Cypress? %}
-[Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)
+{% note info %}
+**Note:** `.and()` assumes you are already familiar with core concepts such as [assertions](https://on.cypress.io/guides/making-assertions)
 {% endnote %}
 
 # Syntax
@@ -20,7 +20,7 @@ An alias of [`.should()`](https://on.cypress.io/api/and)
 .and(chainers)
 .and(chainers, value)
 .and(chainers, method, value)
-.and(function() {})
+.and(callbackFn)
 ```
 
 ## Usage
@@ -30,8 +30,8 @@ An alias of [`.should()`](https://on.cypress.io/api/and)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty').and('be.hidden') // Yields '.error' el
-cy.contains('Login').and('be.visible')               // Yields el containing Login
+cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty & hidden
+cy.contains('Login').and('be.visible')               // Assert el is visible
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -54,7 +54,7 @@ Value to assert against chainer.
 
 A method to be called on the chainer.
 
-**{% fa fa-angle-right %} function** ***(Function)***
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 
@@ -79,7 +79,7 @@ cy
 
 ## Timeout
 
-`.and` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.and()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', 'error')
@@ -204,13 +204,11 @@ Take this *explicit* assertion for example:
 expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 ```
 
-`cy.and` reproduces this same assertion behavior.
+`.and()` reproduces this same assertion behavior.
 
 **How do I know which assertions change the subject and which keep it the same?**
 
 The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
-
-Alternatively, it is very easy to use Cypress itself to figure this out.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 
@@ -236,5 +234,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # See also
 
-- [should](https://on.cypress.io/api/should)
 - [Making Assertions](https://on.cypress.io/guides/making-assertions)
+- [should](https://on.cypress.io/api/should)

@@ -6,16 +6,10 @@ description: ''
 
 Iterate through an array like structure (arrays or objects with a `length` property).
 
-Each time the callback function runs, it is invoked with three arguments:
-
-- `value`
-- `index`
-- `collection`
-
 # Syntax
 
 ```javascript
-.each(function(value, index, collection) {})
+.each(callbackFn)
 ```
 
 ## Usage
@@ -36,6 +30,16 @@ cy.getCookies().each(function(){...}) // Iterate through each cookie
 cy.each(function(){...})            // Errors, cannot be chained off 'cy'
 cy.location().each(function(){...}) // Errors, 'location' doesn't yield an array
 ```
+
+## Arguments
+
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
+
+Pass a function that is invoked with the following arguments:
+
+- `value`
+- `index`
+- `collection`
 
 ## Yields
 
@@ -83,18 +87,16 @@ cy
 
 **Promises are awaited**
 
-If your callback function returns a `Promise` it will be awaited before iterating over the next element in the collection.
+If your callback function returns a `Promise`, it will be awaited before iterating over the next element in the collection.
 
 ```javascript
-cy
-  .wrap([1,2,3])
-  .each(function(num, index, array){
-    return new Cypress.Promise(function(resolve){
-      setTimeout(function(){
-        resolve()
-      }, num * 100)
-    })
+cy.wrap([1,2,3]).each(function(num, i, array){
+  return new Cypress.Promise(function(resolve){
+    setTimeout(function(){
+      resolve()
+    }, num * 100)
   })
+})
 ```
 
 # Notes

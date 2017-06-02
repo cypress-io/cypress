@@ -54,7 +54,7 @@ Pass in an options object to change the default behavior of `.prevUntil()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
 
 ## Yields
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.prevUntil()` will continue to look for the previous element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.prevUntil()` will continue to look for the previous element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -90,7 +90,7 @@ Option | Default | Notes
 
 ```javascript
 // yields [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
-cy.get('#nuts').nextUntil('#veggies')
+cy.get('#nuts').prevUntil('#veggies')
 ```
 
 # Command Log
@@ -98,7 +98,7 @@ cy.get('#nuts').nextUntil('#veggies')
 **Find all of the element's siblings before `#nuts` until `#veggies`**
 
 ```javascript
-cy.get('#nuts').nextUntil('#veggies')
+cy.get('#nuts').prevUntil('#veggies')
 ```
 
 The commands above will display in the command log as:

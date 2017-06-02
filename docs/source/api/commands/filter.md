@@ -46,7 +46,7 @@ Pass in an options object to change the default behavior of `.filter()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -55,13 +55,13 @@ Option | Default | Notes
 
 ## Timeout
 
-`.filter()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.filter()` will continue to look for the filtered element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
 ## Selector
 
-**Filter the current subject to the elements with the class `active`.**
+**Filter the current subject to the elements with the class 'active'.**
 
 ```html
 <ul>
@@ -80,7 +80,7 @@ cy.get('ul').find('>li').filter('.active')
 
 # Command Log
 
-**Filter the `li`'s to the `li` with the class `active`.**
+**Filter the li's to the li with the class 'active'.**
 
 ```javascript
 cy.get('.left-nav>.nav').find('>li').filter('.active')

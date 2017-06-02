@@ -7,7 +7,7 @@ description: ''
 Get the current URL hash.
 
 {% note info %}
-This is the same as [`cy.location().hash`](https://on.cypress.io/api/location)
+This is an alias of [`cy.location().hash`](https://on.cypress.io/api/location)
 {% endnote %}
 
 # Syntax
@@ -19,12 +19,12 @@ cy.hash(options)
 
 ## Usage
 
-`.hash()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.hash()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.hash()    
+cy.hash()     // Get the url hash
 ```
 
 ## Arguments
@@ -37,11 +37,11 @@ Pass in an options object to change the default behavior of `cy.hash()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 
 ## Yields
 
-`.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
+`cy.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
 
 ## Timeout
 

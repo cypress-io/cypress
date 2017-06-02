@@ -20,7 +20,7 @@ Get the first DOM element within a set of DOM elements.
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('nav a').first()       // Yield first link in nav
+cy.get('nav a').first()     // Yield first link in nav
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -34,11 +34,11 @@ cy.getCookies().first()     // Errors, 'getCookies' does not yield DOM element
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
-Pass in an options object to change the default behavior of `.first`.
+Pass in an options object to change the default behavior of `.first()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ## Yields
@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.first()` will continue to look for the first element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.first()` will continue to look for the first element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
@@ -71,7 +71,7 @@ cy.get('ul').first()
 
 # Command Log
 
-**Find the first `input` in the `form`**
+**Find the first input in the form**
 
 ```javascript
 cy.get('form').find('input').first()

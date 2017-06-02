@@ -14,7 +14,8 @@ module.exports = {
     res.type("js")
 
     streamBundle = ->
-      fs.createReadStream(bundle.outputPath(config.projectName, spec))
+      bundledPath = bundle.outputPath(config.projectRoot, spec)
+      fs.createReadStream(bundledPath)
       .pipe(res)
 
     if config.isHeadless

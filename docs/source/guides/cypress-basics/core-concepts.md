@@ -24,11 +24,9 @@ describe("Post Resource", function() {
     cy.visit("/posts/new") /* 1 */
 
     cy.contains("Post Title") /* 2 */
-      .click()
       .type("My First Post") /* 3 */
 
     cy.contains("Post Body") /* 4 */
-      .click()
       .type("Hello, world!") /* 5 */
 
     cy.get('button[type="submit"]') /* 6 */
@@ -48,10 +46,10 @@ Can you read this? If you did, it might sound something like this:
 
 {% note info %}
 1. Visit the page at `/posts/new`
-2. Find the element containing the text "Post Title", click it
-3. Type "My First Post"
-4. Find the element containing the text "Post Body", click it
-5. Type "Hello, world!"
+2. Find the element containing the text "Post Title"
+3. Type "My First Post" into it
+4. Find the element containing the text "Post Body"
+5. Type "Hello, world!" into it
 6. Select the `<button>` tag with a type of `submit`, click it
 7. Grab the browser URL, ensure it is `/posts/my-first-post`
 8. Select the `<h1>` tag, ensure it contains the text "My First Post"
@@ -61,17 +59,6 @@ Can you read this? If you did, it might sound something like this:
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
 
 For the remainder of this guide we'll go through the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
-
-- rules
-- clicking on things
-- asserting various things about elements
-- chai integration
-- subjects
-- async/serial/promises+
-- aliases
-- retries
-- explicit/implicit subject assertions
-- default/automatic assertions
 
 # Finding Elements
 
@@ -167,29 +154,93 @@ There is a performance tradeoff here: essentially, **tests that have longer time
 
 {% endnote %}
 
-# Chaining Commands
+# Chains of Commands
 
-It's crucially important to understand the mechanism by which Cypress Commands chain together: an asynchronous-yet-serial process of doing work on the Subject yielded to the Command, and yielding a Subject to the next Command.
+It's crucially important to understand the mechanism by which Cypress Commands chain together: a queue of work to be done on some subject that flows from one command to the next. It's like Promises, but different, so don't reach for your favorite Promise library until we finish laying it all out.
+
+## Interacting With Elements
+
+As we saw in the initial example, Cypress makes it easy to click on and type into elements on the page by adding `.click()` and `.type()` commands to a `cy.get()` or `.contains()` command. This is a great example of chaining in action. Let's see it again:
+
+```js
+cy.get('textarea.post-body')
+  .type("This is an excellent post.")
+```
+
+We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" of the `cy.get()` command, which will be a DOM element if it is found.
+
+## Asserting Things About Elements
+
+Oftentimes you just want to ensure an element exists, or has a particular attribute, CSS class, or child. Let's see assertions in action:
+
+```js
+cy.get(":checkbox").should("be.disabled")
+
+cy.get("form").should("have.class", "form-horizontal")
+
+cy.get("input").should("not.have.value", "foo")
+```
+
+You can also chain multiple assertions together using `.and()`, which is just another name for `.should()` that makes things more readable:
+
+```js
+cy.get("#header a")
+  .should("have.class", "active")
+  .and("have.attr", "href", "/users")
+```
+
+Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide these assertions. You can [learn more in the Available Assertions Appendix](/guides/appendices/available-assertions.html).
+
+{% note info Beware: Assertions That Change The Subject %}
+Some assertions may modify the current subject unexpectedly. Read the next section on how subjects flow through a Cypress chain, then you'll understand what is happening when `cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `a` element to the string `/users`.
+
+{% endnote %}
 
 ## Subjects
 
-Subjects are the unseen context of a `cy.` chain, the flow of current pushing energy from one Command to the next. Because Cypress is built upon the Promise pattern, that "pushing of energy" is called "yielding" instead of "returning": Cypress Commands do not return useful values, but rather a Cypress Chainer to continue building a sequence on Commands with.
+A new Cypress chain always start with `cy.[something]`, where the `something` establishes what other methods can be called (chained) next. Some methods yield no subject and thus cannot be chained, such as `cy.clearCookies()` or `cy.screenshot()`. Some methods, such as `cy.get()` or `cy.contains()`, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like `.click()` or even `.contains()` again.
 
-Cypress Commands must be executed against an appropriate subject. For instance, you can't call `cy.should("equal", 7)` directly: what should equal 7? `.should()` requires a subject!
+{% note info %}
+**Some commands can be chained:**
+- ...only from `cy`, meaning they don't operate on a subject (`cy.clearCookies()`)
+- ...only from commands yielding particular kinds of subjects (`.type()`)
+- ...from `cy` *or* from a subject-yielding chain (`.contains()`)
+
+**Some commands yield:**
+- ...`null`, meaning they should not be chained against
+- ...the same subject they were chained from
+- ...a new subject as appropriate for the command
+
+{% endnote %}
+
+Examples:
+
+```js
+cy.clearCookies() // Done, no Subject, no chaining
+
+cy.get('.main-container') // Subject is array of matching DOM elements
+  .contains("Today's Headlines") // Subject is a DOM element
+  .click() // Subject did not change
+```
+
+{% note info Yield, Don't Return %}
+When discussing what Cypress commands do with subjects, we always say that they "yield" the subject, never that they "return" it. Remember: Cypress commands are asynchronous and get queued for execution at a later time! Subjects get yielded from command to command after lot of helpful framework code runs to ensure things are in order.
+
+{% endnote %}
 
 ### Using `cy.wrap` To Inject A Custom Subject
 
-Want to bring in a value from outside of the Command flow? You can quickly achieve that with `cy.wrap()`. To rewrite the incorrect usage of `.should` above, let's push the number 7 into Cypress land:
+Want to bring in a value from outside of the Command flow? You can quickly achieve that with `cy.wrap()`.
 
 ```js
 cy.wrap(7).should("equal", 7)
 ```
 
-`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple!
+`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple! The above is the asynchronous equivalent to: `expect(7).to.equal(7)`
 
 ### Using `.then` To Act Synchronously On A Subject
 
-Want to jump into the Command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { /* act here */ })` to your Command chain. When Cypress finishes the previous Command, it will yield control to your custom function, passing in the current subject as the first argument.
+Want to jump into the Command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { })` to your Command chain. When the previous command resolves, it will call your custom function with the current subject as the first argument.
 
 If you have more Commands to add after your `.then()`, you'll need to maintain the subject chain by synchronously returning the new subject.
 

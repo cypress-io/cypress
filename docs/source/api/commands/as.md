@@ -4,10 +4,10 @@ comments: true
 description: ''
 ---
 
-Assign an alias to a route or DOM element for later use. Reference the alias later within a [`.get()`](https://on.cypress.io/api/get) or [`.wait()`](https://on.cypress.io/api/wait) command with a `@` prefix.
+Assign an alias for later use. Reference the alias later within a [`.get()`](https://on.cypress.io/api/get) or [`.wait()`](https://on.cypress.io/api/wait) command with a `@` prefix.
 
-{% note info New to Cypress? %}
-[Read about Using Aliases first.](https://on.cypress.io/guides/using-aliases)
+{% note info %}
+**Note:** `.as()` assumes you are already familiar with core concepts such as [aliases](https://on.cypress.io/guides/using-aliases)
 {% endnote %}
 
 # Syntax
@@ -18,22 +18,21 @@ Assign an alias to a route or DOM element for later use. Reference the alias lat
 
 ## Usage
 
-`.as()` requires being chained off another cy command that *yields* a DOM element,  [`.stub()`](https://on.cypress.io/api/stub), [`.spy()`](https://on.cypress.io/api/spy) or [`.route()`](https://on.cypress.io/api/route).
+`.as()` should be chained off another cy command.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.main-nav').find('li').first().as('firstNav')
-cy.route('PUT', 'users', 'fx:user').as('putUser')    
-cy.stub(api, 'onUnauth').as('unauth')
-cy.spy(win, 'fetch').as('winFetch')
+cy.get('.main-nav').find('li').first().as('firstNav') // Alias first 'li' as @firstNav
+cy.route('PUT', 'users', 'fx:user').as('putUser')     // Alias 'route' as @putUser   
+cy.stub(api, 'onUnauth').as('unauth')                 // Alias 'stub' as @unauth   
+cy.spy(win, 'fetch').as('winFetch')                   // Alias 'spy' as @winFetch  
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
 
 ```javascript
-cy.as('foo')          // Errors, cannot be chained off 'cy'
-cy.title().as('pageTitle')         // Errors, 'title' yields a string
+cy.as('foo')   // Errors, cannot be chained off 'cy'
 ```
 
 ## Arguments
@@ -98,5 +97,5 @@ Aliases of routes display in the routes instrument panel:
 # See also
 
 - [get](https://on.cypress.io/api/get)
-- [wait](https://on.cypress.io/api/wait)
 - [Using Aliases](https://on.cypress.io/guides/using-aliases)
+- [wait](https://on.cypress.io/api/wait)

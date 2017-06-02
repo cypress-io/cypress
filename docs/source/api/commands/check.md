@@ -24,8 +24,8 @@ Check checkbox(es) or radio(s).
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('[type="checkbox"]').check()       // Yields checkbox element
-cy.get('[type="radio"]').first().check()  // Yields first radio element
+cy.get('[type="checkbox"]').check()       // Check checkbox element
+cy.get('[type="radio"]').first().check()  // Check first radio element
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -51,14 +51,14 @@ Pass in an options object to change the default behavior of `.check()`.
 
 Option | Default | Notes
 --- | --- | ---
-`interval` | `16` | Interval which to retry a check
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
 `force` | `false` | Forces check, disables error checking prior to check
-`log` | `true` | whether to display command in command log
+`interval` | `16` | Interval which to retry a check
+`log` | `true` | Whether to display command in Command Log
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
 
 ## Yields
 
-`.check()` yields the DOM element from the previous command.
+`.check()` yields the DOM element(s) that were checked.
 
 ## Timeout
 
@@ -80,7 +80,7 @@ cy.get('[type="checkbox"]').check()
 cy.get('[type="radio"]').check()
 ```
 
-**Check the element with id of `saveUserName`**
+**Check the element with id of 'saveUserName'**
 
 ```javascript
 cy.get('#saveUserName').check()
@@ -96,7 +96,7 @@ cy.get('[type="radio"]').check('US')
 
 ## Values
 
-**Check the checkboxes with the value of 'ga' and 'ca'**
+**Check the checkboxes with the values 'ga' and 'ca'**
 
 ```javascript
 cy.get('[type="checkbox"]').check(['ga', 'ca'])
@@ -106,12 +106,11 @@ cy.get('[type="checkbox"]').check(['ga', 'ca'])
 
 **Check an invisible checkbox**
 
-You can ignore Cypress' default behavior of checking that the element is visible, clickable and not disabled by passing `force: true` in the `.check()` options.
+You can ignore Cypress' default behavior of checking that the element is visible, clickable and not disabled by setting `force` to `true` in the options.
 
 ```javascript
-cy
-  .get('.action-checkboxes').should('not.be.visible') // Passes
-    .check({force: true}).should('be.checked')        // Passes
+cy.get('.action-checkboxes').should('not.be.visible') // Passes
+  .check({ force: true }).should('be.checked')        // Passes
 ```
 
 # Command Log
@@ -132,5 +131,5 @@ When clicking on `check` within the command log, the console outputs the followi
 
 # See also
 
-- [uncheck](https://on.cypress.io/api/uncheck)
 - [click](https://on.cypress.io/api/click)
+- [uncheck](https://on.cypress.io/api/uncheck)

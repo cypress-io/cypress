@@ -24,7 +24,7 @@ Uncheck checkbox(es).
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('[type="checkbox"]').uncheck()       // Yields checkbox element
+cy.get('[type="checkbox"]').uncheck()   // Unchecks checkbox element
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -50,10 +50,10 @@ Pass in an options object to change the default behavior of `.uncheck()`.
 
 Option | Default | Notes
 --- | --- | ---
-`interval` | `16` | Interval which to retry a check
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
 `force` | `false` | Forces check, disables error checking prior to check
-`log` | `true` | whether to display command in command log
+`interval` | `16` | Interval which to retry a check
+`log` | `true` | Whether to display command in Command Log
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
 
 # Examples
 
@@ -65,7 +65,7 @@ Option | Default | Notes
 cy.get(':checkbox').uncheck()
 ```
 
-**Uncheck element with the id `saveUserName`**
+**Uncheck element with the id 'saveUserName'**
 
 ```javascript
 cy.get('#saveUserName').uncheck()
@@ -81,7 +81,7 @@ cy.get('input[type="checkbox"]').uncheck(['ga'])
 
 ## Values
 
-**Uncheck the checkboxes with the value of 'ga' and 'ca'**
+**Uncheck the checkboxes with the values 'ga' and 'ca'**
 
 ```javascript
 cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])

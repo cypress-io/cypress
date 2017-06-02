@@ -7,7 +7,7 @@ description: ''
 Get a property on the previously yielded subject.
 
 {% note info %}
-If you want to call a function on the previously yielded subject, use [`cy.invoke`](https://on.cypress.io/api/invoke).
+If you want to call a function on the previously yielded subject, use [`.invoke()`](https://on.cypress.io/api/invoke).
 {% endnote %}
 
 # Syntax
@@ -53,7 +53,7 @@ Name of property or nested properties (with dot notation) to get.
 **Get property**
 
 ```javascript
-cy.wrap({foo: 'bar'}).its('foo').should('eq', 'bar') // true
+cy.wrap({age: 52}).its('age').should('eq', 52) // true
 ```
 
 ## DOM Elements
@@ -62,9 +62,9 @@ cy.wrap({foo: 'bar'}).its('foo').should('eq', 'bar') // true
 
 ```javascript
 cy
-  .get('ul li') // this returns us the jquery object
-  .its('length') // calls the 'length' property returning that value
-  .should('be.gt', 2) // ensure this length is greater than 2
+  .get('ul li')       // this yields us a jquery object
+  .its('length')      // calls 'length' property returning that value
+  .should('be.gt', 2) // ensure the length is greater than 2
 })
 ```
 
@@ -83,10 +83,10 @@ cy.title().its('length').should('eq', 24)
 
 ```javascript
 var fn = function(){
-  return 'bar'
+  return 42
 }
 
-cy.wrap({foo: fn}).its('foo').should('be.a', 'function')
+cy.wrap({getNum: fn}).its('getNum').should('be.a', 'function')
 ```
 
 **Inspect function**
@@ -95,10 +95,9 @@ You can access functions to then drill into their own properties instead of invo
 
 ```javascript
 // Your app code
-
 // a basic Factory constructor
 var Factory = function(arg){
-  ...
+  // ...
 }
 
 Factory.create = function(arg){
@@ -116,13 +115,15 @@ cy
   .invoke('create', 'arg')  // now invoke properties on it
 ```
 
+**Use `.its()` to test `window.fetch`**
+
 {% note info %}
 [Check out our example recipe on testing `window.fetch` using `.its()`](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
 ## Nested Properties
 
-You can drill into nested properties by using **dot notation**.
+You can drill into nested properties by using *dot notation*.
 
 ```javascript
 var user = {
@@ -141,16 +142,13 @@ cy.wrap(user).its('contacts.work.name').should('eq', 'Kamil') // true
 **Get `responseBody` of aliased route**
 
 ```javascript
-cy
-  .server()
-  .route(/comments/, 'fixture:comments.json').as('getComments')
-  .get('#fetch-comments').click()
-  .wait('@getComments')
-    .its('responseBody')
-    .should('deep.eq', [
-      {id: 1, comment: 'hi'},
-      {id: 2, comment: 'there'}
-    ])
+cy.server()
+cy.route(/comments/, 'fixture:comments.json').as('getComments')
+cy.get('#fetch-comments').click()
+cy.wait('@getComments').its('responseBody').should('deep.eq', [
+  {id: 1, comment: 'hi'},
+  {id: 2, comment: 'there'}
+])
 ```
 
 The commands above will display in the command log as:
@@ -164,5 +162,5 @@ When clicking on `its` within the command log, the console outputs the following
 # See also
 
 - [invoke](https://on.cypress.io/api/invoke)
-- [wrap](https://on.cypress.io/api/wrap)
 - [then](https://on.cypress.io/api/then)
+- [wrap](https://on.cypress.io/api/wrap)

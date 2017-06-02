@@ -20,7 +20,7 @@ cy.setCookie(name, value, options)
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.setCookie('auth_key', '123key')    
+cy.setCookie('auth_key', '123key') // Set the 'auth_key' cookie to '123key'
 ```
 
 ## Arguments
@@ -39,17 +39,17 @@ Pass in an options object to change the default behavior of `cy.setCookie()`.
 
 Option | Default | Notes
 --- | --- | ---
-`path` | `/` | the cookie path
-`domain` | `window.location.hostname` | the domain the cookie is visible to
-`secure` | `false` | whether the cookie is a secure cookie
-`httpOnly` | `false` | whether the cookie is an HTTP only cookie
-`expiry` | 20 years into the future | when the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
+`domain` | `window.location.hostname` | The domain the cookie is visible to
+`expiry` | 20 years into the future | When the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
+`httpOnly` | `false` | Whether the cookie is an HTTP only cookie
+`log` | `true` | Whether to display command in Command Log
+`path` | `/` | The cookie path
+`secure` | `false` | Whether the cookie is a secure cookie
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.setCookie()` command to be processed
-`log` | `true` | whether to display command in command log
 
 ## Yields
 
-`.setCookie()` yields a cookie object literal with the following properties:
+`cy.setCookie()` yields a cookie object literal with the following properties:
 
 - `name`
 - `value`
@@ -61,7 +61,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.setCookie()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+`cy.setCookie()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
 
 # Examples
 
@@ -70,10 +70,9 @@ Option | Default | Notes
 **Set a cookie**
 
 ```javascript
-cy
-  .getCookies().should('be.empty')
-  .setCookie('session_id', '189jd09sufh33aaiidhf99d09')
-  .getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
+cy.getCookies().should('be.empty')
+cy.setCookie('session_id', '189jd09sufh33aaiidhf99d09')
+cy.getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
 ```
 
 # Command Log
@@ -81,10 +80,9 @@ cy
 **Set a cookie**
 
 ```javascript
-cy
-  .getCookies().should('be.empty')
-  .setCookie('fakeCookie1', '123ABC')
-  .getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
+cy.getCookies().should('be.empty')
+cy.setCookie('fakeCookie1', '123ABC')
+cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 ```
 
 The commands above will display in the command log as:
@@ -99,6 +97,6 @@ When clicking on `setCookie` within the command log, the console outputs the fol
 
 - [clearCookie](https://on.cypress.io/api/clearcookie)
 - [clearCookies](https://on.cypress.io/api/clearcookies)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [getCookies](https://on.cypress.io/api/getcookies)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)

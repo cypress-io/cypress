@@ -6,7 +6,6 @@ description: ''
 
 Get the parent DOM elements of a set of DOM elements.
 
-
 # Syntax
 
 ```javascript
@@ -45,7 +44,7 @@ Pass in an options object to change the default behavior of `.parents()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the elements
 
 
@@ -55,13 +54,13 @@ Option | Default | Notes
 
 ## Timeout
 
-`.parents()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.parents()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 
 ## Parents
 
-**Get the parents of the active `li`**
+**Get the parents of the active li**
 
 ```javascript
 cy.get('li.active').parents()
@@ -69,7 +68,7 @@ cy.get('li.active').parents()
 
 ## Selector
 
-**Get the parents with class `nav` of the active `li`**
+**Get the parents with class `nav` of the active li**
 
 ```javascript
 cy.get('li.active').parents('.nav')

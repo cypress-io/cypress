@@ -189,40 +189,6 @@ class Project extends EE
           @emit("end", stats)
     })
 
-  determineIsNewProject: (integrationFolder) ->
-    ## logic to determine if new project
-    ## 1. there are no files in 'integrationFolder'
-    ## 2. there is only 1 file in 'integrationFolder'
-    ## 3. the file is called 'example_spec.js'
-    ## 4. the bytes of the file match lib/scaffold/example_spec.js
-    nameIsDefault = (file) ->
-      path.basename(file) is scaffold.integrationExampleName()
-
-    getCurrentSize = (file) ->
-      fs
-      .statAsync(file)
-      .get("size")
-
-    checkIfBothMatch = (current, scaffold) ->
-      current is scaffold
-
-    glob("**/*", {cwd: integrationFolder, realpath: true})
-    .then (files) ->
-      ## TODO: add tests for this
-      return true if files.length is 0
-
-      return false if files.length isnt 1
-
-      exampleSpec = files[0]
-
-      return false if not def = nameIsDefault(exampleSpec)
-
-      Promise.join(
-        getCurrentSize(exampleSpec),
-        scaffold.integrationExampleSize(),
-        checkIfBothMatch
-      )
-
   changeToUrl: (url) ->
     @server.changeToUrl(url)
 
@@ -234,25 +200,35 @@ class Project extends EE
   getAutomation: ->
     @automation
 
-  getConfig: (options = {}) ->
+  determineIsNewProject: (folder) -> scaffold.isNewProject(folder)
+
+  ## returns project config (user settings + defaults + cypress.json)
+  ## with additional object "state" which are transient things like
+  ## window width and height, DevTools open or not, etc.
+  getConfig: (options = {}) =>
+    setNewProject = (cfg) =>
+      ## decide if new project by asking scaffold
+      ## and looking at previously saved user state
+      throw new Error("Missing integration folder") if not cfg.integrationFolder
+      @determineIsNewProject(cfg.integrationFolder)
+      .then (untouchedScaffold) ->
+        userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
+        cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
+      .return(cfg)
+
     getConfig = =>
       if c = @cfg
         Promise.resolve(c)
       else
         config.get(@projectRoot, options)
-        .then (cfg) =>
-          ## return a boolean whether this is a new project or not
-          @determineIsNewProject(cfg.integrationFolder)
-          .then (bool) ->
-            cfg.isNewProject = bool
-          .return(cfg)
 
-    getConfig().then (cfg) =>
-      @_setSavedState(cfg)
+    getConfig()
+    .then (cfg) => @_setSavedState(cfg)
+    .then setNewProject
 
   # forces saving of project's state
   saveState: () ->
-    throw new Error ("Missing project config") unless @cfg
+    throw new Error ("Missing project config") if not @cfg
     savedState(@projectRoot).set(@cfg.state)
     .then =>
       @cfg.state

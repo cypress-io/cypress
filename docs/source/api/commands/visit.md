@@ -13,8 +13,6 @@ cy.visit(url)
 cy.visit(url, options)
 ```
 
-`cy.visit` resolves when the remote page fires its `load` event.
-
 ## Usage
 
 `cy.visit()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
@@ -37,13 +35,12 @@ Pass in an options object to change the default behavior of `cy.visit()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | Whether to display command in Command Log
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait until `cy.visit` resolves
-`log` | `true` | whether to display command in command log
+`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait until `cy.visit()` resolves
 
 You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
-
 
 ## Yields
 
@@ -51,13 +48,15 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 ## Timeout
 
-`cy.visit` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
+`cy.visit()` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
 
 # Examples
 
 ## Visit
 
 **Visit a local server running on http://localhost:8000**
+
+`cy.visit()` resolves when the remote page fires its `load` event.
 
 ```javascript
 cy.visit('http://localhost:8000')
@@ -171,9 +170,9 @@ cy.server()
 cy.route('/users/**', 'fx:users')
 ```
 
-But if your app makes a request upon being initialized, *the above code will not work*. `cy.visit()` will resolve once its `load` event fires.  The `server` and `route` commands are not processed until *after* `cy.visit()` resolves.
+But if your app makes a request upon being initialized, *the above code will not work*. `cy.visit()` will resolve once its `load` event fires.  The [`cy.server()`](https://on.cypress.io/server) and [`cy.route()`](https://on.cypress.io/route) commands are not processed until *after* `cy.visit()` resolves.
 
-Many applications will have already begun routing, initialization, and requests by the time the `cy.visit()` in the above code resolves. Therefore creating a `cy.server` will happen too late, and Cypress will not process the requests.
+Many applications will have already begun routing, initialization, and requests by the time the `cy.visit()` in the above code resolves. Therefore creating a [`cy.server()`](https://on.cypress.io/server) will happen too late, and Cypress will not process the requests.
 
 Luckily Cypress supports this use case. Simply reverse the order of the commands:
 

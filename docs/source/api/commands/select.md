@@ -4,7 +4,7 @@ comments: true
 description: ''
 ---
 
-Select an option within a `<select>` DOM element.
+Select an `<option>` within a `<select>` DOM element.
 
 # Syntax
 
@@ -32,16 +32,15 @@ cy.select('John Adams')  // Errors, cannot be chained off 'cy'
 cy.location().select()   // Errors, 'location' does not yield <select> element
 ```
 
-
 ## Arguments
 
 **{% fa fa-angle-right %} value**  ***(String)***
 
-The `value` or text content of the option to be selected.
+The `value` or text content of the `<option>` to be selected.
 
 **{% fa fa-angle-right %} values**  ***(Array)***
 
-An array of `values` or text contents of the options to be selected.
+An array of `values` or text contents of the `<option>`s to be selected.
 
 **{% fa fa-angle-right %} options**  ***(Object)***
 
@@ -51,8 +50,8 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces select, disables error checking prior to select
 `interval` | `50` | Interval which to retry a select
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the select
-`log` | `true` | whether to display command in command log
 
 
 ## Yields
@@ -61,7 +60,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.select()` will continue to select the options for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.select()` will continue to select the options for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
 
 # Examples
 

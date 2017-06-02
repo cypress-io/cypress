@@ -15,7 +15,7 @@ cy.exec(command, options)
 
 ## Usage
 
-`.exec()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
+`cy.exec()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -31,28 +31,32 @@ The system command to be executed from the project root (the directory that cont
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `.exec()`.
+Pass in an options object to change the default behavior of `cy.exec()`.
 
 Option | Default | Notes
 --- | --- | ---
+`env` | `{}` | Object of environment variables to set before the command executes (e.g. `{USERNAME: 'johndoe'}`). Will be merged with existing system environment variables
 `failOnNonZeroExit` | `true` | whether to fail if the command exits with a non-zero code
-`env` | `{}` | Object of environment variables to set before the command executes (e.g. `{ USERNAME: 'johndoe' }`). Will be merged with existing system environment variables
-`log` | `true` | whether to display command in command log
+`log` | `true` | Whether to display command in Command Log
 `timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to allow the command to execute
 
 ## Yields
 
-`.exec()` yields an object with the exit `code`, `stdout`, and `stderr`.
+`cy.exec()` yields an object with the following properties:
+
+- `code`
+- `stdout`
+- `stderr`
 
 ## Timeout
 
-`.exec()` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.exec()` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the `timeout` passed into the command's options.
 
 # Examples
 
 ## Prepping data
 
-`cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test, but outside the scope of Cypress. This is great for:
+`cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test outside the scope of Cypress. This is great for:
 
 - Running build scripts
 - Seeding your test database
@@ -62,16 +66,14 @@ Option | Default | Notes
 **Run a build command**
 
 ```javascript
-cy
-  .exec('npm run build')
-  .then(function (result) {
-    // yields the 'result' object
-    // {
-    //   code: 0,
-    //   stdout: "Files successfully built",
-    //   stderr: ""
-    // }
-  })
+cy.exec('npm run build').then(function (result) {
+  // yields the 'result' object
+  // {
+  //   code: 0,
+  //   stdout: "Files successfully built",
+  //   stderr: ""
+  // }
+})
 ```
 
 **Seed the database and assert it was successful**
@@ -103,7 +105,7 @@ cy.wait('@postComment').then(function(xhr){
 
 You can increase the time allowed to execute the command, although *we don't recommend executing commands that take a long time to exit*.
 
-Cypress will *not* continue running any other commands until `.exec()` has finished, so a long-running command will drastically slow down your test cycle.
+Cypress will *not* continue running any other commands until `cy.exec()` has finished, so a long-running command will drastically slow down your test cycle.
 
 ```javascript
 // will fail if script takes longer than 20 seconds to finish
@@ -131,9 +133,9 @@ cy
 
 **Commands that do not exit are not supported**
 
-`.exec()` does not support commands that don't exit, such as:
+`cy.exec()` does not support commands that don't exit, such as:
 
-- `rails server`
+- Starting a `rails server`
 - A task that runs a watch
 - Any process that needs to be manually interrupted to stop
 
@@ -157,6 +159,6 @@ When clicking on the `exec` command within the command log, the console outputs 
 
 # See also
 
-- [request](https://on.cypress.io/api/request)
 - [readFile](https://on.cypress.io/api/readFile)
+- [request](https://on.cypress.io/api/request)
 - [writeFile](https://on.cypress.io/api/writeFile)

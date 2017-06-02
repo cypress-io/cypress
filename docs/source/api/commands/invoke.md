@@ -65,6 +65,8 @@ var fn = function(){
 cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 ```
 
+**Use `.invoke()` to test HTML content**
+
 {% note info %}
 [Check out our example recipe where we use cy.invoke('text') to test against HTML content](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 {% endnote %}
@@ -80,6 +82,8 @@ cy.get('div.container').should('be.hidden') // true
     .should('be.visible') // true
     .find('input').type('Cypress is great')
 ```
+
+**Use `.invoke('show')` and `.invoke('trigger')`**
 
 {% note info %}
 [Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
@@ -124,6 +128,8 @@ cy
     .and('be.lt', 20)    // true
 ```
 
+**Use `cy.invoke('removeAttr', 'target')` to get around new tab**
+
 {% note info %}
 [Check out our example recipe where we use cy.invoke('removeAttr', 'target') to test clicking on a link without opening in a new tab](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)
 {% endnote %}
@@ -136,10 +142,27 @@ cy
     .should('include', 'myLogo')
 ```
 
+# Command Log
+
+**Invoke jQuery show method on element**
+
+```javascript
+cy.get('.connectors-div').should('be.hidden')
+  .invoke('show').should('be.visible')
+```
+
+The commands above will display in the command log as:
+
+<img width="470" alt="screen shot 2017-06-01 at 1 13 44 pm" src="https://cloud.githubusercontent.com/assets/1271364/26691729/3a75b3c8-46cc-11e7-835d-68200388ddf2.png">
+
+When clicking on `invoke` within the command log, the console outputs the following:
+
+<img width="534" alt="screen shot 2017-06-01 at 1 14 00 pm" src="https://cloud.githubusercontent.com/assets/1271364/26691730/3a9baeca-46cc-11e7-8519-9e4a04490601.png">
+
 # See also
 
 - [its](https://on.cypress.io/api/its)
-- [wrap](https://on.cypress.io/api/wrap)
-- [then](https://on.cypress.io/api/then)
-- [stub](https://on.cypress.io/api/stub)
 - [spy](https://on.cypress.io/api/spy)
+- [stub](https://on.cypress.io/api/stub)
+- [then](https://on.cypress.io/api/then)
+- [wrap](https://on.cypress.io/api/wrap)
