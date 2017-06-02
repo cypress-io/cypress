@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
 
-import { closeBrowser } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 
 @observer
 export default class Browsers extends Component {
@@ -44,7 +44,7 @@ export default class Browsers extends Component {
 
   _closeBrowser = (e) => {
     e.preventDefault()
-    closeBrowser(this.props.project.clientId)
+    projectsApi.closeBrowser(this.props.project)
   }
 
   _onSelect = (browser) => {

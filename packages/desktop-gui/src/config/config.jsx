@@ -6,7 +6,7 @@ import Collapse, { Panel } from 'rc-collapse'
 
 import ipc from '../lib/ipc'
 import Project from '../project/project-model'
-import { getRecordKeys } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 
 @observer
 class Config extends Component {
@@ -16,7 +16,7 @@ class Config extends Component {
   }
 
   componentWillMount () {
-    getRecordKeys().then((keys = []) => {
+    projectsApi.getRecordKeys().then((keys = []) => {
       this.setState({
         keys,
         isLoadingKeys: false,

@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import { ContextMenu, MenuItem } from "react-contextmenu"
 
 import Project from './projects-list-item/'
-import { closeProject, getProjects, pollProjects, stopPollingProjects } from './projects-api'
+import projectsApi from './projects-api'
 import projectsStore from './projects-store'
 
 class MyContextMenu extends Component {
@@ -28,19 +28,19 @@ class MyContextMenu extends Component {
 }
 
 @observer
-export default class Projects extends Component {
+class ProjectsList extends Component {
   constructor (props) {
     super(props)
-    closeProject()
+    projectsApi.closeProject()
   }
 
   componentDidMount () {
-    getProjects()
-    this.pollId = pollProjects()
+    projectsApi.getProjects()
+    this.pollId = projectsApi.pollProjects()
   }
 
   componentWillUnmount () {
-    stopPollingProjects(this.pollId)
+    projectsApi.stopPollingProjects(this.pollId)
   }
 
   render () {
@@ -111,3 +111,5 @@ export default class Projects extends Component {
   }
 
 }
+
+export default ProjectsList

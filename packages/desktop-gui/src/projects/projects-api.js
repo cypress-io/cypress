@@ -187,7 +187,7 @@ const getRecordKeys = () => {
   .catch(() => [])
 }
 
-export {
+export default {
   getProjects,
   pollProjects,
   stopPollingProjects,

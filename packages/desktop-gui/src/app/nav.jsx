@@ -6,7 +6,7 @@ import appApi from '../lib/app-api'
 import state from '../lib/state'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
-import { closeProject, addProject } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 
 @observer
 export default class Nav extends Component {
@@ -111,6 +111,6 @@ export default class Nav extends Component {
 
   _addProject (e) {
     e.preventDefault()
-    addProject()
+    projectsApi.addProject()
   }
 }

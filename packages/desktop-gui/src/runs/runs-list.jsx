@@ -9,7 +9,7 @@ import state from '../lib/state'
 import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
 import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
-import { getRecordKeys } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
@@ -74,7 +74,7 @@ class Runs extends Component {
 
   _getKey () {
     if (this._needsKey()) {
-      getRecordKeys().then((keys = []) => {
+      projectsApi.getRecordKeys().then((keys = []) => {
         if (keys.length) {
           this.setState({ recordKey: keys[0].id })
         }

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
-import { runSpec } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
 @observer
@@ -94,7 +94,7 @@ class Specs extends Component {
 
     let project = this.props.project
 
-    runSpec(project, specPath, project.chosenBrowser.name)
+    projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
   }
 
   _empty () {
