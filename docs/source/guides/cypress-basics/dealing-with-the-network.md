@@ -32,7 +32,7 @@ Let's investigate both strategies, why you would use one versus the other, and w
 
 ***
 
-## 1: Don't Stub Responses
+## Option 1: Don't Stub Responses
 
 Requests that aren't stubbed will actually reach your server. By *not* stubbing your responses, you are writing true **end to end** tests. This means you are driving your application the same way a real user would.
 
@@ -67,7 +67,7 @@ If you are writing a traditional server-side application where most of the respo
 
 ***
 
-## 2: Stub Responses
+## Option 2: Stub Responses
 
 Stubbing responses enables you to control every aspect of the response, including the response body, the status, headers, and even network delay. Stubbing is extremely fast, most responses will be returned in less than 20ms.
 
