@@ -28,7 +28,7 @@
     "eslint-plugin-mocha": "^4.9.0",
     "mocha": "^3.2.0",
     "nock": "^9.0.9",
-    "pre-git": "^3.14.0",
+    "pre-git": "^3.15.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0",
     "standard": "^10.0.2"
