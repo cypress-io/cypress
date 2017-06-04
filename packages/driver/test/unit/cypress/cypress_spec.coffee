@@ -136,9 +136,9 @@ describe "$Cypress API", ->
       @trigger = @sandbox.spy @Cypress, "trigger"
 
     it "instantiates EnvironmentVariables", ->
-      expect(@Cypress).not.to.have.property("environmentVariables")
+      expect(@Cypress).not.to.have.property("env")
       @Cypress.setConfig({foo: "bar"})
-      expect(@Cypress.environmentVariables).to.be.instanceof($Cypress.EnvironmentVariables)
+      expect(@Cypress.env).to.be.a("function")
 
     it "passes config.environmentVariables", ->
       @Cypress.setConfig({

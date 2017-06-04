@@ -14,11 +14,10 @@ $Chai = require("./cypress/chai")
 $Chainer = require("./cypress/chainer")
 $Command = require("./cypress/command")
 $Commands = require("./cypress/commands")
-$Config = require("./cypress/config")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Dom = require("./cypress/dom")
-$EnvironmentVariables = require("./cypress/environment_variables")
+$SetterGetter = require("./cypress/setter_getter")
 $ErrorMessages = require("./cypress/error_messages")
 $Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
@@ -92,9 +91,9 @@ class $Cypress
 
     config = _.omit(config, "environmentVariables", "remote")
 
-    $EnvironmentVariables.extend($Cypress)
-    $EnvironmentVariables.create(@, environmentVariables)
-    $Config.create(@, config)
+    @config = $SetterGetter.create(config)
+    @env = $SetterGetter.create(environmentVariables)
+
     $Cookies.create(@, config.namespace, d)
 
     @trigger("config", config)
@@ -303,11 +302,9 @@ $Cypress.Chai = $Chai
 $Cypress.Chainer = $Chainer
 $Cypress.Command = $Command
 $Cypress.Commands = $Commands
-$Cypress.Config = $Config
 $Cypress.Cookies = $Cookies
 $Cypress.Cy = $Cy
 $Cypress.Dom = $Cypress.prototype.Dom = $Dom
-$Cypress.EnvironmentVariables = $EnvironmentVariables
 $Cypress.ErrorMessages = $ErrorMessages
 $Cypress.Keyboard = $Keyboard
 $Cypress.Log = $Log

@@ -1,12 +1,13 @@
 _ = require("lodash")
 
+## a basic object setter / getter class
 module.exports = {
-  create: (Cypress, config) ->
+  create: (state = {}) ->
     get = (key) ->
       if key
-        config[key]
+        state[key]
       else
-        config
+        state
 
     set = (key, value) ->
       if _.isObject(key)
@@ -15,9 +16,10 @@ module.exports = {
         obj = {}
         obj[key] = value
 
-      _.extend(config, obj)
+      _.extend(state, obj)
 
-    Cypress.config = (key, value) ->
+    ## return the getter / setter function interface
+    return (key, value) ->
       switch arguments.length
         when 0
           get()
