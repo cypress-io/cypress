@@ -83,6 +83,7 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
+    @version = config.version
     @isHeadless = !!config.isHeadless
 
     {environmentVariables, remote} = config
@@ -151,9 +152,6 @@ class $Cypress
 
   onUncaughtException: ->
     @cy.onUncaughtException.apply(@cy, arguments)
-
-  setVersion: (version) ->
-    @version = version
 
   ## TODO: TEST THIS
   set: (runnable, hookName) ->

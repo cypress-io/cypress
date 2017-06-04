@@ -9,6 +9,12 @@ describe "e2e config", ->
     }
   })
 
+  it "passes", ->
+    e2e.start(@, {
+      spec: "config_passing_spec.coffee"
+      expectedExitCode: 0
+    })
+
   it "fails", ->
     ## this tests that config is applied correctly
     ## from modified cypress.json

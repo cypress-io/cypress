@@ -166,10 +166,15 @@ describe "$Cypress API", ->
       @Cypress.config({foo: "baz", bar: "baz"})
       expect(@Cypress.config()).to.deep.eq({foo: "baz", bar: "baz"})
 
-  describe "#setVersion", ->
-    it "sets version on instance", ->
-      @Cypress.setVersion("1.0.0")
-      expect(@Cypress.version).to.equal("1.0.0")
+    it "sets version as a property", ->
+      @Cypress.setConfig({version: "1.2.3"})
+      expect(@Cypress.version).to.eq("1.2.3")
+
+    it "sets isHeadless as a property", ->
+      @Cypress.setConfig({})
+      expect(@Cypress.isHeadless).to.be.false
+      @Cypress.setConfig({isHeadless: true})
+      expect(@Cypress.isHeadless).to.be.true
 
   describe "#onSpecWindow", ->
     beforeEach ->
