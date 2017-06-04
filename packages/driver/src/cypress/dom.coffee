@@ -1,6 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
-
 utils = require("./utils")
 
 fixedOrAbsoluteRe = /(fixed|absolute)/
@@ -8,13 +6,13 @@ fixedOrAbsoluteRe = /(fixed|absolute)/
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
 
-$Dom = {
-  isVisible: $.expr.filters.visible = (el) ->
-    not $Dom.isHidden(el, "isVisible()")
+dom = {
+  isVisible: (el) ->
+    not dom.isHidden(el, "isVisible()")
 
   ## assign this fn to jquery and to our revealing module
   ## at the same time. #pro
-  isHidden: $.expr.filters.hidden = (el, filter) ->
+  isHidden: (el, filter) ->
     if not utils.hasElement(el)
       utils.throwErrByPath("dom.non_dom_is_hidden", {
         args: { el, filter: filter || "isHidden()" }
@@ -26,18 +24,18 @@ $Dom = {
     ## either its offsetHeight or offsetWidth is 0 because
     ## it is impossible for the user to interact with this element
     ## offsetHeight / offsetWidth includes the ef
-    $Dom.elHasNoEffectiveWidthOrHeight($el) or
+    dom.elHasNoEffectiveWidthOrHeight($el) or
 
       ## additionally if the effective visibility of the element
       ## is hidden (which includes any parent nodes) then the user
       ## cannot interact with this element and thus it is hidden
-      $Dom.elHasVisibilityHidden($el) or
+      dom.elHasVisibilityHidden($el) or
 
         ## we do some calculations taking into account the parents
         ## to see if its hidden by a parent
-        $Dom.elIsHiddenByAncestors($el) or
+        dom.elIsHiddenByAncestors($el) or
 
-          $Dom.elIsOutOfBoundsOfAncestorsOverflow($el)
+          dom.elIsOutOfBoundsOfAncestorsOverflow($el)
 
   elHasNoEffectiveWidthOrHeight: ($el) ->
     @elOffsetWidth($el) <= 0 or @elOffsetHeight($el) <= 0 or $el[0].getClientRects().length <= 0
@@ -276,4 +274,4 @@ $Dom = {
         "Cypress could not determine why this element (#{node}) is not visible."
 }
 
-module.exports = $Dom
+module.exports = dom

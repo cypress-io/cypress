@@ -5,7 +5,7 @@ chai = require("chai")
 chaijQuery = require("chai-jquery")
 sinonChai = require("@cypress/sinon-chai")
 
-$Dom = require("./dom")
+dom = require("./dom")
 $Utils = require("./utils")
 
 ## all words between single quotes which are at
@@ -168,7 +168,7 @@ chai.use (chai, utils) ->
           catch e
             ## add reason hidden unless we expect the element to be hidden
             if (e.message or "").indexOf("not to be") is -1
-              reason = $Dom.getReasonElIsHidden(@_obj)
+              reason = dom.getReasonElIsHidden(@_obj)
               e.message += "\n\n" + reason
             throw e
 
