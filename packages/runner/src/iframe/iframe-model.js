@@ -16,7 +16,7 @@ export default class IframeModel {
 
   listen () {
     eventManager.on('run:start', action('run:start', this._beforeRun))
-    eventManager.on('run:end', action('run:start', this._afterRun))
+    eventManager.on('run:end', action('run:end', this._afterRun))
 
     eventManager.on('viewport', action('viewport', this._updateViewport))
     eventManager.on('config', action('config', (config) => {
