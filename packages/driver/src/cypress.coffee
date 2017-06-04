@@ -93,7 +93,7 @@ class $Cypress
     @config = $SetterGetter.create(config)
     @env = $SetterGetter.create(environmentVariables)
 
-    $Cookies.create(@, config.namespace, d)
+    @Cookies = $Cookies.create(config.namespace, d)
 
     @trigger("config", config)
 
@@ -272,7 +272,6 @@ class $Cypress
 
   lolex: lolex
 
-  Cookies: Cookies
 
   bililiteRange: bililiteRange
 

@@ -4,7 +4,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 $Cypress = require("#{src}/cypress")
 
-describe "$Cypress API", ->
+describe "src/cypress", ->
   beforeEach ->
     @Cypress = $Cypress.create()
 
@@ -127,22 +127,24 @@ describe "$Cypress API", ->
       @Cypress.env({bar: "baz"})
       expect(@Cypress.env()).to.deep.eq({foo: "bar", bar: "baz"})
 
-    it "throws when Cypress.environmentVariables is undefined", ->
-      delete @Cypress.environmentVariables
-
-      fn = =>
-        @Cypress.env()
-
-      expect(fn).to.throw("Cypress.environmentVariables is not defined. Open an issue if you see this message.")
-
   describe "#setConfig", ->
     beforeEach ->
       @trigger = @sandbox.spy @Cypress, "trigger"
 
-    it "instantiates EnvironmentVariables", ->
+    it "instantiates env", ->
       expect(@Cypress).not.to.have.property("env")
       @Cypress.setConfig({foo: "bar"})
       expect(@Cypress.env).to.be.a("function")
+
+    it "instantiates config", ->
+      expect(@Cypress).not.to.have.property("config")
+      @Cypress.setConfig({foo: "bar"})
+      expect(@Cypress.config).to.be.a("function")
+
+    it "instantiates Cookies", ->
+      expect(@Cypress).not.to.have.property("Cookies")
+      @Cypress.setConfig({foo: "bar"})
+      expect(@Cypress.Cookies).to.be.an("object")
 
     it "passes config.environmentVariables", ->
       @Cypress.setConfig({
@@ -155,7 +157,7 @@ describe "$Cypress API", ->
       @Cypress.setConfig({foo: "bar"})
       expect(@trigger).to.be.calledWith("config", {foo: "bar"})
 
-    it "passes config to Config.create", ->
+    it "passes config to SetterGetter.create", ->
       @Cypress.setConfig({foo: "bar"})
       expect(@Cypress.config()).to.deep.eq({foo: "bar"})
       expect(@Cypress.config("foo")).to.eq("bar")

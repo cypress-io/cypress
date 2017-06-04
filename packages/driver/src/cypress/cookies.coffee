@@ -114,8 +114,8 @@ $Cookies = (namespace, domain) ->
 
   return API
 
-$Cookies.create = (Cypress, namespace, domain) ->
+$Cookies.create = (namespace, domain) ->
   ## set the $Cookies function onto the Cypress instance
-  Cypress.Cookies = $Cookies(namespace, domain)
+  $Cookies(namespace, domain)
 
 module.exports = $Cookies
