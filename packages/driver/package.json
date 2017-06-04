@@ -7,8 +7,11 @@
     "postinstall": "echo '@packages/driver needs: npm run build'",
     "build": "gulp build",
     "watch": "gulp watch",
-    "clean-deps": "rm -rf node_modules",
-    "test": "gulp test"
+    "test": "mocha",
+    "test-watch": "./test/support/watch",
+    "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
+    "test-integration": "gulp test",
+    "clean-deps": "rm -rf node_modules"
   },
   "main": "index.js",
   "files": [
@@ -30,6 +33,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
     "chai-jquery": "^2.0.0",
+    "chokidar-cli": "^1.2.0",
     "coffeeify": "^2.1.0",
     "compression": "^1.1.0",
     "cors": "^2.7.1",
@@ -45,6 +49,7 @@
     "jquery": "2.2.4",
     "jquery.scrollto": "^2.1.2",
     "js-cookie": "2.1.1",
+    "jsdom": "^11.0.0",
     "lodash": "4.17.4",
     "lolex": "^1.5.2",
     "method-override": "^2.3.1",

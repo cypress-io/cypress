@@ -1,4 +1,8 @@
-{ _ } = window.testUtils
+require("../support/unit_spec_helper")
+
+_ = require("lodash")
+Promise = require("bluebird")
+$Cypress = require("#{src}/cypress")
 
 describe "$Cypress API", ->
   beforeEach ->

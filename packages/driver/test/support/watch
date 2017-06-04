@@ -1,0 +1,3 @@
+npm run test --silent & \
+chokidar 'test/**/*' 'src/**/*' \
+-c "npm run test --silent"
