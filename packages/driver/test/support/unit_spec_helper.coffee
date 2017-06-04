@@ -14,7 +14,8 @@ global.src = path.resolve("src")
 global.expect = chai.expect
 
 ## create jsdom and setup browser globals
-global.window = new jsdom('').window
+global.jsdom = j = new jsdom('')
+global.window = j.window
 global.document = window.document
 
 beforeEach ->

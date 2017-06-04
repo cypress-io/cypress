@@ -1,4 +1,10 @@
-urls =
+require("../../support/unit_spec_helper")
+
+_ = require("lodash")
+Promise = require("bluebird")
+$Location = require("#{src}/cypress/location")
+
+urls = {
   blank:    "about:blank"
   cypress:  "http://0.0.0.0:2020/__/#/tests/app.coffee"
   signin:   "http://localhost:2020/signin"
@@ -12,14 +18,12 @@ urls =
   stack:    "https://stackoverflow.com/"
   trailHash:"http://localhost:3500/index.html?foo=bar#"
   email:    "http://localhost:3500/?email=brian@cypress.io"
+}
 
-describe "$Cypress.Location API", ->
+describe "src/cypress/location", ->
   beforeEach ->
     @setup = (remote) =>
-      new $Cypress.Location(urls[remote])
-
-  it "class is defined", ->
-    expect($Cypress.Location).to.be.defined
+      new $Location(urls[remote])
 
   context "#getHash", ->
     it "returns the hash fragment prepended with #", ->
@@ -143,18 +147,18 @@ describe "$Cypress.Location API", ->
 
   context ".create", ->
     it "returns an object literal", ->
-      obj = $Cypress.Location.create(urls.cypress, urls.signin)
+      obj = $Location.create(urls.cypress, urls.signin)
       keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->
-      obj = $Cypress.Location.create(urls.signin)
+      obj = $Location.create(urls.signin)
       expect(obj.toString()).to.eq("http://localhost:2020/signin")
 
   context ".normalize", ->
     beforeEach ->
       @url = (source, expected) ->
-        url = $Cypress.Location.normalize(source)
+        url = $Location.normalize(source)
         expect(url).to.eq(expected)
 
     describe "http urls", ->
@@ -206,39 +210,44 @@ describe "$Cypress.Location API", ->
 
   context ".fullyQualifyUrl", ->
     beforeEach ->
+      ## TODO: might be easier to stub out something on
+      ## the $Location object -> or refactor for it
+      ## to use a location getter module
+      jsdom.reconfigure({url: "http://localhost:3500"})
+
       @normalize = (url) ->
-        $Cypress.Location.normalize(url)
+        $Location.normalize(url)
 
     it "does not append trailing slash on a sub directory", ->
       url = @normalize("http://localhost:4200/app")
-      url = $Cypress.Location.fullyQualifyUrl(url)
+      url = $Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:4200/app"
 
     it "does not append a trailing slash to url with hash", ->
       url = @normalize("http://localhost:4000/#/home")
-      url = $Cypress.Location.fullyQualifyUrl(url)
+      url = $Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:4000/#/home"
 
     it "does not append a trailing slash to protocol-less url with hash", ->
       url = @normalize("www.github.com/#/home")
-      url = $Cypress.Location.fullyQualifyUrl(url)
+      url = $Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://www.github.com/#/home"
 
     it "handles urls without a host", ->
       url = @normalize("index.html")
-      url = $Cypress.Location.fullyQualifyUrl(url)
+      url = $Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/index.html"
 
     it "does not insert trailing slash without a host", ->
-      url = $Cypress.Location.fullyQualifyUrl("index.html")
+      url = $Location.fullyQualifyUrl("index.html")
       expect(url).to.eq "http://localhost:3500/index.html"
 
     it "handles no host + query params", ->
       url = @normalize("timeout?ms=1000")
-      url = $Cypress.Location.fullyQualifyUrl(url)
+      url = $Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
 
     it "does not strip off path", ->
       url = @normalize("fixtures/sinon.html")
-      url = $Cypress.Location.fullyQualifyUrl(url)
+      url = $Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/fixtures/sinon.html"
