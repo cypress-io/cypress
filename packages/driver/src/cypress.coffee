@@ -55,8 +55,6 @@ class $Cypress
     @runner   = null
     @Commands = null
 
-  start: ->
-    window.Cypress = @
 
   setConfig: (config = {}) ->
     ## config.remote

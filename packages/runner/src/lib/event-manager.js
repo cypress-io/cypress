@@ -170,7 +170,9 @@ const eventManager = {
 
     Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
     Cypress.setVersion(config.version)
-    Cypress.start()
+    // expose Cypress globally
+    window.Cypress = Cypress
+
     this._addListeners(config)
     channel.emit('watch:test:file', specPath)
   },
