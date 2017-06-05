@@ -9,7 +9,9 @@
     "test": "mocha",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm lib/*.js lib/**/*.js || true",
-    "lint": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts"
+    "lint": "npm run lint-ts && npm run lint-coffee",
+    "lint-ts": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts",
+    "lint-coffee": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/**/*.coffee"
   },
   "repository": {
     "type": "git",
