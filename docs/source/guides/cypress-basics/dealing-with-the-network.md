@@ -30,8 +30,6 @@ Within Cypress, you have the ability to choose whether to stub responses or allo
 
 Let's investigate both strategies, why you would use one versus the other, and why you should regularly use both.
 
-***
-
 ## Option 1: Don't Stub Responses
 
 Requests that aren't stubbed will actually reach your server. By *not* stubbing your responses, you are writing true **end to end** tests. This means you are driving your application the same way a real user would.
@@ -65,8 +63,6 @@ If you are writing a traditional server-side application where most of the respo
 - Helpful to have one test around the *happy path* of a feature
 {% endnote %}
 
-***
-
 ## Option 2: Stub Responses
 
 Stubbing responses enables you to control every aspect of the response, including the response body, the status, headers, and even network delay. Stubbing is extremely fast, most responses will be returned in less than 20ms.
@@ -94,8 +90,6 @@ You don't have to do any work on the server. Your application will have no idea 
 - Mix and match, typically have one true end to end test, and then stub the rest
 {% endnote %}
 
-***
-
 # How to stub responses
 
 Cypress makes it easy to stub a response and control the `body`, `status`, `headers`, or even delay.
@@ -109,8 +103,6 @@ These two commands work together to control the behavior of your responses withi
 
 [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
 
-***
-
 # Requests
 
 Cypress will automatically indicate when an XHR request happens in your application. These are logged in the Command Log regardless of whether or not you are using stubbing. This provides you a visual indicator when a request has started and when it is finished. Additionally, Cypress will take a snapshot of the DOM when the request is made and another snapshot when the response comes back.
@@ -119,23 +111,20 @@ By default, Cypress is configured to *ignore* requests that are used to fetch st
 
 Cypress automatically collects the request `headers` and the request `body` and will make this available to you.
 
-***
-
 # Server + Routing Table
 
 ```javascript
-cy
-  // enable response stubbing
-  .server()
+// enable response stubbing
+cy.server()
 
-  // Route all GET requests that have a
-  // URL that matches the RegExp /users/
-  // and force the response to be: []
-  .route({
-    method: "GET",
-    url: /users/,
-    response: []
-  })
+// Route all GET requests that have a
+// URL that matches the RegExp /users/
+// and force the response to be: []
+cy.route({
+  method: "GET",
+  url: /users/,
+  response: []
+})
 ```
 
 Each [`cy.route`](https://on.cypress.io/api/route) you provide will automatically route those requests to specific responses and control their body, response headers, or even force additional network delay.
@@ -149,28 +138,24 @@ Once you start a server with [`cy.server`](https://on.cypress.io/api/server), al
 - [`cy.server`](https://on.cypress.io/api/server)
 - [`cy.route`](https://on.cypress.io/api/route)
 
-***
-
 # Fixtures
 
 When stubbing a response, you typically need to manage potentially large and complex JSON objects. Cypress has support for [fixtures](https://on.cypress.io/guides/creating-fixtures), and even allows you to integrate fixture syntax directly into responses.
 
 ```javascript
-cy
-  .server()
+cy.server()
 
-   // we set the response to be the activites.json fixture
-  .route("GET", /activities/, "fixture:activities.json")
+// we set the response to be the activites.json fixture
+cy.route("GET", /activities/, "fixture:activities.json")
 ```
 
 You can additionally reference [aliases](https://on.cypress.io/guides/using-aliases) within responses. These aliases do not have to point to fixtures, but that is a common use case. Separating out a fixture enables you to work and mutate that object prior to handing it off to a response.
 
 ```javascript
-cy
-  .server()
+cy.server()
 
-  .fixture("activities.json").as("activitiesJSON")
-  .route("GET", /activities/, "@activitiesJSON")
+cy.fixture("activities.json").as("activitiesJSON")
+cy.route("GET", /activities/, "@activitiesJSON")
 ```
 
 ***
@@ -180,30 +165,27 @@ cy
 Whether or not you choose to stub responses, Cypress enables you to declaratively [`cy.wait`](https://on.cypress.io/api/wait) for requests and their responses.
 
 ```javascript
-cy
-  .server()
-  .route(/activities/, "fixture:activities").as("getActivities")
-  .route(/messages/, "fixture:messages").as("getMessages")
+cy.server()
+cy.route(/activities/, "fixture:activities").as("getActivities")
+cy.route(/messages/, "fixture:messages").as("getMessages")
 
-  // visit the dashboard, which should make requests that match
-  // the two routes above
-  .visit("http://localhost:8888/dashboard")
+// visit the dashboard, which should make requests that match
+// the two routes above
+cy.visit("http://localhost:8888/dashboard")
 
-  // pass an array of Route Aliases which forces Cypress to wait
-  // until it sees a response for each request that matches
-  // each of these aliases
-  .wait(["@getActivities", "@getMessages"])
+// pass an array of Route Aliases which forces Cypress to wait
+// until it sees a response for each request that matches
+// each of these aliases
+cy.wait(["@getActivities", "@getMessages"])
 
-  // these commands will not run until the wait command resolves above
-  .get("h1").should("contain", "Dashboard")
+// these commands will not run until the wait command resolves above
+cy.get("h1").should("contain", "Dashboard")
 ```
 
 Declaratively waiting for responses has many advantages:
 - You descrease test flake
 - Source of failure is clearer
 - You can make assertions about the XHR objects
-
-***
 
 ## Removing Flake
 
@@ -212,28 +194,25 @@ One advantage of declaratively waiting for requests is that it decreases test fl
 **Auto-complete Example:**
 
 ```javascript
-cy
-  .server()
-  .route(/search/, [{item: "Book 1"}, {item: "Book 2"}]).as("getSearch")
+cy.server()
+cy.route(/search/, [{item: "Book 1"}, {item: "Book 2"}]).as("getSearch")
 
-  // our autocomplete field is throttled
-  // meaning it only makes a request after
-  // 500ms from the last keyPress
-  .get("#autocomplete").type("Book")
+// our autocomplete field is throttled
+// meaning it only makes a request after
+// 500ms from the last keyPress
+cy.get("#autocomplete").type("Book")
 
-  // wait for the request + response
-  // thus insulating us from the
-  // throttled request
-  .wait("@getSearch")
+// wait for the request + response
+// thus insulating us from the
+// throttled request
+cy.wait("@getSearch")
 
-  .get("#results")
-    .should("contain", "Book 1")
-    .and("contain", "Book 2")
+cy.get("#results")
+  .should("contain", "Book 1")
+  .and("contain", "Book 2")
 ```
 
 What makes this example above so powerful is that Cypress will automatically wait for a request that matches the `getSearch` alias. Instead of forcing Cypress to test the *side effect* of a successful request (the display of the Book results), you can test the actual *cause* of the results.
-
-***
 
 ## Clear Source of Failure
 
@@ -253,8 +232,6 @@ With Cypress, by adding a [`cy.wait`](https://on.cypress.io/api/wait) guard, you
 
 Now we know exactly why our test failed. It had nothing to do with the DOM. Instead we can see that either our request never went out or a request went out to the wrong URL.
 
-***
-
 ## Asserting about the XHR Object
 
 Another benefit of using [`cy.wait`](https://on.cypress.io/api/wait) on requests is that it allows you to access the actual `XHR` object. This is useful when you want to make assertions about this object.
@@ -262,20 +239,19 @@ Another benefit of using [`cy.wait`](https://on.cypress.io/api/wait) on requests
 In our example above we can assert about the request object to verify that it sent data as a query string in the URL. Although we're mocking the response, we can still verify that our application sends the correct request.
 
 ```javascript
-cy
-  .server()
-  .route(/search/, [{item: "Book 1"}, {item: "Book 2"}]).as("getSearch")
+cy.server()
+cy.route(/search/, [{item: "Book 1"}, {item: "Book 2"}]).as("getSearch")
 
-  .get("#autocomplete").type("Book")
+cy.get("#autocomplete").type("Book")
 
-  // this yields us the XHR object which includes
-  // fields for request, response, url, method, etc
-  .wait("@getSearch")
-    .its("url").should("include", "/search?query=Book")
+// this yields us the XHR object which includes
+// fields for request, response, url, method, etc
+cy.wait("@getSearch")
+  .its("url").should("include", "/search?query=Book")
 
-  .get("#results")
-    .should("contain", "Book 1")
-    .and("contain", "Book 2")
+cy.get("#results")
+  .should("contain", "Book 1")
+  .and("contain", "Book 2")
 ```
 
 **The XHR object that [`cy.wait`](https://on.cypress.io/api/wait) yields you has everything you need to make assertions including:**

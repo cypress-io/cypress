@@ -20,8 +20,6 @@ Additionally we've integrated the dashboard into the Cypress [Desktop Applicatio
 
 ![Runs List](https://cloud.githubusercontent.com/assets/1271364/22800330/ff6c9474-eed6-11e6-9a32-8360d64b1071.png)
 
-***
-
 ## Example Projects
 
 Once you're logged into the [Dashboard](https://on.cypress.io/dashboard) you can view any [public project](https://on.cypress.io/what-is-project-access).
@@ -34,8 +32,6 @@ Here are some of our own public projects you can look at:
 - [cypress-example-todomvc](https://dashboard.cypress.io/#/projects/245obj)
 - [cypress-example-piechopper](https://dashboard.cypress.io/#/projects/fuduzp)
 
-***
-
 # Frequently Asked Questions
 
 ## How do I record my tests?
@@ -44,8 +40,6 @@ Here are some of our own public projects you can look at:
 2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
-
-***
 
 ## How is this different than CI?
 
@@ -59,8 +53,6 @@ Our dashboard provides you with the low level details of *what* happened during 
 
 When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the test run results. It should be instantly clear what the problem was.
 
-***
-
 ## How much does this cost?
 
 Everything is free while we are in Beta.
@@ -72,13 +64,10 @@ Public projects will be free but will likely have a monthly usage cap on them.
 We will offer similar pricing models of other Developer Tools you are familiar with using.
 
 Plans will likely start around the $99/month level.
-***
 
 ## Can I host this myself?
 
 No, although we are looking to build an on-premise version of the Dashboard for use in private clouds. If you're interested in our on-premise version, [let us know](mailto:hello@cypress.io)!
-
-***
 
 ## Can I choose not to use it?
 

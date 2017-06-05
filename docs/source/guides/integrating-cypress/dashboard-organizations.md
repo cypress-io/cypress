@@ -31,13 +31,9 @@ You cannot delete or edit the name of this organization.
 All existing Cypress projects prior to version 0.19.0 were automatically added to your personal organization.
 {% endnote %}
 
-***
-
 # Creating an Organization
 
 ![Add Organization dialog](https://cloud.githubusercontent.com/assets/1271364/22709492/f1d3e7e4-ed47-11e6-8f35-64fed633862b.png)
-
-***
 
 ## Inviting Users
 
@@ -54,8 +50,6 @@ Even though we are in a **private beta**, any user you invite will automatically
 
 ![Invite User dialog](https://cloud.githubusercontent.com/assets/1271364/22709421/baf79a54-ed47-11e6-9796-79ba2008d2d2.png)
 
-***
-
 ## User Roles
 
 User's can be assigned roles that affect their access to certain features.
@@ -63,8 +57,6 @@ User's can be assigned roles that affect their access to certain features.
 - **Member:** Can see the projects, runs, and keys.
 - **Admin:** Can also invite, edit and delete users.
 - **Owner:** Can also transfer or delete projects. Can delete and edit the organization.
-
-***
 
 ## User Requests
 
@@ -76,8 +68,6 @@ This means instead of you having to invite team members up front, they can simpl
 
 ![User requesting access](https://cloud.githubusercontent.com/assets/1271364/22709877/61ca46be-ed49-11e6-80cc-d54299634053.png)
 
-***
-
 ## Transferring Projects
 
 You can transfer projects that you own to another organization or another user.
@@ -85,8 +75,6 @@ You can transfer projects that you own to another organization or another user.
 This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
 
 ![Transfer Project dialog](https://cloud.githubusercontent.com/assets/1271364/22708695/440f4e5c-ed45-11e6-9a98-8f91b67871a3.png)
-
-***
 
 # Deleting an Organization
 

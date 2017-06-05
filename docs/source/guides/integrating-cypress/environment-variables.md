@@ -27,8 +27,6 @@ cy
   .visit(Cypress.env("host"))
 ```
 
-***
-
 # Setting Environment Variables
 
 There are 4 different ways to set environment variables. Each has a slightly different use case.
@@ -43,8 +41,6 @@ There are 4 different ways to set environment variables. Each has a slightly dif
 Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in CI.
 
 When your tests are running, you can use the [`Cypress.env()`](https://on.cypress.io/api/env) function to access the values of your environment variables.
-
-***
 
 ## Option #1: Set in `cypress.json`
 
@@ -76,8 +72,6 @@ Cypress.env("some") // => "value"
 {% note danger Downsides %}
 - Only works for values which should be the same on across all machines
 {% endnote %}
-
-***
 
 ## Option #2: Create a `cypress.env.json`
 
@@ -113,8 +107,6 @@ Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 - Overkill for 1 or 2 environment variables
 {% endnote %}
 
-***
-
 ## Option #3: Export as `CYPRESS_*`
 
 Any environment variable on your machine that starts with either `CYPRESS_` or `cypress_` will automatically be added and made available to you.
@@ -147,8 +139,6 @@ Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 {% note danger Downsides %}
 - Not as obvious where values come from vs the other methods
 {% endnote %}
-
-***
 
 ## Option #4: Pass in from the CLI as `--env`
 
@@ -184,8 +174,6 @@ Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 {% note danger Downsides %}
 - Pain to write the `--env` options everywhere you use Cypress
 {% endnote %}
-
-***
 
 # Overriding Configuration
 
