@@ -35,6 +35,10 @@
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0"
   },
+  "files": [
+    "bin",
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
