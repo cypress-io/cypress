@@ -30,8 +30,6 @@ Option | Default | Description
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 
-***
-
 ## Timeouts
 
 Option | Default | Description
@@ -41,8 +39,6 @@ Option | Default | Description
 `pageLoadTimeout` | `60000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](https://on.cypress.io/api/wait) command
 `responseTimeout` | `30000` | Time, in milliseconds, to wait until a response for [`cy.request`](https://on.cypress.io/api/request), [`cy.wait`](https://on.cypress.io/api/wait), [`cy.fixture`](https://on.cypress.io/api/fixture), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), [`cy.setCookie`](https://on.cypress.io/api/setcookie), [`cy.clearCookie`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies), and [`cy.screenshot`](https://on.cypress.io/api/screenshot) commands
-
-***
 
 ## Folders
 
@@ -56,8 +52,6 @@ Option | Default | Description
 `screenshotsFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
 `videosFolder`     | `cypress/videos`     | Where Cypress will automatically save the video of the test run when running headlessly.
 
-***
-
 ## Screenshots
 
 Option | Default | Description
@@ -65,8 +59,6 @@ Option | Default | Description
 `screenshotsFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
 `screenshotOnHeadlessFailure` | `true` | Whether Cypress will automatically take a screenshot when a test fails when running tests headlessly or in CI.
 `trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before headless test runs.
-
-***
 
 ## Videos
 
@@ -77,23 +69,17 @@ Option | Default | Description
 `videosFolder`     | `cypress/videos`     | Where Cypress will automatically save the video of the test run when running headlessly.
 `trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before headless test runs.
 
-***
-
 ## Browser
 
 Option | Default | Description
 ----- | ---- | ----
 `chromeWebSecurity`    | true    | Whether Chome Web Security for `same-origin policy` and `insecure mixed content` is enabled. [Read more about this here.](https://on.cypress.io/guides/web-security)
 
-***
-
 ## Web Server
 
 Option | Default | Description
 ----- | ---- | ----
 `fileServerFolder`    | root project folder    | Where Cypress will attempt to serve your application files
-
-***
 
 ## Viewport
 
@@ -102,16 +88,12 @@ Option | Default | Description
 `viewportWidth` | `1000` | Default width in pixels for [`cy.viewport`](https://on.cypress.io/api/viewport)
 `viewportHeight` | `660` | Default height in pixels for  [`cy.viewport`](https://on.cypress.io/api/viewport)
 
-***
-
 ## Animations
 
 Option | Default | Description
 ----- | ---- | ----
 `waitForAnimations` | `true` | Whether to wait for elements to finish animating before applying commands
 `animationDistanceThreshold` | `5` | The distance in pixels an element must exceed to be considered animating
-
-***
 
 # Overriding Options
 
@@ -133,8 +115,6 @@ cypress run --config integrationFolder=tests,fixturesFolder=false
 
 cypress run --record --config viewportWidth=1280,viewportHeight=720
 ```
-
-***
 
 ## Environment Variables
 
@@ -168,7 +148,17 @@ Environment variables which do not match configuration keys will instead be set 
 You can [read more about Environment Variables](https://on.cypress.io/environment-variables).
 {% endnote %}
 
-***
+## Cypress.config
+
+You can also override configuration values within your test using [`Cypress.config()`](https://on.cypress.io/api/config).
+Any value you change will be permanently changed for the remainder of your tests.
+
+
+```
+Cypress.config("pageLoadTimeout", 100000)
+
+Cypress.config("pageLoadTimeout") // => 100000
+```
 
 # Resolved Configuration
 
