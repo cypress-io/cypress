@@ -11,7 +11,7 @@ describe "Guides", ->
     cy.url()
       .should('match', new RegExp(GUIDES_PATH))
 
-  it "all section & body links work", ->
+  xit "all section & body links work", ->
     filterMailtos = (urlsToFilter) ->
       Cypress._.filter(urlsToFilter, (url) -> not url.match(/mailto:/))
 
