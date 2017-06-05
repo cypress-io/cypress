@@ -63,10 +63,10 @@ In this example, on first login our server sends us back a session cookie.
 cy.contains('Login').click()
 cy.url().should('include', 'profile')
 cy.getCookies()
-    .should('have.length', 1)
-    .then(function(cookies) {
-      expect(cookies[0]).to.have.property('name', 'session_id')
-    })
+  .should('have.length', 1)
+  .then(function(cookies) {
+    expect(cookies[0]).to.have.property('name', 'session_id')
+  })
 ```
 
 # Command Log
@@ -75,13 +75,13 @@ cy.getCookies()
 
 ```javascript
 cy.getCookies().should('have.length', 1).then(function(cookies) {
-    expect(cookies[0]).to.have.property('name', 'fakeCookie1')
-    expect(cookies[0]).to.have.property('value', '123ABC')
-    expect(cookies[0]).to.have.property('domain')
-    expect(cookies[0]).to.have.property('httpOnly')
-    expect(cookies[0]).to.have.property('path')
-    expect(cookies[0]).to.have.property('secure')
-  })
+  expect(cookies[0]).to.have.property('name', 'fakeCookie1')
+  expect(cookies[0]).to.have.property('value', '123ABC')
+  expect(cookies[0]).to.have.property('domain')
+  expect(cookies[0]).to.have.property('httpOnly')
+  expect(cookies[0]).to.have.property('path')
+  expect(cookies[0]).to.have.property('secure')
+})
 ```
 
 The commands above will display in the command log as:
