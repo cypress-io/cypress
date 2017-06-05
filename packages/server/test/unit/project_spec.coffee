@@ -44,10 +44,46 @@ describe "lib/project", ->
     expect(p.projectRoot).not.to.eq("../foo/bar")
     expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
 
+  context "#saveState", ->
+    beforeEach ->
+      integrationFolder = "the/save/state/test"
+      @sandbox.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
+      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
+      @project.cfg = { integrationFolder }
+      savedState(@project.projectRoot).remove()
+
+    afterEach ->
+      savedState(@project.projectRoot).remove()
+
+    it "saves state without modification", ->
+      @project.saveState()
+      .then (state) ->
+        expect(state).to.deep.eq({})
+
+    it "adds property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 42 })
+
+    it "adds second property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then () => @project.saveState({ bar: true })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 42, bar: true })
+
+    it "modifes property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then () => @project.saveState({ foo: 'modified' })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 'modified' })
+
   context "#getConfig", ->
     integrationFolder = "foo/bar/baz"
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder })
       @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
@@ -74,8 +110,6 @@ describe "lib/project", ->
         expect(cfg).to.deep.eq(
           integrationFolder: integrationFolder
           foo: "bar"
-          isNewProject: false
-          state: {}
         )
 
     it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
@@ -122,11 +156,11 @@ describe "lib/project", ->
 
     it "updates config.state when saved state changes", ->
       state = savedState(@todosPath)
-      getSavedState = @sandbox.stub(state, "get").returns(Promise.resolve({}))
+      getSavedState = @sandbox.stub(state, "get").resolves({})
       options = {}
       @project.open(options)
       .then ->
-        getSavedState.returns(Promise.resolve({ autoScrollingEnabled: false }))
+        getSavedState.resolves({ autoScrollingEnabled: false })
         options.onSavedStateChanged()
       .then =>
         @project.getConfig()
@@ -246,7 +280,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
-      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").returns(Promise.resolve())
+      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
       @config = {
         projectRoot: "/path/to/root/"
         supportFile: "/path/to/root/foo/bar.js"

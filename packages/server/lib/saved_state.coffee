@@ -26,6 +26,7 @@ findSavedSate = (projectPath) ->
   log('full state path %s', fullStatePath)
   return stateFiles[fullStatePath] if stateFiles[fullStatePath]
 
+  log('making new state file around %s', fullStatePath)
   stateFile = new FileUtil({
     path: fullStatePath
   })

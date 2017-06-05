@@ -21,6 +21,7 @@ savedState  = require("./saved_state")
 Automation  = require("./automation")
 git         = require("./util/git")
 settings    = require("./util/settings")
+scaffoldLog = require("debug")("cypress:server:scaffold")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -200,7 +201,10 @@ class Project extends EE
   getAutomation: ->
     @automation
 
-  determineIsNewProject: (folder) -> scaffold.isNewProject(folder)
+  ## do not check files again and again - keep previous promise
+  ## to refresh it - just close and open the project again.
+  determineIsNewProject: (folder) ->
+    scaffold.isNewProject(folder)
 
   ## returns project config (user settings + defaults + cypress.json)
   ## with additional object "state" which are transient things like
@@ -213,25 +217,26 @@ class Project extends EE
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
+        scaffoldLog "untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}"
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
       .return(cfg)
 
-    getConfig = =>
-      if c = @cfg
-        Promise.resolve(c)
-      else
-        config.get(@projectRoot, options)
+    if c = @cfg
+      Promise.resolve(c)
+    else
+      config.get(@projectRoot, options)
+      .then (cfg) => @_setSavedState(cfg)
+      .then(setNewProject)
 
-    getConfig()
-    .then (cfg) => @_setSavedState(cfg)
-    .then setNewProject
-
-  # forces saving of project's state
-  saveState: () ->
-    throw new Error ("Missing project config") if not @cfg
-    savedState(@projectRoot).set(@cfg.state)
+  # forces saving of project's state by first merging with argument
+  saveState: (stateChanges = {}) ->
+    throw new Error("Missing project config") if not @cfg
+    throw new Error("Missing project root") if not @projectRoot
+    newState = _.merge({}, @cfg.state, stateChanges)
+    savedState(@projectRoot).set(newState)
     .then =>
-      @cfg.state
+      @cfg.state = newState
+      newState
 
   _setSavedState: (cfg) ->
     savedState(@projectRoot).get()

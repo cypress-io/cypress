@@ -53,5 +53,6 @@ register('updater:check', false)
 register('updater:run', false)
 register('window:open')
 register('window:close')
+register('onboarding:closed')
 
 export default ipc
