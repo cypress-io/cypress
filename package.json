@@ -8,7 +8,7 @@
     "all": "node dev/run.js",
     "test": "echo 'This root monorepo is only for local development and new contributions. There are no tests.' && exit(1)",
     "link": "node ./dev/link-packages.js",
-    "postinstall": "npm run link && npm run all install && npm run build",
+    "postinstall": "CYPRESS_DOWNLOAD=0 npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
     "lint": "standard --verbose --fix dev/*.js",
     "commit": "commit-wizard"

@@ -3,10 +3,11 @@ const minimist = require('minimist')
 const args = minimist(process.argv.slice(2))
 
 function installingFromNpmAsAUser () {
-  // when installing this CLI package from
-  // another project, the cwd will not match
-  // __dirname
-  return process.cwd() !== __dirname
+  // when installing from monorepo we explicitly
+  // opt out of downloading. if we aren't running
+  // from the root monorepo, then go ahead and
+  // download and install cypress binary
+  return process.env.CYPRESS_DOWNLOAD !== "0"
 }
 
 switch (args.exec) {
