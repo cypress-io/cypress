@@ -19,7 +19,7 @@ const packageNameFromPath = (fullPath) => {
   .replace('packages/', '')
 }
 
-const nonPackageDirs = ['docs/']
+const nonPackageDirs = ['docs/', 'cli/']
 
 const getDirs = () => {
   const logDirs = (dirs) => {
