@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: faq
 title: FAQ
 comments: false
 containerClass: faq
@@ -173,11 +173,35 @@ It is possible to upload files in your application but its different based on ho
 
 ## {% fa fa-question-circle green %} What is the projectId for?
 
-A `projectId` is added to your `cypress.json` after you setup your project for the Dashboard. This `cypress.json` is meant to be checked into source control.
+Once you setup your project to record, we generate a unique `projectId` for your project, and automatically insert it into your `cypress.json` file.
 
-The `projectId` identifies your project in the [Dashboard](https://on.cypress.io/dashboard), which gives you valuable insight into CI runs and failure and debugging info.
+**The `projectId` is a 6 character string in your cypress.json:**
 
-You can forgo the projectId and CI keys altogether by running `cypress run` headlessly, but then you're basically opting out of the Dashboard and all its goodies.
+```json
+{
+  "projectId": "a7bq2k"
+}
+```
+
+This is how we uniquely identify your project. If you manually alter this, **Cypress will no longer be able to identify your project or find the recorded builds for it**. We recommend that you check your `cypress.json` including the `projectId` into source control.
+
+## {% fa fa-question-circle green %} What is a Record Key?
+
+Once you're setup to record test runs, we automatically generate a **Record Key** for the project.
+
+**A record key is a GUID that looks like this:**
+
+```shell
+f4466038-70c2-4688-9ed9-106bf013cd73
+```
+
+{% note info  %}
+You can create multiple Record Keys for a project, or delete existing ones from our [Dashboard](https://on.cypress.io/dashboard).
+{% endnote %}
+
+You can also find your Record Key inside of the **Settings** tab.
+
+![screen shot 2017-02-12 at 4 12 40 pm](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
 
 
 ## {% fa fa-question-circle green %} How do I get the native DOM reference of an element found using Cypress?
@@ -318,50 +342,97 @@ No, Cypress modifies network traffic in real time and therefore must sit between
 As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with [`.as()`](https://on.cypress.io/as) to essentially recreate what page objects give you.
 
 
-<!-- # Dashboard
+# Dashboard
 
-## What is the Dashboard?
+## {% fa fa-question-circle green %} What is the Dashboard?
+
+![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
+
+[The Dashboard](https://on.cypress.io/dashboard) is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your run.
+
+You can read more [here](https://on.cypress.io/guides/dashboard-features).
+
+## {% fa fa-question-circle green %} How do I record my tests?
+
+1. First [setup your project to record](https://on.cypress.io/recording-project-runs).
+2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
+
+After recording your tests, you will see them in the Dashboard and in the Desktop Application.
+
+## {% fa fa-question-circle green %} How much does it cost?
+
+Everything is free while we are in Beta.
+
+In the future, we will charge per month for private projects.
+
+Public projects will be free but will likely have a monthly usage cap on them.
+
+We will offer similar pricing models of other Developer Tools you are familiar with using.
+
+## {% fa fa-question-circle green %} How is this different than CI?
+
+Cypress is **complimentary** to your CI provider, and plays a completely different role.
+
+It doesn't replace nor change anything related to CI. You will simply run Cypress tests in your CI provider.
+
+The difference is that your CI provider has no idea what is going on inside of the Cypress process. It's simply programmed to know whether or not a process failed - based on whether it had an exit code greater than `0`.
+
+Our dashboard provides you with the low level details of *what* happened during your run. Using both your CI provider + Cypress together gives the insight required to debug your test runs.
+
+When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the test run results. It should be instantly clear what the problem was.
+
+## {% fa fa-question-circle green %} Can I host the Dashboard data myself?
+
+No, although we are looking to build an on-premise version of the Dashboard for use in private clouds. If you're interested in our on-premise version, [let us know](mailto:hello@cypress.io)!
+
+## {% fa fa-question-circle green %} Can I choose not to use the Dashboard?
+
+Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
+
+You can simply always run your tests in CI using `cypress run` without the `--record` flag which does not communicate with our external servers and will not record any test results.
+
+## {% fa fa-question-circle green %} What is the difference between public and private projects?
+
+**A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
+
+**A private project** means that only [users](https://on.cypress.io/guides/organizations#section-inviting-users) you explicitly invite to your [organization](https://on.cypress.io/guides/organizations) can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
+
+A Record Key has nothing to do with **viewing** build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
 
 
+## {% fa fa-question-circle green %} What does Cypress record?
 
-## How much does it cost?
+We capture the following:
 
+- [Standard Output](#section-standard-output)
+- [Test Failures](#section-test-failures)
+- [Screenshots](#section-screenshots)
+- [Video](#section-video)
 
+We have already begun the implementation for capturing even more things from your run such as:
 
-## What does Cypress record?
+- Commands
+- Network Traffic
+- Browser Console Logs
 
+These will be added in subsequent releases.
 
-
-## How many recordings can I store?
-
-
-
-## Can't I just record my app running, without the Cypress runner?
-
-
-
-## Can I see the mouse movements in my recorded video?
-
-
-
-## Is there a way to see console logs or application errors in a recorded run?
+<!-- ## How many recordings can I store? -->
 
 
+<!-- ## Can't I just record my app running, without the Cypress runner? -->
 
-## Is it possible to transfer a project to an organization I'm not a member of?
+<!-- ## Can I see the mouse movements in my recorded video? -->
 
+<!-- ## Is there a way to see console logs or application errors in a recorded run? -->
 
+<!-- ## Is it possible to transfer a project to an organization I'm not a member of? -->
 
-## Why are my tests displaying a “still running”?
+<!-- ## Why are my tests displaying a “still running”? -->
 
+<!-- ## Is there any way to remove a run and the data from the Dashboard? -->
 
-
-## Is there any way to remove a run and the data from the Dashboard?
-
-
-
-## How secure is storing my test runs (videos and screenshots) on your servers? -->
-
+<!-- ## How secure is storing my test runs (videos and screenshots) on your servers? -->
 
 # Company
 
