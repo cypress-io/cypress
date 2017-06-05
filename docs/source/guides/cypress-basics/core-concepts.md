@@ -257,6 +257,23 @@ cy.get('a.some-link') // Find all links with class 'some-link'
   }).should('equal', 'http://example.com') // .should works against Strings!
 ```
 
+### Using Aliases to Refer to Previous Subjects
+
+Cypress has some added functionality for quickly referring back to past DOM element subjects called [Aliases](/guides/cypress-basics/aliases-variables-in-an-async-world.html). It looks something like this:
+
+```js
+cy.get('.my-selector')
+  .as('myElement') // sets the alias
+  .click()
+
+/* many more actions */
+
+cy.get('@myElement') // re-queries the DOM as before only if necessary
+  .click()
+```
+
+This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us in the same way as before if it is not.
+
 ## Commands Are Asynchronous
 
 It is very important to understand that Cypress commands don't do anything at the moment they are invoked, but rather enqueue themselves to be run later. This is what we mean when we say Cypress commands are asynchronous.
