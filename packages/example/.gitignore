@@ -1,9 +1,0 @@
-app
-build
-node_modules
-*.log
-.publish
-cypress/screenshots
-cypress/videos
-cypress/fixtures/profile.json
-cypress/fixtures/users.json
