@@ -39,12 +39,12 @@ describe "App", ->
         @win.foo()
       , 0
 
-      ## wrap it so it retries and avoids async headache
-      cy.wrap(@ipc.guiError).should("be.calledWithExactly", {
-        name: "Error"
-        message: "foo"
-        stack: err.stack
-      })
+      cy.wrap({}).should ->
+        expect(@ipc.guiError).to.be.calledWithExactly({
+          name: "Error"
+          message: "foo"
+          stack: err.stack
+        })
 
   context "on:menu:clicked", ->
     beforeEach ->
@@ -87,8 +87,8 @@ describe "App", ->
       @start()
 
     it "requests current user", ->
-      ## wrap it so it retries and avoids async headache
-      cy.wrap(@ipc.getCurrentUser).should("be.called")
+      cy.wrap({}).should ->
+        expect(@ipc.getCurrentUser).to.be.called
 
     it "redirects to login when no user", ->
       @getCurrentUser.resolve(null)
