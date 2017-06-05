@@ -47,7 +47,7 @@
   }
 
 }
-.article-content, .faq {
+.article-content, .faq .article {
   line-height: $line-height;
 
   hr {
@@ -192,7 +192,7 @@
     }
 
     &+h2 {
-      margin-top: 0;
+      margin-top: 1.5em;
       border-top: 0;
       padding-top: 0;
     }
@@ -200,7 +200,7 @@
 
   h2 {
     font-size: 1.3em;
-    line-height: 1em;
+    line-height: 1.5em;
     font-weight: 500;
     margin: 1.5em 0 0.5em 0;
     padding-top: 1.5em;

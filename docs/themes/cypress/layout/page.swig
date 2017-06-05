@@ -1,4 +1,4 @@
-<div id="content-wrap">
+<div id="content-wrap"  class="{{ page.containerClass }}">
   <div id="content" class="wrapper">
     <div id="content-inner">
       <article class="article-container" itemscope itemtype="http://schema.org/Article">

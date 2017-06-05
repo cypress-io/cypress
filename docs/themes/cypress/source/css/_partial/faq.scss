@@ -1,31 +1,46 @@
 .faq {
-  width: 750px;
-  margin: 0 auto 50px;
 
-
-  h1, h2, p {
-    font-family: $font-title;
+  #content-inner {
+    margin-left: 0;
   }
 
-  h1 {
-    font-size: 2.5em;
-    line-height: 1em;
-    font-weight: 800;
-    margin: 2em 0 1em;
+  .article-inner {
+      margin-right: 350px;
+  }
 
-    &:first-of-type {
-      margin-top: 1em;
+  #article-toc {
+    width: 350px;
+    margin-right: -350px;
+
+    &.fixed {
+      right: 350px;
+    }
+
+    #article-toc-inner {
+      width: 350px;
     }
   }
 
-  h2 {
-    font-size: 1.4em;
-    line-height: 1.6em;
-    margin: 1.5em 0 0.5em;
-    font-weight: 500;
+  .toc-link {
+    white-space: nowrap;
+    overflow: hidden;
   }
 
-  p {
-    font-size: 1em;
+  .article-footer, #sidebar, .article-header {
+    display: none;
+  }
+
+  .article {
+    h1 {
+      &:first-of-type {
+        margin-top: 0;
+        border-top: 0;
+      }
+    }
+
+    h2 {
+      margin-top: 2em;
+      padding-top: 2em;
+    }
   }
 }
