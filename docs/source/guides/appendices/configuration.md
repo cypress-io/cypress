@@ -168,7 +168,17 @@ Environment variables which do not match configuration keys will instead be set 
 You can [read more about Environment Variables](https://on.cypress.io/environment-variables).
 {% endnote %}
 
-***
+## Cypress.config
+
+You can also override configuration values within your test using `Cypress.config`.
+Any value you change will be permanently changed for the remainder of your tests.
+
+
+```
+Cypress.config("pageLoadTimeout", 100000)
+
+Cypress.config("pageLoadTimeout") // => 100000
+```
 
 # Resolved Configuration
 
