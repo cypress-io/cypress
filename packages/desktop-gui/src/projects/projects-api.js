@@ -179,6 +179,11 @@ const openProject = (project) => {
   .catch(setProjectError)
 }
 
+const reopenProject = (project) => {
+  return closeProject(project)
+  .then(() => openProject(project))
+}
+
 const getRecordKeys = () => {
   return ipc.getRecordKeys()
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
@@ -191,6 +196,7 @@ export default {
   pollProjects,
   stopPollingProjects,
   openProject,
+  reopenProject,
   closeProject,
   addProject,
   runSpec,

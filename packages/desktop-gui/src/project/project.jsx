@@ -1,10 +1,10 @@
-import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
+import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
 
 import Config from '../config/config'
@@ -12,15 +12,6 @@ import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import Runs from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
-
-const PortInUse = () => {
-  return (
-    <div>
-      <hr />
-      <p>To fix, stop the other running process or change the port in cypress.json</p>
-    </div>
-  )
-}
 
 @observer
 class Project extends Component {
@@ -63,17 +54,6 @@ class Project extends Component {
     }
   }
 
-  _projectName () {
-    let project = this.props.project
-
-    if (project.name) {
-      return project.name
-    } else {
-      let splitName = _.last(project.path.split('/'))
-      return _.truncate(splitName, { length: 60 })
-    }
-  }
-
   _error = () => {
     let err = this.props.project.error
 
@@ -84,33 +64,29 @@ class Project extends Component {
           <strong>Can't start server</strong>
         </p>
         <p>
-          { this._errorMessage(err.message) }
+          <span dangerouslySetInnerHTML={{
+            __html: err.message.split('\n').join('<br />'),
+          }} />
         </p>
-        {err.portInUse && <PortInUse />}
-        <Link
-          to='/projects'
-          onClick={this._closeProject}
+        {err.portInUse && (
+          <div>
+            <hr />
+            <p>To fix, stop the other running process or change the port in cypress.json</p>
+          </div>
+        )}
+        <button
           className='btn btn-default btn-sm'
+          onClick={this._reopenProject}
         >
-          <i className='fa fa-chevron-left'></i>{' '}
-          Go Back to Projects
-        </Link>
+          <i className='fa fa-refresh'></i>{' '}
+          Try Again
+        </button>
       </div>
     )
   }
 
-  _errorMessage (message) {
-    const html = {
-      __html: message.split('\n').join('<br />'),
-    }
-
-    return (
-      <span dangerouslySetInnerHTML={html} />
-    )
-  }
-
-  _closeProject = function () {
-    projectsApi.closeProject(this.props.project)
+  _reopenProject = () => {
+    projectsApi.reopenProject(this.props.project)
   }
 }
 

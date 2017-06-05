@@ -1,49 +1,32 @@
-{deferred, stubIpc} = require("../support/util")
-
 describe "Specs List", ->
   beforeEach ->
-    cy
-      .fixture("user").as("user")
-      .fixture("projects").as("projects")
-      .fixture("projects_statuses").as("projectStatuses")
-      .fixture("config").as("config")
-      .fixture("specs").as("specs")
-      .visit("/")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
+    cy.fixture("projects").as("projects")
+    cy.fixture("projects_statuses").as("projectStatuses")
+    cy.fixture("config").as("config")
+    cy.fixture("specs").as("specs")
+    cy.visit("/?projectPath=/foo/bar").then (win) ->
+      { start, @ipc } = win.App
 
-        stubIpc(@App.ipc, {
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.resolves(@user)
-          "on:menu:clicked": ->
-          "close:browser": (stub) -> stub.resolves(null)
-          "close:project": ->
-          "on:focus:tests": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:projects": (stub) => stub.resolves(@projects)
-          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
-          "open:project": ->
-          "get:specs": ->
-          "change:browser:spec": (stub) -> stub.resolves({})
-        })
+      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getCurrentUser").resolves(@user)
+      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      cy.stub(@ipc, "closeBrowser").resolves(null)
+      cy.stub(@ipc, "launchBrowser")
+      cy.stub(@ipc, "openProject")
+      cy.stub(@ipc, "closeProject").resolves()
+      cy.stub(@ipc, "openFinder")
+      cy.stub(@ipc, "externalOpen")
 
-        @App.start()
+      @updaterCheck = @util.deferred()
+      cy.stub(@ipc, "updaterCheck").resolves(@updaterCheck.promise)
 
-  it "navigates to project specs page", ->
-    cy
-      .get(".projects-list a")
-        .contains("My-Fake-Project").click()
-      .location().its("hash")
-        .should("include", "specs")
+      start()
 
   describe "no specs", ->
     beforeEach ->
-      @["open:project"].yields(null, @config)
-      @["get:specs"].yields(null, [])
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
+      @ipc.getSpecs.yields(null, [])
+      @ipc.openProject.yield(null, @config)
 
     it "displays empty message", ->
       cy.contains("No files found")
@@ -54,23 +37,19 @@ describe "Specs List", ->
     it "triggers open:finder on click of text folder", ->
       cy
         .contains(@config.integrationFolder).click().then ->
-          expect(@App.ipc).to.be.calledWith("open:finder", @config.integrationFolder)
+          expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
 
     it "displays help link", ->
       cy.contains("a", "Need help?")
 
     it "opens link to docs on click of help link", ->
       cy.contains("a", "Need help?").click().then ->
-        expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/writing-first-test")
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/writing-first-test")
 
   describe "first time onboarding specs", ->
     beforeEach ->
       @config.isNewProject = true
-      @["open:project"].yields(null, @config)
-      @["get:specs"].yields(null, @specs)
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
+      @ipc.openProject.yield(null, @config)
 
     it "displays modal", ->
       cy
@@ -102,23 +81,17 @@ describe "Specs List", ->
     it "triggers open:finder on click of example file", ->
       cy
         .get(".modal").contains("example_spec.js").click().then ->
-          expect(@App.ipc).to.be.calledWith("open:finder", @config.integrationExampleFile)
+          expect(@ipc.openFinder).to.be.calledWith(@config.integrationExampleFile)
 
     it "triggers open:finder on click of text folder", ->
       cy
         .get(".modal").contains("cypress/integration").click().then ->
-          expect(@App.ipc).to.be.calledWith("open:finder", @config.integrationFolder)
+          expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
 
   describe "lists specs", ->
     beforeEach ->
-      @["open:project"].yields(null, @config)
-      @["get:specs"].yields(null, @specs)
-
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .location().its("hash")
-          .should("include", "specs")
+      @ipc.getSpecs.yields(null, @specs)
+      @ipc.openProject.yield(null, @config)
 
     context "run all specs", ->
       it "displays run all specs button", ->
@@ -129,16 +102,14 @@ describe "Specs List", ->
           .contains(".btn", "Run All Tests")
             .find("i").should("have.class", "fa-play")
 
-      it "triggers launch:browser on click of button", ->
+      it "triggers browser launch on click of button", ->
         cy
           .contains(".btn", "Run All Tests").click()
           .then ->
-            ln = @App.ipc.args.length
-            lastCallArgs = @App.ipc.args[ln-1]
+            launchArgs = @ipc.launchBrowser.lastCall.args
 
-            expect(lastCallArgs[0]).to.eq "launch:browser"
-            expect(lastCallArgs[1].browser).to.eq "chrome"
-            expect(lastCallArgs[1].spec).to.eq "__all"
+            expect(launchArgs[0].browser).to.eq "chrome"
+            expect(launchArgs[0].spec).to.eq "__all"
 
       describe "all specs running in browser", ->
         beforeEach ->
@@ -166,19 +137,16 @@ describe "Specs List", ->
       beforeEach ->
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
-      it "triggers close:browser and launch:browser on click of file", ->
+      it "closes then launches browser on click of file", ->
         cy
           .get("@firstSpec")
           .click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("close:browser")
+            expect(@ipc.closeBrowser).to.be.called
 
-            ln = @App.ipc.args.length
-            lastCallArgs = @App.ipc.args[ln-1]
-
-            expect(lastCallArgs[0]).to.eq "launch:browser"
-            expect(lastCallArgs[1].browser).to.eq "chrome"
-            expect(lastCallArgs[1].spec).to.eq "cypress/integration/app_spec.coffee"
+            launchArgs = @ipc.launchBrowser.lastCall.args
+            expect(launchArgs[0].browser).to.equal("chrome")
+            expect(launchArgs[0].spec).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->
         cy
@@ -227,12 +195,8 @@ describe "Specs List", ->
 
   describe "spec list updates", ->
     beforeEach ->
-      @["open:project"].yields(null, @config)
-      @["get:specs"].yields(null, @specs)
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .location().its("hash").should("include", "specs")
+      @ipc.getSpecs.yields(null, @specs)
+      @ipc.openProject.yield(null, @config)
 
     it "updates spec list selected on specChanged", ->
       cy
@@ -240,11 +204,11 @@ describe "Specs List", ->
         .contains("a", "app_spec.coffee").as("firstSpec")
         .then ->
           @config.specChanged = "integration/app_spec.coffee"
-          @["open:project"].yield(null, @config)
+          @ipc.openProject.yield(null, @config)
         .get("@firstSpec").should("have.class", "active")
         .then ->
           @config.specChanged = "integration/accounts/account_new_spec.coffee"
-          @["open:project"].yield(null, @config)
+          @ipc.openProject.yield(null, @config)
         .get("@firstSpec").should("not.have.class", "active")
       cy
         .contains("a", "account_new_spec.coffee")
@@ -262,50 +226,42 @@ describe "Specs List", ->
       }
 
     it "displays normal error message", ->
-      @["open:project"].yields(@err)
+      @ipc.openProject.yield(@err)
       cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
         .get(".error")
           .should("contain", @err.message)
 
     it "displays error message with html escaped", ->
       @err.message = "Error reading from: <span class='ansi-blur-gf'>/Users/cypress.json</span><br /><br /> <span class=ansi-yellow-fg'>SyntaxError</span>"
-      @["open:project"].yields(@err)
+      @ipc.openProject.yield(@err)
       cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
         .get(".error")
           .should("contain", "Error reading from: /Users/cypress.json")
           .should("not.contain", "<span")
 
     it "displays Port in Use instructions on err", ->
-      @["open:project"].yields(@err)
+      @ipc.openProject.yield(@err)
       cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
         .get(".error")
           .should("contain", @err.message)
           .and("contain", "To fix")
 
     it "word wraps long error message plus update bar", ->
-      @App.ipc.withArgs("updater:check").resolves("1.3.4")
+      @updaterCheck.resolve("1.3.4")
       @longErrMessage = "Morbileorisus,portaacconsecteturac,vestibulumateros.Nullamquisrisusegeturnamollis ornare vel eu leo. Donec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo. Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. Vestibulum id ligula porta felis euismod semper.Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam id dolor id nibh ultricies vehicula ut id elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec id elit non mi porta gravida at eget metus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio, dapibus ac facilisis in, egestas eget quam.Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod."
-      @["open:project"].yields({name: "Error", message: @longErrMessage, stack: "[object Object]↵"})
+      @ipc.openProject.yield({name: "Error", message: @longErrMessage, stack: "[object Object]↵"})
+
       cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
         .get("#updates-available").should("be.visible")
         .contains("New updates are available")
 
       cy
         .get(".error")
-          .and("contain", @longErrMessage)
+        .and("contain", @longErrMessage)
 
-    it "closes project on click of 'go back to projects' button", ->
-      @["open:project"].yields(@err)
+    it "re-opens project on click of 'Try again' button", ->
+      @ipc.openProject.yield(@err)
       cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .get(".error").contains("Go Back to Projects").click().then ->
-          expect(@App.ipc).to.be.calledWith("close:project")
+        .get(".error").contains("Try Again").click().should =>
+          expect(@ipc.closeProject).to.be.called
+          expect(@ipc.openProject).to.be.called
