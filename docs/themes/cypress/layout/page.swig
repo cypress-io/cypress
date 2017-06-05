@@ -12,9 +12,11 @@
               {{ page_anchor(page.content) }}
             </div>
             <footer class="article-footer">
-              <time class="article-footer-updated" datetime="{{ date_xml(page.updated) }}" itemprop="dateModified">{{ __('page.last-updated', date(page.updated)) }}</time>
               {{ page_nav() }}
             </footer>
+            <div class="article-footer-updated">
+              <time datetime="{{ date_xml(page.updated) }}" itemprop="dateModified">{{ __('page.last-updated', date(page.updated)) }}</time>
+            </div>
             {{ partial('partial/comment') }}
           </div>
           <aside id="article-toc" role="navigation">

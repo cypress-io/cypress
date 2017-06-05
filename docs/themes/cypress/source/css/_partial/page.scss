@@ -368,35 +368,41 @@
 }
 
 .article-footer {
-  margin: 4em 0;
+  margin: 4em 0 0;
   border-top: 1px solid $color-border;
   text-align: center;
   color: $color-gray;
   line-height: 1em;
   padding-top: 2em;
   position: relative;
+
   &:before {
     content: "";
     display: table;
   }
+
   &:after {
     content: "";
     display: table;
     clear: both;
   }
 }
+
 .article-footer-prev, .article-footer-next {
   color: $color-link;
   text-decoration: none;
   font-weight: 400;
   font-family: $font-title;
   position: absolute;
+
   &:hover {
     color: $color-link-hover;
   }
+
   span {
     padding: 0 6px;
   }
+
   i {
     font-size: 0.8em;
   }
@@ -411,10 +417,29 @@
 }
 
 .article-footer-updated {
+  margin: 3em 0;
+  border-top: 1px solid $color-border;
+  text-align: center;
   font-size: 0.9em;
   font-family: $font-title;
   font-style: italic;
+  color: $color-gray;
+  line-height: 1em;
+  padding-top: 2em;
+  position: relative;
+
+  &:before {
+    content: "";
+    display: table;
+  }
+
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
 }
+
 
 .article-header {
   padding: 20px 0;
