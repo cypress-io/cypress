@@ -15,12 +15,6 @@
     max-width: 800px;
   }
 
-  .faq {
-    // max-width: 750px;
-    // margin: 0 auto 50px;
-    // padding: 0 30px;
-  }
-
 }
 
 @media screen and(min-width: 769px) {
@@ -39,7 +33,7 @@
   }
 
   #lang-select-wrap {
-    display: block;
+    display: inline-block;
   }
   #banner-title {
     padding-top: 100px;

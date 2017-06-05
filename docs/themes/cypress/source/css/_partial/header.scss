@@ -41,7 +41,7 @@
   transition: 0.2s;
   font-family: $font-title;
   display: inline-block;
-  padding: 10px 15px;
+  padding: 5px 15px;
   font-weight: 400;
 
   &:hover {
@@ -64,15 +64,21 @@
 #lang-select-wrap {
   display: none;
   position: relative;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.18);
+  padding: 0 10px;
+  margin-left: 10px;
 }
+
 #lang-select-label {
   color: $white;
   opacity: 0.7;
   font-family: $font-title;
   font-size: 14px;
-  line-height: 50px;
+  line-height: 30px;
   span {
-    padding-left: 8px;
+    padding-left: 6px;
+    padding-right: 6px;
   }
   i {
     opacity: 0.7;
