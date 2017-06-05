@@ -247,12 +247,14 @@ If you have more Commands to add after your `.then()`, you'll need to maintain t
 Let's look at an example:
 
 ```js
-cy.get('a.some-link').first().then(function(myElement) {
-  // Do something with the given subject, which happens to be a link element
-  let linkDestination = myElement.attr('href')
-  // Causes the next Command to be executed with this String as subject
-  return linkDestination
-}).should('equal', 'http://example.com') // .should works against Strings!
+cy.get('a.some-link') // Find all links with class 'some-link'
+  .first()            // Grab the first one
+  .then(function(myElement) { // Work with it a moment...
+    // Extract its href as a string
+    let linkDestination = myElement.attr('href')
+    // This string is yielded into the next command in the chain
+    return linkDestination
+  }).should('equal', 'http://example.com') // .should works against Strings!
 ```
 
 ## Asynchronous, Yet Serial

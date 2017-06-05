@@ -26,7 +26,7 @@ it("let's me debug like a fiend", function() {
 })
 ```
 
-...alas, this will not work. As you may remember from [Commands, Elements, and Assertions](/guides/cypress-basics/commands-elements-and-assertions.html), `cy.*` commands simply enqueue and action to be taken later. Can you see what this test will do given that perspective? `cy.visit()` and `cy.get()` will both return immediately, having enqueued their work to be done later, and `debugger` will be executed before anything has happened... which will result in an error!
+...alas, this will not work. As you may remember from [Core Concepts](/guides/cypress-basics/core-concepts.html), `cy.*` commands simply enqueue and action to be taken later. Can you see what this test will do given that perspective? `cy.visit()` and `cy.get()` will both return immediately, having enqueued their work to be done later, and `debugger` will be executed before anything has happened... which will result in an error!
 
 Let's use `.then()` to tap into the Cypress command flow and execute `debugger` at the appropriate time:
 
