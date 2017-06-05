@@ -30,10 +30,10 @@ collectResponse = (resStream) ->
 
 browserifyFile = (filePath) ->
   streamToPromise(
-    browserify(
-      entries: [filePath]
+    browserify({
+      entries: [filePath],
       extensions: [".js", ".jsx", ".coffee", ".cjsx"]
-    )
+    })
     .transform(cjsxify)
     .transform(babelify, {
       plugins: ["add-module-exports"],

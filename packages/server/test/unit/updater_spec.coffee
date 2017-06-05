@@ -158,7 +158,7 @@ describe "lib/updater", ->
           done()
 
     it "sends x-machine-id as null on error", (done) ->
-      @sandbox.stub(nmi, "machineId").rejects(new Error)
+      @sandbox.stub(nmi, "machineId").rejects(new Error())
 
       @updater.getClient().checkNewVersion =>
         expect(@get).to.be.calledWithMatch({
@@ -212,7 +212,7 @@ describe "lib/updater", ->
         expect(spy).to.be.called
 
       it "does not call #download if there is an error", ->
-        @checkNewVersion.yields((new Error), true, {foo: "bar"})
+        @checkNewVersion.yields((new Error()), true, {foo: "bar"})
         @updater.run()
         expect(@download).not.to.be.called
 
@@ -244,7 +244,7 @@ describe "lib/updater", ->
         expect(@updater.unpack).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app", {})
 
       it "does not call unpack on error", ->
-        @updater.client.download.yields((new Error), "/Users/bmann/app")
+        @updater.client.download.yields((new Error()), "/Users/bmann/app")
         @updater.download({})
         @clock.tick(1000)
         expect(@updater.unpack).not.to.be.called
@@ -275,7 +275,7 @@ describe "lib/updater", ->
         expect(@updater.runInstaller).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app")
 
       it "does not call runInstaller on error", ->
-        @updater.client.unpack.yields((new Error), "/Users/bmann/app")
+        @updater.client.unpack.yields((new Error()), "/Users/bmann/app")
         @updater.unpack("/some/path", {})
         expect(@updater.runInstaller).not.to.be.called
 

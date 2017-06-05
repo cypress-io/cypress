@@ -114,6 +114,6 @@ describe "lib/settings", ->
     it "only writes over conflicting keys", ->
       @setup({projectId: "12345", autoOpen: true})
       .then ->
-        settings.write(projectRoot, projectId: "abc123")
+        settings.write(projectRoot, {projectId: "abc123"})
       .then (obj) ->
         expect(obj).to.deep.eq {projectId: "abc123", autoOpen: true}

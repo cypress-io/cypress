@@ -101,16 +101,17 @@ describe "lib/project", ->
         })
 
     it "resolves if cfg is already set", ->
-      @project.cfg =
-        integrationFolder: integrationFolder
+      @project.cfg = {
+        integrationFolder: integrationFolder,
         foo: "bar"
+      }
 
       @project.getConfig()
       .then (cfg) ->
-        expect(cfg).to.deep.eq(
-          integrationFolder: integrationFolder
+        expect(cfg).to.deep.eq({
+          integrationFolder: integrationFolder,
           foo: "bar"
-        )
+        })
 
     it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
       state = savedState(@todosPath)
@@ -255,7 +256,7 @@ describe "lib/project", ->
       expect(@watch).not.to.be.called
 
     it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
-      @project.generatedProjectIdTimestamp = timestamp = new Date
+      @project.generatedProjectIdTimestamp = timestamp = new Date()
 
       emit = @sandbox.spy(@project, "emit")
 
@@ -371,7 +372,7 @@ describe "lib/project", ->
         expect(err.message).to.include("path/to/project")
 
     it "bubbles up Settings.read errors", ->
-      err = new Error
+      err = new Error()
       err.code = "EACCES"
 
       @sandbox.stub(settings, "read").rejects(err)
@@ -796,7 +797,7 @@ describe "lib/project", ->
     it "throws CANNOT_FETCH_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "getProjectToken")
         .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error)
+        .rejects(new Error())
 
       Project.getSecretKeyByPath(@todosPath)
       .then ->
@@ -819,7 +820,7 @@ describe "lib/project", ->
     it "throws CANNOT_CREATE_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "updateProjectToken")
         .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error)
+        .rejects(new Error())
 
       Project.generateSecretKeyByPath(@todosPath)
       .then ->
