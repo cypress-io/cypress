@@ -99,6 +99,7 @@ api:
     readfile: readfile.html
     reload: reload.html
     request: request.html
+    root: root.html
     route: route.html
     screenshot: screenshot.html
     scrollintoview: scrollintoview.html
