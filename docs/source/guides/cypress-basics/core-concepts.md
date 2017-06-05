@@ -340,7 +340,11 @@ Not very pretty, right? This is essentially what Cypress builds for you behind t
 
 # Assertions
 
-Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and also uses them internally, automatically. It exposes synchronous and asynchronous assertion interfaces, so you're always a few keystrokes away from an expressive test.
+In testing, assertions are how you ensure things are as you expect them to be. In english, this might be phrased as "I assert that two plus two equals four", or "I assert that, when passed two and two as arguments, the addition function returns four." The idea is to throw an error if the condition is ever _not_ true.
+
+## Assertion Libraries
+
+Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
 
 But before we talk about _how_ to assert, let's talk about _whether_ to assert!
 
