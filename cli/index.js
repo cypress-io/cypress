@@ -10,6 +10,7 @@ function installingFromNpmAsAUser () {
   return process.env.CYPRESS_DOWNLOAD !== "0"
 }
 
+// we're being used from the command line
 switch (args.exec) {
   case 'install':
     // only go out and download the cypress
@@ -20,5 +21,6 @@ switch (args.exec) {
     }
     break
   default:
-    require('./lib/cli').init()
+    // export our node module interface
+    module.exports = require("./lib/cypress")
 }

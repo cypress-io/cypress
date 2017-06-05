@@ -1,3 +1,5 @@
+// https://github.com/cypress-io/cypress/issues/316
+
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs-extra'))
 const tmp = Promise.promisifyAll(require('tmp'))
@@ -11,9 +13,12 @@ module.exports = {
   },
 
   run (options = {}) {
-    return tmp.fileAsync().then((outputPath) => {
+    return tmp.fileAsync()
+    .then((outputPath) => {
       options.outputPath = outputPath
-      return run.start(options).then(() => {
+
+      return run.start(options)
+      .then(() => {
         return fs.readJsonAsync(outputPath)
       })
     })
