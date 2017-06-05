@@ -350,7 +350,7 @@ But before we talk about _how_ to assert, let's talk about _whether_ to assert!
 
 ## To Assert, or Not To Assert?
 
-Cypress makes dozens of assertions available to you via its included libraries, but sometimes the best test may make no assertions at all! What do we mean by this? Let's look at an example:
+Despite the dozens of assertions Cypress makes available to you, sometimes the best test may make no assertions at all! How can this be? Let's look at an example:
 
 ```js
 cy.visit("/home")
@@ -375,9 +375,14 @@ Without a single explicit assertion, there are dozens of ways this test can fail
 
 Can you think of any more?
 
-Cypress expects this veritable minefield of modern web development and seeks to visualize all this chaos in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
+{% note info %}
+Even with no assertions, a few lines of Cypress can ensure thousands of lines of code are working properly, both on the client and server!
 
-As such, it may be beneficial to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, and call it a day. You can rest assured that _so many things **must** be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus.
+{% endnote %}
+
+Cypress anticipates the many traps of modern web development and seeks to visualize all this chaos in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
+
+As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, and call it a day. You can rest assured that _so many things **must** be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus.
 
 ## Writing an Assertion
 
@@ -388,7 +393,7 @@ There are two ways to write assertions in Cypress.
 
 ## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
 
-Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making an assertion in Cypress. These are typical Cypress Commands, which means they can be called against a Chainer and will ultimately be applied to the current Subject flowing through the chain.
+Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making an assertion in Cypress. These are typical Cypress Commands, which means they can be called against a Chainer and will ultimately be applied to the current Subject in the chain.
 
 ```javascript
 // the implicit subject here is the first <tr>
@@ -400,7 +405,7 @@ cy.get("tbody tr:first").should("have.class", "active")
 
 ## Explicit Subjects with `expect`
 
-Using `expect` allows you to pass in a specific subject and make an assertion on the specified subject. These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests.
+Using `expect` allows you to pass in a specific subject and make an assertion about it. These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests.
 
 ```js
 // the explicit subject here is the boolean: true
