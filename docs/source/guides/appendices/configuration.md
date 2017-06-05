@@ -150,7 +150,7 @@ You can [read more about Environment Variables](https://on.cypress.io/environmen
 
 ## Cypress.config
 
-You can also override configuration values within your test using `Cypress.config`.
+You can also override configuration values within your test using [`Cypress.config()`](https://on.cypress.io/api/config).
 Any value you change will be permanently changed for the remainder of your tests.
 
 
