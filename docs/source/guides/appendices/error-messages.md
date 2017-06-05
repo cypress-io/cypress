@@ -60,7 +60,7 @@ describe("Some Tests", function(){
 
 Simply move those Cypress commands into an `it(...)` and everything will work correctly.
 
-If you are purposefully writing commands outside of a test, there is probably a better way to accomplish whatever you're trying to do. Read through the [Example Repos](https://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A), or [come talk to someone in Gitter](https://gitter.im/cypress-io/cypress).
+If you are purposefully writing commands outside of a test, there is probably a better way to accomplish whatever you're trying to do. Read through the [Example Repos](https://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new), or [come talk to someone in Gitter](https://gitter.im/cypress-io/cypress).
 
 # cy.method() failed because the element you are chaining off of has become detached or removed from the dom
 
@@ -142,7 +142,7 @@ Cypress runs several calculations to ensure an element can *actually* be interac
 
 If you're seeing this error, the solution is often obvious. You may need to add  **command guards** due to a timing or animation issue.
 
-There have been situations where Cypress does not correctly allow you to interact with an element which should be interactive. If that's the case, [open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) or force the action to happen.
+There have been situations where Cypress does not correctly allow you to interact with an element which should be interactive. If that's the case, [open an issue](https://github.com/cypress-io/cypress/issues/new) or force the action to happen.
 
 If you'd like to override these built-in checks, provide the `{force: true}` option to the action itself. Refer to each command for their available options, additional use cases and argument usage.
 
