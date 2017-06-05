@@ -80,14 +80,14 @@ describe "Routes", ->
           url = options
           options = {}
 
-        _.defaults options,
-          url: url
-          proxy: @proxy
-          jar: jar
-          simple: false
-          followRedirect: false
+        _.defaults options, {
+          url,
+          proxy: @proxy,
+          jar,
+          simple: false,
+          followRedirect: false,
           resolveWithFullResponse: true
-
+        }
         rp(options)
 
       open = =>
@@ -1723,8 +1723,9 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, contents,
+        .reply 200, contents, {
           "Content-Type": "text/html; charset=utf-8"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1744,8 +1745,9 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html> <head prefix=\"og: foo\"> <meta name=\"foo\" content=\"bar\"> </head> <body>hello from bar!</body> </html>",
+        .reply 200, "<html> <head prefix=\"og: foo\"> <meta name=\"foo\" content=\"bar\"> </head> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1764,8 +1766,9 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html> <body>hello from bar!</body> </html>",
+        .reply 200, "<html> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1782,8 +1785,9 @@ describe "Routes", ->
       it "injects when head is capitalized", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<HTML> <HEAD>hello from bar!</HEAD> </HTML>",
+        .reply 200, "<HTML> <HEAD>hello from bar!</HEAD> </HTML>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1799,8 +1803,9 @@ describe "Routes", ->
       it "injects when body is capitalized", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<HTML> <BODY>hello from bar!</BODY> </HTML>",
+        .reply 200, "<HTML> <BODY>hello from bar!</BODY> </HTML>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1816,8 +1821,9 @@ describe "Routes", ->
       it "injects when both head + body are missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<HTML>hello from bar!</HTML>",
+        .reply 200, "<HTML>hello from bar!</HTML>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1834,8 +1840,9 @@ describe "Routes", ->
       it "injects even when html + head + body are missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<div>hello from bar!</div>",
+        .reply 200, "<div>hello from bar!</div>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1852,8 +1859,9 @@ describe "Routes", ->
       it "injects superdomain even when head tag is missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html> <body>hello from bar!</body> </html>",
+        .reply 200, "<html> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -2226,8 +2234,9 @@ describe "Routes", ->
       it "does not rewrite html when initial", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -2245,8 +2254,9 @@ describe "Routes", ->
       it "does not rewrite html when not initial", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"

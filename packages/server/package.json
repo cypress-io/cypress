@@ -25,7 +25,7 @@
     "test-debug": "NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts test/support/mocha.opts --watch",
     "codecov": "codecov",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "lint": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/unit/*.coffee"
+    "lint": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee"
   },
   "repository": {
     "type": "git",
