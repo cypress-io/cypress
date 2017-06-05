@@ -6,7 +6,10 @@
           <div class="article">
             <header class="article-header">
               <h1 class="article-title" itemprop="name">{{ page.title }}</h1>
-              <a href="{{ raw_link(page.source) }}" class="article-edit-link"><i class="fa fa-pencil"></i> {{ __('page.improve') }}</a>
+              {#  COMMENTING OUT  #}
+              {#  Need to update once monorepo is OS  #}
+              {# <a href="{{ raw_link(page.source) }}" class="article-edit-link"><i class="fa fa-pencil"></i> {{ __('page.improve') }}</a> #}
+              <a href="https://github.com/cypress-io/cypress/issues/new" class="article-edit-link"><i class="fa fa-pencil"></i> {{ __('page.improve') }}</a>
             </header>
             <div class="article-content" itemprop="articleBody">
               {{ page_anchor(page.content) }}
