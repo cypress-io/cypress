@@ -25,11 +25,13 @@ const PortInUse = () => {
 @observer
 class Project extends Component {
   componentDidMount () {
-    this.props.project.loading(true)
+    const { project } = this.props
 
-    document.title = this._projectName()
+    project.setLoading(true)
 
-    projectsApi.openProject(this.props.project)
+    document.title = appStore.isGlobal ? project.path : project.displayName
+
+    projectsApi.openProject(project)
   }
 
   componentWillUnmount () {

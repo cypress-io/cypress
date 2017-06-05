@@ -2,7 +2,9 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import appApi from '../lib/app-api'
+import appStore from '../lib/app-store'
 import authStore from '../lib/auth-store'
+import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import projectsApi from '../projects/projects-api'
@@ -14,8 +16,8 @@ export default class Nav extends Component {
       <nav className='navbar navbar-inverse navbar-fixed-top'>
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
-            <li>
-              { this._leftNavButton() }
+            <li className='left-nav'>
+              { this._leftNav() }
             </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
@@ -38,9 +40,12 @@ export default class Nav extends Component {
     )
   }
 
-  _leftNavButton = () => {
-    return <a href='#'>TBD</a>
+  _leftNav = () => {
+    if (appStore.isGlobal) {
+      return <div>{viewStore.currentView.project.displayName}</div>
+    }
 
+    return <div>TBD</div>
     // if (this.props.params.clientId) {
     //   return (
     //     <Link

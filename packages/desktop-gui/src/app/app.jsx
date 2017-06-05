@@ -21,7 +21,7 @@ class App extends Component {
   componentDidMount () {
     appApi.listenForMenuClicks()
 
-    appStore.projectPath = this.props.projectPath
+    appStore.setProjectPath(this.props.projectPath)
 
     ipc.getOptions()
     .then(action('got:options', (options = {}) => {

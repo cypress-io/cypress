@@ -24,6 +24,12 @@ describe "Local Mode", ->
       cy.contains(".folder", "integration")
       cy.contains(".folder", "unit")
 
+    it "sets title as project path", ->
+      cy.title().should("eq", "/foo/bar")
+
+    it "shows project name in nav", ->
+      cy.get('.left-nav').should("have.text", "bar")
+
   describe "without a current user", ->
     beforeEach ->
       cy.stub(@ipc, "getCurrentUser").resolves(null)

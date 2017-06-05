@@ -1,14 +1,17 @@
-import { observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 
-class State {
+class AppStore {
   @observable updateAvailable = false
   @observable version
+  @observable projectPath = null
 
-  projectPath = null
+  @computed get isGlobal () {
+    return !!this.projectPath
+  }
 
-  setProjectPath (projectPath) {
+  @action setProjectPath (projectPath) {
     this.projectPath = projectPath
   }
 }
 
-export default new State()
+export default new AppStore()

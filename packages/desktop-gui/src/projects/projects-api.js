@@ -46,14 +46,14 @@ const addProject = () => {
 
     // initially set our project to be loading state
     project = projectsStore.addProject(path)
-    project.loading(true)
+    project.setLoading(true)
 
     return Promise.all([
       ipc.addProject(path),
       Promise.delay(750),
     ])
     .spread(action('project:added', (clientProjectDetails) => {
-      project.loading(false)
+      project.setLoading(false)
 
       if (clientProjectDetails.id != null) {
         return ipc.getProjectStatus(clientProjectDetails)
@@ -127,7 +127,7 @@ const openProject = (project) => {
   specsCollection.loading(true)
 
   const setProjectError = action('project:open:errored', (err) => {
-    project.loading(false)
+    project.setLoading(false)
     project.setError(err)
   })
 
@@ -170,7 +170,7 @@ const openProject = (project) => {
     Promise.delay(500),
   ])
   .then(() => {
-    project.loading(false)
+    project.setLoading(false)
 
     getSpecs(setProjectError)
 

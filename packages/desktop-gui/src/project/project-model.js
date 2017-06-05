@@ -85,6 +85,13 @@ export default class Project {
     return _.pick(this, persistentProps)
   }
 
+  @computed get displayName () {
+    if (this.name) return this.name
+
+    let splitName = _.last(this.path.split('/'))
+    return _.truncate(splitName, { length: 60 })
+  }
+
   @computed get isValid () {
     return this.state === Project.VALID
   }
@@ -101,8 +108,8 @@ export default class Project {
     return this.browsers[0]
   }
 
-  @action loading (bool) {
-    this.isLoading = bool
+  @action setLoading (isLoading) {
+    this.isLoading = isLoading
   }
 
   @action openModal () {
