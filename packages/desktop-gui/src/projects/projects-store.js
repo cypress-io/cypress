@@ -23,7 +23,9 @@ class Projects {
 
   @action getProjectByPath (path) {
     if (!this.projects.length) {
-      return new Project({ path })
+      const project = new Project({ path })
+      this.projects.push(project)
+      return project
     }
 
     return _.find(this.projects, { path })

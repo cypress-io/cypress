@@ -23,7 +23,7 @@ class SetupProject extends Component {
 
     this.state = {
       error: null,
-      projectName: this._initialProjectName(),
+      projectName: this.props.project.displayName,
       public: null,
       owner: null,
       orgId: null,
@@ -273,17 +273,6 @@ class SetupProject extends Component {
 
   _formNotFilled () {
     return _.isNull(this.state.public) || !this.state.projectName
-  }
-
-  _initialProjectName = () => {
-    let project = this.props.project
-
-    if (project.name) {
-      return project.name
-    } else {
-      let splitName = _.last(project.path.split('/'))
-      return _.truncate(splitName, { length: 60 })
-    }
   }
 
   _error () {
