@@ -22,8 +22,6 @@
     padding: 0 $gutter-width;
   }
 
-
-
   #sidebar .inner {
     padding-right: 0;
   }
@@ -150,8 +148,13 @@
   }
 }
 @media screen and(max-width: 769px) {
+
+  #content-wrap {
+    padding-top: 0;
+  }
+
   #content-inner {
-    margin-left: 20px;
+    padding-bottom: 40px;
   }
 
   .article pre, .article code,
