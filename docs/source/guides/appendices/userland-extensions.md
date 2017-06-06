@@ -1,16 +1,6 @@
-title: userland-extensions
+title: Userland Extensions
 comments: true
 ---
-
-# Docker
-
-## Base Image
-
-Docker image with dependencies and specific version of Cypress.
-
-https://hub.docker.com/r/bahmutov/cypress-image/
-
-***
 
 # Gitlab
 
@@ -19,8 +9,6 @@ https://hub.docker.com/r/bahmutov/cypress-image/
 Run multiple spec files concurrently.
 
 https://github.com/kensho/multi-cypress
-
-***
 
 # Typescript
 

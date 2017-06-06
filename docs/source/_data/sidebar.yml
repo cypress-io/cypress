@@ -41,6 +41,8 @@ guides:
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html
+    userland-extensions: userland-extensions.html
+    known-issues: known-issues.html
     contributing: contributing.html
     changelog: changelog.html
     roadmap: roadmap.html
