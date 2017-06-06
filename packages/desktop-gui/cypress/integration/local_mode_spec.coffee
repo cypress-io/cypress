@@ -21,8 +21,7 @@ describe "Local Mode", ->
       @start()
 
     it "goes straight to project specs list", ->
-      cy.contains(".folder", "integration")
-      cy.contains(".folder", "unit")
+      cy.shouldBeOnProjectSpecs()
 
     it "sets title as project path", ->
       cy.title().should("eq", "/foo/bar")

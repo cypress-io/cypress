@@ -1,9 +1,9 @@
 import once from 'lodash/once'
 import { action } from 'mobx'
 import Promise from 'bluebird'
-// import { hashHistory } from 'react-router'
 
 import ipc from '../lib/ipc'
+import viewStore from '../lib/view-store'
 import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
@@ -143,8 +143,7 @@ const openProject = (project) => {
       resolve = once(resolve)
 
       ipc.onFocusTests(() => {
-        // TODO: fix this
-        // hashHistory.push(`projects/${project.clientId}/specs`)
+        viewStore.showProjectSpecs(project)
       })
 
       ipc.getProjectStatus(project.clientDetails())
