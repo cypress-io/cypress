@@ -42,7 +42,8 @@ export default class Nav extends Component {
 
   _leftNav = () => {
     if (appStore.isGlobal) {
-      return <div>{viewStore.currentView.project.displayName}</div>
+      const project = viewStore.currentView.project
+      return <div>{project && project.displayName}</div>
     }
 
     return <div>TBD</div>

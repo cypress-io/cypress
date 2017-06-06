@@ -69,7 +69,7 @@ export default class Project {
     this.update(props)
   }
 
-  update (props) {
+  @action update (props) {
     if (!props) return
 
     _.each(validProps, (prop) => {
@@ -79,6 +79,10 @@ export default class Project {
 
   _updateProp (props, prop) {
     if (props[prop] != null) this[prop] = props[prop]
+  }
+
+  clientDetails () {
+    return _.pick(this, 'id', 'path')
   }
 
   serialize () {

@@ -147,6 +147,12 @@ const openProject = (project) => {
         // hashHistory.push(`projects/${project.clientId}/specs`)
       })
 
+      ipc.getProjectStatus(project.clientDetails())
+      .then((projectDetails) => {
+        project.update(projectDetails)
+      })
+      .catch(ipc.isUnauthed, ipc.handleUnauthed)
+
       ipc.openProject(project.path, (err, config = {}) => {
         if (config.specChanged) {
           return specsCollection.setChosenSpec(config.specChanged)

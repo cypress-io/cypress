@@ -1,8 +1,6 @@
 describe "Project Nav", ->
   beforeEach ->
     cy.fixture("user").as("user")
-    cy.fixture("projects").as("projects")
-    cy.fixture("projects_statuses").as("projectStatuses")
     cy.fixture("config").as("config")
     cy.fixture("runs").as("runs")
     cy.fixture("specs").as("specs")
@@ -36,7 +34,7 @@ describe "Project Nav", ->
         .get(".empty").should("not.be.visible")
         .get(".navbar-default")
 
-    it "displays 'Specs' nav as active", ->
+    it "displays 'Tests' nav as active", ->
       cy
       .get(".navbar-default").contains("a", "Tests")
       .should("have.class", "active")
@@ -45,7 +43,7 @@ describe "Project Nav", ->
       beforeEach ->
         cy.wait(600)
 
-      it "displays 'Specs' page", ->
+      it "displays 'Tests' page", ->
         cy.contains("integration")
 
     describe "runs page", ->

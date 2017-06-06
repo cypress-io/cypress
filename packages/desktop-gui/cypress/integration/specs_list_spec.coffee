@@ -1,10 +1,9 @@
 describe "Specs List", ->
   beforeEach ->
     cy.fixture("user").as("user")
-    cy.fixture("projects").as("projects")
-    cy.fixture("projects_statuses").as("projectStatuses")
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
+
     cy.visit("/?projectPath=/foo/bar").then (win) ->
       { start, @ipc } = win.App
 
