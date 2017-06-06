@@ -22,6 +22,22 @@
     padding: 0 $gutter-width;
   }
 
+  #logo-wrap {
+    flex: 0 100px;
+  }
+
+  #search-input {
+    font-size: 14px;
+  }
+
+  .main-nav-link {
+    padding: 5px 10px;
+  }
+
+  #header-inner {
+    padding: 0 20px;
+  }
+
   #sidebar .inner {
     padding-right: 0;
   }
@@ -114,7 +130,7 @@
   }
 
   #content-inner {
-    margin-left: $sidebar-width + 20px;
+    margin-left: $sidebar-width;
   }
 
   .article {
@@ -155,6 +171,7 @@
 
   #content-inner {
     padding-bottom: 40px;
+    margin-left: 0;
   }
 
   .article pre, .article code,
