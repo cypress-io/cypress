@@ -1,53 +1,53 @@
 YAML = require('yamljs')
 _ = require('lodash')
 
-GUIDES_PATH = '/guides/getting-started/why-cypress'
-GUIDES_HTML = GUIDES_PATH + '.html'
+API_PATH = "/api/welcome/api"
+API_HTML = API_PATH + '.html'
 
-FIRST_PAGE = "why-cypress.html"
-NEXT_PAGE = "installing-cypress.html"
+FIRST_PAGE = "api.html"
+NEXT_PAGE = "and.html"
 
 MAILTO_REGEX = /mailto:/
 
-Cypress.isHeadless = true
-window.top.$Cypress.isHeadless = true
+# Cypress.isHeadless = true
+# window.top.$Cypress.isHeadless = true
 
-describe "Guides", ->
+describe "API", ->
   context "Main Menu", ->
-    it "Menu goes straight to 'Why Cypress?'", ->
+    it "Menu goes straight to 'API' homepage", ->
       cy.visit('/')
 
-      cy.contains('Guides')
+      cy.contains('API')
         .click()
-        .contains('h1', "Why Cypress?")
+        .contains('h1', "API")
 
       cy.url()
-        .should('match', new RegExp(GUIDES_HTML))
+        .should('match', new RegExp(API_HTML))
 
   context "Header", ->
     beforeEach ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(API_PATH + ".html")
 
     it "should have link to edit doc", ->
       cy.contains("a", "Improve this doc").as("editLink")
       # cy.get("@editLink").should("have.attr", "href")
-      #     .and("include", GUIDES_PATH + ".md")
+      #     .and("include", API_PATH + ".md")
       cy.get("@editLink").should("have.attr", "href")
           .and("include", "https://github.com/cypress-io/cypress/issues/new")
 
   context "Sidebar", ->
     beforeEach ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(API_PATH + ".html")
 
       cy.readFile("source/_data/sidebar.yml").then (yamlString) ->
         @sidebar = YAML.parse(yamlString)
-        @sidebarTitles = _.keys(@sidebar.guides)
+        @sidebarTitles = _.keys(@sidebar.api)
 
-        @sidebarLinkNames =  _.reduce @sidebar.guides, (memo, nestedObj, key) ->
+        @sidebarLinkNames =  _.reduce @sidebar.api, (memo, nestedObj, key) ->
            memo.concat(_.keys(nestedObj))
         , []
 
-        @sidebarLinks =  _.reduce @sidebar.guides, (memo, nestedObj, key) ->
+        @sidebarLinks =  _.reduce @sidebar.api, (memo, nestedObj, key) ->
              memo.concat(_.values(nestedObj))
           , []
 
@@ -57,20 +57,20 @@ describe "Guides", ->
     it "displays current page as highlighted", ->
       cy
         .get("#sidebar").find(".current")
-        .should("have.attr", "href").and("include", "why-cypress.html")
+        .should("have.attr", "href").and("include", "api.html")
 
     it "displays English titles in sidebar", ->
       cy
         .get("#sidebar")
           .find(".sidebar-title").each (displayedTitle, i) ->
-            englishTitle  = @english.sidebar.guides[@sidebarTitles[i]]
+            englishTitle  = @english.sidebar.api[@sidebarTitles[i]]
             expect(displayedTitle.text()).to.eq(englishTitle)
 
     it "displays English link names in sidebar", ->
       cy
         .get("#sidebar")
           .find(".sidebar-link").first(5).each (displayedLink, i) ->
-            englishLink  = @english.sidebar.guides[@sidebarLinkNames[i]]
+            englishLink  = @english.sidebar.api[@sidebarLinkNames[i]]
             expect(displayedLink.text().trim()).to.eq(englishLink)
 
     it "displays English links in sidebar", ->
@@ -84,8 +84,8 @@ describe "Guides", ->
   ## Issue #431 Needs to be fixed first
   ## https://github.com/cypress-io/cypress/issues/431
   context.skip "Table of Contents", ->
-    before ->
-      cy.visit(GUIDES_PATH + ".html")
+    beforeEach ->
+      cy.visit(API_PATH + ".html")
 
     it "displays toc", ->
       cy.get('.sidebar-link').each (linkElement) ->
@@ -115,7 +115,7 @@ describe "Guides", ->
 
   context "Pagination", ->
     beforeEach ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(API_PATH + ".html")
 
     it "does not display Prev link on first page", ->
       cy.get(".article-footer-prev").should("not.exist")
@@ -154,12 +154,12 @@ describe "Guides", ->
         return urlsToVisit
 
       # SPIDER ALL THE THINGS
-      cy.visit(GUIDES_HTML)
+      cy.visit(API_HTML)
 
       cy.get('.sidebar-link')
         .each (linkElement) ->
           cy.request(linkElement[0].href).its('body').then (body) ->
-            elements = Cypress.$(body).find('a').not('.sidebar-link, .toc-link, .main-nav-link, .mobile-nav-link, .article-edit-link, .article-anchor, #article-toc-top, #mobile-nav-toggle, .article-footer-next, .article-footer-prev, .headerlink, #logo, #footer')
+            elements = Cypress.$(body).find('a').not('.sidebar-link, .toc-link, .main-nav-link, .mobile-nav-link, .article-edit-link, .article-anchor, #article-toc-top, #mobile-nav-toggle, .article-footer-next, .article-footer-prev, .headerlink, #logo, .footer-link')
 
             withoutMailtos = filterMailtos(Cypress._.map(elements, "href"))
 
