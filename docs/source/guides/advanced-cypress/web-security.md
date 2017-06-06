@@ -25,8 +25,6 @@ After the first [`cy.visit`](https://on.cypress.io/api/visit) is issued in a tes
 Cypress does some pretty interesting things under the hood to make testing HTTPs sites work. Cypress enables you to control and stub at the network level. Therefore, Cypress must assign and manage browser certificates to be able to modify the traffic in real time. You'll notice Chrome display a warning that the 'SSL certificate does not match'. This is normal and correct. Under the hood we act as our own CA authority and issue certificates dynamically in order to intercept requests otherwise impossible to access. We only do this for the superdomain currently under test, and bypass other traffic. That's why if you open a tab in Cypress to another host, the certificates match as expected.
 {% endnote %}
 
-***
-
 # Limitations
 
 It's important to note that although we do our *very best* to ensure your application works normally inside of Cypress, there **are** some limitations you need to be aware of.
@@ -38,16 +36,13 @@ Because Cypress changes its own host URL to match that of your applications, it 
 If you attempt to visit two different superdomains, Cypress will error. Visiting subdomains works fine, but two different superdomains does not. You can visit different superdomains in *different* tests, just not the *same* test.
 
 ```javascript
-cy
-  .visit("https://www.cypress.io")
-  .visit("https://docs.cypress.io") // yup all good
+cy.visit("https://www.cypress.io")
+cy.visit("https://docs.cypress.io") // yup all good
 ```
 
 ```javascript
-cy
-  .visit("https://apple.com")
-  .visit("https://google.com")      // bad, this will immediately error
-
+cy.visit("https://apple.com")
+cy.visit("https://google.com")      // bad, this will immediately error
 ```
 
 Although Cypress tries to enforce this limitation, it is possible for your application to bypass Cypress's ability to detect this.
@@ -61,8 +56,6 @@ Although Cypress tries to enforce this limitation, it is possible for your appli
 In each of these situations, Cypress will lose the ability to automate your application and will immediately error.
 
 Read on to learn about [working around these common problems](#section-common-workarounds) or even [disabling web security](#section-disabling-web-security) altogether.
-
-***
 
 ## Cross Origin Iframes
 
@@ -79,8 +72,6 @@ It's actually *possible* for Cypress to accomodate these situations the same way
 As a workaround, you may be able to use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) to directly communicate with these iframes and control them (if the 3rd party iframe supports it).
 
 Other than that, you'll have to wait for us to implement API's to support this (check our [open issue](https://github.com/cypress-io/cypress/issues/136)), or you can [disable web security](#section-disabling-web-security).
-
-***
 
 ## Insecure Content
 
@@ -111,9 +102,8 @@ Cypress will immediately fail with the following test code:
 *Test code*
 
 ```javascript
-cy
-  .visit("https://app.corp.com")
-  .get("a").click()               // will immediately fail
+cy.visit("https://app.corp.com")
+cy.get("a").click()               // will immediately fail
 ```
 
 Browsers refuse to display insecure content on a secure page. Because Cypress initially changed its URL to match `https://app.corp.com` when the browser followed the `href` to `http://app.corp.com/page2`, the browser will refuse to display the contents.
@@ -131,8 +121,6 @@ This security vulnerability exists **even if** your webserver forces a `301 redi
 Simply update your `HTML` or `JavaScript` code to not navigate to an insecure `HTTP` page and instead only use `HTTPS`. Additionally make sure that cookies have their `secure` flag set to `true`.
 
 If you're in a situation where you don't control the code, or otherwise cannot work around this, you can bypass this restriction in Cypress by [disabling web security](#section-dislabing-web-security).
-
-***
 
 # Common Workarounds
 
@@ -153,9 +141,8 @@ The most common situation where you might encounter this error is when you click
 **Test code**
 
 ```javascript
-cy
-  .visit("http://localhost:8080") // where your webserver + HTML is hosted
-  .get("a").click()               // browser attempts to load google.com, Cypress errors
+cy.visit("http://localhost:8080") // where your webserver + HTML is hosted
+cy.get("a").click()               // browser attempts to load google.com, Cypress errors
 ```
 
 There is essentially never any reason to visit a site that you don't control in your tests. It's prone to error and slow.
@@ -164,28 +151,24 @@ Instead, all you need to test is that the `href` property is correct!
 
 ```javascript
 // this is much easier to do and will run considerably faster
-cy
-  .visit("http://localhost:8080")
-  .get("a").should("have.attr", "href", "https://google.com") // no page load!
+cy.visit("http://localhost:8080")
+cy.get("a").should("have.attr", "href", "https://google.com") // no page load!
 ```
 
 Okay but let's say you're worried about `google.com` serving up the right HTML content. How would you test that? Easy! Just make a [`cy.request`](https://on.cypress.io/api/request) directly to it. [`cy.request`](https://on.cypress.io/api/request) is **NOT bound to CORS or same-origin policy**.
 
 ```javascript
-cy
-  .visit("http://localhost:8080")
-  .get("a").then(function($a) {
-    // pull off the fully qualified href from the <a>
-    var url = $a.prop("href")
+cy.visit("http://localhost:8080")
+cy.get("a").then(function($a) {
+  // pull off the fully qualified href from the <a>
+  var url = $a.prop("href")
 
-    // make a cy.request to it
-    cy.request(url).its("body").should("include", "</html>")
-  })
+  // make a cy.request to it
+  cy.request(url).its("body").should("include", "</html>")
+})
 ```
 
 Still not satisfied? Do you really want to click through to another application? Okay then read about [disabling web security](#section-disabling-web-security).
-
-***
 
 ## Form Submission Redirects
 
@@ -203,9 +186,8 @@ When you submit a regular HTML form, the browser will follow this `HTTP(s) reque
 ```
 
 ```javascript
-cy
-  .visit("http://localhost:8080")
-  .get("form").submit()           // submit the form!
+cy.visit("http://localhost:8080")
+cy.get("form").submit()           // submit the form!
 ```
 
 If your backend server handling the `/submit` route does a `30x` redirect to a different superdomain, you will get a `cross origin` error.
@@ -227,8 +209,7 @@ If that's the case, don't worry - you can work around it with [`cy.request`](htt
 In fact we can likely bypass the initial visit altogether and just `POST` directly to your `SSO` server.
 
 ```javascript
-cy
-  .request("POST", "https://sso.corp.com/auth", {username: "foo", password: "bar"})
+cy.request("POST", "https://sso.corp.com/auth", {username: "foo", password: "bar"})
   .then(function(response) {
     // pull out the location redirect
     var loc = response.headers["Location"]
@@ -249,8 +230,6 @@ cy
 
 Not working for you? Don't know how to set your token? If you still need to be able to be redirected to your SSO server you can read about [disabling web security](#section-disabling-web-security).
 
-***
-
 ## JavaScript Redirects
 
 When we say *JavaScript Redirects* we are talking about any kind of code that does something like this:
@@ -262,8 +241,6 @@ window.location.href = "http://some.superdomain.com"
 This is probably the hardest situation to test because it's usually happening due to another cause. You will need to figure out why your JavaScript code is redirecting. Perhaps you're not logged in, and you need to handle that setup elsewhere? Perhaps you're using a `Single sign-on (SSO)` server and you just need to read the previous section about working around that?
 
 If you can't figure out why your JavaScript code is redirecting you to a different superdomain then you might want to just read about [disabling web security](#section-disabling-websecurity).
-
-***
 
 # Disabling Web Security
 
@@ -279,7 +256,7 @@ Still here? That's cool, let's disable web security!
 
 ```json
 {
-  chromeWebSecurity: false
+  "chromeWebSecurity": false
 }
 ```
 

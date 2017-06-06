@@ -54,9 +54,13 @@ sidebar:
     appendices: Appendices
     configuration: Configuration
     error-messages: Error Messages
+    bundled-tools: Bundled Tools
     available-assertions: Available Assertions
+    creating-fixtures: Creating Fixtures
     best-practices: Best Practices
     anti-patterns: Anti-patterns
+    userland-extensions: Userland Extensions
+    known-issues: Known Issues
     contributing: Contributing
     changelog: Changelog
     roadmap: Roadmap

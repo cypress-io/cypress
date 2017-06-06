@@ -79,7 +79,7 @@ describe "lib/logger", ->
 
   describe "#exitOnError", ->
     it "invokes logger.defaultErrorHandler", ->
-      err = new Error
+      err = new Error()
       defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
       logger.exitOnError(err)
       expect(defaultErrorHandler).to.be.calledWith err
@@ -88,7 +88,7 @@ describe "lib/logger", ->
     beforeEach ->
       logger.unsetSettings()
 
-      @err    = new Error
+      @err    = new Error()
       @exit   = @sandbox.stub(process, "exit")
       @create = @sandbox.stub(exception, "create").resolves()
 
@@ -114,7 +114,7 @@ describe "lib/logger", ->
           expect(@exit).to.be.called
 
       it "is called after rejecting", ->
-        @create.rejects(new Error)
+        @create.rejects(new Error())
         logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called

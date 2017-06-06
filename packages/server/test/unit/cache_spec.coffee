@@ -104,7 +104,7 @@ describe "lib/cache", ->
 
       it "removes any paths which no longer exist on the filesystem", ->
         @statAsync.withArgs("/Users/brian/app").resolves()
-        @statAsync.withArgs("/Users/sam/app2").rejects(new Error)
+        @statAsync.withArgs("/Users/sam/app2").rejects(new Error())
 
         cache.insertProject("/Users/brian/app")
         .then =>

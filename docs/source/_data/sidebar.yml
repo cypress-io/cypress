@@ -35,10 +35,14 @@ guides:
   appendices:
     configuration: configuration.html
     error-messages: error-messages.html
+    bundled-tools: bundled-tools.html
     available-assertions: available-assertions.html
+    creating-fixtures: creating-fixtures.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html
+    userland-extensions: userland-extensions.html
+    known-issues: known-issues.html
     contributing: contributing.html
     changelog: changelog.html
     roadmap: roadmap.html
@@ -102,8 +106,8 @@ api:
     root: root.html
     route: route.html
     screenshot: screenshot.html
-    scrollintoview: scrollintoview.html
-    scrollto: scrollto.html
+    # scrollintoview: scrollintoview.html
+    # scrollto: scrollto.html
     select: select.html
     server: server.html
     setcookie: setcookie.html
@@ -116,7 +120,7 @@ api:
     then: then.html
     tick: tick.html
     title: title.html
-    trigger: trigger.html
+    # trigger: trigger.html
     type: type.html
     uncheck: uncheck.html
     url: url.html

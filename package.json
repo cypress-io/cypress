@@ -12,14 +12,17 @@
     "clean-deps": "npm run all clean-deps",
     "docker": "./dev/run-docker-local.sh",
     "lint": "standard --verbose --fix dev/*.js",
-    "commit": "commit-wizard"
+    "precommit": "npm run lint && npm run all lint"
   },
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.4",
     "ascii-table": "0.0.9",
+    "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.5",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-react": "^5.1.1",
+    "husky": "^0.13.4",
     "fs-extra": "^2.1.2",
     "pre-git": "^3.15.0",
     "standard": "^10.0.2"

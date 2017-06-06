@@ -1,12 +1,10 @@
-title: known-issues
+title: Known Issues
 comments: true
 ---
 
 # Missing Commands
 
 Some commands have not been implemented in Cypress. Some commands will be implemented in the future and some do not make sense to implement in Cypress.
-
-***
 
 ## Right click
 
@@ -35,8 +33,6 @@ cy
   })
 ```
 
-***
-
 ## Hover
 
 [Issue #10](https://github.com/cypress-io/cypress/issues/10)
@@ -64,8 +60,6 @@ cy.get(".content").click({force: true})
 cy.get(".checkbox").check({force: true})
 ```
 
-***
-
 # Difficult use cases
 
 Cypress does not support the following use cases.
@@ -82,8 +76,6 @@ This is actively being worked on in Cypress and you'll first see support for sam
 
 Sit tight, comment on the issue so we know you care about this support, and be patient.
 
-***
-
 ## OAuth
 
 This is related to the iframe issue above, but basically `oauth` usually will not work. This is one of the hardest things for Cypress to be able to handle as there are so many different implementations and mechanisms.
@@ -93,8 +85,6 @@ Likely we will be able to support server side oauth redirects, but for client si
 **Workaround**
 
 [Come into Gitter](https://gitter.im/cypress-io/cypress) and talk to us about what you're trying to do. We'll tell you if you're able to mock this and how to do it.
-
-***
 
 ## window.fetch routing and stubbing
 

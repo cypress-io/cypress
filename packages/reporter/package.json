@@ -10,7 +10,8 @@
     "watch": "node ./scripts/watch.js",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
-    "test": "node ./scripts/test.js"
+    "test": "node ./scripts/test.js",
+    "lint": "../../node_modules/.bin/eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
   },
   "browserify": {
     "transform": [["babelify", {
@@ -34,15 +35,11 @@
   "devDependencies": {
     "@cypress/react-tooltip": "^0.1.1",
     "@cypress/releaser": "0.1.12",
-    "babel-eslint": "^6.0.4",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.6.1",
     "classnames": "^2.2.5",
     "css-element-queries": "^0.3.2",
     "enzyme": "^2.8.1",
-    "eslint": "^3.11.1",
-    "eslint-plugin-mocha": "^4.0.0",
-    "eslint-plugin-react": "^5.1.1",
     "font-awesome": "^4.6.3",
     "jsdom": "^9.4.1",
     "lodash": "^4.0.0",

@@ -11,8 +11,6 @@ Cypress supports the following reporters:
 * [`junit`](https://github.com/michaelleeallen/mocha-junit-reporter)
 * Custom reporters ([see below](#section-custom-reporters))
 
-***
-
 # Custom Reporters
 
 Cypress supports custom reporters, whether local to your project or installed through npm.
@@ -33,7 +31,7 @@ Specify the path to your custom reporter to use it:
 
 `cypress.json`:
 
-```javascript
+```json
 {
   "reporter": "reporters/custom.js"
 }
@@ -45,13 +43,11 @@ Command line:
 cypress run --reporter reporters/custom.js
 ```
 
-***
-
 ## npm Reporters
 
 If you have installed a custom reporter through npm, specify the package name:
 
-```javascript
+```json
 // cypress.json
 {
   "reporter": "mochawesome"
@@ -68,13 +64,11 @@ cypress run --reporter mochawesome
 You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install mocha as a dev dependency of your own project for it to work (`npm install mocha --save-dev`).
 {% endnote %}
 
-***
-
 # Reporter Options
 
 Some reporters accept options to customize their behavior. These can be specified in your `cypress.json` or via the command line:
 
-```javascript
+```json
 // cypress.json
 {
   "reporter": "junit",

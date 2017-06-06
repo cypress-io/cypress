@@ -56,7 +56,7 @@ Pass in an options object to change the default behavior of `cy.route()`. By def
 Option | Default | Notes
 --- | --- | ---
 `delay` | `0` | Delay for stubbed responses (in ms)
-`force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing [`cy.routes`](https://on.cypress.io/api/routes)
+`force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing [`cy.route`](https://on.cypress.io/api/route)
 `headers` | `null` | Response headers for stubbed routes
 `method` | `GET` | Method to match against requests
 `onAbort` | `null` | Callback function which fires anytime an XHR is aborted
@@ -413,13 +413,13 @@ cy.route('/users/*')
 The following XHR's which were `xhr.open(...)` with these URLs would:
 
 ***Match***
-- /users/1
-- http://localhost:2020/users/2
-- https://google.com/users/3
+- `/users/1`
+- `http://localhost:2020/users/2`
+- `https://google.com/users/3`
 
 ***Not Match***
-- /users/4/foo
-- http://localhost:2020/users/5/foo
+- `/users/4/foo`
+- `http://localhost:2020/users/5/foo`
 
 **Requests that don't match any routes**
 

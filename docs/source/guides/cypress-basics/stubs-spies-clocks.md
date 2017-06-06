@@ -16,8 +16,6 @@ Cypress comes built in with the ability to [`stub`](https://on.cypress.io/api/st
 
 These commands are useful when writing both **unit tests** and **integration tests**.
 
-***
-
 # Libraries and Tools
 
 Cypress automatically bundles and wraps these libraries:
@@ -30,8 +28,6 @@ Cypress automatically bundles and wraps these libraries:
 | [`sinon-chai`](https://github.com/domenic/sinon-chai) | adds `chai` assertions for stubs and spies |
 
 You can refer to each of these libraries documentation for more examples and explanations.
-
-***
 
 # Common Scenarios
 
@@ -81,8 +77,6 @@ You generally stub a function when it has side effects you are trying to control
 [Read more about how to use cy.stub](https://on.cypress.io/api/stub)
 {% endnote %}
 
-***
-
 ## Spies
 
 A spy gives you the ability to "spy" on a function, by being able to capture and then assert that the function was calling with the right arguments, or that the function was called a certain number of times, or even what the return value or context the function was called with.
@@ -96,8 +90,6 @@ cy.spy(obj, "method")
 {% note info cy.spy() %}
 [Read more about how to use cy.spy](https://on.cypress.io/api/spy)
 {% endnote %}
-
-***
 
 ## Clock
 
@@ -117,16 +109,13 @@ There are situations when it is useful to control your applications `date` and `
 Once you've enabled [`cy.clock`](https://on.cypress.io/api/clock) you can then control time by **ticking** it ahead by milliseconds.
 
 ```javascript
-cy
-  .clock()
-  .visit("http://localhost:3333")
-  .get("#search").type("foobarbaz")
-  .tick(1000)
+cy.clock()
+cy.visit("http://localhost:3333")
+cy.get("#search").type("foobarbaz")
+cy.tick(1000)
 ```
 
 [`cy.clock`](https://on.cypress.io/api/clock) is special in that it can be called **prior** to visiting your application, and we will automatically bind it to the application on the next [`cy.visit`](https://on.cypress.io/api/visit). We bind **before** any timers from your application can be invoked. This works identically to [`cy.server`](https://on.cypress.io/api/server) + [`cy.route`](https://on.cypress.io/api/route).
-
-***
 
 ## Assertions
 
@@ -182,8 +171,6 @@ expect(user.updateEmail).to.have.returned("jane@devs.com") // true
 
 expect(user.fail).to.have.thrown("Error")                  // true
 ```
-
-***
 
 # Integration and Extensions
 

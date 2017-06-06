@@ -9,8 +9,6 @@ When you're ready to start testing, Cypress launches the browser for you. It doe
 1. To create a clean, pristine testing environment.
 2. To access the exclusive browser API's for automation.
 
-***
-
 # Launching Browsers
 
 When Cypress is initially [run from the Desktop application](https://on.cypress.io/guides/installing-and-running#section-running-tests-from-the-gui), you can choose to run Cypress in a select number of browsers including:
@@ -39,21 +37,15 @@ Additionally, we've made the browsers spawned by Cypress look different than reg
 
 ![screen shot 2016-05-24 at 5 25 19 pm](https://cloud.githubusercontent.com/assets/1268976/15520464/936b3976-21d4-11e6-8aca-33d05f2c2a8b.png)
 
-***
-
 ## Electron Browser
 
 In addition to the browsers found on your system, you'll notice that `Electron` is another available browser (it may be the only browser if Cypress does not detect any compatible browsers on your system). The `Electron` browser is a version of Chrome that is bundled with [Electron](https://electron.atom.io/) (the platform underlying the Cypress app). Cypress uses it when running headless via `cypress run`. It may be useful for debugging issues that only occur when running headless.
 
 The `Electron` browser does not have its own Dock icon or any chrome (address bar, tabs, bookmarks, etc).
 
-***
-
 ## Unsupported Browsers
 
 ![screen shot 2016-05-24 at 5 29 05 pm](https://cloud.githubusercontent.com/assets/1268976/15520572/12b158a0-21d5-11e6-92e0-2e75e42fa517.png)
-
-***
 
 # Clean Testing Environment
 
@@ -62,8 +54,6 @@ When we launch browsers we open them in a way that makes testing more reliable a
 1. Creating an isolated testing profile
 2. Disabling virtually everything that gets in the way of testing
 3. Enabling access to browser automation API's
-
-***
 
 ## Cypress Profile
 
@@ -74,8 +64,6 @@ Wait, I need my developer extensions such as React Dev Tools, Batarang, or Ember
 {% endnote %}
 
 That's no problem - you simply have to reinstall them **once**. We'll continue to use this Cypress testing profile on subsequent launches so all of your configuration will automatically be preserved. Note that in the [Electron browser](#section-electron-browser), while it's possible to use the dev tools, it's not possible to install developer extensions.
-
-***
 
 ## Testing Barriers
 
@@ -93,21 +81,13 @@ For instance we will automatically:
 - Disable a ton of background network traffic
 - Disable background and renderer throttling
 
-***
-
 ## Tabbed Browsing
-
-***
 
 # Automation API's
 
 ## Cypress Extension
 <talk about not using the debugger protocol>
 
-***
-
 ## Browser Drivers
-
-***
 
 ## No Selenium Server

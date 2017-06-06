@@ -157,15 +157,14 @@ export "EXTERNAL_API_SERVER=https://corp.acme.co"
 And then in your tests:
 
 ```javascript
-cy
-  .request({
-    method: "POST",
-    url: Cypress.env("EXTERNAL_API_SERVER") + "/users/1",
-    body: {
-      foo: "bar",
-      baz: "quux"
-    }
-  })
+cy.request({
+  method: "POST",
+  url: Cypress.env("EXTERNAL_API_SERVER") + "/users/1",
+  body: {
+    foo: "bar",
+    baz: "quux"
+  }
+})
 ```
 
 Refer to the dedicated [Environment Variables Guide](https://on.cypress.io/guides/environment-variables) for more examples.

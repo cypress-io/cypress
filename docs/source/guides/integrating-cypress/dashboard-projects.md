@@ -8,8 +8,6 @@ A Cypress project represents the directory of files and folders that make up you
 
 This is often the same repository as your code, but can also be a subfolder or a separate repository altogether.
 
-***
-
 # Adding a new Project
 
 Projects can **only** be added to Cypress through our [Desktop Application](https://on.cypress.io/guides/installing-and-running).
@@ -21,8 +19,6 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 {% note info  %}
 Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](#section-recording-runs).
 {% endnote %}
-
-***
 
 # Setting up a Project to Record
 
@@ -62,8 +58,6 @@ During a run we record all failing tests, logs, screenshots, and videos.
 
 You are now ready to record your runs. Typically you would record your runs when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration) but you can also record your runs from your local computer.
 
-***
-
 ## How do I record runs?
 
 Now that your project is setup, Cypress has inserted your unique [projectId](#section-what-is-a-projectid-) into `cypress.json`.
@@ -96,24 +90,19 @@ Once tests run, you will see them show up in the [Dashboard](https://on.cypress.
 
 ![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
 
-***
-
 ## What is a projectId?
 
 Once you setup your project to record, we generate a unique `projectId` for your project, and automatically insert it into your `cypress.json` file.
 
 **The `projectId` is a 6 character string in your cypress.json:**
 
-```javascript
-// cypress.json
+```json
 {
   "projectId": "a7bq2k"
 }
 ```
 
 This is how we uniquely identify your project. If you manually alter this, **Cypress will no longer be able to identify your project or find the recorded builds for it**. We recommend that you check your `cypress.json` including the `projectId` into source control.
-
-***
 
 ## What is a Record Key?
 
@@ -133,8 +122,6 @@ You can also find your Record Key inside of the **Settings** tab.
 
 ![screen shot 2017-02-12 at 4 12 40 pm](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
 
-***
-
 ## How do a projectId and Record Key work together?
 
 Cypress uses your `projectId` and **Record Key** together to uniquely identify projects.
@@ -151,8 +138,6 @@ Think of your record key as the key that enables you to **write and create** bui
 If your Record Key is accidentally exposed, you simply need to remove it and generate a new one from our [Dashboard](https://on.cypress.io/dashboard).
 {% endnote %}
 
-***
-
 ## What is the difference between public and private projects?
 
 **A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
@@ -161,15 +146,11 @@ If your Record Key is accidentally exposed, you simply need to remove it and gen
 
 A Record Key has nothing to do with **viewing** build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
 
-***
-
 # Transferring Ownership of a Project
 
 You can transfer projects that you own to another organization you are a part of or to another user in the organization. This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
 
 ![Transfer Project dialog](https://cloud.githubusercontent.com/assets/1271364/22708695/440f4e5c-ed45-11e6-9a98-8f91b67871a3.png)
-
-***
 
 # Deleting a Project
 

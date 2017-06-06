@@ -27,7 +27,7 @@ describe "lib/exceptions", ->
 
   context ".getErr", ->
     it "returns an object literal", ->
-      err = new Error
+      err = new Error()
       expect(exception.getErr(err)).to.have.keys("name", "message", "stack", "info")
 
     describe "fields", ->
@@ -69,7 +69,7 @@ describe "lib/exceptions", ->
     beforeEach ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
       @sandbox.stub(logger, "getLogs").resolves([])
-      @err = new Error
+      @err = new Error()
 
       @sandbox.stub(fs, "readJsonAsync")
       .withArgs("./package.json")

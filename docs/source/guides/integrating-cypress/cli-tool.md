@@ -17,8 +17,6 @@ It provides a set of commands that can be used to do things like:
 You generally install the CLI tool so you can progamatically install and run Cypress. This is commonly used when running Cypress from your CI provider.
 {% endnote %}
 
-***
-
 # Installation
 
 ```shell
@@ -28,8 +26,6 @@ npm install -g cypress-cli
 This will make the `cypress` command globally available from your command line.
 
 You can now execute the following commands:
-
-***
 
 # Available Commands
 
@@ -56,8 +52,6 @@ Additionally if you have a `CYPRESS_VERSION` environment variable set, it will a
 
 ![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
 
-***
-
 ## `cypress update`
 
 Updates Cypress to the latest version. This does the same thing as `cypress install`.
@@ -66,8 +60,6 @@ Updates Cypress to the latest version. This does the same thing as `cypress inst
 ## now we have the latest version
 cypress update
 ```
-
-***
 
 ## `cypress run`
 
@@ -123,8 +115,6 @@ cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
 
 You can read more about [environment variables](https://on.cypress.io/environment-variables) and [configuration](https://on.cypress.io/configuration) here.
 
-***
-
 ## `cypress run --record`
 
 You can also have your test runs recorded [once your project is setup to record](https://on.cypress.io/guides/projects).
@@ -151,8 +141,6 @@ cypress run --record
 
 You can [read more](https://on.cypress.io/how-do-i-record-runs) about recording runs here.
 
-***
-
 ## `cypress open`
 
 Opens the Cypress application. This is the same thing as double-clicking the application.
@@ -176,19 +164,13 @@ cypress open --config pageLoadTimeout=100000,watchForFileChanges=false
 cypress open --env host=api.dev.local
 ```
 
-***
-
 ## `cypress get:path`
 
 Returns the path Cypress will be installed to. Additionally checks to see if Cypress already exists at that path.
 
-***
-
 ## `cypress verify`
 
 Verifies that the Cypress application is found.
-
-***
 
 ## `cypress version`
 

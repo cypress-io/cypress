@@ -1,4 +1,5 @@
 log = require('../log')
+cwd = require('../cwd')
 fs = require('fs')
 { basename, join, isAbsolute } = require('path')
 md5 = require('md5')
@@ -12,15 +13,15 @@ toHashName = (projectPath) ->
   "#{name}-#{hash}"
 
 formStatePath = (projectPath) ->
-  log('making saved state from %s', process.cwd())
+  log('making saved state from %s', cwd())
   if projectPath
     log('for project path %s', projectPath)
   else
     log('missing project path, looking for project here')
-    cypressJsonPath = join(process.cwd(), 'cypress.json')
+    cypressJsonPath = cwd('cypress.json')
     if fs.existsSync(cypressJsonPath)
       log('found cypress file %s', cypressJsonPath)
-      projectPath = process.cwd()
+      projectPath = cwd()
 
   statePath = "state.json"
   if projectPath
