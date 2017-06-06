@@ -147,7 +147,7 @@ Run `npm rebuild node-sass` to build the binding for your current environment.
 From the running container, go into that project and rebuild `node-sass`
 
 ```
-$ ./dev/run-docker-local.sh
+$ npm run docker
 cd packages/desktop-gui
 npm rebuild node-sass
 ```

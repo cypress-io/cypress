@@ -30,7 +30,7 @@ const logAndFail = (...messages) => {
 }
 
 const getInstallationDir = () => {
-  return path.join(__dirname, 'dist')
+  return path.join(__dirname, '..', '..', 'dist')
 }
 
 const getInstalledVersion = () => {

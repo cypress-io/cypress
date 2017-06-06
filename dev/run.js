@@ -1,8 +1,10 @@
-module.exports = (args) => {
-  const cmd = args._[0]
+const minimist = require('minimist')
 
-  require('./run-all')(cmd, args)
-}
+const args = minimist(process.argv.slice(2))
+
+const cmd = args._[0]
+
+require('./run-all')(cmd, args)
 
 /**
 TODO

@@ -1,5 +1,3 @@
-require("app-module-path").addPath("../../")
-
 fs         = require("fs-extra")
 pkg        = require("./package.json")
 gulp       = require("gulp")

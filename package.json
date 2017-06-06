@@ -1,57 +1,43 @@
 {
   "name": "cypress-monorepo",
-  "version": "0.19.1",
-  "main": "index.js",
-  "bin": {
-    "cypress": "bin/cypress"
-  },
+  "private": true,
   "scripts": {
-    "start": "node start.js",
+    "start": "node dev/start.js",
     "watch": "npm run all watch",
     "build": "npm run all build",
-    "all": "node cli.js --exec run",
-    "test": "echo 'This runs just the CLI tests' && mocha",
-    "test-watch": "mocha --watch",
+    "all": "node dev/run.js",
+    "test": "echo 'This root monorepo is only for local development and new contributions. There are no tests.' && exit(1)",
     "link": "node ./dev/link-packages.js",
-    "postinstall": "npm run link && npm run all install && npm run build",
+    "postinstall": "CYPRESS_DOWNLOAD=0 npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
+    "docker": "./dev/run-docker-local.sh",
     "lint": "standard --verbose --fix dev/*.js",
     "precommit": "npm run lint && npm run all lint"
   },
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.4",
     "ascii-table": "0.0.9",
     "babel-eslint": "^6.0.4",
-    "chai": "^3.5.0",
+    "bluebird": "^3.4.5",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-react": "^5.1.1",
     "husky": "^0.13.4",
-    "mocha": "^3.2.0",
-    "nock": "^9.0.9",
-    "sinon": "^2.1.0",
-    "sinon-chai": "^2.9.0",
+    "fs-extra": "^2.1.2",
+    "pre-git": "^3.15.0",
     "standard": "^10.0.2"
   },
-  "dependencies": {
-    "app-module-path": "^1.1.0",
-    "bluebird": "^3.4.5",
-    "chalk": "^1.1.3",
-    "commander": "^2.8.1",
-    "debug": "^2.6.8",
-    "extract-zip": "^1.6.0",
-    "fs-extra": "^2.1.2",
-    "getos": "^2.8.4",
-    "glob": "^7.0.6",
-    "lodash": "^4.16.3",
-    "minimist": "^1.2.0",
-    "progress": "^1.1.8",
-    "request": "^2.81.0",
-    "request-progress": "^0.3.1",
-    "tmp": "0.0.31",
-    "url": "^0.11.0",
-    "xvfb": "cypress-io/node-xvfb"
-  }
+  "config": {
+    "pre-git": {
+      "pre-commit": [
+        "npm run lint",
+        "npm run all lint"
+      ],
+      "pre-push": [],
+      "post-commit": [],
+      "post-checkout": [],
+      "post-merge": []
+    }
+  },
+  "license": "MIT"
 }
