@@ -151,6 +151,8 @@ module.exports = {
 
     setNameParts = (file) ->
       log("found test file %s", file)
+      throw new Error("Cannot set parts of file from non-absolute path #{file}") if not path.isAbsolute(file)
+
       {
         name: relativePathFromIntegrationFolder(file)
         path: relativePathFromProjectRoot(file)
@@ -176,8 +178,10 @@ module.exports = {
     ## ignored test files glob
     .filter(doesNotMatchAllIgnoredPatterns)
     .map(setNameParts)
-    .then (arr) ->
+    .then (files) ->
+      log("found %d spec files", files.length)
+      log(files)
       {
-        integration: arr
+        integration: files
       }
 }
