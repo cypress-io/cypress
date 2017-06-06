@@ -37,6 +37,7 @@ guides:
     error-messages: error-messages.html
     bundled-tools: bundled-tools.html
     available-assertions: available-assertions.html
+    creating-fixtures: creating-fixtures.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html

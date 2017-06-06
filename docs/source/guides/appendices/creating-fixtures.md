@@ -1,12 +1,10 @@
-title: creating-fixtures
+title: Creating Fixtures
 comments: true
 ---
 
 # What are Fixtures
 
 A fixture in Cypress is a fixed set of data located in a file that is used as a baseline for running tests. The purpose of a test fixture is to ensure that there is a well known and fixed environment in which tests are run so that results are repeatable. Fixtures are accessed within tests by using the [`cy.fixture`](https://on.cypress.io/api/fixture) command.
-
-***
 
 # Supported Formats
 
@@ -26,13 +24,9 @@ A fixture in Cypress is a fixed set of data located in a file that is used as a 
 | `.tiff` |
 | `.zip` |
 
-***
-
 ## Validation
 
 Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee` files contain syntax errors, they will automatically be shown in the Command Log.
-
-***
 
 ## Formatting
 
@@ -40,15 +34,9 @@ Cypress automatically formats your fixture files. That means you can paste in a 
 
 Image fixtures will be sent as `base64`.
 
-***
-
-# Fixtures vs Factories
-
-***
-
 # Routing Responses
 
-***
+Cypress makes it easy to stub a network request and have it respond instantly with fixture data. This is covered in-depth [in the network guide](/guides/cypress-basics/dealing-with-the-network.html#Fixtures).
 
 # Organizing Fixtures
 

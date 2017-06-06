@@ -158,8 +158,6 @@ cy.fixture("activities.json").as("activitiesJSON")
 cy.route("GET", /activities/, "@activitiesJSON")
 ```
 
-***
-
 # Waiting
 
 Whether or not you choose to stub responses, Cypress enables you to declaratively [`cy.wait`](https://on.cypress.io/api/wait) for requests and their responses.
