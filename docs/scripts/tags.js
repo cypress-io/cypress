@@ -3,15 +3,6 @@
 /* global hexo */
 
 hexo.extend.tag.register('note', function (args, content) {
-  // WHAT IT IS YO
-  // [block:callout]
-  // {
-  //   "type": "info",
-  //   "body": "Explore talks, blogs, and podcasts about testing in Cypress.",
-  //   "title": "Want to see Cypress in action?"
-  // }
-  // [/block]
-
   // {% note info Want to see Cypress in action? %}
   // Explore talks, blogs, and podcasts about testing in Cypress.
   // {% endnote %}
@@ -52,9 +43,6 @@ hexo.extend.tag.register('note', function (args, content) {
 }, true)
 
 hexo.extend.tag.register('fa', function (args, content) {
-  // WHAT IT IS YO
-  // :fa-angle-right:
-
   // {% fa fa-angle-right green fa-fw %}
   //
   // <<< Transforms into >>>
@@ -64,4 +52,26 @@ hexo.extend.tag.register('fa', function (args, content) {
   var classNames = args.join(' ')
 
   return '<i class="fa ' + classNames + '"></i>'
+})
+
+hexo.extend.tag.register('docLink', function (args, content) {
+  var result = ''
+  // {% docLink api `.and()` and %}
+  // {% docLink guides 'Read about why' why-cypress %}
+  //
+  // <<< Transforms into >>>
+  //
+  // <a href="/api/commands/and.html"><code>.and()</code></a>
+  // <a href="/guides/getting-started/why-cypress.html">Read about why</a>
+
+  var attrs = {
+    text: args[0],
+    url: args[1]
+  }
+
+  result += `<a href="${attrs.url}.html">`
+  result += hexo.render.renderSync({text: attrs.text, engine: 'markdown'})
+  result += `</a>`
+
+  return result
 })
