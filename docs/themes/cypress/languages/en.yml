@@ -54,6 +54,7 @@ sidebar:
     appendices: Appendices
     configuration: Configuration
     error-messages: Error Messages
+    bundled-tools: Bundled Tools
     available-assertions: Available Assertions
     best-practices: Best Practices
     anti-patterns: Anti-patterns

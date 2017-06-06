@@ -35,6 +35,7 @@ guides:
   appendices:
     configuration: configuration.html
     error-messages: error-messages.html
+    bundled-tools: bundled-tools.html
     available-assertions: available-assertions.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html

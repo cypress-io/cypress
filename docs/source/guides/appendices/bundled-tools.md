@@ -1,6 +1,11 @@
-title: bundled-tools
+title: Bundled Tools
 comments: true
 ---
+
+{% note info %}
+Cypress relies on many best-of-breed open source testing libraries to lend stability and familiarity to the platform from the get-go. If you've been testing in JavaScript, you'll recognize many old friends in this list. Understand how we exploit them and hit the ground running with Cypress!
+
+{% endnote %}
 
 # Mocha
 
@@ -20,8 +25,6 @@ Cypress has adopted Mocha's `bdd` syntax, which fits perfectly with both integra
 
 Additionally, Mocha gives us excellent [`async` support](https://mochajs.org/#asynchronous-code). Cypress has extended Mocha, sanding off the rough edges, weird edge cases, bugs, and error messages. These fixes are all completely transparent.
 
-***
-
 # Chai
 
 [Chai docs](http://chaijs.com/)
@@ -32,15 +35,11 @@ While Mocha provides us a framework to structure our tests, Chai gives us the ab
 [Check out our example recipe to see how to extend chai yourself](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/extending_chai_assertion_plugins_spec.js)
 {% endnote %}
 
-***
-
 # Chai-jQuery
 
 [Chai-jQuery docs](https://github.com/chaijs/chai-jquery)
 
 When writing integration tests, you will likely work a lot with the DOM. Cypress brings in Chai-jQuery, which automatically extends Chai with specific jQuery chainer methods.
-
-***
 
 # Sinon
 
@@ -52,23 +51,17 @@ When writing unit tests, or even in integration-like tests, you often need to ab
 [Check out our example recipe for stubbing dependencies in unit tests](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js)
 {% endnote %}
 
-***
-
 # Sinon-Chai
 
 [Sinon-Chai docs](https://github.com/domenic/sinon-chai)
 
 When working with `stubs` or `spies` you'll regularly want to use those when writing Chai assertions. Cypress bundles in Sinon-Chai which extends Chai allowing you to [write assertions](https://github.com/domenic/sinon-chai#assertions) about `stubs` and `spies`.
 
-***
-
 # Sinon-As-Promised
 
 [Sinon-As-Promised docs](https://github.com/bendrucker/sinon-as-promised)
 
 Sinon-as-Promised gives you the ability to stub methods that return Promises. To fulfill the async contract of these methods, you would use Sinon-as-Promised to force these methods to easily [`resolve`](https://github.com/bendrucker/sinon-as-promised#stubresolvesvalue---stub) or [`reject`](https://github.com/bendrucker/sinon-as-promised#stubrejectserr---stub) at your discretion.
-
-***
 
 # Other Library Utilities
 
