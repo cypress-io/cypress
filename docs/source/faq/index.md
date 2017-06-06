@@ -126,7 +126,7 @@ There is nothing currently built into Cypress to do this. Adding code coverage a
 
 No. In fact Cypress' architecture is very different from Selenium in a few critical ways:
 
-- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like [.request()](http://on.cypress.io/request) and [.exec()](https://on.cypress.io/exec).
+- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like [.request()](http://on.cypress.io/api/request) and [.exec()](https://on.cypress.io/api/exec).
 
 ## {% fa fa-question-circle green %} Are there driver bindings in my language?
 
@@ -218,7 +218,7 @@ cy.get('button').then(($el) => {
 
 ## {% fa fa-question-circle green %} How do I wait for multiple XHR requests to the same url?
 
-You should set up an alias (using [`.as()`](https://on.cypress.io/api/as)) to a single route that matches all of the XHRs. You can then [`.wait()`](https://on.cypress.io/wait) on it multiple times and Cypress keeps track of how many matching XHR requests there are.
+You should set up an alias (using [`.as()`](https://on.cypress.io/api/as)) to a single route that matches all of the XHRs. You can then [`.wait()`](https://on.cypress.io/api/wait) on it multiple times and Cypress keeps track of how many matching XHR requests there are.
 
 ```javascript
 cy.server()
@@ -234,9 +234,9 @@ cy.get('#list>li').should('have.length', 20)
 
 ## {% fa fa-question-circle green %} How do I seed / reset my database?
 
-You can use either [`.request()`](https://on.cypress.io/request) or [`cy.exec`](https://on.cypress.io/exec) to talk to your backend to seed data.
+You can use either [`.request()`](https://on.cypress.io/api/request) or [`cy.exec`](https://on.cypress.io/api/exec) to talk to your backend to seed data.
 
-You could also just stub XHR requests directly using [`.route()`](https://on.cypress.io/route) which avoids ever even needing to fuss with your database.
+You could also just stub XHR requests directly using [`.route()`](https://on.cypress.io/api/route) which avoids ever even needing to fuss with your database.
 
 <!-- ## How do I pass data to my webserver from Cypress? -->
 
@@ -331,7 +331,7 @@ cy.get('input').should('have.value', 'abc')
 
 The code you write in Cypress is executed in the browser, so you can import or require JS modules, but only those that work in the browser.
 
-Cypress doesn't have direct access to node or your file system. We recommend utilizing [`.exec()`](https://on.cypress.io/exec) to execute a shell command or a node script that will do what you need.
+Cypress doesn't have direct access to node or your file system. We recommend utilizing [`.exec()`](https://on.cypress.io/api/exec) to execute a shell command or a node script that will do what you need.
 
 ## {% fa fa-question-circle green %} Is there a way to give a proper SSL certificate to your proxy so the page doesn't show up as "not secure"?
 
@@ -339,7 +339,7 @@ No, Cypress modifies network traffic in real time and therefore must sit between
 
 ## {% fa fa-question-circle green %} Can I use the Page Object pattern?
 
-As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with [`.as()`](https://on.cypress.io/as) to essentially recreate what page objects give you.
+As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with [`.as()`](https://on.cypress.io/api/as) to essentially recreate what page objects give you.
 
 
 # Dashboard

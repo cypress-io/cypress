@@ -57,7 +57,7 @@ cy.window().then(function(win){
 
 ## Options
 
-**Passes timeout through to [`.should()`](https://on.cypress.io/should) assertion**
+**Passes timeout through to [`.should()`](https://on.cypress.io/api/should) assertion**
 
 ```javascript
 cy.window({ timeout: 10000 }).should('have.property', 'foo')

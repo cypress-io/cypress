@@ -174,4 +174,4 @@ When clicking on the `readFile` command within the command log, the console outp
 - [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - [exec](https://on.cypress.io/api/exec)
 - [fixture](https://on.cypress.io/api/fixture)
-- [writeFile](https://on.cypress.io/api/writeFile)
+- [writeFile](https://on.cypress.io/api/writefile)

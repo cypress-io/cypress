@@ -10,6 +10,8 @@ Read through our [Guides](https://on.cypress.io/guides/guides) first.
 
 # Commands
 
+## Other Things
+
 Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".
 
 # Utilities

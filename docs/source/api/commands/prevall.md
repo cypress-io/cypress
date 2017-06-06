@@ -114,6 +114,6 @@ When clicking on `prevAll` within the command log, the console outputs the follo
 # See also
 
 - [nextAll](https://on.cypress.io/api/nextall)
-- [parentsAll](https://on.cypress.io/api/parentsall)
+- [parents](https://on.cypress.io/api/parents)
 - [prev](https://on.cypress.io/api/prev)
 - [prevUntil](https://on.cypress.io/api/prevuntil)

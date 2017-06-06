@@ -130,7 +130,7 @@ cy.get('button').click(5, 60, { force: true })
 **Hover and clicking hidden elements**
 
 {% note info %}
-[Check out our example recipe on testing hover and working with hidden elements.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
+[Check out our example recipe on testing hover and working with hidden elements.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
 {% endnote %}
 
 **Click all buttons found on the page**

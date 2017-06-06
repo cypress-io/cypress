@@ -8,17 +8,17 @@
       <div id="footer-social">
         <ul class="list-unstyled list-inline">
           <li>
-            <a href="https://github.com/{{ config.github_main_repo }}">
+            <a class="footer-link" href="https://github.com/{{ config.github_main_repo }}">
               <i class="fa fa-github" title="Github Repo"></i>
             </a>
           </li>
           <li>
-            <a href="https://twitter.com/{{ config.twitter_username }}">
+            <a class="footer-link" href="https://twitter.com/{{ config.twitter_username }}">
               <i class="fa fa-twitter" title="@{{ config.twitter_username }}"></i>
             </a>
           </li>
           <li>
-            <a href="https://facebook.com/{{ config.facebook_username }}">
+            <a class="footer-link" href="https://facebook.com/{{ config.facebook_username }}">
               <i class="fa fa-facebook" title="Facebook"></i>
             </a>
           </li>
