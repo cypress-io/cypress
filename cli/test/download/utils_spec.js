@@ -13,7 +13,7 @@ const packageVersion = require('../../package').version
 const utils = require('../../lib/download/utils')
 const xvfb = require('../../lib/exec/xvfb')
 
-const distDir = path.join(__dirname, '../../lib/download/dist')
+const distDir = path.join(__dirname, '../../dist')
 const infoFilePath = path.join(distDir, 'info.json')
 
 describe('utils', function () {
@@ -168,13 +168,18 @@ describe('utils', function () {
     describe('with force: true', function () {
       beforeEach(function () {
         this.sandbox.stub(fs, 'statAsync').resolves()
+
         return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
       })
 
       it('runs smoke test even if version already verified', function () {
-        return utils.verify({ force: true }).then(() => {
+        return utils.verify({ force: true })
+        .then(() => {
           expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
-          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), ['--project', path.join(distDir, '../project')])
+          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
+            '--project',
+            path.join(distDir, '../lib/download/project')
+          ])
         })
       })
 
@@ -202,7 +207,10 @@ describe('utils', function () {
         })
         .then(() => {
           expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
-          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), ['--project', path.join(distDir, '../project')])
+          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
+            '--project',
+            path.join(distDir, '../lib/download/project')
+          ])
         })
       })
 
