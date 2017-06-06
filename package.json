@@ -16,21 +16,21 @@
     "postinstall": "npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
     "lint": "standard --verbose --fix dev/*.js",
-    "commit": "commit-wizard"
+    "precommit": "npm run lint && npm run all lint"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.4",
     "ascii-table": "0.0.9",
-    "chai": "^3.5.0",
     "babel-eslint": "^6.0.4",
+    "chai": "^3.5.0",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-react": "^5.1.1",
+    "husky": "^0.13.4",
     "mocha": "^3.2.0",
     "nock": "^9.0.9",
-    "pre-git": "^3.15.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0",
     "standard": "^10.0.2"
@@ -53,17 +53,5 @@
     "tmp": "0.0.31",
     "url": "^0.11.0",
     "xvfb": "cypress-io/node-xvfb"
-  },
-  "config": {
-    "pre-git": {
-      "pre-commit": [
-        "npm run lint",
-        "npm run all lint"
-      ],
-      "pre-push": [],
-      "post-commit": [],
-      "post-checkout": [],
-      "post-merge": []
-    }
   }
 }
