@@ -45,14 +45,14 @@ describe("Post Resource", function() {
 Can you read this? If you did, it might sound something like this:
 
 {% note info %}
-1. Visit the page at `/posts/new`
-2. Find the element containing the text "Post Title"
-3. Type "My First Post" into it
-4. Find the element containing the text "Post Body"
-5. Type "Hello, world!" into it
-6. Select the `<button>` tag with a type of `submit`, click it
-7. Grab the browser URL, ensure it is `/posts/my-first-post`
-8. Select the `<h1>` tag, ensure it contains the text "My First Post"
+1. Visit the page at `/posts/new`.
+2. Find the element containing the text "Post Title".
+3. Type "My First Post" into it.
+4. Find the element containing the text "Post Body".
+5. Type "Hello, world!" into it.
+6. Select the `<button>` tag with a type of `submit`, click it.
+7. Grab the browser URL, ensure it is `/posts/my-first-post`.
+8. Select the `<h1>` tag, ensure it contains the text "My First Post".
 
 {% endnote %}
 
@@ -236,7 +236,7 @@ Want to bring in a value from outside of the Command flow? You can quickly achie
 cy.wrap(7).should("equal", 7)
 ```
 
-`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple! The above is the asynchronous equivalent to: `expect(7).to.equal(7)`
+`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple! The above is the asynchronous equivalent to: `expect(7).to.equal(7)`.
 
 ### Using `.then` To Act Synchronously On A Subject
 
