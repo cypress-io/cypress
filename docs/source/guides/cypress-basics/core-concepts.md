@@ -4,11 +4,10 @@ comments: true
 
 # What You'll Learn
 
-- what idiomatic Cypress looks like
-- how to work with web applications
-- how Cypress works like web apps: asynchronous and serial
-- how to assert things yourself, and how Cypress asserts things for you
-- the rules that make Cypress work, and how to follow them
+- what Cypress looks like
+- how Cypress queries the DOM more safely than jQuery
+- how Cypress manages subjects and chains of commands
+- what assertions look like and how they work
 
 {% note info Important! %}
 **This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.
@@ -21,21 +20,21 @@ Expressivity is all about getting more done with less typing. Let's look at an e
 ```js
 describe("Post Resource", function() {
   it("Creating a new Post", function() {
-    cy.visit("/posts/new") /* 1 */
+    cy.visit("/posts/new") // 1.
 
-    cy.contains("Post Title") /* 2 */
-      .type("My First Post") /* 3 */
+    cy.get("input.post-title") // 2.
+      .type("My First Post") // 3.
 
-    cy.contains("Post Body") /* 4 */
-      .type("Hello, world!") /* 5 */
+    cy.get("input.post-body") // 4.
+      .type("Hello, world!") // 5.
 
-    cy.get('button[type="submit"]') /* 6 */
-      .click()
+    cy.get('button[type="submit"]') // 6.
+      .click() // 7.
 
-    cy.url() /* 7 */
+    cy.url() // 8.
       .should("eq", "/posts/my-first-post")
 
-    cy.get('h1') /* 8 */
+    cy.get('h1') // 9.
       .its('value')
       .should("eq", "My First Post")
   })
@@ -46,13 +45,14 @@ Can you read this? If you did, it might sound something like this:
 
 {% note info %}
 1. Visit the page at `/posts/new`.
-2. Find the element containing the text "Post Title".
+2. Find the `<input>` with class `post-title`.
 3. Type "My First Post" into it.
-4. Find the element containing the text "Post Body".
+4. Find the `<input>` with class `post-body`.
 5. Type "Hello, world!" into it.
-6. Select the `<button>` tag with a type of `submit`, click it.
-7. Grab the browser URL, ensure it is `/posts/my-first-post`.
-8. Select the `<h1>` tag, ensure it contains the text "My First Post".
+6. Select the `<button>` tag with a type of `submit`.
+7. Click it.
+8. Grab the browser URL, ensure it is `/posts/my-first-post`.
+9. Select the `<h1>` tag, ensure it contains the text "My First Post".
 
 {% endnote %}
 
@@ -64,7 +64,7 @@ For the remainder of this guide we'll go through the basics of Cypress that make
 
 ## Cypress is Like jQuery
 
-In jQuery, you look up elements like this:
+In jQuery, you're used to looking up elements like this:
 
 ```js
 $('.my-selector')
@@ -94,39 +94,44 @@ Answer: Oops! The dreaded `null` enters your code, and you ignore it at your own
 ```js
 // $() returns immediately with null
 let $myElement = $('.my-selector').first()
-// Begging for an error!
+// Leads to errors or ugly null checks
 doSomething($myElement)
 ```
 
 Question: What happens when Cypress can't find the selector it queries?
 
-Answer: No big deal, Cypress expects this and retries the query until it's found, or the timeout is reached.
+Answer: No big deal! Cypress expects this and automatically retries the query for you until it is found or the timeout is reached.
 
 ```js
 // cy.get() queries using jQuery, repeating the query until...
-cy.get('.my-selector')
+cy.get('.my-selector').first()
   // ...it finds the element! You can now work with it by using .then
   .then(function($myElement) {
     doSomething($myElement)
   })
-  // ...it doesn't find the element before its timeout and Cypress halts, failing the test
+  // ...it doesn't find the element before its timeout.
+  // Cypress halts and fails the test.
+  // No null checks necessary because no other code runs!
 ```
 
-This makes Cypress robust, immune to a thousand tiny, common problems at once. Think about it, what could make the jQuery query fail? How about:
-- dom not loaded yet
+This makes Cypress robust, immune to a thousand tiny, common problems at once. Think about all the circumstances that could cause the jQuery version to fail:
+- DOM not loaded yet
 - framework hasn't finished bootstrapping
-- waiting on an xhr to complete
+- an XHR hasn't completed
+- an animation hasn't completed
 - and on and on...
 
-Normally you'd be writing custom code to ensure against any and all of these kinds of little issues. Not in Cypress! With build-in retrying and customizable timeouts, Cypress sidesteps all of this in one fell swoop. The only price you pay is using a Promise-like `.then()` to access the element.
+Traditionally, you'd be forced to write custom code to ensure against any and all of these issues. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this instantly. The only change in your code is leveraging a Promise-like `.then()` command whenever you need to access the element directly.
 
 {% note info %}
 In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element.
+
+For more, check out [the API docs for `.then()`](http://on.cypress.io/api/then)
 {% endnote %}
 
 ## Finding Elements by Their Contents
 
-Another way to locate things -- a more human way -- is to look them up by their contents. For this, we can use `cy.contains()`, for example:
+Another way to locate things -- a more human way -- is to look them up by their contents, by what the user sees on the page. For this, there's the handy `cy.contains()`, for example:
 
 ```js
 // Finds a single element containing (at least) the text "New Post"
@@ -145,7 +150,7 @@ cy.get('.main').contains("New Post")
 
 ## What If An Element Is Not Found?
 
-Great question! Cypress is smart about finding elements; it knows that the DOM is a dynamic place where things change from one moment to the next, so it doesn't fail immediately if something isn't found. Instead, Cypress gives your app a chance to finish whatever it may be doing!
+As we showed above, Cypress anticipates the asynchronous nature of web applications and doesn't fail immediately when an element is not found. Instead, Cypress gives your app a window of time to finish whatever it may be doing!
 
 This is known as a `timeout`, and most commands may be customized with specific timeout periods. (The default is 4 seconds.) These Commands will list a `timeout` option in their API documentation, allowing you to set the number of milliseconds you need.
 
@@ -156,9 +161,9 @@ cy.get('.my-slow-selector', { timeout: 10000 })
 
 You can also set the timeout globally via the configuration setting `defaultCommandTimeout`.
 
-{% note info Timeouts and Test Performance %}
+{% note info Timeouts and Performance %}
 
-There is a performance tradeoff here: essentially, **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means you want to increase your timeout period to suit your app, but you probably don't want to make it "extra long, just in case".
+There is a performance tradeoff here: **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means that while you _may_ want to increase your timeout period to suit specific parts of your app, you _don't_ want to make it "extra long, just in case".
 
 {% endnote %}
 
