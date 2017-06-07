@@ -1,19 +1,22 @@
-import {detectBrowserLinux} from './linux'
-import {detectBrowserDarwin} from './darwin'
-import {log} from './log'
-import {Browser, NotInstalledError} from './types'
-import {browsers} from './browsers'
+import { detectBrowserLinux } from './linux'
+import { detectBrowserDarwin } from './darwin'
+import { log } from './log'
+import { Browser, NotInstalledError } from './types'
+import { browsers } from './browsers'
 import * as Bluebird from 'bluebird'
-import {merge, pick, tap, uniqBy, prop} from 'ramda'
-
-import _ = require('lodash')
-import os = require('os')
+import { merge, pick, tap, uniqBy, prop } from 'ramda'
+import * as _ from 'lodash'
+import * as os from 'os'
 
 const setMajorVersion = (obj: Browser) => {
   if (obj.version) {
     obj.majorVersion = obj.version.split('.')[0]
-    log('browser %s version %s major version %s',
-      obj.name, obj.version, obj.majorVersion)
+    log(
+      'browser %s version %s major version %s',
+      obj.name,
+      obj.version,
+      obj.majorVersion
+    )
   }
   return obj
 }
@@ -27,7 +30,7 @@ const detectors: Detectors = {
   linux: detectBrowserLinux
 }
 
-function lookup (platform: NodeJS.Platform, obj: Browser): Promise<Object> {
+function lookup(platform: NodeJS.Platform, obj: Browser): Promise<Object> {
   log('looking up %s on %s platform', obj.name, platform)
   const detector = detectors[platform]
   if (!detector) {
@@ -36,9 +39,15 @@ function lookup (platform: NodeJS.Platform, obj: Browser): Promise<Object> {
   return detector(obj)
 }
 
-function checkOneBrowser (browser: Browser) {
+function checkOneBrowser(browser: Browser) {
   const platform = os.platform()
-  const pickBrowserProps = pick(['name', 'displayName', 'type', 'version', 'path'])
+  const pickBrowserProps = pick([
+    'name',
+    'displayName',
+    'type',
+    'version',
+    'path'
+  ])
 
   const logBrowser = (props: any) => {
     log('setting major version for %j', props)
@@ -61,7 +70,7 @@ function checkOneBrowser (browser: Browser) {
 }
 
 /** returns list of detected browsers */
-function detectBrowsers (): Bluebird<Browser[]> {
+function detectBrowsers(): Bluebird<Browser[]> {
   // we can detect same browser under different aliases
   // tell them apart by the full version property
   const removeDuplicates = uniqBy(prop('version'))
