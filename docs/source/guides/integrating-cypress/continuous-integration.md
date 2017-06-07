@@ -88,12 +88,12 @@ If you run `cypress run` and see no output [see this section for troubleshooting
 
 Cypress can record your tests running and make them available in our [Dashboard](https://on.cypress.io/dashboard).
 
-**Recorded tests contain:**
+**Recorded tests allow you to:**
 
-- Standard output
-- Failing Tests
-- Screenshots
-- Videos
+- See the number of failed, pending and passing tests.
+- Get the entire stack trace of failed tests.
+- View screenshots taken when tests fail and when using [`cy.screenshot()`](https://on.cypress.io/api/screenshot).
+- Watch a video of your entire test run or a clip at the point of test failure.
 
 **To record tests running:**
 

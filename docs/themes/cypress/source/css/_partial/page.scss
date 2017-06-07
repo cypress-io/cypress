@@ -70,10 +70,25 @@
     margin-left: 40px;
     list-style: decimal;
 
+
+
+    li {
+      margin: 1em 0;
+
+      p {
+        margin-bottom: 10px;
+      }
+
+      img {
+        margin-top: 10px;
+      }
+    }
+
     ul {
       margin-top: 0;
       margin-bottom: 0;
     }
+
     ol {
       margin-top: 0;
       margin-bottom: 0;
@@ -353,9 +368,9 @@
       }
     }
 
-    // p {
-    //   margin: 0;
-    // }
+    p:first-of-type:last-of-type {
+      margin: 0;
+    }
 
     ul {
       margin: 0 20px 0 40px;
