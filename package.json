@@ -2,16 +2,16 @@
   "name": "cypress-monorepo",
   "private": true,
   "scripts": {
-    "start": "node dev/start.js",
+    "start": "node ./scripts/start.js",
     "watch": "npm run all watch",
     "build": "npm run all build",
-    "all": "node dev/run.js",
+    "all": "node ./scripts/run.js",
     "test": "echo 'This root monorepo is only for local development and new contributions. There are no tests.' && exit(1)",
-    "link": "node ./dev/link-packages.js",
+    "link": "node ./scripts/link-packages.js",
     "postinstall": "CYPRESS_DOWNLOAD=0 npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
-    "docker": "./dev/run-docker-local.sh",
-    "lint": "standard --verbose --fix dev/*.js",
+    "docker": "./scripts/run-docker-local.sh",
+    "lint": "standard --verbose --fix scripts/*.js",
     "precommit": "npm run lint && npm run all lint"
   },
   "devDependencies": {
