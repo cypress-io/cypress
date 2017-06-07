@@ -65,3 +65,14 @@ a code {
     padding: 0.5em 0.25em;
   }
 }
+
+.article pre.language-shell,
+.faq pre.language-shell{
+    border-left: 5px solid #000;
+}
+
+.article pre.language-shell, .article pre.language-shell code,
+.faq pre.language-shell, .faq pre.language-shell  code {
+    background-color: #252831;
+    color: #f5f6f8;
+}

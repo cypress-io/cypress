@@ -228,7 +228,7 @@ describe('if your app uses jQuery', function(){
 
 The code above will produce a suite with 4 tests:
 
-```bash
+```shell
 > if your app uses jQuery
   > triggers event: 'mouseover'
   > triggers event: 'mouseout'

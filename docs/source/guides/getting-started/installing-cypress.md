@@ -10,7 +10,7 @@ comments: true
 
 Installing Cypress to test your modern web project is as easy as:
 
-```bash
+```shell
 $ npm install cypress --save-dev
 ```
 
