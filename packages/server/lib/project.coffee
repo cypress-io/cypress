@@ -81,8 +81,8 @@ class Project extends EE
         ## opening the server
         @cfg = cfg
 
-        options.onSavedStateChanged = =>
-          @_setSavedState(@cfg)
+        options.onSavedStateChanged = (state) =>
+          @saveState(state)
 
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)

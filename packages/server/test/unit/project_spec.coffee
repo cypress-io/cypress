@@ -156,16 +156,17 @@ describe "lib/project", ->
         expect(@project.getConfig).to.be.calledWith(opts)
 
     it "updates config.state when saved state changes", ->
-      state = savedState(@todosPath)
-      getSavedState = @sandbox.stub(state, "get").resolves({})
+      @sandbox.spy(@project, "saveState")
+
       options = {}
+
       @project.open(options)
-      .then ->
-        getSavedState.resolves({ autoScrollingEnabled: false })
-        options.onSavedStateChanged()
+      .then =>
+        options.onSavedStateChanged({ autoScrollingEnabled: false })
       .then =>
         @project.getConfig()
-      .then (config) ->
+      .then (config) =>
+        expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
 
     it.skip "watches cypress.json", ->

@@ -29,4 +29,6 @@ module.exports = {
   getCookieUrl: background.getUrl
 
   connect: background.connect
+
+  app: background
 }
