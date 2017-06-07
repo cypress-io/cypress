@@ -211,7 +211,7 @@ Some assertions may modify the current subject unexpectedly. Read the next secti
 
 ## Subjects
 
-A new Cypress chain always start with `cy.[something]`, where the `something` establishes what other methods can be called (chained) next. Some methods yield no subject and thus cannot be chained, such as `cy.clearCookies()` or `cy.screenshot()`. Some methods, such as `cy.get()` or `cy.contains()`, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like `.click()` or even `.contains()` again.
+A new Cypress chain always starts with `cy.[something]`, where the `something` establishes what other methods can be called next (chained). Some methods yield no subject and thus cannot be chained, such as `cy.clearCookies()` or `cy.screenshot()`. Some methods, such as `cy.get()` or `cy.contains()`, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like `.click()` or even `.contains()` again.
 
 {% note info %}
 **Some commands can be chained:**
@@ -220,9 +220,9 @@ A new Cypress chain always start with `cy.[something]`, where the `something` es
 - ...from `cy` *or* from a subject-yielding chain (`.contains()`)
 
 **Some commands yield:**
-- ...`null`, meaning they should not be chained against
+- ...`null`, meaning they cannot be chained against
 - ...the same subject they were chained from
-- ...a new subject as appropriate for the command
+- ...a new subject, as appropriate for the command
 
 {% endnote %}
 
