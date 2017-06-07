@@ -83,7 +83,10 @@ google:
 ## https://github.com/LouisBarranqueiro/hexo-algoliasearch
 algolia:
   en:
-    api_key: "8baa384b1e9cbf317e714aa0df1a2576"
+    # Algolia application ID
+    app_id: "R9KDA5FMJB"
+    # Algolia SEARCH ID (not Write or Admin)
+    api_key: "8e6c3119ee78db1ad10cd7bfb439d726"
     index_name: "cypress"
 
 # Extensions

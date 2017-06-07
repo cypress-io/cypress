@@ -1,6 +1,7 @@
 <script type="text/javascript">
   document.getElementById('search-input-wrap').classList.add('on');
   docsearch({
+    appId: '{{ config.algolia[page.lang].app_id }}',
     apiKey: '{{ config.algolia[page.lang].api_key }}',
     indexName: '{{ config.algolia[page.lang].index_name }}',
     inputSelector: '#search-input',
