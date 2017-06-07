@@ -87,33 +87,41 @@ Not so fast...
 
 ## Cypress is _Not_ Like jQuery
 
-Cypress re-uses the selector search functionality of jQuery ...actually, jQuery **IS** inside of Cypress, and all element references are real jQuery element objects, but Cypress does not share jQuery's execution model, it just wraps it. Specifically, all Cypress commands are asynchronous: they work more like Promises (more on this later.)
+Question: What happens when jQuery can't find the selector it queries?
 
-In jQuery, if you want to operate on an element, you might do this:
+Answer: Oops! The dreaded `null` enters your code, and you ignore it at your own risk!
 
 ```js
-// $() returns immediately with an element collection
-let myElement = $('.my-selector').first()
-// Do work with it immediately
-doSomething(myElement)
+// $() returns immediately with null
+let $myElement = $('.my-selector').first()
+// Begging for an error!
+doSomething($myElement)
 ```
 
-But in Cypress, calling `cy.get()` will not return a value (actually, it returns a Cypress Chainer instance, but we aren't there yet.) You'll need to call `.then` on your command chain in order to yield the actual, jQuery-wrapped element.
+Question: What happens when Cypress can't find the selector it queries?
+
+Answer: No big deal, Cypress expects this and retries the query until it's found, or the timeout is reached.
 
 ```js
-// cy.get() returns a Cypress Chainer instance, not a value!
+// cy.get() queries using jQuery, repeating the query until...
 cy.get('.my-selector')
-  // .then() is a Chainer method that accepts a function
-  .then(function(myElement) {
-    // the function receives the value and can synchronously work with it
-    doSomething(myElement)
+  // ...it finds the element! You can now work with it by using .then
+  .then(function($myElement) {
+    doSomething($myElement)
   })
+  // ...it doesn't find the element before its timeout and Cypress halts, failing the test
 ```
 
-{% note info Why Complicate Element Selection? %}
+This makes Cypress robust, immune to a thousand tiny, common problems at once. Think about it, what could make the jQuery query fail? How about:
+- dom not loaded yet
+- framework hasn't finished bootstrapping
+- waiting on an xhr to complete
+- and on and on...
 
-If this seems a bit strange, bear with us a bit longer. This isn't needless complication of DOM queries, it's actually critically important to effectively testing web applications. We'll address this fundamental shift by the end of this document, stay tuned!
+Normally you'd be writing custom code to ensure against any and all of these kinds of little issues. Not in Cypress! With build-in retrying and customizable timeouts, Cypress sidesteps all of this in one fell swoop. The only price you pay is using a Promise-like `.then()` to access the element.
 
+{% note info %}
+In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element.
 {% endnote %}
 
 ## Finding Elements by Their Contents
