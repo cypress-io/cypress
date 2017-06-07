@@ -1,7 +1,6 @@
 ---
 title: wait
 comments: true
-description: ''
 ---
 
 Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.

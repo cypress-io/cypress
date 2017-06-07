@@ -1,7 +1,6 @@
 ---
 title: Cypress.Server
 comments: true
-description: ''
 ---
 
 Permanently change the default options for all [`cy.server()`](https://on.cypress.io/api/server) instances

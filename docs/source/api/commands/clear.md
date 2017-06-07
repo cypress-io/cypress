@@ -1,7 +1,6 @@
 ---
 title: clear
 comments: true
-description: ''
 ---
 
 Clear the value of an `input` or `textarea`.

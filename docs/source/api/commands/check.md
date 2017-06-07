@@ -1,7 +1,6 @@
 ---
 title: check
 comments: true
-description: ''
 ---
 
 Check checkbox(es) or radio(s).

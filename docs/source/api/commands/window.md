@@ -1,7 +1,6 @@
 ---
 title: window
 comments: true
-description: ''
 ---
 
 Get the global `window` object of the remote application that was [visited](https://on.cypress.io/api/visit).

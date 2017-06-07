@@ -1,7 +1,6 @@
 ---
 title: stub
 comments: true
-description: ''
 ---
 
 Replace a function, record its usage and control its behavior.

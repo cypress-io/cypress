@@ -1,7 +1,6 @@
 ---
 title: should
 comments: true
-description: ''
 ---
 
 Make an assertion.

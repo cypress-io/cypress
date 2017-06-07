@@ -1,7 +1,6 @@
 ---
 title: type
 comments: true
-description: ''
 ---
 
 Type into a DOM element.

@@ -1,7 +1,6 @@
 ---
 title: root
 comments: true
-description: ''
 ---
 
 Get the root element.

@@ -1,7 +1,6 @@
 ---
-title: writefile
+title: writeFile
 comments: true
-description: ''
 ---
 
 Write to a file with the specified contents.

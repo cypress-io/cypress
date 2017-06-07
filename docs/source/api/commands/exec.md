@@ -1,7 +1,6 @@
 ---
 title: exec
 comments: true
-description: ''
 ---
 
 Execute a system command.

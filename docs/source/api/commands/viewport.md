@@ -1,7 +1,6 @@
 ---
 title: viewport
 comments: true
-description: ''
 ---
 
 Control the size and orientation of the screen for your application.

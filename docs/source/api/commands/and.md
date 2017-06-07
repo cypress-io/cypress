@@ -1,7 +1,6 @@
 ---
 title: and
 comments: true
-description: ''
 ---
 
 Make an assertion.

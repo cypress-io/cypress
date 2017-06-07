@@ -1,7 +1,6 @@
 ---
 title: url
 comments: true
-description: ''
 ---
 
 Get the current URL.

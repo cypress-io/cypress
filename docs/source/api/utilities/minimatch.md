@@ -1,7 +1,6 @@
 ---
 title: Cypress.minimatch
 comments: true
-description: ''
 ---
 
 Cypress automatically proxies [`minimatch`](https://github.com/isaacs/minimatch) and exposes it as `Cypress.minimatch`.

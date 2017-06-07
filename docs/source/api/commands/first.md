@@ -1,7 +1,6 @@
 ---
 title: first
 comments: true
-description: ''
 ---
 
 Get the first DOM element within a set of DOM elements.

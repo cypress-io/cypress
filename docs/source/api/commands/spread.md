@@ -1,7 +1,6 @@
 ---
 title: spread
 comments: true
-description: ''
 ---
 
 Expand an array into multiple arguments.

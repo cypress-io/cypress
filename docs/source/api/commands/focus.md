@@ -1,7 +1,6 @@
 ---
 title: focus
 comments: true
-description: ''
 ---
 
 Focus on a DOM element.

@@ -1,7 +1,6 @@
 ---
 title: end
 comments: true
-description: ''
 ---
 
 End a chain of commands.

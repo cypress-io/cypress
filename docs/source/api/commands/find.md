@@ -1,7 +1,6 @@
 ---
 title: find
 comments: true
-description: ''
 ---
 
 Get the descendent DOM elements of a specific selector.

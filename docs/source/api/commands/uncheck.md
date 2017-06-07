@@ -1,7 +1,6 @@
 ---
 title: uncheck
 comments: true
-description: ''
 ---
 
 Uncheck checkbox(es).

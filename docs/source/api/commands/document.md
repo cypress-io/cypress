@@ -1,7 +1,6 @@
 ---
 title: document
 comments: true
-description: ''
 ---
 
 Get the document.

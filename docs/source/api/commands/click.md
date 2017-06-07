@@ -1,7 +1,6 @@
 ---
 title: click
 comments: true
-description: ''
 ---
 
 Click a DOM element.

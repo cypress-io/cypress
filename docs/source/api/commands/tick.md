@@ -1,7 +1,6 @@
 ---
 title: tick
 comments: true
-description: ''
 ---
 
 Move time after overriding a native time function with [`cy.clock()`](https://on.cypress.io/api/clock).

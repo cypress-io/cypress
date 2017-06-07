@@ -1,7 +1,6 @@
 ---
 title: its
 comments: true
-description: ''
 ---
 
 Get a property on the previously yielded subject.

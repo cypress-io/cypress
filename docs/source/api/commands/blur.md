@@ -1,7 +1,6 @@
 ---
 title: blur
 comments: true
-description: ''
 ---
 
 Make a focused DOM element blur.

@@ -1,7 +1,6 @@
 ---
 title: trigger
 comments: true
-description: ''
 ---
 
 Trigger an event on a DOM element.  
@@ -109,7 +108,7 @@ Note that some implementations may rely on the `input` event instead, which is f
 cy.get('input[type=range]').as('range')
   .invoke('val', 25)
   .trigger('change')
-  
+
 cy.get('@range').siblings('p').should('have.text', '25')
 ```
 
