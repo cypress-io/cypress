@@ -2,7 +2,9 @@
   float: left;
   width: 100%;
   padding: 0px 50px;
-  border-right: 1px solid #eee;
+  border: 1px solid #eee;
+  border-top: 0;
+  border-bottom: 0;
 }
 
 .article-date {
