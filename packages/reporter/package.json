@@ -1,6 +1,7 @@
 {
   "name": "@packages/reporter",
   "version": "0.3.4",
+  "private": true,
   "main": "lib/reporter",
   "browser": "src/main",
   "scripts": {

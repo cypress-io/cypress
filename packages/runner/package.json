@@ -2,6 +2,7 @@
   "name": "@packages/runner",
   "version": "0.3.11",
   "main": "lib/runner.js",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cypress-io/cypress-core-runner.git"

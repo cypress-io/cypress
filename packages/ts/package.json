@@ -1,6 +1,7 @@
 {
   "name": "@packages/ts",
   "version": "1.0.0",
+  "private": true,
   "description": "TypeScript runtime Node hook",
   "main": "index.js",
   "scripts": {

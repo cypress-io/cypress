@@ -1,7 +1,8 @@
 {
   "name": "cypress-documentation",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cypress.io documentation",
+  "private": true,
   "hexo": {
     "version": "3.3.1"
   },

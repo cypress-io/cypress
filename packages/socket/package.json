@@ -1,6 +1,7 @@
 {
   "name": "@packages/socket",
   "version": "0.2.1",
+  "private": true,
   "description": "Cypress Shared Socket Libs",
   "main": "index.js",
   "scripts": {

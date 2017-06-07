@@ -1,6 +1,7 @@
 {
   "name": "@packages/extension",
   "version": "0.4.2",
+  "private": true,
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {

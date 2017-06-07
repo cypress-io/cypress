@@ -1,6 +1,7 @@
 {
   "name": "@packages/static",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "postinstall": "echo '@packages/static needs: npm run build'",
     "build": "gulp build",

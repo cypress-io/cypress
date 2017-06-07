@@ -1,6 +1,7 @@
 {
   "name": "@packages/coffee",
   "main": "index.js",
+  "private": true,
   "dependencies": {
     "coffee-script": "1.12.5"
   },

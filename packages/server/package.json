@@ -2,6 +2,7 @@
   "name": "@packages/server",
   "productName": "Cypress",
   "version": "0.19.2",
+  "private": true,
   "description": "Javascript Test Engine",
   "main": "index.js",
   "scripts": {

@@ -2,6 +2,7 @@
   "name": "@packages/https-proxy",
   "version": "0.1.5",
   "description": "",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

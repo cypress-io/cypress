@@ -2,6 +2,7 @@
   "name": "@packages/launcher",
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
+  "private": true,
   "main": "index.js",
   "types": "../ts/index.d.ts",
   "scripts": {

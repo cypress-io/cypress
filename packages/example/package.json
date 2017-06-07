@@ -1,6 +1,7 @@
 {
   "name": "@packages/example",
   "version": "0.8.0",
+  "private": true,
   "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
