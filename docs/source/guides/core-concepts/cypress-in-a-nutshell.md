@@ -1,4 +1,4 @@
-title: Core Concepts
+title: Cypress in a Nutshell
 comments: true
 ---
 
@@ -20,21 +20,21 @@ Expressivity is all about getting more done with less typing. Let's look at an e
 ```js
 describe("Post Resource", function() {
   it("Creating a new Post", function() {
-    cy.visit("/posts/new") // 1.
+    cy.visit("/posts/new")     // 1.
 
     cy.get("input.post-title") // 2.
-      .type("My First Post") // 3.
+      .type("My First Post")   // 3.
 
-    cy.get("input.post-body") // 4.
-      .type("Hello, world!") // 5.
+    cy.get("input.post-body")  // 4.
+      .type("Hello, world!")   // 5.
 
-    cy.get('button[type="submit"]') // 6.
-      .click() // 7.
+    cy.contains('Submit')      // 6.
+      .click()                 // 7.
 
-    cy.url() // 8.
+    cy.url()                   // 8.
       .should("eq", "/posts/my-first-post")
 
-    cy.get('h1') // 9.
+    cy.get('h1')               // 9.
       .its('value')
       .should("eq", "My First Post")
   })
@@ -49,7 +49,7 @@ Can you read this? If you did, it might sound something like this:
 3. Type "My First Post" into it.
 4. Find the `<input>` with class `post-body`.
 5. Type "Hello, world!" into it.
-6. Select the `<button>` tag with a type of `submit`.
+6. Find the element containing the text `Submit`.
 7. Click it.
 8. Grab the browser URL, ensure it is `/posts/my-first-post`.
 9. Select the `<h1>` tag, ensure it contains the text "My First Post".

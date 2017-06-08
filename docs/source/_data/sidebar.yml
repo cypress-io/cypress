@@ -5,10 +5,10 @@ guides:
     writing-your-first-test: writing-your-first-test.html
     testing-your-app: testing-your-app.html
     next-steps: next-steps.html
-  cypress-basics:
-    overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    core-concepts: core-concepts.html
+  core-concepts:
+    cypress-in-a-nutshell: cypress-in-a-nutshell.html
     organizing-tests: organizing-tests.html
+    overview-of-the-gui-tool: overview-of-the-gui-tool.html
     aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
