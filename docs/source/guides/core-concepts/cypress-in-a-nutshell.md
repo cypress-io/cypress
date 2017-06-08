@@ -58,7 +58,7 @@ Can you read this? If you did, it might sound something like this:
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
 
-For the remainder of this guide we'll go through the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
+For the remainder of this guide, we'll explore the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively script the browser to act as much like an end user as possible, as well as discuss how to take shortcuts when it's useful.
 
 # Finding Elements
 
@@ -70,26 +70,29 @@ In jQuery, you're used to looking up elements like this:
 $('.my-selector')
 ```
 
-Similarly, in Cypress you look up elements like this:
+In Cypress, the query is the same:
 
 ```js
 cy.get('.my-selector')
 ```
 
-Just the same, right? So we can just assign that and move on with our day?
+Accessing the DOM elements from the query works differently, however:
 
 ```js
+// This is fine.
+let $jqElement = $('.my-selector')
+
 // This will not work!
-let myElement = cy.get('.my-selector')
+let $cyElement = cy.get('.my-selector')
 ```
 
-Not so fast...
+Let's look at why this is...
 
 ## Cypress is _Not_ Like jQuery
 
-Question: What happens when jQuery can't find the selector it queries?
+**Question:** What happens when jQuery can't find the selector it queries?
 
-Answer: Oops! The dreaded `null` enters your code, and you ignore it at your own risk!
+**Answer:** *Oops!* The dreaded `null` enters your code, and you ignore it at your own risk!
 
 ```js
 // $() returns immediately with null
@@ -98,9 +101,9 @@ let $myElement = $('.my-selector').first()
 doSomething($myElement)
 ```
 
-Question: What happens when Cypress can't find the selector it queries?
+**Question:** What happens when Cypress can't find the selector it queries?
 
-Answer: No big deal! Cypress expects this and automatically retries the query for you until it is found or the timeout is reached.
+**Answer:** *No big deal!* Anticipating this kind of thing, Cypress automatically retries the query for you until it is found, or the timeout is reached.
 
 ```js
 // cy.get() queries using jQuery, repeating the query until...
@@ -115,13 +118,13 @@ cy.get('.my-selector').first()
 ```
 
 This makes Cypress robust, immune to a thousand tiny, common problems at once. Think about all the circumstances that could cause the jQuery version to fail:
-- DOM not loaded yet
-- framework hasn't finished bootstrapping
+- the DOM has not loaded yet
+- your framework hasn't finished bootstrapping
 - an XHR hasn't completed
 - an animation hasn't completed
 - and on and on...
 
-Traditionally, you'd be forced to write custom code to ensure against any and all of these issues. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this instantly. The only change in your code is leveraging a Promise-like `.then()` command whenever you need to access the element directly.
+Traditionally, you'd be forced to write custom code to ensure against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly. The only change in your code is a shift to leverage the Promise-like `.then()` command whenever you need to access the element directly.
 
 {% note info %}
 In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element.
