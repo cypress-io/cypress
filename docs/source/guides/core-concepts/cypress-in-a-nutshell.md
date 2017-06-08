@@ -381,17 +381,26 @@ Cypress is built using Promises internally, but the developer testing with Cypre
 
 # Assertions
 
-In testing, assertions are how you ensure things are as you expect them to be. In english, this might be phrased as "I assert that two plus two equals four", or "I assert that, when passed two and two as arguments, the addition function returns four." The idea is to throw an error if the condition is ever _not_ true.
+Assertions are how you ensure things are as you expect in your tests. In english, this might be phrased as:
+> I assert that two plus two equals four.
 
-## Assertion Libraries
+...or:
 
-Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
+> I assert that, when passed `two` and `two` as arguments, the `add` function returns `four`.
 
-But before we talk about _how_ to assert, let's talk about _whether_ to assert!
+...and in code:
 
-## To Assert, or Not To Assert?
+```js
+expect( add(2, 2) ).to.equal( 4 )
+```
 
-Despite the dozens of assertions Cypress makes available to you, sometimes the best test may make no assertions at all! How can this be? Let's look at an example:
+The idea is to throw an error if the condition is ever _not_ true.
+
+## When To Assert?
+
+Despite the dozens of assertions Cypress makes available to you, sometimes the best test may make no assertions at all! How can this be? Aren't assertions a basic part of testing?
+
+Consider this example:
 
 ```js
 cy.visit("/home")
@@ -421,11 +430,11 @@ Even with no assertions, a few lines of Cypress can ensure thousands of lines of
 
 {% endnote %}
 
-Cypress anticipates the many traps of modern web development and seeks to visualize all this chaos in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
+Cypress anticipates the chaos of modern web development and visualizes it in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
 
-As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, and call it a day. You can rest assured that _so many things **must** be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus.
+As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, submit a form, and call it a day. You can rest assured that _so many things must be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus!
 
-## Writing an Assertion
+## Writing Assertions
 
 There are two ways to write assertions in Cypress.
 
@@ -442,7 +451,15 @@ Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.c
 cy.get("tbody tr:first").should("have.class", "active")
 ```
 
+And here's what it looks like in the Cypress GUI:
+
 ![implicit_assertion_class_active](https://cloud.githubusercontent.com/assets/1271364/12554600/4cb4115c-c34b-11e5-891c-84ff176ea38f.jpg)
+
+
+{% note info Assertion Libraries %}
+Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
+
+{% endnote %}
 
 ## Explicit Subjects with `expect`
 
