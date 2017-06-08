@@ -9,7 +9,7 @@
     "postinstall": "node index.js --exec install",
     "test": "mocha",
     "test-watch": "mocha --watch",
-    "lint": "../node_modules/.bin/eslint --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
+    "lint": "$(bin-up eslint) --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "pretest": "npm run lint"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "xvfb": "cypress-io/node-xvfb"
   },
   "devDependencies": {
+    "bin-up": "^1.0.1",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "nock": "^9.0.9",
