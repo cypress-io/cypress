@@ -2,11 +2,13 @@ title: Overview of the GUI Tool
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- the names and purposes of the visual parts of the Cypress GUI tool
-- how the tool behaves under different situations and inputs
-- how the tool integrates the browser console experience
+- The names and purposes of the visual parts of the Cypress GUI tool
+- How the tool behaves under different situations and inputs
+- How the tool integrates the browser console experience
+{% endnote %}
 
 # Overview
 

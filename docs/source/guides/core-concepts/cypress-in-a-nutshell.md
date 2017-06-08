@@ -1,13 +1,16 @@
+---
 title: Cypress in a Nutshell
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
 - what Cypress looks like
 - how Cypress queries the DOM more safely than jQuery
 - how Cypress manages subjects and chains of commands
 - what assertions look like and how they work
+{% endnote %}
 
 {% note info Important! %}
 **This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.

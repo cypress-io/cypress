@@ -1,14 +1,17 @@
+---
 title: Stubs, Spies, Clocks
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- which libraries Cypress includes to provide typical testing functionality
-- how to use stubs for asserting that code was called but preventing it from executing
-- how to use spies for asserting that code was called without interfering with its execution
-- how to control time for deterministically testing code that is time-dependent
-- how Cypress improves and extends the included libraries
+- Which libraries Cypress includes to provide typical testing functionality
+- How to use stubs for asserting that code was called but preventing it from executing
+- How to use spies for asserting that code was called without interfering with its execution
+- How to control time for deterministically testing code that is time-dependent
+- How Cypress improves and extends the included libraries
+{% endnote %}
 
 # Capabilities
 

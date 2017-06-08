@@ -1,13 +1,16 @@
+---
 title: "Aliases: Variables in an Async World"
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- how Cypress's asynchronous nature makes it hard to use variables
-- what Aliases are, how they simplify and enable reuse in your code
-- how to use Aliases for DOM elements
-- how to use Aliases for XHR requests
+- How Cypress's asynchronous nature makes it hard to use variables
+- What Aliases are, how they simplify and enable reuse in your code
+- How to use Aliases for DOM elements
+- How to use Aliases for XHR requests
+{% endnote %}
 
 # Async Challenges
 

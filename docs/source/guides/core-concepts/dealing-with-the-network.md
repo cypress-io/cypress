@@ -1,8 +1,10 @@
+---
 title: Dealing with the Network
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress enables you to isolate any or all of your front-end with [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/route)
 - What tradeoffs we make when we stub our network requests
@@ -10,6 +12,7 @@ comments: true
 - How to use Fixtures to reuse XHR responses
 - How to use Aliases to refer back to XHR requests and wait on them
 - How to write declarative tests that resist flake
+{% endnote %}
 
 # Testing Strategies
 

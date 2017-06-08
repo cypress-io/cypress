@@ -1,12 +1,15 @@
+---
 title: Why Cypress?
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- how we think differently about testing the modern web
-- what benefits Cypress can bring for your team
-- what tradeoffs Cypress makes
+- How we think differently about testing the modern web
+- What benefits Cypress can bring for your team
+- What tradeoffs Cypress makes
+{% endnote %}
 
 # Cypress in 10 Minutes
 

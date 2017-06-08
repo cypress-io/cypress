@@ -1,12 +1,15 @@
+---
 title: Testing Your App
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- the relationship between Cypress and your back-end
-- how authentication trips impedes testability... but doesn't have to
-- how sensitive Cypress is to errors from _anywhere_
-- configuration options to ease your pain
+- The relationship between Cypress and your back-end
+- How authentication trips impedes testability... but doesn't have to
+- How sensitive Cypress is to errors from _anywhere_
+- Configuration options to ease your pain
+{% endnote %}
 
 # Once More With Feeling!
 
