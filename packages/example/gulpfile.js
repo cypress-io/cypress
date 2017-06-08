@@ -1,15 +1,15 @@
-var gulp = require('gulp')
-var ghPages = require('gulp-gh-pages')
-var clean = require('gulp-clean')
-var RevAll = require('gulp-rev-all')
-var runSequence = require('run-sequence')
+let gulp = require('gulp')
+let ghPages = require('gulp-gh-pages')
+let clean = require('gulp-clean')
+let RevAll = require('gulp-rev-all')
+let runSequence = require('run-sequence')
 
 gulp.task('assets', function () {
-  var revAll = new RevAll({
+  let revAll = new RevAll({
     dontGlobal: ['.ico', 'fira.css', 'javascript-logo.png'],
     dontRenameFile: ['.ico', '.html', /fonts/],
     dontSearchFile: ['.js'],
-    debug: false
+    debug: false,
   })
 
   return gulp.src('./app/**/*')

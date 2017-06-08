@@ -20,7 +20,7 @@
     "cypress": "cypress run --record --key $DOCS_RECORD_KEY",
     "test-e2e": "run-p --race start cypress",
     "test": "echo 'Nothing to unit test, but there are E2E tests!'",
-    "lint": "standard --verbose --fix *.js cy_scripts/*.js scripts/*.js",
+    "lint": "../node_modules/.bin/eslint --fix *.js cy_scripts/*.js scripts/*.js",
     "pretest": "npm run lint"
   },
   "devDependencies": {
@@ -33,7 +33,6 @@
     "gulp-rev-all": "^0.9.7",
     "npm-run-all": "^4.0.2",
     "run-sequence": "^1.2.2",
-    "standard": "^10.0.2",
     "underscore.string": "^3.3.4",
     "yamljs": "^0.2.10"
   },

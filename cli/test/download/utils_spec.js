@@ -178,7 +178,7 @@ describe('utils', function () {
           expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
             '--project',
-            path.join(distDir, '../lib/download/project')
+            path.join(distDir, '../lib/download/project'),
           ])
         })
       })
@@ -209,7 +209,7 @@ describe('utils', function () {
           expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
             '--project',
-            path.join(distDir, '../lib/download/project')
+            path.join(distDir, '../lib/download/project'),
           ])
         })
       })

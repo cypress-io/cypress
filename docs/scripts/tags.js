@@ -20,13 +20,13 @@ hexo.extend.tag.register('note', function (args, content) {
     info: 'info',
     warning: 'exclamation',
     success: 'check',
-    danger: 'times'
+    danger: 'times',
   }
 
-  var className = args.shift()
-  var header = ''
-  var result = ''
-  var icon = iconLookup[className]
+  let className = args.shift()
+  let header = ''
+  let result = ''
+  let icon = iconLookup[className]
 
   if (args.length) {
     header += `<strong class="note-title foo">
@@ -35,27 +35,27 @@ hexo.extend.tag.register('note', function (args, content) {
     </strong>`
   }
 
-  result += '<blockquote class="note ' + className + '">' + header
-  result += hexo.render.renderSync({text: content, engine: 'markdown'})
+  result += `<blockquote class="note ${className}">${header}`
+  result += hexo.render.renderSync({ text: content, engine: 'markdown' })
   result += '</blockquote>'
 
   return result
 }, true)
 
-hexo.extend.tag.register('fa', function (args, content) {
+hexo.extend.tag.register('fa', function (args/*, content*/) {
   // {% fa fa-angle-right green fa-fw %}
   //
   // <<< Transforms into >>>
   //
   // <i class="fa fa-angle-right"></i>
 
-  var classNames = args.join(' ')
+  let classNames = args.join(' ')
 
-  return '<i class="fa ' + classNames + '"></i>'
+  return `<i class="fa ${classNames}"></i>`
 })
 
-hexo.extend.tag.register('docLink', function (args, content) {
-  var result = ''
+hexo.extend.tag.register('docLink', function (args/*, content*/) {
+  let result = ''
   // {% docLink api `.and()` and %}
   // {% docLink guides 'Read about why' why-cypress %}
   //
@@ -64,13 +64,13 @@ hexo.extend.tag.register('docLink', function (args, content) {
   // <a href="/api/commands/and.html"><code>.and()</code></a>
   // <a href="/guides/getting-started/why-cypress.html">Read about why</a>
 
-  var attrs = {
+  let attrs = {
     text: args[0],
-    url: args[1]
+    url: args[1],
   }
 
   result += `<a href="${attrs.url}.html">`
-  result += hexo.render.renderSync({text: attrs.text, engine: 'markdown'})
+  result += hexo.render.renderSync({ text: attrs.text, engine: 'markdown' })
   result += `</a>`
 
   return result

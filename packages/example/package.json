@@ -14,7 +14,7 @@
     "deploy": "gulp deploy",
     "prerelease": "npm run build",
     "release": "releaser",
-    "lint": "standard --verbose --fix *.js bin/*.js lib/*.js test/*.js",
+    "lint": "../../node_modules/.bin/eslint --fix *.js bin/*.js lib/*.js test/*.js",
     "pretest": "npm run lint"
   },
   "author": "Brian Mann",
@@ -31,8 +31,7 @@
     "gulp-gh-pages": "^0.5.4",
     "gulp-rev-all": "^0.8.22",
     "mocha": "^2.4.5",
-    "run-sequence": "^1.1.5",
-    "standard": "^10.0.2"
+    "run-sequence": "^1.1.5"
   },
   "repository": {
     "type": "git",

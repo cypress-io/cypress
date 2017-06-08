@@ -8,7 +8,9 @@
   "scripts": {
     "postinstall": "node index.js --exec install",
     "test": "mocha",
-    "test-watch": "mocha --watch"
+    "test-watch": "mocha --watch",
+    "lint": "../node_modules/.bin/eslint --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
+    "pretest": "npm run lint"
   },
   "dependencies": {
     "bluebird": "^3.4.5",

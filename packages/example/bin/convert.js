@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-var fs = require('fs')
-var path = require('path')
-var glob = require('glob')
+let fs = require('fs')
+let path = require('path')
+let glob = require('glob')
 
 function replaceStringsIn (file) {
   fs.readFile(file, 'utf8', function (err, str) {
     if (err) throw err
 
-    var replace = function (source, dest) {
+    let replace = function (source, dest) {
       str = str.split(source).join(dest)
     }
 
@@ -22,15 +22,16 @@ function replaceStringsIn (file) {
     fs.writeFile(file, str, function (err) {
       if (err) throw err
 
-      console.log('Converted ' + path.relative(process.cwd(), file) + ' successfully.')
+      // eslint-disable-next-line no-console
+      console.log(`Converted ${path.relative(process.cwd(), file)} successfully.`)
     })
   })
 }
 
-glob('./app/**/*.html', {realpath: true}, function (err, files) {
+glob('./app/**/*.html', { realpath: true }, function (err, files) {
   if (err) throw err
 
-  var spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
+  let spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
 
   files.push(spec)
 
