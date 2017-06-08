@@ -46,18 +46,15 @@ describe("Post Resource", function() {
 
 Can you read this? If you did, it might sound something like this:
 
-{% note info %}
-1. Visit the page at `/posts/new`.
-2. Find the `<input>` with class `post-title`.
-3. Type "My First Post" into it.
-4. Find the `<input>` with class `post-body`.
-5. Type "Hello, world!" into it.
-6. Find the element containing the text `Submit`.
-7. Click it.
-8. Grab the browser URL, ensure it is `/posts/my-first-post`.
-9. Select the `<h1>` tag, ensure it contains the text "My First Post".
-
-{% endnote %}
+> 1. Visit the page at `/posts/new`.
+> 2. Find the `<input>` with class `post-title`.
+> 3. Type "My First Post" into it.
+> 4. Find the `<input>` with class `post-body`.
+> 5. Type "Hello, world!" into it.
+> 6. Find the element containing the text `Submit`.
+> 7. Click it.
+> 8. Grab the browser URL, ensure it is `/posts/my-first-post`.
+> 9. Select the `<h1>` tag, ensure it contains the text "My First Post".
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
 
