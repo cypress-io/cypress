@@ -310,7 +310,7 @@ it("changes the URL when 'awesome' is clicked", function() {
 
 Cypress doesn't kick off the browser automation magic until the test function exits.
 
-{% note info Core Concept %}
+{% note success Core Concept %}
 Each Cypress command (and chain of commands) returns immediately, having only appended to a queue of commands to be executed at a later time.
 
 {% endnote %}
@@ -333,7 +333,7 @@ These actions will always happen serially (one after the other), never in parall
 
 As you can see, Cypress does a lot of extra work to ensure the state of the application matches what our commands have declared about it... with a few seconds of wiggle room to get there!
 
-{% note info Core Concept %}
+{% note success Core Concept %}
 Any waiting or retrying that is necessary to ensure a step was successful must complete before the next step begins. If they don't complete successfully before the timeout is reached, the test will fail.
 
 {% endnote %}
@@ -374,7 +374,7 @@ it("changes the URL when 'awesome' is clicked", function() {
 
 Big difference! The Promise demonstration is not real code (so don't try it), but it shows the magnitude of what Cypress handles for you behind the scenes. Embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
 
-{% note info Core Concept %}
+{% note success Core Concept %}
 Cypress is built using Promises internally, but the developer testing with Cypress should not have need for their own Promises in tests the vast majority of the time.
 
 {% endnote %}
