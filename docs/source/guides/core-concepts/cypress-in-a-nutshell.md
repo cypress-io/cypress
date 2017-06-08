@@ -187,7 +187,7 @@ We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" o
 
 ## Asserting Things About Elements
 
-Oftentimes you just want to ensure an element exists, or has a particular attribute, CSS class, or child. Let's see assertions in action:
+Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that apply to the current subject and halt the test if they aren't true. Here's a quick look at assertions in action:
 
 ```js
 cy.get(":checkbox").should("be.disabled")
@@ -197,20 +197,7 @@ cy.get("form").should("have.class", "form-horizontal")
 cy.get("input").should("not.have.value", "foo")
 ```
 
-You can also chain multiple assertions together using `.and()`, which is just another name for `.should()` that makes things more readable:
-
-```js
-cy.get("#header a")
-  .should("have.class", "active")
-  .and("have.attr", "href", "/users")
-```
-
-Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide these assertions. You can [learn more in the Available Assertions Appendix](/guides/appendices/available-assertions.html).
-
-{% note info Beware: Assertions That Change The Subject %}
-Some assertions may modify the current subject unexpectedly. Read the next section on how subjects flow through a Cypress chain, then you'll understand what is happening when `cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `a` element to the string `/users`.
-
-{% endnote %}
+We'll learn more about assertions in the last section of this guide.
 
 ## Subjects
 
@@ -360,7 +347,7 @@ it("changes the URL when 'awesome' is clicked", function() {
   })
 })
 
-// How Cypress looks, Promises wrapped up and hidden from us.
+// How Cypress really looks, Promises wrapped up and hidden from us.
 it("changes the URL when 'awesome' is clicked", function() {
   cy.visit('/my/resource/path')
 
@@ -434,16 +421,25 @@ Cypress anticipates the chaos of modern web development and visualizes it in a r
 
 As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, submit a form, and call it a day. You can rest assured that _so many things must be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus!
 
+## What Assertions Are Available?
+
+Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide the built-in assertions. You can learn more in [the Available Assertions Appendix](/guides/appendices/available-assertions.html). You can also write your own assertions as Chai plugins and use them in Cypress.
+
 ## Writing Assertions
 
-There are two ways to write assertions in Cypress.
+There are two ways to write assertions in Cypress:
 
 1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
 2. **Explicit Subjects:** Using `expect`
 
+{% note info Assertion Libraries %}
+Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
+
+{% endnote %}
+
 ## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
 
-Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making an assertion in Cypress. These are typical Cypress Commands, which means they can be called against a Chainer and will ultimately be applied to the current Subject in the chain.
+Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
 
 ```javascript
 // the implicit subject here is the first <tr>
@@ -451,30 +447,51 @@ Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.c
 cy.get("tbody tr:first").should("have.class", "active")
 ```
 
-And here's what it looks like in the Cypress GUI:
+You can chain multiple assertions together using `.and()`, which is just another name for `.should()` that makes things more readable:
 
-![implicit_assertion_class_active](https://cloud.githubusercontent.com/assets/1271364/12554600/4cb4115c-c34b-11e5-891c-84ff176ea38f.jpg)
+```js
+cy.get("#header a")
+  .should("have.class", "active")
+  .and("have.attr", "href", "/users")
+```
 
+Because `should("have.class", ...)` does not change the subject, the `.and("have.attr", ...)` is executed against the same element. This is handy when you need to assert multiple things against a single subject quickly, but there are pitfalls...
 
-{% note info Assertion Libraries %}
-Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
+{% note danger Beware: Assertions That Change The Subject %}
+Some assertions modify the current subject unexpectedly. For example, the line `cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `<a>` element to the string `"/users"`. This is because Cypress honors the return value of the assertion, and `have.attr` is a `Chai-jQuery` assertion that returns the matched string instead of the original subject. This can be surprising!
+
+Whenever you have failing assertions and don't understand why, click the line in the Cypress Command Log on the left side of the GUI. Cypress will print details to the browser console to help you troubleshoot what is going on.
 
 {% endnote %}
 
+If we wrote this assertion in the explicit form ("the long way"), it would look like this:
+
+```js
+cy.get("tbody tr:first").should(function($tr) {
+  expect($tr).to.have.class('active')
+})
+```
+
+The implicit form is much shorter! So when would you want to use the explicit form?
+
 ## Explicit Subjects with `expect`
 
-Using `expect` allows you to pass in a specific subject and make an assertion about it. These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests.
+Using `expect` allows you to pass in a specific subject and make an assertion about it. This is probably how you're used to seeing assertions written as it is very common in unit tests:
 
 ```js
 // the explicit subject here is the boolean: true
 expect(true).to.be.true
 ```
 
-{% note info Unit Testing %}
+{% note info Are you trying to write Unit Tests? %}
 Check out our example recipes for [unit testing](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_application_code_spec.js) and [unit testing React components](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_react_enzyme_spec.js)
 {% endnote %}
 
-Explicit assertions are great when you want to perform custom logic prior to making the assertion. The usual caveats apply if you want to do work against the Subject: you'll need to do it asynchronously! The `.should()` Command allows us to pass a function that will be yielded the Subject. This works just like `.then()`, except Cypress will apply its retry-until-timeout magic to the function passed to `.should()`.
+Explicit assertions are great when you want to:
+- perform custom logic prior to making the assertion
+- make multiple assertions against the same subject
+
+The usual caveats apply if you want to do work against the subject: you'll need to do it asynchronously! The `.should()` command allows us to pass a function that will be yielded the subject. This works just like `.then()`, except Cypress will apply its retry-until-timeout magic to the function passed to `.should()`.
 
 ```javascript
 cy
@@ -500,3 +517,8 @@ cy
     ])
 })
 ```
+
+{% note danger Make sure `.should()` is safe %}
+When using a function passed to `.should()`, be sure that the entire function can be executed multiple times without issue. Cypress applies its retry logic to these functions: so long as there's a failure, it will repeatedly try again until the timeout is reached.
+
+{% endnote %}
