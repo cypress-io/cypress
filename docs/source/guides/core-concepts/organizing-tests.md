@@ -2,12 +2,14 @@ title: Organizing Tests
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- how to organize your test and support files
-- what languages the Cypress preprocessor supports
-- how Cypress treats unit tests vs integration tests
-- how to break up your tests
+- How to organize your test and support files.
+- What languages are supported in your test files.
+- How Cypress handles unit tests vs integration tests.
+- How to group your tests.
+{% endnote %}
 
 # Folder Structure
 
@@ -228,7 +230,7 @@ describe('if your app uses jQuery', function(){
 
 The code above will produce a suite with 4 tests:
 
-```shell
+```text
 > if your app uses jQuery
   > triggers event: 'mouseover'
   > triggers event: 'mouseout'

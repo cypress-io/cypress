@@ -52,6 +52,12 @@
 .article-content, .faq .article {
   line-height: $line-height;
 
+  &>h1:first-child {
+    margin-top: 0em;
+    padding-top: 0.5em;
+    border: 0;
+  }
+
   hr {
     border: 0;
     height: 0;
@@ -161,30 +167,6 @@
 
     tr:nth-child(2n) {
       background: #fafafb;
-    }
-  }
-
-  .note {
-    margin: 1em 0;
-    padding: 0 20px;
-    position: relative;
-    border: 1px solid $color-border;
-    border-left: 5px solid $highlight-comment;
-    font-style: normal;
-
-    footer {
-      margin: 1em 0;
-      font-style: italic;
-
-      cite {
-        &:before {
-          content: "â€”";
-          padding: 0 0.3em;
-        }
-        a {
-          color: color-grey;
-        }
-      }
     }
   }
 
@@ -354,11 +336,38 @@
   video {
     max-width: 100%;
   }
+
   .note {
     font-weight: 200;
     border: 0;
-    padding: 1em;
-    border-left: 4px solid #999;
+    margin: 1em 0;
+    padding: 20px;
+    position: relative;
+    border: 1px solid $color-border;
+    border-left: 5px solid $highlight-comment;
+    font-style: normal;
+    font-size: 15px;
+
+    footer {
+      margin: 1em 0;
+      font-style: italic;
+
+      cite {
+        &:before {
+          content: "â€”";
+          padding: 0 0.3em;
+        }
+        a {
+          color: color-grey;
+        }
+      }
+    }
+
+    &>h1, &>h2, &>h3 {
+      margin-top: 0em;
+      padding-top: 0em;
+      border: 0;
+    }
 
     strong {
       font-weight: 500;
@@ -402,7 +411,7 @@
     }
 
     ul {
-      margin: 0 20px 0 40px;
+      margin: 0 20px 0 20px;
     }
   }
   .note-title {
