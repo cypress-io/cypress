@@ -12,13 +12,25 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "test": "node ./scripts/test.js",
-    "lint": "../../node_modules/.bin/eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
+    "lint": "$(bin-up eslint) --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
   },
   "browserify": {
-    "transform": [["babelify", {
-      "presets": ["es2015", "react", "stage-1"],
-      "plugins": ["add-module-exports", "transform-decorators-legacy"] }
-    ]]
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015",
+            "react",
+            "stage-1"
+          ],
+          "plugins": [
+            "add-module-exports",
+            "transform-decorators-legacy"
+          ]
+        }
+      ]
+    ]
   },
   "repository": {
     "type": "git",
@@ -36,6 +48,7 @@
   "devDependencies": {
     "@cypress/react-tooltip": "^0.1.1",
     "@cypress/releaser": "0.1.12",
+    "bin-up": "^1.0.0",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.6.1",
     "classnames": "^2.2.5",
