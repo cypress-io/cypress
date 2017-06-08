@@ -265,9 +265,9 @@ Let's look at an example:
 ```js
 cy.get('a.some-link') // Find all links with class 'some-link'
   .first()            // Grab the first one
-  .then(function(myElement) { // Work with it a moment...
+  .then(function($myElement) { // Work with it a moment...
     // Extract its href as a string
-    let linkDestination = myElement.attr('href')
+    let linkDestination = $myElement.attr('href')
     // This string is yielded into the next command in the chain
     return linkDestination
   }).should('equal', 'http://example.com') // .should works against Strings!
@@ -288,7 +288,7 @@ cy.get('@myElement') // re-queries the DOM as before only if necessary
   .click()
 ```
 
-This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us in the same way as before if it is not.
+This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us as before when it is not in the DOM.
 
 ## Commands Are Asynchronous
 
@@ -308,22 +308,30 @@ it("changes the URL when 'awesome' is clicked", function() {
 }) // Ok, the test method has returned, time to do everything!
 ```
 
+Cypress doesn't kick off the browser automation magic until the test function exits.
+
 {% note info Core Concept %}
-Each Cypress command (and chain of commands) returns immediately, having done nothing but appending to a queue of commands to be executed at a later time.
+Each Cypress command (and chain of commands) returns immediately, having only appended to a queue of commands to be executed at a later time.
 
 {% endnote %}
 
 ## Commands Execute Serially
 
-After a test method is finished running, Cypress wakes up and starts executing the commands that were enqueued during the test. The test above would cause an execution in this order:
+After a test function is finished running, Cypress goes to work executing the commands that were enqueued by `cy.*` commands. The test above would cause an execution in this order:
 
 1. Visit a URL
 2. Find a selector
 3. Perform a click action
-4. Grab the current URL
-5. Make an assertion
+4. Grab the URL that matches a string
 
-These actions will always happen serially (one after the other), never in parallel (at the same time).
+These actions will always happen serially (one after the other), never in parallel (at the same time). Why? To illustrate this, let's revisit that list of actions and expose some of the hidden magic Cypress does for us at each step:
+
+1. Visit a URL **(and wait for the `onload` event to fire)**
+2. Find a selector **(and retry repeatedly if it is not found)**
+3. Perform a click action **(unless the element is covered or hidden)**
+4. Grab the URL that matches a string **(and retry repeatedly until it matches)**
+
+As you can see, Cypress does a lot of extra work to ensure the state of the application matches what our commands have declared about it... with a few seconds of wiggle room to get there!
 
 {% note info Core Concept %}
 Any waiting or retrying that is necessary to ensure a step was successful must complete before the next step begins. If they don't complete successfully before the timeout is reached, the test will fail.
@@ -334,25 +342,42 @@ Any waiting or retrying that is necessary to ensure a step was successful must c
 
 This is the big secret of Cypress: we've taken our favorite pattern for composing JavaScript code, Promises, and built them right into the fabric of Cypress. Above, when we say we're enqueuing actions to be taken later, we could restate that as "adding Promises to the Promise chain".
 
-We do this under the hood to free the end user from having to master the Promise pattern up front: no importing Promise libraries, no remembering which methods are available and their signatures, and no forgetting to return every Promise, Cypress does all this for you.
+We do this under the hood to free the end user from having to master the Promise pattern up front: no importing Promise libraries, no remembering which methods are available and their signatures, and no forgetting to return every Promise; Cypress does all this for you.
 
-To rewrite the above example as idiomatic Promise-based code, it would look something like:
+Let's compare the prior example to fictional version of it as raw, Promise-based code:
 
 ```js
+// Noisy Promise demonstration. Not valid code.
 it("changes the URL when 'awesome' is clicked", function() {
   return cy.visit('/my/resource/path').then(function() {
-    cy.get('.awesome-selector')
+    return cy.get('.awesome-selector')
   }).then(function($element) {
     $element.click()
   }).then(function() {
-    cy.url()
+    return cy.url()
   }).then(function(url) {
     expect(url).to.eq('/my/resource/path#awesomeness')
   })
 })
+
+// How Cypress looks, Promises wrapped up and hidden from us.
+it("changes the URL when 'awesome' is clicked", function() {
+  cy.visit('/my/resource/path')
+
+  cy.get('.awesome-selector')
+    .click()
+
+  cy.url()
+    .should("eq", '/my/resource/path#awesomeness')
+})
 ```
 
-Not very pretty, right? This is essentially what Cypress builds for you behind the scenes, so embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
+Big difference! The Promise demonstration is not real code (so don't try it), but it shows the magnitude of what Cypress handles for you behind the scenes. Embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
+
+{% note info Core Concept %}
+Cypress is built using Promises internally, but the developer testing with Cypress should not have need for their own Promises in tests the vast majority of the time.
+
+{% endnote %}
 
 # Assertions
 
