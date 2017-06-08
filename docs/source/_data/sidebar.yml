@@ -25,28 +25,28 @@ guides:
     dashboard-runs: dashboard-recorded-runs.html
     dashboard-orgs: dashboard-organizations.html
   advanced-cypress:
-    the-cypress-workflow: the-cypress-workflow.html
-    coming-from-selenium: coming-from-selenium.html
-    custom-commands: custom-commands.html
+    # the-cypress-workflow: the-cypress-workflow.html
+    # coming-from-selenium: coming-from-selenium.html
+    # custom-commands: custom-commands.html
     web-security: web-security.html
-    how-cypress-really-works: how-cypress-really-works.html
-    talking-to-your-backend: talking-to-your-backend.html
-    spawning-processes: spawning-processes.html
+    # how-cypress-really-works: how-cypress-really-works.html
+    # talking-to-your-backend: talking-to-your-backend.html
+    # spawning-processes: spawning-processes.html
   appendices:
     configuration: configuration.html
     error-messages: error-messages.html
     bundled-tools: bundled-tools.html
     available-assertions: available-assertions.html
     creating-fixtures: creating-fixtures.html
-    best-practices: best-practices.html
-    anti-patterns: anti-patterns.html
+    # best-practices: best-practices.html
+    # anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html
     userland-extensions: userland-extensions.html
     known-issues: known-issues.html
-    contributing: contributing.html
-    changelog: changelog.html
-    roadmap: roadmap.html
-    all-videos: all-videos.html
+    # contributing: contributing.html
+    # changelog: changelog.html
+    # roadmap: roadmap.html
+    # all-videos: all-videos.html
 
 api:
   welcome:
