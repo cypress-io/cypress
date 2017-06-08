@@ -140,6 +140,10 @@ Once you start a server with [`cy.server`](https://on.cypress.io/api/server), al
 
 # Fixtures
 
+A fixture in Cypress is a fixed set of data located in a file that is used as a baseline for running tests. The purpose of a test fixture is to ensure that there is a well known and fixed environment in which tests are run so that results are repeatable. Fixtures are accessed within tests by using the [`cy.fixture`](https://on.cypress.io/api/fixture) command.
+
+Cypress makes it easy to stub a network request and have it respond instantly with fixture data.
+
 When stubbing a response, you typically need to manage potentially large and complex JSON objects. Cypress has support for [fixtures](https://on.cypress.io/guides/creating-fixtures), and even allows you to integrate fixture syntax directly into responses.
 
 ```javascript
@@ -156,6 +160,28 @@ cy.server()
 
 cy.fixture("activities.json").as("activitiesJSON")
 cy.route("GET", /activities/, "@activitiesJSON")
+```
+
+## Organizing Fixtures
+
+Cypress automatically scaffolds out a suggested folder structure for organizing your fixtures on every new project. By default it will create an `example.json` file when you add your project to Cypress.
+
+```text
+/cypress/fixtures/example.json
+```
+
+Your fixtures can be further organized within additional folders. For instance, you could create another folder called `images` and add images:
+
+```text
+/cypress/fixtures/images/cats.png
+/cypress/fixtures/images/dogs.png
+/cypress/fixtures/images/birds.png
+```
+
+To access the fixtures nested within the `images` folder, simply include the folder in your [`cy.fixture`](https://on.cypress.io/api/fixture) command.
+
+```javascript
+cy.fixture("images/dogs.png") //returns dogs.png as Base64
 ```
 
 # Waiting
