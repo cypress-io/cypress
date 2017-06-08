@@ -143,7 +143,7 @@ cy.contains("New Post")
 
 This is helpful when writing tests from the perspective of a user interacting with the app. They just know they want to click the button labeled "Submit", they have no idea that it has a `type` attribute of `submit`, or a CSS class of `my-submit-button`.
 
-`cy.contains()` is also a great example of a command that can start a chain, or continue a chain. For example, if we wanted to look for the text "New Post" _only inside of the `.main` element_, we could trivially achieve that like this:
+`cy.contains()` is also a great example of a command that can start a chain, or continue a chain. For example, if we wanted to look for the text "New Post" _only inside of the `.main` element_, we could trivially achieve that like so:
 
 ```js
 // First finds the element with class "main",
@@ -155,14 +155,14 @@ cy.get('.main').contains("New Post")
 
 As we showed above, Cypress anticipates the asynchronous nature of web applications and doesn't fail immediately when an element is not found. Instead, Cypress gives your app a window of time to finish whatever it may be doing!
 
-This is known as a `timeout`, and most commands may be customized with specific timeout periods. (The default is 4 seconds.) These Commands will list a `timeout` option in their API documentation, allowing you to set the number of milliseconds you need.
+This is known as a `timeout`, and most commands may be customized with specific timeout periods (the default timeout is 4 seconds.) These Commands will list a `timeout` option in their API documentation, allowing you to set the number of milliseconds you need.
 
 ```js
 // Give this selector 10 seconds to appear
 cy.get('.my-slow-selector', { timeout: 10000 })
 ```
 
-You can also set the timeout globally via the configuration setting `defaultCommandTimeout`.
+You can also set the timeout globally via [the configuration setting `defaultCommandTimeout`](/guides/appendices/configuration.html#Timeouts).
 
 {% note info Timeouts and Performance %}
 
@@ -232,15 +232,15 @@ A new Cypress chain always starts with `cy.[something]`, where the `something` e
 Examples:
 
 ```js
-cy.clearCookies() // Done, no Subject, no chaining
+cy.clearCookies() // Done: no Subject, thus no chaining possible
 
-cy.get('.main-container') // Subject is array of matching DOM elements
+cy.get('.main-container') // Subject an is array of matching DOM elements
   .contains("Today's Headlines") // Subject is a DOM element
-  .click() // Subject did not change
+  .click() // Subject does not change
 ```
 
 {% note info Yield, Don't Return %}
-When discussing what Cypress commands do with subjects, we always say that they "yield" the subject, never that they "return" it. Remember: Cypress commands are asynchronous and get queued for execution at a later time! Subjects get yielded from command to command after lot of helpful framework code runs to ensure things are in order.
+When discussing what Cypress commands do with subjects, we always say that they "yield" the subject, never that they "return" it. Remember: Cypress commands are asynchronous and get queued for execution at a later time. Subjects get yielded from one command to the next after lot of helpful Cypress code runs to ensure things are in order.
 
 {% endnote %}
 
