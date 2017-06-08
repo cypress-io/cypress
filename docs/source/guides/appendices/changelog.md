@@ -57,7 +57,7 @@ comments: false
 **Notes:**
 
 - We have updated all of the docs related to these changes. The [CI Docs](https://on.cypress.io/continuous-integration) got a much needed facelift.
-- There is a new docs section related to the [Dashboard](https://docs.cypress.io/docs/dashboard-features) and the new features.
+- There is a new docs section related to the [Dashboard](https://on.cypress.io/guides/dashboard-features) and the new features.
 
 **Overview:**
 
