@@ -11,6 +11,8 @@ This message means that Cypress was unable to find tests in the specified file. 
 
 {% img /img/guides/appendices/error-messages/no-tests-found.png No tests found %}
 
+***
+
 **{% fa fa-exclamation-triangle red %} We found an error preparing your test file**
 
 This message means that Cypress encountered an error when compiling and/or bundling your test file. Cypress automatically compiles and bundles your test code so you can use ES2015, CoffeeScript, modules, etc.
@@ -91,6 +93,8 @@ Simply move those Cypress commands into an `it(...)` block and everything will w
 
 If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the [Example Repos](https://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new), or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
 
+***
+
 **{% fa fa-exclamation-triangle red %} `cy...()` failed because the element you are chaining off of has become detached or removed from the dom**
 
 Getting this errors means you've tried to interact with a "dead" DOM element - meaning it's been detached or completely removed from the DOM.
@@ -129,8 +133,6 @@ cy.get('button').click().parent()
 
 We've programmed our application above so that as soon as the `click` event happens, the button is removed from the DOM. When Cypress begins processing the next command (`.parent()`) in the test below, it detects that the yielded subject (the button) is detached from the DOM and throws the error.
 
-
-
 We can prevent Cypress from throwing this error by rewriting our test code.
 
 ***Fixed Test Code***
@@ -152,6 +154,8 @@ When we say *guard*, this usually means:
 
 - Writing an assertion
 - Waiting on an XHR
+
+***
 
 **{% fa fa-exclamation-triangle red %} `cy....()` failed because the element cannot be interacted with**
 
@@ -175,6 +179,8 @@ cy.get('[disabled]').click({force: true}).
 ```
 
 *Be careful with this option. It's possible to force your tests to pass when the element is actually not interactable in your application.*
+
+***
 
 **{% fa fa-exclamation-triangle red %} `cy....()` failed because the element is currently animating**
 
@@ -202,6 +208,8 @@ You can globally disable animation error checking, or increase the threshold by 
   "animationDistanceThreshold": 50
 }
 ```
+
+***
 
 **{% fa fa-exclamation-triangle red %} The test has finished but Cypress still has commands in its queue**
 
@@ -315,6 +323,8 @@ Since no record key was passed, Cypress checks for any environment variable with
 You can get your project's record key by running the terminal command: `cypress get:key` or by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
 
 You will want to then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
+
+***
 
 **{% fa fa-exclamation-triangle red %} The 'cypress ci' command has been deprecated**
 
