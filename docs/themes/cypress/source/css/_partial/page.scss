@@ -164,12 +164,41 @@
     }
   }
 
-  blockquote {
+  .note {
     margin: 1em 0;
     padding: 0 20px;
     position: relative;
     border: 1px solid $color-border;
     border-left: 5px solid $highlight-comment;
+    font-style: normal;
+
+    footer {
+      margin: 1em 0;
+      font-style: italic;
+
+      cite {
+        &:before {
+          content: "â€”";
+          padding: 0 0.3em;
+        }
+        a {
+          color: color-grey;
+        }
+      }
+    }
+  }
+
+  blockquote {
+    margin: 1em 0;
+    padding: 20px;
+    position: relative;
+    border-left: 5px solid #eee;
+    background-color: #f7f7f7;
+    font-style: italic;
+
+    &>p:first-of-type:last-of-type {
+      margin-bottom: 0;
+    }
 
     footer {
       margin: 1em 0;
