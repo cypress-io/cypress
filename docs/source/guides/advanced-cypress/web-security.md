@@ -1,14 +1,13 @@
+---
 title: Web Security
 comments: true
 ---
 
-# Overview
-
 Browsers adhere to a strict [`same-origin policy`](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy). This means that browsers restrict access between `<iframes>` when their origin policies do not match.
 
-Because Cypress' internal architecture is different from that of Selenium, Cypress must be able to directly communicate with your remote application at all times. Unfortunately, browsers naturally try to prevent how Cypress works.
+Because Cypress works from within the browser, Cypress must be able to directly communicate with your remote application at all times. Unfortunately, browsers naturally try to prevent Cypress from doing this.
 
-To get around these restrictions, Cypress implements some strategies involving `JavaScript` code, the browser's `internal APIs`, and `network proxying` to **play by the rules** of `same-origin policy`. It is our goal to fully automate your application without needing to modify any application code - and we are *mostly* able to do this.
+To get around these restrictions, Cypress implements some strategies involving `JavaScript` code, the browser's internal APIs, and `network proxying` to *play by the rules* of `same-origin policy`. It is our goal to fully automate the application under test without you needing to modify your application's code - and we are *mostly* able to do this.
 
 **Examples of what Cypress does under the hood:**
 
@@ -19,7 +18,7 @@ To get around these restrictions, Cypress implements some strategies involving `
 
 When Cypress first loads, the internal Cypress web application is hosted on a random port: something like `http://localhost:65874/__/`.
 
-After the first [`cy.visit`](https://on.cypress.io/api/visit) is issued in a test, Cypress automatically changes its URL to match the origin of your remote application, thereby solving the first major hurdle of `same-origin policy`. Your application's code executes the same as it does outside of Cypress, and everything works as expected.
+After the first [`cy.visit()`](https://on.cypress.io/api/visit) command is issued in a test, Cypress changes its URL to match the origin of your remote application, thereby solving the first major hurdle of `same-origin policy`. Your application's code executes the same as it does outside of Cypress, and everything works as expected.
 
 {% note info How is HTTPS supported? %}
 Cypress does some pretty interesting things under the hood to make testing HTTPs sites work. Cypress enables you to control and stub at the network level. Therefore, Cypress must assign and manage browser certificates to be able to modify the traffic in real time. You'll notice Chrome display a warning that the 'SSL certificate does not match'. This is normal and correct. Under the hood we act as our own CA authority and issue certificates dynamically in order to intercept requests otherwise impossible to access. We only do this for the superdomain currently under test, and bypass other traffic. That's why if you open a tab in Cypress to another host, the certificates match as expected.
@@ -27,30 +26,30 @@ Cypress does some pretty interesting things under the hood to make testing HTTPs
 
 # Limitations
 
-It's important to note that although we do our *very best* to ensure your application works normally inside of Cypress, there **are** some limitations you need to be aware of.
+It's important to note that although we do our *very best* to ensure your application works normally inside of Cypress, there *are* some limitations you need to be aware of.
 
 ## One Superdomain per Test
 
 Because Cypress changes its own host URL to match that of your applications, it requires that your application remain on the same superdomain for the entirety of a single test.
 
-If you attempt to visit two different superdomains, Cypress will error. Visiting subdomains works fine, but two different superdomains does not. You can visit different superdomains in *different* tests, just not the *same* test.
+If you attempt to visit two different superdomains, Cypress will error. Visiting subdomains works fine. You can visit different superdomains in *different* tests, just not the *same* test.
 
 ```javascript
-cy.visit("https://www.cypress.io")
-cy.visit("https://docs.cypress.io") // yup all good
+cy.visit('https://www.cypress.io')
+cy.visit('https://docs.cypress.io') // yup all good
 ```
 
 ```javascript
-cy.visit("https://apple.com")
-cy.visit("https://google.com")      // bad, this will immediately error
+cy.visit('https://apple.com')
+cy.visit('https://google.com')      // this will immediately error
 ```
 
 Although Cypress tries to enforce this limitation, it is possible for your application to bypass Cypress's ability to detect this.
 
 **Examples of test cases that will error due to superdomain limitations:**
 
-1. [`cy.click`](https://on.cypress.io/api/click) an `<a>` with an `href` to a different superdomain.
-2. [`cy.submit`](https://on.cypress.io/api/submit) a `<form>` that causes your webserver to redirect to you a different superdomain.
+1. [`.click()`](https://on.cypress.io/api/click) an `<a>` with an `href` to a different superdomain.
+2. [`.submit()`](https://on.cypress.io/api/submit) a `<form>` that causes your web server to redirect to you a different superdomain.
 3. Issue a JavaScript redirect in your application, such as `window.location.href = '...'`, to a different superdomain.
 
 In each of these situations, Cypress will lose the ability to automate your application and will immediately error.
@@ -63,11 +62,12 @@ If your site embeds an `<iframe>` that is a cross-origin frame, Cypress will not
 
 **Examples of uses for cross-origin iframes:**
 
-- Embedding a `Vimeo` or `Youtube` video.
-- Displaying a credit card form from `Stripe` or `Braintree`.
-- Displaying an embedded login form from `Auth0`.
+- Embedding a Vimeo or Youtube video.
+- Displaying a credit card form from Stripe or Braintree.
+- Displaying an embedded login form from Auth0.
+- Showing comments from Disqus.
 
-It's actually *possible* for Cypress to accomodate these situations the same way Selenium does, but you will never have **native** access to these iframes from inside of Cypress.
+It's actually *possible* for Cypress to accommodate these situations the same way Selenium does, but you will never have *native* access to these iframes from inside of Cypress.
 
 As a workaround, you may be able to use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) to directly communicate with these iframes and control them (if the 3rd party iframe supports it).
 
@@ -75,21 +75,19 @@ Other than that, you'll have to wait for us to implement API's to support this (
 
 ## Insecure Content
 
-Because of the way Cypress is designed, if you are testing an `HTTPS` site, Cypress will error anytime you attempt to navigate back to an `HTTP` site. This behavior helps highlight a *pretty serious* security problem with your application.
+Because of the way Cypress is designed, if you are testing an `HTTPS` site, Cypress will error anytime you attempt to navigate back to an `HTTP` site. This behavior helps highlight a *pretty serious security problem* with your application.
 
 **Example of accessing insecure content:**
 
-*Test code*
+***Test code***
 
 ```javascript
-cy.visit("https://app.corp.com")
+cy.visit('https://app.corp.com')
 ```
 
-In the application code, you set `cookies` and store a session on the browser.
+In your application code, you set `cookies` and store a session on the browser. Now let's imagine you have a single `insecure` link (or JavaScript redirect) in your application code.
 
-Now let's imagine you have a single `insecure` link (or JavaScript redirect) in your application code.
-
-*Application code*
+***Application code***
 
 ```html
 <html>
@@ -99,7 +97,7 @@ Now let's imagine you have a single `insecure` link (or JavaScript redirect) in 
 
 Cypress will immediately fail with the following test code:
 
-*Test code*
+***Test code***
 
 ```javascript
 cy.visit("https://app.corp.com")
@@ -108,7 +106,7 @@ cy.get("a").click()               // will immediately fail
 
 Browsers refuse to display insecure content on a secure page. Because Cypress initially changed its URL to match `https://app.corp.com` when the browser followed the `href` to `http://app.corp.com/page2`, the browser will refuse to display the contents.
 
-Now you may be thinking...'this sounds like a problem with Cypress because when I work with my application outside of Cypress it works just fine'.
+Now you may be thinking, *This sounds like a problem with Cypress because when I work with my application outside of Cypress it works just fine.*😒
 
 However, the truth is, Cypress is exposing a **security vulnerability** in your application, and you *want* it to fail in Cypress.
 
