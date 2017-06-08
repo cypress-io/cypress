@@ -7,7 +7,6 @@ export class SpecsCollection {
   @observable specs = []
   @observable error = null
   @observable isLoading = false
-  @observable isLoaded = false
   @observable allSpecsChosen = false
 
   @action loading (bool) {
@@ -18,7 +17,6 @@ export class SpecsCollection {
     this.specs = this.resetToTreeView(specs)
 
     this.isLoading = false
-    this.isLoaded = true
   }
 
   @action setChosenSpec (specPath) {

@@ -6,7 +6,6 @@ class Projects {
   @observable projects = []
   @observable error = null
   @observable isLoading = false
-  @observable isLoaded = false
   @observable _membershipRequestedIds = {}
 
   @computed get chosen () {
@@ -23,27 +22,21 @@ class Projects {
 
   @action getProjectByPath (path) {
     if (!this.projects.length) {
-      const project = new Project({ path })
-      this.projects.push(project)
-      return project
+      return this.addProject()
     }
 
     return _.find(this.projects, { path })
   }
 
-  addProject (path) {
-    let projectToAdd = {
-      path,
-    }
-
-    const project = new Project(projectToAdd)
+  @action addProject (path) {
+    const project = new Project({ path })
     this.projects.push(project)
     this._saveToLocalStorage()
     return project
   }
 
-  @action loading (bool) {
-    this.isLoading = bool
+  @action setLoading (isLoading) {
+    this.isLoading = isLoading
   }
 
   @action setProjects (projects) {
@@ -57,9 +50,6 @@ class Projects {
       const props = _.extend(project, localProjectsIndex[project.id])
       return new Project(props)
     })
-
-    this.isLoading = false
-    this.isLoaded = true
   }
 
   @action setProjectStatuses (projects) {
@@ -92,8 +82,8 @@ class Projects {
     this._saveToLocalStorage()
   }
 
-  @action removeProject (clientId) {
-    const projectIndex = _.findIndex(this.projects, { clientId })
+  @action removeProject ({ path }) {
+    const projectIndex = _.findIndex(this.projects, { path })
 
     if (projectIndex != null) {
       this.projects.splice(projectIndex, 1)

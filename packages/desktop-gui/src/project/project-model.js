@@ -96,6 +96,14 @@ export default class Project {
     return _.truncate(splitName, { length: 60 })
   }
 
+  @computed get displayPath () {
+    const maxPathLength = 45
+    if (this.path.length <= maxPathLength) return this.path
+
+    const truncatedPath = this.path.slice((this.path.length - 1) - maxPathLength, this.path.length)
+    return '...'.concat(truncatedPath)
+  }
+
   @computed get isValid () {
     return this.state === Project.VALID
   }
@@ -174,8 +182,8 @@ export default class Project {
     this.resolvedConfig = resolved
   }
 
-  @action setError (err) {
-    this.error = err
+  @action setError = (err = {}) => {
+    this.error = err.message || err
   }
 
   setChosenBrowserByName (name) {

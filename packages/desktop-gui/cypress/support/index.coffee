@@ -13,9 +13,12 @@ beforeEach ->
       JSON.parse(JSON.stringify(obj))
   }
 
-Cypress.addParentCommand "shouldBeOnLogin", () ->
+Cypress.Commands.add "shouldBeOnLogin", ->
   cy.contains("Log In with GitHub")
 
-Cypress.addParentCommand "shouldBeOnProjectSpecs", () ->
+Cypress.Commands.add "shouldBeOnIntro", ->
+  cy.get(".nav .logo")
+
+Cypress.Commands.add "shouldBeOnProjectSpecs", ->
   cy.contains(".folder", "integration")
   cy.contains(".folder", "unit")

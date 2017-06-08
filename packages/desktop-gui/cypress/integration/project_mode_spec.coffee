@@ -1,11 +1,11 @@
-describe "Local Mode", ->
+describe "Project Mode", ->
   beforeEach ->
     cy.fixture("user").as("user")
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
     cy.visit("/?projectPath=/foo/bar").then (win) =>
-      { @start, @ipc } = win.App
+      { start, @ipc } = win.App
 
       cy.stub(@ipc, "onMenuClicked")
       cy.stub(@ipc, "onFocusTests")
@@ -14,11 +14,14 @@ describe "Local Mode", ->
       cy.stub(@ipc, "openProject").yields(null, @config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
 
+      @getCurrentUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
+
+      start()
+
   describe "with a current user", ->
     beforeEach ->
-      cy.stub(@ipc, "getCurrentUser").resolves(@user)
-
-      @start()
+      @getCurrentUser.resolve(@user)
 
     it "goes straight to project specs list", ->
       cy.shouldBeOnProjectSpecs()
@@ -31,9 +34,7 @@ describe "Local Mode", ->
 
   describe "without a current user", ->
     beforeEach ->
-      cy.stub(@ipc, "getCurrentUser").resolves(null)
-
-      @start()
+      @getCurrentUser.resolve(null)
 
     it "goes to login", ->
       cy.shouldBeOnLogin()

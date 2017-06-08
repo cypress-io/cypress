@@ -11,9 +11,9 @@ import authStore from '../lib/auth-store'
 import viewStore from '../lib/view-store'
 
 import ApplyingUpdates from './applying-updates'
+import Intro from './intro'
 import Layout from './layout'
 import Login from '../login/login'
-import ProjectsList from '../projects/projects-list'
 import Project from '../project/project'
 
 @observer
@@ -58,10 +58,10 @@ class App extends Component {
         return <Login />
       case C.APPLYING_UPDATES:
         return <ApplyingUpdates />
-      case C.PROJECTS:
+      case C.INTRO:
         return (
           <Layout>
-            <ProjectsList />
+            <Intro />
           </Layout>
         )
       default:

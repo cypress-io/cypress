@@ -5,7 +5,7 @@ class AppStore {
   @observable version
   @observable projectPath = null
 
-  @computed get isGlobal () {
+  @computed get isGlobalMode () {
     return !!this.projectPath
   }
 

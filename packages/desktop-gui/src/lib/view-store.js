@@ -35,13 +35,13 @@ class ViewStore {
     if (appStore.projectPath) {
       this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectPath))
     } else {
-      this.showProjects()
+      this.showIntro()
     }
   }
 
-  @action showProjects () {
+  @action showIntro () {
     this.currentView = {
-      name: C.PROJECTS,
+      name: C.INTRO,
     }
   }
 

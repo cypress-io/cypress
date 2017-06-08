@@ -2,114 +2,64 @@ import _ from 'lodash'
 import ipc from '../lib/ipc'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { ContextMenu, MenuItem } from "react-contextmenu"
+import Loader from 'react-loader'
 
-import Project from './projects-list-item/'
 import projectsApi from './projects-api'
 import projectsStore from './projects-store'
+import { Link, routes } from '../lib/routing'
 
-class MyContextMenu extends Component {
-  render () {
-    return (
-      <ContextMenu identifier="context-menu">
-        <MenuItem onClick={this.handleClick}>
-          <i className='fa fa-minus-circle red'></i>{' '}
-          Remove project
-        </MenuItem>
-      </ContextMenu>
-    )
-  }
-
-  handleClick (e, project) {
-    projectsStore.removeProject(project.clientId)
-
-    ipc.removeProject(project.path)
-  }
-}
+const ProjectListItem = observer(({ project, onRemove }) => (
+  <li>
+    <Link className='project' to={routes.specs(project)}>
+      <p className='project-name'>{project.displayName}</p>
+      <p className='project-path'>{project.displayPath}</p>
+    </Link>
+    <button onClick={(e) => {
+      e.stopPropagation()
+      onRemove()
+    }}>
+      <i className='fa fa-remove' />
+    </button>
+  </li>
+))
 
 @observer
 class ProjectsList extends Component {
-  constructor (props) {
-    super(props)
-    projectsApi.closeProject()
-  }
-
   componentDidMount () {
     projectsApi.getProjects()
-    this.pollId = projectsApi.pollProjects()
-  }
-
-  componentWillUnmount () {
-    projectsApi.stopPollingProjects(this.pollId)
   }
 
   render () {
-    if (!projectsStore.projects.length) return this._empty()
+    if (!projectsStore.isLoading && !projectsStore.projects.length) return null
 
     return (
-      <div className="content-wrapper">
-        { this._error() }
-        <ul className='projects-list list-as-table'>
-          { _.map(projectsStore.projects, (project) => (
-            <li key={project.clientId} className='li'>
-              <Project project={project} />
-            </li>
-          ))}
-        </ul>
-        <MyContextMenu />
+      <div className='projects-list'>
+        <h3>Recent Projects</h3>
+        {this._content()}
       </div>
     )
   }
 
-  _empty () {
+  _content () {
+    if (projectsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+
     return (
-      <div className='empty empty-projects'>
-        <h4>Add your first project</h4>
-        <p>To begin testing, click <strong><i className='fa fa-plus'></i> Add Project</strong> above.</p>
-        <p>Choose the folder with the resources of your project.</p>
-        { this._error() }
-        <p className='helper-docs-append'>
-          <a onClick={this._openHelp} className='helper-docs-link'>
-            <i className='fa fa-question-circle'></i>{' '}
-            Need help?
-          </a>
-        </p>
-      </div>
+      <ul>
+        {_.map(projectsStore.projects, (project) => (
+          <ProjectListItem
+            key={project.path}
+            project={project}
+            onRemove={this._removeProject(project)}
+          />
+        ))}
+      </ul>
     )
   }
 
-  _error () {
-    if (!projectsStore.error) return null
-
-    return (
-      <div className='alert alert-danger error alert-in-projects alert-dismissable'>
-        <button type="button" className="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <p className='text-center'>
-          <i className='fa fa-exclamation-triangle'></i>{' '}
-          { this._errorMessage(projectsStore.error) }
-        </p>
-      </div>
-    )
+  _removeProject = (project) => () => {
+    projectsStore.removeProject(project)
+    ipc.removeProject(project.path)
   }
-
-  _errorMessage (message) {
-    function createMarkup () {
-      return {
-        __html: message.replace('\n', '<br /><br />'),
-      }
-    }
-
-    return (
-      <span dangerouslySetInnerHTML={createMarkup()} />
-    )
-  }
-
-  _openHelp () {
-    ipc.externalOpen('https://on.cypress.io/adding-new-project')
-  }
-
 }
 
 export default ProjectsList

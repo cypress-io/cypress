@@ -59,7 +59,6 @@
     "rc-collapse": "^1.6.11",
     "react": "^15.1.0",
     "react-bootstrap-modal": "3.0.1",
-    "react-contextmenu": "^1.6.2",
     "react-dom": "^15.1.0",
     "react-loader": "^2.4.0",
     "zunder": "4.1.1"

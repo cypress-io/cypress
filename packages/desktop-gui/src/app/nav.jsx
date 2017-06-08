@@ -8,6 +8,7 @@ import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import projectsApi from '../projects/projects-api'
+import { Link, routes } from '../lib/routing'
 
 @observer
 export default class Nav extends Component {
@@ -41,30 +42,23 @@ export default class Nav extends Component {
   }
 
   _leftNav = () => {
-    if (appStore.isGlobal) {
-      const project = viewStore.currentView.project
-      return <div>{project && project.displayName}</div>
-    }
+    const project = viewStore.currentView.project
 
-    return <div>TBD</div>
-    // if (this.props.params.clientId) {
-    //   return (
-    //     <Link
-    //       to="/projects"
-    //       onClick={this._closeProject.bind(this)}
-    //       >
-    //       <i className="fa fa-chevron-left"></i>{' '}
-    //       Back to Projects
-    //     </Link>
-    //   )
-    // } else {
-    //   return (
-    //     <a onClick={this._addProject} href='#'>
-    //       <i className='fa fa-plus'></i>{' '}
-    //       Add Project
-    //     </a>
-    //   )
-    // }
+    if (appStore.isGlobalMode) {
+      return <div>{project && project.displayName}</div>
+    } else if (project) {
+      return (
+        <Link to={routes.intro()}>
+          <i className="fa fa-chevron-left"></i> Back
+        </Link>
+      )
+    } else {
+      return (
+        <div className='logo'>
+          <img src='img/cypress-inverse.png' />
+        </div>
+      )
+    }
   }
 
   _userStateButton = () => {

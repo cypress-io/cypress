@@ -11,18 +11,19 @@ import { getSpecs } from '../specs/specs-api'
 
 const getProjects = (shouldLoad = true) => {
   if (shouldLoad) {
-    projectsStore.loading(true)
+    projectsStore.setLoading(true)
   }
 
   return ipc.getProjects()
-  .then(action('got:projects', (projects) => {
+  .then((projects) => {
     projectsStore.setProjects(projects)
+    projectsStore.setLoading(false)
 
     return ipc.getProjectStatuses(projects)
     .then((projects = []) => {
       projectsStore.setProjectStatuses(projects)
     })
-  }))
+  })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
 }
 
@@ -36,37 +37,18 @@ const stopPollingProjects = (pollId) => {
   clearInterval(pollId)
 }
 
-const addProject = () => {
-  let project
-  return ipc.showDirectoryDialog()
-  .then(action('directory:dialog:closed', (path) => {
-     // if the user cancelled the dialog selection
-     // path will be undefined
-    if (!path) return
+const addProject = (path) => {
+  const project = projectsStore.addProject(path)
+  project.setLoading(true)
 
-    // initially set our project to be loading state
-    project = projectsStore.addProject(path)
-    project.setLoading(true)
-
-    return Promise.all([
-      ipc.addProject(path),
-      Promise.delay(750),
-    ])
-    .spread(action('project:added', (clientProjectDetails) => {
-      project.setLoading(false)
-
-      if (clientProjectDetails.id != null) {
-        return ipc.getProjectStatus(clientProjectDetails)
-        .then(action('project:status:received', (projectDetails) => {
-          project.update(projectDetails)
-        }))
-        .catch(ipc.isUnauthed, ipc.handleUnauthed)
-      }
-    }))
-  }))
-  .catch((err) => {
-    projectsStore.setError(err.message)
+  return ipc.addProject(path)
+  .then((details) => {
+    project.setLoading(false)
+    project.update(details)
   })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch(project.setError)
+  .return(project)
 }
 
 const runSpec = (project, spec, browser) => {
@@ -151,6 +133,7 @@ const openProject = (project) => {
         project.update(projectDetails)
       })
       .catch(ipc.isUnauthed, ipc.handleUnauthed)
+      .catch(project.setError)
 
       ipc.openProject(project.path, (err, config = {}) => {
         if (config.specChanged) {

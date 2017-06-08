@@ -7,6 +7,7 @@ function file (name) {
 module.exports = {
   getPathToIndex () {
     return file("index.html")
+    // return file("index.html?projectPath=/Users/chrisbreiding/Dev/cypress/_playground")
   },
 
   getPathToUpdates () {

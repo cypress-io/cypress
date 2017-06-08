@@ -16,6 +16,11 @@ const Link = ({ children, to }) => {
 }
 
 const routes = {
+  intro: () => ({
+    navigate: viewStore.showIntro.bind(viewStore),
+    isActive: () => false,
+  }),
+
   specs: (project) => ({
     navigate: viewStore.showProjectSpecs.bind(viewStore, project),
     isActive: viewStore.isProjectSpecs,
