@@ -1,4 +1,6 @@
 'use strict'
+const util = require('hexo-util')
+const urlGenerator = require('../lib/url_generator')
 
 /* global hexo */
 
@@ -23,10 +25,9 @@ hexo.extend.tag.register('note', function (args, content) {
     danger: 'times',
   }
 
-  let className = args.shift()
   let header = ''
-  let result = ''
-  let icon = iconLookup[className]
+  const className = args.shift()
+  const icon = iconLookup[className]
 
   if (args.length) {
     header += `<strong class="note-title foo">
@@ -35,43 +36,66 @@ hexo.extend.tag.register('note', function (args, content) {
     </strong>`
   }
 
-  result += `<blockquote class="note ${className}">${header}`
-  result += hexo.render.renderSync({ text: content, engine: 'markdown' })
-  result += '</blockquote>'
+  return hexo.render.render({ text: content, engine: 'markdown' })
+  .then((markdown) => {
+    return `<blockquote class="note ${className}">${header}${markdown}</blockquote>`
+  })
+}, { async: true, ends: true })
 
-  return result
-}, true)
-
-hexo.extend.tag.register('fa', function (args/*, content*/) {
+hexo.extend.tag.register('fa', function (args) {
   // {% fa fa-angle-right green fa-fw %}
   //
   // <<< Transforms into >>>
   //
   // <i class="fa fa-angle-right"></i>
 
-  let classNames = args.join(' ')
+  const classNames = args.join(' ')
 
   return `<i class="fa ${classNames}"></i>`
 })
 
-hexo.extend.tag.register('docLink', function (args/*, content*/) {
-  let result = ''
-  // {% docLink api `.and()` and %}
-  // {% docLink guides 'Read about why' why-cypress %}
+hexo.extend.tag.register('url', function (args) {
+  // {% link `.and()` and %}
+  // {% link `.should()` should#notes %}
+  // {% link 'Read about why' guides/getting-started/why-cypress %}
   //
   // <<< Transforms into >>>
   //
   // <a href="/api/commands/and.html"><code>.and()</code></a>
+  // <a href="/api/commands/should.html#notes"><code>.should()</code></a>
   // <a href="/guides/getting-started/why-cypress.html">Read about why</a>
 
-  let attrs = {
+  const sidebar = this.site.data.sidebar
+
+  const props = {
     text: args[0],
     url: args[1],
+    external: args[2],
   }
 
-  result += `<a href="${attrs.url}.html">`
-  result += hexo.render.renderSync({ text: attrs.text, engine: 'markdown' })
-  result += `</a>`
+  return hexo.render.render({ text: props.text, engine: 'markdown' })
+  .then((markdown) => {
+    // remove <p> and </p> and \n
+    markdown = markdown
+    .split("<p>").join("")
+    .split("</p>").join("")
+    .split("\n").join("")
 
-  return result
-})
+    const attrs = {
+      href: props.url,
+    }
+
+    if (props.external) {
+      attrs.target = '_blank'
+    }
+
+    return urlGenerator.validateAndGetUrl(sidebar, attrs.href)
+    .then((href) => {
+      attrs.href = href
+
+      return util.htmlTag('a', attrs, markdown)
+    })
+
+  })
+
+}, { async: true })

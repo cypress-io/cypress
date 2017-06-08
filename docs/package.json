@@ -19,11 +19,12 @@
     "precypress": "npm install cypress-cli && cypress install",
     "cypress": "cypress run --record --key $DOCS_RECORD_KEY",
     "test-e2e": "run-p --race start cypress",
-    "test": "echo 'Nothing to unit test, but there are E2E tests!'",
-    "lint": "../node_modules/.bin/eslint --fix *.js cy_scripts/*.js scripts/*.js",
-    "pretest": "npm run lint"
+    "test": "mocha --compilers coffee:@packages/coffee/register --recursive",
+    "test-watch": "npm run test --silent -- --watch",
+    "lint": "../node_modules/.bin/eslint --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
+    "chai": "^4.0.2",
     "colors": "^1.1.2",
     "fs-extra": "^3.0.1",
     "glob": "^7.1.1",
@@ -31,8 +32,13 @@
     "gulp-clean": "^0.3.2",
     "gulp-debug": "^3.1.0",
     "gulp-rev-all": "^0.9.7",
+    "mocha": "^3.4.2",
+    "nock": "^9.0.13",
     "npm-run-all": "^4.0.2",
+    "request-promise": "^4.2.1",
     "run-sequence": "^1.2.2",
+    "sinon": "^2.3.2",
+    "sinon-chai": "^2.10.0",
     "underscore.string": "^3.3.4",
     "yamljs": "^0.2.10"
   },
