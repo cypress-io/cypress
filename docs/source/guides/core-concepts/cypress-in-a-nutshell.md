@@ -396,7 +396,7 @@ it("changes the URL when 'awesome' is clicked", function() {
 })
 ```
 
-Big difference! The Promise demonstration is not real code (so don't try it), but it shows the magnitude of what Cypress handles for you behind the scenes. Embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
+Big difference! The Promise demonstration is not real code (so don't try it), but it gives an idea the magnitude of what Cypress handles for you behind the scenes. In reality, Cypress does more than this, because Promises themselves aren't entirely suitable to the job as our assertions would fail instantly with no way of retrying. Embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
 
 {% note success Core Concept %}
 Cypress is built using Promises internally, but the developer testing with Cypress should not have need for their own Promises in tests the vast majority of the time.
