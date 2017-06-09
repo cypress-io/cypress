@@ -234,7 +234,7 @@ cy.get("form").should("have.class", "form-horizontal")
 cy.get("input").should("not.have.value", "foo")
 ```
 
-We'll learn more about assertions in the last section of this guide.
+We'll learn more about assertions later in this guide.
 
 ## Subjects
 
@@ -263,8 +263,8 @@ cy.get('.main-container') // Subject an is array of matching DOM elements
   .click() // Subject does not change
 ```
 
-{% note info Yield, Don't Return %}
-When discussing what Cypress commands do with subjects, we always say that they "yield" the subject, never that they "return" it. Remember: Cypress commands are asynchronous and get queued for execution at a later time. Subjects get yielded from one command to the next after lot of helpful Cypress code runs to ensure things are in order.
+{% note success Core Concept %}
+Cypress commands do not return their subjects, they yield them. Remember: Cypress commands are asynchronous and get queued for execution at a later time. During execution, subjects are yielded from one command to the next, and a lot of helpful Cypress code runs between each command to ensure everything is in order.
 
 {% endnote %}
 
@@ -329,7 +329,7 @@ it("changes the URL when 'awesome' is clicked", function() {
 
   cy.url() // Nothing to see, yet
     .should("eq", '/my/resource/path#awesomeness') // Nada.
-}) // Ok, the test method has returned, time to do everything!
+}) // Ok, the test method has returned, time to do everything in order!
 ```
 
 Cypress doesn't kick off the browser automation magic until the test function exits.
@@ -341,7 +341,7 @@ Each Cypress command (and chain of commands) returns immediately, having only ap
 
 ## Commands Execute Serially
 
-After a test function is finished running, Cypress goes to work executing the commands that were enqueued by `cy.*` commands. The test above would cause an execution in this order:
+After a test function is finished running, Cypress goes to work executing the commands that were enqueued by `cy.*` command chains. The test above would cause an execution in this order:
 
 1. Visit a URL
 2. Find a selector
@@ -351,7 +351,7 @@ After a test function is finished running, Cypress goes to work executing the co
 These actions will always happen serially (one after the other), never in parallel (at the same time). Why? To illustrate this, let's revisit that list of actions and expose some of the hidden magic Cypress does for us at each step:
 
 1. Visit a URL **(and wait for the `onload` event to fire)**
-2. Find a selector **(and retry repeatedly if it is not found)**
+2. Find a selector **(and retry repeatedly until it is found)**
 3. Perform a click action **(unless the element is covered or hidden)**
 4. Grab the URL that matches a string **(and retry repeatedly until it matches)**
 
@@ -449,12 +449,12 @@ Without a single explicit assertion, there are dozens of ways this test can fail
 
 Can you think of any more?
 
-{% note info %}
-Even with no assertions, a few lines of Cypress can ensure thousands of lines of code are working properly, both on the client and server!
+{% note success Core Concept %}
+With Cypress, you don't have to assert to have a useful test. Even without assertions, a few lines of Cypress can ensure thousands of lines of code are working properly across the client and server!
 
 {% endnote %}
 
-Cypress anticipates the chaos of modern web development and visualizes it in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
+Cypress anticipates the chaos of modern web development and [visualizes it in a reasonable way](/guides/core-concepts/overview-of-the-gui-tool.html). Failures are important! Cypress makes them obvious and easy to understand.
 
 As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, submit a form, and call it a day. You can rest assured that _so many things must be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus!
 
