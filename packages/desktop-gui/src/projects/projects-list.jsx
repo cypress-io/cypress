@@ -11,8 +11,8 @@ import { Link, routes } from '../lib/routing'
 const ProjectListItem = observer(({ project, onRemove }) => (
   <li>
     <Link className='project' to={routes.specs(project)}>
-      <p className='project-name'>{project.displayName}</p>
-      <p className='project-path'>{project.displayPath}</p>
+      <span className='project-name'>{project.displayName}</span>
+      <span className='project-path'>{project.displayPath}</span>
     </Link>
     <button onClick={(e) => {
       e.stopPropagation()

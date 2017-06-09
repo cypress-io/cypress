@@ -67,7 +67,7 @@
     }
 
     a {
-      display: flex;
+      display: block;
       padding: 5px 0;
       text-decoration: none;
     }
@@ -87,9 +87,10 @@
     }
   }
 
-  p {
+  .project-name,
+  .project-path {
+    display: inline-block;
     line-height: 16px;
-    margin: 0;
   }
 
   .project-name {
