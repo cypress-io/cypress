@@ -105,7 +105,7 @@ comments: false
 **Features:**
 
 - You can now use [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy) synchronously. These both match the Sinon API identically. We will display `stub/spy` calls in the command log and provide the call count, arguments, context, and return values when you click on the log. Stubs are automatically reset between tests.  Fixes [#377](https://github.com/cypress-io/cypress/issues/377).
-- We've added our own special aliasing flavor to [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy). You can use the [`.as()`](https://on.cypress.io/api/as) command and we will associate spy and stub invocations (the same way we do with XHR aliasing and route matching).
+- We've added our own special aliasing flavor to [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy). You can use the {% url `.as()` as %} command and we will associate spy and stub invocations (the same way we do with XHR aliasing and route matching).
 - We've added [`cy.clock()`](https://on.cypress.io/api/clock) and [`cy.tick()`](https://on.cypress.io/api/tick) which are both asynchronous methods to modify timers in your application under test. We automatically apply clock (even if you invoke it before your first [`cy.visit()`](https://on.cypress.io/api/visit)) and will automatically reapply it after page load. [`cy.tick()`](https://on.cypress.io/api/tick) will enable you to control the amount of time you want passed in your application. This is great for controlling *throttled* or *debounced* functions.
 - `sinon-as-promised` is automatically applied under the hood which extends Sinon and provides the `.resolves(...)` and `.rejects(...)` API's which makes it easy to stub promise returning functions.
 - We support and display multiple sub spies when using Sinon's `.withArgs(...)` function.
@@ -1342,7 +1342,7 @@ Almost there:
 **Bugfixes:**
 
 - Snapshots of [`.type()`](https://on.cypress.io/api/type) and [`.select()`](https://on.cypress.io/api/select) are no longer incorrect due to aking snapshot too early. Fixes [#22](https://github.com/cypress-io/cypress/issues/22).
-- Passing `{force: true}` to [`.blur()`](https://on.cypress.io/api/blur) now logs correctly in the Command Log
+- Passing `{force: true}` to {% url `.blur()` blur %} now logs correctly in the Command Log
 
 **Misc:**
 
@@ -1357,7 +1357,7 @@ Almost there:
 
 **Features:**
 
-- [`.blur()`](https://on.cypress.io/api/blur) now accepts `{force: true}` which removes error checking such as validating the element is urrently in focus
+- {% url `.blur()` blur %} now accepts `{force: true}` which removes error checking such as validating the element is urrently in focus
 
 **Bugfixes:**
 
@@ -1839,7 +1839,7 @@ Deprecations:
 - [`.type()`](https://on.cypress.io/api/type) events should be `100%` identical to real browser `KeyboardEvents` including `charCode`, `which`, `keyCode`, `data`, etc
 - [`.type()`](https://on.cypress.io/api/type) now inserts a small delay `10ms` between each keystroke to simulate a real user typing
 - `input` events are now correctly fired when [`.select()`](https://on.cypress.io/api/select) chooses an `<option>`
-- `change` events are now fired exactly how a browser does (when an input loses focus and its value has changed since its last focus event). You'll see these fire after you use [`.blur()`](https://on.cypress.io/api/blur) directly, or use another `action command` on another element.
+- `change` events are now fired exactly how a browser does (when an input loses focus and its value has changed since its last focus event). You'll see these fire after you use {% url `.blur()` blur %} directly, or use another `action command` on another element.
 
 **Bugfixes:**
 
@@ -2286,22 +2286,22 @@ Deprecations:
 
 **Features:**
 
-- [`.as()`](https://on.cypress.io/api/as) can now alias primitives and objects other than routes or DOM
-- [`.as()`](https://on.cypress.io/api/as) automatically assigns this alias to `runnable.ctx` which makes it available synchronously
-- [`.as()`](https://on.cypress.io/api/as) blacklists several reserved words and will throw if you attempt to alias as one of them
+- {% url `.as()` as %} can now alias primitives and objects other than routes or DOM
+- {% url `.as()` as %} automatically assigns this alias to `runnable.ctx` which makes it available synchronously
+- {% url `.as()` as %} blacklists several reserved words and will throw if you attempt to alias as one of them
 - [`cy.get()`](https://on.cypress.io/api/get) can now accept all alias types and will display the labels in the UI differently based on the alias type
 - Cypress now displays a message when the Desktop App update is actually being applied instead of doing nothing and looking like its crashed
 
 **Bugfixes:**
 
-- [`.as()`](https://on.cypress.io/api/as) now throws on empty strings or non string arguments
+- {% url `.as()` as %} now throws on empty strings or non string arguments
 - Desktop App debug logs no longer sort in the wrong direction
 - Permissions are now restored during a cypress update for the `logs` and `cache`
 - Prevent 3rd party windows from gaining focus over main window
 
 **Misc:**
 
-- Removed `cy.assign`, this has been folded into [`.as()`](https://on.cypress.io/api/as)
+- Removed `cy.assign`, this has been folded into {% url `.as()` as %}
 - Updated `chokidar` to `1.0.1`
 
 # 0.5.7
@@ -2363,7 +2363,7 @@ Deprecations:
 
 **Misc:**
 
-- Repurposed [`.and()`](https://on.cypress.io/api/and) to be an alias of [`.should()`](https://on.cypress.io/api/should) for chainability
+- Repurposed {% url `.and()` and %} to be an alias of [`.should()`](https://on.cypress.io/api/should) for chainability
 - Removed `cy.to`
 
 # 0.5.3

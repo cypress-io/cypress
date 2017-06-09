@@ -105,7 +105,7 @@ expect(removeStub).to.be.called
 
 ## Alias a stub
 
-Adding an alias using [`.as()`](https://on.cypress.io/api/as) to stubs makes them easier to identify in error messages and Cypress' command log.
+Adding an alias using {% url `.as()` as %} to stubs makes them easier to identify in error messages and Cypress' command log.
 
 ```javascript
 const obj = {
@@ -160,8 +160,8 @@ When clicking on the `(stub-1)` event within the command log, the console output
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
-- [clock](https://on.cypress.io/api/clock)
+- {% url `.as()` as %}
+- {% url `cy.clock()` clock %}
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)

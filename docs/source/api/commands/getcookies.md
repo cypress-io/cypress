@@ -93,8 +93,8 @@ When clicking on `getCookies` within the command log, the console outputs the fo
 
 # See also
 
-- [clearCookie](https://on.cypress.io/api/clearcookie)
-- [clearCookies](https://on.cypress.io/api/clearcookies)
+- {% url `cy.clearCookie()` clearcookie %}
+- {% url `cy.clearCookies()` clearcookies %}
 - [Cypress Cookies API](https://on.cypress.io/api/cookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [setCookie](https://on.cypress.io/api/setcookie)

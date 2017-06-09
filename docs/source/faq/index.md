@@ -218,7 +218,7 @@ cy.get('button').then(($el) => {
 
 ## {% fa fa-question-circle green %} How do I wait for multiple XHR requests to the same url?
 
-You should set up an alias (using [`.as()`](https://on.cypress.io/api/as)) to a single route that matches all of the XHRs. You can then [`.wait()`](https://on.cypress.io/api/wait) on it multiple times and Cypress keeps track of how many matching XHR requests there are.
+You should set up an alias (using {% url `.as()` as %}) to a single route that matches all of the XHRs. You can then [`.wait()`](https://on.cypress.io/api/wait) on it multiple times and Cypress keeps track of how many matching XHR requests there are.
 
 ```javascript
 cy.server()
@@ -339,7 +339,7 @@ No, Cypress modifies network traffic in real time and therefore must sit between
 
 ## {% fa fa-question-circle green %} Can I use the Page Object pattern?
 
-As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with [`.as()`](https://on.cypress.io/api/as) to essentially recreate what page objects give you.
+As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with {% url `.as()` as %} to essentially recreate what page objects give you.
 
 
 # Dashboard

@@ -12,13 +12,13 @@ You'll notice many of these commands match the same behavior as their [jQuery co
 
 ## List of Commands
 
-- [children](https://on.cypress.io/api/children)
-- [closest](https://on.cypress.io/api/closest)
-- [contains](https://on.cypress.io/api/contains)
-- [eq](https://on.cypress.io/api/eq)
-- [find](https://on.cypress.io/api/find)
-- [filter](https://on.cypress.io/api/filter)
-- [first](https://on.cypress.io/api/first)
+- {% url `.children()` children %}
+- {% url `.closest()` closest %}
+- {% url `cy.contains()` contains %}
+- {% url `.eq()` eq %}
+- {% url `.find()` find %}
+- {% url `.filter()` filter %}
+- {% url `.first()` first %}
 - [get](https://on.cypress.io/api/get)
 - [last](https://on.cypress.io/api/last)
 - [next](https://on.cypress.io/api/next)

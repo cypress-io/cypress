@@ -170,9 +170,9 @@ When clicking on `trigger` within the command log, the console outputs the follo
 
 # See also
 
-- [blur](https://on.cypress.io/api/blur)
-- [check](https://on.cypress.io/api/check)
-- [click](https://on.cypress.io/api/click)
+- {% url `.blur()` blur %}
+- {% url `.check()` check %}
+- {% url `.click()` click %}
 - [focus](https://on.cypress.io/api/focus)
 - [select](https://on.cypress.io/api/select)
 - [submit](https://on.cypress.io/api/submit)

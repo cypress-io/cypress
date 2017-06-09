@@ -211,7 +211,7 @@ In other words, `cy.request()` transparently performs all of the underlying func
 
 # See also
 
-- [exec](https://on.cypress.io/api/exec)
+- {% url `cy.exec()` exec %}
 - [Recipe: Logging In - CSRF Tokens](https://github.com/cypress-io/cypress-example-recipes#logging-in---csrf-tokens)
 - [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)

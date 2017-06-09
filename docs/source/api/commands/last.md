@@ -86,4 +86,4 @@ When clicking on `last` within the command log, the console outputs the followin
 
 # See also
 
-- [first](https://on.cypress.io/api/first)
+- {% url `.first()` first %}

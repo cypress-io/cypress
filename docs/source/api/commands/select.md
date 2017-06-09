@@ -145,4 +145,4 @@ When clicking on `select` within the command log, the console outputs the follow
 
 # See also
 
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}

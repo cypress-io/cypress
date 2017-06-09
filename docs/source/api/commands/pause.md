@@ -103,5 +103,5 @@ When clicking on "Next: 'click'" at the top of the Command Log, the Command Log 
 # See also
 
 - [Cypress Dashboard](https://on.cypress.io/dashboard)
-- [debug](https://on.cypress.io/api/debug)
+- {% url `cy.debug()` debug %}
 - [screenshot](https://on.cypress.io/api/screenshot)

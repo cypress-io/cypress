@@ -69,4 +69,4 @@ When clicking on `title` within the command log, the console outputs the followi
 
 # See also
 
-- [document](https://on.cypress.io/api/document)
+- {% url `cy.document()` document %}

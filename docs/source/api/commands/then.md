@@ -131,7 +131,7 @@ cy.get('button').click().then(function($button){
 
 # See also
 
-- [and](https://on.cypress.io/api/and)
+- {% url `.and()` and %}
 - [invoke](https://on.cypress.io/api/invoke)
 - [Issuing Commands](https://on.cypress.io/guides/issuing-commands)
 - [its](https://on.cypress.io/api/its)

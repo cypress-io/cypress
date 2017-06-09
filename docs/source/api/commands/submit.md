@@ -79,5 +79,5 @@ When clicking on `submit` within the command log, the console outputs the follow
 
 # See also
 
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}
 - [type](https://on.cypress.io/api/type)

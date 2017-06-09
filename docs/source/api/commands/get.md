@@ -32,9 +32,9 @@ A selector used to filter matching DOM elements.
 
 **{% fa fa-angle-right %} alias** ***(String)***
 
-An alias as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
+An alias as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
-Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before [`.as()`](https://on.cypress.io/api/as) to find it again.
+Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before {% url `.as()` as %} to find it again.
 
 {% note info %}
 [Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
@@ -137,7 +137,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
-- [contains](https://on.cypress.io/api/contains)
-- [find](https://on.cypress.io/api/find)
+- {% url `.as()` as %}
+- {% url `cy.contains()` contains %}
+- {% url `.find()` find %}
 - [within](https://on.cypress.io/api/within)

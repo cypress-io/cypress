@@ -206,7 +206,7 @@ When clicking on `click` within the command log, the console outputs the followi
 
 # See also
 
-- [check](https://on.cypress.io/api/check)
-- [dblclick](https://on.cypress.io/api/dblclick)
+- {% url `.check()` check %}
+- {% url `.dblclick()` dblclick %}
 - [select](https://on.cypress.io/api/select)
 - [submit](https://on.cypress.io/api/submit)

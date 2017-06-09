@@ -106,5 +106,5 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 
 # See also
 
-- [check](https://on.cypress.io/api/check)
-- [click](https://on.cypress.io/api/click)
+- {% url `.check()` check %}
+- {% url `.click()` click %}

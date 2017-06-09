@@ -43,7 +43,7 @@ Specify a selector to filter DOM elements containing the text. Cypress will *ign
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.contains`.
+Pass in an options object to change the default behavior of `cy.contains()`.
 
 Option | Default | Notes
 --- | --- | ---

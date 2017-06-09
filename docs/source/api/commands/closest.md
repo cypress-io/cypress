@@ -80,7 +80,7 @@ When clicking on the `closest` command within the command log, the console outpu
 
 # See also
 
-- [first](https://on.cypress.io/api/first)
+- {% url `.first()` first %}
 - [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)
 - [parentsUntil](https://on.cypress.io/api/parentsuntil)

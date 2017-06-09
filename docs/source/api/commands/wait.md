@@ -35,7 +35,7 @@ The amount of time to wait in milliseconds.
 
 **{% fa fa-angle-right %} alias** ***(String)***
 
-An aliased route as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
+An aliased route as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
 {% note info %}
 [Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
@@ -43,7 +43,7 @@ An aliased route as defined using the [`.as()`](https://on.cypress.io/api/as) co
 
 **{% fa fa-angle-right %} aliases** ***(Array)***
 
-An array of aliased routes as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
+An array of aliased routes as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
@@ -236,7 +236,7 @@ When clicking on `wait` within the command log, the console outputs the followin
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
+- {% url `.as()` as %}
 - [route](https://on.cypress.io/api/route)
 - [server](https://on.cypress.io/api/server)
 - [spread](https://on.cypress.io/api/spread)

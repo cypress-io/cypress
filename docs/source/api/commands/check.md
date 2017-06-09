@@ -130,5 +130,5 @@ When clicking on `check` within the command log, the console outputs the followi
 
 # See also
 
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}
 - [uncheck](https://on.cypress.io/api/uncheck)

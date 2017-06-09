@@ -82,7 +82,7 @@ When clicking on `clearCookies` within the command log, the console outputs the 
 
 # See also
 
-- [clearCookie](https://on.cypress.io/api/clearcookie)
+- {% url `cy.clearCookie()` clearcookie %}
 - [Cypress Cookies API](https://on.cypress.io/api/cookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [getCookies](https://on.cypress.io/api/getcookies)

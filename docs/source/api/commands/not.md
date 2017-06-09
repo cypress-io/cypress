@@ -84,4 +84,4 @@ When clicking on `not` within the command log, the console outputs the following
 
 # See also
 
-- [filter](https://on.cypress.io/api/filter)
+- {% url `.filter()` filter %}

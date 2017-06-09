@@ -84,4 +84,4 @@ When clicking on `clearLocalStorage` within the command log, the console outputs
 
 # See also
 
-- [clearCookies](https://on.cypress.io/api/clearcookies)
+- {% url `cy.clearCookies()` clearcookies %}

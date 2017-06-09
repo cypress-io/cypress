@@ -87,6 +87,6 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 # See also
 
-- [blur](https://on.cypress.io/api/blur)
+- {% url `.blur()` blur %}
 - [focus](https://on.cypress.io/api/focus)
 - [type](https://on.cypress.io/api/type)

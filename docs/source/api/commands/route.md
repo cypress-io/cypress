@@ -459,7 +459,7 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
+- {% url `.as()` as %}
 - [fixture](https://on.cypress.io/api/fixture)
 - [Guide: Network Requests](https://on.cypress.io/guides/network-requests-xhr)
 - [Recipe: Loggin in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)

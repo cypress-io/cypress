@@ -429,7 +429,7 @@ Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide the built-in assertio
 
 There are two ways to write assertions in Cypress:
 
-1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
+1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or {% url `.and()` and %}
 2. **Explicit Subjects:** Using `expect`
 
 {% note info Assertion Libraries %}
@@ -437,9 +437,9 @@ Cypress bundles [popular assertion libraries](/guides/appendices/available-asser
 
 {% endnote %}
 
-## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
+## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or {% url `.and()` and %}
 
-Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
+Using [`cy.should`](https://on.cypress.io/api/should) or {% url `.and()` and %} commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
 
 ```javascript
 // the implicit subject here is the first <tr>
@@ -447,7 +447,7 @@ Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.c
 cy.get("tbody tr:first").should("have.class", "active")
 ```
 
-You can chain multiple assertions together using `.and()`, which is just another name for `.should()` that makes things more readable:
+You can chain multiple assertions together using {% url `.and()` and %}, which is just another name for `.should()` that makes things more readable:
 
 ```js
 cy.get("#header a")

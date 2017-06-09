@@ -113,6 +113,6 @@ When clicking on `screenshot` within the command log, the console outputs the fo
 
 # See also
 
-- [debug](https://on.cypress.io/api/debug)
+- {% url `cy.debug()` debug %}
 - [Cypress Dashboard](https://on.cypress.io/dashboard)
 - [pause](https://on.cypress.io/api/pause)

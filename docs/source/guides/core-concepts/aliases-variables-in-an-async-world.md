@@ -55,7 +55,7 @@ Of course, this is *not good*. It's clunky and difficult to figure out what is g
 
 **Aliasing is incredibly powerful but very simple to use:**
 
-* Create an alias with the [`cy.as`](https://on.cypress.io/api/as) command.
+* Create an alias with the {% url `.as()` as %} command.
 * Reference an alias with the [`cy.get`](https://on.cypress.io/api/get) or [`cy.wait`](https://on.cypress.io/api/wait) command.
 
 Every time you reference an alias, it should be prefixed with `@`. You can think of this character as "a" for alias or you can think of an alias as a pointer (like how variables point to memory).

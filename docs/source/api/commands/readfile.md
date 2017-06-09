@@ -171,6 +171,6 @@ When clicking on the `readFile` command within the command log, the console outp
 # See also
 
 - [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
-- [exec](https://on.cypress.io/api/exec)
+- {% url `cy.exec()` exec %}
 - [fixture](https://on.cypress.io/api/fixture)
 - [writeFile](https://on.cypress.io/api/writefile)

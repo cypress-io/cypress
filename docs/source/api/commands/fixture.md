@@ -150,7 +150,7 @@ cy
 
 **Using an alias to access a fixture**
 
-You can make use of aliasing, [`.as()`](https://on.cypress.io/api/as), instead of working directly with the yielded data.
+You can make use of aliasing, {% url `.as()` as %}, instead of working directly with the yielded data.
 
 Using an alias provides the benefit of terseness and readability. It also makes it easier to access the data later in your tests.
 
