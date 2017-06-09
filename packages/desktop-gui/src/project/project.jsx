@@ -27,6 +27,8 @@ class Project extends Component {
 
   componentWillUnmount () {
     document.title = 'Cypress'
+
+    projectsApi.closeProject(this.props.project)
   }
 
   render () {
