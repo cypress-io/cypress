@@ -505,7 +505,8 @@ If we wrote this assertion in the explicit form ("the long way"), it would look 
 
 ```js
 cy.get("tbody tr:first").should(function($tr) {
-  expect($tr).to.have.class('active')
+  expect($tr).to.have.class("active")
+  expect($tr).to.have.attr("href", "/users")
 })
 ```
 
