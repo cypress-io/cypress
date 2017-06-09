@@ -1,7 +1,11 @@
-const _ = require("lodash")
+const _ = require('lodash')
 const fs = require('hexo-fs')
+const url = require('url')
 const path = require('path')
+const cheerio = require('cheerio')
+const Promise = require('bluebird')
 const request = require('request-promise')
+const errors = require('request-promise/errors')
 
 const startsWithHttpRe = /^http/
 const everythingAfterHashRe = /(#.+)/
@@ -10,21 +14,54 @@ function isExternalHref (str) {
   return startsWithHttpRe.test(str)
 }
 
-function stripHashes (str) {
+function stripHash (str) {
   return str.replace(everythingAfterHashRe, '')
 }
 
 function extractHash (str) {
   const matches = everythingAfterHashRe.exec(str)
 
+  // return the hash match or empty string
   return (matches && matches[0]) || ''
 }
 
-function validateExternalUrl (href) {
+function assertHashIsPresent (descriptor, source, hash, html) {
+  // verify that the hash is present on this page
+  const $ = cheerio.load(html)
+
+  // hash starts with a '#'
+  if (!$(hash).length) {
+    const truncated = _.truncate(html, { length: 200 }) || '""'
+
+    // if we dont have a hash
+    throw new Error(`Constructing {% url %} tag helper failed
+
+    > The source file was: ${source}
+
+    > You referenced a hash that does not exist at: ${descriptor}
+
+    > Expected to find an element matching the id: ${hash}
+
+    > The HTML response body was:
+
+    ${truncated}
+    `)
+  }
+}
+
+function validateExternalUrl (href, source) {
+  const { hash } = url.parse(href)
+
   return request(href)
-  .promise()
-  .return(href)
-  .catch((err) => {
+  .then((html) => {
+    // bail if we dont have a hash
+    if (!hash) {
+      return
+    }
+
+    assertHashIsPresent(href, source, hash, html)
+  })
+  .catch(errors.StatusCodeError, (err) => {
     err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
     throw err
   })
@@ -67,7 +104,7 @@ function normalizeNestedPaths (data) {
 function findFileBySource (sidebar, href) {
   const { expanded, flattened } = normalizeNestedPaths(sidebar)
 
-  href = stripHashes(href)
+  href = stripHash(href)
 
   function property () {
     // drill into the original sidebar object
@@ -79,31 +116,59 @@ function findFileBySource (sidebar, href) {
   return flattened[href] || property()
 }
 
-function findUrlByFile (sidebar, href) {
+function getLocalFile (sidebar, href) {
   // get the resolve path to the file
   // cypress-101 -> guides/core-concepts/cypress-101.html
   const pathToFile = findFileBySource(sidebar, href)
 
-  const hash = extractHash(href)
-
   if (pathToFile) {
     // ensure this physically exists on disk
     // inside of './source' folder
-    return fs.stat(
+    return fs.readFile(
       path.resolve('source', pathToFile.replace('.html', '.md'))
-    )
-    .return(`/${pathToFile}${hash}`)
+    ).then((str) => {
+      // return an array with
+      // path to file, and str bytes
+      return [pathToFile, str]
+    })
   }
 
-  throw new Error(`Could not find a valid doc file in the sidebar.yml for: ${href}`)
+  return Promise.reject(
+    new Error(`Could not find a valid doc file in the sidebar.yml for: ${href}`)
+  )
 }
 
-function validateAndGetUrl (sidebar, href) {
+function validateLocalFile (sidebar, href, source, render) {
+  const hash = extractHash(href)
+
+  return getLocalFile(sidebar, stripHash(href))
+  .spread((pathToFile, str) => {
+    if (hash) {
+      // if we have a hash then render
+      // the markdown contents so we can
+      // ensure it has the hash present!
+      return render(str)
+      .then((html) => {
+        assertHashIsPresent(pathToFile, source, hash, html)
+
+        return pathToFile
+      })
+    }
+
+    return pathToFile
+  })
+  .then((pathToFile) => {
+    return `/${pathToFile}${hash}`
+  })
+}
+
+function validateAndGetUrl (sidebar, href, source, render) {
   if (isExternalHref(href)) {
-    return validateExternalUrl(href)
+    return validateExternalUrl(href, source)
+    .return(href)
   }
 
-  return findUrlByFile(sidebar, href)
+  return validateLocalFile(sidebar, href, source, render)
 }
 
 module.exports = {
@@ -111,7 +176,9 @@ module.exports = {
 
   findFileBySource,
 
-  findUrlByFile,
+  getLocalFile,
+
+  validateLocalFile,
 
   validateAndGetUrl,
 }

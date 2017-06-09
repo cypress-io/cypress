@@ -91,7 +91,13 @@ hexo.extend.tag.register('url', function (args) {
       attrs.target = '_blank'
     }
 
-    return urlGenerator.validateAndGetUrl(sidebar, attrs.href)
+    // onRender callback to generate
+    // the markdown for each internal document
+    const onRender = (text) => {
+      return hexo.render.render({ text, engine: 'markdown' })
+    }
+
+    return urlGenerator.validateAndGetUrl(sidebar, attrs.href, this.full_source, onRender)
     .then((href) => {
       attrs.href = href
 

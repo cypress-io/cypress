@@ -77,21 +77,22 @@ describe "lib/url_generator", ->
         "guides/cypress-basics/overview.html"
       )
 
-  context ".findUrlByFile", ->
+  context ".getLocalFile", ->
     beforeEach ->
       @sandbox.stub(fs, "stat").returns(Promise.resolve())
 
-    it "stats file", ->
-      urlGenerator.findUrlByFile(data, "as")
-      .then (pathToFile) ->
-        expect(fs.stat).to.be.calledWith(path.resolve("source/api/commands/as.md"))
-        expect(pathToFile).to.eq("/api/commands/as.html")
+    it "requests file", ->
+      urlGenerator.getLocalFile(data, "as")
+      .spread (pathToFile, str) ->
+        expect(pathToFile).to.eq("api/commands/as.html")
+        expect(str).to.be.a("string")
 
     it "throws when cannot find file", ->
-      fn = ->
-        urlGenerator.findUrlByFile(data, "foo")
-
-      expect(fn).to.throw("Could not find a valid doc file in the sidebar.yml for: foo")
+      urlGenerator.getLocalFile(data, "foo")
+      .then ->
+        throw new Error("should have caught error")
+      .catch (err) ->
+        expect(err.message).to.include("Could not find a valid doc file in the sidebar.yml for: foo")
 
   context ".validateAndGetUrl", ->
     it "verifies external url", ->
@@ -114,7 +115,55 @@ describe "lib/url_generator", ->
       .catch (err) ->
         expect(err.message).to.include("Request to: https://www.google.com failed. (Status Code 500)")
 
-    it "returns absolute path to file", ->
-      urlGenerator.validateAndGetUrl(data, "and#notes")
+    it "verifies local file", ->
+      markdown = "## Notes\nfoobarbaz"
+
+      render = (str) ->
+        expect(str).to.eq(markdown)
+
+        return Promise.resolve("<html><div id='notes'>notes</div></html>")
+
+      @sandbox.stub(fs, "readFile").returns(Promise.resolve(markdown))
+
+      urlGenerator.validateAndGetUrl(data, "and#notes", "", render)
       .then (pathToFile) ->
         expect(pathToFile).to.eq("/api/commands/and.html#notes")
+
+    it "fails when hash is not present in response", ->
+      nock("https://www.google.com")
+      .get("/")
+      .reply(200, "<html></html>")
+
+      urlGenerator.validateAndGetUrl(data, "https://www.google.com/#foo", "bar.md")
+      .then ->
+        throw new Error("should have caught error")
+      .catch (err) ->
+        [
+          "Constructing {% url %} tag helper failed"
+          "The source file was: bar.md"
+          "You referenced a hash that does not exist at: https://www.google.com/",
+          "Expected to find an element matching the id: #foo"
+          "The HTML response body was:"
+          "<html></html>"
+        ].forEach (msg) ->
+          expect(err.message).to.include(msg)
+
+    it "fails when hash is not present in local file", ->
+      render = (str) ->
+        return Promise.resolve("<html></html>")
+
+      @sandbox.stub(fs, "readFile").returns(Promise.resolve(""))
+
+      urlGenerator.validateAndGetUrl(data, "and#foo", "guides/core-concepts/bar.md", render)
+      .then ->
+        throw new Error("should have caught error")
+      .catch (err) ->
+        [
+          "Constructing {% url %} tag helper failed"
+          "The source file was: guides/core-concepts/bar.md"
+          "You referenced a hash that does not exist at: api/commands/and.html",
+          "Expected to find an element matching the id: #foo"
+          "The HTML response body was:"
+          "<html></html>"
+        ].forEach (msg) ->
+          expect(err.message).to.include(msg)

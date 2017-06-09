@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "chai": "^4.0.2",
+    "cheerio": "^1.0.0-rc.1",
     "colors": "^1.1.2",
     "fs-extra": "^3.0.1",
     "glob": "^7.1.1",
