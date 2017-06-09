@@ -184,6 +184,11 @@ cy.get('.my-slow-selector', { timeout: 10000 })
 
 You can also set the timeout globally via [the configuration setting `defaultCommandTimeout`](/guides/appendices/configuration.html#Timeouts).
 
+{% note success Core Concept %}
+To match the behavior of web applications, Cypress is deeply asynchronous and must rely on timeouts to know when to stop waiting on an app to get into a valid state. Timeouts can be configured globally, or on a per-command basis.
+
+{% endnote %}
+
 {% note info Timeouts and Performance %}
 
 There is a performance tradeoff here: **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means that while you _may_ want to increase your timeout period to suit specific parts of your app, you _don't_ want to make it "extra long, just in case".
