@@ -325,7 +325,7 @@ cy.get('input').then(($input) => {
 cy.get('input').should('have.value', 'abc')
  ```
 
-## {% fa fa-question-circle green %} How do I make conditional based assertions / control flow?
+<!-- ## {% fa fa-question-circle green %} How do I make conditional based assertions / control flow? -->
 
 ## {% fa fa-question-circle green %} How do I require "" node module in Cypress?
 
