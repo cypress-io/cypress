@@ -4,7 +4,7 @@
   "description": "Cypress.io documentation",
   "private": true,
   "hexo": {
-    "version": "3.3.1"
+    "version": "3.3.7"
   },
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",
@@ -48,7 +48,7 @@
     "docsearch.js": "^2.3.3",
     "fira": "github:cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "^4.7.0",
-    "hexo": "3.3.1",
+    "hexo": "github:cypress-io/hexo#7d926accd8594dbccf3ee525ba80f9dd75971e3a",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",
     "hexo-filter-cleanup": "1.0.7",
