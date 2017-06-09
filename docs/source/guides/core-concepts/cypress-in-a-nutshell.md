@@ -12,7 +12,7 @@ comments: true
 - what assertions look like and how they work
 {% endnote %}
 
-{% note info Important! %}
+{% note danger Important! %}
 **This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.
 {% endnote %}
 
