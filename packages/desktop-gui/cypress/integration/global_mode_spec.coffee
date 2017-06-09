@@ -95,12 +95,9 @@ describe "Global Mode", ->
         cy.shouldBeOnIntro()
 
     describe "recent projects", ->
-      it "loads projects", ->
-        cy.wrap({}).should =>
+      it "loads projects and shows loader", ->
+        cy.get(".projects-list .loader").then =>
           expect(@ipc.getProjects).to.be.called
-
-      it "shows loader when loading projects", ->
-        cy.get(".projects-list .loader")
 
       describe "when loaded", ->
         beforeEach ->
