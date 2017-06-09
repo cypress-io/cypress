@@ -10,17 +10,17 @@ comments: false
 **Features:**
 
 - You can now run your tests in the [Electron browser](https://on.cypress.io/guides/browser-management#section-electron-browser) that comes built with Cypress. You will see it as an option in the browser dropdown. This is the same browser that Cypress uses when running Cypress headlessly. This is useful for debugging issues that only occur during headless runs. Addresses [#452](https://github.com/cypress-io/cypress/issues/452).
-- New traversal commands [`cy.nextAll`](https://on.cypress.io/api/nextall), [`cy.nextUntil`](https://on.cypress.io/api/nextuntil), [`cy.parentsUntil`](https://on.cypress.io/api/parentsuntil), [`cy.prevAll`](https://on.cypress.io/api/prevall), and [`cy.prevUntil`](https://on.cypress.io/api/prevuntil) have been added. Addresses [#432](https://github.com/cypress-io/cypress/issues/432).
+- New traversal commands [`.nextAll()`](https://on.cypress.io/api/nextall), [`.nextUntil()`](https://on.cypress.io/api/nextuntil), [`.parentsUntil()`](https://on.cypress.io/api/parentsuntil), [`.prevAll()`](https://on.cypress.io/api/prevall), and [`.prevUntil()`](https://on.cypress.io/api/prevuntil) have been added. Addresses [#432](https://github.com/cypress-io/cypress/issues/432).
 
 **Bugfixes:**
 
-- An error is now thrown if an `undefined` value is mistakenly passed into [`cy.wait`](https://on.cypress.io/api/wait). Previously, it would set the command timeout to an unimaginably large number of ms. Fixes [#332](https://github.com/cypress-io/cypress/issues/332)
+- An error is now thrown if an `undefined` value is mistakenly passed into [`cy.wait()`](https://on.cypress.io/api/wait). Previously, it would set the command timeout to an unimaginably large number of ms. Fixes [#332](https://github.com/cypress-io/cypress/issues/332)
 - Fixed issue where the contents of `state.json` were emptied, which would cause a crash and loss of state information. Fixes [#473](https://github.com/cypress-io/cypress/issues/473) and [#474](https://github.com/cypress-io/cypress/issues/474).
 - We no longer write the chrome extension within `node_modules`, and instead write this to the proper OS specific `appData` folder. Fixes [#290](https://github.com/cypress-io/cypress/issues/290) and [#245](https://github.com/cypress-io/cypress/issues/245).
 
 **Misc:**
 
-- Error handling for invalid arguments passed to [`cy.wait`](https://on.cypress.io/api/wait) have been improved and will now suggest valid arguments that are acceptable.
+- Error handling for invalid arguments passed to [`cy.wait()`](https://on.cypress.io/api/wait) have been improved and will now suggest valid arguments that are acceptable.
 - Browsers in the browser dropdown now have colored icons, which help visually distinguish the variants of Chrome.
 - Increased timeout for browser to make a connection when running headlessly from 10 seconds to 30 seconds.
 - Internally refactored how browsers are added and spawned in preparation of us adding cross browser support.
@@ -33,7 +33,7 @@ comments: false
 **Features:**
 
 - Added `Cypress.version` property. Fixes [#404](https://github.com/cypress-io/cypress/issues/404).
-- Selecting `<option>` inside `<optgroup>` now works with [`cy.select`](https://on.cypress.io/api/select). Fixes [#367](https://github.com/cypress-io/cypress/issues/367).
+- Selecting `<option>` inside `<optgroup>` now works with [`.select()`](https://on.cypress.io/api/select). Fixes [#367](https://github.com/cypress-io/cypress/issues/367).
 
 **Bugfixes:**
 
@@ -41,9 +41,9 @@ comments: false
 - Now you can select the error text in the GUI. Fixes [#344](https://github.com/cypress-io/cypress/issues/344).
 - Cypress now correctly re-bundles files even when `watchForFileChanges` is set to `false`. Fixes [#347](https://github.com/cypress-io/cypress/issues/347) and [#446](https://github.com/cypress-io/cypress/issues/446)
 - Fixed file watching when changing the `integrationFolder` to something other than the default value. Fixes [#438](https://github.com/cypress-io/cypress/issues/438).
-- [`cy.select`](https://on.cypress.io/api/select) now works on options that have the same value. Fixes [#441](https://github.com/cypress-io/cypress/issues/441).
+- [`.select()`](https://on.cypress.io/api/select) now works on options that have the same value. Fixes [#441](https://github.com/cypress-io/cypress/issues/441).
 - Cypress no longer crashes when you click links in the on-boarding screen called "To help you get started...". Fixes [#227](https://github.com/cypress-io/cypress/issues/227).
-- The `example_spec.js` file that gets seeded on a new project no longer fails on [`cy.readFile`](https://on.cypress.io/api/readFile). Fixes [#414](https://github.com/cypress-io/cypress/issues/414).
+- The `example_spec.js` file that gets seeded on a new project no longer fails on [`cy.readFile()`](https://on.cypress.io/api/readFile). Fixes [#414](https://github.com/cypress-io/cypress/issues/414).
 
 **Misc:**
 
@@ -99,14 +99,14 @@ comments: false
 
 **Overview:**
 
-- We have officially implemented our [Sinon.JS](http://sinonjs.org/docs/) integration: adding [`cy.stub`](https://on.cypress.io/api/stub), [`cy.spy`](https://on.cypress.io/api/spy), [`cy.clock`](https://on.cypress.io/api/clock), and [`cy.tick`](https://on.cypress.io/api/tick). We've matched Sinon's API's and added `sinon-as-promised` and `chai-sinon`. In addition we've fixed Sinon performance issues, and improved the display of assertion passes and failures.
+- We have officially implemented our [Sinon.JS](http://sinonjs.org/docs/) integration: adding [`cy.stub()`](https://on.cypress.io/api/stub), [`cy.spy()`](https://on.cypress.io/api/spy), [`cy.clock()`](https://on.cypress.io/api/clock), and [`cy.tick()`](https://on.cypress.io/api/tick). We've matched Sinon's API's and added `sinon-as-promised` and `chai-sinon`. In addition we've fixed Sinon performance issues, and improved the display of assertion passes and failures.
 - These new API's will work well in both `unit` tests and `integration` tests.
 
 **Features:**
 
-- You can now use [`cy.stub`](https://on.cypress.io/api/stub) and [`cy.spy`](https://on.cypress.io/api/spy) synchronously. These both match the Sinon API identically. We will display `stub/spy` calls in the command log and provide the call count, arguments, context, and return values when you click on the log. Stubs are automatically reset between tests.  Fixes [#377](https://github.com/cypress-io/cypress/issues/377).
-- We've added our own special aliasing flavor to [`cy.stub`](https://on.cypress.io/api/stub) and [`cy.spy`](https://on.cypress.io/api/spy). You can use the [`.as(alias)`](https://on.cypress.io/api/as) command and we will associate spy and stub invocations (the same way we do with XHR aliasing and route matching).
-- We've added [`cy.clock`](https://on.cypress.io/api/clock) and [`cy.tick`](https://on.cypress.io/api/tick) which are both asynchronous methods to modify timers in your application under test. We automatically apply clock (even if you invoke it before your first [`cy.visit`](https://on.cypress.io/api/visit)) and will automatically reapply it after page load. [`cy.tick`](https://on.cypress.io/api/tick) will enable you to control the amount of time you want passed in your application. This is great for controlling *throttled* or *debounced* functions.
+- You can now use [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy) synchronously. These both match the Sinon API identically. We will display `stub/spy` calls in the command log and provide the call count, arguments, context, and return values when you click on the log. Stubs are automatically reset between tests.  Fixes [#377](https://github.com/cypress-io/cypress/issues/377).
+- We've added our own special aliasing flavor to [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy). You can use the [`.as()`](https://on.cypress.io/api/as) command and we will associate spy and stub invocations (the same way we do with XHR aliasing and route matching).
+- We've added [`cy.clock()`](https://on.cypress.io/api/clock) and [`cy.tick()`](https://on.cypress.io/api/tick) which are both asynchronous methods to modify timers in your application under test. We automatically apply clock (even if you invoke it before your first [`cy.visit()`](https://on.cypress.io/api/visit)) and will automatically reapply it after page load. [`cy.tick()`](https://on.cypress.io/api/tick) will enable you to control the amount of time you want passed in your application. This is great for controlling *throttled* or *debounced* functions.
 - `sinon-as-promised` is automatically applied under the hood which extends Sinon and provides the `.resolves(...)` and `.rejects(...)` API's which makes it easy to stub promise returning functions.
 - We support and display multiple sub spies when using Sinon's `.withArgs(...)` function.
 
@@ -131,7 +131,7 @@ comments: false
 
 **Features:**
 
-- We now launch Cypress tests directly to the `baseUrl` to avoid an initial page refresh when encountering the first [`cy.visit`](https://on.cypress.io/api/visit) command. This should help tests run faster. Fixes [#382](https://github.com/cypress-io/cypress/issues/382).
+- We now launch Cypress tests directly to the `baseUrl` to avoid an initial page refresh when encountering the first [`cy.visit()`](https://on.cypress.io/api/visit) command. This should help tests run faster. Fixes [#382](https://github.com/cypress-io/cypress/issues/382).
 
 **Bugfixes:**
 
@@ -157,10 +157,10 @@ comments: false
 
 **Misc:**
 
-- Improved performance when running headlessly by caching the last bundled spec. This prevents having the same spec file rebundled each time [`cy.visit`](https://on.cypress.io/api/visit) caused a full page navigation. You should see a moderate improvement in test run time. Fixes [#370](https://github.com/cypress-io/cypress/issues/370).
+- Improved performance when running headlessly by caching the last bundled spec. This prevents having the same spec file rebundled each time [`cy.visit()`](https://on.cypress.io/api/visit) caused a full page navigation. You should see a moderate improvement in test run time. Fixes [#370](https://github.com/cypress-io/cypress/issues/370).
 - We are now capturing `stdout` and several other properties for use + display in our Dashboard on `cypress ci` runs.
-- Enable [`cy.fixture`](https://on.cypress.io/api/fixture) to send an encoding for images other than forcing the default encoding of `base64`. Fixes [#373](https://github.com/cypress-io/cypress/issues/373).
-- Enable [`cy.route`](https://on.cypress.io/api/route) to pass an `encoding` parameter when using `fx:fixture` syntax. Fixes [#374](https://github.com/cypress-io/cypress/issues/374).
+- Enable [`cy.fixture()`](https://on.cypress.io/api/fixture) to send an encoding for images other than forcing the default encoding of `base64`. Fixes [#373](https://github.com/cypress-io/cypress/issues/373).
+- Enable [`cy.route()`](https://on.cypress.io/api/route) to pass an `encoding` parameter when using `fx:fixture` syntax. Fixes [#374](https://github.com/cypress-io/cypress/issues/374).
 
 # 0.18.4
 
@@ -168,13 +168,13 @@ comments: false
 
 **Bugfixes:**
 
-- Prevent [`cy.url`](https://on.cypress.io/api/url) from accessing the URL during transition phase and throwing an error. Fixes [#356](https://github.com/cypress-io/cypress/issues/356).
-- Stubbed functions now serialize correctly when switching domains on a [`cy.visit`](https://on.cypress.io/api/visit). Fixes [#354](https://github.com/cypress-io/cypress/issues/354).
+- Prevent [`cy.url()`](https://on.cypress.io/api/url) from accessing the URL during transition phase and throwing an error. Fixes [#356](https://github.com/cypress-io/cypress/issues/356).
+- Stubbed functions now serialize correctly when switching domains on a [`cy.visit()`](https://on.cypress.io/api/visit). Fixes [#354](https://github.com/cypress-io/cypress/issues/354).
 - Fixed a handful of scenarios and edge cases where cookies were not properly synchronized between external requests and the browser. This led to situations where cookies were either duplicated on requests, or were not sent. Fixes [#357](https://github.com/cypress-io/cypress/issues/357) and [#361](https://github.com/cypress-io/cypress/issues/361) and [#362](https://github.com/cypress-io/cypress/issues/362).
 
 **Misc:**
 
-- [`cy.request`](https://on.cypress.io/api/request) now favors `baseUrl` config over remote origin when you do not pass a fully qualified URL. Fixes [#360](https://github.com/cypress-io/cypress/issues/360).
+- [`cy.request()`](https://on.cypress.io/api/request) now favors `baseUrl` config over remote origin when you do not pass a fully qualified URL. Fixes [#360](https://github.com/cypress-io/cypress/issues/360).
 
 # 0.18.3
 
@@ -182,11 +182,11 @@ comments: false
 
 **Features:**
 
-- There is now a [`cy.log`](https://on.cypress.io/api/log) command for displaying an arbitrary message and args. Useful for providing context while testing and debugging long tests. Fixes [#342](https://github.com/cypress-io/cypress/issues/342).
+- There is now a [`cy.log()`](https://on.cypress.io/api/log) command for displaying an arbitrary message and args. Useful for providing context while testing and debugging long tests. Fixes [#342](https://github.com/cypress-io/cypress/issues/342).
 
 **Bugfixes:**
 
-- [`cy.title`](https://on.cypress.io/api/title) now uses the `document.title` property as opposed to querying for `<title>` elements in the `<head>`. Fixes [#331](https://github.com/cypress-io/cypress/issues/331) and [#351](https://github.com/cypress-io/cypress/issues/351).
+- [`cy.title()`](https://on.cypress.io/api/title) now uses the `document.title` property as opposed to querying for `<title>` elements in the `<head>`. Fixes [#331](https://github.com/cypress-io/cypress/issues/331) and [#351](https://github.com/cypress-io/cypress/issues/351).
 - We now exit correctly (with status of 1) in the case of headless renderer crashes. Additionally we capture these errors properly, explain what happened, and link to external error document to suggest fixes. Fixes [#348](https://github.com/cypress-io/cypress/issues/348) and [#270](https://github.com/cypress-io/cypress/issues/270).
 
 **Misc:**
@@ -199,13 +199,13 @@ comments: false
 
 **Bugfixes:**
 
-- Under the hood [`cy.visit`](https://on.cypress.io/api/visit) now sets an `Accept: text/html,*/*` request header to prevent some web servers from sending back `404` in the case where they required this header. Only a small % of servers would ever do this, but `webpack-dev-server` was one of them. Fixes [#309](https://github.com/cypress-io/cypress/issues/309).
-- [`cy.request`](https://on.cypress.io/api/request) now sends an `Accept: */*` request header by default too. Fixes [#338](https://github.com/cypress-io/cypress/issues/338).
+- Under the hood [`cy.visit()`](https://on.cypress.io/api/visit) now sets an `Accept: text/html,*/*` request header to prevent some web servers from sending back `404` in the case where they required this header. Only a small % of servers would ever do this, but `webpack-dev-server` was one of them. Fixes [#309](https://github.com/cypress-io/cypress/issues/309).
+- [`cy.request()`](https://on.cypress.io/api/request) now sends an `Accept: */*` request header by default too. Fixes [#338](https://github.com/cypress-io/cypress/issues/338).
 
 **Misc:**
 
-- [`cy.request`](https://on.cypress.io/api/request) now includes more debugging information (related to headers) in the error output. Fixes [#341](https://github.com/cypress-io/cypress/issues/341).
-- When [`cy.request`](https://on.cypress.io/api/request) times out, we now output much better error messages including information about the request sent. Fixes [#340](https://github.com/cypress-io/cypress/issues/340).
+- [`cy.request()`](https://on.cypress.io/api/request) now includes more debugging information (related to headers) in the error output. Fixes [#341](https://github.com/cypress-io/cypress/issues/341).
+- When [`cy.request()`](https://on.cypress.io/api/request) times out, we now output much better error messages including information about the request sent. Fixes [#340](https://github.com/cypress-io/cypress/issues/340).
 
 # 0.18.1
 
@@ -214,16 +214,16 @@ comments: false
 **Notes:**
 
 - There is a new [recipe showcasing these new features](https://github.com/cypress-io/cypress-example-recipes).
-- We are adding several other recipes to show examples of all the ways you can use [`cy.request`](https://on.cypress.io/api/request) to improve your tests.
+- We are adding several other recipes to show examples of all the ways you can use [`cy.request()`](https://on.cypress.io/api/request) to improve your tests.
 
 **Features:**
 
-- [`cy.request`](https://on.cypress.io/api/request) can now have its automatic redirect following turned off by passing `{followRedirect: false}`. Fixes [#308](https://github.com/cypress-io/cypress/issues/308).
-- [`cy.request`](https://on.cypress.io/api/request) now has a `qs` option that automatically appends query params to the `url` property. Fixes [#321](https://github.com/cypress-io/cypress/issues/321).
-- [`cy.request`](https://on.cypress.io/api/request) now follows redirects exactly like a real browser. Previously if you `POST`ed to an endpoint and it redirected to a `GET` then [`cy.request`](https://on.cypress.io/api/request) would not follow it due to the `method` changing. It now follows method changing redirects by default. Fixes [#322](https://github.com/cypress-io/cypress/issues/322).
-- [`cy.request`](https://on.cypress.io/api/request) now accepts the `form` option which will convert the `body` values to urlencoded content and automatically set the `x-www-form-urlencoded` header. This means you can now use [`cy.request`](https://on.cypress.io/api/request) to bypass your UI and login with standard form values. Fixes [#319](https://github.com/cypress-io/cypress/issues/319).
-- When [`cy.request`](https://on.cypress.io/api/request) fails, it now outputs the full request / response information. This behaves more similar to [`cy.visit`](https://on.cypress.io/api/visit) failures. Fixes [#324](https://github.com/cypress-io/cypress/issues/324).
-- [`cy.request`](https://on.cypress.io/api/request) now prints **all** of the underlying HTTP request / response information into the Dev Tools' console (when clicking on the Command Log). This means that you will see everything you would normally see from the `Network` tab as if the request were made from the browser. We even print redirect information. Fixes [#325](https://github.com/cypress-io/cypress/issues/325).
+- [`cy.request()`](https://on.cypress.io/api/request) can now have its automatic redirect following turned off by passing `{followRedirect: false}`. Fixes [#308](https://github.com/cypress-io/cypress/issues/308).
+- [`cy.request()`](https://on.cypress.io/api/request) now has a `qs` option that automatically appends query params to the `url` property. Fixes [#321](https://github.com/cypress-io/cypress/issues/321).
+- [`cy.request()`](https://on.cypress.io/api/request) now follows redirects exactly like a real browser. Previously if you `POST`ed to an endpoint and it redirected to a `GET` then [`cy.request()`](https://on.cypress.io/api/request) would not follow it due to the `method` changing. It now follows method changing redirects by default. Fixes [#322](https://github.com/cypress-io/cypress/issues/322).
+- [`cy.request()`](https://on.cypress.io/api/request) now accepts the `form` option which will convert the `body` values to urlencoded content and automatically set the `x-www-form-urlencoded` header. This means you can now use [`cy.request()`](https://on.cypress.io/api/request) to bypass your UI and login with standard form values. Fixes [#319](https://github.com/cypress-io/cypress/issues/319).
+- When [`cy.request()`](https://on.cypress.io/api/request) fails, it now outputs the full request / response information. This behaves more similar to [`cy.visit()`](https://on.cypress.io/api/visit) failures. Fixes [#324](https://github.com/cypress-io/cypress/issues/324).
+- [`cy.request()`](https://on.cypress.io/api/request) now prints **all** of the underlying HTTP request / response information into the Dev Tools' console (when clicking on the Command Log). This means that you will see everything you would normally see from the `Network` tab as if the request were made from the browser. We even print redirect information. Fixes [#325](https://github.com/cypress-io/cypress/issues/325).
 
 **Bugfixes:**
 
@@ -238,8 +238,8 @@ comments: false
 
 **Misc:**
 
-- Deprecated `failOnStatus` property for [`cy.request`](https://on.cypress.io/api/request) and renamed to `failOnStatusCode`. Fixes [#323](https://github.com/cypress-io/cypress/issues/323).
-- Removed the `cookies` option from [`cy.request`](https://on.cypress.io/api/request) because cookies are now *always* get/set on requests. This option really never made any sense to have. Fixes [#320](https://github.com/cypress-io/cypress/issues/320).
+- Deprecated `failOnStatus` property for [`cy.request()`](https://on.cypress.io/api/request) and renamed to `failOnStatusCode`. Fixes [#323](https://github.com/cypress-io/cypress/issues/323).
+- Removed the `cookies` option from [`cy.request()`](https://on.cypress.io/api/request) because cookies are now *always* get/set on requests. This option really never made any sense to have. Fixes [#320](https://github.com/cypress-io/cypress/issues/320).
 - Better data reporting when recording builds in CI.
 - We now collect "global" errors that may prevent any tests from running. We will be displaying these in our future CI platform.
 
@@ -326,7 +326,7 @@ comments: false
 **Bugfixes:**
 
 - Fixed switching between two different spec files from the desktop app causing `document.domain` to be wrong. Fixes [#276](https://github.com/cypress-io/cypress/issues/276).
-- Fixed inserting the string `null` into [`cy.request`](https://on.cypress.io/api/request) urls when providing a `baseUrl` in `cypress.json` while origin could not be determined. Fixes [#274](https://github.com/cypress-io/cypress/issues/274).
+- Fixed inserting the string `null` into [`cy.request()`](https://on.cypress.io/api/request) urls when providing a `baseUrl` in `cypress.json` while origin could not be determined. Fixes [#274](https://github.com/cypress-io/cypress/issues/274).
 - Fixed incorrect error message on reverse visibility assertions. Fixes [#275](https://github.com/cypress-io/cypress/issues/275).
 
 **Misc:**
@@ -341,7 +341,7 @@ comments: false
 
 - Cypress now applies cookies to the browser which were cleared between redirects. Fixes [#224](https://github.com/cypress-io/cypress/issues/224).
 - Snapshots now work even when `<html>` tag has invalid attributes. Fixes [#271](https://github.com/cypress-io/cypress/issues/271).
-- Cypress no longer crashes on initial `cy.visit` when the 3rd party webserver never ends the response. Fixes [#272](https://github.com/cypress-io/cypress/issues/272).
+- Cypress no longer crashes on initial `cy.visit()` when the 3rd party webserver never ends the response. Fixes [#272](https://github.com/cypress-io/cypress/issues/272).
 
 **Misc:**
 
@@ -376,7 +376,7 @@ comments: false
 
 - We now capture `cross origin` errors correctly instead of these showing as `Uncaught DOMExceptions` in the console. Fixes [#261](https://github.com/cypress-io/cypress/issues/261).
 - We no longer trash the wrong folder on OSX in-app updates (when a project is open). Sorry about this! Fixes [#260](https://github.com/cypress-io/cypress/issues/260).
-- [`cy.visit`](https://on.cypress.io/api/visit) urls with domain-like segments (which weren't actually the domain) no longer cause Cypress to think you're trying to navigate to a different superdomain. Fixes [#255](https://github.com/cypress-io/cypress/issues/255).
+- [`cy.visit()`](https://on.cypress.io/api/visit) urls with domain-like segments (which weren't actually the domain) no longer cause Cypress to think you're trying to navigate to a different superdomain. Fixes [#255](https://github.com/cypress-io/cypress/issues/255).
 
 # 0.17.6
 
@@ -390,11 +390,11 @@ comments: false
 
 - Fixed a regression where tests that failed outside of a hook would incorrectly indicate themselves as a `before each` hook. In addition, in the default `spec`, reporter will now display the test name when a hook was the source of failure. Fixes [#253](https://github.com/cypress-io/cypress/issues/253).
 - Fixed a deployment bug in the `core-desktop-gui`.
-- We now prevent [`cy.visit`](https://on.cypress.io/api/visit) from accidentally snapshotting twice.
+- We now prevent [`cy.visit()`](https://on.cypress.io/api/visit) from accidentally snapshotting twice.
 
 **Misc:**
 
-- [`cy.request`](https://on.cypress.io/api/request) and [`cy.visit`](https://on.cypress.io/api/visit) now correctly send `User-Agent` headers based on the current open browsing session. Fixes [#230](https://github.com/cypress-io/cypress/issues/230).
+- [`cy.request()`](https://on.cypress.io/api/request) and [`cy.visit()`](https://on.cypress.io/api/visit) now correctly send `User-Agent` headers based on the current open browsing session. Fixes [#230](https://github.com/cypress-io/cypress/issues/230).
 
 # 0.17.5
 
@@ -432,16 +432,16 @@ comments: false
 
 **Breaking Changes:**
 
-- Using subsequent [`cy.visit`](https://on.cypress.io/api/visit)'s *in the same test* will not necessarily force a full page refresh. If all that changed was the hash of a url, then the hash changes will take affect **without** a full page refresh. This matches the behavior of a real browser. Previously [`cy.visit`](https://on.cypress.io/api/visit) always forced a full page refresh and this was not correct.
+- Using subsequent [`cy.visit()`](https://on.cypress.io/api/visit)'s *in the same test* will not necessarily force a full page refresh. If all that changed was the hash of a url, then the hash changes will take affect **without** a full page refresh. This matches the behavior of a real browser. Previously [`cy.visit()`](https://on.cypress.io/api/visit) always forced a full page refresh and this was not correct.
 
 **Features:**
 
-- Using [`cy.visit`](https://on.cypress.io/api/visit) now acts *exactly* how modifying the URL in a real browser works. This means that if you visit a url with a hash in it, instead of forcing a full page refresh, it will now simply modify the hash route as if you had manually changed it. This more accurately reflects real user behavior. Previously this was impossible to do with Cypress other than manually altering `window.location.hash`
+- Using [`cy.visit()`](https://on.cypress.io/api/visit) now acts *exactly* how modifying the URL in a real browser works. This means that if you visit a url with a hash in it, instead of forcing a full page refresh, it will now simply modify the hash route as if you had manually changed it. This more accurately reflects real user behavior. Previously this was impossible to do with Cypress other than manually altering `window.location.hash`
 
 **Bugfixes:**
 
 - Fixed a regression in `0.17.2` which caused **separate** tests that were visiting the same URL not to actually visit the new URL and eventually time out. We've updated some of our internal QA processes around this because we rarely have regressions and they are a pretty big deal. Fixes [#225](https://github.com/cypress-io/cypress/issues/225).
-- Fixed displaying `(null)` contentType when a [`cy.visit`](https://on.cypress.io/api/visit) returned a `404` status code. We now only display `contentType` when one exists.
+- Fixed displaying `(null)` contentType when a [`cy.visit()`](https://on.cypress.io/api/visit) returned a `404` status code. We now only display `contentType` when one exists.
 
 # 0.17.3
 
@@ -469,7 +469,7 @@ comments: false
 
 **Features:**
 
-- Attempting to [`cy.visit`](https://on.cypress.io/api/visit) a non `text/html` resource will now throw a specific error message instead of bombing on page injection with an `<iframe`> origin error. You have to visit actual `html`, you cannot visit something like a `.json` or `.png`. If you're wanting to visit an API route on your backend that does something like set cookies (thus avoiding loading your UI) you can just use [`cy.request`](https://on.cypress.io/api/request) for this since it will now automatically get and set cookies under the hood. Fixes [#211](https://github.com/cypress-io/cypress/issues/211).
+- Attempting to [`cy.visit()`](https://on.cypress.io/api/visit) a non `text/html` resource will now throw a specific error message instead of bombing on page injection with an `<iframe`> origin error. You have to visit actual `html`, you cannot visit something like a `.json` or `.png`. If you're wanting to visit an API route on your backend that does something like set cookies (thus avoiding loading your UI) you can just use [`cy.request()`](https://on.cypress.io/api/request) for this since it will now automatically get and set cookies under the hood. Fixes [#211](https://github.com/cypress-io/cypress/issues/211).
 
 **Bugfixes:**
 
@@ -478,14 +478,14 @@ comments: false
 - We stopped minifying `vendor.js` (for real this time). More optimizations to come around this.
 - Prevented accidentally setting `domain` cookies when they were really `hostOnly` cookies, thus duplicating the number of cookies sent on requests. Kudos to [@bahmutov](https://github.com/bahmutov) for finding this one. Fixes [#207](https://github.com/cypress-io/cypress/issues/207).
 - Fixed some edge cases in `cypress-core-extension` where it threw errors when attempting to `executeScript` on a tab with `about:blank` or `chrome://` urls.
-- We've fixed some underlying issues with [`cy.go`](https://on.cypress.io/api/go) while running headlessly. It always worked fine in real Chrome. Previously there were some situations where it would not navigate forward / back correctly.
+- We've fixed some underlying issues with [`cy.go()`](https://on.cypress.io/api/go) while running headlessly. It always worked fine in real Chrome. Previously there were some situations where it would not navigate forward / back correctly.
 
 **Misc:**
 
-- No longer force [`cy.visit`](https://on.cypress.io/api/visit) to navigate to `about:blank` prior to navigating to the real url. Fixes [#208](https://github.com/cypress-io/cypress/issues/208).
-- [`cy.writeFile`](https://on.cypress.io/api/writefile) can now accept an empty string. Fixes [#206](https://github.com/cypress-io/cypress/issues/206).
-- Improved error messages for [`cy.readFile`](https://on.cypress.io/api/readfile) and [`cy.writeFile`](https://on.cypress.io/api/writefile).
-- The full file path is now included in console output for [`cy.readFile`](https://on.cypress.io/api/readfile) and [`cy.writeFile`](https://on.cypress.io/api/writefile).
+- No longer force [`cy.visit()`](https://on.cypress.io/api/visit) to navigate to `about:blank` prior to navigating to the real url. Fixes [#208](https://github.com/cypress-io/cypress/issues/208).
+- [`cy.writeFile()`](https://on.cypress.io/api/writefile) can now accept an empty string. Fixes [#206](https://github.com/cypress-io/cypress/issues/206).
+- Improved error messages for [`cy.readFile()`](https://on.cypress.io/api/readfile) and [`cy.writeFile()`](https://on.cypress.io/api/writefile).
+- The full file path is now included in console output for [`cy.readFile()`](https://on.cypress.io/api/readfile) and [`cy.writeFile()`](https://on.cypress.io/api/writefile).
 - The [Kitchen Sink](https://github.com/cypress-io/cypress-example-kitchensink) and `example_spec.js` have been updated to reflect the newest changes and features of `0.17.1`.
 
 # 0.17.1
@@ -494,22 +494,22 @@ comments: false
 
 **Features:**
 
-- You can now pass keyboard modifiers such as `ctrl`, `cmd`, `shift`, and `alt` to [`cy.type`](https://on.cypress.io/api/type). In addition we've added support for not "releasing" these keys so they can affect other actions such as [`cy.click`](https://on.cypress.io/api/click). Addresses [#196](https://github.com/cypress-io/cypress/issues/196).
+- You can now pass keyboard modifiers such as `ctrl`, `cmd`, `shift`, and `alt` to [`.type()`](https://on.cypress.io/api/type). In addition we've added support for not "releasing" these keys so they can affect other actions such as [`.click()`](https://on.cypress.io/api/click). Addresses [#196](https://github.com/cypress-io/cypress/issues/196).
 - You can now type into the `<body>` or `document` as opposed to previously *having* to target a valid focusable element. This is useful in situations where you're testing keyboard shortcuts and do not want to target a specific element. Addresses [#150](https://github.com/cypress-io/cypress/issues/150).
-- There is a new command [`cy.readFile`](https://on.cypress.io/api/readfile) that reads files on your file system and changes the subject to the contents. Addresses [#179](https://github.com/cypress-io/cypress/issues/179).
-- There is a new command [`cy.writeFile`](https://on.cypress.io/api/writefile) that creates and/or writes contents to files on your file system. Addresses [#179](https://github.com/cypress-io/cypress/issues/179).
+- There is a new command [`cy.readFile()`](https://on.cypress.io/api/readfile) that reads files on your file system and changes the subject to the contents. Addresses [#179](https://github.com/cypress-io/cypress/issues/179).
+- There is a new command [`cy.writeFile()`](https://on.cypress.io/api/writefile) that creates and/or writes contents to files on your file system. Addresses [#179](https://github.com/cypress-io/cypress/issues/179).
 
 **Bugfixes:**
 
 - [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) now works correctly. The driver was still referencing the old `commandTimeout` value.
-- The `__cypress.initial` cookie should now be removed during any [`cy.visit`](https://on.cypress.io/api/visit), which should fix some edge cases with the proxy accidentally injecting content when it shouldn't. We also added a ton more e2e tests covering these edge cases and other behavior.
+- The `__cypress.initial` cookie should now be removed during any [`cy.visit()`](https://on.cypress.io/api/visit), which should fix some edge cases with the proxy accidentally injecting content when it shouldn't. We also added a ton more e2e tests covering these edge cases and other behavior.
 - The proxy now restricts it's injection to only `Content-Type: text/html` headers so it will not accidentally inject into the wrong responses.
 
 **Misc:**
 
-- All [`cy.fixture`](https://on.cypress.io/api/fixture) extensions are now supported and Cypress will no longer throw on extensions it doesn't recognize. For known fixture extensions we'll continue to apply a default `encoding` and for everything else it will default to `utf8`. Fixes [#200](https://github.com/cypress-io/cypress/issues/200).
-- [`cy.fixture`](https://on.cypress.io/api/fixture) now accepts `encoding` as a 2nd optional argument.
-- We now display a keyboard 'modifiers' column when clicking on a [`cy.type`](https://on.cypress.io/api/type) in the Command Log.
+- All [`cy.fixture()`](https://on.cypress.io/api/fixture) extensions are now supported and Cypress will no longer throw on extensions it doesn't recognize. For known fixture extensions we'll continue to apply a default `encoding` and for everything else it will default to `utf8`. Fixes [#200](https://github.com/cypress-io/cypress/issues/200).
+- [`cy.fixture()`](https://on.cypress.io/api/fixture) now accepts `encoding` as a 2nd optional argument.
+- We now display a keyboard 'modifiers' column when clicking on a [`.type()`](https://on.cypress.io/api/type) in the Command Log.
 
 # 0.17.0
 
@@ -523,22 +523,22 @@ comments: false
 
 **Breaking Changes:**
 
-- You cannot [`cy.visit`](https://on.cypress.io/api/visit) two different super domains within a single test. Example: `cy.visit('https://google.com').visit('https://apple.com')`. There shouldn't be any reason you ever need to do this in a single test, if you do, you should make these two separate tests.
+- You cannot [`cy.visit()`](https://on.cypress.io/api/visit) two different super domains within a single test. Example: `cy.visit('https://google.com').visit('https://apple.com')`. There shouldn't be any reason you ever need to do this in a single test, if you do, you should make these two separate tests.
 
 **Features:**
 
-- **All CORS related issues should finally be fixed now.** Cypress now internally switches to the domain that you used in your [`cy.visit`](https://on.cypress.io/api/visit). This means that the correct domain will display in the URL based on the application currently under test. Your application's code will run under the current domain at all times. Previously we implemented an endless amount of hacks and internal translations to figure out the domain you were *supposed* to be on without actually being on the domain. This caused code to behave different and caused subtle issues. Those issues should now be resolved. The entire proxy layer has been rewritten to handle all `https` certificates flawlessly, continue to inject (even on `https` pages), and still know when to automatically bypass injection so you can open other tabs while testing in Cypress. These new proxy changes also unlock the ability to do things like whitelisting or blacklisting specific 3rd party domains, or even be able to stub not just XHR's but any kind of `HTTP` request.
+- **All CORS related issues should finally be fixed now.** Cypress now internally switches to the domain that you used in your [`cy.visit()`](https://on.cypress.io/api/visit). This means that the correct domain will display in the URL based on the application currently under test. Your application's code will run under the current domain at all times. Previously we implemented an endless amount of hacks and internal translations to figure out the domain you were *supposed* to be on without actually being on the domain. This caused code to behave different and caused subtle issues. Those issues should now be resolved. The entire proxy layer has been rewritten to handle all `https` certificates flawlessly, continue to inject (even on `https` pages), and still know when to automatically bypass injection so you can open other tabs while testing in Cypress. These new proxy changes also unlock the ability to do things like whitelisting or blacklisting specific 3rd party domains, or even be able to stub not just XHR's but any kind of `HTTP` request.
 - `window.fetch` now works correctly. Stubbing these does not yet work but it is now possible for us to implement stubbing in a future version. Addresses [#95](https://github.com/cypress-io/cypress/issues/95).
 - The list of tests now automatically refresh when test files are renamed, deleted, or added. In addition, because the list of tests is now displayed in the desktop application, we now synchronize the state of the current running spec.
-- [`cy.visit`](https://on.cypress.io/api/visit) has better error messages. Cypress now programmatically determines why a [`cy.visit`](https://on.cypress.io/api/visit) failed and gives you a ridiculously accurate error message. Addresses [#138](https://github.com/cypress-io/cypress/issues/138).
-- [`cy.visit`](https://on.cypress.io/api/visit) now displays redirects and any cookies set.
+- [`cy.visit()`](https://on.cypress.io/api/visit) has better error messages. Cypress now programmatically determines why a [`cy.visit()`](https://on.cypress.io/api/visit) failed and gives you a ridiculously accurate error message. Addresses [#138](https://github.com/cypress-io/cypress/issues/138).
+- [`cy.visit()`](https://on.cypress.io/api/visit) now displays redirects and any cookies set.
 - The currently running test is now scrolled into view. This behavior can be turned off by scrolling in the command log or selecting to disable auto-scroll at the top of the command log. Addresses [#194](https://github.com/cypress-io/cypress/issues/194)
 - Tests in the Command Log now automatically expand when specific commands take longer than `1000ms` to run. Previously when running more than 1 test we did not expand commands until a test failed. Now they will be expanded and automatically collapsed whenever a single command is taking a long time to finish.
-- We now have full blown subdomain support. This means you can now navigate to a subdomain either directly via a [`cy.visit`](https://on.cypress.io/api/visit) or by navigating in your application naturally (such as clicking an `<a>`).
-- [`cy.request`](https://on.cypress.io/api/request) now attaches and sets cookies transparently on the browser. Even though the browser will not physically make the request, we automatically apply outgoing cookies *as if* the browser had made the request. Additionally we will automatically *set* cookies on the browser based on the response. This means you can use [`cy.request`](https://on.cypress.io/api/request) to bypass not just CORS but handle things like automatically logging in without having to manually perform these actions in the UI.
+- We now have full blown subdomain support. This means you can now navigate to a subdomain either directly via a [`cy.visit()`](https://on.cypress.io/api/visit) or by navigating in your application naturally (such as clicking an `<a>`).
+- [`cy.request()`](https://on.cypress.io/api/request) now attaches and sets cookies transparently on the browser. Even though the browser will not physically make the request, we automatically apply outgoing cookies *as if* the browser had made the request. Additionally we will automatically *set* cookies on the browser based on the response. This means you can use [`cy.request()`](https://on.cypress.io/api/request) to bypass not just CORS but handle things like automatically logging in without having to manually perform these actions in the UI.
 - We now handle `HTTP` request errors much better. Previously if your web server sent us back a `4xx` or `5xx` response we would automatically send back a `500`. Now we transparently pass these through.
 - Improved dozens of error messages.
-- [`cy.debug`](https://on.cypress.io/api/debug) output has been improved, and you can now easily inspect the current command's subject.
+- [`cy.debug()`](https://on.cypress.io/api/debug) output has been improved, and you can now easily inspect the current command's subject.
 - Clicking the URL in the header of the runner now opens that URL in a new tab.
 
 **Bugfixes:**
@@ -546,7 +546,7 @@ comments: false
 - Fixed URL proxy issue with subdomains. Fixes [#183](https://github.com/cypress-io/cypress/issues/183).
 - Viewport size maximum has been decreased from `3001px` to `3000px` and minimum has been increased from `199px` to `200px` to match error messages. Fixes [#189](https://github.com/cypress-io/cypress/issues/189)
 - Websockets are now correctly proxied through `https` and through subdomains different than the current domain under test.
-- Stopped [`cy.debug`](https://on.cypress.io/api/debug) from accidentally mutating subjects.
+- Stopped [`cy.debug()`](https://on.cypress.io/api/debug) from accidentally mutating subjects.
 - Cypress now correctly injects and handles pages which are missing a `<head>`, a `<body`>, or even an `<html>` tag. Previously it would bomb on pages missing these tags.
 - All commands with a long message (such as assertions) are automatically scaled down in font size and truncated properly. In addition, assertions will correctly bold the `expected` and `actual` values.
 
@@ -581,7 +581,7 @@ comments: false
 
 **Bugfixes:**
 
-- Fixed regression caused by `0.16.2` where a failed [`cy.contains`](https://on.cypress.io/api/contains) would not be cancelled and would continue to run and display failed assertions in between test runs (without a full page refresh). Fixes [#174](https://github.com/cypress-io/cypress/issues/174).
+- Fixed regression caused by `0.16.2` where a failed [`cy.contains()`](https://on.cypress.io/api/contains) would not be cancelled and would continue to run and display failed assertions in between test runs (without a full page refresh). Fixes [#174](https://github.com/cypress-io/cypress/issues/174).
 
 # 0.16.3
 
@@ -589,9 +589,9 @@ comments: false
 
 **Features:**
 
-- [`cy.route`](https://on.cypress.io/api/route) now accepts string glob patterns using [minimatch](https://github.com/isaacs/minimatch) under the hood. This means you can more easily route dynamic urls without using `regex`. Example: `cy.route('POST', '/users/*/comments', {})`
+- [`cy.route()`](https://on.cypress.io/api/route) now accepts string glob patterns using [minimatch](https://github.com/isaacs/minimatch) under the hood. This means you can more easily route dynamic urls without using `regex`. Example: `cy.route('POST', '/users/*/comments', {})`
 - [`Cypress.minimatch`](https://on.cypress.io/api/cypress-minimatch)  is now exposed so you can easily test globbing patterns.
-- [`cy.type`](https://on.cypress.io/api/type) can now be used on non-input elements that have a `tabindex` attribute. Key events will fire but no text content will change and no input based events fire. Fixes [#172](https://github.com/cypress-io/cypress/issues/172).
+- [`.type()`](https://on.cypress.io/api/type) can now be used on non-input elements that have a `tabindex` attribute. Key events will fire but no text content will change and no input based events fire. Fixes [#172](https://github.com/cypress-io/cypress/issues/172).
 - There is now an [`ignoreTestFiles`](https://on.cypress.io/guides/configuration) configuration option that accepts an array of `glob` patterns. This enables you to ignore extraneous spec files that may be created during a build process. The default pattern is `*.hot-update.js` which will ignore dynamically generated webpack hot module swapping files. Fixes [#159](https://github.com/cypress-io/cypress/issues/159).
 
 **Bugfixes:**
@@ -613,26 +613,26 @@ comments: false
 
 **Features:**
 
-- Added new [`cy.screenshot`](https://on.cypress.io/api/screenshot) command which can take screenshots on demand.
+- Added new [`cy.screenshot()`](https://on.cypress.io/api/screenshot) command which can take screenshots on demand.
 - When running headlessly or in CI Cypress will now automatically take a screenshot when a test fails. You can optionally turn this off by setting [`screenshotOnHeadlessFailure`](https://on.cypress.io/guides/configuration#section-global) to `false` in your [configuration](https://on.cypress.io/guides/configuration#section-global).
 - Added new [`screenshotsFolder` configuration option](https://on.cypress.io/guides/configuration#section-folders) with default of `cypress/screenshots`.
 - When running in [Circle CI](https://circleci.com/), we automatically export screenshots as artifacts which makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything. If you're using [Travis CI](https://travis-ci.org/), you'll need to upload artifacts to an `s3 bucket`. This is a small slice of what is coming to help diagnose and understand errors in CI. Also in `0.17.0` we will automatically scroll the tests and more intelligently and open / close test commands so you can visually see what happened. Currently you may not see the test command's failure in the Command Log due to the view not scrolling.
-- Added new [`cy.each`](https://on.cypress.io/api/each) command which iterates serially on a collection yielding the iteratee, the index, and the collection. Addresses [#156](https://github.com/cypress-io/cypress/issues/156).
-- [`cy.route`](https://on.cypress.io/api/route) can now accept a single function and/or you can pass a function to the `response` property. This allows you to lazily evaluate routing responses. Great for referencing [fixtures](https://on.cypress.io/guides/creating-fixtures). Addresses [#152](https://github.com/cypress-io/cypress/issues/152).
-- [`cy.contains`](https://on.cypress.io/api/contains) now accepts a regular expression. Addresses [#158](https://github.com/cypress-io/cypress/issues/158).
-- [`cy.type`](https://on.cypress.io/api/type) now accepts `{downarrow}` and `{uparrow}`. We do not move the caret but do fire all the proper events. Addresses [#157](https://github.com/cypress-io/cypress/issues/157).
+- Added new [`.each()`](https://on.cypress.io/api/each) command which iterates serially on a collection yielding the iteratee, the index, and the collection. Addresses [#156](https://github.com/cypress-io/cypress/issues/156).
+- [`cy.route()`](https://on.cypress.io/api/route) can now accept a single function and/or you can pass a function to the `response` property. This allows you to lazily evaluate routing responses. Great for referencing [fixtures](https://on.cypress.io/guides/creating-fixtures). Addresses [#152](https://github.com/cypress-io/cypress/issues/152).
+- [`cy.contains()`](https://on.cypress.io/api/contains) now accepts a regular expression. Addresses [#158](https://github.com/cypress-io/cypress/issues/158).
+- [`.type()`](https://on.cypress.io/api/type) now accepts `{downarrow}` and `{uparrow}`. We do not move the caret but do fire all the proper events. Addresses [#157](https://github.com/cypress-io/cypress/issues/157).
 
 **Bugfixes:**
 
-- [`cy.exec`](https://on.cypress.io/api/exec) now outputs additional `stderr` and `stdout` information. It additionally will automatically `source` your `$SHELL` which makes GUI apps behave as if they've been launched from your terminal. Fixes [#153](https://github.com/cypress-io/cypress/issues/153) and fixes [#154](https://github.com/cypress-io/cypress/issues/154).
-- [`cy.then`](https://on.cypress.io/api/then) yielding nested subjects.
-- [`cy.contains`](https://on.cypress.io/api/contains) no longer returns the last element found when siblings both contain the same content. Fixes [#158](https://github.com/cypress-io/cypress/issues/158).
+- [`cy.exec()`](https://on.cypress.io/api/exec) now outputs additional `stderr` and `stdout` information. It additionally will automatically `source` your `$SHELL` which makes GUI apps behave as if they've been launched from your terminal. Fixes [#153](https://github.com/cypress-io/cypress/issues/153) and fixes [#154](https://github.com/cypress-io/cypress/issues/154).
+- [`.then()`](https://on.cypress.io/api/then) yielding nested subjects.
+- [`cy.contains()`](https://on.cypress.io/api/contains) no longer returns the last element found when siblings both contain the same content. Fixes [#158](https://github.com/cypress-io/cypress/issues/158).
 - Cypress no longer errors when you return a raw DOM element. It now correctly wraps this as the new subject.
 
 **Misc:**
 
-- [`cy.contains`](https://on.cypress.io/api/contains) now provides an even more specific error message when it was scoped to a particular DOM element and contained a selector. Fixes [#160](https://github.com/cypress-io/cypress/issues/160).
-- You will now see a very specific error message when we detect that you've mixed up `async` and `sync` code in a [`cy.then`](https://on.cypress.io/api/then) callback function. An example would be queuing up a new cypress command but then synchronously returning a different value.
+- [`cy.contains()`](https://on.cypress.io/api/contains) now provides an even more specific error message when it was scoped to a particular DOM element and contained a selector. Fixes [#160](https://github.com/cypress-io/cypress/issues/160).
+- You will now see a very specific error message when we detect that you've mixed up `async` and `sync` code in a [`.then()`](https://on.cypress.io/api/then) callback function. An example would be queuing up a new cypress command but then synchronously returning a different value.
 
 # 0.16.1
 
@@ -648,11 +648,11 @@ comments: false
 - Copy / Paste now works when logging in on OSX. Fixes [#145](https://github.com/cypress-io/cypress/issues/145).
 - Grammar: 'Login -> Log in'. Fixes [#146](https://github.com/cypress-io/cypress/issues/146).
 - Cypress now uses the body instead of headers to send external requests. Fixes [#148](https://github.com/cypress-io/cypress/issues/148).
-- When [`cy.then`](https://on.cypress.io/api/then) throws this no longer prevents the next test from issuing any commands. Fixes [#149](https://github.com/cypress-io/cypress/issues/149).
+- When [`.then()`](https://on.cypress.io/api/then) throws this no longer prevents the next test from issuing any commands. Fixes [#149](https://github.com/cypress-io/cypress/issues/149).
 
 **Misc:**
 
-- Passing multiple arguments to [`cy.its`](https://on.cypress.io/api/its) now throws and suggests you use [`cy.invoke`](https://on.cypress.io/api/invoke). Fixes [#147](https://github.com/cypress-io/cypress/issues/147).
+- Passing multiple arguments to [`.its()`](https://on.cypress.io/api/its) now throws and suggests you use [`.invoke()`](https://on.cypress.io/api/invoke). Fixes [#147](https://github.com/cypress-io/cypress/issues/147).
 
 # 0.16.0
 
@@ -672,8 +672,8 @@ comments: false
 
 - Running tests in Cypress now requires either Chrome, Chromium, or Canary to be installed on your OS environment. We intend to expand support for more browsers in the future, but for now, only these 3 are supported.
 - Removed support for [`Cypress.Cookies.get`](https://on.cypress.io/api/cookies), [`Cypress.Cookies.set`](https://on.cypress.io/api/cookies) and [`Cypress.Cookies.remove`](https://on.cypress.io/api/cookies).
-- Changed return of [`cy.getCookies`](https://on.cypress.io/api/getcookies) to return an array of cookies, each with properties include name, value, etc.
-- Changed return of [`cy.clearCookies`](https://on.cypress.io/api/clearcookies) to return null (previously was returning Cookie that was cleared).
+- Changed return of [`cy.getCookies()`](https://on.cypress.io/api/getcookies) to return an array of cookies, each with properties include name, value, etc.
+- Changed return of [`cy.clearCookies()`](https://on.cypress.io/api/clearcookies) to return null (previously was returning Cookie that was cleared).
 - [`Cypress.Cookies.debug`](https://on.cypress.io/api/cookies) has been temporarily disabled and will be re-enabled later.
 - Browsers are spawned in a Cypress specific profile so that we can maintain a clean state apart of your regular browsing usage. You will notice that your extensions are no longer installed. This is on purpose. 3rd party extensions can often get in the way of Cypress and cause failures. However, developer specific extensions for Angular, Ember, and React do not cause any issues but you'll want to reinstall them. You only have to install them once and they will persist.
 - The `whitelist` callback function of [`Cypress.Cookies.defaults`](https://on.cypress.io/api/cookies#section-defaults-usage) now receives a `cookie object` instead of just the `cookies name` as a string.
@@ -683,10 +683,10 @@ comments: false
 - When a project is initially run from the desktop app, you can now choose to run Cypress in a select number of browsers including: Chrome, Chromium, or Canary (depending on what's installed on your OS).
 - Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/browser-management)
 - We automatically spawn Chrome in a **custom theme** so you can visually distinguish the difference between browser sessions spawned with Cypress vs your normal sessions. We know this may feel a little jarring because you're used to running Cypress alongside your other tabs. You will now see 2 chrome icons in your dock and you'll need to switch between them. We know this is problematic and confusing and we're looking into **changing the icon** of the Chrome running Cypress so it's easier to tell the Chrome sessions apart.
-- Added new commands to handle getting, setting, and clearing cookies: [`cy.clearCookie`](https://on.cypress.io/api/clearcookie), [`cy.getCookie`](https://on.cypress.io/api/getcookie), and [`cy.setCookie`](https://on.cypress.io/api/setcookie).
+- Added new commands to handle getting, setting, and clearing cookies: [`cy.clearCookie()`](https://on.cypress.io/api/clearcookie), [`cy.getCookie()`](https://on.cypress.io/api/getcookie), and [`cy.setCookie()`](https://on.cypress.io/api/setcookie).
 - All the `cy.cookie` commands have been upgraded to take new options and can do much more powerful things outside of the JavaScript sandbox.
 - Upgraded the Chromium version running headlessly and in CI from `47` to `49`.
-- There is a new [`cy.exec`](https://on.cypress.io/api/exec) command that can execute any arbitrary system command. Additionally there is a new [`execTimeout` configurable option](https://on.cypress.io/guides/configuration#section-global) which is set to `60s` by default. Fixes [#126](https://github.com/cypress-io/cypress/issues/126).
+- There is a new [`cy.exec()`](https://on.cypress.io/api/exec) command that can execute any arbitrary system command. Additionally there is a new [`execTimeout` configurable option](https://on.cypress.io/guides/configuration#section-global) which is set to `60s` by default. Fixes [#126](https://github.com/cypress-io/cypress/issues/126).
 - There is a new [`numTestsKeptInMemory` configuration option](https://on.cypress.io/guides/configuration#section-global) that controls how many test's snapshots and command data is kept in memory while tests are running. Reducing this number will reduce the memory used in the browser while tests are running. Whatever this number is - is how many tests you can walk back in time when inspecting their snapshots and return values.  Addresses [#142](https://github.com/cypress-io/cypress/issues/142).
 
 **Bugfixes:**
@@ -701,12 +701,12 @@ comments: false
 **Misc:**
 
 - XHR requests for `.svg` files are no longer shown in the Command Log by default. Addresses [#131](https://github.com/cypress-io/cypress/issues/131).
-- Improved error when [`cy.request`](https://on.cypress.io/api/request) fails. The request parameters are now included in the error. Addresses [#134](https://github.com/cypress-io/cypress/issues/134).
+- Improved error when [`cy.request()`](https://on.cypress.io/api/request) fails. The request parameters are now included in the error. Addresses [#134](https://github.com/cypress-io/cypress/issues/134).
 - When running a project in the new Cypress browser environment, if a new tab is opened, a message now displays discouraging the use of multiple tabs while testing. Addresses [#9](https://github.com/cypress-io/cypress/issues/9).
 - When navigating directly to `localhost:2020` outside of the new Cypress browser environment, a message now displays discouraging running tests outside of the new Cypress browser environment.
 - If, for whatever reason, Cypress cannot communicate with the automation servers, your testing session will immediately end and you'll have the ability to re-spawn the browser.
-- [`cy.fixture`](https://on.cypress.io/api/fixture) now has a default timeout of `responseTimeout` which is `20s`.
-- [`cy.fixture`](https://on.cypress.io/api/fixture) can now properly time out and accepts an `options` argument that can override its default timeout.
+- [`cy.fixture()`](https://on.cypress.io/api/fixture) now has a default timeout of `responseTimeout` which is `20s`.
+- [`cy.fixture()`](https://on.cypress.io/api/fixture) can now properly time out and accepts an `options` argument that can override its default timeout.
 - Improved initial Desktop Application startup performance by about `1.5s`.
 - We now correctly store local data in each operating system's correct `Application Data` area. This will be more resilient to upgrades in the future.
 - Running Cypress in a linux VM on VirtualBox no longer displays "black screens".
@@ -721,19 +721,19 @@ comments: false
 
 **Notes:**
 
-- The docs have not yet been updated to reflect the changes to [`cy.its`](https://on.cypress.io/api/its) and [`cy.invoke`](https://on.cypress.io/api/invoke).
+- The docs have not yet been updated to reflect the changes to [`.its()`](https://on.cypress.io/api/its) and [`.invoke()`](https://on.cypress.io/api/invoke).
 
 **Breaking Changes:**
 
-- You can no longer improperly use [`cy.its`](https://on.cypress.io/api/its) and [`cy.invoke`](https://on.cypress.io/api/invoke). Using [`cy.invoke`](https://on.cypress.io/api/invoke) on a non function property will result in an error that tells you how to write it properly using [`cy.its`](https://on.cypress.io/api/its).
+- You can no longer improperly use [`.its()`](https://on.cypress.io/api/its) and [`.invoke()`](https://on.cypress.io/api/invoke). Using [`.invoke()`](https://on.cypress.io/api/invoke) on a non function property will result in an error that tells you how to write it properly using [`.its()`](https://on.cypress.io/api/its).
 
 **Features:**
 
-- Our [Gitter Chat channel](https://gitter.im/cypress-io/cypress) has now been directly integrated into Cypress's nav. Clicking on the `chat` icon will immediately display the current gitter chat log.
+- Our [Chat channel](https://gitter.im/cypress-io/cypress) has now been directly integrated into Cypress's nav. Clicking on the `chat` icon will immediately display the current gitter chat log.
 - Added a new link to Options dropdown in Desktop app for "Chat" that goes to our [Gitter Chat channel](https://gitter.im/cypress-io/cypress).
-- [`cy.its`](https://on.cypress.io/api/its) and [`cy.invoke`](https://on.cypress.io/api/invoke) now support **dot separated** nested properties.
-- Using [`cy.its`](https://on.cypress.io/api/its) on a function will now allow you to access its properties instead of automatically calling a function. Fixes [#122](https://github.com/cypress-io/cypress/issues/122).
-- Error messages and command messages for [`cy.its`](https://on.cypress.io/api/its) and [`cy.invoke`](https://on.cypress.io/api/invoke) have been improved.
+- [`.its()`](https://on.cypress.io/api/its) and [`.invoke()`](https://on.cypress.io/api/invoke) now support **dot separated** nested properties.
+- Using [`.its()`](https://on.cypress.io/api/its) on a function will now allow you to access its properties instead of automatically calling a function. Fixes [#122](https://github.com/cypress-io/cypress/issues/122).
+- Error messages and command messages for [`.its()`](https://on.cypress.io/api/its) and [`.invoke()`](https://on.cypress.io/api/invoke) have been improved.
 - Adding an attribute called `data-cypress-ignore` to an element will prevent the internal Cypress proxy from rewriting any of its content or attributes.
 
 **Bugfixes:**
@@ -793,7 +793,7 @@ comments: false
 
 **Features:**
 
-- [`cy.go`](https://on.cypress.io/api/go) and [`cy.reload`](https://on.cypress.io/api/reload) now accept a timeout option. Also, these commands would previously time out after the default `commandTimeout` of `4000ms`, but now they will timeout after `pageLoadTimeout` of `30000ms`.
+- [`cy.go()`](https://on.cypress.io/api/go) and [`cy.reload()`](https://on.cypress.io/api/reload) now accept a timeout option. Also, these commands would previously time out after the default `commandTimeout` of `4000ms`, but now they will timeout after `pageLoadTimeout` of `30000ms`.
 
 **Bugfixes:**
 
@@ -802,7 +802,7 @@ comments: false
 
 **Misc:**
 
-- Renamed [configuration](https://on.cypress.io/guides/configuration) option `visitTimeout` to `pageLoadTimeout`. You don't need to change anything. If you were specifically setting `visitTimeout` in your `cypress.json` file it will be transparently rewritten `pageLoadTimeout` on the next server boot. This option was renamed because now multiple commands `cy.visit`, `cy.go`, and `cy.reload` all depend on this timeout option.
+- Renamed [configuration](https://on.cypress.io/guides/configuration) option `visitTimeout` to `pageLoadTimeout`. You don't need to change anything. If you were specifically setting `visitTimeout` in your `cypress.json` file it will be transparently rewritten `pageLoadTimeout` on the next server boot. This option was renamed because now multiple commands `cy.visit()`, `cy.go()`, and `cy.reload()` all depend on this timeout option.
 - The Cypress tray icon has been updated. It's much better now.
 
 # 0.15.0
@@ -831,14 +831,14 @@ comments: false
 
 **Misc:**
 
-- Using [`cy.hover`](https://on.cypress.io/api/hover) will provide a detailed error message with a link for working around hover constraints. Addresses [#10](https://github.com/cypress-io/cypress/issues/10)
+- Using [`.hover()`](https://on.cypress.io/api/hover) will provide a detailed error message with a link for working around hover constraints. Addresses [#10](https://github.com/cypress-io/cypress/issues/10)
 - Internal routing errors in Cypress are now gracefully handled with `x-cypress-error` and `x-cypress-stack` set on response headers.
 - Updated all of the repo names to be modular.
 
 **What you need to do**:
 - We did not write an automatic migration from `tests` -> `cypress`
 - You need to manually move your existing test files from `tests` into `cypress/integration`.
-- [Come into the gitter channel](https://gitter.im/cypress-io/cypress) and let us know if you have any problems or need help.
+- [Come into the chat](https://gitter.im/cypress-io/cypress) if you have any problems or need help.
 
 More Info:
 - Why did you change the default test folder to be `cypress/integration`?
@@ -850,7 +850,7 @@ More Info:
 
 **Features:**
 
-- Added [`cy.getCookies`](https://on.cypress.io/api/getcookies) command for easy chain-ability. Fixes [#103](https://github.com/cypress-io/cypress/issues/103).
+- Added [`cy.getCookies()`](https://on.cypress.io/api/getcookies) command for easy chain-ability. Fixes [#103](https://github.com/cypress-io/cypress/issues/103).
 - Cypress now outputs its version when passed the `--version` argument
 - If you are not logged in on OSX, Cypress now issues a native system notification indicating to you that Cypress is running in your tray (many users often complained they could not tell Cypress was actually running)
 
@@ -863,7 +863,7 @@ More Info:
 
 **Misc:**
 
-- `cy.visit` callback functions: `onBeforeLoad` and `onLoad` are now invoked with the current runnables context instead of with `cy`. This makes accessing properties in your tests much easier.
+- `cy.visit()` callback functions: `onBeforeLoad` and `onLoad` are now invoked with the current runnables context instead of with `cy`. This makes accessing properties in your tests much easier.
 
 # 0.14.2
 
@@ -871,8 +871,8 @@ More Info:
 
 **Bugfixes:**
 
-- Chaining more cy commands after using `cy.wrap` now works. Fixes [#114](https://github.com/cypress-io/cypress/issues/114).
-- Cypress now handles events property when a DOM element is removed during a `cy.click` event. As per the spec, if `mousedown` causes element removal then `mouseup` and `click` and `focus` events will not be fired. Additionally if removal happens during `mouseup` then `click` event will not be fired. Also updated the `onConsole` groups to only display and indicate the events which actually fired. Fixes [#109](https://github.com/cypress-io/cypress/issues/109).
+- Chaining more cy commands after using [`cy.wrap()`](https://on.cypress.io/api/wrap) now works. Fixes [#114](https://github.com/cypress-io/cypress/issues/114).
+- Cypress now handles events property when a DOM element is removed during a `.click()` event. As per the spec, if `mousedown` causes element removal then `mouseup` and `click` and `focus` events will not be fired. Additionally if removal happens during `mouseup` then `click` event will not be fired. Also updated the `onConsole` groups to only display and indicate the events which actually fired. Fixes [#109](https://github.com/cypress-io/cypress/issues/109).
 
 **Misc:**
 
@@ -916,7 +916,7 @@ More Info:
 - The Desktop App has been re-skinned with misc GUI enhancements such as help text, popovers, clearer errors, better loading indicators, etc.
 - The Desktop App's file size is now much smaller and unzips much faster. In the next release there will be a special `CI` build which removes the need to run `XVFB`.
 - Test IDs have been removed. You will no longer see Cypress insert IDs into your test files. This was a feature we implemented on day 1 - the idea being we could track test performance and do regression analysis. Unfortunately, it will be a long time before we actually implement the data science to make this happen. For the time being, IDs presented unnecessary technical complexity and challenges with no real upside. We recommend you remove all of your existing IDs. We've added a new command to the CLI tool that can do this in one shot. [`cypress remove:ids`](https://github.com/cypress-io/cypress-cli#cypress-removeids-1) You may see IDs be reintroduced at a later time when we provide analytics.
-- [`cy.then`](https://on.cypress.io/api/then) now supports a `timeout` option. Fixes [#110](https://github.com/cypress-io/cypress/issues/110).
+- [`.then()`](https://on.cypress.io/api/then) now supports a `timeout` option. Fixes [#110](https://github.com/cypress-io/cypress/issues/110).
 - All error messages from using the CLI have been rewritten and improved.
 - Cypress will now automatically prompt you to add a project when using [`cypress run`](https://github.com/cypress-io/cypress-cli#cypress-run-1) on a project that has not yet been added.
 - Domain cookies are now proxied better. There's still more work to do before they are 100% fixed but now most typical domain cookie scenarios should 'just work'.
@@ -928,16 +928,16 @@ More Info:
 - Added fs polling support to fix issues where Cypress would not detect file changes.
 - Tests should reload inside of Cypress faster when they are changed.
 - Better error messages when a command times out waiting for a promise to resolve. Fixes [#108](https://github.com/cypress-io/cypress/issues/108).
-- [`cy.viewport("ipad-2")`](https://on.cypress.io/api/viewport) now displays by default in portrait. Landscape orientation is now properly landscape. Fixes [#100](https://github.com/cypress-io/cypress/issues/100).
-- [`cy.click`](https://on.cypress.io/api/click) will now properly click within an element's bounding box when a `position` option is passed and the calculated coordinates are a fraction. This previously forced the click to happen outside of the element. Fixes [#99](https://github.com/cypress-io/cypress/issues/99).
+- [`cy.viewport('ipad-2')`](https://on.cypress.io/api/viewport) now displays by default in portrait. Landscape orientation is now properly landscape. Fixes [#100](https://github.com/cypress-io/cypress/issues/100).
+- [`.click()`](https://on.cypress.io/api/click) will now properly click within an element's bounding box when a `position` option is passed and the calculated coordinates are a fraction. This previously forced the click to happen outside of the element. Fixes [#99](https://github.com/cypress-io/cypress/issues/99).
 - `clientX` and `clientY` event properties are now correctly calculated for elements when the page is scrolled. Fixes [#98](https://github.com/cypress-io/cypress/issues/98).
-- [`cy.check`](https://on.cypress.io/api/check) and [`cy.uncheck`](https://on.cypress.io/api/uncheck) now correctly filter down the subject when a value is passed as an option. Fixes [#94](https://github.com/cypress-io/cypress/issues/94).
+- [`.check()`](https://on.cypress.io/api/check) and [`.uncheck()`](https://on.cypress.io/api/uncheck) now correctly filter down the subject when a value is passed as an option. Fixes [#94](https://github.com/cypress-io/cypress/issues/94).
 - The desktop GUI will now display your email address when you have not set a name in GitHub.
 
 **Misc:**
 
 - Improved element display in Command Log when multiple elements are part of an assertion. Fixes [#96](https://github.com/cypress-io/cypress/issues/96).
-- [`cy.reload`](https://on.cypress.io/api/reload) now returns the window object of the newly reloaded page. Fixes [#105](https://github.com/cypress-io/cypress/issues/105).
+- [`cy.reload()`](https://on.cypress.io/api/reload) now returns the window object of the newly reloaded page. Fixes [#105](https://github.com/cypress-io/cypress/issues/105).
 
 Known Issues:
 - Clicking the 'reload' icon next to a test that does not have an ID will not work anymore. We're reworking this feature to work without the presence of IDs.
@@ -953,7 +953,7 @@ Known Issues:
 **Misc:**
 
 - Update links to match new [documentation hub](https://docs.cypress.io)
-- [`cy.debug`](https://on.cypress.io/api/debug) has been zipped up - it no longer logs confusing debugging information and now logs information about the previously run command.
+- [`cy.debug()`](https://on.cypress.io/api/debug) has been zipped up - it no longer logs confusing debugging information and now logs information about the previously run command.
 - [`_`](https://on.cypress.io/api/cypress-underscore), [`$`](https://on.cypress.io/api/cypress-jquery), [`Promise`](https://on.cypress.io/api/cypress-promise), [`Blob`](https://on.cypress.io/api/cypress-blob), [`moment`](https://on.cypress.io/api/cypress-moment) utilities have been moved off of `cy` and are now attached to `Cypress`. This is much more consistent with how the `cy` and `Cypress` API's work. You can continue to use these objects off of `cy` but this has been deprecated and you will see a warning message.
 
 # 0.13.8
@@ -962,15 +962,15 @@ Known Issues:
 
 **Features:**
 
-- Added [`cy.reload`](https://on.cypress.io/api/reload) command which does a full page refresh. This is the same as the user hitting the 'Reload' button. Additionally it matches the same argument signature as `window.location.reload`.
+- Added [`cy.reload()`](https://on.cypress.io/api/reload) command which does a full page refresh. This is the same as the user hitting the 'Reload' button. Additionally it matches the same argument signature as `window.location.reload`.
 
 **Bugfixes:**
 
-- Fixed situation where [`cy.viewport`](https://on.cypress.io/api/viewport) would not restore correctly between tests. Previously this would cause subsequent tests to be issued at the modified `cy.viewport`. Now viewport is automatically restored to the settings in your `cypress.json` file.
+- Fixed situation where [`cy.viewport()`](https://on.cypress.io/api/viewport) would not restore correctly between tests. Previously this would cause subsequent tests to be issued at the modified `cy.viewport()`. Now viewport is automatically restored to the settings in your `cypress.json` file.
 
 **Misc:**
 
-- Using [`cy.its`](https://on.cypress.io/api/its) on a function or [`cy.invoke`](https://on.cypress.io/api/its) on a property now logs a deprecation warning. In the next major release this will become a full error. It is valuable to make a distinction whether you're operating on a property vs a function, and this change improves overall readability with less confusion.
+- Using [`.its()`](https://on.cypress.io/api/its) on a function or [`.invoke()`](https://on.cypress.io/api/its) on a property now logs a deprecation warning. In the next major release this will become a full error. It is valuable to make a distinction whether you're operating on a property vs a function, and this change improves overall readability with less confusion.
 - Cypress deprecations and warnings are now prefixed with: `Cypress Warning:` to indicate this message is coming from Cypress
 
 # 0.13.7
@@ -981,7 +981,7 @@ Known Issues:
 
 - Prevent error during element stringification on `<svg>`. Fixes [#93](https://github.com/cypress-io/cypress/issues/93).
 - Clarified on errors related to not being able to run in CI. Previously there was a "catch all" error indicating your Cypress API Key was invalid. This was oftentimes incorrect. More specific errors have been added.
-- [`cy.type`](https://on.cypress.io/api/type) has been upgraded to handle current selection ranges. Previously if an `<input>` had a selection range as Cypress began to type, this would be ignored. Cypress now takes this into account and will type over any selected text (as native typing would do).
+- [`.type()`](https://on.cypress.io/api/type) has been upgraded to handle current selection ranges. Previously if an `<input>` had a selection range as Cypress began to type, this would be ignored. Cypress now takes this into account and will type over any selected text (as native typing would do).
 
 **Misc:**
 
@@ -994,12 +994,12 @@ Known Issues:
 **Features:**
 
 - All commands now retry if the the associated element is disabled until the element is no longer disabled. If the command times out a specific error message is now thrown.
-- [`cy.server`](https://on.cypress.io/api/server) and [`cy.route`](https://on.cypress.io/api/route) now take an optional `onAbort` callback which fires anytime an XHR is aborted
+- [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/api/route) now take an optional `onAbort` callback which fires anytime an XHR is aborted
 
 **Bugfixes:**
 
 - Fixed edge case where XHR's which were already aborted were aborted a 2nd time when tests end. Cypress now only aborts currently running XHR's which have not already been aborted.
-- When passing an array of aliases to [`cy.wait`](https://on.cypress.io/api/wait) there was an edge case where an incorrect error message was being thrown. The incorrect values were a combination of the wrong alias, the wrong timeout value, or the wrong request or response. Now Cypress correctly provides all 3 of these values.
+- When passing an array of aliases to [`cy.wait()`](https://on.cypress.io/api/wait) there was an edge case where an incorrect error message was being thrown. The incorrect values were a combination of the wrong alias, the wrong timeout value, or the wrong request or response. Now Cypress correctly provides all 3 of these values.
 
 # 0.13.5
 
@@ -1007,8 +1007,8 @@ Known Issues:
 
 **Features:**
 
-- Added new command: [`cy.go`](https://on.cypress.io/api/go) which accepts `back`, `forward`, or an arbitrary Number.
-- [`cy.go`](https://on.cypress.io/api/go) enables you to navigate back or forward in your history. Cypress intelligently handles situations where moving forward or back causing a full page refresh, and will wait for the new page to load before resolving and moving onto new commands. It additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
+- Added new command: [`cy.go()`](https://on.cypress.io/api/go) which accepts `back`, `forward`, or an arbitrary Number.
+- [`cy.go()`](https://on.cypress.io/api/go) enables you to navigate back or forward in your history. Cypress intelligently handles situations where moving forward or back causing a full page refresh, and will wait for the new page to load before resolving and moving onto new commands. It additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
 
 **Misc:**
 
@@ -1021,16 +1021,16 @@ Known Issues:
 **Features:**
 
 - Added `waitForAnimations` and `animationDistanceThreshold` [configuration options](https://on.cypress.io/guides/configuration)
-- Cypress now automatically detects and waits for an element which is animating to stop animating. The threshold that Cypress considers *animating* is set to a distance of `5px` per `60fps`. In other words, if your element is moving too fast for a user to interact with, then Cypress considers the element animating and will wait until it finishes before attempting to interact with it. When we say 'interact' we mean apply command actions like [`cy.click`](https://on.cypress.io/api/click), [`cy.select`](https://on.cypress.io/api/select), [`cy.type`](https://on.cypress.io/api/type), [`cy.check`](https://on.cypress.io/api/check), etc. Waiting for animations prevents a series of edge cases and weird bugs where Cypress was interacting with elements **too** quickly which might cause undesired side effects in your application which are hard to track down. The downside to this implementation is that for every action Cypress must wait at least 2 run loops before applying actions. This slows down every action command by about `32ms`. If your app does not use animations you may wish to turn off this behavior in your `cypress.json` file.
+- Cypress now automatically detects and waits for an element which is animating to stop animating. The threshold that Cypress considers *animating* is set to a distance of `5px` per `60fps`. In other words, if your element is moving too fast for a user to interact with, then Cypress considers the element animating and will wait until it finishes before attempting to interact with it. When we say 'interact' we mean apply command actions like [`.click()`](https://on.cypress.io/api/click), [`.select()`](https://on.cypress.io/api/select), [`.type()`](https://on.cypress.io/api/type), [`.check()`](https://on.cypress.io/api/check), etc. Waiting for animations prevents a series of edge cases and weird bugs where Cypress was interacting with elements **too** quickly which might cause undesired side effects in your application which are hard to track down. The downside to this implementation is that for every action Cypress must wait at least 2 run loops before applying actions. This slows down every action command by about `32ms`. If your app does not use animations you may wish to turn off this behavior in your `cypress.json` file.
 
 **Bugfixes:**
 
-- Prevent `undefined` error when attempting to [`cy.click`](https://on.cypress.io/api/click) an element which is fixed position when it is covered by another element. Cypress now correctly provides why it cannot click the element in question. Fixes [#90](https://github.com/cypress-io/cypress/issues/90).
+- Prevent `undefined` error when attempting to [`.click()`](https://on.cypress.io/api/click) an element which is fixed position when it is covered by another element. Cypress now correctly provides why it cannot click the element in question. Fixes [#90](https://github.com/cypress-io/cypress/issues/90).
 - Prevent infinite loop in edge cases when checking whether an element was hidden
 
 **Misc:**
 
-- The default behavior of [`cy.server`](https://on.cypress.io/api/server) has changed from `force404: true` to become `force404: false`. In other words, Cypress will no longer forcibly send XHR's to 404 status when these XHR's do not match any existing [`cy.routes`](https://on.cypress.io/api/). This change better aligns with predictable usage for most Cypress users.
+- The default behavior of [`cy.server()`](https://on.cypress.io/api/server) has changed from `force404: true` to become `force404: false`. In other words, Cypress will no longer forcibly send XHR's to 404 status when these XHR's do not match any existing [`cy.route()`](https://on.cypress.io/api/route). This change better aligns with predictable usage for most Cypress users.
 
 # 0.13.3
 
@@ -1046,11 +1046,11 @@ Known Issues:
 - An element is considered visible if it can be "interactive" with a user. In other words, if the user is able to click, type, drag, or otherwise physically interact with the element it is considered visible.
 - Because of the additional complexities of how Cypress considers an element `visible`, we now have added the **exact** reason why an element is not visible when throwing an error. This means you'll see errors detailing whether an element or its parents have `display: none`, `visibility: hidden`, or whether an element is considered hidden because its effective `width` or `height` is zero. Whatever the reason, Cypress will indicate why your element is considered hidden.
 - Exposed [`Cypress.Dom.isHidden`](https://on.cypress.io/api/dom) which holds the logic for determining an element's visibility. Modify this to change the rules.
-- Upgraded [`cy.select`](https://on.cypress.io/api/select) to automatically retry when the `<select>` is disabled, its matching `<option>` is disabled, or when Cypress cannot find a matching `<option>`. This more correctly aligns with the behavior of other actions like [`cy.click`](https://on.cypress.io/api/click), which automatically retry until the element is ready to receive the action.
+- Upgraded [`.select()`](https://on.cypress.io/api/select) to automatically retry when the `<select>` is disabled, its matching `<option>` is disabled, or when Cypress cannot find a matching `<option>`. This more correctly aligns with the behavior of other actions like [`.click()`](https://on.cypress.io/api/click), which automatically retry until the element is ready to receive the action.
 
 **Bugfixes:**
 
-- Throw on [`cy.select`](https://on.cypress.io/api/select) when it cannot find a matching `<option>`. Also throw when `<select>` or a matching `<option>` is disabled. Fixes [#91](https://github.com/cypress-io/cypress/issues/91).
+- Throw on [`.select()`](https://on.cypress.io/api/select) when it cannot find a matching `<option>`. Also throw when `<select>` or a matching `<option>` is disabled. Fixes [#91](https://github.com/cypress-io/cypress/issues/91).
 - "Hidden" elements which actually displace height or width are now highlighted when restoring the DOM when a command is hovered.
 - Margin on zero client width / client height is now displayed correctly on command hover and more accurately mimics the way Chrome Dev Tools highlights elements.
 - Using `history.back`, `history.forward`, or `history.go` in CI or in headless mode now works again.
@@ -1068,12 +1068,12 @@ Known Issues:
 
 **Notes:**
 
-- Docs have been updated for [cy.wait](https://on.cypress.io/api/wait), [cy.route](https://on.cypress.io/api/route), [cy.server](https://on.cypress.io/api/server), and [deprecations](https://on.cypress.io/guides/deprecations) to reflect these changes.
+- Docs have been updated for [`cy.wait()`](https://on.cypress.io/api/wait), [`cy.route()`](https://on.cypress.io/api/route), [`cy.server()`](https://on.cypress.io/api/server), and [deprecations](https://on.cypress.io/guides/deprecations) to reflect these changes.
 
 **Features:**
 
 - Added `responseTimeout` [configuration](https://on.cypress.io/guides/configuration) value.
-- [`cy.wait`]https://on.cypress.io/api/wait) has been upgraded to now use two separate `timeout` values. In previous versions [`cy.wait`](https://on.cypress.io/api/wait) used the `commandTimeout` and would automatically time out if the XHR did not achieve a response in that time frame. Now [`cy.wait`](https://on.cypress.io/api/wait) will go through two independent timeout phases. At first [`cy.wait`](https://on.cypress.io/api/wait) will wait for an XHR to be requested which matches its route. It will wait up to the value configured with `requestTimeout` (default 5000ms). After it sees a matching request it will then go into `response` waiting mode. It will wait up to the value configured with `responseTimeout` (default 20000ms). When [`cy.wait`](https://on.cypress.io/api/wait) fails you now receive a much better error message indicating exactly which phase failed. Whether a request was never sent out, or whether it timed out waiting for a response. This gives you the best of both worlds and prevents situations where Cypress was timing out on slow servers. By creating new configuration values: `requestTimeout` and `responseTimeout` you can now directly control this behavior without affecting other regular commands.
+- [`cy.wait()`](https://on.cypress.io/api/wait) has been upgraded to now use two separate `timeout` values. In previous versions [`cy.wait()`](https://on.cypress.io/api/wait) used the `commandTimeout` and would automatically time out if the XHR did not achieve a response in that time frame. Now [`cy.wait()`](https://on.cypress.io/api/wait) will go through two independent timeout phases. At first [`cy.wait()`](https://on.cypress.io/api/wait) will wait for an XHR to be requested which matches its route. It will wait up to the value configured with `requestTimeout` (default 5000ms). After it sees a matching request it will then go into `response` waiting mode. It will wait up to the value configured with `responseTimeout` (default 20000ms). When [`cy.wait()`](https://on.cypress.io/api/wait) fails you now receive a much better error message indicating exactly which phase failed. Whether a request was never sent out, or whether it timed out waiting for a response. This gives you the best of both worlds and prevents situations where Cypress was timing out on slow servers. By creating new configuration values: `requestTimeout` and `responseTimeout` you can now directly control this behavior without affecting other regular commands.
 
 **Bugfixes:**
 
@@ -1083,7 +1083,7 @@ Known Issues:
 **Misc:**
 
 - Removed `{stub: false}` option from [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/api/route). Cypress will now log a deprecation warning when you use the this option. Removing this option helps simplify the API because now Cypress can figure out whether you really want to stub the route based on whether you've provided a response or not. If you have not provided a response, the default behavior will be to not stub. If you do provide a response, Cypress will stub the route.
-- Repurposed `requestTimeout` to now mean the time we wait for an XHR to be requested. Changed [`cy.request`](https://on.cypress.io/api/request) to now use `responseTimeout` configuration value.
+- Repurposed `requestTimeout` to now mean the time we wait for an XHR to be requested. Changed [`cy.request()`](https://on.cypress.io/api/request) to now use `responseTimeout` configuration value.
 - Updated many error messages to be more consistent.
 - Added special error messages when elements can not have actions applied to them with a suggestion to use `{force: true}`.
 
@@ -1126,7 +1126,7 @@ Known Issues:
 **Breaking Changes:**
 
 - Temporarily ignoring the `--reporter` option for headless / CI runs. Currently it is locked to the `spec` reporter, which is the default. This will be fixed in the next few patch releases.
-- ~~Accessing `window.history.go()`, `window.history.back()`, `window.history.forward()` will throw an error when running headlessly / CI. This is a regression that will be fixed - hopefully very soon.~~ This is fixed in [`0.13.3`](https://github.com/cypress-io/cypress/wiki/changelog#0133-12252015)
+- ~~Accessing `window.history.go()`, `window.history.back()`, `window.history.forward()` will throw an error when running headlessly / CI. This is a regression that will be fixed - hopefully very soon.~~ This is fixed in [`0.13.3`](#0-13-3)
 - While this new Chromium application passes our internal tests, it may crop up other regressions we aren't aware of. If you're experiencing different behavior in CI vs running locally in Chrome, this may be an indication of these.
 
 # 0.12.8
@@ -1143,7 +1143,7 @@ Known Issues:
 **Misc:**
 
 - Rewrote error message which is displayed when Cypress cannot parse your test / spec file. Now a list of suggestions are given and an external link is provided which further explains how this may happen.
-- Clarified the "Default Message" page when you have not [`cy.visit`](https://on.cypress.io/api/visit) your application yet.
+- Clarified the "Default Message" page when you have not [`cy.visit()`](https://on.cypress.io/api/visit) your application yet.
 - Whitelisted `.coffee`, `.scss`, `.less` XHR's from displaying in the Command Log
 
 # 0.12.7
@@ -1169,15 +1169,15 @@ Known Issues:
 **Bugfixes:**
 
 - Setup/Teardown code was not properly running on nested mocha `before`hooks which caused the error: `The XHR server is unavailable or missing...`. Fixes [#80](https://github.com/cypress-io/cypress/issues/80) and [#86](https://github.com/cypress-io/cypress/issues/86).
-- Prevent accidental mutation of [`cy.server`](https://on.cypress.io/api/server) options when [`cy.route`](https://on.cypress.io/api/route) was provided options. Fixes [#85](https://github.com/cypress-io/cypress/issues/85) and [#84](https://github.com/cypress-io/cypress/issues/84).
-- Using [`cy.title`](https://on.cypress.io/api/title) would incorrectly search the `<body>` for title elements, and is now restricted to only searching in the `<head>`
+- Prevent accidental mutation of [`cy.server()`](https://on.cypress.io/api/server) options when [`cy.route()`](https://on.cypress.io/api/route) was provided options. Fixes [#85](https://github.com/cypress-io/cypress/issues/85) and [#84](https://github.com/cypress-io/cypress/issues/84).
+- Using [`cy.title()`](https://on.cypress.io/api/title) would incorrectly search the `<body>` for title elements, and is now restricted to only searching in the `<head>`
 - Cross-Origin requests are now proxied by Cypress. In other words their URL's are transparently rewritten which bypasses CORS problems. This is a quick fix which should satisfy most of the problems users were having with CORS requests. However there is a much bigger change coming in `0.14.0` where the entire proxy layer will be rewritten to accommodate CORS, `window.fetch` and `domain cookies` flawlessly. As it stands Cypress is prone to errors in complex setups.
 
 **Misc:**
 
 - Exposed `visitTimeout` and `requestTimeout` [configuration options](https://on.cypress.io/guides/configuration)
 - Increased `visitTimeout` from `20s` to `30s`
-- [`cy.click`](https://on.cypress.io/api/click) will now throw if you are attempting to click more than 1 element. Pass `{multiple: true}` to enable this behavior again. Each element will be clicked serially and inserted into the Command Log.
+- [`.click()`](https://on.cypress.io/api/click) will now throw if you are attempting to click more than 1 element. Pass `{multiple: true}` to enable this behavior again. Each element will be clicked serially and inserted into the Command Log.
 
 # 0.12.5
 
@@ -1223,8 +1223,8 @@ Known Issues:
 
 **Bugfixes:**
 
-- Prevent [`cy.pause`](https://on.cypress.io/api/pause) from actually pausing when running headlessly
-- Fix for [`cy.request`](https://on.cypress.io/api/request) SSL issues when host certificates were self signed
+- Prevent [`cy.pause()`](https://on.cypress.io/api/pause) from actually pausing when running headlessly
+- Fix for [`cy.request()`](https://on.cypress.io/api/request) SSL issues when host certificates were self signed
 
 # 0.12.2
 
@@ -1245,7 +1245,7 @@ Known Issues:
 
 **Bugfixes:**
 
-- [`cy.route`](https://on.cypress.io/api/route) will no longer throw that a response is needed when using [`cy.server({stub: false})`](https://on.cypress.io/api/server)
+- [`cy.route()`](https://on.cypress.io/api/route) will no longer throw that a response is needed when using [`cy.server({stub: false})`](https://on.cypress.io/api/server)
 - Applying server defaults to `Cypress.Server.defaults({})` now [works as documented](https://on.cypress.io/api/api-server)
 - `onRequest` and `onResponse` can now be correctly set as permanent server defaults
 - XHR `URL` is now decoded to make assertions easier. Fixes [#75](https://github.com/cypress-io/cypress/issues/75).
@@ -1271,7 +1271,7 @@ Deprecations:
 
 - All XHR's (regardless of whether they are stubbed or not) are now logged in the Command Log. Stubbed XHR's display as "XHR Stub" vs vanilla "XHR".
 - Stubbed XHR's will now show up in the `Network Tab` in Dev Tools. In other words they will *really* go out and you'll be able to inspect them just like regular XHRs.
-- Regular XHR's can now be aliased and waited on without actually being stubbed by passing `{stub: false}` to the [`cy.route`](https://on.cypress.io/api/route).
+- Regular XHR's can now be aliased and waited on without actually being stubbed by passing `{stub: false}` to the [`cy.route()`](https://on.cypress.io/api/route).
 - XHR's will continue to work correctly even *after* a test ends. In previous versions, due to replacing the entire XHR object, your application would not work correctly after a test ended. This prevented you from "navigating around" and working with your app after the tests end.
 - Servers can now be disabled in the middle of a test. Previously once a server was started all XHR's would be stubbed.
 - You can now disable the force sending of `404` to all XHR's which are not stubbed. This allows you to mix and match, enabling some requests to be stubbed and others to hit your server and respond normally.
@@ -1282,15 +1282,15 @@ Deprecations:
 - Response headers on XHR stubs will now automatically set their `Content-Type` based on the stub response. Previously this would always set to the `Content-Type` to `application/json`. Now if you force a response to be text or html, the `Content-Type` response header will be set appropriately.
 - You can now force other additional response headers to be sent on stubbed XHRs.
 - XHR's now snapshot twice - when the request is made and when the response is returned.
-- Removed sending `sinon` on every [`cy.visit`](https://on.cypress.io/api/visit).
-- The XHR object which is returned to you to via [`cy.wait("@xhrAlias")`](https://on.cypress.io/api/wait) is now more consistent with other return values such as [`cy.request`](https://on.cypress.io/api/request). It should be much easier to work with `request body`, `request headers`, `response body` and `response headers`.
+- Removed sending `sinon` on every [`cy.visit()`](https://on.cypress.io/api/visit).
+- The XHR object which is returned to you to via [`cy.wait("@xhrAlias")`](https://on.cypress.io/api/wait) is now more consistent with other return values such as [`cy.request()`](https://on.cypress.io/api/request). It should be much easier to work with `request body`, `request headers`, `response body` and `response headers`.
 
 **Bugfixes:**
 
-- Routes no longer display as duplicated in between test runs when [`cy.server`](https://on.cypress.io/api/server) is started prior to a [`cy.visit`](https://on.cypress.io/api/visit) and you cause a full page refresh, which caused all routes to be re-bound.
+- Routes no longer display as duplicated in between test runs when [`cy.server()`](https://on.cypress.io/api/server) is started prior to a [`cy.visit()`](https://on.cypress.io/api/visit) and you cause a full page refresh, which caused all routes to be re-bound.
 - Any issues related to `requestJSON` or `responseJSON` being duplicated are now fixed. Fixes [#65](https://github.com/cypress-io/cypress/issues/65).
 - Fully Qualified XHR's which should be proxied are now correctly transparently rewritten to prevent CORS problems.
-- [`cy.route`](https://on.cypress.io/api/route) - `onRequest` and `onResponse` callbacks are now called with `cy` as the context.
+- [`cy.route()`](https://on.cypress.io/api/route) - `onRequest` and `onResponse` callbacks are now called with `cy` as the context.
 - Whitelisting assets which should never be stubbed has been improved. Now `.jsx` templates pass-through correctly.
 - CORS Network Errors are now correctly caught.
 
@@ -1341,8 +1341,8 @@ Almost there:
 
 **Bugfixes:**
 
-- Snapshots of [`cy.type`](https://on.cypress.io/api/type) and [`cy.select`](https://on.cypress.io/api/select) are no longer incorrect due to aking snapshot too early. Fixes [#22](https://github.com/cypress-io/cypress/issues/22).
-- Passing `{force: true}` to [`cy.blur`](https://on.cypress.io/api/blur) now logs correctly in the Command Log
+- Snapshots of [`.type()`](https://on.cypress.io/api/type) and [`.select()`](https://on.cypress.io/api/select) are no longer incorrect due to aking snapshot too early. Fixes [#22](https://github.com/cypress-io/cypress/issues/22).
+- Passing `{force: true}` to [`.blur()`](https://on.cypress.io/api/blur) now logs correctly in the Command Log
 
 **Misc:**
 
@@ -1357,11 +1357,11 @@ Almost there:
 
 **Features:**
 
-- [`cy.blur`](https://on.cypress.io/api/blur) now accepts `{force: true}` which removes error checking such as validating the element is urrently in focus
+- [`.blur()`](https://on.cypress.io/api/blur) now accepts `{force: true}` which removes error checking such as validating the element is urrently in focus
 
 **Bugfixes:**
 
-- [`cy.pause`](https://on.cypress.io/api/pause) is now noop when Cypress is running headlessly in `cypress run` or `cypress ci`
+- [`cy.pause()`](https://on.cypress.io/api/pause) is now noop when Cypress is running headlessly in `cypress run` or `cypress ci`
 
 **Misc:**
 
@@ -1379,7 +1379,7 @@ Almost there:
 - Added docs to nav, consolidated `organize` into `tests`
 - Added favicon
 - Added tooltips everywhere
-- Created new debugging command: [`cy.pause`](https://on.cypress.io/api/pause) which will pause executing commands and allow you to resume or tep into the next command one at a time.
+- Created new debugging command: [`cy.pause()`](https://on.cypress.io/api/pause) which will pause executing commands and allow you to resume or tep into the next command one at a time.
 - You can now stop and restart tests from the UI.
 - Added `cy.Blob` utilities for `blob` / `string` / `base64` conversion. Useful for manually handling uploads.
 
@@ -1399,11 +1399,11 @@ Almost there:
 
 **Features:**
 
-- Added [`cy.request`](https://on.cypress.io/api/request) command which can issue XHR requests. The request is generated outside of the rowser, and bypasses all CORS restrictions. Great for talking to an API for seeding, querying, building, etc.
+- Added [`cy.request()`](https://on.cypress.io/api/request) command which can issue XHR requests. The request is generated outside of the rowser, and bypasses all CORS restrictions. Great for talking to an API for seeding, querying, building, etc.
 
 **Bugfixes:**
 
-- Prevented edge case with [`cy.fixture`](https://on.cypress.io/api/fixture) where it would not be able to be cancelled without throwing an nhandled rejection error.
+- Prevented edge case with [`cy.fixture()`](https://on.cypress.io/api/fixture) where it would not be able to be cancelled without throwing an nhandled rejection error.
 
 # 0.11.7
 
@@ -1421,15 +1421,15 @@ Almost there:
 **Bugfixes:**
 
 - Viewport is now properly restored to the default width / height after on subsequent runs. Previously it would retain the last viewport sized sed until there was a new viewport command.
-- [`cy.should("contain", "...")`](https://on.cypress.io/api/should) now correctly escapes quotes and single quotes.
+- [`cy.should('contain', '...')`](https://on.cypress.io/api/should) now correctly escapes quotes and single quotes.
 - Assertion messages are no longer truncated, and instead will scale down by reducing the `font-size` and `line-height` after they exceed 110` characters. So you'll now always see the full assertion message.
 - Fixed some scenarios where assertions would not be logged as a child command.
 - Assertions based around the `window` or `document` object no longer cause `chai` to bomb on formatting their object structures (due to yclic references) and instead now will show up as `<window>` and `<document>`
 
 **Misc:**
 
-- [`cy.window`](https://on.cypress.io/api/window) now logs out to the `Command Log` and additionally verifies upcoming assertions.
-- [`cy.document`](https://on.cypress.io/api/document) now logs out to the `Command Log` and additionally verifies upcoming assertions.
+- [`cy.window()`](https://on.cypress.io/api/window) now logs out to the `Command Log` and additionally verifies upcoming assertions.
+- [`cy.document()`](https://on.cypress.io/api/document) now logs out to the `Command Log` and additionally verifies upcoming assertions.
 - Removed `numElements` label on assertions which indicated the number of elements found if > 1. This was annoying and redundant since the inked command already had this number.
 
 # 0.11.5
@@ -1443,8 +1443,8 @@ Almost there:
 
 **Bugfixes:**
 
-- Cypress now forces the initial [`cy.visit`](https://on.cypress.io/api/visit) not to be cached by the browser. This was incorrectly being ached which meant when you changed the [`cy.visit`](https://on.cypress.io/api/visit) it would not actually go out and fetch the new contents. reviously you had to check `Disable Cache` in the `Network Tab` inside of Chrome to prevent this bug. Unfortunately this has a significant erformance drawback. If you use a [`cy.visit`](https://on.cypress.io/api/visit) before each test you will notice a degrade in performance ecause this request is no longer cached. This is a temporary problem until Cypress implements a more sophisticated caching strategy which ptimizes these concerns. There is a lot to improve in this arena but it will take more time before it's implemented.
-- [`cy.should`](https://on.cypress.io/api/should) will no longer throw an error when it is used as a `parent command` and has a callback unction signature, and that callback function throws outside of an assertion. Instead now it logs correctly, handles the error, and displays his error for you.
+- Cypress now forces the initial [`cy.visit()`](https://on.cypress.io/api/visit) not to be cached by the browser. This was incorrectly being ached which meant when you changed the [`cy.visit()`](https://on.cypress.io/api/visit) it would not actually go out and fetch the new contents. reviously you had to check `Disable Cache` in the `Network Tab` inside of Chrome to prevent this bug. Unfortunately this has a significant erformance drawback. If you use a [`cy.visit()`](https://on.cypress.io/api/visit) before each test you will notice a degrade in performance ecause this request is no longer cached. This is a temporary problem until Cypress implements a more sophisticated caching strategy which ptimizes these concerns. There is a lot to improve in this arena but it will take more time before it's implemented.
+- [`.should()`](https://on.cypress.io/api/should) will no longer throw an error when it is used as a `parent command` and has a callback unction signature, and that callback function throws outside of an assertion. Instead now it logs correctly, handles the error, and displays his error for you.
 
 **Misc:**
 
@@ -1457,14 +1457,14 @@ Almost there:
 
 **Features:**
 
-- [`cy.should`](https://on.cypress.io/api/should) now accepts a callback function which will be retried until it does not throw. The callback unction will be retried in the exact same way as passing regular string-based chainers to [`cy.should`](https://on.cypress.io/api/should). aving a callback function gives you an opportunity to *massage* the expected subject such as comparing multiple elements, creating an array of ext or classes, etc.
+- [`.should()`](https://on.cypress.io/api/should) now accepts a callback function which will be retried until it does not throw. The callback unction will be retried in the exact same way as passing regular string-based chainers to [`.should()`](https://on.cypress.io/api/should). aving a callback function gives you an opportunity to *massage* the expected subject such as comparing multiple elements, creating an array of ext or classes, etc.
 
 Deprecations:
 - `cy.wait(function)` has been deprecated and you can safely rename this command to `should`.
 
 **Misc:**
 
-- All of the docs surrounding [Assertions](https://on.cypress.io/guides/making-assertions), [cy.should](https://on.cypress.io/api/should), and cy.and](https://on.cypress.io/api/and) have been updated to reflect the new API.
+- All of the docs surrounding [Assertions](https://on.cypress.io/guides/making-assertions), [`.should()`](https://on.cypress.io/api/should), and cy.and](https://on.cypress.io/api/and) have been updated to reflect the new API.
 
 # 0.11.3
 
@@ -1490,7 +1490,7 @@ Deprecations:
 
 **Misc:**
 
-- [`cy.root`](https://on.cypress.io/api/root) now outputs its subject when clicking on its command log. Fixes [#55](https://github.com/cypress-io/cypress/issues/55).
+- [`.root()`](https://on.cypress.io/api/root) now outputs its subject when clicking on its command log. Fixes [#55](https://github.com/cypress-io/cypress/issues/55).
 
 # 0.11.1
 
@@ -1498,7 +1498,7 @@ Deprecations:
 
 **Bugfixes:**
 
-- Utilizing [`cy.server`](https://on.cypress.io/api/server) across multiple tests before a [`cy.visit`](https://on.cypress.io/api/visit) now orks correctly. As a side effect now Cypress will rebind both the `server` and all `routes` **whenever** the remote window is reloaded (for hatever reason) - even during a test itself. This means you can navigate between pages without ever having to restart the server or routes (hey will automatically rebind) when the window loads. Fixes [#59](https://github.com/cypress-io/cypress/issues/59).
+- Utilizing [`cy.server()`](https://on.cypress.io/api/server) across multiple tests before a [`cy.visit()`](https://on.cypress.io/api/visit) now orks correctly. As a side effect now Cypress will rebind both the `server` and all `routes` **whenever** the remote window is reloaded (for hatever reason) - even during a test itself. This means you can navigate between pages without ever having to restart the server or routes (hey will automatically rebind) when the window loads. Fixes [#59](https://github.com/cypress-io/cypress/issues/59).
 
 **Misc:**
 
@@ -1537,26 +1537,17 @@ Deprecations:
 - Cypress overrides chai's default inspection function for DOM elements meaning instead of seeing `{ Object (0, length, ...) }` you will now ee the nicely formatted Cypress DOM element like: `<button#primary.btn-large>`.
 - Cypress now overrides chai's `match` chainer and provides a specific error message when a non `regex` value is provided. Fixes [#58](../ssues/58).
 - Cypress now handles `length` and `exist` assertion chainers in a very specific way, providing a detailed message on failure, and utomatically slices out any stale element references.
-- The `contain` assertion chainer from `chai-jquery` has been extended to match the same selector logic as [`cy.contains`](https://n.cypress.io/api/contains) - meaning it now checks the `value` of `input[type=submit]`.
+- The `contain` assertion chainer from `chai-jquery` has been extended to match the same selector logic as [`cy.contains()`](https://n.cypress.io/api/contains) - meaning it now checks the `value` of `input[type=submit]`.
 - Tweaked the label for displaying the number of elements a command resolved with (now displays 0 differently than > 1).
 - Removed the `eventually` flag in assertions as now this is the default behavior on normal assertions.
 - Deprecated all *Command Options*. You will see a very nice and simple error message explaining how to convert these to assertions.
-- [`cy.within`](https://on.cypress.io/api/within) can now be silenced with `{log: false}`.
+- [`.within()`](https://on.cypress.io/api/within) can now be silenced with `{log: false}`.
 - Many error messages have been rewritten to be much more fluent and easier to understand.
 
 **Other News:**
 
-- Cypress is currently seeking to raise a Series A. This will enable us to grow the team and speed up development but seeking it has come at a ost for current development speed. If you have any VC connections [please send them our way](mailto:support@cypress.io
+- Cypress is currently seeking to raise a Series A. This will enable us to grow the team and speed up development but seeking it has come at a ost for current development speed. If you have any VC connections [please send them our way](mailto:support@cypress.io)
 ).
-
-**Upcoming:**
-
-- Lots of other misc bug fixes, especially related to [`cy.server`](https://on.cypress.io/api/server) and [`cy.route`](https://on.cypress.io/pi/route).
-- Dual snapshots (before / after) actions.
-- XHR overhaul to support XHR's without having to mock them.
-- `cy.spy`, `cy.stub`, `cy.clock` commands.
-- [`cy.request`](https://on.cypress.io/api/request), `cy.navigate` commands.
-- `cy.spawn` command.
 
 # 0.10.8
 
@@ -1598,7 +1589,7 @@ Deprecations:
 **Bugfixes:**
 
 - Running a specific test won't open/close immediately when starting up (fixes weird flickering effect)
-- [`cy.check`](https://on.cypress.io/api/check) and [`cy.uncheck`](https://on.cypress.io/api/uncheck) commands will now correctly "end" even if hey were `noop` due to the element already being in a checked or unchecked state.
+- [`.check()`](https://on.cypress.io/api/check) and [`.uncheck()`](https://on.cypress.io/api/uncheck) commands will now correctly "end" even if hey were `noop` due to the element already being in a checked or unchecked state.
 
 **Misc:**
 
@@ -1627,7 +1618,7 @@ Deprecations:
 **Misc:**
 
 - Tweaked clicking algorithm to re-verify an elements visibility anytime the click retries its `retry` logic. Previously this check only appened once at the beginning of the click.
-- In CI, the window size (not the viewport) has been changed from `1024x768` to `1280x720`. This will only affect `screenshot` artifacts which re taken automatically with `cy.screenshot` (coming soon) or whenever a test fails (also coming soon).
+- In CI, the window size (not the viewport) has been changed from `1024x768` to `1280x720`. This will only affect `screenshot` artifacts which re taken automatically with [`cy.screenshot()`](https://on.cypress.io/api/screenshot) (coming soon) or whenever a test fails (also coming soon).
 
 # 0.10.2
 
@@ -1708,13 +1699,9 @@ Deprecations:
 
 *Released 07/14/2015*
 
-**Upcoming:**
-
-- Currently `0.10.0` is in development which will include CI, running all tests, perf / memory improvements, and a headless API. No release ate set, but seems on target for end of July.
-
 **Features:**
 
-- [`cy.click`](https://on.cypress.io/api/click), [`cy.type`](https://on.cypress.io/api/type), [`cy.clear`](https://on.cypress.io/api/clear), `cy.select`](https://on.cypress.io/api/select), [`cy.check`](https://on.cypress.io/api/check), [`cy.uncheck`](https://on.cypress.io/api/ncheck) now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
+- [`.click()`](https://on.cypress.io/api/click), [`.type()`](https://on.cypress.io/api/type), [`.clear()`](https://on.cypress.io/api/clear), `.select()`](https://on.cypress.io/api/select), [`.check()`](https://on.cypress.io/api/check), [`.uncheck()`](https://on.cypress.io/api/ncheck) now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
 
 **Misc:**
 
@@ -1726,15 +1713,15 @@ Deprecations:
 
 **Features:**
 
-- [`cy.contains`](https://on.cypress.io/api/contains), [`cy.get`](https://on.cypress.io/api/get), and `traversal commands` will now all log out heir last known `$el` on failure. This means the `$el` will be highlight during Command Log hovering, and will display in the console on click. his should make debugging failed DOM based commands much easier. Fixes [#52](https://github.com/cypress-io/cypress/issues/52).
+- [`cy.contains()`](https://on.cypress.io/api/contains), [`cy.get()`](https://on.cypress.io/api/get), and `traversal commands` will now all log out heir last known `$el` on failure. This means the `$el` will be highlight during Command Log hovering, and will display in the console on click. his should make debugging failed DOM based commands much easier. Fixes [#52](https://github.com/cypress-io/cypress/issues/52).
 
 **Bugfixes:**
 
-- Fixed edge case with [`cy.contains`](https://on.cypress.io/api/contains) and command options `visible` and `exist` where it would always fail ven though the matched element was in the correct state.
+- Fixed edge case with [`cy.contains()`](https://on.cypress.io/api/contains) and command options `visible` and `exist` where it would always fail ven though the matched element was in the correct state.
 
 **Misc:**
 
-- [`cy.contains`](https://on.cypress.io/api/contains) now throws when provided the command option: `length` because it will only ever return 1` element.
+- [`cy.contains()`](https://on.cypress.io/api/contains) now throws when provided the command option: `length` because it will only ever return 1` element.
 
 # 0.9.3
 
@@ -1745,13 +1732,13 @@ Deprecations:
 - Proxied jQuery: `$` onto `cy` as `cy.$` and specific class methods: `Event`, `Deferred`, `ajax`, `get`, `getJSON`, `getScript`, `post`
 - Proxied `moment` onto `cy` as `cy.moment`
 - The `url` will now automatically be restored when hovering over the Command Log to indicate the state of the URL at the time the command ran.
-- [`cy.click`](https://on.cypress.io/api/click) now accepts an optional: `position` argument (`center`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`). Center is still the default.
-- [`cy.click`](https://on.cypress.io/api/click) now accepts an optional `x` and `y` coordinate argument, which is relative to the top left corner of the element. Fixes [#50](https://github.com/cypress-io/cypress/issues/50).
+- [`.click()`](https://on.cypress.io/api/click) now accepts an optional: `position` argument (`center`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`). Center is still the default.
+- [`.click()`](https://on.cypress.io/api/click) now accepts an optional `x` and `y` coordinate argument, which is relative to the top left corner of the element. Fixes [#50](https://github.com/cypress-io/cypress/issues/50).
 - [Click docs have been updated](https://on.cypress.io/api/click) to reflect these changes.
 
 **Bugfixes:**
 
-- `onBeforeLoad` and `onLoad` callbacks to [`cy.visit`](https://on.cypress.io/api/visit) are now invoked with `cy` as the context
+- `onBeforeLoad` and `onLoad` callbacks to [`cy.visit()`](https://on.cypress.io/api/visit) are now invoked with `cy` as the context
 - Cypress logo now displays in `About Page`
 
 **Misc:**
@@ -1765,7 +1752,7 @@ Deprecations:
 **Features:**
 
 - Added `About` page in desktop application annotating the current version.
-- [`cy.fixture`](https://on.cypress.io/api/fixture) now supports these additional extensions: `.html`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.tif`, `.tiff`.
+- [`cy.fixture()`](https://on.cypress.io/api/fixture) now supports these additional extensions: `.html`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.tif`, `.tiff`.
 - Image fixtures will be sent back as a `base64` string.
 - Html fixtures will be prettified and saved back over the original.
 
@@ -1779,20 +1766,20 @@ Deprecations:
 
 **Features:**
 
-- [`cy.viewport`](https://on.cypress.io/api/viewport) can now accept an `orientation` when providing a `preset`. Valid orientations are `landscape` and `portrait`
+- [`cy.viewport()`](https://on.cypress.io/api/viewport) can now accept an `orientation` when providing a `preset`. Valid orientations are `landscape` and `portrait`
 
 **Bugfixes:**
 
 - The scaffolded `spec_helper.js` now correctly returns its object literal in the `onConsole` callback.
-- [`cy.type`](https://on.cypress.io/api/type) now correctly logs its message to the Command Log when provided options.
-- [`cy.type`](https://on.cypress.io/api/type has been upgraded to handle situations where as it's typing, 3rd party code mutates the value either synchronously or asynchronously. The caret is automatically moved to the end position matching browser behavior.
+- [`.type()`](https://on.cypress.io/api/type) now correctly logs its message to the Command Log when provided options.
+- [`.type()`](https://on.cypress.io/api/type) has been upgraded to handle situations where as it's typing, 3rd party code mutates the value either synchronously or asynchronously. The caret is automatically moved to the end position matching browser behavior.
 
 **Misc:**
 
 - Deprecated `Cypress.command`, instead use `Cypress.Log.command` to output a Command Log. Updated scaffolding on new projects to reflect this change.
-- [`cy.contains`](https://on.cypress.io/api/contains) now outputs much more explicit error messages when given command options. Fixes [#49](../ssues/49).
-- [`cy.route`](https://on.cypress.io/api/route) no longer validates `response` value when `{respond: false}` is passed in as options. Fixes [#48](https://github.com/cypress-io/cypress/issues/48).
-- [`cy.invoke`](https://on.cypress.io/api/invoke) and [`cy.its`](https://on.cypress.io/api/its) will now log out the $el if it's a DOM object, which will now correctly highlight the $el during a command revert. Additionally if these commands have been called on a DOM object, their `onConsole` message will include the DOM objects.
+- [`cy.contains()`](https://on.cypress.io/api/contains) now outputs much more explicit error messages when given command options. Fixes [#49](../ssues/49).
+- [`cy.route()`](https://on.cypress.io/api/route) no longer validates `response` value when `{respond: false}` is passed in as options. Fixes [#48](https://github.com/cypress-io/cypress/issues/48).
+- [`.invoke()`](https://on.cypress.io/api/invoke) and [`.its()`](https://on.cypress.io/api/its) will now log out the $el if it's a DOM object, which will now correctly highlight the $el during a command revert. Additionally if these commands have been called on a DOM object, their `onConsole` message will include the DOM objects.
 
 # 0.9.0
 
@@ -1800,7 +1787,7 @@ Deprecations:
 
 **Summary:**
 
-- [`cy.viewport`](https://on.cypress.io/api/viewport) is a new command which will resize the viewport to a specified width and height. There is ow a default `viewport` size of `1000x660`. See [viewport docs](https://on.cypress.io/api/viewport).
+- [`cy.viewport()`](https://on.cypress.io/api/viewport) is a new command which will resize the viewport to a specified width and height. There is ow a default `viewport` size of `1000x660`. See [viewport docs](https://on.cypress.io/api/viewport).
 
 **Features:**
 
@@ -1828,9 +1815,9 @@ Deprecations:
 
 **Bugfixes:**
 
-- [`cy.select`](https://on.cypress.io/api/select) will now fire a `focus` event on the `<select>` even if the window isn't in focus
-- [`cy.click`](https://on.cypress.io/api/click) has been upgraded to be more intelligent about firing `focus` events, and now takes into account the previously focused element
-- [`cy.type`](https://on.cypress.io/api/type) and [`cy.clear`](https://on.cypress.io/api/clear) will not issue `change` events or `focus` events unnecessary when chaining together multiple actions which do not change the element or cause it to lose focus. Fixes [#47](https://github.com/cypress-io/cypress/issues/47).
+- [`.select()`](https://on.cypress.io/api/select) will now fire a `focus` event on the `<select>` even if the window isn't in focus
+- [`.click()`](https://on.cypress.io/api/click) has been upgraded to be more intelligent about firing `focus` events, and now takes into account the previously focused element
+- [`.type()`](https://on.cypress.io/api/type) and [`.clear()`](https://on.cypress.io/api/clear) will not issue `change` events or `focus` events unnecessary when chaining together multiple actions which do not change the element or cause it to lose focus. Fixes [#47](https://github.com/cypress-io/cypress/issues/47).
 
 # 0.8.0
 
@@ -1838,40 +1825,33 @@ Deprecations:
 
 **Summary:**
 
-- [`cy.type`](https://on.cypress.io/api/type) now implements all DOM events to simulate every aspect of typing on a real keyboard
+- [`.type()`](https://on.cypress.io/api/type) now implements all DOM events to simulate every aspect of typing on a real keyboard
 - All of the [type docs have been updated](type) to reflect these changes
-
-**Upcoming:**
-
-- `cy.tab` is coming soon
-- `cy.type` combo's like "CTRL/META/ALT+key" is coming soon
-- Using `cy.type` on the document (and not a specific element) is coming soon
-- Using `cy.type` on native `date/datetime/month/time` input elements is coming soon
 
 **Features:**
 
-- [`cy.type`](https://on.cypress.io/api/type) now outputs "Key Events Table" which is a `console.table` of every key typed, the `charCode`, all vents that fired, and whether any were `preventedDefault`
-- [`cy.type`](https://on.cypress.io/api/type) now accepts the following special character sequences: `{selectall}`, `{del}`, `{backspace}`, `{esc}`, `{% raw %}{{{% endraw %}}`, `{enter}`, `{leftarrow}`, `{rightarrow}`
-- [`cy.type`](https://on.cypress.io/api/type) implements `cursor` and `selection` and `range` accurately like a real keyboard
-- [`cy.type`](https://on.cypress.io/api/type) now fires change events exactly like real browsers when `{enter}` is used
-- [`cy.type`](https://on.cypress.io/api/type) will fire `textInput` and `input` events exactly like a real browser. Fixes [#7](https://github.com/cypress-io/cypress/issues/7).
-- [`cy.type`](https://on.cypress.io/api/type) now follows all of the spec in regards to `preventingDefault` on any event that would insert a character such as `keydown`, `keypress`, `textInput`
-- [`cy.type`](https://on.cypress.io/api/type) events should be `100%` identical to real browser `KeyboardEvents` including `charCode`, `which`, `keyCode`, `data`, etc
-- [`cy.type`](https://on.cypress.io/api/type) now inserts a small delay `10ms` between each keystroke to simulate a real user typing
-- `input` events are now correctly fired when [`cy.select`](https://on.cypress.io/api/select) chooses an `<option>`
-- `change` events are now fired exactly how a browser does (when an input loses focus and its value has changed since its last focus event). You'll see these fire after you use [`cy.blur`](https://on.cypress.io/api/blur) directly, or use another `action command` on another element.
+- [`.type()`](https://on.cypress.io/api/type) now outputs "Key Events Table" which is a `console.table` of every key typed, the `charCode`, all vents that fired, and whether any were `preventedDefault`
+- [`.type()`](https://on.cypress.io/api/type) now accepts the following special character sequences: `{selectall}`, `{del}`, `{backspace}`, `{esc}`, `{% raw %}{{{% endraw %}}`, `{enter}`, `{leftarrow}`, `{rightarrow}`
+- [`.type()`](https://on.cypress.io/api/type) implements `cursor` and `selection` and `range` accurately like a real keyboard
+- [`.type()`](https://on.cypress.io/api/type) now fires change events exactly like real browsers when `{enter}` is used
+- [`.type()`](https://on.cypress.io/api/type) will fire `textInput` and `input` events exactly like a real browser. Fixes [#7](https://github.com/cypress-io/cypress/issues/7).
+- [`.type()`](https://on.cypress.io/api/type) now follows all of the spec in regards to `preventingDefault` on any event that would insert a character such as `keydown`, `keypress`, `textInput`
+- [`.type()`](https://on.cypress.io/api/type) events should be `100%` identical to real browser `KeyboardEvents` including `charCode`, `which`, `keyCode`, `data`, etc
+- [`.type()`](https://on.cypress.io/api/type) now inserts a small delay `10ms` between each keystroke to simulate a real user typing
+- `input` events are now correctly fired when [`.select()`](https://on.cypress.io/api/select) chooses an `<option>`
+- `change` events are now fired exactly how a browser does (when an input loses focus and its value has changed since its last focus event). You'll see these fire after you use [`.blur()`](https://on.cypress.io/api/blur) directly, or use another `action command` on another element.
 
 **Bugfixes:**
 
-- Using [`cy.type`](https://on.cypress.io/api/type) in an `input[type=number]` will no longer prepend the value. Fixes [#26](https://github.com/cypress-io/cypress/issues/26).
+- Using [`.type()`](https://on.cypress.io/api/type) in an `input[type=number]` will no longer prepend the value. Fixes [#26](https://github.com/cypress-io/cypress/issues/26).
 - `[contenteditable]` elements can now be focused and blurred
-- `aborting` during [`cy.click`](https://on.cypress.io/api/click) / [`cy.dblclick`](https://on.cypress.io/api/dblclick) now correctly cancels remaining queued click/dblclick events
+- `aborting` during [`.click()`](https://on.cypress.io/api/click) / [`.dblclick()`](https://on.cypress.io/api/dblclick) now correctly cancels remaining queued click/dblclick events
 
 **Misc:**
 
 - `console.groups` are now collapsed by default
-- [`cy.type`](https://on.cypress.io/api/type) now validates the chars and will throw on anything other than a string or finite number
-- [`cy.type`](https://on.cypress.io/api/type) now throws on empty strings
+- [`.type()`](https://on.cypress.io/api/type) now validates the chars and will throw on anything other than a string or finite number
+- [`.type()`](https://on.cypress.io/api/type) now throws on empty strings
 - Removed several libs that used to handle typing simulation and rewrote typing from scratch
 
 # 0.7.6
@@ -1880,7 +1860,7 @@ Deprecations:
 
 **Bugfixes:**
 
-- Prevent infinite loop due to a trifecta of rare circumstances with [`cy.click`](https://on.cypress.io/api/click). Clicking will now retry sync after it attempts to scroll past the element covering up the desired clickable element. Fixes [#46](https://github.com/cypress-io/cypress/issues/46).
+- Prevent infinite loop due to a trifecta of rare circumstances with [`.click()`](https://on.cypress.io/api/click). Clicking will now retry sync after it attempts to scroll past the element covering up the desired clickable element. Fixes [#46](https://github.com/cypress-io/cypress/issues/46).
 
 # 0.7.5
 
@@ -1888,8 +1868,8 @@ Deprecations:
 
 **Bugfixes:**
 
-- [`cy.click`](https://on.cypress.io/api/click) now takes into account being covered by a fixed positioned element and will increase the window's scroll offset to account for this. There are still more improvements to be made before this is bulletproof though.
-- [`cy.contains`](https://on.cypress.io/api/contains) could potentially resolve to a null subject if the matching content was split across multiple nested children elements. This has been fixed and contains will now return the first, deepest element which contains text potentially spread over multiple text nodes and/or children elements.
+- [`.click()`](https://on.cypress.io/api/click) now takes into account being covered by a fixed positioned element and will increase the window's scroll offset to account for this. There are still more improvements to be made before this is bulletproof though.
+- [`cy.contains()`](https://on.cypress.io/api/contains) could potentially resolve to a null subject if the matching content was split across multiple nested children elements. This has been fixed and contains will now return the first, deepest element which contains text potentially spread over multiple text nodes and/or children elements.
 
 # 0.7.4
 
@@ -1897,8 +1877,8 @@ Deprecations:
 
 **Misc:**
 
-- Attempting to [`cy.click`](https://on.cypress.io/api/click) a select element will now throw an error. The error guides you to using the `cy.select`](https://on.cypress.io/api/select) command, as that is the command you should use to change a `<select>` value.
-- [`cy.route`](https://on.cypress.io/api/route) responses are now validated. If responses are `null` or `undefined` Cypress will throw a very specific error message.
+- Attempting to [`.click()`](https://on.cypress.io/api/click) a select element will now throw an error. The error guides you to using the `.select()`](https://on.cypress.io/api/select) command, as that is the command you should use to change a `<select>` value.
+- [`cy.route()`](https://on.cypress.io/api/route) responses are now validated. If responses are `null` or `undefined` Cypress will throw a very specific error message.
 - Cypress will now display `cypress.json` parse errors when attempting to boot a project when there is a syntax error in `cypress.json`.
 
 # 0.7.3
@@ -1907,9 +1887,9 @@ Deprecations:
 
 **Features:**
 
-- [`cy.select`](https://on.cypress.io/api/select) will now output a command log
-- [`cy.select`](https://on.cypress.io/api/select) will now have `click` / `focus` events fired on itself and the selected options (as per the pec)
-- [`cy.select`](https://on.cypress.io/api/select) is now inline with the other `Action` commands and will retry until the element naturally becomes selectable.
+- [`.select()`](https://on.cypress.io/api/select) will now output a command log
+- [`.select()`](https://on.cypress.io/api/select) will now have `click` / `focus` events fired on itself and the selected options (as per the pec)
+- [`.select()`](https://on.cypress.io/api/select) is now inline with the other `Action` commands and will retry until the element naturally becomes selectable.
 
 **Bugfixes:**
 
@@ -1948,14 +1928,14 @@ Deprecations:
 **Features:**
 
 - Cypress now has first class support for `fixtures` (official docs coming soon)
-- Introduced new [`cy.fixture`](https://on.cypress.io/api/fixture) command
+- Introduced new [`cy.fixture()`](https://on.cypress.io/api/fixture) command
 - Fixtures support `json`, `js`, and `coffee` files with image support coming soon
 - Fixtures are automatically validated, with error messages propagating up to the client
 - Fixtures are automatically formatted / indented for easy debugging
 - Example fixture is automatically created with every project
 - Example support files are now automatically created with every project
-- [`cy.route`](https://on.cypress.io/api/route) now accepts an **alias** as its response
-- [`cy.route`](https://on.cypress.io/api/route) additionally accepts a special `fixture:` or `fx:` keyword which automatically loads the fixture as the response
+- [`cy.route()`](https://on.cypress.io/api/route) now accepts an **alias** as its response
+- [`cy.route()`](https://on.cypress.io/api/route) additionally accepts a special `fixture:` or `fx:` keyword which automatically loads the fixture as the response
 
 **Bugfixes:**
 
@@ -1980,10 +1960,10 @@ Deprecations:
 
 - Internal refactor / improvements to support long lived runnable objects to work with page events
 - Request Commands (now page events) have now been renamed to 'XHR'
-- [`cy.document`](https://on.cypress.io/api/document) now returns the raw document object instead of a jQuery wrapped document object
-- When [`cy.its`](https://on.cypress.io/api/its) or [`cy.invoke`](https://on.cypress.io/api/invoke) fails it will include the current subject n the `onConsole` log
-- [`cy.wait`](https://on.cypress.io/api/wait) now logs out when its referenced aliases, and its `onConsole` output displays the XHR return values
-- [`cy.hash`](https://on.cypress.io/api/hash) and [`cy.url`](https://on.cypress.io/api/url) no longer pass the return value as the command log's `message`, which made no sense and was unlike every other command
+- [`cy.document()`](https://on.cypress.io/api/document) now returns the raw document object instead of a jQuery wrapped document object
+- When [`.its()`](https://on.cypress.io/api/its) or [`.invoke()`](https://on.cypress.io/api/invoke) fails it will include the current subject n the `onConsole` log
+- [`cy.wait()`](https://on.cypress.io/api/wait) now logs out when its referenced aliases, and its `onConsole` output displays the XHR return values
+- [`cy.hash()`](https://on.cypress.io/api/hash) and [`cy.url()`](https://on.cypress.io/api/url) no longer pass the return value as the command log's `message`, which made no sense and was unlike every other command
 
 # 0.6.13
 
@@ -1995,7 +1975,7 @@ Deprecations:
 
 **Misc:**
 
-- [`cy.type`](https://on.cypress.io/api/type) now works with `contenteditable` attributes
+- [`.type()`](https://on.cypress.io/api/type) now works with `contenteditable` attributes
 
 # 0.6.12
 
@@ -2004,11 +1984,11 @@ Deprecations:
 **Bugfixes:**
 
 - When Cypress detects a `page loading` event it will now clear out the subject so the next commands cannot reference previous page DOM elements
-- [`cy.check`](https://on.cypress.io/api/check) and [`cy.uncheck`](https://on.cypress.io/api/uncheck) will no longer output additional error'd commands when their associated `click` fails
+- [`.check()`](https://on.cypress.io/api/check) and [`.uncheck()`](https://on.cypress.io/api/uncheck) will no longer output additional error'd commands when their associated `click` fails
 
 **Misc:**
 
-- [`cy.type`](https://on.cypress.io/api/type), [`cy.clear`](https://on.cypress.io/api/clear), [`cy.check`](https://on.cypress.io/api/check), `cy.uncheck`](https://on.cypress.io/api/uncheck) now all take `{force: true}` options to force the click to happen and skip additional clickable checks
+- [`.type()`](https://on.cypress.io/api/type), [`.clear()`](https://on.cypress.io/api/clear), [`.check()`](https://on.cypress.io/api/check), `.uncheck()`](https://on.cypress.io/api/uncheck) now all take `{force: true}` options to force the click to happen and skip additional clickable checks
 - Now when you click the giant yellow failure messages if the error is a `CypressError` instead of logging nothing it will now find the command associated to that error and display the same message as if you clicked the failed command
 
 # 0.6.11
@@ -2017,13 +1997,13 @@ Deprecations:
 
 **Bugfixes:**
 
-- [`cy.clear`](https://on.cypress.io/api/clear) and [`cy.type`](https://on.cypress.io/api/type) no longer output additional error'd commands hen their associated `click` fails
+- [`.clear()`](https://on.cypress.io/api/clear) and [`.type()`](https://on.cypress.io/api/type) no longer output additional error'd commands hen their associated `click` fails
 - Changed scrolling elements into view to use top strategy instead of bottom which fixes times where the middle of an element was not yet in he viewport. Fixes [#42](https://github.com/cypress-io/cypress/issues/42).
 
 **Misc:**
 
-- [`cy.submit`](https://on.cypress.io/api/submit) now errors if its been called on >1 form element. Fixes [#41](https://github.com/cypress-io/cypress/issues/41).
-- Coordinates and hitboxes are now logged and displayed on [`cy.clear`](https://on.cypress.io/api/clear) and [`cy.type`](https://on.cypress.io/pi/type)
+- [`.submit()`](https://on.cypress.io/api/submit) now errors if its been called on >1 form element. Fixes [#41](https://github.com/cypress-io/cypress/issues/41).
+- Coordinates and hitboxes are now logged and displayed on [`.clear()`](https://on.cypress.io/api/clear) and [`.type()`](https://on.cypress.io/pi/type)
 
 # 0.6.10
 
@@ -2035,9 +2015,9 @@ Deprecations:
 
 **Misc:**
 
-- [`cy.click`](https://on.cypress.io/api/click) accepts `{force: true}` which will force it to issue the click event and bypass checking to ensure element is physically clickable.
+- [`.click()`](https://on.cypress.io/api/click) accepts `{force: true}` which will force it to issue the click event and bypass checking to ensure element is physically clickable.
 - Elements which are children of a container with `overflow` are automatically scrolled prior to a click (which is an abstraction around real user behavior).
-- Elements that are covering up an element you targeted for [`cy.click`](https://on.cypress.io/api/click) are now logged out in the command console.
+- Elements that are covering up an element you targeted for [`.click()`](https://on.cypress.io/api/click) are now logged out in the command console.
 - All elements are now logged out as real DOM elements instead of jQuery wrapped elements. This has several upsides. Chrome will allow you to immediately interact with these elements, drilling into their contents, displaying the element box model on hover, etc. This prevents you from having to expand the jQuery elements and click "Reveal in Elements Panel".
 
 # 0.6.9
@@ -2054,7 +2034,7 @@ Deprecations:
 
 **Features:**
 
-- `cy.clearCookie` and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies) have been added as new commands.
+- [`cy.clearCookie()`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies()`](https://on.cypress.io/api/clearcookies) have been added as new commands.
 - Cypress will automatically clear all cookies **before** each test run.
 - Named the spec + app iframe so that inside of Chrome Dev Tools the iframe selector will clearly distinguish which iframe is your application versus Cypress.
 
@@ -2065,8 +2045,8 @@ Deprecations:
 
 **Misc:**
 
-- [`cy.visit`](https://on.cypress.io/api/visit) now accepts `{log: false}` to prevent logging out (useful in custom commands).
-- [`cy.contains`](https://on.cypress.io/api/contains) is now scoped by default to the `<body>` instead of `document` which prevents it from returning elements in the `head` like `title`.
+- [`cy.visit()`](https://on.cypress.io/api/visit) now accepts `{log: false}` to prevent logging out (useful in custom commands).
+- [`cy.contains()`](https://on.cypress.io/api/contains) is now scoped by default to the `<body>` instead of `document` which prevents it from returning elements in the `head` like `title`.
 
 # 0.6.7
 
@@ -2098,7 +2078,7 @@ Deprecations:
 
 **Bugfixes:**
 
-- Fixed regression related to [`cy.visit`](https://on.cypress.io/api/visit) not re-visiting when current match matches remote url
+- Fixed regression related to [`cy.visit()`](https://on.cypress.io/api/visit) not re-visiting when current match matches remote url
 
 # 0.6.5
 
@@ -2107,12 +2087,12 @@ Deprecations:
 **Features:**
 
 - When Cypress detects a regular HTTP page loading event (where we're leaving the current page and requesting a new one) it will now insert a `loading` command which indicates to the user Cypress has stopped running commands until the new page loads.
-- If for some reason this new page errors Cypress will display the initial 500 error messages just like [`cy.visit`](https://on.cypress.io/api/isit)
-- Cypress now waits `20s` (which matches [`cy.visit`](https://on.cypress.io/api/visit)) for the new page to load instead of `4s` previously
+- If for some reason this new page errors Cypress will display the initial 500 error messages just like [`cy.visit()`](https://on.cypress.io/api/isit)
+- Cypress now waits `20s` (which matches [`cy.visit()`](https://on.cypress.io/api/visit)) for the new page to load instead of `4s` previously
 
 **Bugfixes:**
 
-- [`cy.submit`](https://on.cypress.io/api/submit) will actually submit the form for real now, instead of just firing the submit event. Now its been upgraded to be able to be cancelled or have its returnValue set to false and will not submit the form. Don't ask how I missed this one. I as once a young naive programmer who trusted the DOM not to be the abomination it actually is.
+- [`.submit()`](https://on.cypress.io/api/submit) will actually submit the form for real now, instead of just firing the submit event. Now its been upgraded to be able to be cancelled or have its returnValue set to false and will not submit the form. Don't ask how I missed this one. I as once a young naive programmer who trusted the DOM not to be the abomination it actually is.
 
 **Misc:**
 
@@ -2156,7 +2136,7 @@ Deprecations:
 
 **Misc:**
 
-- Removed cy proxy commands: `each`, `map`. These didn't really "fit" into the concept of a command, and with [`cy.invoke`](https://n.cypress.io/api/invoke) or [`cy.its`](https://on.cypress.io/api/its) they're accessible anyway, so nothing is really lost.
+- Removed cy proxy commands: `each`, `map`. These didn't really "fit" into the concept of a command, and with [`.invoke()`](https://n.cypress.io/api/invoke) or [`.its()`](https://on.cypress.io/api/its) they're accessible anyway, so nothing is really lost.
 
 # 0.6.0
 
@@ -2167,7 +2147,7 @@ Deprecations:
 - Pushstate application routing now works 100% reliably with NO hacky overrides in all browsers
 - All incompatible `a` / `link` / `form` elements are transparently rewritten to be compatible including FQDN and protocol-less `href` / `src`
 - Cookies are automatically cleared between page refreshes, during app startup, and leaving the test page
-- 3rd Party cookies are now additionally cleared.  All cookies are now accessible to the client in preparation for [`cy.clearCookies`](https://n.cypress.io/api/clearcookies).
+- 3rd Party cookies are now additionally cleared.  All cookies are now accessible to the client in preparation for [`cy.clearCookies()`](https://n.cypress.io/api/clearcookies).
 - Manual navigation after tests run now works reliably
 - Navigating between full page refreshes during tests now works reliably
 
@@ -2213,7 +2193,7 @@ Deprecations:
 - Removed `iframe` and `link[rel=stylesheet]` elements during DOM revert
 - Server instrument now correctly displays the number of responses their corresponding routes have had
 - Spies/Stubs/Mocks instrument now correctly displays the number of calls their corresponding methods have had
-- When users navigate between pages with commands (like [`cy.click`](https://on.cypress.io/api/click)), Cypress now correctly waits until the age has finished loading before running more commands. Previously this waited for the `unload` event, which did not fire synchronously, and ow we bind to `beforeunload` which does.  Additionally Cypress checks to ensure `beforeunload` did not return a non-undefined value.
+- When users navigate between pages with commands (like [`.click()`](https://on.cypress.io/api/click)), Cypress now correctly waits until the age has finished loading before running more commands. Previously this waited for the `unload` event, which did not fire synchronously, and ow we bind to `beforeunload` which does.  Additionally Cypress checks to ensure `beforeunload` did not return a non-undefined value.
 
 **Misc:**
 
@@ -2252,7 +2232,7 @@ Deprecations:
 
 **Misc:**
 
-- Cypress now throws on [`cy.should`](https://on.cypress.io/api/should) if any DOM member isn't in the DOM, except for `exist` assertions
+- Cypress now throws on [`.should()`](https://on.cypress.io/api/should) if any DOM member isn't in the DOM, except for `exist` assertions
 - Cypress now throws on `eventually.have.length` assertions. Use implicit `{length: n}` command options instead.
 - Cypress overrides chai `exist` assertion to really mean: "does this subject exist in the document?"
 
@@ -2274,14 +2254,14 @@ Deprecations:
 
 **Features:**
 
-- [`cy.server`](https://on.cypress.io/api/server) now accepts a `delay` option which will delay all responses to requests (including 404) based on the value in ms
-- [`cy.server`](https://on.cypress.io/api/server) now accepts a `respond` option which can turn off automatic responding to requests
-- [`cy.route`](https://on.cypress.io/api/route) now accepts a `delay` option which overrides the delay option set in [`cy.server`](https://n.cypress.io/api/server) to just matched requests
-- [`cy.route`](https://on.cypress.io/api/route) now accepts a `respond` option which will turn off automatic responding to just matched requests
+- [`cy.server()`](https://on.cypress.io/api/server) now accepts a `delay` option which will delay all responses to requests (including 404) based on the value in ms
+- [`cy.server()`](https://on.cypress.io/api/server) now accepts a `respond` option which can turn off automatic responding to requests
+- [`cy.route()`](https://on.cypress.io/api/route) now accepts a `delay` option which overrides the delay option set in [`cy.server()`](https://n.cypress.io/api/server) to just matched requests
+- [`cy.route()`](https://on.cypress.io/api/route) now accepts a `respond` option which will turn off automatic responding to just matched requests
 - Fixes [#14](https://github.com/cypress-io/cypress/issues/14)
-- [`cy.wait`](https://on.cypress.io/api/wait) now accepts an alias property called `request`. Example: `cy.wait("@getUsers.request")` which ill resolve once the XHR is initially requested, before it is responded to.  This allows you to test things when a request is in flight.
+- [`cy.wait()`](https://on.cypress.io/api/wait) now accepts an alias property called `request`. Example: `cy.wait("@getUsers.request")` which ill resolve once the XHR is initially requested, before it is responded to.  This allows you to test things when a request is in flight.
 - Added `cy.respond` command which will respond to all pending requests when `{respond: false}` is set in the `server` or `route`
-- [`cy.debug`](https://on.cypress.io/api/debug) now displays pending requests and completed requests
+- [`cy.debug()`](https://on.cypress.io/api/debug) now displays pending requests and completed requests
 - The command UI now displays pending requests as a `pending command`
 
 **Misc:**
@@ -2293,12 +2273,12 @@ Deprecations:
 *Released 04/26/2015*
 
 **Features:**
-- Added [`cy.spread`](https://on.cypress.io/api/spread) method which spreads an array as individual arguments to a callback function (like `cy.then`](https://on.cypress.io/api/then)
+- Added [`.spread()`](https://on.cypress.io/api/spread) method which spreads an array as individual arguments to a callback function (like [`.then()`](https://on.cypress.io/api/then)
 - During an update Cypress will now display the updating message in the same coordinates as when the app was open by clicking the tray icon
 - After an update Cypress will now open back up and show itself in these same coordinates
-- [`cy.wait`](https://on.cypress.io/api/wait) can now accept an array of route aliases which will wait until all have completed.  This array f resolved XHRs will become the next subject.
-- Each time an alias in used with a [`cy.wait`](https://on.cypress.io/api/wait), Cypress will not resolve until the Nth request matching the outing alias responds.  Fixes [#4](https://github.com/cypress-io/cypress/issues/4)
-- [`cy.get`](https://on.cypress.io/api/get) has been upgraded to accept a routing alias.  By default it will yield the last matched request, but also supports special alias properties which return a different request or potentially an array of requests.
+- [`cy.wait()`](https://on.cypress.io/api/wait) can now accept an array of route aliases which will wait until all have completed.  This array of resolved XHRs will become the next subject.
+- Each time an alias in used with a [`cy.wait()`](https://on.cypress.io/api/wait), Cypress will not resolve until the Nth request matching the outing alias responds.  Fixes [#4](https://github.com/cypress-io/cypress/issues/4)
+- [`cy.get()`](https://on.cypress.io/api/get) has been upgraded to accept a routing alias.  By default it will yield the last matched request, but also supports special alias properties which return a different request or potentially an array of requests.
 
 # 0.5.8
 
@@ -2306,22 +2286,22 @@ Deprecations:
 
 **Features:**
 
-- [`cy.as`](https://on.cypress.io/api/as) can now alias primitives and objects other than routes or DOM
-- [`cy.as`](https://on.cypress.io/api/as) automatically assigns this alias to `runnable.ctx` which makes it available synchronously
-- [`cy.as`](https://on.cypress.io/api/as) blacklists several reserved words and will throw if you attempt to alias as one of them
-- [`cy.get`](https://on.cypress.io/api/get) can now accept all alias types and will display the labels in the UI differently based on the alias type
+- [`.as()`](https://on.cypress.io/api/as) can now alias primitives and objects other than routes or DOM
+- [`.as()`](https://on.cypress.io/api/as) automatically assigns this alias to `runnable.ctx` which makes it available synchronously
+- [`.as()`](https://on.cypress.io/api/as) blacklists several reserved words and will throw if you attempt to alias as one of them
+- [`cy.get()`](https://on.cypress.io/api/get) can now accept all alias types and will display the labels in the UI differently based on the alias type
 - Cypress now displays a message when the Desktop App update is actually being applied instead of doing nothing and looking like its crashed
 
 **Bugfixes:**
 
-- [`cy.as`](https://on.cypress.io/api/as) now throws on empty strings or non string arguments
+- [`.as()`](https://on.cypress.io/api/as) now throws on empty strings or non string arguments
 - Desktop App debug logs no longer sort in the wrong direction
 - Permissions are now restored during a cypress update for the `logs` and `cache`
 - Prevent 3rd party windows from gaining focus over main window
 
 **Misc:**
 
-- Removed `cy.assign`, this has been folded into [`cy.as`](https://on.cypress.io/api/as)
+- Removed `cy.assign`, this has been folded into [`.as()`](https://on.cypress.io/api/as)
 - Updated `chokidar` to `1.0.1`
 
 # 0.5.7
@@ -2349,13 +2329,13 @@ Deprecations:
 
 **Bugfixes:**
 
-- [`cy.visit`](https://on.cypress.io/api/visit) now properly times out when the `load` event does not occur within the time out window
-- If a page loads after a [`cy.visit`](https://on.cypress.io/api/visit) times out it will no longer cause an exception in the `onBeforeLoad` handler
+- [`cy.visit()`](https://on.cypress.io/api/visit) now properly times out when the `load` event does not occur within the time out window
+- If a page loads after a [`cy.visit()`](https://on.cypress.io/api/visit) times out it will no longer cause an exception in the `onBeforeLoad` handler
 
 **Misc:**
 
-- Increased [`cy.visit`](https://on.cypress.io/api/visit) timeout from **15s** to **20s**
-- [`cy.visit`](https://on.cypress.io/api/visit) now throws a custom error message when it times out (instead of an incorrect / confusing default mocha timeout message)
+- Increased [`cy.visit()`](https://on.cypress.io/api/visit) timeout from **15s** to **20s**
+- [`cy.visit()`](https://on.cypress.io/api/visit) now throws a custom error message when it times out (instead of an incorrect / confusing default mocha timeout message)
 - Using a `debugger` while running a test will no longer always cause the test to time out (yay!)
 - Override default mocha timeout handling, replaced with custom logic. Removes many bizarre edge cases
 
@@ -2379,11 +2359,11 @@ Deprecations:
 
 **Features:**
 
-- Enhanced [`cy.should`](https://on.cypress.io/api/should) to accept `eventually` flag to automatically retry assertions until timeout is reached
+- Enhanced [`.should()`](https://on.cypress.io/api/should) to accept `eventually` flag to automatically retry assertions until timeout is reached
 
 **Misc:**
 
-- Repurposed [`cy.and`](https://on.cypress.io/api/and) to be an alias of [`cy.should`](https://on.cypress.io/api/should) for chainability
+- Repurposed [`.and()`](https://on.cypress.io/api/and) to be an alias of [`.should()`](https://on.cypress.io/api/should) for chainability
 - Removed `cy.to`
 
 # 0.5.3
@@ -2393,10 +2373,10 @@ Deprecations:
 **Bugfixes:**
 
 - Handle relative path segments which walk up past the remote host `../../assets/app.css`
-- Throw explicit error for `null`, `undefined`, and `""` arguments to [`cy.contains`](https://on.cypress.io/api/contains). Fixes [#24](https://github.com/cypress-io/cypress/issues/24)
+- Throw explicit error for `null`, `undefined`, and `""` arguments to [`cy.contains()`](https://on.cypress.io/api/contains). Fixes [#24](https://github.com/cypress-io/cypress/issues/24)
 
 Misc
-- Improved `onConsole` message for [`cy.focused`](https://on.cypress.io/api/focused) when no element was returned. Fixes [#23](https://github.com/cypress-io/cypress/issues/23)
+- Improved `onConsole` message for [`cy.focused()`](https://on.cypress.io/api/focused) when no element was returned. Fixes [#23](https://github.com/cypress-io/cypress/issues/23)
 
 # 0.5.2
 
@@ -2448,7 +2428,7 @@ Misc
 
 **Features:**
 
-- Added [`cy.wrap`](https://on.cypress.io/api/wrap) command
+- Added [`cy.wrap()`](https://on.cypress.io/api/wrap) command
 
 **Bugfixes:**
 
@@ -2460,12 +2440,12 @@ Misc
 
 **Features:**
 
-- Added [`cy.not`](https://on.cypress.io/api/not) traversal filtering method. Suggested in [#16](https://github.com/cypress-io/cypress/issues/16)
+- Added [`.not()`](https://on.cypress.io/api/not) traversal filtering method. Suggested in [#16](https://github.com/cypress-io/cypress/issues/16)
 
 **Misc:**
 
 - Improved error messages for traversal failures. Errors now include the parent context DOM element. Fixes [#11](https://github.com/cypress-io/cypress/issues/11)
-- Improved error messages for invalid [`cy.route`](https://on.cypress.io/api/route) arguments. Fixes [#20](https://github.com/cypress-io/cypress/issues/20)
+- Improved error messages for invalid [`cy.route()`](https://on.cypress.io/api/route) arguments. Fixes [#20](https://github.com/cypress-io/cypress/issues/20)
 
 # 0.4.3
 
@@ -2473,8 +2453,8 @@ Misc
 
 **Features:**
 
-- Added functionality which enables [`cy.server`](https://on.cypress.io/api/server) and [`cy.route`](https://on.cypress.io/api/route) to be created prior to [`cy.visit`](https://on.cypress.io/api/visit). The server and routes will apply to the next page which is visited. This allows you to stub requests which happen on page load. Suggested in [#17](https://github.com/cypress-io/cypress/issues/17)
-- [`cy.visit`](https://on.cypress.io/api/visit) now takes an optional `onBeforeLoad` callback option which is invoked when your page begins to ender but prior to its load event.
+- Added functionality which enables [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/api/route) to be created prior to [`cy.visit()`](https://on.cypress.io/api/visit). The server and routes will apply to the next page which is visited. This allows you to stub requests which happen on page load. Suggested in [#17](https://github.com/cypress-io/cypress/issues/17)
+- [`cy.visit()`](https://on.cypress.io/api/visit) now takes an optional `onBeforeLoad` callback option which is invoked when your page begins to ender but prior to its load event.
 
 **Misc:**
 
@@ -2526,8 +2506,8 @@ Misc
 
 - Fixed hook failure associated to wrong failed current test when `grep` was set
 - Async tests which used a `cy` command and had a `done` callback was always undefined.  Now its back to real mocha `function done(err)`
-- Fixed bug in mocha where it incorrectly associates `hook.ctx.currentTest` to the wrong `test`. https://github.com/mochajs/mocha/issues/1638
-- [`cy.title`](https://on.cypress.io/api/title) no longer logs twice on a failure
+- Fixed bug in mocha where it incorrectly associates `hook.ctx.currentTest` to the wrong `test`. [Mocha Issue](https://github.com/mochajs/mocha/issues/1638)
+- [`cy.title()`](https://on.cypress.io/api/title) no longer logs twice on a failure
 - Fixed putting an `.only` on a large list of tests that would sometimes not clear the previous runnables in the UI
 
 **Misc:**
@@ -2562,20 +2542,20 @@ Misc
 
 **Features:**
 
-- [`cy.visit`](https://on.cypress.io/api/visit) now detects a local url.  `localhost`, `0.0.0.0`, `127.0.0.1` can omit the `http://` protocol
+- [`cy.visit()`](https://on.cypress.io/api/visit) now detects a local url.  `localhost`, `0.0.0.0`, `127.0.0.1` can omit the `http://` protocol
 
 **Bugfixes:**
 
-- [`cy.contains`](https://on.cypress.io/api/contains) now properly escape quotes in the text
-- [`cy.visit`](https://on.cypress.io/api/visit) now inserts a trailing slash intelligently into the correct `path` position (not after query params or hashes)
-- [`cy.visit`](https://on.cypress.io/api/visit) will no longer log 2 failed commands on error
+- [`cy.contains()`](https://on.cypress.io/api/contains) now properly escape quotes in the text
+- [`cy.visit()`](https://on.cypress.io/api/visit) now inserts a trailing slash intelligently into the correct `path` position (not after query params or hashes)
+- [`cy.visit()`](https://on.cypress.io/api/visit) will no longer log 2 failed commands on error
 - Hovering on commands which delay resolving their $el will now properly highlight again
 
 **Misc:**
 
-- [`cy.debug`](https://on.cypress.io/api/debug) returns the current subject now
+- [`cy.debug()`](https://on.cypress.io/api/debug) returns the current subject now
 - upgraded jsUri to `1.3.0`
-- [`cy.visit`](https://on.cypress.io/api/visit) now throws when url argument isn't a string
+- [`cy.visit()`](https://on.cypress.io/api/visit) now throws when url argument isn't a string
 - `Cypress.Log` instances now fire `attrs:changed` event. Removed `state:change` event.
 
 # 0.3.12
@@ -2586,15 +2566,15 @@ Misc
 
 - Aliases which replay their commands will no longer break the current chain and therefore not unintentionally null our their subject for the ext command
 - Highlighting $el's on DOM restore now works again
-- Asserting against [`cy.focused`](https://on.cypress.io/api/focused) will indent command logs now
-- Prevent failed [`cy.should`](https://on.cypress.io/api/should) and `cy.to` from outputting a second error'd command log
+- Asserting against [`cy.focused()`](https://on.cypress.io/api/focused) will indent command logs now
+- Prevent failed [`.should()`](https://on.cypress.io/api/should) and `cy.to` from outputting a second error'd command log
 - Removed memory leaks surrounding mocha runner
 - Captured remote page uncaught errors again which fail corresponding tests
 - Captured spec iframe errors again and preserve their stack trace
 
 **Misc:**
 
-- [`cy.focused`](https://on.cypress.io/api/focused) is now a parent command
+- [`cy.focused()`](https://on.cypress.io/api/focused) is now a parent command
 - Memory usage improvements
 
 # 0.3.11
@@ -2604,7 +2584,7 @@ Misc
 **Bugfixes:**
 
 - Automatic command errors now properly show as errored commands
-- [`cy.invoke`](https://on.cypress.io/api/invoke) now correctly checks for a subject before running
+- [`.invoke()`](https://on.cypress.io/api/invoke) now correctly checks for a subject before running
 
 **Misc:**
 
@@ -2633,15 +2613,15 @@ Misc
 - Instead of waiting until commands resolve, commands are immediately inserted with a `pending` status
 - Pending commands are now visually distinguishable
 - Created new `Cypress.Log` interface for greater control over the display of commands
-- Available aliases are now logged in the console on [`cy.debug`](https://on.cypress.io/api/debug)
+- Available aliases are now logged in the console on [`cy.debug()`](https://on.cypress.io/api/debug)
 
 **Bugfixes:**
 
 - Allow projects to be scrolled when >4 are added
-- [`cy.type`](https://on.cypress.io/api/type) accepts remaining `input[type=*]` that users can type into
+- [`.type()`](https://on.cypress.io/api/type) accepts remaining `input[type=*]` that users can type into
 - Cause + Effect commands are now logged in the correct order.  IE, clicking something which causes another command to insert will be inserted correctly in the order they arrived
 - `numRetries` is no longer shown in commands
-- [`cy.clear`](https://on.cypress.io/api/clear) now logs a command
+- [`.clear()`](https://on.cypress.io/api/clear) now logs a command
 - `Promise.reduce` bugs are now fixed, causing events on a collection of elements in the synchronous wrong order
 - `cy.chain` is now coercively returned instead of `cy` which prevents losing access to the subject in custom commands
 - Trailing slashes are removed when serving initial files from the file system directly
@@ -2677,7 +2657,7 @@ Misc
 
 **Bugfixes:**
 
- - Force trailing slash on all [`cy.visit`](https://on.cypress.io/api/visit) to fix relative links `href="assets/app.js"`
+ - Force trailing slash on all [`cy.visit()`](https://on.cypress.io/api/visit) to fix relative links `href="assets/app.js"`
  - Fix sourceMappingURL browser bug `http:/localhost:4200/app.css.map`
  - Fix test titles not being escaped due to refactoring
 
@@ -2688,7 +2668,7 @@ Misc
 **Bugfixes:**
 
  - Fix missing `moment.js` from `bower.json`
- - Fix missing trailing slash from initial [`cy.visit`](https://on.cypress.io/api/visit) requests
+ - Fix missing trailing slash from initial [`cy.visit()`](https://on.cypress.io/api/visit) requests
  - Fix missing `__initial=true` query param on initial redirects
 
 **Misc:**
@@ -2700,8 +2680,8 @@ Misc
 *Released 03/19/2015*
 
 **Features:**
- - [`cy.type`](https://on.cypress.io/api/type) now causes the subject to receive `focus` event
- - [`cy.type`](https://on.cypress.io/api/type) now causes previously `focused` elements to receive `blur` event
+ - [`.type()`](https://on.cypress.io/api/type) now causes the subject to receive `focus` event
+ - [`.type()`](https://on.cypress.io/api/type) now causes previously `focused` elements to receive `blur` event
  - Typing `{enter}` now handles form submit logic as per the HTML spec
    - Form with 1 input, no defaultButton
    - Form with 2 inputs, no defaultButton
@@ -2712,7 +2692,7 @@ Misc
 
 **Bugfixes:**
 
- - [`cy.clear`](https://on.cypress.io/api/clear) now returns a promise
+ - [`.clear()`](https://on.cypress.io/api/clear) now returns a promise
 
 **Misc:**
 
@@ -2725,11 +2705,11 @@ Misc
 **Features:**
 
  - Filtered out AJAX requests for `.js`, `.html`, `.css` files by default
- - [`cy.server`](https://on.cypress.io/api/server) can configure whether this is turned on or off
+ - [`cy.server()`](https://on.cypress.io/api/server) can configure whether this is turned on or off
 
 **Bugfixes:**
 
- - Prevent [`cy.server`](https://on.cypress.io/api/server) from slurping up Angular async template GETs
+ - Prevent [`cy.server()`](https://on.cypress.io/api/server) from slurping up Angular async template GETs
 
 **Misc:**
 
