@@ -210,6 +210,18 @@ cy.get('textarea.post-body')
 
 We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" of the `cy.get()` command, which will be a DOM element if it is found.
 
+`.type()` and `.click()` are just 2 interaction commands Cypress exposes for you, but there are many more! For instance:
+- `.blur()`/`.focus()`
+- `.check()`/`.uncheck()`
+- `.select()`
+- `.hover()`
+- `.dblclick()`
+
+{% note success Core Concept %}
+Cypress exposes common user interactions as commands, making it simple to encapsulate the behaviors you're looking to create.
+
+{% endnote %}
+
 ## Asserting Things About Elements
 
 Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that apply to the current subject and halt the test if they aren't true. Here's a quick look at assertions in action:
