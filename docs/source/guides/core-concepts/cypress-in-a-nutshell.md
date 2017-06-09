@@ -224,7 +224,7 @@ Cypress exposes common user interactions as commands, making it simple to encaps
 
 ## Asserting Things About Elements
 
-Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that apply to the current subject and halt the test if they aren't true. Here's a quick look at assertions in action:
+Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that ask a question of the current subject and halt the test if they don't get the expected response. Here's a quick look at assertions in action:
 
 ```js
 cy.get(":checkbox").should("be.disabled")
