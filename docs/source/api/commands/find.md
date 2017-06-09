@@ -88,4 +88,4 @@ When clicking on the `find` command within the command log, the console outputs 
 
 # See also
 
-- [get](https://on.cypress.io/api/get)
+- {% url `cy.get()` get %}

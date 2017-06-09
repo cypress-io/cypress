@@ -93,5 +93,5 @@ When clicking on the `blur` command within the command log, the console outputs 
 
 # See also
 
-- [focus](https://on.cypress.io/api/focus)
-- [focused](https://on.cypress.io/api/focused)
+- {% url `.focus()` focus %}
+- {% url `cy.focused()` focused %}

@@ -115,4 +115,4 @@ When clicking on `screenshot` within the command log, the console outputs the fo
 
 - {% url `cy.debug()` debug %}
 - [Cypress Dashboard](https://on.cypress.io/dashboard)
-- [pause](https://on.cypress.io/api/pause)
+- {% url `cy.pause()` pause %}

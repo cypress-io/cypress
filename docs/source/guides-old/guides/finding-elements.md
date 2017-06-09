@@ -19,14 +19,14 @@ You'll notice many of these commands match the same behavior as their [jQuery co
 - {% url `.find()` find %}
 - {% url `.filter()` filter %}
 - {% url `.first()` first %}
-- [get](https://on.cypress.io/api/get)
-- [last](https://on.cypress.io/api/last)
-- [next](https://on.cypress.io/api/next)
-- [not](https://on.cypress.io/api/not)
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [prev](https://on.cypress.io/api/prev)
-- [siblings](https://on.cypress.io/api/siblings)
+- {% url `cy.get()` get %}
+- {% url `.last()` last %}
+- {% url `.next()` next %}
+- {% url `.not()` not %}
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.prev()` prev %}
+- {% url `.siblings()` siblings %}
 
 ***
 

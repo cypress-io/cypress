@@ -233,7 +233,7 @@ You can [read more about XHR strategy here](https://on.cypress.io/guides/network
 # See also
 
 - [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
-- [request](https://on.cypress.io/api/request)
-- [route](https://on.cypress.io/api/route)
-- [visit](https://on.cypress.io/api/visit)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `cy.request()` request %}
+- {% url `cy.route()` route %}
+- {% url `cy.visit()` visit %}
+- {% url `cy.wait()` wait %}

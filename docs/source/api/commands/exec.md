@@ -158,6 +158,6 @@ When clicking on the `exec` command within the command log, the console outputs 
 
 # See also
 
-- [readFile](https://on.cypress.io/api/readfile)
-- [request](https://on.cypress.io/api/request)
-- [writeFile](https://on.cypress.io/api/writefile)
+- {% url `cy.readFile()` readfile %}
+- {% url `cy.request()` request %}
+- {% url `cy.writeFile()` writefile %}

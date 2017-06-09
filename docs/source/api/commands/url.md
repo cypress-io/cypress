@@ -102,6 +102,6 @@ When clicking on `url` within the command log, the console outputs the following
 # See also
 
 - {% url `cy.document()` document %}
-- [hash](https://on.cypress.io/api/hash)
-- [location](https://on.cypress.io/api/location)
-- [window](https://on.cypress.io/api/window)
+- {% url `cy.hash()` hash %}
+- {% url `cy.location()` location %}
+- {% url `cy.window()` window %}

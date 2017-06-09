@@ -97,5 +97,5 @@ When clicking on `setCookie` within the command log, the console outputs the fol
 - {% url `cy.clearCookie()` clearcookie %}
 - {% url `cy.clearCookies()` clearcookies %}
 - [Cypress Cookies API](https://on.cypress.io/api/cookies)
-- [getCookie](https://on.cypress.io/api/getcookie)
-- [getCookies](https://on.cypress.io/api/getcookies)
+- {% url `cy.getCookie()` getcookie %}
+- {% url `cy.getCookies()` getcookies %}

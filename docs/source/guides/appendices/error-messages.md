@@ -186,7 +186,7 @@ cy.get('[disabled]').click({force: true}).
 
 {% img /img/guides/appendices/error-messages/cy-method-failed-element-is-animating.png cy.method() failed because element is animating %}
 
-By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions, such as [`.type()`](https://on.cypress.io/api/type) or [`.click()`](https://on.cypress.io/api/click), happened too fast during a transition.
+By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions, such as [`.type()`](https://on.cypress.io/api/type) or {% url `.click()` click %}, happened too fast during a transition.
 
 Cypress will continuously attempt to interact with the element until it eventually times out. If you'd like to force Cypress to interact with the element there are a few options:
 

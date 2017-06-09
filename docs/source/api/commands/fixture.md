@@ -226,7 +226,7 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 # See also
 
 - [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
-- [readFile](https://on.cypress.io/api/readfile)
+- {% url `cy.readFile()` readfile %}
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
-- [route](https://on.cypress.io/api/route)
-- [then](https://on.cypress.io/api/then)
+- {% url `cy.route()` route %}
+- {% url `.then()` then %}

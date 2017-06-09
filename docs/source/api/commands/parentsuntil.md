@@ -109,7 +109,7 @@ When clicking on `parentsUntil` within the command log, the console outputs the 
 
 # See also
 
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.prevUntil()` prevuntil %}
+- {% url `.nextUntil()` nextuntil %}

@@ -234,4 +234,4 @@ When clicking on `assert` within the command log, the console outputs the follow
 # See also
 
 - [Making Assertions](https://on.cypress.io/guides/making-assertions)
-- [should](https://on.cypress.io/api/should)
+- {% url `.should()` should %}

@@ -76,4 +76,4 @@ When clicking on `document` within the command log, the console outputs the foll
 
 # See also
 
-- [window](https://on.cypress.io/api/window)
+- {% url `cy.window()` window %}

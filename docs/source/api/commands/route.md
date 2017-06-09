@@ -238,7 +238,7 @@ cy.route('DELETE', '/users', {})
 
 ## Using Fixtures as Responses
 
-Instead of writing a response inline you can automatically connect a response with a [fixture](https://on.cypress.io/api/fixture).
+Instead of writing a response inline you can automatically connect a response with a {% url `cy.fixture()` fixture %}.
 
 ```javascript
 cy.server()
@@ -460,8 +460,8 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 # See also
 
 - {% url `.as()` as %}
-- [fixture](https://on.cypress.io/api/fixture)
+- {% url `cy.fixture()` fixture %}
 - [Guide: Network Requests](https://on.cypress.io/guides/network-requests-xhr)
 - [Recipe: Loggin in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
-- [server](https://on.cypress.io/api/server)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `cy.server()` server %}
+- {% url `cy.wait()` wait %}

@@ -237,6 +237,6 @@ When clicking on `wait` within the command log, the console outputs the followin
 # See also
 
 - {% url `.as()` as %}
-- [route](https://on.cypress.io/api/route)
-- [server](https://on.cypress.io/api/server)
-- [spread](https://on.cypress.io/api/spread)
+- {% url `cy.route()` route %}
+- {% url `cy.server()` server %}
+- {% url `.spread()` spread %}

@@ -106,5 +106,5 @@ You can stop the `.each()` loop early by returning `false` in the callback funct
 
 # See also
 
-- [spread](https://on.cypress.io/api/spread)
-- [then](https://on.cypress.io/api/then)
+- {% url `.spread()` spread %}
+- {% url `.then()` then %}

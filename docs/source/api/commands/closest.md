@@ -81,9 +81,9 @@ When clicking on the `closest` command within the command log, the console outpu
 # See also
 
 - {% url `.first()` first %}
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
-- [prev](https://on.cypress.io/api/prev)
-- [prevAll](https://on.cypress.io/api/prevall)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.parentsUntil()` parentsuntil %}
+- {% url `.prev()` prev %}
+- {% url `.prevAll()` prevall %}
+- {% url `.prevUntil()` prevuntil %}

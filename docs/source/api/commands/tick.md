@@ -3,7 +3,7 @@ title: tick
 comments: true
 ---
 
-Move time after overriding a native time function with [`cy.clock()`](https://on.cypress.io/api/clock).
+Move time after overriding a native time function with {% url `cy.clock()` clock %}.
 
 {% note warning %}
 [`cy.clock`](https://on.cypress.io/api/clock) must be called before `cy.tick` in order to override native time functions first.
@@ -97,5 +97,5 @@ When clicking on the `tick` command within the command log, the console outputs 
 - {% url `cy.clock()` clock %}
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [spy](https://on.cypress.io/api/spy)
-- [stub](https://on.cypress.io/api/stub)
+- {% url `cy.spy()` spy %}
+- {% url `cy.stub()` stub %}

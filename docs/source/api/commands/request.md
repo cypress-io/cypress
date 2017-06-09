@@ -216,4 +216,4 @@ In other words, `cy.request()` transparently performs all of the underlying func
 - [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 - [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
-- [visit](https://on.cypress.io/api/visit)
+- {% url `cy.visit()` visit %}

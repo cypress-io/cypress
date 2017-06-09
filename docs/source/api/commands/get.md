@@ -140,4 +140,4 @@ When clicking on the `get` command within the command log, the console outputs t
 - {% url `.as()` as %}
 - {% url `cy.contains()` contains %}
 - {% url `.find()` find %}
-- [within](https://on.cypress.io/api/within)
+- {% url `.within()` within %}

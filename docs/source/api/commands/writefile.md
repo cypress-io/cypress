@@ -155,5 +155,5 @@ When clicking on the `writeFile` command within the command log, the console out
 
 # See also
 
-- [readFile](https://on.cypress.io/api/readfile)
+- {% url `cy.readFile()` readfile %}
 - [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)

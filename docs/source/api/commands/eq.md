@@ -116,6 +116,6 @@ When clicking on the `eq` command within the command log, the console outputs th
 # See also
 
 - {% url `.first()` first %}
-- [last](https://on.cypress.io/api/last)
-- [next](https://on.cypress.io/api/next)
-- [prev](https://on.cypress.io/api/prev)
+- {% url `.last()` last %}
+- {% url `.next()` next %}
+- {% url `.prev()` prev %}

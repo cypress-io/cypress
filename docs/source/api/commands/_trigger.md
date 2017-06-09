@@ -173,8 +173,8 @@ When clicking on `trigger` within the command log, the console outputs the follo
 - {% url `.blur()` blur %}
 - {% url `.check()` check %}
 - {% url `.click()` click %}
-- [focus](https://on.cypress.io/api/focus)
-- [select](https://on.cypress.io/api/select)
-- [submit](https://on.cypress.io/api/submit)
-- [type](https://on.cypress.io/api/type)
-- [uncheck](https://on.cypress.io/api/uncheck)
+- {% url `.focus()` focus %}
+- {% url `.select()` select %}
+- {% url `.submit()` submit %}
+- {% url `.type()` type %}
+- {% url `.uncheck()` uncheck %}

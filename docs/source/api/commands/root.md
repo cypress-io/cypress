@@ -90,5 +90,5 @@ When clicking on the `root` command within the command log, the console outputs 
 
 # See also
 
-- [get](https://on.cypress.io/api/get)
-- [within](https://on.cypress.io/api/within)
+- {% url `cy.get()` get %}
+- {% url `.within()` within %}

@@ -118,4 +118,4 @@ When clicking on the `spy-1` event within the command log, the console outputs t
 - {% url `cy.clock()` clock %}
 - [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [stub](https://on.cypress.io/api/stub)
+- {% url `cy.stub()` stub %}

@@ -208,5 +208,5 @@ When clicking on `click` within the command log, the console outputs the followi
 
 - {% url `.check()` check %}
 - {% url `.dblclick()` dblclick %}
-- [select](https://on.cypress.io/api/select)
-- [submit](https://on.cypress.io/api/submit)
+- {% url `.select()` select %}
+- {% url `.submit()` submit %}

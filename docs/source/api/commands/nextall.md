@@ -112,6 +112,6 @@ When clicking on `nextAll` within the command log, the console outputs the follo
 
 # See also
 
-- [next](https://on.cypress.io/api/next)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
-- [prevAll](https://on.cypress.io/api/prevall)
+- {% url `.next()` next %}
+- {% url `.nextUntil()` nextuntil %}
+- {% url `.prevAll()` prevall %}

@@ -80,5 +80,5 @@ When clicking on `window` within the command log, the console outputs the follow
 
 # See also
 
-- [visit](https://on.cypress.io/api/visit)
+- {% url `cy.visit()` visit %}
 - {% url `cy.document()` document %}

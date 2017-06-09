@@ -48,7 +48,7 @@ Although Cypress tries to enforce this limitation, it is possible for your appli
 
 **Examples of test cases that will error due to superdomain limitations:**
 
-1. [`.click()`](https://on.cypress.io/api/click) an `<a>` with an `href` to a different superdomain.
+1. {% url `.click()` click %} an `<a>` with an `href` to a different superdomain.
 2. [`.submit()`](https://on.cypress.io/api/submit) a `<form>` that causes your web server to redirect to you a different superdomain.
 3. Issue a JavaScript redirect in your application, such as `window.location.href = '...'`, to a different superdomain.
 

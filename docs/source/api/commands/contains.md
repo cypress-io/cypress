@@ -326,5 +326,5 @@ When clicking on the `contains` command within the command log, the console outp
 
 # See also
 
-- [get](https://on.cypress.io/api/get)
-- [within](https://on.cypress.io/api/within)
+- {% url `cy.get()` get %}
+- {% url `.within()` within %}

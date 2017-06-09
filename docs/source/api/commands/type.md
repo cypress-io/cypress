@@ -424,5 +424,5 @@ When clicking on `type` within the command log, the console outputs the followin
 - {% url `.blur()` blur %}
 - {% url `.clear()` clear %}
 - {% url `.click()` click %}
-- [focus](https://on.cypress.io/api/focus)
-- [submit](https://on.cypress.io/api/submit)
+- {% url `.focus()` focus %}
+- {% url `.submit()` submit %}

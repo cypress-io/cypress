@@ -186,8 +186,8 @@ Cypress will automatically apply the server and routes to the very next `cy.visi
 
 # See also
 
-- [go](https://on.cypress.io/api/go)
+- {% url `cy.go()` go %}
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
-- [request](https://on.cypress.io/api/request)
-- [server](https://on.cypress.io/api/server)
+- {% url `cy.request()` request %}
+- {% url `cy.server()` server %}

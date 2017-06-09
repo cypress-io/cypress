@@ -88,5 +88,5 @@ When clicking on `hash` within the command log, the console outputs the followin
 
 # See also
 
-- [location](https://on.cypress.io/api/location)
-- [url](https://on.cypress.io/api/url)
+- {% url `cy.location()` location %}
+- {% url `cy.url()` url %}

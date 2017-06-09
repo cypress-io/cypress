@@ -111,7 +111,7 @@ When clicking on `nextUntil` within the command log, the console outputs the fol
 
 # See also
 
-- [next](https://on.cypress.io/api/next)
-- [nextAll](https://on.cypress.io/api/nextall)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
+- {% url `.next()` next %}
+- {% url `.nextAll()` nextall %}
+- {% url `.parentsUntil()` parentsuntil %}
+- {% url `.prevUntil()` prevuntil %}

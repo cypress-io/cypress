@@ -98,5 +98,5 @@ When clicking on the `focus` command within the command log, the console outputs
 
 - {% url `.blur()` blur %}
 - {% url `.click()` click %}
-- [focused](https://on.cypress.io/api/focused)
-- [type](https://on.cypress.io/api/type)
+- {% url `cy.focused()` focused %}
+- {% url `.type()` type %}

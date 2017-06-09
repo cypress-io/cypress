@@ -104,5 +104,5 @@ When clicking on the `go` command within the command log, the console outputs th
 
 # See also
 
-- [reload](https://on.cypress.io/api/reload)
-- [visit](https://on.cypress.io/api/visit)
+- {% url `cy.reload()` reload %}
+- {% url `cy.visit()` visit %}

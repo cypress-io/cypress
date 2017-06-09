@@ -132,8 +132,8 @@ cy.get('button').click().then(function($button){
 # See also
 
 - {% url `.and()` and %}
-- [invoke](https://on.cypress.io/api/invoke)
+- {% url `.invoke()` invoke %}
 - [Issuing Commands](https://on.cypress.io/guides/issuing-commands)
-- [its](https://on.cypress.io/api/its)
-- [should](https://on.cypress.io/api/should)
-- [spread](https://on.cypress.io/api/spread)
+- {% url `.its()` its %}
+- {% url `.should()` should %}
+- {% url `.spread()` spread %}

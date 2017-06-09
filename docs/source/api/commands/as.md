@@ -95,6 +95,6 @@ Aliases of routes display in the routes instrument panel:
 
 # See also
 
-- [get](https://on.cypress.io/api/get)
+- {% url `cy.get()` get %}
 - [Using Aliases](https://on.cypress.io/guides/using-aliases)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `cy.wait()` wait %}

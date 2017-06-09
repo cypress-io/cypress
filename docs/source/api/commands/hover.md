@@ -51,7 +51,7 @@ cy.get('.content').trigger('mouseover')
 
 # See also
 
-- [invoke](https://on.cypress.io/api/invoke)
+- {% url `.invoke()` invoke %}
 - [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
 <!-- - [trigger](https://on.cypress.io/api/trigger) -->
-- [wrap](https://on.cypress.io/api/wrap)
+- {% url `cy.wrap()` wrap %}

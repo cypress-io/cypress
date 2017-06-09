@@ -85,6 +85,6 @@ When clicking on `reload` within the command log, the console outputs the follow
 
 # See also
 
-- [go](https://on.cypress.io/api/go)
-- [location](https://on.cypress.io/api/location)
-- [visit](https://on.cypress.io/api/visit)
+- {% url `cy.go()` go %}
+- {% url `cy.location()` location %}
+- {% url `cy.visit()` visit %}

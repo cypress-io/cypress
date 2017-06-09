@@ -160,6 +160,6 @@ When clicking on `its` within the command log, the console outputs the following
 
 # See also
 
-- [invoke](https://on.cypress.io/api/invoke)
-- [then](https://on.cypress.io/api/then)
-- [wrap](https://on.cypress.io/api/wrap)
+- {% url `.invoke()` invoke %}
+- {% url `.then()` then %}
+- {% url `cy.wrap()` wrap %}

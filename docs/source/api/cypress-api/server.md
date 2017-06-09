@@ -62,4 +62,4 @@ A great place to put this configuration is in your `cypress/support/defaults.js`
 
 # See also
 
-- [server](https://on.cypress.io/api/server)
+- {% url `cy.server()` server %}

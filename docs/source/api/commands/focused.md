@@ -83,4 +83,4 @@ When clicking on the `focused` command within the command log, the console outpu
 # See also
 
 - {% url `.blur()` blur %}
-- [focus](https://on.cypress.io/api/focus)
+- {% url `.focus()` focus %}

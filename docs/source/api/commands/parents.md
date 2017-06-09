@@ -90,5 +90,5 @@ When clicking on the `parents` command within the command log, the console outpu
 # See also
 
 - {% url `.children()` children %}
-- [parent](https://on.cypress.io/api/parent)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
+- {% url `.parent()` parent %}
+- {% url `.parentsUntil()` parentsuntil %}

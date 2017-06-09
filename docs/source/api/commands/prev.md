@@ -112,6 +112,6 @@ When clicking on `prev` within the command log, the console outputs the followin
 
 # See also
 
-- [next](https://on.cypress.io/api/next)
-- [prevAll](https://on.cypress.io/api/prevall)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
+- {% url `.next()` next %}
+- {% url `.prevAll()` prevall %}
+- {% url `.prevUntil()` prevuntil %}

@@ -99,14 +99,14 @@ comments: false
 
 **Overview:**
 
-- We have officially implemented our [Sinon.JS](http://sinonjs.org/docs/) integration: adding [`cy.stub()`](https://on.cypress.io/api/stub), [`cy.spy()`](https://on.cypress.io/api/spy), [`cy.clock()`](https://on.cypress.io/api/clock), and [`cy.tick()`](https://on.cypress.io/api/tick). We've matched Sinon's API's and added `sinon-as-promised` and `chai-sinon`. In addition we've fixed Sinon performance issues, and improved the display of assertion passes and failures.
+- We have officially implemented our [Sinon.JS](http://sinonjs.org/docs/) integration: adding [`cy.stub()`](https://on.cypress.io/api/stub), [`cy.spy()`](https://on.cypress.io/api/spy), {% url `cy.clock()` clock %}, and [`cy.tick()`](https://on.cypress.io/api/tick). We've matched Sinon's API's and added `sinon-as-promised` and `chai-sinon`. In addition we've fixed Sinon performance issues, and improved the display of assertion passes and failures.
 - These new API's will work well in both `unit` tests and `integration` tests.
 
 **Features:**
 
 - You can now use [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy) synchronously. These both match the Sinon API identically. We will display `stub/spy` calls in the command log and provide the call count, arguments, context, and return values when you click on the log. Stubs are automatically reset between tests.  Fixes [#377](https://github.com/cypress-io/cypress/issues/377).
 - We've added our own special aliasing flavor to [`cy.stub()`](https://on.cypress.io/api/stub) and [`cy.spy()`](https://on.cypress.io/api/spy). You can use the {% url `.as()` as %} command and we will associate spy and stub invocations (the same way we do with XHR aliasing and route matching).
-- We've added [`cy.clock()`](https://on.cypress.io/api/clock) and [`cy.tick()`](https://on.cypress.io/api/tick) which are both asynchronous methods to modify timers in your application under test. We automatically apply clock (even if you invoke it before your first [`cy.visit()`](https://on.cypress.io/api/visit)) and will automatically reapply it after page load. [`cy.tick()`](https://on.cypress.io/api/tick) will enable you to control the amount of time you want passed in your application. This is great for controlling *throttled* or *debounced* functions.
+- We've added {% url `cy.clock()` clock %} and [`cy.tick()`](https://on.cypress.io/api/tick) which are both asynchronous methods to modify timers in your application under test. We automatically apply clock (even if you invoke it before your first [`cy.visit()`](https://on.cypress.io/api/visit)) and will automatically reapply it after page load. [`cy.tick()`](https://on.cypress.io/api/tick) will enable you to control the amount of time you want passed in your application. This is great for controlling *throttled* or *debounced* functions.
 - `sinon-as-promised` is automatically applied under the hood which extends Sinon and provides the `.resolves(...)` and `.rejects(...)` API's which makes it easy to stub promise returning functions.
 - We support and display multiple sub spies when using Sinon's `.withArgs(...)` function.
 
@@ -494,7 +494,7 @@ comments: false
 
 **Features:**
 
-- You can now pass keyboard modifiers such as `ctrl`, `cmd`, `shift`, and `alt` to [`.type()`](https://on.cypress.io/api/type). In addition we've added support for not "releasing" these keys so they can affect other actions such as [`.click()`](https://on.cypress.io/api/click). Addresses [#196](https://github.com/cypress-io/cypress/issues/196).
+- You can now pass keyboard modifiers such as `ctrl`, `cmd`, `shift`, and `alt` to [`.type()`](https://on.cypress.io/api/type). In addition we've added support for not "releasing" these keys so they can affect other actions such as {% url `.click()` click %}. Addresses [#196](https://github.com/cypress-io/cypress/issues/196).
 - You can now type into the `<body>` or `document` as opposed to previously *having* to target a valid focusable element. This is useful in situations where you're testing keyboard shortcuts and do not want to target a specific element. Addresses [#150](https://github.com/cypress-io/cypress/issues/150).
 - There is a new command [`cy.readFile()`](https://on.cypress.io/api/readfile) that reads files on your file system and changes the subject to the contents. Addresses [#179](https://github.com/cypress-io/cypress/issues/179).
 - There is a new command [`cy.writeFile()`](https://on.cypress.io/api/writefile) that creates and/or writes contents to files on your file system. Addresses [#179](https://github.com/cypress-io/cypress/issues/179).
@@ -581,7 +581,7 @@ comments: false
 
 **Bugfixes:**
 
-- Fixed regression caused by `0.16.2` where a failed [`cy.contains()`](https://on.cypress.io/api/contains) would not be cancelled and would continue to run and display failed assertions in between test runs (without a full page refresh). Fixes [#174](https://github.com/cypress-io/cypress/issues/174).
+- Fixed regression caused by `0.16.2` where a failed {% url `cy.contains()` contains %} would not be cancelled and would continue to run and display failed assertions in between test runs (without a full page refresh). Fixes [#174](https://github.com/cypress-io/cypress/issues/174).
 
 # 0.16.3
 
@@ -619,19 +619,19 @@ comments: false
 - When running in [Circle CI](https://circleci.com/), we automatically export screenshots as artifacts which makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything. If you're using [Travis CI](https://travis-ci.org/), you'll need to upload artifacts to an `s3 bucket`. This is a small slice of what is coming to help diagnose and understand errors in CI. Also in `0.17.0` we will automatically scroll the tests and more intelligently and open / close test commands so you can visually see what happened. Currently you may not see the test command's failure in the Command Log due to the view not scrolling.
 - Added new [`.each()`](https://on.cypress.io/api/each) command which iterates serially on a collection yielding the iteratee, the index, and the collection. Addresses [#156](https://github.com/cypress-io/cypress/issues/156).
 - [`cy.route()`](https://on.cypress.io/api/route) can now accept a single function and/or you can pass a function to the `response` property. This allows you to lazily evaluate routing responses. Great for referencing [fixtures](https://on.cypress.io/guides/creating-fixtures). Addresses [#152](https://github.com/cypress-io/cypress/issues/152).
-- [`cy.contains()`](https://on.cypress.io/api/contains) now accepts a regular expression. Addresses [#158](https://github.com/cypress-io/cypress/issues/158).
+- {% url `cy.contains()` contains %} now accepts a regular expression. Addresses [#158](https://github.com/cypress-io/cypress/issues/158).
 - [`.type()`](https://on.cypress.io/api/type) now accepts `{downarrow}` and `{uparrow}`. We do not move the caret but do fire all the proper events. Addresses [#157](https://github.com/cypress-io/cypress/issues/157).
 
 **Bugfixes:**
 
 - [`cy.exec()`](https://on.cypress.io/api/exec) now outputs additional `stderr` and `stdout` information. It additionally will automatically `source` your `$SHELL` which makes GUI apps behave as if they've been launched from your terminal. Fixes [#153](https://github.com/cypress-io/cypress/issues/153) and fixes [#154](https://github.com/cypress-io/cypress/issues/154).
 - [`.then()`](https://on.cypress.io/api/then) yielding nested subjects.
-- [`cy.contains()`](https://on.cypress.io/api/contains) no longer returns the last element found when siblings both contain the same content. Fixes [#158](https://github.com/cypress-io/cypress/issues/158).
+- {% url `cy.contains()` contains %} no longer returns the last element found when siblings both contain the same content. Fixes [#158](https://github.com/cypress-io/cypress/issues/158).
 - Cypress no longer errors when you return a raw DOM element. It now correctly wraps this as the new subject.
 
 **Misc:**
 
-- [`cy.contains()`](https://on.cypress.io/api/contains) now provides an even more specific error message when it was scoped to a particular DOM element and contained a selector. Fixes [#160](https://github.com/cypress-io/cypress/issues/160).
+- {% url `cy.contains()` contains %} now provides an even more specific error message when it was scoped to a particular DOM element and contained a selector. Fixes [#160](https://github.com/cypress-io/cypress/issues/160).
 - You will now see a very specific error message when we detect that you've mixed up `async` and `sync` code in a [`.then()`](https://on.cypress.io/api/then) callback function. An example would be queuing up a new cypress command but then synchronously returning a different value.
 
 # 0.16.1
@@ -673,7 +673,7 @@ comments: false
 - Running tests in Cypress now requires either Chrome, Chromium, or Canary to be installed on your OS environment. We intend to expand support for more browsers in the future, but for now, only these 3 are supported.
 - Removed support for [`Cypress.Cookies.get`](https://on.cypress.io/api/cookies), [`Cypress.Cookies.set`](https://on.cypress.io/api/cookies) and [`Cypress.Cookies.remove`](https://on.cypress.io/api/cookies).
 - Changed return of [`cy.getCookies()`](https://on.cypress.io/api/getcookies) to return an array of cookies, each with properties include name, value, etc.
-- Changed return of [`cy.clearCookies()`](https://on.cypress.io/api/clearcookies) to return null (previously was returning Cookie that was cleared).
+- Changed return of {% url `cy.clearCookies()` clearcookies %} to return null (previously was returning Cookie that was cleared).
 - [`Cypress.Cookies.debug`](https://on.cypress.io/api/cookies) has been temporarily disabled and will be re-enabled later.
 - Browsers are spawned in a Cypress specific profile so that we can maintain a clean state apart of your regular browsing usage. You will notice that your extensions are no longer installed. This is on purpose. 3rd party extensions can often get in the way of Cypress and cause failures. However, developer specific extensions for Angular, Ember, and React do not cause any issues but you'll want to reinstall them. You only have to install them once and they will persist.
 - The `whitelist` callback function of [`Cypress.Cookies.defaults`](https://on.cypress.io/api/cookies#section-defaults-usage) now receives a `cookie object` instead of just the `cookies name` as a string.
@@ -683,7 +683,7 @@ comments: false
 - When a project is initially run from the desktop app, you can now choose to run Cypress in a select number of browsers including: Chrome, Chromium, or Canary (depending on what's installed on your OS).
 - Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/browser-management)
 - We automatically spawn Chrome in a **custom theme** so you can visually distinguish the difference between browser sessions spawned with Cypress vs your normal sessions. We know this may feel a little jarring because you're used to running Cypress alongside your other tabs. You will now see 2 chrome icons in your dock and you'll need to switch between them. We know this is problematic and confusing and we're looking into **changing the icon** of the Chrome running Cypress so it's easier to tell the Chrome sessions apart.
-- Added new commands to handle getting, setting, and clearing cookies: [`cy.clearCookie()`](https://on.cypress.io/api/clearcookie), [`cy.getCookie()`](https://on.cypress.io/api/getcookie), and [`cy.setCookie()`](https://on.cypress.io/api/setcookie).
+- Added new commands to handle getting, setting, and clearing cookies: {% url `cy.clearCookie()` clearcookie %}, [`cy.getCookie()`](https://on.cypress.io/api/getcookie), and [`cy.setCookie()`](https://on.cypress.io/api/setcookie).
 - All the `cy.cookie` commands have been upgraded to take new options and can do much more powerful things outside of the JavaScript sandbox.
 - Upgraded the Chromium version running headlessly and in CI from `47` to `49`.
 - There is a new [`cy.exec()`](https://on.cypress.io/api/exec) command that can execute any arbitrary system command. Additionally there is a new [`execTimeout` configurable option](https://on.cypress.io/guides/configuration#section-global) which is set to `60s` by default. Fixes [#126](https://github.com/cypress-io/cypress/issues/126).
@@ -929,9 +929,9 @@ More Info:
 - Tests should reload inside of Cypress faster when they are changed.
 - Better error messages when a command times out waiting for a promise to resolve. Fixes [#108](https://github.com/cypress-io/cypress/issues/108).
 - [`cy.viewport('ipad-2')`](https://on.cypress.io/api/viewport) now displays by default in portrait. Landscape orientation is now properly landscape. Fixes [#100](https://github.com/cypress-io/cypress/issues/100).
-- [`.click()`](https://on.cypress.io/api/click) will now properly click within an element's bounding box when a `position` option is passed and the calculated coordinates are a fraction. This previously forced the click to happen outside of the element. Fixes [#99](https://github.com/cypress-io/cypress/issues/99).
+- {% url `.click()` click %} will now properly click within an element's bounding box when a `position` option is passed and the calculated coordinates are a fraction. This previously forced the click to happen outside of the element. Fixes [#99](https://github.com/cypress-io/cypress/issues/99).
 - `clientX` and `clientY` event properties are now correctly calculated for elements when the page is scrolled. Fixes [#98](https://github.com/cypress-io/cypress/issues/98).
-- [`.check()`](https://on.cypress.io/api/check) and [`.uncheck()`](https://on.cypress.io/api/uncheck) now correctly filter down the subject when a value is passed as an option. Fixes [#94](https://github.com/cypress-io/cypress/issues/94).
+- {% url `.check()` check %} and [`.uncheck()`](https://on.cypress.io/api/uncheck) now correctly filter down the subject when a value is passed as an option. Fixes [#94](https://github.com/cypress-io/cypress/issues/94).
 - The desktop GUI will now display your email address when you have not set a name in GitHub.
 
 **Misc:**
@@ -1021,11 +1021,11 @@ Known Issues:
 **Features:**
 
 - Added `waitForAnimations` and `animationDistanceThreshold` [configuration options](https://on.cypress.io/guides/configuration)
-- Cypress now automatically detects and waits for an element which is animating to stop animating. The threshold that Cypress considers *animating* is set to a distance of `5px` per `60fps`. In other words, if your element is moving too fast for a user to interact with, then Cypress considers the element animating and will wait until it finishes before attempting to interact with it. When we say 'interact' we mean apply command actions like [`.click()`](https://on.cypress.io/api/click), [`.select()`](https://on.cypress.io/api/select), [`.type()`](https://on.cypress.io/api/type), [`.check()`](https://on.cypress.io/api/check), etc. Waiting for animations prevents a series of edge cases and weird bugs where Cypress was interacting with elements **too** quickly which might cause undesired side effects in your application which are hard to track down. The downside to this implementation is that for every action Cypress must wait at least 2 run loops before applying actions. This slows down every action command by about `32ms`. If your app does not use animations you may wish to turn off this behavior in your `cypress.json` file.
+- Cypress now automatically detects and waits for an element which is animating to stop animating. The threshold that Cypress considers *animating* is set to a distance of `5px` per `60fps`. In other words, if your element is moving too fast for a user to interact with, then Cypress considers the element animating and will wait until it finishes before attempting to interact with it. When we say 'interact' we mean apply command actions like {% url `.click()` click %}, [`.select()`](https://on.cypress.io/api/select), [`.type()`](https://on.cypress.io/api/type), {% url `.check()` check %}, etc. Waiting for animations prevents a series of edge cases and weird bugs where Cypress was interacting with elements **too** quickly which might cause undesired side effects in your application which are hard to track down. The downside to this implementation is that for every action Cypress must wait at least 2 run loops before applying actions. This slows down every action command by about `32ms`. If your app does not use animations you may wish to turn off this behavior in your `cypress.json` file.
 
 **Bugfixes:**
 
-- Prevent `undefined` error when attempting to [`.click()`](https://on.cypress.io/api/click) an element which is fixed position when it is covered by another element. Cypress now correctly provides why it cannot click the element in question. Fixes [#90](https://github.com/cypress-io/cypress/issues/90).
+- Prevent `undefined` error when attempting to {% url `.click()` click %} an element which is fixed position when it is covered by another element. Cypress now correctly provides why it cannot click the element in question. Fixes [#90](https://github.com/cypress-io/cypress/issues/90).
 - Prevent infinite loop in edge cases when checking whether an element was hidden
 
 **Misc:**
@@ -1046,7 +1046,7 @@ Known Issues:
 - An element is considered visible if it can be "interactive" with a user. In other words, if the user is able to click, type, drag, or otherwise physically interact with the element it is considered visible.
 - Because of the additional complexities of how Cypress considers an element `visible`, we now have added the **exact** reason why an element is not visible when throwing an error. This means you'll see errors detailing whether an element or its parents have `display: none`, `visibility: hidden`, or whether an element is considered hidden because its effective `width` or `height` is zero. Whatever the reason, Cypress will indicate why your element is considered hidden.
 - Exposed [`Cypress.Dom.isHidden`](https://on.cypress.io/api/dom) which holds the logic for determining an element's visibility. Modify this to change the rules.
-- Upgraded [`.select()`](https://on.cypress.io/api/select) to automatically retry when the `<select>` is disabled, its matching `<option>` is disabled, or when Cypress cannot find a matching `<option>`. This more correctly aligns with the behavior of other actions like [`.click()`](https://on.cypress.io/api/click), which automatically retry until the element is ready to receive the action.
+- Upgraded [`.select()`](https://on.cypress.io/api/select) to automatically retry when the `<select>` is disabled, its matching `<option>` is disabled, or when Cypress cannot find a matching `<option>`. This more correctly aligns with the behavior of other actions like {% url `.click()` click %}, which automatically retry until the element is ready to receive the action.
 
 **Bugfixes:**
 
@@ -1177,7 +1177,7 @@ Known Issues:
 
 - Exposed `visitTimeout` and `requestTimeout` [configuration options](https://on.cypress.io/guides/configuration)
 - Increased `visitTimeout` from `20s` to `30s`
-- [`.click()`](https://on.cypress.io/api/click) will now throw if you are attempting to click more than 1 element. Pass `{multiple: true}` to enable this behavior again. Each element will be clicked serially and inserted into the Command Log.
+- {% url `.click()` click %} will now throw if you are attempting to click more than 1 element. Pass `{multiple: true}` to enable this behavior again. Each element will be clicked serially and inserted into the Command Log.
 
 # 0.12.5
 
@@ -1589,7 +1589,7 @@ Deprecations:
 **Bugfixes:**
 
 - Running a specific test won't open/close immediately when starting up (fixes weird flickering effect)
-- [`.check()`](https://on.cypress.io/api/check) and [`.uncheck()`](https://on.cypress.io/api/uncheck) commands will now correctly "end" even if hey were `noop` due to the element already being in a checked or unchecked state.
+- {% url `.check()` check %} and [`.uncheck()`](https://on.cypress.io/api/uncheck) commands will now correctly "end" even if hey were `noop` due to the element already being in a checked or unchecked state.
 
 **Misc:**
 
@@ -1701,7 +1701,7 @@ Deprecations:
 
 **Features:**
 
-- [`.click()`](https://on.cypress.io/api/click), [`.type()`](https://on.cypress.io/api/type), [`.clear()`](https://on.cypress.io/api/clear), `.select()`](https://on.cypress.io/api/select), [`.check()`](https://on.cypress.io/api/check), [`.uncheck()`](https://on.cypress.io/api/ncheck) now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
+- {% url `.click()` click %}, [`.type()`](https://on.cypress.io/api/type), {% url `.clear()` clear %}, `.select()`](https://on.cypress.io/api/select), {% url `.check()` check %}, [`.uncheck()`](https://on.cypress.io/api/ncheck) now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
 
 **Misc:**
 
@@ -1713,15 +1713,15 @@ Deprecations:
 
 **Features:**
 
-- [`cy.contains()`](https://on.cypress.io/api/contains), [`cy.get()`](https://on.cypress.io/api/get), and `traversal commands` will now all log out heir last known `$el` on failure. This means the `$el` will be highlight during Command Log hovering, and will display in the console on click. his should make debugging failed DOM based commands much easier. Fixes [#52](https://github.com/cypress-io/cypress/issues/52).
+- {% url `cy.contains()` contains %}, [`cy.get()`](https://on.cypress.io/api/get), and `traversal commands` will now all log out heir last known `$el` on failure. This means the `$el` will be highlight during Command Log hovering, and will display in the console on click. his should make debugging failed DOM based commands much easier. Fixes [#52](https://github.com/cypress-io/cypress/issues/52).
 
 **Bugfixes:**
 
-- Fixed edge case with [`cy.contains()`](https://on.cypress.io/api/contains) and command options `visible` and `exist` where it would always fail ven though the matched element was in the correct state.
+- Fixed edge case with {% url `cy.contains()` contains %} and command options `visible` and `exist` where it would always fail ven though the matched element was in the correct state.
 
 **Misc:**
 
-- [`cy.contains()`](https://on.cypress.io/api/contains) now throws when provided the command option: `length` because it will only ever return 1` element.
+- {% url `cy.contains()` contains %} now throws when provided the command option: `length` because it will only ever return 1` element.
 
 # 0.9.3
 
@@ -1732,8 +1732,8 @@ Deprecations:
 - Proxied jQuery: `$` onto `cy` as `cy.$` and specific class methods: `Event`, `Deferred`, `ajax`, `get`, `getJSON`, `getScript`, `post`
 - Proxied `moment` onto `cy` as `cy.moment`
 - The `url` will now automatically be restored when hovering over the Command Log to indicate the state of the URL at the time the command ran.
-- [`.click()`](https://on.cypress.io/api/click) now accepts an optional: `position` argument (`center`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`). Center is still the default.
-- [`.click()`](https://on.cypress.io/api/click) now accepts an optional `x` and `y` coordinate argument, which is relative to the top left corner of the element. Fixes [#50](https://github.com/cypress-io/cypress/issues/50).
+- {% url `.click()` click %} now accepts an optional: `position` argument (`center`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`). Center is still the default.
+- {% url `.click()` click %} now accepts an optional `x` and `y` coordinate argument, which is relative to the top left corner of the element. Fixes [#50](https://github.com/cypress-io/cypress/issues/50).
 - [Click docs have been updated](https://on.cypress.io/api/click) to reflect these changes.
 
 **Bugfixes:**
@@ -1777,7 +1777,7 @@ Deprecations:
 **Misc:**
 
 - Deprecated `Cypress.command`, instead use `Cypress.Log.command` to output a Command Log. Updated scaffolding on new projects to reflect this change.
-- [`cy.contains()`](https://on.cypress.io/api/contains) now outputs much more explicit error messages when given command options. Fixes [#49](../ssues/49).
+- {% url `cy.contains()` contains %} now outputs much more explicit error messages when given command options. Fixes [#49](../ssues/49).
 - [`cy.route()`](https://on.cypress.io/api/route) no longer validates `response` value when `{respond: false}` is passed in as options. Fixes [#48](https://github.com/cypress-io/cypress/issues/48).
 - [`.invoke()`](https://on.cypress.io/api/invoke) and [`.its()`](https://on.cypress.io/api/its) will now log out the $el if it's a DOM object, which will now correctly highlight the $el during a command revert. Additionally if these commands have been called on a DOM object, their `onConsole` message will include the DOM objects.
 
@@ -1816,8 +1816,8 @@ Deprecations:
 **Bugfixes:**
 
 - [`.select()`](https://on.cypress.io/api/select) will now fire a `focus` event on the `<select>` even if the window isn't in focus
-- [`.click()`](https://on.cypress.io/api/click) has been upgraded to be more intelligent about firing `focus` events, and now takes into account the previously focused element
-- [`.type()`](https://on.cypress.io/api/type) and [`.clear()`](https://on.cypress.io/api/clear) will not issue `change` events or `focus` events unnecessary when chaining together multiple actions which do not change the element or cause it to lose focus. Fixes [#47](https://github.com/cypress-io/cypress/issues/47).
+- {% url `.click()` click %} has been upgraded to be more intelligent about firing `focus` events, and now takes into account the previously focused element
+- [`.type()`](https://on.cypress.io/api/type) and {% url `.clear()` clear %} will not issue `change` events or `focus` events unnecessary when chaining together multiple actions which do not change the element or cause it to lose focus. Fixes [#47](https://github.com/cypress-io/cypress/issues/47).
 
 # 0.8.0
 
@@ -1845,7 +1845,7 @@ Deprecations:
 
 - Using [`.type()`](https://on.cypress.io/api/type) in an `input[type=number]` will no longer prepend the value. Fixes [#26](https://github.com/cypress-io/cypress/issues/26).
 - `[contenteditable]` elements can now be focused and blurred
-- `aborting` during [`.click()`](https://on.cypress.io/api/click) / [`.dblclick()`](https://on.cypress.io/api/dblclick) now correctly cancels remaining queued click/dblclick events
+- `aborting` during {% url `.click()` click %} / [`.dblclick()`](https://on.cypress.io/api/dblclick) now correctly cancels remaining queued click/dblclick events
 
 **Misc:**
 
@@ -1860,7 +1860,7 @@ Deprecations:
 
 **Bugfixes:**
 
-- Prevent infinite loop due to a trifecta of rare circumstances with [`.click()`](https://on.cypress.io/api/click). Clicking will now retry sync after it attempts to scroll past the element covering up the desired clickable element. Fixes [#46](https://github.com/cypress-io/cypress/issues/46).
+- Prevent infinite loop due to a trifecta of rare circumstances with {% url `.click()` click %}. Clicking will now retry sync after it attempts to scroll past the element covering up the desired clickable element. Fixes [#46](https://github.com/cypress-io/cypress/issues/46).
 
 # 0.7.5
 
@@ -1868,8 +1868,8 @@ Deprecations:
 
 **Bugfixes:**
 
-- [`.click()`](https://on.cypress.io/api/click) now takes into account being covered by a fixed positioned element and will increase the window's scroll offset to account for this. There are still more improvements to be made before this is bulletproof though.
-- [`cy.contains()`](https://on.cypress.io/api/contains) could potentially resolve to a null subject if the matching content was split across multiple nested children elements. This has been fixed and contains will now return the first, deepest element which contains text potentially spread over multiple text nodes and/or children elements.
+- {% url `.click()` click %} now takes into account being covered by a fixed positioned element and will increase the window's scroll offset to account for this. There are still more improvements to be made before this is bulletproof though.
+- {% url `cy.contains()` contains %} could potentially resolve to a null subject if the matching content was split across multiple nested children elements. This has been fixed and contains will now return the first, deepest element which contains text potentially spread over multiple text nodes and/or children elements.
 
 # 0.7.4
 
@@ -1877,7 +1877,7 @@ Deprecations:
 
 **Misc:**
 
-- Attempting to [`.click()`](https://on.cypress.io/api/click) a select element will now throw an error. The error guides you to using the `.select()`](https://on.cypress.io/api/select) command, as that is the command you should use to change a `<select>` value.
+- Attempting to {% url `.click()` click %} a select element will now throw an error. The error guides you to using the `.select()`](https://on.cypress.io/api/select) command, as that is the command you should use to change a `<select>` value.
 - [`cy.route()`](https://on.cypress.io/api/route) responses are now validated. If responses are `null` or `undefined` Cypress will throw a very specific error message.
 - Cypress will now display `cypress.json` parse errors when attempting to boot a project when there is a syntax error in `cypress.json`.
 
@@ -1984,11 +1984,11 @@ Deprecations:
 **Bugfixes:**
 
 - When Cypress detects a `page loading` event it will now clear out the subject so the next commands cannot reference previous page DOM elements
-- [`.check()`](https://on.cypress.io/api/check) and [`.uncheck()`](https://on.cypress.io/api/uncheck) will no longer output additional error'd commands when their associated `click` fails
+- {% url `.check()` check %} and [`.uncheck()`](https://on.cypress.io/api/uncheck) will no longer output additional error'd commands when their associated `click` fails
 
 **Misc:**
 
-- [`.type()`](https://on.cypress.io/api/type), [`.clear()`](https://on.cypress.io/api/clear), [`.check()`](https://on.cypress.io/api/check), `.uncheck()`](https://on.cypress.io/api/uncheck) now all take `{force: true}` options to force the click to happen and skip additional clickable checks
+- [`.type()`](https://on.cypress.io/api/type), {% url `.clear()` clear %}, {% url `.check()` check %}, `.uncheck()`](https://on.cypress.io/api/uncheck) now all take `{force: true}` options to force the click to happen and skip additional clickable checks
 - Now when you click the giant yellow failure messages if the error is a `CypressError` instead of logging nothing it will now find the command associated to that error and display the same message as if you clicked the failed command
 
 # 0.6.11
@@ -1997,13 +1997,13 @@ Deprecations:
 
 **Bugfixes:**
 
-- [`.clear()`](https://on.cypress.io/api/clear) and [`.type()`](https://on.cypress.io/api/type) no longer output additional error'd commands hen their associated `click` fails
+- {% url `.clear()` clear %} and [`.type()`](https://on.cypress.io/api/type) no longer output additional error'd commands hen their associated `click` fails
 - Changed scrolling elements into view to use top strategy instead of bottom which fixes times where the middle of an element was not yet in he viewport. Fixes [#42](https://github.com/cypress-io/cypress/issues/42).
 
 **Misc:**
 
 - [`.submit()`](https://on.cypress.io/api/submit) now errors if its been called on >1 form element. Fixes [#41](https://github.com/cypress-io/cypress/issues/41).
-- Coordinates and hitboxes are now logged and displayed on [`.clear()`](https://on.cypress.io/api/clear) and [`.type()`](https://on.cypress.io/pi/type)
+- Coordinates and hitboxes are now logged and displayed on {% url `.clear()` clear %} and [`.type()`](https://on.cypress.io/pi/type)
 
 # 0.6.10
 
@@ -2015,9 +2015,9 @@ Deprecations:
 
 **Misc:**
 
-- [`.click()`](https://on.cypress.io/api/click) accepts `{force: true}` which will force it to issue the click event and bypass checking to ensure element is physically clickable.
+- {% url `.click()` click %} accepts `{force: true}` which will force it to issue the click event and bypass checking to ensure element is physically clickable.
 - Elements which are children of a container with `overflow` are automatically scrolled prior to a click (which is an abstraction around real user behavior).
-- Elements that are covering up an element you targeted for [`.click()`](https://on.cypress.io/api/click) are now logged out in the command console.
+- Elements that are covering up an element you targeted for {% url `.click()` click %} are now logged out in the command console.
 - All elements are now logged out as real DOM elements instead of jQuery wrapped elements. This has several upsides. Chrome will allow you to immediately interact with these elements, drilling into their contents, displaying the element box model on hover, etc. This prevents you from having to expand the jQuery elements and click "Reveal in Elements Panel".
 
 # 0.6.9
@@ -2034,7 +2034,7 @@ Deprecations:
 
 **Features:**
 
-- [`cy.clearCookie()`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies()`](https://on.cypress.io/api/clearcookies) have been added as new commands.
+- {% url `cy.clearCookie()` clearcookie %} and {% url `cy.clearCookies()` clearcookies %} have been added as new commands.
 - Cypress will automatically clear all cookies **before** each test run.
 - Named the spec + app iframe so that inside of Chrome Dev Tools the iframe selector will clearly distinguish which iframe is your application versus Cypress.
 
@@ -2046,7 +2046,7 @@ Deprecations:
 **Misc:**
 
 - [`cy.visit()`](https://on.cypress.io/api/visit) now accepts `{log: false}` to prevent logging out (useful in custom commands).
-- [`cy.contains()`](https://on.cypress.io/api/contains) is now scoped by default to the `<body>` instead of `document` which prevents it from returning elements in the `head` like `title`.
+- {% url `cy.contains()` contains %} is now scoped by default to the `<body>` instead of `document` which prevents it from returning elements in the `head` like `title`.
 
 # 0.6.7
 
@@ -2193,7 +2193,7 @@ Deprecations:
 - Removed `iframe` and `link[rel=stylesheet]` elements during DOM revert
 - Server instrument now correctly displays the number of responses their corresponding routes have had
 - Spies/Stubs/Mocks instrument now correctly displays the number of calls their corresponding methods have had
-- When users navigate between pages with commands (like [`.click()`](https://on.cypress.io/api/click)), Cypress now correctly waits until the age has finished loading before running more commands. Previously this waited for the `unload` event, which did not fire synchronously, and ow we bind to `beforeunload` which does.  Additionally Cypress checks to ensure `beforeunload` did not return a non-undefined value.
+- When users navigate between pages with commands (like {% url `.click()` click %}), Cypress now correctly waits until the age has finished loading before running more commands. Previously this waited for the `unload` event, which did not fire synchronously, and ow we bind to `beforeunload` which does.  Additionally Cypress checks to ensure `beforeunload` did not return a non-undefined value.
 
 **Misc:**
 
@@ -2373,7 +2373,7 @@ Deprecations:
 **Bugfixes:**
 
 - Handle relative path segments which walk up past the remote host `../../assets/app.css`
-- Throw explicit error for `null`, `undefined`, and `""` arguments to [`cy.contains()`](https://on.cypress.io/api/contains). Fixes [#24](https://github.com/cypress-io/cypress/issues/24)
+- Throw explicit error for `null`, `undefined`, and `""` arguments to {% url `cy.contains()` contains %}. Fixes [#24](https://github.com/cypress-io/cypress/issues/24)
 
 Misc
 - Improved `onConsole` message for [`cy.focused()`](https://on.cypress.io/api/focused) when no element was returned. Fixes [#23](https://github.com/cypress-io/cypress/issues/23)
@@ -2546,7 +2546,7 @@ Misc
 
 **Bugfixes:**
 
-- [`cy.contains()`](https://on.cypress.io/api/contains) now properly escape quotes in the text
+- {% url `cy.contains()` contains %} now properly escape quotes in the text
 - [`cy.visit()`](https://on.cypress.io/api/visit) now inserts a trailing slash intelligently into the correct `path` position (not after query params or hashes)
 - [`cy.visit()`](https://on.cypress.io/api/visit) will no longer log 2 failed commands on error
 - Hovering on commands which delay resolving their $el will now properly highlight again
@@ -2621,7 +2621,7 @@ Misc
 - [`.type()`](https://on.cypress.io/api/type) accepts remaining `input[type=*]` that users can type into
 - Cause + Effect commands are now logged in the correct order.  IE, clicking something which causes another command to insert will be inserted correctly in the order they arrived
 - `numRetries` is no longer shown in commands
-- [`.clear()`](https://on.cypress.io/api/clear) now logs a command
+- {% url `.clear()` clear %} now logs a command
 - `Promise.reduce` bugs are now fixed, causing events on a collection of elements in the synchronous wrong order
 - `cy.chain` is now coercively returned instead of `cy` which prevents losing access to the subject in custom commands
 - Trailing slashes are removed when serving initial files from the file system directly
@@ -2692,7 +2692,7 @@ Misc
 
 **Bugfixes:**
 
- - [`.clear()`](https://on.cypress.io/api/clear) now returns a promise
+ - {% url `.clear()` clear %} now returns a promise
 
 **Misc:**
 

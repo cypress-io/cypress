@@ -203,6 +203,6 @@ Cypress.Cookies.defaults({
 
 - {% url `cy.clearCookie()` clearcookie %}
 - {% url `cy.clearCookies()` clearcookies %}
-- [getCookie](https://on.cypress.io/api/getcookie)
-- [getCookies](https://on.cypress.io/api/getcookies)
-- [setCookie](https://on.cypress.io/api/setcookie)
+- {% url `cy.getCookie()` getcookie %}
+- {% url `cy.getCookies()` getcookies %}
+- {% url `cy.setCookie()` setcookie %}

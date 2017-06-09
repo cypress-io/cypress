@@ -102,5 +102,5 @@ When clicking on `siblings` within the command log, the console outputs the foll
 
 # See also
 
-- [prev](https://on.cypress.io/api/prev)
-- [next](https://on.cypress.io/api/next)
+- {% url `.prev()` prev %}
+- {% url `.next()` next %}

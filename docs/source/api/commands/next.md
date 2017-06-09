@@ -110,5 +110,5 @@ When clicking on `next` within the command log, the console outputs the followin
 # See also
 
 - [nextall](https://on.cypress.io/api/nextall)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
-- [prev](https://on.cypress.io/api/prev)
+- {% url `.nextUntil()` nextuntil %}
+- {% url `.prev()` prev %}

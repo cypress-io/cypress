@@ -78,6 +78,6 @@ cy.getCookies().spread(function(cookie1, cookie2, cookie3){
 # See also
 
 - {% url `.each()` each %}
-- [getCookies](https://on.cypress.io/api/getcookies)
-- [then](https://on.cypress.io/api/then)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `cy.getCookies()` getcookies %}
+- {% url `.then()` then %}
+- {% url `cy.wait()` wait %}

@@ -80,4 +80,4 @@ When clicking on `submit` within the command log, the console outputs the follow
 # See also
 
 - {% url `.click()` click %}
-- [type](https://on.cypress.io/api/type)
+- {% url `.type()` type %}
