@@ -12,6 +12,9 @@ describe "Global Mode", ->
       }
     }
 
+    @getLocalStorageProjects = ->
+      JSON.parse(localStorage.projects || "[]")
+
     cy.visit("/").then (win) ->
       { @start, @ipc } = win.App
 
@@ -87,6 +90,11 @@ describe "Global Mode", ->
           expect(@ipc.showDirectoryDialog).to.be.called
           cy.shouldBeOnProjectSpecs()
 
+      it "updates local storage", ->
+        cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
+        cy.get(".project-drop button").click().then =>
+          expect(@getLocalStorageProjects()[0].path).to.equal("/foo/bar")
+
       it "does nothing when user cancels", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves()
         cy.get(".project-drop button").click()
@@ -122,7 +130,7 @@ describe "Global Mode", ->
             cy.get(".projects-list li") ## ensures projects have loaded
 
           it "updates local storage with project statuses", ->
-            localStorageProjects = JSON.parse(localStorage.projects || "[]")
+            localStorageProjects = @getLocalStorageProjects()
             expect(localStorageProjects.length).to.equal(5)
             expect(localStorageProjects[0].orgId).to.equal(@projectStatuses[0].orgId)
 
@@ -141,7 +149,7 @@ describe "Global Mode", ->
             expect(@ipc.removeProject).to.be.calledWith(@projects[0].path)
 
           it "removes project from local storage", ->
-            localStorageProjects = JSON.parse(localStorage.projects || "[]")
+            localStorageProjects = @getLocalStorageProjects()
             expect(localStorageProjects.length).to.equal(4)
             expect(localStorageProjects[0].path).not.to.equal(@projects[0].path)
 
@@ -159,7 +167,7 @@ describe "Global Mode", ->
             {path: "/project/b"},
           ]
           @assertOrder = (expected) =>
-            actual = JSON.parse(localStorage.projects || "[]").map (project) ->
+            actual = @getLocalStorageProjects().map (project) ->
               project.path
             expect(actual).to.eql(expected)
 
@@ -187,6 +195,19 @@ describe "Global Mode", ->
         it "puts project at beginning when clicked on in list", ->
           cy.get(".projects-list a").eq(1).click().then =>
             @assertOrder(["/project/b", "/project/a"])
+
+      describe "limit", ->
+        beforeEach ->
+          @getProjects.resolve(@projects)
+
+        it "limits to 5 when dropped", ->
+          cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
+            expect(@getLocalStorageProjects().length).to.equal(5)
+
+        it "limits to 5 when selected", ->
+          cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
+          cy.get(".project-drop button").click().then =>
+            expect(@getLocalStorageProjects().length).to.equal(5)
 
     describe "going to project", ->
       beforeEach ->
