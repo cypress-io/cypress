@@ -107,12 +107,12 @@ Let's look at why this is...
 
 **Question:** What happens when jQuery can't find the selector it queries?
 
-**Answer:** *Oops!* The dreaded `null` enters your code, and you ignore it at your own risk!
+**Answer:** *Oops!* It returns an empty jQuery collection. We've got a real object to work with, but it doesn't contain the element we think it does. So we start adding conditional checks and retrying our queries manually.
 
 ```js
-// $() returns immediately with null
+// $() returns immediately with an empty collection.
 let $myElement = $('.my-selector').first()
-// Leads to errors or ugly null checks
+// Leads to errors or ugly conditional checks
 doSomething($myElement)
 ```
 
