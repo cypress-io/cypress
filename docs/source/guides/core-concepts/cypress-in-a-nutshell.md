@@ -132,14 +132,14 @@ cy.get('.my-selector').first()
   // No null checks necessary because no other code runs!
 ```
 
-This makes Cypress robust, immune to a thousand tiny, common problems at once. Think about all the circumstances that could cause the jQuery version to fail:
+This makes Cypress robust, immune to dozens of common, irritating problems at once. Consider all the circumstances that could cause the jQuery version to fail:
 - the DOM has not loaded yet
 - your framework hasn't finished bootstrapping
 - an XHR hasn't completed
 - an animation hasn't completed
 - and on and on...
 
-Traditionally, you'd be forced to write custom code to ensure against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly.
+Traditionally, you'd be forced to write custom code to protect against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly.
 
 {% note success Core Concept %}
 Cypress wraps all DOM queries with robust retry-and-timeout logic that better suits how real web apps work. We trade a minor change in how we work with our queries for a major stability upgrade to all our tests. Banish flake for good!
