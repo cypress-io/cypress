@@ -6,8 +6,14 @@ describe "Global Mode", ->
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
+    @dropEvent = {
+      dataTransfer: {
+        files: [{path: "/foo/bar"}]
+      }
+    }
+
     cy.visit("/").then (win) ->
-      { start, @ipc } = win.App
+      { @start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({})
       cy.stub(@ipc, "updaterCheck").resolves(false)
@@ -31,10 +37,9 @@ describe "Global Mode", ->
       @getProjectStatuses = @util.deferred()
       cy.stub(@ipc, "getProjectStatuses").returns(@getProjectStatuses.promise)
 
-      start()
-
   describe "with a current user", ->
     beforeEach ->
+      @start()
       @getCurrentUser.resolve(@user)
 
     it "shows cypress logo in nav", ->
@@ -55,13 +60,6 @@ describe "Global Mode", ->
       cy.get(".project-drop button").should("have.text", "Select Project")
 
     describe "dragging and dropping project", ->
-      beforeEach ->
-        @dropEvent = {
-          dataTransfer: {
-            files: [{path: "/foo/bar"}]
-          }
-        }
-
       it "highlights/unhighlights drop area when dragging over it/leaving it", ->
         cy
           .get(".project-drop")
@@ -154,6 +152,42 @@ describe "Global Mode", ->
         it "shows nothing", ->
           cy.get(".projects-list").should("not.exist")
 
+      describe "order", ->
+        beforeEach ->
+          @aCoupleProjects = [
+            {path: "/project/a"},
+            {path: "/project/b"},
+          ]
+          @assertOrder = (expected) =>
+            actual = JSON.parse(localStorage.projects || "[]").map (project) ->
+              project.path
+            expect(actual).to.eql(expected)
+
+          @getProjects.resolve(@aCoupleProjects)
+
+        it "puts project at beginning when dropped", ->
+          cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
+            @assertOrder(["/foo/bar", "/project/a", "/project/b"])
+
+        it "puts project at beginning when dropped and it already exists", ->
+          @dropEvent.dataTransfer.files[0].path = "/project/b"
+          cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
+            @assertOrder(["/project/b", "/project/a"])
+
+        it "puts project at beginning when selected", ->
+          cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
+          cy.get(".project-drop button").click().then =>
+            @assertOrder(["/foo/bar", "/project/a", "/project/b"])
+
+        it "puts project at beginning when selected and it already exists", ->
+          cy.stub(@ipc, "showDirectoryDialog").resolves("/project/b")
+          cy.get(".project-drop button").click().then =>
+            @assertOrder(["/project/b", "/project/a"])
+
+        it "puts project at beginning when clicked on in list", ->
+          cy.get(".projects-list a").eq(1).click().then =>
+            @assertOrder(["/project/b", "/project/a"])
+
     describe "going to project", ->
       beforeEach ->
         @getProjects.resolve(@projects)
@@ -201,8 +235,19 @@ describe "Global Mode", ->
         @getProjectStatuses.reject(@unauthError)
         cy.shouldBeOnLogin()
 
+  describe "when there are projects in local storage", ->
+    beforeEach ->
+      @projects[0].name = "Cached"
+      localStorage.projects = JSON.stringify(@projects)
+      @start()
+      @getCurrentUser.resolve(@user)
+
+    it "displays projects without waiting for ipc", ->
+      cy.get(".project-name:first").should("have.text", "Cached")
+
   describe "without a current user", ->
     beforeEach ->
+      @start()
       @getCurrentUser.resolve(null)
 
     it "goes to login", ->

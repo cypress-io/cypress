@@ -2,8 +2,9 @@ import _ from 'lodash'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
-const persistentProps = [
+const cacheProps = [
   'id',
+  'path',
   'name',
   'public',
   'orgName',
@@ -13,7 +14,7 @@ const persistentProps = [
   'lastBuildCreatedAt',
 ]
 
-const validProps = persistentProps.concat([
+const validProps = cacheProps.concat([
   'state',
   'clientId',
   'isChosen',
@@ -86,7 +87,7 @@ export default class Project {
   }
 
   serialize () {
-    return _.pick(this, persistentProps)
+    return _.pick(this, cacheProps)
   }
 
   @computed get displayName () {

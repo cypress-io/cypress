@@ -29,9 +29,18 @@ class Projects {
   }
 
   @action addProject (path) {
-    const project = new Project({ path })
-    this.projects.push(project)
-    this._saveToLocalStorage()
+    // projects is sorted by most recently used, so add a project to the start
+    // or move it to the start if it already exists
+    const existingIndex = _.findIndex(this.projects, { path })
+    let project
+    if (existingIndex > -1) {
+      project = this.projects[existingIndex]
+      this.projects.splice(existingIndex, 1)
+    } else {
+      project = new Project({ path })
+    }
+
+    this.projects.unshift(project)
     return project
   }
 
@@ -40,29 +49,15 @@ class Projects {
   }
 
   @action setProjects (projects) {
-    // get the projects off of localStorage (with statuses)
-    // and set them up so we don't have to wait for data from server
-    const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
-    // index for quick lookup
-    const localProjectsIndex = _.keyBy(localProjects, 'id')
-
-    this.projects = _.map(projects, (project) => {
-      const props = _.extend(project, localProjectsIndex[project.id])
-      return new Project(props)
-    })
+    this.projects = _.map(projects, (project) =>  new Project(project))
   }
 
-  @action setProjectStatuses (projects) {
-    // index for quick lookup
-    const projectsIndex = _.keyBy(projects, 'id')
+  @action updateProjectsWithStatuses (projectsWithStatuses = []) {
+    const projectsIndex = _.keyBy(projectsWithStatuses, 'id') // index for quick lookup
 
-    // merge projects received from api with what we
-    // already have in memory
     _.each(this.projects, (project) => {
       project.update(projectsIndex[project.id])
     })
-
-    this._saveToLocalStorage()
   }
 
   @action setError (err) {
@@ -79,7 +74,6 @@ class Projects {
 
   updateProject (project, props) {
     project.update(props)
-    this._saveToLocalStorage()
   }
 
   @action removeProject ({ path }) {
@@ -87,16 +81,11 @@ class Projects {
 
     if (projectIndex != null) {
       this.projects.splice(projectIndex, 1)
-      this._saveToLocalStorage()
     }
   }
 
   serializeProjects () {
     return _.map(this.projects, (project) => project.serialize())
-  }
-
-  _saveToLocalStorage () {
-    localStorage.setItem('projects', JSON.stringify(this.serializeProjects()))
   }
 
   membershipRequested (id) {

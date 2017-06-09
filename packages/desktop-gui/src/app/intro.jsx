@@ -41,7 +41,7 @@ class Default extends Component {
           <p>- or -</p>
           <button className='btn btn-xs btn-black' onClick={this._selectProject}>Select Project</button>
         </div>
-        <ProjectsList />
+        <ProjectsList onSelect={this._projectSelected} />
       </div>
     )
   }
@@ -57,6 +57,10 @@ class Default extends Component {
 
       return this._addProject(path)
     })
+  }
+
+  _projectSelected = (project) => {
+    projectsApi.addProject(project.path)
   }
 
   _addProject (path) {

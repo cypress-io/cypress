@@ -8,9 +8,9 @@ import projectsApi from './projects-api'
 import projectsStore from './projects-store'
 import { Link, routes } from '../lib/routing'
 
-const ProjectListItem = observer(({ project, onRemove }) => (
+const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
   <li>
-    <Link className='project' to={routes.specs(project)}>
+    <Link className='project' to={routes.specs(project)} onClick={onSelect}>
       <span className='project-name'>{project.displayName}</span>
       <span className='project-path'>{project.displayPath}</span>
     </Link>
@@ -26,7 +26,7 @@ const ProjectListItem = observer(({ project, onRemove }) => (
 @observer
 class ProjectsList extends Component {
   componentDidMount () {
-    projectsApi.getProjects()
+    projectsApi.loadProjects()
   }
 
   render () {
@@ -49,16 +49,12 @@ class ProjectsList extends Component {
           <ProjectListItem
             key={project.path}
             project={project}
-            onRemove={this._removeProject(project)}
+            onSelect={() => this.props.onSelect(project)}
+            onRemove={() => projectsApi.removeProject(project)}
           />
         ))}
       </ul>
     )
-  }
-
-  _removeProject = (project) => () => {
-    projectsStore.removeProject(project)
-    ipc.removeProject(project.path)
   }
 }
 

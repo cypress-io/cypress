@@ -2,9 +2,10 @@ import React from 'react'
 
 import viewStore from './view-store'
 
-const Link = ({ children, to }) => {
+const Link = ({ children, to, onClick }) => {
   const navigate = (e) => {
     e.preventDefault()
+    if (onClick) onClick()
     to.navigate()
   }
 

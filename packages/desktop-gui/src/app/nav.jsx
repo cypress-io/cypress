@@ -88,10 +88,6 @@ export default class Nav extends Component {
     )
   }
 
-  // _closeProject = () => {
-  //   projectsApi.closeProject(this.props.params.clientId)
-  // }
-
   _openDocs (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io')
@@ -106,10 +102,5 @@ export default class Nav extends Component {
     e.preventDefault()
 
     appApi.logOut()
-  }
-
-  _addProject (e) {
-    e.preventDefault()
-    projectsApi.addProject()
   }
 }

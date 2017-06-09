@@ -1,42 +1,59 @@
-import once from 'lodash/once'
+import _ from 'lodash'
 import { action } from 'mobx'
 import Promise from 'bluebird'
 
 import ipc from '../lib/ipc'
+import localData from '../lib/local-data'
 import viewStore from '../lib/view-store'
 import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
 import { getSpecs } from '../specs/specs-api'
 
-const getProjects = (shouldLoad = true) => {
-  if (shouldLoad) {
-    projectsStore.setLoading(true)
+const saveToLocalStorage = () => {
+  localData.set('projects', projectsStore.serializeProjects())
+}
+
+const loadProjects = (shouldLoad = true) => {
+  const inMemoryProjects = projectsStore.projects
+  const cachedProjects = localData.get('projects') || []
+
+  if (!inMemoryProjects.length) {
+    if (cachedProjects.length) {
+      projectsStore.setProjects(cachedProjects)
+    } else if (shouldLoad) {
+      projectsStore.setLoading(true)
+    }
   }
 
   return ipc.getProjects()
-  .then((projects) => {
+  .then((ipcProjects) => {
+    const cacheIndex = _.keyBy(cachedProjects, 'id') // index for quick lookup
+    const projects = _.map(ipcProjects, (ipcProject) => {
+      return _.extend(ipcProject, cacheIndex[ipcProject.id])
+    })
     projectsStore.setProjects(projects)
     projectsStore.setLoading(false)
 
     return ipc.getProjectStatuses(projects)
-    .then((projects = []) => {
-      projectsStore.setProjectStatuses(projects)
-    })
+  })
+  .then((projectsWithStatuses) => {
+    projectsStore.updateProjectsWithStatuses(projectsWithStatuses)
+    saveToLocalStorage()
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch(projectsStore.setError)
 }
 
-const pollProjects = () => {
-  return setInterval(() => {
-    getProjects(false)
-  }, 10000)
-}
+// const pollProjects = () => {
+//   return setInterval(() => {
+//     loadProjects(false)
+//   }, 10000)
+// }
 
-const stopPollingProjects = (pollId) => {
-  clearInterval(pollId)
-}
+// const stopPollingProjects = (pollId) => {
+//   clearInterval(pollId)
+// }
 
 const addProject = (path) => {
   const project = projectsStore.addProject(path)
@@ -46,6 +63,7 @@ const addProject = (path) => {
   .then((details) => {
     project.setLoading(false)
     project.update(details)
+    saveToLocalStorage()
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch(project.setError)
@@ -123,7 +141,7 @@ const openProject = (project) => {
 
   const open = () => {
     return new Promise((resolve) => {
-      resolve = once(resolve)
+      resolve = _.once(resolve)
 
       ipc.onFocusTests(() => {
         viewStore.showProjectSpecs(project)
@@ -173,6 +191,12 @@ const reopenProject = (project) => {
   .then(() => openProject(project))
 }
 
+const removeProject = (project) => {
+  ipc.removeProject(project.path)
+  projectsStore.removeProject(project)
+  saveToLocalStorage()
+}
+
 const getRecordKeys = () => {
   return ipc.getRecordKeys()
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
@@ -181,13 +205,14 @@ const getRecordKeys = () => {
 }
 
 export default {
-  getProjects,
-  pollProjects,
-  stopPollingProjects,
+  loadProjects,
+  // pollProjects,
+  // stopPollingProjects,
   openProject,
   reopenProject,
   closeProject,
   addProject,
+  removeProject,
   runSpec,
   closeBrowser,
   getRecordKeys,
