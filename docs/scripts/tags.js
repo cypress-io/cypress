@@ -55,15 +55,17 @@ hexo.extend.tag.register('fa', function (args) {
 })
 
 hexo.extend.tag.register('url', function (args) {
-  // {% link `.and()` and %}
-  // {% link `.should()` should#notes %}
-  // {% link 'Read about why' guides/getting-started/why-cypress %}
+  // {% url `.and()` and %}
+  // {% url `.should()` should#Notes %}
+  // {% url 'Read about why' why-cypress %}
+  // {% url 'Benefits' guides/getting-started/why-cypress#Benefits %}
   //
   // <<< Transforms into >>>
   //
   // <a href="/api/commands/and.html"><code>.and()</code></a>
-  // <a href="/api/commands/should.html#notes"><code>.should()</code></a>
+  // <a href="/api/commands/should.html#Notes"><code>.should()</code></a>
   // <a href="/guides/getting-started/why-cypress.html">Read about why</a>
+  // <a href="/guides/getting-started/why-cypress.html#Benefits">Benefits</a>
 
   const sidebar = this.site.data.sidebar
 
