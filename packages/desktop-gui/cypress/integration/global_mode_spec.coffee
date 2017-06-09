@@ -186,9 +186,14 @@ describe "Global Mode", ->
         it "closes project", ->
           expect(@ipc.closeProject).to.be.called
 
-    describe.skip "if user becomes unauthenticated", ->
+    describe "if user becomes unauthenticated", ->
       beforeEach ->
         @unauthError = {name: "", message: "", statusCode: 401}
+        ## error is being caught here for some reason, so nullify it
+        window.onunhandledrejection = ->
+
+      afterEach ->
+        window.onunhandledrejection = undefined
 
       it "redirects to login when get:projects returns 401", ->
         @getProjects.reject(@unauthError)
@@ -197,18 +202,6 @@ describe "Global Mode", ->
       it "redirects to login when get:project:statuses returns 401", ->
         @getProjects.resolve([])
         @getProjectStatuses.reject(@unauthError)
-        cy.shouldBeOnLogin()
-
-      it "redirects to login when get:project:status returns 401", ->
-        cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.stub(@ipc, "addProject").resolves({ id: "id-123" })
-        cy.stub(@ipc, "getProjectStatus").rejects(@unauthError)
-
-        @getProjects.resolve([])
-        @getProjectStatuses.resolve([])
-
-        cy.get("nav").find(".fa-plus").click().wait(1000)
-
         cy.shouldBeOnLogin()
 
   describe "without a current user", ->

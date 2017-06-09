@@ -25,6 +25,7 @@ const getProjects = (shouldLoad = true) => {
     })
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch(projectsStore.setError)
 }
 
 const pollProjects = () => {

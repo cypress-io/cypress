@@ -66,7 +66,7 @@ class Projects {
   }
 
   @action setError (err) {
-    this.error = err
+    this.error = err.message || err
   }
 
   setChosen (project) {
