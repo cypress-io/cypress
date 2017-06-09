@@ -28,6 +28,9 @@ describe "Global Mode", ->
       @getProjects = @util.deferred()
       cy.stub(@ipc, "getProjects").returns(@getProjects.promise)
 
+      @getProjectStatuses = @util.deferred()
+      cy.stub(@ipc, "getProjectStatuses").returns(@getProjectStatuses.promise)
+
       start()
 
   describe "with a current user", ->
@@ -106,13 +109,30 @@ describe "Global Mode", ->
         it "displays projects", ->
           cy.get(".projects-list li").should("have.length", @projects.length)
 
-        it.only "displays project name and path", ->
+        it "displays project name and path", ->
           cy.get(".projects-list li:first .project-name").should("have.text", "My-Fake-Project")
           cy.get(".projects-list li:first .project-path").should("have.text", "/Users/Jane/Projects/My-Fake-Project")
 
         it "goes to project when clicked", ->
           cy.get(".projects-list a:first").click()
           cy.shouldBeOnProjectSpecs()
+
+        it "gets project statuses", ->
+          cy.get(".projects-list li").then => ## ensures projects have loaded
+            expect(@ipc.getProjectStatuses).to.be.called
+
+        describe "when project statuses have loaded", ->
+          beforeEach ->
+            @getProjectStatuses.resolve(@projectStatuses)
+            cy.get(".projects-list li") ## ensures projects have loaded
+
+          it "updates local storage with project statuses", ->
+            localStorageProjects = JSON.parse(localStorage.projects || "[]")
+            expect(localStorageProjects.length).to.equal(5)
+            expect(localStorageProjects[0].orgId).to.equal(@projectStatuses[0].orgId)
+
+          it "updates project names", ->
+            cy.get(".projects-list li .project-name").eq(3).should("have.text", "Client Work")
 
         describe "removing project", ->
           beforeEach ->
