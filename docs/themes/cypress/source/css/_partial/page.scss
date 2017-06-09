@@ -78,7 +78,7 @@
 
 
 
-    li {
+    li:not('.toc-item') {
       margin: 1em 0;
 
       p {
