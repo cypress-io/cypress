@@ -79,10 +79,10 @@ cy.get('.my-selector')
 Accessing the DOM elements from the query works differently, however:
 
 ```js
-// This is fine.
+// This is fine, jQuery returns the element synchronously.
 let $jqElement = $('.my-selector')
 
-// This will not work!
+// This will not work! Cypress does not return the element synchronously.
 let $cyElement = cy.get('.my-selector')
 ```
 
@@ -124,12 +124,17 @@ This makes Cypress robust, immune to a thousand tiny, common problems at once. T
 - an animation hasn't completed
 - and on and on...
 
-Traditionally, you'd be forced to write custom code to ensure against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly. The only change in your code is a shift to leverage the Promise-like `.then()` command whenever you need to access the element directly.
+Traditionally, you'd be forced to write custom code to ensure against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly.
+
+{% note success Core Concept %}
+Cypress wraps all DOM queries with robust retry-and-timeout logic that better suits how real web apps work. We trade a minor change in how we work with our queries for a major stability upgrade to all our tests. Banish flake for good!
+
+{% endnote %}
 
 {% note info %}
-In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element.
+In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element. When you need to skip the retry-and-timeout functionality entirely and perform a traditional, synchronous query, you can still use `Cypress.$()`.
 
-For more, check out [the API docs for `.then()`](http://on.cypress.io/api/then)
+For more, check out the API docs for [`.then()`](http://on.cypress.io/api/then) and [`Cypress.$()`](http://on.cypress.io/api/utilities/$.html).
 {% endnote %}
 
 ## Finding Elements by Their Contents
