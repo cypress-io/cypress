@@ -1,7 +1,6 @@
 ---
 title: clock
 comments: true
-description: ''
 ---
 
 `cy.clock()` overrides native global functions related to time allowing them to be controlled synchronously via [`cy.tick()`](https://on.cypress.io/api/tick) or the yielded `clock` object. This includes controlling:

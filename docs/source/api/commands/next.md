@@ -1,7 +1,6 @@
 ---
 title: next
 comments: true
-description: ''
 ---
 
 Get the immediately following sibling of each DOM element within a set of DOM elements.
@@ -110,6 +109,6 @@ When clicking on `next` within the command log, the console outputs the followin
 
 # See also
 
-- [nextAll](https://on.cypress.io/api/nextAll)
-- [nextUntil](https://on.cypress.io/api/nextUntil)
+- [nextall](https://on.cypress.io/api/nextall)
+- [nextUntil](https://on.cypress.io/api/nextuntil)
 - [prev](https://on.cypress.io/api/prev)

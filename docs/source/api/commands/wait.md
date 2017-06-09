@@ -1,7 +1,6 @@
 ---
 title: wait
 comments: true
-description: ''
 ---
 
 Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
@@ -77,7 +76,7 @@ In Cypress, you almost never need to use `cy.wait()` for an arbitrary amount of 
 
 ***Unnecessary wait for `cy.request()`***
 
-Waiting here is unnecessary since the [`cy.request()`](https://on.cypress.io/request) command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the [`cy.request()`](https://on.cypress.io/request) has already resolved.
+Waiting here is unnecessary since the [`cy.request()`](https://on.cypress.io/api/request) command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the [`cy.request()`](https://on.cypress.io/api/request) has already resolved.
 
 ```javascript
 cy.request("http://localhost:8080/db/seed")
@@ -95,7 +94,7 @@ cy.wait(5000)     // <--- this is unnecessary
 
 ***Unnecessary wait for `cy.get()`***
 
-Waiting for the [`cy.get()`](https://on.cypress.io/get) below is unncessary because [`cy.get()`](https://on.cypress.io/get) automatically retries until the table's `tr` has a length of 2.
+Waiting for the [`cy.get()`](https://on.cypress.io/api/get) below is unncessary because [`cy.get()`](https://on.cypress.io/api/get) automatically retries until the table's `tr` has a length of 2.
 
 Whenever commands have an assertion they will not resolve until their associated assertions pass. This enables you to simply describe the state of your application without having to worry about when it gets there.
 

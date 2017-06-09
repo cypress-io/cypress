@@ -1,7 +1,6 @@
 ---
 title: fixture
 comments: true
-description: ''
 ---
 
 Load a fixed set of data located in a file.

@@ -1,14 +1,17 @@
 code {
   margin: 0;
-  padding: 0;
-  border: 0;
+  padding: 3px 4px;
+  border: 1px solid #f4f4f4;
   outline: 0;
   font-weight: 600;
   font-family: inherit;
   font-size: 0.9em;
   vertical-align: baseline;
-  color: #46af91;
+  color: $highlight-foreground;
+  // color: #ea436d;
   font-family: $font-mono;
+  background-color: $highlight-background;
+  border-radius: 3px;
 }
 
 a code {
@@ -61,4 +64,15 @@ a code {
     border-left: 5px solid $color-border;
     padding: 0.5em 0.25em;
   }
+}
+
+.article pre.language-shell,
+.faq pre.language-shell{
+    border-left: 5px solid #000;
+}
+
+.article pre.language-shell, .article pre.language-shell code,
+.faq pre.language-shell, .faq pre.language-shell  code {
+    background-color: #252831;
+    color: #f5f6f8;
 }

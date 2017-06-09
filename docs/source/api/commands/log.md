@@ -1,7 +1,6 @@
 ---
 title: log
 comments: true
-description: ''
 ---
 
 Print a message to the Cypress Command Log.

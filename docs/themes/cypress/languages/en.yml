@@ -2,7 +2,7 @@ menu:
   guides: Guides
   api: API
   faq: FAQ
-  ecosystem: Ecosystem
+  examples: Examples
   search: Search
 
 index:
@@ -24,10 +24,10 @@ sidebar:
     writing-your-first-test: Writing Your First Test
     testing-your-app: Testing Your App
     next-steps: Next Steps
-    cypress-basics: Basics
-    overview-of-the-gui-tool: Overview of the GUI Tool
     core-concepts: Core Concepts
+    cypress-in-a-nutshell: Cypress in a Nutshell
     organizing-tests: Organizing Tests
+    overview-of-the-gui-tool: Overview of the GUI Tool
     dead-simple-debugging: Dead Simple Debugging
     aliases-variables-in-an-async-world: Aliases&#58; Variables in an Async World
     stubs-spies-clocks: Stubs, Spies, and Clocks
@@ -54,9 +54,13 @@ sidebar:
     appendices: Appendices
     configuration: Configuration
     error-messages: Error Messages
+    bundled-tools: Bundled Tools
     available-assertions: Available Assertions
+    creating-fixtures: Creating Fixtures
     best-practices: Best Practices
     anti-patterns: Anti-patterns
+    userland-extensions: Userland Extensions
+    known-issues: Known Issues
     contributing: Contributing
     changelog: Changelog
     roadmap: Roadmap

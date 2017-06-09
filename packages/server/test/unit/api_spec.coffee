@@ -235,10 +235,13 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: ->
-          get: ->
-            catch: ->
+        promise: -> {
+          get: -> {
+            catch: -> {
               then: (fn) -> fn()
+            }
+          }
+        }
       })
 
       api.createRun({})
@@ -334,10 +337,13 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: ->
-          get: ->
-            catch: ->
+        promise: -> {
+          get: -> {
+            catch: -> {
               then: (fn) -> fn()
+            }
+          }
+        }
       })
 
       api.createInstance({})

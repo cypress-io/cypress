@@ -1,7 +1,6 @@
 ---
 title: exec
 comments: true
-description: ''
 ---
 
 Execute a system command.
@@ -159,6 +158,6 @@ When clicking on the `exec` command within the command log, the console outputs 
 
 # See also
 
-- [readFile](https://on.cypress.io/api/readFile)
+- [readFile](https://on.cypress.io/api/readfile)
 - [request](https://on.cypress.io/api/request)
-- [writeFile](https://on.cypress.io/api/writeFile)
+- [writeFile](https://on.cypress.io/api/writefile)

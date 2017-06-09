@@ -1,7 +1,6 @@
 ---
 title: last
 comments: true
-description: ''
 ---
 
 Get the last DOM element within a set of DOM elements.
@@ -66,7 +65,7 @@ Option | Default | Notes
 
 ```javascript
 // yields <li class="four">Knick knack on my door</li>
-cy.get('ul').last()
+cy.get('li').last()
 ```
 
 # Command Log

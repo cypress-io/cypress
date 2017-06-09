@@ -1,7 +1,6 @@
 ---
 title: blur
 comments: true
-description: ''
 ---
 
 Make a focused DOM element blur.
@@ -15,7 +14,7 @@ Make a focused DOM element blur.
 
 ## Usage
 
-`.blur()` requires being chained off another cy command that *yields* a DOM element that is currently in focus. If you want to ensure an element is focused before blurring, try using [`.focus()`](https://on.cypress.io/focus) before `.blur()`.
+`.blur()` requires being chained off another cy command that *yields* a DOM element that is currently in focus. If you want to ensure an element is focused before blurring, try using [`.focus()`](https://on.cypress.io/api/focus) before `.blur()`.
 
 **{% fa fa-check-circle green %} Valid Usage**
 

@@ -1,13 +1,12 @@
 ---
 title: and
 comments: true
-description: ''
 ---
 
 Make an assertion.
 
 {% note info %}
-An alias of [`.should()`](https://on.cypress.io/api/and)
+An alias of [`.should()`](https://on.cypress.io/api/should)
 {% endnote %}
 
 {% note info %}

@@ -2,6 +2,7 @@
   "name": "@packages/launcher",
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
+  "private": true,
   "main": "index.js",
   "types": "../ts/index.d.ts",
   "scripts": {
@@ -9,7 +10,10 @@
     "test": "mocha",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm lib/*.js lib/**/*.js || true",
-    "lint": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts"
+    "lint": "npm run format-ts && npm run lint-ts && npm run lint-coffee",
+    "lint-ts": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts",
+    "lint-coffee": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/**/*.coffee",
+    "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -32,9 +36,10 @@
     "@types/node": "^7.0.18",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
+    "prettier": "^1.4.2",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "tslint": "5.3.2",
+    "tslint": "5.4.3",
     "tslint-config-standard": "5.0.2",
     "typescript": "2.3.2"
   },
@@ -45,7 +50,7 @@
     "execa": "^0.6.3",
     "fs-extra": "^3.0.0",
     "lodash": "^4.11.1",
-    "plist": "^1.2.0",
+    "plist": "^2.1.0",
     "ramda": "^0.23.0"
   }
 }

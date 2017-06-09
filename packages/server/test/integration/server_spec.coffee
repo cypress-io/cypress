@@ -42,14 +42,14 @@ describe "Server", ->
             url = options
             options = {}
 
-          _.defaults options,
-            url: url
+          _.defaults options, {
+            url
             proxy: @proxy
-            jar: jar
+            jar
             simple: false
             followRedirect: false
             resolveWithFullResponse: true
-
+          }
           rp(options)
 
         open = =>

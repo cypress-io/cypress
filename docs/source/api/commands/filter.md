@@ -1,7 +1,6 @@
 ---
 title: filter
 comments: true
-description: ''
 ---
 
 Get the DOM elements that match a specific selector.

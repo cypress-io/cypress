@@ -168,6 +168,7 @@ module.exports = {
     getFilePath = (dir, name) ->
       path.relative(config.projectRoot, path.join(dir, name))
 
+    log("example spec from integration folder %s", config.integrationFolder)
     files = [
       getFilePath(config.integrationFolder, "example_spec.js")
     ]
@@ -178,11 +179,13 @@ module.exports = {
       ])
 
     if config.supportFolder and config.supportFile isnt false
+      log "supporting files from folder #{config.supportFolder}"
       files = files.concat([
         getFilePath(config.supportFolder, "commands.js")
         getFilePath(config.supportFolder, "defaults.js")
         getFilePath(config.supportFolder, "index.js")
       ])
+    log("scaffolded files %j", files)
 
     return @_fileListToTree(files)
 

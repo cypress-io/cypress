@@ -1,7 +1,6 @@
 ---
 title: siblings
 comments: true
-description: ''
 ---
 
 Get sibling DOM elements.

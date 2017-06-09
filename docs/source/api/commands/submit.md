@@ -1,7 +1,6 @@
 ---
 title: submit
 comments: true
-description: ''
 ---
 
 Submit a form.

@@ -15,7 +15,7 @@
   }
 }
 
-.toc {
+.toc, .toc-item {
   list-style: none;
 }
 
@@ -48,7 +48,7 @@
   width: $sidebar-width;
 
   .sidebar-title {
-    margin-top: 0; 
+    margin-top: 0;
   }
 
   &:before {

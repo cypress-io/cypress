@@ -20,6 +20,7 @@ class OnBoading extends Component {
 
     let closeModal = () => {
       project.closeModal()
+      ipc.onboardingClosed()
     }
 
     return (

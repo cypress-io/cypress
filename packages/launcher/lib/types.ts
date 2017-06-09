@@ -5,25 +5,25 @@ export type PlatformName = 'darwin' | 'linux'
 
 export type Browser = {
   /** short browser name */
-  name: MacBrowserName,
+  name: MacBrowserName
   /** Optional display name */
-  displayName?: string,
+  displayName?: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
-  versionRegex: RegExp,
-  profile: boolean,
-  binary: string,
-  version?: string,
-  majorVersion?: string,
+  versionRegex: RegExp
+  profile: boolean
+  binary: string
+  version?: string
+  majorVersion?: string
   page?: string
 }
 
 export type FoundBrowser = {
-  name: string,
+  name: string
   path?: string
 }
 
 interface ExtraLauncherMethods {
-  update: Function,
+  update: Function
   detect: Function
 }
 
@@ -33,6 +33,6 @@ export type LauncherApi = LauncherLaunch & ExtraLauncherMethods
 
 // all common type definition for this module
 
-export type NotInstalledError = Error & {notInstalled: boolean}
+export type NotInstalledError = Error & { notInstalled: boolean }
 
-export type BrowserNotFoundError = Error & {specificBrowserNotFound: boolean}
+export type BrowserNotFoundError = Error & { specificBrowserNotFound: boolean }

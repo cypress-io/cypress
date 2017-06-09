@@ -66,7 +66,7 @@ describe "lib/exec", ->
         expect(cp.execAsync).to.be.calledWith("which bash")
 
     it.skip "TODO: test what happens when which bash fails - like on windows", ->
-      @sandbox.stub(cp, "execAsync").withArgs("which bash").rejects(new Error)
+      @sandbox.stub(cp, "execAsync").withArgs("which bash").rejects(new Error())
 
       runCommand("echo foo")
       .then (result) ->

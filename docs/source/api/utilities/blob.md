@@ -1,7 +1,6 @@
 ---
 title: Cypress.Blob
 comments: true
-description: ''
 ---
 
 Cypress proxies a [`Blob Utilities`](https://github.com/nolanlawson/blob-util) library and exposes it as `Cypress.Blob`.

@@ -1,16 +1,19 @@
+---
 title: Installing Cypress
 comments: true
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- how to install Cypress on your project using `npm`
+- How to install Cypress on your project using `npm`
+{% endnote %}
 
 # Installing via NPM
 
 Installing Cypress to test your modern web project is as easy as:
 
-```bash
+```shell
 $ npm install cypress --save-dev
 ```
 

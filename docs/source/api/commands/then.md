@@ -1,7 +1,6 @@
 ---
 title: then
 comments: true
-description: ''
 ---
 
 Yield the previously yielded subject as the first argument of a function.

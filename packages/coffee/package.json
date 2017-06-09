@@ -1,10 +1,14 @@
 {
   "name": "@packages/coffee",
   "main": "index.js",
+  "private": true,
   "dependencies": {
     "coffee-script": "1.12.5"
   },
   "scripts": {
     "test": "echo 'Nothing to test for the coffee package'"
+  },
+  "devDependencies": {
+    "coffeelint": "^1.16.0"
   }
 }

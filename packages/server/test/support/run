@@ -22,7 +22,7 @@ NODE_ENV=test \
 NODE_DEBUG=request \
 CYPRESS_ENV=test \
 BLUEBIRD_DEBUG=1 \
-DEBUG=nock.*,-nock.common,-nock.scope,socket.io:*,xvfb-maybe \
+DEBUG=$DEBUG,nock.*,-nock.common,-nock.scope,socket.io:*,xvfb-maybe \
 BROWSER=$BROWSER \
 xvfb-maybe --xvfb-run-args "-s \"-screen 0 1280x1024x8\"" mocha $SPEC \
 --fgrep "$FGREP" \

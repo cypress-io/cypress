@@ -1,31 +1,101 @@
 .faq {
-  width: 750px;
-  margin: 0 auto 50px;
 
-
-  h1, h2, p {
-    font-family: $font-title;
+  .article ol {
+    margin-left: 0;
+    padding-left: 0;
   }
 
-  h1 {
-    font-size: 2.5em;
-    line-height: 1em;
-    font-weight: 800;
-    margin: 2em 0 1em;
+  #content-inner {
+    margin-left: 0;
+  }
 
-    &:first-of-type {
-      margin-top: 1em;
+  .sidebar-title {
+    padding-left: 5px;
+    margin-left: 5px;
+    color: $color-default;
+  }
+
+  .article-inner {
+    margin-right: 0;
+    border-right: 0;
+  }
+
+  .toc {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .toc-link {
+    padding-left: 0;
+    // background-color: #f5f5f5;
+    padding: 5px 10px;
+    line-height: 1.5em;
+    font-size: 14.5px;
+  }
+
+  .toc-level-1 {
+
+    a.toc-link {
+      border-bottom: 0;
+      padding-left: 5px;
+
+      &:before {
+        content: "\f105";
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit;
+        margin-right: 3px;
+      }
+
+      &:hover {
+        cursor: pointer;
+        color: #0369b3;
+        border-bottom: 0;
+      }
+    }
+    &>a.toc-link {
+      color: #474a54;
+      border-bottom: 1px solid #ddd;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      // padding-bottom: 10px;
+      padding-left: 0;
+      font-family: $font-title;
+      font-size: 1.1em;
+
+      &:before {
+        content: ''
+      }
+
+      &:hover {
+        cursor: default;
+        color: #474a54;
+        border-bottom: 1px solid #ddd;
+      }
     }
   }
 
-  h2 {
-    font-size: 1.4em;
-    line-height: 1.6em;
-    margin: 1.5em 0 0.5em;
-    font-weight: 500;
+  .article-footer, #sidebar, .article-header {
+    display: none;
   }
 
-  p {
-    font-size: 1em;
+  .article {
+    border-right: 0;
+    max-width: 750px;
+    margin: 0 auto;
+    float: none;
+
+    h1 {
+      &:first-of-type {
+        margin-top: 0;
+        border-top: 0;
+      }
+    }
+
+    h2 {
+      margin-top: 2em;
+      padding-top: 2em;
+    }
   }
 }

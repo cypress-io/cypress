@@ -44,10 +44,46 @@ describe "lib/project", ->
     expect(p.projectRoot).not.to.eq("../foo/bar")
     expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
 
+  context "#saveState", ->
+    beforeEach ->
+      integrationFolder = "the/save/state/test"
+      @sandbox.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
+      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
+      @project.cfg = { integrationFolder }
+      savedState(@project.projectRoot).remove()
+
+    afterEach ->
+      savedState(@project.projectRoot).remove()
+
+    it "saves state without modification", ->
+      @project.saveState()
+      .then (state) ->
+        expect(state).to.deep.eq({})
+
+    it "adds property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 42 })
+
+    it "adds second property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then () => @project.saveState({ bar: true })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 42, bar: true })
+
+    it "modifes property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then () => @project.saveState({ foo: 'modified' })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 'modified' })
+
   context "#getConfig", ->
     integrationFolder = "foo/bar/baz"
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder })
       @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
@@ -65,18 +101,17 @@ describe "lib/project", ->
         })
 
     it "resolves if cfg is already set", ->
-      @project.cfg =
-        integrationFolder: integrationFolder
+      @project.cfg = {
+        integrationFolder: integrationFolder,
         foo: "bar"
+      }
 
       @project.getConfig()
       .then (cfg) ->
-        expect(cfg).to.deep.eq(
-          integrationFolder: integrationFolder
+        expect(cfg).to.deep.eq({
+          integrationFolder: integrationFolder,
           foo: "bar"
-          isNewProject: false
-          state: {}
-        )
+        })
 
     it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
       state = savedState(@todosPath)
@@ -121,16 +156,17 @@ describe "lib/project", ->
         expect(@project.getConfig).to.be.calledWith(opts)
 
     it "updates config.state when saved state changes", ->
-      state = savedState(@todosPath)
-      getSavedState = @sandbox.stub(state, "get").returns(Promise.resolve({}))
+      @sandbox.spy(@project, "saveState")
+
       options = {}
+
       @project.open(options)
-      .then ->
-        getSavedState.returns(Promise.resolve({ autoScrollingEnabled: false }))
-        options.onSavedStateChanged()
+      .then =>
+        options.onSavedStateChanged({ autoScrollingEnabled: false })
       .then =>
         @project.getConfig()
-      .then (config) ->
+      .then (config) =>
+        expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
 
     it.skip "watches cypress.json", ->
@@ -221,7 +257,7 @@ describe "lib/project", ->
       expect(@watch).not.to.be.called
 
     it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
-      @project.generatedProjectIdTimestamp = timestamp = new Date
+      @project.generatedProjectIdTimestamp = timestamp = new Date()
 
       emit = @sandbox.spy(@project, "emit")
 
@@ -246,7 +282,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
-      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").returns(Promise.resolve())
+      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
       @config = {
         projectRoot: "/path/to/root/"
         supportFile: "/path/to/root/foo/bar.js"
@@ -337,7 +373,7 @@ describe "lib/project", ->
         expect(err.message).to.include("path/to/project")
 
     it "bubbles up Settings.read errors", ->
-      err = new Error
+      err = new Error()
       err.code = "EACCES"
 
       @sandbox.stub(settings, "read").rejects(err)
@@ -762,7 +798,7 @@ describe "lib/project", ->
     it "throws CANNOT_FETCH_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "getProjectToken")
         .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error)
+        .rejects(new Error())
 
       Project.getSecretKeyByPath(@todosPath)
       .then ->
@@ -785,7 +821,7 @@ describe "lib/project", ->
     it "throws CANNOT_CREATE_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "updateProjectToken")
         .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error)
+        .rejects(new Error())
 
       Project.generateSecretKeyByPath(@todosPath)
       .then ->

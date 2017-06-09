@@ -1,6 +1,7 @@
 {
   "name": "@packages/extension",
   "version": "0.4.2",
+  "private": true,
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
@@ -8,7 +9,7 @@
     "watch": "gulp watch",
     "build": "gulp build",
     "build-prod": "gulp build",
-    "test": "NODE_ENV=test mocha --require test-setup.js",
+    "test": "NODE_ENV=test mocha",
     "test-watch": "npm run test -- --watch",
     "clean": "gulp clean",
     "clean-deps": "rm -rf node_modules"

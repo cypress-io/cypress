@@ -14,7 +14,7 @@ describe('linux browser detection', () => {
     execa.shell.restore()
   })
 
-  it('is detects browser by running --version', () => {
+  it('detects browser by running --version', () => {
     const goal = {
       name: 'test-browser-name',
       versionRegex: /v(\S+)$/,

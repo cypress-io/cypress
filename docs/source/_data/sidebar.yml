@@ -5,10 +5,10 @@ guides:
     writing-your-first-test: writing-your-first-test.html
     testing-your-app: testing-your-app.html
     next-steps: next-steps.html
-  cypress-basics:
-    overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    core-concepts: core-concepts.html
+  core-concepts:
+    cypress-in-a-nutshell: cypress-in-a-nutshell.html
     organizing-tests: organizing-tests.html
+    overview-of-the-gui-tool: overview-of-the-gui-tool.html
     aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
@@ -25,24 +25,28 @@ guides:
     dashboard-runs: dashboard-recorded-runs.html
     dashboard-orgs: dashboard-organizations.html
   advanced-cypress:
-    the-cypress-workflow: the-cypress-workflow.html
-    coming-from-selenium: coming-from-selenium.html
-    custom-commands: custom-commands.html
+    # the-cypress-workflow: the-cypress-workflow.html
+    # coming-from-selenium: coming-from-selenium.html
+    # custom-commands: custom-commands.html
     web-security: web-security.html
-    how-cypress-really-works: how-cypress-really-works.html
-    talking-to-your-backend: talking-to-your-backend.html
-    spawning-processes: spawning-processes.html
+    # how-cypress-really-works: how-cypress-really-works.html
+    # talking-to-your-backend: talking-to-your-backend.html
+    # spawning-processes: spawning-processes.html
   appendices:
     configuration: configuration.html
     error-messages: error-messages.html
+    bundled-tools: bundled-tools.html
     available-assertions: available-assertions.html
-    best-practices: best-practices.html
-    anti-patterns: anti-patterns.html
+    creating-fixtures: creating-fixtures.html
+    # best-practices: best-practices.html
+    # anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html
-    contributing: contributing.html
+    userland-extensions: userland-extensions.html
+    known-issues: known-issues.html
+    # contributing: contributing.html
     changelog: changelog.html
-    roadmap: roadmap.html
-    all-videos: all-videos.html
+    # roadmap: roadmap.html
+    # all-videos: all-videos.html
 
 api:
   welcome:
@@ -99,10 +103,11 @@ api:
     readfile: readfile.html
     reload: reload.html
     request: request.html
+    root: root.html
     route: route.html
     screenshot: screenshot.html
-    scrollintoview: scrollintoview.html
-    scrollto: scrollto.html
+    # scrollintoview: scrollintoview.html
+    # scrollto: scrollto.html
     select: select.html
     server: server.html
     setcookie: setcookie.html
@@ -115,7 +120,7 @@ api:
     then: then.html
     tick: tick.html
     title: title.html
-    trigger: trigger.html
+    # trigger: trigger.html
     type: type.html
     uncheck: uncheck.html
     url: url.html

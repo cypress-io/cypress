@@ -1,7 +1,6 @@
 ---
 title: Cypress.Promise
 comments: true
-description: ''
 ---
 
 Cypress automatically proxies [`Bluebird`](https://github.com/petkaantonov/bluebird) and exposes it as `Cypress.Promise`.

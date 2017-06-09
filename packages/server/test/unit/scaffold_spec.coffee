@@ -127,7 +127,7 @@ describe "lib/scaffold", ->
       .then =>
         scaffold.integration(integrationPath, @cfg)
       .then ->
-        throw "Should throw the right error"
+        throw new Error("Should throw the right error")
       .catch (err = {}) =>
         expect(err.stack).to.contain("not in the scaffolded file tree")
 
@@ -181,7 +181,7 @@ describe "lib/scaffold", ->
       .then =>
         scaffold.support(supportPath, @cfg)
       .then ->
-        throw "Should throw the right error"
+        throw new Error("Should throw the right error")
       .catch (err = {}) =>
         expect(err.stack).to.contain("not in the scaffolded file tree")
 
@@ -327,7 +327,7 @@ describe "lib/scaffold", ->
       .then =>
         scaffold.fixture(fixturesPath, @cfg)
       .then ->
-        throw "Should throw the right error"
+        throw new Error("Should throw the right error")
       .catch (err = {}) =>
         expect(err.stack).to.contain("not in the scaffolded file tree")
 

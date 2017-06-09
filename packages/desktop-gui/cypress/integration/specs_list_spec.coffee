@@ -76,6 +76,8 @@ describe "Specs List", ->
       cy
         .contains("OK, got it!").click()
         .get(".modal").should("not.be.visible")
+        .then ->
+          expect(@App.ipc).to.be.calledWith("onboarding:closed")
 
     it "triggers open:finder on click of example file", ->
       cy

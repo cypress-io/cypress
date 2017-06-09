@@ -1,7 +1,6 @@
 ---
 title: closest
 comments: true
-description: ''
 ---
 
 Get the first DOM element that matches the selector (whether it be itself or one of it's ancestors).
@@ -84,7 +83,7 @@ When clicking on the `closest` command within the command log, the console outpu
 - [first](https://on.cypress.io/api/first)
 - [parent](https://on.cypress.io/api/parent)
 - [parents](https://on.cypress.io/api/parents)
-- [parentsUntil](https://on.cypress.io/api/parentsUntil)
+- [parentsUntil](https://on.cypress.io/api/parentsuntil)
 - [prev](https://on.cypress.io/api/prev)
-- [prevAll](https://on.cypress.io/api/prevAll)
-- [prevUntil](https://on.cypress.io/api/prevUntil)
+- [prevAll](https://on.cypress.io/api/prevall)
+- [prevUntil](https://on.cypress.io/api/prevuntil)

@@ -130,7 +130,7 @@ describe "lib/cypress", ->
       .then =>
         @sandbox.stub(api, "getProjectToken")
           .withArgs(@projectId, "auth-token-123")
-          .rejects(new Error)
+          .rejects(new Error())
 
         cypress.start(["--get-key", "--project=#{@todosPath}"])
       .then =>
@@ -191,7 +191,7 @@ describe "lib/cypress", ->
       .then =>
         @sandbox.stub(api, "updateProjectToken")
           .withArgs(@projectId, "auth-token-123")
-          .rejects(new Error)
+          .rejects(new Error())
 
         cypress.start(["--new-key", "--project=#{@todosPath}"])
       .then =>
@@ -878,7 +878,7 @@ describe "lib/cypress", ->
     it "logs error and exits when ci key is not valid", ->
       @setup()
 
-      err = new Error
+      err = new Error()
       err.statusCode = 401
       @createRun.rejects(err)
 
@@ -889,7 +889,7 @@ describe "lib/cypress", ->
     it "logs error and exits when project could not be found", ->
       @setup()
 
-      err = new Error
+      err = new Error()
       err.statusCode = 404
       @createRun.rejects(err)
 
@@ -900,7 +900,7 @@ describe "lib/cypress", ->
     it "logs error but continues running the tests", ->
       @setup()
 
-      err = new Error
+      err = new Error()
       err.statusCode = 500
       @createRun.rejects(err)
 

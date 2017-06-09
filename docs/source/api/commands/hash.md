@@ -1,13 +1,12 @@
 ---
 title: hash
 comments: true
-description: ''
 ---
 
 Get the current URL hash.
 
 {% note info %}
-This is an alias of [`cy.location().hash`](https://on.cypress.io/api/location)
+This is an alias of [`cy.location('hash')`](https://on.cypress.io/api/location)
 {% endnote %}
 
 # Syntax

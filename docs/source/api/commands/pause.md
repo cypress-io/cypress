@@ -1,7 +1,6 @@
 ---
 title: pause
 comments: true
-description: ''
 ---
 
 Stop `cy` commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.

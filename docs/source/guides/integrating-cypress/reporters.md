@@ -2,20 +2,16 @@ title: Reporters
 comments: true
 ---
 
-# Supported Reporters
-
 Cypress supports the following reporters:
 
 * [Mocha's built-in reporters](https://mochajs.org/#reporters).
 * [`teamcity`](https://github.com/cypress-io/mocha-teamcity-reporter)
 * [`junit`](https://github.com/michaelleeallen/mocha-junit-reporter)
-* Custom reporters ([see below](#section-custom-reporters))
-
-***
+* [Custom reporters](#Custom-Reporters))
 
 # Custom Reporters
 
-Cypress supports custom reporters, whether local to your project or installed through npm.
+Cypress supports custom reporters, whether local to your project or installed through [npm](https://www.npmjs.com/).
 
 ## Local Reporters
 
@@ -29,53 +25,51 @@ Say you have the following directory structure:
     - custom.js
 ```
 
-Specify the path to your custom reporter to use it:
+**To specify the path to your custom reporter:**
 
-`cypress.json`:
+***cypress.json***
 
-```javascript
+```json
 {
   "reporter": "reporters/custom.js"
 }
 ```
 
-Command line:
+***Command line***  
 
 ```shell
 cypress run --reporter reporters/custom.js
 ```
 
-***
-
 ## npm Reporters
 
-If you have installed a custom reporter through npm, specify the package name:
+If you installed a custom reporter through npm, specify the package name:
 
-```javascript
-// cypress.json
+***cypress.json***
+
+```json
 {
   "reporter": "mochawesome"
 }
 ```
 
-Command line:
+**Command line**
 
 ```shell
 cypress run --reporter mochawesome
 ```
 
-{% note info Peer Dependencies %}
-You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install mocha as a dev dependency of your own project for it to work (`npm install mocha --save-dev`).
+{% note info  %}
+You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install `mocha` as a dev dependency of your own project for it to work (`npm install mocha --save-dev`).
 {% endnote %}
 
-***
+# Options
 
-# Reporter Options
+Some reporters accept options that customize their behavior. These can be specified in your `cypress.json` or via the command line:
 
-Some reporters accept options to customize their behavior. These can be specified in your `cypress.json` or via the command line:
+**cypress.json**
 
-```javascript
-// cypress.json
+```json
 {
   "reporter": "junit",
   "reporterOptions": {
@@ -85,7 +79,7 @@ Some reporters accept options to customize their behavior. These can be specifie
 }
 ```
 
-Command line:
+**Command line**
 
 ```shell
 cypress run --reporter junit --reporter-options "mochaFile=results/my-test-output.xml,toConsole=true"

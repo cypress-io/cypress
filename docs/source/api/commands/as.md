@@ -1,7 +1,6 @@
 ---
 title: as
 comments: true
-description: ''
 ---
 
 Assign an alias for later use. Reference the alias later within a [`.get()`](https://on.cypress.io/api/get) or [`.wait()`](https://on.cypress.io/api/wait) command with a `@` prefix.

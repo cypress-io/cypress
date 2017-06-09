@@ -35,7 +35,7 @@ module.exports = {
     if config.isHeadless and built = builtFiles[filePath]
       return built
 
-    log "bundler for project #{config.projectRoot}"
+    log "bundler for project #{config.projectRoot} for file #{filePath}"
 
     emitter = new EE()
 

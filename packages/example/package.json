@@ -1,6 +1,7 @@
 {
   "name": "@packages/example",
   "version": "0.8.0",
+  "private": true,
   "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
@@ -13,7 +14,7 @@
     "deploy": "gulp deploy",
     "prerelease": "npm run build",
     "release": "releaser",
-    "lint": "standard --verbose --fix *.js bin/*.js lib/*.js test/*.js",
+    "lint": "$(bin-up eslint) --fix *.js bin/*.js lib/*.js test/*.js",
     "pretest": "npm run lint"
   },
   "author": "Brian Mann",
@@ -24,14 +25,14 @@
   },
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
+    "bin-up": "^1.0.1",
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.1",
     "gulp-gh-pages": "^0.5.4",
     "gulp-rev-all": "^0.8.22",
     "mocha": "^2.4.5",
-    "run-sequence": "^1.1.5",
-    "standard": "^10.0.2"
+    "run-sequence": "^1.1.5"
   },
   "repository": {
     "type": "git",

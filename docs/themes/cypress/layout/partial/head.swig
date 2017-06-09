@@ -2,7 +2,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{{ description(page, config.description) }}" />
+<meta name="description" content="{% if page.description %}{{ page.description }}{% endif %}" />
 
   <title>{{ config.title }} | {% if page.title %}{{ page.title }}{% else %}{{ config.subtitle }}{% endif %}</title>
 

@@ -1,7 +1,6 @@
 ---
 title: parent
 comments: true
-description: ''
 ---
 
 Get the parent DOM element of a set of DOM elements.

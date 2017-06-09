@@ -1,21 +1,21 @@
-var _ = require('lodash')
-var str = require('underscore.string')
-var path = require('path')
-var Promise = require('bluebird')
+let _ = require('lodash')
+let str = require('underscore.string')
+let path = require('path')
+let Promise = require('bluebird')
 
-var fs = Promise.promisifyAll(require('fs-extra'))
-var glob = Promise.promisify(require('glob'))
+let fs = Promise.promisifyAll(require('fs-extra'))
+let glob = Promise.promisify(require('glob'))
 
-var startsWithNumberAndDashRe = /(\d+-)/
-var excerptRe = /excerpt:.+/
-var newLinesRe = /\n{3,}/
-var calloutGlobalRe = /\[block:callout\]([^]+?)\[\/block\]/g
-var calloutRe = /\[block:callout\]([^]+?)\[\/block\]/
-var underscoreRe = /_.md/
+let startsWithNumberAndDashRe = /(\d+-)/
+let excerptRe = /excerpt:.+/
+let newLinesRe = /\n{3,}/
+let calloutGlobalRe = /\[block:callout\]([^]+?)\[\/block\]/g
+let calloutRe = /\[block:callout\]([^]+?)\[\/block\]/
+let underscoreRe = /_.md/
 
-var LOOKUP = {
+let LOOKUP = {
   guides: 'v0.0',
-  api: 'v1.0'
+  api: 'v1.0',
 }
 
 const getFolderFromFile = function (file) {
@@ -39,11 +39,11 @@ const normalize = function (string) {
 }
 
 const find = function (type) {
-  var folder = LOOKUP[type]
-  var globstar = path.join('old_docs', folder, 'documentation', '**', '*.md')
+  let folder = LOOKUP[type]
+  let globstar = path.join('old_docs', folder, 'documentation', '**', '*.md')
 
   return glob(globstar, {
-    realpath: true
+    realpath: true,
   })
 }
 
@@ -51,9 +51,9 @@ const transfer = function (type) {
   return find(type).then(function (files = []) {
     return _.filter(files, fileStartsWithNumberAndDash)
   }).map(function (file) {
-    var name = normalize(getNameFromFile(file))
-    var folder = normalize(getFolderFromFile(file))
-    var dest = path.join('source', type, folder, name)
+    let name = normalize(getNameFromFile(file))
+    let folder = normalize(getFolderFromFile(file))
+    let dest = path.join('source', type, folder, name)
 
     return copy(file, dest)
     .then(function () {
@@ -77,9 +77,9 @@ const transfer = function (type) {
       // - :fa-angle-right: Welcome
       // ***
 
-      var contentsIndex = string.indexOf('# Contents')
-      var dividerIndex = string.indexOf('***') + 3
-      var chunkToRemove = string.slice(contentsIndex, dividerIndex)
+      let contentsIndex = string.indexOf('# Contents')
+      let dividerIndex = string.indexOf('***') + 3
+      let chunkToRemove = string.slice(contentsIndex, dividerIndex)
 
       return string
       .split(chunkToRemove)
@@ -94,7 +94,7 @@ const transfer = function (type) {
 
       function replace (s, icon) {
         return s
-        .replace(':fa-' + icon + ':', '{% fa fa-' + icon + ' %}')
+        .replace(`:fa-${icon}:`, `{% fa fa-${icon} %}`)
       }
 
       return ['cog', 'plus'].reduce(function (memo, icon) {
@@ -151,12 +151,12 @@ const transfer = function (type) {
 
 const copy = function (src, dest) {
   return fs.copyAsync(src, dest, {
-    overwrite: true
+    overwrite: true,
   })
 }
 
 function fileStartsWithNumberAndDash (file) {
-  var name = getNameFromFile(file)
+  let name = getNameFromFile(file)
   return startsWithNumberAndDashRe.test(name)
 }
 
@@ -167,7 +167,9 @@ const transferIncomplete = function () {
     }
     return _.reject(files, fileStartsWithNumberAndDash)
   }).map(function (file) {
-    var dest, folder, name
+    let dest
+    let folder
+    let name
     name = getNameFromFile(file)
     folder = getFolderFromFile(file)
     dest = path.join('source', 'incomplete', folder, name)

@@ -1,7 +1,7 @@
-var path = require('path')
+let path = require('path')
 
 module.exports = {
-  getPathToExample: function () {
+  getPathToExample () {
     return path.join(__dirname, '..', 'cypress', 'integration', 'example_spec.js')
-  }
+  },
 }

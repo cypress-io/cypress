@@ -1,22 +1,31 @@
-import {log} from '../log'
-import {prop, trim, tap} from 'ramda'
-import {FoundBrowser, Browser, NotInstalledError} from '../types'
-import execa = require('execa')
+import { log } from '../log'
+import { prop, trim, tap } from 'ramda'
+import { FoundBrowser, Browser, NotInstalledError } from '../types'
+import * as execa from 'execa'
 
 const notInstalledErr = (name: string) => {
-  const err: NotInstalledError =
-    new Error(`Browser not installed: ${name}`) as NotInstalledError
+  const err: NotInstalledError = new Error(
+    `Browser not installed: ${name}`
+  ) as NotInstalledError
   err.notInstalled = true
   throw err
 }
 
-function getLinuxBrowser (name: string, binary: string, versionRegex: RegExp): Promise<FoundBrowser> {
+function getLinuxBrowser(
+  name: string,
+  binary: string,
+  versionRegex: RegExp
+): Promise<FoundBrowser> {
   const getVersion = (stdout: string) => {
     const m = versionRegex.exec(stdout)
     if (m) {
       return m[1]
     }
-    log('Could not extract version from %s using regex %s', stdout, versionRegex)
+    log(
+      'Could not extract version from %s using regex %s',
+      stdout,
+      versionRegex
+    )
     return notInstalledErr(binary)
   }
 
@@ -27,12 +36,13 @@ function getLinuxBrowser (name: string, binary: string, versionRegex: RegExp): P
 
   const cmd = `${binary} --version`
   log('looking using command "%s"', cmd)
-  return execa.shell(cmd)
+  return execa
+    .shell(cmd)
     .then(prop('stdout'))
     .then(trim)
     .then(tap(log))
     .then(getVersion)
-    .then((version) => {
+    .then(version => {
       return {
         name,
         version,
@@ -42,6 +52,6 @@ function getLinuxBrowser (name: string, binary: string, versionRegex: RegExp): P
     .catch(returnError)
 }
 
-export function detectBrowserLinux (browser: Browser) {
+export function detectBrowserLinux(browser: Browser) {
   return getLinuxBrowser(browser.name, browser.binary, browser.versionRegex)
 }

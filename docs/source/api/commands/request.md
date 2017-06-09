@@ -1,7 +1,6 @@
 ---
 title: request
 comments: true
-description: ''
 ---
 
 Make an HTTP request.

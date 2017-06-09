@@ -1,7 +1,6 @@
 ---
 title: visit
 comments: true
-description: ''
 ---
 
 Visit a remote url.
@@ -54,7 +53,7 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 ## Visit
 
-**Visit a local server running on http://localhost:8000**
+**Visit a local server running on `http://localhost:8000`**
 
 `cy.visit()` resolves when the remote page fires its `load` event.
 
@@ -170,9 +169,9 @@ cy.server()
 cy.route('/users/**', 'fx:users')
 ```
 
-But if your app makes a request upon being initialized, *the above code will not work*. `cy.visit()` will resolve once its `load` event fires.  The [`cy.server()`](https://on.cypress.io/server) and [`cy.route()`](https://on.cypress.io/route) commands are not processed until *after* `cy.visit()` resolves.
+But if your app makes a request upon being initialized, *the above code will not work*. `cy.visit()` will resolve once its `load` event fires.  The [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/api/route) commands are not processed until *after* `cy.visit()` resolves.
 
-Many applications will have already begun routing, initialization, and requests by the time the `cy.visit()` in the above code resolves. Therefore creating a [`cy.server()`](https://on.cypress.io/server) will happen too late, and Cypress will not process the requests.
+Many applications will have already begun routing, initialization, and requests by the time the `cy.visit()` in the above code resolves. Therefore creating a [`cy.server()`](https://on.cypress.io/api/server) will happen too late, and Cypress will not process the requests.
 
 Luckily Cypress supports this use case. Simply reverse the order of the commands:
 

@@ -1,7 +1,6 @@
 ---
 title: go
 comments: true
-description: ''
 ---
 
 Navigate back or forward to the previous or next URL in the browser's history.

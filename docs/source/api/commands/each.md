@@ -1,7 +1,6 @@
 ---
 title: each
 comments: true
-description: ''
 ---
 
 Iterate through an array like structure (arrays or objects with a `length` property).

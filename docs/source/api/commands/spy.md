@@ -1,7 +1,6 @@
 ---
 title: spy
 comments: true
-description: ''
 ---
 
 Wrap a method in a spy in order to record calls to and arguments of the function.

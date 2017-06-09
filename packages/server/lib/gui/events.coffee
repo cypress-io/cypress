@@ -26,6 +26,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
   send = (data) ->
     sendResponse({id: id, data: data})
 
+  sendNull = ->
+    send(null)
+
   onBus = (event) ->
     bus.removeAllListeners(event)
     bus.on(event, send)
@@ -42,7 +45,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "gui:error"
       logs.error(arg)
-      .then -> send(null)
+      .then(sendNull)
       .catch(sendErr)
 
     when "show:directory:dialog"
@@ -141,7 +144,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "clear:logs"
       logs.clear()
-      .then -> send(null)
+      .then(sendNull)
       .catch(sendErr)
 
     when "on:log"
@@ -254,6 +257,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
           err.type or "UNKNOWN"
 
         sendErr(err)
+
+    when "onboarding:closed"
+      openProject.getProject()
+      .saveState({ showedOnBoardingModal: true })
+      .then(sendNull)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

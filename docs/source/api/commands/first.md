@@ -1,7 +1,6 @@
 ---
 title: first
 comments: true
-description: ''
 ---
 
 Get the first DOM element within a set of DOM elements.
@@ -66,7 +65,7 @@ Option | Default | Notes
 
 ```javascript
 // yields <li class="one">Knick knack on my thumb</li>
-cy.get('ul').first()
+cy.get('li').first()
 ```
 
 # Command Log

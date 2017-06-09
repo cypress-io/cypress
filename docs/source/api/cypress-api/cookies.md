@@ -1,7 +1,6 @@
 ---
 title: Cypress.Cookies
 comments: true
-description: ''
 ---
 
 `Cookies.debug()`, `Cookies.preserveOnce()` and `Cookies.defaults()` allow you to do more than just get, set, or clear cookies.

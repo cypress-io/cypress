@@ -15,6 +15,7 @@ logger        = require("./logger")
 browsers      = require("./browsers")
 automation    = require("./automation")
 savedState    = require("./saved_state")
+log           = require('debug')('cypress:server:socket')
 
 existingState = null
 
@@ -44,6 +45,9 @@ reporterEvents = [
 retry = (fn) ->
   Promise.delay(25).then(fn)
 
+isSpecialSpec = (name) ->
+  name.endsWith("__all")
+
 class Socket
   constructor: ->
     if not (@ instanceof Socket)
@@ -65,8 +69,13 @@ class Socket
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
+    log("watch test file #{originalFilePath}")
     filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
     filePath = filePath.replace("#{config.projectRoot}/", "")
+
+    ## bail if this is special path like "__all"
+    ## maybe the client should not ask to watch non-spec files?
+    return if isSpecialSpec(filePath)
 
     ## bail if we're already watching this
     ## exact file or we've turned off watching
@@ -81,6 +90,7 @@ class Socket
 
     ## store this location
     @testFilePath = filePath
+    log("will watch test file path #{filePath}")
 
     watchers.watchBundle(filePath, config, {
       onChange: @onTestFileChange.bind(@)
@@ -119,7 +129,9 @@ class Socket
   toRunner: (event, data) ->
     @io and @io.to("runner").emit(event, data)
 
-  # onAutomation: (messages, message, data) ->
+  isSocketConnected: (socket) ->
+    socket and socket.connected
+
   onAutomation: (socket, message, data, id) ->
     ## instead of throwing immediately here perhaps we need
     ## to make this more resilient by automatically retrying
@@ -129,7 +141,7 @@ class Socket
     ## for instance when socket.io detects a disconnect
     ## does it immediately remove the member from the room?
     ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
-    if socket and socket.connected
+    if @isSocketConnected(socket)
       socket.emit("automation:request", id, message, data)
     else
       throw new Error("Could not process '#{message}'. No automation clients connected.")
@@ -167,7 +179,7 @@ class Socket
     @io = @createIo(server, socketIoRoute, socketIoCookie)
 
     automation.use({
-      onPush: (message, data)  =>
+      onPush: (message, data) =>
         @io.emit("automation:push:message", message, data)
     })
 
@@ -208,15 +220,12 @@ class Socket
             ## TODO: no longer emit this, just close the browser and display message in reporter
             @io.emit("automation:disconnected")
 
-        socket.on "automation:push:request", (message, data) =>
-          # fn = (data) =>
-            # @io.emit("automation:push:message", message, data)
-            # cb()
-
-          # automation(config.namespace, socketIoCookie)
-          # .pushMessage(message, data, fn)
-
+        socket.on "automation:push:request", (message, data, cb) =>
           automation.push(message, data)
+
+          ## just immediately callback because there
+          ## is not really an 'ack' here
+          cb() if cb
 
         socket.on "automation:response", automation.response
 
@@ -355,9 +364,11 @@ class Socket
           host: "http://localhost:2020"
         })
 
-      socket.on "save:app:state", (state) ->
-        savedState().set(state).then ->
-          options.onSavedStateChanged()
+      socket.on "save:app:state", (state, cb) ->
+        options.onSavedStateChanged(state)
+
+        ## we only use the 'ack' here in tests
+        cb() if cb
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

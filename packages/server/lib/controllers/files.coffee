@@ -9,6 +9,7 @@ user        = require("../user")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 errors      = require("../errors")
+log         = require("debug")("cypress:server:files")
 
 glob = Promise.promisify(glob)
 
@@ -102,6 +103,8 @@ module.exports = {
 
   getTestFiles: (config) ->
     integrationFolderPath = config.integrationFolder
+    log("looking for test files in the integration folder %s",
+      integrationFolderPath)
 
     ## support files are not automatically
     ## ignored because only _fixtures are hard
@@ -126,7 +129,7 @@ module.exports = {
     ## ignore fixtures + javascripts
     options = {
       sort:     true
-      realpath: true
+      absolute: true
       cwd:      integrationFolderPath
       ignore:   [].concat(
         javascriptsPath,
@@ -145,7 +148,17 @@ module.exports = {
 
     relativePathFromProjectRoot = (file) ->
       path.relative(config.projectRoot, file)
-    
+
+    setNameParts = (file) ->
+      log("found test file %s", file)
+      throw new Error("Cannot set parts of file from non-absolute path #{file}") if not path.isAbsolute(file)
+
+      {
+        name: relativePathFromIntegrationFolder(file)
+        path: relativePathFromProjectRoot(file)
+        absolute: file
+      }
+
     ignorePatterns = [].concat(config.ignoreTestFiles)
 
     ## a function which returns true if the file does NOT match
@@ -164,14 +177,11 @@ module.exports = {
     ## filter out anything that matches our
     ## ignored test files glob
     .filter(doesNotMatchAllIgnoredPatterns)
-    .map (file) ->
+    .map(setNameParts)
+    .then (files) ->
+      log("found %d spec files", files.length)
+      log(files)
       {
-        name: relativePathFromIntegrationFolder(file)
-        path: relativePathFromProjectRoot(file)
-        absolute: file
-      }
-    .then (arr) ->
-      {
-        integration: arr
+        integration: files
       }
 }

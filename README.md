@@ -122,7 +122,7 @@ DEBUG=cypress:* ...
 
 Sometimes tests pass locally, but fail on CI. Our CI environment should be
 dockerized. In order to run the same image locally, there is script
-[dev/run-docker-local.sh](dev/run-docker-local.sh) that assumes that you
+[scripts/run-docker-local.sh](scripts/run-docker-local.sh) that assumes that you
 have pulled the image `cypress/internal:chrome58` (see
 [circle.yml](circle.yml) for the current image name).
 
@@ -147,7 +147,7 @@ Run `npm rebuild node-sass` to build the binding for your current environment.
 From the running container, go into that project and rebuild `node-sass`
 
 ```
-$ ./dev/run-docker-local.sh
+$ npm run docker
 cd packages/desktop-gui
 npm rebuild node-sass
 ```

@@ -1,7 +1,6 @@
 ---
 title: invoke
 comments: true
-description: ''
 ---
 
 Invoke a function on the previously yielded subject.
@@ -86,10 +85,10 @@ cy.get('div.container').should('be.hidden') // true
 **Use `.invoke('show')` and `.invoke('trigger')`**
 
 {% note info %}
-[Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
+[Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
 {% endnote %}
 
-## 3rd Party Plugins
+## Third Party Plugins
 
 **Using a Kendo DropDown**
 

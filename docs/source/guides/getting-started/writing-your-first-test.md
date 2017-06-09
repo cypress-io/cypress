@@ -1,10 +1,13 @@
+---
 title: Writing Your First Test
 ---
 
-# What You'll Learn
+{% note info %}
+### {% fa fa-graduation-cap %} What You'll Learn
 
-- how test files are structured and executed
-- basic web navigation, dom selection, and assertions
+- How test files are structured and executed
+- Basic web navigation, DOM selection, and assertions
+{% endnote %}
 
 # Visual Learners
 

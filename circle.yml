@@ -159,7 +159,7 @@ jobs:
           name: Fast unit tests
           command: |
             if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm test
+              npm run all test -- --package cli
               npm run all test -- --package coffee
               npm run all test -- --package desktop-gui
               npm run all test -- --package electron
