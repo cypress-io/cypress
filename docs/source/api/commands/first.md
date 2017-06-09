@@ -65,7 +65,7 @@ Option | Default | Notes
 
 ```javascript
 // yields <li class="one">Knick knack on my thumb</li>
-cy.get('ul').first()
+cy.get('li').first()
 ```
 
 # Command Log
