@@ -197,7 +197,7 @@ There is a performance tradeoff here: **tests that have longer timeout periods t
 
 # Chains of Commands
 
-It's crucially important to understand the mechanism by which Cypress Commands chain together: a queue of work to be done on some subject that flows from one command to the next. It's like Promises, but different, so don't reach for your favorite Promise library until we finish laying it all out.
+It's very important to understand the mechanism Cypress uses to chain commands together. It manages a Promise chain on your behalf, with each Promise yielding a subject to the next Promise, until the chain ends or an error is encountered. The developer should not need to use Promises directly, though!
 
 ## Interacting With Elements
 
