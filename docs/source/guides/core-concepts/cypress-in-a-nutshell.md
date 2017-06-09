@@ -76,6 +76,21 @@ In Cypress, the query is the same:
 cy.get('.my-selector')
 ```
 
+In fact, Cypress wraps jQuery and exposes all of its DOM selection and traversal methods to you so you can work with complex HTML structures with ease.
+
+```js
+// Each method is equivalent to its jQuery counterpart. Use what you know!
+cy.get('#main-content')
+  .find('.article')
+  .children('img[src^="/static"]')
+  .first()
+```
+
+{% note success Core Concept %}
+Cypress leverages jQuery's powerful query engine to make tests familiar and readable for modern web developers.
+
+{% endnote %}
+
 Accessing the DOM elements from the query works differently, however:
 
 ```js
