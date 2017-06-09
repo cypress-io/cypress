@@ -4,14 +4,25 @@ const cp = require('child_process')
 const os = require('os')
 const path = require('path')
 const Promise = require('bluebird')
-const getos = Promise.promisify(require('getos'))
 const fs = Promise.promisifyAll(require('fs-extra'))
+const debug = require('debug')('cypress:cli')
+const R = require('ramda')
+const { stripIndent } = require('common-tags')
+const ProgressBar = require('progress')
 
 const xvfb = require('../exec/xvfb')
+const { formErrorText, errors } = require('./errors')
 const packageVersion = require('../../package').version
 
 const log = (...messages) => {
   console.log(...messages) // eslint-disable-line no-console
+}
+
+// splits long text into lines and calls log()
+// on each one to allow easy unit testing for specific message
+const logLines = (text) => {
+  const lines = text.split('\n')
+  R.forEach(log, lines)
 }
 
 const getPlatformExecutable = () => {
@@ -24,17 +35,20 @@ const getPlatformExecutable = () => {
   }
 }
 
-const logAndFail = (...messages) => {
-  log(...messages.map((msg) => chalk.red(msg)))
-  process.exit(1)
-}
-
 const getInstallationDir = () => {
   return path.join(__dirname, '..', '..', 'dist')
 }
 
+const getInfoFilePath = () => {
+  const infoPath = path.join(getInstallationDir(), 'info.json')
+  debug('path to info.json file %s', infoPath)
+  return infoPath
+}
+
 const getInstalledVersion = () => {
-  return ensureFileInfoContents().get('version')
+  return ensureFileInfoContents()
+    .tap(debug)
+    .get('version')
 }
 
 const getVerifiedVersion = () => {
@@ -58,6 +72,7 @@ const writeInstalledVersion = (version) => {
 }
 
 const writeVerifiedVersion = (verifiedVersion) => {
+  debug('writing verified version string "%s"', verifiedVersion)
   return ensureFileInfoContents().then((contents) => {
     return writeInfoFileContents(_.extend(contents, { verifiedVersion }))
   })
@@ -72,30 +87,45 @@ const getPathToUserExecutable = () => {
 }
 
 const getInfoFileContents = () => {
-  return fs.readJsonAsync(path.join(getInstallationDir(), 'info.json'))
+  return fs.readJsonAsync(getInfoFilePath())
 }
 
 const ensureFileInfoContents = () => {
   return getInfoFileContents().catch(() => {
+    debug('could not read info file')
     return {}
   })
 }
 
 const writeInfoFileContents = (contents) => {
-  return fs.outputJsonAsync(path.join(getInstallationDir(), 'info.json'), contents)
+  return fs.outputJsonAsync(getInfoFilePath(), contents)
 }
 
 const verificationError = (message) => {
   return _.extend(new Error(''), { name: '', message, isVerificationError: true })
 }
 
+const xvfbError = (message) => {
+  return _.extend(new Error(''), { name: '', message, isXvfbError: true })
+}
+
+const appMissingError = (message) => {
+  return _.extend(new Error(''), { name: '', message, isAppMissing: true })
+}
+
 const runSmokeTest = () => {
+  debug('running smoke test')
   let stderr = ''
   const needsXvfb = xvfb.isNeeded()
+  debug('needs XVFB?', needsXvfb)
+  const cypressExecPath = getPathToExecutable()
+  debug('using Cypress executable %s', cypressExecPath)
+  const project = path.join(__dirname, 'project')
+  debug('test project %s', project)
 
   const spawn = () => {
     return new Promise((resolve, reject) => {
-      const child = cp.spawn(getPathToExecutable(), ['--project', path.join(__dirname, 'project')])
+      const child = cp.spawn(cypressExecPath, ['--project', project])
 
       child.stderr.on('data', (data) => {
         stderr += data.toString()
@@ -103,9 +133,18 @@ const runSmokeTest = () => {
 
       if (needsXvfb) {
         child.on('close', () => {
+          debug('spawn stop, closing XVFB')
           xvfb.stop()
         })
       }
+
+      child.on('error', (err) => {
+        debug('spawn error', err)
+        reject(appMissingError(stripIndent`
+          Could not execute Cypress
+          ${err.message}
+        `))
+      })
 
       child.on('exit', (code) => {
         if (code === 0) {
@@ -117,60 +156,84 @@ const runSmokeTest = () => {
     })
   }
 
+  const onXvfbError = (err) => {
+    debug('caught xvfb error %s', err.message)
+    throw xvfbError(`Caught error trying to run XVFB: "${err.message}"`)
+  }
+
+  const cypressError = (err) => {
+    // pass other errors unchangd
+    if (err.isAppMissing || err.isXvfbError) {
+      throw err
+    }
+    throw verificationError(err.message)
+  }
+
   if (needsXvfb) {
     return xvfb.start()
+    .catch(onXvfbError)
     .then(spawn)
-    .catch((err) => {
-      throw verificationError(`Could not start XVFB. Make sure it is installed on your system.\n\n${err.stack}`)
-    })
+    .catch(cypressError)
   } else {
     return spawn()
   }
 }
 
-const getOsVersion = () => {
-  if (os.platform() === 'linux') {
-    return getos()
-    .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
-    .catch(() => os.release())
-  } else {
-    return Promise.resolve(os.release())
-  }
+const differentFrom = (a) => (b) => a !== b
+
+const logStart = () =>
+  log(chalk.green('⧖ Verifying Cypress executable...'))
+
+const logSuccess = () => {
+  log()
+  log(chalk.green('✓ Successfully verified Cypress executable'))
 }
 
-const checkIfVerified = (options) => {
+const logFailed = () => {
+  log()
+  log(chalk.red('✖ Failed to verify Cypress executable.'))
+  log()
+}
+
+function testVersion (version) {
+  return writeVerifiedVersion(null)
+    .then(runSmokeTest)
+    .then(() => {
+      logSuccess()
+      return writeVerifiedVersion(version)
+    }, (err) => {
+      throw err
+    })
+}
+
+const failProcess = () =>
+  process.exit(1)
+
+const explainAndFail = (info) => (err) =>
+  formErrorText(info, err)
+    .then(logLines)
+    .then(logFailed)
+    .then(failProcess)
+
+const maybeVerify = (options = {}) => {
+  debug('check if verified')
+  const shouldVerify = options.force ? R.T : differentFrom(packageVersion)
+
   return getVerifiedVersion()
   .then((verifiedVersion) => {
-    if (options.force || verifiedVersion !== packageVersion) {
-      log(chalk.green('⧖ Verifying Cypress executable...'))
-      return writeVerifiedVersion(null)
-      .then(runSmokeTest)
-      .then(() => {
-        log()
-        log(chalk.green('✓ Successfully verified Cypress executable'))
-        return writeVerifiedVersion(packageVersion)
-      })
+    if (shouldVerify(verifiedVersion)) {
+      return testVersion(packageVersion)
     }
   })
-  .catch({ isVerificationError: true }, (err) => {
-    return getOsVersion().then((version) => {
-      log()
-      log(chalk.red('✖ Failed to verify Cypress executable.'))
-      log()
-      log('This is usually caused by a missing dependency. The error below should indicate which dependency is missing. Read our doc on CI dependencies for more information: https://on.cypress.io/continuous-integration#section-dependencies')
-      log('----------')
-      log()
-      log(err.message)
-      log()
-      log('----------')
-      log('Platform:', os.platform())
-      log('Version:', version)
-      process.exit(1)
-    })
-  })
+  .catch({ isAppMissing: true }, explainAndFail(errors.missingApp))
+  .catch({ isXvfbError: true }, explainAndFail(errors.missingXvfb))
+  .catch({ isVerificationError: true }, explainAndFail(errors.missingDependency))
 }
 
 const verify = (options = {}) => {
+  debug('verifying Cypress app')
+  logStart()
+
   _.defaults(options, {
     force: false,
   })
@@ -178,25 +241,61 @@ const verify = (options = {}) => {
   return getInstalledVersion()
   .then((installedVersion) => {
     if (!installedVersion) {
-      logAndFail('No version of Cypress executable installed. Run `cypress install` and try again.')
+      return explainAndFail(errors.missingApp)(new Error('Missing install'))
     } else if (installedVersion !== packageVersion) {
-      logAndFail(`Installed version (${installedVersion}) does not match package version (${packageVersion}). Run \`cypress install\` and try again.`)
+      // TODO does this fail if we installed with CYPRESS_VERSION ?!
+      const msg = `Installed version (${installedVersion}) does not match package version (${packageVersion})`
+      return explainAndFail(errors.versionMismatch)(new Error(msg))
     }
   })
   .then(() => {
-    return fs.statAsync(getPathToExecutable()).catch(() => {
-      logAndFail('Cypress executable not found. Run `cypress install` and try again.')
-    })
+    const executable = getPathToExecutable()
+    return fs.statAsync(executable).catch(() =>
+      explainAndFail(errors.missingApp)(new Error(stripIndent`
+        Cypress executable not found at
+        ${executable}
+      `))
+    )
   })
   .then(() => {
-    return checkIfVerified(options)
+    return maybeVerify(options)
   })
-  .catch((err) => {
-    log('An unexpected error occurred while verifying the Cypress executable:')
-    log()
-    log(err.stack)
-    process.exit(1)
-  })
+  .catch(explainAndFail(errors.unexpected))
+}
+
+const makeMockBar = (title, barOptions = { total: 100 }) => {
+  if (!title) {
+    throw new Error('Missing progress bar title')
+  }
+  /* eslint-disable no-console */
+  console.log(chalk.blue(`${title}, please wait`))
+  return {
+    mock: true,
+    curr: 0,
+    tick () {
+      this.curr += 1
+      if (this.curr >= barOptions.total) {
+        this.complete = true
+        console.log(chalk.green(`${title} finished`))
+      }
+    },
+    terminate () {
+      console.log(`${title} failed`)
+    },
+  }
+}
+
+const getProgressBar = (title, barOptions) => {
+  const isCI = require('is-ci')
+  const ascii = [
+    chalk.white('  -'),
+    chalk.blue(title),
+    chalk.yellow('[:bar]'),
+    chalk.white(':percent'),
+    chalk.gray(':etas'),
+  ]
+  debug('progress bar with options %j isCI?', barOptions, isCI)
+  return isCI ? makeMockBar(title, barOptions) : new ProgressBar(ascii.join(' '), barOptions)
 }
 
 module.exports = {
@@ -208,5 +307,7 @@ module.exports = {
   getPathToExecutable,
   log,
   verify,
+  maybeVerify,
   writeInstalledVersion,
+  getProgressBar,
 }
