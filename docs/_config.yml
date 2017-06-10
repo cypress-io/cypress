@@ -104,13 +104,17 @@ node_sass:
 sitemap:
   path: sitemap.xml
 
+## https://github.com/hexojs/hexo-renderer-marked
+marked:
+  autolink: false
+
 ## https://github.com/mamboer/hexo-filter-cleanup
 hfc_useref:
   enable: true
   concat: true
   exclude:
 hfc_html:
-  enable: true
+  enable: false
   exclude:
 hfc_css:
   enable: true
