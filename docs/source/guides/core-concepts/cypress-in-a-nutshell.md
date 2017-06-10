@@ -35,11 +35,10 @@ describe("Post Resource", function() {
       .click()                 // 7.
 
     cy.url()                   // 8.
-      .should("eq", "/posts/my-first-post")
+      .should("include", "/posts/my-first-post")
 
     cy.get('h1')               // 9.
-      .its('value')
-      .should("eq", "My First Post")
+      .should("contain", "My First Post")
   })
 })
 ```
@@ -53,7 +52,7 @@ Can you read this? If you did, it might sound something like this:
 > 5. Type "Hello, world!" into it.
 > 6. Find the element containing the text `Submit`.
 > 7. Click it.
-> 8. Grab the browser URL, ensure it is `/posts/my-first-post`.
+> 8. Grab the browser URL, ensure it includes `/posts/my-first-post`.
 > 9. Select the `<h1>` tag, ensure it contains the text "My First Post".
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
