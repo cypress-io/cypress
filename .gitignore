@@ -8,6 +8,7 @@ dist
 dist-*
 .vscode
 .publish
+support
 
 # from extension
 Cached Theme.pak
