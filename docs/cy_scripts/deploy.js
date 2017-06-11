@@ -121,9 +121,14 @@ function prompt (questions) {
   return Promise.resolve(inquirer.prompt(questions))
 }
 
-function commitMessage (env) {
+function commitMessage (env, branch) {
+  // commit empty message that we deployed
   return repo.commitAsync(`deployed docs to ${env} [skip ci]`, {
     'allow-empty': true,
+  })
+  .then(function () {
+    // and push it to the origin with the current branch
+    return repo.remote_pushAsync("origin", branch)
   })
 }
 
@@ -149,10 +154,10 @@ getS3Credentials()
       throw new Error(`Unknown environment: ${env}`)
     }
   })
-})
-.then((env) => {
-  return commitMessage(env)
-  .then(uploadToS3.bind(null, env))
+  .then((env) => {
+    return commitMessage(env, branch)
+    .then(uploadToS3.bind(null, env))
+  })
 })
 .then(() => {
   console.log(chalk.yellow('\n==============================\n'))
