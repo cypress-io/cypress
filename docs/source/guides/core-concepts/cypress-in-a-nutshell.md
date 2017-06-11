@@ -21,24 +21,24 @@ comments: true
 Expressivity is all about getting more done with less typing. Let's look at an example:
 
 ```js
-describe("Post Resource", function() {
-  it("Creating a new Post", function() {
-    cy.visit("/posts/new")     // 1.
+describe('Post Resource', function() {
+  it('Creating a new Post', function() {
+    cy.visit('/posts/new')     // 1.
 
-    cy.get("input.post-title") // 2.
-      .type("My First Post")   // 3.
+    cy.get('input.post-title') // 2.
+      .type('My First Post')   // 3.
 
-    cy.get("input.post-body")  // 4.
-      .type("Hello, world!")   // 5.
+    cy.get('input.post-body')  // 4.
+      .type('Hello, world!')   // 5.
 
     cy.contains('Submit')      // 6.
       .click()                 // 7.
 
     cy.url()                   // 8.
-      .should("include", "/posts/my-first-post")
+      .should('include', '/posts/my-first-post')
 
     cy.get('h1')               // 9.
-      .should("contain", "My First Post")
+      .should('contain', 'My First Post')
   })
 })
 ```
