@@ -144,11 +144,3 @@ hfc_img:
   svgo: false
 hfc_favicons:
   enable: false
-
-# Deployment
-## Docs: https://hexo.io/docs/deployment.html
-deploy:
-  type: git
-  repo: git@github.com:cypress-io/cypress-monorepo
-  branch: gh-pages
-  message: '[skip ci] deploying docs'
