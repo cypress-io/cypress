@@ -103,7 +103,7 @@ function publishToS3 (publisher) {
 }
 
 function uploadToS3 (env) {
-  getS3Credentials()
+  return getS3Credentials()
   .then((json) => {
     const bucket = json[`bucket-${env}`] || (function () {
       throw new Error(`Could not find a bucket for environment: ${env}`)
@@ -122,8 +122,18 @@ function prompt (questions) {
 }
 
 function commitMessage (env, branch) {
+  const msg = `deployed docs to ${env} [skip ci]`
+
+  console.log(
+    '\n',
+    'Commiting and pushing to remote origin:',
+    '\n',
+    chalk.green(`(${branch})`),
+    chalk.cyan(msg)
+  )
+
   // commit empty message that we deployed
-  return repo.commitAsync(`deployed docs to ${env} [skip ci]`, {
+  return repo.commitAsync(msg, {
     'allow-empty': true,
   })
   .then(function () {
@@ -155,8 +165,10 @@ getS3Credentials()
     }
   })
   .then((env) => {
-    return commitMessage(env, branch)
-    .then(uploadToS3.bind(null, env))
+    return uploadToS3(env)
+    .then(() => {
+      return commitMessage(env, branch)
+    })
   })
 })
 .then(() => {
