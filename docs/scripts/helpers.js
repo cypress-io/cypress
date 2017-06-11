@@ -120,14 +120,21 @@ hexo.extend.helper.register('raw_link', function (path) {
   return `https://github.com/cypress-io/cypress-documentation/edit/master/source/${path}`
 })
 
-hexo.extend.helper.register('page_anchor', function (str) {
-  let $ = cheerio.load(str, { decodeEntities: false })
-  let headings = $('h1, h2, h3, h4, h5, h6')
+hexo.extend.helper.register('add_page_anchors', function (str) {
+  // use the htmlParser2 which does not add
+  // <html><head><body to the resulting DOM
+  // https://github.com/cheeriojs/cheerio/pull/1027/files
+  const $ = cheerio.load(str, {
+    useHtmlParser2: true,
+    decodeEntities: false,
+  })
 
-  if (!headings.length) return str
+  const $headings = $('h1, h2, h3, h4, h5, h6')
 
-  headings.each(function () {
-    let id = $(this).attr('id')
+  if (!$headings.length) return str
+
+  $headings.each(function () {
+    const id = $(this).attr('id')
 
     $(this)
       .addClass('article-heading')
