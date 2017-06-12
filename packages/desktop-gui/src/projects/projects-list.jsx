@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import ipc from '../lib/ipc'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'

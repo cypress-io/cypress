@@ -7,7 +7,6 @@ import authStore from '../lib/auth-store'
 import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
-import projectsApi from '../projects/projects-api'
 import { Link, routes } from '../lib/routing'
 
 @observer
