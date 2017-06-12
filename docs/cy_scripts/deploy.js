@@ -122,7 +122,7 @@ function prompt (questions) {
 }
 
 function commitMessage (env, branch) {
-  const msg = `deployed docs to ${env} [skip ci]`
+  const msg = `docs: deployed to ${env} [skip ci]`
 
   console.log(
     '\n',
