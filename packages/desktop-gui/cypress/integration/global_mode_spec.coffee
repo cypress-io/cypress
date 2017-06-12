@@ -15,13 +15,16 @@ describe "Global Mode", ->
     @getLocalStorageProjects = ->
       JSON.parse(localStorage.projects || "[]")
 
+    @setLocalStorageProjects = (projects) ->
+      localStorage.projects = JSON.stringify(projects)
+
     cy.visit("/").then (win) ->
       { @start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "logOut").resolves({})
-      cy.stub(@ipc, "addProject").resolves(null, @projects[0])
+      cy.stub(@ipc, "addProject").resolves(@projects[0])
       cy.stub(@ipc, "openProject").yields(null, @config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "offOpenProject")
@@ -92,8 +95,8 @@ describe "Global Mode", ->
 
       it "updates local storage", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop button").click().then =>
-          expect(@getLocalStorageProjects()[0].path).to.equal("/foo/bar")
+        cy.get(".project-drop button").click().should =>
+          expect(@getLocalStorageProjects()[0].id).to.equal(@projects[0].id)
 
       it "does nothing when user cancels", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves()
@@ -153,6 +156,25 @@ describe "Global Mode", ->
             expect(localStorageProjects.length).to.equal(4)
             expect(localStorageProjects[0].path).not.to.equal(@projects[0].path)
 
+      describe "when projects statuses are cached in local storage", ->
+        beforeEach ->
+          @setLocalStorageProjects([
+            {id: @projectStatuses[0].id, name: "Cached name", path: @projects[0].path}
+          ])
+          @getProjects.resolve(@projects)
+
+        it "displays cached name", ->
+          cy.get(".project-name:first").should("have.text", "Cached name")
+
+        it "updates name displayed and in local storage when project statuses load", ->
+          @getProjectStatuses.resolve(@projectStatuses)
+          cy
+            .get(".project-name:first")
+            .should("have.text", @projectStatuses[0].name)
+            .then =>
+              localStorageProjects = @getLocalStorageProjects()
+              expect(localStorageProjects[0].name).to.equal(@projectStatuses[0].name)
+
       describe "when there are none", ->
         beforeEach ->
           @getProjects.resolve([])
@@ -163,38 +185,40 @@ describe "Global Mode", ->
       describe "order", ->
         beforeEach ->
           @aCoupleProjects = [
-            {path: "/project/a"},
-            {path: "/project/b"},
+            {id: "id-a", path: "/project/a"},
+            {id: "id-b", path: "/project/b"},
           ]
+          @ipc.addProject.withArgs("/project/b").resolves({id: "id-b", path: "/project/b"})
+          @ipc.addProject.withArgs("/foo/bar").resolves({id: "id-bar", path: "/foo/bar"})
+
           @assertOrder = (expected) =>
-            actual = @getLocalStorageProjects().map (project) ->
-              project.path
+            actual = @getLocalStorageProjects().map (project) -> project.id
             expect(actual).to.eql(expected)
 
           @getProjects.resolve(@aCoupleProjects)
 
-        it "puts project at beginning when dropped", ->
-          cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
-            @assertOrder(["/foo/bar", "/project/a", "/project/b"])
+        it "puts project at start when dropped", ->
+          cy.get(".project-drop").ttrigger("drop", @dropEvent).should =>
+            @assertOrder(["id-bar", "id-a", "id-b"])
 
-        it "puts project at beginning when dropped and it already exists", ->
+        it "puts project at start when dropped and it already exists", ->
           @dropEvent.dataTransfer.files[0].path = "/project/b"
           cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
-            @assertOrder(["/project/b", "/project/a"])
+            @assertOrder(["id-b", "id-a"])
 
-        it "puts project at beginning when selected", ->
+        it "puts project at start when selected", ->
           cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
           cy.get(".project-drop button").click().then =>
-            @assertOrder(["/foo/bar", "/project/a", "/project/b"])
+            @assertOrder(["id-bar", "id-a", "id-b"])
 
-        it "puts project at beginning when selected and it already exists", ->
+        it "puts project at start when selected and it already exists", ->
           cy.stub(@ipc, "showDirectoryDialog").resolves("/project/b")
           cy.get(".project-drop button").click().then =>
-            @assertOrder(["/project/b", "/project/a"])
+            @assertOrder(["id-b", "id-a"])
 
-        it "puts project at beginning when clicked on in list", ->
+        it "puts project at start when clicked on in list", ->
           cy.get(".projects-list a").eq(1).click().then =>
-            @assertOrder(["/project/b", "/project/a"])
+            @assertOrder(["id-b", "id-a"])
 
       describe "limit", ->
         beforeEach ->
@@ -256,15 +280,20 @@ describe "Global Mode", ->
         @getProjectStatuses.reject(@unauthError)
         cy.shouldBeOnLogin()
 
-  describe "when there are projects in local storage", ->
+  describe "when there are projects in local storage that no longer exist", ->
     beforeEach ->
-      @projects[0].name = "Cached"
-      localStorage.projects = JSON.stringify(@projects)
-      @start()
-      @getCurrentUser.resolve(@user)
+      localStorageProjects = @util.deepClone(@projects)
+      localStorageProjects[0].path = "has/been/moved"
+      @setLocalStorageProjects(localStorageProjects)
 
-    it "displays projects without waiting for ipc", ->
-      cy.get(".project-name:first").should("have.text", "Cached")
+      @getCurrentUser.resolve(@user)
+      @projects.shift()
+      @getProjects.resolve(@projects)
+
+      @start()
+
+    it "does not display them", ->
+      cy.get(".project-name:first").should("have.text", "My-Other-Fake-Project")
 
   describe "without a current user", ->
     beforeEach ->

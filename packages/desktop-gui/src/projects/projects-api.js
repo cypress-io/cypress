@@ -15,25 +15,21 @@ const saveToLocalStorage = () => {
 }
 
 const loadProjects = (shouldLoad = true) => {
-  const inMemoryProjects = projectsStore.projects
-  const cachedProjects = localData.get('projects') || []
-
-  if (!inMemoryProjects.length) {
-    if (cachedProjects.length) {
-      projectsStore.setProjects(cachedProjects)
-    } else if (shouldLoad) {
-      projectsStore.setLoading(true)
-    }
+  if (!projectsStore.projects.length && shouldLoad) {
+    projectsStore.setLoading(true)
   }
 
   return ipc.getProjects()
   .then((ipcProjects) => {
-    const cacheIndex = _.keyBy(cachedProjects, 'id') // index for quick lookup
+    // extend the projects with data cached in local storage
+    const cacheIndex = _.keyBy(localData.get('projects'), 'path')
     const projects = _.map(ipcProjects, (ipcProject) => {
-      return _.extend(ipcProject, cacheIndex[ipcProject.id])
+      return _.extend(ipcProject, cacheIndex[ipcProject.path])
     })
+
     projectsStore.setProjects(projects)
     projectsStore.setLoading(false)
+    saveToLocalStorage()
 
     return ipc.getProjectStatuses(projects)
   })

@@ -4,7 +4,6 @@ import Browser from '../lib/browser-model'
 
 const cacheProps = [
   'id',
-  'path',
   'name',
   'public',
   'orgName',
