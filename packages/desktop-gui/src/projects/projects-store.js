@@ -31,7 +31,7 @@ class ProjectsStore {
   }
 
   @action addProject (path) {
-    // projects is sorted by most recently used, so add a project to the start
+    // projects are sorted by most recently used, so add a project to the start
     // or move it to the start if it already exists
     const existingIndex = _.findIndex(this.projects, { path })
     let project
@@ -67,7 +67,7 @@ class ProjectsStore {
     })
   }
 
-  @action setError (err) {
+  @action setError = (err) => {
     this.error = err.message || err
   }
 

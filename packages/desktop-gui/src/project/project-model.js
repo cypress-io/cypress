@@ -184,7 +184,7 @@ export default class Project {
   }
 
   @action setError = (err = {}) => {
-    this.error = err.message || err
+    this.error = err
   }
 
   setChosenBrowserByName (name) {
