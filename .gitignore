@@ -8,7 +8,6 @@ dist
 dist-*
 .vscode
 .publish
-support
 
 # from extension
 Cached Theme.pak
@@ -37,3 +36,4 @@ docs/cypress/videos
 docs/themes/cypress/source/css/vendor
 docs/themes/cypress/source/js/vendor
 docs/themes/cypress/source/fonts/vendor
+docs/support
