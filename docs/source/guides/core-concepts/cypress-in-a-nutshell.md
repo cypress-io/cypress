@@ -156,19 +156,19 @@ For more, check out the API docs for [`.then()`](http://on.cypress.io/api/then) 
 Another way to locate things -- a more human way -- is to look them up by their contents, by what the user sees on the page. For this, there's the handy `cy.contains()`, for example:
 
 ```js
-// Finds a single element containing (at least) the text "New Post"
+// Finds an element in the document containing the text "New Post"
 cy.contains("New Post")
+
+// Finds a child element of the .main element containing the text "New Post"
+cy.get('.main').contains("New Post")
 ```
 
 This is helpful when writing tests from the perspective of a user interacting with the app. They just know they want to click the button labeled "Submit", they have no idea that it has a `type` attribute of `submit`, or a CSS class of `my-submit-button`.
 
-`cy.contains()` is also a great example of a command that can start a chain, or continue a chain. For example, if we wanted to look for the text "New Post" _only inside of the `.main` element_, we could trivially achieve that like so:
+{% note danger Localization %}
+If your app is translated into multiple languages, make sure you consider the implications of using user-facing text as a query criteria!
 
-```js
-// First finds the element with class "main",
-// then looks for children with the text "New Post"
-cy.get('.main').contains("New Post")
-```
+{% endnote %}
 
 ## What If An Element Is Not Found?
 
@@ -245,6 +245,7 @@ A new Cypress chain always starts with `cy.[something]`, where the `something` e
 - ...only from commands yielding particular kinds of subjects (`.type()`)
 - ...from `cy` *or* from a subject-yielding chain (`.contains()`)
 
+
 **Some commands yield:**
 - ...`null`, meaning they cannot be chained against
 - ...the same subject they were chained from
@@ -267,21 +268,11 @@ Cypress commands do not return their subjects, they yield them. Remember: Cypres
 
 {% endnote %}
 
-### Using `cy.wrap` To Inject A Custom Subject
+### Using `.then` To Act On A Subject
 
-Want to bring in a value from outside of the Command flow? You can quickly achieve that with `cy.wrap()`.
+Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { })` to your command chain. When the previous command resolves, it will call your custom function with the yielded subject as the first argument.
 
-```js
-cy.wrap(7).should("equal", 7)
-```
-
-`cy.wrap()` takes an argument as a new subject to yield to the next Command in the chain. Simple! The above is the asynchronous equivalent to: `expect(7).to.equal(7)`.
-
-### Using `.then` To Act Synchronously On A Subject
-
-Want to jump into the Command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { })` to your Command chain. When the previous command resolves, it will call your custom function with the current subject as the first argument.
-
-If you have more Commands to add after your `.then()`, you'll need to maintain the subject chain by synchronously returning the new subject.
+If you wish to continue chaining commands to your `.then()`, you'll need to specify the subject you want to yield to those commands, which you can achieve by a simple return value. (Cypress will yield that to the next command for you.)
 
 Let's look at an example:
 
@@ -311,7 +302,7 @@ cy.get('@myElement') // re-queries the DOM as before only if necessary
   .click()
 ```
 
-This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us as before when it is not in the DOM.
+This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us when it is not in the DOM. This is particularly helpful when dealing with front-end frameworks that do a lot of re-rendering!
 
 ## Commands Are Asynchronous
 
