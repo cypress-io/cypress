@@ -57,7 +57,7 @@ After setting up your project, Cypress inserted a unique [projectId](what-is-a-p
 
 In order to record your test runs, you'll also need to provide a [Record Key](what-is-a-record-key-). The record key along with your `projectId` are used by Cypress to uniquely identify your project.
 
-**Provide record key in `cypress run`:**
+**Provide record key in {% url '`cypress run`' cli-tool#cypress-run %}:**
 
 ```shell
 cypress run --record --key <record_key>

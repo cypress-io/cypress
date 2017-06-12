@@ -68,4 +68,4 @@ No, although we are looking to build an on-premise version of the Dashboard for 
 
 Yes. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
-You can always run your tests in CI using `cypress run` without the `--record` flag. Doing this will not record any test results or communicate to our external servers.
+You can always run your tests in CI using {% url '`cypress run`' cli-tool#cypress-run %} without the `--record` flag. Doing this will not record any test results or communicate to our external servers.

@@ -43,7 +43,7 @@ cy.and('eq', '42')   // Errors, cannot be chained off 'cy'
 
 **{% fa fa-angle-right %} chainers** ***(String)***
 
-Chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery)
+Chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
 
 **{% fa fa-angle-right %} value** ***(String)***
 
@@ -207,7 +207,7 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 
 **How do I know which assertions change the subject and which keep it the same?**
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 

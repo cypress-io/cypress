@@ -163,7 +163,7 @@ You can read more about parallelization [here](https://github.com/cypress-io/cyp
 
 You can run a group of tests or a single test by placing an `.only` to a test suite or specific test.
 
-You can run a single test headlessly by passing the `--spec` flag to `cypress run`.
+You can run a single test headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
 
 Currently there is no way to specify a group of tests to run headlessly. You can read more [here](https://github.com/cypress-io/cypress/issues/263).
 
@@ -389,7 +389,7 @@ No, although we are looking to build an on-premise version of the Dashboard for 
 
 Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
-You can simply always run your tests in CI using `cypress run` without the `--record` flag which does not communicate with our external servers and will not record any test results.
+You can simply always run your tests in CI using {% url '`cypress run`' cli-tool#cypress-run %} without the `--record` flag which does not communicate with our external servers and will not record any test results.
 
 ## {% fa fa-question-circle green %} What is the difference between public and private projects?
 

@@ -29,7 +29,7 @@ When the error is fixed in your test file, your tests will automatically re-run.
 
 **{% fa fa-exclamation-triangle red %} Support file missing or invalid**
 
-The `supportFolder` option was removed from Cypress in version [0.18.0](https://on.cypress.io/guides/changelog#0-18-0) and was replaced by module support and the {% url `supportFile` configuration#Folders %} configuration option.
+The `supportFolder` option was removed from Cypress in version {% url `0.18.0` changelog#0-18-0 %} and was replaced by module support and the {% url `supportFile` configuration#Folders %} configuration option.
 
 Cypress used to automatically include any scripts in the `supportFolder` before your test files. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions.
 
@@ -328,7 +328,7 @@ You will want to then [add the key to your config file or as an environment vari
 
 **{% fa fa-exclamation-triangle red %} The 'cypress ci' command has been deprecated**
 
-As of version [`0.19.0`](https://on.cypress.io/guides/changelog#0.19.0) and CLI versions `0.13.0`, the `cypress ci` command has been deprecated. We did this to make it clearer what the difference was between a *regular test run* and a *recorded test run*.
+As of version {% url `0.19.0` changelog#0-19-0 %} and CLI versions `0.13.0`, the `cypress ci` command has been deprecated. We did this to make it clearer what the difference was between a *regular test run* and a *recorded test run*.
 
 Previously to record runs you had the environment variable: `CYPRESS_CI_KEY` or you wrote:
 
@@ -357,7 +357,7 @@ We will automatically apply the record key environment variable.
 **{% fa fa-exclamation-triangle red %} Cypress detected a cross origin error happened on page load**
 
 {% note info %}
-For a more thorough explanation of Cypress's Web Security model, [please read our dedicated guide to it](https://on.cypress.io/guides/web-security).
+For a more thorough explanation of Cypress's Web Security model, {% url 'please read our dedicated guide to it' web-security %}.
 {% endnote %}
 
 This error means that your application navigated to a superdomain that Cypress was not bound to. Initially when you {% url `cy.visit()` visit %}, Cypress changes the browser's url to match the `url` passed to {% url `cy.visit()` visit %}. This enables Cypress to communicate with your application to bypasses all same-origin security policies among other things.
@@ -370,7 +370,7 @@ When your application navigates to a superdomain outside of the current origin-p
 
 2. You are testing a page that uses `Single sign-on (SSO)`. In this case your web server is likely redirecting you between superdomains, so you receive this error message. You can likely get around this redirect problem by using {% url `cy.request()` request %} to manually handle the session yourself.
 
-If you find yourself stuck and can't work around these issues you can just set this in your `cypress.json` file. But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
+If you find yourself stuck and can't work around these issues you can just set this in your `cypress.json` file. But before doing so you should really understand and {% url 'read about the reasoning here' web-security %}.
 
 ***cypress.json***
 

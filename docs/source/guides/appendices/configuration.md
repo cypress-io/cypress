@@ -70,7 +70,7 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`chromeWebSecurity`    | `true`    | Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. [Read more about this here.](https://on.cypress.io/guides/web-security)
+`chromeWebSecurity`    | `true`    | Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. {% url 'Read more about this here' web-security %}
 
 ## Viewport
 
@@ -92,7 +92,7 @@ Besides modifying your `cypress.json` you can also change configuration options 
 
 ## Command Line
 
-When [running Cypress from the Command Line](https://on.cypress.io/guides/cli) you can pass a `--config` flag.
+When {% url 'running Cypress from the Command Line' cli-tool %} you can pass a `--config` flag.
 
 **Examples:**
 

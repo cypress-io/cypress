@@ -31,9 +31,9 @@ Using `expect` allows you to pass in a specific subject and make an assertion on
 
 These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests. Cypress comes bundled with some existing tools that handle assertions such as:
 
-* [Chai](https://on.cypress.io/guides/bundled-tools#section-chai)
-* [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery)
-* [Chai-Sinon](https://on.cypress.io/guides/bundled-tools#section-sinon-chai)
+* {% url 'Chai' bundled-tools#Chai %}
+* {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
+* {% url 'Sinon-Chai' bundled-tools#Sinon-Chai %}
 
 ```javascript
 // the explicit subject here is the boolean: true
@@ -317,7 +317,7 @@ cy
 
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
+The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
