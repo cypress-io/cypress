@@ -259,13 +259,13 @@ comments: false
 
 **Breaking Changes:**
 
-- Previously, we auto-magically included all files within [`cypress/support`](https://on.cypress.io/guides/writing-your-first-test#section-folder-structure). This has now [gone away](https://on.cypress.io/guides/errors#section-the-supportfolder-option-has-been-removed) and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
+- Previously, we auto-magically included all files within [`cypress/support`](https://on.cypress.io/guides/writing-your-first-test#section-folder-structure). This has now {% url 'gone away' error-messages %} and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
 
 **Features:**
 
 - We now support ES2015+, modules, and JSX in all spec files. Fixes [#246](https://github.com/cypress-io/cypress/issues/246).
 - Spec files may now be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
-- Test files with JS syntax errors are now [handled](https://on.cypress.io/guides/errors#section-we-found-an-error-preparing-your-test-file) and we provide a GUI that points to the exact line/column number. Additionally we print these out when running headlessly and exit the process with `code 1`. Fixes [#293](https://github.com/cypress-io/cypress/issues/293).
+- Test files with JS syntax errors are now {% url 'handled' error-messages %} and we provide a GUI that points to the exact line/column number. Additionally we print these out when running headlessly and exit the process with `code 1`. Fixes [#293](https://github.com/cypress-io/cypress/issues/293).
 
 **Misc:**
 
@@ -402,8 +402,8 @@ comments: false
 
 **Features:**
 
-- We've added `JUnit` as a valid [built-in reporter](https://on.cypress.io/guides/reporters). Fixes [#178](https://github.com/cypress-io/cypress/issues/178).
-- You can now [add or write your own custom reporters](https://on.cypress.io/guides/reporters). This means you can `npm install xyz-mocha-reporter` and we'll automatically correctly `require` that package. Alternatively you can write your own `xyz-custom_reporter.js` file. Fixes [#231](https://github.com/cypress-io/cypress/issues/231).
+- We've added `JUnit` as a valid {% url 'built-in reporters' reporters %}. Fixes [#178](https://github.com/cypress-io/cypress/issues/178).
+- You can now {% url 'add or write your own custom reporters' reporters %}. This means you can `npm install xyz-mocha-reporter` and we'll automatically correctly `require` that package. Alternatively you can write your own `xyz-custom_reporter.js` file. Fixes [#231](https://github.com/cypress-io/cypress/issues/231).
 - The `reporter` can now be resized. We persist this state locally so it should "stick" between browser launches / app restarts. Fixes [#204](https://github.com/cypress-io/cypress/issues/204).
 - Cypress now "remembers" the last browser you had open and will suggest opening that whenever a project is opened. Addresses [#193](https://github.com/cypress-io/cypress/issues/193).
 - Instead of seeing `Script error.` - cross origins script errors are now handled specially and we throw a very long and exciting error explaining what just happened. Fixes [#241](https://github.com/cypress-io/cypress/issues/241).

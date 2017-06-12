@@ -17,7 +17,7 @@ comments: true
 
 **See Tests Runs in Desktop**
 
-Additionally we've integrated the test runs into the Cypress [Desktop Application](https://on.cypress.io/guides/installing-and-running). This means you can see the test runs in the *Runs* tab from within every project.
+Additionally we've integrated the test runs into the Cypress {% url 'Desktop Application' installing-cypress %}). This means you can see the test runs in the *Runs* tab from within every project.
 
 ![Runs List](https://cloud.githubusercontent.com/assets/1271364/22800330/ff6c9474-eed6-11e6-9a32-8360d64b1071.png)
 

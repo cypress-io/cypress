@@ -49,14 +49,14 @@ it('uses modules', function () {
 
 ***Use supportFile to load scripts before your test code***
 
-It's still useful to load a setup files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the `supportFile` configuration option.
+It's still useful to load a setup files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the {% url `supportFile` configuration#Folders %} configuration option.
 
-`supportFile` is a path to a file to include before your test files. By default, `supportFile` is set to look for one of the following files:
+{% url `supportFile` configuration#Folders %} is a path to a file to include before your test files. By default, {% url `supportFile` configuration#Folders %} is set to look for one of the following files:
 
 * `cypress/support/index.js`
 * `cypress/support/index.coffee`
 
-Just like with your test files, the `supportFile` can use ES2015+ (or CoffeeScript) and modules, so you can import/require other files as needed.
+Just like with your test files, the {% url `supportFile` configuration#Folders %} can use ES2015+ (or CoffeeScript) and modules, so you can import/require other files as needed.
 
 # Command Errors
 
@@ -131,7 +131,7 @@ $('button').click(function() {
 cy.get('button').click().parent()
 ```
 
-We've programmed our application above so that as soon as the `click` event happens, the button is removed from the DOM. When Cypress begins processing the next command (`.parent()`) in the test below, it detects that the yielded subject (the button) is detached from the DOM and throws the error.
+We've programmed our application above so that as soon as the `click` event happens, the button is removed from the DOM. When Cypress begins processing the next command ({% url `.parent()` parent %}) in the test above, it detects that the yielded subject (the button) is detached from the DOM and throws the error.
 
 We can prevent Cypress from throwing this error by rewriting our test code.
 
@@ -316,11 +316,11 @@ it('does not forget to return a promise', function(){
 
 **{% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.**
 
-You may receive this error when trying to run Cypress tests in [Continuous Integration](https://on.cypress.io/continuous-integration). This means that you did not pass a specific record key to: `cypress run --record`.
+You may receive this error when trying to run Cypress tests in {% url 'Continuous Integration' continuous-integration %}. This means that you did not pass a specific record key to: {% url '`cypress run --record`' cli-tool#cypress-run-record %}.
 
 Since no record key was passed, Cypress checks for any environment variable with the name `CYPRESS_RECORD_KEY`. In this case, that was also not found.
 
-You can get your project's record key by running the terminal command: `cypress get:key` or by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
+You can get your project's record key by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
 
 You will want to then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
 

@@ -2,7 +2,7 @@ title: Available Assertions
 comments: true
 ---
 
-Cypress bundles the popular [Chai](#Chai) assertion library, as well as helpful extensions for [Sinon](#Chai-Sinon) and [jQuery](#Chai-jQuery), bringing you dozens of powerful assertions for free.
+Cypress bundles the popular {% url 'Chai' available-assertions#Chai %} assertion library, as well as helpful extensions for {% url 'Sinon' available-assertions#Sinon-Chai %} and {% url 'jQuery' available-assertions#Chai-jQuery %}, bringing you dozens of powerful assertions for free.
 
 # Chai
 
@@ -116,7 +116,7 @@ Cypress bundles the popular [Chai](#Chai) assertion library, as well as helpful 
 
 You will commonly use these chainers after using DOM commands like: {% url `cy.get()` get %}, {% url `cy.contains()` contains %}, etc.
 
-# Chai-Sinon
+# Sinon-Chai
 
 All Sinon assertions are available in [Sinon–Chai](https://github.com/domenic/sinon-chai).
 

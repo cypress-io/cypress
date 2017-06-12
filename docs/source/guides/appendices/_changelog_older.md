@@ -26,7 +26,7 @@
 
 **Misc:**
 
-- Better error handling of unauthorized users attempting to login to Cypress with improved [Login documentation](https://on.cypress.io/guides/installing-and-running#section-logging-in).
+- Better error handling of unauthorized users attempting to login to Cypress with improved {% url 'Login documentation' installing-cypress %}.
 
 # 0.15.3
 
@@ -57,7 +57,7 @@
 
 **Features:**
 
-- The [error message when Cypress detects that a test has ended early](https://on.cypress.io/guides/errors#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue) (there are still commands left in the queue) now displays a list of these commands with a much improved explanation.
+- The {% url 'error message when Cypress detects that a test has ended early' error-messages %} (there are still commands left in the queue) now displays a list of these commands with a much improved explanation.
 - There is now a new {% url 'configuration option' configuration %}: `watchForFileChanges` that, when set to `false` in the `cypress.json`, will prevent Cypress from attempting to watch for file changes and restart your tests.
 - You can now set the default {% url `reporter` configuration %} in `cypress.json` for use when running headlessly or in CI.
 
@@ -418,7 +418,7 @@ Known Issues:
 
 **Features:**
 
-- There is now a new [Errors Page](https://on.cypress.io/guides/errors) which will provide additional explanation when you are getting errors from Cypress. These errors will be directly linked to (like how Angular provides errors).
+- There is now a new {% url 'Error Messages Page' error-messages %} which will provide additional explanation when you are getting errors from Cypress. These errors will be directly linked to (like how Angular provides errors).
 - Instead of hard coding external documentation, we now link everything through a redirection portal. This will prevent any links / documentation from ever breaking due to reorganization or renaming.
 - Cypress now throws a specific error message (with a link to further explanation) if you attempt to run commands outside of a test. Usually this happens accidentally when you write `cy.commands` inside of a `describe` or `context` block instead of the `it`. I've wasted too much time and almost bombed entire presentations / demos so I've finally stopped this from ever happening again. If you ever see this error message, trust me, you will forever thank me.
 - The error message: `Cannot call cy.method() because the current subject has been removed or detached from the DOM.` has been rewritten to provide much clearer information on why this is happening, including a string representation of your DOM element. Additionally it will have its own error page dedicated to explaining how this happens and what you can do to prevent it.
@@ -445,7 +445,7 @@ Known Issues:
 
 **Features:**
 
-- There are now [Getting Started](https://on.cypress.io/guides/installing-and-running) docs including {% url 'configuration' configuration %} for `cypress.json`
+- There are now {% url 'Getting Started' installing-cypress %} docs including {% url 'configuration' configuration %} for `cypress.json`
 - Cypress now silently restarts the server whenever it detects a change to `cypress.json` - meaning you no longer have to manually reboot the server for changes to be picked up.
 - There is a new {% url `Cypress.config` config %} interface - akin to {% url `Cypress.env` env %} which provides access to configuration values.
 

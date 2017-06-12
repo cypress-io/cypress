@@ -7,7 +7,7 @@ A Cypress project represents the directory of files and folders that make up you
 
 # Add a New Project
 
-Projects can *only* be added to Cypress through our [Desktop Application](https://on.cypress.io/guides/installing-and-running).
+Projects can *only* be added to Cypress through our Desktop Application.
 
 1. Click {% fa fa-plus %} Add Project.
 
