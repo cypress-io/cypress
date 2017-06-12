@@ -230,7 +230,7 @@ cy.get(':checkbox').should('be.disabled')
 
 cy.get('form').should('have.class', 'form-horizontal')
 
-cy.get("input").should("not.have.value", "foo")
+cy.get('input').should('not.have.value', 'US')
 ```
 
 We'll learn more about assertions later in this guide.
