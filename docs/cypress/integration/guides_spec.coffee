@@ -1,8 +1,7 @@
 YAML = require('yamljs')
 _ = require('lodash')
 
-GUIDES_PATH = '/guides/getting-started/why-cypress'
-GUIDES_HTML = GUIDES_PATH + '.html'
+GUIDES_PATH = '/guides/getting-started/why-cypress.html'
 
 FIRST_PAGE = "why-cypress.html"
 NEXT_PAGE = "installing-cypress.html"
@@ -22,11 +21,11 @@ describe "Guides", ->
         .contains('h1', "Why Cypress?")
 
       cy.url()
-        .should('match', new RegExp(GUIDES_HTML))
+        .should('include', GUIDES_PATH)
 
   context "Header", ->
     beforeEach ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(GUIDES_PATH)
 
     it "should have link to edit doc", ->
       cy.contains("a", "Improve this doc").as("editLink")
@@ -37,7 +36,7 @@ describe "Guides", ->
 
   context "Sidebar", ->
     beforeEach ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(GUIDES_PATH)
 
       cy.readFile("source/_data/sidebar.yml").then (yamlString) ->
         @sidebar = YAML.parse(yamlString)
@@ -85,7 +84,7 @@ describe "Guides", ->
   ## https://github.com/cypress-io/cypress/issues/431
   context.skip "Table of Contents", ->
     before ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(GUIDES_PATH)
 
     it "displays toc", ->
       cy.get('.sidebar-link').each (linkElement) ->
@@ -115,7 +114,7 @@ describe "Guides", ->
 
   context "Pagination", ->
     beforeEach ->
-      cy.visit(GUIDES_PATH + ".html")
+      cy.visit(GUIDES_PATH)
 
     it "does not display Prev link on first page", ->
       cy.get(".article-footer-prev").should("not.exist")
@@ -138,32 +137,3 @@ describe "Guides", ->
   context "Comments", ->
     it "displays comments section", ->
       cy.get("#comments")
-
-  context "Content", ->
-    it "all section & body links work", ->
-      filterMailtos = (urlsToFilter) ->
-        Cypress._.filter(urlsToFilter, (url) -> not url.match(MAILTO_REGEX))
-
-      alreadySeen = []
-      cullAlreadySeenUrls = (urlsToCull) ->
-        # difference is what to return
-        urlsToVisit = Cypress._.difference(urlsToCull, alreadySeen)
-        # union is what to persist
-        alreadySeen = Cypress._.union(urlsToCull, alreadySeen)
-
-        return urlsToVisit
-
-      # SPIDER ALL THE THINGS
-      cy.visit(GUIDES_HTML)
-
-      cy.get('.sidebar-link')
-        .each (linkElement) ->
-          cy.request(linkElement[0].href).its('body').then (body) ->
-            elements = Cypress.$(body).find('a').not('.sidebar-link, .toc-link, .main-nav-link, .mobile-nav-link, .article-edit-link, .article-anchor, #article-toc-top, #mobile-nav-toggle, .article-footer-next, .article-footer-prev, .headerlink, #logo, #footer')
-
-            withoutMailtos = filterMailtos(Cypress._.map(elements, "href"))
-
-            urls = cullAlreadySeenUrls(withoutMailtos)
-
-            cy.wrap(urls).each (url) ->
-              cy.request(url)
