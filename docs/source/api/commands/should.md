@@ -79,7 +79,7 @@ cy
 
 ## Timeout
 
-`.should()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.should()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10')

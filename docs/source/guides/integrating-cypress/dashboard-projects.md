@@ -49,7 +49,7 @@ During a run we record all failing tests, logs, screenshots, and videos and make
 
   ![screen shot 2017-02-12 at 3 46 30 pm](https://cloud.githubusercontent.com/assets/1268976/22866093/64a9fb4c-f13e-11e6-9ebe-980ec078ba4e.png)
 
-Your tests runs are now ready to record. Typically you would record your runs when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration) but you can also record your runs from your local computer.
+Your tests runs are now ready to record. Typically you would record your runs when running in {% url 'Continuous Integration' continuous-integration %} but you can also record your runs from your local computer.
 
 ## Record Test Runs
 

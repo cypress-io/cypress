@@ -37,7 +37,7 @@ Option | Default | Notes
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. `{USERNAME: 'johndoe'}`). Will be merged with existing system environment variables
 `failOnNonZeroExit` | `true` | whether to fail if the command exits with a non-zero code
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to allow the command to execute
+`timeout` | {% url `execTimeout` configuration#Timeouts %} | Total time to allow the command to execute
 
 ## Yields
 
@@ -49,7 +49,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.exec()` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the `timeout` passed into the command's options.
+`cy.exec()` will allow the command to execute for the duration of the {% url `execTimeout` configuration#Timeouts %} or the `timeout` passed into the command's options.
 
 # Examples
 

@@ -45,7 +45,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.focus()` will continue to try to focus the element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.focus()` will continue to try to focus the element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

@@ -37,7 +37,7 @@ Pass in an options object to change the default behavior of `cy.screenshot()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the automation server to process the command.
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the automation server to process the command.
 
 ## Yields
 
@@ -45,13 +45,13 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.screenshot()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+`cy.screenshot()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 
 # Examples
 
 The screenshot will be stored in the `cypress/screenshots` folder by default.
 
-You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#folders).
+You can change the directory where screenshots are saved in your {% url 'configuration' configuration#Folders %}.
 
 ## Screenshot
 
@@ -79,7 +79,7 @@ cy.screenshot('clickingOnNav')
 
 **Automatic screenshots on test failure**
 
-When running headlessly or in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), Cypress automatically takes a screenshot when a test fails. You can optionally turn this off by setting `screenshotOnHeadlessFailure` to `false` in your [configuration](https://on.cypress.io/guides/configuration).
+When running headlessly or in {% url 'Continuous Integration' continuous-integration %}, Cypress automatically takes a screenshot when a test fails. You can optionally turn this off by setting `screenshotOnHeadlessFailure` to `false` in your {% url 'configuration' configuration %}.
 
 **Screenshots in CI**
 

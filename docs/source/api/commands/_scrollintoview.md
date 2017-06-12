@@ -42,7 +42,7 @@ Option | Default | Notes
 `easing` | `swing` | Will scroll with the easing animation
 `log` | `true` | Whether to display command in Command Log
 `offset` | `{top: 0, left: 0}` | Amount to scroll after the element has been scrolled into view
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the scroll
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
 
 ## Yields
 
@@ -50,7 +50,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.scrollIntoView()` will continue to scroll the element into view for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.scrollIntoView()` will continue to scroll the element into view for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

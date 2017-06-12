@@ -38,7 +38,7 @@ Specify keys to be cleared in local storage.
 
 ## Timeout
 
-`cy.clearLocalStorage()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) to process this command.
+`cy.clearLocalStorage()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} to process this command.
 
 # Examples
 

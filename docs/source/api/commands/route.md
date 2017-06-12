@@ -65,7 +65,7 @@ Option | Default | Notes
 `status` | `200` | Response status code when stubbing routes
 `url`    | `null` | String or RegExp url to match against request urls
 
-You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration) to control how long to wait for the request and response of a supplied route.
+You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` and `responseTimeout` globally in {% url 'configuration' configuration %} to control how long to wait for the request and response of a supplied route.
 
 ## Yields
 

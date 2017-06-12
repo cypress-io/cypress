@@ -46,7 +46,7 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 
 ## Timeout
 
-`.as()` will retry the chain of commands before the `.as()` command for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`.as()` will retry the chain of commands before the `.as()` command for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
 
 # Examples
 

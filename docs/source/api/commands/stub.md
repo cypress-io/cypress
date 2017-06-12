@@ -162,7 +162,7 @@ When clicking on the `(stub-1)` event within the command log, the console output
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
-- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
 - {% url `cy.spy()` spy %}

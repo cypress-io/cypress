@@ -55,7 +55,7 @@ Pass in an options object to change the default behavior of `.nextUntil()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
 
 ## Yields
 
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.nextUntil()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.nextUntil()` will continue to look for the next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

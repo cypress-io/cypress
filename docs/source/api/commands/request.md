@@ -80,10 +80,10 @@ Option | Default | Notes
 `log` | `true` | Whether to log the request in the Command Log
 `method` | `GET` | The HTTP method to use in the request
 `qs` | `null` | Query parameters to append to the `url` of the request
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for a response (in ms)
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for a response (in ms)
 `url` | `null` | The URL to make the request to
 
-You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in {% url 'configuration' configuration %}.
 
 ## Yields
 
@@ -96,7 +96,7 @@ You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` glob
 
 ## Timeout
 
-`cy.request()` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or the `timeout` passed in the options object of the command.
+`cy.request()` will wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or the `timeout` passed in the options object of the command.
 
 # Examples
 

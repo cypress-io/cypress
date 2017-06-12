@@ -52,9 +52,9 @@ Pass in an options object to change the default behavior of `cy.wait()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [requestTimeout](https://on.cypress.io/guides/configuration#timeouts), [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) | Override the default requestTimeout and responseTimeout (in ms)
+`timeout` | {% url `requestTimeout` configuration#Timeouts %}, {% url `responseTimeout` configuration#Timeouts %} | Override the default requestTimeout and responseTimeout (in ms)
 
-You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the [configuration](https://on.cypress.io/guides/configuration).
+You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the {% url 'configuration' configuration %}.
 
 ## Yields
 
@@ -64,7 +64,7 @@ When given an `alias` argument, `cy.wait()` yields the XHR object of the aliased
 
 ## Timeout
 
-`cy.wait()` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
+`cy.wait()` will wait for the request the duration of the {% url `requestTimeout` configuration#Timeouts %} and wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -201,13 +201,13 @@ cy.wait(['@getUsers', '@getActivities', 'getComments'])
 
 When used with an alias, `cy.wait()` goes through two separate "waiting" periods.
 
-The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `5000` ms.
+The first period waits for a matching request to leave the browser. This duration is configured by {% url `requestTimeout` configuration#Timeouts %} - which has a default of `5000` ms.
 
 This means that when you begin waiting for an aliased XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
 
 ![screen shot 2015-12-21 at 5 00 09 pm](https://cloud.githubusercontent.com/assets/1268976/11942578/8e7cba50-a805-11e5-805c-614f8640fbcc.png)
 
-Once Cypress detects that a matching XHR has begun its request, it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `20000` ms.
+Once Cypress detects that a matching XHR has begun its request, it then switches over to the 2nd waiting period. This duration is configured by {% url `responseTimeout` configuration#Timeouts %} - which has a default of `20000` ms.
 
 This means Cypress will now wait up to 20 seconds for the external server to respond to this XHR. If no response is detected, you will get an error message that looks like this:
 

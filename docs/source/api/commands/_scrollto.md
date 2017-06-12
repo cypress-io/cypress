@@ -54,7 +54,7 @@ Option | Default | Notes
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the scroll
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
 
 ## Yields
 
@@ -62,7 +62,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

@@ -6,7 +6,7 @@ comments: true
 Control the size and orientation of the screen for your application.
 
 {% note info %}
-You can set the viewport's width and height globally by defining `viewportWidth` and `viewportHeight` in the [configuration](https://on.cypress.io/guides/configuration).
+You can set the viewport's width and height globally by defining `viewportWidth` and `viewportHeight` in the {% url 'configuration' configuration %}.
 {% endnote %}
 
 # Syntax
@@ -151,7 +151,7 @@ When hovering over each command, Cypress will automatically display the snapshot
 
 By default, until you issue a `cy.viewport()` command, Cypress sets the width to `1000px` and the height to `660px` by default.
 
-You can [change these default dimensions](https://on.cypress.io/guides/configuration) by adding the following to your `cypress.json`:
+You can {% url 'change these default dimensions' configuration#Viewport %} by adding the following to your `cypress.json`:
 
 ```json
 {
@@ -172,4 +172,4 @@ The upsides to this are that tests should consistently pass or fail regardless o
 
 # See also
 
-- [Configuration](https://on.cypress.io/guides/configuration)
+- {% url 'configuration' configuration %}

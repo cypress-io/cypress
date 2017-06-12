@@ -39,7 +39,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.title()` will continue to retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)
+`cy.title()` will continue to retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
 
 # Examples
 

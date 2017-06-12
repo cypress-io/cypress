@@ -39,7 +39,7 @@ When your tests are running, you can use the {% url `Cypress.env` env %} functio
 
 ## Option #1: `cypress.json`
 
-Any key/value you set in your [`cypress.json`](https://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
+Any key/value you set in your {% url 'configuration' configuration %} under the `env` key will become an environment variable.
 
 ***cypress.json***
 

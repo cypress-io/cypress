@@ -76,7 +76,7 @@
 
 **Features:**
 
-- Added `waitForAnimations` and `animationDistanceThreshold` [configuration options](https://on.cypress.io/guides/configuration).
+- Added `waitForAnimations` and `animationDistanceThreshold` {% url 'configuration options' configuration#Animations %}.
 - Cypress now automatically detects and waits for an element which is animating to stop animating. The threshold that Cypress considers *animating* is set to a distance of `5px` per `60fps`. In other words, if your element is moving too fast for a user to interact with, then Cypress considers the element animating and will wait until it finishes before attempting to interact with it. When we say 'interact' we mean apply command actions like {% url `.click()` click %}, {% url `.select()` select %}, {% url `.type()` type %}, {% url `.check()` check %}, etc. Waiting for animations prevents a series of edge cases and weird bugs where Cypress was interacting with elements **too** quickly which might cause undesired side effects in your application which are hard to track down. The downside to this implementation is that for every action Cypress must wait at least 2 run loops before applying actions. This slows down every action command by about `32ms`. If your app does not use animations you may wish to turn off this behavior in your `cypress.json` file.
 
 **Bugfixes:**
@@ -128,7 +128,7 @@
 
 **Features:**
 
-- Added `responseTimeout` [configuration](https://on.cypress.io/guides/configuration) value.
+- Added `responseTimeout` {% url 'configuration' configuration %} value.
 - {% url `cy.wait()` wait %} has been upgraded to now use two separate `timeout` values. In previous versions {% url `cy.wait()` wait %} used the `commandTimeout` and would automatically time out if the XHR did not achieve a response in that time frame. Now {% url `cy.wait()` wait %} will go through two independent timeout phases. At first {% url `cy.wait()` wait %} will wait for an XHR to be requested which matches its route. It will wait up to the value configured with `requestTimeout` (default 5000ms). After it sees a matching request it will then go into `response` waiting mode. It will wait up to the value configured with `responseTimeout` (default 20000ms). When {% url `cy.wait()` wait %} fails you now receive a much better error message indicating exactly which phase failed. Whether a request was never sent out, or whether it timed out waiting for a response. This gives you the best of both worlds and prevents situations where Cypress was timing out on slow servers. By creating new configuration values: `requestTimeout` and `responseTimeout` you can now directly control this behavior without affecting other regular commands.
 
 **Bugfixes:**
@@ -218,7 +218,7 @@
 
 **Features:**
 
-- There are now [Getting Started](https://on.cypress.io/guides/installing-and-running) docs including [configuration options](https://on.cypress.io/guides/configuration) for `cypress.json`
+- There are now [Getting Started](https://on.cypress.io/guides/installing-and-running) docs including {% url 'configuration' configuration %} for `cypress.json`
 - Cypress now silently restarts the server whenever it detects a change to `cypress.json` - meaning you no longer have to manually reboot the server for changes to be picked up.
 - There is a new {% url `Cypress.config` config %} interface - akin to {% url `Cypress.env` env %} which provides access to configuration values.
 
@@ -231,7 +231,7 @@
 
 **Misc:**
 
-- Exposed `visitTimeout` and `requestTimeout` [configuration options](https://on.cypress.io/guides/configuration).
+- Exposed `visitTimeout` and `requestTimeout` {% url 'configuration' configuration %}.
 - Increased `visitTimeout` from `20s` to `30s`.
 - {% url `.click()` click %} will now throw if you are attempting to click more than 1 element. Pass `{multiple: true}` to enable this behavior again. Each element will be clicked serially and inserted into the Command Log.
 

@@ -29,7 +29,7 @@ When the error is fixed in your test file, your tests will automatically re-run.
 
 **{% fa fa-exclamation-triangle red %} Support file missing or invalid**
 
-The `supportFolder` option was removed from Cypress in version [0.18.0](https://on.cypress.io/guides/changelog#0-18-0) and was replaced by module support and the [`supportFile`](https://on.cypress.io/guides/configuration) configuration option.
+The `supportFolder` option was removed from Cypress in version [0.18.0](https://on.cypress.io/guides/changelog#0-18-0) and was replaced by module support and the {% url `supportFile` configuration#Folders %} configuration option.
 
 Cypress used to automatically include any scripts in the `supportFolder` before your test files. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions.
 
@@ -198,7 +198,7 @@ Cypress will continuously attempt to interact with the element until it eventual
 cy.get('#modal button').click({waitForAnimations: false})
 ```
 
-You can globally disable animation error checking, or increase the threshold by modifying the [configuration options](https://on.cypress.io/guides/configuration) in your [`cypress.json`](https://on.cypress.io/guides/configuration).
+You can globally disable animation error checking, or increase the threshold by modifying the {% url 'configuration' configuration %} in your {% url 'configuration' configuration %}.
 
 ***cypress.json***
 

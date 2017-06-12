@@ -63,7 +63,7 @@ Option | Default | Notes
 `cancelable` | `true` | Whether the event is cancelable
 `interval` | `16` | Interval which to retry triggering the event
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry triggering the event
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry triggering the event
 
 You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and they will be attached to the event. Passing in coordinate arguments (`clientX`, `pageX`, etc) will override the position coordinates.
 
@@ -73,7 +73,7 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 ## Timeout
 
-`.trigger()` will wait until the element is in an 'interactable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`.trigger()` will wait until the element is in an 'interactable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

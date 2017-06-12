@@ -259,7 +259,7 @@ comments: false
 
 **Breaking Changes:**
 
-- Previously, we auto-magically included all files within [`cypress/support`](https://on.cypress.io/guides/writing-your-first-test#section-folder-structure). This has now [gone away](https://on.cypress.io/guides/errors#section-the-supportfolder-option-has-been-removed) and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new [`supportFile`](https://on.cypress.io/guides/configuration#section-folders) option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
+- Previously, we auto-magically included all files within [`cypress/support`](https://on.cypress.io/guides/writing-your-first-test#section-folder-structure). This has now [gone away](https://on.cypress.io/guides/errors#section-the-supportfolder-option-has-been-removed) and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
 
 **Features:**
 
@@ -271,7 +271,7 @@ comments: false
 
 - We improved the logic around when and if we scaffold files on a new project. We're much smarter about this and not generating these forcibly every time. Fixes [#285](https://github.com/cypress-io/cypress/issues/285).
 - Simplified handling of support files and made them less "magical". Fixes [#286](https://github.com/cypress-io/cypress/issues/286).
-- Renamed `supportFolder` to [`supportFile`](https://on.cypress.io/guides/configuration#section-folders) in `cypress.json`. We will automatically rename your `cypress.json` if this property was present on update.
+- Renamed `supportFolder` to {% url `supportFile` configuration#Folders %} in `cypress.json`. We will automatically rename your `cypress.json` if this property was present on update.
 
 # 0.17.12
 
@@ -316,8 +316,8 @@ comments: false
 - We no longer artificially restrict the environment [`cypress ci`](https://docs.cypress.io/docs/continuous-integration#section-what-is-the-difference-between-cypress-run-and-cypress-ci-) can run in. It can now run *anywhere*. Fixes [#296](https://github.com/cypress-io/cypress/issues/296).
 - We removed scaffolding any directories on a new project (when running headlessly). Fixes [#295](https://github.com/cypress-io/cypress/issues/295).
 - [`cypress run`](https://docs.cypress.io/docs/continuous-integration#section-what-is-the-difference-between-cypress-run-and-cypress-ci-) no longer prompts the user for any kind of interaction, thus enabling you to use this in CI if you choose to do so. Fixes [#294](https://github.com/cypress-io/cypress/issues/294).
-- There is a new [configuration](https://on.cypress.io/guides/configuration) property called: `trashAssetsBeforeHeadlessRuns` that is set to `true` by default and will automatically clear out screenshots + videos folders before each run. These files are not deleted, they are just moved to your trash.
-- There are several new [configuration](https://on.cypress.io/guides/configuration) properties for video recording: `videoRecording`, `videoCompression`, and `videosFolder`.
+- There is a new {% url 'configuration' configuration %} property called: `trashAssetsBeforeHeadlessRuns` that is set to `true` by default and will automatically clear out screenshots + videos folders before each run. These files are not deleted, they are just moved to your trash.
+- There are several new {% url 'configuration' configuration %} properties for video recording: `videoRecording`, `videoCompression`, and `videosFolder`.
 
 # 0.17.10
 
@@ -345,8 +345,8 @@ comments: false
 
 **Misc:**
 
-- Changed default [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) from `20000` to `30000`.
-- Changed default [`pageLoadTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) from `30000` to `60000`.
+- Changed default {% url `responseTimeout` configuration#Timeouts %} from `20000` to `30000`.
+- Changed default {% url `pageLoadTimeout` configuration#Timeouts %} from `30000` to `60000`.
 - The internal Cypress proxy now forcibly responds to requests taking longer than `responseTimeout`. Currently this sends back `text/html` with the `ETIMEDOUT` error, but this likely needs to be configurable. The reason we are now forcibly applying timeouts is to prevent `socket pooling exhaustion` where tests are running and a 3rd party server never responds to the request.
 
 # 0.17.8
@@ -370,7 +370,7 @@ comments: false
 
 **Features:**
 
-- There is now a new [`chromeWebSecurity`](https://on.cypress.io/guides/configuration#section-browser) option you can set in `cypress.json` to turn off Chrome's Web Security features. We've written a brand new reference that details why and how you could use this. [Cypress Web Security](https://on.cypress.io/guides/web-security). This option can be used for accessing `cross origin` `<iframes>` or if your application needs to test navigation across super domains. Fixes [#262](https://github.com/cypress-io/cypress/issues/262).
+- There is now a new {% url `chromeWebSecurity` configuration#Browser %} option you can set in `cypress.json` to turn off Chrome's Web Security features. We've written a brand new reference that details why and how you could use this. [Cypress Web Security](https://on.cypress.io/guides/web-security). This option can be used for accessing `cross origin` `<iframes>` or if your application needs to test navigation across super domains. Fixes [#262](https://github.com/cypress-io/cypress/issues/262).
 
 **Bugfixes:**
 
@@ -501,7 +501,7 @@ comments: false
 
 **Bugfixes:**
 
-- [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) now works correctly. The driver was still referencing the old `commandTimeout` value.
+- {% url `defaultCommandTimeout` configuration#Timeouts %} now works correctly. The driver was still referencing the old `commandTimeout` value.
 - The `__cypress.initial` cookie should now be removed during any {% url `cy.visit()` visit %}, which should fix some edge cases with the proxy accidentally injecting content when it shouldn't. We also added a ton more e2e tests covering these edge cases and other behavior.
 - The proxy now restricts it's injection to only `Content-Type: text/html` headers so it will not accidentally inject into the wrong responses.
 
@@ -553,10 +553,10 @@ comments: false
 **Misc:**
 
 - [`cypress run`](https://github.com/cypress-io/cypress-cli#cypress-run-1) no longer requires being logged in.
-- Renamed configuration option `commandTimeout` to [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts). Cypress will transparently rewrite this if you have it in your `cypress.json`, so you don't have to do anything.
+- Renamed configuration option `commandTimeout` to {% url `defaultCommandTimeout` configuration %}. Cypress will transparently rewrite this if you have it in your `cypress.json`, so you don't have to do anything.
 - Renamed `onConsole` and `onRender` Command Log options to `consoleProps` and `renderProps`. We still support the older property names for backwards compatibility.
 - Added support for a command's `message` or `renderProps.message` to use markdown.
-- The default value of `port` within a project's global [configuration](https://on.cypress.io/guides/configuration) has changed from `2020` to now being a random open port. You can still configure a specific `port` if needed within the [configuration](https://on.cypress.io/guides/configuration).
+- The default value of `port` within a project's global {% url 'configuration' configuration %} has changed from `2020` to now being a random open port. You can still configure a specific `port` if needed within the {% url 'configuration' configuration %}.
 - We have upgraded the `Chromium` that runs headlessly on `cypress run` to version `51`.
 - The internal version of `node` which is built into Cypress is now `6.1.0`.
 - Cypress `.js` files are no longer minified to make them easier to debug.
@@ -592,7 +592,7 @@ comments: false
 - {% url `cy.route()` route %} now accepts string glob patterns using [minimatch](https://github.com/isaacs/minimatch) under the hood. This means you can more easily route dynamic urls without using `regex`. Example: `cy.route('POST', '/users/*/comments', {})`.
 - {% url `Cypress.minimatch` minimatch %}  is now exposed so you can easily test globbing patterns.
 - {% url `.type()` type %} can now be used on non-input elements that have a `tabindex` attribute. Key events will fire but no text content will change and no input based events fire. Fixes [#172](https://github.com/cypress-io/cypress/issues/172).
-- There is now an [`ignoreTestFiles`](https://on.cypress.io/guides/configuration) configuration option that accepts an array of `glob` patterns. This enables you to ignore extraneous spec files that may be created during a build process. The default pattern is `*.hot-update.js` which will ignore dynamically generated webpack hot module swapping files. Fixes [#159](https://github.com/cypress-io/cypress/issues/159).
+- There is now an {% url `ignoreTestFiles` configuration %} configuration option that accepts an array of `glob` patterns. This enables you to ignore extraneous spec files that may be created during a build process. The default pattern is `*.hot-update.js` which will ignore dynamically generated webpack hot module swapping files. Fixes [#159](https://github.com/cypress-io/cypress/issues/159).
 
 **Bugfixes:**
 
@@ -614,8 +614,8 @@ comments: false
 **Features:**
 
 - Added new {% url `cy.screenshot()` screenshot %} command which can take screenshots on demand.
-- When running headlessly or in CI Cypress will now automatically take a screenshot when a test fails. You can optionally turn this off by setting [`screenshotOnHeadlessFailure`](https://on.cypress.io/guides/configuration#section-global) to `false` in your [configuration](https://on.cypress.io/guides/configuration#section-global).
-- Added new [`screenshotsFolder` configuration option](https://on.cypress.io/guides/configuration#section-folders) with default of `cypress/screenshots`.
+- When running headlessly or in CI Cypress will now automatically take a screenshot when a test fails. You can optionally turn this off by setting {% url `screenshotOnHeadlessFailure` configuration#Screenshots %} to `false` in your configuration.
+- Added new {% url `screenshotsFolder` configuration#Screenshots %} configuration option with default of `cypress/screenshots`.
 - When running in [Circle CI](https://circleci.com/), we automatically export screenshots as artifacts which makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything. If you're using [Travis CI](https://travis-ci.org/), you'll need to upload artifacts to an `s3 bucket`. This is a small slice of what is coming to help diagnose and understand errors in CI. Also in `0.17.0` we will automatically scroll the tests and more intelligently and open / close test commands so you can visually see what happened. Currently you may not see the test command's failure in the Command Log due to the view not scrolling.
 - Added new {% url `.each()` each %} command which iterates serially on a collection yielding the iteratee, the index, and the collection. Addresses [#156](https://github.com/cypress-io/cypress/issues/156).
 - {% url `cy.route()` route %} can now accept a single function and/or you can pass a function to the `response` property. This allows you to lazily evaluate routing responses. Great for referencing [fixtures](https://on.cypress.io/guides/creating-fixtures). Addresses [#152](https://github.com/cypress-io/cypress/issues/152).
@@ -686,8 +686,8 @@ comments: false
 - Added new commands to handle getting, setting, and clearing cookies: {% url `cy.clearCookie()` clearcookie %}, {% url `cy.getCookie()` getcookie %}, and {% url `cy.setCookie()` setcookie %}.
 - All the `cy.cookie` commands have been upgraded to take new options and can do much more powerful things outside of the JavaScript sandbox.
 - Upgraded the Chromium version running headlessly and in CI from `47` to `49`.
-- There is a new {% url `cy.exec()` exec %} command that can execute any arbitrary system command. Additionally there is a new [`execTimeout` configurable option](https://on.cypress.io/guides/configuration#section-global) which is set to `60s` by default. Fixes [#126](https://github.com/cypress-io/cypress/issues/126).
-- There is a new [`numTestsKeptInMemory` configuration option](https://on.cypress.io/guides/configuration#section-global) that controls how many test's snapshots and command data is kept in memory while tests are running. Reducing this number will reduce the memory used in the browser while tests are running. Whatever this number is - is how many tests you can walk back in time when inspecting their snapshots and return values.  Addresses [#142](https://github.com/cypress-io/cypress/issues/142).
+- There is a new {% url `cy.exec()` exec %} command that can execute any arbitrary system command. Additionally there is a new {% url `execTimeout` configuration#Timeouts %} configuration option which is set to `60s` by default. Fixes [#126](https://github.com/cypress-io/cypress/issues/126).
+- There is a new {% url `numTestsKeptInMemory` configuration#Global %} configuration option that controls how many test's snapshots and command data is kept in memory while tests are running. Reducing this number will reduce the memory used in the browser while tests are running. Whatever this number is - is how many tests you can walk back in time when inspecting their snapshots and return values.  Addresses [#142](https://github.com/cypress-io/cypress/issues/142).
 
 **Bugfixes:**
 
@@ -775,8 +775,8 @@ comments: false
 **Features:**
 
 - The [error message when Cypress detects that a test has ended early](https://on.cypress.io/guides/errors#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue) (there are still commands left in the queue) now displays a list of these commands with a much improved explanation.
-- There is now a new [configuration option](https://on.cypress.io/guides/configuration): `watchForFileChanges` that, when set to `false` in the `cypress.json`, will prevent Cypress from attempting to watch for file changes and restart your tests.
-- You can now set the default [`reporter`](https://on.cypress.io/guides/configuration) in `cypress.json` for use when running headlessly or in CI.
+- There is now a new {% url 'configuration option' configuration %}: `watchForFileChanges` that, when set to `false` in the `cypress.json`, will prevent Cypress from attempting to watch for file changes and restart your tests.
+- You can now set the default {% url `reporter` configuration %} in `cypress.json` for use when running headlessly or in CI.
 
 **Bugfixes:**
 
@@ -802,7 +802,7 @@ comments: false
 
 **Misc:**
 
-- Renamed [configuration](https://on.cypress.io/guides/configuration) option `visitTimeout` to `pageLoadTimeout`. You don't need to change anything. If you were specifically setting `visitTimeout` in your `cypress.json` file it will be transparently rewritten `pageLoadTimeout` on the next server boot. This option was renamed because now multiple commands `cy.visit()`, `cy.go()`, and `cy.reload()` all depend on this timeout option.
+- Renamed {% url 'configuration' configuration %} option `visitTimeout` to `pageLoadTimeout`. You don't need to change anything. If you were specifically setting `visitTimeout` in your `cypress.json` file it will be transparently rewritten `pageLoadTimeout` on the next server boot. This option was renamed because now multiple commands `cy.visit()`, `cy.go()`, and `cy.reload()` all depend on this timeout option.
 - The Cypress tray icon has been updated. It's much better now.
 
 # 0.15.0
@@ -825,9 +825,9 @@ comments: false
 **Breaking Changes:**
 
 - Cypress no longer looks at your `tests` directory for test files. Now, by default, it looks in the `cypress/integration` directory.
-- We've removed the [configuration option](https://on.cypress.io/guides/configuration) `testFolder` and renamed it to `integrationFolder` inside of the `cypress.json`.
+- We've removed the configuration option `testFolder` and renamed it to {% url `integrationFolder` configuration#Folders %} inside of the `cypress.json`.
 - We've renamed the `cypress` npm package to be [`cypress-cli`](https://github.com/cypress-io/cypress-cli). You'll see a giant deprecation warning until your scripts have been updated to reference `cypress-cli`. [More info here](https://www.npmjs.com/package/cypress). You can also uninstall the `cypress` npm package.
-- Added new `fileServerFolder` [configuration option](https://on.cypress.io/guides/configuration) that can mount a directory other than your project root when using Cypress as a webserver.
+- Added new {% url `fileServerFolder` configuration#Folders %} configuration option that can mount a directory other than your project root when using Cypress as a webserver.
 
 **Misc:**
 

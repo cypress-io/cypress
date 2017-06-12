@@ -41,7 +41,7 @@ Pass in an options object to change the default behavior of `.submit()`.
 
 ## Timeout
 
-`.submit()` will continue to try to submit the form for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.submit()` will continue to try to submit the form for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Example
 

@@ -47,7 +47,7 @@ Pass in an options object to change the default behavior of `cy.get()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -55,7 +55,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.get()` will continue to look for the elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.get()` will continue to look for the elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

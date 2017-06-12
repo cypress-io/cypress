@@ -42,7 +42,7 @@ Pass in an options object to change the default behavior of `.closest()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -50,7 +50,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.closest()` will continue to look for the closest element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.closest()` will continue to look for the closest element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

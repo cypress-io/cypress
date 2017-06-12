@@ -37,9 +37,9 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait until `cy.visit()` resolves
+`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to wait until `cy.visit()` resolves
 
-You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in {% url 'configuration' configuration %}.
 
 ## Yields
 
@@ -47,7 +47,7 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 ## Timeout
 
-`cy.visit()` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
+`cy.visit()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -83,7 +83,7 @@ cy.visit('app/index.html')
 
 **Visit is automatically prefixed with `baseUrl`.**
 
-Configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit()` command. Read more about [`configuration`](https://on.cypress.io/guides/configuration).
+Configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit()` command. Read more about {% url 'configuration' configuration %}.
 
 ```json
 {

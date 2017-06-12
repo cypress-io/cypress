@@ -35,7 +35,7 @@ Whether to reload the current page without using the cache. `true` forces the re
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to reload the page
+`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to reload the page
 
 ## Yields
 
@@ -43,7 +43,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.reload()` will wait for the load event of the newly loaded page for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`cy.reload()` will wait for the load event of the newly loaded page for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

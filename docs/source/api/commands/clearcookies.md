@@ -35,7 +35,7 @@ Pass in an options object to change the default behavior of `cy.clearCookies()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.clearCookies()` command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.clearCookies()` command to be processed
 
 ## Yields
 
@@ -43,7 +43,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.clearCookies()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+`cy.clearCookies()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 
 # Examples
 

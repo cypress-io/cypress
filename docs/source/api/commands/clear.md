@@ -47,7 +47,7 @@ Option | Default | Notes
 `force` | `false` | Force clear, disables error checking prior to clear
 `interval` | `16` | Interval which to retry clear
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the clear
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the clear
 
 ## Yields
 
@@ -55,7 +55,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.clear()` will continue to look for the `input` or `textarea` for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.clear()` will continue to look for the `input` or `textarea` for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

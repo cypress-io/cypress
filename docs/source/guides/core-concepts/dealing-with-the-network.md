@@ -114,7 +114,7 @@ Cypress automatically indicates when an XHR request happens in your application.
 
 ![snapshot_request](https://user-images.githubusercontent.com/1271364/26947393-930508b0-4c60-11e7-90a0-4d42ee3f24c0.gif)
 
-By default, Cypress is configured to *ignore* requests that are used to fetch static content like `.js` or `.html` files. This keeps the Command Log less noisy. This option can be changed in the [configuration](https://on.cypress.io/guides/configuration).
+By default, Cypress is configured to *ignore* requests that are used to fetch static content like `.js` or `.html` files. This keeps the Command Log less noisy. This option can be changed in the {% url 'configuration' configuration %}.
 
 Cypress automatically collects the request `headers` and the request `body` and will make this available to you.
 

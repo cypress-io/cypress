@@ -70,7 +70,7 @@ Option | Default | Notes
 `interval` | `16` | Interval to retry type
 `log` | `true` | Whether to display command in Command Log
 `release` | `true` | Keep a modifier activated between commands
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the type
 
 ## Yields
 
@@ -78,7 +78,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.type()` will continue to retry typing for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.type()` will continue to retry typing for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

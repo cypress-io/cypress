@@ -52,7 +52,7 @@ Pass in an options object to change the default behavior of `cy.readFile()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the command to be processed
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
 
 ## Yields
 
@@ -60,7 +60,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.readFile()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process the command.
+`cy.readFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to process the command.
 
 # Examples
 

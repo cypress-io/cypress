@@ -48,7 +48,7 @@ Pass in an options object to change the default behavior of `cy.contains()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry finding an element containing the content
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry finding an element containing the content
 
 ## Yields
 
@@ -56,7 +56,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.contains()` will try to find the content within the DOM for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.contains()` will try to find the content within the DOM for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

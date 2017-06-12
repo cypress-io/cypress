@@ -95,7 +95,7 @@ When clicking on the `tick` command within the command log, the console outputs 
 # See also
 
 - {% url `cy.clock()` clock %}
-- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}

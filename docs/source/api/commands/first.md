@@ -38,7 +38,7 @@ Pass in an options object to change the default behavior of `.first()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -46,7 +46,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.first()` will continue to look for the first element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.first()` will continue to look for the first element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

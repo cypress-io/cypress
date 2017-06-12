@@ -50,7 +50,7 @@ Option | Default | Notes
 `force` | `false` | Forces select, disables error checking prior to select
 `interval` | `50` | Interval which to retry a select
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the select
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the select
 
 
 ## Yields
@@ -59,7 +59,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.select()` will continue to select the options for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.select()` will continue to select the options for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

@@ -61,7 +61,7 @@ Option | Default | Notes
 `interval` | `16` | Interval which to retry a click
 `log` | `true` | Whether to display command in Command Log
 `multiple` | `false` | Enable serially clicking multiple elements
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the click
 
 ## Yields
 
@@ -69,7 +69,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`.click()` will wait until the element is in a 'clickable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

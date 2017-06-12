@@ -44,7 +44,7 @@ The root element yielded is `document` by default. However, when calling `.root(
 
 ## Timeout
 
-`.root()` will continue to look for the root element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.root()` will continue to look for the root element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

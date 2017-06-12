@@ -44,7 +44,7 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `path` | `/` | The cookie path
 `secure` | `false` | Whether the cookie is a secure cookie
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.setCookie()` command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.setCookie()` command to be processed
 
 ## Yields
 
@@ -60,7 +60,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.setCookie()` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.
+`cy.setCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 
 # Examples
 

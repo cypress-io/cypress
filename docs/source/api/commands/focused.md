@@ -38,7 +38,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.focused()` will continue to look for the focused element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.focused()` will continue to look for the focused element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

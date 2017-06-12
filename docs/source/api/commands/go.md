@@ -38,7 +38,7 @@ Pass in an options object to change the default behavior of `cy.go()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the navigation
+`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to retry the navigation
 
 ## Yields
 
@@ -46,7 +46,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.go()` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`cy.go()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 

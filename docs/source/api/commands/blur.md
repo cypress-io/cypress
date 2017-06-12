@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.blur()` will continue to look for the focusable element to blur for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.blur()` will continue to look for the focusable element to blur for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 

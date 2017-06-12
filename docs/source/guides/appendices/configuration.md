@@ -110,7 +110,7 @@ cypress run --record --config viewportWidth=1280,viewportHeight=720
 
 ## Environment Variables
 
-You can also use [environment variables](https://on.cypress.io/guides/environment-variables) to override configuration values. This is especially useful in [CI](https://on.cypress.io/guides/continuous-integration) or when working locally. This gives you the ability to change configuration options without modifying any code or build scripts.
+You can also use [environment variables](https://on.cypress.io/guides/environment-variables) to override configuration values. This is especially useful in {% url 'Continuous Integration' continuous-integration %} or when working locally. This gives you the ability to change configuration options without modifying any code or build scripts.
 
 By default, any environment variable that matches a corresponding configuration key will override the `cypress.json` value.
 
