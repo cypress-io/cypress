@@ -6,10 +6,10 @@ comments: true
 {% note info %}
 ### {% fa fa-graduation-cap %} What You'll Learn
 
-- what Cypress looks like
-- how Cypress queries the DOM more safely than jQuery
-- how Cypress manages subjects and chains of commands
-- what assertions look like and how they work
+- What Cypress looks like
+- How Cypress queries the DOM more safely than jQuery
+- How Cypress manages subjects and chains of commands
+- What assertions look like and how they work
 {% endnote %}
 
 {% note danger Important! %}
@@ -132,10 +132,11 @@ cy.get('.my-selector').first()
 ```
 
 This makes Cypress robust, immune to dozens of common, irritating problems at once. Consider all the circumstances that could cause the jQuery version to fail:
-- the DOM has not loaded yet
-- your framework hasn't finished bootstrapping
-- an XHR hasn't completed
-- an animation hasn't completed
+
+- The DOM has not loaded yet
+- Your framework hasn't finished bootstrapping
+- An XHR hasn't completed
+- An animation hasn't completed
 - and on and on...
 
 Traditionally, you'd be forced to write custom code to protect against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly.
@@ -157,10 +158,10 @@ Another way to locate things -- a more human way -- is to look them up by their 
 
 ```js
 // Finds an element in the document containing the text "New Post"
-cy.contains("New Post")
+cy.contains('New Post')
 
 // Finds a child element of the .main element containing the text "New Post"
-cy.get('.main').contains("New Post")
+cy.get('.main').contains('New Post')
 ```
 
 This is helpful when writing tests from the perspective of a user interacting with the app. They just know they want to click the button labeled "Submit", they have no idea that it has a `type` attribute of `submit`, or a CSS class of `my-submit-button`.
@@ -204,7 +205,7 @@ As we saw in the initial example, Cypress makes it easy to click on and type int
 
 ```js
 cy.get('textarea.post-body')
-  .type("This is an excellent post.")
+  .type('This is an excellent post.')
 ```
 
 We're chaining the {% url `.type()` type %} onto the {% url `cy.get()` get %}, applying it to the "subject" of the {% url `cy.get()` get %} command, which will be a DOM element if it is found.
@@ -225,9 +226,9 @@ Cypress exposes common user interactions as commands, making it simple to encaps
 Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that ask a question of the current subject and halt the test if they don't get the expected response. Here's a quick look at assertions in action:
 
 ```js
-cy.get(":checkbox").should("be.disabled")
+cy.get(':checkbox').should('be.disabled')
 
-cy.get("form").should("have.class", "form-horizontal")
+cy.get('form').should('have.class', 'form-horizontal')
 
 cy.get("input").should("not.have.value", "foo")
 ```
@@ -255,11 +256,11 @@ A new Cypress chain always starts with `cy.[something]`, where the `something` e
 Examples:
 
 ```js
-cy.clearCookies() // Done: no Subject, thus no chaining possible
+cy.clearCookies()                   // Done: no Subject, thus no chaining possible
 
-cy.get('.main-container') // Subject an is array of matching DOM elements
-  .contains("Today's Headlines") // Subject is a DOM element
-  .click() // Subject does not change
+cy.get('.main-container')           // Subject an is array of matching DOM elements
+  .contains('Today\'s Headlines')   // Subject is a DOM element
+  .click()                          // Subject does not change
 ```
 
 {% note success Core Concept %}
@@ -310,14 +311,14 @@ It is very important to understand that Cypress commands don't do anything at th
 Take this simple test, for example:
 
 ```js
-it("changes the URL when 'awesome' is clicked", function() {
+it('changes the URL when "awesome" is clicked', function() {
   cy.visit('/my/resource/path') // Nothing happens yet
 
   cy.get('.awesome-selector') // Still nothing happening
     .click() // Nope, nothing
 
   cy.url() // Nothing to see, yet
-    .should("eq", '/my/resource/path#awesomeness') // Nada.
+    .should('eq', '/my/resource/path#awesomeness') // Nada.
 }) // Ok, the test method has returned, time to do everything in order!
 ```
 
@@ -361,7 +362,7 @@ Let's compare the prior example to fictional version of it as raw, Promise-based
 
 ```js
 // Noisy Promise demonstration. Not valid code.
-it("changes the URL when 'awesome' is clicked", function() {
+it('changes the URL when "awesome" is clicked', function() {
   return cy.visit('/my/resource/path').then(function() {
     return cy.get('.awesome-selector')
   }).then(function($element) {
@@ -374,14 +375,14 @@ it("changes the URL when 'awesome' is clicked", function() {
 })
 
 // How Cypress really looks, Promises wrapped up and hidden from us.
-it("changes the URL when 'awesome' is clicked", function() {
+it('changes the URL when "awesome" is clicked', function() {
   cy.visit('/my/resource/path')
 
   cy.get('.awesome-selector')
     .click()
 
   cy.url()
-    .should("eq", '/my/resource/path#awesomeness')
+    .should('eq', '/my/resource/path#awesomeness')
 })
 ```
 
@@ -416,16 +417,16 @@ Despite the dozens of assertions Cypress makes available to you, sometimes the b
 Consider this example:
 
 ```js
-cy.visit("/home")
+cy.visit('/home')
 
-cy.get(".main-menu")
-  .contains("New Project")
+cy.get('.main-menu')
+  .contains('New Project')
   .click()
 
-cy.get(".title")
-  .type("My Awesome Project")
+cy.get('.title')
+  .type('My Awesome Project')
 
-cy.get("form")
+cy.get('form')
   .submit()
 ```
 
@@ -470,18 +471,18 @@ Using {% url `.should()` should %} or {% url `.and()` and %} commands is the pre
 ```javascript
 // the implicit subject here is the first <tr>
 // this asserts that the <tr> has an .active class
-cy.get("tbody tr:first").should("have.class", "active")
+cy.get('tbody tr:first').should('have.class', 'active')
 ```
 
 You can chain multiple assertions together using {% url `.and()` and %}, which is just another name for {% url `.should()` should %} that makes things more readable:
 
 ```js
-cy.get("#header a")
-  .should("have.class", "active")
-  .and("have.attr", "href", "/users")
+cy.get('#header a')
+  .should('have.class', 'active')
+  .and('have.attr', 'href', '/users')
 ```
 
-Because `should("have.class", ...)` does not change the subject, the `.and("have.attr", ...)` is executed against the same element. This is handy when you need to assert multiple things against a single subject quickly, but there are pitfalls...
+Because `should('have.class', ...)` does not change the subject, the `.and('have.attr', ...)` is executed against the same element. This is handy when you need to assert multiple things against a single subject quickly, but there are pitfalls...
 
 {% note danger Beware: Assertions That Change The Subject %}
 Some assertions modify the current subject unexpectedly. For example, the line `cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `<a>` element to the string `"/users"`. This is because Cypress honors the return value of the assertion, and `have.attr` is a `Chai-jQuery` assertion that returns the matched string instead of the original subject. This can be surprising!
@@ -493,9 +494,9 @@ Whenever you have failing assertions and don't understand why, click the line in
 If we wrote this assertion in the explicit form ("the long way"), it would look like this:
 
 ```js
-cy.get("tbody tr:first").should(function($tr) {
-  expect($tr).to.have.class("active")
-  expect($tr).to.have.attr("href", "/users")
+cy.get('tbody tr:first').should(function($tr) {
+  expect($tr).to.have.class('active')
+  expect($tr).to.have.attr('href', '/users')
 })
 ```
 
@@ -538,9 +539,9 @@ cy
 
     // set this specific subject
     expect(texts).to.deep.eq([
-      "Some text from first p",
-      "More text from second p",
-      "And even more text from third p"
+      'Some text from first p',
+      'More text from second p',
+      'And even more text from third p'
     ])
 })
 ```

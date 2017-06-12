@@ -16,9 +16,9 @@ title: Testing Your App
 To round out this guide, let's actually test _your_ app! (You do have an app to test, right?) Create a new test file in the `cypress/integration` folder named `my_spec.js` (or whatever you want, the name is not meaningful.) We'll fill in a quick smoke test to make sure we can visit the app:
 
 ```js
-describe.only("My App", function() {
-  it("can be visited", function() {
-    cy.visit("http://localhost:3000")
+describe.only('My App', function() {
+  it('can be visited', function() {
+    cy.visit('http://localhost:3000')
   })
 })
 ```
@@ -42,6 +42,7 @@ Now that you've gotten your server running and you're considering what to test n
 For now, we recommend that you toy around with Cypress in the public areas of your website (perhaps your marketing pages, documentation, ...or even the login form itself if that's really all you have!)
 
 Try to write some simple tests on your own, and for the moment don't worry if they are "good tests", you just want to get a feel for the texture of Cypress tests. Some things to try:
+
 - Find some elements based on their contents.
 - Click on things.
 - Assert that the page title has changed after following a link.

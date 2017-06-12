@@ -22,13 +22,13 @@ _Aside: Is this your first test **ever**? It's OK if so! We're willing to teach 
 Cypress uses the nested, functional style of organizing tests made popular by the RSpec, Jasmine, and Mocha communities. (In fact, Cypress bundles and improves on Mocha to provide this support.) It looks like this:
 
 ```js
-describe("The Pricing Page", function() {
-  it("shows 3 prices", function() {
+describe('The Pricing Page', function() {
+  it('shows 3 prices', function() {
     // test code...
   })
 
-  context("buttons", function() {
-    it("have the label 'buy this'", function() {
+  context('buttons', function() {
+    it('have the label "buy this"', function() {
       // test code...
     })
   })
