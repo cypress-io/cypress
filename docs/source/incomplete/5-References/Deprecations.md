@@ -19,13 +19,13 @@ cy
   .route(...)
 ```
 
-You no longer have to do this. Whether a [cy.route](https://on.cypress.io/api/route) is stubbed or not is simply based on whether or not you specified a response in [cy.route](https://on.cypress.io/api/route).
+You no longer have to do this. Whether a {% url `cy.route()` route %} is stubbed or not is simply based on whether or not you specified a response in {% url `cy.route()` route %}.
 
 ***
 
 # Passing `cy.route({stub: false})` is now deprecated
 
-In previous versions of Cypress, [cy.route](https://on.cypress.io/api/route) would require a `response` unless you specified `stub: false` in its options.
+In previous versions of Cypress, {% url `cy.route()` route %} would require a `response` unless you specified `stub: false` in its options.
 
 You used to have to write this:
 
@@ -35,7 +35,7 @@ cy
   .route({url: /posts/, stub: false})
 ```
 
-This is now deprecated because Cypress automatically stubs [cy.route](https://on.cypress.io/api/route) based on whether or not it has a `response` property.
+This is now deprecated because Cypress automatically stubs {% url `cy.route()` route %} based on whether or not it has a `response` property.
 
 ```javascript
 cy

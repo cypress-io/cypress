@@ -114,7 +114,7 @@ Cypress bundles the popular [Chai](#Chai) assertion library, as well as helpful 
 | contain( *text* ) | `expect($('#content')).to.contain('text')` |
 | descendents( *selector* ) | `expect($('#content')).to.have.descendants('div')` |
 
-You will commonly use these chainers after using DOM commands like: [`cy.get`](https://on.cypress.io/api/get), [`cy.contains`](https://on.cypress.io/api/contains), etc.
+You will commonly use these chainers after using DOM commands like: {% url `cy.get()` get %}, {% url `cy.contains()` contains %}, etc.
 
 # Chai-Sinon
 

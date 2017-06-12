@@ -102,10 +102,10 @@ Cypress makes it easy to stub a response and control the `body`, `status`, `head
 1. Start a {% url `cy.server()` server %}
 2. Provide a {% url `cy.route()` route %}
 
-These two commands work together to control the behavior of your responses within the command's options. [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
+These two commands work together to control the behavior of your responses within the command's options. {% url `cy.server()` server %} enables stubbing, while {% url `cy.route()` route %} provides a routing table so Cypress understands which response should go with which request.
 
 {% note info %}
-See [`cy.server()` options](https://on.cypress.io/api/server#section-options) and [`cy.route()` options](https://on.cypress.io/api/route#section-options) for instructions on how to stub responses.
+See {% url '`cy.server()` options' server#Options %} and {% url '`cy.route()` options' route#Options %} for instructions on how to stub responses.
 {% endnote %}
 
 # Requests
@@ -129,7 +129,7 @@ cy.route({
 })
 ```
 
-When you start a `cy.server()` and define `cy.route()` commands, Cypress displays this under "Routes" in the Command Log.
+When you start a {% url `cy.server()` server %} and define {% url `cy.route()` route %} commands, Cypress displays this under "Routes" in the Command Log.
 
 {% img /img/guides/cypress-basics/dealing-with-the-network/server-routing-table.png Routing Table %}
 

@@ -32,7 +32,7 @@ You'll notice many of these commands match the same behavior as their [jQuery co
 
 ## Starting a Query
 
-In Cypress, you will almost always start a sequence of traversal commands with [`cy.get`](https://on.cypress.io/api/get). You can think of [`cy.get`](https://on.cypress.io/api/get) as the same as jQuery's `$` for getting DOM elements.
+In Cypress, you will almost always start a sequence of traversal commands with {% url `cy.get()` get %}. You can think of {% url `cy.get()` get %} as the same as jQuery's `$` for getting DOM elements.
 
 **The following examples are equivalent:**
 
@@ -103,7 +103,7 @@ cy.get("form").find("inpit").type("foo").parent(".row")
     // oops we have a typo here in our selector
 ```
 
-Cypress will continue to retry finding the `inpit` element for **4 seconds** and then time out since this element does not exist. The [`cy.type`](https://on.cypress.io/api/type) and [`cy.parent`](https://on.cypress.io/api/parent) commands are never issued because Cypress will give up after failing to find the `inpit` element.
+Cypress will continue to retry finding the `inpit` element for **4 seconds** and then time out since this element does not exist. The {% url `.type()` type %} and {% url `.parent()` parent %} commands are never issued because Cypress will give up after failing to find the `inpit` element.
 
 Another way to look at it is to imagine there being an implied `.should("exist")` after every DOM command.
 

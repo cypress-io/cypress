@@ -153,7 +153,7 @@ cy.visit("http://localhost:8080")
 cy.get("a").should("have.attr", "href", "https://google.com") // no page load!
 ```
 
-Okay but let's say you're worried about `google.com` serving up the right HTML content. How would you test that? Easy! Just make a [`cy.request`](https://on.cypress.io/api/request) directly to it. [`cy.request`](https://on.cypress.io/api/request) is **NOT bound to CORS or same-origin policy**.
+Okay but let's say you're worried about `google.com` serving up the right HTML content. How would you test that? Easy! Just make a {% url `cy.request()` request %} directly to it. {% url `cy.request()` request %} is **NOT bound to CORS or same-origin policy**.
 
 ```javascript
 cy.visit("http://localhost:8080")
@@ -202,7 +202,7 @@ app.post("/submit", function(req, res) {
 
 A commone use case for this is `Single sign-on (SSO)`. In that situation you may `POST` to a different server and are redirected elsewhere (typically with the session token in the URL).
 
-If that's the case, don't worry - you can work around it with [`cy.request`](https://on.cypress.io/api/request). [`cy.request`](https://on.cypress.io/api/request) is special because it is **NOT bound to CORS or same-origin policy**.
+If that's the case, don't worry - you can work around it with {% url `cy.request()` request %}. {% url `cy.request()` request %} is special because it is **NOT bound to CORS or same-origin policy**.
 
 In fact we can likely bypass the initial visit altogether and just `POST` directly to your `SSO` server.
 
@@ -260,4 +260,4 @@ Still here? That's cool, let's disable web security!
 
 The browser will now display insecure content, you can now navigate to any superdomain without cross origin errors, and you can access cross origin iframes that are embedded in your application.
 
-One thing you may notice though is that Cypress still enforces visiting a single superdomain with [`cy.visit`](https://on.cypress.io/api/visit). This is an artificial limitation (and one that can be removed). You should [open an issue](https://github.com/cypress-io/cypress/issues/new) and tell us what you're trying to do!
+One thing you may notice though is that Cypress still enforces visiting a single superdomain with {% url `cy.visit()` visit %}. This is an artificial limitation (and one that can be removed). You should [open an issue](https://github.com/cypress-io/cypress/issues/new) and tell us what you're trying to do!

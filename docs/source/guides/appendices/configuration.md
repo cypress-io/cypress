@@ -36,7 +36,7 @@ Option | Default | Description
 `execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during a {% url `cy.exec()` exec %} command
 `pageLoadTimeout` | `60000` | Time, in milliseconds, to wait until {% url `cy.visit()` visit %}, {% url `cy.go()` go %}, {% url `cy.reload()` reload %} commands or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request to go out in a {% url `cy.wait()` wait %} command
-`responseTimeout` | `30000` | Time, in milliseconds, to wait until a response in a {% url `cy.request()` request %}, {% url `cy.wait()` wait %}, {% url `cy.fixture()` fixture %}, {% url `cy.getCookie()` getcookie %}, {% url `cy.getCookies()` getcookies %}, {% url `cy.setCookie()` setcookie %}, {% url `cy.clearCookie()` clearcookie %}, [`cy.clearCookies`()](https://on.cypress.io/api/clearcookies), and {% url `cy.screenshot()` screenshot %} commands
+`responseTimeout` | `30000` | Time, in milliseconds, to wait until a response in a {% url `cy.request()` request %}, {% url `cy.wait()` wait %}, {% url `cy.fixture()` fixture %}, {% url `cy.getCookie()` getcookie %}, {% url `cy.getCookies()` getcookies %}, {% url `cy.setCookie()` setcookie %}, {% url `cy.clearCookie()` clearcookie %}, {% url `cy.clearCookies()` clearcookies %}, and {% url `cy.screenshot()` screenshot %} commands
 
 ## Folders
 
@@ -136,7 +136,7 @@ You can [read more about Environment Variables](https://on.cypress.io/environmen
 
 ## `Cypress.config()`
 
-You can also override configuration values within your test using [`Cypress.config()`](https://on.cypress.io/api/config).
+You can also override configuration values within your test using {% url `Cypress.config()` config %}.
 Any value you change will be permanently changed for the remainder of your tests.
 
 ```javascript

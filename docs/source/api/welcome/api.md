@@ -1,7 +1,7 @@
 ---
 title: API
 comments: true
- 
+
 ---
 
 {% note info New to Cypress? %}
@@ -10,11 +10,11 @@ Read through our [Guides](https://on.cypress.io/guides/guides) first.
 
 # Sections
 
-- **[Commands:](https://on.cypress.io/api/and)** Drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".
+- **{% url 'Commands:' and %}** Drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".
 
-- **[Utilities:](https://on.cypress.io/api/_)** Access methods from other commonly used libraries.
+- **{% url 'Utilities:' _ %}** Access methods from other commonly used libraries.
 
-- **[Cypress API:](https://on.cypress.io/api/commands)** Configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
+- **{% url 'Cypress API:' cypress-commands %}** Configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
 
 # Organization
 

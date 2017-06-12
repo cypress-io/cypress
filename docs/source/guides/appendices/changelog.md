@@ -43,7 +43,7 @@ comments: false
 - Fixed file watching when changing the `integrationFolder` to something other than the default value. Fixes [#438](https://github.com/cypress-io/cypress/issues/438).
 - {% url `.select()` select %} now works on options that have the same value. Fixes [#441](https://github.com/cypress-io/cypress/issues/441).
 - Cypress no longer crashes when you click links in the on-boarding screen called "To help you get started...". Fixes [#227](https://github.com/cypress-io/cypress/issues/227).
-- The `example_spec.js` file that gets seeded on a new project no longer fails on [`cy.readFile()`](https://on.cypress.io/api/readFile). Fixes [#414](https://github.com/cypress-io/cypress/issues/414).
+- The `example_spec.js` file that gets seeded on a new project no longer fails on {% url `cy.readFile()` readfile %}. Fixes [#414](https://github.com/cypress-io/cypress/issues/414).
 
 **Misc:**
 
@@ -640,8 +640,8 @@ comments: false
 
 **Features:**
 
-- [`Cypress.Cookies.debug()`](https://on.cypress.io/api/cookies#section-debug-usage) now works again. Additionally it provides much more feedback than it used to.
-- [`Cypress.Cookies.debug(true, {verbose: false})`](https://on.cypress.io/api/cookies#section-turn-off-verbose-debugging-output) option has been added to remove verbose cookie object logging.
+- {% url `Cypress.Cookies.debug()` cookies#Debug %} now works again. Additionally it provides much more feedback than it used to.
+- {% url '`Cypress.Cookies.debug(true, {verbose: false})`' cookies#Debug %} option has been added to remove verbose cookie object logging.
 
 **Bugfixes:**
 
@@ -671,12 +671,12 @@ comments: false
 **Breaking Changes:**
 
 - Running tests in Cypress now requires either Chrome, Chromium, or Canary to be installed on your OS environment. We intend to expand support for more browsers in the future, but for now, only these 3 are supported.
-- Removed support for [`Cypress.Cookies.get`](https://on.cypress.io/api/cookies), [`Cypress.Cookies.set`](https://on.cypress.io/api/cookies) and [`Cypress.Cookies.remove`](https://on.cypress.io/api/cookies).
+- Removed support for `Cypress.Cookies.get`, `Cypress.Cookies.set` and `Cypress.Cookies.remove`.
 - Changed return of {% url `cy.getCookies()` getcookies %} to return an array of cookies, each with properties include name, value, etc.
 - Changed return of {% url `cy.clearCookies()` clearcookies %} to return null (previously was returning Cookie that was cleared).
-- [`Cypress.Cookies.debug`](https://on.cypress.io/api/cookies) has been temporarily disabled and will be re-enabled later.
+- {% url `Cypress.Cookies.debug()` cookies#Debug %} has been temporarily disabled and will be re-enabled later.
 - Browsers are spawned in a Cypress specific profile so that we can maintain a clean state apart of your regular browsing usage. You will notice that your extensions are no longer installed. This is on purpose. 3rd party extensions can often get in the way of Cypress and cause failures. However, developer specific extensions for Angular, Ember, and React do not cause any issues but you'll want to reinstall them. You only have to install them once and they will persist.
-- The `whitelist` callback function of [`Cypress.Cookies.defaults`](https://on.cypress.io/api/cookies#section-defaults-usage) now receives a `cookie object` instead of just the `cookies name` as a string.
+- The `whitelist` callback function of {% url `Cypress.Cookies.defaults()` cookies#Defaults %} now receives a `cookie object` instead of just the `cookies name` as a string.
 
 **Features:**
 
@@ -798,7 +798,7 @@ comments: false
 **Bugfixes:**
 
 - When an integration test file is unable to run and the `integrationFolder` is not the default path, the UI error now properly prints the integration test file's path by stripping off `integration` in the path. Fixes [#117](https://github.com/cypress-io/cypress/issues/117).
-- [Cypress.Dom.isHidden()](https://on.cypress.io/api/dom#section-is-hidden-usage) will now throw error when it isn't passed a DOM element.
+- {% url `Cypress.Dom.isHidden()` dom#Is-Hidden %} will now throw error when it isn't passed a DOM element.
 
 **Misc:**
 
@@ -928,7 +928,7 @@ More Info:
 - Added fs polling support to fix issues where Cypress would not detect file changes.
 - Tests should reload inside of Cypress faster when they are changed.
 - Better error messages when a command times out waiting for a promise to resolve. Fixes [#108](https://github.com/cypress-io/cypress/issues/108).
-- [`cy.viewport('ipad-2')`](https://on.cypress.io/api/viewport) now displays by default in portrait. Landscape orientation is now properly landscape. Fixes [#100](https://github.com/cypress-io/cypress/issues/100).
+- {% url `cy.viewport('ipad-2')` viewport %} now displays by default in portrait. Landscape orientation is now properly landscape. Fixes [#100](https://github.com/cypress-io/cypress/issues/100).
 - {% url `.click()` click %} will now properly click within an element's bounding box when a `position` option is passed and the calculated coordinates are a fraction. This previously forced the click to happen outside of the element. Fixes [#99](https://github.com/cypress-io/cypress/issues/99).
 - `clientX` and `clientY` event properties are now correctly calculated for elements when the page is scrolled. Fixes [#98](https://github.com/cypress-io/cypress/issues/98).
 - {% url `.check()` check %} and {% url `.uncheck()` uncheck %} now correctly filter down the subject when a value is passed as an option. Fixes [#94](https://github.com/cypress-io/cypress/issues/94).

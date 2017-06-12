@@ -68,7 +68,7 @@ The desktop application can be installed in OSX and Linux. [Windows is not yet s
 
 Cypress would never be able to run on a native mobile app, but would be able to run in a web view. In that mode, you'd see the commands display in a browser while you would drive the mobile device separately. Down the road we'll likely have first class support for this, but today it is not a current priority.
 
-Currently you can control the [`.viewport()`](https://on.cypress.io/api/viewport) to test responsive, mobile views in a website or web application.
+Currently you can control the {% url `cy.viewport()` viewport %} to test responsive, mobile views in a website or web application.
 
 ## {% fa fa-question-circle green %} Do you support X language or X framework?
 
@@ -126,7 +126,7 @@ There is nothing currently built into Cypress to do this. Adding code coverage a
 
 No. In fact Cypress' architecture is very different from Selenium in a few critical ways:
 
-- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like [.request()](http://on.cypress.io/api/request) and [.exec()](https://on.cypress.io/api/exec).
+- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like {% url `cy.request()` request %} and {% url `cy.exec()` exec %}.
 
 ## {% fa fa-question-circle green %} Are there driver bindings in my language?
 
@@ -234,7 +234,7 @@ cy.get('#list>li').should('have.length', 20)
 
 ## {% fa fa-question-circle green %} How do I seed / reset my database?
 
-You can use either {% url `cy.request()` request %} or [`cy.exec`](https://on.cypress.io/api/exec) to talk to your backend to seed data.
+You can use either {% url `cy.request()` request %} or {% url `cy.exec()` exec %} to talk to your backend to seed data.
 
 You could also just stub XHR requests directly using {% url `cy.route()` route %} which avoids ever even needing to fuss with your database.
 

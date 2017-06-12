@@ -10,7 +10,7 @@
 
 - Update links to match new [documentation hub](https://docs.cypress.io)
 - {% url `.debug()` debug %} has been zipped up - it no longer logs confusing debugging information and now logs information about the previously run command.
-- [`_`](https://on.cypress.io/api/cypress-underscore), [`$`](https://on.cypress.io/api/cypress-jquery), [`Promise`](https://on.cypress.io/api/cypress-promise), [`Blob`](https://on.cypress.io/api/cypress-blob), [`moment`](https://on.cypress.io/api/cypress-moment) utilities have been moved off of `cy` and are now attached to `Cypress`. This is much more consistent with how the `cy` and `Cypress` API's work. You can continue to use these objects off of `cy` but this has been deprecated and you will see a warning message.
+- {% url `Cypress._` _ %}, {% url `Cypress.$` $ %}, {% url `Cypress.Promise` promise %}, {% url `Cypress.Blob` blob %}, {% url `Cypress.moment` moment %} utilities have been moved off of `cy` and are now attached to `Cypress`. This is much more consistent with how the `cy` and `Cypress` API's work. You can continue to use these objects off of `cy` but this has been deprecated and you will see a warning message.
 
 # 0.13.8
 
@@ -101,7 +101,7 @@
 - Overhauled the entire subsystem dealing with an element's visibility state. Previously we were simply using jQuery's `.is(":visible")` selector which was ineffective at truly determining when an element is "visible". Our changes now differ significantly from jQuery, but they match what a real user would consider visible, and the rules are fairly easy to explain. In other words these rules should just "make sense".
 - An element is considered visible if it can be "interactive" with a user. In other words, if the user is able to click, type, drag, or otherwise physically interact with the element it is considered visible.
 - Because of the additional complexities of how Cypress considers an element `visible`, we now have added the **exact** reason why an element is not visible when throwing an error. This means you'll see errors detailing whether an element or its parents have `display: none`, `visibility: hidden`, or whether an element is considered hidden because its effective `width` or `height` is zero. Whatever the reason, Cypress will indicate why your element is considered hidden.
-- Exposed [`Cypress.Dom.isHidden`](https://on.cypress.io/api/dom) which holds the logic for determining an element's visibility. Modify this to change the rules.
+- Exposed {% url `Cypress.Dom.isHidden` dom %} which holds the logic for determining an element's visibility. Modify this to change the rules.
 - Upgraded {% url `.select()` select %} to automatically retry when the `<select>` is disabled, its matching `<option>` is disabled, or when Cypress cannot find a matching `<option>`. This more correctly aligns with the behavior of other actions like {% url `.click()` click %}, which automatically retry until the element is ready to receive the action.
 
 **Bugfixes:**
@@ -116,7 +116,7 @@
 - The updated hidden rules apply to all assertions like `should("be.hidden")`, and how Cypress indicates an element is hidden displays in the Command Log.
 - Updated many error messages to be more explanatory and precise.
 - Elements which are stringified during errors now indicate their text content (truncated to 10 characters) `<button>Save</button>` or whether they contain children elements by indicating an ellipsis `<div>...</div>`.
-- The [`Routes` instrument panel](https://on.cypress.io/api/routes) now displays the column: `Stubbed` instead of `Status`, which indicates whether a route is stubbing matching XHR's.
+- The {% url 'Routes instrument panel' route %} now displays the column: `Stubbed` instead of `Status`, which indicates whether a route is stubbing matching XHR's.
 
 # 0.13.2
 
@@ -220,7 +220,7 @@
 
 - There are now [Getting Started](https://on.cypress.io/guides/installing-and-running) docs including [configuration options](https://on.cypress.io/guides/configuration) for `cypress.json`
 - Cypress now silently restarts the server whenever it detects a change to `cypress.json` - meaning you no longer have to manually reboot the server for changes to be picked up.
-- There is a new [`Cypress.config`](https://on.cypress.io/api/config) interface - akin to [`Cypress.env`](https://on.cypress.io/api/env) which provides access to configuration values.
+- There is a new {% url `Cypress.config` config %} interface - akin to {% url `Cypress.env` env %} which provides access to configuration values.
 
 **Bugfixes:**
 
@@ -258,7 +258,7 @@
 
 **Features:**
 
-- There is a new [`Cypress.Cookies`](https://on.cypress.io/api/cookies) interface which enables you to `get`, `set`, and even `preserve` cookies throughout your test. Useful to preserve cookie-based sessions between your tests. [Documentation is written here](https://on.cypress.io/api/cookies).
+- There is a new {% url `Cypress.Cookies` cookies %} interface which enables you to `get`, `set`, and even `preserve` cookies throughout your test. Useful to preserve cookie-based sessions between your tests. {% url 'Documentation is written here' cookies %}.
 
 **Bugfixes:**
 
@@ -289,7 +289,7 @@
 **Features:**
 
 - There is now a `cy.cmd` and `cy.command` method which enables you to invoke commands by their string name. This is most useful when using *namespaced* custom commands. So `Cypress.addParentCommand("dashboard.setSlider", ...)` can be accessed by `cy.cmd("dashboard.setSlider", arg1, arg2)`. (Docs have not been written yet).
-- `Environment Variable` support has been added and can be accessed in your tests with [`Cypress.env`](https://on.cypress.io/api/env). The docs have been written [here](https://on.cypress.io/guides/environment-variables) and [here](https://on.cypress.io/api/env).
+- `Environment Variable` support has been added and can be accessed in your tests with {% url `Cypress.env` env %}. The docs have been written [here](https://on.cypress.io/guides/environment-variables) and {% url 'here' env %}.
 
 **Misc:**
 
@@ -301,7 +301,7 @@
 
 **Bugfixes:**
 
-- {% url `cy.route()` route %} will no longer throw that a response is needed when using [`cy.server({stub: false})`](https://on.cypress.io/api/server).
+- {% url `cy.route()` route %} will no longer throw that a response is needed when using {% url '`cy.server({stub: false})`' server %}.
 - Applying server defaults to `Cypress.Server.defaults({})` now {% url 'works as documented' cypress-server %}.
 - `onRequest` and `onResponse` can now be correctly set as permanent server defaults.
 - XHR `URL` is now decoded to make assertions easier. Fixes [#75](https://github.com/cypress-io/cypress/issues/75).
@@ -339,7 +339,7 @@ Deprecations:
 - You can now force other additional response headers to be sent on stubbed XHRs.
 - XHR's now snapshot twice - when the request is made and when the response is returned.
 - Removed sending `sinon` on every {% url `cy.visit()` visit %}.
-- The XHR object which is returned to you to via [`cy.wait("@xhrAlias")`](https://on.cypress.io/api/wait) is now more consistent with other return values such as {% url `cy.request()` request %}. It should be much easier to work with `request body`, `request headers`, `response body` and `response headers`.
+- The XHR object which is returned to you to via {% url `cy.wait()` wait %} is now more consistent with other return values such as {% url `cy.request()` request %}. It should be much easier to work with `request body`, `request headers`, `response body` and `response headers`.
 
 **Bugfixes:**
 
@@ -477,7 +477,7 @@ Almost there:
 **Bugfixes:**
 
 - Viewport is now properly restored to the default width / height after on subsequent runs. Previously it would retain the last viewport sized sed until there was a new viewport command.
-- [`cy.should('contain', '...')`](https://on.cypress.io/api/should) now correctly escapes quotes and single quotes.
+- {% url '`cy.should('contain', '...')`' should %} now correctly escapes quotes and single quotes.
 - Assertion messages are no longer truncated, and instead will scale down by reducing the `font-size` and `line-height` after they exceed 110 characters. So you'll now always see the full assertion message.
 - Fixed some scenarios where assertions would not be logged as a child command.
 - Assertions based around the `window` or `document` object no longer cause `chai` to bomb on formatting their object structures (due to yclic references) and instead now will show up as `<window>` and `<document>`.
@@ -494,7 +494,7 @@ Almost there:
 
 **Features:**
 
-- The `Linux` version of Cypress now works correctly for GUI Desktop versions (tested on Ubuntu Desktop). Previously it would only work eadlessly in server versions. The `tray` used in OSX does not work with the `Linux`, so in `Linux` we just use a standard window + menu.
+- The `Linux` version of Cypress now works correctly for GUI Desktop versions (tested on Ubuntu Desktop). Previously it would only work headlessly in server versions. The `tray` used in OSX does not work with the `Linux`, so in `Linux` we just use a standard window + menu.
 - Added Desktop Icon.
 
 **Bugfixes:**
@@ -573,11 +573,11 @@ Deprecations:
 
 **Features:**
 
-- Commands which precede assertions will now look downstream at those assertions and not resolve until their subject's state passes all ssertions. Previously this was **sort of** implemented using *Command Options* and the `eventually` flag, but now this is the default ehavior. *Command Options* only worked on DOM-based subjects, and now the new assertion verification works on everything else (including RL-based commands, etc). What this means is that Cypress can predict what you are requesting and automatically modifies its behavior until his state is reached. This prevents test brittleness / random test flake. Additionally this removes ever having to use [`cy.wait(Number)`](https://on.cypress.io/api/wait) or `cy.wait(Function)` (though this is still a valid command). As a side effect, you will now see commands + heir assertions in the spinning pending blue state. When assertions fail their associated command also fails at the same time. This visually epresents the coupling between these two concepts. Another side effect is that `timeout` options do not need to be provided on the succeeding ssertions, and can instead just be provided on the proceeding command. All of the coupled assertions will automatically be retried to the aximum `timeout` setting. Fixes [#43](https://github.com/cypress-io/cypress/issues/43).
-- Action commands will now insert an artificial delay after resolving to enable modern JavaScript frameworks time to *flush* their run loops. napshots are delayed until after the action, resulting in more accurate snapshots because JavaScript frameworks would not process these DOM vents until `N` milliseconds after they occurred. This has the unfortunate side effect of *decreasing* performance by about *5-10%* but the nd result is that it is much easier to debug and Cypress is less prone to flake caused by modern JavaScript frameworks. This change comes fter collecting many data points and this was one of the easiest changes that help reduce flake. For users that don't use the latest and reatest JavaScript frameworks, this action delay can be reduced through `cypress.json` which may speed up large test suites.
+- Commands which precede assertions will now look downstream at those assertions and not resolve until their subject's state passes all ssertions. Previously this was **sort of** implemented using *Command Options* and the `eventually` flag, but now this is the default ehavior. *Command Options* only worked on DOM-based subjects, and now the new assertion verification works on everything else (including RL-based commands, etc). What this means is that Cypress can predict what you are requesting and automatically modifies its behavior until his state is reached. This prevents test brittleness / random test flake. Additionally this removes ever having to use {% url `cy.wait(Number)` wait %} or `cy.wait(Function)` (though this is still a valid command). As a side effect, you will now see commands + heir assertions in the spinning pending blue state. When assertions fail their associated command also fails at the same time. This visually represents the coupling between these two concepts. Another side effect is that `timeout` options do not need to be provided on the succeeding assertions, and can instead just be provided on the proceeding command. All of the coupled assertions will automatically be retried to the maximum `timeout` setting. Fixes [#43](https://github.com/cypress-io/cypress/issues/43).
+- Action commands will now insert an artificial delay after resolving to enable modern JavaScript frameworks time to *flush* their run loops. snapshots are delayed until after the action, resulting in more accurate snapshots because JavaScript frameworks would not process these DOM vents until `N` milliseconds after they occurred. This has the unfortunate side effect of *decreasing* performance by about *5-10%* but the and result is that it is much easier to debug and Cypress is less prone to flake caused by modern JavaScript frameworks. This change comes after collecting many data points and this was one of the easiest changes that help reduce flake. For users that don't use the latest and greatest JavaScript frameworks, this action delay can be reduced through `cypress.json` which may speed up large test suites.
 - Aliasing custom commands now intelligently figures out where to apply the alias without being specified inside of the actual custom command.
-- The algorithm for replaying aliased commands is now much more accurate, handles stale element references better, and will not replay ommands which have a side effect (like action commands). The end result is Cypress will now almost always find the desired element by etermining the minimum number of re-queries and is not susceptible to stale element references. Additionally using assertions on aliased lements now works (where previously using a *Command Option* on an alias would just be ignored. This was crazy difficult to implement but hould be 100% solid. Fixes [#36](https://github.com/cypress-io/cypress/issues/36).
-- Assertions which actually produced 2 assertions (under the hood) such as `should('have.attr', 'href', '/users/1')` will now only log the 2nd ssertion, unless the first fails.
+- The algorithm for replaying aliased commands is now much more accurate, handles stale element references better, and will not replay commands which have a side effect (like action commands). The end result is Cypress will now almost always find the desired element by determining the minimum number of re-queries and is not susceptible to stale element references. Additionally using assertions on aliased elements now works (where previously using a *Command Option* on an alias would just be ignored. This was crazy difficult to implement but should be 100% solid. Fixes [#36](https://github.com/cypress-io/cypress/issues/36).
+- Assertions which actually produced 2 assertions (under the hood) such as `should('have.attr', 'href', '/users/1')` will now only log the 2nd assertion, unless the first fails.
 - Previously using `eventually.have.length` was impossible (and this would throw an error), but now this works as you'd expect with the default `should('have.length')`.
 
 **Bugfixes:**
@@ -593,7 +593,7 @@ Deprecations:
 - Cypress overrides chai's default inspection function for DOM elements meaning instead of seeing `{ Object (0, length, ...) }` you will now ee the nicely formatted Cypress DOM element like: `<button#primary.btn-large>`.
 - Cypress now overrides chai's `match` chainer and provides a specific error message when a non `regex` value is provided. Fixes [#58](../ssues/58).
 - Cypress now handles `length` and `exist` assertion chainers in a very specific way, providing a detailed message on failure, and utomatically slices out any stale element references.
-- The `contain` assertion chainer from `chai-jquery` has been extended to match the same selector logic as [`cy.contains()`](https://n.cypress.io/api/contains) - meaning it now checks the `value` of `input[type=submit]`.
+- The `contain` assertion chainer from `chai-jquery` has been extended to match the same selector logic as {% url `cy.contains()` contains %} - meaning it now checks the `value` of `input[type=submit]`.
 - Tweaked the label for displaying the number of elements a command resolved with (now displays 0 differently than > 1).
 - Removed the `eventually` flag in assertions as now this is the default behavior on normal assertions.
 - Deprecated all *Command Options*. You will see a very nice and simple error message explaining how to convert these to assertions.
@@ -756,7 +756,7 @@ Deprecations:
 
 **Features:**
 
-- {% url `.click()` click %}, {% url `.type()` type %}, {% url `.clear()` clear %}, [`.select()`](https://on.cypress.io/api/select), {% url `.check()` check %}, [`.uncheck()`](https://on.cypress.io/api/ncheck) now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
+- {% url `.click()` click %}, {% url `.type()` type %}, {% url `.clear()` clear %}, {% url `.select()` select %}, {% url `.check()` check %}, {% url `.uncheck()` uncheck %} now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
 
 **Misc:**
 
@@ -776,7 +776,7 @@ Deprecations:
 
 **Misc:**
 
-- {% url `cy.contains()` contains %} now throws when provided the command option: `length` because it will only ever return 1` element.
+- {% url `cy.contains()` contains %} now throws when provided the command option: `length` because it will only ever return 1 element.
 
 # 0.9.3
 
@@ -789,7 +789,7 @@ Deprecations:
 - The `url` will now automatically be restored when hovering over the Command Log to indicate the state of the URL at the time the command ran.
 - {% url `.click()` click %} now accepts an optional: `position` argument (`center`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`). Center is still the default.
 - {% url `.click()` click %} now accepts an optional `x` and `y` coordinate argument, which is relative to the top left corner of the element. Fixes [#50](https://github.com/cypress-io/cypress/issues/50).
-- [Click docs have been updated](https://on.cypress.io/api/click) to reflect these changes.
+- {% url 'Click docs have been updated' click %} to reflect these changes.
 
 **Bugfixes:**
 
@@ -842,7 +842,7 @@ Deprecations:
 
 **Summary:**
 
-- {% url `cy.viewport()` viewport %} is a new command which will resize the viewport to a specified width and height. There is ow a default `viewport` size of `1000x660`. See [viewport docs](https://on.cypress.io/api/viewport).
+- {% url `cy.viewport()` viewport %} is a new command which will resize the viewport to a specified width and height. There is ow a default `viewport` size of `1000x660`.
 
 **Features:**
 
@@ -932,7 +932,7 @@ Deprecations:
 
 **Misc:**
 
-- Attempting to {% url `.click()` click %} a select element will now throw an error. The error guides you to using the `.select()`](https://on.cypress.io/api/select) command, as that is the command you should use to change a `<select>` value.
+- Attempting to {% url `.click()` click %} a select element will now throw an error. The error guides you to using the {% url `.select()` select %} command, as that is the command you should use to change a `<select>` value.
 - {% url `cy.route()` route %} responses are now validated. If responses are `null` or `undefined` Cypress will throw a very specific error message.
 - Cypress will now display `cypress.json` parse errors when attempting to boot a project when there is a syntax error in `cypress.json`.
 
@@ -1043,7 +1043,7 @@ Deprecations:
 
 **Misc:**
 
-- {% url `.type()` type %}, {% url `.clear()` clear %}, {% url `.check()` check %}, `.uncheck()`](https://on.cypress.io/api/uncheck) now all take `{force: true}` options to force the click to happen and skip additional clickable checks.
+- {% url `.type()` type %}, {% url `.clear()` clear %}, {% url `.check()` check %}, {% url `.uncheck()` uncheck %} now all take `{force: true}` options to force the click to happen and skip additional clickable checks.
 - Now when you click the giant yellow failure messages if the error is a `CypressError` instead of logging nothing it will now find the command associated to that error and display the same message as if you clicked the failed command.
 
 # 0.6.11
@@ -1142,7 +1142,7 @@ Deprecations:
 **Features:**
 
 - When Cypress detects a regular HTTP page loading event (where we're leaving the current page and requesting a new one) it will now insert a `loading` command which indicates to the user Cypress has stopped running commands until the new page loads.
-- If for some reason this new page errors Cypress will display the initial 500 error messages just like [`cy.visit()`](https://on.cypress.io/api/cisit).
+- If for some reason this new page errors Cypress will display the initial 500 error messages just like {% url `cy.visit()` visit %}.
 - Cypress now waits `20s` (which matches {% url `cy.visit()` visit %}) for the new page to load instead of `4s` previously.
 
 **Bugfixes:**
@@ -1311,7 +1311,7 @@ Deprecations:
 
 - {% url `cy.server()` server %} now accepts a `delay` option which will delay all responses to requests (including 404) based on the value in ms
 - {% url `cy.server()` server %} now accepts a `respond` option which can turn off automatic responding to requests.
-- {% url `cy.route()` route %} now accepts a `delay` option which overrides the delay option set in [`cy.server()`](https://n.cypress.io/api/server) to just matched requests.
+- {% url `cy.route()` route %} now accepts a `delay` option which overrides the delay option set in {% url `cy.server()` server %} to just matched requests.
 - {% url `cy.route()` route %} now accepts a `respond` option which will turn off automatic responding to just matched requests.
 - Fixes [#14](https://github.com/cypress-io/cypress/issues/14).
 - {% url `cy.wait()` wait %} now accepts an alias property called `request`. Example: `cy.wait('@getUsers.request')` which ill resolve once the XHR is initially requested, before it is responded to.  This allows you to test things when a request is in flight.

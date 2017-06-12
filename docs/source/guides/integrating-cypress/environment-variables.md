@@ -35,7 +35,7 @@ There are 4 different ways to set environment variables. Each has a slightly dif
 
 Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in [CI](https://on.cypress.io/continuous-integration).
 
-When your tests are running, you can use the [`Cypress.env()`](https://on.cypress.io/api/env) function to access the values of your environment variables.
+When your tests are running, you can use the {% url `Cypress.env` env %} function to access the values of your environment variables.
 
 ## Option #1: `cypress.json`
 
