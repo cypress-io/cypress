@@ -6,7 +6,7 @@ comments: true
 Stop `cy` commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
 
 {% note info %}
-This does not set a `debugger` in your code, unlike [`.debug()`](https://on.cypress.io/api/debug)
+This does not set a `debugger` in your code, unlike {% url `.debug()` debug %}
 {% endnote %}
 
 # Syntax
@@ -103,5 +103,6 @@ When clicking on "Next: 'click'" at the top of the Command Log, the Command Log 
 # See also
 
 - [Cypress Dashboard](https://on.cypress.io/dashboard)
-- [debug](https://on.cypress.io/api/debug)
-- [screenshot](https://on.cypress.io/api/screenshot)
+- {% url `cy.debug()` debug %}
+- {% url `cy.log()` log %}
+- {% url `cy.screenshot()` screenshot %}

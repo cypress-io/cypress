@@ -12,7 +12,7 @@ Some commands have not been implemented in Cypress. Some commands will be implem
 
 **Workaround**
 
-Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to trigger the event or execute the action in the DOM.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to trigger the event or execute the action in the DOM.
 
 **Example of right clicking on an element using jQuery**
 ```javascript
@@ -41,7 +41,7 @@ Sometimes an element has specific logic on hover. Maybe the element doesn't even
 
 **Workaround**
 
-Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to show the element before you perform the action.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to show the element before you perform the action.
 
 **Example of showing an element in order to perform action**
 ```javascript

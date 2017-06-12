@@ -105,7 +105,7 @@ expect(removeStub).to.be.called
 
 ## Alias a stub
 
-Adding an alias using [`.as()`](https://on.cypress.io/api/as) to stubs makes them easier to identify in error messages and Cypress' command log.
+Adding an alias using {% url `.as()` as %} to stubs makes them easier to identify in error messages and Cypress' command log.
 
 ```javascript
 const obj = {
@@ -131,7 +131,7 @@ You will see the following in the command log:
 
 **Difference between cy.spy() and cy.stub()**
 
-The main difference between `cy.spy()` and [`cy.stub()`](https://on.cypress.io/api/stub) is that `cy.spy()` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
+The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `cy.spy()` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
 
 **Assertion Support**
 
@@ -160,9 +160,9 @@ When clicking on the `(stub-1)` event within the command log, the console output
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
-- [clock](https://on.cypress.io/api/clock)
-- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- {% url `.as()` as %}
+- {% url `cy.clock()` clock %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
-- [spy](https://on.cypress.io/api/spy)
+- {% url `cy.spy()` spy %}

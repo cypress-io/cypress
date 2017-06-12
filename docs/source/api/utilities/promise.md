@@ -31,7 +31,7 @@ new cy.Promise  // Errors, cannot be chained off 'cy'
 
 # Examples
 
-Use `Cypress.Promise` to create promises. Cypress is promise aware so if you return a promise from inside of commands like [`cy.then`](https://on.cypress.io/api/then), Cypress will not continue until those promises resolve.
+Use `Cypress.Promise` to create promises. Cypress is promise aware so if you return a promise from inside of commands like {% url `.then()` then %}, Cypress will not continue until those promises resolve.
 
 ## Basic Promise
 

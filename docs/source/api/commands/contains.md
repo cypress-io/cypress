@@ -43,12 +43,12 @@ Specify a selector to filter DOM elements containing the text. Cypress will *ign
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.contains`.
+Pass in an options object to change the default behavior of `cy.contains()`.
 
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry finding an element containing the content
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry finding an element containing the content
 
 ## Yields
 
@@ -56,7 +56,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.contains()` will try to find the content within the DOM for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.contains()` will try to find the content within the DOM for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -301,7 +301,7 @@ cy.contains('Delete User').click()
 cy.contains('Yes, Delete!').click()
 ```
 
-You could also chain the second contains off of a parent command (such as [`.get()`](https://on.cypress.io/api/get). This automatically changes the subject to `#dialog` which contains the content we're looking for.
+You could also chain the second contains off of a parent command (such as {% url `cy.get()` get %}. This automatically changes the subject to `#dialog` which contains the content we're looking for.
 
 ```javascript
 cy.contains('Delete User').click()
@@ -326,5 +326,5 @@ When clicking on the `contains` command within the command log, the console outp
 
 # See also
 
-- [get](https://on.cypress.io/api/get)
-- [within](https://on.cypress.io/api/within)
+- {% url `cy.get()` get %}
+- {% url `.within()` within %}

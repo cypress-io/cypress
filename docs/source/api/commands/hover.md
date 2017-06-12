@@ -13,7 +13,7 @@ If `cy.hover()` is used, an error will display and redirect you to this page.
 
 Sometimes an element has specific logic on hover and you *do* need to "hover" in Cypress. Maybe the element doesn't even display to be clickable until you hover over another element.
 
-Oftentimes you can use [`cy.invoke()`](https://on.cypress.io/api/invoke) or [`cy.wrap()`](https://on.cypress.io/api/wrap) to show the element before you perform the action.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to show the element before you perform the action.
 
 ## Invoke
 
@@ -51,7 +51,6 @@ cy.get('.content').trigger('mouseover')
 
 # See also
 
-- [invoke](https://on.cypress.io/api/invoke)
+- {% url `.invoke()` invoke %}
 - [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
-<!-- - [trigger](https://on.cypress.io/api/trigger) -->
-- [wrap](https://on.cypress.io/api/wrap)
+- {% url `cy.wrap()` wrap %}

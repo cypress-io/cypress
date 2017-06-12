@@ -42,7 +42,7 @@ Pass in an options object to change the default behavior of `.closest()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -50,7 +50,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.closest()` will continue to look for the closest element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.closest()` will continue to look for the closest element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -80,10 +80,10 @@ When clicking on the `closest` command within the command log, the console outpu
 
 # See also
 
-- [first](https://on.cypress.io/api/first)
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
-- [prev](https://on.cypress.io/api/prev)
-- [prevAll](https://on.cypress.io/api/prevall)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
+- {% url `.first()` first %}
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.parentsUntil()` parentsuntil %}
+- {% url `.prev()` prev %}
+- {% url `.prevAll()` prevall %}
+- {% url `.prevUntil()` prevuntil %}

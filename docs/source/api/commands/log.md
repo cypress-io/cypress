@@ -77,4 +77,4 @@ When clicking on `log` within the command log, the console outputs the following
 
 # See also
 
-- [exec](https://on.cypress.io/api/exec)
+- {% url `cy.exec()` exec %}

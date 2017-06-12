@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `.prev()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -52,7 +52,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.prev()` will continue to look for the previous element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.prev()` will continue to look for the previous element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -112,6 +112,6 @@ When clicking on `prev` within the command log, the console outputs the followin
 
 # See also
 
-- [next](https://on.cypress.io/api/next)
-- [prevAll](https://on.cypress.io/api/prevall)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
+- {% url `.next()` next %}
+- {% url `.prevAll()` prevall %}
+- {% url `.prevUntil()` prevuntil %}

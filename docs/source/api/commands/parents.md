@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `.parents()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the elements
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the elements
 
 
 ## Yields
@@ -53,7 +53,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.parents()` will continue to look for the next element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.parents()` will continue to look for the next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -89,6 +89,6 @@ When clicking on the `parents` command within the command log, the console outpu
 
 # See also
 
-- [children](https://on.cypress.io/api/children)
-- [parent](https://on.cypress.io/api/parent)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
+- {% url `.children()` children %}
+- {% url `.parent()` parent %}
+- {% url `.parentsUntil()` parentsuntil %}

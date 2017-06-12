@@ -18,7 +18,7 @@ To get around these restrictions, Cypress implements some strategies involving `
 
 When Cypress first loads, the internal Cypress web application is hosted on a random port: something like `http://localhost:65874/__/`.
 
-After the first [`cy.visit()`](https://on.cypress.io/api/visit) command is issued in a test, Cypress changes its URL to match the origin of your remote application, thereby solving the first major hurdle of `same-origin policy`. Your application's code executes the same as it does outside of Cypress, and everything works as expected.
+After the first {% url `cy.visit()` visit %} command is issued in a test, Cypress changes its URL to match the origin of your remote application, thereby solving the first major hurdle of `same-origin policy`. Your application's code executes the same as it does outside of Cypress, and everything works as expected.
 
 {% note info How is HTTPS supported? %}
 Cypress does some pretty interesting things under the hood to make testing HTTPs sites work. Cypress enables you to control and stub at the network level. Therefore, Cypress must assign and manage browser certificates to be able to modify the traffic in real time. You'll notice Chrome display a warning that the 'SSL certificate does not match'. This is normal and correct. Under the hood we act as our own CA authority and issue certificates dynamically in order to intercept requests otherwise impossible to access. We only do this for the superdomain currently under test, and bypass other traffic. That's why if you open a tab in Cypress to another host, the certificates match as expected.
@@ -48,8 +48,8 @@ Although Cypress tries to enforce this limitation, it is possible for your appli
 
 **Examples of test cases that will error due to superdomain limitations:**
 
-1. [`.click()`](https://on.cypress.io/api/click) an `<a>` with an `href` to a different superdomain.
-2. [`.submit()`](https://on.cypress.io/api/submit) a `<form>` that causes your web server to redirect to you a different superdomain.
+1. {% url `.click()` click %} an `<a>` with an `href` to a different superdomain.
+2. {% url `.submit()` submit %} a `<form>` that causes your web server to redirect to you a different superdomain.
 3. Issue a JavaScript redirect in your application, such as `window.location.href = '...'`, to a different superdomain.
 
 In each of these situations, Cypress will lose the ability to automate your application and will immediately error.
@@ -153,7 +153,7 @@ cy.visit("http://localhost:8080")
 cy.get("a").should("have.attr", "href", "https://google.com") // no page load!
 ```
 
-Okay but let's say you're worried about `google.com` serving up the right HTML content. How would you test that? Easy! Just make a [`cy.request`](https://on.cypress.io/api/request) directly to it. [`cy.request`](https://on.cypress.io/api/request) is **NOT bound to CORS or same-origin policy**.
+Okay but let's say you're worried about `google.com` serving up the right HTML content. How would you test that? Easy! Just make a {% url `cy.request()` request %} directly to it. {% url `cy.request()` request %} is **NOT bound to CORS or same-origin policy**.
 
 ```javascript
 cy.visit("http://localhost:8080")
@@ -202,7 +202,7 @@ app.post("/submit", function(req, res) {
 
 A commone use case for this is `Single sign-on (SSO)`. In that situation you may `POST` to a different server and are redirected elsewhere (typically with the session token in the URL).
 
-If that's the case, don't worry - you can work around it with [`cy.request`](https://on.cypress.io/api/request). [`cy.request`](https://on.cypress.io/api/request) is special because it is **NOT bound to CORS or same-origin policy**.
+If that's the case, don't worry - you can work around it with {% url `cy.request()` request %}. {% url `cy.request()` request %} is special because it is **NOT bound to CORS or same-origin policy**.
 
 In fact we can likely bypass the initial visit altogether and just `POST` directly to your `SSO` server.
 
@@ -260,4 +260,4 @@ Still here? That's cool, let's disable web security!
 
 The browser will now display insecure content, you can now navigate to any superdomain without cross origin errors, and you can access cross origin iframes that are embedded in your application.
 
-One thing you may notice though is that Cypress still enforces visiting a single superdomain with [`cy.visit`](https://on.cypress.io/api/visit). This is an artificial limitation (and one that can be removed). You should [open an issue](https://github.com/cypress-io/cypress/issues/new) and tell us what you're trying to do!
+One thing you may notice though is that Cypress still enforces visiting a single superdomain with {% url `cy.visit()` visit %}. This is an artificial limitation (and one that can be removed). You should [open an issue](https://github.com/cypress-io/cypress/issues/new) and tell us what you're trying to do!

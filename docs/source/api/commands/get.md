@@ -32,9 +32,9 @@ A selector used to filter matching DOM elements.
 
 **{% fa fa-angle-right %} alias** ***(String)***
 
-An alias as defined using the [`.as()`](https://on.cypress.io/api/as) command and referenced with the `@` character and the name of the alias.
+An alias as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
-Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before [`.as()`](https://on.cypress.io/api/as) to find it again.
+Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before {% url `.as()` as %} to find it again.
 
 {% note info %}
 [Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
@@ -47,7 +47,7 @@ Pass in an options object to change the default behavior of `cy.get()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -55,7 +55,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.get()` will continue to look for the elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.get()` will continue to look for the elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -81,7 +81,7 @@ cy.get('.dropdown-menu').click()
 
 ## Get in Within
 
-**`cy.get()` in the [`.within()`](https://on.cypress.io/api/within) command**
+**`cy.get()` in the {% url `.within()` within %} command**
 
 Since `cy.get()` is chained off of `cy`, it always looks for the selector within the entire `document`. The only exception is when used inside a [`.within()`]() command.
 
@@ -137,7 +137,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
-- [contains](https://on.cypress.io/api/contains)
-- [find](https://on.cypress.io/api/find)
-- [within](https://on.cypress.io/api/within)
+- {% url `.as()` as %}
+- {% url `cy.contains()` contains %}
+- {% url `.find()` find %}
+- {% url `.within()` within %}

@@ -31,7 +31,7 @@ Pass in an options object to change the default behavior of `cy.getCookies()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.getCookies()` command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.getCookies()` command to be processed
 
 ## Yields
 
@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.getCookies()` will continue to look for cookies for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.getCookies()` will continue to look for cookies for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -93,8 +93,8 @@ When clicking on `getCookies` within the command log, the console outputs the fo
 
 # See also
 
-- [clearCookie](https://on.cypress.io/api/clearcookie)
-- [clearCookies](https://on.cypress.io/api/clearcookies)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)
-- [getCookie](https://on.cypress.io/api/getcookie)
-- [setCookie](https://on.cypress.io/api/setcookie)
+- {% url `cy.clearCookie()` clearcookie %}
+- {% url `cy.clearCookies()` clearcookies %}
+- {% url 'Cypress Cookies API' cookies %}
+- {% url `cy.getCookie()` getcookie %}
+- {% url `cy.setCookie()` setcookie %}

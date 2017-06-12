@@ -6,7 +6,7 @@ comments: true
 Clear the value of an `input` or `textarea`.
 
 {% note info %}
-An alias for [`cy.type('{selectall}{backspace}')`](https://on.cypress.io/api/type)
+An alias for {% url `.type('{selectall}{backspace}')` type %}
 {% endnote %}
 
 # Syntax
@@ -47,7 +47,7 @@ Option | Default | Notes
 `force` | `false` | Force clear, disables error checking prior to clear
 `interval` | `16` | Interval which to retry clear
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the clear
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the clear
 
 ## Yields
 
@@ -55,7 +55,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.clear()` will continue to look for the `input` or `textarea` for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.clear()` will continue to look for the `input` or `textarea` for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 **Clear the input and type a new value.**
 
-Prior to clearing, if the element isn't currently focused, Cypress issues a [.click()](https://on.cypress.io/api/click) on the element, which causes the element to receive focus.
+Prior to clearing, if the element isn't currently focused, Cypress issues a {% url `.click()` click %} on the element, which causes the element to receive focus.
 
 ```javascript
 cy.get('textarea').clear().type('Hello, World')
@@ -87,6 +87,6 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 # See also
 
-- [blur](https://on.cypress.io/api/blur)
-- [focus](https://on.cypress.io/api/focus)
-- [type](https://on.cypress.io/api/type)
+- {% url `.blur()` blur %}
+- {% url `.focus()` focus %}
+- {% url `.type()` type %}

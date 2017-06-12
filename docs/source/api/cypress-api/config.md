@@ -6,7 +6,7 @@ comments: true
 `get` and `set` configuration options *in your tests*.
 
 {% note info New to Cypress? %}
-[Read about configuration first.](https://on.cypress.io/guides/configuration)
+{% url 'Read about configuration first.' configuration %}
 {% endnote %}
 
 # Syntax
@@ -143,4 +143,4 @@ Methods on `cy` are local and specific to a single test. Side effects from `cy` 
 
 # See also
 
-- [Configuration](https://on.cypress.io/guides/configuration)
+- {% url 'configuration' configuration %}

@@ -54,7 +54,7 @@ Pass in an options object to change the default behavior of `.prevUntil()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
 
 ## Yields
 
@@ -62,7 +62,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.prevUntil()` will continue to look for the previous element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.prevUntil()` will continue to look for the previous element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -110,7 +110,7 @@ When clicking on `prevUntil` within the command log, the console outputs the fol
 
 # See also
 
-- [prev](https://on.cypress.io/api/prev)
-- [prevAll](https://on.cypress.io/api/prevall)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
+- {% url `.prev()` prev %}
+- {% url `.prevAll()` prevall %}
+- {% url `.parentsUntil()` parentsuntil %}
+- {% url `.nextUntil()` nextuntil %}

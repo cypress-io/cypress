@@ -42,7 +42,7 @@ Each command, assertion, or error, when clicked on, displays extra information i
 
 ## Instrument Panel
 
-For certain commands like [`cy.route()`](https://on.cypress.io/api/route), [`cy.stub()`](https://on.cypress.io/api/stub), and [`cy.spy()`](https://on.cypress.io/api/spy), an extra instrument panel is displayed above the test to give more information about the state of your tests.
+For certain commands like {% url `cy.route()` route %}, {% url `cy.stub()` stub %}, and {% url `cy.spy()` spy %}, an extra instrument panel is displayed above the test to give more information about the state of your tests.
 
 *Routes*
 
@@ -58,7 +58,7 @@ For certain commands like [`cy.route()`](https://on.cypress.io/api/route), [`cy.
 
 ## Application Under Test
 
-The righthand side of the test runner is used to display the Application Under Test (AUT: the application that was navigated to using a [`cy.visit()`](https://on.cypress.io/api/visit) or any subsequent routing calls made from the visited application.
+The righthand side of the test runner is used to display the Application Under Test (AUT: the application that was navigated to using a {% url `cy.visit()` visit %} or any subsequent routing calls made from the visited application.
 
 In the example below, we wrote the following code in our test file:
 
@@ -72,7 +72,7 @@ In the corresponding Application Preview below, you can see `https://example.cyp
 
 {% img /img/guides/cypress-basics/overview-of-the-gui-tool/application-under-test.png Application Under Test %}
 
-The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the [`cy.viewport()`](https://on.cypress.io/api/viewport) command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#section-viewport). If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
+The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the {% url `cy.viewport()` viewport %} command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#section-viewport). If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
 
 The current size and scale of the AUT is displayed in the top right corner of the window.
 

@@ -3,7 +3,7 @@ _ = require('lodash')
 
 GUIDES_PATH = "/guides/getting-started/why-cypress"
 API_PATH = "/api/welcome/api"
-ECO_PATH = "/ecosystem/index"
+EXAMPLES_PATH = "/examples/index"
 FAQ_PATH = "/faq/index"
 
 describe "Documentation", ->
@@ -35,8 +35,8 @@ describe "Documentation", ->
       cy.contains(".main-nav-link", "API")
         .should("have.attr", "href").and("include", API_PATH)
 
-      cy.contains(".main-nav-link", "Ecosystem")
-        .should("have.attr", "href").and("include", ECO_PATH)
+      cy.contains(".main-nav-link", "Examples")
+        .should("have.attr", "href").and("include", EXAMPLES_PATH)
 
       cy.contains(".main-nav-link", "FAQ")
         .should("have.attr", "href").and("include", FAQ_PATH)
@@ -65,8 +65,8 @@ describe "Documentation", ->
 
       it "higlights eco when on a eco page", ->
         cy
-          .visit(ECO_PATH + ".html")
-            .contains(".main-nav-link", "Ecosystem")
+          .visit(EXAMPLES_PATH + ".html")
+            .contains(".main-nav-link", "Examples")
               .should("have.class", "active")
 
       it "higlights FAQ when on a FAQ page", ->

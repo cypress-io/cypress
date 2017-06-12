@@ -33,11 +33,11 @@ cy.server()
 
 Pass in an options object to change the default behavior of `cy.server()`. These options are used for 2 different purposes:
 
-  - As defaults that are merged into [`cy.route()`](https://on.cypress.io/api/route).
+  - As defaults that are merged into {% url `cy.route()` route %}.
 
   - As configuration behavior for *all* requests.
 
-***The following options are merged in as default options to [`.route()`](https://on.cypress.io/api/route)***
+***The following options are merged in as default options to {% url `cy.route()` route %}***
 
 Option | Default | Notes
 --- | --- | ---
@@ -72,7 +72,7 @@ Option | Default | Notes
 
 **After starting a server:**
 
-- Any request that does not match a [`cy.route()`](https://on.cypress.io/api/route) will be sent a `404` status code.
+- Any request that does not match a {% url `cy.route()` route %} will be sent a `404` status code.
 - Any request that matches the `options.whitelist` function will **NOT** be logged or stubbed. In other words it is "whitelisted" and ignored.
 - You will see requests named as `(XHR Stub)` or `(XHR)` in the Command Log.
 
@@ -82,11 +82,11 @@ cy.server()
 
 ## Options
 
-**Change defaults for [`.route()`](https://on.cypress.io/api/route)**
+**Change defaults for {% url `cy.route()` route %}**
 
-By default [`cy.route()`](https://on.cypress.io/api/route) inherits some of its options from `cy.server()`.
+By default {% url `cy.route()` route %} inherits some of its options from `cy.server()`.
 
-In this example, our matching requests will be delayed 1000ms and have a status of `422`, but its `response` will be what was set in [`cy.route()`](https://on.cypress.io/api/route).
+In this example, our matching requests will be delayed 1000ms and have a status of `422`, but its `response` will be what was set in {% url `cy.route()` route %}.
 
 ```javascript
 cy.server({
@@ -174,7 +174,7 @@ xhr.send()
 
 `cy.server()` comes with a `whitelist` function that by default filters out any requests that are for static assets like `.html`, `.js`, `.jsx`, and `.css`.
 
-Any request that passes the `whitelist` will be ignored - it will not be logged nor will it be stubbed in any way (even if it matches a specific [`cy.route()`](https://on.cypress.io/api/route)).
+Any request that passes the `whitelist` will be ignored - it will not be logged nor will it be stubbed in any way (even if it matches a specific {% url `cy.route()` route %}).
 
 The idea is that we never want to interfere with static assets that are fetched via AJAX.
 
@@ -224,16 +224,16 @@ However between tests, when a new test runs, the previous configuration is resto
 
 When a new test runs, any outstanding requests still in flight are automatically aborted. In fact this happens by default whether or not you've even started a `cy.server()`.
 
-**Server can be started before you [`cy.visit()`](https://on.cypress.io/api/visit)**
+**Server can be started before you {% url `cy.visit()` visit %}**
 
-Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit()`](https://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
+Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a {% url `cy.visit()` visit %}. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
 You can [read more about XHR strategy here](https://on.cypress.io/guides/network-requests-xhr).
 
 # See also
 
 - [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
-- [request](https://on.cypress.io/api/request)
-- [route](https://on.cypress.io/api/route)
-- [visit](https://on.cypress.io/api/visit)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `cy.request()` request %}
+- {% url `cy.route()` route %}
+- {% url `cy.visit()` visit %}
+- {% url `cy.wait()` wait %}

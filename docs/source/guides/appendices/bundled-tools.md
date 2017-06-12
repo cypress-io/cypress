@@ -29,7 +29,7 @@ Additionally, Mocha gives us excellent [`async` support](https://mochajs.org/#as
 
 [Chai docs](http://chaijs.com/)
 
-While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using [subjects](https://on.cypress.io/guides/making-assertions) and the [cy.should](https://on.cypress.io/api/should) command.
+While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using [subjects](https://on.cypress.io/guides/making-assertions) and the {% url `.should()` should %} command.
 
 {% note info Extending chai to use assertion plugins %}
 [Check out our example recipe to see how to extend chai yourself](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/extending_chai_assertion_plugins_spec.js)
@@ -45,7 +45,7 @@ When writing integration tests, you will likely work a lot with the DOM. Cypress
 
 [Sinon docs](http://sinonjs.org/)
 
-When writing unit tests, or even in integration-like tests, you often need to ability to [stub](http://sinonjs.org/docs/#stubs) and [spy](http://sinonjs.org/docs/#spies) methods. Cypress includes two methods, [`cy.stub`](https://on.cypress.io/api/stub) and [`cy.spy`](https://on.cypress.io/api/spy) that return Sinon stubs and spies, respectively.
+When writing unit tests, or even in integration-like tests, you often need to ability to [stub](http://sinonjs.org/docs/#stubs) and [spy](http://sinonjs.org/docs/#spies) methods. Cypress includes two methods, {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} that return Sinon stubs and spies, respectively.
 
 {% note info Stubbing Dependencies when Unit Testing %}
 [Check out our example recipe for stubbing dependencies in unit tests](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js)
@@ -67,9 +67,9 @@ Sinon-as-Promised gives you the ability to stub methods that return Promises. To
 
 Cypress also bundles the following tools on the `Cypress` object. These can be used anywhere inside of your tests.
 
-- [Cypress._](https://on.cypress.io/api/cypress-underscore) (Underscore)
-- [Cypress.$](https://on.cypress.io/api/cypress-jquery) (jQuery)
-- [Cypress.minimatch](https://on.cypress.io/api/cypress-minimatch) (minimatch.js)
-- [Cypress.moment](https://on.cypress.io/api/cypress-moment) (moment.js)
-- [Cypress.Blob](https://on.cypress.io/api/cypress-blob) (blob utils)
-- [Cypress.Promise](https://on.cypress.io/api/cypress-promise) (Bluebird)
+- {% url `Cypress._` _ %} (Underscore)
+- {% url `Cypress.$` $ %} (jQuery)
+- {% url `Cypress.minimatch` minimatch %} (minimatch.js)
+- {% url `Cypress.moment` moment %} (moment.js)
+- {% url `Cypress.Blob` blob %} (blob utils)
+- {% url `Cypress.Promise` promise %} (Bluebird)

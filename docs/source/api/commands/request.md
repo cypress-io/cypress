@@ -80,10 +80,10 @@ Option | Default | Notes
 `log` | `true` | Whether to log the request in the Command Log
 `method` | `GET` | The HTTP method to use in the request
 `qs` | `null` | Query parameters to append to the `url` of the request
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for a response (in ms)
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for a response (in ms)
 `url` | `null` | The URL to make the request to
 
-You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in {% url 'configuration' configuration %}.
 
 ## Yields
 
@@ -96,7 +96,7 @@ You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` glob
 
 ## Timeout
 
-`cy.request()` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or the `timeout` passed in the options object of the command.
+`cy.request()` will wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or the `timeout` passed in the options object of the command.
 
 # Examples
 
@@ -114,7 +114,7 @@ beforeEach(function(){
 
 **Issue a simple HTTP request**
 
-Sometimes it is quicker to simply test the contents of a page rather than [`cy.visit()`](https://on.cypress.io/api/visit) and wait for the entire page and all of it's resource to load.
+Sometimes it is quicker to simply test the contents of a page rather than {% url `cy.visit()` visit %} and wait for the entire page and all of it's resource to load.
 
 ```javascript
 cy.request('/admin').its('body').should('include', '<h1>Admin</h1>')
@@ -211,9 +211,9 @@ In other words, `cy.request()` transparently performs all of the underlying func
 
 # See also
 
-- [exec](https://on.cypress.io/api/exec)
+- {% url `cy.exec()` exec %}
 - [Recipe: Logging In - CSRF Tokens](https://github.com/cypress-io/cypress-example-recipes#logging-in---csrf-tokens)
 - [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 - [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
-- [visit](https://on.cypress.io/api/visit)
+- {% url `cy.visit()` visit %}

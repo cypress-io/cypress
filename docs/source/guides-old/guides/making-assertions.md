@@ -6,14 +6,14 @@ comments: true
 
 There are two ways to write an assertion in Cypress.
 
-1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
+1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or {% url `.and()` and %}
 2. **Explicit Subjects:** Using `expect`
 
 ***
 
-## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
+## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or {% url `.and()` and %}
 
-Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making an assertion in Cypress. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
+Using [`cy.should`](https://on.cypress.io/api/should) or {% url `.and()` and %} commands is the preferred way of making an assertion in Cypress. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
 
 ```javascript
 // the implicit subject here is the first <tr>

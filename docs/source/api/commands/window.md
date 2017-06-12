@@ -3,7 +3,7 @@ title: window
 comments: true
 ---
 
-Get the global `window` object of the remote application that was [visited](https://on.cypress.io/api/visit).
+Get the global `window` object of the remote application that was visited in {% url `cy.visit()` visit %}.
 
 # Syntax
 
@@ -38,7 +38,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.window()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.window()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -56,7 +56,7 @@ cy.window().then(function(win){
 
 ## Options
 
-**Passes timeout through to [`.should()`](https://on.cypress.io/api/should) assertion**
+**Passes timeout through to {% url `.should()` should %} assertion**
 
 ```javascript
 cy.window({ timeout: 10000 }).should('have.property', 'foo')
@@ -80,5 +80,5 @@ When clicking on `window` within the command log, the console outputs the follow
 
 # See also
 
-- [visit](https://on.cypress.io/api/visit)
-- [document](https://on.cypress.io/api/document)
+- {% url `cy.visit()` visit %}
+- {% url `cy.document()` document %}

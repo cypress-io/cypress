@@ -146,14 +146,14 @@ Cypress wraps all DOM queries with robust retry-and-timeout logic that better su
 {% endnote %}
 
 {% note info %}
-In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element. When you need to skip the retry-and-timeout functionality entirely and perform a traditional, synchronous query, you can still use `Cypress.$()`.
+In Cypress, when you want to interact with a DOM element directly, call {% url `.then()` then %} and pass a function to it that will receive the element. When you need to skip the retry-and-timeout functionality entirely and perform a traditional, synchronous query, you can still use {% url `Cypress.$` $ %}.
 
-For more, check out the API docs for [`.then()`](http://on.cypress.io/api/then) and [`Cypress.$()`](http://on.cypress.io/api/utilities/$.html).
+For more, check out the API docs for {% url `.then()` then %} and {% url `Cypress.$` $ %}.
 {% endnote %}
 
 ## Finding Elements by Their Contents
 
-Another way to locate things -- a more human way -- is to look them up by their contents, by what the user sees on the page. For this, there's the handy `cy.contains()`, for example:
+Another way to locate things -- a more human way -- is to look them up by their contents, by what the user sees on the page. For this, there's the handy {% url `cy.contains()` contains %}, for example:
 
 ```js
 // Finds an element in the document containing the text "New Post"
@@ -200,21 +200,20 @@ It's very important to understand the mechanism Cypress uses to chain commands t
 
 ## Interacting With Elements
 
-As we saw in the initial example, Cypress makes it easy to click on and type into elements on the page by adding `.click()` and `.type()` commands to a `cy.get()` or `.contains()` command. This is a great example of chaining in action. Let's see it again:
+As we saw in the initial example, Cypress makes it easy to click on and type into elements on the page by adding {% url `.click()` click %} and {% url `.type()` type %} commands to a {% url `cy.get()` get %} or {% url `cy.contains()` contains %} command. This is a great example of chaining in action. Let's see it again:
 
 ```js
 cy.get('textarea.post-body')
   .type("This is an excellent post.")
 ```
 
-We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" of the `cy.get()` command, which will be a DOM element if it is found.
+We're chaining the {% url `.type()` type %} onto the {% url `cy.get()` get %}, applying it to the "subject" of the {% url `cy.get()` get %} command, which will be a DOM element if it is found.
 
-`.type()` and `.click()` are just 2 interaction commands Cypress exposes for you, but there are many more! For instance:
-- `.blur()`/`.focus()`
-- `.check()`/`.uncheck()`
-- `.select()`
-- `.hover()`
-- `.dblclick()`
+{% url `.type()` type %} and {% url `.click()` click %} are just 2 interaction commands Cypress exposes for you, but there are many more! For instance:
+- {% url `.blur()` blur %}/{% url `.focus()` focus %}
+- {% url `.check()` check %}/{% url `.uncheck()` uncheck %}
+- {% url `.select()` select %}
+- {% url `.dblclick()` dblclick %}
 
 {% note success Core Concept %}
 Cypress exposes common user interactions as commands, making it simple to encapsulate the behaviors you're looking to create.
@@ -237,13 +236,13 @@ We'll learn more about assertions later in this guide.
 
 ## Subjects
 
-A new Cypress chain always starts with `cy.[something]`, where the `something` establishes what other methods can be called next (chained). Some methods yield no subject and thus cannot be chained, such as `cy.clearCookies()` or `cy.screenshot()`. Some methods, such as `cy.get()` or `cy.contains()`, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like `.click()` or even `.contains()` again.
+A new Cypress chain always starts with `cy.[something]`, where the `something` establishes what other methods can be called next (chained). Some methods yield no subject and thus cannot be chained, such as {% url `cy.clearCookies()` clearcookies %} or {% url `cy.screenshot()` screenshot %}. Some methods, such as {% url `cy.get()` get %} or {% url `cy.contains()` contains %}, yield a jQuery-wrapped DOM element as a subject, allowing further methods to be chained onto them like {% url `.click()` click %} or even {% url `cy.contains()` contains %} again.
 
 {% note info %}
 **Some commands can be chained:**
-- ...only from `cy`, meaning they don't operate on a subject (`cy.clearCookies()`)
-- ...only from commands yielding particular kinds of subjects (`.type()`)
-- ...from `cy` *or* from a subject-yielding chain (`.contains()`)
+- ...only from `cy`, meaning they don't operate on a subject ({% url `cy.clearCookies()` clearcookies %})
+- ...only from commands yielding particular kinds of subjects ({% url `.type()` type %})
+- ...from `cy` *or* from a subject-yielding chain ({% url `cy.contains()` contains %})
 
 
 **Some commands yield:**
@@ -268,11 +267,11 @@ Cypress commands do not return their subjects, they yield them. Remember: Cypres
 
 {% endnote %}
 
-### Using `.then` To Act On A Subject
+### Using {% url `.then()` then %} To Act On A Subject
 
-Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a `.then(function(subject) { })` to your command chain. When the previous command resolves, it will call your custom function with the yielded subject as the first argument.
+Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a {% url '`.then(function(subject) { })`' type %} to your command chain. When the previous command resolves, it will call your custom function with the yielded subject as the first argument.
 
-If you wish to continue chaining commands to your `.then()`, you'll need to specify the subject you want to yield to those commands, which you can achieve by a simple return value. (Cypress will yield that to the next command for you.)
+If you wish to continue chaining commands to your {% url `.then()` then %}, you'll need to specify the subject you want to yield to those commands, which you can achieve by a simple return value. (Cypress will yield that to the next command for you.)
 
 Let's look at an example:
 
@@ -433,7 +432,7 @@ cy.get("form")
 Without a single explicit assertion, there are dozens of ways this test can fail! Here's a few:
 
 - the initial visit url could respond with something other than success
-- any of the `cy.get()` Commands could fail to find their elements
+- any of the {% url `cy.get()` get %} Commands could fail to find their elements
 - form submission could result in a non-success HTTP code
 - the in-page JS (the application under test) could throw an error
 
@@ -456,17 +455,17 @@ Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide the built-in assertio
 
 There are two ways to write assertions in Cypress:
 
-1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
-2. **Explicit Subjects:** Using `expect`
+1. **Implicit Subjects:** Using {% url `.should()` should %} or {% url `.and()` and %}
+2. **Explicit Subjects:** Using `expect`.
 
 {% note info Assertion Libraries %}
 Cypress bundles [popular assertion libraries](/guides/appendices/available-assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
 
 {% endnote %}
 
-## Implicit Subjects with [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
+## Implicit Subjects with {% url `.should()` should %} or {% url `.and()` and %}
 
-Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
+Using {% url `.should()` should %} or {% url `.and()` and %} commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
 
 ```javascript
 // the implicit subject here is the first <tr>
@@ -474,7 +473,7 @@ Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.c
 cy.get("tbody tr:first").should("have.class", "active")
 ```
 
-You can chain multiple assertions together using `.and()`, which is just another name for `.should()` that makes things more readable:
+You can chain multiple assertions together using {% url `.and()` and %}, which is just another name for {% url `.should()` should %} that makes things more readable:
 
 ```js
 cy.get("#header a")
@@ -519,7 +518,7 @@ Explicit assertions are great when you want to:
 - perform custom logic prior to making the assertion
 - make multiple assertions against the same subject
 
-The usual caveats apply if you want to do work against the subject: you'll need to do it asynchronously! The `.should()` command allows us to pass a function that will be yielded the subject. This works just like `.then()`, except Cypress will apply its retry-until-timeout magic to the function passed to `.should()`.
+The usual caveats apply if you want to do work against the subject: you'll need to do it asynchronously! The {% url `.should()` should %} command allows us to pass a function that will be yielded the subject. This works just like {% url `.then()` then %}, except Cypress will apply its retry-until-timeout magic to the function passed to {% url `.should()` should %}.
 
 ```javascript
 cy
@@ -547,6 +546,6 @@ cy
 ```
 
 {% note danger Make sure `.should()` is safe %}
-When using a function passed to `.should()`, be sure that the entire function can be executed multiple times without issue. Cypress applies its retry logic to these functions: so long as there's a failure, it will repeatedly try again until the timeout is reached.
+When using a function passed to {% url `.should()` should %}, be sure that the entire function can be executed multiple times without issue. Cypress applies its retry logic to these functions: so long as there's a failure, it will repeatedly try again until the timeout is reached.
 
 {% endnote %}

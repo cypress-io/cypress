@@ -70,7 +70,7 @@ Option | Default | Notes
 `interval` | `16` | Interval to retry type
 `log` | `true` | Whether to display command in Command Log
 `release` | `true` | Keep a modifier activated between commands
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the type
 
 ## Yields
 
@@ -78,7 +78,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.type()` will continue to retry typing for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.type()` will continue to retry typing for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -168,7 +168,7 @@ Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
 
 **Force a click to happen prior to type**
 
-Prior to typing, if the DOM element isn't currently focused, Cypress issues a [.click()](https://on.cypress.io/api/click) on the element, which causes the element to receive focus.
+Prior to typing, if the DOM element isn't currently focused, Cypress issues a {% url `.click()` click %} on the element, which causes the element to receive focus.
 
 Sometimes it is useful to force the click to happen in order to disables error checking, like whether the element is currently visible.
 
@@ -182,7 +182,7 @@ Be careful with the `force` option because it allows the type to happen where it
 
 ## Key Combinations
 
-When using special character sequences, it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
+When using special character sequences, it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `.type()` command, and are released when all subsequent characters are typed, unless {% url '`{release: false}`' type#Options %} is passed as an {% url 'option' type#Key-Combinations %}. A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
 
 **Type a key combination**
 
@@ -381,7 +381,7 @@ Of course if the form's `submit` event is `preventedDefault` the form will not a
 
 **Key Events Table**
 
-Cypress prints out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
+Cypress prints out a table of key events that detail the keys that were pressed when clicking on type within the {% url 'Command Log' type#Command-Log %}. Each character will contain the `which` character code and the events that happened as a result of that key press.
 
 Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
 
@@ -421,8 +421,8 @@ When clicking on `type` within the command log, the console outputs the followin
 
 # See also
 
-- [blur](https://on.cypress.io/api/blur)
-- [clear](https://on.cypress.io/api/clear)
-- [click](https://on.cypress.io/api/click)
-- [focus](https://on.cypress.io/api/focus)
-- [submit](https://on.cypress.io/api/submit)
+- {% url `.blur()` blur %}
+- {% url `.clear()` clear %}
+- {% url `.click()` click %}
+- {% url `.focus()` focus %}
+- {% url `.submit()` submit %}

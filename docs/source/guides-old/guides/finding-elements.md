@@ -12,27 +12,27 @@ You'll notice many of these commands match the same behavior as their [jQuery co
 
 ## List of Commands
 
-- [children](https://on.cypress.io/api/children)
-- [closest](https://on.cypress.io/api/closest)
-- [contains](https://on.cypress.io/api/contains)
-- [eq](https://on.cypress.io/api/eq)
-- [find](https://on.cypress.io/api/find)
-- [filter](https://on.cypress.io/api/filter)
-- [first](https://on.cypress.io/api/first)
-- [get](https://on.cypress.io/api/get)
-- [last](https://on.cypress.io/api/last)
-- [next](https://on.cypress.io/api/next)
-- [not](https://on.cypress.io/api/not)
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [prev](https://on.cypress.io/api/prev)
-- [siblings](https://on.cypress.io/api/siblings)
+- {% url `.children()` children %}
+- {% url `.closest()` closest %}
+- {% url `cy.contains()` contains %}
+- {% url `.eq()` eq %}
+- {% url `.find()` find %}
+- {% url `.filter()` filter %}
+- {% url `.first()` first %}
+- {% url `cy.get()` get %}
+- {% url `.last()` last %}
+- {% url `.next()` next %}
+- {% url `.not()` not %}
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.prev()` prev %}
+- {% url `.siblings()` siblings %}
 
 ***
 
 ## Starting a Query
 
-In Cypress, you will almost always start a sequence of traversal commands with [`cy.get`](https://on.cypress.io/api/get). You can think of [`cy.get`](https://on.cypress.io/api/get) as the same as jQuery's `$` for getting DOM elements.
+In Cypress, you will almost always start a sequence of traversal commands with {% url `cy.get()` get %}. You can think of {% url `cy.get()` get %} as the same as jQuery's `$` for getting DOM elements.
 
 **The following examples are equivalent:**
 
@@ -103,7 +103,7 @@ cy.get("form").find("inpit").type("foo").parent(".row")
     // oops we have a typo here in our selector
 ```
 
-Cypress will continue to retry finding the `inpit` element for **4 seconds** and then time out since this element does not exist. The [`cy.type`](https://on.cypress.io/api/type) and [`cy.parent`](https://on.cypress.io/api/parent) commands are never issued because Cypress will give up after failing to find the `inpit` element.
+Cypress will continue to retry finding the `inpit` element for **4 seconds** and then time out since this element does not exist. The {% url `.type()` type %} and {% url `.parent()` parent %} commands are never issued because Cypress will give up after failing to find the `inpit` element.
 
 Another way to look at it is to imagine there being an implied `.should("exist")` after every DOM command.
 

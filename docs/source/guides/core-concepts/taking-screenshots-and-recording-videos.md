@@ -16,7 +16,7 @@ comments: true
 
 Cypress comes with the ability to take screenshots, whether you are running in a real, headed browser (such as Chrome) or when you are running headlessly, possibly in CI.
 
-To take a manual screenshot just use the [`cy.screenshot`](https://on.cypress.io/api/screenshot) command.
+To take a manual screenshot just use the {% url `cy.screenshot()` screenshot %} command.
 
 Additionally, Cypress will automatically capture screenshots when a failure happens but only during a headless run.
 

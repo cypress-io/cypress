@@ -3,10 +3,10 @@ title: tick
 comments: true
 ---
 
-Move time after overriding a native time function with [`cy.clock()`](https://on.cypress.io/api/clock).
+Move time after overriding a native time function with {% url `cy.clock()` clock %}.
 
 {% note warning %}
-[`cy.clock`](https://on.cypress.io/api/clock) must be called before `cy.tick` in order to override native time functions first.
+{% url `cy.clock()` clock %} must be called before `cy.tick` in order to override native time functions first.
 {% endnote %}
 
 # Syntax
@@ -43,7 +43,7 @@ The number of `milliseconds` to move the clock. Any timers within the affected r
 
   Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
-You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
+You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
 
 # Examples
@@ -94,8 +94,8 @@ When clicking on the `tick` command within the command log, the console outputs 
 
 # See also
 
-- [clock](https://on.cypress.io/api/clock)
-- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- {% url `cy.clock()` clock %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
 - [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [spy](https://on.cypress.io/api/spy)
-- [stub](https://on.cypress.io/api/stub)
+- {% url `cy.spy()` spy %}
+- {% url `cy.stub()` stub %}

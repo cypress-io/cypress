@@ -6,7 +6,7 @@ comments: true
 Expand an array into multiple arguments.
 
 {% note info %}
-Similar to [`.then()`](https://on.cypress.io/api/then), but always expects an array as it's subject.
+Similar to {% url `.then()` then %}, but always expects an array as it's subject.
 {% endnote %}
 
 # Syntax
@@ -77,6 +77,7 @@ cy.getCookies().spread(function(cookie1, cookie2, cookie3){
 
 # See also
 
-- [getCookies](https://on.cypress.io/api/getcookies)
-- [then](https://on.cypress.io/api/then)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `.each()` each %}
+- {% url `cy.getCookies()` getcookies %}
+- {% url `.then()` then %}
+- {% url `cy.wait()` wait %}
