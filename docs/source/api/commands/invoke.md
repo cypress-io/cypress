@@ -6,7 +6,7 @@ comments: true
 Invoke a function on the previously yielded subject.
 
 {% note info %}
-If you want to get a property that is not a function on the previously yielded subject, use [`.its()`](https://on.cypress.io/api/its).
+If you want to get a property that is not a function on the previously yielded subject, use {% url `.its()` its %}.
 {% endnote %}
 
 # Syntax

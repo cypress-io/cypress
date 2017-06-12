@@ -301,7 +301,7 @@ cy.contains('Delete User').click()
 cy.contains('Yes, Delete!').click()
 ```
 
-You could also chain the second contains off of a parent command (such as [`.get()`](https://on.cypress.io/api/get). This automatically changes the subject to `#dialog` which contains the content we're looking for.
+You could also chain the second contains off of a parent command (such as {% url `cy.get()` get %}. This automatically changes the subject to `#dialog` which contains the content we're looking for.
 
 ```javascript
 cy.contains('Delete User').click()

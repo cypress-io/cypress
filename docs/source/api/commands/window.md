@@ -3,7 +3,7 @@ title: window
 comments: true
 ---
 
-Get the global `window` object of the remote application that was [visited](https://on.cypress.io/api/visit).
+Get the global `window` object of the remote application that was visited in {% url `cy.visit()` visit %}.
 
 # Syntax
 
@@ -56,7 +56,7 @@ cy.window().then(function(win){
 
 ## Options
 
-**Passes timeout through to [`.should()`](https://on.cypress.io/api/should) assertion**
+**Passes timeout through to {% url `.should()` should %} assertion**
 
 ```javascript
 cy.window({ timeout: 10000 }).should('have.property', 'foo')

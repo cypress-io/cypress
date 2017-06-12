@@ -81,7 +81,7 @@ cy.get('.dropdown-menu').click()
 
 ## Get in Within
 
-**`cy.get()` in the [`.within()`](https://on.cypress.io/api/within) command**
+**`cy.get()` in the {% url `.within()` within %} command**
 
 Since `cy.get()` is chained off of `cy`, it always looks for the selector within the entire `document`. The only exception is when used inside a [`.within()`]() command.
 

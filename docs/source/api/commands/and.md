@@ -6,7 +6,7 @@ comments: true
 Make an assertion.
 
 {% note info %}
-An alias of [`.should()`](https://on.cypress.io/api/should)
+An alias of {% url `.should()` should %}
 {% endnote %}
 
 {% note info %}

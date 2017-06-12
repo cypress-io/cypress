@@ -6,7 +6,7 @@ comments: true
 Get the DOM elements that match a specific selector.
 
 {% note info %}
-Opposite of [`.not()`](https://on.cypress.io/api/not)
+Opposite of {% url `.not()` not %}
 {% endnote %}
 
 # Syntax

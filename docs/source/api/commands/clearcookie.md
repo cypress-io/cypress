@@ -89,7 +89,7 @@ When clicking on `clearCookie` within the command log, the console outputs the f
 
 - {% url `cy.clearCookies()` clearcookies %}
 - {% url `cy.clearLocalStorage()` clearlocalstorage %}
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)
+- {% url 'Cypress Cookies API' cookies %}
 - {% url `cy.getCookie()` getcookie %}
 - {% url `cy.getCookies()` getcookies %}
 - {% url `cy.setCookie()` setcookie %}

@@ -118,7 +118,7 @@ cy.get('#slider').scrollTo('right', { duration: 2000} )
 
 **Snapshots do not reflect scroll behavior**
 
-*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using [`cy.pause()`](https://on.cypress.io/api/pause) to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#videos).
+*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#videos).
 
 # Command Log
 
@@ -139,4 +139,4 @@ When clicking on `scrollTo` within the command log, the console outputs the foll
 
 # See also
 
-- [scrollIntoView](https://on.cypress.io/api/scrollintoview)
+- {% url `.scrollIntoView()` scrollintoview %}

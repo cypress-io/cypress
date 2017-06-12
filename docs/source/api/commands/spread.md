@@ -6,7 +6,7 @@ comments: true
 Expand an array into multiple arguments.
 
 {% note info %}
-Similar to [`.then()`](https://on.cypress.io/api/then), but always expects an array as it's subject.
+Similar to {% url `.then()` then %}, but always expects an array as it's subject.
 {% endnote %}
 
 # Syntax

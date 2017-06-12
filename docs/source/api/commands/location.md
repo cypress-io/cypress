@@ -80,7 +80,7 @@ cy.location().should(function(location) {
 
 **Check location for query params and pathname**
 
-We can yield the location object within a [`.should()`](https://on.cypress.io/api/should) command and work with it directly.
+We can yield the location object within a {% url `.should()` should %} command and work with it directly.
 
 ```javascript
 cy.get('#search').type('niklas{enter}')

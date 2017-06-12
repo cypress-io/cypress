@@ -6,7 +6,7 @@ comments: true
 Get a property on the previously yielded subject.
 
 {% note info %}
-If you want to call a function on the previously yielded subject, use [`.invoke()`](https://on.cypress.io/api/invoke).
+If you want to call a function on the previously yielded subject, use {% url `.invoke()` invoke %}.
 {% endnote %}
 
 # Syntax

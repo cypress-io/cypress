@@ -6,7 +6,7 @@ comments: true
 Filter DOM element(s) from a set of DOM elements.
 
 {% note info %}
-Opposite of [`.filter()`](https://on.cypress.io/api/filter)
+Opposite of {% url `.filter()` filter %}
 {% endnote %}
 
 # Syntax

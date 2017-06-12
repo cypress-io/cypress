@@ -3,7 +3,7 @@ title: as
 comments: true
 ---
 
-Assign an alias for later use. Reference the alias later within a [`.get()`](https://on.cypress.io/api/get) or [`.wait()`](https://on.cypress.io/api/wait) command with a `@` prefix.
+Assign an alias for later use. Reference the alias later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command with a `@` prefix.
 
 {% note info %}
 **Note:** `.as()` assumes you are already familiar with core concepts such as [aliases](https://on.cypress.io/guides/using-aliases)
@@ -38,7 +38,7 @@ cy.as('foo')   // Errors, cannot be chained off 'cy'
 
 **{% fa fa-angle-right %} aliasName** ***(String)***
 
-The name of the alias to be referenced later within a [`.get()`](https://on.cypress.io/api/get) or [`.wait()`](https://on.cypress.io/api/wait) command using a `@` prefix.
+The name of the alias to be referenced later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command using a `@` prefix.
 
 ## Yields
 

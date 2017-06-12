@@ -58,10 +58,10 @@ Option | Default | Notes
 
 **Snapshots do not reflect scroll behavior**
 
-*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using [`cy.pause()`](https://on.cypress.io/api/pause) to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#videos).
+*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#videos).
 
 # Command Log
 
 # See also
 
-- [scrollTo](https://on.cypress.io/api/scrollto)
+- {% url `cy.scrollTo()` scrollto %}

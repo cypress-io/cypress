@@ -6,7 +6,7 @@ comments: true
 Get the current URL.
 
 {% note info %}
-This is an alias of [`cy.location.href`](https://on.cypress.io/api/location)
+This is an alias of {% url `cy.location.href` location %}
 {% endnote %}
 
 # Syntax

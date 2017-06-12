@@ -186,7 +186,7 @@ cy.wait('@getUser').then(function(xhr) {
 
 **Using `fixture` or `fx` shortcuts**
 
-Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within [`cy.route()`](https://on.cypress.io/api/route).
+Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within {% url `cy.route()` route %}.
 
 ```javascript
 cy.route('GET', '/users/**', 'fixture:users') // this works

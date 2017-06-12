@@ -40,7 +40,7 @@ Option | Default | Notes
 
 `.root()` yields the root element regardless of what was yielded from a previous command.
 
-The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a [`.within()`](https://on.cypress.io/api/within) command, the root element yielded is the yielded subject of the [`.within()`](https://on.cypress.io/api/within) command.
+The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a {% url `.within()` within %} command, the root element yielded is the yielded subject of the {% url `.within()` within %} command.
 
 ## Timeout
 
@@ -56,7 +56,7 @@ The root element yielded is `document` by default. However, when calling `.root(
 cy.get('aside').root() // yields document
 ```
 
-## Root in [`.within()`](https://on.cypress.io/api/within)
+## Root in {% url `.within()` within %}
 
 **Get the root element in a `.within()` callback function**
 

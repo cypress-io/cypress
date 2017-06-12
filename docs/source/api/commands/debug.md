@@ -72,6 +72,6 @@ When clicking on the `debug` command within the command log, the console outputs
 # See also
 
 - [Cypress Dashboard](https://on.cypress.io/dashboard)
-- {% url `cy.pause()` pause %}
+- {% url `.pause()` pause %}
 - {% url `cy.log()` log %}
 - {% url `cy.screenshot()` screenshot %}

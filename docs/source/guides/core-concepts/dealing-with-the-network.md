@@ -6,7 +6,7 @@ comments: true
 {% note info %}
 ### {% fa fa-graduation-cap %} What You'll Learn
 
-- How Cypress enables you to isolate any or all of your front-end with [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/route)
+- How Cypress enables you to isolate any or all of your front-end with {% url `cy.server()` server %} and [`cy.route()`](https://on.cypress.io/route)
 - What tradeoffs we make when we stub our network requests
 - How Cypress visualizes network management in the Command Log
 - How to use Fixtures to reuse XHR responses
@@ -99,8 +99,8 @@ Cypress makes it easy to stub a response and control the `body`, `status`, `head
 
 **To begin stubbing responses you need to do two things.**
 
-1. Start a [`cy.server()`](https://on.cypress.io/api/server)
-2. Provide a [`cy.route()`](https://on.cypress.io/api/route)
+1. Start a {% url `cy.server()` server %}
+2. Provide a {% url `cy.route()` route %}
 
 These two commands work together to control the behavior of your responses within the command's options. [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
 
@@ -133,14 +133,14 @@ When you start a `cy.server()` and define `cy.route()` commands, Cypress display
 
 {% img /img/guides/cypress-basics/dealing-with-the-network/server-routing-table.png Routing Table %}
 
-Once you start a server with [`cy.server()`](https://on.cypress.io/api/server), all requests will be controllable for the remainder of the test. When a new test runs, Cypress will restore the default behavior and remove all routing and stubbing. For a complete reference of the API and options, refer to the documentation for each command.
+Once you start a server with {% url `cy.server()` server %}, all requests will be controllable for the remainder of the test. When a new test runs, Cypress will restore the default behavior and remove all routing and stubbing. For a complete reference of the API and options, refer to the documentation for each command.
 
-- [`cy.server()`](https://on.cypress.io/api/server)
-- [`cy.route()`](https://on.cypress.io/api/route)
+- {% url `cy.server()` server %}
+- {% url `cy.route()` route %}
 
 # Fixtures
 
-A fixture is a fixed set of data located in a file that is used in your tests. The purpose of a test fixture is to ensure that there is a well known and fixed environment in which tests are run so that results are repeatable. Fixtures are accessed within tests by calling the [`cy.fixture()`](https://on.cypress.io/api/fixture) command.
+A fixture is a fixed set of data located in a file that is used in your tests. The purpose of a test fixture is to ensure that there is a well known and fixed environment in which tests are run so that results are repeatable. Fixtures are accessed within tests by calling the {% url `cy.fixture()` fixture %} command.
 
 Cypress makes it easy to stub a network requests and have it respond instantly with fixture data.
 
@@ -178,7 +178,7 @@ Your fixtures can be further organized within additional folders. For instance, 
 /cypress/fixtures/images/birds.png
 ```
 
-To access the fixtures nested within the `images` folder, simply include the folder in your [`cy.fixture()`](https://on.cypress.io/api/fixture) command.
+To access the fixtures nested within the `images` folder, simply include the folder in your {% url `cy.fixture()` fixture %} command.
 
 ```javascript
 cy.fixture("images/dogs.png") //returns dogs.png as Base64
@@ -186,7 +186,7 @@ cy.fixture("images/dogs.png") //returns dogs.png as Base64
 
 # Waiting
 
-Whether or not you choose to stub responses, Cypress enables you to declaratively [`cy.wait()`](https://on.cypress.io/api/wait) for requests and their responses.
+Whether or not you choose to stub responses, Cypress enables you to declaratively {% url `cy.wait()` wait %} for requests and their responses.
 
 ```javascript
 cy.server()
@@ -208,7 +208,7 @@ cy.get('h1').should('contain', 'Dashboard')
 
 ## Removing Flake
 
-One advantage of declaratively waiting for responses is that it decreases test flake. You can think of [`cy.wait()`](https://on.cypress.io/api/wait) as a guard that indicates to Cypress when you expect a request to be made that matches a specific routing alias. This prevents the next commands from running until responses come back and it guards against situations where your requests are initially delayed.
+One advantage of declaratively waiting for responses is that it decreases test flake. You can think of {% url `cy.wait()` wait %} as a guard that indicates to Cypress when you expect a request to be made that matches a specific routing alias. This prevents the next commands from running until responses come back and it guards against situations where your requests are initially delayed.
 
 **Auto-complete Example:**
 
@@ -245,7 +245,7 @@ In our example above, we added an assertion to the display of the search results
 
 In this example, there are many possible sources of failure. In most testing tools, if our request failed to go out, we would normally only ever get an error once we attempt to find the results in the DOM and see that there is no matching element. This is problematic because it's unknown *why* the results failed to be displayed. Was there a problem with our rendering code? Did we modify or change an attribute such as an `id` or `class` on an element? Perhaps our server sent us different Book items.
 
-With Cypress, by adding a [`cy.wait()`](https://on.cypress.io/api/wait), you can more easily pinpoint your specific problem. If the response never came back, you'll receive an error like this:
+With Cypress, by adding a {% url `cy.wait()` wait %}, you can more easily pinpoint your specific problem. If the response never came back, you'll receive an error like this:
 
 {% img /img/guides/cypress-basics/dealing-with-the-network/clear-source-of-failure.png Wait Failure %}
 
@@ -253,7 +253,7 @@ Now we know exactly why our test failed. It had nothing to do with the DOM. Inst
 
 ## Asserting about the XHR Object
 
-Another benefit of using [`cy.wait()`](https://on.cypress.io/api/wait) on requests is that it allows you to access the actual `XHR` object. This is useful when you want to make assertions about this object.
+Another benefit of using {% url `cy.wait()` wait %} on requests is that it allows you to access the actual `XHR` object. This is useful when you want to make assertions about this object.
 
 In our example above we can assert about the request object to verify that it sent data as a query string in the URL. Although we're mocking the response, we can still verify that our application sends the correct request.
 
@@ -273,7 +273,7 @@ cy.get('#results')
   .and('contain', 'Book 2')
 ```
 
-**The XHR object that [`cy.wait()`](https://on.cypress.io/api/wait) yields you has everything you need to make assertions including:**
+**The XHR object that {% url `cy.wait()` wait %} yields you has everything you need to make assertions including:**
 
 - URL
 - Method

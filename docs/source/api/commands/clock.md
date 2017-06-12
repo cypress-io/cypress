@@ -3,7 +3,7 @@ title: clock
 comments: true
 ---
 
-`cy.clock()` overrides native global functions related to time allowing them to be controlled synchronously via [`cy.tick()`](https://on.cypress.io/api/tick) or the yielded `clock` object. This includes controlling:
+`cy.clock()` overrides native global functions related to time allowing them to be controlled synchronously via {% url `cy.tick()` tick %} or the yielded `clock` object. This includes controlling:
 
 - `setTimeout`
 - `clearTimeout`
@@ -64,7 +64,7 @@ Option | Default | Notes
 
   Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
-You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
+You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
 ## Timeout
 
@@ -94,7 +94,7 @@ cy.get('#seconds-elapsed').should('have.text', '2 seconds')
 
 **Access the clock object to synchronously move time**
 
-In most cases, it's easier to use [`cy.tick()`](https://on.cypress.io/api/tick) to move time, but you can also use the `clock` object yielded by `cy.clock()`.
+In most cases, it's easier to use {% url `cy.tick()` tick %} to move time, but you can also use the `clock` object yielded by `cy.clock()`.
 
 ```javascript
 cy.clock().then(function (clock) {
@@ -112,7 +112,7 @@ cy.clock().then(function (clock) {
 })
 ```
 
-The clock object is also available via `this.clock` in any [`.then()`](https://on.cypress.io/api/then) callback.
+The clock object is also available via `this.clock` in any {% url `.then()` then %} callback.
 
 ```javascript
 cy.clock()
@@ -183,7 +183,7 @@ Note that `cy.clock()` only applies to the `top` window on a web page. It will n
 
 **clock behavior before `cy.visit()`**
 
-If you call `cy.clock()` before visiting a page with [`cy.visit()`](https://on.cypress.io/api/visit), the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via [`cy.tick()`](https://on.cypress.io/api/tick). This also applies if, during the course of a test, the page under test is reloaded or changed.
+If you call `cy.clock()` before visiting a page with {% url `cy.visit()` visit %}, the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via {% url `cy.tick()` tick %}. This also applies if, during the course of a test, the page under test is reloaded or changed.
 
 # Command Log
 

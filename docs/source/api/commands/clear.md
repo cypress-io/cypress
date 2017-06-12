@@ -6,7 +6,7 @@ comments: true
 Clear the value of an `input` or `textarea`.
 
 {% note info %}
-An alias for [`cy.type('{selectall}{backspace}')`](https://on.cypress.io/api/type)
+An alias for {% url `.type('{selectall}{backspace}')` type %}
 {% endnote %}
 
 # Syntax
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 **Clear the input and type a new value.**
 
-Prior to clearing, if the element isn't currently focused, Cypress issues a [.click()](https://on.cypress.io/api/click) on the element, which causes the element to receive focus.
+Prior to clearing, if the element isn't currently focused, Cypress issues a {% url `.click()` click %} on the element, which causes the element to receive focus.
 
 ```javascript
 cy.get('textarea').clear().type('Hello, World')

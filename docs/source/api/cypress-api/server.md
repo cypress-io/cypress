@@ -3,10 +3,10 @@ title: Cypress.Server
 comments: true
 ---
 
-Permanently change the default options for all [`cy.server()`](https://on.cypress.io/api/server) instances
+Permanently change the default options for all {% url `cy.server()` server %} instances
 
 {% note info New to Cypress? %}
-Any configuration you pass to [`cy.server()`](https://on.cypress.io/api/server) will only persist until the end of the test.
+Any configuration you pass to {% url `cy.server()` server %} will only persist until the end of the test.
 {% endnote %}
 
 # Syntax

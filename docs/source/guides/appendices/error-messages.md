@@ -186,7 +186,7 @@ cy.get('[disabled]').click({force: true}).
 
 {% img /img/guides/appendices/error-messages/cy-method-failed-element-is-animating.png cy.method() failed because element is animating %}
 
-By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions, such as [`.type()`](https://on.cypress.io/api/type) or {% url `.click()` click %}, happened too fast during a transition.
+By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions, such as {% url `.type()` type %} or {% url `.click()` click %}, happened too fast during a transition.
 
 Cypress will continuously attempt to interact with the element until it eventually times out. If you'd like to force Cypress to interact with the element there are a few options:
 
@@ -360,7 +360,7 @@ We will automatically apply the record key environment variable.
 For a more thorough explanation of Cypress's Web Security model, [please read our dedicated guide to it](https://on.cypress.io/guides/web-security).
 {% endnote %}
 
-This error means that your application navigated to a superdomain that Cypress was not bound to. Initially when you [`cy.visit()`](https://on.cypress.io/api/visit), Cypress changes the browser's url to match the `url` passed to [`cy.visit()`](https://on.cypress.io/api/visit). This enables Cypress to communicate with your application to bypasses all same-origin security policies among other things.
+This error means that your application navigated to a superdomain that Cypress was not bound to. Initially when you {% url `cy.visit()` visit %}, Cypress changes the browser's url to match the `url` passed to {% url `cy.visit()` visit %}. This enables Cypress to communicate with your application to bypasses all same-origin security policies among other things.
 
 When your application navigates to a superdomain outside of the current origin-policy, Cypress is unable to communicate with it, and thus fails.
 
@@ -368,7 +368,7 @@ When your application navigates to a superdomain outside of the current origin-p
 
 1. Don't click `<a>` links in your tests that navigate outside of your application. Likely this isn't worth testing anyway. You should ask yourself: *What's the point of clicking and going to another app?* Likely all you care about is that the `href` attribute matches what you expect. So simply make an assertion about that. You can see more strategies on testing anchor links [in our Example Recipe](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js).
 
-2. You are testing a page that uses `Single sign-on (SSO)`. In this case your web server is likely redirecting you between superdomains, so you receive this error message. You can likely get around this redirect problem by using [`cy.request()`](https://on.cypress.io/api/request) to manually handle the session yourself.
+2. You are testing a page that uses `Single sign-on (SSO)`. In this case your web server is likely redirecting you between superdomains, so you receive this error message. You can likely get around this redirect problem by using {% url `cy.request()` request %} to manually handle the session yourself.
 
 If you find yourself stuck and can't work around these issues you can just set this in your `cypress.json` file. But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
 

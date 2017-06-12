@@ -6,7 +6,7 @@ comments: true
 Move time after overriding a native time function with {% url `cy.clock()` clock %}.
 
 {% note warning %}
-[`cy.clock`](https://on.cypress.io/api/clock) must be called before `cy.tick` in order to override native time functions first.
+{% url `cy.clock()` clock %} must be called before `cy.tick` in order to override native time functions first.
 {% endnote %}
 
 # Syntax
@@ -43,7 +43,7 @@ The number of `milliseconds` to move the clock. Any timers within the affected r
 
   Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
-You can also access the `clock` object via `this.clock` in a [`.then()`](https://on.cypress.io/api/then) callback.
+You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
 
 # Examples

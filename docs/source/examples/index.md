@@ -99,7 +99,7 @@ CI | [TravisCI](https://travis-ci.org/)
 
 **{% fa fa-angle-right %} Stubbing Dependencies** | [ Code](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js)
 
-- Use [`cy.stub()`](https://on.cypress.io/api/stub) to stub dependencies in a unit test
+- Use {% url `cy.stub()` stub %} to stub dependencies in a unit test
 - Handle promises returned by stubbed functions
 - Handle callbacks in stubbed functions
 
@@ -113,7 +113,7 @@ CI | [TravisCI](https://travis-ci.org/)
 - Authenticate users with cookies
 - Create a custom `login` test command
 - Bypass needing to use your actual UI
-- Increase speed of testing with [`cy.request()`](https://on.cypress.io/api/request)
+- Increase speed of testing with {% url `cy.request()` request %}
 
 **{% fa fa-angle-right %} XHR Web Form** | [ Code](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 
@@ -123,11 +123,11 @@ CI | [TravisCI](https://travis-ci.org/)
 - Stub application functions
 - Create a custom `login` test command
 - Bypass needing to use your actual UI
-- Increase speed of testing with [`cy.request()`](https://on.cypress.io/api/request)
+- Increase speed of testing with {% url `cy.request()` request %}
 
 **{% fa fa-angle-right %} CSRF Tokens** | [ Code](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_csrf_tokens_spec.js)
 
-- Use [`cy.request()`](https://on.cypress.io/api/request) to get around CSRF protections
+- Use {% url `cy.request()` request %} to get around CSRF protections
 - Parse CSRF tokens out of HTML
 - Parse CSRF tokens out of response headers
 - Expose CSRF via a route
@@ -136,7 +136,7 @@ CI | [TravisCI](https://travis-ci.org/)
 **{% fa fa-angle-right %} Single Sign On** | [ Code](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 
 - Login when authentication is done on a 3rd party server
-- Parse tokens using [`cy.request()`](https://on.cypress.io/api/request)
+- Parse tokens using {% url `cy.request()` request %}
 - Manually set tokens on local storage
 - Map external hosts and point to local servers
 
@@ -159,7 +159,7 @@ CI | [TravisCI](https://travis-ci.org/)
 
 **{% fa fa-angle-right %} Bootstrapping your App with Test Data** | [ Code](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 
-- Use [`cy.visit()`](https://on.cypress.io/api/visit) `onBeforeLoad` callback
+- Use {% url `cy.visit()` visit %} `onBeforeLoad` callback
 - Start your application with test data
 - Stub an XHR to seed with test data
 - Wait on an XHR to finish
@@ -168,9 +168,9 @@ CI | [TravisCI](https://travis-ci.org/)
 
 **{% fa fa-angle-right %} Controlling Behavior with Spies, Stubs and Clocks** | [ Code](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 
-- Use [`cy.spy()`](https://on.cypress.io/api/spy) to verify the behavior of a function
-- Use [`cy.stub()`](https://on.cypress.io/api/stub) to verify and control the behavior of a function
-- Use {% url `cy.clock()` clock %} and [`cy.tick()`](https://on.cypress.io/api/tick) to control time
+- Use {% url `cy.spy()` spy %} to verify the behavior of a function
+- Use {% url `cy.stub()` stub %} to verify and control the behavior of a function
+- Use {% url `cy.clock()` clock %} and {% url `cy.tick()` tick %} to control time
 - Stub `window.fetch` to control server responses
 
 ## Extending Cypress

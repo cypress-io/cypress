@@ -1,0 +1,1771 @@
+# 0.13.9
+
+*Released 01/28/2016*
+
+**Bugfixes:**
+
+- Prevent regression with not automatically scaling the viewport to fit into the window size
+
+**Misc:**
+
+- Update links to match new [documentation hub](https://docs.cypress.io)
+- {% url `.debug()` debug %} has been zipped up - it no longer logs confusing debugging information and now logs information about the previously run command.
+- [`_`](https://on.cypress.io/api/cypress-underscore), [`$`](https://on.cypress.io/api/cypress-jquery), [`Promise`](https://on.cypress.io/api/cypress-promise), [`Blob`](https://on.cypress.io/api/cypress-blob), [`moment`](https://on.cypress.io/api/cypress-moment) utilities have been moved off of `cy` and are now attached to `Cypress`. This is much more consistent with how the `cy` and `Cypress` API's work. You can continue to use these objects off of `cy` but this has been deprecated and you will see a warning message.
+
+# 0.13.8
+
+*Released 01/24/2016*
+
+**Features:**
+
+- Added {% url `cy.reload()` reload %} command which does a full page refresh. This is the same as the user hitting the 'Reload' button. Additionally it matches the same argument signature as `window.location.reload`.
+
+**Bugfixes:**
+
+- Fixed situation where {% url `cy.viewport()` viewport %} would not restore correctly between tests. Previously this would cause subsequent tests to be issued at the modified `cy.viewport()`. Now viewport is automatically restored to the settings in your `cypress.json` file.
+
+**Misc:**
+
+- Using {% url `.its()` its %} on a function or {% url `.invoke()` invoke %} on a property now logs a deprecation warning. In the next major release this will become a full error. It is valuable to make a distinction whether you're operating on a property vs a function, and this change improves overall readability with less confusion.
+- Cypress deprecations and warnings are now prefixed with: `Cypress Warning:` to indicate this message is coming from Cypress
+
+# 0.13.7
+
+*Released 01/17/2016*
+
+**Bugfixes:**
+
+- Prevent error during element stringification on `<svg>`. Fixes [#93](https://github.com/cypress-io/cypress/issues/93).
+- Clarified on errors related to not being able to run in CI. Previously there was a "catch all" error indicating your Cypress API Key was invalid. This was oftentimes incorrect. More specific errors have been added.
+- {% url `.type()` type %} has been upgraded to handle current selection ranges. Previously if an `<input>` had a selection range as Cypress began to type, this would be ignored. Cypress now takes this into account and will type over any selected text (as native typing would do).
+
+**Misc:**
+
+- All Cypress related services have been updated to use `https`. We are forcing `https` redirects for everything except for `api.cypress.io`, which would be a breaking change. By the next minor release we will force that as well. Once we make this change we will remove all versions below `0.13.7`. So make sure you **are not** locking the Cypress version when running in CI. We periodically remove old Cypress versions which have security flaws and this is an example of one.
+
+# 0.13.6
+
+*Released 01/09/2016*
+
+**Features:**
+
+- All commands now retry if the the associated element is disabled until the element is no longer disabled. If the command times out a specific error message is now thrown.
+- {% url `cy.server()` server %} and {% url `cy.route()` route %} now take an optional `onAbort` callback which fires anytime an XHR is aborted.
+
+**Bugfixes:**
+
+- Fixed edge case where XHR's which were already aborted were aborted a 2nd time when tests end. Cypress now only aborts currently running XHR's which have not already been aborted.
+- When passing an array of aliases to {% url `cy.wait()` wait %} there was an edge case where an incorrect error message was being thrown. The incorrect values were a combination of the wrong alias, the wrong timeout value, or the wrong request or response. Now Cypress correctly provides all 3 of these values.
+
+# 0.13.5
+
+*Released 01/03/2016*
+
+**Features:**
+
+- Added new command: {% url `cy.go()` go %} which accepts `back`, `forward`, or an arbitrary Number.
+- {% url `cy.go()` go %} enables you to navigate back or forward in your history. Cypress intelligently handles situations where moving forward or back causing a full page refresh, and will wait for the new page to load before resolving and moving onto new commands. It additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
+
+**Misc:**
+
+- Using `{force404: false}` will now output a warning explaining this is now the default option and can be removed safely.
+
+# 0.13.4
+
+*Released 12/31/2015*
+
+**Features:**
+
+- Added `waitForAnimations` and `animationDistanceThreshold` [configuration options](https://on.cypress.io/guides/configuration).
+- Cypress now automatically detects and waits for an element which is animating to stop animating. The threshold that Cypress considers *animating* is set to a distance of `5px` per `60fps`. In other words, if your element is moving too fast for a user to interact with, then Cypress considers the element animating and will wait until it finishes before attempting to interact with it. When we say 'interact' we mean apply command actions like {% url `.click()` click %}, {% url `.select()` select %}, {% url `.type()` type %}, {% url `.check()` check %}, etc. Waiting for animations prevents a series of edge cases and weird bugs where Cypress was interacting with elements **too** quickly which might cause undesired side effects in your application which are hard to track down. The downside to this implementation is that for every action Cypress must wait at least 2 run loops before applying actions. This slows down every action command by about `32ms`. If your app does not use animations you may wish to turn off this behavior in your `cypress.json` file.
+
+**Bugfixes:**
+
+- Prevent `undefined` error when attempting to {% url `.click()` click %} an element which is fixed position when it is covered by another element. Cypress now correctly provides why it cannot click the element in question. Fixes [#90](https://github.com/cypress-io/cypress/issues/90).
+- Prevent infinite loop in edge cases when checking whether an element was hidden.
+
+**Misc:**
+
+- The default behavior of {% url `cy.server()` server %} has changed from `force404: true` to become `force404: false`. In other words, Cypress will no longer forcibly send XHR's to 404 status when these XHR's do not match any existing {% url `cy.route()` route %}. This change better aligns with predictable usage for most Cypress users.
+
+# 0.13.3
+
+*Released 12/25/2015*
+
+**Notes:**
+
+- Merry Christmas everyone ;-)
+
+**Features:**
+
+- Overhauled the entire subsystem dealing with an element's visibility state. Previously we were simply using jQuery's `.is(":visible")` selector which was ineffective at truly determining when an element is "visible". Our changes now differ significantly from jQuery, but they match what a real user would consider visible, and the rules are fairly easy to explain. In other words these rules should just "make sense".
+- An element is considered visible if it can be "interactive" with a user. In other words, if the user is able to click, type, drag, or otherwise physically interact with the element it is considered visible.
+- Because of the additional complexities of how Cypress considers an element `visible`, we now have added the **exact** reason why an element is not visible when throwing an error. This means you'll see errors detailing whether an element or its parents have `display: none`, `visibility: hidden`, or whether an element is considered hidden because its effective `width` or `height` is zero. Whatever the reason, Cypress will indicate why your element is considered hidden.
+- Exposed [`Cypress.Dom.isHidden`](https://on.cypress.io/api/dom) which holds the logic for determining an element's visibility. Modify this to change the rules.
+- Upgraded {% url `.select()` select %} to automatically retry when the `<select>` is disabled, its matching `<option>` is disabled, or when Cypress cannot find a matching `<option>`. This more correctly aligns with the behavior of other actions like {% url `.click()` click %}, which automatically retry until the element is ready to receive the action.
+
+**Bugfixes:**
+
+- Throw on {% url `.select()` select %} when it cannot find a matching `<option>`. Also throw when `<select>` or a matching `<option>` is disabled. Fixes [#91](https://github.com/cypress-io/cypress/issues/91).
+- "Hidden" elements which actually displace height or width are now highlighted when restoring the DOM when a command is hovered.
+- Margin on zero client width / client height is now displayed correctly on command hover and more accurately mimics the way Chrome Dev Tools highlights elements.
+- Using `history.back`, `history.forward`, or `history.go` in CI or in headless mode now works again.
+
+**Misc:**
+
+- The updated hidden rules apply to all assertions like `should("be.hidden")`, and how Cypress indicates an element is hidden displays in the Command Log.
+- Updated many error messages to be more explanatory and precise.
+- Elements which are stringified during errors now indicate their text content (truncated to 10 characters) `<button>Save</button>` or whether they contain children elements by indicating an ellipsis `<div>...</div>`.
+- The [`Routes` instrument panel](https://on.cypress.io/api/routes) now displays the column: `Stubbed` instead of `Status`, which indicates whether a route is stubbing matching XHR's.
+
+# 0.13.2
+
+*Released 12/20/2015*
+
+**Notes:**
+
+- Docs have been updated for {% url `cy.wait()` wait %}, {% url `cy.route()` route %}, {% url `cy.server()` server %}, and [deprecations](https://on.cypress.io/guides/deprecations) to reflect these changes.
+
+**Features:**
+
+- Added `responseTimeout` [configuration](https://on.cypress.io/guides/configuration) value.
+- {% url `cy.wait()` wait %} has been upgraded to now use two separate `timeout` values. In previous versions {% url `cy.wait()` wait %} used the `commandTimeout` and would automatically time out if the XHR did not achieve a response in that time frame. Now {% url `cy.wait()` wait %} will go through two independent timeout phases. At first {% url `cy.wait()` wait %} will wait for an XHR to be requested which matches its route. It will wait up to the value configured with `requestTimeout` (default 5000ms). After it sees a matching request it will then go into `response` waiting mode. It will wait up to the value configured with `responseTimeout` (default 20000ms). When {% url `cy.wait()` wait %} fails you now receive a much better error message indicating exactly which phase failed. Whether a request was never sent out, or whether it timed out waiting for a response. This gives you the best of both worlds and prevents situations where Cypress was timing out on slow servers. By creating new configuration values: `requestTimeout` and `responseTimeout` you can now directly control this behavior without affecting other regular commands.
+
+**Bugfixes:**
+
+- Prevent removing trailing new lines on fixtures after formatting.
+- Added cache buster to test files which forces them to be reloaded in the `Sources` panel after making modifications. In previous versions when test files were live reloaded Chrome would not display their new contents due to a bug in Dev Tools. We've now worked around this issue.
+
+**Misc:**
+
+- Removed `{stub: false}` option from {% url `cy.server()` server %} and {% url `cy.route()` route %}. Cypress will now log a deprecation warning when you use the this option. Removing this option helps simplify the API because now Cypress can figure out whether you really want to stub the route based on whether you've provided a response or not. If you have not provided a response, the default behavior will be to not stub. If you do provide a response, Cypress will stub the route.
+- Repurposed `requestTimeout` to now mean the time we wait for an XHR to be requested. Changed {% url `cy.request()` request %} to now use `responseTimeout` configuration value.
+- Updated many error messages to be more consistent.
+- Added special error messages when elements can not have actions applied to them with a suggestion to use `{force: true}`.
+
+# 0.13.1
+
+*Released 12/11/2015*
+
+**Notes:**
+
+- We are aware of issues running in CI with Linux builds, and are working through those issues.
+
+**Bugfixes:**
+
+- Prevent headless / CI from throwing errors on `history.pushState` and `history.replaceState`.
+- Prevent edge case where `aliasing` in the command log was aliasing the wrong command
+- Prevent XHR's from throwing errors on `arraybuffer` content. Properly set `xhr.responseBody` for `XML`, `blob`, and `arraybuffer`.
+- Headless running is now fixed in OSX. This was due to a bug with app signing + unzipping via the CLI.
+
+# 0.13.0
+
+*Released 12/9/2015*
+
+**Summary:**
+
+- Though it may not look like much, this upgrade was a long time in the making. There were limitations in the way we were currently handling headless / CI builds which restricted our ability to make updates or fix bugs. Additionally CI runs would randomly crash for no good reason. We decided to split out the headless / CI process into it's own independent Chromium application which is now independently controlled, and is much more reliable. This upgrade enables us to handle CI features coming down the pipe and was necessary for moving forward.
+
+**Features:**
+
+- Upgraded `Chromium` for headless and CI runs from `41` to `45`.
+- You will now see better stack traces and errors when running headlessly / in CI. No more `undefined is not a function` errors.
+- Ported all links to use the new Cypress CDN.
+- [Documentation + updates for the CLI tool](https://github.com/cypress-io/cypress-cli).
+
+**Bugfixes:**
+
+- New chromium upgrade prevents synchronous XHR freezes.
+- New chromium upgrade fixes situation where extremely long CI runs would sometimes randomly crash.
+- Fixed problem with rewriting content on elements which contained `<svg>` elements.
+
+**Breaking Changes:**
+
+- Temporarily ignoring the `--reporter` option for headless / CI runs. Currently it is locked to the `spec` reporter, which is the default. This will be fixed in the next few patch releases.
+- ~~Accessing `window.history.go()`, `window.history.back()`, `window.history.forward()` will throw an error when running headlessly / CI. This is a regression that will be fixed - hopefully very soon.~~ This is fixed in [`0.13.3`](#0-13-3)
+- While this new Chromium application passes our internal tests, it may crop up other regressions we aren't aware of. If you're experiencing different behavior in CI vs running locally in Chrome, this may be an indication of these.
+
+# 0.12.8
+
+*Released 12/2/2015*
+
+**Features:**
+
+- There is now a new [Errors Page](https://on.cypress.io/guides/errors) which will provide additional explanation when you are getting errors from Cypress. These errors will be directly linked to (like how Angular provides errors).
+- Instead of hard coding external documentation, we now link everything through a redirection portal. This will prevent any links / documentation from ever breaking due to reorganization or renaming.
+- Cypress now throws a specific error message (with a link to further explanation) if you attempt to run commands outside of a test. Usually this happens accidentally when you write `cy.commands` inside of a `describe` or `context` block instead of the `it`. I've wasted too much time and almost bombed entire presentations / demos so I've finally stopped this from ever happening again. If you ever see this error message, trust me, you will forever thank me.
+- The error message: `Cannot call cy.method() because the current subject has been removed or detached from the DOM.` has been rewritten to provide much clearer information on why this is happening, including a string representation of your DOM element. Additionally it will have its own error page dedicated to explaining how this happens and what you can do to prevent it.
+
+**Misc:**
+
+- Rewrote error message which is displayed when Cypress cannot parse your test / spec file. Now a list of suggestions are given and an external link is provided which further explains how this may happen.
+- Clarified the "Default Message" page when you have not {% url `cy.visit()` visit %} your application yet.
+- Whitelisted `.coffee`, `.scss`, `.less` XHR's from displaying in the Command Log.
+
+# 0.12.7
+
+*Released 11/30/2015*
+
+**Bugfixes:**
+
+- Prevent passing `{multiple: true}` incorrectly showing up in Command Log. Fixes [#88](https://github.com/cypress-io/cypress/issues/88).
+- Properly whitelist resource like XHR's which have query params such as jquery's `{cache: false}` option.
+- Correctly take into account `<base>` tag on XHR's. Fixes [#89](https://github.com/cypress-io/cypress/issues/89).
+
+# 0.12.6
+
+*Released 11/29/2015*
+
+**Features:**
+
+- There are now [Getting Started](https://on.cypress.io/guides/installing-and-running) docs including [configuration options](https://on.cypress.io/guides/configuration) for `cypress.json`
+- Cypress now silently restarts the server whenever it detects a change to `cypress.json` - meaning you no longer have to manually reboot the server for changes to be picked up.
+- There is a new [`Cypress.config`](https://on.cypress.io/api/config) interface - akin to [`Cypress.env`](https://on.cypress.io/api/env) which provides access to configuration values.
+
+**Bugfixes:**
+
+- Setup/Teardown code was not properly running on nested mocha `before`hooks which caused the error: `The XHR server is unavailable or missing...`. Fixes [#80](https://github.com/cypress-io/cypress/issues/80) and [#86](https://github.com/cypress-io/cypress/issues/86).
+- Prevent accidental mutation of {% url `cy.server()` server %} options when {% url `cy.route()` route %} was provided options. Fixes [#85](https://github.com/cypress-io/cypress/issues/85) and [#84](https://github.com/cypress-io/cypress/issues/84).
+- Using {% url `cy.title()` title %} would incorrectly search the `<body>` for title elements, and is now restricted to only searching in the `<head>`
+- Cross-Origin requests are now proxied by Cypress. In other words their URL's are transparently rewritten which bypasses CORS problems. This is a quick fix which should satisfy most of the problems users were having with CORS requests. However there is a much bigger change coming in `0.14.0` where the entire proxy layer will be rewritten to accommodate CORS, `window.fetch` and `domain cookies` flawlessly. As it stands Cypress is prone to errors in complex setups.
+
+**Misc:**
+
+- Exposed `visitTimeout` and `requestTimeout` [configuration options](https://on.cypress.io/guides/configuration).
+- Increased `visitTimeout` from `20s` to `30s`.
+- {% url `.click()` click %} will now throw if you are attempting to click more than 1 element. Pass `{multiple: true}` to enable this behavior again. Each element will be clicked serially and inserted into the Command Log.
+
+# 0.12.5
+
+*Released 11/22/2015*
+
+**Features:**
+
+- Errors reading / writing `cypress.json` on project add are now displayed inline.
+
+**Bugfixes:**
+
+- Prevent app crashing when `cypress.json` could not be read or written to when adding a project.
+
+**Misc:**
+
+- App crashes now send a full stack trace (instead of 10 line truncation).
+- Better error handling + error messages when trying to read / write from `cypress.json`.
+
+# 0.12.4
+
+*Released 11/19/2015*
+
+**Features:**
+
+- There is a new [`Cypress.Cookies`](https://on.cypress.io/api/cookies) interface which enables you to `get`, `set`, and even `preserve` cookies throughout your test. Useful to preserve cookie-based sessions between your tests. [Documentation is written here](https://on.cypress.io/api/cookies).
+
+**Bugfixes:**
+
+- Removed problematic `content-security-policy` headers
+- Fixed situation where Cypress was not injected correctly when `<head>` tag had attributes
+- Prevent [`fixtures`](https://on.cypress.io/guides/creating-fixtures) from being accidentally overwritten and having their content blanked out. There was a very subtle chance due to node's async file writing that as a file was being written with a formatted fixture, that another call to the same fixture would read in at that exact moment. If this happened the 2nd read would resolve with zero bytes, which would then end up rewriting the file back with zero bytes.
+
+**Misc:**
+
+- `alerts` are automatically accepted now and a message logs to the console.
+- Added retina favicon. Fixes [#83](https://github.com/cypress-io/cypress/issues/83).
+- Removed nested `cypress` object in the `cypress.json`. Existing `cypress.json` files are transparently rewritten on the next server boot, so you can check in the modified `cypress.json` and all will be well. Fixes [#82](https://github.com/cypress-io/cypress/issues/82).
+- Improved performance of formatting fixtures.
+
+# 0.12.3
+
+*Released 11/04/2015*
+
+**Bugfixes:**
+
+- Prevent {% url `.pause()` pause %} from actually pausing when running headlessly.
+- Fix for {% url `cy.request()` request %} SSL issues when host certificates were self signed.
+
+# 0.12.2
+
+*Released 11/01/2015*
+
+**Features:**
+
+- There is now a `cy.cmd` and `cy.command` method which enables you to invoke commands by their string name. This is most useful when using *namespaced* custom commands. So `Cypress.addParentCommand("dashboard.setSlider", ...)` can be accessed by `cy.cmd("dashboard.setSlider", arg1, arg2)`. (Docs have not been written yet).
+- `Environment Variable` support has been added and can be accessed in your tests with [`Cypress.env`](https://on.cypress.io/api/env). The docs have been written [here](https://on.cypress.io/guides/environment-variables) and [here](https://on.cypress.io/api/env).
+
+**Misc:**
+
+- The `URL` property on all XHR's is now completely decoded, even on URL's which were originally encoded. The reason is for easier assertions and debugging. This `URL` property is specific to Cypress and does not actually affect the underlying XHR.
+
+# 0.12.1
+
+*Released 10/28/2015*
+
+**Bugfixes:**
+
+- {% url `cy.route()` route %} will no longer throw that a response is needed when using [`cy.server({stub: false})`](https://on.cypress.io/api/server).
+- Applying server defaults to `Cypress.Server.defaults({})` now {% url 'works as documented' cypress-server %}.
+- `onRequest` and `onResponse` can now be correctly set as permanent server defaults.
+- XHR `URL` is now decoded to make assertions easier. Fixes [#75](https://github.com/cypress-io/cypress/issues/75).
+
+# 0.12.0
+
+*Released 10/23/2015*
+
+**Summary:**
+
+- XHR handling has been rewritten to be much more flexible, extensible, and future-proof.
+
+**Breaking Changes:**
+
+- The object you receive after waiting on an XHR alias is now different. Previously this was a `FakeXMLHttpRequest` object which came from `sinon`. Now it is a special `XMLHttpRequest` object which comes from Cypress. You may need to rewrite some of your assertions but we've tried to keep the signatures as close as possible.
+- The XHR's `url` property will now always return you a `Fully Qualified Domain Name` including the origin, port, host, etc. Previously the `url` property represented whatever the `XHR` was opened with. We've worked around this difference by when checking whether an XHR should be stubbed, the origin is tested both as present and omitted.
+
+Deprecations:
+- Accessing `requestJSON` or `responseJSON` on XHR objects is deprecated, and will be removed in the next version. Accessing those properties will throw a warning which explains how to rewrite these.
+- `cy.respond` is *temporarily* deprecated because the semantics of how this works is completely different and will require more work (mentioned later on) before this can be re-enabled again.
+
+**Features:**
+
+- All XHR's (regardless of whether they are stubbed or not) are now logged in the Command Log. Stubbed XHR's display as "XHR Stub" vs vanilla "XHR".
+- Stubbed XHR's will now show up in the `Network Tab` in Dev Tools. In other words they will *really* go out and you'll be able to inspect them just like regular XHRs.
+- Regular XHR's can now be aliased and waited on without actually being stubbed by passing `{stub: false}` to the {% url `cy.route()` route %}.
+- XHR's will continue to work correctly even *after* a test ends. In previous versions, due to replacing the entire XHR object, your application would not work correctly after a test ended. This prevented you from "navigating around" and working with your app after the tests end.
+- Servers can now be disabled in the middle of a test. Previously once a server was started all XHR's would be stubbed.
+- You can now disable the force sending of `404` to all XHR's which are not stubbed. This allows you to mix and match, enabling some requests to be stubbed and others to hit your server and respond normally.
+- The default XHR configuration can now be overwritten in a single area.
+- Many new configuration options are available for controlling how XHR's are stubbed.
+- XHR's now include an `Initiator` stack regardless of whether they're stubbed. The `Initiator` stack includes the stack which caused the XHR to be created and sent.
+- The `onConsole` information related to an XHR has been updated to make it easier to understand why a route was or was not stubbed, and it's associated request and response headers.
+- Response headers on XHR stubs will now automatically set their `Content-Type` based on the stub response. Previously this would always set to the `Content-Type` to `application/json`. Now if you force a response to be text or html, the `Content-Type` response header will be set appropriately.
+- You can now force other additional response headers to be sent on stubbed XHRs.
+- XHR's now snapshot twice - when the request is made and when the response is returned.
+- Removed sending `sinon` on every {% url `cy.visit()` visit %}.
+- The XHR object which is returned to you to via [`cy.wait("@xhrAlias")`](https://on.cypress.io/api/wait) is now more consistent with other return values such as {% url `cy.request()` request %}. It should be much easier to work with `request body`, `request headers`, `response body` and `response headers`.
+
+**Bugfixes:**
+
+- Routes no longer display as duplicated in between test runs when {% url `cy.server()` server %} is started prior to a {% url `cy.visit()` visit %} and you cause a full page refresh, which caused all routes to be re-bound.
+- Any issues related to `requestJSON` or `responseJSON` being duplicated are now fixed. Fixes [#65](https://github.com/cypress-io/cypress/issues/65).
+- Fully Qualified XHR's which should be proxied are now correctly transparently rewritten to prevent CORS problems.
+- {% url `cy.route()` route %} - `onRequest` and `onResponse` callbacks are now called with `cy` as the context.
+- Whitelisting assets which should never be stubbed has been improved. Now `.jsx` templates pass-through correctly.
+- CORS Network Errors are now correctly caught.
+
+**Misc:**
+
+- All `ng` based commands now display in the Command Log.
+- The built in XHR response delay has been removed since now all requests really go over the HTTP stack, which inherently has its own delay. You can still optionally force responses to be delayed by a set amount.
+
+Almost there:
+- Support for the native `fetch` object.
+- Configuration to automatically force Cypress to wait for outstanding XHR's (like it does for other Page Events). This would mean when testing more traditional apps without XHR stubbing, commands would automatically wait until all outstanding XHR's complete. The internal retry loop needs to be rewritten to make this possible, but the XHR architecture is now there.
+
+# 0.11.13
+
+*Released 10/08/2015*
+
+**Bugfixes:**
+
+- Prevent rejected promise from causing error about invalid API key during a CI run.
+
+**Misc:**
+
+- Better error handling of rejected promises.
+
+# 0.11.12
+
+*Released 10/07/2015*
+
+**Features:**
+
+- Snapshots can now be named and a command can have multiple snapshots.
+- Multiple snapshots are now cycled automatically on hover, and the name of the snapshot is displayed.
+- Most of the action commands now take multiple snapshots (giving you a precise look at an action prior to it happening, and then afterwards).
+
+**Bugfixes:**
+
+- Fixed situation where an `Uncaught Error` was not being properly handled. Cypress would incorrectly continue to retry commands instead of anceling them, which lead to incorrect errors downstream in other tests.
+- Fixed situation where an error being thrown from an XHR was being improperly handled (in a slightly different way than the problem above).
+- Stopped sending CI data when `cypress run` was issued.
+
+**Misc:**
+
+- CSS Improvements
+
+# 0.11.11
+
+*Released 10/04/2015*
+
+**Bugfixes:**
+
+- Snapshots of {% url `.type()` type %} and {% url `.select()` select %} are no longer incorrect due to aking snapshot too early. Fixes [#22](https://github.com/cypress-io/cypress/issues/22).
+- Passing `{force: true}` to {% url `.blur()` blur %} now logs correctly in the Command Log.
+
+**Misc:**
+
+- Added delays on some tooltips.
+- The URL will now highlight in a yellow background during a revert DOM snapshot.
+- Moved snapshot message to be affixed to the bottom of the remote app in preparation for cycling through multiple snapshots.
+- Cleaned up the URL by removing some unused content.
+
+# 0.11.10
+
+*Released 10/04/2015*
+
+**Features:**
+
+- {% url `.blur()` blur %} now accepts `{force: true}` which removes error checking such as validating the element is urrently in focus.
+
+**Bugfixes:**
+
+- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in `cypress run` or `cypress ci`.
+
+**Misc:**
+
+- Removed `cy.inspect` command.
+- Added Cypress logo to nav.
+- CSS changes.
+
+# 0.11.9
+
+*Released 10/03/2015*
+
+**Features:**
+
+- Added `.zip` as acceptable fixture extension. Content is sent back as `base64`.
+- Added docs to nav, consolidated `organize` into `tests`.
+- Added favicon.
+- Added tooltips everywhere.
+- Created new debugging command: {% url `.pause()` pause %} which will pause executing commands and allow you to resume or tep into the next command one at a time.
+- You can now stop and restart tests from the UI.
+- Added `cy.Blob` utilities for `blob` / `string` / `base64` conversion. Useful for manually handling uploads.
+
+**Bugfixes:**
+
+- "Cannot revert DOM while tests are running" now removes itself correctly.
+- Aliased DOM objects are now correctly stored on the test's `ctx` as instances of **your** jQuery (if one exists).
+
+**Misc:**
+
+- Updated UI styles / tests list / run all.
+- Fixed alt tray icon so it shows up correctly on click.
+
+# 0.11.8
+
+*Released 09/25/2015*
+
+**Features:**
+
+- Added {% url `cy.request()` request %} command which can issue XHR requests. The request is generated outside of the rowser, and bypasses all CORS restrictions. Great for talking to an API for seeding, querying, building, etc.
+
+**Bugfixes:**
+
+- Prevented edge case with {% url `cy.fixture()` fixture %} where it would not be able to be cancelled without throwing an nhandled rejection error.
+
+# 0.11.7
+
+*Released 09/25/2015*
+
+**Bugfixes:**
+
+- The debug window now works again.
+- Changed `Linux` build strategy which fixes not saving the internal `.cy cache`. Also fixes not being able to update from the GUI. Fixes #66](https://github.com/cypress-io/cypress/issues/66).
+
+# 0.11.6
+
+*Released 09/25/2015*
+
+**Bugfixes:**
+
+- Viewport is now properly restored to the default width / height after on subsequent runs. Previously it would retain the last viewport sized sed until there was a new viewport command.
+- [`cy.should('contain', '...')`](https://on.cypress.io/api/should) now correctly escapes quotes and single quotes.
+- Assertion messages are no longer truncated, and instead will scale down by reducing the `font-size` and `line-height` after they exceed 110 characters. So you'll now always see the full assertion message.
+- Fixed some scenarios where assertions would not be logged as a child command.
+- Assertions based around the `window` or `document` object no longer cause `chai` to bomb on formatting their object structures (due to yclic references) and instead now will show up as `<window>` and `<document>`.
+
+**Misc:**
+
+- {% url `cy.window()` window %} now logs out to the `Command Log` and additionally verifies upcoming assertions.
+- {% url `cy.document()` document %} now logs out to the `Command Log` and additionally verifies upcoming assertions.
+- Removed `numElements` label on assertions which indicated the number of elements found if > 1. This was annoying and redundant since the inked command already had this number.
+
+# 0.11.5
+
+*Released 09/20/2015*
+
+**Features:**
+
+- The `Linux` version of Cypress now works correctly for GUI Desktop versions (tested on Ubuntu Desktop). Previously it would only work eadlessly in server versions. The `tray` used in OSX does not work with the `Linux`, so in `Linux` we just use a standard window + menu.
+- Added Desktop Icon.
+
+**Bugfixes:**
+
+- Cypress now forces the initial {% url `cy.visit()` visit %} not to be cached by the browser. This was incorrectly being ached which meant when you changed the {% url `cy.visit()` visit %} it would not actually go out and fetch the new contents. reviously you had to check `Disable Cache` in the `Network Tab` inside of Chrome to prevent this bug. Unfortunately this has a significant erformance drawback. If you use a {% url `cy.visit()` visit %} before each test you will notice a degrade in performance ecause this request is no longer cached. This is a temporary problem until Cypress implements a more sophisticated caching strategy which ptimizes these concerns. There is a lot to improve in this arena but it will take more time before it's implemented.
+- {% url `.should()` should %} will no longer throw an error when it is used as a `parent command` and has a callback unction signature, and that callback function throws outside of an assertion. Instead now it logs correctly, handles the error, and displays his error for you.
+
+**Misc:**
+
+- Many additional tests added to the multi-os deployment process.
+- When Cypress opens other windows they are now auto-focused.
+
+# 0.11.4
+
+*Released 09/17/2015*
+
+**Features:**
+
+- {% url `.should()` should %} now accepts a callback function which will be retried until it does not throw. The callback unction will be retried in the exact same way as passing regular string-based chainers to {% url `.should()` should %}. aving a callback function gives you an opportunity to *massage* the expected subject such as comparing multiple elements, creating an array of ext or classes, etc.
+
+Deprecations:
+- `cy.wait(function)` has been deprecated and you can safely rename this command to {% url `.should()` should %}.
+
+**Misc:**
+
+- All of the docs surrounding [Assertions](https://on.cypress.io/guides/making-assertions), {% url `.should()` should %}, and {% url `.and()` and %} have been updated to reflect the new API.
+
+# 0.11.3
+
+*Released 09/16/2015*
+
+**Features:**
+
+- When XHR's are aborted Cypress will display the stack trace indicating where in your app the XHR was aborted. Additionally it will display s `(aborted)` in the command log.
+
+**Bugfixes:**
+
+- XHR's will no longer be ended early and display no status as if there was no response. Fixes [#63](https://github.com/cypress-io/cypress/issues/63).
+- XHR's which are aborted no longer cause an `INVALID_STATE_ERR` to be thrown. Fixes [#62](https://github.com/cypress-io/cypress/issues/62) and [#34](https://github.com/cypress-io/cypress/issues/34).
+- Cypress will no longer incorrectly revert to a previous test run's snapshot when tests are re-run.
+
+# 0.11.2
+
+*Released 09/14/2015*
+
+**Bugfixes:**
+
+- Prevented bug where the assertion message: `expected <x> element to exist` would log over and over again when Cypress retried querying for a OM element.
+
+**Misc:**
+
+- {% url `.root()` root %} now outputs its subject when clicking on its command log. Fixes [#55](https://github.com/cypress-io/cypress/issues/55).
+
+# 0.11.1
+
+*Released 09/14/2015*
+
+**Bugfixes:**
+
+- Utilizing {% url `cy.server()` server %} across multiple tests before a {% url `cy.visit()` visit %} now orks correctly. As a side effect now Cypress will rebind both the `server` and all `routes` **whenever** the remote window is reloaded (for hatever reason) - even during a test itself. This means you can navigate between pages without ever having to restart the server or routes (hey will automatically rebind) when the window loads. Fixes [#59](https://github.com/cypress-io/cypress/issues/59).
+
+**Misc:**
+
+- Providing a "number-string" as in: `should("have.length", "1")` will no longer throw an error.
+- Internal API changes for `$Commands`.
+
+# 0.11.0
+
+*Released 09/13/2015*
+
+**Summary:**
+
+- This release marks a major change in the underlying algorithms used to prevent testing flake. It is a major goal of Cypress to combat and revent **all** test flake. These algorithm changes go a long way towards making this a reality, and have been months in the making.
+- Cypress can now predict upcoming assertions and modifies its behavior until the intended state has been reached.
+- Command options `exist` / `visible` / `length` have been deprecated, these were confusing and limiting, and the same result can now be chieved using normal assertions. The end result is much more robust and much easier to understand.
+
+**Features:**
+
+- Commands which precede assertions will now look downstream at those assertions and not resolve until their subject's state passes all ssertions. Previously this was **sort of** implemented using *Command Options* and the `eventually` flag, but now this is the default ehavior. *Command Options* only worked on DOM-based subjects, and now the new assertion verification works on everything else (including RL-based commands, etc). What this means is that Cypress can predict what you are requesting and automatically modifies its behavior until his state is reached. This prevents test brittleness / random test flake. Additionally this removes ever having to use [`cy.wait(Number)`](https://on.cypress.io/api/wait) or `cy.wait(Function)` (though this is still a valid command). As a side effect, you will now see commands + heir assertions in the spinning pending blue state. When assertions fail their associated command also fails at the same time. This visually epresents the coupling between these two concepts. Another side effect is that `timeout` options do not need to be provided on the succeeding ssertions, and can instead just be provided on the proceeding command. All of the coupled assertions will automatically be retried to the aximum `timeout` setting. Fixes [#43](https://github.com/cypress-io/cypress/issues/43).
+- Action commands will now insert an artificial delay after resolving to enable modern JavaScript frameworks time to *flush* their run loops. napshots are delayed until after the action, resulting in more accurate snapshots because JavaScript frameworks would not process these DOM vents until `N` milliseconds after they occurred. This has the unfortunate side effect of *decreasing* performance by about *5-10%* but the nd result is that it is much easier to debug and Cypress is less prone to flake caused by modern JavaScript frameworks. This change comes fter collecting many data points and this was one of the easiest changes that help reduce flake. For users that don't use the latest and reatest JavaScript frameworks, this action delay can be reduced through `cypress.json` which may speed up large test suites.
+- Aliasing custom commands now intelligently figures out where to apply the alias without being specified inside of the actual custom command.
+- The algorithm for replaying aliased commands is now much more accurate, handles stale element references better, and will not replay ommands which have a side effect (like action commands). The end result is Cypress will now almost always find the desired element by etermining the minimum number of re-queries and is not susceptible to stale element references. Additionally using assertions on aliased lements now works (where previously using a *Command Option* on an alias would just be ignored. This was crazy difficult to implement but hould be 100% solid. Fixes [#36](https://github.com/cypress-io/cypress/issues/36).
+- Assertions which actually produced 2 assertions (under the hood) such as `should('have.attr', 'href', '/users/1')` will now only log the 2nd ssertion, unless the first fails.
+- Previously using `eventually.have.length` was impossible (and this would throw an error), but now this works as you'd expect with the default `should('have.length')`.
+
+**Bugfixes:**
+
+- Aliased commands now correctly output a command log again when they are replayed.
+- Assertions that involved an `{exp}` property are no longer incorrectly substituted with the `#{this}` subject.
+- Removed special logic for *Angular* which tapped into its digest cycle for queueing commands. This had unpredictable results when there was n `interval` set, and is now superseded by the new queueing system anyway (which is more performant).
+- `Sinon's` formatting of failed `spy` or `stub` calls is horrendously non-performant and would sometimes choke the CPU for several seconds. his formatting has been completely removed and will be replaced by something less insane later on. At the moment you can still use the built n Cypress debugging (clicking on a command log, etc) to see what the actual values were. Fixes [#18](https://github.com/cypress-io/cypress/issues/18).
+
+**Misc:**
+
+- The internal retry loop of Cypress now runs at `60fps`, instead of `20fps`.
+- Cypress overrides chai's default inspection function for DOM elements meaning instead of seeing `{ Object (0, length, ...) }` you will now ee the nicely formatted Cypress DOM element like: `<button#primary.btn-large>`.
+- Cypress now overrides chai's `match` chainer and provides a specific error message when a non `regex` value is provided. Fixes [#58](../ssues/58).
+- Cypress now handles `length` and `exist` assertion chainers in a very specific way, providing a detailed message on failure, and utomatically slices out any stale element references.
+- The `contain` assertion chainer from `chai-jquery` has been extended to match the same selector logic as [`cy.contains()`](https://n.cypress.io/api/contains) - meaning it now checks the `value` of `input[type=submit]`.
+- Tweaked the label for displaying the number of elements a command resolved with (now displays 0 differently than > 1).
+- Removed the `eventually` flag in assertions as now this is the default behavior on normal assertions.
+- Deprecated all *Command Options*. You will see a very nice and simple error message explaining how to convert these to assertions.
+- {% url `.within()` within %} can now be silenced with `{log: false}`.
+- Many error messages have been rewritten to be much more fluent and easier to understand.
+
+**Other News:**
+
+- Cypress is currently seeking to raise a Series A. This will enable us to grow the team and speed up development but seeking it has come at a ost for current development speed. If you have any VC connections [please send them our way](mailto:support@cypress.io).
+
+# 0.10.8
+
+*Released 08/21/2015*
+
+**Features:**
+
+- Reporters in CI can now be specified.
+- Added `teamcity` reporter.
+
+# 0.10.7
+
+*Released 08/16/2015*
+
+**Features:**
+
+- Port can now be specified as a CLI argument and will override any values stored in `cypress.json`.
+
+**Misc:**
+
+- When running through the CLI, Cypress will now display an error if the server's port is currently in use. Previously this would not output an rror and the process would just hang.
+
+# 0.10.6
+
+*Released 08/15/2015*
+
+**Bugfixes:**
+
+- Fixed edge case where Cypress would not correctly handle `POST` or `PUT` requests with a `JSON body`. These requests would just hang and ventually time out.
+
+**Misc:**
+
+- Project ID's can be programmatically set now.
+
+# 0.10.5
+
+*Released 08/13/2015*
+
+**Bugfixes:**
+
+- Running a specific test won't open/close immediately when starting up (fixes weird flickering effect).
+- {% url `.check()` check %} and {% url `.uncheck()` uncheck %} commands will now correctly "end" even if they were `noop` due to the element already being in a checked or unchecked state.
+
+**Misc:**
+
+- Currently running tests now display a spinner to indicate they are currently running.
+- Optimized performance of command lists.
+- Commands which were silenced with `{log: false}` will now always display in the Command Log if they were part of a replayed chain of commands ue to an alias reference becoming stale. Previously they would not display which was very confusing.
+- `sinon.js` is no longer minified.
+
+# 0.10.4
+
+*Released 08/11/2015*
+
+**Bugfixes:**
+
+- The OSX Cypress App was not being properly signed (since 0.10.0) due to an oversight in our deployment process. This has been fixed now and dditional checks have been added to ensure the deploy'd version is properly signed. Updating within the app was unaffected. This bug only ffected fresh downloads from the internet.
+- Errors / crashes encountered when updating to newer versions through the app should be fixed now.
+
+# 0.10.3
+
+*Released 08/10/2015*
+
+**Bugfixes:**
+
+- Cypress Errors in `hooks` (beforeEach, etc) will no longer cause Mocha to fire its `end` event thus ending the entire run. In CI, this would ause the test suite to end early. Uncaught Mocha errors will however continue this behavior. Cypress does not yet have a "skipped" visual state or tests which were skipped, so at the moment it may look a little strange and unpredictable.
+
+**Misc:**
+
+- Tweaked clicking algorithm to re-verify an elements visibility anytime the click retries its `retry` logic. Previously this check only appened once at the beginning of the click.
+- In CI, the window size (not the viewport) has been changed from `1024x768` to `1280x720`. This will only affect `screenshot` artifacts which re taken automatically with {% url `cy.screenshot()` screenshot %} (coming soon) or whenever a test fails (also coming soon).
+
+# 0.10.2
+
+*Released 08/10/2015*
+
+**Bugfixes:**
+
+- Memory Optimizations in CI.
+- Reduce noise in logs.
+- Prevented external NODE_ENV mutations causing problems in CI.
+
+**Misc:**
+
+- Better error tracing.
+
+# 0.10.1
+
+*Released 08/07/2015*
+
+**Bugfixes:**
+
+- Fixed missing dependency for CI.
+
+**Misc:**
+
+- Cypress now logs out your project's API key on a failed CI run.
+
+# 0.10.0
+
+*Released 08/06/2015*
+
+**Summary:**
+
+- Cypress is now able to run all the tests, run headlessly, and includes support for Linux and CI. Additionally, most of the functionality of he GUI Desktop App can now be accessed through command line arguments.
+- Because each operating system requires a specific build of Cypress - a new CLI tool has been created which abstracts away these differences nd orchestrates the Desktop App regardless of which OS you are running.
+- This [CLI tool is now published on NPM](https://www.npmjs.com/package/cypress), though the documentation still needs to be written.
+- There is now a download service to access the latest version of Cypress and previous versions.
+- Cypress aims not only to make it easier to write tests, but after you build a test harness, it will make it easier to dive into failed tests (hat run in CI). This release paves the way for providing after-run results and allowing you to dive into those failures.
+
+**Breaking Changes:**
+
+- Due to security upgrades, adding projects in previous versions will no longer work. Upgrade and everything should be okay.
+
+**Features:**
+
+- The latest version of Cypress can be downloaded here: [http://download.cypress.io/latest](http://download.cypress.io/latest).
+- Cypress can alternatively be downloaded / installed / managed through the CLI utility.
+- Cypress can now be run headlessly through the terminal.
+- You can now run all of your tests inside of the GUI App.
+- You can use the CLI tool to run Cypress in CI. The documentation for this needs to be written, but it will be very simple to do. You will robably only have to write 2 lines in your CI scripts to run Cypress.
+- You can configure CI to use any reporter built into Mocha, and additionally we are adding JUnit XML output (for Jenkins) as a built in default.
+- You can write your own custom reporter which Cypress can use in CI.
+- Console output from your apps is suppressed while running headlessly.
+
+**Bugfixes:**
+
+- Several security problems with projects have been closed in preparation for running in CI.
+- Extensive memory profiling has been done and Cypress has implemented several strategies for aggressively causing garbage collection. The ebugging tools (which allow you to walk back in time through DOM snapshots, or access objects from previous tests) could exhaust all available emory in previous versions. This likely never affected most users, but if a user ran 1000's of tests (which have been written in Cypress) it ould bomb. Now Cypress only stores data for up to 50 tests, and will begin purging data past that. When run headlessly, Cypress doesn't apply ny of its debugging tools, so CI will be unaffected.
+- Several instances of memory leaks were plugged up.
+
+**Misc:**
+
+- Everything except for the `cypress driver` is now minified.
+- Some users have reported problems upgrading previous versions. This is because we changed the name from "cypress" to "Cypress" including some inaries. If your upgrade does not finish you can simply redownload the latest version of Cypress or use the CLI tool to reinstall it.
+- Our build and testing processes have been upgraded to accommodate Linux builds.
+- Sinon object formatting during errors has been suppressed (when using spies/stubs) due to its horrendous performance when comparing deeply nested objects. This means you won't see the (mostly) useless error output from Sinon, but given Cypress debugging tools you can still inspect objects and figure out what went wrong.
+
+# 0.9.6
+
+*Released 07/27/2015*
+
+**Bugfixes:**
+
+- Fixed server crash on improperly handled proxy error.
+- Upgraded logic to redirect back to the Cypress client app on manual URL changes.
+
+# 0.9.5
+
+*Released 07/14/2015*
+
+**Features:**
+
+- {% url `.click()` click %}, {% url `.type()` type %}, {% url `.clear()` clear %}, [`.select()`](https://on.cypress.io/api/select), {% url `.check()` check %}, [`.uncheck()`](https://on.cypress.io/api/ncheck) now will wait for the subject to automatically become visible instead of throwing immediately if the element is not in a visible state.
+
+**Misc:**
+
+- Swapped out ugly nonsense `refresh` icon to `square-o` to represent a test which has not run yet.
+
+# 0.9.4
+
+*Released 07/06/2015*
+
+**Features:**
+
+- {% url `cy.contains()` contains %}, {% url `cy.get()` get %}, and `traversal commands` will now all log out heir last known `$el` on failure. This means the `$el` will be highlight during Command Log hovering, and will display in the console on click. his should make debugging failed DOM based commands much easier. Fixes [#52](https://github.com/cypress-io/cypress/issues/52).
+
+**Bugfixes:**
+
+- Fixed edge case with {% url `cy.contains()` contains %} and command options `visible` and `exist` where it would always fail ven though the matched element was in the correct state.
+
+**Misc:**
+
+- {% url `cy.contains()` contains %} now throws when provided the command option: `length` because it will only ever return 1` element.
+
+# 0.9.3
+
+*Released 07/06/2015*
+
+**Features:**
+
+- Proxied jQuery: `$` onto `cy` as `cy.$` and specific class methods: `Event`, `Deferred`, `ajax`, `get`, `getJSON`, `getScript`, `post`.
+- Proxied `moment` onto `cy` as `cy.moment`.
+- The `url` will now automatically be restored when hovering over the Command Log to indicate the state of the URL at the time the command ran.
+- {% url `.click()` click %} now accepts an optional: `position` argument (`center`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`). Center is still the default.
+- {% url `.click()` click %} now accepts an optional `x` and `y` coordinate argument, which is relative to the top left corner of the element. Fixes [#50](https://github.com/cypress-io/cypress/issues/50).
+- [Click docs have been updated](https://on.cypress.io/api/click) to reflect these changes.
+
+**Bugfixes:**
+
+- `onBeforeLoad` and `onLoad` callbacks to {% url `cy.visit()` visit %} are now invoked with `cy` as the context.
+- Cypress logo now displays in `About Page`.
+
+**Misc:**
+
+- Internal refactoring to `Cypress.Mouse`.
+
+# 0.9.2
+
+*Released 07/04/2015*
+
+**Features:**
+
+- Added `About` page in desktop application annotating the current version.
+- {% url `cy.fixture()` fixture %} now supports these additional extensions: `.html`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.tif`, `.tiff`.
+- Image fixtures will be sent back as a `base64` string.
+- Html fixtures will be prettified and saved back over the original.
+
+**Misc:**
+
+- Added more tests around various areas of the desktop application and ID generator.
+
+# 0.9.1
+
+*Released 07/03/2015*
+
+**Features:**
+
+- {% url `cy.viewport()` viewport %} can now accept an `orientation` when providing a `preset`. Valid orientations are `landscape` and `portrait`.
+
+**Bugfixes:**
+
+- The scaffolded `spec_helper.js` now correctly returns its object literal in the `onConsole` callback.
+- {% url `.type()` type %} now correctly logs its message to the Command Log when provided options.
+- {% url `.type()` type %} has been upgraded to handle situations where as it's typing, 3rd party code mutates the value either synchronously or asynchronously. The caret is automatically moved to the end position matching browser behavior.
+
+**Misc:**
+
+- Deprecated `Cypress.command`, instead use `Cypress.Log.command` to output a Command Log. Updated scaffolding on new projects to reflect this change.
+- {% url `cy.contains()` contains %} now outputs much more explicit error messages when given command options. Fixes [#49](https://github.com/cypress-io/cypress/issues/49).
+- {% url `cy.route()` route %} no longer validates `response` value when `{respond: false}` is passed in as options. Fixes [#48](https://github.com/cypress-io/cypress/issues/48).
+- {% url `.invoke()` invoke %} and {% url `.its()` its %} will now log out the $el if it's a DOM object, which will now correctly highlight the $el during a command revert. Additionally if these commands have been called on a DOM object, their `onConsole` message will include the DOM objects.
+
+# 0.9.0
+
+*Released 07/02/2015*
+
+**Summary:**
+
+- {% url `cy.viewport()` viewport %} is a new command which will resize the viewport to a specified width and height. There is ow a default `viewport` size of `1000x660`. See [viewport docs](https://on.cypress.io/api/viewport).
+
+**Features:**
+
+- Your application's viewport dimensions will now automatically scale to fit regardless of your screen's size. This enables you to test resolutions larger than what your screen is capable of displaying. Additionally this fixes edge cases caused when there was a difference in viewports between users.
+- The viewport's dimensions will now dynamically display accurately as they are changed in the header area.
+- The viewport's scale will now dynamically display accurately as it is changed.
+- Each command will automatically restore the viewport to the dimensions at the time the command was issued. In other words, scrolling over each command will restore exactly what Cypress "saw" when it issued the command.
+- Several common viewport presets have been added for convenience
+
+**Misc:**
+
+- Cypress now requires a viewport to be issued at all times. By default it is `1000x660` but can be changed in your `cypress.json` file with he keys: `viewportWidth` and `viewportHeight`.
+
+**Bugfixes:**
+
+- Scrollbar styling is no longer hijacked by Cypress.
+
+**Misc:**
+
+- Updated remote application iframe styles.
+
+# 0.8.1
+
+*Released 06/30/2015*
+
+**Bugfixes:**
+
+- {% url `.select()` select %} will now fire a `focus` event on the `<select>` even if the window isn't in focus.
+- {% url `.click()` click %} has been upgraded to be more intelligent about firing `focus` events, and now takes into account the previously focused element.
+- {% url `.type()` type %} and {% url `.clear()` clear %} will not issue `change` events or `focus` events unnecessary when chaining together multiple actions which do not change the element or cause it to lose focus. Fixes [#47](https://github.com/cypress-io/cypress/issues/47).
+
+# 0.8.0
+
+*Released 06/26/2015*
+
+**Summary:**
+
+- {% url `.type()` type %} now implements all DOM events to simulate every aspect of typing on a real keyboard.
+- All of the [type docs have been updated](type) to reflect these changes.
+
+**Features:**
+
+- {% url `.type()` type %} now outputs "Key Events Table" which is a `console.table` of every key typed, the `charCode`, all vents that fired, and whether any were `preventedDefault`.
+- {% url `.type()` type %} now accepts the following special character sequences: `{selectall}`, `{del}`, `{backspace}`, `{esc}`, `{% raw %}{{{% endraw %}}`, `{enter}`, `{leftarrow}`, `{rightarrow}`.
+- {% url `.type()` type %} implements `cursor` and `selection` and `range` accurately like a real keyboard.
+- {% url `.type()` type %} now fires change events exactly like real browsers when `{enter}` is used.
+- {% url `.type()` type %} will fire `textInput` and `input` events exactly like a real browser. Fixes [#7](https://github.com/cypress-io/cypress/issues/7).
+- {% url `.type()` type %} now follows all of the spec in regards to `preventingDefault` on any event that would insert a character such as `keydown`, `keypress`, `textInput`.
+- {% url `.type()` type %} events should be `100%` identical to real browser `KeyboardEvents` including `charCode`, `which`, `keyCode`, `data`, etc.
+- {% url `.type()` type %} now inserts a small delay `10ms` between each keystroke to simulate a real user typing.
+- `input` events are now correctly fired when {% url `.select()` select %} chooses an `<option>`.
+- `change` events are now fired exactly how a browser does (when an input loses focus and its value has changed since its last focus event). You'll see these fire after you use {% url `.blur()` blur %} directly, or use another `action command` on another element.
+
+**Bugfixes:**
+
+- Using {% url `.type()` type %} in an `input[type=number]` will no longer prepend the value. Fixes [#26](https://github.com/cypress-io/cypress/issues/26).
+- `[contenteditable]` elements can now be focused and blurred.
+- `aborting` during {% url `.click()` click %} / {% url `.dblclick()` dblclick %} now correctly cancels remaining queued click/dblclick events.
+
+**Misc:**
+
+- `console.groups` are now collapsed by default.
+- {% url `.type()` type %} now validates the chars and will throw on anything other than a string or finite number.
+- {% url `.type()` type %} now throws on empty strings.
+- Removed several libs that used to handle typing simulation and rewrote typing from scratch.
+
+# 0.7.6
+
+*Released 06/23/2015*
+
+**Bugfixes:**
+
+- Prevent infinite loop due to a trifecta of rare circumstances with {% url `.click()` click %}. Clicking will now retry sync after it attempts to scroll past the element covering up the desired clickable element. Fixes [#46](https://github.com/cypress-io/cypress/issues/46).
+
+# 0.7.5
+
+*Released 06/19/2015*
+
+**Bugfixes:**
+
+- {% url `.click()` click %} now takes into account being covered by a fixed positioned element and will increase the window's scroll offset to account for this. There are still more improvements to be made before this is bulletproof though.
+- {% url `cy.contains()` contains %} could potentially resolve to a null subject if the matching content was split across multiple nested children elements. This has been fixed and contains will now return the first, deepest element which contains text potentially spread over multiple text nodes and/or children elements.
+
+# 0.7.4
+
+*Released 06/18/2015*
+
+**Misc:**
+
+- Attempting to {% url `.click()` click %} a select element will now throw an error. The error guides you to using the `.select()`](https://on.cypress.io/api/select) command, as that is the command you should use to change a `<select>` value.
+- {% url `cy.route()` route %} responses are now validated. If responses are `null` or `undefined` Cypress will throw a very specific error message.
+- Cypress will now display `cypress.json` parse errors when attempting to boot a project when there is a syntax error in `cypress.json`.
+
+# 0.7.3
+
+*Released 06/17/2015*
+
+**Features:**
+
+- {% url `.select()` select %} will now output a command log.
+- {% url `.select()` select %} will now have `click` / `focus` events fired on itself and the selected options (as per the pec).
+- {% url `.select()` select %} is now inline with the other `Action` commands and will retry until the element naturally becomes selectable.
+
+**Bugfixes:**
+
+- `Action` command options are now properly formatted, instead of saying `Object{4}` they will display the overridden default options - ie: `force`, `timeout`, `interval`.
+- Sending `{force: true}` to `Action` commands will no longer error out if the element is not visible. Forcing the action to take place now correctly removes all error checking prior to issuing the action and events.
+
+**Misc:**
+
+- Removed stack traces on `AssertionErrors` in the console since those come from `chai` and are basically useless.
+
+# 0.7.2
+
+*Released 06/17/2015*
+
+**Bugfixes:**
+
+- Removed factoring in the total time a test has been running when determining when its command timeout. This fixes a bug where commands down he chain would timeout earlier than their specified `{timeout: num}` option.
+
+# 0.7.1
+
+*Released 06/16/2015*
+
+**Bugfixes:**
+
+- DOM commands which can retry now correctly support `{timeout: num}` options which will raise the timeout beyond the standard `commandTimeout` rom `cypress.json`.
+- `<script>`, `<img>`, `<video>` commands or any other element which supports `crossorigin` attribute now are proxied correctly. The `crossorigin` attribute removes sending cookies with the HTTP request and now there is a fallback to figure out the `remoteHost` even in this situation.
+
+**Misc:**
+
+- Support for redirects with status code `303`.
+
+# 0.7.0
+
+*Released 06/15/2015*
+
+**Features:**
+
+- Cypress now has first class support for `fixtures` (official docs coming soon).
+- Introduced new {% url `cy.fixture()` fixture %} command.
+- Fixtures support `json`, `js`, and `coffee` files with image support coming soon.
+- Fixtures are automatically validated, with error messages propagating up to the client.
+- Fixtures are automatically formatted / indented for easy debugging.
+- Example fixture is automatically created with every project.
+- Example support files are now automatically created with every project.
+- {% url `cy.route()` route %} now accepts an **alias** as its response.
+- {% url `cy.route()` route %} additionally accepts a special `fixture:` or `fx:` keyword which automatically loads the fixture as the response.
+
+**Bugfixes:**
+
+- Clicking giant yellow CypressError now displays associated XHR error in the console.
+
+**Misc:**
+
+- RegExp arguments are now properly formatted in the command log.
+- Update `bluebird` to `2.9.27`.
+- Update `glob` to `5.0.10`.
+
+# 0.6.14
+
+*Released 06/11/2015*
+
+**Features:**
+
+- Command logging has been upgraded to support "page events", which are different than commands. Now events which happen (XHR/page load/url change/spies/stubs/mocks) log out visually differently and do not use a command number. This should be easier to parse what was a real command and what was a page event.
+- When the url changes this is now logged as a page event, and its `onConsole` logs what caused it to change.
+
+**Misc:**
+
+- Internal refactor / improvements to support long lived runnable objects to work with page events.
+- Request Commands (now page events) have now been renamed to 'XHR'.
+- {% url `cy.document()` document %} now returns the raw document object instead of a jQuery wrapped document object.
+- When {% url `.its()` its %} or {% url `.invoke()` invoke %} fails it will include the current subject n the `onConsole` log.
+- {% url `cy.wait()` wait %} now logs out when its referenced aliases, and its `onConsole` output displays the XHR return values.
+- {% url `cy.hash()` hash %} and {% url `cy.url()` url %} no longer pass the return value as the command log's `message`, which made no sense and was unlike every other command.
+
+# 0.6.13
+
+*Released 06/09/2015*
+
+**Bugfixes:**
+
+- Traversal methods now correctly return their `$el` even when `{log: false}` option is passed.
+
+**Misc:**
+
+- {% url `.type()` type %} now works with `contenteditable` attributes.
+
+# 0.6.12
+
+*Released 06/09/2015*
+
+**Bugfixes:**
+
+- When Cypress detects a `page loading` event it will now clear out the subject so the next commands cannot reference previous page DOM elements.
+- {% url `.check()` check %} and {% url `.uncheck()` uncheck %} will no longer output additional error'd commands when their associated `click` fails.
+
+**Misc:**
+
+- {% url `.type()` type %}, {% url `.clear()` clear %}, {% url `.check()` check %}, `.uncheck()`](https://on.cypress.io/api/uncheck) now all take `{force: true}` options to force the click to happen and skip additional clickable checks.
+- Now when you click the giant yellow failure messages if the error is a `CypressError` instead of logging nothing it will now find the command associated to that error and display the same message as if you clicked the failed command.
+
+# 0.6.11
+
+*Released 06/08/2015*
+
+**Bugfixes:**
+
+- {% url `.clear()` clear %} and {% url `.type()` type %} no longer output additional error'd commands hen their associated `click` fails.
+- Changed scrolling elements into view to use top strategy instead of bottom which fixes times where the middle of an element was not yet in he viewport. Fixes [#42](https://github.com/cypress-io/cypress/issues/42).
+
+**Misc:**
+
+- {% url `.submit()` submit %} now errors if its been called on >1 form element. Fixes [#41](https://github.com/cypress-io/cypress/issues/41).
+- Coordinates and hitboxes are now logged and displayed on {% url `.clear()` clear %} and [`.type()`](https://on.cypress.io/pi/type).
+
+# 0.6.10
+
+*Released 06/06/2015*
+
+**Bugfixes:**
+
+- Improved clicking algorithm to reduce edge cases where element could not be clicked but should have been able to be clicked.
+
+**Misc:**
+
+- {% url `.click()` click %} accepts `{force: true}` which will force it to issue the click event and bypass checking to ensure element is physically clickable.
+- Elements which are children of a container with `overflow` are automatically scrolled prior to a click (which is an abstraction around real user behavior).
+- Elements that are covering up an element you targeted for {% url `.click()` click %} are now logged out in the command console.
+- All elements are now logged out as real DOM elements instead of jQuery wrapped elements. This has several upsides. Chrome will allow you to immediately interact with these elements, drilling into their contents, displaying the element box model on hover, etc. This prevents you from having to expand the jQuery elements and click "Reveal in Elements Panel".
+
+# 0.6.9
+
+*Released 06/06/2015*
+
+**Bugfixes:**
+
+- Custom commands no longer error out if they are the very first `cy` command.
+
+# 0.6.8
+
+*Released 06/05/2015*
+
+**Features:**
+
+- {% url `cy.clearCookie()` clearcookie %} and {% url `cy.clearCookies()` clearcookies %} have been added as new commands.
+- Cypress will automatically clear all cookies **before** each test run.
+- Named the spec + app iframe so that inside of Chrome Dev Tools the iframe selector will clearly distinguish which iframe is your application versus Cypress.
+
+**Bugfixes:**
+
+- Hitbox is no longer covered up by element layers on DOM revert.
+- Finally tracked down and fixed edge case causing empty view to display when tests were not empty. Fixes [#13](https://github.com/cypress-io/cypress/issues/13)
+
+**Misc:**
+
+- {% url `cy.visit()` visit %} now accepts `{log: false}` to prevent logging out (useful in custom commands).
+- {% url `cy.contains()` contains %} is now scoped by default to the `<body>` instead of `document` which prevents it from returning elements in the `head` like `title`.
+
+# 0.6.7
+
+*Released 06/04/2015*
+
+**Features:**
+
+- When reverting the DOM, associated command elements are now automatically scrolled into view.
+- Hitboxes are now displayed on the screen based on the actual coordinates where an `action command` event took place.
+- Click events now display event information about the `mousedown` / `mouseup` / `click` default action + propagation in the command console.
+- Preventing default action on `mousedown` will no longer give focus as per the spec.
+- Click events are now issued in the exact center of an element (taking into account 2d transforms) and provide the coordinates in the command console and in the actual event
+- Click events now take into account whether the associated element is being covered up by another element, and will retry or fail with an exact error message if the click was unable to be issued due to this reason.
+- Click events will now intelligently provide `focus` to the first focusable element on the stack at the click coordinates, or will give `focus` to the window.
+- Click events will issue the click to the topmost element based on the click coordinates and not necessarily to the element you requested to e clicked (which simulates exactly how a real click works). If this happens it is noted in the command console and provides the `Actual Element Clicked`.
+
+**Bugfixes:**
+
+- When hover over commands element layers (2d transforms like rotation) are now taken into account and displayed correctly.
+- There was a bug when checking / unchecking `:checkbox` where it did not properly receive focus.
+
+**Misc:**
+
+- Click events are now replicated *almost* identically to the W3C click spec. They should behave for all intents and purposes, identically to real clicks in the browser.
+
+# 0.6.6
+
+*Released 05/31/2015*
+
+**Bugfixes:**
+
+- Fixed regression related to {% url `cy.visit()` visit %} not re-visiting when current match matches remote url.
+
+# 0.6.5
+
+*Released 05/23/2015*
+
+**Features:**
+
+- When Cypress detects a regular HTTP page loading event (where we're leaving the current page and requesting a new one) it will now insert a `loading` command which indicates to the user Cypress has stopped running commands until the new page loads.
+- If for some reason this new page errors Cypress will display the initial 500 error messages just like [`cy.visit()`](https://on.cypress.io/api/cisit).
+- Cypress now waits `20s` (which matches {% url `cy.visit()` visit %}) for the new page to load instead of `4s` previously.
+
+**Bugfixes:**
+
+- {% url `.submit()` submit %} will actually submit the form for real now, instead of just firing the submit event. Now its been upgraded to be able to be cancelled or have its returnValue set to false and will not submit the form. Don't ask how I missed this one. I as once a young naive programmer who trusted the DOM not to be the abomination it actually is.
+
+**Misc:**
+
+- No longer send back a 500 message when initial response status code is 4xx.
+
+# 0.6.4
+
+*Released 05/21/2015*
+
+**Bugfixes:**
+
+- Host header https protocol handling fixed.
+- Incorrectly handling query params on redirects fixed.
+- Other header edge cases fixed.
+
+# 0.6.3
+
+*Released 05/20/2015*
+
+**Misc:**
+
+- Cypress should work with self signed SSL certificates now.
+
+# 0.6.2
+
+*Released 05/20/2015*
+
+**Bugfixes:**
+
+- Using the `length` option in `querying` or `traversal` commands now logs out in the command log. Fixes [#40](https://github.com/cypress-io/cypress/issues/40).
+- Other scenarios are fixed where command options would show incorrect number of object keys due to a bug in underscore's `reduce` with an object that has a `length` key. Fixes [#35](https://github.com/cypress-io/cypress/issues/35).
+
+# 0.6.1
+
+*Released 05/15/2015*
+
+**Bugfixes:**
+
+- Using the `length` option in traversal commands works properly now. Fixes [#38](https://github.com/cypress-io/cypress/issues/38).
+- Command logging now works even if no `cy` commands have been issued. Fixes [#37](https://github.com/cypress-io/cypress/issues/37).
+
+**Misc:**
+
+- Removed cy proxy commands: `each`, `map`. These didn't really "fit" into the concept of a command, and with {% url `.invoke()` invoke %} or {% url `.its()` its %} they're accessible anyway, so nothing is really lost.
+
+# 0.6.0
+
+*Released 05/14/2015*
+
+**Features:**
+
+- Pushstate application routing now works 100% reliably with NO hacky overrides in all browsers.
+- All incompatible `a` / `link` / `form` elements are transparently rewritten to be compatible including FQDN and protocol-less `href` / `src`.
+- Cookies are automatically cleared between page refreshes, during app startup, and leaving the test page.
+- 3rd Party cookies are now additionally cleared.  All cookies are now accessible to the client in preparation for {% url `cy.clearCookies()` clearcookies %}.
+- Manual navigation after tests run now works reliably.
+- Navigating between full page refreshes during tests now works reliably.
+
+**Bugfixes:**
+
+- Server-side redirects are now completely transparently handled and supported.
+- URLs are no longer altered in any weird way.
+- Problematic `headers` are now automatically stripped from remote responses.
+- 3rd party `headers` are now properly proxied onto all responses.
+- Custom headers and other headers "of interest" are rewritten for transparent compatibility.
+- `gzip` compression now handled and proxied correctly.
+
+**Misc:**
+
+- Completely overhauled the URL and proxy system used to serve remote applications.
+- Drastically simplified the architecture required for proxying.
+- Improved reliability for displaying the remote url.
+- Namespaced all cypress internal routes.
+- Many internal development / debugging processes improved.
+- Added 100+ new tests surrounding serving remote content and processing requests.
+- Renamed all remaining old references to `eclectus`.
+- All responses are now streamed using `content-encoding: chunked`.
+
+# 0.5.15
+
+*Released 05/07/2015*
+
+**Bugfixes:**
+
+- Reverted `window.location` overrides. This broke things in unexpected ways and after further testing would not have worked on `Firefox` and `IE`. It's back to the drawing board (but I have some ideas).  Apps using `pushState` routing are broken again.
+
+# 0.5.14
+
+*Released 05/06/2015*
+
+**Features:**
+
+- Cypress now works with JS applications that use `pushState` and `replaceState` routing (commonly known as `HTML5 History`) without having to change any application code.
+- Cypress now always updates the remote URL whenever your application changes its URL through the vast variety of ways it can do this.
+
+**Bugfixes:**
+
+- Removed `iframe` and `link[rel=stylesheet]` elements during DOM revert.
+- Server instrument now correctly displays the number of responses their corresponding routes have had.
+- Spies/Stubs/Mocks instrument now correctly displays the number of calls their corresponding methods have had.
+- When users navigate between pages with commands, like {% url `.click()` click %}, Cypress now correctly waits until the age has finished loading before running more commands. Previously this waited for the `unload` event, which did not fire synchronously, and ow we bind to `beforeunload` which does.  Additionally Cypress checks to ensure `beforeunload` did not return a non-undefined value.
+
+**Misc:**
+
+- More changes to prepare for server adapters,
+
+# 0.5.13
+
+*Released 05/04/2015*
+
+**Features:**
+
+- New `cy.message` and `cy.msg` commands in preparation for `cypress-ruby`, `cypress-node`, `cypress-*` packages/gem to talk directly to your backend.
+
+**Bugfixes:**
+
+- Using `querying` or `traversal` commands will no longer throw a 2nd command error when using improper sizzle selectors.
+- Argument formatting display for command messages is fixed. There were instances of leading commas, or no commas on some commands.
+
+**Misc:**
+
+- Changed default port from `3000` to `2020` to avoid standard port conflicts with commonly used backends. Afterall, using Cypress is testing with 2020 vision. ;-)
+- Updated `bluebird` to `2.9.25`.
+- Began implementation in preparation for **cross browser testing** coming sometime relatively soon.
+
+# 0.5.12
+
+*Released 04/30/2015*
+
+**Features:**
+
+- Introduced new **command option** `length` which cues Cypress into not resolving matched elements until their length matches the option provided.
+
+**Bugfixes:**
+
+- `cy.respond` will not resolve until all of the queue'd XHR's have resolved.
+
+**Misc:**
+
+- Cypress now throws on {% url `.should()` should %} if any DOM member isn't in the DOM, except for `exist` assertions.
+- Cypress now throws on `eventually.have.length` assertions. Use implicit `{length: n}` command options instead.
+- Cypress overrides chai `exist` assertion to really mean: "does this subject exist in the document?"
+
+# 0.5.11
+
+*Released 04/29/2015*
+
+**Bugfixes:**
+
+- Fixed missing `aliasType` from primitives and some DOM aliases, which prevent the background color from displaying in the UI.
+
+**Misc:**
+
+- Optimized performance for hovering / exiting commands. Heavily reduced the CPU on revert / restore the DOM.
+
+# 0.5.10
+
+*Released 04/28/2015*
+
+**Features:**
+
+- {% url `cy.server()` server %} now accepts a `delay` option which will delay all responses to requests (including 404) based on the value in ms
+- {% url `cy.server()` server %} now accepts a `respond` option which can turn off automatic responding to requests.
+- {% url `cy.route()` route %} now accepts a `delay` option which overrides the delay option set in [`cy.server()`](https://n.cypress.io/api/server) to just matched requests.
+- {% url `cy.route()` route %} now accepts a `respond` option which will turn off automatic responding to just matched requests.
+- Fixes [#14](https://github.com/cypress-io/cypress/issues/14).
+- {% url `cy.wait()` wait %} now accepts an alias property called `request`. Example: `cy.wait('@getUsers.request')` which ill resolve once the XHR is initially requested, before it is responded to.  This allows you to test things when a request is in flight.
+- Added `cy.respond` command which will respond to all pending requests when `{respond: false}` is set in the `server` or `route`.
+- {% url `.debug()` debug %} now displays pending requests and completed requests.
+- The command UI now displays pending requests as a `pending command`.
+
+**Misc:**
+
+- Updated `sinon` to `1.14.1`.
+
+# 0.5.9
+
+*Released 04/26/2015*
+
+**Features:**
+- Added {% url `.spread()` spread %} method which spreads an array as individual arguments to a callback function,like {% url `.then()` then %}.
+- During an update Cypress will now display the updating message in the same coordinates as when the app was open by clicking the tray icon.
+- After an update Cypress will now open back up and show itself in these same coordinates.
+- {% url `cy.wait()` wait %} can now accept an array of route aliases which will wait until all have completed.  This array of resolved XHRs will become the next subject.
+- Each time an alias in used with a {% url `cy.wait()` wait %}, Cypress will not resolve until the Nth request matching the outing alias responds.  Fixes [#4](https://github.com/cypress-io/cypress/issues/4).
+- {% url `cy.get()` get %} has been upgraded to accept a routing alias.  By default it will yield the last matched request, but also supports special alias properties which return a different request or potentially an array of requests.
+
+# 0.5.8
+
+*Released 04/24/2015*
+
+**Features:**
+
+- {% url `.as()` as %} can now alias primitives and objects other than routes or DOM.
+- {% url `.as()` as %} automatically assigns this alias to `runnable.ctx` which makes it available synchronously.
+- {% url `.as()` as %} blacklists several reserved words and will throw if you attempt to alias as one of them.
+- {% url `cy.get()` get %} can now accept all alias types and will display the labels in the UI differently based on the alias type.
+- Cypress now displays a message when the Desktop App update is actually being applied instead of doing nothing and looking like its crashed.
+
+**Bugfixes:**
+
+- {% url `.as()` as %} now throws on empty strings or non string arguments.
+- Desktop App debug logs no longer sort in the wrong direction.
+- Permissions are now restored during a cypress update for the `logs` and `cache`.
+- Prevent 3rd party windows from gaining focus over main window.
+
+**Misc:**
+
+- Removed `cy.assign`, this has been folded into {% url `.as()` as %}.
+- Updated `chokidar` to `1.0.1`.
+
+# 0.5.7
+
+*Released 04/23/2015*
+
+**Features:**
+
+- The insanity that is URL parsing to figure out absolute, relative, absolute-path-relative, http, sub domains, and local files should work in most cases. In other words, Cypress has implemented the vast majority of url parsing based on the [w3c URL spec](http://www.w3.org/TR/rl-1/#url-parsing).
+
+**Bugfixes:**
+
+- Prevent reverting the DOM while tests are running. Fixes [#28](https://github.com/cypress-io/cypress/issues/28).
+- Fix edge case with forced focusing / blurring an element when document is not in focus and the element is no longer in the DOM.
+- Visiting relative paths which are served from your file system works again.
+- Visiting absolute paths in the iframe now displays the correct URL in the address bar again.
+
+# 0.5.6
+
+*Released 04/22/2015*
+
+**Features:**
+
+- Cypress now detects the difference between a forced async `done` test timeout vs a regular command timeout, and will throw the appropriate message indicating whether the user forgot to simply invoke `done` or whether the timeout happened due to a command.
+
+**Bugfixes:**
+
+- {% url `cy.visit()` visit %} now properly times out when the `load` event does not occur within the time out window.
+- If a page loads after a {% url `cy.visit()` visit %} times out it will no longer cause an exception in the `onBeforeLoad` handler.
+
+**Misc:**
+
+- Increased {% url `cy.visit()` visit %} timeout from **15s** to **20s**.
+- {% url `cy.visit()` visit %} now throws a custom error message when it times out (instead of an incorrect / confusing default mocha timeout message).
+- Using a `debugger` while running a test will no longer always cause the test to time out (yay!).
+- Override default mocha timeout handling, replaced with custom logic. Removes many bizarre edge cases.
+
+# 0.5.5
+
+*Released 04/20/2015*
+
+**Features:**
+
+- When main app window comes into focus, it will automatically focus other peripheral windows.
+- Added explicit error message when using child commands on a subject which has been detached or removed from the DOM.
+- Cypress now detects when an async test is passed and not all commands have finished running. It will throw an explicit error message in this situation.
+
+**Misc:**
+
+- Error messages no longer break within words.
+
+# 0.5.4
+
+*Released 04/20/2015*
+
+**Features:**
+
+- Enhanced {% url `.should()` should %} to accept `eventually` flag to automatically retry assertions until timeout is reached.
+
+**Misc:**
+
+- Repurposed {% url `.and()` and %} to be an alias of {% url `.should()` should %} for chainability.
+- Removed `cy.to`.
+
+# 0.5.3
+
+*Released 04/19/2015*
+
+**Bugfixes:**
+
+- Handle relative path segments which walk up past the remote host `../../assets/app.css`.
+- Throw explicit error for `null`, `undefined`, and `""` arguments to {% url `cy.contains()` contains %}. Fixes [#24](https://github.com/cypress-io/cypress/issues/24).
+
+Misc
+- Improved `onConsole` message for {% url `cy.focused()` focused %} when no element was returned. Fixes [#23](https://github.com/cypress-io/cypress/issues/23).
+
+# 0.5.2
+
+*Released 04/17/2015*
+
+**Bugfixes:**
+
+- Fixed missing files from deployment. Added tests around this.
+
+# 0.5.1
+
+*Released 04/16/2015*
+
+**Misc:**
+
+- Updated dependencies: `bluebird`, `fs-extra`, `sinon-as-promised`.
+- Updated `nw` to `0.12.1`.
+
+# 0.5.0
+
+*Released 04/15/2015*
+
+**Misc:**
+
+- Snapshot source code.
+
+# 0.4.7
+
+*Released 04/15/2015*
+
+**Misc:**
+
+- Added automated functional NW tests during deployment in preparation for `0.5.0` release.
+
+# 0.4.6
+
+*Released 04/11/2015*
+
+**Features:**
+
+- Added "invisible" icon to a command when its matched element(s) are invisible.
+- Running a single test will now automatically expand to display its commands.
+- Any failing test will now automatically expand to display its commands.
+- Failing tests which become passing will automatically collapse again.
+
+# 0.4.5
+
+*Released 04/10/2015*
+
+**Features:**
+
+- Added {% url `cy.wrap()` wrap %} command.
+
+**Bugfixes:**
+
+- Improved options logging and argument logging for all commands.  Fixes [#8](https://github.com/cypress-io/cypress/issues/8).
+
+# 0.4.4
+
+*Released 04/09/2015*
+
+**Features:**
+
+- Added {% url `.not()` not %} traversal filtering method. Suggested in [#16](https://github.com/cypress-io/cypress/issues/16).
+
+**Misc:**
+
+- Improved error messages for traversal failures. Errors now include the parent context DOM element. Fixes [#11](https://github.com/cypress-io/cypress/issues/11).
+- Improved error messages for invalid {% url `cy.route()` route %} arguments. Fixes [#20](https://github.com/cypress-io/cypress/issues/20).
+
+# 0.4.3
+
+*Released 04/09/2015*
+
+**Features:**
+
+- Added functionality which enables {% url `cy.server()` server %} and {% url `cy.route()` route %} to be created prior to {% url `cy.visit()` visit %}. The server and routes will apply to the next page which is visited. This allows you to stub requests which happen on page load. Suggested in [#17](https://github.com/cypress-io/cypress/issues/17).
+- {% url `cy.visit()` visit %} now takes an optional `onBeforeLoad` callback option which is invoked when your page begins to ender but prior to its load event.
+
+**Misc:**
+
+- Improved error message when attempting to use `cy.agents` or anything else which requires a remote sandbox.  Fixes [#12](https://github.com/cypress-io/cypress/issues/12).
+
+# 0.4.2
+
+*Released 04/09/2015*
+
+**Bugfixes:**
+
+- Remove accidental `debugger` left in `uncaught` overloads (used only in Dev).
+- Prevent memory leak with Cypress helper listeners on every re-run of the tests.
+- Prevent memory leak with custom 3rd party Cypress listeners in spec windows on every re-run of the tests.
+- Prevent error from being thrown when `.only`'s are switched in between active test runs.
+
+# 0.4.1
+
+*Released 04/08/2015*
+
+**Features:**
+
+- `javascripts` files can now utilize `snockets`, `browserify`, or `requirejs`.
+
+**Bugfixes:**
+
+- Handle `javascripts` and preprocess them as we do regular specs. Fixes: [#15](https://github.com/cypress-io/cypress/issues/15).
+- Fixed an edge case when writing a test with a `done` callback alongside `cy` commands.  This situation would always cause a timeout after 30 seconds even though the test would pass.
+
+**Misc:**
+
+- Internally refactored Cypress for easier testability / debuggability.
+- Organized files around in preparation for OS release.
+- Added lightweight module system / optimized Cypress listeners to prevent duplicated events.
+- Changed url strategy for sending down `spec` files.
+
+# 0.4.0
+
+*Released 04/02/2015*
+
+**Features:**
+
+- `sinon-as-promised` is now a bundled extension.
+- tests without an `id` now run (with a random temporarily assigned id).
+- tests with a duplicate `id` to another test will now run (with a random temporarily assigned id).
+- tests or suites which are manually re-run from the UI now hide all of the other tests / suites.
+
+**Bugfixes:**
+
+- Fixed hook failure associated to wrong failed current test when `grep` was set.
+- Async tests which used a `cy` command and had a `done` callback was always undefined.  Now its back to real mocha `function done(err)`.
+- Fixed bug in mocha where it incorrectly associates `hook.ctx.currentTest` to the wrong `test`. [Mocha Issue](https://github.com/mochajs/mocha/issues/1638)
+- {% url `cy.title()` title %} no longer logs twice on a failure.
+- Fixed putting an `.only` on a large list of tests that would sometimes not clear the previous runnables in the UI.
+
+**Misc:**
+
+- Optimized first test run after hard refresh.
+- Performance improvements on successive runnable iterations.
+- Aborting currently running tests performance improvement.
+- Live reload performance improvements when tests are changed.
+- Added 100+ tests covering Runner + Reporter behavior.
+- Aggressively cleaned up listeners after each test completion + run.
+- Added additional `Cypress` events for 3rd party custom handling.
+
+# 0.3.15
+
+*Released 03/28/2015*
+
+**Misc:**
+
+- Drastically improved file watching on large projects with many tests.  Instead of choking the CPU at nearly 100% indefinitely we now optimally watch the current working files for changes.
+
+# 0.3.14
+
+*Released 03/27/2015*
+
+**Bugfixes:**
+
+- `Socket.io` and `chokidar` are now being cleaned up when a project is closed.  Previously `chokidar` file watchers would stick around indefinitely causing a memory leak each time any project is closed and reopened.
+
+# 0.3.13
+
+*Released 03/27/2015*
+
+**Features:**
+
+- {% url `cy.visit()` visit %} now detects a local url.  `localhost`, `0.0.0.0`, `127.0.0.1` can omit the `http://` protocol.
+
+**Bugfixes:**
+
+- {% url `cy.contains()` contains %} now properly escape quotes in the text.
+- {% url `cy.visit()` visit %} now inserts a trailing slash intelligently into the correct `path` position (not after query params or hashes).
+- {% url `cy.visit()` visit %} will no longer log 2 failed commands on error.
+- Hovering on commands which delay resolving their $el will now properly highlight again.
+
+**Misc:**
+
+- {% url `.debug()` debug %} returns the current subject now.
+- upgraded jsUri to `1.3.0`.
+- {% url `cy.visit()` visit %} now throws when url argument isn't a string.
+- `Cypress.Log` instances now fire `attrs:changed` event. Removed `state:change` event.
+
+# 0.3.12
+
+*Released 03/26/2015*
+
+**Bugfixes:**
+
+- Aliases which replay their commands will no longer break the current chain and therefore not unintentionally null our their subject for the ext command.
+- Highlighting $el's on DOM restore now works again.
+- Asserting against {% url `cy.focused()` focused %} will indent command logs now.
+- Prevent failed {% url `.should()` should %} and `cy.to` from outputting a second error'd command log.
+- Removed memory leaks surrounding mocha runner.
+- Captured remote page uncaught errors again which fail corresponding tests.
+- Captured spec iframe errors again and preserve their stack trace.
+
+**Misc:**
+
+- {% url `cy.focused()` focused %} is now a parent command.
+- Memory usage improvements.
+
+# 0.3.11
+
+*Released 03/25/2015*
+
+**Bugfixes:**
+
+- Automatic command errors now properly show as errored commands.
+- {% url `.invoke()` invoke %} now correctly checks for a subject before running.
+
+**Misc:**
+
+- `cy.Promise` (Bluebird) is now publicly available.
+
+# 0.3.10
+
+*Released 03/24/2015*
+
+**Bugfixes:**
+
+- Test duration is now correct and only updates when tests finish.
+- Failing a hook will no longer continue to count the duration forever.
+
+**Misc:**
+
+- Bumped Mocha to 2.2.1
+- Users now see a specialized error message when Cypress could not serve static files from the file system.
+
+# 0.3.9
+
+*Released 03/24/2015*
+
+**Features:**
+
+- Instead of waiting until commands resolve, commands are immediately inserted with a `pending` status.
+- Pending commands are now visually distinguishable.
+- Created new `Cypress.Log` interface for greater control over the display of commands.
+- Available aliases are now logged in the console on {% url `.debug()` debug %}.
+
+**Bugfixes:**
+
+- Allow projects to be scrolled when >4 are added.
+- {% url `.type()` type %} accepts remaining `input[type=*]` that users can type into.
+- Cause + Effect commands are now logged in the correct order.  IE, clicking something which causes another command to insert will be inserted correctly in the order they arrived
+- `numRetries` is no longer shown in commands.
+- {% url `.clear()` clear %} now logs a command.
+- `Promise.reduce` bugs are now fixed, causing events on a collection of elements in the synchronous wrong order.
+- `cy.chain` is now coercively returned instead of `cy` which prevents losing access to the subject in custom commands.
+- Trailing slashes are removed when serving initial files from the file system directly.
+
+# 0.3.8
+
+*Released 03/22/2015*
+
+**Features:**
+
+- Added icons + tray icons.
+
+**Bugfixes:**
+
+- Prevent cypress.app from showing in taskbar.
+- Clicking on tray twice will toggle hide/show of app.
+
+# 0.3.7
+
+*Released 03/21/2015*
+
+**Features:**
+
+ - Code Signed Mac App to prevent "Unidentified Developer" message on open.
+
+# 0.3.6
+
+*Released 03/20/2015*
+
+**Features:**
+
+ - Added external link to changelog when checking for updates :-)
+
+**Bugfixes:**
+
+ - Force trailing slash on all {% url `cy.visit()` visit %} to fix relative links `href="assets/app.js"`.
+ - Fix sourceMappingURL browser bug `http:/localhost:4200/app.css.map`.
+ - Fix test titles not being escaped due to refactoring.
+
+# 0.3.5
+
+*Released 03/20/2015*
+
+**Bugfixes:**
+
+ - Fix missing `moment.js` from `bower.json`.
+ - Fix missing trailing slash from initial {% url `cy.visit()` visit %} requests.
+ - Fix missing `__initial=true` query param on initial redirects.
+
+**Misc:**
+
+ - Updated $.simulate to 1.0.1.
+
+# 0.3.4
+
+*Released 03/19/2015*
+
+**Features:**
+ - {% url `.type()` type %} now causes the subject to receive `focus` event.
+ - {% url `.type()` type %} now causes previously `focused` elements to receive `blur` event/
+ - Typing `{enter}` now handles form submit logic as per the HTML spec.
+   - Form with 1 input, no defaultButton.
+   - Form with 2 inputs, no defaultButton.
+   - Form with disabled defaultButton.
+   - Form with multiple defaultButtons.
+   - Correctly processes defaultButton click event, form submit event.
+   - Intelligently handle defaultPrevented events from descendants.
+
+**Bugfixes:**
+
+ - {% url `.clear()` clear %} now returns a promise.
+
+**Misc:**
+
+ - Updated `bluebird` to `2.9.14`.
+
+# 0.3.3
+
+*Released 03/18/2015*
+
+**Features:**
+
+ - Filtered out AJAX requests for `.js`, `.html`, `.css` files by default.
+ - {% url `cy.server()` server %} can configure whether this is turned on or off.
+
+**Bugfixes:**
+
+ - Prevent {% url `cy.server()` server %} from slurping up Angular async template GETs.
+
+**Misc:**
+
+ - Inlined Google Fonts into `vendor.css`.
