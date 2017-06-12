@@ -104,8 +104,6 @@ function normalizeNestedPaths (data) {
 function findFileBySource (sidebar, href) {
   const { expanded, flattened } = normalizeNestedPaths(sidebar)
 
-  href = stripHash(href)
-
   function property () {
     // drill into the original sidebar object
     return _.get(expanded, href.split('/'))

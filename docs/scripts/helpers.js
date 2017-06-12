@@ -2,9 +2,10 @@
 
 /* global hexo */
 
+const helpers = require('../lib/helpers')
+
 let pathFn = require('path')
 let _ = require('lodash')
-let cheerio = require('cheerio')
 let lunr = require('lunr')
 
 let localizedPath = ['guides', 'api']
@@ -120,22 +121,7 @@ hexo.extend.helper.register('raw_link', function (path) {
   return `https://github.com/cypress-io/cypress-documentation/edit/master/source/${path}`
 })
 
-hexo.extend.helper.register('page_anchor', function (str) {
-  let $ = cheerio.load(str, { decodeEntities: false })
-  let headings = $('h1, h2, h3, h4, h5, h6')
-
-  if (!headings.length) return str
-
-  headings.each(function () {
-    let id = $(this).attr('id')
-
-    $(this)
-      .addClass('article-heading')
-      .append(`<a class="article-anchor" href="#${id}" aria-hidden="true"></a>`)
-  })
-
-  return $.html()
-})
+hexo.extend.helper.register('add_page_anchors', helpers.addPageAnchors)
 
 hexo.extend.helper.register('lunr_index', function (data) {
   let index = lunr(function () {

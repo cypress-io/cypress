@@ -85,9 +85,9 @@ const mapTasks = (cmd, packages) => {
         cwd: dir,
         label: {
           name: `${packageName.replace(/\/$/, '')}:${cmd}`,
-          color: colors[index]
-        }
-      }
+          color: colors[index],
+        },
+      },
     }
   })
 }
@@ -142,7 +142,7 @@ module.exports = (cmd, options) => {
       parallel: !options.serial,
       printLabel: tasks.length > 1,
       stdout: process.stdout,
-      stderr: collectStderr
+      stderr: collectStderr,
     })
   })
   .then(() => {
@@ -157,7 +157,7 @@ module.exports = (cmd, options) => {
   .catch(resultsError, (err) => {
     const results = AsciiTable.factory({
       heading: ['package', 'exit code'],
-      rows: err.results.map((result) => [result.name.replace(`:${cmd}`, ''), result.code])
+      rows: err.results.map((result) => [result.name.replace(`:${cmd}`, ''), result.code]),
     }).toString()
 
     console.error(chalk.red(`\nOne or more tasks failed running 'npm run all ${cmd}'.`))

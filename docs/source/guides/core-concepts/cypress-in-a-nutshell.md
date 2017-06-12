@@ -12,7 +12,7 @@ comments: true
 - what assertions look like and how they work
 {% endnote %}
 
-{% note info Important! %}
+{% note danger Important! %}
 **This is the single most important guide for understanding how to work with Cypress** to test your modern web application. Read it. Understand it. Ask questions about it so that we can improve it.
 {% endnote %}
 
@@ -21,25 +21,24 @@ comments: true
 Expressivity is all about getting more done with less typing. Let's look at an example:
 
 ```js
-describe("Post Resource", function() {
-  it("Creating a new Post", function() {
-    cy.visit("/posts/new")     // 1.
+describe('Post Resource', function() {
+  it('Creating a new Post', function() {
+    cy.visit('/posts/new')     // 1.
 
-    cy.get("input.post-title") // 2.
-      .type("My First Post")   // 3.
+    cy.get('input.post-title') // 2.
+      .type('My First Post')   // 3.
 
-    cy.get("input.post-body")  // 4.
-      .type("Hello, world!")   // 5.
+    cy.get('input.post-body')  // 4.
+      .type('Hello, world!')   // 5.
 
     cy.contains('Submit')      // 6.
       .click()                 // 7.
 
     cy.url()                   // 8.
-      .should("eq", "/posts/my-first-post")
+      .should('include', '/posts/my-first-post')
 
     cy.get('h1')               // 9.
-      .its('value')
-      .should("eq", "My First Post")
+      .should('contain', 'My First Post')
   })
 })
 ```
@@ -53,7 +52,7 @@ Can you read this? If you did, it might sound something like this:
 > 5. Type "Hello, world!" into it.
 > 6. Find the element containing the text `Submit`.
 > 7. Click it.
-> 8. Grab the browser URL, ensure it is `/posts/my-first-post`.
+> 8. Grab the browser URL, ensure it includes `/posts/my-first-post`.
 > 9. Select the `<h1>` tag, ensure it contains the text "My First Post".
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
@@ -76,13 +75,28 @@ In Cypress, the query is the same:
 cy.get('.my-selector')
 ```
 
+In fact, Cypress wraps jQuery and exposes all of its DOM selection and traversal methods to you so you can work with complex HTML structures with ease.
+
+```js
+// Each method is equivalent to its jQuery counterpart. Use what you know!
+cy.get('#main-content')
+  .find('.article')
+  .children('img[src^="/static"]')
+  .first()
+```
+
+{% note success Core Concept %}
+Cypress leverages jQuery's powerful query engine to make tests familiar and readable for modern web developers.
+
+{% endnote %}
+
 Accessing the DOM elements from the query works differently, however:
 
 ```js
-// This is fine.
+// This is fine, jQuery returns the element synchronously.
 let $jqElement = $('.my-selector')
 
-// This will not work!
+// This will not work! Cypress does not return the element synchronously.
 let $cyElement = cy.get('.my-selector')
 ```
 
@@ -92,12 +106,12 @@ Let's look at why this is...
 
 **Question:** What happens when jQuery can't find the selector it queries?
 
-**Answer:** *Oops!* The dreaded `null` enters your code, and you ignore it at your own risk!
+**Answer:** *Oops!* It returns an empty jQuery collection. We've got a real object to work with, but it doesn't contain the element we think it does. So we start adding conditional checks and retrying our queries manually.
 
 ```js
-// $() returns immediately with null
+// $() returns immediately with an empty collection.
 let $myElement = $('.my-selector').first()
-// Leads to errors or ugly null checks
+// Leads to errors or ugly conditional checks
 doSomething($myElement)
 ```
 
@@ -117,19 +131,24 @@ cy.get('.my-selector').first()
   // No null checks necessary because no other code runs!
 ```
 
-This makes Cypress robust, immune to a thousand tiny, common problems at once. Think about all the circumstances that could cause the jQuery version to fail:
+This makes Cypress robust, immune to dozens of common, irritating problems at once. Consider all the circumstances that could cause the jQuery version to fail:
 - the DOM has not loaded yet
 - your framework hasn't finished bootstrapping
 - an XHR hasn't completed
 - an animation hasn't completed
 - and on and on...
 
-Traditionally, you'd be forced to write custom code to ensure against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly. The only change in your code is a shift to leverage the Promise-like `.then()` command whenever you need to access the element directly.
+Traditionally, you'd be forced to write custom code to protect against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and customizable timeouts, Cypress sidesteps all of this, instantly.
+
+{% note success Core Concept %}
+Cypress wraps all DOM queries with robust retry-and-timeout logic that better suits how real web apps work. We trade a minor change in how we work with our queries for a major stability upgrade to all our tests. Banish flake for good!
+
+{% endnote %}
 
 {% note info %}
-In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element.
+In Cypress, when you want to interact with a DOM element directly, call `.then()` and pass a function to it that will receive the element. When you need to skip the retry-and-timeout functionality entirely and perform a traditional, synchronous query, you can still use `Cypress.$()`.
 
-For more, check out [the API docs for `.then()`](http://on.cypress.io/api/then)
+For more, check out the API docs for [`.then()`](http://on.cypress.io/api/then) and [`Cypress.$()`](http://on.cypress.io/api/utilities/$.html).
 {% endnote %}
 
 ## Finding Elements by Their Contents
@@ -164,6 +183,11 @@ cy.get('.my-slow-selector', { timeout: 10000 })
 
 You can also set the timeout globally via [the configuration setting `defaultCommandTimeout`](/guides/appendices/configuration.html#Timeouts).
 
+{% note success Core Concept %}
+To match the behavior of web applications, Cypress is deeply asynchronous and must rely on timeouts to know when to stop waiting on an app to get into a valid state. Timeouts can be configured globally, or on a per-command basis.
+
+{% endnote %}
+
 {% note info Timeouts and Performance %}
 
 There is a performance tradeoff here: **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their criteria is met, so working tests will be performed as fast as possible. A test that fails due to timeout will consume the entire timeout period, by design. This means that while you _may_ want to increase your timeout period to suit specific parts of your app, you _don't_ want to make it "extra long, just in case".
@@ -172,7 +196,7 @@ There is a performance tradeoff here: **tests that have longer timeout periods t
 
 # Chains of Commands
 
-It's crucially important to understand the mechanism by which Cypress Commands chain together: a queue of work to be done on some subject that flows from one command to the next. It's like Promises, but different, so don't reach for your favorite Promise library until we finish laying it all out.
+It's very important to understand the mechanism Cypress uses to chain commands together. It manages a Promise chain on your behalf, with each Promise yielding a subject to the next Promise, until the chain ends or an error is encountered. The developer should not need to use Promises directly, though!
 
 ## Interacting With Elements
 
@@ -185,9 +209,21 @@ cy.get('textarea.post-body')
 
 We're chaining the `.type()` onto the `cy.get()`, applying it to the "subject" of the `cy.get()` command, which will be a DOM element if it is found.
 
+`.type()` and `.click()` are just 2 interaction commands Cypress exposes for you, but there are many more! For instance:
+- `.blur()`/`.focus()`
+- `.check()`/`.uncheck()`
+- `.select()`
+- `.hover()`
+- `.dblclick()`
+
+{% note success Core Concept %}
+Cypress exposes common user interactions as commands, making it simple to encapsulate the behaviors you're looking to create.
+
+{% endnote %}
+
 ## Asserting Things About Elements
 
-Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that apply to the current subject and halt the test if they aren't true. Here's a quick look at assertions in action:
+Assertions let you do things like ensuring an element exists or has a particular attribute, CSS class, or child. Assertions are just commands that ask a question of the current subject and halt the test if they don't get the expected response. Here's a quick look at assertions in action:
 
 ```js
 cy.get(":checkbox").should("be.disabled")
@@ -197,7 +233,7 @@ cy.get("form").should("have.class", "form-horizontal")
 cy.get("input").should("not.have.value", "foo")
 ```
 
-We'll learn more about assertions in the last section of this guide.
+We'll learn more about assertions later in this guide.
 
 ## Subjects
 
@@ -226,8 +262,8 @@ cy.get('.main-container') // Subject an is array of matching DOM elements
   .click() // Subject does not change
 ```
 
-{% note info Yield, Don't Return %}
-When discussing what Cypress commands do with subjects, we always say that they "yield" the subject, never that they "return" it. Remember: Cypress commands are asynchronous and get queued for execution at a later time. Subjects get yielded from one command to the next after lot of helpful Cypress code runs to ensure things are in order.
+{% note success Core Concept %}
+Cypress commands do not return their subjects, they yield them. Remember: Cypress commands are asynchronous and get queued for execution at a later time. During execution, subjects are yielded from one command to the next, and a lot of helpful Cypress code runs between each command to ensure everything is in order.
 
 {% endnote %}
 
@@ -292,7 +328,7 @@ it("changes the URL when 'awesome' is clicked", function() {
 
   cy.url() // Nothing to see, yet
     .should("eq", '/my/resource/path#awesomeness') // Nada.
-}) // Ok, the test method has returned, time to do everything!
+}) // Ok, the test method has returned, time to do everything in order!
 ```
 
 Cypress doesn't kick off the browser automation magic until the test function exits.
@@ -304,7 +340,7 @@ Each Cypress command (and chain of commands) returns immediately, having only ap
 
 ## Commands Execute Serially
 
-After a test function is finished running, Cypress goes to work executing the commands that were enqueued by `cy.*` commands. The test above would cause an execution in this order:
+After a test function is finished running, Cypress goes to work executing the commands that were enqueued by `cy.*` command chains. The test above would cause an execution in this order:
 
 1. Visit a URL
 2. Find a selector
@@ -314,7 +350,7 @@ After a test function is finished running, Cypress goes to work executing the co
 These actions will always happen serially (one after the other), never in parallel (at the same time). Why? To illustrate this, let's revisit that list of actions and expose some of the hidden magic Cypress does for us at each step:
 
 1. Visit a URL **(and wait for the `onload` event to fire)**
-2. Find a selector **(and retry repeatedly if it is not found)**
+2. Find a selector **(and retry repeatedly until it is found)**
 3. Perform a click action **(unless the element is covered or hidden)**
 4. Grab the URL that matches a string **(and retry repeatedly until it matches)**
 
@@ -359,7 +395,7 @@ it("changes the URL when 'awesome' is clicked", function() {
 })
 ```
 
-Big difference! The Promise demonstration is not real code (so don't try it), but it shows the magnitude of what Cypress handles for you behind the scenes. Embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
+Big difference! The Promise demonstration is not real code (so don't try it), but it gives an idea the magnitude of what Cypress handles for you behind the scenes. In reality, Cypress does more than this, because Promises themselves aren't entirely suitable to the job as our assertions would fail instantly with no way of retrying. Embrace the beautiful language of Cypress commands and let it do the heavy lifting for you!
 
 {% note success Core Concept %}
 Cypress is built using Promises internally, but the developer testing with Cypress should not have need for their own Promises in tests the vast majority of the time.
@@ -412,12 +448,12 @@ Without a single explicit assertion, there are dozens of ways this test can fail
 
 Can you think of any more?
 
-{% note info %}
-Even with no assertions, a few lines of Cypress can ensure thousands of lines of code are working properly, both on the client and server!
+{% note success Core Concept %}
+With Cypress, you don't have to assert to have a useful test. Even without assertions, a few lines of Cypress can ensure thousands of lines of code are working properly across the client and server!
 
 {% endnote %}
 
-Cypress anticipates the chaos of modern web development and visualizes it in a reasonable way. Failures are important! Cypress makes them obvious and easy to understand.
+Cypress anticipates the chaos of modern web development and [visualizes it in a reasonable way](/guides/core-concepts/overview-of-the-gui-tool.html). Failures are important! Cypress makes them obvious and easy to understand.
 
 As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, submit a form, and call it a day. You can rest assured that _so many things must be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus!
 
@@ -468,7 +504,8 @@ If we wrote this assertion in the explicit form ("the long way"), it would look 
 
 ```js
 cy.get("tbody tr:first").should(function($tr) {
-  expect($tr).to.have.class('active')
+  expect($tr).to.have.class("active")
+  expect($tr).to.have.attr("href", "/users")
 })
 ```
 

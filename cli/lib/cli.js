@@ -75,3 +75,10 @@ module.exports = {
     return program
   },
 }
+
+if (!module.parent) {
+  /* eslint-disable no-console */
+  console.error('This CLI module should be required from another Node module')
+  console.error('and not executed directly')
+  process.exit(-1)
+}

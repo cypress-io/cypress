@@ -12,7 +12,7 @@
               <a href="https://github.com/cypress-io/cypress/issues/new" class="article-edit-link"><i class="fa fa-pencil"></i> {{ __('page.improve') }}</a>
             </header>
             <div class="article-content" itemprop="articleBody">
-              {{ page_anchor(page.content) }}
+              {{ add_page_anchors(page.content) }}
             </div>
             <footer class="article-footer">
               {{ page_nav() }}

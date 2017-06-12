@@ -3,10 +3,13 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const progress = require('request-progress')
-const ProgressBar = require('progress')
 const Promise = require('bluebird')
 const request = require('request')
 const url = require('url')
+const debug = require('debug')('cypress:cli')
+const { formErrorText, errors } = require('./errors')
+const { stripIndent } = require('common-tags')
+const R = require('ramda')
 
 const unzip = require('./unzip')
 const utils = require('./utils')
@@ -31,24 +34,17 @@ const prepend = (urlPath) => {
 }
 
 const getUrl = (version) => {
-  version = version || process.env.CYPRESS_VERSION
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
-const download = (options) => {
-  return new Promise((resolve, reject) => {
-    const ascii = [
-      chalk.white('  -'),
-      chalk.blue('Downloading Cypress'),
-      chalk.yellow('[:bar]'),
-      chalk.white(':percent'),
-      chalk.gray(':etas'),
-    ]
+const download = (options = {}) => {
+  if (!options.version) {
+    debug('empty Cypress version to download')
+  }
 
-    const bar = new ProgressBar(ascii.join(' '), {
-      total: options.total,
-      width: options.width,
-    })
+  return new Promise((resolve, reject) => {
+    const barOptions = R.pick(['total', 'width'], options)
+    const bar = utils.getProgressBar('Downloading Cypress', barOptions)
 
     // nuke the bar on error
     const terminate = (err) => {
@@ -57,8 +53,11 @@ const download = (options) => {
       reject(err)
     }
 
+    const url = getUrl(options.cypressVersion)
+    debug('Downloading from %s', url)
+
     const req = request({
-      url: getUrl(options.cypressVersion),
+      url,
       followRedirect (response) {
         const version = response.headers['x-version']
         if (version) {
@@ -98,6 +97,7 @@ const download = (options) => {
     .on('finish', () => {
       // make sure we get to 100% on the progress bar
       const diff = options.total - percent
+      debug('download finish, options.total %d percent %d', options.total, percent)
       if (diff) {
         bar.tick(diff)
       }
@@ -107,30 +107,27 @@ const download = (options) => {
   })
 }
 
-const logErr = (err) => {
-  /* eslint-disable no-console */
-  console.log('')
-  console.log(chalk.bgRed.white(' -Error- '))
-  console.log(chalk.red.underline('The Cypress App could not be downloaded.'))
-  console.log('')
-  console.log('URL:', chalk.blue(getUrl()))
-  if (err.statusCode) {
-    const msg = [err.statusCode, err.statusMessage].join(' - ')
-    console.log('The server returned:', chalk.red(msg))
-  } else {
-    console.log(err.toString())
-  }
-  console.log('')
-  process.exit(1)
-  /* eslint-enable no-console */
+const statusMessage = (err) =>
+  err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
+
+const logErr = (options) => (err) => {
+  const msg = stripIndent`
+    URL: ${getUrl(options.version)}
+    Server response: ${statusMessage(err)}
+  `
+  return formErrorText(errors.failedDownload, new Error(msg))
+    .then(console.log) //eslint-disable-line no-console
+    .then(process.exit(1))
 }
 
 const logFinish = (options) => {
+  const relativeExecutable = path.relative(process.cwd(), options.executable)
+
   /* eslint-disable no-console */
   console.log(
     chalk.white('  -'),
     chalk.blue('Finished Installing'),
-    chalk.green(options.executable),
+    chalk.green(relativeExecutable),
     chalk.gray(`(version: ${options.version})`)
   )
   /* eslint-enable no-console */
@@ -169,10 +166,11 @@ const start = (options) => {
     destination: utils.getInstallationDir(),
     executable: utils.getPathToUserExecutable(),
   })
+  debug('zip destination %s', options.zipDestination)
 
   return utils.ensureInstallationDir()
   .then(() => download(options))
-  .catch(logErr)
+  .catch(logErr(options))
   .then(unzip.start)
   .catch((err) => {
     unzip.logErr(err)

@@ -8,6 +8,7 @@ const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs-extra'))
 const EE = require('events').EventEmitter
 const cp = require('child_process')
+const clearModule = require('clear-module')
 
 const packageVersion = require('../../package').version
 const utils = require('../../lib/download/utils')
@@ -24,6 +25,70 @@ describe('utils', function () {
         return utils.ensureInstallationDir()
       })
     }
+  })
+
+  afterEach(function () {
+    return fs.removeAsync(distDir)
+  })
+
+  context('#getProgressBar', function () {
+    const barOptions = {
+      total: 3,
+      width: 10,
+    }
+
+    it('makes valid progress bar', function () {
+      const bar = utils.getProgressBar('test bar', barOptions)
+      expect(bar.curr).to.equal(0)
+      bar.tick()
+      bar.tick()
+      bar.tick()
+      expect(bar.curr).to.equal(3)
+      expect(bar.complete).to.be.true
+    })
+
+    describe('mock bar', function () {
+      beforeEach(function saveCI () {
+        this.ciFlag = process.env.CI
+        // force recomputing CI flag
+        clearModule('is-ci')
+        clearModule('ci-info')
+        this.console = this.sandbox.spy(console, 'log')
+      })
+
+      afterEach(function restoreCI () {
+        process.env.CI = this.ciFlag
+      })
+
+      it('makes valid mock progress bar', function () {
+        process.env.CI = '1'
+        const bar = utils.getProgressBar('test bar', barOptions)
+        expect(bar.mock).to.be.true
+        expect(bar.curr).to.equal(0)
+        bar.tick()
+        bar.tick()
+        bar.tick()
+        expect(bar.curr).to.equal(3)
+        expect(bar.complete).to.be.true
+      })
+
+      it('prints title in mock bar', function () {
+        process.env.CI = '1'
+        utils.getProgressBar('test bar', barOptions)
+        const logged = this.console.firstCall.args.join()
+        expect(logged).to.include('test bar')
+      })
+
+      it('prints message on completing the mock bar', function () {
+        process.env.CI = '1'
+        const bar = utils.getProgressBar('test bar', barOptions)
+        bar.tick()
+        bar.tick()
+        bar.tick()
+        const logged = this.console.lastCall.args.join()
+        expect(logged).to.include('finished')
+      })
+    })
   })
 
   context('#clearVersionState', function () {
@@ -136,7 +201,7 @@ describe('utils', function () {
         return utils.verify()
       })
       .then(() => {
-        expect(this.log).to.be.calledWith(chalk.red('No version of Cypress executable installed. Run `cypress install` and try again.'))
+        expect(this.log).to.be.calledWith('No version of Cypress executable installed')
         expect(process.exit).to.be.calledWith(1)
       })
     })
@@ -147,7 +212,7 @@ describe('utils', function () {
         return utils.verify()
       })
       .then(() => {
-        expect(this.log).to.be.calledWith(chalk.red(`Installed version (bloop) does not match package version (${packageVersion}). Run \`cypress install\` and try again.`))
+        expect(this.log).to.be.calledWith('Installed version does not match package version')
         expect(process.exit).to.be.calledWith(1)
       })
     })
@@ -160,7 +225,7 @@ describe('utils', function () {
         return utils.verify()
       })
       .then(() => {
-        expect(this.log).to.be.calledWith(chalk.red('Cypress executable not found. Run `cypress install` and try again.'))
+        expect(this.log).to.be.calledWith('Cypress executable not found at')
         expect(process.exit).to.be.calledWith(1)
       })
     })
@@ -291,12 +356,12 @@ describe('utils', function () {
         })
 
         it('logs error and exits when starting xvfb fails', function () {
-          const err = new Error('')
+          const err = new Error('test without xvfb')
           err.stack = 'xvfb? no dice'
           xvfb.start.rejects(err)
           return utils.verify()
           .then(() => {
-            expect(this.log).to.be.calledWith('Could not start XVFB. Make sure it is installed on your system.\n\nxvfb? no dice')
+            expect(this.log).to.be.calledWith('Looks like your system is missing a must have dependency: XVFB')
           })
         })
       })
