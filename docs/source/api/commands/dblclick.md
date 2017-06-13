@@ -1,6 +1,6 @@
 ---
 title: dblclick
-comments: true
+comments: false
 ---
 
 Double-click a DOM element.

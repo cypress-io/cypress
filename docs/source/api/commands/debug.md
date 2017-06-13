@@ -1,6 +1,6 @@
 ---
 title: debug
-comments: true
+comments: false
 ---
 
 Set a `debugger` and log what the previous command yields.

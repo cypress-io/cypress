@@ -1,6 +1,6 @@
 ---
 title: focus
-comments: true
+comments: false
 ---
 
 Focus on a DOM element.

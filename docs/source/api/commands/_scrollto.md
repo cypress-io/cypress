@@ -1,6 +1,6 @@
 ---
 title: scrollTo
-comments: true
+comments: false
 ---
 
 Scroll to a specific position.

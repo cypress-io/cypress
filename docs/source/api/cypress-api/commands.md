@@ -1,6 +1,6 @@
 ---
 title: Cypress commands
-comments: true
+comments: false
 ---
 
 Cypress comes with its own API for creating custom commands. In fact, the same public methods *you* have access to are the same ones we use to create all of the built in commands. In other words, there's nothing special or different about ours versus yours. You can customize every aspect of commands, not only their behavior, but also their display in the Command Log.

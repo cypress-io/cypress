@@ -1,6 +1,6 @@
 ---
 title: get
-comments: true
+comments: false
 ---
 
 Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).

@@ -1,5 +1,5 @@
 title: Known Issues
-comments: true
+comments: false
 ---
 
 # Missing Commands

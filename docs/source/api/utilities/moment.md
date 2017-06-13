@@ -1,6 +1,6 @@
 ---
 title: Cypress.moment
-comments: true
+comments: false
 ---
 
 Cypress automatically proxies [`moment.js`](http://momentjs.com/) and exposes it as `Cypress.moment`.

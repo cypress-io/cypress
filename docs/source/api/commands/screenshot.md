@@ -1,6 +1,6 @@
 ---
 title: screenshot
-comments: true
+comments: false
 ---
 
 Take a screenshot of the application under test and the Cypress Command Log.

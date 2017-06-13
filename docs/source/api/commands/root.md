@@ -1,6 +1,6 @@
 ---
 title: root
-comments: true
+comments: false
 ---
 
 Get the root element.

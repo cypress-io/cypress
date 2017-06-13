@@ -1,6 +1,6 @@
 ---
 title: select
-comments: true
+comments: false
 ---
 
 Select an `<option>` within a `<select>` DOM element.

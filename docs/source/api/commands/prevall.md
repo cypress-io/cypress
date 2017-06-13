@@ -1,6 +1,6 @@
 ---
 title: prevAll
-comments: true
+comments: false
 ---
 
 Get all previous siblings of each DOM element in a set of matched DOM elements.

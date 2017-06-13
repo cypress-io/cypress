@@ -1,6 +1,6 @@
 ---
 title: getCookie
-comments: true
+comments: false
 ---
 
 Get a browser cookie by it's name.

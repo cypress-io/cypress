@@ -1,6 +1,6 @@
 ---
 title: Cypress.Dom
-comments: true
+comments: false
 ---
 
 `Cypress.Dom.isHidden()` allows you to work with logic that determines whether an element is hidden.

@@ -1,6 +1,6 @@
 ---
 title: document
-comments: true
+comments: false
 ---
 
 Get the document.

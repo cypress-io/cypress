@@ -1,6 +1,6 @@
 ---
 title: as
-comments: true
+comments: false
 ---
 
 Assign an alias for later use. Reference the alias later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command with a `@` prefix.

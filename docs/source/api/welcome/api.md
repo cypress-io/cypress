@@ -1,6 +1,6 @@
 ---
 title: API
-comments: true
+comments: false
 ---
 
 # Sections

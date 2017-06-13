@@ -1,6 +1,6 @@
 ---
 title: Cypress.env
-comments: true
+comments: false
 ---
 
 `get` and `set` environment variables *in your tests*.

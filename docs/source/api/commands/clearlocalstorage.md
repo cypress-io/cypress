@@ -1,6 +1,6 @@
 ---
 title: clearLocalStorage
-comments: true
+comments: false
 ---
 
 Clear all data in local storage.

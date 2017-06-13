@@ -1,6 +1,6 @@
 ---
 title: then
-comments: true
+comments: false
 ---
 
 Yield the previously yielded subject as the first argument of a function.

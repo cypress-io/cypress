@@ -1,6 +1,6 @@
 ---
 title: last
-comments: true
+comments: false
 ---
 
 Get the last DOM element within a set of DOM elements.

@@ -1,5 +1,5 @@
 title: Reporters
-comments: true
+comments: false
 ---
 
 Cypress supports the following reporters:

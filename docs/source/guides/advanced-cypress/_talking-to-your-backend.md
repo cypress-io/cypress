@@ -1,5 +1,5 @@
 title: Talking to Your Backend
-comments: true
+comments: false
 ---
 
 # What You'll Learn

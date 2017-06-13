@@ -1,6 +1,6 @@
 ---
 title: visit
-comments: true
+comments: false
 ---
 
 Visit a remote url.

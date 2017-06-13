@@ -1,6 +1,6 @@
 ---
 title: Dealing with the Network
-comments: true
+comments: false
 ---
 
 {% note info %}

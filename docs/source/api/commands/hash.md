@@ -1,6 +1,6 @@
 ---
 title: hash
-comments: true
+comments: false
 ---
 
 Get the current URL hash.

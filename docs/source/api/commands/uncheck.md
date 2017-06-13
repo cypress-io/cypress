@@ -1,6 +1,6 @@
 ---
 title: uncheck
-comments: true
+comments: false
 ---
 
 Uncheck checkbox(es).

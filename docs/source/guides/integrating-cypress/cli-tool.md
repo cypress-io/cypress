@@ -1,6 +1,6 @@
 ---
 title: CLI Tool
-comments: true
+comments: false
 ---
 
 The CLI Tool is an [`npm package`](https://github.com/cypress-io/cypress-cli) that wraps the Desktop Application.

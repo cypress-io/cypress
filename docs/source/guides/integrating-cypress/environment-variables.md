@@ -1,6 +1,6 @@
 ---
 title: Environment Variables
-comments: true
+comments: false
 ---
 
 Environment variables are useful when:

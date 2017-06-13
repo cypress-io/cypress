@@ -1,5 +1,5 @@
 title: making-assertions
-comments: true
+comments: false
 ---
 
 # Writing an Assertion
