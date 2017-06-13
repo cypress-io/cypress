@@ -208,7 +208,7 @@ class Runs extends Component {
 
   @action _setProjectDetails = (projectDetails) => {
     this.runsCollection.setError(null)
-    projectsStore.updateProject(this.props.project, {
+    projectsApi.updateProject(this.props.project, {
       id: projectDetails.id,
       name: projectDetails.projectName,
       public: projectDetails.public,

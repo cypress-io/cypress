@@ -193,6 +193,11 @@ const removeProject = (project) => {
   saveToLocalStorage()
 }
 
+const updateProject = (project, projectDetails) => {
+  project.update(projectDetails)
+  saveToLocalStorage()
+}
+
 const getRecordKeys = () => {
   return ipc.getRecordKeys()
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
@@ -209,6 +214,7 @@ export default {
   closeProject,
   addProject,
   removeProject,
+  updateProject,
   runSpec,
   closeBrowser,
   getRecordKeys,

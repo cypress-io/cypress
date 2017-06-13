@@ -79,10 +79,6 @@ class ProjectsStore {
     project.isChosen = true
   }
 
-  updateProject (project, props) {
-    project.update(props)
-  }
-
   @action removeProject ({ path }) {
     const projectIndex = _.findIndex(this.projects, { path })
 
