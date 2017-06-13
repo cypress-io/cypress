@@ -8,14 +8,14 @@
     <nav id="main-nav">
       {{ menu('main') }}
       <a href="https://github.com/{{ config.github_main_repo }}" class="main-nav-link"><i class="fa fa-github"></i></a>
-      {# <div id="lang-select-wrap">
+      <div id="lang-select-wrap">
         <label id="lang-select-label"><i class="fa fa-globe"></i><span>{{ lang_name(page.lang) }}</span><i class="fa fa-caret-down"></i></label>
         <select id="lang-select" data-canonical="{{ canonical_path_for_nav() }}">
           {% for lang in site.data.languages %}
             <option value="{{ loop.key }}"{% if page.lang === loop.key %} selected{% endif %}>{{ lang_name(loop.key) }}</option>
           {% endfor %}
         </select>
-      </div> #}
+      </div>
       <div id="search-input-wrap">
         <div id="search-input-icon">
           <i class="fa fa-search"></i>
