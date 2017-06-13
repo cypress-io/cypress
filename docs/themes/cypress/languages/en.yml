@@ -154,12 +154,12 @@ sidebar:
     $: $
     minimatch: minimatch
     moment: moment
-    blob: blob
-    promise: promise
+    blob: Blob
+    promise: Promise
     cypress-api: Cypress API
     config: config
     env: env
-    cypress-commands: commands
-    cookies: cookies
-    dom: dom
-    cypress-server: server
+    cypress-commands: Commands
+    cookies: Cookies
+    dom: Dom
+    cypress-server: Server
