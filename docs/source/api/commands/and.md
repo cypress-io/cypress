@@ -3,8 +3,6 @@ title: and
 comments: true
 ---
 
-{% partial then_should_difference %}
-
 Make an assertion.
 
 {% note info %}
@@ -80,13 +78,24 @@ cy
 
 ## Timeout
 
-`.and()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+`.and()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', 'error')
                          ↲
-      // timeout here will be passed down to the '.and()'
-      // and it will retry for up to 10 secs
+  // timeout here will be passed down to the '.and()'
+  // and it will retry for up to 10 secs
+```
+
+```javascript
+cy.get('input', {timeout: 10000}).should('have.value', 'US').and(function($input)){
+                                    ↲
+  // timeout here will be passed down to the '.and()'
+  // unless an assertion throws earlier,
+  // ALL of the assertions will retry for up to 10 secs
+  expect($input).to.not.be('disabled')
+  expect($input).to.not.have.class('error')
+})
 ```
 
 # Examples
@@ -212,6 +221,8 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
+
+{% partial then_should_difference %}
 
 # Command Log
 

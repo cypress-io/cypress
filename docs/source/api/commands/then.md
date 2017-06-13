@@ -67,10 +67,10 @@ cy.get('form').find('input').then(function($input){
 
 ```javascript
 cy.then(function(){
-  return {foo: 'bar'}
+  return {id: 123}
 }).then(function(obj){
-  // subject is now the obj {foo: 'bar'}
-  expect(obj).to.deep.eq({foo: 'bar'}) // true
+  // subject is now the obj {id: 123}
+  obj.id === 123 // true
 })
 ```
 
@@ -85,7 +85,7 @@ cy
   }).find('input').then(function($input){
     // we have our $input element here since
     // our form element was yielded and we called
-    // .find("input") on it
+    // .find('input') on it
   })
 ```
 
@@ -129,9 +129,18 @@ cy.get('button').click().then(function($button){
 })
 ```
 
+# Notes
+
+{% partial then_should_difference %}
+
+# Command Log
+
+**`cy.then()` does *not* log in the command log**
+
 # See also
 
 - {% url `.and()` and %}
+- {% url `.each()` each %}
 - {% url `.invoke()` invoke %}
 - [Issuing Commands](https://on.cypress.io/guides/issuing-commands)
 - {% url `.its()` its %}
