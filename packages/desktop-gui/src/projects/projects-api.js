@@ -40,16 +40,6 @@ const loadProjects = (shouldLoad = true) => {
   .catch(projectsStore.setError)
 }
 
-// const pollProjects = () => {
-//   return setInterval(() => {
-//     loadProjects(false)
-//   }, 10000)
-// }
-
-// const stopPollingProjects = (pollId) => {
-//   clearInterval(pollId)
-// }
-
 const addProject = (path) => {
   const project = projectsStore.addProject(path)
   project.setLoading(true)
@@ -107,8 +97,10 @@ const closeBrowser = (project) => {
   return ipc.closeBrowser()
 }
 
+let projectPollingId
+
 const closeProject = (project) => {
-  // unbind listeners
+  clearInterval(projectPollingId)
   ipc.offOpenProject()
   ipc.offGetSpecs()
   ipc.offOnFocusTests()
@@ -127,7 +119,16 @@ const openProject = (project) => {
     project.setError(err)
   }
 
-  const changeConfig = (config) => {
+  const updateProjectStatus = () => {
+    ipc.getProjectStatus(project.clientDetails())
+    .then((projectDetails) => {
+      project.update(projectDetails)
+    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    .catch(project.setError)
+  }
+
+  const updateConfig = (config) => {
     project.update({ id: config.projectId })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
@@ -142,13 +143,6 @@ const openProject = (project) => {
         viewStore.showProjectSpecs(project)
       })
 
-      ipc.getProjectStatus(project.clientDetails())
-      .then((projectDetails) => {
-        project.update(projectDetails)
-      })
-      .catch(ipc.isUnauthed, ipc.handleUnauthed)
-      .catch(project.setError)
-
       ipc.openProject(project.path, (err, config = {}) => {
         if (config.specChanged) {
           return specsCollection.setChosenSpec(config.specChanged)
@@ -160,7 +154,11 @@ const openProject = (project) => {
           return setProjectError(err)
         }
 
-        changeConfig(config)
+        updateConfig(config)
+
+         // this needs to be after updateConfig so that the project's id is set
+        updateProjectStatus()
+        projectPollingId = setInterval(updateProjectStatus, 10000)
 
         resolve()
       })
@@ -206,8 +204,6 @@ const getRecordKeys = () => {
 
 export default {
   loadProjects,
-  // pollProjects,
-  // stopPollingProjects,
   openProject,
   reopenProject,
   closeProject,

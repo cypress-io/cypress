@@ -287,11 +287,6 @@ describe "Global Mode", ->
         @getProjectStatuses.reject(@unauthError)
         cy.shouldBeOnLogin()
 
-      it "redirects to login when get:project:status returns 401", ->
-        @ipc.getProjectStatus.rejects(@unauthError)
-        cy.get(".project-drop").ttrigger("drop", @dropEvent)
-        cy.shouldBeOnLogin()
-
   describe "when there are projects in local storage that no longer exist", ->
     beforeEach ->
       localStorageProjects = @util.deepClone(@projects)
