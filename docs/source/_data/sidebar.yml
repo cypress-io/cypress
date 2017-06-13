@@ -9,7 +9,7 @@ guides:
     cypress-in-a-nutshell: cypress-in-a-nutshell.html
     organizing-tests: organizing-tests.html
     overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
+    aliases: aliases.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
     dealing-with-the-network: dealing-with-the-network.html
