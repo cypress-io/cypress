@@ -5,54 +5,48 @@ title: Writing Your First Test
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- How test files are structured and executed
+- Where test files go and how they look
 - Basic web navigation, DOM selection, and assertions
 {% endnote %}
 
-<!-- # Visual Learners
+# A Simple Test
 
-Now we're going to dig in and write our first test in Cypress.
-
-_Aside: Is this your first test **ever**? It's OK if so! We're willing to teach if you're willing to learn._ -->
-
-# Organizing Tests with `describe`, `context`, and `it`
-
-Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. (In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support.) It looks like this:
+Let's start with something simple. Open up your favorite IDE and create a new file at `./cypress/integration/simple_spec.js`. We'll fill it in with an outline to demonstrate how Cypress works:
 
 ```js
-describe('The Pricing Page', function() {
-  it('shows 3 prices', function() {
-    // test code...
-  })
-
-  context('buttons', function() {
-    it('has the label "buy this"', function() {
-      // test code...
-    })
+describe("My First Test", function() {
+  it("Doesn't do much!", function() {
+    expect(true).to.equal(true)
   })
 })
 ```
 
-Notice the clean, hierarchical flow of our tests when written in this way. You can nest as many `describe` and `context` blocks under the top-level `describe` as you wish
+Though it doesn't do anything useful, this is a valid test! If we open Cypress (via `npm test` if you created the shortcut in the previous guide) it will list our new spec file next to the generated `example_spec.js`:
 
-> `describe` and `context` are aliases for each other, use whichever you prefer!
+{% img /img/guides/getting-started/writing-your-first-test/a-simple-test.png %}
 
-Tests will be defined inside `it` blocks, and get run sequentially.
+Click on `simple_spec.js` and Cypress will execute the test suite defined in that file. It doesn't do much, but hey, it's green!
 
-<!-- When we load up this file inside Cypress, we can see the hierarchy clearly: -->
+{% note info Where do `describe` and `it` come from? %}
+Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support.
+{% endnote %}
 
-<!-- Cypress has also noticed that these tests are empty, and marked them "pending". Let's implement them now! -->
-
-<!-- # Interacting with the Page
+## Visit a Page
 
 Implement `cy.visit(kitchen sink url)`, show in cypress
-_Aside: Visiting non-development URLs is an anti-pattern: don't do this for real tests, you should ALWAYS be testing against a development build!_
-Use `.only` to focus on our test
+
+{% note danger Never Test Production %}
+Visiting non-development URLs is an anti-pattern: don't do this for real tests, you should ALWAYS be testing against a development build!
+{% endnote %}
+
+## Find an Element and Click It
+
 Implement `cy.get()` incorrectly, look at error in cypress
 Fix `cy.get()`, add a `.click()`
 Find something to assert on in the final state
 
-# More Organization with `beforeEach` and `afterEach` Hooks
+## Leverage `beforeEach` and `afterEach` Hooks
 
 Implement a 2nd test
+Use `.only` to focus on our new test
 Utilize `.beforeEach` to do the `cy.visit()` -->
