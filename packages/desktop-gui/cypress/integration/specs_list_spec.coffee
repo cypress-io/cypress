@@ -4,10 +4,10 @@ describe "Specs List", ->
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
-    cy.visit("/?projectPath=/foo/bar").then (win) ->
+    cy.visit("/").then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeBrowser").resolves(null)

@@ -21,11 +21,12 @@ class App extends Component {
   componentDidMount () {
     appApi.listenForMenuClicks()
 
-    appStore.setProjectPath(this.props.projectPath)
-
     ipc.getOptions()
-    .then(action('got:options', (options = {}) => {
-      appStore.version = options.version
+    .then((options = {}) => {
+      appStore.set({
+        version: options.version,
+        projectPath: options.projectPath,
+      })
 
       if (options.updating) {
         viewStore.showApplyingUpdates()

@@ -1,5 +1,4 @@
 import { useStrict, toJS } from 'mobx'
-import queryString from 'query-string'
 import React from 'react'
 import { render } from 'react-dom'
 
@@ -23,8 +22,7 @@ window.App = {
   ipc, // for stubbing in tests
 
   start () {
-    const projectPath = queryString.parse(location.search).projectPath
-    render(<App projectPath={projectPath} />, document.getElementById('app'))
+    render(<App />, document.getElementById('app'))
   },
 
   startUpdateApp () {

@@ -13,10 +13,10 @@ describe "Settings", ->
         .get(".navbar-default")
         .get("a").contains("Settings").click()
 
-    cy.visit("/?projectPath=/foo/bar").then (win) ->
+    cy.visit("/").then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "openProject").yields(null, @config)

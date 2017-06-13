@@ -4,12 +4,12 @@ describe "Project Mode", ->
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
-    cy.visit("/?projectPath=/foo/bar").then (win) =>
+    cy.visit("/").then (win) =>
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "onMenuClicked")
       cy.stub(@ipc, "onFocusTests")
-      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "openProject").yields(null, @config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)

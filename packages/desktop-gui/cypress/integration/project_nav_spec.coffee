@@ -5,10 +5,10 @@ describe "Project Nav", ->
     cy.fixture("runs").as("runs")
     cy.fixture("specs").as("specs")
 
-    cy.visit("/?projectPath=/foo/bar").then (win) ->
+    cy.visit("/").then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "getRuns").resolves(@runs)
