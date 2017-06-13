@@ -1,7 +1,7 @@
 <header id="header" class="wrapper">
   <div id="header-inner" class="inner">
     <h1 id="logo-wrap">
-      <a href="{{ site.data['main-menu'].guides }}" id="logo">
+      <a href="/" id="logo">
         <img src="/{{ config.logo }}" alt="Cypress"/>
       </a>
     </h1>
