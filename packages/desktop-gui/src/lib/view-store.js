@@ -67,15 +67,15 @@ class ViewStore {
     return this._isView(C.PROJECT_RUNS)
   }
 
-  @action showProjectConfig (project) {
+  @action showProjectSettings (project) {
     this.currentView = {
-      name: C.PROJECT_CONFIG,
+      name: C.PROJECT_SETTINGS,
       project,
     }
   }
 
-  isProjectConfig = () => {
-    return this._isView(C.PROJECT_CONFIG)
+  isProjectSettings = () => {
+    return this._isView(C.PROJECT_SETTINGS)
   }
 
   _isView (name) {

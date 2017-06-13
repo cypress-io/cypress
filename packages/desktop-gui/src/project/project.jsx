@@ -7,7 +7,7 @@ import projectsApi from '../projects/projects-api'
 import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
 
-import Config from '../config/config'
+import Settings from '../settings/settings'
 import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import Runs from '../runs/runs-list'
@@ -49,8 +49,8 @@ class Project extends Component {
     switch (viewStore.currentView.name) {
       case C.PROJECT_RUNS:
         return <Runs project={this.props.project} />
-      case C.PROJECT_CONFIG:
-        return <Config project={this.props.project} />
+      case C.PROJECT_SETTINGS:
+        return <Settings project={this.props.project} />
       default:
         return <SpecsList project={this.props.project} />
     }

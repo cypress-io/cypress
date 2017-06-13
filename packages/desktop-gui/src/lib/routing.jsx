@@ -32,9 +32,9 @@ const routes = {
     isActive: viewStore.isProjectRuns,
   }),
 
-  config: (project) => ({
-    navigate: viewStore.showProjectConfig.bind(viewStore, project),
-    isActive: viewStore.isProjectConfig,
+  settings: (project) => ({
+    navigate: viewStore.showProjectSettings.bind(viewStore, project),
+    isActive: viewStore.isProjectSettings,
   }),
 }
 

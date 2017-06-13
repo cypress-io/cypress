@@ -82,9 +82,10 @@ describe "Settings", ->
           .get(".nested").eq(1)
             .contains("*.foobar.com")
 
+      ## FIXME
       it "opens help link on click", ->
         cy
-          .get(".fa-info-circle").first().click().then ->
+          .get(".settings-config .learn-more").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/guides/configuration")
 
     describe "when project id panel is opened", ->
@@ -101,20 +102,21 @@ describe "Settings", ->
       it "displays record keys section", ->
         cy.contains("A Record Key sends")
 
+      ## FIXME
       it "opens ci guide when learn more is clicked", ->
         cy
-          .get(".config-record-keys").contains("Learn More").click().then ->
+          .get(".settings-record-keys").contains("Learn More").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-record-key")
 
       it "loads the project's record keys", ->
         expect(@ipc.getRecordKeys).to.be.called
 
       it "shows spinner", ->
-        cy.get(".config-record-keys .fa-spinner")
+        cy.get(".settings-record-keys .fa-spinner")
 
       it "opens admin project settings when record keys link is clicked", ->
         cy
-          .get(".config-record-keys").contains("You can change").click().then ->
+          .get(".settings-record-keys").contains("You can change").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
       describe "when record keys load", ->
@@ -123,7 +125,7 @@ describe "Settings", ->
 
         it "displays first Record Key", ->
           cy
-            .get(".config-record-keys")
+            .get(".settings-record-keys")
               .contains("cypress run --record --key #{@keys[0].id}")
 
       describe "when there are no keys", ->
@@ -132,7 +134,7 @@ describe "Settings", ->
 
         it "does not display cypress run command", ->
           cy
-            .get(".config-record-keys").should("not.contain", "cypress run")
+            .get(".settings-record-keys").should("not.contain", "cypress run")
 
     context "on config changes", ->
       beforeEach ->

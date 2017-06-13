@@ -24,7 +24,7 @@ export default class ProjectNav extends Component {
               </Link>
             </li>
             <li>
-              <Link to={routes.config(project)}>
+              <Link to={routes.settings(project)}>
                 <i className='fa fa-cog'></i>{' '}
                 Settings
               </Link>
