@@ -17,9 +17,7 @@ export class RunsCollection {
   }
 
   @action setRuns (runs) {
-    this.runs = _.map(runs, (run) => (
-      new Run(run)
-    ))
+    this.runs = _.map(runs, (run) => new Run(run))
 
     this.lastUpdated = moment().format("h:mm:ssa")
     this.error = null

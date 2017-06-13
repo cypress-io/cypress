@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 
 import appStore from '../lib/app-store'
@@ -39,9 +38,9 @@ class UpdateBanner extends Component {
   _checkForUpdate () {
     ipc.offUpdaterCheck()
     ipc.updaterCheck()
-    .then(action('checked:updates', (version) => {
-      appStore.updateAvailable = !!version
-    }))
+    .then((version) => {
+      appStore.set({ updateAvailable: !!version })
+    })
     .catch((error) => {
       console.warn('Error checking for updates:', error) // eslint-disable-line no-console
     })

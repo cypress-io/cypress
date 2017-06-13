@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
 
@@ -74,9 +73,9 @@ class Login extends Component {
 
       return ipc.logIn(code)
     })
-    .then(action('logged:in', (user) => {
+    .then((user) => {
       authStore.setUser(user)
-    }))
+    })
     .catch(alreadyOpen, () => {
       return // do nothing if we're already open!
     })

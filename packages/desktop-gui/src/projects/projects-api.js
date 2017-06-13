@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { action } from 'mobx'
 import Promise from 'bluebird'
 
 import ipc from '../lib/ipc'
@@ -123,17 +122,17 @@ const closeProject = (project) => {
 const openProject = (project) => {
   specsCollection.loading(true)
 
-  const setProjectError = action('project:open:errored', (err) => {
+  const setProjectError = (err) => {
     project.setLoading(false)
     project.setError(err)
-  })
+  }
 
-  const changeConfig = action('config:changed', (config) => {
-    project.id = config.projectId
+  const changeConfig = (config) => {
+    project.update({ id: config.projectId })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
-  })
+  }
 
   const open = () => {
     return new Promise((resolve) => {

@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Loader from 'react-loader'
@@ -39,12 +38,12 @@ class App extends Component {
       } else {
         return ipc.getCurrentUser()
       }
-    }))
-    .then(action('got:current:user', (user) => {
+    })
+    .then((user) => {
       if (viewStore.isApplyingUpdates()) return
       authStore.setUser(user)
       return null
-    }))
+    })
     .catch(ipc.isUnauthed, () => {
       viewStore.showLogin()
       return null

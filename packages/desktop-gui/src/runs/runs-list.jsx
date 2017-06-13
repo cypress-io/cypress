@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
@@ -10,7 +9,6 @@ import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
 import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
 import projectsApi from '../projects/projects-api'
-import projectsStore from '../projects/projects-store'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
 import Run from './runs-list-item'
@@ -206,7 +204,7 @@ class Runs extends Component {
     )
   }
 
-  @action _setProjectDetails = (projectDetails) => {
+  _setProjectDetails = (projectDetails) => {
     this.runsCollection.setError(null)
     projectsApi.updateProject(this.props.project, {
       id: projectDetails.id,

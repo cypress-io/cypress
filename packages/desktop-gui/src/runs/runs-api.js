@@ -1,5 +1,3 @@
-import { action } from 'mobx'
-
 import ipc from '../lib/ipc'
 
 let pollId
@@ -8,10 +6,10 @@ const getRuns = (runsCollection) => {
   runsCollection.loading(true)
 
   ipc.getRuns()
-  .then(action('got:runs', (runs) => {
+  .then((runs) => {
     runsCollection.setRuns(runs)
     return null
-  }))
+  })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {
     runsCollection.setError(err)
