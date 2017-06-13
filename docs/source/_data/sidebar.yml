@@ -4,7 +4,7 @@ guides:
     installing-cypress: installing-cypress.html
     writing-your-first-test: writing-your-first-test.html
     testing-your-app: testing-your-app.html
-    next-steps: next-steps.html
+    # next-steps: next-steps.html
   core-concepts:
     cypress-in-a-nutshell: cypress-in-a-nutshell.html
     organizing-tests: organizing-tests.html
