@@ -6,7 +6,7 @@ comments: false
 `get` and `set` environment variables *in your tests*.
 
 {% note info %}
-The [Environment Variable](https://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set them *outside of your tests*.
+The {% url 'Environment Variable' environment-variables %} guide explains the 4 ways you can set them *outside of your tests*.
 {% endnote %}
 
 # Syntax
@@ -148,10 +148,10 @@ Methods on `cy` are local and specific to a single test. Side effects from `cy` 
 
 **Why would I ever need to use environment variables?**
 
-The [Environment Variables](https://on.cypress.io/guides/environment-variables) guide explains common use cases.
+The {% url 'Environment Variables' environment-variables %} guide explains common use cases.
 
 **Can I pass in environment variables from the command line?**
 
 Yes. You can do that and much more.
 
-The [Environment Variables](https://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set environment variables for your tests.
+The {% url 'Environment Variables' environment-variables %} guide explains the 4 ways you can set environment variables for your tests.

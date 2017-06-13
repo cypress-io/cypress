@@ -26,7 +26,7 @@ cy.visit('http://localhost:3000')
 
 **{% fa fa-angle-right %} url** ***(String)***
 
-The url to visit. The url provided will be prefixed with the `baseUrl` configured in your [network options](https://on.cypress.io/guides/configuration#global).
+The url to visit. The url provided will be prefixed with the `baseUrl` configured in your {% url 'network options' configuration#Global %}.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 

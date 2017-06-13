@@ -151,7 +151,7 @@ You can set any configuration value as an environment variable. This overrides v
 - `CYPRESS_REPORTER`
 
 {% note info %}
-Refer to the [configuration docs](https://on.cypress.io/guides/configuration#section-environment-variables) for more examples.
+Refer to the {% url 'configuration' configuration#Environment-Variables %} for more examples.
 {% endnote %}
 
 ## Custom Environment Variables
@@ -176,7 +176,7 @@ cy.request({
 ```
 
 {% note info %}
-Refer to the dedicated [Environment Variables Guide](https://on.cypress.io/guides/environment-variables) for more examples.
+Refer to the dedicated {% url 'Environment Variables Guide' environment-variables %} for more examples.
 {% endnote %}
 
 # Optimizing CI with Caching

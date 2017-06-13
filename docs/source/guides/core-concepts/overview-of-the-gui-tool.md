@@ -31,7 +31,7 @@ The lefthand side of the test runner is a visual representation of your test sui
 Each command and assertion, when hovered over, restores the Application Under Test (righthand side) to the state it was in when that command executed. This allows you to 'time-travel' back to previous states of your application when testing.
 
 {% note info  %}
-By default, Cypress keeps 50 tests worth of snapshots and command data for time traveling. If you are seeing extremely high memory consumption in your browser, you may want to lower the `numTestsKeptInMemory` in your [configuration](https://on.cypress.io/guides/configuration#section-global).
+By default, Cypress keeps 50 tests worth of snapshots and command data for time traveling. If you are seeing extremely high memory consumption in your browser, you may want to lower the `numTestsKeptInMemory` in your {% url 'configuration' configuration#Global %}.
 {% endnote %}
 
 **Clicking on Commands**
