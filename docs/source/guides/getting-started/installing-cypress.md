@@ -25,8 +25,6 @@ _Aside: Not familiar with npm?_
 
 To run Cypress...
 
-![The Cypress GUI](http://placehold.it/1920x1080)
-
 _Aside: link to GUI overview doc_
 
 To automate running Cypress with `package.json`...

@@ -11,8 +11,6 @@ title: Writing Your First Test
 
 # Visual Learners
 
-![First Test](http://placehold.it/1920x1080)
-
 Now we're going to dig in and write our first test in Cypress.
 
 _Aside: Is this your first test **ever**? It's OK if so! We're willing to teach if you're willing to learn._
@@ -38,8 +36,6 @@ describe('The Pricing Page', function() {
 Notice the clean, hierarchical flow of our tests when written in this way. You can nest as many `describe` and `context` blocks under the top-level `describe` as you wish (`describe` and `context` are aliases for each other, use whichever you prefer.) Tests will be defined inside the `it` blocks, and get run sequentially.
 
 When we load up this file inside Cypress, we can see the hierarchy clearly:
-
-![Test Hierarchy](http://placehold.it/1920x1080)
 
 Cypress has also noticed that these tests are empty, and marked them "pending". Let's implement them now!
 

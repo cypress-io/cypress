@@ -13,8 +13,6 @@ comments: false
 
 # Cypress in 10 Minutes
 
-![Cypress in 10 Minutes](http://placehold.it/1920x1080)
-
 Welcome to Cypress: the next-generation testing tool for front-end professionals!
 
 Typically, our users are developers or QA engineers building web applications using modern JavaScript frameworks. Cypress enables us to write **end to end tests**, **integration tests**, and **unit tests**, all of which run in the browser.

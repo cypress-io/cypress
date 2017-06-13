@@ -26,8 +26,6 @@ describe.only('My App', function() {
 
 Save this file, open Cypress, and run the tests. This should be the only test that runs because we leveraged `.only` on the `describe` block, and it should fail because we didn't start our server (see image below)
 
-![Cypress Can't Find Your Server](http://placehold.it/1920x1080)
-
 Why? Well, remember that Cypress is back-end agnostic: it doesn't know _anything_ about your app server, let alone whether it is running or not. All Cypress can do is attempt to visit the link you gave it and report back about the response it gets. No response? Must not be running!
 
 This is where your own knowledge of your app comes in, as you'll need to boot your app server into an appropriate mode for testing. What this means is entirely app-dependent: Cypress doesn't know anything about your environment, and we couldn't hope to guess anything about it for this guide, either!
