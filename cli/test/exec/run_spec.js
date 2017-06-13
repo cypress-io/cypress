@@ -7,10 +7,35 @@ const downloadUtils = require('../../lib/download/utils')
 const cli = require('../../lib/cli')
 const spawn = require('../../lib/exec/spawn')
 const run = require('../../lib/exec/run')
+const snapshot = require('snap-shot')
 
 describe('exec run', function () {
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
+  })
+
+  context('#processRunOptions', function () {
+    it('passes --browser option', () => {
+      const args = run.processRunOptions({
+        browser: 'test browser',
+      })
+      snapshot(args)
+    })
+
+    it('passes --record option', () => {
+      const args = run.processRunOptions({
+        record: 'my record id',
+      })
+      snapshot(args)
+    })
+
+    it('does not remove --record option when using --browser', () => {
+      const args = run.processRunOptions({
+        record: 'foo',
+        browser: 'test browser',
+      })
+      snapshot(args)
+    })
   })
 
   context('cli interface', function () {

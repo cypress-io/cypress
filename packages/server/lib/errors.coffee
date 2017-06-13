@@ -5,6 +5,8 @@ ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
 API = {
+  # forms well-formatted user-friendly error for most common
+  # errors Cypress can encounter
   getMsgByType: (type, arg1, arg2) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
@@ -30,6 +32,18 @@ API = {
         This error will not alter the exit code.
 
         #{arg1}
+        """
+      when "BROWSER_NOT_FOUND"
+        """
+        Browser: #{arg1} was not found on your system.
+
+        Available browsers found are: #{arg2}
+        """
+      when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
+        """
+        Warning: Cannot record test run video when using non built-in electron browser
+
+        You are using #{arg1}, disabling video recording
         """
       when "NOT_LOGGED_IN"
         """

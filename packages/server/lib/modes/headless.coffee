@@ -21,6 +21,7 @@ terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 Windows    = require("../gui/windows")
 pkg        = require("../../package.json")
+log        = require("../log")
 
 fs = Promise.promisifyAll(fs)
 
@@ -400,6 +401,7 @@ module.exports = {
 
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
+    log "runTests for browser #{browser}"
 
     screenshots = []
 
@@ -410,12 +412,19 @@ module.exports = {
     ## to gracefully handle this in promise land
 
     ## if we've been told to record and we're not spawning a headed browser
-    if videoRecording and not browser
-      id2       = @getId()
-      name      = path.join(videosFolder, id2 + ".mp4")
-      cname     = path.join(videosFolder, id2 + "-compressed.mp4")
+    browserCanBeRecorded = (name) ->
+      not name or name == "electron"
 
-      recording = @createRecording(name)
+    if videoRecording
+      if browserCanBeRecorded(browser)
+        if !videosFolder
+          throw new Error("Missing videoFolder for recording")
+        id2       = @getId()
+        name      = path.join(videosFolder, id2 + ".mp4")
+        cname     = path.join(videosFolder, id2 + "-compressed.mp4")
+        recording = @createRecording(name)
+      else
+        errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -453,6 +462,7 @@ module.exports = {
         })
 
   ready: (options = {}) ->
+    log("headless mode ready with options %j", options)
     id = @getId()
 
     ## verify this is an added project

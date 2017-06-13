@@ -62,6 +62,7 @@ create = ->
           options = _.extend({}, cfg, options)
 
           do relaunchBrowser = ->
+            log "launching project in browser #{browserName}"
             browsers.open(browserName, options, automation)
 
     getSpecChanges: (options = {}) ->
