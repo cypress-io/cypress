@@ -1,4 +1,5 @@
 'use strict'
+const path = require('path')
 const util = require('hexo-util')
 const urlGenerator = require('../lib/url_generator')
 
@@ -106,4 +107,10 @@ hexo.extend.tag.register('url', function (args) {
 
   })
 
+}, { async: true })
+
+hexo.extend.tag.register('partial', (fileName) => {
+  const pathToFile = path.resolve('source', '_partial', `${fileName}.md`)
+
+  return hexo.render.render({ path: pathToFile, engine: 'markdown' })
 }, { async: true })

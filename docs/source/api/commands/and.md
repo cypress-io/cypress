@@ -3,6 +3,8 @@ title: and
 comments: true
 ---
 
+{% partial then_should_difference %}
+
 Make an assertion.
 
 {% note info %}
