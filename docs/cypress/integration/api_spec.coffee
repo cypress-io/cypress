@@ -138,32 +138,3 @@ describe "API", ->
   context "Comments", ->
     it "displays comments section", ->
       cy.get("#comments")
-
-  context "Content", ->
-    it "all section & body links work", ->
-      filterMailtos = (urlsToFilter) ->
-        Cypress._.filter(urlsToFilter, (url) -> not url.match(MAILTO_REGEX))
-
-      alreadySeen = []
-      cullAlreadySeenUrls = (urlsToCull) ->
-        # difference is what to return
-        urlsToVisit = Cypress._.difference(urlsToCull, alreadySeen)
-        # union is what to persist
-        alreadySeen = Cypress._.union(urlsToCull, alreadySeen)
-
-        return urlsToVisit
-
-      # SPIDER ALL THE THINGS
-      cy.visit(API_HTML)
-
-      cy.get('.sidebar-link')
-        .each (linkElement) ->
-          cy.request(linkElement[0].href).its('body').then (body) ->
-            elements = Cypress.$(body).find('a').not('.sidebar-link, .toc-link, .main-nav-link, .mobile-nav-link, .article-edit-link, .article-anchor, #article-toc-top, #mobile-nav-toggle, .article-footer-next, .article-footer-prev, .headerlink, #logo, .footer-link')
-
-            withoutMailtos = filterMailtos(Cypress._.map(elements, "href"))
-
-            urls = cullAlreadySeenUrls(withoutMailtos)
-
-            cy.wrap(urls).each (url) ->
-              cy.request(url)

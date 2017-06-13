@@ -6,7 +6,7 @@ comments: true
 Make an assertion.
 
 {% note info %}
-An alias of [`.and()`](https://on.cypress.io/api/and)
+An alias of {% url `.and()` and %}
 {% endnote %}
 
 {% note info %}
@@ -45,7 +45,7 @@ cy.should('eq', '42')   // Errors, cannot be chained off 'cy'
 
 **{% fa fa-angle-right %} chainers** ***(String)***
 
-Chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery)
+Chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
 
 **{% fa fa-angle-right %} value** ***(String)***
 
@@ -79,7 +79,7 @@ cy
 
 ## Timeout
 
-`.should()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the `defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.should()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10')
@@ -221,7 +221,7 @@ cy
 
 Cypress makes it easy to chain assertions together.
 
-In this example we use [`.and()`](https://on.cypress.io/api/and) which is identical to `.should()`.
+In this example we use {% url `.and()` and %} which is identical to `.should()`.
 
 ```javascript
 // our subject is not changed by our first assertion,
@@ -256,7 +256,7 @@ You can [read more about how Cypress resolves your assertions](https://on.cypres
 
 **How do I know which assertions change the subject and which keep it the same?**
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 
@@ -278,5 +278,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # See also
 
-- [and](https://on.cypress.io/api/and)
+- {% url `.and()` and %}
 - [Assertions](https://on.cypress.io/guides/making-assertions)

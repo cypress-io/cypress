@@ -91,4 +91,4 @@ When clicking on the `within` command within the command log, the console output
 
 # See also
 
-- [root](https://on.cypress.io/api/root)
+- {% url `.root()` root %}

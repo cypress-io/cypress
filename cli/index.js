@@ -1,4 +1,5 @@
 const minimist = require('minimist')
+const debug = require('debug')('cypress:cli')
 
 const args = minimist(process.argv.slice(2))
 
@@ -17,8 +18,18 @@ switch (args.exec) {
     // binary if we're consuming this as an
     // npm package
     if (installingFromNpmAsAUser()) {
-      require('./lib/download').install()
+      debug('installing Cypress from NPM')
+      require('./lib/download')
+        .install()
+        .catch(console.error) // eslint-disable-line no-console
     }
+    break
+  case 'verify':
+    // for simple testing in the monorepo
+    debug('verifying Cypress')
+    require('./lib/download/utils')
+      .verify()
+      .catch(console.error) // eslint-disable-line no-console
     break
   default:
     // export our node module interface

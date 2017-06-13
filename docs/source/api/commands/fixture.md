@@ -35,7 +35,7 @@ cy.fixture('logo.png').then(function(logo){
 
 **{% fa fa-angle-right %} filePath**  ***(String)***
 
-A path to a file within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) , which defaults to `cypress/fixtures`.
+A path to a file within the {% url `fixturesFolder` configuration#Folders %} , which defaults to `cypress/fixtures`.
 
 You can nest fixtures within folders and reference them by defining the path from the fixturesFolder:
 
@@ -65,7 +65,7 @@ Pass in an options object to change the default behavior of `cy.fixture()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
 
 ## Yields
 
@@ -73,7 +73,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process the command.
+`cy.fixture` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the server to process the command.
 
 # Examples
 
@@ -87,7 +87,7 @@ cy.fixture('users.json').as('usersData')
 
 **Omit the fixture file's extension**
 
-When no extension is passed to `cy.fixture()`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders) (which defaults to `cypress/fixtures`) and resolve the first one.
+When no extension is passed to `cy.fixture()`, Cypress will search for files with the specified name within the {% url `fixturesFolder` configuration#Folders %} (which defaults to `cypress/fixtures`) and resolve the first one.
 
 ```javascript
 cy.fixture('admin').as('adminJSON')
@@ -150,7 +150,7 @@ cy
 
 **Using an alias to access a fixture**
 
-You can make use of aliasing, [`.as()`](https://on.cypress.io/api/as), instead of working directly with the yielded data.
+You can make use of aliasing, {% url `.as()` as %}, instead of working directly with the yielded data.
 
 Using an alias provides the benefit of terseness and readability. It also makes it easier to access the data later in your tests.
 
@@ -186,7 +186,7 @@ cy.wait('@getUser').then(function(xhr) {
 
 **Using `fixture` or `fx` shortcuts**
 
-Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within [`cy.route()`](https://on.cypress.io/api/route).
+Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within {% url `cy.route()` route %}.
 
 ```javascript
 cy.route('GET', '/users/**', 'fixture:users') // this works
@@ -226,7 +226,7 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 # See also
 
 - [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
-- [readFile](https://on.cypress.io/api/readfile)
+- {% url `cy.readFile()` readfile %}
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
-- [route](https://on.cypress.io/api/route)
-- [then](https://on.cypress.io/api/then)
+- {% url `cy.route()` route %}
+- {% url `.then()` then %}

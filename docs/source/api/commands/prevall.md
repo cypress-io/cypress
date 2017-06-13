@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `.prevAll()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -52,7 +52,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.prevAll()` will continue to look for the previous elements for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.prevAll()` will continue to look for the previous elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -112,7 +112,7 @@ When clicking on `prevAll` within the command log, the console outputs the follo
 
 # See also
 
-- [nextAll](https://on.cypress.io/api/nextall)
-- [parents](https://on.cypress.io/api/parents)
-- [prev](https://on.cypress.io/api/prev)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
+- {% url `.nextAll()` nextall %}
+- {% url `.parents()` parents %}
+- {% url `.prev()` prev %}
+- {% url `.prevUntil()` prevuntil %}

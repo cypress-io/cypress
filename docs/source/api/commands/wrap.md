@@ -76,7 +76,7 @@ When clicking on the `wrap` command within the command log, the console outputs 
 
 # See also
 
-- [invoke](https://on.cypress.io/api/invoke)
-- [its](https://on.cypress.io/api/its)
-- [spread](https://on.cypress.io/api/spread)
-- [then](https://on.cypress.io/api/then)
+- {% url `.invoke()` invoke %}
+- {% url `.its()` its %}
+- {% url `.spread()` spread %}
+- {% url `.then()` then %}

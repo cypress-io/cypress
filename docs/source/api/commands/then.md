@@ -35,7 +35,7 @@ Pass in an options object to change the default behavior of `.then()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to yield the then
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to yield the then
 
 ## Yields
 
@@ -47,7 +47,7 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 
 ## Timeout
 
-`.then()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
+`.then()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -131,9 +131,9 @@ cy.get('button').click().then(function($button){
 
 # See also
 
-- [and](https://on.cypress.io/api/and)
-- [invoke](https://on.cypress.io/api/invoke)
+- {% url `.and()` and %}
+- {% url `.invoke()` invoke %}
 - [Issuing Commands](https://on.cypress.io/guides/issuing-commands)
-- [its](https://on.cypress.io/api/its)
-- [should](https://on.cypress.io/api/should)
-- [spread](https://on.cypress.io/api/spread)
+- {% url `.its()` its %}
+- {% url `.should()` should %}
+- {% url `.spread()` spread %}

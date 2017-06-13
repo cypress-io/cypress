@@ -12,11 +12,11 @@ Some commands have not been implemented in Cypress. Some commands will be implem
 
 **Workaround**
 
-Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to trigger the event or execute the action in the DOM.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to trigger the event or execute the action in the DOM.
 
 **Example of right clicking on an element using jQuery**
 ```javascript
-cy.get("#nav").first().invoke("trigger", "contextmenu")
+cy.get('#nav').first().invoke('trigger', 'contextmenu')
 ```
 
 **Example of right clicking on an element without jQuery**
@@ -28,7 +28,7 @@ e.clientX = 451
 e.clientY = 68
 
 cy
-  .get("#nav").first().then(function($el) {
+  .get('#nav').first().then(function($el) {
     $el[0].dispatchEvent(e)
   })
 ```
@@ -41,23 +41,23 @@ Sometimes an element has specific logic on hover. Maybe the element doesn't even
 
 **Workaround**
 
-Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to show the element before you perform the action.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to show the element before you perform the action.
 
 **Example of showing an element in order to perform action**
 ```javascript
-cy.get(".content").invoke("show").click()
+cy.get('.content').invoke('show').click()
 ```
 
 You can also force the action to be performed on the element regardless of whether the element is visible or not.
 
 **Example of clicking on a hidden element**
 ```javascript
-cy.get(".content").click({force: true})
+cy.get('.content').click({force: true})
 ```
 
 **Example of checking a hidden element**
 ```javascript
-cy.get(".checkbox").check({force: true})
+cy.get('.checkbox').check({force: true})
 ```
 
 # Difficult use cases

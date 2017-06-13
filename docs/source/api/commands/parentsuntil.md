@@ -54,7 +54,7 @@ Pass in an options object to change the default behavior of `.parentsUntil()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element(s)
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
 
 ## Yields
 
@@ -62,7 +62,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.parentsUntil()` will continue to look for the parent element(s) for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.parentsUntil()` will continue to look for the parent element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -109,7 +109,7 @@ When clicking on `parentsUntil` within the command log, the console outputs the 
 
 # See also
 
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.prevUntil()` prevuntil %}
+- {% url `.nextUntil()` nextuntil %}

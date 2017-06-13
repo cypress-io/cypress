@@ -17,10 +17,6 @@ describe('download', function () {
     this.sandbox.stub(unzip, 'cleanup').resolves()
   })
 
-  afterEach(function () {
-    delete process.env.CYPRESS_VERSION
-  })
-
   it('sets options.version to response x-version', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
@@ -36,26 +32,6 @@ describe('download', function () {
 
     return download.start(this.options).then(() => {
       expect(this.options.version).to.eq('0.11.1')
-    })
-  })
-
-  it('can specify cypress version in env', function () {
-    process.env.CYPRESS_VERSION = '0.12.1'
-
-    nock('https://aws.amazon.com')
-    .get('/some.zip')
-    .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
-
-    nock('https://download.cypress.io')
-    .get('/desktop/0.12.1')
-    .query(true)
-    .reply(302, undefined, {
-      'Location': 'https://aws.amazon.com/some.zip',
-      'x-version': '0.12.1',
-    })
-
-    return download.start(this.options).then(() => {
-      expect(this.options.version).to.eq('0.12.1')
     })
   })
 

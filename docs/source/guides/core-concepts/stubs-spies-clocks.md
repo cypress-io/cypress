@@ -15,7 +15,7 @@ comments: true
 
 # Capabilities
 
-Cypress comes built in with the ability to [`stub`](https://on.cypress.io/api/stub), [`spy`](https://on.cypress.io/api/spy) or modify your applications [`clock`](https://on.cypress.io/api/clock) - such as controlling `Date`, `setTimeout`, and `setInterval`.
+Cypress comes built in with the ability to {% url `cy.stub()` stub %}, {% url `cy.spy()` spy %} or modify your applications {% url `cy.clock()` clock %} - such as controlling `Date`, `setTimeout`, and `setInterval`.
 
 These commands are useful when writing both **unit tests** and **integration tests**.
 
@@ -25,8 +25,8 @@ Cypress automatically bundles and wraps these libraries:
 
 | Name | What it does |
 | --- | ---- |
-| [`sinon`](http://sinonjs.org) | provides the [`stub`](https://on.cypress.io/api/stub) and [`spy`](https://on.cypress.io/api/spy) API's |
-| [`lolex`](https://github.com/sinonjs/lolex) | provides the [`clock`](https://on.cypress.io/api/clock) and [`tick`](https://on.cypress.io/api/tick) API's |
+| [`sinon`](http://sinonjs.org) | provides the {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} API's |
+| [`lolex`](https://github.com/sinonjs/lolex) | provides the {% url `cy.clock()` clock %} and {% url `cy.tick()` tick %} API's |
 | [`sinon-as-promised`](https://github.com/bendrucker/sinon-as-promised) | makes it easy to stub `Promise` returning functions |
 | [`sinon-chai`](https://github.com/domenic/sinon-chai) | adds `chai` assertions for stubs and spies |
 
@@ -77,7 +77,7 @@ You generally stub a function when it has side effects you are trying to control
 - You're using `oauth` and want to stub login methods.
 
 {% note info cy.stub() %}
-[Read more about how to use cy.stub](https://on.cypress.io/api/stub)
+{% url 'Read more about how to use `cy.stub()`' stub %}
 {% endnote %}
 
 ## Spies
@@ -91,14 +91,14 @@ cy.spy(obj, "method")
 ```
 
 {% note info cy.spy() %}
-[Read more about how to use cy.spy](https://on.cypress.io/api/spy)
+{% url 'Read more about how to use `cy.spy()`' spy %}
 {% endnote %}
 
 ## Clock
 
 There are situations when it is useful to control your applications `date` and `time` in order to force its behavior or avoid slow tests.
 
-[`cy.clock`](https://on.cypress.io/api/clock) gives you the ability to control:
+{% url `cy.clock()` clock %} gives you the ability to control:
 
 - `Date`
 - `setTimeout`
@@ -109,7 +109,7 @@ There are situations when it is useful to control your applications `date` and `
 - You're polling something in your application with `setInterval` and want to control that.
 - You have **throttled** or **debounced** functions which you want to control.
 
-Once you've enabled [`cy.clock`](https://on.cypress.io/api/clock) you can then control time by **ticking** it ahead by milliseconds.
+Once you've enabled {% url `cy.clock()` clock %} you can then control time by **ticking** it ahead by milliseconds.
 
 ```javascript
 cy.clock()
@@ -118,7 +118,7 @@ cy.get("#search").type("foobarbaz")
 cy.tick(1000)
 ```
 
-[`cy.clock`](https://on.cypress.io/api/clock) is special in that it can be called **prior** to visiting your application, and we will automatically bind it to the application on the next [`cy.visit`](https://on.cypress.io/api/visit). We bind **before** any timers from your application can be invoked. This works identically to [`cy.server`](https://on.cypress.io/api/server) + [`cy.route`](https://on.cypress.io/api/route).
+{% url `cy.clock()` clock %} is special in that it can be called **prior** to visiting your application, and we will automatically bind it to the application on the next {% url `cy.visit()` visit %}. We bind **before** any timers from your application can be invoked. This works identically to {% url `cy.server()` server %} + {% url `cy.route()` route %}.
 
 ## Assertions
 
@@ -194,7 +194,7 @@ We visually indicate when:
 - A `spy` is called
 - A `clock` is ticked
 
-When you use aliasing with the [`.as(alias)`](https://on.cypress.io/api/as) command, we also coorelate those aliases with the calls. This works identically to aliasing a [`cy.route`](https://on.cypress.io/api/route).
+When you use aliasing with the {% url `.as()` as %} command, we also correlate those aliases with the calls. This works identically to aliasing a {% url `cy.route()` route %}.
 
 When stubs are created by calling the method `.withArgs(...)` we also visually link these together.
 

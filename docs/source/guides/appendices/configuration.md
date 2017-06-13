@@ -18,13 +18,13 @@ The default behavior of Cypress can be modified by supplying any of the followin
 
 Option | Default | Description
 ----- | ---- | ----
-`baseUrl` | `null` | Url used as prefix for [`cy.visit()`](https://on.cypress.io/api/visit) or [`cy.request()`](https://on.cypress.io/api/request) command's url
+`baseUrl` | `null` | Url used as prefix for {% url `cy.visit()` visit %} or {% url `cy.request()` request %} command's url
 `env` | `{}` | Any values to be set as [environment variables](https://on.cypress.io/guides/environment-variables)
 `ignoreTestFiles` | `*.hot-update.js` | A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest using [http://globtester.com](http://globtester.com) to test what files would match.
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
 `port` | `null` | Port used to host Cypress. Normally this is a randomly generated port
-`reporter` | `spec` | The [reporter](https://on.cypress.io/guides/reporters) used when running headlessly or in CI
-`reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#section-reporter-options) used. Supported options depend on the reporter.
+`reporter` | `spec` | The {% url 'reporter' reporters %} used when running headlessly or in CI
+`reporterOptions` | `null` | The {% url 'reporter options' reporters#Options %} used. Supported options depend on the reporter.
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on test file changes
 
@@ -33,10 +33,10 @@ Option | Default | Description
 Option | Default | Description
 ----- | ---- | ----
 `defaultCommandTimeout` | `4000` | Time, in milliseconds, to wait until a cy command is considered timed out
-`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during a [`cy.exec()`](https://on.cypress.io/api/exec) command
-`pageLoadTimeout` | `60000` | Time, in milliseconds, to wait until [`cy.visit()`](https://on.cypress.io/api/visit), [`cy.go()`](https://on.cypress.io/api/go), [`cy.reload()`](https://on.cypress.io/api/reload) commands or a page load times out
-`requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request to go out in a [`cy.wait()`](https://on.cypress.io/api/wait) command
-`responseTimeout` | `30000` | Time, in milliseconds, to wait until a response in a [`cy.request()`](https://on.cypress.io/api/request), [`cy.wait()`](https://on.cypress.io/api/wait), [`cy.fixture()`](https://on.cypress.io/api/fixture), [`cy.getCookie()`](https://on.cypress.io/api/getcookie), [`cy.getCookies()`](https://on.cypress.io/api/getcookies), [`cy.setCookie()`](https://on.cypress.io/api/setcookie), [`cy.clearCookie()`](https://on.cypress.io/api/clearcookie), [`cy.clearCookies`()](https://on.cypress.io/api/clearcookies), and [`cy.screenshot()`](https://on.cypress.io/api/screenshot) commands
+`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during a {% url `cy.exec()` exec %} command
+`pageLoadTimeout` | `60000` | Time, in milliseconds, to wait until {% url `cy.visit()` visit %}, {% url `cy.go()` go %}, {% url `cy.reload()` reload %} commands or a page load times out
+`requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request to go out in a {% url `cy.wait()` wait %} command
+`responseTimeout` | `30000` | Time, in milliseconds, to wait until a response in a {% url `cy.request()` request %}, {% url `cy.wait()` wait %}, {% url `cy.fixture()` fixture %}, {% url `cy.getCookie()` getcookie %}, {% url `cy.getCookies()` getcookies %}, {% url `cy.setCookie()` setcookie %}, {% url `cy.clearCookie()` clearcookie %}, {% url `cy.clearCookies()` clearcookies %}, and {% url `cy.screenshot()` screenshot %} commands
 
 ## Folders
 
@@ -45,7 +45,7 @@ Option | Default | Description
 `fileServerFolder`    | root project folder    |Path to folder where application files will attempt to be served from
 `fixturesFolder`    | `cypress/fixtures`    | Path to folder containing fixture files (Pass `false` to disable)
 `integrationFolder` | `cypress/integration` | Path to folder containing integration test files
-`screenshotsFolder`     | `cypress/screenshots`     | Path to folder where screenshots will be saved from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) command or after a headless or CI run's test failure
+`screenshotsFolder`     | `cypress/screenshots`     | Path to folder where screenshots will be saved from {% url `cy.screenshot()` screenshot %} command or after a headless or CI run's test failure
 `supportFile` | `cypress/support` | Path to file to load before test files load. This file is compiled and bundled. (Pass `false` to disable)
 `videosFolder`     | `cypress/videos`     | Path to folder where videos will be saved after a headless or CI run
 
@@ -54,7 +54,7 @@ Option | Default | Description
 Option | Default | Description
 ----- | ---- | ----
 `screenshotOnHeadlessFailure` | `true` | Whether Cypress will automatically take a screenshot when a test fails when running tests headlessly or in CI.
-`screenshotsFolder`     | `cypress/screenshots`     | Path to folder where screenshots will be saved from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) command or after a headless run's test failure
+`screenshotsFolder`     | `cypress/screenshots`     | Path to folder where screenshots will be saved from {% url `cy.screenshot()` screenshot %} command or after a headless run's test failure
 `trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before headless test runs.
 
 ## Videos
@@ -70,14 +70,14 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`chromeWebSecurity`    | `true`    | Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. [Read more about this here.](https://on.cypress.io/guides/web-security)
+`chromeWebSecurity`    | `true`    | Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. {% url 'Read more about this here' web-security %}
 
 ## Viewport
 
 Option | Default | Description
 ----- | ---- | ----
-`viewportHeight` | `660` | Default height in pixels for the application under tests' viewport (Override with [`cy.viewport()`](https://on.cypress.io/api/viewport) command)
-`viewportWidth` | `1000` | Default width in pixels for the application under tests' viewport. (Override with [`cy.viewport()`](https://on.cypress.io/api/viewport) command)
+`viewportHeight` | `660` | Default height in pixels for the application under tests' viewport (Override with {% url `cy.viewport()` viewport %} command)
+`viewportWidth` | `1000` | Default width in pixels for the application under tests' viewport. (Override with {% url `cy.viewport()` viewport %} command)
 
 ## Animations
 
@@ -92,7 +92,7 @@ Besides modifying your `cypress.json` you can also change configuration options 
 
 ## Command Line
 
-When [running Cypress from the Command Line](https://on.cypress.io/guides/cli) you can pass a `--config` flag.
+When {% url 'running Cypress from the Command Line' cli-tool %} you can pass a `--config` flag.
 
 **Examples:**
 
@@ -110,7 +110,7 @@ cypress run --record --config viewportWidth=1280,viewportHeight=720
 
 ## Environment Variables
 
-You can also use [environment variables](https://on.cypress.io/guides/environment-variables) to override configuration values. This is especially useful in [CI](https://on.cypress.io/guides/continuous-integration) or when working locally. This gives you the ability to change configuration options without modifying any code or build scripts.
+You can also use [environment variables](https://on.cypress.io/guides/environment-variables) to override configuration values. This is especially useful in {% url 'Continuous Integration' continuous-integration %} or when working locally. This gives you the ability to change configuration options without modifying any code or build scripts.
 
 By default, any environment variable that matches a corresponding configuration key will override the `cypress.json` value.
 
@@ -136,7 +136,7 @@ You can [read more about Environment Variables](https://on.cypress.io/environmen
 
 ## `Cypress.config()`
 
-You can also override configuration values within your test using [`Cypress.config()`](https://on.cypress.io/api/config).
+You can also override configuration values within your test using {% url `Cypress.config()` config %}.
 Any value you change will be permanently changed for the remainder of your tests.
 
 ```javascript

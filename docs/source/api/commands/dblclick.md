@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.dblclick()` will wait for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.dblclick()` will wait for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -77,4 +77,4 @@ When clicking on `dblclick` within the command log, the console outputs the foll
 
 # See also
 
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}

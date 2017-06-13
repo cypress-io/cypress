@@ -97,12 +97,8 @@ gulp.task('clean:public', () => {
   return remove('public')
 })
 
-gulp.task('cname', () => {
-  return gulp.src('CNAME').pipe(gulp.dest('public'))
-})
-
 gulp.task('post:build', (cb) => {
-  runSequence('copy:static:assets', 'clean:js', 'clean:css', 'revision', 'clean:public', 'copy:tmp:to:public', 'clean:tmp', 'cname', cb)
+  runSequence('copy:static:assets', 'clean:js', 'clean:css', 'revision', 'clean:public', 'copy:tmp:to:public', 'clean:tmp', cb)
 })
 
 gulp.task('copy:static:assets', ['move:menu:spy:js', 'move:scrolling:element:js', 'move:doc:search:js', 'move:doc:search:css', 'move:fira:fonts', 'move:font:awesome:fonts'])

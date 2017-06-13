@@ -38,7 +38,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.document()` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`cy.document()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -76,4 +76,4 @@ When clicking on `document` within the command log, the console outputs the foll
 
 # See also
 
-- [window](https://on.cypress.io/api/window)
+- {% url `cy.window()` window %}

@@ -37,9 +37,9 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait until `cy.visit()` resolves
+`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to wait until `cy.visit()` resolves
 
-You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in {% url 'configuration' configuration %}.
 
 ## Yields
 
@@ -47,7 +47,7 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 ## Timeout
 
-`cy.visit()` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).
+`cy.visit()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -83,7 +83,7 @@ cy.visit('app/index.html')
 
 **Visit is automatically prefixed with `baseUrl`.**
 
-Configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit()` command. Read more about [`configuration`](https://on.cypress.io/guides/configuration).
+Configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit()` command. Read more about {% url 'configuration' configuration %}.
 
 ```json
 {
@@ -169,9 +169,9 @@ cy.server()
 cy.route('/users/**', 'fx:users')
 ```
 
-But if your app makes a request upon being initialized, *the above code will not work*. `cy.visit()` will resolve once its `load` event fires.  The [`cy.server()`](https://on.cypress.io/api/server) and [`cy.route()`](https://on.cypress.io/api/route) commands are not processed until *after* `cy.visit()` resolves.
+But if your app makes a request upon being initialized, *the above code will not work*. `cy.visit()` will resolve once its `load` event fires.  The {% url `cy.server()` server %} and {% url `cy.route()` route %} commands are not processed until *after* `cy.visit()` resolves.
 
-Many applications will have already begun routing, initialization, and requests by the time the `cy.visit()` in the above code resolves. Therefore creating a [`cy.server()`](https://on.cypress.io/api/server) will happen too late, and Cypress will not process the requests.
+Many applications will have already begun routing, initialization, and requests by the time the `cy.visit()` in the above code resolves. Therefore creating a {% url `cy.server()` server %} will happen too late, and Cypress will not process the requests.
 
 Luckily Cypress supports this use case. Simply reverse the order of the commands:
 
@@ -186,8 +186,8 @@ Cypress will automatically apply the server and routes to the very next `cy.visi
 
 # See also
 
-- [go](https://on.cypress.io/api/go)
+- {% url `cy.go()` go %}
 - [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
-- [request](https://on.cypress.io/api/request)
-- [server](https://on.cypress.io/api/server)
+- {% url `cy.request()` request %}
+- {% url `cy.server()` server %}

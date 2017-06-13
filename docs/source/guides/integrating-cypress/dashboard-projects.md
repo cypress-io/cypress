@@ -7,7 +7,7 @@ A Cypress project represents the directory of files and folders that make up you
 
 # Add a New Project
 
-Projects can *only* be added to Cypress through our [Desktop Application](https://on.cypress.io/guides/installing-and-running).
+Projects can *only* be added to Cypress through our Desktop Application.
 
 1. Click {% fa fa-plus %} Add Project.
 
@@ -49,7 +49,7 @@ During a run we record all failing tests, logs, screenshots, and videos and make
 
   ![screen shot 2017-02-12 at 3 46 30 pm](https://cloud.githubusercontent.com/assets/1268976/22866093/64a9fb4c-f13e-11e6-9ebe-980ec078ba4e.png)
 
-Your tests runs are now ready to record. Typically you would record your runs when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration) but you can also record your runs from your local computer.
+Your tests runs are now ready to record. Typically you would record your runs when running in {% url 'Continuous Integration' continuous-integration %} but you can also record your runs from your local computer.
 
 ## Record Test Runs
 
@@ -57,7 +57,7 @@ After setting up your project, Cypress inserted a unique [projectId](what-is-a-p
 
 In order to record your test runs, you'll also need to provide a [Record Key](what-is-a-record-key-). The record key along with your `projectId` are used by Cypress to uniquely identify your project.
 
-**Provide record key in `cypress run`:**
+**Provide record key in {% url '`cypress run`' cli-tool#cypress-run %}:**
 
 ```shell
 cypress run --record --key <record_key>

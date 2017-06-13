@@ -50,12 +50,12 @@ Set a route by returning an object literal from a callback function. Functions t
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.route()`. By default `cy.route()` inherits its options from [`cy.server()`](https://on.cypress.io/api/server).
+Pass in an options object to change the default behavior of `cy.route()`. By default `cy.route()` inherits its options from {% url `cy.server()` server %}.
 
 Option | Default | Notes
 --- | --- | ---
 `delay` | `0` | Delay for stubbed responses (in ms)
-`force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing [`cy.route`](https://on.cypress.io/api/route)
+`force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing {% url `cy.route()` route %}.
 `headers` | `null` | Response headers for stubbed routes
 `method` | `GET` | Method to match against requests
 `onAbort` | `null` | Callback function which fires anytime an XHR is aborted
@@ -65,7 +65,7 @@ Option | Default | Notes
 `status` | `200` | Response status code when stubbing routes
 `url`    | `null` | String or RegExp url to match against request urls
 
-You can also set options for all [`cy.wait()`](https://on.cypress.io/api/wait)'s `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration) to control how long to wait for the request and response of a supplied route.
+You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` and `responseTimeout` globally in {% url 'configuration' configuration %} to control how long to wait for the request and response of a supplied route.
 
 ## Yields
 
@@ -108,7 +108,7 @@ Under the hood Cypress uses [minimatch](https://github.com/isaacs/minimatch) to 
 
 This means you can take advantage of `*` and `**` glob support. This makes it *much* easier to route against dynamic segments without having to build up a complex `RegExp`.
 
-We expose [`Cypress.minimatch`](https://on.cypress.io/api/cypress-minimatch) as a function that you can use in your console to test routes.
+We expose {% url `Cypress.minimatch` minimatch %} as a function that you can use in your console to test routes.
 
 ***Match route against any UserId***
 
@@ -133,9 +133,9 @@ cy.route('/posts/**')
 
 **Override `url` glob matching options**
 
-When we check `glob` patterns with [minimatch](https://github.com/isaacs/minimatch), by default Cypress uses sets `matchBase` to `true`. You can override this option in [`cy.server()`](https://on.cypress.io/api/server) options.
+When we check `glob` patterns with [minimatch](https://github.com/isaacs/minimatch), by default Cypress uses sets `matchBase` to `true`. You can override this option in {% url `cy.server()` server %} options.
 
-If you want to permanently override these options you could do so by setting [`Cypress.Server.defaults(...)`](https://on.cypress.io/api/api-server).
+If you want to permanently override these options you could do so by setting {% url `Cypress.Server.defaults()` cypress-server %}.
 
 ```javascript
 cy.server({
@@ -238,7 +238,7 @@ cy.route('DELETE', '/users', {})
 
 ## Using Fixtures as Responses
 
-Instead of writing a response inline you can automatically connect a response with a [fixture](https://on.cypress.io/api/fixture).
+Instead of writing a response inline you can automatically connect a response with a {% url `cy.fixture()` fixture %}.
 
 ```javascript
 cy.server()
@@ -434,7 +434,7 @@ If you'd like to enable this behavior you need to pass:
 cy.server({force404: true})
 ```
 
-You can [read more about this here.](https://on.cypress.io/api/server#prevent-sending-404s-to-unmatched-requests)
+You can {% url 'read more about this here.' server#Options %}
 
 # Command Log
 
@@ -459,9 +459,9 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 # See also
 
-- [as](https://on.cypress.io/api/as)
-- [fixture](https://on.cypress.io/api/fixture)
+- {% url `.as()` as %}
+- {% url `cy.fixture()` fixture %}
 - [Guide: Network Requests](https://on.cypress.io/guides/network-requests-xhr)
 - [Recipe: Loggin in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
-- [server](https://on.cypress.io/api/server)
-- [wait](https://on.cypress.io/api/wait)
+- {% url `cy.server()` server %}
+- {% url `cy.wait()` wait %}

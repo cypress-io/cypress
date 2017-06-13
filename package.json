@@ -6,13 +6,18 @@
     "watch": "npm run all watch",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
-    "test": "echo 'This root monorepo is only for local development and new contributions. There are no tests.' && exit(1)",
+    "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "link": "node ./scripts/link-packages.js",
     "postinstall": "CYPRESS_DOWNLOAD=0 npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
     "docker": "./scripts/run-docker-local.sh",
-    "lint": "standard --verbose --fix scripts/*.js",
-    "precommit": "npm run lint && npm run all lint"
+    "lint": "eslint --fix scripts/*.js",
+    "pretest": "npm run lint && npm run all lint",
+    "precommit": "lint-staged",
+    "precommit-lint": "eslint --fix --rule 'no-only-tests/no-only-tests: 2'"
+  },
+  "lint-staged": {
+    "*.js": ["precommit-lint", "git add"]
   },
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.4",
@@ -21,11 +26,12 @@
     "bluebird": "^3.4.5",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-no-only-tests": "levibuzolic/eslint-plugin-no-only-tests#dbb7270c4f48e33081729c0ef076441b39f35487",
     "eslint-plugin-react": "^5.1.1",
-    "husky": "^0.13.4",
     "fs-extra": "^2.1.2",
-    "pre-git": "^3.15.0",
-    "standard": "^10.0.2"
+    "husky": "^0.13.4",
+    "lint-staged": "^3.6.0",
+    "pre-git": "^3.15.0"
   },
   "config": {
     "pre-git": {

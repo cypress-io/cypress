@@ -35,11 +35,11 @@ There are 4 different ways to set environment variables. Each has a slightly dif
 
 Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in [CI](https://on.cypress.io/continuous-integration).
 
-When your tests are running, you can use the [`Cypress.env()`](https://on.cypress.io/api/env) function to access the values of your environment variables.
+When your tests are running, you can use the {% url `Cypress.env` env %} function to access the values of your environment variables.
 
 ## Option #1: `cypress.json`
 
-Any key/value you set in your [`cypress.json`](https://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
+Any key/value you set in your {% url 'configuration' configuration %} under the `env` key will become an environment variable.
 
 ***cypress.json***
 
@@ -145,11 +145,11 @@ Cypress.env("api_server") // "http://localhost:8888/api/v1/"
 
 ## Option #4: `--env`
 
-Lastly you can pass in environment variables as options when [using the CLI tool](https://github.com/cypress-io/cypress-cli).
+Lastly you can pass in environment variables as options when {% url 'using the CLI tool' cli-tool#cypress-run %}.
 
 Values here will overwrite all other conflicting environment variables.
 
-You can use the `--env` argument for `cypress run`.
+You can use the `--env` argument for {% url '`cypress run`' cli-tool#cypress-run %}.
 
 {% note warning  %}
 Multiple values must be separated by a comma, not a space.

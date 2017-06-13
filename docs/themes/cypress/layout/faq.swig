@@ -9,7 +9,7 @@
               {{ toc(page.content, {list_number: false}) }}
             </div>
             <div class="article-content" itemprop="articleBody">
-              {{ page_anchor(page.content) }}
+              {{ add_page_anchors(page.content) }}
             </div>
             <footer class="article-footer">
               {{ page_nav() }}

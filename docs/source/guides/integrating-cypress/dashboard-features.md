@@ -11,13 +11,13 @@ comments: true
 
 - See the number of failed, pending and passing tests.
 - Get the entire stack trace of failed tests.
-- View screenshots taken when tests fail and when using [`cy.screenshot()`](https://on.cypress.io/api/screenshot).
+- View screenshots taken when tests fail and when using {% url `cy.screenshot()` screenshot %}.
 - Watch a video of your entire test run or a clip at the point of test failure.
 - Manage who has access to your recorded test data.
 
 **See Tests Runs in Desktop**
 
-Additionally we've integrated the test runs into the Cypress [Desktop Application](https://on.cypress.io/guides/installing-and-running). This means you can see the test runs in the *Runs* tab from within every project.
+Additionally we've integrated the test runs into the Cypress {% url 'Desktop Application' installing-cypress %}). This means you can see the test runs in the *Runs* tab from within every project.
 
 ![Runs List](https://cloud.githubusercontent.com/assets/1271364/22800330/ff6c9474-eed6-11e6-9a32-8360d64b1071.png)
 
@@ -68,4 +68,4 @@ No, although we are looking to build an on-premise version of the Dashboard for 
 
 Yes. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
-You can always run your tests in CI using `cypress run` without the `--record` flag. Doing this will not record any test results or communicate to our external servers.
+You can always run your tests in CI using {% url '`cypress run`' cli-tool#cypress-run %} without the `--record` flag. Doing this will not record any test results or communicate to our external servers.

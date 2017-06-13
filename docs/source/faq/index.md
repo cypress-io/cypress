@@ -68,7 +68,7 @@ The desktop application can be installed in OSX and Linux. [Windows is not yet s
 
 Cypress would never be able to run on a native mobile app, but would be able to run in a web view. In that mode, you'd see the commands display in a browser while you would drive the mobile device separately. Down the road we'll likely have first class support for this, but today it is not a current priority.
 
-Currently you can control the [`.viewport()`](https://on.cypress.io/api/viewport) to test responsive, mobile views in a website or web application.
+Currently you can control the {% url `cy.viewport()` viewport %} to test responsive, mobile views in a website or web application.
 
 ## {% fa fa-question-circle green %} Do you support X language or X framework?
 
@@ -126,7 +126,7 @@ There is nothing currently built into Cypress to do this. Adding code coverage a
 
 No. In fact Cypress' architecture is very different from Selenium in a few critical ways:
 
-- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like [.request()](http://on.cypress.io/api/request) and [.exec()](https://on.cypress.io/api/exec).
+- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like {% url `cy.request()` request %} and {% url `cy.exec()` exec %}.
 
 ## {% fa fa-question-circle green %} Are there driver bindings in my language?
 
@@ -163,7 +163,7 @@ You can read more about parallelization [here](https://github.com/cypress-io/cyp
 
 You can run a group of tests or a single test by placing an `.only` to a test suite or specific test.
 
-You can run a single test headlessly by passing the `--spec` flag to `cypress run`.
+You can run a single test headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
 
 Currently there is no way to specify a group of tests to run headlessly. You can read more [here](https://github.com/cypress-io/cypress/issues/263).
 
@@ -218,7 +218,7 @@ cy.get('button').then(($el) => {
 
 ## {% fa fa-question-circle green %} How do I wait for multiple XHR requests to the same url?
 
-You should set up an alias (using [`.as()`](https://on.cypress.io/api/as)) to a single route that matches all of the XHRs. You can then [`.wait()`](https://on.cypress.io/api/wait) on it multiple times and Cypress keeps track of how many matching XHR requests there are.
+You should set up an alias (using {% url `.as()` as %}) to a single route that matches all of the XHRs. You can then {% url `cy.wait()` wait %} on it multiple times and Cypress keeps track of how many matching XHR requests there are.
 
 ```javascript
 cy.server()
@@ -234,9 +234,9 @@ cy.get('#list>li').should('have.length', 20)
 
 ## {% fa fa-question-circle green %} How do I seed / reset my database?
 
-You can use either [`.request()`](https://on.cypress.io/api/request) or [`cy.exec`](https://on.cypress.io/api/exec) to talk to your backend to seed data.
+You can use either {% url `cy.request()` request %} or {% url `cy.exec()` exec %} to talk to your backend to seed data.
 
-You could also just stub XHR requests directly using [`.route()`](https://on.cypress.io/api/route) which avoids ever even needing to fuss with your database.
+You could also just stub XHR requests directly using {% url `cy.route()` route %} which avoids ever even needing to fuss with your database.
 
 <!-- ## How do I pass data to my webserver from Cypress? -->
 
@@ -331,7 +331,7 @@ cy.get('input').should('have.value', 'abc')
 
 The code you write in Cypress is executed in the browser, so you can import or require JS modules, but only those that work in the browser.
 
-Cypress doesn't have direct access to node or your file system. We recommend utilizing [`.exec()`](https://on.cypress.io/api/exec) to execute a shell command or a node script that will do what you need.
+Cypress doesn't have direct access to node or your file system. We recommend utilizing {% url `cy.exec()` exec %} to execute a shell command or a node script that will do what you need.
 
 ## {% fa fa-question-circle green %} Is there a way to give a proper SSL certificate to your proxy so the page doesn't show up as "not secure"?
 
@@ -339,7 +339,7 @@ No, Cypress modifies network traffic in real time and therefore must sit between
 
 ## {% fa fa-question-circle green %} Can I use the Page Object pattern?
 
-As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with [`.as()`](https://on.cypress.io/api/as) to essentially recreate what page objects give you.
+As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with {% url `.as()` as %} to essentially recreate what page objects give you.
 
 
 # Dashboard
@@ -389,7 +389,7 @@ No, although we are looking to build an on-premise version of the Dashboard for 
 
 Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
-You can simply always run your tests in CI using `cypress run` without the `--record` flag which does not communicate with our external servers and will not record any test results.
+You can simply always run your tests in CI using {% url '`cypress run`' cli-tool#cypress-run %} without the `--record` flag which does not communicate with our external servers and will not record any test results.
 
 ## {% fa fa-question-circle green %} What is the difference between public and private projects?
 

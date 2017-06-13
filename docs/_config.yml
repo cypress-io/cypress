@@ -104,6 +104,10 @@ node_sass:
 sitemap:
   path: sitemap.xml
 
+## https://github.com/hexojs/hexo-renderer-marked
+marked:
+  autolink: false
+
 ## https://github.com/mamboer/hexo-filter-cleanup
 hfc_useref:
   enable: true
@@ -140,11 +144,3 @@ hfc_img:
   svgo: false
 hfc_favicons:
   enable: false
-
-# Deployment
-## Docs: https://hexo.io/docs/deployment.html
-deploy:
-  type: git
-  repo: git@github.com:cypress-io/cypress-monorepo
-  branch: gh-pages
-  message: '[skip ci] deploying docs'

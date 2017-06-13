@@ -6,7 +6,7 @@ comments: true
 Invoke a function on the previously yielded subject.
 
 {% note info %}
-If you want to get a property that is not a function on the previously yielded subject, use [`.its()`](https://on.cypress.io/api/its).
+If you want to get a property that is not a function on the previously yielded subject, use {% url `.its()` its %}.
 {% endnote %}
 
 # Syntax
@@ -160,8 +160,8 @@ When clicking on `invoke` within the command log, the console outputs the follow
 
 # See also
 
-- [its](https://on.cypress.io/api/its)
-- [spy](https://on.cypress.io/api/spy)
-- [stub](https://on.cypress.io/api/stub)
-- [then](https://on.cypress.io/api/then)
-- [wrap](https://on.cypress.io/api/wrap)
+- {% url `.its()` its %}
+- {% url `cy.spy()` spy %}
+- {% url `cy.stub()` stub %}
+- {% url `.then()` then %}
+- {% url `cy.wrap()` wrap %}

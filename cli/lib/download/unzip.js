@@ -1,21 +1,13 @@
-const chalk = require('chalk')
 const cp = require('child_process')
 const extract = require('extract-zip')
 const os = require('os')
-const ProgressBar = require('progress')
 const Promise = require('bluebird')
 const readline = require('readline')
 const yauzl = require('yauzl')
+const { formErrorText, errors } = require('./errors')
+const utils = require('./utils')
 
 const fs = Promise.promisifyAll(require('fs-extra'))
-
-const ascii = [
-  chalk.white('  -'),
-  chalk.blue('Unzipping Cypress  '),
-  chalk.yellow('[:bar]'),
-  chalk.white(':percent'),
-  chalk.gray(':etas'),
-]
 
 const start = (options) => {
   const unzip = () => {
@@ -26,10 +18,11 @@ const start = (options) => {
         let count = 0
         const total = Math.floor(zipFile.entryCount / 500)
 
-        const bar = new ProgressBar(ascii.join(' '), {
+        const barOptions = {
           total,
           width: options.width,
-        })
+        }
+        const bar = utils.getProgressBar('Unzipping Cypress', barOptions)
 
         const tick = () => {
           count += 1
@@ -112,14 +105,8 @@ const cleanup = (options) => {
 }
 
 const logErr = (err) => {
-  /* eslint-disable no-console */
-  console.log('')
-  console.log(chalk.bgRed.white(' -Error- '))
-  console.log(chalk.red.underline('The Cypress App could not be unzipped.'))
-  console.log('')
-  console.log(chalk.red(err.stack))
-  console.log('')
-  /* eslint-enable no-console */
+  return formErrorText(errors.failedToUnZip, err)
+    .then(console.log) // eslint-disable-line no-console
 }
 
 module.exports = {

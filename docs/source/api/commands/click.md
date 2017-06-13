@@ -61,7 +61,7 @@ Option | Default | Notes
 `interval` | `16` | Interval which to retry a click
 `log` | `true` | Whether to display command in Command Log
 `multiple` | `false` | Enable serially clicking multiple elements
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the click
 
 ## Yields
 
@@ -69,7 +69,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.click()` will wait until the element is in a 'clickable' state for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`.click()` will wait until the element is in a 'clickable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 
@@ -186,7 +186,7 @@ However, sometimes when dealing with 3rd party plugins that animate, Cypress' lo
 
 Cypress attempts to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event.
 
-These situations are rare, but if you're having a difficult time clicking an element or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with [`cy.wait(ms)`](https://on.cypress.io/api/wait). It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
+These situations are rare, but if you're having a difficult time clicking an element or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with {% url 'cy.wait()' wait %}. It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
 
 # Command Log
 
@@ -206,7 +206,7 @@ When clicking on `click` within the command log, the console outputs the followi
 
 # See also
 
-- [check](https://on.cypress.io/api/check)
-- [dblclick](https://on.cypress.io/api/dblclick)
-- [select](https://on.cypress.io/api/select)
-- [submit](https://on.cypress.io/api/submit)
+- {% url `.check()` check %}
+- {% url `.dblclick()` dblclick %}
+- {% url `.select()` select %}
+- {% url `.submit()` submit %}

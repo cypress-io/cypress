@@ -1,6 +1,5 @@
 {
   "baseUrl": "http://localhost:2222",
   "projectId": "ma3dkn",
-  "viewportWidth": 1300,
-  "numTestsKeptInMemory": 0
+  "viewportWidth": 1300
 }

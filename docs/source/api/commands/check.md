@@ -53,7 +53,7 @@ Option | Default | Notes
 `force` | `false` | Forces check, disables error checking prior to check
 `interval` | `16` | Interval which to retry a check
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the check
 
 ## Yields
 
@@ -61,7 +61,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.check` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's options.
+`.check` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
 # Examples
 
@@ -130,5 +130,5 @@ When clicking on `check` within the command log, the console outputs the followi
 
 # See also
 
-- [click](https://on.cypress.io/api/click)
-- [uncheck](https://on.cypress.io/api/uncheck)
+- {% url `.click()` click %}
+- {% url `.uncheck()` uncheck %}

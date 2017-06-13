@@ -123,7 +123,7 @@ You can read more about [environment variables](https://on.cypress.io/environmen
 Record video of tests running after [setting up your project to record](https://on.cypress.io/guides/projects).
 
 {% note info  %}
-You'd typically record your runs in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), but you can also record when running locally.
+You'd typically record your runs in {% url 'Continuous Integration' continuous-integration %}, but you can also record when running locally.
 {% endnote %}
 
 After setting up your project you will be given a **Record Key**.
@@ -136,7 +136,7 @@ cypress run --record --key <record_key>
 
 If you set the **Record Key** as the environment variable `CYPRESS_RECORD_KEY`, you can omit the `--key` flag.
 
-**Set environment variable (typically in [CI](https://on.cypress.io/guides/continuous-integration)).**
+**Set environment variable (typically in {% url 'Continuous Integration' continuous-integration %}).**
 
 ```shell
 export CYPRESS_RECORD_KEY=abc-key-123

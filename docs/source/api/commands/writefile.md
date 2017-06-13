@@ -56,7 +56,7 @@ Pass in an options object to change the default behavior of `cy.writeFile()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the command to be processed.
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed.
 
 ## Yields
 
@@ -64,7 +64,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`cy.writeFile()` will wait up for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to write to the file.
+`cy.writeFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to write to the file.
 
 # Examples
 
@@ -155,5 +155,5 @@ When clicking on the `writeFile` command within the command log, the console out
 
 # See also
 
-- [readFile](https://on.cypress.io/api/readfile)
+- {% url `cy.readFile()` readfile %}
 - [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)

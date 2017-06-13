@@ -1,5 +1,6 @@
 require('../spec_helper')
 
+const chalk = require('chalk')
 const download = require('../../lib/download/download')
 const index = require('../../lib/download/index')
 const utils = require('../../lib/download/utils')
@@ -7,11 +8,43 @@ const utils = require('../../lib/download/utils')
 const packageVersion = require('../../package').version
 
 describe('index', function () {
+  beforeEach(() => {
+    // allow simpler log message comparison without
+    // chalk's terminal control strings
+    chalk.enabled = false
+  })
+
+  afterEach(() => {
+    chalk.enabled = true
+  })
+
   context('#install', function () {
     beforeEach(function () {
       this.sandbox.stub(utils, 'log')
       this.sandbox.stub(download, 'start').resolves()
       this.sandbox.stub(utils, 'getInstalledVersion').resolves()
+    })
+
+    describe('override version', function () {
+      afterEach(function () {
+        delete process.env.CYPRESS_VERSION
+      })
+
+      it('can specify cypress version in env', function () {
+        const version = '0.12.1'
+        process.env.CYPRESS_VERSION = version
+
+        return index.install()
+          .then(() => {
+            const msg = `Forcing CYPRESS_VERSION ${version}`
+            expect(utils.log.calledWith(msg)).to.be.true
+            expect(download.start).to.be.calledWith({
+              displayOpen: false,
+              version,
+              cypressVersion: version,
+            })
+          })
+      })
     })
 
     describe('when version is already installed', function () {
@@ -21,7 +54,8 @@ describe('index', function () {
       })
 
       it('logs message', function () {
-        expect(utils.log.lastCall.args[0]).to.include(`Cypress ${packageVersion} already installed.`)
+        const msg = `Cypress ${packageVersion} already installed.`
+        expect(utils.log.calledWith(msg)).to.be.true
       })
 
       it('does not download', function () {
@@ -36,8 +70,8 @@ describe('index', function () {
       })
 
       it('logs message', function () {
-        expect(utils.log.lastCall.args[0]).to.equal('Cypress executable was not found.')
-        expect(utils.log.lastCall.args[1]).to.include(`Installing Cypress (version: ${packageVersion}).`)
+        expect(utils.log.calledWith('Cypress executable was not found.')).to.be.true
+        expect(utils.log.calledWith(`Installing Cypress (version: ${packageVersion}).`)).to.be.true
       })
 
       it('downloads', function () {
@@ -49,15 +83,17 @@ describe('index', function () {
       })
     })
 
-    describe('when getting installed version does not match package version', function () {
+    describe('when getting installed version does not match needed version', function () {
       beforeEach(function () {
         utils.getInstalledVersion.resolves('x.x.x')
         return index.install()
       })
 
       it('logs message', function () {
-        expect(utils.log.lastCall.args[0]).to.equal(`Installed version (x.x.x) does not match package version (${packageVersion}).`)
-        expect(utils.log.lastCall.args[1]).to.include(`Installing Cypress (version: ${packageVersion}).`)
+        const versionMessage = `Installed version (x.x.x) does not match needed version (${packageVersion}).`
+        expect(utils.log.calledWith(versionMessage)).to.be.true
+        const installMessage = `Installing Cypress (version: ${packageVersion}).`
+        expect(utils.log.calledWith(installMessage)).to.be.true
       })
 
       it('downloads', function () {

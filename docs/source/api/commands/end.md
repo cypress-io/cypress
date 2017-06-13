@@ -57,5 +57,5 @@ cy.contains('User: Charles').click()  // contains looks for content in document 
 
 # See also
 
-- [root](https://on.cypress.io/api/root)
-- [within](https://on.cypress.io/api/within)
+- {% url `.root()` root %}
+- {% url `.within()` within %}

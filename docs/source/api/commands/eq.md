@@ -49,7 +49,7 @@ Pass in an options object to change the default behavior of `.eq()`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
 ## Yields
 
@@ -57,7 +57,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.eq()` will continue to look for the element at the specified index for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.eq()` will continue to look for the element at the specified index for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -115,7 +115,7 @@ When clicking on the `eq` command within the command log, the console outputs th
 
 # See also
 
-- [first](https://on.cypress.io/api/first)
-- [last](https://on.cypress.io/api/last)
-- [next](https://on.cypress.io/api/next)
-- [prev](https://on.cypress.io/api/prev)
+- {% url `.first()` first %}
+- {% url `.last()` last %}
+- {% url `.next()` next %}
+- {% url `.prev()` prev %}

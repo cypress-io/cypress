@@ -11,7 +11,7 @@
 
   // https://github.com/lcdsantos/menuspy
   // This highlights the proper toc link while scrolling
-  var ms = new MenuSpy(tocInner, { threshold: -300 })
+  var ms = new MenuSpy(tocInner)
 
   // This keeps the toc within the view
   function updateSidebarPosition(){

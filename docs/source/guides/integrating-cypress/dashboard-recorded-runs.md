@@ -16,12 +16,12 @@ We capture the following:
 
 - [Standard Output](#Standard-Output)
 - [Test Failures](#Test-Failures)
-- [Screenshots](Screenshots)
-- [Video](Video)
+- [Screenshots](#Screenshots)
+- [Video](#Video)
 
 ## Standard Output
 
-Standard output includes details and summaries of your tests based on the [reporter](https://on.cypress.io/guides/reporters) you have set. By default it is the `spec` reporter.
+Standard output includes details and summaries of your tests based on the {% url 'reporter' reporters %} you have set. By default it is the `spec` reporter.
 
 ![output](https://cloud.githubusercontent.com/assets/1271364/22707798/f5e5608e-ed41-11e6-8832-d66e5a68094b.png)
 
@@ -41,7 +41,7 @@ Any tests that fail during a test run can be found under the *Failures* tab. Eac
 
 ## Screenshots
 
-All screenshots taken during the test run can be found under the *Screenshots* tab. Both screenshots taken during failures and screenshots taken using the [`cy.screenshot()`](https://on.cypress.io/api/screenshot) command will show up here. Each screenshot includes the application under test as well as the Cypress Command Log.
+All screenshots taken during the test run can be found under the *Screenshots* tab. Both screenshots taken during failures and screenshots taken using the {% url `cy.screenshot()` screenshot %} command will show up here. Each screenshot includes the application under test as well as the Cypress Command Log.
 
 ![Screenshots](https://cloud.githubusercontent.com/assets/1271364/22707241/28bf50de-ed40-11e6-93a1-4e09c2767605.png)
 

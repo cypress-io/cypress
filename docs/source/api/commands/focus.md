@@ -45,7 +45,7 @@ Option | Default | Notes
 
 ## Timeout
 
-`.focus()` will continue to try to focus the element for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts).
+`.focus()` will continue to try to focus the element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -96,7 +96,7 @@ When clicking on the `focus` command within the command log, the console outputs
 
 # See also
 
-- [blur](https://on.cypress.io/api/blur)
-- [click](https://on.cypress.io/api/click)
-- [focused](https://on.cypress.io/api/focused)
-- [type](https://on.cypress.io/api/type)
+- {% url `.blur()` blur %}
+- {% url `.click()` click %}
+- {% url `cy.focused()` focused %}
+- {% url `.type()` type %}

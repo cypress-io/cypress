@@ -80,7 +80,7 @@ cy.location().should(function(location) {
 
 **Check location for query params and pathname**
 
-We can yield the location object within a [`.should()`](https://on.cypress.io/api/should) command and work with it directly.
+We can yield the location object within a {% url `.should()` should %} command and work with it directly.
 
 ```javascript
 cy.get('#search').type('niklas{enter}')
@@ -147,6 +147,6 @@ When clicking on `location` within the command log, the console outputs the foll
 
 # See also
 
-- [hash](https://on.cypress.io/api/hash)
-- [url](https://on.cypress.io/api/url)
-- [window](https://on.cypress.io/api/window)
+- {% url `cy.hash()` hash %}
+- {% url `cy.url()` url %}
+- {% url `cy.window()` window %}
