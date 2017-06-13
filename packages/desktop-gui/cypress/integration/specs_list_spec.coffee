@@ -16,6 +16,7 @@ describe "Specs List", ->
       cy.stub(@ipc, "closeProject").resolves()
       cy.stub(@ipc, "openFinder")
       cy.stub(@ipc, "externalOpen")
+      cy.stub(@ipc, "onboardingClosed")
 
       @updaterCheck = @util.deferred()
       cy.stub(@ipc, "updaterCheck").resolves(@updaterCheck.promise)
@@ -77,7 +78,7 @@ describe "Specs List", ->
         .contains("OK, got it!").click()
         .get(".modal").should("not.be.visible")
         .then ->
-          expect(@App.ipc).to.be.calledWith("onboarding:closed")
+          expect(@ipc.onboardingClosed).to.be.called
 
     it "triggers open:finder on click of example file", ->
       cy
