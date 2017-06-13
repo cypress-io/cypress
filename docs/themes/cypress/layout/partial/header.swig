@@ -9,11 +9,13 @@
       {{ menu('main') }}
       <a href="https://github.com/{{ config.github_main_repo }}" class="main-nav-link"><i class="fa fa-github"></i></a>
 
-      <div id="search-input-wrap">
-        <div id="search-input-icon">
-          <i class="fa fa-search"></i>
+      <div id="search-container">
+        <div id="search-input-wrap">
+          <div id="search-input-icon">
+            <i class="fa fa-search"></i>
+          </div>
+          <input type="search" id="search-input" placeholder="Search...">
         </div>
-        <input type="search" id="search-input" placeholder="Search...">
       </div>
       <div id="lang-select-wrap">
         <label id="lang-select-label"><i class="fa fa-globe"></i><span>{{ lang_name(page.lang) }}</span><i class="fa fa-caret-down"></i></label>
