@@ -40,6 +40,9 @@ describe "Global Mode", ->
       @getProjects = @util.deferred()
       cy.stub(@ipc, "getProjects").returns(@getProjects.promise)
 
+      @getProjectStatus = @util.deferred()
+      cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
+
       @getProjectStatuses = @util.deferred()
       cy.stub(@ipc, "getProjectStatuses").returns(@getProjectStatuses.promise)
 
@@ -81,6 +84,10 @@ describe "Global Mode", ->
               .should("have.class", "is-dragging-over")
             .ttrigger("drop", @dropEvent)
               .should("not.have.class", "is-dragging-over")
+
+      it "gets project status when dropped", ->
+        cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
+          expect(@ipc.getProjectStatus).to.be.calledWith({id: @projects[0].id, path: "/foo/bar"})
 
       it "adds project and opens it when dropped", ->
         cy.get(".project-drop").ttrigger("drop", @dropEvent)
@@ -278,6 +285,11 @@ describe "Global Mode", ->
       it "redirects to login when get:project:statuses returns 401", ->
         @getProjects.resolve([])
         @getProjectStatuses.reject(@unauthError)
+        cy.shouldBeOnLogin()
+
+      it "redirects to login when get:project:status returns 401", ->
+        @ipc.getProjectStatus.rejects(@unauthError)
+        cy.get(".project-drop").ttrigger("drop", @dropEvent)
         cy.shouldBeOnLogin()
 
   describe "when there are projects in local storage that no longer exist", ->
