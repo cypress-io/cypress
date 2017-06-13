@@ -401,6 +401,7 @@ module.exports = {
 
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
+    browser ?= "electron"
     log "runTests for browser #{browser}"
 
     screenshots = []
@@ -413,7 +414,7 @@ module.exports = {
 
     ## if we've been told to record and we're not spawning a headed browser
     browserCanBeRecorded = (name) ->
-      not name or name == "electron"
+      name == "electron"
 
     if videoRecording
       if browserCanBeRecorded(browser)
