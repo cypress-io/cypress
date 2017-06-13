@@ -65,7 +65,8 @@
   display: none;
   position: relative;
   border-radius: 5px;
-  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  // background-color: rgba(255, 255, 255, 0.18);
   padding: 0 10px;
   margin-left: 10px;
 }
