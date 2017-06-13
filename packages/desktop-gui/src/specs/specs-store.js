@@ -3,7 +3,7 @@ import { observable, action } from 'mobx'
 
 import Spec from './spec-model'
 
-export class SpecsCollection {
+export class SpecsStore {
   @observable specs = []
   @observable error = null
   @observable isLoading = false
@@ -20,19 +20,15 @@ export class SpecsCollection {
   }
 
   @action setChosenSpec (specPath) {
-    if (specPath === '__all') {
-      this.allSpecsChosen = true
-    } else {
-      this.allSpecsChosen = false
-    }
+    this.allSpecsChosen = specPath === '__all'
 
     function setChosen (specs) {
       _.forEach(specs, (spec) => {
         // we're a file if we have no child specs
         if (!spec.children.specs.length && (spec.name === specPath || spec.path === specPath)) {
-          spec.isChosen = true
+          spec.setChosen(true)
         } else {
-          spec.isChosen = false
+          spec.setChosen(false)
           setChosen(spec.children.specs)
         }
       })
@@ -51,7 +47,7 @@ export class SpecsCollection {
   }
 
   resetToTreeView (specs) {
-    let specsTree = new SpecsCollection([])
+    let specsTree = new SpecsStore()
 
     _.forEach(specs, (arr, key) => {
       _.forEach(this.getFilesSplitByDirectory(arr), (segments, index) => {
@@ -93,4 +89,4 @@ export class SpecsCollection {
   }
 }
 
-export default new SpecsCollection()
+export default new SpecsStore()

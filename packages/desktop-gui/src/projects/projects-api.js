@@ -5,7 +5,7 @@ import ipc from '../lib/ipc'
 import localData from '../lib/local-data'
 import viewStore from '../lib/view-store'
 import projectsStore from '../projects/projects-store'
-import specsCollection from '../specs/specs-collection'
+import specsStore from '../specs/specs-store'
 
 import { getSpecs } from '../specs/specs-api'
 
@@ -69,7 +69,7 @@ const runSpec = (project, spec, browser) => {
       if (data.browserClosed) {
         project.browserClosed()
 
-        specsCollection.setChosenSpec('')
+        specsStore.setChosenSpec('')
 
         ipc.offLaunchBrowser()
       }
@@ -77,7 +77,7 @@ const runSpec = (project, spec, browser) => {
   }
 
   let changeChosenSpec = () => {
-    specsCollection.setChosenSpec(spec)
+    specsStore.setChosenSpec(spec)
   }
 
   return closeBrowser()
@@ -86,7 +86,7 @@ const runSpec = (project, spec, browser) => {
 }
 
 const closeBrowser = (project) => {
-  specsCollection.setChosenSpec('')
+  specsStore.setChosenSpec('')
 
   if (project) {
     project.browserClosed()
@@ -112,7 +112,7 @@ const closeProject = (project) => {
 }
 
 const openProject = (project) => {
-  specsCollection.loading(true)
+  specsStore.loading(true)
 
   const setProjectError = (err) => {
     project.setLoading(false)
@@ -145,7 +145,7 @@ const openProject = (project) => {
 
       ipc.openProject(project.path, (err, config = {}) => {
         if (config.specChanged) {
-          return specsCollection.setChosenSpec(config.specChanged)
+          return specsStore.setChosenSpec(config.specChanged)
         }
 
         project.clearError()
