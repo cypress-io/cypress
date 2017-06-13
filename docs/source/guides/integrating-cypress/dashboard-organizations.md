@@ -31,7 +31,7 @@ You can create an organization from within the [Dashboard](https://on.cypress.io
 
 ## Inviting Users
 
-You can invite users to Cypress from our [Dashboard](https://on.cypress.io/dashboard). Invited users will see all projects and test runs for the organization.
+You can invite users to Cypress from our {% url 'Dashboard' https://on.cypress.io/dashboard %}. Invited users will see all projects and test runs for the organization.
 
 Even though we are in a **private beta**, any user you invite will automatically be whitelisted to use Cypress. This means you can freely invite your team members without needing to talk to us!
 
@@ -46,7 +46,7 @@ Even though we are in a **private beta**, any user you invite will automatically
 
 ## User Roles
 
-User's can be assigned roles that affect their access to certain features of the [Dashboard](https://on.cypress.io/dashboard).
+User's can be assigned roles that affect their access to certain features of the {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
 - **Member:** Can see the projects, runs, and keys.
 - **Admin:** Can also invite, edit and delete users.
@@ -60,7 +60,7 @@ Users can "Request" access to a given organization. If a developer on your team 
 
 ## Transferring Projects
 
-You can transfer projects that you own to another organization or another user. You can only transfer projects from our [Dashboard](https://on.cypress.io/dashboard).
+You can transfer projects that you own to another organization or another user. You can only transfer projects from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
 ![Transfer Project dialog](https://cloud.githubusercontent.com/assets/1271364/22708695/440f4e5c-ed45-11e6-9a98-8f91b67871a3.png)
 

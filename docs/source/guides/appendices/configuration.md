@@ -132,7 +132,7 @@ export CYPRESS_PAGE_LOAD_TIMEOUT=100000
 {% note warning  %}
 Environment variables that do not match configuration keys will instead be set as regular environment variables for use in your tests with `Cypress.env()`.
 
-You can [read more about Environment Variables](https://on.cypress.io/environment-variables).
+You can {% url 'read more about Environment Variables' environment-variables %}.
 {% endnote %}
 
 ## `Cypress.config()`

@@ -34,7 +34,7 @@
 
 **Features:**
 
-- Cypress will now [display the **resolved** configuration values when you open a project](https://on.cypress.io/configuration#section-resolved-configuration). This tells you the source of all config values.
+- Cypress will now {% url 'display the **resolved** configuration values when you open a project' configuration#Resolved-Configuration %}. This tells you the source of all config values.
 - The latest version of the {% url 'Cypress CLI' cli-tool %} now accepts passing arguments to {% url '`cypress open`' cli-tool#cypress-open %}. Example: `cypress open --config waitForAnimations=false --env foo=bar,baz=quux`. This enables you to set and override local `cypress.json` configuration and additionally set environment variables.
 - {% url 'Environment Variables' environment-variables %} that match any configuration keys (such as `pageLoadTimeout` or `watchForFileChanges`) now override their values. So, if you `export CYPRESS_WATCH_FOR_FILE_CHANGES=false` it will turn off this configuration option. Also note that we'll automatically normalize environment keys so: `CYPRESS_pageLoadTimeout=100000` and `CYPRESS_PAGE_LOAD_TIMEOUT=100000` will both be correctly handled. We'll also coerce values into `Boolean` or `Number` correctly.
 - Cypress now correctly proxies `Websockets` that are pointed at the local Cypress server (typically `localhost:2020`). Because most users use [Socket.io](http://socket.io/), when Socket.io could not correctly connect over Websockets it would fall back to XHR polling. You may notice many less XHR requests in your command log (which is the intended behavior).
@@ -1285,7 +1285,7 @@ Deprecations:
 **Misc:**
 
 - {% url `.submit()` submit %} now errors if its been called on >1 form element. Fixes [#41](https://github.com/cypress-io/cypress/issues/41).
-- Coordinates and hitboxes are now logged and displayed on {% url `.clear()` clear %} and [`.type()`](https://on.cypress.io/pi/type).
+- Coordinates and hitboxes are now logged and displayed on {% url `.clear()` clear %} and {% url `.type()` type %}.
 
 # 0.6.10
 

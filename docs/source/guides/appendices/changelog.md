@@ -61,7 +61,7 @@ comments: false
 
 **Overview:**
 
-- We have officially released our [Dashboard](https://on.cypress.io/dashboard) which is our service that will display recorded runs.
+- We have officially released our {% url 'Dashboard' https://on.cypress.io/dashboard %} which is our service that will display recorded runs.
 - This service has now been fully integrated into the Desktop Application. There is a new on-boarding process that helps you setup projects for recording.
 
 **Breaking Changes:**
@@ -73,14 +73,14 @@ comments: false
 
 **Features:**
 
-- There is a new [Dashboard](https://on.cypress.io/dashboard) service that displays your recorded runs.
-- The [Dashboard](https://on.cypress.io/dashboard) enables you to view your recorded runs, manage projects, create organizations, invite users and set permissions.
+- There is a new {% url 'Dashboard' https://on.cypress.io/dashboard %} service that displays your recorded runs.
+- The {% url 'Dashboard' https://on.cypress.io/dashboard %} enables you to view your recorded runs, manage projects, create organizations, invite users and set permissions.
 - Projects are either **public** with their runs being publicly viewable by anyone, or **private** which restricts their access to only users you've invited. All **existing** projects were set to **private** by default.
 - When you invite users (from the Dashboard) we will **automatically** whitelist them. This means you can invite all of your teammates (or anyone else). They can start using Cypress without talking to us.
 - We now list all of the recorded runs directly in the Desktop GUI under a new `Runs` tab. Fixes [#236](https://github.com/cypress-io/cypress/issues/236).
 - Your list of projects in the Desktop GUI now displays their last recorded run status - passing, failing, pending, running, etc.
 - We've changed the "Config" tab to now be called "Settings". We added two new sections to the "Settings" tab which displays your `projectId` and your Record Key. These sections do a much better job explaining what these are and how you use them.
-- You no longer have to use `cypress get:key` to get your Record Key. We now display this in your "Settings" tab and also in the [Dashboard](https://on.cypress.io/dashboard).
+- You no longer have to use `cypress get:key` to get your Record Key. We now display this in your "Settings" tab and also in the {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 - Projects will no longer automatically acquire a `projectId` when being added. There is now a very explicit **opt-in** process where you setup your project to record. This should make it much clearer what's going on behind the scenes.
 - {% url '`cypress run`' cli-tool#cypress-run %} now behaves likes `cypress ci` previously did and downloads + installs Cypress if its not already installed.
 - `cypress ci` now works in OSX, and also works in Linux in Desktop flavors (like Ubuntu).

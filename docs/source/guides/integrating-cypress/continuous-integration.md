@@ -17,7 +17,7 @@ Running Cypress tests in Continous Integration is as easy as running tests local
   cypress run
   ```
 
-That's it! This will go out and [install Cypress](https://on.cypress.io/installing-cypress), and then run all your tests.
+That's it! This will go out and {% url 'install Cypress' installing-cypress %}, and then run all your tests.
 
 For a comprehensive list of all the options you can pass to {% url '`cypress run`' cli-tool#cypress-run %}, {% url 'refer to the CLI documentation' cli-tool %}.
 
@@ -66,7 +66,7 @@ test:
 
 We have [created](https://github.com/cypress-io/docker) an official [cypress/base](https://hub.docker.com/r/cypress/base/) container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete [cypress/internal:cy](https://hub.docker.com/r/cypress/internal/tags/) image with pre-installed Cypress; just call {% url '`cypress run`' cli-tool#cypress-run %}.
 
-If you don't use this image you must install all of the [linux dependencies](https://on.cypress.io/continuous-integration#section-dependencies). See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
+If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Other %}. See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
 
 **Docker CI examples**
 
@@ -86,7 +86,7 @@ If you run {% url '`cypress run`' cli-tool#cypress-run %} and see no output {% u
 
 # Recording Tests in CI
 
-Cypress can record your tests running and make them available in our [Dashboard](https://on.cypress.io/dashboard).
+Cypress can record your tests running and make them available in our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
 **Recorded tests allow you to:**
 

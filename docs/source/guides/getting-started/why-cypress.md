@@ -26,7 +26,7 @@ Typically, our users are developers or QA engineers building web applications us
 Cypress is an open source local testing tool *and* a value-added service for {% url 'continuous integration' continuous-integration %}.
 
 - **First:** Cypress is useful to write tests *every day* as you build your application locally (you can even use TDD if you prefer).
-- **Later:** Once you've integrated Cypress with your CI Provider, the  [Cypress Dashboard](https://on.cypress.io/dashboard-features) records your test runs and clearly presents the results so we never have to ask, "Why did this fail?".
+- **Later:** Once you've integrated Cypress with your CI Provider, the  {% url 'Dashboard' dashboard-features %} records your test runs and clearly presents the results so we never have to ask, "Why did this fail?".
 
 Cypress is most often compared to [**Selenium**](http://www.seleniumhq.org/); however, Cypress is fundamentally and architecturally different. Cypress is not bound by the same restrictions as Selenium. Cypress enables us to write faster, more reliable tests that achieve *much more* test coverage. Cypress fundamentally shifts the way we test and build web applications.
 

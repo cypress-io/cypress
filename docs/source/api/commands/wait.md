@@ -85,7 +85,7 @@ cy.wait(5000)     // <--- this is unnecessary
 
 ***Unnecessary wait for `cy.visit()`***
 
-Waiting for this is unnecessary because the [`cy.visit()`](https://on.cypress.io/visit) resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
+Waiting for this is unnecessary because the {% url '`cy.visit()`' visit %} resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
 
 ```javascript
 cy.visit("http://localhost/8080")

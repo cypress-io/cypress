@@ -83,7 +83,7 @@ When running headlessly or in {% url 'Continuous Integration' continuous-integra
 
 **Screenshots in CI**
 
-You can see screenshots taken during a CI run in the [Cypress Dashboard](https://on.cypress.io/dashboard) without any extra work.
+You can see screenshots taken during a CI run in the {% url 'Dashboard' https://on.cypress.io/dashboard %} without any extra work.
 
 Alternatively, to see screenshots in the [Circle CI](https://circleci.com/) UI, we automatically export screenshots as artifacts. This makes them available directly in their web UI.
 
@@ -114,5 +114,5 @@ When clicking on `screenshot` within the command log, the console outputs the fo
 # See also
 
 - {% url `cy.debug()` debug %}
-- [Cypress Dashboard](https://on.cypress.io/dashboard)
+- {% url 'Dashboard' https://on.cypress.io/dashboard %}
 - {% url `.pause()` pause %}

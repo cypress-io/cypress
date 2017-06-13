@@ -33,7 +33,7 @@ There are 4 different ways to set environment variables. Each has a slightly dif
 - Export as `CYPRESS_*`
 - Pass in the CLI as `--env`
 
-Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in [CI](https://on.cypress.io/continuous-integration).
+Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in {% url 'CI' continuous-integration %}.
 
 When your tests are running, you can use the {% url `Cypress.env` env %} function to access the values of your environment variables.
 
@@ -198,4 +198,4 @@ export CYPRESS_BASE_URL=http://localhost:8080
 export CYPRESS_FOO=bar
 ```
 
-You can [read more about how environment variables can change configuration here](https://on.cypress.io/configuration).
+You can {% url 'read more about how environment variables can change configuration here' configuration %}.

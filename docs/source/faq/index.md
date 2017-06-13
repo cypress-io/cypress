@@ -196,7 +196,7 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 ```
 
 {% note info  %}
-You can create multiple Record Keys for a project, or delete existing ones from our [Dashboard](https://on.cypress.io/dashboard).
+You can create multiple Record Keys for a project, or delete existing ones from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 {% endnote %}
 
 You can also find your Record Key inside of the **Settings** tab.
@@ -348,14 +348,14 @@ As far as page objects are concerned, you should be able to use regular JavaScri
 
 ![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
 
-[The Dashboard](https://on.cypress.io/dashboard) is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your run.
+{% url 'Dashboard' https://on.cypress.io/dashboard %} is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your run.
 
 You can read more {% url 'here' dashboard-features %}.
 
 ## {% fa fa-angle-right %} How do I record my tests?
 
-1. First [setup your project to record](https://on.cypress.io/recording-project-runs).
-2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
+1. First {% url 'setup the project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
+2. Then {% url 'record your runs' dashboard-features#How-do-I-record-my-tests %}.
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
 
@@ -379,7 +379,7 @@ The difference is that your CI provider has no idea what is going on inside of t
 
 Our dashboard provides you with the low level details of *what* happened during your run. Using both your CI provider + Cypress together gives the insight required to debug your test runs.
 
-When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the test run results. It should be instantly clear what the problem was.
+When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the {% url 'Dashboard' https://on.cypress.io/dashboard %} and see all of the test run results. It should be instantly clear what the problem was.
 
 ## {% fa fa-angle-right %} Can I host the Dashboard data myself?
 

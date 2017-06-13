@@ -19,7 +19,7 @@ Projects added in our Desktop Application are strictly local to your computer. T
 
 # Set up a Project to Record
 
-During a run we record all failing tests, logs, screenshots, and videos and make these available in our [Dashboard](https://on.cypress.io/dashboard).
+During a run we record all failing tests, logs, screenshots, and videos and make these available in our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
 **To setup a project to record:**
 
@@ -73,7 +73,7 @@ export CYPRESS_RECORD_KEY=abc-key-123
 cypress run --record
 ```
 
-Now as soon as tests finish running, you'll see them in the [Dashboard](https://on.cypress.io/dashboard) and in the Runs tab of the Desktop Application.
+Now as soon as tests finish running, you'll see them in the {% url 'Dashboard' https://on.cypress.io/dashboard %} and in the Runs tab of the Desktop Application.
 
 ![Runs List](https://cloud.githubusercontent.com/assets/1271364/22800330/ff6c9474-eed6-11e6-9a32-8360d64b1071.png)
 
@@ -103,7 +103,7 @@ Once you're setup to record test runs, we automatically generate a *Record Key* 
 f4466038-70c2-4688-9ed9-106bf013cd73
 ```
 
-You can create multiple Record Keys for a project, or delete existing ones from our [Dashboard](https://on.cypress.io/dashboard). You can also find your Record Key inside of the *Settings* tab on the Desktop App.
+You can create multiple Record Keys for a project, or delete existing ones from our {% url 'Dashboard' https://on.cypress.io/dashboard %}. You can also find your Record Key inside of the *Settings* tab on the Desktop App.
 
 ![screen shot 2017-02-12 at 4 12 40 pm](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
 
@@ -120,7 +120,7 @@ If you have a public project you should *still* keep your record key secret. If 
 Think of your record key as the key that enables you to *write and create* runs. However, it has nothing to do with being able to *read or see* runs once they are recorded.
 
 {% note warning  %}
-If your Record Key is accidentally exposed, you should remove it and generate a new one from our [Dashboard](https://on.cypress.io/dashboard).
+If your Record Key is accidentally exposed, you should remove it and generate a new one from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 {% endnote %}
 
 # Public vs Private Projects
@@ -131,12 +131,12 @@ If your Record Key is accidentally exposed, you should remove it and generate a 
 
 # Transfer Ownership of Project
 
-You can transfer projects that you own to another organization you are a part of or to another user in the organization. Projects can only be transferred from our [Dashboard](https://on.cypress.io/dashboard).
+You can transfer projects that you own to another organization you are a part of or to another user in the organization. Projects can only be transferred from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
 ![Transfer Project dialog](https://cloud.githubusercontent.com/assets/1271364/22708695/440f4e5c-ed45-11e6-9a98-8f91b67871a3.png)
 
 # Delete a Project
 
-You can delete projects you own. This will also delete all of their recorded runs. Deleting projects can only be done from our [Dashboard](https://on.cypress.io/dashboard).
+You can delete projects you own. This will also delete all of their recorded runs. Deleting projects can only be done from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
 ![Delete project dialog](https://cloud.githubusercontent.com/assets/1271364/22708770/89f3080a-ed45-11e6-820e-7a8880fb0c20.png)

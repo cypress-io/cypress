@@ -102,7 +102,7 @@ When clicking on "Next: 'click'" at the top of the Command Log, the Command Log 
 
 # See also
 
-- [Cypress Dashboard](https://on.cypress.io/dashboard)
+- {% url 'Dashboard' https://on.cypress.io/dashboard %}
 - {% url `cy.debug()` debug %}
 - {% url `cy.log()` log %}
 - {% url `cy.screenshot()` screenshot %}
