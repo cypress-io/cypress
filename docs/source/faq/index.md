@@ -12,7 +12,7 @@ containerClass: faq
 
 <!-- ## Hasn’t this been done before? -->
 
-## {% fa fa-question-circle green %} How is this different from 'X' testing tool?
+## {% fa fa-angle-right %} How is this different from 'X' testing tool?
 
 Cypress is kind of a hybrid application/framework/service all rolled into one. It takes a little bit of other testing tools, brings them together and improves on them.
 
@@ -56,35 +56,35 @@ Ultimately SauceLabs and Cypress offer very different value propositions. SauceL
 
 Cypress on the other hand **helps** you write your tests. You would use Cypress every day, building and testing your application, and then use SauceLabs to ensure your application works on every browser.
 
-## {% fa fa-question-circle green %} Is Cypress free?
+## {% fa fa-angle-right %} Is Cypress free?
 
 Cypress desktop app and CLI are free to use. The Cypress Dashboard is a premium feature for non-open source projects and offers recording videos, screenshots and logs in a web interface.
 
-## {% fa fa-question-circle green %} What operating systems do you support?
+## {% fa fa-angle-right %} What operating systems do you support?
 
 The desktop application can be installed in OSX and Linux. [Windows is not yet supported](https://github.com/cypress-io/cypress/issues/74), although you can use Cypress if you install a Linux VM using something like VirtualBox or using a Docker image.
 
-## {% fa fa-question-circle green %} Do you support native mobile apps?
+## {% fa fa-angle-right %} Do you support native mobile apps?
 
 Cypress would never be able to run on a native mobile app, but would be able to run in a web view. In that mode, you'd see the commands display in a browser while you would drive the mobile device separately. Down the road we'll likely have first class support for this, but today it is not a current priority.
 
 Currently you can control the {% url `cy.viewport()` viewport %} to test responsive, mobile views in a website or web application.
 
-## {% fa fa-question-circle green %} Do you support X language or X framework?
+## {% fa fa-angle-right %} Do you support X language or X framework?
 
 Any and all. Ruby, Node, C#, PHP - none of that matters. Cypress tests anything that runs in the context of a browser. It is backend, front-end, language and framework agnostic.
 
 You'll write your tests in JavaScript, but beyond that Cypress works everywhere.
 
-## {% fa fa-question-circle green %} Will Cypress work in my CI provider?
+## {% fa fa-angle-right %} Will Cypress work in my CI provider?
 
 Cypress works in any CI provider.
 
-## {% fa fa-question-circle green %} Does Cypress require me to change any of my existing code?
+## {% fa fa-angle-right %} Does Cypress require me to change any of my existing code?
 
 No. But if you're wanting to test parts of your application that are not easily testable, you'll want to refactor those situations (as you would for any testing).
 
-## {% fa fa-question-circle green %} If Cypress runs in the browser, doesn't that mean it's sandboxed?
+## {% fa fa-angle-right %} If Cypress runs in the browser, doesn't that mean it's sandboxed?
 
 Yes, technically; it's sandboxed and has to follow the same rules as every other browser. That's actually a good thing because it doesn't require a browser extension, and it naturally will work across all browsers (which enables cross-browser testing).
 
@@ -92,7 +92,7 @@ But Cypress is actually way beyond just a basic JavaScript application running i
 
 All of these technologies together are coordinated and enable Cypress to work, which extends its capabilities far outside of the browser sandbox. Without these, Cypress would not work at all. For the vast majority of your web development, Cypress will work just fine, and already **does** work.
 
-## {% fa fa-question-circle green %} We use WebSockets, will Cypress work with that?
+## {% fa fa-angle-right %} We use WebSockets, will Cypress work with that?
 
 Yes.
 
@@ -101,7 +101,7 @@ Yes.
 
 <!-- ## What are bad use cases for Cypress? -->
 
-## {% fa fa-question-circle green %} We have the craziest most insane authentication system ever, will Cypress work with that?
+## {% fa fa-angle-right %} We have the craziest most insane authentication system ever, will Cypress work with that?
 
 If you're using some crazy thumb-print, retinal-scan, time-based, key-changing, microphone audial decoding mechanism to log in your users, then no, Cypress won't work with that.  But seriously, Cypress is a **development** tool, which makes it easy to test your web applications. If your application is doing 100x things to make it extremely difficult to access, Cypress won't magically make it any easier.
 
@@ -111,36 +111,36 @@ In doing so, Cypress may not be able to give you 100% coverage without you chang
 
 Just remember, Cypress won't make a non-testable application suddenly testable. It's on your shoulders to architect your code in an accessible manner.
 
-## {% fa fa-question-circle green %} Can I use Cypress to script user-actions on an external site like `gmail.com`?
+## {% fa fa-angle-right %} Can I use Cypress to script user-actions on an external site like `gmail.com`?
 
 No. There are already lots of tools to do that. Using Cypress to test against a 3rd party application is not supported. It **may** work but will defeat the purpose of why it was created. You use Cypress *while* you develop **your** application, it helps you write your tests.
 
-## {% fa fa-question-circle green %} Is there code coverage?
+## {% fa fa-angle-right %} Is there code coverage?
 
 There is nothing currently built into Cypress to do this. Adding code coverage around end to end tests is much harder than unit and its possible it may not be feasible to do in a generic way. You can read in more detail about code coverage [here](https://github.com/cypress-io/cypress/issues/346).
 
 <!-- ## What kind of tests do I write in Cypress? -->
 
 
-## {% fa fa-question-circle green %} Does Cypress use Selenium / Webdriver?
+## {% fa fa-angle-right %} Does Cypress use Selenium / Webdriver?
 
 No. In fact Cypress' architecture is very different from Selenium in a few critical ways:
 
 - Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like {% url `cy.request()` request %} and {% url `cy.exec()` exec %}.
 
-## {% fa fa-question-circle green %} Are there driver bindings in my language?
+## {% fa fa-angle-right %} Are there driver bindings in my language?
 
 Cypress does *not* utilize WebDriver for testing, so does not use or have any notion of driver bindings.
 
 <!-- ## Does Cypress have an equivalent to Selenium IDE? -->
 
-## {% fa fa-question-circle green %} Is Cypress open source?
+## {% fa fa-angle-right %} Is Cypress open source?
 
 We are working on open sourcing Cypress. You can read more [here](https://www.cypress.io/blog/2017/05/04/cypress-is-going-open-source/).
 
 <!-- ## How can I contribute to Cypress? -->
 
-## {% fa fa-question-circle green %} I found a bug! What do I do?
+## {% fa fa-angle-right %} I found a bug! What do I do?
 
 - Search existing [open issues](https://github.com/cypress-io/cypress/issues), it may already be reported!
 - Update Cypress. Your issue may have [already been fixed](https://github.com/cypress-io/cypress/wiki/changelog).
@@ -155,11 +155,11 @@ We are working on open sourcing Cypress. You can read more [here](https://www.cy
 <!-- ## How do I do different things depending on what’s currently in the dom/url/cookies/localstore? -->
 
 
-## {% fa fa-question-circle green %} How can I parallelize my runs?
+## {% fa fa-angle-right %} How can I parallelize my runs?
 
 You can read more about parallelization [here](https://github.com/cypress-io/cypress/issues/64).
 
-## {% fa fa-question-circle green %} Can I run a single test or group of tests?
+## {% fa fa-angle-right %} Can I run a single test or group of tests?
 
 You can run a group of tests or a single test by placing an `.only` to a test suite or specific test.
 
@@ -167,11 +167,11 @@ You can run a single test headlessly by passing the `--spec` flag to {% url '`cy
 
 Currently there is no way to specify a group of tests to run headlessly. You can read more [here](https://github.com/cypress-io/cypress/issues/263).
 
-## {% fa fa-question-circle green %} How do I test uploading a file?
+## {% fa fa-angle-right %} How do I test uploading a file?
 
 It is possible to upload files in your application but its different based on how you've written your own upload code. You can read more about this [here](https://github.com/cypress-io/cypress/issues/170)
 
-## {% fa fa-question-circle green %} What is the projectId for?
+## {% fa fa-angle-right %} What is the projectId for?
 
 Once you setup your project to record, we generate a unique `projectId` for your project, and automatically insert it into your `cypress.json` file.
 
@@ -185,7 +185,7 @@ Once you setup your project to record, we generate a unique `projectId` for your
 
 This is how we uniquely identify your project. If you manually alter this, **Cypress will no longer be able to identify your project or find the recorded builds for it**. We recommend that you check your `cypress.json` including the `projectId` into source control.
 
-## {% fa fa-question-circle green %} What is a Record Key?
+## {% fa fa-angle-right %} What is a Record Key?
 
 Once you're setup to record test runs, we automatically generate a **Record Key** for the project.
 
@@ -204,7 +204,7 @@ You can also find your Record Key inside of the **Settings** tab.
 ![screen shot 2017-02-12 at 4 12 40 pm](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
 
 
-## {% fa fa-question-circle green %} How do I get the native DOM reference of an element found using Cypress?
+## {% fa fa-angle-right %} How do I get the native DOM reference of an element found using Cypress?
 
 Cypress wraps elements in jQuery so you'd just get the native element from there.
 
@@ -216,7 +216,7 @@ cy.get('button').then(($el) => {
 
 <!-- ## How do I make Cypress wait for an XHR request? -->
 
-## {% fa fa-question-circle green %} How do I wait for multiple XHR requests to the same url?
+## {% fa fa-angle-right %} How do I wait for multiple XHR requests to the same url?
 
 You should set up an alias (using {% url `.as()` as %}) to a single route that matches all of the XHRs. You can then {% url `cy.wait()` wait %} on it multiple times and Cypress keeps track of how many matching XHR requests there are.
 
@@ -232,7 +232,7 @@ cy.get('#list>li').should('have.length', 20)
 
 <!-- ## How do I test drag-n-drop? -->
 
-## {% fa fa-question-circle green %} How do I seed / reset my database?
+## {% fa fa-angle-right %} How do I seed / reset my database?
 
 You can use either {% url `cy.request()` request %} or {% url `cy.exec()` exec %} to talk to your backend to seed data.
 
@@ -240,11 +240,11 @@ You could also just stub XHR requests directly using {% url `cy.route()` route %
 
 <!-- ## How do I pass data to my webserver from Cypress? -->
 
-## {% fa fa-question-circle green %} How do I test content inside an iframe?
+## {% fa fa-angle-right %} How do I test content inside an iframe?
 
 Currently Cypress does not support selecting or accessing elements from within an iframe. You can read more about this [#here](https://github.com/cypress-io/cypress/issues/136).
 
-## {% fa fa-question-circle green %} How do I preserve cookies/localstorage in between my tests?
+## {% fa fa-angle-right %} How do I preserve cookies/localstorage in between my tests?
 
 By default, Cypress automatically clears all cookies **before** each test to prevent state from building up.
 
@@ -260,7 +260,7 @@ Cypress.Cookies.defaults({
 
 You cannot currently preserve localStorage across tests and can read more [here](https://github.com/cypress-io/cypress/issues/461).
 
-## {% fa fa-question-circle green %} Some of my elements animate in, how do I work around that?
+## {% fa fa-angle-right %} Some of my elements animate in, how do I work around that?
 
 Oftentimes you can usually account for animation by asserting `.should('be.visible')` or another assertion on one of the elements you expect to be animated in.
 
@@ -278,7 +278,7 @@ cy.get('button', { timeout: 10000 }) // <-- wait up to 10 seconds for this 'butt
 cy.get('element').click({ timeout: 10000 }).should('not.have.class', 'animating')
 ```
 
-## {% fa fa-question-circle green %} Can I test anchor links that open in a new tab?
+## {% fa fa-angle-right %} Can I test anchor links that open in a new tab?
 
 Cypress does not and may never have multi-tab support for various reasons.
 
@@ -307,7 +307,7 @@ Luckily there are lots of easy and safe workarounds that enable you to test the 
 
 <!-- ## I’m running a lot of tests that appear to slow down as they run, is there a way to fix this? -->
 
-## {% fa fa-question-circle green %} How do I get an input's value in Cypress?
+## {% fa fa-angle-right %} How do I get an input's value in Cypress?
 
  Cypress DOM elements are just jQuery elements so you can use any method available in jQuery. Below are some examples of working with an input's value.
 
@@ -325,26 +325,26 @@ cy.get('input').then(($input) => {
 cy.get('input').should('have.value', 'abc')
  ```
 
-<!-- ## {% fa fa-question-circle green %} How do I make conditional based assertions / control flow? -->
+<!-- ## {% fa fa-angle-right %} How do I make conditional based assertions / control flow? -->
 
-## {% fa fa-question-circle green %} How do I require "" node module in Cypress?
+## {% fa fa-angle-right %} How do I require "" node module in Cypress?
 
 The code you write in Cypress is executed in the browser, so you can import or require JS modules, but only those that work in the browser.
 
 Cypress doesn't have direct access to node or your file system. We recommend utilizing {% url `cy.exec()` exec %} to execute a shell command or a node script that will do what you need.
 
-## {% fa fa-question-circle green %} Is there a way to give a proper SSL certificate to your proxy so the page doesn't show up as "not secure"?
+## {% fa fa-angle-right %} Is there a way to give a proper SSL certificate to your proxy so the page doesn't show up as "not secure"?
 
 No, Cypress modifies network traffic in real time and therefore must sit between your server and the browser. There is no other way for us to achieve that.
 
-## {% fa fa-question-circle green %} Can I use the Page Object pattern?
+## {% fa fa-angle-right %} Can I use the Page Object pattern?
 
 As far as page objects are concerned, you should be able to use regular JavaScript functions and aliasing with {% url `.as()` as %} to essentially recreate what page objects give you.
 
 
 # Dashboard
 
-## {% fa fa-question-circle green %} What is the Dashboard?
+## {% fa fa-angle-right %} What is the Dashboard?
 
 ![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
 
@@ -352,14 +352,14 @@ As far as page objects are concerned, you should be able to use regular JavaScri
 
 You can read more [here](https://on.cypress.io/guides/dashboard-features).
 
-## {% fa fa-question-circle green %} How do I record my tests?
+## {% fa fa-angle-right %} How do I record my tests?
 
 1. First [setup your project to record](https://on.cypress.io/recording-project-runs).
 2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
 
-## {% fa fa-question-circle green %} How much does it cost?
+## {% fa fa-angle-right %} How much does it cost?
 
 Everything is free while we are in Beta.
 
@@ -369,7 +369,7 @@ Public projects will be free but will likely have a monthly usage cap on them.
 
 We will offer similar pricing models of other Developer Tools you are familiar with using.
 
-## {% fa fa-question-circle green %} How is this different than CI?
+## {% fa fa-angle-right %} How is this different than CI?
 
 Cypress is **complimentary** to your CI provider, and plays a completely different role.
 
@@ -381,17 +381,17 @@ Our dashboard provides you with the low level details of *what* happened during 
 
 When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the test run results. It should be instantly clear what the problem was.
 
-## {% fa fa-question-circle green %} Can I host the Dashboard data myself?
+## {% fa fa-angle-right %} Can I host the Dashboard data myself?
 
 No, although we are looking to build an on-premise version of the Dashboard for use in private clouds. If you're interested in our on-premise version, [let us know](mailto:hello@cypress.io)!
 
-## {% fa fa-question-circle green %} Can I choose not to use the Dashboard?
+## {% fa fa-angle-right %} Can I choose not to use the Dashboard?
 
 Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
 You can simply always run your tests in CI using {% url '`cypress run`' cli-tool#cypress-run %} without the `--record` flag which does not communicate with our external servers and will not record any test results.
 
-## {% fa fa-question-circle green %} What is the difference between public and private projects?
+## {% fa fa-angle-right %} What is the difference between public and private projects?
 
 **A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
 
@@ -400,7 +400,7 @@ You can simply always run your tests in CI using {% url '`cypress run`' cli-tool
 A Record Key has nothing to do with **viewing** build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
 
 
-## {% fa fa-question-circle green %} What does Cypress record?
+## {% fa fa-angle-right %} What does Cypress record?
 
 We capture the following:
 
@@ -436,10 +436,10 @@ These will be added in subsequent releases.
 
 # Company
 
-## {% fa fa-question-circle green %} Who’s behind Cypress?
+## {% fa fa-angle-right %} Who’s behind Cypress?
 
 You can read more about who's behind Cypress on our [here](https://www.cypress.io/about).
 
-## {% fa fa-question-circle green %} Are you hiring?
+## {% fa fa-angle-right %} Are you hiring?
 
 You can check our open positions [here](https://www.cypress.io/jobs).
