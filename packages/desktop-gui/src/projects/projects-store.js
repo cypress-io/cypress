@@ -24,7 +24,7 @@ class ProjectsStore {
 
   @action getProjectByPath (path) {
     if (!this.projects.length) {
-      return this.addProject()
+      return this.addProject(path)
     }
 
     return _.find(this.projects, { path })
