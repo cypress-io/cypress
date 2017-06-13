@@ -63,7 +63,7 @@ cy.get('form').find('input').then(function($input){
 
 ## Change subject
 
-**The subject is changed by returning `{foo: 'bar'}`**
+**The subject is changed by returning**
 
 ```javascript
 cy.then(function(){
