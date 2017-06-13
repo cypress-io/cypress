@@ -1,6 +1,6 @@
 ---
 title: Dashboard&#58; Recorded Runs
-comments: true
+comments: false
 ---
 
 Recorded runs are the results and artifacts captured from your test runs.

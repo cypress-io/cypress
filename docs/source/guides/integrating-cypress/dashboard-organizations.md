@@ -1,5 +1,5 @@
 title: Dashboard&#58; Organizations
-comments: true
+comments: false
 ---
 
 Organizations are used to group projects and manage access to those projects.

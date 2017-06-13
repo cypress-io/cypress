@@ -1,6 +1,6 @@
 ---
 title: "Aliases: Variables in an Async World"
-comments: true
+comments: false
 ---
 
 {% note info %}

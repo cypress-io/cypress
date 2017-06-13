@@ -1,6 +1,6 @@
 ---
 title: clearCookie
-comments: true
+comments: false
 ---
 
 Clear a browser cookie.

@@ -1,6 +1,6 @@
 ---
 title: Error Messages
-comments: true
+comments: false
 ---
 
 # Test File Errors

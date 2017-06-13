@@ -1,6 +1,6 @@
 ---
 title: Dead Simple Debugging
-comments: true
+comments: false
 ---
 
 {% note info %}

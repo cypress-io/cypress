@@ -1,6 +1,6 @@
 ---
 title: and
-comments: true
+comments: false
 ---
 
 Make an assertion.

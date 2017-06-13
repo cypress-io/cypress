@@ -1,6 +1,6 @@
 ---
 title: Dashboard&#58; Projects
-comments: true
+comments: false
 ---
 
 A Cypress project represents the directory of files and folders that make up your tests. This is often the same repository as your code, but can also be a subfolder or a separate repository altogether.

@@ -1,6 +1,6 @@
 ---
 title: children
-comments: true
+comments: false
 ---
 
 Get the children of each DOM element within a set of DOM elements.

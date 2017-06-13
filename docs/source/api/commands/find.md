@@ -1,6 +1,6 @@
 ---
 title: find
-comments: true
+comments: false
 ---
 
 Get the descendent DOM elements of a specific selector.

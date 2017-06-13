@@ -1,5 +1,5 @@
 title: Why Cypress?
-comments: true
+comments: false
 ---
 
 {% note info %}

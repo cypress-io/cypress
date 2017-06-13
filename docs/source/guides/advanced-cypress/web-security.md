@@ -1,6 +1,6 @@
 ---
 title: Web Security
-comments: true
+comments: false
 ---
 
 Browsers adhere to a strict [`same-origin policy`](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy). This means that browsers restrict access between `<iframes>` when their origin policies do not match.

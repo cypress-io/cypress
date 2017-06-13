@@ -1,6 +1,6 @@
 ---
 title: Stubs, Spies, Clocks
-comments: true
+comments: false
 ---
 
 {% note info %}

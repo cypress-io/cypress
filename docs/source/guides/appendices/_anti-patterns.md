@@ -1,5 +1,5 @@
 title: Anti-Patterns
-comments: true
+comments: false
 ---
 
 # What You'll Learn

@@ -1,5 +1,5 @@
 title: Bundled Tools
-comments: true
+comments: false
 ---
 
 {% note info %}

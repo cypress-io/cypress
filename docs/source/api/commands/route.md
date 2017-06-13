@@ -1,6 +1,6 @@
 ---
 title: route
-comments: true
+comments: false
 ---
 
 Use `cy.route` to manage the behavior of network requests.

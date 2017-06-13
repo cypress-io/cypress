@@ -1,6 +1,6 @@
 ---
 title: Cypress in a Nutshell
-comments: true
+comments: false
 ---
 
 {% note info %}

@@ -1,6 +1,6 @@
 ---
 title: Continuous Integration
-comments: true
+comments: false
 ---
 
 Running Cypress tests in Continous Integration is as easy as running tests locally. You generally only need to do two things:

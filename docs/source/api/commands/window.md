@@ -1,6 +1,6 @@
 ---
 title: window
-comments: true
+comments: false
 ---
 
 Get the global `window` object of the remote application that was visited in {% url `cy.visit()` visit %}.

@@ -1,6 +1,6 @@
 ---
 title: eq
-comments: true
+comments: false
 ---
 
 Get A DOM element at a specific index in an array of elements.

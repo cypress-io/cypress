@@ -1,5 +1,5 @@
 title: Configuration
-comments: true
+comments: false
 ---
 
 When a project is added to Cypress, a `cypress.json` file is created in the project. This file is used to store the `projectId` ([after configuring your tests to record](https://on.cypress.io/guides/projects)) and any configuration values you supply.

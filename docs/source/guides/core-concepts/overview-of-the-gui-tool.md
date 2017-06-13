@@ -1,5 +1,5 @@
 title: Overview of the GUI Tool
-comments: true
+comments: false
 ---
 
 {% note info %}

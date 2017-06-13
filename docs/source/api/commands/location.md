@@ -1,6 +1,6 @@
 ---
 title: location
-comments: true
+comments: false
 ---
 
 Get the remote `window.location` as an object.

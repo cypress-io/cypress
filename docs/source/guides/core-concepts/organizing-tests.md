@@ -1,5 +1,5 @@
 title: Organizing Tests
-comments: true
+comments: false
 ---
 
 {% note info %}

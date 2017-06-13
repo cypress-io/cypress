@@ -1,6 +1,6 @@
 ---
 title: title
-comments: true
+comments: false
 ---
 
 Get the title of the document.

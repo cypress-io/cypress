@@ -1,5 +1,5 @@
 title: Cypress API Design
-comments: true
+comments: false
 ---
 
 # What You'll Learn

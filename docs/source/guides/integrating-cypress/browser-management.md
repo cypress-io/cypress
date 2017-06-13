@@ -1,6 +1,6 @@
 ---
 title: Browser Management
-comments: true
+comments: false
 ---
 
 When you run tests in Cypress, we launches a browser for you. Cypress launches a real browser for two main reasons:
