@@ -1,13 +1,13 @@
 ---
 title: Dashboard&#58; Projects
-comments: true
+comments: false
 ---
 
 A Cypress project represents the directory of files and folders that make up your tests. This is often the same repository as your code, but can also be a subfolder or a separate repository altogether.
 
 # Add a New Project
 
-Projects can *only* be added to Cypress through our [Desktop Application](https://on.cypress.io/guides/installing-and-running).
+Projects can *only* be added to Cypress through our Desktop Application.
 
 1. Click {% fa fa-plus %} Add Project.
 
@@ -57,7 +57,7 @@ After setting up your project, Cypress inserted a unique [projectId](what-is-a-p
 
 In order to record your test runs, you'll also need to provide a [Record Key](what-is-a-record-key-). The record key along with your `projectId` are used by Cypress to uniquely identify your project.
 
-**Provide record key in `cypress run`:**
+**Provide record key in {% url '`cypress run`' cli-tool#cypress-run %}:**
 
 ```shell
 cypress run --record --key <record_key>

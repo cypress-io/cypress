@@ -1,5 +1,5 @@
 title: The Cypress Workflow
-comments: true
+comments: false
 ---
 
 # What You'll Learn

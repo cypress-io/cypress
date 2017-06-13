@@ -1,9 +1,10 @@
+---
 title: Overview of the GUI Tool
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - The names and purposes of the visual parts of the Cypress GUI tool
 - How the tool behaves under different situations and inputs

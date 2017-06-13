@@ -145,3 +145,17 @@ api:
     dom: dom.html
     env: env.html
     cypress-server: server.html
+
+examples:
+  recipes:
+    unit-testing: unit-testing.html
+    logging-in: logging-in.html
+    testing-the-dom: testing-the-dom.html
+    working-with-the-backend: working-with-the-backend.html
+    spies-stubs-and-clocks: spies-stubs-and-clocks.html
+    extending-cypress: extending-cypress.html
+  applications:
+    kitchen-sink: kitchen-sink.html
+    todo-mvc: todo-mvc.html
+    pie-chopper: pie-chopper.html
+    phonecat: phonecat.html

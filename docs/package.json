@@ -57,6 +57,7 @@
     "hexo": "github:cypress-io/hexo#d709e91b9a014d01215bcebc7299ea3e2ad9153d",
     "hexo-algoliasearch": "0.2.1",
     "hexo-filter-cleanup": "1.0.7",
+    "hexo-generator-alias": "0.1.3",
     "hexo-generator-seo-friendly-sitemap": "0.0.20",
     "hexo-prism-plugin": "2.0.2",
     "hexo-renderer-marked": "0.3.0",

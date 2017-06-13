@@ -1,3 +1,230 @@
+# 0.15.4
+
+*Released 04/22/2016*
+
+**Notes:**
+
+- The docs have not yet been updated to reflect the changes to {% url `.its()` its %} and {% url `.invoke()` invoke %}.
+
+**Breaking Changes:**
+
+- You can no longer improperly use {% url `.its()` its %} and {% url `.invoke()` invoke %}. Using {% url `.invoke()` invoke %} on a non function property will result in an error that tells you how to write it properly using {% url `.its()` its %}.
+
+**Features:**
+
+- Our [Chat channel](https://gitter.im/cypress-io/cypress) has now been directly integrated into Cypress's nav. Clicking on the `chat` icon will immediately display the current gitter chat log.
+- Added a new link to Options dropdown in Desktop app for "Chat" that goes to our [Gitter Chat channel](https://gitter.im/cypress-io/cypress).
+- {% url `.its()` its %} and {% url `.invoke()` invoke %} now support **dot separated** nested properties.
+- Using {% url `.its()` its %} on a function will now allow you to access its properties instead of automatically calling a function. Fixes [#122](https://github.com/cypress-io/cypress/issues/122).
+- Error messages and command messages for {% url `.its()` its %} and {% url `.invoke()` invoke %} have been improved.
+- Adding an attribute called `data-cypress-ignore` to an element will prevent the internal Cypress proxy from rewriting any of its content or attributes.
+
+**Bugfixes:**
+
+- When running headlessly, windows created with `window.open` will no longer physically display. They are now correctly headless. Fixes [#123](https://github.com/cypress-io/cypress/issues/123).
+- The auto generated `example_spec.js` no longer errors on `cy.visit('app/index.html')` since that file would likely not locally exist.
+
+**Misc:**
+
+- Better error handling of unauthorized users attempting to login to Cypress with improved {% url 'Login documentation' installing-cypress %}.
+
+# 0.15.3
+
+*Released 04/10/2016*
+
+**Features:**
+
+- Cypress will now [display the **resolved** configuration values when you open a project](https://on.cypress.io/configuration#section-resolved-configuration). This tells you the source of all config values.
+- The latest version of the {% url 'Cypress CLI' cli-tool %} now accepts passing arguments to {% url '`cypress open`' cli-tool#cypress-open %}. Example: `cypress open --config waitForAnimations=false --env foo=bar,baz=quux`. This enables you to set and override local `cypress.json` configuration and additionally set environment variables.
+- [Environment Variables](https://on.cypress.io/guides/environment-variables#section-overriding-configuration) that match any configuration keys (such as `pageLoadTimeout` or `watchForFileChanges`) now override their values. So, if you `export CYPRESS_WATCH_FOR_FILE_CHANGES=false` it will turn off this configuration option. Also note that we'll automatically normalize environment keys so: `CYPRESS_pageLoadTimeout=100000` and `CYPRESS_PAGE_LOAD_TIMEOUT=100000` will both be correctly handled. We'll also coerce values into `Boolean` or `Number` correctly.
+- Cypress now correctly proxies `Websockets` that are pointed at the local Cypress server (typically `localhost:2020`). Because most users use [Socket.io](http://socket.io/), when Socket.io could not correctly connect over Websockets it would fall back to XHR polling. You may notice many less XHR requests in your command log (which is the intended behavior).
+- The tray icon in OSX will now change colors. It will turn blue when you're running a Cypress project and red on any kind of failures such as syntax errors in `cypress.json`. It will turn back black when nothing is actively running.
+- The title of your project is now the title of the browser tab (so you can easily tell Cypress tabs from one another).
+- There is now a link to our [Gitter Chat](https://gitter.im/cypress-io/cypress) in the navigation of the web app.
+
+**Bugfixes:**
+
+- The `-s` or `--spec` option now works correctly. You now must pass a relative or absolute path to your spec file. This is much less confusing, allows you to easily autocomplete entries from bash, and will support `unitFolder` later when it's added. Assuming you want to run a spec file that is located in `cypress/integration/foo_spec.js` you would pass: `cypress run --spec cypress/integration/foo_spec.js`. Previously you could just pass `--spec foo_spec.js` which now no longer works (and was broken anyway). Fixes [#120](https://github.com/cypress-io/cypress/issues/120).
+
+**Misc:**
+
+- Open sourced another core repo: [Cypress Core Desktop GUI](https://github.com/cypress-io/cypress-core-desktop-gui) which makes up the Cypress Desktop Application.
+- Improved the [error message](https://github.com/cypress-io/cypress/issues/74#issuecomment-208422453) displayed to users on Windows attempting to download the Cypress Desktop app.
+
+# 0.15.2
+
+*Released 04/03/2016*
+
+**Features:**
+
+- The {% url 'error message when Cypress detects that a test has ended early' error-messages %} (there are still commands left in the queue) now displays a list of these commands with a much improved explanation.
+- There is now a new {% url 'configuration option' configuration %}: `watchForFileChanges` that, when set to `false` in the `cypress.json`, will prevent Cypress from attempting to watch for file changes and restart your tests.
+- You can now set the default {% url `reporter` configuration %} in `cypress.json` for use when running headlessly or in CI.
+
+**Bugfixes:**
+
+- The {% url '`--reporter`' cli-tool#cypress-run %} CLI option is now working again.
+- the `teamcity` reporter is now also working again.
+
+**Misc:**
+
+- Updated favicon + logo mark
+
+# 0.15.1
+
+*Released 04/01/2016*
+
+**Features:**
+
+- {% url `cy.go()` go %} and {% url `cy.reload()` reload %} now accept a timeout option. Also, these commands would previously time out after the default `commandTimeout` of `4000ms`, but now they will timeout after `pageLoadTimeout` of `30000ms`.
+
+**Bugfixes:**
+
+- When an integration test file is unable to run and the `integrationFolder` is not the default path, the UI error now properly prints the integration test file's path by stripping off `integration` in the path. Fixes [#117](https://github.com/cypress-io/cypress/issues/117).
+- {% url `Cypress.Dom.isHidden()` dom#Is-Hidden %} will now throw error when it isn't passed a DOM element.
+
+**Misc:**
+
+- Renamed {% url 'configuration' configuration %} option `visitTimeout` to `pageLoadTimeout`. You don't need to change anything. If you were specifically setting `visitTimeout` in your `cypress.json` file it will be transparently rewritten `pageLoadTimeout` on the next server boot. This option was renamed because now multiple commands `cy.visit()`, `cy.go()`, and `cy.reload()` all depend on this timeout option.
+- The Cypress tray icon has been updated. It's much better now.
+
+# 0.15.0
+
+*Released 03/28/2016*
+
+**Overview:**
+
+- As we get closer to a public release we've decided to focus on onboarding new users and new projects. We've made several breaking changes to help with this process.
+
+**Features:**
+
+- There is now an `example_spec.js` file that is scaffolded on new projects. This allows new users to instantly see Cypress successfully running on an example project and will answer many questions on writing your first tests. This `example_spec.js` file contains every single Cypress command and has approximately 70 tests.
+- Added a welcome dialog for new projects that explains how Cypress scaffolds out it's folder structure. This dialog will only display if Cypress detects that you haven't written any tests or changed the initial `example_spec.js` file. The welcome dialog will no longer display after you've changed or added any tests.
+- Added the ability to click on file/folder links from within the Cypress webapp that will spawn your OS file/folder finder and show you where the files are located in your project.
+- There is now a default `cypress` folder that contains your test files, a `fixtures` folder with an example fixture, and a `support` folder with example support files. Inside `cypress` there is an `integration` folder that will contain your integration tests.
+- You can now turn off `supportFolder` and `fixturesFolder` by passing `false` in `cypress.json`. This will automatically remove the folders the next time you open your project in Cypress. Fixes [#102](https://github.com/cypress-io/cypress/issues/102).
+- Restyled the tests list.
+
+**Breaking Changes:**
+
+- Cypress no longer looks at your `tests` directory for test files. Now, by default, it looks in the `cypress/integration` directory.
+- We've removed the configuration option `testFolder` and renamed it to {% url `integrationFolder` configuration#Folders %} inside of the `cypress.json`.
+- We've renamed the `cypress` npm package to be `cypress-cli`. You'll see a giant deprecation warning until your scripts have been updated to reference `cypress-cli`.. You can also uninstall the `cypress` npm package.
+- Added new {% url `fileServerFolder` configuration#Folders %} configuration option that can mount a directory other than your project root when using Cypress as a webserver.
+
+**Misc:**
+
+- Using {% url `.hover()` hover %} will provide a detailed error message with a link for working around hover constraints. Addresses [#10](https://github.com/cypress-io/cypress/issues/10)
+- Internal routing errors in Cypress are now gracefully handled with `x-cypress-error` and `x-cypress-stack` set on response headers.
+- Updated all of the repo names to be modular.
+
+**What you need to do**:
+- We did not write an automatic migration from `tests` -> `cypress`
+- You need to manually move your existing test files from `tests` into `cypress/integration`.
+- [Come into the chat](https://gitter.im/cypress-io/cypress) if you have any problems or need help.
+
+More Info:
+- Why did you change the default test folder to be `cypress/integration`.
+- We are adding support for unit testing in the near future and decided that there needs to be a separation between `unit` and `integration` tests. The actual runner will handle these two sets of specs very differently. It's important to make the change now so when we do add support for unit tests, you only have to create a `unit` folder inside of your `cypress` folder.
+
+# 0.14.3
+
+*Released 03/20/2016*
+
+**Features:**
+
+- Added {% url `cy.getCookies()` getcookies %} command for easy chain-ability. Fixes [#103](https://github.com/cypress-io/cypress/issues/103).
+- Cypress now outputs its version when passed the `--version` argument
+- If you are not logged in on OSX, Cypress now issues a native system notification indicating to you that Cypress is running in your tray (many users often complained they could not tell Cypress was actually running)
+
+**Bugfixes:**
+
+- Handle clearing cookies better when they are created on a path other than `/`. Fixes [#104](https://github.com/cypress-io/cypress/issues/104).
+- Issuing Cypress Commands inside of a Promise now works. Fixes [#111](https://github.com/cypress-io/cypress/issues/111).
+- 'Add Project' dialog is no longer lost on blur. Fixes [#115](https://github.com/cypress-io/cypress/issues/115).
+- Desktop windows that are transparent no longer lose their box shadow.
+
+**Misc:**
+
+- `cy.visit()` callback functions: `onBeforeLoad` and `onLoad` are now invoked with the current runnables context instead of with `cy`. This makes accessing properties in your tests much easier.
+
+# 0.14.2
+
+*Released 03/14/2016*
+
+**Bugfixes:**
+
+- Chaining more cy commands after using {% url `cy.wrap()` wrap %} now works. Fixes [#114](https://github.com/cypress-io/cypress/issues/114).
+- Cypress now handles events property when a DOM element is removed during a `.click()` event. As per the spec, if `mousedown` causes element removal then `mouseup` and `click` and `focus` events will not be fired. Additionally if removal happens during `mouseup` then `click` event will not be fired. Also updated the `onConsole` groups to only display and indicate the events which actually fired. Fixes [#109](https://github.com/cypress-io/cypress/issues/109).
+
+**Misc:**
+
+- Removed `fa-refresh` icons next to suites and tests until this behavior has been reimplemented due to ID removal.
+- Removed resetting the runnable timeout when a `page load` event resolves. This prevents an edge case where the next test may show as timed out when running headlessly.
+
+# 0.14.1
+
+*Released 03/13/2016*
+
+**Features:**
+
+- Project ID's and `cypress.json` are now only generated once you start your Cypress server. Previously they were created initially when you choose the project folder. This now means you won't have to cleanup excess files if you accidentally select the wrong folder. Additionally you can now use Cypress 100% offline. Previously the GUI would block until the project had an ID but this restriction has been lifted.
+
+**Bugfixes:**
+
+- The proxy server can now correctly proxy content on a `ipv6` host only. We had to patch node core to get this in, as by default node prefers `ipv4`. We now concurrently test all hosts via `dns.lookup` to find the first one that responds. This updated behavior now matches how other clients, like `curl`, and browsers resolve hosts. Fixes [#112](https://github.com/cypress-io/cypress/issues/112).
+- Simplified how Cypress stores projects and fixed some edge cases where Cypress would send an outdated Project ID.
+- Prevent server from opening and immediately closing + re-opening when project is missing a Project ID and one is generated.
+- Using Cypress as a file server and serving a file that's part of a folder that has a name containing a space now works. Fixes [#113](https://github.com/cypress-io/cypress/issues/113).
+- The existing `.cy` cache and settings are now correctly copied again after an app update.
+
+**Misc:**
+
+- Projects without an ID now error correctly when running in CI.
+- When Cypress cannot proxy http content due to a software error it will attach a `x-cypress-error` and `x-cypress-stack` to the HTTP request for easy inspection and debugging.
+- Cypress will now output its internal logger directly to the console when `CYPRESS_DEBUG` env var is set.
+- Replaced Ruby / Compass with `node saas`.
+
+# 0.14.0
+
+*Released 03/08/2016*
+
+**Summary:**
+
+- This update represents mostly a lot of internal structure changes. We swapped out the underlying Desktop architecture and refactored all of the backend code to prepare for an open-source release.
+- If you choose to install Cypress from the {% url 'CLI Tool' cli-tool %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' cli-tool#cypress-install %}. You don't need to do anything if you update from within the Desktop GUI itself.
+
+**Features:**
+
+- The Desktop App has been re-skinned with misc GUI enhancements such as help text, popovers, clearer errors, better loading indicators, etc.
+- The Desktop App's file size is now much smaller and unzips much faster. In the next release there will be a special `CI` build which removes the need to run `XVFB`.
+- Test IDs have been removed. You will no longer see Cypress insert IDs into your test files. This was a feature we implemented on day 1 - the idea being we could track test performance and do regression analysis. Unfortunately, it will be a long time before we actually implement the data science to make this happen. For the time being, IDs presented unnecessary technical complexity and challenges with no real upside. We recommend you remove all of your existing IDs. We've added a new command to the CLI tool that can do this in one shot. `cypress remove:ids` You may see IDs be reintroduced at a later time when we provide analytics.
+- {% url `.then()` then %} now supports a `timeout` option. Fixes [#110](https://github.com/cypress-io/cypress/issues/110).
+- All error messages from using the CLI have been rewritten and improved.
+- Cypress will now automatically prompt you to add a project when using {% url '`cypress run`' cli-tool#cypress-run %} on a project that has not yet been added.
+- Domain cookies are now proxied better. There's still more work to do before they are 100% fixed but now most typical domain cookie scenarios should 'just work'.
+- We've put together a new example repo called [`The Kitchen Sink`](https://github.com/cypress-io/examples-kitchen-sink). It demonstrates usage of every single Cypress command.
+
+**Bugfixes:**
+
+- Using {% url '`cypress run`' cli-tool#cypress-run %} in OSX now works again.
+- Added fs polling support to fix issues where Cypress would not detect file changes.
+- Tests should reload inside of Cypress faster when they are changed.
+- Better error messages when a command times out waiting for a promise to resolve. Fixes [#108](https://github.com/cypress-io/cypress/issues/108).
+- {% url `cy.viewport('ipad-2')` viewport %} now displays by default in portrait. Landscape orientation is now properly landscape. Fixes [#100](https://github.com/cypress-io/cypress/issues/100).
+- {% url `.click()` click %} will now properly click within an element's bounding box when a `position` option is passed and the calculated coordinates are a fraction. This previously forced the click to happen outside of the element. Fixes [#99](https://github.com/cypress-io/cypress/issues/99).
+- `clientX` and `clientY` event properties are now correctly calculated for elements when the page is scrolled. Fixes [#98](https://github.com/cypress-io/cypress/issues/98).
+- {% url `.check()` check %} and {% url `.uncheck()` uncheck %} now correctly filter down the subject when a value is passed as an option. Fixes [#94](https://github.com/cypress-io/cypress/issues/94).
+- The desktop GUI will now display your email address when you have not set a name in GitHub.
+
+**Misc:**
+
+- Improved element display in Command Log when multiple elements are part of an assertion. Fixes [#96](https://github.com/cypress-io/cypress/issues/96).
+- {% url `cy.reload()` reload %} now returns the window object of the newly reloaded page. Fixes [#105](https://github.com/cypress-io/cypress/issues/105).
+
+Known Issues:
+- Clicking the 'reload' icon next to a test that does not have an ID will not work anymore. We're reworking this feature to work without the presence of IDs.
+
 # 0.13.9
 
 *Released 01/28/2016*
@@ -171,7 +398,7 @@
 - Upgraded `Chromium` for headless and CI runs from `41` to `45`.
 - You will now see better stack traces and errors when running headlessly / in CI. No more `undefined is not a function` errors.
 - Ported all links to use the new Cypress CDN.
-- [Documentation + updates for the CLI tool](https://github.com/cypress-io/cypress-cli).
+- {% url 'Documentation to CLI' cli-tool %}.
 
 **Bugfixes:**
 
@@ -191,7 +418,7 @@
 
 **Features:**
 
-- There is now a new [Errors Page](https://on.cypress.io/guides/errors) which will provide additional explanation when you are getting errors from Cypress. These errors will be directly linked to (like how Angular provides errors).
+- There is now a new {% url 'Error Messages Page' error-messages %} which will provide additional explanation when you are getting errors from Cypress. These errors will be directly linked to (like how Angular provides errors).
 - Instead of hard coding external documentation, we now link everything through a redirection portal. This will prevent any links / documentation from ever breaking due to reorganization or renaming.
 - Cypress now throws a specific error message (with a link to further explanation) if you attempt to run commands outside of a test. Usually this happens accidentally when you write `cy.commands` inside of a `describe` or `context` block instead of the `it`. I've wasted too much time and almost bombed entire presentations / demos so I've finally stopped this from ever happening again. If you ever see this error message, trust me, you will forever thank me.
 - The error message: `Cannot call cy.method() because the current subject has been removed or detached from the DOM.` has been rewritten to provide much clearer information on why this is happening, including a string representation of your DOM element. Additionally it will have its own error page dedicated to explaining how this happens and what you can do to prevent it.
@@ -218,7 +445,7 @@
 
 **Features:**
 
-- There are now [Getting Started](https://on.cypress.io/guides/installing-and-running) docs including {% url 'configuration' configuration %} for `cypress.json`
+- There are now {% url 'Getting Started' installing-cypress %} docs including {% url 'configuration' configuration %} for `cypress.json`
 - Cypress now silently restarts the server whenever it detects a change to `cypress.json` - meaning you no longer have to manually reboot the server for changes to be picked up.
 - There is a new {% url `Cypress.config` config %} interface - akin to {% url `Cypress.env` env %} which provides access to configuration values.
 
@@ -385,7 +612,7 @@ Almost there:
 
 - Fixed situation where an `Uncaught Error` was not being properly handled. Cypress would incorrectly continue to retry commands instead of anceling them, which lead to incorrect errors downstream in other tests.
 - Fixed situation where an error being thrown from an XHR was being improperly handled (in a slightly different way than the problem above).
-- Stopped sending CI data when `cypress run` was issued.
+- Stopped sending CI data when {% url '`cypress run`' cli-tool#cypress-run %} was issued.
 
 **Misc:**
 
@@ -417,7 +644,7 @@ Almost there:
 
 **Bugfixes:**
 
-- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in `cypress run` or `cypress ci`.
+- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in {% url '`cypress run`' cli-tool#cypress-run %} or `cypress ci`.
 
 **Misc:**
 

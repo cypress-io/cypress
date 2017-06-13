@@ -1,6 +1,6 @@
 ---
 title: request
-comments: true
+comments: false
 ---
 
 Make an HTTP request.

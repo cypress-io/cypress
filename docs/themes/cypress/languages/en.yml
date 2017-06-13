@@ -154,12 +154,25 @@ sidebar:
     $: $
     minimatch: minimatch
     moment: moment
-    blob: blob
-    promise: promise
+    blob: Blob
+    promise: Promise
     cypress-api: Cypress API
     config: config
     env: env
-    cypress-commands: commands
-    cookies: cookies
-    dom: dom
-    cypress-server: server
+    cypress-commands: Commands
+    cookies: Cookies
+    dom: Dom
+    cypress-server: Server
+  examples:
+    recipes: Recipes
+    unit-testing: Unit Testing
+    logging-in: Logging In
+    testing-the-dom: Testing the DOM
+    working-with-the-backend: Working with the Backend
+    spies-stubs-and-clocks: Spies, Stubs, and Clocks
+    extending-cypress: Extending Cypress
+    applications: Applications
+    kitchen-sink: Kitchen Sink
+    todo-mvc: TodoMVC
+    pie-chopper: PieChopper
+    phonecat: Phonecat

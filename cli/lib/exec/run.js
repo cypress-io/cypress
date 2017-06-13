@@ -4,7 +4,7 @@ const downloadUtils = require('../download/utils')
 const spawn = require('./spawn')
 const pkg = require('../../package')
 
-const run = (options) => () => {
+const processRunOptions = (options = {}) => {
   const args = ['--project', options.project]
 
   //// if key is set use that - else attempt to find it by env var
@@ -65,10 +65,20 @@ const run = (options) => () => {
   //// send in the CLI version
   args.push('--cli-version', pkg.version)
 
+  if (options.browser) {
+    args.push('--browser', options.browser)
+  }
+
+  return args
+}
+
+const run = (options) => () => {
+  const args = processRunOptions(options)
   return spawn.start(args)
 }
 
 module.exports = {
+  processRunOptions,
   start (options = {}) {
     _.defaults(options, {
       key: null,

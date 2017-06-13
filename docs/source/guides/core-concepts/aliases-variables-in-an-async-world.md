@@ -1,10 +1,10 @@
 ---
 title: "Aliases: Variables in an Async World"
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress's asynchronous nature makes it hard to use variables
 - What Aliases are, how they simplify and enable reuse in your code
@@ -19,12 +19,12 @@ Because all commands in Cypress are asynchronous, it can be difficult to refer b
 **Imagine the following synchronous example in jQuery:**
 
 ```javascript
-var body = $("body")
+var body = $('body')
 
 // do more work here
 
 // later use this body reference
-body.find("button")
+body.find('button')
 ```
 
 > In Cypress, every command is asynchronous.
@@ -36,14 +36,14 @@ In jQuery, we can assign regular values because work is performed synchronously.
 
 var _this = this
 
-cy.get("body").then(function($body){
+cy.get('body').then(function($body){
   _this.body = $body
 })
 
 // more work here
 
 cy.then(function(){
-  cy.wrap(_this.body).find("button")
+  cy.wrap(_this.body).find('button')
 })
 ```
 
@@ -66,7 +66,7 @@ One use case for aliasing is referencing a DOM Element:
 
 ```javascript
 // alias all of the tr's found in the table as 'rows'
-cy.get("table").find("tr").as("rows")
+cy.get('table').find('tr').as('rows')
 ```
 
 Internally, Cypress has made a reference to the `<tr>` collection returned as the alias "rows". To reference these same "rows" later, you can use the {% url `cy.get()` get %} command.
@@ -75,7 +75,7 @@ Internally, Cypress has made a reference to the `<tr>` collection returned as th
 // Cypress returns the reference to the <tr>'s
 // which allows us to continue to chain commands
 // finding the 1st row.
-cy.get("@rows").first().click()
+cy.get('@rows').first().click()
 ```
 
 Because we've used the `@` character in {% url `cy.get()` get %}, instead of querying the DOM for elements, {% url `cy.get()` get %} looks for an existing alias called `rows` and returns the reference (if it finds it).
@@ -104,16 +104,15 @@ Let's imagine when we click the `.edit` button that our `<li>` is re-rendered in
 **Cypress calculates stale alias references.**
 
 ```javascript
-cy
-  .get("#todos li").first().as("firstTodo")
-  .get("@firstTodo").find(".edit").click()
-  .get("@firstTodo").should("have.class", "editing")
-    .find("input").type("Clean the kitchen")
+cy.get('#todos li').first().as('firstTodo')
+cy.get('@firstTodo').find('.edit').click()
+cy.get('@firstTodo').should('have.class', 'editing')
+  .find('input').type('Clean the kitchen')
 ```
 
 When we reference `@firstTodo`, Cypress checks to see if all of the elements it is referencing are still in the DOM. If they are, it returns those existing elements. If they aren't, Cypress replays the commands leading up to the alias definition.
 
-In our case it would re-issue the commands: `cy.get("#todos li").first()`. Everything just works because the new `<li>` is found.
+In our case it would re-issue the commands: `cy.get('#todos li').first()`. Everything just works because the new `<li>` is found.
 
 {% note warning  %}
 *Usually*, replaying previous commands will return what you expect, but not always. Cypress' calculations are complicated and we may improve this algorithm at a later time. It is recommended to not alias DOM elements very far down a chain of commands - **alias elements as soon as possible with as few commands as possible**. When in doubt, you can *always* issue a regular {% url `cy.get()` get %} to query for the elements again.
@@ -126,23 +125,22 @@ Another use case for aliasing is with routes. Using aliases with {% url `cy.rout
 ![alias-commands](/img/guides/cypress-basics/aliases-variables-in-an-async-world/aliasing-routes.jpg)
 
 ```javascript
-cy
-  .server()
-  // alias this route as 'postUser'
-  .route("POST", /users/, {id: 123}).as("postUser")
+cy.server()
+// alias this route as 'postUser'
+cy.route('POST', /users/, {id: 123}).as('postUser')
 ```
 
 Once you've given a route an alias, you can use it later to indicate what you expect to have happen in your application. Imagine your application's code is as follows:
 
 ```javascript
-$("form").submit(function(){
+$('form').submit(function(){
   var data = $(this).serializeData()
 
   // simple example of an async
   // request that only goes out
   // after an indeterminate period of time
   setTimeout(function(){
-    $.post("/users", {data: data})
+    $.post('/users', {data: data})
   }, 1000)
 })
 ```
@@ -150,10 +148,9 @@ $("form").submit(function(){
 You can tell Cypress to wait until it sees a request that matches your aliased route using the {% url `cy.wait()` wait %} command.
 
 ```javascript
-cy
-  .get("form").submit()
-  .wait("@postUser")
-  .get(".success").contains("User successfully created!")
+cy.get('form').submit()
+cy.wait('@postUser')
+cy.get('.success').contains('User successfully created!')
 ```
 
 **Telling Cypress to wait for an AJAX request that matches an aliased route has enormous advantages.**

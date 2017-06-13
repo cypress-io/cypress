@@ -1,6 +1,6 @@
 ---
 title: Cypress.Server
-comments: true
+comments: false
 ---
 
 Permanently change the default options for all {% url `cy.server()` server %} instances

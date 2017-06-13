@@ -1,6 +1,6 @@
 ---
 title: fixture
-comments: true
+comments: false
 ---
 
 Load a fixed set of data located in a file.

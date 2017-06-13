@@ -1,12 +1,12 @@
 ---
 title: Dealing with the Network
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
-- How Cypress enables you to isolate any or all of your front-end with {% url `cy.server()` server %} and [`cy.route()`](https://on.cypress.io/route)
+- How Cypress enables you to isolate any or all of your front-end with {% url `cy.server()` server %} and {% url `cy.route()` route %}
 - What tradeoffs we make when we stub our network requests
 - How Cypress visualizes network management in the Command Log
 - How to use Fixtures to reuse XHR responses

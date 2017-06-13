@@ -1,5 +1,5 @@
 title: How Cypress Really Works
-comments: true
+comments: false
 ---
 
 # What You'll Learn

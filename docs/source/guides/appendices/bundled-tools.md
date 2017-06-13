@@ -1,5 +1,6 @@
+---
 title: Bundled Tools
-comments: true
+comments: false
 ---
 
 {% note info %}
@@ -9,25 +10,25 @@ Cypress relies on many best-of-breed open source testing libraries to lend stabi
 
 # Mocha
 
-[Mocha docs](http://mochajs.org/)
+{% url 'Mocha docs' http://mochajs.org/ %}
 
 Cypress has adopted Mocha's `bdd` syntax, which fits perfectly with both integration and unit testing. All of the tests you'll be writing sit on the fundamental harness Mocha provides, namely:
 
-* [describe()](https://mochajs.org/#bdd)
-* [context()](https://mochajs.org/#bdd)
-* [it()](https://mochajs.org/#bdd)
-* [before()](https://mochajs.org/#hooks)
-* [beforeEach()](https://mochajs.org/#hooks)
-* [afterEach()](https://mochajs.org/#hooks)
-* [after()](https://mochajs.org/#hooks)
-* [.only()](https://mochajs.org/#exclusive-tests)
-* [.skip()](https://mochajs.org/#inclusive-tests)
+* {% url '`describe()`' http://mochajs.org/#bdd %}
+* {% url '`context()`' http://mochajs.org/#bdd %}
+* {% url '`it()`' http://mochajs.org/#bdd %}
+* {% url '`before()`' http://mochajs.org/#hooks %}
+* {% url '`beforeEach()`' http://mochajs.org/#hooks %}
+* {% url '`afterEach()`' http://mochajs.org/#hooks %}
+* {% url '`after()`' http://mochajs.org/#hooks %}
+* {% url '`.only()`' http://mochajs.org/#exclusive-tests %}
+* {% url '`.skip()`' http://mochajs.org/#exclusive-tests %}
 
-Additionally, Mocha gives us excellent [`async` support](https://mochajs.org/#asynchronous-code). Cypress has extended Mocha, sanding off the rough edges, weird edge cases, bugs, and error messages. These fixes are all completely transparent.
+Additionally, Mocha gives us excellent {% url '`async` support' http://mochajs.org/#asynchronous-code %}. Cypress has extended Mocha, sanding off the rough edges, weird edge cases, bugs, and error messages. These fixes are all completely transparent.
 
 # Chai
 
-[Chai docs](http://chaijs.com/)
+{% url 'Chai docs' http://chaijs.com/ %}
 
 While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using [subjects](https://on.cypress.io/guides/making-assertions) and the {% url `.should()` should %} command.
 
@@ -37,15 +38,15 @@ While Mocha provides us a framework to structure our tests, Chai gives us the ab
 
 # Chai-jQuery
 
-[Chai-jQuery docs](https://github.com/chaijs/chai-jquery)
+{% url 'Chai-jQuery docs' https://github.com/chaijs/chai-jquery %}
 
 When writing integration tests, you will likely work a lot with the DOM. Cypress brings in Chai-jQuery, which automatically extends Chai with specific jQuery chainer methods.
 
 # Sinon
 
-[Sinon docs](http://sinonjs.org/)
+{% url 'Sinon docs' http://sinonjs.org/ %}
 
-When writing unit tests, or even in integration-like tests, you often need to ability to [stub](http://sinonjs.org/docs/#stubs) and [spy](http://sinonjs.org/docs/#spies) methods. Cypress includes two methods, {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} that return Sinon stubs and spies, respectively.
+When writing unit tests, or even in integration-like tests, you often need to ability to stub and spy methods. Cypress includes two methods, {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} that return Sinon stubs and spies, respectively.
 
 {% note info Stubbing Dependencies when Unit Testing %}
 [Check out our example recipe for stubbing dependencies in unit tests](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js)
@@ -53,15 +54,15 @@ When writing unit tests, or even in integration-like tests, you often need to ab
 
 # Sinon-Chai
 
-[Sinon-Chai docs](https://github.com/domenic/sinon-chai)
+{% url 'Sinon-Chai docs' https://github.com/domenic/sinon-chai %}
 
-When working with `stubs` or `spies` you'll regularly want to use those when writing Chai assertions. Cypress bundles in Sinon-Chai which extends Chai allowing you to [write assertions](https://github.com/domenic/sinon-chai#assertions) about `stubs` and `spies`.
+When working with `stubs` or `spies` you'll regularly want to use those when writing Chai assertions. Cypress bundles in Sinon-Chai which extends Chai allowing you to {% url 'write assertions' https://github.com/domenic/sinon-chai %} about `stubs` and `spies`.
 
 # Sinon-As-Promised
 
-[Sinon-As-Promised docs](https://github.com/bendrucker/sinon-as-promised)
+{% url 'Sinon-As-Promised docs' https://github.com/bendrucker/sinon-as-promised %}
 
-Sinon-as-Promised gives you the ability to stub methods that return Promises. To fulfill the async contract of these methods, you would use Sinon-as-Promised to force these methods to easily [`resolve`](https://github.com/bendrucker/sinon-as-promised#stubresolvesvalue---stub) or [`reject`](https://github.com/bendrucker/sinon-as-promised#stubrejectserr---stub) at your discretion.
+Sinon-as-Promised gives you the ability to stub methods that return Promises. To fulfill the async contract of these methods, you would use Sinon-as-Promised to force these methods to easily {% url '`resolve`' https://github.com/bendrucker/sinon-as-promised %} or {% url '`reject`' https://github.com/bendrucker/sinon-as-promised %} at your discretion.
 
 # Other Library Utilities
 

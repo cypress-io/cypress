@@ -1,5 +1,6 @@
+---
 title: Configuration
-comments: true
+comments: false
 ---
 
 When a project is added to Cypress, a `cypress.json` file is created in the project. This file is used to store the `projectId` ([after configuring your tests to record](https://on.cypress.io/guides/projects)) and any configuration values you supply.
@@ -23,8 +24,8 @@ Option | Default | Description
 `ignoreTestFiles` | `*.hot-update.js` | A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest using [http://globtester.com](http://globtester.com) to test what files would match.
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
 `port` | `null` | Port used to host Cypress. Normally this is a randomly generated port
-`reporter` | `spec` | The [reporter](https://on.cypress.io/guides/reporters) used when running headlessly or in CI
-`reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#section-reporter-options) used. Supported options depend on the reporter.
+`reporter` | `spec` | The {% url 'reporter' reporters %} used when running headlessly or in CI
+`reporterOptions` | `null` | The {% url 'reporter options' reporters#Options %} used. Supported options depend on the reporter.
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on test file changes
 
@@ -70,7 +71,7 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`chromeWebSecurity`    | `true`    | Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. [Read more about this here.](https://on.cypress.io/guides/web-security)
+`chromeWebSecurity`    | `true`    | Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. {% url 'Read more about this here' web-security %}
 
 ## Viewport
 
@@ -92,7 +93,7 @@ Besides modifying your `cypress.json` you can also change configuration options 
 
 ## Command Line
 
-When [running Cypress from the Command Line](https://on.cypress.io/guides/cli) you can pass a `--config` flag.
+When {% url 'running Cypress from the Command Line' cli-tool %} you can pass a `--config` flag.
 
 **Examples:**
 

@@ -1,10 +1,10 @@
 ---
 title: Installing Cypress
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How to install Cypress on your project using `npm`
 - How to run Cypress via the command line

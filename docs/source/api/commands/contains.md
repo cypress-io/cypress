@@ -1,6 +1,6 @@
 ---
 title: contains
-comments: true
+comments: false
 ---
 
 Get the DOM element containing the text. DOM elements can contain *more* than the desired text and still match. Additionally, Cypress [prefers some DOM elements](#Notes) over the deepest element found.

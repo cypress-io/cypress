@@ -343,7 +343,6 @@
     margin: 1em 0;
     padding: 20px;
     position: relative;
-    border: 1px solid $color-border;
     border-left: 5px solid $highlight-comment;
     font-style: normal;
     font-size: 15px;
@@ -367,6 +366,10 @@
       margin-top: 0em;
       padding-top: 0em;
       border: 0;
+    }
+
+    h1 {
+      font-size: 1em;
     }
 
     strong {

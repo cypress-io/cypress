@@ -1,6 +1,6 @@
 ---
 title: and
-comments: true
+comments: false
 ---
 
 Make an assertion.
@@ -43,7 +43,7 @@ cy.and('eq', '42')   // Errors, cannot be chained off 'cy'
 
 **{% fa fa-angle-right %} chainers** ***(String)***
 
-Chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery)
+Chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
 
 **{% fa fa-angle-right %} value** ***(String)***
 
@@ -78,13 +78,24 @@ cy
 
 ## Timeout
 
-`.and()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+`.and()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', 'error')
                          ↲
-      // timeout here will be passed down to the '.and()'
-      // and it will retry for up to 10 secs
+  // timeout here will be passed down to the '.and()'
+  // and it will retry for up to 10 secs
+```
+
+```javascript
+cy.get('input', {timeout: 10000}).should('have.value', 'US').and(function($input)){
+                                    ↲
+  // timeout here will be passed down to the '.and()'
+  // unless an assertion throws earlier,
+  // ALL of the assertions will retry for up to 10 secs
+  expect($input).to.not.be('disabled')
+  expect($input).to.not.have.class('error')
+})
 ```
 
 # Examples
@@ -207,9 +218,11 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 
 **How do I know which assertions change the subject and which keep it the same?**
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
+
+{% partial then_should_difference %}
 
 # Command Log
 

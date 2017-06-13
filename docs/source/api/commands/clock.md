@@ -1,6 +1,6 @@
 ---
 title: clock
-comments: true
+comments: false
 ---
 
 `cy.clock()` overrides native global functions related to time allowing them to be controlled synchronously via {% url `cy.tick()` tick %} or the yielded `clock` object. This includes controlling:

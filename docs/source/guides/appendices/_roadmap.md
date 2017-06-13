@@ -1,5 +1,5 @@
 title: Roadmap
-comments: true
+comments: false
 ---
 
 # What You'll Learn

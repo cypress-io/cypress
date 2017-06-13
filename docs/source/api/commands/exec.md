@@ -1,6 +1,6 @@
 ---
 title: exec
-comments: true
+comments: false
 ---
 
 Execute a system command.

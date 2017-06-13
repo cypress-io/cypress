@@ -1,5 +1,5 @@
 title: Custom Commands
-comments: true
+comments: false
 ---
 
 # What You'll Learn

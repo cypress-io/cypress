@@ -1,6 +1,6 @@
 ---
 title: Environment Variables
-comments: true
+comments: false
 ---
 
 Environment variables are useful when:
@@ -145,11 +145,11 @@ Cypress.env("api_server") // "http://localhost:8888/api/v1/"
 
 ## Option #4: `--env`
 
-Lastly you can pass in environment variables as options when [using the CLI tool](https://github.com/cypress-io/cypress-cli).
+Lastly you can pass in environment variables as options when {% url 'using the CLI tool' cli-tool#cypress-run %}.
 
 Values here will overwrite all other conflicting environment variables.
 
-You can use the `--env` argument for `cypress run`.
+You can use the `--env` argument for {% url '`cypress run`' cli-tool#cypress-run %}.
 
 {% note warning  %}
 Multiple values must be separated by a comma, not a space.

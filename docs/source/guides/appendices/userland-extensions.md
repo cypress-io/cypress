@@ -1,5 +1,6 @@
+---
 title: Userland Extensions
-comments: true
+comments: false
 ---
 
 # Gitlab

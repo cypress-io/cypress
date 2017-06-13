@@ -1,6 +1,6 @@
 ---
 title: reload
-comments: true
+comments: false
 ---
 
 Reload the page.

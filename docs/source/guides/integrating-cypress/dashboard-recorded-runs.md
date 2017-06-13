@@ -1,6 +1,6 @@
 ---
 title: Dashboard&#58; Recorded Runs
-comments: true
+comments: false
 ---
 
 Recorded runs are the results and artifacts captured from your test runs.
@@ -16,12 +16,12 @@ We capture the following:
 
 - [Standard Output](#Standard-Output)
 - [Test Failures](#Test-Failures)
-- [Screenshots](Screenshots)
-- [Video](Video)
+- [Screenshots](#Screenshots)
+- [Video](#Video)
 
 ## Standard Output
 
-Standard output includes details and summaries of your tests based on the [reporter](https://on.cypress.io/guides/reporters) you have set. By default it is the `spec` reporter.
+Standard output includes details and summaries of your tests based on the {% url 'reporter' reporters %} you have set. By default it is the `spec` reporter.
 
 ![output](https://cloud.githubusercontent.com/assets/1271364/22707798/f5e5608e-ed41-11e6-8832-d66e5a68094b.png)
 

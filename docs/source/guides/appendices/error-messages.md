@@ -1,6 +1,6 @@
 ---
 title: Error Messages
-comments: true
+comments: false
 ---
 
 # Test File Errors
@@ -29,7 +29,7 @@ When the error is fixed in your test file, your tests will automatically re-run.
 
 **{% fa fa-exclamation-triangle red %} Support file missing or invalid**
 
-The `supportFolder` option was removed from Cypress in version [0.18.0](https://on.cypress.io/guides/changelog#0-18-0) and was replaced by module support and the {% url `supportFile` configuration#Folders %} configuration option.
+The `supportFolder` option was removed from Cypress in version {% url `0.18.0` changelog#0-18-0 %} and was replaced by module support and the {% url `supportFile` configuration#Folders %} configuration option.
 
 Cypress used to automatically include any scripts in the `supportFolder` before your test files. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions.
 
@@ -49,14 +49,14 @@ it('uses modules', function () {
 
 ***Use supportFile to load scripts before your test code***
 
-It's still useful to load a setup files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the `supportFile` configuration option.
+It's still useful to load a setup files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the {% url `supportFile` configuration#Folders %} configuration option.
 
-`supportFile` is a path to a file to include before your test files. By default, `supportFile` is set to look for one of the following files:
+{% url `supportFile` configuration#Folders %} is a path to a file to include before your test files. By default, {% url `supportFile` configuration#Folders %} is set to look for one of the following files:
 
 * `cypress/support/index.js`
 * `cypress/support/index.coffee`
 
-Just like with your test files, the `supportFile` can use ES2015+ (or CoffeeScript) and modules, so you can import/require other files as needed.
+Just like with your test files, the {% url `supportFile` configuration#Folders %} can use ES2015+ (or CoffeeScript) and modules, so you can import/require other files as needed.
 
 # Command Errors
 
@@ -131,7 +131,7 @@ $('button').click(function() {
 cy.get('button').click().parent()
 ```
 
-We've programmed our application above so that as soon as the `click` event happens, the button is removed from the DOM. When Cypress begins processing the next command (`.parent()`) in the test below, it detects that the yielded subject (the button) is detached from the DOM and throws the error.
+We've programmed our application above so that as soon as the `click` event happens, the button is removed from the DOM. When Cypress begins processing the next command ({% url `.parent()` parent %}) in the test above, it detects that the yielded subject (the button) is detached from the DOM and throws the error.
 
 We can prevent Cypress from throwing this error by rewriting our test code.
 
@@ -316,11 +316,11 @@ it('does not forget to return a promise', function(){
 
 **{% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.**
 
-You may receive this error when trying to run Cypress tests in [Continuous Integration](https://on.cypress.io/continuous-integration). This means that you did not pass a specific record key to: `cypress run --record`.
+You may receive this error when trying to run Cypress tests in {% url 'Continuous Integration' continuous-integration %}. This means that you did not pass a specific record key to: {% url '`cypress run --record`' cli-tool#cypress-run-record %}.
 
 Since no record key was passed, Cypress checks for any environment variable with the name `CYPRESS_RECORD_KEY`. In this case, that was also not found.
 
-You can get your project's record key by running the terminal command: `cypress get:key` or by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
+You can get your project's record key by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
 
 You will want to then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
 
@@ -328,7 +328,7 @@ You will want to then [add the key to your config file or as an environment vari
 
 **{% fa fa-exclamation-triangle red %} The 'cypress ci' command has been deprecated**
 
-As of version [`0.19.0`](https://on.cypress.io/guides/changelog#0.19.0) and CLI versions `0.13.0`, the `cypress ci` command has been deprecated. We did this to make it clearer what the difference was between a *regular test run* and a *recorded test run*.
+As of version {% url `0.19.0` changelog#0-19-0 %} and CLI versions `0.13.0`, the `cypress ci` command has been deprecated. We did this to make it clearer what the difference was between a *regular test run* and a *recorded test run*.
 
 Previously to record runs you had the environment variable: `CYPRESS_CI_KEY` or you wrote:
 
@@ -357,7 +357,7 @@ We will automatically apply the record key environment variable.
 **{% fa fa-exclamation-triangle red %} Cypress detected a cross origin error happened on page load**
 
 {% note info %}
-For a more thorough explanation of Cypress's Web Security model, [please read our dedicated guide to it](https://on.cypress.io/guides/web-security).
+For a more thorough explanation of Cypress's Web Security model, {% url 'please read our dedicated guide to it' web-security %}.
 {% endnote %}
 
 This error means that your application navigated to a superdomain that Cypress was not bound to. Initially when you {% url `cy.visit()` visit %}, Cypress changes the browser's url to match the `url` passed to {% url `cy.visit()` visit %}. This enables Cypress to communicate with your application to bypasses all same-origin security policies among other things.
@@ -370,7 +370,7 @@ When your application navigates to a superdomain outside of the current origin-p
 
 2. You are testing a page that uses `Single sign-on (SSO)`. In this case your web server is likely redirecting you between superdomains, so you receive this error message. You can likely get around this redirect problem by using {% url `cy.request()` request %} to manually handle the session yourself.
 
-If you find yourself stuck and can't work around these issues you can just set this in your `cypress.json` file. But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
+If you find yourself stuck and can't work around these issues you can just set this in your `cypress.json` file. But before doing so you should really understand and {% url 'read about the reasoning here' web-security %}.
 
 ***cypress.json***
 

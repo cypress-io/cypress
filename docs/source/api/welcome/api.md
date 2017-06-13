@@ -1,12 +1,7 @@
 ---
 title: API
-comments: true
-
+comments: false
 ---
-
-{% note info New to Cypress? %}
-Read through our [Guides](https://on.cypress.io/guides/guides) first.
-{% endnote %}
 
 # Sections
 

@@ -1,6 +1,6 @@
 ---
 title: setCookie
-comments: true
+comments: false
 ---
 
 Set a browser cookie.

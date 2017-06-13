@@ -1,6 +1,6 @@
 ---
 title: check
-comments: true
+comments: false
 ---
 
 Check checkbox(es) or radio(s).

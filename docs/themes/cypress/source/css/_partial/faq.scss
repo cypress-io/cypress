@@ -39,6 +39,7 @@
       border-bottom: 0;
       padding-left: 5px;
 
+
       &:before {
         content: "\f105";
         font-family: FontAwesome;
@@ -69,7 +70,7 @@
       }
 
       &:hover {
-        cursor: default;
+        cursor: pointer;
         color: #474a54;
         border-bottom: 1px solid #ddd;
       }
