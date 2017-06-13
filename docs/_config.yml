@@ -31,7 +31,7 @@ skip_render:
 alias:
   index.html: guides/getting-started/why-cypress.html
   guides/index.html: guides/getting-started/why-cypress.html
-  guides/index.html: api/welcome/api.html
+  api/index.html: api/welcome/api.html
   # can also do outside page links here
   # plugins/index.html: https://github.com/cypress/cypress/wiki/Plugins
 
