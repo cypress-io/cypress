@@ -104,11 +104,11 @@ cy.get('.left-nav').find('li.active').prevAll()
 
 The commands above will display in the command log as:
 
-<img width="562" alt="screen shot 2017-03-23 at 2 50 20 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264885/1a1d87ac-0fd8-11e7-97cb-1d0d2110de81.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/24264885/1a1d87ac-0fd8-11e7-97cb-1d0d2110de81.png)
 
 When clicking on `prevAll` within the command log, the console outputs the following:
 
-<img width="539" alt="screen shot 2017-03-23 at 2 50 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264898/2219d1a4-0fd8-11e7-9e8b-6b2d97166d6a.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/24264898/2219d1a4-0fd8-11e7-9e8b-6b2d97166d6a.png)
 
 # See also
 

@@ -115,7 +115,7 @@ cy.window().then(function(window){
 })
 ```
 
-<img width="422" alt="screen shot 2017-05-26 at 11 41 27 am" src="https://cloud.githubusercontent.com/assets/1271364/26501744/6f9b6188-4208-11e7-91ce-59dbb455b1fc.png">
+![Command Log location](https://cloud.githubusercontent.com/assets/1271364/26501744/6f9b6188-4208-11e7-91ce-59dbb455b1fc.png)
 
 ***Console output of `.location()`***
 
@@ -125,7 +125,7 @@ cy.location().then(function(location){
 })
 ```
 
-<img width="478" alt="screen shot 2017-05-26 at 11 42 11 am" src="https://cloud.githubusercontent.com/assets/1271364/26501743/6f8fcb84-4208-11e7-9f08-9c97592afc08.png">
+![Console Log location](https://cloud.githubusercontent.com/assets/1271364/26501743/6f8fcb84-4208-11e7-9f08-9c97592afc08.png)
 
 # Command Log
 

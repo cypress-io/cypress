@@ -152,11 +152,11 @@ cy.get('.connectors-div').should('be.hidden')
 
 The commands above will display in the command log as:
 
-<img width="470" alt="screen shot 2017-06-01 at 1 13 44 pm" src="https://cloud.githubusercontent.com/assets/1271364/26691729/3a75b3c8-46cc-11e7-835d-68200388ddf2.png">
+![Command Log invoke](https://cloud.githubusercontent.com/assets/1271364/26691729/3a75b3c8-46cc-11e7-835d-68200388ddf2.png)
 
 When clicking on `invoke` within the command log, the console outputs the following:
 
-<img width="534" alt="screen shot 2017-06-01 at 1 14 00 pm" src="https://cloud.githubusercontent.com/assets/1271364/26691730/3a9baeca-46cc-11e7-8519-9e4a04490601.png">
+![Console log invoke](https://cloud.githubusercontent.com/assets/1271364/26691730/3a9baeca-46cc-11e7-8519-9e4a04490601.png)
 
 # See also
 

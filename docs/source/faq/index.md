@@ -144,7 +144,7 @@ We are working on open sourcing Cypress. You can read more [here](https://www.cy
 
 - Search existing [open issues](https://github.com/cypress-io/cypress/issues), it may already be reported!
 - Update Cypress. Your issue may have [already been fixed](https://github.com/cypress-io/cypress/wiki/changelog).
-- [Open an issue](https://github.com/cypress-io/cypress/issues/new). Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.
+- {% url 'Open an issue' https://github.com/cypress-io/cypress/issues/new %}. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.
 
 # Using Cypress
 

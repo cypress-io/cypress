@@ -39,7 +39,7 @@ Pass in an options object to change the default behavior of `cy.setCookie()`.
 Option | Default | Notes
 --- | --- | ---
 `domain` | `window.location.hostname` | The domain the cookie is visible to
-`expiry` | 20 years into the future | When the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
+`expiry` | 20 years into the future | When the cookie expires, specified in seconds since {% url 'Unix Epoch' https://en.wikipedia.org/wiki/Unix_time %}.
 `httpOnly` | `false` | Whether the cookie is an HTTP only cookie
 `log` | `true` | Whether to display command in Command Log
 `path` | `/` | The cookie path

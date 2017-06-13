@@ -90,7 +90,7 @@ cy.get('button').trigger('mouseover') // yields 'button'
 **Drag and Drop**
 
 {% note info %}
-[Check out our example recipe triggering mouse and drag events to test dragging and dropping](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/drag_n_drop_spec.js)
+{% url 'Check out our example recipe triggering mouse and drag events to test dragging and dropping' 'https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/drag_n_drop_spec.js' %}
 {% endnote %}
 
 ## Change Event
@@ -162,11 +162,11 @@ cy.get('button').first().trigger('mouseover')
 
 The commands above will display in the command log as:
 
-<img width="364" alt="Command log output" src="https://cloud.githubusercontent.com/assets/1157043/23477277/749d347e-fe8b-11e6-9c31-6667f7ff65d8.png">
+![command log for trigger](https://cloud.githubusercontent.com/assets/1157043/23477277/749d347e-fe8b-11e6-9c31-6667f7ff65d8.png)
 
 When clicking on `trigger` within the command log, the console outputs the following:
 
-<img width="630" alt="Console output" src="https://cloud.githubusercontent.com/assets/1157043/23477276/749aac54-fe8b-11e6-81b3-e7600cca0ba0.png">
+![console.log for trigger](https://cloud.githubusercontent.com/assets/1157043/23477276/749aac54-fe8b-11e6-81b3-e7600cca0ba0.png)
 
 # See also
 

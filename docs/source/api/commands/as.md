@@ -91,7 +91,7 @@ cy
 
 Aliases of routes display in the routes instrument panel:
 
-<img width="567" alt="screen shot 2015-11-29 at 2 25 47 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459470/22e31e54-96a5-11e5-8895-a6ff5f8bb973.png">
+![Command log for route](https://cloud.githubusercontent.com/assets/1271364/11459470/22e31e54-96a5-11e5-8895-a6ff5f8bb973.png)
 
 # See also
 

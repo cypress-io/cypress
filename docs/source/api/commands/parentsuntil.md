@@ -101,11 +101,11 @@ cy.get('.active').parentsUntil('.nav')
 
 The commands above will display in the command log as:
 
-<img width="561" alt="screen shot 2017-03-23 at 2 37 31 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264301/516d5fd6-0fd6-11e7-9ab7-b55b211acde3.png">
+![Command Log parentsUntil](https://cloud.githubusercontent.com/assets/1271364/24264301/516d5fd6-0fd6-11e7-9ab7-b55b211acde3.png)
 
 When clicking on `parentsUntil` within the command log, the console outputs the following:
 
-<img width="523" alt="screen shot 2017-03-23 at 2 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264309/60cc75de-0fd6-11e7-97b4-d0aa184b0ba6.png">
+![Console Log parentsUntil](https://cloud.githubusercontent.com/assets/1271364/24264309/60cc75de-0fd6-11e7-97b4-d0aa184b0ba6.png)
 
 # See also
 

@@ -80,11 +80,11 @@ cy.hash().should('eq', '#users/new')
 
 The commands above will display in the command log as:
 
-<img width="581" alt="screen shot 2015-11-29 at 1 34 12 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459152/ed737be4-969d-11e5-823e-1d12cd7d03b1.png">
+![Command Log for hash](https://cloud.githubusercontent.com/assets/1271364/11459152/ed737be4-969d-11e5-823e-1d12cd7d03b1.png)
 
 When clicking on `hash` within the command log, the console outputs the following:
 
-<img width="472" alt="screen shot 2015-11-29 at 1 34 17 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459153/f0aa6476-969d-11e5-9851-302957f9eb0f.png">
+![Console Log for hash](https://cloud.githubusercontent.com/assets/1271364/11459153/f0aa6476-969d-11e5-9851-302957f9eb0f.png)
 
 # See also
 

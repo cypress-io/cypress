@@ -85,15 +85,15 @@ When running headlessly or in {% url 'Continuous Integration' continuous-integra
 
 You can see screenshots taken during a CI run in the {% url 'Dashboard' https://on.cypress.io/dashboard %} without any extra work.
 
-Alternatively, to see screenshots in the [Circle CI](https://circleci.com/) UI, we automatically export screenshots as artifacts. This makes them available directly in their web UI.
+Alternatively, to see screenshots in the {% url 'Circle CI' https://circleci.com/ %} UI, we automatically export screenshots as artifacts. This makes them available directly in their web UI.
 
-If you're using Travis, you'll need to upload artifacts to an s3 bucket as per their [uploading artifacts doc](https://docs.travis-ci.com/user/uploading-artifacts/) to see screenshots outside of the Cypress Dashboard.
+If you're using Travis, you'll need to upload artifacts to an s3 bucket as per their {% url 'uploading artifacts doc' https://docs.travis-ci.com/user/uploading-artifacts/ %} to see screenshots outside of the Cypress Dashboard.
 
 **Understanding when a screenshot happens**
 
 Taking a screenshot is an asynchronous action that takes around `100ms` to complete. By the time the screenshot is taken, it's possible something in your application may have changed. It's important to realize that the screenshot may not reflect 100% of what your application looked like when the command was issued.
 
-For example - say a command we wrote times outs: `cy.get('#element')`. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
+For example - say a command we wrote times outs: {% url '`cy.get('#element')`' get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
 
 # Command Log
 
@@ -105,11 +105,11 @@ cy.screenshot('my-image')
 
 The commands above will display in the command log as:
 
-<img width="559" alt="screen shot 2016-06-13 at 10 46 25 am" src="https://cloud.githubusercontent.com/assets/1271364/16012082/ded7af6c-3155-11e6-83cb-b0dcb6f850a7.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/16012082/ded7af6c-3155-11e6-83cb-b0dcb6f850a7.png)
 
 When clicking on `screenshot` within the command log, the console outputs the following:
 
-<img width="667" alt="screen shot 2016-06-13 at 10 46 15 am" src="https://cloud.githubusercontent.com/assets/1271364/16012081/ded22a2e-3155-11e6-8303-0f1ec64e209b.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/16012081/ded22a2e-3155-11e6-8303-0f1ec64e209b.png)
 
 # See also
 

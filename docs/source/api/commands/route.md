@@ -99,12 +99,12 @@ cy.wait('@postUser')
 **Setup route to `POST` to login**
 
 {% note info %}
-[Check out our example recipe using `cy.route()` to POST for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+{% url 'Check out our example recipe using `cy.route()` to POST for login' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js  %}
 {% endnote %}
 
 **Wait on `url` matching glob**
 
-Under the hood Cypress uses [minimatch](https://github.com/isaacs/minimatch) to match glob patterns of `url`.
+Under the hood Cypress uses {% url 'minimatch' https://github.com/isaacs/minimatch %} to match glob patterns of `url`.
 
 This means you can take advantage of `*` and `**` glob support. This makes it *much* easier to route against dynamic segments without having to build up a complex `RegExp`.
 
@@ -133,7 +133,7 @@ cy.route('/posts/**')
 
 **Override `url` glob matching options**
 
-When we check `glob` patterns with [minimatch](https://github.com/isaacs/minimatch), by default Cypress uses sets `matchBase` to `true`. You can override this option in {% url `cy.server()` server %} options.
+When we check `glob` patterns with {% url 'minimatch' https://github.com/isaacs/minimatch %}, by default Cypress uses sets `matchBase` to `true`. You can override this option in {% url `cy.server()` server %} options.
 
 If you want to permanently override these options you could do so by setting {% url `Cypress.Server.defaults()` cypress-server %}.
 
@@ -194,7 +194,7 @@ cy.route('POST', '/comments/**', commentsResponse)
 
 Any request that matches the `method` and `url` of a route will be responded to based on the configuration of that route.
 
-If a request doesn't match any route, [it will automatically receive a 404](#notes). For example, given we have the following routes:
+If a request doesn't match any route, [it will automatically receive a 404](#Notes). For example, given we have the following routes:
 
 ```javascript
 cy.server()
@@ -315,7 +315,7 @@ cy.route({
 **Setup route to error on POST to login**
 
 {% note info %}
-[Check out our example recipe using cy.route to simulate a 503 on POST to login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+{% url 'Check out our example recipe using `cy.route()` to simulate a 503 on POST to login' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
 {% endnote %}
 
 **Change `headers`**
@@ -462,6 +462,6 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 - {% url `.as()` as %}
 - {% url `cy.fixture()` fixture %}
 - {% url 'Network Requests' network-requests %}
-- [Recipe: Logging in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+- {% url 'Recipe: Logging in - XHR Web Form' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
 - {% url `cy.server()` server %}
 - {% url `cy.wait()` wait %}

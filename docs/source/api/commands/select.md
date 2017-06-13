@@ -137,11 +137,11 @@ cy.get('select').select('Homer Simpson')
 
 The commands above will display in the command log as:
 
-<img width="575" alt="screen shot 2015-11-29 at 1 17 27 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459044/a2fd8fca-969b-11e5-8d23-3a118b82b5de.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/11459044/a2fd8fca-969b-11e5-8d23-3a118b82b5de.png)
 
 When clicking on `select` within the command log, the console outputs the following:
 
-<img width="560" alt="screen shot 2015-11-29 at 1 17 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459045/a6b3bde2-969b-11e5-9357-272ea9684987.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/11459045/a6b3bde2-969b-11e5-9357-272ea9684987.png)
 
 # See also
 

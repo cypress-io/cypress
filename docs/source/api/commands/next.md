@@ -101,11 +101,11 @@ cy.get('.left-nav').find('li.active').next()
 
 The commands above will display in the command log as:
 
-<img width="563" alt="screen shot 2015-11-29 at 12 42 07 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458857/afcfddf2-9696-11e5-9405-0cd994f70d45.png">
+![Command Log next](https://cloud.githubusercontent.com/assets/1271364/11458857/afcfddf2-9696-11e5-9405-0cd994f70d45.png)
 
 When clicking on `next` within the command log, the console outputs the following:
 
-<img width="547" alt="screen shot 2015-11-29 at 12 42 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png">
+![Console log next](https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png)
 
 # See also
 

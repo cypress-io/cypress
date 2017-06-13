@@ -129,11 +129,11 @@ cy.get('input[name="firstName"]').should('have.value', 'Homer')
 
 The commands above will display in the command log as:
 
-<img width="524" alt="screen shot 2015-11-27 at 1 24 20 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446808/5d2f2180-950a-11e5-8645-4f0f14321f86.png">
+![Command Log get](https://cloud.githubusercontent.com/assets/1271364/11446808/5d2f2180-950a-11e5-8645-4f0f14321f86.png)
 
 When clicking on the `get` command within the command log, the console outputs the following:
 
-<img width="543" alt="screen shot 2015-11-27 at 1 24 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png">
+![Console Log get](https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png)
 
 # See also
 
