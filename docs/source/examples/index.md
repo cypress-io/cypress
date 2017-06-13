@@ -3,82 +3,6 @@ title: Examples
 comments: false
 ---
 
-# Applications
-
-## jQuery
-
-**{% fa fa-angle-right %} Kitchen Sink** | [Code](https://github.com/cypress-io/cypress-example-kitchensink)
-
-This is an example app is used to showcase every command available in Cypress.
-
-
-- Query and traverse DOM elements using `cy.get()`, `cy.find()` and other commands.
-- Type into forms, click elements, select dropdowns, and other actions.
-- Change the size of the viewport using `cy.viewport()`
-- Navigation to other pages
-- Do network requests, and wait on responses, and stub response data using `cy.fixture()`.
-- Inspect and manipulate cookies and localStorage.
-
-![kitchensink](https://cloud.githubusercontent.com/assets/1268976/14084252/e309e370-f4e7-11e5-9562-24f516563ac9.gif)
-
-Stack | -
- -- | --
-Frontend | [jQuery](https://jquery.com/)
-Backend | [Node](https://nodejs.org/)
-CI | [TravisCI](https://travis-ci.org/), [CircleCI](https://circleci.com), [Codeship](https://codeship.com/)
-
-## React
-
-**{% fa fa-angle-right %} TodoMVC** | [Code](https://github.com/cypress-io/cypress-example-todomvc)
-
-This repo compares [Cypress Tests](https://github.com/cypress-io/cypress-example-todomvc/blob/master/cypress/integration/app_spec.js) to [official TodoMVC Tests](https://github.com/tastejs/todomvc/blob/master/tests/test.js). This gives you a good comparison of writing and running tests in Cypress versus vanilla Selenium.
-
-- Query and make assertions about DOM elements state.
-- Type into an input using `cy.type()`
-- Create a custom `cy.createTodo()` command to run multiple cy commands.
-- Click and double click elements using `cy.click()` and `cy.dblclick()`
-
-![todomvc-gif](https://cloud.githubusercontent.com/assets/1268976/12985445/ad168098-d0c0-11e5-94e7-2f2e619bae93.gif)
-
-Stack | -
- -- | --
-Frontend | [React](https://facebook.github.io/react/)
-Backend | [Node](https://nodejs.org/)
-CI | [TravisCI](https://travis-ci.org/), [CircleCI](https://circleci.com)
-
-## Angular
-
-**{% fa fa-angle-right %} PieChopper** | [Code](https://github.com/cypress-io/cypress-example-piechopper)
-
-This is a single page application with a decent amount of features. The [tests](https://github.com/cypress-io/cypress-example-piechopper/blob/master/cypress/integration/app_spec.js) involve a lot of form submissions.
-
-- Test mobile responsive views using `cy.viewport()`
-- Test that the app scrolls correctly
-- Check checkboxes using `cy.check()`
-- Stub responses from our backend using `cy.route()`
-
-![piechopper-gif](https://cloud.githubusercontent.com/assets/1268976/12985444/ad14159c-d0c0-11e5-8e50-2b64a1d389ac.gif)
-
-Stack | -
- -- | --
-Frontend | [Angular](https://angularjs.org/)
-Backend | [Node](https://nodejs.org/)
-CI | [TravisCI](https://travis-ci.org/), [CircleCI](https://circleci.com)
-
-**{% fa fa-angle-right %} Phonecat** | [Code](https://github.com/cypress-io/cypress-example-phonecat)
-
-This tests the [original Angular Phonecat example app](https://github.com/angular/angular-phonecat) using Cypress.
-
-- Test redirect behavior of application using `.hash()`
-- Test loading behavior of app
-
-![phonecat-angular-tutorial-app-tested-in-cypress 2d78065e](https://user-images.githubusercontent.com/1271364/26952946-ac944a10-4c75-11e7-8e21-e0290537b153.jpg)
-
-Stack | -
- -- | --
-Frontend | [Angular](https://angularjs.org/)
-Backend | [Node](https://nodejs.org/)
-CI | [TravisCI](https://travis-ci.org/)
 
 # [Recipes](https://github.com/cypress-io/cypress-example-recipes)
 
@@ -187,3 +111,80 @@ CI | [TravisCI](https://travis-ci.org/)
 - Require CommonJS modules
 - Organize reusable utility functions
 - Import 3rd party `node_modules`
+
+# Applications
+
+## jQuery
+
+**{% fa fa-angle-right %} Kitchen Sink** | [Code](https://github.com/cypress-io/cypress-example-kitchensink)
+
+This is an example app is used to showcase every command available in Cypress.
+
+
+- Query and traverse DOM elements using `cy.get()`, `cy.find()` and other commands.
+- Type into forms, click elements, select dropdowns, and other actions.
+- Change the size of the viewport using `cy.viewport()`
+- Navigation to other pages
+- Do network requests, and wait on responses, and stub response data using `cy.fixture()`.
+- Inspect and manipulate cookies and localStorage.
+
+![kitchensink](https://cloud.githubusercontent.com/assets/1268976/14084252/e309e370-f4e7-11e5-9562-24f516563ac9.gif)
+
+Stack | -
+ -- | --
+Frontend | [jQuery](https://jquery.com/)
+Backend | [Node](https://nodejs.org/)
+CI | [TravisCI](https://travis-ci.org/), [CircleCI](https://circleci.com), [Codeship](https://codeship.com/)
+
+## React
+
+**{% fa fa-angle-right %} TodoMVC** | [Code](https://github.com/cypress-io/cypress-example-todomvc)
+
+This repo compares [Cypress Tests](https://github.com/cypress-io/cypress-example-todomvc/blob/master/cypress/integration/app_spec.js) to [official TodoMVC Tests](https://github.com/tastejs/todomvc/blob/master/tests/test.js). This gives you a good comparison of writing and running tests in Cypress versus vanilla Selenium.
+
+- Query and make assertions about DOM elements state.
+- Type into an input using `cy.type()`
+- Create a custom `cy.createTodo()` command to run multiple cy commands.
+- Click and double click elements using `cy.click()` and `cy.dblclick()`
+
+![todomvc-gif](https://cloud.githubusercontent.com/assets/1268976/12985445/ad168098-d0c0-11e5-94e7-2f2e619bae93.gif)
+
+Stack | -
+ -- | --
+Frontend | [React](https://facebook.github.io/react/)
+Backend | [Node](https://nodejs.org/)
+CI | [TravisCI](https://travis-ci.org/), [CircleCI](https://circleci.com)
+
+## Angular
+
+**{% fa fa-angle-right %} PieChopper** | [Code](https://github.com/cypress-io/cypress-example-piechopper)
+
+This is a single page application with a decent amount of features. The [tests](https://github.com/cypress-io/cypress-example-piechopper/blob/master/cypress/integration/app_spec.js) involve a lot of form submissions.
+
+- Test mobile responsive views using `cy.viewport()`
+- Test that the app scrolls correctly
+- Check checkboxes using `cy.check()`
+- Stub responses from our backend using `cy.route()`
+
+![piechopper-gif](https://cloud.githubusercontent.com/assets/1268976/12985444/ad14159c-d0c0-11e5-8e50-2b64a1d389ac.gif)
+
+Stack | -
+ -- | --
+Frontend | [Angular](https://angularjs.org/)
+Backend | [Node](https://nodejs.org/)
+CI | [TravisCI](https://travis-ci.org/), [CircleCI](https://circleci.com)
+
+**{% fa fa-angle-right %} Phonecat** | [Code](https://github.com/cypress-io/cypress-example-phonecat)
+
+This tests the [original Angular Phonecat example app](https://github.com/angular/angular-phonecat) using Cypress.
+
+- Test redirect behavior of application using `.hash()`
+- Test loading behavior of app
+
+![phonecat-angular-tutorial-app-tested-in-cypress 2d78065e](https://user-images.githubusercontent.com/1271364/26952946-ac944a10-4c75-11e7-8e21-e0290537b153.jpg)
+
+Stack | -
+ -- | --
+Frontend | [Angular](https://angularjs.org/)
+Backend | [Node](https://nodejs.org/)
+CI | [TravisCI](https://travis-ci.org/)
