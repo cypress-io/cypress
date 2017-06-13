@@ -4,7 +4,7 @@ comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How to install Cypress on your project using `npm`
 {% endnote %}

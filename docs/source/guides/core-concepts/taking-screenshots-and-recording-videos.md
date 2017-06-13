@@ -4,7 +4,7 @@ comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress captures screenshots of test failures automatically
 - How to manually grab your own screenshot

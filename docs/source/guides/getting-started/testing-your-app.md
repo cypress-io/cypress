@@ -1,9 +1,10 @@
 ---
 title: Testing Your App
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - The relationship between Cypress and your back-end
 - How authentication trips impedes testability... but doesn't have to

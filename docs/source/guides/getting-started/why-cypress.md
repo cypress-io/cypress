@@ -1,9 +1,10 @@
+---
 title: Why Cypress?
 comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How we think differently about testing the modern web
 - What benefits Cypress can bring for your team

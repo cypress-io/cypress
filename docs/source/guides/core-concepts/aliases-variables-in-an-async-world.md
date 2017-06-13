@@ -4,7 +4,7 @@ comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress's asynchronous nature makes it hard to use variables
 - What Aliases are, how they simplify and enable reuse in your code

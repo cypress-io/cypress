@@ -4,7 +4,7 @@ comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress runs in the runloop with your code, keeping debugging simple and understandable for modern web developers
 - How Cypress embraces the standard DevTools

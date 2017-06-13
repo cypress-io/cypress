@@ -4,7 +4,7 @@ comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - Which libraries Cypress includes to provide typical testing functionality
 - How to use stubs for asserting that code was called but preventing it from executing
