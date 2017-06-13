@@ -56,8 +56,8 @@ comments: false
 
 **Notes:**
 
-- We have updated all of the docs related to these changes. The [CI Docs](https://on.cypress.io/continuous-integration) got a much needed facelift.
-- There is a new docs section related to the [Dashboard](https://on.cypress.io/guides/dashboard-features) and the new features.
+- We have updated all of the docs related to these changes. The {% url 'CI Docs' continuous-integration %} got a much needed facelift.
+- There is a new docs section related to the {% url 'Dashboard' dashboard-features %} and the new features.
 
 **Overview:**
 
@@ -75,13 +75,13 @@ comments: false
 
 - There is a new [Dashboard](https://on.cypress.io/dashboard) service that displays your recorded runs.
 - The [Dashboard](https://on.cypress.io/dashboard) enables you to view your recorded runs, manage projects, create organizations, invite users and set permissions.
-- Projects are either **[public](https://on.cypress.io/guides/projects#section-what-is-the-difference-between-public-and-private-projects-)** with their runs being publicly viewable by anyone, or **[private](https://on.cypress.io/guides/projects#section-what-is-the-difference-between-public-and-private-projects-)** which restricts their access to only users you've invited. All **existing** projects were set to **private** by default.
-- When you [invite users](https://on.cypress.io/guides/organizations#section-inviting-users) (from the Dashboard) we will **automatically** whitelist them. This means you can invite all of your teammates (or anyone else). They can start using Cypress without talking to us.
+- Projects are either **public** with their runs being publicly viewable by anyone, or **private** which restricts their access to only users you've invited. All **existing** projects were set to **private** by default.
+- When you invite users (from the Dashboard) we will **automatically** whitelist them. This means you can invite all of your teammates (or anyone else). They can start using Cypress without talking to us.
 - We now list all of the recorded runs directly in the Desktop GUI under a new `Runs` tab. Fixes [#236](https://github.com/cypress-io/cypress/issues/236).
 - Your list of projects in the Desktop GUI now displays their last recorded run status - passing, failing, pending, running, etc.
-- We've changed the "Config" tab to now be called "Settings". We added two new sections to the "Settings" tab which displays your [`projectId`](https://on.cypress.io/guides/projects#section-what-is-a-projectid-) and your [Record Key](https://on.cypress.io/guides/projects#section-what-is-a-record-key-). These sections do a much better job explaining what these are and how you use them.
-- You no longer have to use `cypress get:key` to get your [Record Key](https://on.cypress.io/guides/projects#section-what-is-a-record-key-). We now display this in your "Settings" tab and also in the [Dashboard](https://on.cypress.io/dashboard).
-- Projects will no longer automatically acquire a `projectId` when being added. There is now a very explicit **opt-in** process where you [setup your project to record](https://on.cypress.io/guides/projects#section-setting-up-a-project-to-record). This should make it much clearer what's going on behind the scenes.
+- We've changed the "Config" tab to now be called "Settings". We added two new sections to the "Settings" tab which displays your `projectId` and your Record Key. These sections do a much better job explaining what these are and how you use them.
+- You no longer have to use `cypress get:key` to get your Record Key. We now display this in your "Settings" tab and also in the [Dashboard](https://on.cypress.io/dashboard).
+- Projects will no longer automatically acquire a `projectId` when being added. There is now a very explicit **opt-in** process where you setup your project to record. This should make it much clearer what's going on behind the scenes.
 - {% url '`cypress run`' cli-tool#cypress-run %} now behaves likes `cypress ci` previously did and downloads + installs Cypress if its not already installed.
 - `cypress ci` now works in OSX, and also works in Linux in Desktop flavors (like Ubuntu).
 
@@ -259,7 +259,7 @@ comments: false
 
 **Breaking Changes:**
 
-- Previously, we auto-magically included all files within [`cypress/support`](https://on.cypress.io/guides/writing-your-first-test#section-folder-structure). This has now {% url 'gone away' error-messages %} and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
+- Previously, we auto-magically included all files within {% url '`cypress/support`' organizing-tests#Folder-Structure %}. This has now {% url 'gone away' error-messages %} and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
 
 **Features:**
 
@@ -618,7 +618,7 @@ comments: false
 - Added new {% url `screenshotsFolder` configuration#Screenshots %} configuration option with default of `cypress/screenshots`.
 - When running in [Circle CI](https://circleci.com/), we automatically export screenshots as artifacts which makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything. If you're using [Travis CI](https://travis-ci.org/), you'll need to upload artifacts to an `s3 bucket`. This is a small slice of what is coming to help diagnose and understand errors in CI. Also in `0.17.0` we will automatically scroll the tests and more intelligently and open / close test commands so you can visually see what happened. Currently you may not see the test command's failure in the Command Log due to the view not scrolling.
 - Added new {% url `.each()` each %} command which iterates serially on a collection yielding the iteratee, the index, and the collection. Addresses [#156](https://github.com/cypress-io/cypress/issues/156).
-- {% url `cy.route()` route %} can now accept a single function and/or you can pass a function to the `response` property. This allows you to lazily evaluate routing responses. Great for referencing [fixtures](https://on.cypress.io/guides/creating-fixtures). Addresses [#152](https://github.com/cypress-io/cypress/issues/152).
+- {% url `cy.route()` route %} can now accept a single function and/or you can pass a function to the `response` property. This allows you to lazily evaluate routing responses. Great for referencing fixtures. Addresses [#152](https://github.com/cypress-io/cypress/issues/152).
 - {% url `cy.contains()` contains %} now accepts a regular expression. Addresses [#158](https://github.com/cypress-io/cypress/issues/158).
 - {% url `.type()` type %} now accepts `{downarrow}` and `{uparrow}`. We do not move the caret but do fire all the proper events. Addresses [#157](https://github.com/cypress-io/cypress/issues/157).
 

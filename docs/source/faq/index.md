@@ -350,7 +350,7 @@ As far as page objects are concerned, you should be able to use regular JavaScri
 
 [The Dashboard](https://on.cypress.io/dashboard) is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your run.
 
-You can read more [here](https://on.cypress.io/guides/dashboard-features).
+You can read more {% url 'here' dashboard-features %}.
 
 ## {% fa fa-angle-right %} How do I record my tests?
 
@@ -395,7 +395,7 @@ You can simply always run your tests in CI using {% url '`cypress run`' cli-tool
 
 **A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
 
-**A private project** means that only [users](https://on.cypress.io/guides/organizations#section-inviting-users) you explicitly invite to your [organization](https://on.cypress.io/guides/organizations) can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
+**A private project** means that only {% url 'users' dashboard-organizations#Inviting-Users %} you explicitly invite to your {% url 'organization' dashboard-organizations %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
 
 A Record Key has nothing to do with **viewing** build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
 
@@ -404,10 +404,10 @@ A Record Key has nothing to do with **viewing** build data - it's a "write only"
 
 We capture the following:
 
-- [Standard Output](#section-standard-output)
-- [Test Failures](#section-test-failures)
-- [Screenshots](#section-screenshots)
-- [Video](#section-video)
+- Standard Output
+- Test Failures
+- Screenshots
+- Video
 
 We have already begun the implementation for capturing even more things from your run such as:
 

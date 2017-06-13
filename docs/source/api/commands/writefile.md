@@ -156,4 +156,3 @@ When clicking on the `writeFile` command within the command log, the console out
 # See also
 
 - {% url `cy.readFile()` readfile %}
-- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)

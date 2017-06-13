@@ -82,7 +82,7 @@ You must install these dependencies:
 apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 ```
 
-If you run {% url '`cypress run`' cli-tool#cypress-run %} and see no output [see this section for troubleshooting this known issue](#section-no-output).
+If you run {% url '`cypress run`' cli-tool#cypress-run %} and see no output {% url 'see this section for troubleshooting this known issue' continuous-integration#Troubleshooting %}.
 
 # Recording Tests in CI
 
@@ -97,10 +97,10 @@ Cypress can record your tests running and make them available in our [Dashboard]
 
 **To record tests running:**
 
-1. [Setup your project to record](https://on.cypress.io/guides/projects)
-2. [Pass the `--record` flag to `cypress run`](https://on.cypress.io/how-do-i-record-runs)
+1. {% url 'Setup your project to record' dashboard-projects#Set-up-a-Project-to-Record %}
+2. {% url 'Pass the `--record` flag to `cypress run`' cli-tool#cypress-run-record %}
 
-You can [read more about the Dashboard here](https://on.cypress.io/guides/dashboard-features).
+You can {% url 'read more about the Dashboard here' dashboard-features %}.
 
 # Environment Variables
 
@@ -108,7 +108,7 @@ You can set various environment variables to modify how Cypress runs.
 
 ## Record Key
 
-If you are [recording your runs](#recording-your-runs) on a public project, you'll want to protect your Record Key. [Learn why.](https://docs.cypress.io/docs/projects#section-how-do-a-projectid-and-record-key-work-together-)
+If you are {% url 'recording your runs' continuous-integration#Recording-Tests-in-CI %} on a public project, you'll want to protect your Record Key. {% url 'Learn why.' dashboard-projects#Project-ID-amp-RecordKey-Together %}
 
 Instead of hard coding it into your run command like this:
 
@@ -122,7 +122,7 @@ You can set the record key as the environment variable, `CYPRESS_RECORD_KEY`, an
 cypress run --record
 ```
 
-Typically you'd set this inside of your [CI provider](https://on.cypress.io/continuous-integration).
+Typically you'd set this inside of your CI provider.
 
 **CircleCI Environment Variable**
 
@@ -216,7 +216,7 @@ You need to select their [`Ubuntu 12.04` image](https://circleci.com/docs/build-
 
 ## Jenkins
 
-You need to install all of the [linux dependencies](#section-dependencies).
+You need to install all of the {% url 'linux dependencies' continuous-integration#Other %}.
 
 ## Docker
 
@@ -232,7 +232,7 @@ After executing {% url '`cypress run`' cli-tool#cypress-run %} you don't see any
 
 **Problem**
 
-You are missing [a dependency](#Dependencies) above. *Please install all of the dependencies.*
+You are missing  {% url 'a dependency' continuous-integration#Other %} above. *Please install all of the dependencies.*
 
 The reason you're not seeing any output is a longstanding issue with Cypress which [there is an open issue for](https://github.com/cypress-io/cypress/issues/317). We are working on improving this experience!
 

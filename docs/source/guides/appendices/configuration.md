@@ -3,7 +3,7 @@ title: Configuration
 comments: false
 ---
 
-When a project is added to Cypress, a `cypress.json` file is created in the project. This file is used to store the `projectId` ([after configuring your tests to record](https://on.cypress.io/guides/projects)) and any configuration values you supply.
+When a project is added to Cypress, a `cypress.json` file is created in the project. This file is used to store the `projectId` ({% url 'after configuring your tests to record' dashboard-projects#Set-up-a-Project-to-Record %}) and any configuration values you supply.
 
 ```json
 {
@@ -89,7 +89,7 @@ Option | Default | Description
 
 # Overriding Options
 
-Besides modifying your `cypress.json` you can also change configuration options through the *command line* or from your system *[environment variables](https://on.cypress.io/guides/environment-variables)*.
+Besides modifying your `cypress.json` you can also change configuration options through the *command line* or from your system *{% url 'environment variables' environment-variables %}*.
 
 ## Command Line
 

@@ -6,7 +6,7 @@ comments: false
 Use `cy.route` to manage the behavior of network requests.
 
 {% note info %}
-**Note:** `cy.route()` assumes you are already familiar with core concepts such as [network requests](https://on.cypress.io/guides/network-requests-xhr)
+**Note:** `cy.route()` assumes you are already familiar with core concepts such as {% url 'network requests' network-requests %}
 {% endnote %}
 
 # Syntax
@@ -461,7 +461,7 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 - {% url `.as()` as %}
 - {% url `cy.fixture()` fixture %}
-- [Guide: Network Requests](https://on.cypress.io/guides/network-requests-xhr)
-- [Recipe: Loggin in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+- {% url 'Network Requests' network-requests %}
+- [Recipe: Logging in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 - {% url `cy.server()` server %}
 - {% url `cy.wait()` wait %}

@@ -142,7 +142,7 @@ cy.get('button').click().then(function($button){
 - {% url `.and()` and %}
 - {% url `.each()` each %}
 - {% url `.invoke()` invoke %}
-- [Issuing Commands](https://on.cypress.io/guides/issuing-commands)
+- {% url 'Chains of Commands' cypress-in-a-nutshell#Chains-of-Commands %}
 - {% url `.its()` its %}
 - {% url `.should()` should %}
 - {% url `.spread()` spread %}

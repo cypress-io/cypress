@@ -3,7 +3,7 @@ title: get
 comments: false
 ---
 
-Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
+Get one or more DOM elements by selector or {% url 'alias' aliases %}.
 
 # Syntax
 
@@ -37,7 +37,7 @@ An alias as defined using the {% url `.as()` as %} command and referenced with t
 Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before {% url `.as()` as %} to find it again.
 
 {% note info %}
-[Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
+{% url 'Read more about aliases here' aliases %}
 {% endnote %}
 
 **{% fa fa-angle-right %} options** ***(Object)***
@@ -94,7 +94,7 @@ cy.get('form').within(function(){
 
 ## Alias
 
-For a detailed explanation of aliasing, [read more about aliasing here](https://on.cypress.io/guides/using-aliases).
+For a detailed explanation of aliasing, {% url 'read more about aliasing here' aliases %}.
 
 **Get the aliased 'todos' elements**
 

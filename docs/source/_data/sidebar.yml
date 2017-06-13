@@ -12,7 +12,7 @@ guides:
     aliases: aliases.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
-    dealing-with-the-network: dealing-with-the-network.html
+    network-requests: network-requests.html
     taking-screenshots-and-recording-videos: taking-screenshots-and-recording-videos.html
   integrating-cypress:
     cli-tool: cli-tool.html
@@ -23,7 +23,7 @@ guides:
     dashboard-features: dashboard-features.html
     dashboard-projects: dashboard-projects.html
     dashboard-runs: dashboard-recorded-runs.html
-    dashboard-orgs: dashboard-organizations.html
+    dashboard-organizations: dashboard-organizations.html
   advanced-cypress:
     # the-cypress-workflow: the-cypress-workflow.html
     # coming-from-selenium: coming-from-selenium.html

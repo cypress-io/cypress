@@ -91,7 +91,7 @@ describe('Some Tests', function(){
 
 Simply move those Cypress commands into an `it(...)` block and everything will work correctly.
 
-If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the [Example Repos](https://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new), or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
+If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url 'Examples' examples/recipes/unit-testing %}, {% url 'open an issue' https://github.com/cypress-io/cypress/issues/new %}, or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
 
 ***
 
@@ -168,7 +168,7 @@ You may see a variation of this message for 4 different reasons:
 
 Cypress runs several calculations to ensure an element can *actually* be interacted with like a real user would. If you're seeing this error, the solution is often obvious. You may need to *guard* your commands (due to a timing or an animation issue).
 
-There have been situations where Cypress does not correctly allow you to interact with an element that should be interactable. If that's the case, [open an issue](https://github.com/cypress-io/cypress/issues/new).
+There have been situations where Cypress does not correctly allow you to interact with an element that should be interactable. If that's the case, {% url 'open an issue' https://github.com/cypress-io/cypress/issues/new %}.
 
 If you'd like to override these built-in checks, provide the `{force: true}` option to the action itself. Refer to each command for their available options, additional use cases, and argument usage.
 
@@ -322,7 +322,7 @@ Since no record key was passed, Cypress checks for any environment variable with
 
 You can get your project's record key by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
 
-You will want to then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
+You will want to then {% url 'add the key to your config file or as an environment variable' continuous-integration#Record-Key %}.
 
 ***
 

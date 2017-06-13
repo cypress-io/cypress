@@ -351,7 +351,7 @@ Known Issues:
 
 **Notes:**
 
-- Docs have been updated for {% url `cy.wait()` wait %}, {% url `cy.route()` route %}, {% url `cy.server()` server %}, and [deprecations](https://on.cypress.io/guides/deprecations) to reflect these changes.
+- Docs have been updated for {% url `cy.wait()` wait %}, {% url `cy.route()` route %} and {% url `cy.server()` server %} to reflect these changes.
 
 **Features:**
 
@@ -491,7 +491,7 @@ Known Issues:
 
 - Removed problematic `content-security-policy` headers
 - Fixed situation where Cypress was not injected correctly when `<head>` tag had attributes
-- Prevent [`fixtures`](https://on.cypress.io/guides/creating-fixtures) from being accidentally overwritten and having their content blanked out. There was a very subtle chance due to node's async file writing that as a file was being written with a formatted fixture, that another call to the same fixture would read in at that exact moment. If this happened the 2nd read would resolve with zero bytes, which would then end up rewriting the file back with zero bytes.
+- Prevent fixtures from being accidentally overwritten and having their content blanked out. There was a very subtle chance due to node's async file writing that as a file was being written with a formatted fixture, that another call to the same fixture would read in at that exact moment. If this happened the 2nd read would resolve with zero bytes, which would then end up rewriting the file back with zero bytes.
 
 **Misc:**
 
@@ -516,7 +516,7 @@ Known Issues:
 **Features:**
 
 - There is now a `cy.cmd` and `cy.command` method which enables you to invoke commands by their string name. This is most useful when using *namespaced* custom commands. So `Cypress.addParentCommand("dashboard.setSlider", ...)` can be accessed by `cy.cmd("dashboard.setSlider", arg1, arg2)`. (Docs have not been written yet).
-- `Environment Variable` support has been added and can be accessed in your tests with {% url `Cypress.env` env %}. The docs have been written {% url 'here' environment-variables %} and {% url 'here' env %}.
+- `Environment Variable` support has been added and can be accessed in your tests with {% url `Cypress.env` env %}. The docs have been written {% url 'Environment Variable' environment-variables %} and {% url 'here' env %}.
 
 **Misc:**
 

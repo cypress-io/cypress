@@ -33,7 +33,7 @@ During a run we record all failing tests, logs, screenshots, and videos and make
 
 3. **Choose who owns the project.** You can personally own it or select an organization you've created.
 
-  Organizations work just like they do in Github. They enable you to separate your personal and work projects. [Read more about Organizations.](https://on.cypress.io/guides/organizations)
+  Organizations work just like they do in Github. They enable you to separate your personal and work projects. {% url 'Read more about organizations' dashboard-organizations %}.
 
   ![Chosen Organization to Own](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
 
@@ -127,7 +127,7 @@ If your Record Key is accidentally exposed, you should remove it and generate a 
 
 - **Public** means that anyone can see the recorded test runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
 
-- **Private** means that only [users](https://on.cypress.io/guides/organizations#section-inviting-users) you explicitly invite to your [organization](https://on.cypress.io/guides/organizations) can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
+- **Private** means that only {% url 'users' dashboard-organizations#Inviting-Users %} you explicitly invite to your {% url 'organization' dashboard-organizations %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
 
 # Transfer Ownership of Project
 

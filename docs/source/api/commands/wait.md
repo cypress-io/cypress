@@ -38,7 +38,7 @@ The amount of time to wait in milliseconds.
 An aliased route as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
 {% note info %}
-[Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
+{% url 'Read about using aliases here.' aliases %}
 {% endnote %}
 
 **{% fa fa-angle-right %} aliases** ***(Array)***

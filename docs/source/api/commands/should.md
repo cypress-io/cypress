@@ -269,8 +269,6 @@ cy.get('button').click()
 
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
-You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
-
 {% partial then_should_difference %}
 
 # Command Log
