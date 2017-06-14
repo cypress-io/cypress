@@ -6,6 +6,7 @@ https        = require("https")
 Promise      = require("bluebird")
 semaphore    = require("semaphore")
 allowDestroy = require("server-destroy-vvo")
+log          = require("debug")("cypress:https-proxy")
 parse        = require("./util/parse")
 
 fs = Promise.promisifyAll(fs)
@@ -64,9 +65,11 @@ class Server
     .pipe(res)
 
   _makeDirectConnection: (req, socket, head) ->
-    directUrl = url.parse("http://#{req.url}")
+    { port, hostname } = url.parse("http://#{req.url}")
 
-    @_makeConnection(socket, head, directUrl.port, directUrl.hostname)
+    log("Making direct connection to %s:%s", hostname, port)
+
+    @_makeConnection(socket, head, port, hostname)
 
   _makeConnection: (socket, head, port, hostname) ->
     cb = ->
@@ -89,6 +92,8 @@ class Server
     firstBytes = head[0]
 
     makeConnection = (port) =>
+      log("Making intercepted connection to %s", port)
+
       @_makeConnection(socket, head, port)
 
     if firstBytes is 0x16 or firstBytes is 0x80 or firstBytes is 0x00
@@ -159,6 +164,8 @@ class Server
       @_sniServer.listen =>
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port
+
+        log("Created SNI HTTPS Proxy on port %s", @_sniPort)
 
         resolve()
 
