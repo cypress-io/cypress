@@ -925,7 +925,7 @@ describe "Routes", ->
       it "unzips, injects, and then rezips initial content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
+        .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
           "Content-Type": "text/html"
           "Content-Encoding": "gzip"
@@ -949,7 +949,7 @@ describe "Routes", ->
       it "unzips, injects, and then rezips regular http content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
+        .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
           "Content-Type": "text/html"
           "Content-Encoding": "gzip"
@@ -973,7 +973,7 @@ describe "Routes", ->
       it "does not inject on regular gzip'd content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
+        .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
           "Content-Type": "application/javascript"
           "Content-Encoding": "gzip"
@@ -989,6 +989,45 @@ describe "Routes", ->
           expect(res.body).to.include("gzip")
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
+
+    context "accept-encoding", ->
+      beforeEach ->
+        @setup("http://www.github.com")
+
+      it "strips unsupported deflate and br encoding", ->
+        nock(@server._remoteOrigin)
+        .get("/accept")
+        .matchHeader("accept-encoding", "gzip")
+        .reply(200, "<html>accept</html>")
+
+        @rp({
+          url: "http://www.github.com/accept"
+          gzip: true
+          headers: {
+            "accept-encoding": "gzip,deflate,br"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html>accept</html>")
+
+      it "removes accept-encoding when nothing is supported", ->
+        nock(@server._remoteOrigin, {
+          badheaders: ["accept-encoding"]
+        })
+        .get("/accept")
+        .reply(200, "<html>accept</html>")
+
+        @rp({
+          url: "http://www.github.com/accept"
+          gzip: true
+          headers: {
+            "accept-encoding": "foo,bar,baz"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html>accept</html>")
 
     context "304 Not Modified", ->
       beforeEach ->
