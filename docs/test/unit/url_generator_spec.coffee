@@ -129,6 +129,14 @@ describe "lib/url_generator", ->
       .then (pathToFile) ->
         expect(pathToFile).to.eq("/api/commands/and.html#notes")
 
+    it "verifies external url with anchor href matching hash", ->
+      nock("https://www.google.com")
+      .get("/")
+      .reply(200, "<html><a href='#assertions'>assertions</a></html>")
+
+      urlGenerator.validateAndGetUrl(data, "https://www.google.com/#assertions")
+      .then (url) ->
+        expect(url).to.eq("https://www.google.com/#assertions")
     it "fails when hash is not present in response", ->
       nock("https://www.google.com")
       .get("/")
@@ -142,7 +150,7 @@ describe "lib/url_generator", ->
           "Constructing {% url %} tag helper failed"
           "The source file was: bar.md"
           "You referenced a hash that does not exist at: https://www.google.com/",
-          "Expected to find an element matching the id: #foo"
+          "Expected to find an element matching the id: #foo or href: #foo"
           "The HTML response body was:"
           "<html></html>"
         ].forEach (msg) ->
@@ -162,7 +170,7 @@ describe "lib/url_generator", ->
           "Constructing {% url %} tag helper failed"
           "The source file was: guides/core-concepts/bar.md"
           "You referenced a hash that does not exist at: api/commands/and.html",
-          "Expected to find an element matching the id: #foo"
+          "Expected to find an element matching the id: #foo or href: #foo"
           "The HTML response body was:"
           "<html></html>"
         ].forEach (msg) ->

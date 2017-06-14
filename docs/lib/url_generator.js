@@ -29,24 +29,29 @@ function assertHashIsPresent (descriptor, source, hash, html) {
   // verify that the hash is present on this page
   const $ = cheerio.load(html)
 
-  // hash starts with a '#'
-  if (!$(hash).length) {
-    const truncated = _.truncate(html, { length: 200 }) || '""'
-
-    // if we dont have a hash
-    throw new Error(`Constructing {% url %} tag helper failed
-
-    > The source file was: ${source}
-
-    > You referenced a hash that does not exist at: ${descriptor}
-
-    > Expected to find an element matching the id: ${hash}
-
-    > The HTML response body was:
-
-    ${truncated}
-    `)
+  // hash starts with a '#hash'
+  // or href starts with '#hash'
+  if ($(hash).length || $(`a[href=${hash}]`).length) {
+    // found it, we good!
+    return
   }
+
+  // we didnt find anything, so throw the errror
+  const truncated = _.truncate(html, { length: 200 }) || '""'
+
+  // if we dont have a hash
+  throw new Error(`Constructing {% url %} tag helper failed
+
+  > The source file was: ${source}
+
+  > You referenced a hash that does not exist at: ${descriptor}
+
+  > Expected to find an element matching the id: ${hash} or href: ${hash}
+
+  > The HTML response body was:
+
+  ${truncated}
+  `)
 }
 
 function validateExternalUrl (href, source) {
@@ -54,18 +59,17 @@ function validateExternalUrl (href, source) {
 
   return request(href)
   .then((html) => {
-    return
     // bail if we dont have a hash
-    // if (!hash) {
-    //   return
-    // }
-    //
-    // assertHashIsPresent(href, source, hash, html)
+    if (!hash) {
+      return
+    }
+
+    assertHashIsPresent(href, source, hash, html)
   })
-  // .catch(errors.StatusCodeError, (err) => {
-  //   err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
-  //   throw err
-  // })
+  .catch(errors.StatusCodeError, (err) => {
+    err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
+    throw err
+  })
 }
 
 function normalizeNestedPaths (data) {
