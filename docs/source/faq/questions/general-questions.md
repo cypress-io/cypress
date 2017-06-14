@@ -60,7 +60,7 @@ Cypress desktop app and CLI are free to use. The Cypress Dashboard is a premium 
 
 # {% fa fa-angle-right %} What operating systems do you support?
 
-The desktop application can be installed in OSX and Linux. [Windows is not yet supported](https://github.com/cypress-io/cypress/issues/74), although you can use Cypress if you install a Linux VM using something like VirtualBox or using a Docker image.
+The desktop application can be installed in OSX and Linux. {% issue 74 'Windows is not yet supported' %}, although you can use Cypress if you install a Linux VM using something like VirtualBox or using a Docker image.
 
 # {% fa fa-angle-right %} Do you support native mobile apps?
 
@@ -115,7 +115,7 @@ No. There are already lots of tools to do that. Using Cypress to test against a 
 
 # {% fa fa-angle-right %} Is there code coverage?
 
-There is nothing currently built into Cypress to do this. Adding code coverage around end to end tests is much harder than unit and its possible it may not be feasible to do in a generic way. You can read in more detail about code coverage [here](https://github.com/cypress-io/cypress/issues/346).
+There is nothing currently built into Cypress to do this. Adding code coverage around end to end tests is much harder than unit and its possible it may not be feasible to do in a generic way. You can read in more detail about code coverage {% issue 346 'here' %}.
 
 <!-- # What kind of tests do I write in Cypress? -->
 

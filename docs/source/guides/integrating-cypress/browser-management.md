@@ -32,7 +32,7 @@ The `Electron` browser does not have its own Dock icon or any chrome (address ba
 
 ## Unsupported Browsers
 
-Many browsers are not currently supported, but are on our roadmap. You can read an exhaustive explanation about our future cross browser testing strategy [here](https://github.com/cypress-io/cypress/issues/310).
+Many browsers are not currently supported, but are on our roadmap. You can read an exhaustive explanation about our future cross browser testing strategy {% issue 310 'here' %}.
 
 # Browser Environment
 

@@ -4,7 +4,7 @@ comments: false
 ---
 
 {% note danger %}
-Cypress does not have a **cy.hover()** command. See [Issue #10](https://github.com/cypress-io/cypress/issues/10).
+Cypress does not have a **cy.hover()** command. See {% issue 10 'Issue #10' %}.
 {% endnote %}
 
 If `cy.hover()` is used, an error will display and redirect you to this page.

@@ -71,7 +71,7 @@ It's actually *possible* for Cypress to accommodate these situations the same wa
 
 As a workaround, you may be able to use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) to directly communicate with these iframes and control them (if the 3rd party iframe supports it).
 
-Other than that, you'll have to wait for us to implement API's to support this (check our [open issue](https://github.com/cypress-io/cypress/issues/136)), or you can [disable web security](#section-disabling-web-security).
+Other than that, you'll have to wait for us to implement API's to support this (check our {% issue 136 'open issue' %}), or you can [disable web security](#section-disabling-web-security).
 
 ## Insecure Content
 

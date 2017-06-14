@@ -34,7 +34,7 @@ OS | Path
 :--- | :---
 Mac  | `/Applications/Cypress.app`
 Linux  | `/home/<user>/.cypress/Cypress`
-Windows  | [not currently supported](https://github.com/cypress-io/cypress/issues/74)
+Windows  | {% issue 74 'not currently supported' %}
 
 **Install the latest version**
 

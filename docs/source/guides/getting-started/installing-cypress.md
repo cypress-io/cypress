@@ -31,7 +31,7 @@ If you've never set up a NodeJS project before, this is all probably a bit confu
 {% endnote %}
 
 {% note danger Windows: Coming Soon %}
-A big, hearty thanks to all of our patient early adopters avidly awaiting the development of the Windows version of Cypress! If this is you, feel free to follow [this issue](https://github.com/cypress-io/cypress/issues/74) to be notified when Windows support lands.
+A big, hearty thanks to all of our patient early adopters avidly awaiting the development of the Windows version of Cypress! If this is you, feel free to follow {% issue 74 'this issue' %} to be notified when Windows support lands.
 {% endnote %}
 
 # Running Cypress via the CLI

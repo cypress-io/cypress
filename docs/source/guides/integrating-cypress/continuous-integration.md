@@ -66,7 +66,7 @@ test:
 
 We have [created](https://github.com/cypress-io/docker) an official [cypress/base](https://hub.docker.com/r/cypress/base/) container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete [cypress/internal:cy](https://hub.docker.com/r/cypress/internal/tags/) image with pre-installed Cypress; just call {% url '`cypress run`' cli-tool#cypress-run %}.
 
-If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Other %}. See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
+If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Other %}. See {% issue 165 'this issue' %} for more information.
 
 **Docker CI examples**
 
@@ -210,7 +210,7 @@ dependencies:
 
 ## CircleCI
 
-You need to select their [`Ubuntu 12.04` image](https://circleci.com/docs/build-image-precise/). The `Ubuntu 14.04` image does not have all of the required dependencies installed by default. You can likely install them yourself. [There is an open issue for this here.](https://github.com/cypress-io/cypress/issues/315)
+You need to select their [`Ubuntu 12.04` image](https://circleci.com/docs/build-image-precise/). The `Ubuntu 14.04` image does not have all of the required dependencies installed by default. You can likely install them yourself. {% issue 315 'There is an open issue for this here.' %}
 
 ![Ubuntu build environment in circle](https://cloud.githubusercontent.com/assets/1268976/20771195/6e93e9f4-b716-11e6-809b-f4fd8f6fa439.png)
 
@@ -220,7 +220,7 @@ You need to install all of the {% url 'linux dependencies' continuous-integratio
 
 ## Docker
 
-If you are running long runs on Docker, you need to set the `ipc` to `host` mode. [This issue](https://github.com/cypress-io/cypress/issues/350) describes exactly what to do.
+If you are running long runs on Docker, you need to set the `ipc` to `host` mode. {% issue 350 'This issue' %} describes exactly what to do.
 
 # Troubleshooting
 
@@ -234,7 +234,7 @@ After executing {% url '`cypress run`' cli-tool#cypress-run %} you don't see any
 
 You are missing  {% url 'a dependency' continuous-integration#Other %} above. *Please install all of the dependencies.*
 
-The reason you're not seeing any output is a longstanding issue with Cypress which [there is an open issue for](https://github.com/cypress-io/cypress/issues/317). We are working on improving this experience!
+The reason you're not seeing any output is a longstanding issue with Cypress which {% issue 317 'there is an open issue for' %}. We are working on improving this experience!
 
 **Seeing Errors**
 

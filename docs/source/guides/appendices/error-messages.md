@@ -388,6 +388,6 @@ Browsers are enormously complex pieces of software, and from time to time they w
 
 {% img /img/guides/appendices/error-messages/chromium-renderer-crashed.png Chromium Renderer process just crashed %}
 
-At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an [open issue documenting the steps](https://github.com/cypress-io/cypress/issues/349) we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
+At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an {% issue 349 'open issue documenting the steps' %} we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
 
-If you are running `Docker` [there is a simple one line fix for this problem documented here](https://github.com/cypress-io/cypress/issues/350).
+If you are running `Docker` {% issue 350 'there is a simple one line fix for this problem documented here' %}.

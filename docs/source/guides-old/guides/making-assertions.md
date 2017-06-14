@@ -46,7 +46,7 @@ Check out our example recipes for [unit testing](https://github.com/cypress-io/c
 
 Explicit assertions are great when you want to perform custom logic prior to making the assertion.
 
-There is an [open issue](https://github.com/cypress-io/cypress/issues/101) for supporting `assert`.
+There is an {% issue 101 'open issue' %} for supporting `assert`.
 
 ```javascript
 cy

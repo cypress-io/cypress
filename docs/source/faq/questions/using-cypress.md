@@ -14,7 +14,7 @@ containerClass: faq
 
 # {% fa fa-angle-right %} How can I parallelize my runs?
 
-You can read more about parallelization [here](https://github.com/cypress-io/cypress/issues/64).
+You can read more about parallelization {% issue 64 'here' %}.
 
 # {% fa fa-angle-right %} Can I run a single test or group of tests?
 
@@ -22,11 +22,11 @@ You can run a group of tests or a single test by placing an `.only` to a test su
 
 You can run a single test headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
 
-Currently there is no way to specify a group of tests to run headlessly. You can read more [here](https://github.com/cypress-io/cypress/issues/263).
+Currently there is no way to specify a group of tests to run headlessly. You can read more {% issue 263 'here' %}.
 
 # {% fa fa-angle-right %} How do I test uploading a file?
 
-It is possible to upload files in your application but its different based on how you've written your own upload code. You can read more about this [here](https://github.com/cypress-io/cypress/issues/170)
+It is possible to upload files in your application but its different based on how you've written your own upload code. You can read more about this {% issue 170 'here' %}
 
 # {% fa fa-angle-right %} What is the projectId for?
 
@@ -99,7 +99,7 @@ You could also just stub XHR requests directly using {% url `cy.route()` route %
 
 # {% fa fa-angle-right %} How do I test content inside an iframe?
 
-Currently Cypress does not support selecting or accessing elements from within an iframe. You can read more about this [#here](https://github.com/cypress-io/cypress/issues/136).
+Currently Cypress does not support selecting or accessing elements from within an iframe. You can read more about this {% issue 136 '#here' %}.
 
 # {% fa fa-angle-right %} How do I preserve cookies/localstorage in between my tests?
 
@@ -115,7 +115,7 @@ Cypress.Cookies.defaults({
 })
 ```
 
-You cannot currently preserve localStorage across tests and can read more [here](https://github.com/cypress-io/cypress/issues/461).
+You cannot currently preserve localStorage across tests and can read more {% issue 461 'here' %}.
 
 # {% fa fa-angle-right %} Some of my elements animate in, how do I work around that?
 
