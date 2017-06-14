@@ -176,3 +176,8 @@ sidebar:
     todo-mvc: TodoMVC
     pie-chopper: PieChopper
     phonecat: Phonecat
+  faq:
+    questions: FAQ
+    general-questions: General Questions
+    using-cypress: Using Cypress
+    company: Company

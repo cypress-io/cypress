@@ -33,6 +33,7 @@ alias:
   guides/index.html: guides/getting-started/why-cypress.html
   api/index.html: api/welcome/api.html
   examples/index.html: examples/recipes/unit-testing.html
+  faq/index.html: faq/questions/general-questions.html
   # can also do outside page links here
   # plugins/index.html: https://github.com/cypress/cypress/wiki/Plugins
 

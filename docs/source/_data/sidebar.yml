@@ -159,3 +159,9 @@ examples:
     todo-mvc: todo-mvc.html
     pie-chopper: pie-chopper.html
     phonecat: phonecat.html
+
+faq:
+  questions:
+    general-questions: general-questions.html
+    using-cypress: using-cypress.html
+    company: company.html
