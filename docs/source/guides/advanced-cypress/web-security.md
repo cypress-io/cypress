@@ -244,7 +244,7 @@ If you can't figure out why your JavaScript code is redirecting you to a differe
 
 So if you cannot work around any of the issues using the suggested workarounds above, you may want to disable web security.
 
-One last thing to consider here is that every once in a while we discover bugs in Cypress that lead to `cross origin` errors that can otherwise be fixed. If you think you're experiencing a bug, [come into gitter](https://gitter.im/cypress-io/cypress) or {% url 'open an issue' https://github.com/cypress-io/cypress/issues/new %}.
+One last thing to consider here is that every once in a while we discover bugs in Cypress that lead to `cross origin` errors that can otherwise be fixed. If you think you're experiencing a bug, [come into gitter](https://gitter.im/cypress-io/cypress) or {% open_an_issue 'open an issue' %>.
 
 To start, you will need to understand that **not all browsers expose a way to turn off web security**. Some do, some don't. If you rely on disabling web security, you will not be able to run tests on browsers that do not support this feature.
 
@@ -260,4 +260,4 @@ Still here? That's cool, let's disable web security!
 
 The browser will now display insecure content, you can now navigate to any superdomain without cross origin errors, and you can access cross origin iframes that are embedded in your application.
 
-One thing you may notice though is that Cypress still enforces visiting a single superdomain with {% url `cy.visit()` visit %}. This is an artificial limitation (and one that can be removed). You should {% url 'open an issue' https://github.com/cypress-io/cypress/issues/new %} and tell us what you're trying to do!
+One thing you may notice though is that Cypress still enforces visiting a single superdomain with {% url `cy.visit()` visit %}. This is an artificial limitation (and one that can be removed). You should {% open_an_issue 'open an issue' %> and tell us what you're trying to do!

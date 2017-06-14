@@ -55,6 +55,17 @@ hexo.extend.tag.register('fa', function (args) {
   return `<i class="fa ${classNames}"></i>`
 })
 
+hexo.extend.tag.register('open_an_issue', function (args) {
+  const attrs = {
+    href: 'https://github.com/cypress-io/cypress/issues/new',
+    target: '_blank',
+  }
+
+  const text = args[0] || 'Open an issue'
+
+  return util.htmlTag('a', attrs, text)
+})
+
 hexo.extend.tag.register('url', function (args) {
   // {% url `.and()` and %}
   // {% url `.should()` should#Notes %}

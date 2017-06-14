@@ -274,11 +274,11 @@ cy.get('body').type('{shift}', {release: false}).get('li:first').click()
 
 **Typing `tab` key does not work**
 
-Tabbing will be implemented as a separate command as `cy.tab` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% url 'Open an issue' https://github.com/cypress-io/cypress/issues/new %} if you need this to be fixed.
+Tabbing will be implemented as a separate command as `cy.tab` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% open_an_issue %} if you need this to be fixed.
 
 **Preventing `mousedown` does not prevent typing**
 
-In a real browser, preventing `mousedown` on a form field will prevent it from receiving focus and thus prevent it from being able to be typed into. Currently, Cypress does not factor this in. {% url 'Open an issue' https://github.com/cypress-io/cypress/issues/new %} if you need this to be fixed.
+In a real browser, preventing `mousedown` on a form field will prevent it from receiving focus and thus prevent it from being able to be typed into. Currently, Cypress does not factor this in. {% open_an_issue %} if you need this to be fixed.
 
 **Modifier effects**
 
@@ -300,7 +300,7 @@ In the example above, a lowercase `a` will be typed, because that's the literal 
 
 This holds true for other special key combinations as well (that may be OS-specific). For example, on OSX, typing `ALT + SHIFT + K` creates the special character ``. Like with capitalization, `cy.type()` will not output ``, but simply the letter `k`.
 
-{% url 'Open an issue' https://github.com/cypress-io/cypress/issues/new %} if you need modifier effects to be implemented.
+{% open_an_issue %} if you need modifier effects to be implemented.
 
 **Events that fire**
 

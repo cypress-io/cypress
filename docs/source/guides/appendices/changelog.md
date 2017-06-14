@@ -474,7 +474,7 @@ comments: false
 **Bugfixes:**
 
 - Fixed a regression in `0.17.1` that was incorrectly setting `Cache` headers. This *could* cause a situation where you received an `<iframe>` origin error. Additionally we now set `No-Cache` headers whenever we inject content, but otherwise respect the headers coming from web servers. When using Cypress as the file server, we set `etags` but prevent caching.
-- Most likely fixed a bug that was crashing Cypress due to `Cannot set headers after they've been sent`. We were unable to write a test for this since we could not recreate the error, but analyzed how it *may* happen and fixed the code there. {% url 'Open an issue' https://github.com/cypress-io/cypress/issues/new %} if you see this error, it will be obvious since Cypress will literally crash.
+- Most likely fixed a bug that was crashing Cypress due to `Cannot set headers after they've been sent`. We were unable to write a test for this since we could not recreate the error, but analyzed how it *may* happen and fixed the code there. {% open_an_issue %} if you see this error, it will be obvious since Cypress will literally crash.
 - We stopped minifying `vendor.js` (for real this time). More optimizations to come around this.
 - Prevented accidentally setting `domain` cookies when they were really `hostOnly` cookies, thus duplicating the number of cookies sent on requests. Kudos to [@bahmutov](https://github.com/bahmutov) for finding this one. Fixes [#207](https://github.com/cypress-io/cypress/issues/207).
 - Fixed some edge cases in `cypress-core-extension` where it threw errors when attempting to `executeScript` on a tab with `about:blank` or `chrome://` urls.
