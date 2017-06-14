@@ -164,11 +164,12 @@ class $Cypress
   ## at this point
   onSpecWindow: (specWindow) ->
     cy       = $Cy.create(@, specWindow)
-    chai     = $Chai.create(@, specWindow)
     mocha    = $Mocha.create(@, specWindow)
     runner   = $Runner.create(@, specWindow, mocha)
     log      = $Log.create(@, cy)
 
+    $Chai.create(specWindow, cy)
+    
     ## wire up command create to cy
     @Commands = $Commands.create(@, cy)
 

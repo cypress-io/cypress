@@ -1,43 +1,66 @@
-{ _ } = window.testUtils
+require("../../support/unit_spec_helper")
 
-describe "$Cypress.Chai API", ->
+chai = require("chai")
+Chai = require("#{src}/cypress/chai")
+
+describe "src/cypress/chai", ->
+  assert = chai.Assertion.prototype.assert
+
+  expectedUnchangedAssertProto = =>
+    expect(chai.Assertion.prototype.assert).to.eq(assert)
+
   beforeEach ->
-    @Cypress = $Cypress.create()
-    @chai =    $Cypress.Chai.create(@Cypress, {})
+    @specWindow = {}
+    @cy = {
+      assert: @sandbox.stub()
+    }
 
-    ## by default chai will attempt to
-    ## call into cy.assert which isnt
-    ## defined, so we restore the override
-    @chai.restore()
+    Chai.create(@specWindow, @cy)
 
-  context "#listeners", ->
-    it "binds to stop event", ->
-      stop = @sandbox.stub @chai, "stop"
-      @Cypress.trigger("stop")
-      expect(stop).to.be.calledOnce
+  context.only ".setSpecWindowGlobals", ->
 
-    it "unbinds previous chai listeners on Cypress", ->
-      totalEvents = =>
-        _.reduce @Cypress._events, (memo, value, key) ->
-          memo += value.length
-        , 0
+    it "sets chai, expect, and assert", ->
+      expect(@specWindow.chai).not.to.be.undefined
+      expect(@specWindow.expect).not.to.be.undefined
+      expect(@specWindow.assert).not.to.be.undefined
 
-      count = totalEvents()
+    it "does not replace assert prototype", ->
+      expectedUnchangedAssertProto()
 
-      ## after instantiating another chai
-      chai = $Cypress.Chai.create(@Cypress, {})
-      chai.restore()
+    it "sets a custom expect function", ->
+      @specWindow.expect("foo").to.eq("foo")
 
-      ## we shouldn't have any additional events
-      expect(totalEvents()).not.to.be.gt count
+      expectedUnchangedAssertProto()
 
-  context "#stop", ->
-    it "calls restore", ->
-      restore = @sandbox.spy @chai, "restore"
-      @Cypress.trigger("stop")
-      expect(restore).to.be.calledOnce
+      expect(@cy.assert).to.be.calledOnce
 
-    it "null outs Cypress.chai", ->
-      expect(@Cypress.chai).to.be.ok
-      @Cypress.trigger("stop")
-      expect(@Cypress.chai).to.be.null
+    it "can fail an expect assertion", ->
+      try
+        @specWindow.expect("foo").to.eq("bar")
+      catch error
+        expect(@cy.assert).to.be.calledOnce
+        expectedUnchangedAssertProto()
+
+    it "sets custom assert function", ->
+      @specWindow.assert.ok(true, "is true")
+
+      expectedUnchangedAssertProto()
+
+      expect(@cy.assert).to.be.calledOnce
+
+      expectedUnchangedAssertProto()
+
+      @specWindow.assert(1 is 1, "equality")
+
+      expectedUnchangedAssertProto()
+
+      expect(@cy.assert).to.be.calledTwice
+
+      expectedUnchangedAssertProto()
+
+    it "can fail an assert assertion", ->
+      try
+        @specWindow.assert.ok(false)
+      catch error
+        expect(@cy.assert).to.be.calledOnce
+        expectedUnchangedAssertProto()

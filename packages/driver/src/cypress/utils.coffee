@@ -276,6 +276,12 @@ module.exports = {
     ## or double quotes
     ("" + text).replace(quotesRe, "\\$1")
 
+  normalizeNumber: (num) ->
+    parsed = Number(num)
+
+    ## return num if this isNaN else return parsed
+    if _.isNaN(parsed) then num else parsed
+
   getCypressNamespace: (obj) ->
     obj and obj[CYPRESS_OBJECT_NAMESPACE]
 

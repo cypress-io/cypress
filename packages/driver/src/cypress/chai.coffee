@@ -6,7 +6,7 @@ chaijQuery = require("chai-jquery")
 sinonChai = require("@cypress/sinon-chai")
 
 dom = require("./dom")
-$Utils = require("./utils")
+utils = require("./utils")
 
 ## all words between single quotes which are at
 ## the end of the string
@@ -16,325 +16,342 @@ allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
 ## when the single quote word is the LAST word
 allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
+allBetweenFourStars = /\*\*.*\*\*/
 allSingleQuotes = /'/g
 allEscapedSingleQuotes = /\\'/g
 allQuoteMarkers = /__quote__/g
 allWordsBetweenCurlyBraces  = /(#{.+?})/g
 allQuadStars = /\*\*\*\*/g
 
-$ChaiRef = null
+assertProto = null
+matchProto = null
+lengthProto = null
+containProto = null
+existProto = null
+visibleProto = null
+getMessage = null
+chaiUtils = null
 
 chai.use(sinonChai)
 
-chai.use (chai, utils) ->
-  chaijQuery(chai, utils, $)
+chai.use (chai, u) ->
+  chaiUtils = u
 
-  expect       = chai.expect
-  assert       = chai.assert
+  chaijQuery(chai, chaiUtils, $)
+
   assertProto  = chai.Assertion::assert
   matchProto   = chai.Assertion::match
   lengthProto  = chai.Assertion::__methods.length.method
   containProto = chai.Assertion::__methods.contain.method
   existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
   visibleProto = Object.getOwnPropertyDescriptor(chai.Assertion::, "visible").get
-  getMessage   = utils.getMessage
+  getMessage   = chaiUtils.getMessage
 
-  class $Chai
-    constructor: (@Cypress, specWindow) ->
-      @restoreAsserts()
-      @override()
-      @listeners()
+  patchChaiMethod = (fn, key) ->
+    chai[key] = _.wrap fn, (orig, args...) ->
 
-      $Chai.setGlobals(specWindow)
-      @addCustomProperties()
+      args = _.map args, (arg) ->
+        ## if the object in the arguments has a cypress namespace
+        ## then swap it out for that object
+        if obj = utils.getCypressNamespace(arg)
+          return obj
 
-    addCustomProperties: ->
-      _this = @
+        return arg
 
-      normalizeNumber = (num) ->
-        parsed = Number(num)
+      orig.apply(@, args)
 
-        ## return num if this isNaN else return parsed
-        if _.isNaN(parsed) then num else parsed
+  removeOrKeepSingleQuotesBetweenStars = (message) ->
+    ## remove any single quotes between our **, preserving escaped quotes
+    ## and if an empty string, put the quotes back
+    message.replace allBetweenFourStars, (match) ->
+      match
+        .replace(allEscapedSingleQuotes, "__quote__") # preserve escaped quotes
+        .replace(allSingleQuotes, "")
+        .replace(allQuoteMarkers, "'") ## put escaped quotes back
+        .replace(allQuadStars, "**''**") ## fix empty strings that end up as ****
 
-      utils.getMessage = _.wrap getMessage, (orig, assert, args) ->
-        obj = assert._obj
+  replaceArgMessages = (args, str) ->
+    _.reduce args, (memo, value, index) =>
+      if _.isString(value)
+        value = value
+          .replace(allWordsBetweenCurlyBraces,          "**$1**")
+          .replace(allEscapedSingleQuotes,              "__quote__")
+          .replace(allButLastWordsBetweenSingleQuotes,  "**$1**$2")
+          .replace(allPropertyWordsBetweenSingleQuotes, "**$1**")
+        memo.push value
+      else
+        memo.push value
 
-        ## if we are formatting a DOM object
-        if $Utils.hasElement(obj) or $Utils.hasWindow(obj) or $Utils.hasDocument(obj)
-          ## replace object with our formatted one
-          assert._obj = $Utils.stringifyElement(obj, "short")
+      memo
+    , []
 
-        msg = orig.call(@, assert, args)
+  restoreAsserts = ->
+    chaiUtils.getMessage = getMessage
 
-        ## restore the real obj if we changed it
-        if obj isnt assert._obj
-          assert._obj = obj
+    chai.Assertion::assert = assertProto
+    chai.Assertion::match = matchProto
+    chai.Assertion::__methods.length.method = lengthProto
+    chai.Assertion::__methods.contain.method = containProto
 
-        return msg
+    Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
+    Object.defineProperty(chai.Assertion::, "visible", {get: visibleProto})
 
-      chai.Assertion.overwriteMethod "match", (_super) ->
-        return (regExp) ->
-          if _.isRegExp(regExp) or $Utils.hasElement(@_obj)
-            _super.apply(@, arguments)
-          else
-            err = $Utils.cypressErr($Utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
-            err.retry = false
-            throw err
+  overrideChaiAsserts = (cy) ->
+    _this = @
 
-      chai.Assertion.overwriteChainableMethod "contain",
-        fn1 = (_super) ->
-          return (text) ->
-            cy = _this.Cypress.cy
+    chaiUtils.getMessage = _.wrap getMessage, (orig, assert, args) ->
+      obj = assert._obj
 
-            obj = @_obj
+      ## if we are formatting a DOM object
+      if utils.hasElement(obj) or utils.hasWindow(obj) or utils.hasDocument(obj)
+        ## replace object with our formatted one
+        assert._obj = utils.stringifyElement(obj, "short")
 
-            if not cy or not ($Utils.isInstanceOf(obj, $) or $Utils.hasElement(obj))
-              return _super.apply(@, arguments)
+      msg = orig.call(@, assert, args)
 
-            escText = $Utils.escapeQuotes(text)
+      ## restore the real obj if we changed it
+      if obj isnt assert._obj
+        assert._obj = obj
 
-            selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
+      return msg
 
+    chai.Assertion.overwriteMethod "match", (_super) ->
+      return (regExp) ->
+        if _.isRegExp(regExp) or utils.hasElement(@_obj)
+          _super.apply(@, arguments)
+        else
+          err = utils.cypressErr(utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
+          err.retry = false
+          throw err
+
+    chai.Assertion.overwriteChainableMethod "contain",
+      fn1 = (_super) ->
+        return (text) ->
+          obj = @_obj
+
+          if not (utils.isInstanceOf(obj, $) or utils.hasElement(obj))
+            return _super.apply(@, arguments)
+
+          escText = utils.escapeQuotes(text)
+
+          selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
+
+          @assert(
+            obj.is(selector) or !!obj.find(selector).length
+            "expected \#{this} to contain \#{exp}"
+            "expected \#{this} not to contain \#{exp}"
+            text
+          )
+
+      fn2 = (_super) ->
+        return ->
+          _super.apply(@, arguments)
+
+    chai.Assertion.overwriteChainableMethod "length",
+      fn1 = (_super) ->
+        return (length) ->
+          obj = @_obj
+
+          if not (utils.isInstanceOf(obj, $) or utils.hasElement(obj))
+            return _super.apply(@, arguments)
+
+          length = utils.normalizeNumber(length)
+
+          ## filter out anything not currently in our document
+          if not cy._contains(obj)
+            obj = @_obj = obj.filter (index, el) ->
+              cy._contains(el)
+
+          node = if obj and obj.length then utils.stringifyElement(obj, "short") else obj.selector
+
+          ## if our length assertion fails we need to check to
+          ## ensure that the length argument is a finite number
+          ## because if its not, we need to bail on retrying
+          try
             @assert(
-              obj.is(selector) or !!obj.find(selector).length
-              "expected \#{this} to contain \#{exp}"
-              "expected \#{this} not to contain \#{exp}"
-              text
+              obj.length is length,
+              "expected '#{node}' to have a length of \#{exp} but got \#{act}",
+              "expected '#{node}' to not have a length of \#{act}",
+              length,
+              obj.length
             )
 
-        fn2 = (_super) ->
-          return ->
-            _super.apply(@, arguments)
+          catch e1
+            e1.node = node
+            e1.negated = chaiUtils.flag(@, "negate")
+            e1.type = "length"
 
-      chai.Assertion.overwriteChainableMethod "length",
-        fn1 = (_super) ->
-          return (length) ->
-            cy = _this.Cypress.cy
+            if _.isFinite(length)
+              getLongLengthMessage = (len1, len2) ->
+                if len1 > len2
+                  "Too many elements found. Found '#{len1}', expected '#{len2}'."
+                else
+                  "Not enough elements found. Found '#{len1}', expected '#{len2}'."
 
-            obj = @_obj
+              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              throw e1
 
-            if not cy or not ($Utils.isInstanceOf(obj, $) or $Utils.hasElement(obj))
-              return _super.apply(@, arguments)
+            e2 = utils.cypressErr(utils.errMessageByPath("chai.length_invalid_argument", { length }))
+            e2.retry = false
+            throw e2
 
-            length = normalizeNumber(length)
-
-            ## filter out anything not currently in our document
-            if not cy._contains(obj)
-              obj = @_obj = obj.filter (index, el) ->
-                cy._contains(el)
-
-            node = if obj and obj.length then $Utils.stringifyElement(obj, "short") else obj.selector
-
-            ## if our length assertion fails we need to check to
-            ## ensure that the length argument is a finite number
-            ## because if its not, we need to bail on retrying
-            try
-              @assert(
-                obj.length is length,
-                "expected '#{node}' to have a length of \#{exp} but got \#{act}",
-                "expected '#{node}' to not have a length of \#{act}",
-                length,
-                obj.length
-              )
-
-            catch e1
-              e1.node = node
-              e1.negated = utils.flag(@, "negate")
-              e1.type = "length"
-
-              if _.isFinite(length)
-                getLongLengthMessage = (len1, len2) ->
-                  if len1 > len2
-                    "Too many elements found. Found '#{len1}', expected '#{len2}'."
-                  else
-                    "Not enough elements found. Found '#{len1}', expected '#{len2}'."
-
-                e1.displayMessage = getLongLengthMessage(obj.length, length)
-                throw e1
-
-              e2 = $Utils.cypressErr($Utils.errMessageByPath("chai.length_invalid_argument", { length }))
-              e2.retry = false
-              throw e2
-
-        fn2 = (_super) ->
-          return ->
-            _super.apply(@, arguments)
-
-      chai.Assertion.overwriteProperty "visible", (_super) ->
+      fn2 = (_super) ->
         return ->
+          _super.apply(@, arguments)
+
+    chai.Assertion.overwriteProperty "visible", (_super) ->
+      return ->
+        try
+          _super.apply(@, arguments)
+        catch e
+          ## add reason hidden unless we expect the element to be hidden
+          if (e.message or "").indexOf("not to be") is -1
+            reason = dom.getReasonElIsHidden(@_obj)
+            e.message += "\n\n" + reason
+          throw e
+
+    chai.Assertion.overwriteProperty "exist", (_super) ->
+      return ->
+        obj = @_obj
+
+        if not (utils.isInstanceOf(obj, $) or utils.hasElement(obj))
           try
             _super.apply(@, arguments)
           catch e
-            ## add reason hidden unless we expect the element to be hidden
-            if (e.message or "").indexOf("not to be") is -1
-              reason = dom.getReasonElIsHidden(@_obj)
-              e.message += "\n\n" + reason
+            e.type = "existence"
             throw e
-
-      chai.Assertion.overwriteProperty "exist", (_super) ->
-        return ->
-          cy = _this.Cypress.cy
-
-          obj = @_obj
-
-          if not cy or not ($Utils.isInstanceOf(obj, $) or $Utils.hasElement(obj))
-            try
-              _super.apply(@, arguments)
-            catch e
-              e.type = "existence"
-              throw e
-          else
-            if not obj.length
-              @_obj = null
-
-            node = if obj and obj.length then $Utils.stringifyElement(obj, "short") else obj.selector
-
-            try
-              @assert(
-                isContained = cy._contains(obj),
-                "expected \#{act} to exist in the DOM",
-                "expected \#{act} not to exist in the DOM",
-                node,
-                node
-              )
-            catch e1
-              e1.node = node
-              e1.negated = utils.flag(@, "negate")
-              e1.type = "existence"
-
-              getLongExistsMessage = (obj) ->
-                ## if we expected not for an element to exist
-                if isContained
-                  "Expected #{node} not to exist in the DOM, but it was continuously found."
-                else
-                  "Expected to find element: '#{obj.selector}', but never found it."
-
-              e1.displayMessage = getLongExistsMessage(obj)
-              throw e1
-
-    listeners: ->
-      @listenTo @Cypress, "stop", => @stop()
-
-      return @
-
-    stop: ->
-      @stopListening()
-      @restore()
-      @Cypress.chai = null
-      return @
-
-    restore: ->
-      chai.expect = expect
-      chai.assert = assert
-      @restoreAsserts()
-
-      return @
-
-    override: ->
-      originals = {expect: expect, assert: assert}
-      _.each originals, @patchMethod
-
-      @patchAssert()
-
-      return @
-
-    restoreAsserts: ->
-      utils.getMessage = getMessage
-
-      chai.Assertion::assert = assertProto
-      chai.Assertion::match = matchProto
-      chai.Assertion::__methods.length.method = lengthProto
-      chai.Assertion::__methods.contain.method = containProto
-
-      Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
-      Object.defineProperty(chai.Assertion::, "visible", {get: visibleProto})
-
-    patchAssert: ->
-      _this = @
-
-      chai.Assertion::assert = _.wrap assertProto, (orig, args...) ->
-        passed    = utils.test(@, args)
-        value     = utils.flag(@, "object")
-        expected  = args[3]
-
-        customArgs = _this.replaceArgMessages(args, @_obj)
-
-        message   = utils.getMessage(@, customArgs)
-        actual    = utils.getActual(@, customArgs)
-
-        ## remove any single quotes between our **, preserving escaped quotes
-        ## and if an empty string, put the quotes back
-        message = message.replace /\*\*.*\*\*/, (match) ->
-          match
-            .replace(allEscapedSingleQuotes, "__quote__") # preserve escaped quotes
-            .replace(allSingleQuotes, "")
-            .replace(allQuoteMarkers, "'") ## put escaped quotes back
-            .replace(allQuadStars, "**''**") ## fix empty strings that end up as ****
-
-        try
-          orig.apply(@, args)
-        catch e
-          error = e
-
-        _this.Cypress.trigger "assert", passed, message, value, actual, expected, error
-
-        throw(error) if error
-
-      return @
-
-    replaceArgMessages: (args, str) ->
-      _.reduce args, (memo, value, index) =>
-        if _.isString(value)
-          value = value
-            .replace(allWordsBetweenCurlyBraces,          "**$1**")
-            .replace(allEscapedSingleQuotes,              "__quote__")
-            .replace(allButLastWordsBetweenSingleQuotes,  "**$1**$2")
-            .replace(allPropertyWordsBetweenSingleQuotes, "**$1**")
-          memo.push value
         else
-          memo.push value
+          if not obj.length
+            @_obj = null
 
-        memo
-      , []
+          node = if obj and obj.length then utils.stringifyElement(obj, "short") else obj.selector
 
-    patchMethod: (value, key) ->
-      chai[key] = _.wrap value, (orig, args...) ->
+          try
+            @assert(
+              isContained = cy._contains(obj),
+              "expected \#{act} to exist in the DOM",
+              "expected \#{act} not to exist in the DOM",
+              node,
+              node
+            )
+          catch e1
+            e1.node = node
+            e1.negated = chaiUtils.flag(@, "negate")
+            e1.type = "existence"
 
-        args = _.map args, (arg) ->
-          ## if the object in the arguments has a cypress namespace
-          ## then swap it out for that object
-          if obj = $Utils.getCypressNamespace(arg)
-            return obj
+            getLongExistsMessage = (obj) ->
+              ## if we expected not for an element to exist
+              if isContained
+                "Expected #{node} not to exist in the DOM, but it was continuously found."
+              else
+                "Expected to find element: '#{obj.selector}', but never found it."
 
-          return arg
+            e1.displayMessage = getLongExistsMessage(obj)
+            throw e1
 
-        orig.apply(@, args)
+  createPatchedAssert = (cy) ->
+    return (args...) ->
+      passed    = chaiUtils.test(@, args)
+      value     = chaiUtils.flag(@, "object")
+      expected  = args[3]
 
-      return @
+      customArgs = replaceArgMessages(args, @_obj)
 
-    _.extend $Chai.prototype, Backbone.Events
+      message   = chaiUtils.getMessage(@, customArgs)
+      actual    = chaiUtils.getActual(@, customArgs)
 
-    @expect = -> chai.expect.apply(chai, arguments)
+      message = removeOrKeepSingleQuotesBetweenStars(message)
 
-    @setGlobals = (contentWindow) ->
-      contentWindow.chai           = chai
-      contentWindow.expect         = chai.expect
-      contentWindow.expectOriginal = expect
-      # contentWindow.should         = chai.should()
-      contentWindow.assert         = chai.assert
-      contentWindow.assertOriginal = assert
+      try
+        assertProto.apply(@, args)
+      catch e
+        err = e
 
-    @use = chai.use.bind(chai)
+      cy.assert(passed, message, value, actual, expected, err)
 
-    @create = (Cypress, specWindow) ->
-      ## clear out existing listeners
-      ## if we already exist!
-      if existing = Cypress.chai
-        existing.stopListening()
+      throw err if err
 
-      Cypress.chai = new $Chai Cypress, specWindow
+  overrideExpect = (cy) ->
+    patchedAssert = createPatchedAssert(cy)
 
-  $ChaiRef = $Chai
+    ## only override assertions for this specific
+    ## expect function instance so we do not affect
+    ## the outside world
+    return (val, message) ->
+      ## make the assertion
+      ret = new chai.Assertion(val, message)
 
-module.exports = $ChaiRef
+      ## replace the assert function
+      ## for this assertion instance
+      ret.assert = patchedAssert
+
+      ## return assertion instance
+      return ret
+
+  overrideAssert = (cy) ->
+    patchedAssert = createPatchedAssert(cy)
+
+    tryCatchFinally = (fn) ->
+      try
+        fn()
+      catch err
+      finally
+        ## always reset the prototype method
+        chai.Assertion.prototype.assert = assertProto
+
+      throw err if err
+
+      return undefined
+
+    fn = (express, errmsg) ->
+      chai.Assertion.prototype.assert = patchedAssert
+
+      tryCatchFinally ->
+        chai.assert(express, errmsg)
+
+    fns = _.functions(chai.assert)
+
+    _.each fns, (name) ->
+      fn[name] = ->
+        args = arguments
+
+        chai.Assertion.prototype.assert = patchedAssert
+
+        tryCatchFinally =>
+          chai.assert[name].apply(@, args)
+
+    return fn
+
+  setSpecWindowGlobals = (specWindow, cy) ->
+    specWindow.chai   = chai
+    specWindow.expect = overrideExpect(cy)
+    specWindow.assert = overrideAssert(cy)
+
+  module.exports = {
+    replaceArgMessages
+
+    removeOrKeepSingleQuotesBetweenStars
+
+    patchChaiMethod
+
+    setSpecWindowGlobals
+
+    # overrideChai: overrideChai
+
+    restoreAsserts
+
+    overrideExpect
+
+    overrideChaiAsserts
+
+    create: (specWindow, cy) ->
+      # restoreOverrides()
+      restoreAsserts()
+
+      # overrideChai()
+      overrideChaiAsserts(cy)
+
+      setSpecWindowGlobals(specWindow, cy)
+
+      return null
+  }

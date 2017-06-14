@@ -488,9 +488,6 @@ $Cy.extend({
 })
 
 module.exports = (Cypress, Commands) ->
-  Cypress.on "assert", ->
-    @assert.apply(@, arguments)
-
   Commands.addAssertion({
     should: ->
       shouldFn.apply(@, arguments)
