@@ -3,8 +3,9 @@ const chalk = require('chalk')
 const download = require('./download')
 const utils = require('./utils')
 const debug = require('debug')('cypress:cli')
-
-const packageVersion = require('../../package').version
+const path = require('path')
+const packagePath = path.join(__dirname, '..', '..', 'package.json')
+const packageVersion = require(packagePath).version
 
 const hasSomethingToSay = (err) => err && err.message
 

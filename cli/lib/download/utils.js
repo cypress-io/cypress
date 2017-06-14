@@ -12,7 +12,8 @@ const ProgressBar = require('progress')
 
 const xvfb = require('../exec/xvfb')
 const { formErrorText, errors } = require('./errors')
-const packageVersion = require('../../package').version
+const packagePath = path.join(__dirname, '..', '..', 'package.json')
+const packageVersion = require(packagePath).version
 
 const log = (...messages) => {
   console.log(...messages) // eslint-disable-line no-console

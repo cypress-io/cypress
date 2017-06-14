@@ -2,7 +2,9 @@ const _ = require('lodash')
 
 const downloadUtils = require('../download/utils')
 const spawn = require('./spawn')
-const pkg = require('../../package')
+const path = require('path')
+const packagePath = path.join(__dirname, '..', '..', 'package.json')
+const pkg = require(packagePath)
 
 const processRunOptions = (options = {}) => {
   const args = ['--project', options.project]
