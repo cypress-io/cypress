@@ -153,7 +153,7 @@ module.exports = {
         when options.record or options.ci
           options.mode = "record"
 
-        when options.run
+        when options.runProject
           ## go into headless mode when told to run
           options.mode = "headless"
 

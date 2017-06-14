@@ -54,7 +54,7 @@ npm start
 
 ```bash
 ## boot a specific project
-npm run server -- --project <path-to-the-project-you-want-to-test>
+npm run server -- --run-project <path-to-the-project-you-want-to-test>
 ```
 
 You should see `nodemon` watching all of your files.
@@ -68,7 +68,7 @@ Code changes are applied instantly:
 
 ```bash
 ## boot a specific project
-npm start -- --project <path-to-the-project-you-want-to-test>
+npm start -- --run-project <path-to-the-project-you-want-to-test>
 ```
 
 You will see Cypress run all the tests headlessly and you'll see output in your console.

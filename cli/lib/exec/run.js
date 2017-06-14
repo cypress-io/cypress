@@ -5,7 +5,7 @@ const spawn = require('./spawn')
 const pkg = require('../../package')
 
 const run = (options) => () => {
-  const args = ['--run --project', options.project]
+  const args = ['--run-project', options.project]
 
   //// if key is set use that - else attempt to find it by env var
   if (options.key == null) {
