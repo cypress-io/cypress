@@ -54,17 +54,18 @@ function validateExternalUrl (href, source) {
 
   return request(href)
   .then((html) => {
+    return
     // bail if we dont have a hash
-    if (!hash) {
-      return
-    }
-
-    assertHashIsPresent(href, source, hash, html)
+    // if (!hash) {
+    //   return
+    // }
+    //
+    // assertHashIsPresent(href, source, hash, html)
   })
-  .catch(errors.StatusCodeError, (err) => {
-    err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
-    throw err
-  })
+  // .catch(errors.StatusCodeError, (err) => {
+  //   err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
+  //   throw err
+  // })
 }
 
 function normalizeNestedPaths (data) {
