@@ -139,11 +139,11 @@ cy.location().should(function(location){
 
 The commands above will display in the command log as:
 
-![screen shot 2017-03-09 at 1 54 22 pm](https://cloud.githubusercontent.com/assets/1268976/23765705/0768366a-04d0-11e7-8936-beb7d546cbc7.png)
+![Command Log](https://cloud.githubusercontent.com/assets/1268976/23765705/0768366a-04d0-11e7-8936-beb7d546cbc7.png)
 
 When clicking on `location` within the command log, the console outputs the following:
 
-![screen shot 2017-03-09 at 1 54 58 pm](https://cloud.githubusercontent.com/assets/1268976/23765706/089375e0-04d0-11e7-8344-5872c6f270b2.png)
+![Console Log](https://cloud.githubusercontent.com/assets/1268976/23765706/089375e0-04d0-11e7-8344-5872c6f270b2.png)
 
 # See also
 

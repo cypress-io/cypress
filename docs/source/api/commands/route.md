@@ -99,7 +99,7 @@ cy.wait('@postUser')
 **Setup route to `POST` to login**
 
 {% note info %}
-{% url 'Check out our example recipe using `cy.route()` to POST for login' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js  %}
+{% url "Check out our example recipe using `cy.route()` to POST for login" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js  %}
 {% endnote %}
 
 **Wait on `url` matching glob**
@@ -315,7 +315,7 @@ cy.route({
 **Setup route to error on POST to login**
 
 {% note info %}
-{% url 'Check out our example recipe using `cy.route()` to simulate a 503 on POST to login' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
+{% url "Check out our example recipe using `cy.route()` to simulate a `503` on `POST` to login" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
 {% endnote %}
 
 **Change `headers`**
@@ -393,11 +393,11 @@ XHR's that display `(XHR STUB)` in the Command Log have been stubbed and their r
 
 XHR's that display `(XHR)` in the Command Log have *not* been stubbed and were passed directly through to a server.
 
-![screen shot 2015-12-21 at 7 03 57 pm](https://cloud.githubusercontent.com/assets/1268976/11944790/9b3fe2d8-a816-11e5-9e90-7405555d0c58.png)
+![XHR Command Log when not stubbed](https://cloud.githubusercontent.com/assets/1268976/11944790/9b3fe2d8-a816-11e5-9e90-7405555d0c58.png)
 
 Cypress also logs whether the XHR was stubbed or not to the console when you click on the command in the Command Log. It will indicate whether a request was stubbed, which url it matched or that it did not match any routes.
 
-![screen shot 2015-12-21 at 7 22 23 pm](https://cloud.githubusercontent.com/assets/1268976/11945010/0358123a-a819-11e5-9080-f4e0abf8aaa3.png)
+![XHR Command Log stubbed](https://cloud.githubusercontent.com/assets/1268976/11945010/0358123a-a819-11e5-9080-f4e0abf8aaa3.png)
 
 Even the `Initiator` is included, which is a stack trace to what caused the XHR to be sent.
 
@@ -447,15 +447,15 @@ cy.route(/teams/,   'fixtures:teams').as('teamsGet')
 
 Whenever you start a server and add routes, Cypress will display a new Instrument Log called *Routes*. It will list the routing table in the Instrument Log, including the `method`, `url`, `stubbed`, `alias` and number of matched requests:
 
-![screen shot 2015-12-21 at 7 04 41 pm](https://cloud.githubusercontent.com/assets/1268976/11944789/9b3f69b6-a816-11e5-8b8f-bf8a235cf700.png)
+![Command Log routing table](https://cloud.githubusercontent.com/assets/1268976/11944789/9b3f69b6-a816-11e5-8b8f-bf8a235cf700.png)
 
 When XHR's are made, Cypress will log them in the Command Log and indicate whether they matched a routing alias:
 
-![screen shot 2015-12-21 at 7 19 20 pm](https://cloud.githubusercontent.com/assets/1268976/11944892/ca762cf0-a817-11e5-8713-91ced4a36a8a.png)
+![Command Log XHR alias route](https://cloud.githubusercontent.com/assets/1268976/11944892/ca762cf0-a817-11e5-8713-91ced4a36a8a.png)
 
 When clicking on `XHR Stub` within the Command Log, the console outputs the following:
 
-![screen shot 2015-12-21 at 7 22 23 pm copy](https://cloud.githubusercontent.com/assets/1268976/11944950/711af9e6-a818-11e5-86b6-d17554403355.png)
+![Console Log](https://cloud.githubusercontent.com/assets/1268976/11944950/711af9e6-a818-11e5-86b6-d17554403355.png)
 
 # See also
 

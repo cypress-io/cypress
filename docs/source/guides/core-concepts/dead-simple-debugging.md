@@ -73,4 +73,4 @@ Use {% url `.debug()` debug %} to quickly inspect any (or many!) part(s) of your
 
 Though Cypress has built out [an excellent GUI application](/guides/cypress-basics/overview-of-the-gui-tool.html) to help you understand what is happening in your app and your tests, there's simply no replacing all the amazing work browser teams have done on their built-in development tools. Once again, we see that Cypress goes _with_ the flow of the modern ecosystem, opting to leverage these tools wherever possible.
 
-TODO: show how clicking commands populates the dev tools, demonstrate a few commands
+<!-- TODO: show how clicking commands populates the dev tools, demonstrate a few commands -->

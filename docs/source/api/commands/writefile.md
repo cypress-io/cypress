@@ -147,11 +147,11 @@ cy.writeFile('info.log', ['foo', 'bar', 'baz'])
 
 The command above will display in the command log as:
 
-<img width="618" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/17936162/df857dda-69eb-11e6-8951-f34618a72e39.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1157043/17936162/df857dda-69eb-11e6-8951-f34618a72e39.png)
 
 When clicking on the `writeFile` command within the command log, the console outputs the following:
 
-<img width="452" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17936161/df7e6bf8-69eb-11e6-8ef2-a90113dece9b.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1157043/17936161/df7e6bf8-69eb-11e6-8ef2-a90113dece9b.png)
 
 # See also
 

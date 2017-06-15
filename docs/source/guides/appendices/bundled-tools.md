@@ -33,7 +33,7 @@ Additionally, Mocha gives us excellent {% url '`async` support' http://mochajs.o
 While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using {% url 'subjects' cypress-in-a-nutshell#Assertions %} and the {% url `.should()` should %} command.
 
 {% note info Extending chai to use assertion plugins %}
-[Check out our example recipe to see how to extend chai yourself](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/extending_chai_assertion_plugins_spec.js)
+{% url "Check out our example recipe to see how to extend chai yourself." https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/extending_chai_assertion_plugins_spec.js %}
 {% endnote %}
 
 # Chai-jQuery
@@ -49,7 +49,7 @@ When writing integration tests, you will likely work a lot with the DOM. Cypress
 When writing unit tests, or even in integration-like tests, you often need to ability to stub and spy methods. Cypress includes two methods, {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} that return Sinon stubs and spies, respectively.
 
 {% note info Stubbing Dependencies when Unit Testing %}
-[Check out our example recipe for stubbing dependencies in unit tests](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js)
+{% url "Check out our example recipe for stubbing dependencies in unit tests." https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js %}
 {% endnote %}
 
 # Sinon-Chai

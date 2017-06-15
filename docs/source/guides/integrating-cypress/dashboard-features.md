@@ -27,11 +27,11 @@ Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %
 
 **Here are some of our own public projects you can view:**
 
-- [cypress-core-desktop-gui](https://dashboard.cypress.io/#/projects/fas5qd)
-- [cypress-example-recipes](https://dashboard.cypress.io/#/projects/6p53jw)
-- [cypress-example-kitchensink](https://dashboard.cypress.io/#/projects/4b7344)
-- [cypress-example-todomvc](https://dashboard.cypress.io/#/projects/245obj)
-- [cypress-example-piechopper](https://dashboard.cypress.io/#/projects/fuduzp)
+-  [{% fa fa-folder-open-o %} cypress-core-desktop-gui](https://dashboard.cypress.io/#/projects/fas5qd)
+- [{% fa fa-folder-open-o %} cypress-example-recipes](https://dashboard.cypress.io/#/projects/6p53jw)
+- [{% fa fa-folder-open-o %} cypress-example-kitchensink](https://dashboard.cypress.io/#/projects/4b7344)
+- [{% fa fa-folder-open-o %} cypress-example-todomvc](https://dashboard.cypress.io/#/projects/245obj)
+- [{% fa fa-folder-open-o %} cypress-example-piechopper](https://dashboard.cypress.io/#/projects/fuduzp)
 
 # Frequently Asked Questions
 
@@ -42,7 +42,7 @@ Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
 
-## How is this different than CI?
+## {% fa fa-angle-right %} How is this different than CI?
 
 {% url 'Cypress is *complimentary* to your CI provider' continuous-integration %}, and plays a completely different role.
 
@@ -52,7 +52,7 @@ The Cypress {% url 'Dashboard' https://on.cypress.io/dashboard %} provides you w
 
 When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the {% url 'Dashboard' https://on.cypress.io/dashboard %} and see all of the `stdout` as well as any errors during failures, any screenshots taken, and an entire video recording of the tests run.
 
-## How much does this cost?
+## {% fa fa-angle-right %} How much does this cost?
 
 Everything is free while we are in Beta.
 
@@ -60,11 +60,11 @@ In the future, we will charge per month for *private* projects offering a simila
 
 *Public* projects will be free, but will likely have a monthly usage cap on them.
 
-## Can I host this myself?
+## {% fa fa-angle-right %} Can I host this myself?
 
 No, although we are looking to build an on-premise version of the Dashboard for use in private clouds. If you're interested in our on-premise version, [let us know](mailto:hello@cypress.io)!
 
-## Can I choose not to use it?
+## {% fa fa-angle-right %} Can I choose not to use it?
 
 Yes. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 

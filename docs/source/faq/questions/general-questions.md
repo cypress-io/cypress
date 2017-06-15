@@ -28,7 +28,7 @@ Cypress essentially replaces Karma because it does all of this already and much 
 
 **Capybara**
 
-[Capybara](http://teamcapybara.github.io/capybara/) is a `Ruby` specific tool that allows you to write integration tests for your web application. In the Rails world, this is the *go-to* tool for testing your application. It uses `Selenium` (or another headless driver) to interact with browsers. It's API consists of commands that query for DOM elements, perform user actions, navigate around, etc.
+{% url "Capybara" http://teamcapybara.github.io/capybara/ %} is a `Ruby` specific tool that allows you to write integration tests for your web application. In the Rails world, this is the *go-to* tool for testing your application. It uses `Selenium` (or another headless driver) to interact with browsers. It's API consists of commands that query for DOM elements, perform user actions, navigate around, etc.
 
 Cypress essentially replaces Capybara because it does all of these things and much more. The difference is that instead of testing your application in a GUI-less console, you'd see your application at all times. You'd never have to take a screenshot to debug because all commands instantly provide you the state of your application while they run. Upon any command failing, you'll get a human-readable error explaining why it failed. There's no "guessing" when debugging.
 
@@ -36,7 +36,7 @@ Oftentimes Capybara begins to not work as well in complex JavaScript application
 
 **Protractor**
 
-[Protractor](http://www.protractortest.org/) is basically the `Capybara` of the JavaScript world. It provides a nice Promise-based interface on top of Selenium, which makes it easy to deal with asynchronous code. Protractor comes with all of the features of Capybara and essentially suffers from the same problems.
+{% url "Protractor" http://www.protractortest.org/ %} is basically the `Capybara` of the JavaScript world. It provides a nice Promise-based interface on top of Selenium, which makes it easy to deal with asynchronous code. Protractor comes with all of the features of Capybara and essentially suffers from the same problems.
 
 Cypress replaces Protractor because it does all of these things and much more. One major difference is that Cypress enables you to write your unit tests and integration tests in the same tool, as opposed to splitting up this work across both Karma and Protractor.
 
@@ -44,7 +44,7 @@ Also, Protractor is very much focused on `AngularJS`, whereas Cypress is designe
 
 **SauceLabs**
 
-[SauceLabs](https://saucelabs.com/) is a 3rd party tool which enables Selenium-based tests to be run across various browsers and operating systems. Additionally, they have a JavaScript Unit Testing tool that isn't Selenium focused.
+{% url "SauceLabs" https://saucelabs.com/ %} is a 3rd party tool which enables Selenium-based tests to be run across various browsers and operating systems. Additionally, they have a JavaScript Unit Testing tool that isn't Selenium focused.
 
 SauceLabs also has a `manual testing` mode, where you can remotely control browsers in the cloud as if they were installed on your machine.
 
@@ -111,7 +111,7 @@ Just remember, Cypress won't make a non-testable application suddenly testable. 
 
 # {% fa fa-angle-right %} Can I use Cypress to script user-actions on an external site like `gmail.com`?
 
-No. There are already lots of tools to do that. Using Cypress to test against a 3rd party application is not supported. It **may** work but will defeat the purpose of why it was created. You use Cypress *while* you develop **your** application, it helps you write your tests.
+No. There are already lots of tools to do that. Using Cypress to test against a 3rd party application is not supported. It *may* work but will defeat the purpose of why it was created. You use Cypress *while* you develop *your* application, it helps you write your tests.
 
 # {% fa fa-angle-right %} Is there code coverage?
 
@@ -134,12 +134,12 @@ Cypress does *not* utilize WebDriver for testing, so does not use or have any no
 
 # {% fa fa-angle-right %} Is Cypress open source?
 
-We are working on open sourcing Cypress. You can read more [here](https://www.cypress.io/blog/2017/05/04/cypress-is-going-open-source/).
+We are working on open sourcing Cypress. You can read more {% url "here" https://www.cypress.io/blog/2017/05/04/cypress-is-going-open-source/ %}.
 
 <!-- # How can I contribute to Cypress? -->
 
 # {% fa fa-angle-right %} I found a bug! What do I do?
 
-- Search existing [open issues](https://github.com/cypress-io/cypress/issues), it may already be reported!
-- Update Cypress. Your issue may have [already been fixed](https://github.com/cypress-io/cypress/wiki/changelog).
+- Search existing {% url "open issues" https://github.com/cypress-io/cypress/issues %}, it may already be reported!
+- Update Cypress. Your issue may have {% url "already been fixed" changelog %}.
 - {% open_an_issue %}. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.

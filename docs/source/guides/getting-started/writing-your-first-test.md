@@ -30,8 +30,8 @@ Click on `simple_spec.js` and Cypress will execute the test suite defined in tha
 
 {% img /img/guides/getting-started/writing-your-first-test/simple-spec.png %}
 
-{% note info Where do `describe` and `it` come from? %}
-Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support.
+{% note info Where do the `describe()` and `it()` functions come from? %}
+Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support. Your other favorites, `context()`, `before()`, `beforeEach()`, `after()`, and `afterEach()` are available, too!
 {% endnote %}
 
 # Structure of a Test
@@ -42,19 +42,19 @@ A solid test generally happens in 3 phases:
 2. Take an action.
 3. Make an assertion about the resulting world state.
 
-You might also see this phrased as "Given, When, Then", or other formulations of this idea. The idea is simple: first you set the system up exactly how you want it, then you inject some change agent into the system, and then you check that the final state of the system is what you expect it to be.
+You might also see this phrased as "Given, When, Then", or "Arrange, Act, Assert". The idea is simple: first you put the system into a specific state, then you take some action in the system that causes it to change, and finally you check the resulting system state.
 
-Today we'll take a narrow view of these steps and map them cleanly to some Cypress commands:
+Today, we'll take a narrow view of these steps and map them cleanly to Cypress commands:
 
 1. Visit a web page.
 2. Select and interact with an element on the page.
 3. Assert something about the content on the page.
 
-## Step 1: Visit a Page with `cy.visit(url)`
+## Step 1: Visit a Page
 
 First, let's visit a web page. We will use our {% url 'Kitchen Sink application' 'https://example.cypress.io/' %} in this example so that you can try Cypress out without needing to bring your own app today.
 
-Using {% url "cy.visit" visit %} is easy, it's just `cy.visit("https://example.cypress.io/")`. Let's replace our previous test with a new one that actually visits a page:
+Using {% url `cy.visit()` visit %} is easy, we just pass it the URL we wish to visit. Let's replace our previous test with a new one that actually visits a page:
 
 ```js
 describe("My First Test", function() {
@@ -74,10 +74,10 @@ Save the file and switch back over to the Cypress browser (or start it back up a
 {% img /img/guides/getting-started/writing-your-first-test/visit-a-page.png %}
 
 {% note danger Warning: Do Not Test Production Apps %}
-Visiting non-development URLs (as we've done here) is an anti-pattern: don't do this for your real tests, you should ALWAYS be testing against a development build that you have full control over. Cypress is not a general web automation tool and is poorly suited to scripting live, production websites.
+Visiting non-development URLs (as we just did above) is an anti-pattern: don't do this for your real tests, you should ALWAYS be testing against a development build that you have full control over. Cypress is not a general web automation tool and is poorly suited to scripting live, production websites.
 {% endnote %}
 
-## Step 2: Find an Element and Click It
+## Step 2: Click an Element
 
 Now that we've got a page loading, we need to take some action on it. Why don't we click a link on the page? Sounds easy enough, let's go look for one we like... how about "type" under the "Actions" heading?
 
@@ -85,7 +85,7 @@ To find this element by its contents, we'll use {% url `cy.contains` contains %}
 
 ```js
 describe("My First Test", function() {
-  it("Visits the Kitchen Sink", function() {
+  it("finds 'type'", function() {
     cy.visit("https://example.cypress.io/")
 
     cy.contains("type")
@@ -99,7 +99,7 @@ Ok, now how do we click on the link we found? You could almost guess this one: j
 
 ```js
 describe("My First Test", function() {
-  it("Visits the Kitchen Sink", function() {
+  it("clicks 'type'", function() {
     cy.visit("https://example.cypress.io/")
 
     cy.contains("type").click()
@@ -111,41 +111,46 @@ You can almost read it like a little story! Cypress calls this "chaining", and w
 
 Also note that the app preview pane has updated further after the click, following the link and showing the destination page:
 
-SCREENSHOT
+{% img /img/guides/getting-started/writing-your-first-test/find-and-click-element.png %}
+
+Now we can declare something about this new page!
 
 ## Step 3: Make an Assertion
 
-Finally, let's assert that something is happening. Looking at this new page about the `.type()` command, we decide that we'd like to make sure some text is always present in the `<h1>` tag here. We can do that by looking up the tag and chaining an assertion to it with `.should()`.
+Finally, let's find something to assert something about the new page. Perhaps we'd like to make sure the proper headings are present. We can do that by looking up the appropriate tags and chaining assertions to them with `.should()`.
 
 Here's what that looks like:
 
 ```js
 describe("My First Test", function() {
-  it("Visits the Kitchen Sink", function() {
+  it("clicking 'type' shows the right headings", function() {
     cy.visit("https://example.cypress.io/")
 
     cy.contains("type").click()
 
-    cy.get("h1").should('have.value', "Type Command")
+    // Should see the main header "Actions"
+    cy.get("h1").should('contain', "Actions")
+    // Should also see a sub-header about the type command
+    cy.get("h4").should('contain', "cy.type()")
   })
 })
 ```
 
-And there you have: a simple test in Cypress that visits a page, finds and clicks a link, then verifies the contents of the next page. If we read it out loud, it might sound like:
+And there you have it: a simple test in Cypress that visits a page, finds and clicks a link, then verifies the contents of the resulting page. If we read it out loud, it might sound like:
 
-> Visit example.cypress.io, find and click on something labeled "type", then we should see an H1 tag with the text "Type Command".
+> Visit example.cypress.io, find and click on something labeled "type", then we should see an H1 tag containing "Actions" and an H4 tag containing "cy.type()".
 
 Or in the Given, When, Then syntax:
 
-1. Given a user visits example.cypress.io
-2. When they click the link labeled "type"
-3. Then they should see a heading of "Type Command"
+> 1. Given a user visits example.cypress.io
+> 2. When they click the link labeled "type"
+> 3. Then they should see a heading of "Actions" and a subheading of "cy.type()"
 
-Even your business analysts can appreciate this!
+Even your non-technical collaborators can appreciate the way this reads!
 
-And hey, this is a very clean test! We didn't have to say anything about *how* things work, just that we'd like to verify a particular series of events.
+And hey, this is a very clean test! We didn't have to say anything about *how* things work, just that we'd like to verify a particular series of events and outcomes.
 
-## Bonus Step: Refactor
+<!-- ## Bonus Step: Refactor
 
 Once we have a passing test that covers the system we're working on, we usually like to go one step further and make sure the test code itself is well-structured and maintainable. This is sometimes expressed in TDD circles as "Red, Green, Refactor", which means:
 
@@ -159,12 +164,12 @@ To make this concrete, imagine we added a second, similar test to this suite:
 
 ```js
 describe("My First Test", function() {
-  it("clicking type shows the heading Type Command", function() {
+  it("clicking type shows the heading Actions", function() {
     cy.visit("https://example.cypress.io/")
 
     cy.contains("type").click()
 
-    cy.get("h1").should('have.value', "Type Command")
+    cy.get("h1").should('have.value', "Actions")
   })
 
   it("clicking focus shows the heading Focus Command", function() {
@@ -185,10 +190,10 @@ describe("My First Test", function() {
     cy.visit("https://example.cypress.io/")    
   })
 
-  it("clicking type shows the heading Type Command", function() {
+  it("clicking type shows the heading Actions", function() {
     cy.contains("type").click()
 
-    cy.get("h1").should('have.value', "Type Command")
+    cy.get("h1").should('have.value', "Actions")
   })
 
   it("clicking focus shows the heading Focus Command", function() {
@@ -199,8 +204,6 @@ describe("My First Test", function() {
 })
 ```
 
-## Leverage `beforeEach` and `afterEach` Hooks
+`beforeEach()` runs before each and every test in the same `describe()` block, so both of our tests in this case. Both tests still pass, and both are a bit shorter and easier to read.
 
-Implement a 2nd test
-Use `.only` to focus on our new test
-Utilize `.beforeEach` to do the `cy.visit()` -->
+-->

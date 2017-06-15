@@ -86,11 +86,11 @@ cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-10 at 12 15 53 pm](https://cloud.githubusercontent.com/assets/1271364/15153887/00b4c98e-16a9-11e6-8df5-bb2018582439.png)
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/15153887/00b4c98e-16a9-11e6-8df5-bb2018582439.png)
 
 When clicking on `setCookie` within the command log, the console outputs the following:
 
-![screen shot 2016-05-10 at 12 16 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153886/00b41782-16a9-11e6-99db-bc085c3513b3.png)
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/15153886/00b41782-16a9-11e6-99db-bc085c3513b3.png)
 
 # See also
 

@@ -90,7 +90,7 @@ Cypress bundles the popular {% url 'Chai' available-assertions#Chai %} assertion
 
 # Chai-jQuery
 
-[Chai-jQuery](https://github.com/chaijs/chai-jquery) chainers are available when asserting about a DOM object.
+{% url "Chai-jQuery" https://github.com/chaijs/chai-jquery %} chainers are available when asserting about a DOM object.
 
 | Chainers | Assertion |
 | --- | --- |
@@ -119,7 +119,7 @@ You will commonly use these chainers after using DOM commands like: {% url `cy.g
 
 # Sinon-Chai
 
-All Sinon assertions are available in [Sinon–Chai](https://github.com/domenic/sinon-chai).
+All Sinon assertions are available in {% url "Sinon–Chai" https://github.com/domenic/sinon-chai %}.
 
 | Sinon.JS property/method | Assertion |
 | -- | -- |

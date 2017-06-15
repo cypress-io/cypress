@@ -23,33 +23,33 @@ During a run we record all failing tests, logs, screenshots, and videos and make
 
 **To setup a project to record:**
 
-1. **Click on the "Runs" tab of your project, then click "Setup Project to Record".**
+***1. Click on the "Runs" tab of your project, then click "Setup Project to Record".***
 
-  ![Setup Project Screen](https://cloud.githubusercontent.com/assets/1271364/22803739/2d66f42a-eee4-11e6-9b84-bd2e73a523d0.png)
+![Setup Project Screen](https://cloud.githubusercontent.com/assets/1271364/22803739/2d66f42a-eee4-11e6-9b84-bd2e73a523d0.png)
 
-2. **Fill in the name of your project** (this is only for display purposes and can be changed later).
+***2. Fill in the name of your project (this is only for display purposes and can be changed later).***
 
-  ![Project Name in Setup Project](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
+![Project Name in Setup Project](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
 
-3. **Choose who owns the project.** You can personally own it or select an organization you've created.
+***3. Choose who owns the project. You can personally own it or select an organization you've created.***
 
-  Organizations work just like they do in Github. They enable you to separate your personal and work projects. {% url 'Read more about organizations' dashboard-organizations %}.
+Organizations work just like they do in Github. They enable you to separate your personal and work projects. {% url 'Read more about organizations' dashboard-organizations %}.
 
-  ![Chosen Organization to Own](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
+![Chosen Organization to Own](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
 
-4. **Choose whether this project is Public or Private.**
+***4. Choose whether this project is Public or Private.***
 
-  - **A public project** can have its recordings and runs seen by *anyone*. Typically these are open source projects.
+- **A public project** can have its recordings and runs seen by *anyone*. Typically these are open source projects.
 
-  - **A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
+- **A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
 
-  ![Privacy of Project](https://cloud.githubusercontent.com/assets/1271364/22803847/95870626-eee4-11e6-9627-7c00e8b77519.png)
+![Privacy of Project](https://cloud.githubusercontent.com/assets/1271364/22803847/95870626-eee4-11e6-9627-7c00e8b77519.png)
 
-5. **Click "Setup Project".**
+***5. Click "Setup Project".***
 
-  ![screen shot 2017-02-12 at 3 46 30 pm](https://cloud.githubusercontent.com/assets/1268976/22866093/64a9fb4c-f13e-11e6-9ebe-980ec078ba4e.png)
+![Setup Project](https://cloud.githubusercontent.com/assets/1268976/22866093/64a9fb4c-f13e-11e6-9ebe-980ec078ba4e.png)
 
-Your tests runs are now ready to record. Typically you would record your runs when running in {% url 'Continuous Integration' continuous-integration %} but you can also record your runs from your local computer.
+🎉 Your tests runs are now ready to record! Typically you would record your runs when running in {% url 'Continuous Integration' continuous-integration %} but you can also record your runs from your local computer.
 
 ## Record Test Runs
 

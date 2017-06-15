@@ -108,7 +108,7 @@ Cypress.config("viewportWidth") // => 800
 **Using config to set `baseUrl`**
 
 {% note info %}
-[Check out our example recipe where we reset our baseUrl using Cypress.config](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+{% url "Check out our example recipe where we reset our `baseUrl` using `Cypress.config()`" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
 {% endnote %}
 
 ## Object

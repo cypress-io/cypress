@@ -40,7 +40,7 @@ Once you setup your project to record, we generate a unique `projectId` for your
 }
 ```
 
-This is how we uniquely identify your project. If you manually alter this, **Cypress will no longer be able to identify your project or find the recorded builds for it**. We recommend that you check your `cypress.json` including the `projectId` into source control.
+This is how we uniquely identify your project. If you manually alter this, *Cypress will no longer be able to identify your project or find the recorded builds for it*. We recommend that you check your `cypress.json` including the `projectId` into source control.
 
 # {% fa fa-angle-right %} What is a Record Key?
 
@@ -48,7 +48,7 @@ Once you're setup to record test runs, we automatically generate a **Record Key*
 
 **A record key is a GUID that looks like this:**
 
-```shell
+```text
 f4466038-70c2-4688-9ed9-106bf013cd73
 ```
 
@@ -56,9 +56,9 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 You can create multiple Record Keys for a project, or delete existing ones from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 {% endnote %}
 
-You can also find your Record Key inside of the **Settings** tab.
+You can also find your Record Key inside of the *Settings* tab.
 
-![screen shot 2017-02-12 at 4 12 40 pm](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
+![Settings Tab of Desktop](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
 
 
 # {% fa fa-angle-right %} How do I get the native DOM reference of an element found using Cypress?
@@ -254,7 +254,7 @@ You can simply always run your tests in CI using {% url '`cypress run`' cli-tool
 
 **A private project** means that only {% url 'users' dashboard-organizations#Inviting-Users %} you explicitly invite to your {% url 'organization' dashboard-organizations %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
 
-A Record Key has nothing to do with **viewing** build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
+A Record Key has nothing to do with *viewing* build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
 
 
 # {% fa fa-angle-right %} What does Cypress record?
