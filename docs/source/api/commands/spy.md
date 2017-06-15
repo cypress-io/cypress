@@ -52,10 +52,10 @@ App.start()
 expect(util.addListeners).to.be.called
 ```
 
-**Using cy.spy()**
+**Using `cy.spy()`**
 
 {% note info %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
 {% endnote %}
 
 ## Alias a spy
@@ -89,7 +89,7 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 
 **Assertion Support**
 
-Cypress has also built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any [assertions](https://github.com/domenic/sinon-chai#assertions) supported by `sinon-chai` can be used without any configuration.
+Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" available-assertions#Sinon-Chai %} can be used without any configuration.
 
 # Command Log
 
@@ -106,16 +106,16 @@ expect(spy).to.be.called
 
 The command above will display in the command log as:
 
-<img width="454" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437713/1d5f7be6-e6f7-11e6-9457-f35cbeaa5385.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437713/1d5f7be6-e6f7-11e6-9457-f35cbeaa5385.png)
 
 When clicking on the `spy-1` event within the command log, the console outputs the following:
 
-<img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437712/1d5ed1e6-e6f7-11e6-9808-e61936b1d75f.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437712/1d5ed1e6-e6f7-11e6-9808-e61936b1d75f.png)
 
 # See also
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
 - {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
 - {% url `cy.stub()` stub %}

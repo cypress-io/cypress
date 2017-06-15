@@ -74,11 +74,11 @@ cy.getCookies().should('be.empty')
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-10 at 12 01 38 pm](https://cloud.githubusercontent.com/assets/1271364/15153391/1afa9fb4-16a7-11e6-9a76-3c3e6b4b9f6b.png)
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/15153391/1afa9fb4-16a7-11e6-9a76-3c3e6b4b9f6b.png)
 
 When clicking on `clearCookies` within the command log, the console outputs the following:
 
-![screen shot 2016-05-10 at 12 02 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153392/1afb086e-16a7-11e6-9541-1b1794e14705.png)
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/15153392/1afb086e-16a7-11e6-9541-1b1794e14705.png)
 
 # See also
 

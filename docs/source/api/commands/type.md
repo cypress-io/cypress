@@ -87,13 +87,13 @@ Option | Default | Notes
 **Type into a textarea.**
 
 ```javascript
-cy.get('textarea').type('Hello world') //yields <textarea>
+cy.get('textarea').type('Hello world') // yields <textarea>
 ```
 
 **Type into a login form**
 
 {% note info %}
-[Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
+[](){% url "Check out our example recipe of logging in by typing username and password" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
 {% endnote %}
 
 **Mimic user typing behavior**
@@ -126,7 +126,7 @@ Using `.type()` on a date input (`<input type="date">`) requires specifying a va
 
 - `yyyy-MM-dd` (e.g. `1999-12-31`)
 
-This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#sec-dates) and is what the input's `value` will be set to regardless of browser or locale.
+This isn't exactly how a user would type into a date input, but is a workaround since date input support varies between browsers and the format varies based on locale. `yyyy-MM-dd` is the format required by {% url "the W3 spec" https://www.w3.org/TR/html/infrastructure.html#sec-dates %} and is what the input's `value` will be set to regardless of browser or locale.
 
 Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
 
@@ -136,7 +136,7 @@ Using `.type()` on a month input (`<input type="month">`) requires specifying a 
 
 - `yyyy-MM` (e.g. `1999-12`)
 
-This isn't exactly how a user would type into a month input, but is a workaround since month input support varies between browsers and the format varies based on locale. `yyyy-MM` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#months) and is what the input's `value` will be set to regardless of browser or locale.
+This isn't exactly how a user would type into a month input, but is a workaround since month input support varies between browsers and the format varies based on locale. `yyyy-MM` is the format required by {% url "the W3 spec" https://www.w3.org/TR/html/infrastructure.html#months %} and is what the input's `value` will be set to regardless of browser or locale.
 
 Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
 
@@ -148,7 +148,7 @@ Using `.type()` on a week input (`<input type="week">`) requires specifying a va
 
 Where `W` is the literal character 'W' and `ww` is the number of the week (01-53).
 
-This isn't exactly how a user would type into a week input, but is a workaround since week input support varies between browsers and the format varies based on locale. `yyyy-Www` is the format required by [the W3 spec](https://www.w3.org/TR/html/infrastructure.html#valid-week-string) and is what the input's `value` will be set to regardless of browser or locale.
+This isn't exactly how a user would type into a week input, but is a workaround since week input support varies between browsers and the format varies based on locale. `yyyy-Www` is the format required by {% url "the W3 spec" https://www.w3.org/TR/html/infrastructure.html#valid-week-string %} and is what the input's `value` will be set to regardless of browser or locale.
 
 Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
 
@@ -274,7 +274,7 @@ cy.get('body').type('{shift}', {release: false}).get('li:first').click()
 
 **Typing `tab` key does not work**
 
-Tabbing will be implemented as a separate command as `cy.tab` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% open_an_issue %} if you need this to be fixed.
+Tabbing will be implemented as a separate command as `.tab()` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% open_an_issue %} if you need this to be fixed.
 
 **Preventing `mousedown` does not prevent typing**
 
@@ -296,23 +296,21 @@ document.querySelector('input:first').addEventListener('keydown', function (e) {
 cy.get('input:first').type('{shift}a')
 ```
 
-In the example above, a lowercase `a` will be typed, because that's the literal character specified. To type a capital `A`, you can use `cy.type('{shift}A')` (or simply `cy.type('A')` if you don't care about the `shiftKey` property on any key events).
+In the example above, a lowercase `a` will be typed, because that's the literal character specified. To type a capital `A`, you can use `.type('{shift}A')` (or simply `.type('A')` if you don't care about the `shiftKey` property on any key events).
 
-This holds true for other special key combinations as well (that may be OS-specific). For example, on OSX, typing `ALT + SHIFT + K` creates the special character ``. Like with capitalization, `cy.type()` will not output ``, but simply the letter `k`.
-
-{% open_an_issue %} if you need modifier effects to be implemented.
+This holds true for other special key combinations as well (that may be OS-specific). For example, on OSX, typing `ALT + SHIFT + K` creates the special character ``. Like with capitalization, `.type()` will not output ``, but simply the letter `k`. {% open_an_issue %} if you need modifier effects to be implemented.
 
 **Events that fire**
 
-Cypress implements all events that Chrome fires as part of typing in a real keyboard. Read the section: [Simulated Events vs Native Events](#simulated-events-vs-native-events) below for more information.
+Cypress implements all events that Chrome fires as part of typing in a real keyboard. Read the section: "Simulated Events vs Native Events" below for more information.
 
-The following events will be fired based on what key was pressed identical to the event spec.
+The following events will be fired based on what key was pressed identical to the event spec:
 
-* keydown
-* keypress
-* textInput
-* input
-* keyup
+- keydown
+- keypress
+- textInput
+- input
+- keyup
 
 `beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
 
@@ -349,7 +347,7 @@ cy.get('#username').type('bob@gmail.com').should('have.value', '') // true
 
 Cypress automatically matches the spec and browser behavior for pressing the `{enter}` key when the input belongs to a `<form>`.
 
-This behavior is defined here: [Form Implicit Submission](https://html.spec.whatwg.org/multipage/forms.html#implicit-submission)
+This behavior is defined here: {% url "Form Implicit Submission" https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission %}.
 
 For instance the following will submit the form.
 
@@ -368,7 +366,7 @@ cy.get('#password').type('password123{enter}')
 
 Because there are multiple `inputs` and one `submit` button, Cypress submits the form (and fires submit events) as well as a synthetic `click` event to the `button`.
 
-The spec defines the **submit** button as the first `input[type=submit]` or `button[type!=button]` from the form.
+The spec defines the "submit" button as the first `input[type=submit]` or `button[type!=button]` from the form.
 
 Additionally Cypress handles these 4 other situations as defined in the spec:
 
@@ -389,13 +387,13 @@ Additionally, events that cause a `change` event to fire (such as typing `{enter
 
 Any modifiers activated for the event are also listed in a `modifiers` column.
 
-![Cypress cy.type key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
+![Cypress .type() key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
 
 **Simulated Events vs Native Events**
 
 When Cypress is running on your local computer, all events are simulated identically to real native events.
 
-There should be no distinguishable difference between these simulated events and real native events. We chose to model these simulated events to match what Chrome fires. In other words, using `cy.type` should essentially match actually typing keys on your keyboard while in Chrome.
+There should be no distinguishable difference between these simulated events and real native events. We chose to model these simulated events to match what Chrome fires. In other words, using `.type()` should essentially match actually typing keys on your keyboard while in Chrome.
 
 However, when Cypress is run in `cross browser mode`, Cypress uses the actual `OS keyboard` to type, and therefore the browser will fire all of it's native events as you'd expect.
 
@@ -413,11 +411,11 @@ cy.get('input[name=firstName]').type('Jane Lane')
 
 The commands above will display in the command log as:
 
-<img width="584" alt="screen shot 2015-11-29 at 1 25 51 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459104/ee20613e-969c-11e5-8c78-e78b39d9ec46.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/11459104/ee20613e-969c-11e5-8c78-e78b39d9ec46.png)
 
 When clicking on `type` within the command log, the console outputs the following:
 
-<img width="637" alt="screen shot 2015-11-29 at 1 26 24 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459106/f14f3308-969c-11e5-8352-f96744bbd713.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/11459106/f14f3308-969c-11e5-8352-f96744bbd713.png)
 
 # See also
 

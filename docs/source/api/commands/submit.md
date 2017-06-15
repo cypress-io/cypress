@@ -71,7 +71,7 @@ cy.get('form').submit()
 
 The commands above will display in the command log as:
 
-<img width="594" alt="screen shot 2015-11-29 at 1 21 43 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459081/3149d9e6-969c-11e5-85b2-ba57638f02df.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/11459081/3149d9e6-969c-11e5-85b2-ba57638f02df.png)
 
 When clicking on `submit` within the command log, the console outputs the following:
 

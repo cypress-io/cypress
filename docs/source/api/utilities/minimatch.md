@@ -3,7 +3,7 @@ title: Cypress.minimatch
 comments: false
 ---
 
-Cypress automatically proxies [`minimatch`](https://github.com/isaacs/minimatch) and exposes it as `Cypress.minimatch`.
+Cypress automatically proxies {% url "minimatch" bundled-tools#Other-Library-Utilities %} and exposes it as `Cypress.minimatch`.
 
 Use `Cypress.minimatch` to test out glob patterns against strings.
 

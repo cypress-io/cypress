@@ -69,10 +69,10 @@ cy.tick(500)
 cy.get('#header').should('have.text', 'Hello, World')
 ```
 
-**Using cy.clock and cy.tick**
+**Using `cy.clock()` and `cy.tick()`**
 
 {% note info %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
 {% endnote %}
 
 # Command Log
@@ -86,16 +86,16 @@ cy.tick(1000)
 
 The command above will display in the command log as:
 
-<img width="448" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png)
 
 When clicking on the `tick` command within the command log, the console outputs the following:
 
-<img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22438009/504fecd8-e6f8-11e6-8ef1-4d7cb0b5594c.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1157043/22438009/504fecd8-e6f8-11e6-8ef1-4d7cb0b5594c.png)
 
 # See also
 
 - {% url `cy.clock()` clock %}
 - {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %} 
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
