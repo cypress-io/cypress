@@ -216,7 +216,7 @@ module.exports = (Cypress, Commands) ->
           isDate or
           isMonth or
           isWeek or
-          isTime or 
+          isTime or
           (options.$el.is("[type=number]") and _.includes(options.chars, "."))
 
         ## see comment in updateValue below
