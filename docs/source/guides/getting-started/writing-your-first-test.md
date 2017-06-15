@@ -93,7 +93,57 @@ describe("My First Test", function() {
 })
 ```
 
+...and the test is still green. We know that Cypress found something because it will fail if anything isn't in place the way we say it is. To verify this, replace "type" with something not on the page, like "hype", and rerun the test. It goes red! Cypress verifies everything for us as we go, and fails a test if anything is out of order.
+
+Ok, now how do we click on the link we found? You could almost guess this one: just add a `.click()` to the end of the previous command, like so:
+
+```js
+describe("My First Test", function() {
+  it("Visits the Kitchen Sink", function() {
+    cy.visit("https://example.cypress.io/")
+
+    cy.contains("type").click()
+  })
+})
+```
+
+You can almost read it like a little story! Cypress calls this "chaining", and we chain together commands to build up great-looking tests that really express what the app does in declarative language.
+
+Also note that the app preview pane has updated further after the click, following the link and showing the destination page:
+
+SCREENSHOT
+
 ## Step 3: Make an Assertion
+
+Finally, let's assert that something is happening. Looking at this new page about the `.type()` command, we decide that we'd like to make sure some text is always present in the `<h1>` tag here. We can do that by looking up the tag and chaining an assertion to it with `.should()`.
+
+Here's what that looks like:
+
+```js
+describe("My First Test", function() {
+  it("Visits the Kitchen Sink", function() {
+    cy.visit("https://example.cypress.io/")
+
+    cy.contains("type").click()
+
+    cy.get("h1").should('have.value', "Type Command")
+  })
+})
+```
+
+And there you have: a simple test in Cypress that visits a page, finds and clicks a link, then verifies the contents of the next page. If we read it out loud, it might sound like:
+
+> Visit example.cypress.io, find and click on something labeled "type", then we should see an H1 tag with the text "Type Command".
+
+Or in the Given, When, Then syntax:
+
+1. Given a user visits example.cypress.io
+2. When they click the link labeled "type"
+3. Then they should see a heading of "Type Command"
+
+Even your business analysts can appreciate this!
+
+And hey, this is a very clean test! We didn't have to say anything about *how* things work, just that we'd like to verify a particular series of events.
 
 ## Bonus Step: Refactor
 
@@ -103,7 +153,51 @@ Once we have a passing test that covers the system we're working on, we usually 
 2. Write the code to make the test pass.
 3. Clean up the code, keeping the test passing.
 
-Regardless of how you feel about writing tests first, the refactor step is very important! We want our code to be maintainable and extensible so that it lives a long and fruitful life, and *test code is code, too*. 
+Regardless of how you feel about writing tests first, the refactor step is very important! We want all of our code to be maintainable and extensible so that it lives a long and productive life, *including our test code*.
+
+To make this concrete, imagine we added a second, similar test to this suite:
+
+```js
+describe("My First Test", function() {
+  it("clicking type shows the heading Type Command", function() {
+    cy.visit("https://example.cypress.io/")
+
+    cy.contains("type").click()
+
+    cy.get("h1").should('have.value', "Type Command")
+  })
+
+  it("clicking focus shows the heading Focus Command", function() {
+    cy.visit("https://example.cypress.io/")
+
+    cy.contains("focus").click()
+
+    cy.get("h1").should('have.value', "Focus Command")
+  })
+})
+```
+
+We've got some duplication here and could probably make a number of refactoring moves, but for this brief tutorial we'll do a simple and common one. Let's move that initial visit out into a `beforeEach()` block.
+
+```js
+describe("My First Test", function() {
+  beforeEach(function() {
+    cy.visit("https://example.cypress.io/")    
+  })
+
+  it("clicking type shows the heading Type Command", function() {
+    cy.contains("type").click()
+
+    cy.get("h1").should('have.value', "Type Command")
+  })
+
+  it("clicking focus shows the heading Focus Command", function() {
+    cy.contains("focus").click()
+
+    cy.get("h1").should('have.value', "Focus Command")
+  })
+})
+```
 
 ## Leverage `beforeEach` and `afterEach` Hooks
 
