@@ -14,12 +14,8 @@ Recorded runs are the results and artifacts captured from your test runs.
 
 We capture the following:
 
-- [Standard Output](#Standard-Output)
-- [Test Failures](#Test-Failures)
-- [Screenshots](#Screenshots)
-- [Video](#Video)
 
-## Standard Output
+## {% fa fa-code fa-fw %} Standard Output
 
 Standard output includes details and summaries of your tests based on the {% url 'reporter' reporters %} you have set. By default it is the `spec` reporter.
 
@@ -27,7 +23,7 @@ Standard output includes details and summaries of your tests based on the {% url
 
 You will also see a summary at the bottom indicating the files we've created during the recording.
 
-## Test Failures
+## {% fa fa-exclamation-triangle fa-fw %} Test Failures
 
 Any tests that fail during a test run can be found under the *Failures* tab. Each failure is listed under it's test title.
 
@@ -39,13 +35,13 @@ Any tests that fail during a test run can be found under the *Failures* tab. Eac
 
 ![failures](https://cloud.githubusercontent.com/assets/1271364/22707770/dce3664e-ed41-11e6-84de-03acdc499daa.png)
 
-## Screenshots
+## {% fa fa-picture-o fa-fw %} Screenshots
 
 All screenshots taken during the test run can be found under the *Screenshots* tab. Both screenshots taken during failures and screenshots taken using the {% url `cy.screenshot()` screenshot %} command will show up here. Each screenshot includes the application under test as well as the Cypress Command Log.
 
 ![Screenshots](https://cloud.githubusercontent.com/assets/1271364/22707241/28bf50de-ed40-11e6-93a1-4e09c2767605.png)
 
-## Videos
+## {% fa fa-video-camera fa-fw %}  Videos
 
 Any videos recorded during the test run can be found under the *Videos* tab. You can also download the video of a run.
 
