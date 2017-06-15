@@ -215,6 +215,22 @@ describe "Setup Project", ->
 
       cy.contains(".btn", "Setup Project").click()
 
+    it "sends project name, org id, and public flag to ipc event", ->
+      cy
+        .get(".modal-body")
+          .contains(".btn", "An Organization").click()
+        .get("#projectName").clear().type("New Project")
+        .get("select").select("Acme Developers")
+        .get(".privacy-radio").find("input").first().check()
+        .get(".modal-body")
+          .contains(".btn", "Setup Project").click()
+        .then =>
+          expect(@ipc.setupDashboardProject).to.be.calledWith({
+            projectName: "New Project"
+            orgId: "777"
+            public: true
+          })
+
     context "org/public", ->
       beforeEach ->
         cy

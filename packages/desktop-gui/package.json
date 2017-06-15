@@ -55,9 +55,9 @@
     "moment": "^2.15.1",
     "prop-types": "^15.5.10",
     "rc-collapse": "^1.6.11",
-    "react": "^15.1.0",
+    "react": "^15.6.1",
     "react-bootstrap-modal": "3.0.1",
-    "react-dom": "^15.1.0",
+    "react-dom": "^15.6.1",
     "react-loader": "^2.4.0",
     "zunder": "4.1.1"
   }
