@@ -9,7 +9,7 @@ comments: false
 
 Run multiple spec files concurrently.
 
-https://github.com/kensho/multi-cypress
+{% url "https://github.com/kensho/multi-cypress" https://github.com/kensho/multi-cypress %}
 
 # Typescript
 
@@ -17,4 +17,4 @@ https://github.com/kensho/multi-cypress
 
 Typescript typings for most Cypress API commands.
 
-https://github.com/StackVista/typed-cypress
+{% url "https://github.com/StackVista/typed-cypress" https://github.com/StackVista/typed-cypress %}

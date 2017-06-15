@@ -8,7 +8,7 @@ Recorded runs are the results and artifacts captured from your test runs.
 **To record your tests:**
 
 1. First {% url 'setup the project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
-2. Then {% url 'record your runs' dashboard-features#How-do-I-record-my-tests %}.
+2. Then {% url 'record your runs' dashboard-runs %}.
 
 # What is recorded during a test run?
 

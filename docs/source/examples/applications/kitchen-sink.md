@@ -5,7 +5,7 @@ comments: false
 
 # Overview
 
-{% url "Code" https://github.com/cypress-io/cypress-example-kitchensink %}
+{% url "https://github.com/cypress-io/cypress-example-kitchensink" https://github.com/cypress-io/cypress-example-kitchensink %}
 
 This is an example app is used to showcase every command available in Cypress.
 

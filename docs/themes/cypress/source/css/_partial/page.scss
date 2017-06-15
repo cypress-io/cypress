@@ -58,6 +58,8 @@
     border: 0;
   }
 
+
+
   hr {
     border: 0;
     height: 0;
@@ -289,8 +291,13 @@
       color: $color-link-hover;
       border-bottom: 1px solid $color-link;
     }
-
   }
+
+  &>a {
+    display: inline-block;
+    margin-bottom: 15px;
+  }
+  
   strong {
     font-weight: 500;
   }

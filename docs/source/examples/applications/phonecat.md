@@ -5,7 +5,7 @@ comments: false
 
 # Overview
 
-{% url "Code" https://github.com/cypress-io/cypress-example-phonecat %}
+{% url "https://github.com/cypress-io/cypress-example-phonecat" https://github.com/cypress-io/cypress-example-phonecat %}
 
 This tests the {% url "original Angular Phonecat example app" https://github.com/angular/angular-phonecat %} using Cypress.
 

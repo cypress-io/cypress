@@ -5,7 +5,7 @@ comments: false
 
 # Overview
 
-{% url "Code" https://github.com/cypress-io/cypress-example-todomvc %}
+{% url "https://github.com/cypress-io/cypress-example-todomvc" https://github.com/cypress-io/cypress-example-todomvc %}
 
 This repo compares {% url "Cypress Tests" https://github.com/cypress-io/cypress-example-todomvc/blob/master/cypress/integration/app_spec.js %} to {% url "official TodoMVC Tests" https://github.com/tastejs/todomvc/blob/master/tests/test.js %}. This gives you a good comparison of writing and running tests in Cypress versus vanilla Selenium.
 
