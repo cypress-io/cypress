@@ -71,11 +71,11 @@ cy.get('form').submit()
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/11459081/3149d9e6-969c-11e5-85b2-ba57638f02df.png)
+![Command Log](/img/api/commands/submit/form-submit-shows-in-command-log-of-cypress.png)
 
 When clicking on `submit` within the command log, the console outputs the following:
 
-![cy.submit console log](https://cloud.githubusercontent.com/assets/1271364/12888878/222f5522-ce4a-11e5-9edd-f67be2ebce40.png)
+![cy.submit console log](/img/api/commands/submit/console-shows-what-form-was-submitted.png)
 
 # See also
 

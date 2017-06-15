@@ -281,11 +281,11 @@ cy.get('.left-nav>.nav').children().should('have.length', 8)
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/11458632/04e5da58-9692-11e5-870d-8f9e274192d1.png)
+![Command Log should](/img/api/commands/should/should-command-shows-up-as-assert-for-each-assertion.png)
 
 When clicking on `assert` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/11458633/08a7b238-9692-11e5-9d5d-620122436bc0.png)
+![Console Log should](/img/api/commands/should/assertion-in-console-log-shows-actual-versus-expected-data.png)
 
 # See also
 

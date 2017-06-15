@@ -93,7 +93,7 @@ cy.get('textarea').type('Hello world') // yields <textarea>
 **Type into a login form**
 
 {% note info %}
-[](){% url "Check out our example recipe of logging in by typing username and password" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
+{% url "Check out our example recipe of logging in by typing username and password" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
 {% endnote %}
 
 **Mimic user typing behavior**
@@ -387,7 +387,7 @@ Additionally, events that cause a `change` event to fire (such as typing `{enter
 
 Any modifiers activated for the event are also listed in a `modifiers` column.
 
-![Cypress .type() key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
+![Cypress .type() key events table](/img/api/commands/type/key-events-table-shown-in-console-for-testing-typing.png)
 
 **Simulated Events vs Native Events**
 
@@ -411,11 +411,11 @@ cy.get('input[name=firstName]').type('Jane Lane')
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/11459104/ee20613e-969c-11e5-8c78-e78b39d9ec46.png)
+![Command Log](/img/api/commands/type/type-in-input-shown-in-command-log.png)
 
 When clicking on `type` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/11459106/f14f3308-969c-11e5-8352-f96744bbd713.png)
+![Console Log](/img/api/commands/type/console-log-of-typing-with-entire-key-events-table-for-each-character.png)
 
 # See also
 

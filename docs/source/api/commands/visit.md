@@ -184,6 +184,25 @@ cy.visit('http://localhost:8000/#/app')
 
 Cypress will automatically apply the server and routes to the very next `cy.visit()` and does so immediately before any of your application code runs.
 
+# Command Log
+
+**Visit example application in a `beforeEach`**
+
+```javascript
+beforeEach(function(){
+  cy.visit('https://example.cypress.io/commands/viewport')
+})
+```
+
+The commands above will display in the command log as:
+
+![Command Log visit](/img/api/commands/visit/visit-example-page-in-before-each-of-test.png)
+
+When clicking on `visit` within the command log, the console outputs the following:
+
+![Console log visit](/img/api/commands/visit/visit-shows-any-redirect-or-cookies-set-in-the-console.png)
+
+
 # See also
 
 - {% url `cy.go()` go %}

@@ -79,11 +79,11 @@ cy.getCookie('foo').should('be.null')
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1268976/15458066/345b5bb8-2063-11e6-91bb-173421c8440a.png)
+![Command Log](/img/api/commands/clearcookie/clear-cookie-in-browser-tests.png)
 
 When clicking on `clearCookie` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1268976/15458067/345dba3e-2063-11e6-8739-af971bc79068.png)
+![Console Log](/img/api/commands/clearcookie/cleared-cookie-shown-in-console.png)
 
 # See also
 

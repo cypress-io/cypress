@@ -72,33 +72,33 @@ cy.get('#action-canvas')
 
 The commands above will display in the GUI as:
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507426/4d48a5e4-421e-11e7-9bd4-c6829f80910d.png)
+![Pause command on intial pause](/img/api/commands/pause/initial-pause-in-gui-highlights-the-pause-command.png)
 
 When clicking on "Next: 'click'" at the top of the Command Log, the Command Log will run only the next command and pause again.
 
 ***Click "Next"***
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507427/4d49e33c-421e-11e7-9bea-26b89ec6fe32.png)
+![Pause command after clicking next](/img/api/commands/pause/next-goes-on-to-next-command-during-pause.png)
 
 ***Click "Next" again***
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507424/4d446204-421e-11e7-82a1-a5ce8b4bb4a9.png)
+![Continue to next command during pause](/img/api/commands/pause/continue-in-pause-command-just-like-debugger.png)
 
 ***Click "Next" again***
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507421/4d3a69e8-421e-11e7-9a26-1026d0d133ec.png)
+![Pause command](/img/api/commands/pause/pause-goes-to-show-next-click.png)
 
 ***Click "Next" again***
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507422/4d3b30a8-421e-11e7-940d-bd7bdc7b6e81.png)
+![Pause command](/img/api/commands/pause/clicking-on-canvas-continues-as-we-click-next.png)
 
 ***Click "Next" again***
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507420/4d37dcc8-421e-11e7-8428-8529ad628b05.png)
+![Pause command](/img/api/commands/pause/last-next-click-before-out-test-is-finished.png)
 
 ***Click "Next" again, then 'Resume'***
 
-![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507423/4d3c5992-421e-11e7-8df8-9af67f5ceb4a.png)
+![Pause command](/img/api/commands/pause/next-then-resume-shows-our-test-has-ended.png)
 
 # See also
 

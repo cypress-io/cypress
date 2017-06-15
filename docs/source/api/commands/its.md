@@ -152,11 +152,11 @@ cy.wait('@getComments').its('responseBody').should('deep.eq', [
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1268976/15512229/d512cbb4-21ac-11e6-9a9a-5d358ae4fe4b.png)
+![Command Log](/img/api/commands/its/xhr-response-its-response-body-for-testing.png)
 
 When clicking on `its` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1268976/15512225/d14723cc-21ac-11e6-88d5-39ffe6c0a195.png)
+![Console Log](/img/api/commands/its/response-body-yielded-with-its-command-log.png)
 
 # See also
 

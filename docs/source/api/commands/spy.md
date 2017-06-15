@@ -106,11 +106,11 @@ expect(spy).to.be.called
 
 The command above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437713/1d5f7be6-e6f7-11e6-9457-f35cbeaa5385.png)
+![Command Log spy](/img/api/commands/spy/spying-shows-any-aliases-and-also-any-assertions-made.png)
 
 When clicking on the `spy-1` event within the command log, the console outputs the following:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437712/1d5ed1e6-e6f7-11e6-9808-e61936b1d75f.png)
+![Command Log](/img/api/commands/spy/console-shows-spy-arguments-calls-and-the-object-being-spied.png)
 
 # See also
 

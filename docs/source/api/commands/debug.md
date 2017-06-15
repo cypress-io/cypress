@@ -63,11 +63,11 @@ cy.get(".ls-btn").click({ force: true }).debug()
 
 The commands above will display in the command log as:
 
-![Command Log debug](https://cloud.githubusercontent.com/assets/1271364/26423391/896b858e-409b-11e7-91ce-14c5bf38ab11.png)
+![Command Log debug](/img/api/commands/debug/how-debug-displays-in-command-log.png)
 
 When clicking on the `debug` command within the command log, the console outputs the following:
 
-![console.log debug](https://cloud.githubusercontent.com/assets/1271364/26423392/89725486-409b-11e7-94d5-aebdffe16abf.png)
+![console.log debug](/img/api/commands/debug/console-gives-all-debug-info-for-command.png)
 
 # See also
 

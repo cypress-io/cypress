@@ -83,11 +83,11 @@ cy.get('.query-form').within(function(el){
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/26648611/05e133a0-4611-11e7-883e-735bc65cf739.png)
+![Command Log](/img/api/commands/within/go-within-other-dom-elements.png)
 
 When clicking on the `within` command within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/26648610/05d540fe-4611-11e7-9d20-d67c714beb6b.png)
+![Console Log](/img/api/commands/within/within-shows-its-yield-in-console-log.png)
 
 # See also
 

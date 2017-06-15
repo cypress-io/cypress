@@ -41,7 +41,7 @@ The function used to replace the `method` on the `object`.
 
 Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (the stub) instead of a Promise-like chain-able object.
 
-`cy.stub()` returns a [Sinon.js stub](http://sinonjs.org/docs/#stubs). All methods found on Sinon.JS [spies](http://sinonjs.org/docs/#spies-api) and [stubs](http://sinonjs.org/docs/#stubs-api) are supported.
+`cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
 
 ## Timeout
 
@@ -121,7 +121,7 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22437243/4cc778a4-e6f5-11e6-8f07-e601d3438c4f.png)
+![stubs with aliases](/img/api/commands/stub/stubs-with-aliases-and-error-in-command-log.png)
 
 # Notes
 
@@ -152,11 +152,11 @@ expect(stub).to.be.called
 
 The command above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437473/335f7104-e6f6-11e6-8ee8-74dc21e7d4fa.png)
+![Command Log](/img/api/commands/stub/stub-in-command-log.png)
 
 When clicking on the `(stub-1)` event within the command log, the console outputs the following:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1157043/22437546/6b01e574-e6f6-11e6-878f-e10c2316d213.png)
+![Command Log](/img/api/commands/stub/inspect-the-stubbed-object-and-any-calls-or-arguments-made.png)
 
 # See also
 

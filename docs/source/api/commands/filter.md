@@ -87,11 +87,11 @@ cy.get('.left-nav>.nav').find('>li').filter('.active')
 
 The commands above will display in the command log as:
 
-![Command Log filter](https://cloud.githubusercontent.com/assets/1271364/11447263/7176e824-9511-11e5-93cc-fa10b3b94482.png)
+![Command Log filter](/img/api/commands/filter/filter-el-by-selector.png)
 
 When clicking on the `filter` command within the command log, the console outputs the following:
 
-![console.log filter](https://cloud.githubusercontent.com/assets/1271364/11447266/74b643a4-9511-11e5-8b42-6f6dfbdfb2a8.png)
+![console.log filter](/img/api/commands/filter/console-shows-list-and-filtered-element.png)
 
 # See also
 

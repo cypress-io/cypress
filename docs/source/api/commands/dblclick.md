@@ -69,11 +69,11 @@ cy.get('[data-schedule-id="4529114"]:first').dblclick()
 
 The commands above will display in the command log as:
 
-![Command Log dblclick](https://cloud.githubusercontent.com/assets/1271364/11459013/035a6c5e-969b-11e5-935f-dce5c8efbdd6.png)
+![Command Log dblclick](/img/api/commands/dblclick/double-click-in-testing.png)
 
 When clicking on `dblclick` within the command log, the console outputs the following:
 
-![console.log dblclick](https://cloud.githubusercontent.com/assets/1271364/11459015/0755e216-969b-11e5-9f7e-ed04245d75ef.png)
+![console.log dblclick](/img/api/commands/dblclick/element-double-clicked-on.png)
 
 # See also
 

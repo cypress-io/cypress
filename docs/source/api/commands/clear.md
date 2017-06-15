@@ -79,11 +79,11 @@ cy.get('input[name="name"]').clear().type('Jane Lane')
 
 The commands above will display in the command log as:
 
-![Command log for clear](https://cloud.githubusercontent.com/assets/1271364/11458939/bac1f4dc-9698-11e5-8e20-1ed9405f3d30.png)
+![Command log for clear](/img/api/commands/clear/clear-input-in-cypress.png)
 
 When clicking on `clear` within the command log, the console outputs the following:
 
-![console.log for clear](https://cloud.githubusercontent.com/assets/1271364/11458940/bdc93a50-9698-11e5-8be7-ef6a0470c3ae.png)
+![console.log for clear](/img/api/commands/clear/one-input-cleared-in-tests.png)
 
 # See also
 

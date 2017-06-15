@@ -105,11 +105,11 @@ cy.screenshot('my-image')
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/16012082/ded7af6c-3155-11e6-83cb-b0dcb6f850a7.png)
+![Command Log](/img/api/commands/screenshot/command-log-shows-name-of-screenshot-taken.png)
 
 When clicking on `screenshot` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/16012081/ded22a2e-3155-11e6-8303-0f1ec64e209b.png)
+![Console Log](/img/api/commands/screenshot/console-logs-exactly-where-screenshot-was-saved-in-file-system.png)
 
 # See also
 

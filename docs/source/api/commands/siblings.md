@@ -94,11 +94,11 @@ cy.get('.left-nav').find('li.active').siblings()
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/11458897/a93f2a1e-9697-11e5-8a5b-b131156e1aa4.png)
+![Command Log](/img/api/commands/siblings/find-siblings-of-dom-elements-to-test.png)
 
 When clicking on `siblings` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/11458898/ab940fd2-9697-11e5-96ab-a4c34efa3431.png)
+![Console Log](/img/api/commands/siblings/console-log-of-sibling-elements.png)
 
 # See also
 

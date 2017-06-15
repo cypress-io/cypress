@@ -102,11 +102,11 @@ cy.get('#nuts').prevUntil('#veggies')
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/24264621/69ed829c-0fd7-11e7-934d-c11157c36aca.png)
+![Command Log](/img/api/commands/prevuntil/prev-until-finding-elements-in-command-log.png)
 
 When clicking on `prevUntil` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/24264632/7743f57a-0fd7-11e7-99f8-c148acd17459.png)
+![Console Log](/img/api/commands/prevuntil/console-log-previous-elements-until-defined-el.png)
 
 # See also
 

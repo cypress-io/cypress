@@ -137,11 +137,11 @@ cy.get('select').select('Homer Simpson')
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/11459044/a2fd8fca-969b-11e5-8d23-3a118b82b5de.png)
+![Command Log select](/img/api/commands/select/select-homer-option-from-browser-dropdown.png)
 
 When clicking on `select` within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/11459045/a6b3bde2-969b-11e5-9357-272ea9684987.png)
+![Console Log select](/img/api/commands/select/console-log-for-select-shows-option-and-any-events-caused-from-clicking.png)
 
 # See also
 

@@ -104,6 +104,10 @@ cy.wrap([1,2,3]).each(function(num, i, array){
 
 You can stop the `.each()` loop early by returning `false` in the callback function.
 
+# Command Log
+
+**`cy.each()` does *not* log in the command log**
+
 # See also
 
 - {% url `.spread()` spread %}

@@ -206,7 +206,7 @@ cy
 
 **Similarities to Chai**
 
-If you've worked in [Chai](http://chaijs.com/) before, you will recognize that `.and()` matches the same fluent assertion syntax.
+If you've worked in {% url "Chai" http://chaijs.com/ %} before, you will recognize that `.and()` matches the same fluent assertion syntax.
 
 Take this *explicit* assertion for example:
 
@@ -236,11 +236,11 @@ cy
 
 The commands above will display in the command log as:
 
-![Command log for and](https://cloud.githubusercontent.com/assets/1271364/11458700/36d1e646-9693-11e5-8771-158230530fdc.png)
+![Command log for assertions](/img/api/commands/and/cypress-and-command-log.png)
 
 When clicking on `assert` within the command log, the console outputs the following:
 
-![console.log for and](https://cloud.githubusercontent.com/assets/1271364/11458702/3b6873be-9693-11e5-88f7-a928ebdac80c.png)
+![console.log for assertions](/img/api/commands/and/cypress-assertions-console-log.png)
 
 # See also
 

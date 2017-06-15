@@ -82,11 +82,11 @@ cy.get('.query-ul').within(function(){
 
 The commands above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1271364/26793399/ddafd970-49eb-11e7-9267-c35b583bb76f.png)
+![Command Log root](/img/api/commands/root/find-root-element-and-assert.png)
 
 When clicking on the `root` command within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1271364/26793398/dda22da2-49eb-11e7-98e8-5cd381aac175.png)
+![Console Log root](/img/api/commands/root/console-log-root-which-is-usually-the-main-document.png)
 
 # See also
 

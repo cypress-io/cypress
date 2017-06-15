@@ -68,11 +68,11 @@ cy.document()
 
 The command above will display in the command log as:
 
-![Command log document](https://cloud.githubusercontent.com/assets/1271364/11459311/aab8fe88-96a1-11e5-9b72-b0501204030d.png)
+![Command log document](/img/api/commands/document/get-document-of-application-in-command-log.png)
 
 When clicking on `document` within the command log, the console outputs the following:
 
-![console.log document](https://cloud.githubusercontent.com/assets/1271364/11459314/ad27d7e8-96a1-11e5-8d1c-9c4ede6c54aa.png)
+![console.log document](/img/api/commands/document/console-yields-the-document-of-aut.png)
 
 # See also
 

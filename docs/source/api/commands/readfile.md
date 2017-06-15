@@ -162,11 +162,11 @@ cy.readFile('cypress.json')
 
 The command above will display in the command log as:
 
-![Command Log](https://cloud.githubusercontent.com/assets/1157043/17934353/a02d6c34-69e5-11e6-8f1d-ab1eda17ab3b.png)
+![Command Log](/img/api/commands/readfile/readfile-can-get-content-of-system-files-in-tests.png)
 
 When clicking on the `readFile` command within the command log, the console outputs the following:
 
-![Console Log](https://cloud.githubusercontent.com/assets/1157043/17934460/089e0652-69e6-11e6-9f00-7eb282be0d27.png)
+![Console Log](/img/api/commands/readfile/console-log-shows-content-from-file-formatted-as-javascript.png)
 
 # See also
 

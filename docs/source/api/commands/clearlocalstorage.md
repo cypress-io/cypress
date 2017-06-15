@@ -76,11 +76,11 @@ cy.clearLocalStorage(/prop1|2/).then(function(ls){
 
 The commands above will display in the command log as:
 
-![Command log for clearLocalStorage](https://cloud.githubusercontent.com/assets/1271364/26421551/738be792-4094-11e7-9100-14937a369c7c.png)
+![Command log for clearLocalStorage](/img/api/commands/clearlocalstorage/clear-ls-localstorage-in-command-log.png)
 
 When clicking on `clearLocalStorage` within the command log, the console outputs the following:
 
-![console.log for clearLocalStorage](https://cloud.githubusercontent.com/assets/1271364/26421552/73b17ac0-4094-11e7-8a13-b59bc9613613.png)
+![console.log for clearLocalStorage](/img/api/commands/clearlocalstorage/local-storage-object-shown-in-console.png)
 
 # See also
 

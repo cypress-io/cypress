@@ -101,11 +101,11 @@ cy.get('.left-nav').find('li.active').next()
 
 The commands above will display in the command log as:
 
-![Command Log next](https://cloud.githubusercontent.com/assets/1271364/11458857/afcfddf2-9696-11e5-9405-0cd994f70d45.png)
+![Command Log next](/img/api/commands/next/find-next-element-when-testing-dom.png)
 
 When clicking on `next` within the command log, the console outputs the following:
 
-![Console log next](https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png)
+![Console log next](/img/api/commands/next/elements-next-command-applied-to.png)
 
 # See also
 
