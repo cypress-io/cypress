@@ -35,10 +35,10 @@ Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %
 
 # Frequently Asked Questions
 
-## How do I record my tests?
+## {% fa fa-angle-right %} How do I record my tests?
 
 1. First {% url 'setup the project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
-2. Then {% url 'record your runs' dashboard-features#How-do-I-record-my-tests %}.
+2. Then [record your runs](#How-do-I-record-my-tests).
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
 

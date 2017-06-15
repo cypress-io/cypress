@@ -14,6 +14,11 @@ Recorded runs are the results and artifacts captured from your test runs.
 
 We capture the following:
 
+- [Standard Output](#Standard-Output)
+- [Test Failures](#Test-Failures)
+- [Screenshots](#Screenshots)
+- [Video](#Video)
+
 
 ## {% fa fa-code fa-fw %} Standard Output
 
