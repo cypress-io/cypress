@@ -1,6 +1,6 @@
 ---
 title: root
-comments: true
+comments: false
 ---
 
 Get the root element.
@@ -82,11 +82,11 @@ cy.get('.query-ul').within(function(){
 
 The commands above will display in the command log as:
 
-<img width="471" alt="screen shot 2017-06-05 at 12 37 56 pm" src="https://cloud.githubusercontent.com/assets/1271364/26793399/ddafd970-49eb-11e7-9267-c35b583bb76f.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/26793399/ddafd970-49eb-11e7-9267-c35b583bb76f.png)
 
 When clicking on the `root` command within the command log, the console outputs the following:
 
-<img width="394" alt="screen shot 2017-06-05 at 12 38 02 pm" src="https://cloud.githubusercontent.com/assets/1271364/26793398/dda22da2-49eb-11e7-98e8-5cd381aac175.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/26793398/dda22da2-49eb-11e7-98e8-5cd381aac175.png)
 
 # See also
 

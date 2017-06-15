@@ -1,6 +1,6 @@
 ---
 title: Error Messages
-comments: true
+comments: false
 ---
 
 # Test File Errors
@@ -91,7 +91,7 @@ describe('Some Tests', function(){
 
 Simply move those Cypress commands into an `it(...)` block and everything will work correctly.
 
-If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the [Example Repos](https://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new), or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
+If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url 'Examples' examples/recipes/unit-testing %}, {% open_an_issue 'open an issue' %>, or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
 
 ***
 
@@ -168,7 +168,7 @@ You may see a variation of this message for 4 different reasons:
 
 Cypress runs several calculations to ensure an element can *actually* be interacted with like a real user would. If you're seeing this error, the solution is often obvious. You may need to *guard* your commands (due to a timing or an animation issue).
 
-There have been situations where Cypress does not correctly allow you to interact with an element that should be interactable. If that's the case, [open an issue](https://github.com/cypress-io/cypress/issues/new).
+There have been situations where Cypress does not correctly allow you to interact with an element that should be interactable. If that's the case, {% open_an_issue 'open an issue' %>.
 
 If you'd like to override these built-in checks, provide the `{force: true}` option to the action itself. Refer to each command for their available options, additional use cases, and argument usage.
 
@@ -320,9 +320,9 @@ You may receive this error when trying to run Cypress tests in {% url 'Continuou
 
 Since no record key was passed, Cypress checks for any environment variable with the name `CYPRESS_RECORD_KEY`. In this case, that was also not found.
 
-You can get your project's record key by locating it in your settings tab in the Desktop or in the [Dashboard](https://on.cypress.io/dashboard).
+You can get your project's record key by locating it in your settings tab in the Desktop or in the {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 
-You will want to then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
+You will want to then {% url 'add the key to your config file or as an environment variable' continuous-integration#Record-Key %}.
 
 ***
 
@@ -388,6 +388,6 @@ Browsers are enormously complex pieces of software, and from time to time they w
 
 {% img /img/guides/appendices/error-messages/chromium-renderer-crashed.png Chromium Renderer process just crashed %}
 
-At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an [open issue documenting the steps](https://github.com/cypress-io/cypress/issues/349) we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
+At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an {% issue 349 'open issue documenting the steps' %} we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
 
-If you are running `Docker` [there is a simple one line fix for this problem documented here](https://github.com/cypress-io/cypress/issues/350).
+If you are running `Docker` {% issue 350 'there is a simple one line fix for this problem documented here' %}.

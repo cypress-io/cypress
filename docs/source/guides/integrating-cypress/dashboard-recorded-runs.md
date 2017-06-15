@@ -1,14 +1,14 @@
 ---
 title: Dashboard&#58; Recorded Runs
-comments: true
+comments: false
 ---
 
 Recorded runs are the results and artifacts captured from your test runs.
 
 **To record your tests:**
 
-1. First [setup your project to record](https://on.cypress.io/recording-project-runs).
-2. Then [run the command](https://on.cypress.io/how-do-i-record-runs) `cypress run --record --key <record_key>`.
+1. First {% url 'setup the project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
+2. Then {% url 'record your runs' dashboard-features#How-do-I-record-my-tests %}.
 
 # What is recorded during a test run?
 

@@ -1,6 +1,6 @@
 ---
 title: wait
-comments: true
+comments: false
 ---
 
 Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
@@ -38,7 +38,7 @@ The amount of time to wait in milliseconds.
 An aliased route as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
 {% note info %}
-[Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
+{% url 'Read about using aliases here.' aliases %}
 {% endnote %}
 
 **{% fa fa-angle-right %} aliases** ***(Array)***
@@ -85,7 +85,7 @@ cy.wait(5000)     // <--- this is unnecessary
 
 ***Unnecessary wait for `cy.visit()`***
 
-Waiting for this is unnecessary because the [`cy.visit()`](https://on.cypress.io/visit) resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
+Waiting for this is unnecessary because the {% url '`cy.visit()`' visit %} resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
 
 ```javascript
 cy.visit("http://localhost/8080")

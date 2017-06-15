@@ -1,6 +1,6 @@
 ---
 title: exec
-comments: true
+comments: false
 ---
 
 Execute a system command.
@@ -150,11 +150,11 @@ cy.exec('cat cypress.json')
 
 The command above will display in the command log as:
 
-<img width="445" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/15369507/e03a7eca-1d00-11e6-8558-396d8c9b6d98.png">
+![Command Log exec](https://cloud.githubusercontent.com/assets/1157043/15369507/e03a7eca-1d00-11e6-8558-396d8c9b6d98.png)
 
 When clicking on the `exec` command within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15969867/e3ab646e-2eff-11e6-9199-987ca2f74025.png">
+![console.log exec](https://cloud.githubusercontent.com/assets/1157043/15969867/e3ab646e-2eff-11e6-9199-987ca2f74025.png)
 
 # See also
 

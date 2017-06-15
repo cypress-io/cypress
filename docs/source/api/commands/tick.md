@@ -1,6 +1,6 @@
 ---
 title: tick
-comments: true
+comments: false
 ---
 
 Move time after overriding a native time function with {% url `cy.clock()` clock %}.

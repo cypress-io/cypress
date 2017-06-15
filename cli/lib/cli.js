@@ -1,11 +1,12 @@
 const _ = require('lodash')
 const commander = require('commander')
+const { oneLine } = require('common-tags')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = (opts) => _.pick(opts, 'spec', 'reporter', 'reporterOptions', 'path', 'destination', 'port', 'env', 'cypressVersion', 'config', 'record', 'key')
+const parseOpts = (opts) => _.pick(opts, 'spec', 'reporter', 'reporterOptions', 'path', 'destination', 'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser')
 
 const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -16,6 +17,10 @@ const descriptions = {
   port: 'runs Cypress on a specific port. overrides any value in cypress.json. defaults to "2020"',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
+  browser: oneLine`
+    runs Cypress in the browser with the given name.
+    note: using an external browser will cancel video recording of tests.
+  `,
 }
 
 const text = (description) => {
@@ -42,6 +47,7 @@ module.exports = {
       .option('-p, --port <port>',                         text('port'))
       .option('-e, --env <env>',                           text('env'))
       .option('-c, --config <config>',                     text('config'))
+      .option('-b, --browser <browser name>',              text('browser'))
       .action((opts) => require('./exec/run').start(parseOpts(opts)))
 
     program

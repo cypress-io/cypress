@@ -1,5 +1,6 @@
+---
 title: Available Assertions
-comments: true
+comments: false
 ---
 
 Cypress bundles the popular {% url 'Chai' available-assertions#Chai %} assertion library, as well as helpful extensions for {% url 'Sinon' available-assertions#Sinon-Chai %} and {% url 'jQuery' available-assertions#Chai-jQuery %}, bringing you dozens of powerful assertions for free.

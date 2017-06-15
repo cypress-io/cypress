@@ -1,6 +1,6 @@
 ---
 title: spread
-comments: true
+comments: false
 ---
 
 Expand an array into multiple arguments.

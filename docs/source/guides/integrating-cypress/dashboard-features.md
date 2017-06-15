@@ -1,9 +1,9 @@
 ---
 title: The Cypress Dashboard
-comments: true
+comments: false
 ---
 
-[The Dashboard](https://on.cypress.io/dashboard) is a Cypress service that gives you access to recorded tests - typically when running Cypress tests from your [CI provider](https://on.cypress.io/continuous-integration). The Dashboard provides you insight into what happened when your tests ran.
+{% url 'Dashboard' https://on.cypress.io/dashboard %} is a Cypress service that gives you access to recorded tests - typically when running Cypress tests from your {% url 'CI provider' continuous-integration %}. The Dashboard provides you insight into what happened when your tests ran.
 
 ![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
 
@@ -23,7 +23,7 @@ Additionally we've integrated the test runs into the Cypress {% url 'Desktop App
 
 # Example Projects
 
-Once you're logged into the [Dashboard](https://on.cypress.io/dashboard) you can view any [public project](https://on.cypress.io/what-is-project-access).
+Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %} you can view any [public project](https://on.cypress.io/what-is-project-access).
 
 **Here are some of our own public projects you can view:**
 
@@ -37,20 +37,20 @@ Once you're logged into the [Dashboard](https://on.cypress.io/dashboard) you can
 
 ## How do I record my tests?
 
-1. First [setup your project to record](https://on.cypress.io/recording-project-runs).
-2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
+1. First {% url 'setup the project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
+2. Then {% url 'record your runs' dashboard-features#How-do-I-record-my-tests %}.
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
 
 ## How is this different than CI?
 
-[Cypress is *complimentary* to your CI provider](https://on.cypress.io/continuous-integration), and plays a completely different role.
+{% url 'Cypress is *complimentary* to your CI provider' continuous-integration %}, and plays a completely different role.
 
 CI providers have no idea what is going on inside of the Cypress process while your tests run. They are simply programmed to know whether or not a process failed.
 
-The Cypress [Dashboard](https://on.cypress.io/dashboard) provides you with the low level details of *what* happened while the tests ran. Using both your CI provider *and* Cypress together gives you the insight to debug failing tests.
+The Cypress {% url 'Dashboard' https://on.cypress.io/dashboard %} provides you with the low level details of *what* happened while the tests ran. Using both your CI provider *and* Cypress together gives you the insight to debug failing tests.
 
-When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the `stdout` as well as any errors during failures, any screenshots taken, and an entire video recording of the tests run.
+When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the {% url 'Dashboard' https://on.cypress.io/dashboard %} and see all of the `stdout` as well as any errors during failures, any screenshots taken, and an entire video recording of the tests run.
 
 ## How much does this cost?
 

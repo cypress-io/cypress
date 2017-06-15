@@ -1,4 +1,5 @@
 'use strict'
+const path = require('path')
 const util = require('hexo-util')
 const urlGenerator = require('../lib/url_generator')
 
@@ -54,6 +55,30 @@ hexo.extend.tag.register('fa', function (args) {
   return `<i class="fa ${classNames}"></i>`
 })
 
+hexo.extend.tag.register('open_an_issue', function (args) {
+  const attrs = {
+    href: 'https://github.com/cypress-io/cypress/issues/new',
+    target: '_blank',
+  }
+
+  const text = args[0] || 'Open an issue'
+
+  return util.htmlTag('a', attrs, text)
+})
+
+hexo.extend.tag.register('issue', function (args) {
+  const num = args[0]
+
+  const attrs = {
+    href: `https://github.com/cypress-io/cypress/issues/${num}`,
+    target: '_blank',
+  }
+
+  const text = args[1] || `issue #${num}`
+
+  return util.htmlTag('a', attrs, text)
+})
+
 hexo.extend.tag.register('url', function (args) {
   // {% url `.and()` and %}
   // {% url `.should()` should#Notes %}
@@ -106,4 +131,10 @@ hexo.extend.tag.register('url', function (args) {
 
   })
 
+}, { async: true })
+
+hexo.extend.tag.register('partial', (fileName) => {
+  const pathToFile = path.resolve('source', '_partial', `${fileName}.md`)
+
+  return hexo.render.render({ path: pathToFile, engine: 'markdown' })
 }, { async: true })

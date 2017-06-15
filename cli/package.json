@@ -11,7 +11,8 @@
     "test-unit": "mocha",
     "test-watch": "mocha --watch",
     "lint": "$(bin-up eslint) --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
-    "pretest": "npm run lint"
+    "pretest": "npm run lint && npm run test-dependencies",
+    "test-dependencies": "deps-ok && dependency-check . --no-dev"
   },
   "dependencies": {
     "bluebird": "^3.4.5",
@@ -27,19 +28,22 @@
     "lodash": "^4.16.3",
     "minimist": "^1.2.0",
     "progress": "^1.1.8",
+    "ramda": "^0.24.1",
     "request": "^2.81.0",
     "request-progress": "^0.3.1",
     "tmp": "0.0.31",
     "url": "^0.11.0",
-    "xvfb": "cypress-io/node-xvfb"
+    "xvfb": "cypress-io/node-xvfb",
+    "yauzl": "^2.8.0"
   },
   "devDependencies": {
     "bin-up": "^1.0.1",
     "chai": "^3.5.0",
     "clear-module": "^2.1.0",
+    "dependency-check": "^2.8.0",
+    "deps-ok": "^1.2.0",
     "mocha": "^3.2.0",
     "nock": "^9.0.9",
-    "ramda": "^0.24.1",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0",
     "snap-shot": "^2.17.0"

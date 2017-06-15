@@ -1,12 +1,12 @@
 ---
 title: as
-comments: true
+comments: false
 ---
 
 Assign an alias for later use. Reference the alias later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command with a `@` prefix.
 
 {% note info %}
-**Note:** `.as()` assumes you are already familiar with core concepts such as [aliases](https://on.cypress.io/guides/using-aliases)
+**Note:** `.as()` assumes you are already familiar with core concepts such as {% url 'aliases' aliases %}
 {% endnote %}
 
 # Syntax
@@ -91,10 +91,10 @@ cy
 
 Aliases of routes display in the routes instrument panel:
 
-<img width="567" alt="screen shot 2015-11-29 at 2 25 47 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459470/22e31e54-96a5-11e5-8895-a6ff5f8bb973.png">
+![Command log for route](https://cloud.githubusercontent.com/assets/1271364/11459470/22e31e54-96a5-11e5-8895-a6ff5f8bb973.png)
 
 # See also
 
 - {% url `cy.get()` get %}
-- [Using Aliases](https://on.cypress.io/guides/using-aliases)
+- {% url 'Aliases' aliases %}
 - {% url `cy.wait()` wait %}

@@ -1,13 +1,9 @@
 ---
 title: fixture
-comments: true
+comments: false
 ---
 
 Load a fixed set of data located in a file.
-
-{% note info %}
-**Note:** `cy.fixture()` assumes you are already familiar with core concepts such as [fixtures](https://on.cypress.io/guides/creating-fixtures)
-{% endnote %}
 
 # Syntax
 
@@ -145,7 +141,7 @@ cy
 **Using fixtures to bootstrap data**
 
 {% note info %}
-[Check out our example recipe using cy.fixture to bootstrap data for our application.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+{% url 'Check out our example recipe using cy.fixture to bootstrap data for our application.' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}
 {% endnote %}
 
 **Using an alias to access a fixture**
@@ -225,8 +221,7 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 
 # See also
 
-- [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - {% url `cy.readFile()` readfile %}
-- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+- {% url 'Recipe: Bootstrapping App Test Data' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js%}
 - {% url `cy.route()` route %}
 - {% url `.then()` then %}

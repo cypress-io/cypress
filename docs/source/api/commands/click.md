@@ -1,6 +1,6 @@
 ---
 title: click
-comments: true
+comments: false
 ---
 
 Click a DOM element.
@@ -129,7 +129,7 @@ cy.get('button').click(5, 60, { force: true })
 **Hover and clicking hidden elements**
 
 {% note info %}
-[Check out our example recipe on testing hover and working with hidden elements.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
+{% url 'Check out our example recipe on testing hover and working with hidden elements.' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js %}
 {% endnote %}
 
 **Click all buttons found on the page**
@@ -152,9 +152,9 @@ cy.get('button').click()
 
 The events are fired to spec, including the coordinates of where the event took place.
 
-At the moment, `mouseover` and `mouseout` events are *not* fired. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
+At the moment, `mouseover` and `mouseout` events are *not* fired. {% open_an_issue %} if you need this to be fixed.
 
-Additionally if the `mousedown` event causes the element to be removed from the DOM, the remaining events should continue to be fired, but to the resulting element left below the removed element. This has also not been implemented. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
+Additionally if the `mousedown` event causes the element to be removed from the DOM, the remaining events should continue to be fired, but to the resulting element left below the removed element. This has also not been implemented. {% open_an_issue %} if you need this to be fixed.
 
 **Focus is given to the first focusable element**
 
@@ -172,11 +172,11 @@ The coordinates of the click will be recorded the exact moment the click happens
 
 **pointer-events: none**
 
-Cypress does not currently factor in `pointer-events: none` in its clicking algorithm. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
+Cypress does not currently factor in `pointer-events: none` in its clicking algorithm. {% open_an_issue %} if you need this to be fixed.
 
 **Element removal during `mousedown` or `mouseup`**
 
-The spec states what should happen if the element clicked is removed from the DOM during `mousedown` or `mouseup`, but Cypress is not currently factoring this in. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
+The spec states what should happen if the element clicked is removed from the DOM during `mousedown` or `mouseup`, but Cypress is not currently factoring this in. {% open_an_issue %} if you need this to be fixed.
 
 **Animations**
 
@@ -198,11 +198,11 @@ cy.get('form').find('button').contains('Create User').click()
 
 The commands above will display in the command log as:
 
-<img width="590" alt="screen shot 2015-11-29 at 1 07 27 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458988/3cd5bae8-969a-11e5-9938-40a553402992.png">
+![Command log for click](https://cloud.githubusercontent.com/assets/1271364/11458988/3cd5bae8-969a-11e5-9938-40a553402992.png)
 
 When clicking on `click` within the command log, the console outputs the following:
 
-<img width="759" alt="screen shot 2015-11-29 at 1 07 49 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458989/4036493c-969a-11e5-8f98-377dfce1f2c1.png">
+![console.log for click](https://cloud.githubusercontent.com/assets/1271364/11458989/4036493c-969a-11e5-8f98-377dfce1f2c1.png)
 
 # See also
 

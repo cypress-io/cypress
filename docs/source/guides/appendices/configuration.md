@@ -1,8 +1,9 @@
+---
 title: Configuration
-comments: true
+comments: false
 ---
 
-When a project is added to Cypress, a `cypress.json` file is created in the project. This file is used to store the `projectId` ([after configuring your tests to record](https://on.cypress.io/guides/projects)) and any configuration values you supply.
+When a project is added to Cypress, a `cypress.json` file is created in the project. This file is used to store the `projectId` ({% url 'after configuring your tests to record' dashboard-projects#Set-up-a-Project-to-Record %}) and any configuration values you supply.
 
 ```json
 {
@@ -19,7 +20,7 @@ The default behavior of Cypress can be modified by supplying any of the followin
 Option | Default | Description
 ----- | ---- | ----
 `baseUrl` | `null` | Url used as prefix for {% url `cy.visit()` visit %} or {% url `cy.request()` request %} command's url
-`env` | `{}` | Any values to be set as [environment variables](https://on.cypress.io/guides/environment-variables)
+`env` | `{}` | Any values to be set as {% url 'environment variables' environment-variables %}
 `ignoreTestFiles` | `*.hot-update.js` | A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest using [http://globtester.com](http://globtester.com) to test what files would match.
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
 `port` | `null` | Port used to host Cypress. Normally this is a randomly generated port
@@ -88,7 +89,7 @@ Option | Default | Description
 
 # Overriding Options
 
-Besides modifying your `cypress.json` you can also change configuration options through the *command line* or from your system *[environment variables](https://on.cypress.io/guides/environment-variables)*.
+Besides modifying your `cypress.json` you can also change configuration options through the *command line* or from your system *{% url 'environment variables' environment-variables %}*.
 
 ## Command Line
 
@@ -110,7 +111,7 @@ cypress run --record --config viewportWidth=1280,viewportHeight=720
 
 ## Environment Variables
 
-You can also use [environment variables](https://on.cypress.io/guides/environment-variables) to override configuration values. This is especially useful in {% url 'Continuous Integration' continuous-integration %} or when working locally. This gives you the ability to change configuration options without modifying any code or build scripts.
+You can also use {% url 'environment variables' environment-variables %} to override configuration values. This is especially useful in {% url 'Continuous Integration' continuous-integration %} or when working locally. This gives you the ability to change configuration options without modifying any code or build scripts.
 
 By default, any environment variable that matches a corresponding configuration key will override the `cypress.json` value.
 
@@ -131,7 +132,7 @@ export CYPRESS_PAGE_LOAD_TIMEOUT=100000
 {% note warning  %}
 Environment variables that do not match configuration keys will instead be set as regular environment variables for use in your tests with `Cypress.env()`.
 
-You can [read more about Environment Variables](https://on.cypress.io/environment-variables).
+You can {% url 'read more about Environment Variables' environment-variables %}.
 {% endnote %}
 
 ## `Cypress.config()`

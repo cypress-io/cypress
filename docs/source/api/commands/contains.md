@@ -1,6 +1,6 @@
 ---
 title: contains
-comments: true
+comments: false
 ---
 
 Get the DOM element containing the text. DOM elements can contain *more* than the desired text and still match. Additionally, Cypress [prefers some DOM elements](#Notes) over the deepest element found.
@@ -318,11 +318,11 @@ cy.get('h1').contains('New User')
 
 The commands above will display in the command log as:
 
-<img width="536" alt="screen shot 2015-11-27 at 1 43 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446973/009ac32c-950d-11e5-9eaa-09f8b8ddf086.png">
+![Command Log contains](https://cloud.githubusercontent.com/assets/1271364/11446973/009ac32c-950d-11e5-9eaa-09f8b8ddf086.png)
 
 When clicking on the `contains` command within the command log, the console outputs the following:
 
-<img width="477" alt="screen shot 2015-11-27 at 1 43 50 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446977/04b31be4-950d-11e5-811e-4fd83d364d00.png">
+![console.log contains](https://cloud.githubusercontent.com/assets/1271364/11446977/04b31be4-950d-11e5-811e-4fd83d364d00.png)
 
 # See also
 

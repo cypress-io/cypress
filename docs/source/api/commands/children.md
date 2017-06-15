@@ -1,6 +1,6 @@
 ---
 title: children
-comments: true
+comments: false
 ---
 
 Get the children of each DOM element within a set of DOM elements.
@@ -117,11 +117,11 @@ cy.get('.left-nav>.nav').children().should('have.length', 8)
 
 The commands above will display in the command log as:
 
-<img width="521" alt="screen shot 2015-11-27 at 1 52 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447069/2b0f8a7e-950e-11e5-96b5-9d82d9fdddec.png">
+![Command log for children](https://cloud.githubusercontent.com/assets/1271364/11447069/2b0f8a7e-950e-11e5-96b5-9d82d9fdddec.png)
 
 When clicking on the `children` command within the command log, the console outputs the following:
 
-<img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
+![console.log for children](https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png)
 
 # See also
 

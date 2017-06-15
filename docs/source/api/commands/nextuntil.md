@@ -1,6 +1,6 @@
 ---
 title: nextUntil
-comments: true
+comments: false
 ---
 
 Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
@@ -103,11 +103,11 @@ cy.get('#veggies').nextUntil('#nuts')
 
 The commands above will display in the command log as:
 
-<img width="563" alt="screen shot 2017-03-23 at 2 17 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/24263453/96a8c0b6-0fd3-11e7-8a66-da9177ca94a7.png">
+![Command Log nextUntil](https://cloud.githubusercontent.com/assets/1271364/24263453/96a8c0b6-0fd3-11e7-8a66-da9177ca94a7.png)
 
 When clicking on `nextUntil` within the command log, the console outputs the following:
 
-<img width="514" alt="screen shot 2017-03-23 at 2 18 01 pm" src="https://cloud.githubusercontent.com/assets/1271364/24263481/a20ce2f2-0fd3-11e7-881c-f6bf8d652263.png">
+![Console Log nextUntil](https://cloud.githubusercontent.com/assets/1271364/24263481/a20ce2f2-0fd3-11e7-881c-f6bf8d652263.png)
 
 # See also
 

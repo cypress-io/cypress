@@ -1,6 +1,6 @@
 ---
 title: last
-comments: true
+comments: false
 ---
 
 Get the last DOM element within a set of DOM elements.
@@ -78,11 +78,11 @@ cy.get('form').find('button').last()
 
 The commands above will display in the command log as:
 
-<img width="560" alt="screen shot 2015-11-29 at 12 33 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458797/8e9abdf6-9695-11e5-8594-7044751d5199.png">
+![Command Log last](https://cloud.githubusercontent.com/assets/1271364/11458797/8e9abdf6-9695-11e5-8594-7044751d5199.png)
 
 When clicking on `last` within the command log, the console outputs the following:
 
-<img width="746" alt="screen shot 2015-11-29 at 12 34 07 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458799/91a115cc-9695-11e5-8569-93fbaa2704d4.png">
+![Console log last](https://cloud.githubusercontent.com/assets/1271364/11458799/91a115cc-9695-11e5-8569-93fbaa2704d4.png)
 
 # See also
 

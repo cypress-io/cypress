@@ -1,10 +1,10 @@
 ---
 title: Cypress in a Nutshell
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - What Cypress looks like
 - How Cypress queries the DOM more safely than jQuery

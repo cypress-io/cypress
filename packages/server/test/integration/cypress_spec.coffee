@@ -520,6 +520,11 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
 
+    it "logs error when browser cannot be found", ->
+    cypress.start(["--project=#{@idsPath}", "--browser=foo"])
+    .then =>
+      @expectExitWithErr("BROWSER_NOT_FOUND", "browser foo")
+
     it "logs error and exits when spec file was specified and does not exist", ->
       Project.add(@todosPath)
       .then =>

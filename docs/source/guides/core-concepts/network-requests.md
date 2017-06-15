@@ -1,10 +1,10 @@
 ---
 title: Dealing with the Network
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress enables you to isolate any or all of your front-end with {% url `cy.server()` server %} and {% url `cy.route()` route %}
 - What tradeoffs we make when we stub our network requests
@@ -153,7 +153,7 @@ cy.server()
 cy.route('GET', 'activities/*', 'fixture:activities.json')
 ```
 
-You can additionally reference [aliases](https://on.cypress.io/guides/using-aliases) within responses. These aliases do not have to point to fixtures, but that is a common use case. Separating out a fixture enables you to work and mutate that object prior to handing it off to a response.
+You can additionally reference {% url 'aliases' aliases %} within responses. These aliases do not have to point to fixtures, but that is a common use case. Separating out a fixture enables you to work and mutate that object prior to handing it off to a response.
 
 ```javascript
 cy.server()

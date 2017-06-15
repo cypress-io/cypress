@@ -1,6 +1,6 @@
 ---
 title: clock
-comments: true
+comments: false
 ---
 
 `cy.clock()` overrides native global functions related to time allowing them to be controlled synchronously via {% url `cy.tick()` tick %} or the yielded `clock` object. This includes controlling:
@@ -172,7 +172,7 @@ cy.clock(null, ['setTimeout', 'clearTimeout'])
 **Using cy.clock() and cy.tick()**
 
 {% note info %}
-[Check out our example recipe testing spying, stubbing and time.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url 'Check out our example recipe testing spying, stubbing and time.' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js%}
 {% endnote %}
 
 # Notes
@@ -196,16 +196,16 @@ cy.tick(1000)
 
 The command above will display in the command log as:
 
-<img width="448" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png">
+![Command Log clock](https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png)
 
 When clicking on the `clock` command within the command log, the console outputs the following:
 
-<img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437920/0786f9d8-e6f8-11e6-9e77-926b15aa8dae.png">
+![console.log clock command](https://cloud.githubusercontent.com/assets/1157043/22437920/0786f9d8-e6f8-11e6-9e77-926b15aa8dae.png)
 
 # See also
 
 - {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
+- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' https://github.com/cypress-io/cypress-example-recipes %}
 - {% url `cy.tick()` tick %}

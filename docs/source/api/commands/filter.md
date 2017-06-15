@@ -1,6 +1,6 @@
 ---
 title: filter
-comments: true
+comments: false
 ---
 
 Get the DOM elements that match a specific selector.
@@ -87,11 +87,11 @@ cy.get('.left-nav>.nav').find('>li').filter('.active')
 
 The commands above will display in the command log as:
 
-<img width="522" alt="screen shot 2015-11-27 at 2 15 53 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447263/7176e824-9511-11e5-93cc-fa10b3b94482.png">
+![Command Log filter](https://cloud.githubusercontent.com/assets/1271364/11447263/7176e824-9511-11e5-93cc-fa10b3b94482.png)
 
 When clicking on the `filter` command within the command log, the console outputs the following:
 
-<img width="503" alt="screen shot 2015-11-27 at 2 16 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447266/74b643a4-9511-11e5-8b42-6f6dfbdfb2a8.png">
+![console.log filter](https://cloud.githubusercontent.com/assets/1271364/11447266/74b643a4-9511-11e5-8b42-6f6dfbdfb2a8.png)
 
 # See also
 

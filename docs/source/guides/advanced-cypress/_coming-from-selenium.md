@@ -1,5 +1,5 @@
 title: Coming From Selenium
-comments: true
+comments: false
 ---
 
 # What You'll Learn

@@ -1,6 +1,6 @@
 ---
 title: and
-comments: true
+comments: false
 ---
 
 Make an assertion.
@@ -10,7 +10,7 @@ An alias of {% url `.should()` should %}
 {% endnote %}
 
 {% note info %}
-**Note:** `.and()` assumes you are already familiar with core concepts such as [assertions](https://on.cypress.io/guides/making-assertions)
+**Note:** `.and()` assumes you are already familiar with core concepts such as {% url 'assertions' cypress-in-a-nutshell#Assertions %}
 {% endnote %}
 
 # Syntax
@@ -78,13 +78,24 @@ cy
 
 ## Timeout
 
-`.and()` will continue to retry the assertion to the duration of the previous cy commands `timeout` or the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+`.and()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', 'error')
                          ↲
-      // timeout here will be passed down to the '.and()'
-      // and it will retry for up to 10 secs
+  // timeout here will be passed down to the '.and()'
+  // and it will retry for up to 10 secs
+```
+
+```javascript
+cy.get('input', {timeout: 10000}).should('have.value', 'US').and(function($input)){
+                                    ↲
+  // timeout here will be passed down to the '.and()'
+  // unless an assertion throws earlier,
+  // ALL of the assertions will retry for up to 10 secs
+  expect($input).to.not.be('disabled')
+  expect($input).to.not.have.class('error')
+})
 ```
 
 # Examples
@@ -209,7 +220,7 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
-You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
+{% partial then_should_difference %}
 
 # Command Log
 
@@ -225,13 +236,13 @@ cy
 
 The commands above will display in the command log as:
 
-<img width="530" alt="screen shot 2015-11-29 at 12 16 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458700/36d1e646-9693-11e5-8771-158230530fdc.png">
+![Command log for and](https://cloud.githubusercontent.com/assets/1271364/11458700/36d1e646-9693-11e5-8771-158230530fdc.png)
 
 When clicking on `assert` within the command log, the console outputs the following:
 
-<img width="636" alt="screen shot 2015-11-29 at 12 17 03 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458702/3b6873be-9693-11e5-88f7-a928ebdac80c.png">
+![console.log for and](https://cloud.githubusercontent.com/assets/1271364/11458702/3b6873be-9693-11e5-88f7-a928ebdac80c.png)
 
 # See also
 
-- [Making Assertions](https://on.cypress.io/guides/making-assertions)
+- {% url 'Assertions' cypress-in-a-nutshell#Assertions %}
 - {% url `.should()` should %}

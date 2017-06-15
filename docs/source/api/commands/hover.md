@@ -1,10 +1,10 @@
 ---
 title: hover
-comments: true
+comments: false
 ---
 
 {% note danger %}
-Cypress does not have a **cy.hover()** command. See [Issue #10](https://github.com/cypress-io/cypress/issues/10).
+Cypress does not have a **cy.hover()** command. See {% issue 10 'Issue #10' %}.
 {% endnote %}
 
 If `cy.hover()` is used, an error will display and redirect you to this page.
@@ -23,7 +23,7 @@ cy.get('.content').invoke('show').click()
 ```
 
 {% note info %}
-[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
+{% url 'Check out our example recipe on testing hover and working with hidden elements' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js %}
 {% endnote %}
 
 You can also force the action to be performed on the element regardless of whether the element is visible or not.
@@ -52,5 +52,5 @@ cy.get('.content').trigger('mouseover')
 # See also
 
 - {% url `.invoke()` invoke %}
-- [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
+- {% url 'Recipe: Dealing with Hover and Hidden Elements' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js %}
 - {% url `cy.wrap()` wrap %}

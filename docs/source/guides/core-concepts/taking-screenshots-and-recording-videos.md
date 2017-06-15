@@ -1,10 +1,10 @@
 ---
 title: Taking Screenshots and Recording Videos
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress captures screenshots of test failures automatically
 - How to manually grab your own screenshot
@@ -48,4 +48,4 @@ Something you can take advantage of today is the [Cypress Dashboard](/guides/int
 
 ## Visual Regression Test / Screenshot Diffing
 
-Another possibility is visual regression testing: comparing screenshots of past runs with the current run to ensure that nothing changed. Cypress doesn't currently have this built-in, but it is on our radar. [Follow this issue](https://github.com/cypress-io/cypress/issues/495) if you're interested in being updated about this feature, leave comments if you'd like to influence what gets built, and open a pull request if you work on it yourself!
+Another possibility is visual regression testing: comparing screenshots of past runs with the current run to ensure that nothing changed. Cypress doesn't currently have this built-in, but it is on our radar. {% issue 495 'Follow this issue' %} if you're interested in being updated about this feature, leave comments if you'd like to influence what gets built, and open a pull request if you work on it yourself!

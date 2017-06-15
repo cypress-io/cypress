@@ -13,6 +13,7 @@ _       = require("lodash")
 cp      = require("child_process")
 path    = require("path")
 Promise = require("bluebird")
+log     = require('./log')
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
@@ -168,6 +169,7 @@ module.exports = {
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->
+    log("start in mode %s with options %j", mode, options)
     switch mode
       when "removeIds"
         require("./project").removeIds(options.projectPath)

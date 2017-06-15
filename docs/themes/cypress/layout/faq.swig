@@ -20,6 +20,7 @@
           </div>
         </div>
       </article>
+      {{ partial('partial/sidebar') }}
     </div>
   </div>
 </div>

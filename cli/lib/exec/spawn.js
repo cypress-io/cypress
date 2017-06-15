@@ -2,6 +2,7 @@ const _ = require('lodash')
 const cp = require('child_process')
 const chalk = require('chalk')
 const Promise = require('bluebird')
+const debug = require('debug')('cypress:cli')
 
 const downloadUtils = require('../download/utils')
 const xvfb = require('./xvfb')
@@ -20,7 +21,12 @@ module.exports = {
 
     const spawn = () => {
       return new Promise((resolve) => {
-        const child = cp.spawn(downloadUtils.getPathToExecutable(), args, options)
+        const cypressPath = downloadUtils.getPathToExecutable()
+        debug('spawning Cypress %s', cypressPath)
+        debug('args %j', args)
+        debug('some of the options %j', _.pick(options, ['verify', 'detached']))
+
+        const child = cp.spawn(cypressPath, args, options)
         if (needsXvfb) {
           //// make sure we close down xvfb
           //// when our spawned process exits

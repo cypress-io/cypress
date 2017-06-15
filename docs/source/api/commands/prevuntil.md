@@ -1,6 +1,6 @@
 ---
 title: prevUntil
-comments: true
+comments: false
 ---
 
 Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
@@ -102,11 +102,11 @@ cy.get('#nuts').prevUntil('#veggies')
 
 The commands above will display in the command log as:
 
-<img width="560" alt="screen shot 2017-03-23 at 2 45 30 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264621/69ed829c-0fd7-11e7-934d-c11157c36aca.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1271364/24264621/69ed829c-0fd7-11e7-934d-c11157c36aca.png)
 
 When clicking on `prevUntil` within the command log, the console outputs the following:
 
-<img width="560" alt="screen shot 2017-03-23 at 2 45 36 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264632/7743f57a-0fd7-11e7-99f8-c148acd17459.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1271364/24264632/7743f57a-0fd7-11e7-99f8-c148acd17459.png)
 
 # See also
 

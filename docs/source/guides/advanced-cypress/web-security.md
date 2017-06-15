@@ -1,6 +1,6 @@
 ---
 title: Web Security
-comments: true
+comments: false
 ---
 
 Browsers adhere to a strict [`same-origin policy`](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy). This means that browsers restrict access between `<iframes>` when their origin policies do not match.
@@ -71,7 +71,7 @@ It's actually *possible* for Cypress to accommodate these situations the same wa
 
 As a workaround, you may be able to use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) to directly communicate with these iframes and control them (if the 3rd party iframe supports it).
 
-Other than that, you'll have to wait for us to implement API's to support this (check our [open issue](https://github.com/cypress-io/cypress/issues/136)), or you can [disable web security](#section-disabling-web-security).
+Other than that, you'll have to wait for us to implement API's to support this (check our {% issue 136 'open issue' %}), or you can [disable web security](#section-disabling-web-security).
 
 ## Insecure Content
 
@@ -244,7 +244,7 @@ If you can't figure out why your JavaScript code is redirecting you to a differe
 
 So if you cannot work around any of the issues using the suggested workarounds above, you may want to disable web security.
 
-One last thing to consider here is that every once in a while we discover bugs in Cypress that lead to `cross origin` errors that can otherwise be fixed. If you think you're experiencing a bug, [come into gitter](https://gitter.im/cypress-io/cypress) or [open an issue](https://github.com/cypress-io/cypress/issues/new).
+One last thing to consider here is that every once in a while we discover bugs in Cypress that lead to `cross origin` errors that can otherwise be fixed. If you think you're experiencing a bug, [come into gitter](https://gitter.im/cypress-io/cypress) or {% open_an_issue 'open an issue' %>.
 
 To start, you will need to understand that **not all browsers expose a way to turn off web security**. Some do, some don't. If you rely on disabling web security, you will not be able to run tests on browsers that do not support this feature.
 
@@ -260,4 +260,4 @@ Still here? That's cool, let's disable web security!
 
 The browser will now display insecure content, you can now navigate to any superdomain without cross origin errors, and you can access cross origin iframes that are embedded in your application.
 
-One thing you may notice though is that Cypress still enforces visiting a single superdomain with {% url `cy.visit()` visit %}. This is an artificial limitation (and one that can be removed). You should [open an issue](https://github.com/cypress-io/cypress/issues/new) and tell us what you're trying to do!
+One thing you may notice though is that Cypress still enforces visiting a single superdomain with {% url `cy.visit()` visit %}. This is an artificial limitation (and one that can be removed). You should {% open_an_issue 'open an issue' %> and tell us what you're trying to do!

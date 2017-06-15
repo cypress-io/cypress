@@ -10,6 +10,9 @@ const errors = require('request-promise/errors')
 const startsWithHttpRe = /^http/
 const everythingAfterHashRe = /(#.+)/
 
+// cache validations
+const cache = {}
+
 function isExternalHref (str) {
   return startsWithHttpRe.test(str)
 }
@@ -29,24 +32,29 @@ function assertHashIsPresent (descriptor, source, hash, html) {
   // verify that the hash is present on this page
   const $ = cheerio.load(html)
 
-  // hash starts with a '#'
-  if (!$(hash).length) {
-    const truncated = _.truncate(html, { length: 200 }) || '""'
-
-    // if we dont have a hash
-    throw new Error(`Constructing {% url %} tag helper failed
-
-    > The source file was: ${source}
-
-    > You referenced a hash that does not exist at: ${descriptor}
-
-    > Expected to find an element matching the id: ${hash}
-
-    > The HTML response body was:
-
-    ${truncated}
-    `)
+  // hash starts with a '#hash'
+  // or href starts with '#hash'
+  if ($(hash).length || $(`a[href=${hash}]`).length) {
+    // found it, we good!
+    return
   }
+
+  // we didnt find anything, so throw the errror
+  const truncated = _.truncate(html, { length: 200 }) || '""'
+
+  // if we dont have a hash
+  throw new Error(`Constructing {% url %} tag helper failed
+
+  > The source file was: ${source}
+
+  > You referenced a hash that does not exist at: ${descriptor}
+
+  > Expected to find an element matching the id: ${hash} or href: ${hash}
+
+  > The HTML response body was:
+
+  ${truncated}
+  `)
 }
 
 function validateExternalUrl (href, source) {
@@ -161,15 +169,36 @@ function validateLocalFile (sidebar, href, source, render) {
 }
 
 function validateAndGetUrl (sidebar, href, source, render) {
+  // do we already have a cache for this href?
+  const cachedValue = cache[href]
+
+  // if we got it, return it!
+  if (cachedValue) {
+    return Promise.resolve(cachedValue)
+  }
+
   if (isExternalHref(href)) {
+    // cache this now even though
+    // we haven't validated it yet
+    // because it will just fail later
+    cache[href] = href
+
     return validateExternalUrl(href, source)
     .return(href)
   }
 
   return validateLocalFile(sidebar, href, source, render)
+  .then((pathToFile) => {
+    // cache this once its been locally resolved
+    cache[href] = pathToFile
+
+    return pathToFile
+  })
 }
 
 module.exports = {
+  cache,
+
   normalizeNestedPaths,
 
   findFileBySource,

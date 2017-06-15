@@ -1,9 +1,9 @@
 ---
 title: get
-comments: true
+comments: false
 ---
 
-Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
+Get one or more DOM elements by selector or {% url 'alias' aliases %}.
 
 # Syntax
 
@@ -37,7 +37,7 @@ An alias as defined using the {% url `.as()` as %} command and referenced with t
 Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before {% url `.as()` as %} to find it again.
 
 {% note info %}
-[Read about using aliases here.](https://on.cypress.io/guides/using-aliases)
+{% url 'Read more about aliases here' aliases %}
 {% endnote %}
 
 **{% fa fa-angle-right %} options** ***(Object)***
@@ -94,7 +94,7 @@ cy.get('form').within(function(){
 
 ## Alias
 
-For a detailed explanation of aliasing, [read more about aliasing here](https://on.cypress.io/guides/using-aliases).
+For a detailed explanation of aliasing, {% url 'read more about aliasing here' aliases %}.
 
 **Get the aliased 'todos' elements**
 
@@ -129,11 +129,11 @@ cy.get('input[name="firstName"]').should('have.value', 'Homer')
 
 The commands above will display in the command log as:
 
-<img width="524" alt="screen shot 2015-11-27 at 1 24 20 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446808/5d2f2180-950a-11e5-8645-4f0f14321f86.png">
+![Command Log get](https://cloud.githubusercontent.com/assets/1271364/11446808/5d2f2180-950a-11e5-8645-4f0f14321f86.png)
 
 When clicking on the `get` command within the command log, the console outputs the following:
 
-<img width="543" alt="screen shot 2015-11-27 at 1 24 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png">
+![Console Log get](https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png)
 
 # See also
 

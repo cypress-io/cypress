@@ -1,13 +1,19 @@
+#search-container {
+  width: $sidebar-width;
+  padding: 0 20px;
+  float: right;
+  top: 10px;
+  margin-top: 17px;
+}
+
 #search-input-wrap {
   display: none;
   border-bottom: 1px solid $color-gray;
   &.on {
     display: inline-block;
   }
-  float: right;
-  top: 10px;
-  margin: 15px 0 0 6px;
 }
+
 #search-input-icon {
   color: $white;
   padding-right: 0.5em;
@@ -16,6 +22,7 @@
   display: inline-block;
   opacity: 0.7;
 }
+
 #search-input {
   background: none;
   font-size: inherit;

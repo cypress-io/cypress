@@ -95,15 +95,6 @@ describe "lib/url_generator", ->
         expect(err.message).to.include("Could not find a valid doc file in the sidebar.yml for: foo")
 
   context ".validateAndGetUrl", ->
-    it "verifies external url", ->
-      nock("https://www.google.com")
-      .get("/")
-      .reply(200)
-
-      urlGenerator.validateAndGetUrl(data, "https://www.google.com")
-      .then (url) ->
-        expect(url).to.eq("https://www.google.com")
-
     it "fails when external returns non 2xx", ->
       nock("https://www.google.com")
       .get("/")
@@ -115,7 +106,7 @@ describe "lib/url_generator", ->
       .catch (err) ->
         expect(err.message).to.include("Request to: https://www.google.com failed. (Status Code 500)")
 
-    it "verifies local file", ->
+    it "verifies local file and caches subsequent requests", ->
       markdown = "## Notes\nfoobarbaz"
 
       render = (str) ->
@@ -128,6 +119,25 @@ describe "lib/url_generator", ->
       urlGenerator.validateAndGetUrl(data, "and#notes", "", render)
       .then (pathToFile) ->
         expect(pathToFile).to.eq("/api/commands/and.html#notes")
+
+        urlGenerator.validateAndGetUrl(data, "and#notes", "", render)
+      .then (pathToFile) ->
+        expect(pathToFile).to.eq("/api/commands/and.html#notes")
+
+        expect(fs.readFile).to.be.calledOnce
+
+    it "verifies external url with anchor href matching hash", ->
+      nock("https://www.google.com")
+      .get("/")
+      .reply(200, "<html><a href='#assertions'>assertions</a></html>")
+
+      urlGenerator.validateAndGetUrl(data, "https://www.google.com/#assertions")
+      .then (url) ->
+        expect(url).to.eq("https://www.google.com/#assertions")
+
+        urlGenerator.validateAndGetUrl(data, "https://www.google.com/#assertions")
+      .then (url) ->
+        expect(url).to.eq("https://www.google.com/#assertions")
 
     it "fails when hash is not present in response", ->
       nock("https://www.google.com")
@@ -142,7 +152,7 @@ describe "lib/url_generator", ->
           "Constructing {% url %} tag helper failed"
           "The source file was: bar.md"
           "You referenced a hash that does not exist at: https://www.google.com/",
-          "Expected to find an element matching the id: #foo"
+          "Expected to find an element matching the id: #foo or href: #foo"
           "The HTML response body was:"
           "<html></html>"
         ].forEach (msg) ->
@@ -162,8 +172,15 @@ describe "lib/url_generator", ->
           "Constructing {% url %} tag helper failed"
           "The source file was: guides/core-concepts/bar.md"
           "You referenced a hash that does not exist at: api/commands/and.html",
-          "Expected to find an element matching the id: #foo"
+          "Expected to find an element matching the id: #foo or href: #foo"
           "The HTML response body was:"
           "<html></html>"
         ].forEach (msg) ->
           expect(err.message).to.include(msg)
+
+    it "resolves cached values in a promise", ->
+      urlGenerator.cache["foo"] = "bar"
+
+      urlGenerator.validateAndGetUrl(data, "foo")
+      .then (url) ->
+        expect(url).to.eq("bar")

@@ -4,6 +4,7 @@ path          = require("path")
 Promise       = require("bluebird")
 savedState    = require("../saved_state")
 utils         = require("./utils")
+errors        = require("../errors")
 
 fs              = Promise.promisifyAll(fs)
 instance        = null
@@ -52,7 +53,7 @@ module.exports = {
 
       if not browser = browsers[name]
         keys = _.keys(browsers).join(", ")
-        throw new Error("Browser: #{name} has not been added. Available browsers are: #{keys}")
+        errors.throw("BROWSER_NOT_FOUND", name, keys)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)

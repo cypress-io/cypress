@@ -1,6 +1,6 @@
 ---
 title: pause
-comments: true
+comments: false
 ---
 
 Stop `cy` commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
@@ -72,37 +72,37 @@ cy.get('#action-canvas')
 
 The commands above will display in the GUI as:
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 10 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507426/4d48a5e4-421e-11e7-9bd4-c6829f80910d.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507426/4d48a5e4-421e-11e7-9bd4-c6829f80910d.png)
 
 When clicking on "Next: 'click'" at the top of the Command Log, the Command Log will run only the next command and pause again.
 
 ***Click "Next"***
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 15 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507427/4d49e33c-421e-11e7-9bea-26b89ec6fe32.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507427/4d49e33c-421e-11e7-9bea-26b89ec6fe32.png)
 
 ***Click "Next" again***
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 24 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507424/4d446204-421e-11e7-82a1-a5ce8b4bb4a9.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507424/4d446204-421e-11e7-82a1-a5ce8b4bb4a9.png)
 
 ***Click "Next" again***
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 29 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507421/4d3a69e8-421e-11e7-9a26-1026d0d133ec.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507421/4d3a69e8-421e-11e7-9a26-1026d0d133ec.png)
 
 ***Click "Next" again***
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 33 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507422/4d3b30a8-421e-11e7-940d-bd7bdc7b6e81.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507422/4d3b30a8-421e-11e7-940d-bd7bdc7b6e81.png)
 
 ***Click "Next" again***
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 36 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507420/4d37dcc8-421e-11e7-8428-8529ad628b05.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507420/4d37dcc8-421e-11e7-8428-8529ad628b05.png)
 
 ***Click "Next" again, then 'Resume'***
 
-<img width="985" alt="screen shot 2017-05-26 at 2 18 51 pm" src="https://cloud.githubusercontent.com/assets/1271364/26507423/4d3c5992-421e-11e7-8df8-9af67f5ceb4a.png">
+![Pause command](https://cloud.githubusercontent.com/assets/1271364/26507423/4d3c5992-421e-11e7-8df8-9af67f5ceb4a.png)
 
 # See also
 
-- [Cypress Dashboard](https://on.cypress.io/dashboard)
+- {% url 'Dashboard' https://on.cypress.io/dashboard %}
 - {% url `cy.debug()` debug %}
 - {% url `cy.log()` log %}
 - {% url `cy.screenshot()` screenshot %}

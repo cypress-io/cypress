@@ -1,10 +1,10 @@
 ---
 title: Dead Simple Debugging
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How Cypress runs in the runloop with your code, keeping debugging simple and understandable for modern web developers
 - How Cypress embraces the standard DevTools
@@ -74,5 +74,3 @@ Use {% url `.debug()` debug %} to quickly inspect any (or many!) part(s) of your
 Though Cypress has built out [an excellent GUI application](/guides/cypress-basics/overview-of-the-gui-tool.html) to help you understand what is happening in your app and your tests, there's simply no replacing all the amazing work browser teams have done on their built-in development tools. Once again, we see that Cypress goes _with_ the flow of the modern ecosystem, opting to leverage these tools wherever possible.
 
 TODO: show how clicking commands populates the dev tools, demonstrate a few commands
-
-![Using the DevTools](http://placehold.it/1920x1080)

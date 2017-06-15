@@ -1,6 +1,6 @@
 ---
 title: viewport
-comments: true
+comments: false
 ---
 
 Control the size and orientation of the screen for your application.
@@ -141,7 +141,7 @@ cy.viewport('iphone-6', 'landscape')
 
 **`devicePixelRatio` is not simulated**
 
-This is something Cypress will eventually do, which will match how Chrome's responsive mobile browsing simulation works. [Open an issue](https://github.com/cypress-io/cypress/issues/new) if you need this to be fixed.
+This is something Cypress will eventually do, which will match how Chrome's responsive mobile browsing simulation works. {% open_an_issue %} if you need this to be fixed.
 
 **Cypress will restore the viewport in the snapshot**
 

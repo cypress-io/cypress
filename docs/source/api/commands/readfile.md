@@ -1,6 +1,6 @@
 ---
 title: readFile
-comments: true
+comments: false
 ---
 
 Read a file and yield its contents.
@@ -162,15 +162,14 @@ cy.readFile('cypress.json')
 
 The command above will display in the command log as:
 
-<img width="521" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/17934353/a02d6c34-69e5-11e6-8f1d-ab1eda17ab3b.png">
+![Command Log](https://cloud.githubusercontent.com/assets/1157043/17934353/a02d6c34-69e5-11e6-8f1d-ab1eda17ab3b.png)
 
 When clicking on the `readFile` command within the command log, the console outputs the following:
 
-<img width="689" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17934460/089e0652-69e6-11e6-9f00-7eb282be0d27.png">
+![Console Log](https://cloud.githubusercontent.com/assets/1157043/17934460/089e0652-69e6-11e6-9f00-7eb282be0d27.png)
 
 # See also
 
-- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
 - {% url `cy.exec()` exec %}
 - {% url `cy.fixture()` fixture %}
 - {% url `cy.writeFile()` writefile %}

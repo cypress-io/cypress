@@ -4,15 +4,15 @@ guides:
     installing-cypress: installing-cypress.html
     writing-your-first-test: writing-your-first-test.html
     testing-your-app: testing-your-app.html
-    next-steps: next-steps.html
+    # next-steps: next-steps.html
   core-concepts:
     cypress-in-a-nutshell: cypress-in-a-nutshell.html
     organizing-tests: organizing-tests.html
     overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
+    aliases: aliases.html
     dead-simple-debugging: dead-simple-debugging.html
     stubs-spies-clocks: stubs-spies-clocks.html
-    dealing-with-the-network: dealing-with-the-network.html
+    network-requests: network-requests.html
     taking-screenshots-and-recording-videos: taking-screenshots-and-recording-videos.html
   integrating-cypress:
     cli-tool: cli-tool.html
@@ -23,7 +23,7 @@ guides:
     dashboard-features: dashboard-features.html
     dashboard-projects: dashboard-projects.html
     dashboard-runs: dashboard-recorded-runs.html
-    dashboard-orgs: dashboard-organizations.html
+    dashboard-organizations: dashboard-organizations.html
   advanced-cypress:
     # the-cypress-workflow: the-cypress-workflow.html
     # coming-from-selenium: coming-from-selenium.html
@@ -37,7 +37,7 @@ guides:
     error-messages: error-messages.html
     bundled-tools: bundled-tools.html
     available-assertions: available-assertions.html
-    creating-fixtures: creating-fixtures.html
+    # creating-fixtures: creating-fixtures.html
     # best-practices: best-practices.html
     # anti-patterns: anti-patterns.html
     cypress-api-design: cypress-api-design.html
@@ -145,3 +145,23 @@ api:
     dom: dom.html
     env: env.html
     cypress-server: server.html
+
+examples:
+  recipes:
+    unit-testing: unit-testing.html
+    logging-in: logging-in.html
+    testing-the-dom: testing-the-dom.html
+    working-with-the-backend: working-with-the-backend.html
+    spies-stubs-and-clocks: spies-stubs-and-clocks.html
+    extending-cypress: extending-cypress.html
+  applications:
+    kitchen-sink: kitchen-sink.html
+    todo-mvc: todo-mvc.html
+    pie-chopper: pie-chopper.html
+    phonecat: phonecat.html
+
+faq:
+  questions:
+    general-questions: general-questions.html
+    using-cypress: using-cypress.html
+    company: company.html

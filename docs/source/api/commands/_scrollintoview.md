@@ -1,6 +1,6 @@
 ---
 title: scrollIntoView
-comments: true
+comments: false
 ---
 
 Scroll an element into view.
@@ -58,7 +58,7 @@ Option | Default | Notes
 
 **Snapshots do not reflect scroll behavior**
 
-*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#videos).
+*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' taking-screenshots-and-recording-videos.html#Videos %}.
 
 # Command Log
 

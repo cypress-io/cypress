@@ -1,12 +1,12 @@
 ---
 title: server
-comments: true
+comments: false
 ---
 
 Start a server to begin routing responses to `cy.route()` and `cy.request()`.
 
 {% note info %}
-**Note:** `cy.server()` assumes you are already familiar with core concepts such as [network requests](https://on.cypress.io/guides/network-requests-xhr)
+**Note:** `cy.server()` assumes you are already familiar with core concepts such as {% url 'network requests' network-requests %}.
 {% endnote %}
 
 
@@ -228,11 +228,11 @@ When a new test runs, any outstanding requests still in flight are automatically
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a {% url `cy.visit()` visit %}. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
-You can [read more about XHR strategy here](https://on.cypress.io/guides/network-requests-xhr).
+You can {% url 'read more about XHR strategy here' network-requests %}.
 
 # See also
 
-- [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- {% url 'Network Requests' network-requests %}
 - {% url `cy.request()` request %}
 - {% url `cy.route()` route %}
 - {% url `cy.visit()` visit %}

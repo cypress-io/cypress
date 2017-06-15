@@ -1,6 +1,6 @@
 ---
 title: CLI Tool
-comments: true
+comments: false
 ---
 
 The CLI Tool is an [`npm package`](https://github.com/cypress-io/cypress-cli) that wraps the Desktop Application.
@@ -13,7 +13,7 @@ It provides a set of commands that can be used to:
 - Output the current installed version
 
 {% note info  %}
-Installing the CLI tool allows you to programmatically install and run Cypress. This is commonly used when [running Cypress in CI](https://on.cypress.io/guides/continuous-integration).
+Installing the CLI tool allows you to programmatically install and run Cypress. This is commonly used when {% url 'running Cypress in CI' continuous-integration %}.
 {% endnote %}
 
 # Installation
@@ -34,7 +34,7 @@ OS | Path
 :--- | :---
 Mac  | `/Applications/Cypress.app`
 Linux  | `/home/<user>/.cypress/Cypress`
-Windows  | [not currently supported](https://github.com/cypress-io/cypress/issues/74)
+Windows  | {% issue 74 'not currently supported' %}
 
 **Install the latest version**
 
@@ -47,7 +47,7 @@ cypress install
 cypress install --cypress-version 0.13.0
 ```
 
-Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. This is most useful when [running Cypress in CI](https://on.cypress.io/guides/continuous-integration).
+Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. This is most useful when {% url 'running Cypress in CI' continuous-integration %}.
 
 ![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
 
@@ -63,7 +63,7 @@ cypress update
 
 Run Cypress headlessly without spawning a browser.
 
-You can use this command when working locally or when [running in Continuous Integration](https://on.cypress.io/guides/continuous-integration).
+You can use this command when working locally or when {% url 'running Cypress in CI' continuous-integration %}.
 
 Cypress checks to see that the Desktop Application is installed and automatically installs it prior to running (if necessary).
 
@@ -115,12 +115,12 @@ cypress run --env host=api.dev.local
 cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
 ```
 {% note info  %}
-You can read more about [environment variables](https://on.cypress.io/environment-variables) and [configuration](https://on.cypress.io/configuration) here.
+Read more about {% url 'environment variables' environment-variables %} and {% url 'configuration' configuration %}.
 {% endnote %}
 
 ## `cypress run --record`
 
-Record video of tests running after [setting up your project to record](https://on.cypress.io/guides/projects).
+Record video of tests running after {% url 'setting up your project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
 
 {% note info  %}
 You'd typically record your runs in {% url 'Continuous Integration' continuous-integration %}, but you can also record when running locally.
@@ -148,7 +148,7 @@ export CYPRESS_RECORD_KEY=abc-key-123
 cypress run --record
 ```
 
-You can [read more about recording runs here](https://on.cypress.io/how-do-i-record-runs).
+You can {% url 'read more about recording runs here' dashboard-projects#Set-up-a-Project-to-Record %}.
 
 ## `cypress open`
 

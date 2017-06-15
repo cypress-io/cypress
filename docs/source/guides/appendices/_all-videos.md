@@ -1,5 +1,5 @@
 title: All Videos
-comments: true
+comments: false
 ---
 
 # What You'll Learn

@@ -1,5 +1,5 @@
 title: finding-elements
-comments: true
+comments: false
 ---
 
 # Traversal

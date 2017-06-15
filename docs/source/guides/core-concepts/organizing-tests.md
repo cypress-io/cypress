@@ -1,9 +1,10 @@
+---
 title: Organizing Tests
-comments: true
+comments: false
 ---
 
 {% note info %}
-### {% fa fa-graduation-cap %} What You'll Learn
+# {% fa fa-graduation-cap %} What You'll Learn
 
 - How to organize your test and support files.
 - What languages are supported in your test files.

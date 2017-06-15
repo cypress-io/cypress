@@ -1,5 +1,5 @@
 title: Contributing
-comments: true
+comments: false
 ---
 
 # What You'll Learn
