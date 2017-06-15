@@ -28,7 +28,7 @@ function extractHash (str) {
   return (matches && matches[0]) || ''
 }
 
-function assertHashIsPresent (descriptor, source, hash, html) {
+function assertHashIsPresent (descriptor, source, hash, html, tag = 'url') {
   // verify that the hash is present on this page
   const $ = cheerio.load(html)
 
@@ -43,7 +43,7 @@ function assertHashIsPresent (descriptor, source, hash, html) {
   const truncated = _.truncate(html, { length: 200 }) || '""'
 
   // if we dont have a hash
-  throw new Error(`Constructing {% url %} tag helper failed
+  throw new Error(`Constructing {% ${tag} %} tag helper failed
 
   > The source file was: ${source}
 
@@ -198,6 +198,8 @@ function validateAndGetUrl (sidebar, href, source, render) {
 
 module.exports = {
   cache,
+
+  assertHashIsPresent,
 
   normalizeNestedPaths,
 
