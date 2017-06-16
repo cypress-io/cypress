@@ -18,19 +18,19 @@ You can read more about parallelization {% issue 64 'here' %}.
 
 ## {% fa fa-angle-right %} Can I run a single test or group of tests?
 
-You can run a group of tests or a single test by placing an `.only` to a test suite or specific test.
+You can run a group of tests or a single test by placing an {% url `.only` organizing-tests#Excluding-and-Including-Tests %} on a test suite or specific test.
 
-You can run a single test headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
+You can run a single test file headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
 
-Currently there is no way to specify a group of tests to run headlessly. You can read more {% issue 263 'here' %}.
+Currently there is no way to specify a group of test files to run headlessly. You can read more {% issue 263 'here' %}.
 
 ## {% fa fa-angle-right %} How do I test uploading a file?
 
-It is possible to upload files in your application but its different based on how you've written your own upload code. You can read more about this {% issue 170 'here' %}
+It is possible to upload files in your application but it's different based on how you've written your own upload code. You can read more about this {% issue 170 'here' %}
 
 ## {% fa fa-angle-right %} What is the projectId for?
 
-Once you setup your project to record, we generate a unique `projectId` for your project, and automatically insert it into your `cypress.json` file.
+Once you {% url "setup your tests to record" dashboard-runs %}, we generate a unique `projectId` for your project and automatically insert it into your `cypress.json` file.
 
 **The `projectId` is a 6 character string in your cypress.json:**
 
@@ -40,11 +40,11 @@ Once you setup your project to record, we generate a unique `projectId` for your
 }
 ```
 
-This is how we uniquely identify your project. If you manually alter this, *Cypress will no longer be able to identify your project or find the recorded builds for it*. We recommend that you check your `cypress.json` including the `projectId` into source control.
+This is how we uniquely identify your project. If you manually alter this, *Cypress will no longer be able to identify your project or find the recorded tests for it*. We recommend that you check your `cypress.json`, including the `projectId`, into source control.
 
 ## {% fa fa-angle-right %} What is a Record Key?
 
-Once you're setup to record test runs, we automatically generate a **Record Key** for the project.
+Once you're {% url "setup to record test runs" dashboard-runs %}, we automatically generate a *Record Key* for the project.
 
 **A record key is a GUID that looks like this:**
 
@@ -56,14 +56,14 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 You can create multiple Record Keys for a project, or delete existing ones from our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 {% endnote %}
 
-You can also find your Record Key inside of the *Settings* tab.
+You can also find your Record Key inside of the *Settings* tab in our Desktop Application.
 
 ![Settings Tab of Desktop](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
 
 
 ## {% fa fa-angle-right %} How do I get the native DOM reference of an element found using Cypress?
 
-Cypress wraps elements in jQuery so you'd just get the native element from there.
+Cypress wraps elements in jQuery so you'd just get the native element from there within a {% url "`.then()`" then %} command.
 
 ```javascript
 cy.get('button').then(($el) => {
@@ -75,7 +75,7 @@ cy.get('button').then(($el) => {
 
 ## {% fa fa-angle-right %} How do I wait for multiple XHR requests to the same url?
 
-You should set up an alias (using {% url `.as()` as %}) to a single route that matches all of the XHRs. You can then {% url `cy.wait()` wait %} on it multiple times and Cypress keeps track of how many matching XHR requests there are.
+You should set up an alias (using {% url `.as()` as %}) to a single {% url `cy.route()` route %} that matches all of the XHRs. You can then {% url `cy.wait()` wait %} on it multiple times. Cypress keeps track of how many matching XHR requests there are.
 
 ```javascript
 cy.server()
@@ -99,13 +99,13 @@ You could also just stub XHR requests directly using {% url `cy.route()` route %
 
 ## {% fa fa-angle-right %} How do I test content inside an iframe?
 
-Currently Cypress does not support selecting or accessing elements from within an iframe. You can read more about this {% issue 136 '#here' %}.
+Currently Cypress does not support selecting or accessing elements from within an iframe. You can read more about this {% issue 136 'here' %}.
 
-## {% fa fa-angle-right %} How do I preserve cookies/localstorage in between my tests?
+## {% fa fa-angle-right %} How do I preserve cookies / localStorage in between my tests?
 
-By default, Cypress automatically clears all cookies **before** each test to prevent state from building up.
+By default, Cypress automatically {% url "clears all cookies **before** each test" clearcookies %} to prevent state from building up.
 
-You can whitelist specific cookies to be preserved across tests:
+You can whitelist specific cookies to be preserved across tests using the {% url "Cypress.Cookies api" cookies %}:
 
 ```javascript
 // now any cookie with the name 'session_id' will
@@ -115,31 +115,32 @@ Cypress.Cookies.defaults({
 })
 ```
 
-You cannot currently preserve localStorage across tests and can read more {% issue 461 'here' %}.
+You can *not* currently preserve localStorage across tests and can read more {% issue 461 'here' %}.
 
 ## {% fa fa-angle-right %} Some of my elements animate in, how do I work around that?
 
-Oftentimes you can usually account for animation by asserting `.should('be.visible')` or another assertion on one of the elements you expect to be animated in.
+Oftentimes you can usually account for animation by asserting {% url "`.should('be.visible')`" should %} or {% url "another assertion" cypress-in-a-nutshell#Assertions %} on one of the elements you expect to be animated in.
 
 ```javascript
 // assuming a click event causes the animation
-cy.get('element').click().should('not.have.class', 'animating')
+cy.get('.element').click().should('not.have.class', 'animating')
 ```
 
-If the animation is especially long, you could extend the time Cypress waits for the assertion to be true by increasing the `timeout`.
+If the animation is especially long, you could extend the time Cypress waits for the assertion to pass by increasing the `timeout` of the previous command before the assertion.
 
 ```javascript
-cy.get('button', { timeout: 10000 }) // <-- wait up to 10 seconds for this 'button' to be found
-    .should('be.visible')   // <-- and to be visible
+cy.get('button', { timeout: 10000 }) // wait up to 10 seconds for this 'button' to exist
+    .should('be.visible')            // and to be visible
 
-cy.get('element').click({ timeout: 10000 }).should('not.have.class', 'animating')
+cy.get('.element').click({ timeout: 10000 }).should('not.have.class', 'animating')
+// wait up to 10 seconds for the .element to not have 'animating' class
 ```
 
 ## {% fa fa-angle-right %} Can I test anchor links that open in a new tab?
 
 Cypress does not and may never have multi-tab support for various reasons.
 
-Luckily there are lots of easy and safe workarounds that enable you to test the behavior of your application
+Luckily there are lots of easy and safe workarounds that enable you to test this behavior in your application.
 
 [Read through this recipe to see how to test anchor links.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)
 
@@ -166,7 +167,7 @@ Luckily there are lots of easy and safe workarounds that enable you to test the 
 
 ## {% fa fa-angle-right %} How do I get an input's value in Cypress?
 
- Cypress DOM elements are just jQuery elements so you can use any method available in jQuery. Below are some examples of working with an input's value.
+DOM elements yielded in Cypress are just jQuery elements so you can use any method available in jQuery. Below are some examples of working with an input's value.
 
  ```javascript
 cy.get('input').invoke('val').then((val) => {
@@ -180,13 +181,13 @@ cy.get('input').then(($input) => {
 
 // make an assertion on the value
 cy.get('input').should('have.value', 'abc')
- ```
+```
 
-<!-- ## {% fa fa-angle-right %} How do I make conditional based assertions / control flow? -->
+<!-- ## How do I make conditional based assertions / control flow? -->
 
-## {% fa fa-angle-right %} How do I require "" node module in Cypress?
+## {% fa fa-angle-right %} How do I require X node module in Cypress?
 
-The code you write in Cypress is executed in the browser, so you can import or require JS modules, but only those that work in the browser.
+The code you write in Cypress is executed in the browser, so you can import or require JS modules, *but* only those that work in a browser.
 
 Cypress doesn't have direct access to node or your file system. We recommend utilizing {% url `cy.exec()` exec %} to execute a shell command or a node script that will do what you need.
 

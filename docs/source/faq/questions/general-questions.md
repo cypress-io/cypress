@@ -16,11 +16,11 @@ Cypress is kind of a hybrid application/framework/service all rolled into one. I
 
 **Mocha**
 
- Mocha is a testing framework for JavaScript. {%url "Mocha" http://mochajs.org/%} gives you the `it`, `describe`, `beforeEach` methods. Cypress isn't **different** from Mocha, it actually **uses** Mocha under the hood. All of your tests will be written on top of Mocha's `bdd` interface.
+ Mocha is a testing framework for JavaScript. { %url "Mocha" http://mochajs.org/ %} gives you the `it`, `describe`, `beforeEach` methods. Cypress isn't **different** from Mocha, it actually **uses** Mocha under the hood. All of your tests will be written on top of Mocha's `bdd` interface.
 
 **Karma**
 
-A unit testing runner for JavaScript,  {% url "Karma" http://karma-runner.github.io/ %}, works with either `Jasmine`, `Mocha`, or any other JavaScript testing framework.
+A unit testing runner for JavaScript, {% url "Karma" http://karma-runner.github.io/ %}, works with either {% url "Jasmine" https://jasmine.github.io/ %}, { %url "Mocha" http://mochajs.org/ %}, or any other JavaScript testing framework.
 
 Karma also watches your JavaScript files, live reloads when they change, and is also the `reporter` for your tests failing / passing. It runs from the command line.
 
@@ -28,7 +28,7 @@ Cypress essentially replaces Karma because it does all of this already and much 
 
 **Capybara**
 
-The a `Ruby` specific tool that allows you to write integration tests for your web application is {% url "Capybara" http://teamcapybara.github.io/capybara/ %}. In the Rails world, this is the *go-to* tool for testing your application. It uses `Selenium` (or another headless driver) to interact with browsers. It's API consists of commands that query for DOM elements, perform user actions, navigate around, etc.
+The a `Ruby` specific tool that allows you to write integration tests for your web application is {% url "Capybara" http://teamcapybara.github.io/capybara/ %}. In the Rails world, this is the *go-to* tool for testing your application. It uses {% url "SauceLabs" https://saucelabs.com/ %} (or another headless driver) to interact with browsers. It's API consists of commands that query for DOM elements, perform user actions, navigate around, etc.
 
 Cypress essentially replaces Capybara because it does all of these things and much more. The difference is that instead of testing your application in a GUI-less console, you'd see your application at all times. You'd never have to take a screenshot to debug because all commands instantly provide you the state of your application while they run. Upon any command failing, you'll get a human-readable error explaining why it failed. There's no "guessing" when debugging.
 
@@ -60,13 +60,13 @@ Cypress desktop app and CLI are free to use. The Cypress Dashboard is a premium 
 
 ## {% fa fa-angle-right %} What operating systems do you support?
 
-The desktop application can be installed in OSX and Linux. {% issue 74 'Windows is not yet supported' %}, although you can use Cypress if you install a Linux VM using something like VirtualBox or using a Docker image.
+The desktop application can be {% url "installed" installing-cypress %} in OSX and Linux. {% issue 74 'Windows is not yet supported' %}, although you can use Cypress if you install a Linux VM using something like {% url "VirtualBox" https://www.virtualbox.org/ %} or using a {% url "Docker image" userland-extensions#Docker %}.
 
 ## {% fa fa-angle-right %} Do you support native mobile apps?
 
-Cypress would never be able to run on a native mobile app, but would be able to run in a web view. In that mode, you'd see the commands display in a browser while you would drive the mobile device separately. Down the road we'll likely have first class support for this, but today it is not a current priority.
+Cypress would never be able to run on a native mobile app, but would be able to run in a mobile web browser. In that mode, you'd see the commands display in a browser while you would drive the mobile device separately. Down the road we'll likely have first class support for this, but today it is not a current priority.
 
-Currently you can control the {% url `cy.viewport()` viewport %} to test responsive, mobile views in a website or web application.
+Currently you can control the viewport with the {% url `cy.viewport()` viewport %} command to test responsive, mobile views in a website or web application.
 
 ## {% fa fa-angle-right %} Do you support X language or X framework?
 
@@ -76,7 +76,7 @@ You'll write your tests in JavaScript, but beyond that Cypress works everywhere.
 
 ## {% fa fa-angle-right %} Will Cypress work in my CI provider?
 
-Cypress works in any CI provider.
+Cypress works in any {% url "CI provider" continuous-integration %}.
 
 ## {% fa fa-angle-right %} Does Cypress require me to change any of my existing code?
 
@@ -88,7 +88,7 @@ Yes, technically; it's sandboxed and has to follow the same rules as every other
 
 But Cypress is actually way beyond just a basic JavaScript application running in the browser. It's also a Desktop Application and communicates with backend web services.
 
-All of these technologies together are coordinated and enable Cypress to work, which extends its capabilities far outside of the browser sandbox. Without these, Cypress would not work at all. For the vast majority of your web development, Cypress will work just fine, and already **does** work.
+All of these technologies together are coordinated and enable Cypress to work, which extends its capabilities far outside of the browser sandbox. Without these, Cypress would not work at all. For the vast majority of your web development, Cypress will work just fine, and already *does* work.
 
 ## {% fa fa-angle-right %} We use WebSockets, will Cypress work with that?
 
@@ -101,7 +101,7 @@ Yes.
 
 ## {% fa fa-angle-right %} We have the craziest most insane authentication system ever, will Cypress work with that?
 
-If you're using some crazy thumb-print, retinal-scan, time-based, key-changing, microphone audial decoding mechanism to log in your users, then no, Cypress won't work with that.  But seriously, Cypress is a **development** tool, which makes it easy to test your web applications. If your application is doing 100x things to make it extremely difficult to access, Cypress won't magically make it any easier.
+If you're using some crazy thumb-print, retinal-scan, time-based, key-changing, microphone, audial, decoding mechanism to log in your users, then no, Cypress won't work with that.  But seriously, Cypress is a *development* tool, which makes it easy to test your web applications. If your application is doing 100x things to make it extremely difficult to access, Cypress won't magically make it any easier.
 
 Because Cypress is a development tool, you can always make your application more accessible while in your development environment. If you want, simply disable crazy steps in your authentication systems while you're in your testing environment. After all, that's why we have different environments! Normally you already have a development environment, a testing environment, a staging environment, and a production environment.  So simply expose the parts of your system you want accessible in each appropriate environment.
 
@@ -111,11 +111,11 @@ Just remember, Cypress won't make a non-testable application suddenly testable. 
 
 ## {% fa fa-angle-right %} Can I use Cypress to script user-actions on an external site like `gmail.com`?
 
-No. There are already lots of tools to do that. Using Cypress to test against a 3rd party application is not supported. It *may* work but will defeat the purpose of why it was created. You use Cypress *while* you develop *your* application, it helps you write your tests.
+No. There are already lots of tools to do that. Using Cypress to test against a 3rd party application is not it's intended use. It *may* work but will defeat the purpose of why it was created. You use Cypress *while* you develop your application, it helps you write your tests.
 
 ## {% fa fa-angle-right %} Is there code coverage?
 
-There is nothing currently built into Cypress to do this. Adding code coverage around end to end tests is much harder than unit and its possible it may not be feasible to do in a generic way. You can read in more detail about code coverage {% issue 346 'here' %}.
+There is nothing currently built into Cypress to do this. Adding code coverage around end to end tests is much harder than unit tests and it may not be feasible to do in a generic way. You can read in more detail about code coverage {% issue 346 'here' %}.
 
 <!-- ## What kind of tests do I write in Cypress? -->
 
@@ -124,7 +124,8 @@ There is nothing currently built into Cypress to do this. Adding code coverage a
 
 No. In fact Cypress' architecture is very different from Selenium in a few critical ways:
 
-- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite. Although Cypress has a few commands that give you access to the outside world - like {% url `cy.request()` request %} and {% url `cy.exec()` exec %}.
+- Cypress runs in the context of the browser. With Cypress it's much easier to accurately test the browser, but harder to talk to the outside work. In Selenium it's the exact opposite, it runs outside of the browser where your application is running. Although Cypress has a few commands that give you access to the outside world - like {% url `cy.request()` request %} and {% url `cy.exec()` exec %}.
+- With Selenium - aka WebDriver, you either get 100% simulated events (with Selenium RC) or you got 100% native events with Selenium WebDriver. However, with Cypress, you actually get both. For the most part we use simulated events; We can reproduce them with nearly 100% fidelity, they are much faster, and guaranteed to work the same way every time. However we do use automation API's for things like Cookies where we extend outside of the JavaScript sandbox and interact with the underlying browser API's. This gives us flexibility to determine which type of event to use in specific situations. We've yet to add native input events though.
 
 ## {% fa fa-angle-right %} Are there driver bindings in my language?
 

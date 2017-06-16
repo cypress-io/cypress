@@ -3,6 +3,14 @@ title: Userland Extensions
 comments: false
 ---
 
+# Docker
+
+## Base Image
+
+Docker image with dependencies and specific version of Cypress.
+
+{% url "https://hub.docker.com/r/bahmutov/cypress-image/" https://hub.docker.com/r/bahmutov/cypress-image/ %}
+
 # Gitlab
 
 ## Multi Cypress
