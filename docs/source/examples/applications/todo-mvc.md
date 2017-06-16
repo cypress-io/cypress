@@ -1,11 +1,12 @@
 ---
 title: TodoMVC
 comments: false
+containerClass: examples
 ---
 
-# Overview
+{% fa fa-github %} {% url "https://github.com/cypress-io/cypress-example-todomvc" https://github.com/cypress-io/cypress-example-todomvc %}
 
-{% url "https://github.com/cypress-io/cypress-example-todomvc" https://github.com/cypress-io/cypress-example-todomvc %}
+## Overview
 
 This repo compares {% url "Cypress Tests" https://github.com/cypress-io/cypress-example-todomvc/blob/master/cypress/integration/app_spec.js %} to {% url "official TodoMVC Tests" https://github.com/tastejs/todomvc/blob/master/tests/test.js %}. This gives you a good comparison of writing and running tests in Cypress versus vanilla Selenium.
 
@@ -16,7 +17,7 @@ This repo compares {% url "Cypress Tests" https://github.com/cypress-io/cypress-
 
 ![todomvc-gif](https://cloud.githubusercontent.com/assets/1268976/12985445/ad168098-d0c0-11e5-94e7-2f2e619bae93.gif)
 
-# Stack
+## Stack
 
 Stack | -
  -- | --

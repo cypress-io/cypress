@@ -1,11 +1,12 @@
 ---
 title: Kitchen Sink
 comments: false
+containerClass: examples
 ---
 
-# Overview
+{% fa fa-github %} {% url "https://github.com/cypress-io/cypress-example-kitchensink" https://github.com/cypress-io/cypress-example-kitchensink %}
 
-{% url "https://github.com/cypress-io/cypress-example-kitchensink" https://github.com/cypress-io/cypress-example-kitchensink %}
+## Overview
 
 This is an example app is used to showcase every command available in Cypress.
 
@@ -18,7 +19,7 @@ This is an example app is used to showcase every command available in Cypress.
 
 ![kitchensink running](https://cloud.githubusercontent.com/assets/1268976/14084252/e309e370-f4e7-11e5-9562-24f516563ac9.gif)
 
-# Stack
+## Stack
 
 Stack | -
  -- | --
