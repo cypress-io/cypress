@@ -60,7 +60,10 @@ function assertHashIsPresent (descriptor, source, hash, html, tag = 'url') {
 function validateExternalUrl (href, source) {
   const { hash } = url.parse(href)
 
-  return request(href)
+  return request({
+    url: href,
+    timeout: 5000,
+  })
   .then((html) => {
     // bail if we dont have a hash
     if (!hash) {
