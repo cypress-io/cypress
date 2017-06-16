@@ -37,12 +37,66 @@ $ npm install cypress --save-dev
 Now you can run Cypress from the command line by typing `npm run test-cypress`, do so now. Cypress will open and generate the needed files to get started. (You may delete `./cypress/integration/example_spec.js` if you wish, it is only provided as, you guessed it, an example.)
 
 {% note info Which Project To Install To? %}
-Does your application have multiple project repositories? Many modern applications do! Cypress should be installed with your *front-end project*.
+Does your application have multiple project repositories? Many modern applications do! Cypress should be installed with your *front-end project*, wherever you serve the front-end files for development.
 {% endnote %}
 
 # Visit Your Development URL
 
+First things first, you'll want to visit your app, plain and simple. We'll start where your users start: the home page. Create a new file in the `./cypress/integration` folder, `home_page_spec.js`, and fill it in with a simple test that calls the `cy.visit()` command, something like this:
+
+```js
+describe("The Home Page", function() {
+  it("successfully loads", function() {
+    cy.visit("http://localhost:8080/") // change URL to match your dev URL
+  })
+})
+```
+
+**You'll need to do 2 things for this example to work:**
+1. Where does your dev server run? Change `http://localhost:8080/` to the correct URL for your environment.
+2. You'll have to also start your server! If Cypress tries to visit before you've started your server, you'll see the error pictured below:
+
+{% img /img/guides/getting-started/testing-your-app/visit-your-development-url.png %}
+
+{% note info How do I run my app in development mode? %}
+If you aren't sure about this, you'll need to track down someone on your team who is! Cypress expects its users to be members of a web development team who work on the application every day, able to boot the server and modify the code as they go.
+{% endnote %}
+
+Once you get your server booted, refresh the Cypress browser and you should see your application's home page in the app preview pane. Congratulations! You've just taken the first step toward a better integration testing experience for your web application.
+
 # Useful Configuration Options
+
+If you think ahead, you'll quickly realize that you're going to be typing this URL a lot, since every test is going to need to visit some page of your application. Luckily, Cypress anticipates this need and provides a configuration option for it. Let's leverage that immediately.
+
+Open up `cypress.json`, which you will find in your project root (where you installed Cypress.) It starts out empty:
+
+```js
+{}
+```
+
+...we'll add an option to default our URL in all `cy.visit()` commands (make sure you use your URL if it is different!):
+
+```js
+{
+  "baseUrl": "https://localhost:8080/"
+}
+```
+
+Got it? Great! Now let's rewrite that test to just use the path we want to visit instead of the entire URL:
+
+```js
+describe("The Home Page", function() {
+  it("successfully loads", function() {
+    cy.visit("/")
+  })
+})
+```
+
+Refresh Cypress and have a look to make sure everything is working, then give yourself a pat on the back: that's a lot of typing our future selves won't be doing!
+
+{% note info Configuration Options %}
+Cypress has many more configuration options you can use to customize its behavior to your app. Things like where your tests live, default timeout periods, environment variables, which reporters to use, etc. Check them out in the {% url "Configuration Appendix" configuration %}!
+{% endnote %}
 
 # Think Through Your Testing Strategy
 
@@ -51,6 +105,10 @@ Does your application have multiple project repositories? Many modern applicatio
 ## Preparing the Back-end Data Store
 
 ## Ignoring the Back-end with Network Stubbing
+
+# Get Started!
+
+Ok, we're done slowing you down, dive in and test your app! From here you may want to have a look at the {% url "Cypress API" api %} to learn what commands are available as you work. Once you've written a few tests, {% url "Cypress in a Nutshell" cypress-in-a-nutshell %} is a must-read: it will teach you how Cypress _really_ works, and how to write effective Cypress tests.
 
 <!-- To round out this guide, let's actually test _your_ app! (You do have an app to test, right?)
 

@@ -7,11 +7,11 @@ comments: false
 # {% fa fa-graduation-cap %} What You'll Learn
 
 - How we think differently about testing the modern web
-- What benefits Cypress can bring for your team
+- What benefits Cypress can bring to your team
 - What tradeoffs Cypress makes
 {% endnote %}
 
-# Cypress in 10 Minutes
+# Modern Web Testing with Cypress
 
 Welcome to Cypress: the next-generation testing tool for front-end professionals!
 
