@@ -57,8 +57,14 @@ function assertHashIsPresent (descriptor, source, hash, html, tag = 'url') {
   `)
 }
 
+function isTimeoutError (err) {
+  return err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT'
+}
+
 function validateExternalUrl (href, source) {
   const { hash } = url.parse(href)
+
+  const started = new Date()
 
   return request({
     url: href,
@@ -76,9 +82,23 @@ function validateExternalUrl (href, source) {
     err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
     throw err
   })
-  .catch({ code: 'ETIMEDOUT' }, () => {
+  .catch(errors.RequestError, (reason) => {
+    // https://github.com/request/request-promise#rejected-promises-and-the-simple-option
+    const err = reason.error
+
+    if (isTimeoutError(err)) {
+      /* eslint-disable no-console */
+      const ms = new Date() - started
+
+      console.log(`Request to: ${href} timed out. Ignoring this error and proceeding. Waited for ${ms}ms.`)
+
+      return
+    }
+
     /* eslint-disable no-console */
-    console.log(`Request to: ${href} timed out. Ignoring this error and proceeding.`)
+    console.log(`Request to: ${href} failed.`)
+
+    throw err
   })
 }
 
