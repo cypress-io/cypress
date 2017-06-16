@@ -22,7 +22,7 @@
   color: $color-link;
   font-size: 14px;
   text-decoration: none;
-  line-height: 70px;
+  line-height: 50px;
   transition: 0.2s;
   display: none;
   &:hover {
@@ -199,7 +199,7 @@
   }
 
   h1 {
-    font-size: 2.0em;
+    font-size: 1.9em;
     line-height: 1.7em;
     font-weight: bold;
     margin: 1.5em 0 15px 0;
@@ -218,9 +218,9 @@
   }
 
   h2 {
-    font-size: 1.7em;
+    font-size: 1.6em;
     line-height: 1.7em;
-    font-weight: 500;
+    font-weight: bold;
     margin: 1.5em 0 15px;
     font-family: $font-title;
     border-bottom: 1px solid #eee;
@@ -263,6 +263,7 @@
     display: inline-block;
     margin-top: 15px;
     font-weight: bold;
+    font-size: 1.2em;
   }
 
   &>h2+p>strong, &>h1+p>strong {
@@ -517,7 +518,7 @@
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 2.2em;
+  font-size: 1.9em;
   font-weight: bold;
   text-decoration: none;
   color: $color-default;
