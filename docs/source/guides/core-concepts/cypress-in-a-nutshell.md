@@ -213,6 +213,7 @@ It's very important to understand the mechanism Cypress uses to chain commands t
 
 As we saw in the initial example, Cypress makes it easy to click on and type into elements on the page by using {% url `.click()` click %} and {% url `.type()` type %} commands with a {% url `cy.get()` get %} or {% url `cy.contains()` contains %} command. This is a great example of chaining in action. Let's see it again:
 
+
 ```js
 cy.get('textarea.post-body')
   .type('This is an excellent post.')
@@ -220,13 +221,16 @@ cy.get('textarea.post-body')
 
 We're chaining the {% url `.type()` type %} onto the {% url `cy.get()` get %}, applying it to the "subject" yielded from the {% url `cy.get()` get %} command, which will be a DOM element.
 
-{% url `.type()` type %} and {% url `.click()` click %} are just 2  commands Cypress exposes to you to interact with your app, but there are many more! For instance:
+Here are even more action commands Cypress provides to interact with your app:
 
-- {% url `.blur()` blur %}/{% url `.focus()` focus %}
-- {% url `.type()` type %}/{% url `.clear()` clear %}
-- {% url `.check()` check %}/{% url `.uncheck()` uncheck %}
-- {% url `.select()` select %}
-- {% url `.dblclick()` dblclick %}
+> {% url `.blur()` blur %}
+> {% url `.focus()` focus %}
+> {% url `.type()` type %}
+> {% url `.clear()` clear %}
+> {% url `.check()` check %}
+> {% url `.uncheck()` uncheck %}
+> {% url `.select()` select %}
+> {% url `.dblclick()` dblclick %}
 
 These commands make some assumptions about the what the state of the elements should be.
 
@@ -341,7 +345,8 @@ it('changes the URL when "awesome" is clicked', function() {
     .should('eq', '/my/resource/path#awesomeness') // Nada.
 })
 
-// Ok, the test method has returned, time to do everything in order!
+// Ok, the test function has finished executing...
+// We've queued all of these commands and now we run them in order!
 ```
 
 Cypress doesn't kick off the browser automation magic until the test function exits.
