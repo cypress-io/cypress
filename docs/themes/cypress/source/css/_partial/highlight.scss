@@ -1,7 +1,7 @@
 code {
   margin: 0;
   padding: 3px 4px;
-  border: 1px solid #f4f4f4;
+  border: 1px solid #eee;
   outline: 0;
   font-weight: 600;
   font-family: inherit;
@@ -18,6 +18,7 @@ a code {
 
   &:hover {
     color: $color-link-hover;
+    background-color: darken($highlight-background, 2%);
   }
 }
 

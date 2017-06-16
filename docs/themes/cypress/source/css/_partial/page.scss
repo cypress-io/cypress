@@ -174,6 +174,10 @@
       margin-bottom: 0;
     }
 
+    code {
+      border-color: #ddd
+    }
+
     footer {
       margin: 15px 0;
       font-style: italic;
@@ -297,7 +301,8 @@
   strong>em {
     font-style: normal;
     font-weight: 500;
-    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+    border-bottom: 1px dotted #ccc;
   }
 
   strong + strong>em {
@@ -381,8 +386,7 @@
     }
 
     code {
-      background-color: #fff;
-      border-color: #f7f7f7;
+      border-color: #ddd;
     }
 
     &.warning {
