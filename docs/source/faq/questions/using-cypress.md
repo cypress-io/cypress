@@ -210,3 +210,15 @@ if (window.Cypress) {
   window.env = '{{env.NODE_ENV}}'
 }
 ```
+
+<!-- ## is there CLI option to run in chrome? Or is electron the only way to run headlessly? -->
+
+## {% fa fa-angle-right %} Do you allow before, beforeEach, after, or afterEach hooks?
+
+Yes. You can read more {% url "here" organizing-tests#Hooks %}.
+
+## {% fa fa-angle-right %} I tried to install Cypress in my CI, but I get the error: `EACCES: permission denied`.
+
+First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" cli-tool %}.
+
+Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress-cli`.
