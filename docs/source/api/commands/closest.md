@@ -72,11 +72,11 @@ cy.get('li.active').closest('.nav')
 
 The commands above will display in the command log as:
 
-![Command Log closest](https://cloud.githubusercontent.com/assets/1271364/11447200/500fe9ca-9510-11e5-8c77-8afb8325d937.png)
+![Command Log closest](/img/api/commands/closest/find-closest-nav-element-in-test.png)
 
 When clicking on the `closest` command within the command log, the console outputs the following:
 
-![console.log closest](https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png)
+![console.log closest](/img/api/commands/closest/closest-console-logs-elements-found.png)
 
 # See also
 

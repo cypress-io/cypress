@@ -115,7 +115,7 @@ cy.window().then(function(window){
 })
 ```
 
-![Command Log location](https://cloud.githubusercontent.com/assets/1271364/26501744/6f9b6188-4208-11e7-91ce-59dbb455b1fc.png)
+![Console.log of window.location](/img/api/commands/location/window-location-object-printed-in-console-log.png)
 
 ***Console output of `.location()`***
 
@@ -125,7 +125,7 @@ cy.location().then(function(location){
 })
 ```
 
-![Console Log location](https://cloud.githubusercontent.com/assets/1271364/26501743/6f8fcb84-4208-11e7-9f08-9c97592afc08.png)
+![Console Log of Cypress location command](/img/api/commands/location/special-cypress-location-object-logged-in-console-output.png)
 
 # Command Log
 
@@ -139,11 +139,11 @@ cy.location().should(function(location){
 
 The commands above will display in the command log as:
 
-![screen shot 2017-03-09 at 1 54 22 pm](https://cloud.githubusercontent.com/assets/1268976/23765705/0768366a-04d0-11e7-8936-beb7d546cbc7.png)
+![Command Log](/img/api/commands/location/make-assertion-about-location-url-in-tests.png)
 
 When clicking on `location` within the command log, the console outputs the following:
 
-![screen shot 2017-03-09 at 1 54 58 pm](https://cloud.githubusercontent.com/assets/1268976/23765706/089375e0-04d0-11e7-8344-5872c6f270b2.png)
+![Console Log](/img/api/commands/location/location-object-in-console-log.png)
 
 # See also
 

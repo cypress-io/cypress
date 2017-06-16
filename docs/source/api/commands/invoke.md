@@ -67,7 +67,7 @@ cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 **Use `.invoke()` to test HTML content**
 
 {% note info %}
-[Check out our example recipe where we use cy.invoke('text') to test against HTML content](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+{% url "Check out our example recipe where we use `cy.invoke('text')` to test against HTML content" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}
 {% endnote %}
 
 **Properties that are functions are invoked**
@@ -85,7 +85,7 @@ cy.get('div.container').should('be.hidden') // true
 **Use `.invoke('show')` and `.invoke('trigger')`**
 
 {% note info %}
-[Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js)
+{% url "Check out our example recipe where we use `cy.invoke('show')` and `cy.invoke('trigger')` to click an element that is only visible on hover" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js %}
 {% endnote %}
 
 ## Third Party Plugins
@@ -130,7 +130,7 @@ cy
 **Use `cy.invoke('removeAttr', 'target')` to get around new tab**
 
 {% note info %}
-[Check out our example recipe where we use cy.invoke('removeAttr', 'target') to test clicking on a link without opening in a new tab](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)
+{% url "Check out our example recipe where we use `cy.invoke('removeAttr', 'target')` to test clicking on a link without opening in a new tab" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js %}
 {% endnote %}
 
 **Arguments are automatically forwarded to the function**
@@ -152,11 +152,11 @@ cy.get('.connectors-div').should('be.hidden')
 
 The commands above will display in the command log as:
 
-![Command Log invoke](https://cloud.githubusercontent.com/assets/1271364/26691729/3a75b3c8-46cc-11e7-835d-68200388ddf2.png)
+![Command Log invoke](/img/api/commands/invoke/invoke-jquery-show-on-element-for-testing.png)
 
 When clicking on `invoke` within the command log, the console outputs the following:
 
-![Console log invoke](https://cloud.githubusercontent.com/assets/1271364/26691730/3a9baeca-46cc-11e7-8519-9e4a04490601.png)
+![Console log invoke](/img/api/commands/invoke/log-function-invoked-and-return.png)
 
 # See also
 

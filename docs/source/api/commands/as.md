@@ -53,21 +53,19 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 ## DOM Element
 
 ```javascript
-cy
-  .route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
-  .get('form').submit()
-  .wait('@userPut')
-    .its('url').should('contain', 'users')
+cy.route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
+cy.get('form').submit()
+cy.wait('@userPut')
+  .its('url').should('contain', 'users')
 ```
 
 ## Route
 
 ```javascript
-cy
-  .route('PUT', 'users', 'fx:user').as('userPut')
-  .get('form').submit()
-  .wait('@userPut')
-    .its('url').should('contain', 'users')
+cy.route('PUT', 'users', 'fx:user').as('userPut')
+cy.get('form').submit()
+cy.wait('@userPut')
+  .its('url').should('contain', 'users')
 ```
 
 # Notes
@@ -81,17 +79,16 @@ Some strings are not allowed as alias names since they are reserved words in Cyp
 **Alias several routes**
 
 ```javascript
-cy
-  .route(/company/, 'fixture:company').as('companyGet')
-  .route(/roles/, 'fixture:roles').as('rolesGet')
-  .route(/teams/, 'fixture:teams').as('teamsGet')
-  .route(/users\/\d+/, 'fixture:user').as('userGet')
-  .route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
+cy.route(/company/, 'fixture:company').as('companyGet')
+cy.route(/roles/, 'fixture:roles').as('rolesGet')
+cy.route(/teams/, 'fixture:teams').as('teamsGet')
+cy.route(/users\/\d+/, 'fixture:user').as('userGet')
+cy.route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
 ```
 
 Aliases of routes display in the routes instrument panel:
 
-![Command log for route](https://cloud.githubusercontent.com/assets/1271364/11459470/22e31e54-96a5-11e5-8895-a6ff5f8bb973.png)
+![Command log for route](/img/api/commands/as/routes-table-in-command-log.png)
 
 # See also
 

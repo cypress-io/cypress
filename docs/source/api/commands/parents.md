@@ -81,11 +81,11 @@ cy.get('li.active').parents('.nav')
 cy.get('li.active').parents()
 ```
 
-![Command Log parents](https://cloud.githubusercontent.com/assets/1271364/11447168/be286244-950f-11e5-82e8-9a2a6d1d08e8.png)
+![Command Log parents](/img/api/commands/parents/get-all-parents-of-a-dom-element.png)
 
 When clicking on the `parents` command within the command log, the console outputs the following:
 
-![Console Log parents](https://cloud.githubusercontent.com/assets/1271364/11447171/c1ba5ef8-950f-11e5-9f2d-7fbd0b142649.png)
+![Console Log parents](/img/api/commands/parents/parents-elements-displayed-in-devtools-console.png)
 
 # See also
 

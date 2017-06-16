@@ -93,11 +93,11 @@ cy.url().should('contain', '#users/new')
 
 The commands above will display in the command log as:
 
-<img width="583" alt="screen shot 2015-11-29 at 1 42 40 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459196/20645888-969f-11e5-973a-6a4a98339b15.png">
+![Command Log](/img/api/commands/url/test-url-of-website-or-web-application.png)
 
 When clicking on `url` within the command log, the console outputs the following:
 
-<img width="440" alt="screen shot 2015-11-29 at 1 42 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459197/229e2552-969f-11e5-80a9-eeaf3221a178.png">
+![Console Log](/img/api/commands/url/console-log-of-browser-url-string.png)
 
 # See also
 

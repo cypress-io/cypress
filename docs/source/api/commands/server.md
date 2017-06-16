@@ -230,6 +230,10 @@ Oftentimes your application may make initial requests immediately when it loads 
 
 You can {% url 'read more about XHR strategy here' network-requests %}.
 
+# Command Log
+
+**`cy.server()` does *not* log in the command log**
+
 # See also
 
 - {% url 'Network Requests' network-requests %}

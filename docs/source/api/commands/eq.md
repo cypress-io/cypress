@@ -107,11 +107,11 @@ cy.get('.left-nav.nav').find('>li').eq(3)
 
 The commands above will display in the command log as:
 
-![Command log eq](https://cloud.githubusercontent.com/assets/1271364/11447231/e225e1f2-9510-11e5-8615-4a5b42ef71c1.png)
+![Command log eq](/img/api/commands/eq/find-element-at-index.png)
 
 When clicking on the `eq` command within the command log, the console outputs the following:
 
-![console.log eq](https://cloud.githubusercontent.com/assets/1271364/11447234/e594ce52-9510-11e5-8794-712a7dbeae55.png)
+![console.log eq](/img/api/commands/eq/see-element-and-list-when-using-eq.png)
 
 # See also
 

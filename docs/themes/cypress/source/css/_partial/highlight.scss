@@ -1,14 +1,13 @@
 code {
   margin: 0;
   padding: 3px 4px;
-  border: 1px solid #f4f4f4;
+  border: 1px solid #eee;
   outline: 0;
   font-weight: 600;
   font-family: inherit;
   font-size: 0.9em;
   vertical-align: baseline;
   color: $highlight-foreground;
-  // color: #ea436d;
   font-family: $font-mono;
   background-color: $highlight-background;
   border-radius: 3px;
@@ -19,6 +18,7 @@ a code {
 
   &:hover {
     color: $color-link-hover;
+    background-color: darken($highlight-background, 2%);
   }
 }
 
@@ -62,7 +62,8 @@ a code {
 .article pre, .faq pre {
   &[class*="language-"] {
     border-left: 5px solid $color-border;
-    padding: 0.5em 0.25em;
+    padding: 15px 0;
+    margin: 15px 0;
   }
 }
 

@@ -72,11 +72,11 @@ cy.window()
 
 The commands above will display in the command log as:
 
-<img width="587" alt="screen shot 2015-11-29 at 2 15 49 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459397/ced0a6de-96a3-11e5-93b4-9abd9ffabd98.png">
+![Command Log](/img/api/commands/window/window-command-log-for-cypress-tests.png)
 
 When clicking on `window` within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot 2015-11-29 at 2 16 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459398/d0e6f4be-96a3-11e5-8583-69dcffef9cd3.png">
+![Console Log](/img/api/commands/window/console-shows-the-applications-window-object-being-tested.png)
 
 # See also
 

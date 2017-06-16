@@ -40,7 +40,7 @@ guides:
     # creating-fixtures: creating-fixtures.html
     # best-practices: best-practices.html
     # anti-patterns: anti-patterns.html
-    cypress-api-design: cypress-api-design.html
+    # cypress-api-design: cypress-api-design.html
     userland-extensions: userland-extensions.html
     known-issues: known-issues.html
     # contributing: contributing.html
@@ -164,4 +164,5 @@ faq:
   questions:
     general-questions: general-questions.html
     using-cypress: using-cypress.html
+    dashboard: dashboard.html
     company: company.html

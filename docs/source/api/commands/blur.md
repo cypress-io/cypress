@@ -85,11 +85,11 @@ cy.get('[name="comment"]').focus().type('Nice Product!').blur()
 
 The commands above will display in the command log as:
 
-![command log for blur](https://cloud.githubusercontent.com/assets/1271364/11446921/58a14e34-950c-11e5-85ba-633b7ed5d7f1.png)
+![command log for blur](/img/api/commands/blur/blur-input-command-log.png)
 
 When clicking on the `blur` command within the command log, the console outputs the following:
 
-![console.log for blur](https://cloud.githubusercontent.com/assets/1271364/11446923/5c44a2ca-950c-11e5-8080-0dc108bc4959.png)
+![console.log for blur](/img/api/commands/blur/console-showing-blur-command.png)
 
 # See also
 

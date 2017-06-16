@@ -184,7 +184,7 @@ cy.getCookie('cypress-session-cookie').should('exist')
 **Using cy.request for HTML Forms**
 
 {% note info %}
-{% url 'Check out our example recipe using `cy.request` for HTML form submissions' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
+{% url "Check out our example recipe using `cy.request()` for HTML form submissions" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
 {% endnote %}
 
 # Notes
@@ -209,11 +209,33 @@ Before sending the HTTP request, we automatically attach cookies that would have
 
 In other words, `cy.request()` transparently performs all of the underlying functions as if it came from the browser.
 
+
+# Command Log
+
+**Request comments endpoint and test response**
+
+```javascript
+cy.request('https://jsonplaceholder.typicode.com/comments').then(function(response){
+  expect(response.status).to.eq(200)
+  expect(response.body).to.have.length(500)
+  expect(response).to.have.property('headers')
+  expect(response).to.have.property('duration')
+})
+```
+
+The commands above will display in the command log as:
+
+![Command Log request](/img/api/commands/request/testing-request-url-and-its-response-body-headers.png)
+
+When clicking on `request` within the command log, the console outputs the following:
+
+![Console log request](/img/api/commands/request/console-log-request-response-body-headers-status-url.png)
+
 # See also
 
 - {% url `cy.exec()` exec %}
-- {% url 'Recipe: Logging In - CSRF Tokens' https://github.com/cypress-io/cypress-example-recipes %}
-- {% url 'Recipe: Logging In - HTML Web Form' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
-- {% url 'Recipe: Logging In - Single Sign on' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
-- {% url 'Recipe: Logging In - XHR Web Form' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
+- {% url "Recipe: Logging In - CSRF Tokens" https://github.com/cypress-io/cypress-example-recipes %}
+- {% url "Recipe: Logging In - HTML Web Form" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
+- {% url "Recipe: Logging In - Single Sign on" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
+- {% url "Recipe: Logging In - XHR Web Form" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
 - {% url `cy.visit()` visit %}

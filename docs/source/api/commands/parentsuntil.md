@@ -8,12 +8,12 @@ Get all ancestors of each DOM element in a set of matched DOM elements up to, bu
 # Syntax
 
 ```javascript
-.parentUntil(selector)
-.parentUntil(selector, filter)
-.parentUntil(selector, filter, options)
-.parentUntil(element)
-.parentUntil(element, filter)
-.parentUntil(element, filter, options)
+.parentsUntil(selector)
+.parentsUntil(selector, filter)
+.parentsUntil(selector, filter, options)
+.parentsUntil(element)
+.parentsUntil(element, filter)
+.parentsUntil(element, filter, options)
 ```
 
 ## Usage
@@ -101,11 +101,11 @@ cy.get('.active').parentsUntil('.nav')
 
 The commands above will display in the command log as:
 
-![Command Log parentsUntil](https://cloud.githubusercontent.com/assets/1271364/24264301/516d5fd6-0fd6-11e7-9ab7-b55b211acde3.png)
+![Command Log parentsUntil](/img/api/commands/parentsuntil/get-all-parents-until-nav-selector.png)
 
 When clicking on `parentsUntil` within the command log, the console outputs the following:
 
-![Console Log parentsUntil](https://cloud.githubusercontent.com/assets/1271364/24264309/60cc75de-0fd6-11e7-97b4-d0aa184b0ba6.png)
+![Console Log parentsUntil](/img/api/commands/parentsuntil/show-parents-until-nav-in-console.png)
 
 # See also
 

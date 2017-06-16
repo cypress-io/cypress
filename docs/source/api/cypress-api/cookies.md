@@ -67,7 +67,7 @@ cy.clearCookie('foo')
 cy.setCookie('foo', 'bar')
 ```
 
-![screen shot 2016-05-22 at 8 54 00 pm](https://cloud.githubusercontent.com/assets/1268976/15457855/e2b6e99c-205f-11e6-8b25-ac6e0dcae9ce.png)
+![Console log when debugging cookies](https://cloud.githubusercontent.com/assets/1268976/15457855/e2b6e99c-205f-11e6-8b25-ac6e0dcae9ce.png)
 
 **Turn off verbose debugging output**
 
@@ -79,7 +79,7 @@ Cypress.Cookies.debug(true, {verbose: false})
 
 Now when Cypress logs cookies they will only include the `name` and `value`.
 
-![screen shot 2016-05-22 at 8 54 13 pm](https://cloud.githubusercontent.com/assets/1268976/15457832/680bc71c-205f-11e6-9b8b-1c84380790e0.png)
+![Console log cookies with debug](https://cloud.githubusercontent.com/assets/1268976/15457832/680bc71c-205f-11e6-9b8b-1c84380790e0.png)
 
 Debugging will be turned on until you explicitly turn it off.
 

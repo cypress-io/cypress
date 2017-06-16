@@ -51,7 +51,7 @@ it('uses modules', function () {
 
 It's still useful to load a setup files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the {% url `supportFile` configuration#Folders %} configuration option.
 
-{% url `supportFile` configuration#Folders %} is a path to a file to include before your test files. By default, {% url `supportFile` configuration#Folders %} is set to look for one of the following files:
+To include code before your test files, set the {% url `supportFile` configuration#Folders %} path. By default, {% url `supportFile` configuration#Folders %} is set to look for one of the following files:
 
 * `cypress/support/index.js`
 * `cypress/support/index.coffee`

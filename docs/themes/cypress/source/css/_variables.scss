@@ -10,7 +10,7 @@ $white-60: rgba(255,255,255,0.6);
 $color-gray: #999;
 $color-green: #04C38E;
 $color-red: #EA4D5C;
-$color-default: #474a54;
+$color-default: #444;
 $color-border: #e3e3e3;
 $color-link: #3B94D9;
 $color-link-hover: #0369b3;
@@ -30,7 +30,7 @@ $highlight-blue:          #183691;
 $highlight-purple:        #795da3;
 
 // Typography
-$font-sans: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+$font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $font-serif: Garamond, Georgia, "Times New Roman", serif;
 $font-mono: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 $font-title: "Fira Sans", font-sans;

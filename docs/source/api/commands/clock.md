@@ -196,11 +196,11 @@ cy.tick(1000)
 
 The command above will display in the command log as:
 
-![Command Log clock](https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png)
+![Command Log clock](/img/api/commands/clock/clock-displays-in-command-log.png)
 
 When clicking on the `clock` command within the command log, the console outputs the following:
 
-![console.log clock command](https://cloud.githubusercontent.com/assets/1157043/22437920/0786f9d8-e6f8-11e6-9e77-926b15aa8dae.png)
+![console.log clock command](/img/api/commands/clock/clock-displays-methods-replaced-in-console.png)
 
 # See also
 

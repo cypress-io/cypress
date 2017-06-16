@@ -117,7 +117,7 @@ cy
 **Use `.its()` to test `window.fetch`**
 
 {% note info %}
-{% url 'Check out our example recipe on testing `window.fetch` using `.its()`' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe on testing `window.fetch` using `.its()`" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
 {% endnote %}
 
 ## Nested Properties
@@ -152,11 +152,11 @@ cy.wait('@getComments').its('responseBody').should('deep.eq', [
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-24 at 12 39 40 pm](https://cloud.githubusercontent.com/assets/1268976/15512229/d512cbb4-21ac-11e6-9a9a-5d358ae4fe4b.png)
+![Command Log](/img/api/commands/its/xhr-response-its-response-body-for-testing.png)
 
 When clicking on `its` within the command log, the console outputs the following:
 
-![screen shot 2016-05-24 at 12 40 17 pm](https://cloud.githubusercontent.com/assets/1268976/15512225/d14723cc-21ac-11e6-88d5-39ffe6c0a195.png)
+![Console Log](/img/api/commands/its/response-body-yielded-with-its-command-log.png)
 
 # See also
 

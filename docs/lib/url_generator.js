@@ -28,7 +28,7 @@ function extractHash (str) {
   return (matches && matches[0]) || ''
 }
 
-function assertHashIsPresent (descriptor, source, hash, html) {
+function assertHashIsPresent (descriptor, source, hash, html, tag = 'url') {
   // verify that the hash is present on this page
   const $ = cheerio.load(html)
 
@@ -43,7 +43,7 @@ function assertHashIsPresent (descriptor, source, hash, html) {
   const truncated = _.truncate(html, { length: 200 }) || '""'
 
   // if we dont have a hash
-  throw new Error(`Constructing {% url %} tag helper failed
+  throw new Error(`Constructing {% ${tag} %} tag helper failed
 
   > The source file was: ${source}
 
@@ -57,10 +57,29 @@ function assertHashIsPresent (descriptor, source, hash, html) {
   `)
 }
 
-function validateExternalUrl (href, source) {
-  const { hash } = url.parse(href)
+const hrefs = []
 
-  return request(href)
+function isTimeoutError (err) {
+  return err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT'
+}
+
+function validateExternalUrl (href, source) {
+  const { hash, hostname } = url.parse(href)
+
+  const started = new Date()
+
+  // don't check download.cypress.io
+  if (hostname === 'download.cypress.io') {
+    return Promise.resolve()
+  }
+
+  hrefs.push(href)
+
+  return request({
+    method: hash ? 'GET' : 'HEAD', // if we have a hash, use GET, else HEAD
+    url: href,
+    timeout: 5000,
+  })
   .then((html) => {
     // bail if we dont have a hash
     if (!hash) {
@@ -71,6 +90,24 @@ function validateExternalUrl (href, source) {
   })
   .catch(errors.StatusCodeError, (err) => {
     err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
+    throw err
+  })
+  .catch(errors.RequestError, (reason) => {
+    // https://github.com/request/request-promise#rejected-promises-and-the-simple-option
+    const err = reason.error
+
+    if (isTimeoutError(err)) {
+      /* eslint-disable no-console */
+      const ms = new Date() - started
+
+      console.log(`Request to: ${href} timed out. Ignoring this error and proceeding. Waited for ${ms}ms.`)
+
+      return
+    }
+
+    /* eslint-disable no-console */
+    console.log(`Request to: ${href} failed.`)
+
     throw err
   })
 }
@@ -168,7 +205,27 @@ function validateLocalFile (sidebar, href, source, render) {
   })
 }
 
-function validateAndGetUrl (sidebar, href, source, render) {
+function validateAndGetUrl (sidebar, href, source, text, render) {
+  if (!href) {
+    // if we dont have a hash
+    return Promise.reject(
+      new Error(`A url tag was not passed an href argument.
+
+        > The source file was: ${source}
+
+        > url tag's text was: ${text}
+      `)
+    )
+  }
+
+  // parse this into fully qualified url
+  // so we normalize values like
+  // http://foo.com
+  // http://foo.com/
+  const parsed = url.parse(href)
+
+  href = parsed.href
+
   // do we already have a cache for this href?
   const cachedValue = cache[href]
 
@@ -198,6 +255,8 @@ function validateAndGetUrl (sidebar, href, source, render) {
 
 module.exports = {
   cache,
+
+  assertHashIsPresent,
 
   normalizeNestedPaths,
 

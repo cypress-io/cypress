@@ -126,7 +126,7 @@ hfc_useref:
   concat: true
   exclude:
 hfc_html:
-  enable: true
+  enable: false
   exclude:
 hfc_css:
   enable: true

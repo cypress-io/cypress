@@ -7,14 +7,52 @@ comments: false
 # {% fa fa-graduation-cap %} What You'll Learn
 
 - The relationship between Cypress and your back-end
-- How authentication impedes testability... but doesn't have to
-- How sensitive Cypress is to errors from _anywhere_
-- Configuration options to ease your pain
+- Configuring Cypress to fit your app
+- Working with (or without!) your authentication mechanism
+- Effectively leveraging test data
 {% endnote %}
 
-# Once More With Feeling!
+We covered Cypress in a tutorial app, now let's integrate it into your **real** app!
 
-To round out this guide, let's actually test _your_ app! (You do have an app to test, right?)
+# Add Cypress to Your App
+
+Add Cypress to your app as we did before with `npm`:
+
+```shell
+$ npm install cypress --save-dev
+```
+
+...and make yourself an `npm` script in `package.json` to run it easily (we named it "test-cypress" this time because we're assuming you already have a "test" script, but the name is arbitrary):
+
+```json
+{
+  ...
+  "scripts": {
+    "test-cypress": "cypress open"
+  }
+  ...
+}
+```
+
+Now you can run Cypress from the command line by typing `npm run test-cypress`, do so now. Cypress will open and generate the needed files to get started. (You may delete `./cypress/integration/example_spec.js` if you wish, it is only provided as, you guessed it, an example.)
+
+{% note info Which Project To Install To? %}
+Does your application have multiple project repositories? Many modern applications do! Cypress should be installed with your *front-end project*.
+{% endnote %}
+
+# Visit Your Development URL
+
+# Useful Configuration Options
+
+# Think Through Your Testing Strategy
+
+## Logging In with Speed and Grace
+
+## Preparing the Back-end Data Store
+
+## Ignoring the Back-end with Network Stubbing
+
+<!-- To round out this guide, let's actually test _your_ app! (You do have an app to test, right?)
 
 First, create a new test file in the `cypress/integration` folder named `my_spec.js` (or whatever you want, the name is not meaningful.) We'll fill in a quick smoke test to make sure we can visit the app:
 
@@ -28,13 +66,9 @@ describe.only('My App', function() {
 
 Save this file, open Cypress, and click on the `my_spec.js` file. This should be the only test that runs because we leveraged `.only` on the `describe` block, and it should fail because we didn't start our server
 
-<!-- (see image below) -->
-
 Why? Well, remember that Cypress is back-end agnostic: it doesn't know _anything_ about your app server, let alone whether it is running or not. All Cypress can do is attempt to visit the link you gave it and report back about the response it gets. No response? Must not be running!
 
 This is where your own knowledge of your app comes in, as you'll need to boot your app server into an appropriate mode for testing. What this means is entirely app-dependent: Cypress doesn't know anything about your environment, and we couldn't hope to guess anything about it for this guide, either!
-
-<!-- _Aside: Look at our page dedicated to framework-specific server-side patterns and adapters_ -->
 
 Start your server and re-run the tests in Cypress. You will see your web app booted up inside the Cypress browser and ready to be automated. Score!
 
@@ -42,7 +76,6 @@ Start your server and re-run the tests in Cypress. You will see your web app boo
 
 Now that you've gotten your server running and you're considering what to test next, you're probably realizing something common to most modern web apps: all the interesting functionality is behind a login form!
 
-<!-- This is a major hurdle to fast tests, and it's something we're going to visit in detail later in this guide. -->
 
 For now, we recommend that you toy around with Cypress in the public areas of your website (perhaps your marketing pages, documentation, ...or even the login form itself if that's really all you have!)
 
@@ -56,10 +89,10 @@ Try to write some simple tests on your own, and for the moment don't worry if th
 Does your app have pre-existing errors that are causing Cypress to fail?
 
 Cypress is actually working as expected: those errors are real errors and need to be fixed in your application!
-{% endnote %}
+{% endnote %} -->
 
  <!-- However, we understand that developers don't always have complete control over their environment and need a little help from time to time. If you need to disable this behavior of Cypress (at your own risk), you can..._ -->
-<!-- 
+<!--
 Configuration:
 - baseUrl
 - ignore existing errors? -->

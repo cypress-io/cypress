@@ -170,6 +170,29 @@ Scaling the app should not affect any calculations or behavior of your applicati
 
 The upsides to this are that tests should consistently pass or fail regardless of a developers' screen size. Tests will also consistently run in `CI` because all of the viewports will be the same no matter what machine Cypress runs on.
 
+# Command Log
+
+**Change viewport size to test responsive nav**
+
+```javascript
+cy.get('#navbar').should('be.visible')
+
+cy.viewport(320, 480)
+
+// the navbar should have collapse since our screen is smaller
+cy.get('#navbar').should('not.be.visible')
+cy.get('.navbar-toggle').should('be.visible').click()
+cy.get('.nav').find('a').should('be.visible')
+```
+
+The commands above will display in the command log as:
+
+![Command Log viewport](/img/api/commands/viewport/viewport-size-width-and-height-changes-and-is-shown-in-the-commands.png)
+
+When clicking on `viewport` within the command log, the console outputs the following:
+
+![Console log viewport](/img/api/commands/viewport/console-log-shows-width-and-height-of-tested-viewport.png)
+
 # See also
 
 - {% url 'configuration' configuration %}

@@ -79,6 +79,26 @@ hexo.extend.tag.register('issue', function (args) {
   return util.htmlTag('a', attrs, text)
 })
 
+hexo.extend.tag.register('urlHash', function (args) {
+  const content = this.content
+  const text = args[0]
+  const hash = `#${args[1]}`
+
+  const attrs = {
+    href: hash,
+  }
+
+  urlGenerator.assertHashIsPresent(
+    this.full_source,
+    this.source,
+    hash,
+    content,
+    'urlHash'
+  )
+
+  return util.htmlTag('a', attrs, text)
+})
+
 hexo.extend.tag.register('url', function (args) {
   // {% url `.and()` and %}
   // {% url `.should()` should#Notes %}
@@ -122,7 +142,7 @@ hexo.extend.tag.register('url', function (args) {
       return hexo.render.render({ text, engine: 'markdown' })
     }
 
-    return urlGenerator.validateAndGetUrl(sidebar, attrs.href, this.full_source, onRender)
+    return urlGenerator.validateAndGetUrl(sidebar, attrs.href, this.full_source, props.text, onRender)
     .then((href) => {
       attrs.href = href
 

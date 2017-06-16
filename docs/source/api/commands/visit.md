@@ -119,7 +119,7 @@ cy.visit('http://localhost:3000/#dashboard', {
 **Using onBeforeLoad**
 
 {% note info %}
-Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to [help bootstrap app data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js), to [set a token to localStorage for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js) and to [stub window.fetch](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url "Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to help bootstrap app data" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}, to {% url "set a token to `localStorage` for login" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %} and to {% url "stub `window.fetch`" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
 {% endnote %}
 
 **Provide an `onLoad` callback function**
@@ -184,10 +184,29 @@ cy.visit('http://localhost:8000/#/app')
 
 Cypress will automatically apply the server and routes to the very next `cy.visit()` and does so immediately before any of your application code runs.
 
+# Command Log
+
+**Visit example application in a `beforeEach`**
+
+```javascript
+beforeEach(function(){
+  cy.visit('https://example.cypress.io/commands/viewport')
+})
+```
+
+The commands above will display in the command log as:
+
+![Command Log visit](/img/api/commands/visit/visit-example-page-in-before-each-of-test.png)
+
+When clicking on `visit` within the command log, the console outputs the following:
+
+![Console log visit](/img/api/commands/visit/visit-shows-any-redirect-or-cookies-set-in-the-console.png)
+
+
 # See also
 
 - {% url `cy.go()` go %}
-- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
-- [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+- {% url "Recipe: Bootstrapping App Test Data" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}
+- {% url "Recipe: Logging In - Single Sign on" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
 - {% url `cy.request()` request %}
 - {% url `cy.server()` server %}

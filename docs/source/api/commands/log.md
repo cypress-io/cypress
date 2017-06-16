@@ -69,11 +69,11 @@ cy.log('another message', ['one', 'two', 'three'])
 
 The commands above will display in the command log as:
 
-![Command Log log](https://cloud.githubusercontent.com/assets/1271364/21321329/55389b3c-c5e2-11e6-8607-592683d520da.png)
+![Command Log log](/img/api/commands/log/custom-command-log-with-any-message.png)
 
 When clicking on `log` within the command log, the console outputs the following:
 
-![Console log log](https://cloud.githubusercontent.com/assets/1271364/21321324/4f616dec-c5e2-11e6-8c2f-924e7bfd6f87.png)
+![Console log log](/img/api/commands/log/console-shows-logs-message-and-any-arguments.png)
 
 # See also
 

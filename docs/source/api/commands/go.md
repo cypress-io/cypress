@@ -96,11 +96,11 @@ cy
 
 The commands above will display in the command log as:
 
-![screen shot 2016-01-21 at 1 45 25 pm](https://cloud.githubusercontent.com/assets/1271364/12491029/c33087f0-c046-11e5-8475-4e6c35296085.png)
+![Command Log](/img/api/commands/go/test-showing-go-back-browser-button.png)
 
 When clicking on the `go` command within the command log, the console outputs the following:
 
-![screen shot 2016-01-21 at 1 46 02 pm](https://cloud.githubusercontent.com/assets/1271364/12491359/b22e569c-c048-11e5-8ec3-f46217a19fc1.png)
+![Console Log](/img/api/commands/go/window-is-logged-when-go-back-in-browser-history.png)
 
 # See also
 

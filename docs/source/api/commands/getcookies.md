@@ -85,11 +85,11 @@ cy.getCookies().should('have.length', 1).then(function(cookies) {
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-10 at 12 06 46 pm](https://cloud.githubusercontent.com/assets/1271364/15153582/bc370c32-16a7-11e6-94b5-add51d7df7e5.png)
+![Command Log](/img/api/commands/getcookies/get-browser-cookies-and-inspect-all-properties.png)
 
 When clicking on `getCookies` within the command log, the console outputs the following:
 
-![screen shot 2016-05-10 at 12 07 00 pm](https://cloud.githubusercontent.com/assets/1271364/15153583/bc374300-16a7-11e6-8e40-2cba54b95a5a.png)
+![Console Log](/img/api/commands/getcookies/test-application-cookies.png)
 
 # See also
 

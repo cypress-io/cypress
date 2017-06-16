@@ -41,7 +41,7 @@ The function used to replace the `method` on the `object`.
 
 Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (the stub) instead of a Promise-like chain-able object.
 
-`cy.stub()` returns a [Sinon.js stub](http://sinonjs.org/docs/#stubs). All methods found on Sinon.JS [spies](http://sinonjs.org/docs/#spies-api) and [stubs](http://sinonjs.org/docs/#stubs-api) are supported.
+`cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
 
 ## Timeout
 
@@ -100,7 +100,7 @@ expect(removeStub).to.be.called
 **Using cy.stub**
 
 {% note info %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
 {% endnote %}
 
 ## Alias a stub
@@ -121,13 +121,13 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22437243/4cc778a4-e6f5-11e6-8f07-e601d3438c4f.png)
+![stubs with aliases](/img/api/commands/stub/stubs-with-aliases-and-error-in-command-log.png)
 
 # Notes
 
 **Automatic reset/restore between tests**
 
-`cy.stub()` creates stubs in a [sandbox](http://sinonjs.org/docs/#sandbox), so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
+`cy.stub()` creates stubs in a {% url "sandbox" http://sinonjs.org/releases/v2.0.0/sandbox/ %}, so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
 **Difference between cy.spy() and cy.stub()**
 
@@ -135,7 +135,7 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 
 **Assertion Support**
 
-Cypress has built-in [sinon-as-promised](https://github.com/bendrucker/sinon-as-promised) support, so the stubs returned by `cy.stub()` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
+Cypress has built-in {% url "sinon-as-promised" https://github.com/bendrucker/sinon-as-promised %} support, so the stubs returned by `cy.stub()` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
 
 # Command Log
 
@@ -152,17 +152,17 @@ expect(stub).to.be.called
 
 The command above will display in the command log as:
 
-<img width="454" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437473/335f7104-e6f6-11e6-8ee8-74dc21e7d4fa.png">
+![Command Log](/img/api/commands/stub/stub-in-command-log.png)
 
 When clicking on the `(stub-1)` event within the command log, the console outputs the following:
 
-<img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437546/6b01e574-e6f6-11e6-878f-e10c2316d213.png">
+![Command Log](/img/api/commands/stub/inspect-the-stubbed-object-and-any-calls-or-arguments-made.png)
 
 # See also
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
 - {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
+- {% url "Recipe: Unit Test - Stubbing Dependencies" https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies %}
 - {% url `cy.spy()` spy %}

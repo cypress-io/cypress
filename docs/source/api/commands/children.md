@@ -117,11 +117,11 @@ cy.get('.left-nav>.nav').children().should('have.length', 8)
 
 The commands above will display in the command log as:
 
-![Command log for children](https://cloud.githubusercontent.com/assets/1271364/11447069/2b0f8a7e-950e-11e5-96b5-9d82d9fdddec.png)
+![Command log for children](/img/api/commands/children/children-elements-shown-in-command-log.png)
 
 When clicking on the `children` command within the command log, the console outputs the following:
 
-![console.log for children](https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png)
+![console.log for children](/img/api/commands/children/children-yielded-in-console.png)
 
 # See also
 
