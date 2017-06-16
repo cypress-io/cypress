@@ -43,8 +43,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
         expect(obj).to.deep.eq {foo: "bar"}
 
     describe "cancellation", ->
-      ## FIXME: fails when running all tests in this file
-      it.skip "cancels promise", (done) ->
+      it "cancels promise", (done) ->
         ## respond after 50 ms
         @respondWith({}, 50)
 
@@ -83,8 +82,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         @cy.fixture("err")
 
-      ## FIXME
-      it.skip "throws after timing out", (done) ->
+      it "throws after timing out", (done) ->
         @respondWith({foo: "bar"}, 1000)
 
         logs = []
@@ -103,8 +101,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         @cy.fixture("foo", {timeout: 50})
 
-    ## FIXME: these are failing because the fixture cache needs to be cleared somehow
-    describe.skip "timeout", ->
+    describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
         @Cypress.config("responseTimeout", 2500)
 
@@ -140,8 +137,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
           ## restores the timeout afterwards
           expect(@cy._timeout()).to.eq(100)
 
-    ## FIXME: these are failing because the fixture cache needs to be cleared somehow
-    describe.skip "caching", ->
+    describe "caching", ->
       it "caches fixtures by name", ->
         @respondWith({foo: "bar"})
         cy.fixture("foo").then (obj) =>
