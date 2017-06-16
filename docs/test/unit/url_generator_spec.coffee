@@ -95,6 +95,21 @@ describe "lib/url_generator", ->
         expect(err.message).to.include("Could not find a valid doc file in the sidebar.yml for: foo")
 
   context ".validateAndGetUrl", ->
+    it "fails when given undefined href", ->
+      render = (str) ->
+        return Promise.resolve("<html><div id='notes'>notes</div></html>")
+
+      urlGenerator.validateAndGetUrl(data, undefined, 'foo', 'content', render )
+      .then ->
+        throw new Error("should have caught error")
+      .catch (err) ->
+        [
+          "A url tag was not passed an href argument."
+          "The source file was: foo"
+          "url tag's text was: content",
+        ].forEach (msg) ->
+          expect(err.message).to.include(msg)
+
     it "fails when external returns non 2xx", ->
       nock("https://www.google.com")
       .get("/")
@@ -116,11 +131,11 @@ describe "lib/url_generator", ->
 
       @sandbox.stub(fs, "readFile").returns(Promise.resolve(markdown))
 
-      urlGenerator.validateAndGetUrl(data, "and#notes", "", render)
+      urlGenerator.validateAndGetUrl(data, "and#notes", "", "", render)
       .then (pathToFile) ->
         expect(pathToFile).to.eq("/api/commands/and.html#notes")
 
-        urlGenerator.validateAndGetUrl(data, "and#notes", "", render)
+        urlGenerator.validateAndGetUrl(data, "and#notes", "", "", render)
       .then (pathToFile) ->
         expect(pathToFile).to.eq("/api/commands/and.html#notes")
 
@@ -164,7 +179,7 @@ describe "lib/url_generator", ->
 
       @sandbox.stub(fs, "readFile").returns(Promise.resolve(""))
 
-      urlGenerator.validateAndGetUrl(data, "and#foo", "guides/core-concepts/bar.md", render)
+      urlGenerator.validateAndGetUrl(data, "and#foo", "guides/core-concepts/bar.md", "content", render)
       .then ->
         throw new Error("should have caught error")
       .catch (err) ->

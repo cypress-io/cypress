@@ -142,7 +142,7 @@ hexo.extend.tag.register('url', function (args) {
       return hexo.render.render({ text, engine: 'markdown' })
     }
 
-    return urlGenerator.validateAndGetUrl(sidebar, attrs.href, this.full_source, onRender)
+    return urlGenerator.validateAndGetUrl(sidebar, attrs.href, this.full_source, props.text, onRender)
     .then((href) => {
       attrs.href = href
 

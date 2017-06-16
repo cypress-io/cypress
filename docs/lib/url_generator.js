@@ -168,7 +168,19 @@ function validateLocalFile (sidebar, href, source, render) {
   })
 }
 
-function validateAndGetUrl (sidebar, href, source, render) {
+function validateAndGetUrl (sidebar, href, source, text, render) {
+  if (!href) {
+    // if we dont have a hash
+    return Promise.reject(
+      new Error(`A url tag was not passed an href argument.
+
+        > The source file was: ${source}
+
+        > url tag's text was: ${text}
+      `)
+    )
+  }
+
   // do we already have a cache for this href?
   const cachedValue = cache[href]
 
