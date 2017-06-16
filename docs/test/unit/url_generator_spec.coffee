@@ -112,14 +112,14 @@ describe "lib/url_generator", ->
 
     it "fails when external returns non 2xx", ->
       nock("https://www.google.com")
-      .get("/")
+      .head("/")
       .reply(500)
 
       urlGenerator.validateAndGetUrl(data, "https://www.google.com")
       .then ->
         throw new Error("should have caught error")
       .catch (err) ->
-        expect(err.message).to.include("Request to: https://www.google.com failed. (Status Code 500)")
+        expect(err.message).to.include("Request to: https://www.google.com/ failed. (Status Code 500)")
 
     it "verifies local file and caches subsequent requests", ->
       markdown = "## Notes\nfoobarbaz"
