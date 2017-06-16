@@ -57,16 +57,26 @@ function assertHashIsPresent (descriptor, source, hash, html, tag = 'url') {
   `)
 }
 
+const hrefs = []
+
 function isTimeoutError (err) {
   return err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT'
 }
 
 function validateExternalUrl (href, source) {
-  const { hash } = url.parse(href)
+  const { hash, hostname } = url.parse(href)
 
   const started = new Date()
 
+  // don't check download.cypress.io
+  if (hostname === 'download.cypress.io') {
+    return Promise.resolve()
+  }
+
+  hrefs.push(href)
+
   return request({
+    method: hash ? 'GET' : 'HEAD', // if we have a hash, use GET, else HEAD
     url: href,
     timeout: 5000,
   })
@@ -207,6 +217,14 @@ function validateAndGetUrl (sidebar, href, source, text, render) {
       `)
     )
   }
+
+  // parse this into fully qualified url
+  // so we normalize values like
+  // http://foo.com
+  // http://foo.com/
+  const parsed = url.parse(href)
+
+  href = parsed.href
 
   // do we already have a cache for this href?
   const cachedValue = cache[href]
