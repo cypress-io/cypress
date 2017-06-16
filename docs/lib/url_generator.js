@@ -76,9 +76,9 @@ function validateExternalUrl (href, source) {
     err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
     throw err
   })
-  .catch(errors.RequestError, (err) => {
-    console.log(`Request to: ${href} failed. Reason: ${err.message}`)
-    return
+  .catch({ code: 'ETIMEDOUT' }, () => {
+    /* eslint-disable no-console */
+    console.log(`Request to: ${href} timed out. Ignoring this error and proceeding.`)
   })
 }
 
