@@ -5,9 +5,9 @@ title: Writing Your First Test
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- Where test files go and how they look
+- Where test files go and what they look like
 - Basics of testing
-- Basic web navigation, DOM selection, and assertions
+- Testing web navigation, DOM selection, and making assertions
 {% endnote %}
 
 # A Simple Test
@@ -26,23 +26,23 @@ Though it doesn't do anything useful, this is a valid test! If we open Cypress (
 
 {% img /img/guides/getting-started/writing-your-first-test/a-simple-test.png %}
 
-Click on `simple_spec.js` and Cypress will execute the test suite defined in that file. Below, you can see how Cypress sees that test and visualizes it in the Command Log. Admittedly, the test doesn't do much, but hey, it's green!
+Click on `simple_spec.js` and Cypress will run the test suite defined in that file. Below, you can see how Cypress sees that test and visualizes it in the Command Log. Admittedly, the test doesn't do much, but hey, it's green!
 
 {% img /img/guides/getting-started/writing-your-first-test/simple-spec.png %}
 
 {% note info Where do the `describe()` and `it()` functions come from? %}
-Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support. Your other favorites, `context()`, `before()`, `beforeEach()`, `after()`, and `afterEach()` are available, too!
+Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support. Your other favorites, `context()`, `before()`, `beforeEach()`, `after()`, and `afterEach()` are available too!
 {% endnote %}
 
 # Structure of a Test
 
-A solid test generally happens in 3 phases:
+A solid test generally covers 3 phases:
 
-1. Set up the world state.
+1. Set up the application state.
 2. Take an action.
-3. Make an assertion about the resulting world state.
+3. Make an assertion about the resulting application state.
 
-You might also see this phrased as "Given, When, Then", or "Arrange, Act, Assert". The idea is simple: first you put the system into a specific state, then you take some action in the system that causes it to change, and finally you check the resulting system state.
+You might also see this phrased as "Given, When, Then", or "Arrange, Act, Assert". The idea is simple: first you put the application into a specific state, then you take some action in the application that causes it to change, and finally you check the resulting application state.
 
 Today, we'll take a narrow view of these steps and map them cleanly to Cypress commands:
 
@@ -50,23 +50,23 @@ Today, we'll take a narrow view of these steps and map them cleanly to Cypress c
 2. Select and interact with an element on the page.
 3. Assert something about the content on the page.
 
-## Step 1: Visit a Page
+## {% fa fa-globe %} Step 1: Visit a Page
 
-First, let's visit a web page. We will use our {% url 'Kitchen Sink application' 'https://example.cypress.io/' %} in this example so that you can try Cypress out without needing to bring your own app today.
+First, let's visit a web page. We will visit our {% url 'Kitchen Sink application' 'https://example.cypress.io/' %} in this example so that you can try Cypress out without needing to worry about finding a project to test.
 
-Using {% url `cy.visit()` visit %} is easy, we just pass it the URL we wish to visit. Let's replace our previous test with a new one that actually visits a page:
+Using {% url `cy.visit()` visit %} is easy, we just pass it the URL we want to visit. Let's replace our previous test with a new one that actually visits a page:
 
 ```js
 describe("My First Test", function() {
   it("Visits the Kitchen Sink", function() {
-    cy.visit("https://example.cypress.io/")
+    cy.visit('https://example.cypress.io/')
   })
 })
 ```
 
 Save the file and switch back over to the Cypress browser (or start it back up again if you closed it.) You might notice a few things:
 
-1. Cypress detected that the test file changed and automatically reloaded and re-ran it.
+1. Cypress detected that the test file changed, automatically reloaded and re-ran it.
 2. The Command Log now shows the new `VISIT` action.
 3. The Kitchen Sink application has been loaded into the app preview pane.
 4. The test is green, even though we made no assertions.
@@ -77,7 +77,7 @@ Save the file and switch back over to the Cypress browser (or start it back up a
 Visiting non-development URLs (as we just did above) is an anti-pattern: don't do this for your real tests, you should ALWAYS be testing against a development build that you have full control over. Cypress is not a general web automation tool and is poorly suited to scripting live, production websites.
 {% endnote %}
 
-## Step 2: Click an Element
+## {% fa fa-mouse-pointer %} Step 2: Click an Element
 
 Now that we've got a page loading, we need to take some action on it. Why don't we click a link on the page? Sounds easy enough, let's go look for one we like... how about "type" under the "Actions" heading?
 
@@ -115,7 +115,7 @@ Also note that the app preview pane has updated further after the click, followi
 
 Now we can declare something about this new page!
 
-## Step 3: Make an Assertion
+## {% fa fa-check-square-o %} Step 3: Make an Assertion
 
 Finally, let's find something to assert something about the new page. Perhaps we'd like to make sure the proper headings are present. We can do that by looking up the appropriate tags and chaining assertions to them with `.should()`.
 
