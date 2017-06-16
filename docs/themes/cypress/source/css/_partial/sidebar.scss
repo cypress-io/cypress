@@ -8,36 +8,36 @@
 
   ul {
     list-style: none;
+
   }
 }
 
 .sidebar-title {
-  margin-top: 1.5em;
-  font-size: 1.1em;
+  margin-top: 15px;
+  font-size: 1em;
   padding: 10px 20px;
   font-family: $font-title;
-  font-weight: 400;
+  font-weight: 500;
   color: $color-default;
   display: inline-block;
   line-height: 1;
 }
 
 #sidebar .sidebar-title:first-child {
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 .sidebar-li {
-  line-height: 1.3;
-  padding: 2px 0;
+  line-height: 1.7;
 }
 
 .sidebar-link {
   font-family: $font-sans;
-  font-size: 0.9em;
+  font-size: 0.8em;
   display: block;
   color: $color-link;
   text-decoration: none;
-  padding: 3px 10px 3px 21px;
+  padding: 3px 15px 3px 21px;
   position: relative;
   width: 100%;
   font-weight: 400;

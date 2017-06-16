@@ -1,20 +1,10 @@
 .faq {
-  .article ol {
-    margin-left: 0;
-    padding-left: 0;
-  }
-
-  .article-inner {
-    border-right: 0;
-  }
-
   .article-content {
     padding-top: 40px;
-    border-top: 1px solid #eee;
   }
 
   .toc {
-    padding-bottom: 20px;
+    padding-bottom: 15px;
   }
 
   .toc-link {
@@ -24,7 +14,7 @@
     font-size: 14.5px;
   }
 
-  .toc-level-1 {
+  .toc-level-1, .toc-level-2 {
     a.toc-link {
       border-bottom: 0;
       padding-left: 5px;
@@ -56,8 +46,11 @@
     }
 
     h2 {
-      margin-top: 2em;
-      padding-top: 2em;
+      &:first-of-type {
+        margin-top: 0;
+        border-top: 0;
+        padding-top: 0;
+      }
     }
   }
 }

@@ -22,7 +22,7 @@
   color: $color-link;
   font-size: 14px;
   text-decoration: none;
-  line-height: 40px;
+  line-height: 70px;
   transition: 0.2s;
   display: none;
   &:hover {
@@ -52,14 +52,6 @@
 .article-content, .faq .article {
   line-height: $line-height;
 
-  &>h1:first-child {
-    margin-top: 0em;
-    padding-top: 0.5em;
-    border: 0;
-  }
-
-
-
   hr {
     border: 0;
     height: 0;
@@ -68,27 +60,25 @@
   }
 
   p {
-    margin-bottom: 15px;
+    margin: 15px 0;
     word-wrap: break-word;
-    line-height: 1.5em;
+    font-family: $font-sans;
   }
 
   ol {
-    margin: 1em 0;
-    margin-left: 40px;
+    margin: 15px 0;
+    padding-left: 30px;
     list-style: decimal;
 
-
-
     li:not('.toc-item') {
-      margin: 1em 0;
+      margin: 15px 0;
 
       p {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
       }
 
       img {
-        margin-top: 10px;
+        margin-top: 15px;
       }
     }
 
@@ -108,8 +98,8 @@
   }
 
   ul {
-    margin: 1em 0;
-    margin-left: 40px;
+    margin: 15px 0;
+    padding-left: 30px;
     list-style: disc;
 
     ul {
@@ -127,8 +117,8 @@
   }
 
   dl {
-    margin: 1em 0;
-    margin-left: 20px;
+    margin: 15px 0;
+    padding-left: 30px;
     list-style: square;
     ul {
       margin-top: 0;
@@ -145,7 +135,7 @@
   }
 
   table {
-    margin: 1em 0;
+    margin: 15px 0;
     width: 100%;
     border: 1px solid #e8e8e8;
 
@@ -173,8 +163,8 @@
   }
 
   blockquote {
-    margin: 1em 0;
-    padding: 20px;
+    margin: 15px 0;
+    padding: 15px;
     position: relative;
     border-left: 5px solid #eee;
     background-color: #f7f7f7;
@@ -185,7 +175,7 @@
     }
 
     footer {
-      margin: 1em 0;
+      margin: 15px 0;
       font-style: italic;
 
       cite {
@@ -209,34 +199,31 @@
   }
 
   h1 {
-    font-size: 1.7em;
-    line-height: 1em;
-    font-weight: 500;
-    margin: 1.5em 0 0.5em 0;
-    padding: 0;
+    font-size: 2.0em;
+    line-height: 1.7em;
+    font-weight: bold;
+    margin: 1.5em 0 15px 0;
     font-family: $font-title;
-    border-top: 1px solid #eee;
-    padding-top: 1em;
+    border-bottom: 1px solid #eee;
 
     &>a {
       font-weight: 500;
     }
 
     &+h2 {
-      margin-top: 1.5em;
+      margin-top: 0;
       border-top: 0;
       padding-top: 0;
     }
   }
 
   h2 {
-    font-size: 1.3em;
-    line-height: 1.5em;
+    font-size: 1.7em;
+    line-height: 1.7em;
     font-weight: 500;
-    margin: 1.5em 0 0.5em 0;
-    padding-top: 1.5em;
+    margin: 1.5em 0 15px;
     font-family: $font-title;
-    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
 
     code {
       font-weight: bold;
@@ -272,10 +259,10 @@
     font-family: $font-title;
   }
 
-
   &>p>strong {
     display: inline-block;
-    margin-top: 1em;
+    margin-top: 15px;
+    font-weight: bold;
   }
 
   &>h2+p>strong, &>h1+p>strong {
@@ -297,7 +284,7 @@
     display: inline-block;
     margin-bottom: 15px;
   }
-  
+
   strong {
     font-weight: 500;
   }
@@ -336,26 +323,31 @@
       margin: 2em 0;
     }
   }
+
   img {
     max-width: 100%;
     border: 1px solid #ddd;
+    margin: 15px 0;
   }
+
   video {
     max-width: 100%;
+    border: 1px solid #ddd;
+    margin: 15px 0;
   }
 
   .note {
     font-weight: 200;
     border: 0;
-    margin: 1em 0;
-    padding: 20px;
+    margin: 15px 0;
+    padding: 15px 25px;
     position: relative;
     border-left: 5px solid $highlight-comment;
     font-style: normal;
-    font-size: 15px;
+    font-size: 16px;
 
     footer {
-      margin: 1em 0;
+      margin: 15px 0;
       font-style: italic;
 
       cite {
@@ -370,13 +362,17 @@
     }
 
     &>h1, &>h2, &>h3 {
-      margin-top: 0em;
+      margin-top: 15px;
       padding-top: 0em;
       border: 0;
     }
 
     h1 {
       font-size: 1em;
+    }
+
+    p:first-of-type:last-of-type {
+      margin: 0;
     }
 
     strong {
@@ -421,13 +417,6 @@
       }
     }
 
-    p:first-of-type:last-of-type {
-      margin: 0;
-    }
-
-    ul {
-      margin: 0 20px 0 20px;
-    }
   }
   .note-title {
     margin: 0;
@@ -511,9 +500,9 @@
   }
 }
 
-
 .article-header {
-  padding: 20px 0;
+  margin: 0 0 15px 0;
+  border-bottom: 1px solid #ddd;
   &:before {
     content: "";
     display: table;
@@ -528,12 +517,11 @@
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 2.4em;
-  font-weight: 500;
+  font-size: 2.2em;
+  font-weight: bold;
   text-decoration: none;
   color: $color-default;
-  transition: 0.2s;
-  line-height: 1em;
+  line-height: 1.7em;
 }
 
 .article-inner {

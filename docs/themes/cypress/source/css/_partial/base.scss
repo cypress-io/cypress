@@ -26,9 +26,12 @@ body {
 
 a {
   cursor: pointer;
+  transition: 0.2s;
+
   img {
     border: none;
   }
+
   &.article-title:hover {
     color: $color-link-hover;
   }
