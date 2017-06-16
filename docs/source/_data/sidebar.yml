@@ -164,4 +164,5 @@ faq:
   questions:
     general-questions: general-questions.html
     using-cypress: using-cypress.html
+    dashboard: dashboard.html
     company: company.html
