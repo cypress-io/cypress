@@ -73,6 +73,10 @@ function validateExternalUrl (href, source) {
     err.message = `Request to: ${href} failed. (Status Code ${err.statusCode})`
     throw err
   })
+  .catch(errors.RequestError, (err) => {
+    console.log(`Request to: ${href} failed. Reason: ${err.message}`)
+    return
+  })
 }
 
 function normalizeNestedPaths (data) {
