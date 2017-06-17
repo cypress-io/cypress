@@ -9,7 +9,7 @@ Some commands have not been implemented in Cypress. Some commands will be implem
 
 ## Right click
 
-{% issue 53 'Issue #53' %}
+{% fa fa-github %} {% issue 53 'Issue #53' %}
 
 **Workaround**
 
@@ -36,7 +36,7 @@ cy
 
 ## Hover
 
-{% issue 10 'Issue #10' %}
+{% fa fa-github %} {% issue 10 'Issue #10' %}
 
 Sometimes an element has specific logic on hover. Maybe the element doesn't even display to be clickable until you hover over a specific element.
 
@@ -67,7 +67,7 @@ Cypress does not support the following use cases.
 
 ## Iframes
 
-{% issue 136 'Issue #136' %}
+{% fa fa-github %} {% issue 136 'Issue #136' %}
 
 You cannot target elements or interact with anything in an iframe - regardless of it being a same domain or cross domain iframe.
 
@@ -89,7 +89,7 @@ Likely we will be able to support server side oauth redirects, but for client si
 
 ## window.fetch routing and stubbing
 
-{% issue 95 'Issue #95' %}
+{% fa fa-github %} {% issue 95 'Issue #95' %}
 
 Support for `fetch` has not been added but it's possible to handle in the same way as we handle `XHRs`. This biggest challenge here is that you can use `fetch` in `Service Workers` outside of the global context. We'll likely have to move routing to the server and handle it in the proxy layer but it should be possible.
 
