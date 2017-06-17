@@ -9,7 +9,7 @@ comments: false
 
 Docker image with dependencies and specific version of Cypress.
 
-{% url "https://hub.docker.com/r/bahmutov/cypress-image/" https://hub.docker.com/r/bahmutov/cypress-image/ %}
+{% url "https://github.com/cypress-io/docker" https://github.com/cypress-io/docker %}
 
 # Gitlab
 
