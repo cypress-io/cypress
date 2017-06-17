@@ -38,7 +38,7 @@ The amount of time to wait in milliseconds.
 An aliased route as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
 {% note info %}
-{% url 'Read about using aliases here.' aliases %}
+{% url 'Read about using aliases here.' aliases-and-references %}
 {% endnote %}
 
 **{% fa fa-angle-right %} aliases** ***(Array)***
