@@ -7,11 +7,9 @@ Cypress bundles the popular {% url 'Chai' assertions#Chai %} assertion library, 
 
 # Chai
 
-[Chai](http://chaijs.com/) chainers are available for assertions.
+{% fa fa-github %} {% url http://chaijs.com/ %}
 
-| Chainable getters |
-| --- |
-| `to`, `be`, `been`, `is`, `that`, `which`, `and`, `has`, `have`, `with`, `at`, `of`, `same` |
+These chainers are available for assertions.
 
 | Assertion | Example |
 | --- | --- |
@@ -76,9 +74,19 @@ Cypress bundles the popular {% url 'Chai' assertions#Chai %} assertion library, 
 | decrease( *function* )  | `expect(fn).to.decrease(obj, 'val')` |
 | decreases( *function* ) | `expect(fn).decreases(obj, 'val')` |
 
+These getters are also available. They don't actually do anything, but they enable you to write simple, english sentences.
+
+| Chainable getters |
+| --- |
+| `to`, `be`, `been`, `is`, `that`, `which`, `and`, `has`, `have`, `with`, `at`, `of`, `same` |
+
 # Chai-jQuery
 
-{% url "Chai-jQuery" https://github.com/chaijs/chai-jquery %} chainers are available when asserting about a DOM object.
+{% fa fa-github %} {% url https://github.com/chaijs/chai-jquery %}
+
+These chainers are available when asserting about a DOM object.
+
+You will commonly use these chainers after using DOM commands like: {% url `cy.get()` get %}, {% url `cy.contains()` contains %}, etc.
 
 | Chainers | Assertion |
 | --- | --- |
@@ -103,13 +111,11 @@ Cypress bundles the popular {% url 'Chai' assertions#Chai %} assertion library, 
 | contain( *text* ) | `expect($('#content')).to.contain('text')` |
 | descendents( *selector* ) | `expect($('#content')).to.have.descendants('div')` |
 
-You will commonly use these chainers after using DOM commands like: {% url `cy.get()` get %}, {% url `cy.contains()` contains %}, etc.
-
 # Sinon-Chai
 
-All Sinon assertions are available in {% url "Sinon–Chai" https://github.com/domenic/sinon-chai %}.
+{% fa fa-github %} {% url https://github.com/domenic/sinon-chai %}
 
-You'll typically use these alongside {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %}.
+These chainers are used on assertions with {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %}.
 
 | Sinon.JS property/method | Assertion |
 | -- | -- |
@@ -134,3 +140,58 @@ You'll typically use these alongside {% url `cy.stub()` stub %} and {% url `cy.s
 | alwaysReturned |  `expect(spy).to.have.always.returned(returnVal)` |
 | threw | `expect(spy).to.have.thrown(errorObjOrErrorTypeStringOrNothing)` |
 | alwaysThrew | `expect(spy).to.have.always.thrown(errorObjOrErrorTypeStringOrNothing)` |
+
+# Common Assertions
+
+Here is a list of common element assertions.
+
+Notice how we use these assertions (listed above) with {% url `.should()` should %}.
+
+## Length
+
+```javascript
+// retry until we find 3 matching <li.selected>
+cy.get("li.selected").should("have.length", 3)
+```
+
+## Class
+
+```javascript
+// retry until this input does not have class disabled
+cy.get("form").find("input").should("not.have.class", "disabled")
+```
+
+## Value
+
+```javascript
+// retry until this textarea has the correct value
+cy.get("textarea").should("have.value", "foo bar baz")
+```
+
+## Text Content
+
+```javascript
+// retry until this span does not contain 'click me'
+cy.get("a").parent("span.help").should("not.contain", "click me")
+```
+
+## Visibility
+
+```javascript
+// retry until this button is visible
+cy.get("button").should("be.visible")
+```
+
+## Existence
+
+```javascript
+// retry until loading spinner no longer exists
+cy.get("#loading").should("not.exist")
+```
+
+## State
+
+```javascript
+// retry until our radio is checked
+cy.get(":radio").should("be.checked")
+```
