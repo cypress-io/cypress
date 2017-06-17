@@ -120,7 +120,7 @@ Read more about {% url 'environment variables' environment-variables %} and {% u
 
 ## `cypress run --record`
 
-Record video of tests running after {% url 'setting up your project to record' dashboard-projects#Set-up-a-Project-to-Record %}.
+Record video of tests running after {% url 'setting up your project to record' projects#Set-up-a-Project-to-Record %}.
 
 {% note info  %}
 You'd typically record your runs in {% url 'Continuous Integration' continuous-integration %}, but you can also record when running locally.
@@ -148,7 +148,7 @@ export CYPRESS_RECORD_KEY=abc-key-123
 cypress run --record
 ```
 
-You can {% url 'read more about recording runs here' dashboard-projects#Set-up-a-Project-to-Record %}.
+You can {% url 'read more about recording runs here' projects#Set-up-a-Project-to-Record %}.
 
 ## `cypress open`
 

@@ -65,7 +65,7 @@ comments: false
 **Notes:**
 
 - We have updated all of the docs related to these changes. The {% url 'CI Docs' continuous-integration %} got a much needed facelift.
-- There is a new docs section related to the {% url 'Dashboard' dashboard-features %} and the new features.
+- There is a new docs section related to the {% url 'Dashboard' features %} and the new features.
 
 **Overview:**
 

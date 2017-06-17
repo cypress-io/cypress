@@ -20,10 +20,6 @@ guides:
     environment-variables: environment-variables.html
     reporters: reporters.html
     browser-management: browser-management.html
-    dashboard-features: dashboard-features.html
-    dashboard-projects: dashboard-projects.html
-    dashboard-runs: dashboard-recorded-runs.html
-    dashboard-organizations: dashboard-organizations.html
   advanced-cypress:
     # the-cypress-workflow: the-cypress-workflow.html
     # coming-from-selenium: coming-from-selenium.html
@@ -159,6 +155,13 @@ examples:
     todo-mvc: todo-mvc.html
     pie-chopper: pie-chopper.html
     phonecat: phonecat.html
+
+dashboard:
+  overview:
+    features: features.html
+    projects: projects.html
+    runs: runs.html
+    organizations: organizations.html
 
 faq:
   questions:

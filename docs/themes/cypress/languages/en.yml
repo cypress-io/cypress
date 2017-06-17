@@ -3,6 +3,7 @@ menu:
   api: API
   faq: FAQ
   examples: Examples
+  dashboard: Dashboard
   search: Search
 
 index:
@@ -39,10 +40,6 @@ sidebar:
     environment-variables: Environment Variables
     reporters: Reporters
     browser-management: Browser Management
-    dashboard-features: The Cypress Dashboard
-    dashboard-projects: Dashboard&#58; Projects
-    dashboard-runs: Dashboard&#58; Recorded Runs
-    dashboard-organizations: Dashboard&#58; Organizations
     advanced-cypress: Advanced
     the-cypress-workflow: The Cypress Workflow
     coming-from-selenium: Coming from Selenium?
@@ -176,6 +173,12 @@ sidebar:
     todo-mvc: TodoMVC
     pie-chopper: PieChopper
     phonecat: Phonecat
+  dashboard:
+    overview: Dashboard
+    features: Features
+    projects: Projects
+    runs: Recorded Runs
+    organizations: Organizations
   faq:
     questions: FAQ
     general-questions: General Questions

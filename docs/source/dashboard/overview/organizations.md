@@ -1,5 +1,5 @@
 ---
-title: Dashboard&#58; Organizations
+title: Organizations
 comments: false
 ---
 
