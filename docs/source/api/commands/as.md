@@ -88,7 +88,7 @@ cy.route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
 
 Aliases of routes display in the routes instrument panel:
 
-![Command log for route](/img/api/commands/as/routes-table-in-command-log.png)
+![Command log for route](/img/api/as/routes-table-in-command-log.png)
 
 # See also
 

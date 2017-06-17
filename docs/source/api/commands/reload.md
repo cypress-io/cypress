@@ -77,11 +77,11 @@ cy.reload()
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/reload/test-page-after-reload-button.png)
+![Command Log](/img/api/reload/test-page-after-reload-button.png)
 
 When clicking on `reload` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/reload/command-log-for-reload-cypress.png)
+![Console Log](/img/api/reload/command-log-for-reload-cypress.png)
 
 # See also
 

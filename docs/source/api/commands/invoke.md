@@ -152,11 +152,11 @@ cy.get('.connectors-div').should('be.hidden')
 
 The commands above will display in the command log as:
 
-![Command Log invoke](/img/api/commands/invoke/invoke-jquery-show-on-element-for-testing.png)
+![Command Log invoke](/img/api/invoke/invoke-jquery-show-on-element-for-testing.png)
 
 When clicking on `invoke` within the command log, the console outputs the following:
 
-![Console log invoke](/img/api/commands/invoke/log-function-invoked-and-return.png)
+![Console log invoke](/img/api/invoke/log-function-invoked-and-return.png)
 
 # See also
 

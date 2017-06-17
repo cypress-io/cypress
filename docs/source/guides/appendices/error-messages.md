@@ -9,7 +9,7 @@ comments: false
 
 This message means that Cypress was unable to find tests in the specified file. You'll likely get this message if you have an empty test file and have not yet written any tests.
 
-{% img /img/guides/appendices/error-messages/no-tests-found.png No tests found %}
+{% img /img/guides/no-tests-found.png No tests found %}
 
 ***
 
@@ -62,7 +62,7 @@ Just like with your test files, the {% url `supportFile` configuration#Folders %
 
 **{% fa fa-exclamation-triangle red %} Cypress cannot execute commands outside a running test**
 
-{% img /img/guides/appendices/error-messages/cypress-cannot-execute.png Cannot Execute Commands %}
+{% img /img/guides/cypress-cannot-execute.png Cannot Execute Commands %}
 
 This message means you tried to execute one or more Cypress commands outside of a currently running test. Cypress has to be able to associate commands to a specific test.
 
@@ -99,7 +99,7 @@ If you are purposefully writing commands outside of a test, there is probably a 
 
 Getting this errors means you've tried to interact with a "dead" DOM element - meaning it's been detached or completely removed from the DOM.
 
-{% img /img/guides/appendices/error-messages/cy-method-failed-element-is-detached.png cy.method() failed because element is detached %}
+{% img /img/guides/cy-method-failed-element-is-detached.png cy.method() failed because element is detached %}
 
 Cypress errors because it can't interact with "dead" elements - just like a real user could not do this either. Understanding how this happens is very important - and it is often easy to prevent.
 
@@ -184,7 +184,7 @@ cy.get('[disabled]').click({force: true}).
 
 **{% fa fa-exclamation-triangle red %} `cy....()` failed because the element is currently animating**
 
-{% img /img/guides/appendices/error-messages/cy-method-failed-element-is-animating.png cy.method() failed because element is animating %}
+{% img /img/guides/cy-method-failed-element-is-animating.png cy.method() failed because element is animating %}
 
 By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions, such as {% url `.type()` type %} or {% url `.click()` click %}, happened too fast during a transition.
 
@@ -215,7 +215,7 @@ You can globally disable animation error checking, or increase the threshold by 
 
 Let's examine several different ways you may get this error message. In every situation, you'll need to change something in your test code to prevent the error.
 
-{% img /img/guides/appendices/error-messages/the-test-has-finished.png The test has finished but Cypress still has commands %}
+{% img /img/guides/the-test-has-finished.png The test has finished but Cypress still has commands %}
 
 {% note warning Flaky tests below! %}
 Several of these tests are dependent on race conditions. You may have to run these tests multiple times before they will actually fail. You can also try tweaking some of the delays.
@@ -386,7 +386,7 @@ If you find yourself stuck and can't work around these issues you can just set t
 
 Browsers are enormously complex pieces of software, and from time to time they will inconsistently crash *for no good reason*. Crashes are just a part of running automated tests.
 
-{% img /img/guides/appendices/error-messages/chromium-renderer-crashed.png Chromium Renderer process just crashed %}
+{% img /img/guides/chromium-renderer-crashed.png Chromium Renderer process just crashed %}
 
 At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an {% issue 349 'open issue documenting the steps' %} we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
 

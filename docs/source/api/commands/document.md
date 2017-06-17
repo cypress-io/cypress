@@ -68,11 +68,11 @@ cy.document()
 
 The command above will display in the command log as:
 
-![Command log document](/img/api/commands/document/get-document-of-application-in-command-log.png)
+![Command log document](/img/api/document/get-document-of-application-in-command-log.png)
 
 When clicking on `document` within the command log, the console outputs the following:
 
-![console.log document](/img/api/commands/document/console-yields-the-document-of-aut.png)
+![console.log document](/img/api/document/console-yields-the-document-of-aut.png)
 
 # See also
 

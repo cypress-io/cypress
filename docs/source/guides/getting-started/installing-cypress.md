@@ -47,7 +47,7 @@ $ $(npm bin)/cypress open
 
 After a moment, the Cypress graphical application will launch. If this is your first time running Cypress in this project, it will generate some files to help you get started. These files live in the new `./cypress` directory (also generated for you), and are very user friendly so don't be afraid have a look through them!
 
-![Cypress First Run Experience](/img/guides/getting-started/installing-cypress/generated-files.png)
+![Cypress First Run Experience](/img/guides/generated-files.png)
 
 # Managing Cypress with `package.json`
 

@@ -281,11 +281,11 @@ cy.get('.left-nav>.nav').children().should('have.length', 8)
 
 The commands above will display in the command log as:
 
-![Command Log should](/img/api/commands/should/should-command-shows-up-as-assert-for-each-assertion.png)
+![Command Log should](/img/api/should/should-command-shows-up-as-assert-for-each-assertion.png)
 
 When clicking on `assert` within the command log, the console outputs the following:
 
-![Console Log should](/img/api/commands/should/assertion-in-console-log-shows-actual-versus-expected-data.png)
+![Console Log should](/img/api/should/assertion-in-console-log-shows-actual-versus-expected-data.png)
 
 # See also
 

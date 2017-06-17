@@ -122,7 +122,7 @@ In our case it would re-issue the commands: `cy.get('#todos li').first()`. Every
 
 Another use case for aliasing is with routes. Using aliases with {% url `cy.route()` route %} makes dealing with AJAX requests much easier.
 
-![alias-commands](/img/guides/cypress-basics/aliases-variables-in-an-async-world/aliasing-routes.jpg)
+![alias-commands](/img/guides/aliasing-routes.jpg)
 
 ```javascript
 cy.server()

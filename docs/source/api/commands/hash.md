@@ -80,11 +80,11 @@ cy.hash().should('eq', '#users/new')
 
 The commands above will display in the command log as:
 
-![Command Log for hash](/img/api/commands/hash/test-url-hash-for-users-page.png)
+![Command Log for hash](/img/api/hash/test-url-hash-for-users-page.png)
 
 When clicking on `hash` within the command log, the console outputs the following:
 
-![Console Log for hash](/img/api/commands/hash/hash-command-yields-url-after-hash.png)
+![Console Log for hash](/img/api/hash/hash-command-yields-url-after-hash.png)
 
 # See also
 

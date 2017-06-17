@@ -150,11 +150,11 @@ cy.exec('cat cypress.json')
 
 The command above will display in the command log as:
 
-![Command Log exec](/img/api/commands/exec/exec-cat-in-shell.png)
+![Command Log exec](/img/api/exec/exec-cat-in-shell.png)
 
 When clicking on the `exec` command within the command log, the console outputs the following:
 
-![console.log exec](/img/api/commands/exec/console-shows-code-shell-stderr-and-stdout-for-exec.png)
+![console.log exec](/img/api/exec/console-shows-code-shell-stderr-and-stdout-for-exec.png)
 
 # See also
 

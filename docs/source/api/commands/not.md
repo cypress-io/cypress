@@ -76,11 +76,11 @@ cy.get('form').find('button').not('[type="submit"]')
 
 The commands above will display in the command log as:
 
-![Command Log not](/img/api/commands/not/filter-elements-with-not-and-optional-selector.png)
+![Command Log not](/img/api/not/filter-elements-with-not-and-optional-selector.png)
 
 When clicking on `not` within the command log, the console outputs the following:
 
-![Console log not](/img/api/commands/not/log-elements-found-when-using-cy-not.png)
+![Console log not](/img/api/not/log-elements-found-when-using-cy-not.png)
 
 # See also
 

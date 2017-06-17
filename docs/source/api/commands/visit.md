@@ -196,11 +196,11 @@ beforeEach(function(){
 
 The commands above will display in the command log as:
 
-![Command Log visit](/img/api/commands/visit/visit-example-page-in-before-each-of-test.png)
+![Command Log visit](/img/api/visit/visit-example-page-in-before-each-of-test.png)
 
 When clicking on `visit` within the command log, the console outputs the following:
 
-![Console log visit](/img/api/commands/visit/visit-shows-any-redirect-or-cookies-set-in-the-console.png)
+![Console log visit](/img/api/visit/visit-shows-any-redirect-or-cookies-set-in-the-console.png)
 
 
 # See also

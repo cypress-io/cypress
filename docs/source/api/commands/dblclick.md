@@ -69,11 +69,11 @@ cy.get('[data-schedule-id="4529114"]:first').dblclick()
 
 The commands above will display in the command log as:
 
-![Command Log dblclick](/img/api/commands/dblclick/double-click-in-testing.png)
+![Command Log dblclick](/img/api/dblclick/double-click-in-testing.png)
 
 When clicking on `dblclick` within the command log, the console outputs the following:
 
-![console.log dblclick](/img/api/commands/dblclick/element-double-clicked-on.png)
+![console.log dblclick](/img/api/dblclick/element-double-clicked-on.png)
 
 # See also
 

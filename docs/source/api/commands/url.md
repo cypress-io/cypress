@@ -93,11 +93,11 @@ cy.url().should('contain', '#users/new')
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/url/test-url-of-website-or-web-application.png)
+![Command Log](/img/api/url/test-url-of-website-or-web-application.png)
 
 When clicking on `url` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/url/console-log-of-browser-url-string.png)
+![Console Log](/img/api/url/console-log-of-browser-url-string.png)
 
 # See also
 

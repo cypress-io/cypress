@@ -56,7 +56,7 @@ describe("The Home Page", function() {
 1. Where does your dev server run? Change `http://localhost:8080/` to the correct URL for your environment.
 2. You'll have to also start your server! If Cypress tries to visit before you've started your server, you'll see the error pictured below:
 
-{% img /img/guides/getting-started/testing-your-app/visit-your-development-url.png %}
+{% img /img/guides/visit-your-development-url.png %}
 
 {% note info How do I run my app in development mode? %}
 If you aren't sure about this, you'll need to track down someone on your team who is! Cypress expects its users to be members of a web development team who work on the application every day, able to boot the server and modify the code as they go.

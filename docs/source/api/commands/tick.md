@@ -86,11 +86,11 @@ cy.tick(1000)
 
 The command above will display in the command log as:
 
-![Command Log](/img/api/commands/tick/tick-machine-clock-1-second-in-time.png)
+![Command Log](/img/api/tick/tick-machine-clock-1-second-in-time.png)
 
 When clicking on the `tick` command within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/tick/console-shows-same-clock-object-as-clock-command.png)
+![Console Log](/img/api/tick/console-shows-same-clock-object-as-clock-command.png)
 
 # See also
 

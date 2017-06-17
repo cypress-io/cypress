@@ -225,11 +225,11 @@ cy.request('https://jsonplaceholder.typicode.com/comments').then(function(respon
 
 The commands above will display in the command log as:
 
-![Command Log request](/img/api/commands/request/testing-request-url-and-its-response-body-headers.png)
+![Command Log request](/img/api/request/testing-request-url-and-its-response-body-headers.png)
 
 When clicking on `request` within the command log, the console outputs the following:
 
-![Console log request](/img/api/commands/request/console-log-request-response-body-headers-status-url.png)
+![Console log request](/img/api/request/console-log-request-response-body-headers-status-url.png)
 
 # See also
 

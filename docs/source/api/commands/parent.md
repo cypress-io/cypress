@@ -82,11 +82,11 @@ cy.get('li.active').parent().should('have.class', 'nav')
 
 The commands above will display in the command log as:
 
-![Command Log parent](/img/api/commands/parent/get-parent-element-just-like-jquery.png)
+![Command Log parent](/img/api/parent/get-parent-element-just-like-jquery.png)
 
 When clicking on the `parent` command within the command log, the console outputs the following:
 
-![Console Log parent](/img/api/commands/parent/parent-command-found-elements-for-console-log.png)
+![Console Log parent](/img/api/parent/parent-command-found-elements-for-console-log.png)
 
 # See also
 

@@ -80,11 +80,11 @@ cy.get('.left-nav>.nav').find('>li')
 
 The commands above will display in the command log as:
 
-![Command Log find](/img/api/commands/find/find-li-of-uls-in-test.png)
+![Command Log find](/img/api/find/find-li-of-uls-in-test.png)
 
 When clicking on the `find` command within the command log, the console outputs the following:
 
-![console.log find](/img/api/commands/find/find-in-console-shows-list-and-yields.png)
+![console.log find](/img/api/find/find-in-console-shows-list-and-yields.png)
 
 # See also
 

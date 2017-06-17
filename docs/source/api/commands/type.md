@@ -387,7 +387,7 @@ Additionally, events that cause a `change` event to fire (such as typing `{enter
 
 Any modifiers activated for the event are also listed in a `modifiers` column.
 
-![Cypress .type() key events table](/img/api/commands/type/key-events-table-shown-in-console-for-testing-typing.png)
+![Cypress .type() key events table](/img/api/type/key-events-table-shown-in-console-for-testing-typing.png)
 
 **Simulated Events vs Native Events**
 
@@ -411,11 +411,11 @@ cy.get('input[name=firstName]').type('Jane Lane')
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/type/type-in-input-shown-in-command-log.png)
+![Command Log](/img/api/type/type-in-input-shown-in-command-log.png)
 
 When clicking on `type` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/type/console-log-of-typing-with-entire-key-events-table-for-each-character.png)
+![Console Log](/img/api/type/console-log-of-typing-with-entire-key-events-table-for-each-character.png)
 
 # See also
 

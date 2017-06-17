@@ -147,11 +147,11 @@ cy.writeFile('info.log', ['foo', 'bar', 'baz'])
 
 The command above will display in the command log as:
 
-![Command Log](/img/api/commands/writefile/write-data-to-system-file-for-testing.png)
+![Command Log](/img/api/writefile/write-data-to-system-file-for-testing.png)
 
 When clicking on the `writeFile` command within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/writefile/console-log-shows-contents-written-to-file.png)
+![Console Log](/img/api/writefile/console-log-shows-contents-written-to-file.png)
 
 # See also
 

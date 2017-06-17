@@ -104,11 +104,11 @@ cy.get('.left-nav').find('li.active').prev()
 
 The commands above will display in the command log as:
 
-![Command Log prev](/img/api/commands/prev/find-prev-element-in-list-of-els.png)
+![Command Log prev](/img/api/prev/find-prev-element-in-list-of-els.png)
 
 When clicking on `prev` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/prev/previous-element-in-console-log.png)
+![Console Log](/img/api/prev/previous-element-in-console-log.png)
 
 # See also
 

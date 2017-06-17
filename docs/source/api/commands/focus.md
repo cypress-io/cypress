@@ -88,11 +88,11 @@ cy.get('[name="comment"]').focus()
 
 The commands above will display in the command log as:
 
-![Command Log focus](/img/api/commands/focus/get-input-then-focus.png)
+![Command Log focus](/img/api/focus/get-input-then-focus.png)
 
 When clicking on the `focus` command within the command log, the console outputs the following:
 
-![console.log focus](/img/api/commands/focus/console-log-textarea-that-was-focused-on.png)
+![console.log focus](/img/api/focus/console-log-textarea-that-was-focused-on.png)
 
 # See also
 

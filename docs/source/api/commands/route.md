@@ -393,11 +393,11 @@ XHR's that display `(XHR STUB)` in the Command Log have been stubbed and their r
 
 XHR's that display `(XHR)` in the Command Log have *not* been stubbed and were passed directly through to a server.
 
-![XHR Command Log when not stubbed](/img/api/commands/route/xhr-stub-versus-not-stubbed-routes-in-command-log.png)
+![XHR Command Log when not stubbed](/img/api/route/xhr-stub-versus-not-stubbed-routes-in-command-log.png)
 
 Cypress also logs whether the XHR was stubbed or not to the console when you click on the command in the Command Log. It will indicate whether a request was stubbed, which url it matched or that it did not match any routes.
 
-![XHR Command Log stubbed](/img/api/commands/route/console-log-shows-if-route-was-stubbed-also.png)
+![XHR Command Log stubbed](/img/api/route/console-log-shows-if-route-was-stubbed-also.png)
 
 Even the `Initiator` is included, which is a stack trace to what caused the XHR to be sent.
 
@@ -447,15 +447,15 @@ cy.route(/teams/,   'fixtures:teams').as('teamsGet')
 
 Whenever you start a server and add routes, Cypress will display a new Instrument Log called *Routes*. It will list the routing table in the Instrument Log, including the `method`, `url`, `stubbed`, `alias` and number of matched requests:
 
-![Command Log routing table](/img/api/commands/route/routing-table-displayed-in-command-log-for-cy-route.png)
+![Command Log routing table](/img/api/route/routing-table-displayed-in-command-log-for-cy-route.png)
 
 When XHR's are made, Cypress will log them in the Command Log and indicate whether they matched a routing alias:
 
-![Command Log XHR alias route](/img/api/commands/route/some-xhr-responses-including-200-and-500-status-codes.png)
+![Command Log XHR alias route](/img/api/route/some-xhr-responses-including-200-and-500-status-codes.png)
 
 When clicking on `XHR Stub` within the Command Log, the console outputs the following:
 
-![Console Log](/img/api/commands/route/console-log-shows-status-duration-response-request-and-other-data-for-routing.png)
+![Console Log](/img/api/route/console-log-shows-status-duration-response-request-and-other-data-for-routing.png)
 
 # See also
 

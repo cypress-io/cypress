@@ -313,7 +313,7 @@ cy.get('#some-link') // Find the el with id 'some-link'
 
 **Using Aliases to Refer to Previous Subjects**
 
-Cypress has some added functionality for quickly referring back to past DOM element subjects called [Aliases](/guides/cypress-basics/aliases-variables-in-an-async-world.html). It looks something like this:
+Cypress has some added functionality for quickly referring back to past DOM element subjects called [Aliases](/guides.html). It looks something like this:
 
 ```js
 cy.get('.my-selector')

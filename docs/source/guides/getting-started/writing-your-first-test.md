@@ -24,11 +24,11 @@ describe("My First Test", function() {
 
 Though it doesn't do anything useful, this is a valid test! If we open Cypress (via `npm test` if you created the shortcut in the previous guide) it will list our new spec file next to the generated `example_spec.js`:
 
-{% img /img/guides/getting-started/writing-your-first-test/a-simple-test.png %}
+{% img /img/guides/a-simple-test.png %}
 
 Click on `simple_spec.js` and Cypress will run the test suite defined in that file. Below, you can see how Cypress sees that test and visualizes it in the Command Log. Admittedly, the test doesn't do much, but hey, it's green!
 
-{% img /img/guides/getting-started/writing-your-first-test/simple-spec.png %}
+{% img /img/guides/simple-spec.png %}
 
 {% note info Where do the `describe()` and `it()` functions come from? %}
 Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support. Your other favorites, `context()`, `before()`, `beforeEach()`, `after()`, and `afterEach()` are available too!
@@ -71,7 +71,7 @@ Save the file and switch back over to the Cypress browser (or start it back up a
 3. The Kitchen Sink application has been loaded into the app preview pane.
 4. The test is green, even though we made no assertions.
 
-{% img /img/guides/getting-started/writing-your-first-test/visit-a-page.png %}
+{% img /img/guides/visit-a-page.png %}
 
 {% note danger Warning: Do Not Test Production Apps %}
 Visiting non-development URLs (as we just did above) is an anti-pattern: don't do this for your real tests, you should ALWAYS be testing against a development build that you have full control over. Cypress is not a general web automation tool and is poorly suited to scripting live, production websites.
@@ -111,7 +111,7 @@ You can almost read it like a little story! Cypress calls this "chaining", and w
 
 Also note that the app preview pane has updated further after the click, following the link and showing the destination page:
 
-{% img /img/guides/getting-started/writing-your-first-test/find-and-click-element.png %}
+{% img /img/guides/find-and-click-element.png %}
 
 Now we can declare something about this new page!
 
