@@ -1,5 +1,5 @@
 ---
-title: Browser Management
+title: Launching Browsers
 comments: false
 ---
 
@@ -8,7 +8,7 @@ When you run tests in Cypress, we launches a browser for you. Cypress launches a
 1. To create a clean, pristine testing environment.
 2. To access the exclusive browser API's for automation.
 
-# Launching Browsers
+# Available Browsers
 
 When Cypress is initially run from the Desktop application, you can choose to run Cypress in a select number of browsers including:
 
@@ -26,7 +26,7 @@ Cypress automatically detects available browsers on your system (based on your O
 
 ## Electron Browser
 
-In addition to the browsers found on your system, you'll notice that Electron is an available browser. The Electron browser is a version of Chrome that is bundled with [Electron](https://electron.atom.io/) (the platform underlying the Cypress app). Cypress runs all headless runs using {% url '`cypress run`' cli-tool#cypress-run %} in Electron. Launching the Electron browser may be useful for debugging issues that only occur when running headless.
+In addition to the browsers found on your system, you'll notice that Electron is an available browser. The Electron browser is a version of Chrome that is bundled with [Electron](https://electron.atom.io/) (the platform underlying the Cypress app). Cypress runs all headless runs using {% url '`cypress run`' command-line#cypress-run %} in Electron. Launching the Electron browser may be useful for debugging issues that only occur when running headless.
 
 The `Electron` browser does not have its own Dock icon or any chrome (address bar, tabs, bookmarks, etc).
 

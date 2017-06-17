@@ -35,8 +35,8 @@
 **Misc:**
 
 - {% url `Cypress.Server.defaults()` cypress-server %} now accepts a `urlMatchingOptions` option for passing options to {% url "minimatch" https://github.com/isaacs/minimatch %}.
-- {% url '`cypress run`' cli-tool#cypress-run %} now exits with the number of test failures instead of always exiting with 0. This matches the same way `cypress ci` works. Fixes {% issue 167 '#167' %}.
-- In the {% url 'Cypress CLI tool' cli-tool %} package version `0.11.1`, you can now pass the `--spec` option to `cypress ci`. This enables you to run a specific spec file as opposed to all tests. Fixes {% issue 161 '#161' %}.
+- {% url '`cypress run`' command-line#cypress-run %} now exits with the number of test failures instead of always exiting with 0. This matches the same way `cypress ci` works. Fixes {% issue 167 '#167' %}.
+- In the {% url 'Cypress CLI tool' command-line %} package version `0.11.1`, you can now pass the `--spec` option to `cypress ci`. This enables you to run a specific spec file as opposed to all tests. Fixes {% issue 161 '#161' %}.
 
 # 0.16.2
 
@@ -91,13 +91,13 @@
 
 **Notes:**
 
-- Updating through the Desktop App in **Linux** does not work. To update please run {% url '`cypress install`' cli-tool#cypress-install %} from the command line.
+- Updating through the Desktop App in **Linux** does not work. To update please run {% url '`cypress install`' command-line#cypress-install %} from the command line.
 - We are still updating the docs to reflect all of these changes.
 - All users must *LOG IN AGAIN* and re-add their projects. Sorry, we've changed the way we store local data.
 
 **Overview:**
 
-- `0.16.0` marks a significant change for Cypress. Before this we only issued commands using regular JavaScript and coordinated these with the backend server which is running. As of `0.16.0` we are now tapping into the underlying browser automation libraries which enable us to exceed the limitations of the JavaScript sandbox. This means we have total control over the browser for more powerful automation tooling. The downside is that we have only implemented these API's for Chrome, and therefore running on multiple browsers will no longer work. This is a temporary setback as we'll be adding driver support for all of the other browsers over a period of time. You can read more about our browser management [here](https://docs.cypress.io/docs/browser-management).
+- `0.16.0` marks a significant change for Cypress. Before this we only issued commands using regular JavaScript and coordinated these with the backend server which is running. As of `0.16.0` we are now tapping into the underlying browser automation libraries which enable us to exceed the limitations of the JavaScript sandbox. This means we have total control over the browser for more powerful automation tooling. The downside is that we have only implemented these API's for Chrome, and therefore running on multiple browsers will no longer work. This is a temporary setback as we'll be adding driver support for all of the other browsers over a period of time. You can read more about our browser management [here](https://docs.cypress.io/docs/launching-browsers).
 
 **Breaking Changes:**
 
@@ -112,7 +112,7 @@
 **Features:**
 
 - When a project is initially run from the desktop app, you can now choose to run Cypress in a select number of browsers including: Chrome, Chromium, or Canary (depending on what's installed on your OS).
-- Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/browser-management)
+- Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/launching-browsers)
 - We automatically spawn Chrome in a **custom theme** so you can visually distinguish the difference between browser sessions spawned with Cypress vs your normal sessions. We know this may feel a little jarring because you're used to running Cypress alongside your other tabs. You will now see 2 chrome icons in your dock and you'll need to switch between them. We know this is problematic and confusing and we're looking into **changing the icon** of the Chrome running Cypress so it's easier to tell the Chrome sessions apart.
 - Added new commands to handle getting, setting, and clearing cookies: {% url `cy.clearCookie()` clearcookie %}, {% url `cy.getCookie()` getcookie %}, and {% url `cy.setCookie()` setcookie %}.
 - All the `cy.cookie` commands have been upgraded to take new options and can do much more powerful things outside of the JavaScript sandbox.
@@ -183,7 +183,7 @@
 **Features:**
 
 - Cypress will now {% url 'display the **resolved** configuration values when you open a project' configuration#Resolved-Configuration %}. This tells you the source of all config values.
-- The latest version of the {% url 'Cypress CLI' cli-tool %} now accepts passing arguments to {% url '`cypress open`' cli-tool#cypress-open %}. Example: `cypress open --config waitForAnimations=false --env foo=bar,baz=quux`. This enables you to set and override local `cypress.json` configuration and additionally set environment variables.
+- The latest version of the {% url 'Cypress CLI' command-line %} now accepts passing arguments to {% url '`cypress open`' command-line#cypress-open %}. Example: `cypress open --config waitForAnimations=false --env foo=bar,baz=quux`. This enables you to set and override local `cypress.json` configuration and additionally set environment variables.
 - {% url 'Environment Variables' environment-variables %} that match any configuration keys (such as `pageLoadTimeout` or `watchForFileChanges`) now override their values. So, if you `export CYPRESS_WATCH_FOR_FILE_CHANGES=false` it will turn off this configuration option. Also note that we'll automatically normalize environment keys so: `CYPRESS_pageLoadTimeout=100000` and `CYPRESS_PAGE_LOAD_TIMEOUT=100000` will both be correctly handled. We'll also coerce values into `Boolean` or `Number` correctly.
 - Cypress now correctly proxies `Websockets` that are pointed at the local Cypress server (typically `localhost:2020`). Because most users use {% url "Socket.io" http://socket.io/ %}, when Socket.io could not correctly connect over Websockets it would fall back to XHR polling. You may notice many less XHR requests in your command log (which is the intended behavior).
 - The tray icon in OSX will now change colors. It will turn blue when you're running a Cypress project and red on any kind of failures such as syntax errors in `cypress.json`. It will turn back black when nothing is actively running.
@@ -211,7 +211,7 @@
 
 **Bugfixes:**
 
-- The {% url '`--reporter`' cli-tool#cypress-run %} CLI option is now working again.
+- The {% url '`--reporter`' command-line#cypress-run %} CLI option is now working again.
 - the `teamcity` reporter is now also working again.
 
 **Misc:**
@@ -340,7 +340,7 @@ More Info:
 **Summary:**
 
 - This update represents mostly a lot of internal structure changes. We swapped out the underlying Desktop architecture and refactored all of the backend code to prepare for an open-source release.
-- If you choose to install Cypress from the {% url 'CLI Tool' cli-tool %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' cli-tool#cypress-install %}. You don't need to do anything if you update from within the Desktop GUI itself.
+- If you choose to install Cypress from the {% url 'CLI Tool' command-line %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' command-line#cypress-install %}. You don't need to do anything if you update from within the Desktop GUI itself.
 
 **Features:**
 
@@ -349,13 +349,13 @@ More Info:
 - Test IDs have been removed. You will no longer see Cypress insert IDs into your test files. This was a feature we implemented on day 1 - the idea being we could track test performance and do regression analysis. Unfortunately, it will be a long time before we actually implement the data science to make this happen. For the time being, IDs presented unnecessary technical complexity and challenges with no real upside. We recommend you remove all of your existing IDs. We've added a new command to the CLI tool that can do this in one shot. `cypress remove:ids` You may see IDs be reintroduced at a later time when we provide analytics.
 - {% url `.then()` then %} now supports a `timeout` option. Fixes {% issue 110 '#110' %}.
 - All error messages from using the CLI have been rewritten and improved.
-- Cypress will now automatically prompt you to add a project when using {% url '`cypress run`' cli-tool#cypress-run %} on a project that has not yet been added.
+- Cypress will now automatically prompt you to add a project when using {% url '`cypress run`' command-line#cypress-run %} on a project that has not yet been added.
 - Domain cookies are now proxied better. There's still more work to do before they are 100% fixed but now most typical domain cookie scenarios should 'just work'.
 - We've put together a new example repo called {% "The Kitchen Sink" https://github.com/cypress-io/examples-kitchen-sink %}. It demonstrates usage of every single Cypress command.
 
 **Bugfixes:**
 
-- Using {% url '`cypress run`' cli-tool#cypress-run %} in OSX now works again.
+- Using {% url '`cypress run`' command-line#cypress-run %} in OSX now works again.
 - Added fs polling support to fix issues where Cypress would not detect file changes.
 - Tests should reload inside of Cypress faster when they are changed.
 - Better error messages when a command times out waiting for a promise to resolve. Fixes {% issue 108 '#108' %}.
@@ -546,7 +546,7 @@ Known Issues:
 - Upgraded `Chromium` for headless and CI runs from `41` to `45`.
 - You will now see better stack traces and errors when running headlessly / in CI. No more `undefined is not a function` errors.
 - Ported all links to use the new Cypress CDN.
-- {% url 'Documentation to CLI' cli-tool %}.
+- {% url 'Documentation to CLI' command-line %}.
 
 **Bugfixes:**
 
@@ -760,7 +760,7 @@ Almost there:
 
 - Fixed situation where an `Uncaught Error` was not being properly handled. Cypress would incorrectly continue to retry commands instead of anceling them, which lead to incorrect errors downstream in other tests.
 - Fixed situation where an error being thrown from an XHR was being improperly handled (in a slightly different way than the problem above).
-- Stopped sending CI data when {% url '`cypress run`' cli-tool#cypress-run %} was issued.
+- Stopped sending CI data when {% url '`cypress run`' command-line#cypress-run %} was issued.
 
 **Misc:**
 
@@ -792,7 +792,7 @@ Almost there:
 
 **Bugfixes:**
 
-- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in {% url '`cypress run`' cli-tool#cypress-run %} or `cypress ci`.
+- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in {% url '`cypress run`' command-line#cypress-run %} or `cypress ci`.
 
 **Misc:**
 
@@ -895,7 +895,7 @@ Deprecations:
 
 **Misc:**
 
-- All of the docs surrounding {% url 'assertions' cypress-in-a-nutshell#Assertions %}, {% url `.should()` should %}, and {% url `.and()` and %} have been updated to reflect the new API.
+- All of the docs surrounding {% url 'assertions' introduction-to-cypress#Assertions %}, {% url `.should()` should %}, and {% url `.and()` and %} have been updated to reflect the new API.
 
 # 0.11.3
 

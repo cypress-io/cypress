@@ -1,5 +1,5 @@
 ---
-title: "Aliases: Variables in an Async World"
+title: Aliases
 comments: false
 ---
 

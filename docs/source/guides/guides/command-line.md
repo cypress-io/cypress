@@ -1,5 +1,5 @@
 ---
-title: CLI Tool
+title: Command Line
 comments: false
 ---
 

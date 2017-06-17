@@ -1,5 +1,5 @@
 ---
-title: Dealing with the Network
+title: Network Requests
 comments: false
 ---
 

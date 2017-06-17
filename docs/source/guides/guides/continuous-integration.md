@@ -19,7 +19,7 @@ Running Cypress tests in Continous Integration is as easy as running tests local
 
 That's it! This will go out and {% url 'install Cypress' installing-cypress %}, and then run all your tests.
 
-For a comprehensive list of all the options you can pass to {% url '`cypress run`' cli-tool#cypress-run %}, {% url 'refer to the CLI documentation' cli-tool %}.
+For a comprehensive list of all the options you can pass to {% url '`cypress run`' command-line#cypress-run %}, {% url 'refer to the CLI documentation' command-line %}.
 
 ![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
 
@@ -64,7 +64,7 @@ test:
 
 ## Docker
 
-We have [created](https://github.com/cypress-io/docker) an official [cypress/base](https://hub.docker.com/r/cypress/base/) container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete [cypress/internal:cy](https://hub.docker.com/r/cypress/internal/tags/) image with pre-installed Cypress; just call {% url '`cypress run`' cli-tool#cypress-run %}.
+We have [created](https://github.com/cypress-io/docker) an official [cypress/base](https://hub.docker.com/r/cypress/base/) container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete [cypress/internal:cy](https://hub.docker.com/r/cypress/internal/tags/) image with pre-installed Cypress; just call {% url '`cypress run`' command-line#cypress-run %}.
 
 If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Other %}. See {% issue 165 'this issue' %} for more information.
 
@@ -82,7 +82,7 @@ You must install these dependencies:
 apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 ```
 
-If you run {% url '`cypress run`' cli-tool#cypress-run %} and see no output {% url 'see this section for troubleshooting this known issue' continuous-integration#Troubleshooting %}.
+If you run {% url '`cypress run`' command-line#cypress-run %} and see no output {% url 'see this section for troubleshooting this known issue' continuous-integration#Troubleshooting %}.
 
 # Recording Tests in CI
 
@@ -98,7 +98,7 @@ Cypress can record your tests running and make them available in our {% url 'Das
 **To record tests running:**
 
 1. {% url 'Setup your project to record' projects#Set-up-a-Project-to-Record %}
-2. {% url 'Pass the `--record` flag to `cypress run`' cli-tool#cypress-run-record %}
+2. {% url 'Pass the `--record` flag to `cypress run`' command-line#cypress-run-record %}
 
 You can {% url 'read more about the Dashboard here' features %}.
 
@@ -228,7 +228,7 @@ If you are running long runs on Docker, you need to set the `ipc` to `host` mode
 
 **Symptom**
 
-After executing {% url '`cypress run`' cli-tool#cypress-run %} you don't see any output. In other words: nothing happens.
+After executing {% url '`cypress run`' command-line#cypress-run %} you don't see any output. In other words: nothing happens.
 
 **Problem**
 
@@ -238,7 +238,7 @@ The reason you're not seeing any output is a longstanding issue with Cypress whi
 
 **Seeing Errors**
 
-Although running {% url '`cypress run`' cli-tool#cypress-run %} will yield no output - you can see the actual dependency failure by invoking the Cypress binary directly.
+Although running {% url '`cypress run`' command-line#cypress-run %} will yield no output - you can see the actual dependency failure by invoking the Cypress binary directly.
 
 ***Invoke the Cypress binary directly***
 

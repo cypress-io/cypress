@@ -5,6 +5,10 @@ comments: false
 
 Wrap a method in a spy in order to record calls to and arguments of the function.
 
+{% note info %}
+**Note:** `.spy()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-clocks %}
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -89,7 +93,7 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 
 **Assertion Support**
 
-Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" available-assertions#Sinon-Chai %} can be used without any configuration.
+Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" assertions#Sinon-Chai %} can be used without any configuration.
 
 # Command Log
 

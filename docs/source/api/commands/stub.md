@@ -5,6 +5,10 @@ comments: false
 
 Replace a function, record its usage and control its behavior.
 
+{% note info %}
+**Note:** `.stub()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-clocks %}
+{% endnote %}
+
 # Syntax
 
 ```javascript

@@ -10,7 +10,7 @@ An alias of {% url `.should()` should %}
 {% endnote %}
 
 {% note info %}
-**Note:** `.and()` assumes you are already familiar with core concepts such as {% url 'assertions' cypress-in-a-nutshell#Assertions %}
+**Note:** `.and()` assumes you are already familiar with core concepts such as {% url 'assertions' introduction-to-cypress#Assertions %}
 {% endnote %}
 
 # Syntax
@@ -244,5 +244,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # See also
 
-- {% url 'Assertions' cypress-in-a-nutshell#Assertions %}
+- {% url 'Assertions' introduction-to-cypress#Assertions %}
 - {% url `.should()` should %}

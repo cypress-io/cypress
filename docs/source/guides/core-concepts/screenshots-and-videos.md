@@ -1,5 +1,5 @@
 ---
-title: Taking Screenshots and Recording Videos
+title: Screenshots and Videos
 comments: false
 ---
 

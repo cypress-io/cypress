@@ -1,5 +1,5 @@
 ---
-title: Stubs, Spies, Clocks
+title: Stubs, Spies, and Clocks
 comments: false
 ---
 

@@ -108,7 +108,7 @@ Cypress has many more configuration options you can use to customize its behavio
 
 # Get Started!
 
-Ok, we're done slowing you down, dive in and test your app! From here you may want to have a look at the {% url "Cypress API" api %} to learn what commands are available as you work. Once you've written a few tests, {% url "Cypress in a Nutshell" cypress-in-a-nutshell %} is a must-read: it will teach you how Cypress _really_ works, and how to write effective Cypress tests.
+Ok, we're done slowing you down, dive in and test your app! From here you may want to have a look at the {% url "Cypress API" api %} to learn what commands are available as you work. Once you've written a few tests, {% url "Cypress in a Nutshell" introduction-to-cypress %} is a must-read: it will teach you how Cypress _really_ works, and how to write effective Cypress tests.
 
 <!-- To round out this guide, let's actually test _your_ app! (You do have an app to test, right?)
 

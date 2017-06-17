@@ -50,7 +50,7 @@ No, although we are looking to build an on-premise version of the Dashboard for 
 
 Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
-You can simply always run your tests in CI using {% url "`cypress run`" cli-tool#cypress-run %} without the `--record` flag which does not communicate with our external servers and will not record any test results.
+You can simply always run your tests in CI using {% url "`cypress run`" command-line#cypress-run %} without the `--record` flag which does not communicate with our external servers and will not record any test results.
 
 ## {% fa fa-angle-right %} What is the difference between public and private projects?
 

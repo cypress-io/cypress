@@ -1,9 +1,9 @@
 ---
-title: Available Assertions
+title: Assertions
 comments: false
 ---
 
-Cypress bundles the popular {% url 'Chai' available-assertions#Chai %} assertion library, as well as helpful extensions for {% url 'Sinon' available-assertions#Sinon-Chai %} and {% url 'jQuery' available-assertions#Chai-jQuery %}, bringing you dozens of powerful assertions for free.
+Cypress bundles the popular {% url 'Chai' assertions#Chai %} assertion library, as well as helpful extensions for {% url 'Sinon' assertions#Sinon-Chai %} and {% url 'jQuery' assertions#Chai-jQuery %}, bringing you dozens of powerful assertions for free.
 
 # Chai
 
@@ -11,19 +11,7 @@ Cypress bundles the popular {% url 'Chai' available-assertions#Chai %} assertion
 
 | Chainable getters |
 | --- |
-| to |
-| be |
-| been |
-| is |
-| that |
-| which |
-| and |
-| has |
-| have |
-| with |
-| at |
-| of |
-| same |
+| `to`, `be`, `been`, `is`, `that`, `which`, `and`, `has`, `have`, `with`, `at`, `of`, `same` |
 
 | Assertion | Example |
 | --- | --- |
@@ -120,6 +108,8 @@ You will commonly use these chainers after using DOM commands like: {% url `cy.g
 # Sinon-Chai
 
 All Sinon assertions are available in {% url "Sinon–Chai" https://github.com/domenic/sinon-chai %}.
+
+You'll typically use these alongside {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %}.
 
 | Sinon.JS property/method | Assertion |
 | -- | -- |

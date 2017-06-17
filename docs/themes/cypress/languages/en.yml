@@ -26,20 +26,20 @@ sidebar:
     testing-your-app: Testing Your App
     next-steps: Next Steps
     core-concepts: Core Concepts
-    cypress-in-a-nutshell: Cypress in a Nutshell
-    organizing-tests: Organizing Tests
-    overview-of-the-gui-tool: Overview of the GUI Tool
-    dead-simple-debugging: Dead Simple Debugging
-    aliases: Aliases&#58; Variables in an Async World
+    introduction-to-cypress: Introduction to Cypress
+    writing-and-organizing-tests: Writing and Organizing Tests
+    overview-of-the-gui: Overview of the GUI
+    debugging: Debugging
+    aliases: Aliases and References
     stubs-spies-clocks: Stubs, Spies, and Clocks
     network-requests: Network Requests
-    taking-screenshots-and-recording-videos: Taking Screenshots and Recording Videos
-    integrating-cypress: Integration
-    cli-tool: CLI Tool
+    screenshots-and-videos: Screenshots and Videos
+    guides: Guides
+    command-line: Command Line
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
     reporters: Reporters
-    browser-management: Browser Management
+    launching-browsers: Launching Browsers
     advanced-cypress: Advanced
     the-cypress-workflow: The Cypress Workflow
     coming-from-selenium: Coming from Selenium?
@@ -52,7 +52,7 @@ sidebar:
     configuration: Configuration
     error-messages: Error Messages
     bundled-tools: Bundled Tools
-    available-assertions: Available Assertions
+    assertions: Assertions
     creating-fixtures: Creating Fixtures
     best-practices: Best Practices
     anti-patterns: Anti-patterns

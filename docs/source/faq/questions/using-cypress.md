@@ -18,9 +18,9 @@ You can read more about parallelization {% issue 64 'here' %}.
 
 ## {% fa fa-angle-right %} Can I run a single test or group of tests?
 
-You can run a group of tests or a single test by placing an {% url `.only` organizing-tests#Excluding-and-Including-Tests %} on a test suite or specific test.
+You can run a group of tests or a single test by placing an {% url `.only` writing-and-organizing-tests#Excluding-and-Including-Tests %} on a test suite or specific test.
 
-You can run a single test file headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
+You can run a single test file headlessly by passing the `--spec` flag to {% url '`cypress run`' command-line#cypress-run %}.
 
 Currently there is no way to specify a group of test files to run headlessly. You can read more {% issue 263 'here' %}.
 
@@ -119,7 +119,7 @@ You can *not* currently preserve localStorage across tests and can read more {% 
 
 ## {% fa fa-angle-right %} Some of my elements animate in, how do I work around that?
 
-Oftentimes you can usually account for animation by asserting {% url "`.should('be.visible')`" should %} or {% url "another assertion" cypress-in-a-nutshell#Assertions %} on one of the elements you expect to be animated in.
+Oftentimes you can usually account for animation by asserting {% url "`.should('be.visible')`" should %} or {% url "another assertion" introduction-to-cypress#Assertions %} on one of the elements you expect to be animated in.
 
 ```javascript
 // assuming a click event causes the animation
@@ -215,10 +215,10 @@ if (window.Cypress) {
 
 ## {% fa fa-angle-right %} Do you allow before, beforeEach, after, or afterEach hooks?
 
-Yes. You can read more {% url "here" organizing-tests#Hooks %}.
+Yes. You can read more {% url "here" writing-and-organizing-tests#Hooks %}.
 
 ## {% fa fa-angle-right %} I tried to install Cypress in my CI, but I get the error: `EACCES: permission denied`.
 
-First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" cli-tool %}.
+First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" command-line %}.
 
 Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress-cli`.

@@ -30,7 +30,7 @@ Additionally, Mocha gives us excellent {% url '`async` support' http://mochajs.o
 
 {% url 'Chai docs' http://chaijs.com/ %}
 
-While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using {% url 'subjects' cypress-in-a-nutshell#Assertions %} and the {% url `.should()` should %} command.
+While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using {% url 'subjects' introduction-to-cypress#Assertions %} and the {% url `.should()` should %} command.
 
 {% note info Extending chai to use assertion plugins %}
 {% url "Check out our example recipe to see how to extend chai yourself." https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/extending_chai_assertion_plugins_spec.js %}

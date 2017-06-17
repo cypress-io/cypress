@@ -93,7 +93,7 @@ Besides modifying your `cypress.json` you can also change configuration options 
 
 ## Command Line
 
-When {% url 'running Cypress from the Command Line' cli-tool %} you can pass a `--config` flag.
+When {% url 'running Cypress from the Command Line' command-line %} you can pass a `--config` flag.
 
 **Examples:**
 

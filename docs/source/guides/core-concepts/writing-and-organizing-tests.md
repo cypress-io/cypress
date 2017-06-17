@@ -1,5 +1,5 @@
 ---
-title: Organizing Tests
+title: Writing and Organizing Tests
 comments: false
 ---
 

@@ -17,7 +17,7 @@ comments: false
 
 **Features:**
 
-- You can now run your tests in the {% url 'Electron browser' browser-management#Electron-Browser %} that comes built with Cypress. You will see it as an option in the browser dropdown. This is the same browser that Cypress uses when running Cypress headlessly. This is useful for debugging issues that only occur during headless runs. Addresses {% issue 452 '#452' %}.
+- You can now run your tests in the {% url 'Electron browser' launching-browsers#Electron-Browser %} that comes built with Cypress. You will see it as an option in the browser dropdown. This is the same browser that Cypress uses when running Cypress headlessly. This is useful for debugging issues that only occur during headless runs. Addresses {% issue 452 '#452' %}.
 - New traversal commands {% url `.nextAll()` nextall %}, {% url `.nextUntil()` nextuntil %}, {% url `.parentsUntil()` parentsuntil %}, {% url `.prevAll()` prevall %}, and {% url `.prevUntil()` prevuntil %} have been added. Addresses {% issue 432 '#432' %}.
 
 **Bugfixes:**
@@ -75,8 +75,8 @@ comments: false
 **Breaking Changes:**
 
 - We have done our very best to create as little breaking changes as possible.
-- You will need to download a new {% url 'cypress-cli' cli-tool %} - version `0.13.1`.
-- Older CLI versions will continue to work on `0.19.0` except for the {% url '`cypress open`' cli-tool#cypress-open %} command - and will we print a warning to nudge you to upgrade.
+- You will need to download a new {% url 'cypress-cli' command-line %} - version `0.13.1`.
+- Older CLI versions will continue to work on `0.19.0` except for the {% url '`cypress open`' command-line#cypress-open %} command - and will we print a warning to nudge you to upgrade.
 - Newer CLI versions will not work on versions of Cypress < `0.19.0` (but we don't know why this would ever even happen).
 
 **Features:**
@@ -90,16 +90,16 @@ comments: false
 - We've changed the "Config" tab to now be called "Settings". We added two new sections to the "Settings" tab which displays your `projectId` and your Record Key. These sections do a much better job explaining what these are and how you use them.
 - You no longer have to use `cypress get:key` to get your Record Key. We now display this in your "Settings" tab and also in the {% url 'Dashboard' https://on.cypress.io/dashboard %}.
 - Projects will no longer automatically acquire a `projectId` when being added. There is now a very explicit **opt-in** process where you setup your project to record. This should make it much clearer what's going on behind the scenes.
-- {% url '`cypress run`' cli-tool#cypress-run %} now behaves likes `cypress ci` previously did and downloads + installs Cypress if its not already installed.
+- {% url '`cypress run`' command-line#cypress-run %} now behaves likes `cypress ci` previously did and downloads + installs Cypress if its not already installed.
 - `cypress ci` now works in OSX, and also works in Linux in Desktop flavors (like Ubuntu).
 
 **Misc:**
 
-- {% url '`cypress run`' cli-tool#cypress-run %} will now download and install Cypress if its not already installed.
+- {% url '`cypress run`' command-line#cypress-run %} will now download and install Cypress if its not already installed.
 - We renamed `CYPRESS_CI_KEY` TO `CYPRESS_RECORD_KEY`. This makes it clearer what this key actually does - and the fact that it can be run anywhere irrespective of CI. We still look for the old named key but will print a warning if we detect it.
 - We print a warning when using an older CLI tool version. Fixes {% issue 424 '#424' %}.
 - We've improved many of the error messages related to recording runs. Fixes {% issue 423 '#423' %}.
-- `cypress ci` has been deprecated. You now use {% url '`cypress run --record --key <record_key>`' cli-tool#cypress-run-record %}. The key you used to pass to `cypress ci` is the same key. We've simply consolidated these commands into just {% url '`cypress run`' cli-tool#cypress-run %} which makes it simpler and clearer. Their only difference is that passing `--record` to {% url '`cypress run`' cli-tool#cypress-run %} will **record** the build to our Dashboard. Fixes {% issue 417 '#417' %}.
+- `cypress ci` has been deprecated. You now use {% url '`cypress run --record --key <record_key>`' command-line#cypress-run-record %}. The key you used to pass to `cypress ci` is the same key. We've simply consolidated these commands into just {% url '`cypress run`' command-line#cypress-run %} which makes it simpler and clearer. Their only difference is that passing `--record` to {% url '`cypress run`' command-line#cypress-run %} will **record** the build to our Dashboard. Fixes {% issue 417 '#417' %}.
 
 # 0.18.8
 
@@ -267,7 +267,7 @@ comments: false
 
 **Breaking Changes:**
 
-- Previously, we auto-magically included all files within {% url '`cypress/support`' organizing-tests#Folder-Structure %}. This has now {% url 'gone away' error-messages %} and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
+- Previously, we auto-magically included all files within {% url '`cypress/support`' writing-and-organizing-tests#Folder-Structure %}. This has now {% url 'gone away' error-messages %} and we've simplified this to automatically including a single `cypress/support/index.js` file. That single file acts as the entry point meaning you should `import` or `require` the other support files you'd like to include. Although this is still "automatic" it's much less magical and we'll be updating all of our docs to reflect this. The purpose of `cypress/support` hasn't really changed, just the implementation of it has. We will automatically seed a `cypress/support/index.js` file for you (even on existing projects). The file location of `cypress/support/index.js` can be changed with the new {% url `supportFile` configuration#Folders %} option in your `cypress.json`. This feature can also be turned off by specifying `supportFile: false`.
 
 **Features:**
 
@@ -295,7 +295,7 @@ comments: false
 
 **Misc:**
 
-- Improved {% url '`cypress run`' cli-tool#cypress-run %} and `cypress ci` headless output. Fixes {% issue 306 '#306' %}.
+- Improved {% url '`cypress run`' command-line#cypress-run %} and `cypress ci` headless output. Fixes {% issue 306 '#306' %}.
 - Improved performance by preventing `snapshots` from being taken during headless runs.
 
 # 0.17.11
@@ -309,11 +309,11 @@ comments: false
 **Overview:**
 
 - `cypress ci` now uploads build assets to our servers after a test run completes. Additionally, it tracks the `config` settings used during the build and tracks each individual test failure.
-- If you do *not* want these assets to be tracked by Cypress, you need to switch to using {% url "`cypress run`" cli-tool#cypress-run %}. We will happily remove any build assets that are accidentally uploaded to us during the update transition.
+- If you do *not* want these assets to be tracked by Cypress, you need to switch to using {% url "`cypress run`" command-line#cypress-run %}. We will happily remove any build assets that are accidentally uploaded to us during the update transition.
 
 **Features:**
 
-- We now record videos during a headless run with both `cypress ci` and {% url '`cypress run`' cli-tool#cypress-run %}. Fixes {% issue 229 '#229' %}.
+- We now record videos during a headless run with both `cypress ci` and {% url '`cypress run`' command-line#cypress-run %}. Fixes {% issue 229 '#229' %}.
 - After completing `cypress ci`, we now upload build assets (such as `screenshots` and `videos`) to be used in our upcoming admin interface. This will enable you to review assets without having to touch your CI server. Fixes {% issue 292 '#292' %}.
 
 **Misc:**
@@ -322,7 +322,7 @@ comments: false
 - Screenshot names now include their parent titles, and invalid file system characters are scrubbed. Fixes {% issue 297 '#297' %}.
 - We no longer artificially restrict the environment `cypress ci` can run in. It can now run *anywhere*. Fixes {% issue 296 '#296' %}.
 - We removed scaffolding any directories on a new project (when running headlessly). Fixes {% issue 295 '#295' %}.
-- {% url '`cypress run`' cli-tool#cypress-run %} no longer prompts the user for any kind of interaction, thus enabling you to use this in CI if you choose to do so. Fixes {% issue 294 '#294' %}.
+- {% url '`cypress run`' command-line#cypress-run %} no longer prompts the user for any kind of interaction, thus enabling you to use this in CI if you choose to do so. Fixes {% issue 294 '#294' %}.
 - There is a new {% url 'configuration' configuration %} property called: `trashAssetsBeforeHeadlessRuns` that is set to `true` by default and will automatically clear out screenshots + videos folders before each run. These files are not deleted, they are just moved to your trash.
 - There are several new {% url 'configuration' configuration %} properties for video recording: `videoRecording`, `videoCompression`, and `videosFolder`.
 
@@ -559,12 +559,12 @@ comments: false
 
 **Misc:**
 
-- {% url '`cypress run`' cli-tool#cypress-run %} no longer requires being logged in.
+- {% url '`cypress run`' command-line#cypress-run %} no longer requires being logged in.
 - Renamed configuration option `commandTimeout` to {% url `defaultCommandTimeout` configuration %}. Cypress will transparently rewrite this if you have it in your `cypress.json`, so you don't have to do anything.
 - Renamed `onConsole` and `onRender` Command Log options to `consoleProps` and `renderProps`. We still support the older property names for backwards compatibility.
 - Added support for a command's `message` or `renderProps.message` to use markdown.
 - The default value of `port` within a project's global {% url 'configuration' configuration %} has changed from `2020` to now being a random open port. You can still configure a specific `port` if needed within the {% url 'configuration' configuration %}.
-- We have upgraded the `Chromium` that runs headlessly on {% url '`cypress run`' cli-tool#cypress-run %} to version `51`.
+- We have upgraded the `Chromium` that runs headlessly on {% url '`cypress run`' command-line#cypress-run %} to version `51`.
 - The internal version of `node` which is built into Cypress is now `6.1.0`.
 - Cypress `.js` files are no longer minified to make them easier to debug.
 - We are cleaning up internal `__cypress` cookies more so they won't get in the way of testing your application.
@@ -611,8 +611,8 @@ comments: false
 **Misc:**
 
 - {% url `Cypress.Server.defaults()` cypress-server %} now accepts a `urlMatchingOptions` option for passing options to {% url "minimatch" https://github.com/isaacs/minimatch %}.
-- {% url '`cypress run`' cli-tool#cypress-run %} now exits with the number of test failures instead of always exiting with 0. This matches the same way `cypress ci` works. Fixes {% issue 167 '#167' %}.
-- In the {% url 'Cypress CLI tool' cli-tool %} package version `0.11.1`, you can now pass the `--spec` option to `cypress ci`. This enables you to run a specific spec file as opposed to all tests. Fixes {% issue 161 '#161' %}.
+- {% url '`cypress run`' command-line#cypress-run %} now exits with the number of test failures instead of always exiting with 0. This matches the same way `cypress ci` works. Fixes {% issue 167 '#167' %}.
+- In the {% url 'Cypress CLI tool' command-line %} package version `0.11.1`, you can now pass the `--spec` option to `cypress ci`. This enables you to run a specific spec file as opposed to all tests. Fixes {% issue 161 '#161' %}.
 
 # 0.16.2
 
@@ -667,13 +667,13 @@ comments: false
 
 **Notes:**
 
-- Updating through the Desktop App in **Linux** does not work. To update please run {% url '`cypress install`' cli-tool#cypress-install %} from the command line.
+- Updating through the Desktop App in **Linux** does not work. To update please run {% url '`cypress install`' command-line#cypress-install %} from the command line.
 - We are still updating the docs to reflect all of these changes.
 - All users must *LOG IN AGAIN* and re-add their projects. Sorry, we've changed the way we store local data.
 
 **Overview:**
 
-- `0.16.0` marks a significant change for Cypress. Before this we only issued commands using regular JavaScript and coordinated these with the backend server which is running. As of `0.16.0` we are now tapping into the underlying browser automation libraries which enable us to exceed the limitations of the JavaScript sandbox. This means we have total control over the browser for more powerful automation tooling. The downside is that we have only implemented these API's for Chrome, and therefore running on multiple browsers will no longer work. This is a temporary setback as we'll be adding driver support for all of the other browsers over a period of time. You can read more about our browser management [here](https://docs.cypress.io/docs/browser-management).
+- `0.16.0` marks a significant change for Cypress. Before this we only issued commands using regular JavaScript and coordinated these with the backend server which is running. As of `0.16.0` we are now tapping into the underlying browser automation libraries which enable us to exceed the limitations of the JavaScript sandbox. This means we have total control over the browser for more powerful automation tooling. The downside is that we have only implemented these API's for Chrome, and therefore running on multiple browsers will no longer work. This is a temporary setback as we'll be adding driver support for all of the other browsers over a period of time. You can read more about our browser management [here](https://docs.cypress.io/docs/launching-browsers).
 
 **Breaking Changes:**
 
@@ -688,7 +688,7 @@ comments: false
 **Features:**
 
 - When a project is initially run from the desktop app, you can now choose to run Cypress in a select number of browsers including: Chrome, Chromium, or Canary (depending on what's installed on your OS).
-- Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/browser-management)
+- Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/launching-browsers)
 - We automatically spawn Chrome in a **custom theme** so you can visually distinguish the difference between browser sessions spawned with Cypress vs your normal sessions. We know this may feel a little jarring because you're used to running Cypress alongside your other tabs. You will now see 2 chrome icons in your dock and you'll need to switch between them. We know this is problematic and confusing and we're looking into **changing the icon** of the Chrome running Cypress so it's easier to tell the Chrome sessions apart.
 - Added new commands to handle getting, setting, and clearing cookies: {% url `cy.clearCookie()` clearcookie %}, {% url `cy.getCookie()` getcookie %}, and {% url `cy.setCookie()` setcookie %}.
 - All the `cy.cookie` commands have been upgraded to take new options and can do much more powerful things outside of the JavaScript sandbox.
@@ -759,7 +759,7 @@ comments: false
 **Features:**
 
 - Cypress will now {% url 'display the **resolved** configuration values when you open a project' configuration#Resolved-Configuration %}. This tells you the source of all config values.
-- The latest version of the {% url 'Cypress CLI' cli-tool %} now accepts passing arguments to {% url '`cypress open`' cli-tool#cypress-open %}. Example: `cypress open --config waitForAnimations=false --env foo=bar,baz=quux`. This enables you to set and override local `cypress.json` configuration and additionally set environment variables.
+- The latest version of the {% url 'Cypress CLI' command-line %} now accepts passing arguments to {% url '`cypress open`' command-line#cypress-open %}. Example: `cypress open --config waitForAnimations=false --env foo=bar,baz=quux`. This enables you to set and override local `cypress.json` configuration and additionally set environment variables.
 - {% url 'Environment Variables' environment-variables %} that match any configuration keys (such as `pageLoadTimeout` or `watchForFileChanges`) now override their values. So, if you `export CYPRESS_WATCH_FOR_FILE_CHANGES=false` it will turn off this configuration option. Also note that we'll automatically normalize environment keys so: `CYPRESS_pageLoadTimeout=100000` and `CYPRESS_PAGE_LOAD_TIMEOUT=100000` will both be correctly handled. We'll also coerce values into `Boolean` or `Number` correctly.
 - Cypress now correctly proxies `Websockets` that are pointed at the local Cypress server (typically `localhost:2020`). Because most users use {% url "Socket.io" http://socket.io/ %}, when Socket.io could not correctly connect over Websockets it would fall back to XHR polling. You may notice many less XHR requests in your command log (which is the intended behavior).
 - The tray icon in OSX will now change colors. It will turn blue when you're running a Cypress project and red on any kind of failures such as syntax errors in `cypress.json`. It will turn back black when nothing is actively running.
@@ -787,7 +787,7 @@ comments: false
 
 **Bugfixes:**
 
-- The {% url '`--reporter`' cli-tool#cypress-run %} CLI option is now working again.
+- The {% url '`--reporter`' command-line#cypress-run %} CLI option is now working again.
 - the `teamcity` reporter is now also working again.
 
 **Misc:**
@@ -916,7 +916,7 @@ More Info:
 **Summary:**
 
 - This update represents mostly a lot of internal structure changes. We swapped out the underlying Desktop architecture and refactored all of the backend code to prepare for an open-source release.
-- If you choose to install Cypress from the {% url 'CLI Tool' cli-tool %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' cli-tool#cypress-install %}. You don't need to do anything if you update from within the Desktop GUI itself.
+- If you choose to install Cypress from the {% url 'CLI Tool' command-line %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' command-line#cypress-install %}. You don't need to do anything if you update from within the Desktop GUI itself.
 
 **Features:**
 
@@ -925,13 +925,13 @@ More Info:
 - Test IDs have been removed. You will no longer see Cypress insert IDs into your test files. This was a feature we implemented on day 1 - the idea being we could track test performance and do regression analysis. Unfortunately, it will be a long time before we actually implement the data science to make this happen. For the time being, IDs presented unnecessary technical complexity and challenges with no real upside. We recommend you remove all of your existing IDs. We've added a new command to the CLI tool that can do this in one shot. `cypress remove:ids` You may see IDs be reintroduced at a later time when we provide analytics.
 - {% url `.then()` then %} now supports a `timeout` option. Fixes {% issue 110 '#110' %}.
 - All error messages from using the CLI have been rewritten and improved.
-- Cypress will now automatically prompt you to add a project when using {% url '`cypress run`' cli-tool#cypress-run %} on a project that has not yet been added.
+- Cypress will now automatically prompt you to add a project when using {% url '`cypress run`' command-line#cypress-run %} on a project that has not yet been added.
 - Domain cookies are now proxied better. There's still more work to do before they are 100% fixed but now most typical domain cookie scenarios should 'just work'.
 - We've put together a new example repo called {% url "The Kitchen Sink" https://github.com/cypress-io/examples-kitchen-sink %}. It demonstrates usage of every single Cypress command.
 
 **Bugfixes:**
 
-- Using {% url '`cypress run`' cli-tool#cypress-run %} in OSX now works again.
+- Using {% url '`cypress run`' command-line#cypress-run %} in OSX now works again.
 - Added fs polling support to fix issues where Cypress would not detect file changes.
 - Tests should reload inside of Cypress faster when they are changed.
 - Better error messages when a command times out waiting for a promise to resolve. Fixes {% issue 108 '#108' %}.
@@ -1122,7 +1122,7 @@ Known Issues:
 - Upgraded `Chromium` for headless and CI runs from `41` to `45`.
 - You will now see better stack traces and errors when running headlessly / in CI. No more `undefined is not a function` errors.
 - Ported all links to use the new Cypress CDN.
-- {% url 'Documentation to CLI' cli-tool %}.
+- {% url 'Documentation to CLI' command-line %}.
 
 **Bugfixes:**
 
@@ -1336,7 +1336,7 @@ Almost there:
 
 - Fixed situation where an `Uncaught Error` was not being properly handled. Cypress would incorrectly continue to retry commands instead of anceling them, which lead to incorrect errors downstream in other tests.
 - Fixed situation where an error being thrown from an XHR was being improperly handled (in a slightly different way than the problem above).
-- Stopped sending CI data when {% url '`cypress run`' cli-tool#cypress-run %} was issued.
+- Stopped sending CI data when {% url '`cypress run`' command-line#cypress-run %} was issued.
 
 **Misc:**
 
@@ -1368,7 +1368,7 @@ Almost there:
 
 **Bugfixes:**
 
-- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in {% url '`cypress run`' cli-tool#cypress-run %} or `cypress ci`.
+- {% url `.pause()` pause %} is now noop when Cypress is running headlessly in {% url '`cypress run`' command-line#cypress-run %} or `cypress ci`.
 
 **Misc:**
 
@@ -1471,7 +1471,7 @@ Deprecations:
 
 **Misc:**
 
-- All of the docs surrounding {% url 'assertions' cypress-in-a-nutshell#Assertions %}, {% url `.should()` should %}, and {% url `.and()` and %} have been updated to reflect the new API.
+- All of the docs surrounding {% url 'assertions' introduction-to-cypress#Assertions %}, {% url `.should()` should %}, and {% url `.and()` and %} have been updated to reflect the new API.
 
 # 0.11.3
 
