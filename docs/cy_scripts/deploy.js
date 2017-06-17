@@ -160,7 +160,22 @@ function scrapeDocs (env, branch) {
     return
   }
 
-  return scrape()
+  return prompt({
+    type: 'list',
+    name: 'scrape',
+    message: 'Would you like to scrape the docs? (You only need to do this if they have changed on this deployment)',
+    choices: [
+      { name: 'Yes', value: true },
+      { name: 'No',  value: false },
+    ],
+  })
+  .get('scrape')
+  .then((bool) => {
+    if (bool) {
+      return scrape()
+    }
+  })
+
 }
 
 getS3Credentials()
