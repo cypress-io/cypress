@@ -64,9 +64,9 @@ If you aren't sure about this, you'll need to track down someone on your team wh
 
 Once you get your server booted, refresh the Cypress browser and you should see your application's home page in the app preview pane. Congratulations! You've just taken the first step toward a better integration testing experience for your web application.
 
-# Useful Configuration Options
+# Configure Cypress to Go With Your Flow
 
-If you think ahead, you'll quickly realize that you're going to be typing this URL a lot, since every test is going to need to visit some page of your application. Luckily, Cypress anticipates this need and provides a configuration option for it. Let's leverage that immediately.
+If you think ahead, you'll quickly realize that you're going to be typing this URL a lot, since every test is going to need to visit some page of your application. Luckily, Cypress anticipates this need and provides a configuration option for it. Let's leverage that now.
 
 Open up `cypress.json`, which you will find in your project root (where you installed Cypress.) It starts out empty:
 
@@ -74,7 +74,7 @@ Open up `cypress.json`, which you will find in your project root (where you inst
 {}
 ```
 
-...we'll add an option to default our URL in all `cy.visit()` commands (make sure you use your URL if it is different!):
+...we'll add an option to default our URL in all `cy.visit()` commands (make sure you replace with *your* URL if it is different!):
 
 ```js
 {
@@ -82,7 +82,7 @@ Open up `cypress.json`, which you will find in your project root (where you inst
 }
 ```
 
-Got it? Great! Now let's rewrite that test to just use the path we want to visit instead of the entire URL:
+Got it? Great! Now let's rewrite the previous test to just use the path we want to visit instead of the entire URL:
 
 ```js
 describe("The Home Page", function() {
@@ -92,19 +92,29 @@ describe("The Home Page", function() {
 })
 ```
 
-Refresh Cypress and have a look to make sure everything is working, then give yourself a pat on the back: that's a lot of typing our future selves won't be doing!
+Refresh Cypress and have a look to make sure everything is working, then give yourself a pat on the back: that's a lot of typing your future self won't be doing!
 
 {% note info Configuration Options %}
-Cypress has many more configuration options you can use to customize its behavior to your app. Things like where your tests live, default timeout periods, environment variables, which reporters to use, etc. Check them out in the {% url "Configuration Appendix" configuration %}!
+Cypress has many more configuration options you can use to customize its behavior to your app. Things like where your tests live, default timeout periods, environment variables, which reporter to use, etc. Check them out in the {% url "Configuration Appendix" configuration %}!
 {% endnote %}
 
 # Think Through Your Testing Strategy
 
+You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advise to give you. What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you and your team.
+
+That said, modern web testing has a few wrinkles that every team experiences, so here's some quick tips on common situations you're likely to run into sooner than later.
+
 ## Logging In with Speed and Grace
 
-## Preparing the Back-end Data Store
+Nothing slows a test suite like having to log in, but all the good parts of your application most likely require an authenticated user! Here's some tips.
 
-## Ignoring the Back-end with Network Stubbing
+### Fully Test the Login Flow, _Once_
+
+### Short-Circuit the Login Flow Everywhere Else
+
+## Preparing and Cleaning Up Test Data
+
+## Isolation from the Back-end with Network Stubbing
 
 # Get Started!
 
