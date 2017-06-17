@@ -16,6 +16,7 @@
     "convert": "node ./cy_scripts/convert.js",
     "predeploy": "NODE_ENV=production npm run build",
     "deploy": "node ./cy_scripts/deploy.js",
+    "scrape": "node ./cy_scripts/scrape.js",
     "start": "node --stack-size=4096 ./index.js server --port 2222",
     "precypress": "npm install cypress-cli && cypress install",
     "cypress": "cypress run --record --key $DOCS_RECORD_KEY",
