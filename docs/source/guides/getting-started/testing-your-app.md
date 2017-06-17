@@ -131,53 +131,20 @@ If you need help getting started with this, you could open up the dev tools and 
 
 ## Preparing and Cleaning Up Test Data
 
+If you're familiar with server-side unit testing, you're probably used to using fixtures or factories to build up state in the database before each test, and cleaning it up after. You may decide you want this flow for your client-side tests, as well. In that case, you'll need to bridge Cypress to your back-end, and again we'll use `cy.request()` for this task.
+
+You'll want to add some routes to your application that only exist in the `test` environment so that you know they never exist in production. These routes simply take commands about the data you want to test against, bridging over to your fixtures and factories, or your "clear the data store" mechanism.
+
+You might use this with the login advice above to create a user in the database before you log in, allowing you to skip the signup flow step (particularly useful for skipping email confirmation if you require it before the first login!) It's also easy to imagine building up different quantities of your business objects for testing the {% url "5 states of any user interface element: empty, partial, full, loading, and error." http://scotthurff.com/posts/why-your-user-interface-is-awkward-youre-ignoring-the-ui-stack %}
+
 ## Isolation from the Back-end with Network Stubbing
+
+One final strategy that Cypress enables is complete isolation from your server via route stubbing. This is an absolute ninja trick, especially for web projects that have already separated their front-ends from their back-ends: separate repositories that get deployed to completely different places and only communicate over HTTP(S).
+
+Cypress anticipates these kinds of projects and enables network stubbing via the `cy.server()` and `cy.route()` commands. You can declare the API calls you expect your application to make, then capture them before they hit the network and provide your own custom responses.
+
+Since it skips the network and all of the code on the server, _this is fast_. It's also easier to maintain, as your tests can live with your front-end project and never need to coordinate spinning up a development server for another project. Continuous Integration is simpler because it doesn't need to package up the API server project. All of the login logic is simplified because it is no longer coordinating with the back-end, but rather reacting to canned responses.
 
 # Get Started!
 
-Ok, we're done slowing you down, dive in and test your app! From here you may want to have a look at the {% url "Cypress API" api %} to learn what commands are available as you work. Once you've written a few tests, {% url "Cypress in a Nutshell" introduction-to-cypress %} is a must-read: it will teach you how Cypress _really_ works, and how to write effective Cypress tests.
-
-<!-- To round out this guide, let's actually test _your_ app! (You do have an app to test, right?)
-
-First, create a new test file in the `cypress/integration` folder named `my_spec.js` (or whatever you want, the name is not meaningful.) We'll fill in a quick smoke test to make sure we can visit the app:
-
-```js
-describe.only('My App', function() {
-  it('can be visited', function() {
-    cy.visit('http://localhost:3000')
-  })
-})
-```
-
-Save this file, open Cypress, and click on the `my_spec.js` file. This should be the only test that runs because we leveraged `.only` on the `describe` block, and it should fail because we didn't start our server
-
-Why? Well, remember that Cypress is back-end agnostic: it doesn't know _anything_ about your app server, let alone whether it is running or not. All Cypress can do is attempt to visit the link you gave it and report back about the response it gets. No response? Must not be running!
-
-This is where your own knowledge of your app comes in, as you'll need to boot your app server into an appropriate mode for testing. What this means is entirely app-dependent: Cypress doesn't know anything about your environment, and we couldn't hope to guess anything about it for this guide, either!
-
-Start your server and re-run the tests in Cypress. You will see your web app booted up inside the Cypress browser and ready to be automated. Score!
-
-# Avoiding Authentication
-
-Now that you've gotten your server running and you're considering what to test next, you're probably realizing something common to most modern web apps: all the interesting functionality is behind a login form!
-
-
-For now, we recommend that you toy around with Cypress in the public areas of your website (perhaps your marketing pages, documentation, ...or even the login form itself if that's really all you have!)
-
-Try to write some simple tests on your own, and for the moment don't worry if they are "good tests", you just want to get a feel for the texture of Cypress tests. Some things to try:
-
-- Get some elements based on their content using {% url `.contains()` contains %}.
-- Click on things using {% url `.click()` click %}.
-- Assert that the page title has changed after clicking a link using {% url `cy.title()` title %} .
-
-{% note warning %}
-Does your app have pre-existing errors that are causing Cypress to fail?
-
-Cypress is actually working as expected: those errors are real errors and need to be fixed in your application!
-{% endnote %} -->
-
- <!-- However, we understand that developers don't always have complete control over their environment and need a little help from time to time. If you need to disable this behavior of Cypress (at your own risk), you can..._ -->
-<!--
-Configuration:
-- baseUrl
-- ignore existing errors? -->
+Ok, we're done talking for now, dive in and test your app! From here you may want to have a look at the {% url "Cypress API" api %} to learn what commands are available as you work. Once you've written a few tests, {% url "Introduction to Cypress" introduction-to-cypress %} is a must-read: it will teach you how Cypress _really_ works, and how to write effective Cypress tests.
