@@ -67,8 +67,8 @@ sidebar:
     cypress-api-design: API Design
     all-videos: Videos
   api:
-    welcome: Welcome
-    api: api
+    introduction: Introduction
+    api: API
     commands: Commands
     and: and
     as: as

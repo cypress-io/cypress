@@ -31,7 +31,7 @@ skip_render:
 alias:
   index.html: guides/getting-started/why-cypress.html
   guides/index.html: guides/getting-started/why-cypress.html
-  api/index.html: api/welcome/api.html
+  api/index.html: api/introduction/api.html
   examples/index.html: examples/recipes/unit-testing.html
   faq/index.html: faq/questions/general-questions.html
   # can also do outside page links here

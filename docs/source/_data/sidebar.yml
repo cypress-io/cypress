@@ -49,7 +49,7 @@ guides:
     # all-videos: all-videos.html
 
 api:
-  welcome:
+  introduction:
     api: api.html
   commands:
     and: and.html
