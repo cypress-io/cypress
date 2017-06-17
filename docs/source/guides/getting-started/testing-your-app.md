@@ -110,7 +110,24 @@ Nothing slows a test suite like having to log in, but all the good parts of your
 
 ### Fully Test the Login Flow, _Once_
 
+It's a great idea to get your signup and login flow under test coverage since it is very important to all of your users and you never want it to break. We recommend you test signup and login the way you test most things in Cypress:
+
+1. `cy.visit()` the page with the login form
+2. `cy.get()` the username and password inputs and `.type()` into them
+3. `cy.get()` the login form and `.submit()` it
+4. make an appropriate assertion about the next page
+
+You can quickly test your app's behavior like this for a number of scenarios. For the "happy path", you might include signing up before logging in. Next, incorrect usernames and passwords are obvious scenarios to test, and furthermore you might include edge cases like locked or deleted accounts, username or email already exists at signup, etc. Whatever you need assurances about, get it under coverage!
+
+But don't try to reuse this login test for every other test...
+
 ### Short-Circuit the Login Flow Everywhere Else
+
+Now that the signup and login flow are covered, we want to avoid them for tests that aren't specifically about them. For this, we can leverage `cy.request()`, which makes a web request _just like the browser, but outside of the browser_. Cypress will send all the appropriate cookies and headers, just like the browser would, but without engaging all of the graphical overhead of the browser.
+
+This is where your own knowledge of your web app comes in: What does a login request look like for your app? You want to emulate that with `cy.request()` outright, instead of filling out a form and submitting it manually.
+
+If you need help getting started with this, you could open up the dev tools and see what the form actually submits. Look at it to see what data you need to send, then do it directly. Keeping your tests fast depends on it!
 
 ## Preparing and Cleaning Up Test Data
 
