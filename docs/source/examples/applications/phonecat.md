@@ -4,7 +4,7 @@ comments: false
 containerClass: examples
 ---
 
-{% fa fa-github %} {% url "https://github.com/cypress-io/cypress-example-phonecat" https://github.com/cypress-io/cypress-example-phonecat %}
+{% fa fa-github %} {% url  https://github.com/cypress-io/cypress-example-phonecat %}
 
 ## Overview
 

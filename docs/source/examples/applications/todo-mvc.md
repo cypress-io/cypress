@@ -4,7 +4,7 @@ comments: false
 containerClass: examples
 ---
 
-{% fa fa-github %} {% url "https://github.com/cypress-io/cypress-example-todomvc" https://github.com/cypress-io/cypress-example-todomvc %}
+{% fa fa-github %} {% url  https://github.com/cypress-io/cypress-example-todomvc %}
 
 ## Overview
 

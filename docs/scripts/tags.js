@@ -104,6 +104,7 @@ hexo.extend.tag.register('url', function (args) {
   // {% url `.should()` should#Notes %}
   // {% url 'Read about why' why-cypress %}
   // {% url 'Benefits' guides/getting-started/why-cypress#Benefits %}
+  // {% url http://foo.com %}
   //
   // <<< Transforms into >>>
   //
@@ -111,12 +112,13 @@ hexo.extend.tag.register('url', function (args) {
   // <a href="/api/commands/should.html#Notes"><code>.should()</code></a>
   // <a href="/guides/getting-started/why-cypress.html">Read about why</a>
   // <a href="/guides/getting-started/why-cypress.html#Benefits">Benefits</a>
+  // <a href="http://foo.com">http://foo.com</a>
 
   const sidebar = this.site.data.sidebar
 
   const props = {
     text: args[0],
-    url: args[1],
+    url: args[1] || args[0],
     external: args[2],
   }
 
