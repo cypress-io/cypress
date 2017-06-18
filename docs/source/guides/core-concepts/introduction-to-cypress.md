@@ -474,13 +474,13 @@ With Cypress, you don't have to assert to have a useful test. Even without asser
 
 {% endnote %}
 
-Cypress anticipates the chaos of modern web development and [visualizes it in a reasonable way](/guides/core-concepts/overview-of-the-gui.html). Failures are important! Cypress makes them obvious and easy to understand.
+Cypress anticipates the chaos of modern web development and {% url 'visualizes it in a reasonable way' overview-of-the-gui %}. Failures are important! Cypress makes them obvious and easy to understand.
 
 As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, submit a form, and call it a day. You can rest assured that _so many things must be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus!
 
 ## What Assertions Are Available?
 
-Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide the built-in assertions. You can learn more in [the Available Assertions Appendix](/guides/appendices/assertions.html). You can also write your own assertions as Chai plugins and use them in Cypress.
+Cypress wraps Chai, Chai-jQuery, and Chai-Sinon to provide the built-in assertions. You can learn more in {% url 'the list of assertions reference' assertions %}. You can also write your own assertions as Chai plugins and use them in Cypress.
 
 ## Writing Assertions
 
@@ -490,7 +490,7 @@ There are two ways to write assertions in Cypress:
 2. **Explicit Subjects:** Using `expect`.
 
 {% note info Assertion Libraries %}
-Cypress bundles [popular assertion libraries](/guides/appendices/assertions.html) for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
+Cypress bundles {% url 'popular assertion libraries' assertions %} for you, and exposes synchronous and asynchronous assertion interfaces. In Cypress, you're always a few keystrokes away from an expressive test.
 
 {% endnote %}
 
