@@ -28,7 +28,7 @@ guides:
     # how-cypress-really-works: how-cypress-really-works.html
     # talking-to-your-backend: talking-to-your-backend.html
     # spawning-processes: spawning-processes.html
-  appendices:
+  references:
     assertions: assertions.html
     configuration: configuration.html
     error-messages: error-messages.html
