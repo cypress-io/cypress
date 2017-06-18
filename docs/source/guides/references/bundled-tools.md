@@ -26,6 +26,10 @@ Cypress has adopted Mocha's `bdd` syntax, which fits perfectly with both integra
 
 Additionally, Mocha gives us excellent {% url '`async` support' http://mochajs.org/#asynchronous-code %}. Cypress has extended Mocha, sanding off the rough edges, weird edge cases, bugs, and error messages. These fixes are all completely transparent.
 
+{% note info %}
+{% url "Check out our guide to writing and organizing tests." writing-and-organizing-tests %}
+{% endnote %}
+
 # Chai
 
 {% fa fa-github %} {% url http://chaijs.com/ %}
@@ -48,7 +52,7 @@ When writing integration tests, you will likely work a lot with the DOM. Cypress
 
 When writing unit tests, or even in integration-like tests, you often need to ability to stub and spy methods. Cypress includes two methods, {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} that return Sinon stubs and spies, respectively.
 
-{% note info New to spies and stubs? %}
+{% note info %}
 {% url "Check out our guide for working with spies, stubs, and clocks." stubs-spies-and-clocks %}
 {% endnote %}
 
