@@ -119,7 +119,7 @@ cy.visit('http://localhost:3000/#dashboard', {
 **Using onBeforeLoad**
 
 {% note info %}
-{% url "Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to help bootstrap app data" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}, to {% url "set a token to `localStorage` for login" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %} and to {% url "stub `window.fetch`" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to help bootstrap app data" working-with-the-backend %}, to {% url "set a token to `localStorage` for login" logging-in %} and to {% url "stub `window.fetch`" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 **Provide an `onLoad` callback function**
@@ -206,7 +206,7 @@ When clicking on `visit` within the command log, the console outputs the followi
 # See also
 
 - {% url `cy.go()` go %}
-- {% url "Recipe: Bootstrapping App Test Data" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}
-- {% url "Recipe: Logging In - Single Sign on" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
+- {% url "Recipe: Bootstrapping App Test Data" working-with-the-backend %}
+- {% url "Recipe: Logging In - Single Sign on" logging-in %}
 - {% url `cy.request()` request %}
 - {% url `cy.server()` server %}

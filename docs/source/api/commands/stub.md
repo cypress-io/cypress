@@ -6,7 +6,7 @@ comments: false
 Replace a function, record its usage and control its behavior.
 
 {% note info %}
-**Note:** `.stub()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-clocks %}
+**Note:** `.stub()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-and-clocks %}
 {% endnote %}
 
 # Syntax
@@ -104,7 +104,7 @@ expect(removeStub).to.be.called
 **Using cy.stub**
 
 {% note info %}
-{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Alias a stub
@@ -166,7 +166,7 @@ When clicking on the `(stub-1)` event within the command log, the console output
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
-- {% url "Recipe: Unit Test - Stubbing Dependencies" https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies %}
 - {% url `cy.spy()` spy %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}
+- {% url "Recipe: Unit Test - Stubbing Dependencies" unit-testing %}

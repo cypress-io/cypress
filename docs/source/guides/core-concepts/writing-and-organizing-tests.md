@@ -43,7 +43,7 @@ Cypress also adds placeholder files to help get you started with examples in eac
 ```
 
 {% note info Using Support files for common functionality %}
-[Check out our example recipe using support files to import common utilities](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)
+{% url 'Check out our example recipe using support files to import common utilities' extending-cypress %}
 {% endnote %}
 
 **Configuring Folder Structure**
@@ -59,7 +59,7 @@ Test files may be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
 Cypress supports ES2015, ES2016, ES2017, and JSX. ES2015 modules and CommonJS modules are also supported, so you can `import` or `require` both npm packages and local modules.
 
 {% note info Importing ES2015 or CommonJS modules %}
-[Check out our example recipe using ES2015 and CommonJS modules](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)
+{% url 'Check out our example recipe using ES2015 and CommonJS modules' extending-cypress %}
 {% endnote %}
 
 To see an example of every command used in Cypress, open the [`example_spec.js`](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/example_spec.js) within your `cypress/integration` folder.
@@ -72,7 +72,7 @@ Cypress is built on top of {% url 'Mocha' bundled-tools#Mocha %} and uses its `b
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
-We're still working on introductory docs and videos. If you want to see Cypress in action, [check out some examples](https://on.cypress.io/guides/all-example-apps) of applications using Cypress tests and [check out some example recipes we've written](https://github.com/cypress-io/cypress-example-recipes) for special use cases.
+We're still working on introductory docs and videos. If you want to see Cypress in action, %{ url 'check out some examples' kitchen-sink %} of applications using Cypress tests and {% url "check out some example recipes we've written" unit-testing %} for special use cases.
 
 ## BDD Interface
 

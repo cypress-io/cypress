@@ -6,7 +6,7 @@ comments: false
 Move time after overriding a native time function with {% url `cy.clock()` clock %}.
 
 {% note warning %}
-{% url `cy.clock()` clock %} must be called before `cy.tick` in order to override native time functions first.
+{% url `cy.clock()` clock %} must be called before `cy.tick()` in order to override native time functions first.
 {% endnote %}
 
 # Syntax
@@ -72,7 +72,7 @@ cy.get('#header').should('have.text', 'Hello, World')
 **Using `cy.clock()` and `cy.tick()`**
 
 {% note info %}
-{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 # Command Log
@@ -95,7 +95,7 @@ When clicking on the `tick` command within the command log, the console outputs 
 # See also
 
 - {% url `cy.clock()` clock %}
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}

@@ -90,7 +90,7 @@ cy.get('button').trigger('mouseover') // yields 'button'
 **Drag and Drop**
 
 {% note info %}
-{% url 'Check out our example recipe triggering mouse and drag events to test dragging and dropping' 'https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/drag_n_drop_spec.js' %}
+{% url 'Check out our example recipe triggering mouse and drag events to test dragging and dropping' drag-and-drop %}
 {% endnote %}
 
 ## Change Event

@@ -93,7 +93,7 @@ cy.get('textarea').type('Hello world') // yields <textarea>
 **Type into a login form**
 
 {% note info %}
-{% url "Check out our example recipe of logging in by typing username and password" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
+{% url "Check out our example recipe of logging in by typing username and password" logging-in %}
 {% endnote %}
 
 **Mimic user typing behavior**

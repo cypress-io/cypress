@@ -35,7 +35,7 @@ You can refer to each of these libraries documentation for more examples and exp
 # Common Scenarios
 
 {% note info Example test! %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url 'Check out our example recipe testing spying, stubbing and time' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Stubs

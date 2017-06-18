@@ -18,7 +18,7 @@ guides:
     network-requests: network-requests.html
     continuous-integration: continuous-integration.html
     environment-variables: environment-variables.html
-    stubs-spies-clocks: stubs-spies-clocks.html
+    stubs-spies-and-clocks: stubs-spies-and-clocks.html
     web-security: web-security.html
     reporters: reporters.html
   # advanced-cypress:
@@ -148,7 +148,7 @@ examples:
     logging-in: logging-in.html
     testing-the-dom: testing-the-dom.html
     working-with-the-backend: working-with-the-backend.html
-    spies-stubs-and-clocks: spies-stubs-and-clocks.html
+    stubs-spies-and-clocks-recipe: stubs-spies-and-clocks.html
     extending-cypress: extending-cypress.html
   applications:
     kitchen-sink: kitchen-sink.html

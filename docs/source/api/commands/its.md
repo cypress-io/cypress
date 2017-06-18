@@ -117,7 +117,7 @@ cy
 **Use `.its()` to test `window.fetch`**
 
 {% note info %}
-{% url "Check out our example recipe on testing `window.fetch` using `.its()`" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe on testing `window.fetch` using `.its()`" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Nested Properties

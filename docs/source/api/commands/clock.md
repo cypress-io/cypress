@@ -172,7 +172,7 @@ cy.clock(null, ['setTimeout', 'clearTimeout'])
 **Using cy.clock() and cy.tick()**
 
 {% note info %}
-{% url 'Check out our example recipe testing spying, stubbing and time.' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js%}
+{% url 'Check out our example recipe testing spying, stubbing and time.' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 # Notes
@@ -204,8 +204,8 @@ When clicking on the `clock` command within the command log, the console outputs
 
 # See also
 
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
-- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' https://github.com/cypress-io/cypress-example-recipes %}
+- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' stubs-spies-and-clocks-recipe %}
 - {% url `cy.tick()` tick %}

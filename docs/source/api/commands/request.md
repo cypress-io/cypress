@@ -184,7 +184,7 @@ cy.getCookie('cypress-session-cookie').should('exist')
 **Using cy.request for HTML Forms**
 
 {% note info %}
-{% url "Check out our example recipe using `cy.request()` for HTML form submissions" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
+{% url "Check out our example recipe using `cy.request()` for HTML form submissions" logging-in %}
 {% endnote %}
 
 # Notes
@@ -234,8 +234,8 @@ When clicking on `request` within the command log, the console outputs the follo
 # See also
 
 - {% url `cy.exec()` exec %}
-- {% url "Recipe: Logging In - CSRF Tokens" https://github.com/cypress-io/cypress-example-recipes %}
-- {% url "Recipe: Logging In - HTML Web Form" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}
-- {% url "Recipe: Logging In - Single Sign on" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
-- {% url "Recipe: Logging In - XHR Web Form" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
+- {% url "Recipe: Logging In - CSRF Tokens" logging-in %}
+- {% url "Recipe: Logging In - HTML Web Form" logging-in %}
+- {% url "Recipe: Logging In - Single Sign on" logging-in %}
+- {% url "Recipe: Logging In - XHR Web Form" logging-in %}
 - {% url `cy.visit()` visit %}

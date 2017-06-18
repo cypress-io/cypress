@@ -142,7 +142,7 @@ Cypress does not and may never have multi-tab support for various reasons.
 
 Luckily there are lots of easy and safe workarounds that enable you to test this behavior in your application.
 
-[Read through this recipe to see how to test anchor links.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)
+{% url 'Read through this recipe to see how to test anchor links.' testing-the-dom %}
 
 
 <!-- ## How do I run my tests in another browser? -->

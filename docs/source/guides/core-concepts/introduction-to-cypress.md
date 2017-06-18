@@ -542,7 +542,7 @@ expect(true).to.be.true
 ```
 
 {% note info Are you trying to write Unit Tests? %}
-Check out our example recipes for [unit testing](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_application_code_spec.js) and [unit testing React components](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_react_enzyme_spec.js)
+Check out our example recipes for {% url 'unit testing' unit-testing %} and {% url 'unit testing React components' unit-testing %}
 {% endnote %}
 
 Explicit assertions are great when you want to:

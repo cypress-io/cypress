@@ -6,7 +6,7 @@ comments: false
 Wrap a method in a spy in order to record calls to and arguments of the function.
 
 {% note info %}
-**Note:** `.spy()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-clocks %}
+**Note:** `.spy()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-and-clocks %}
 {% endnote %}
 
 # Syntax
@@ -59,7 +59,7 @@ expect(util.addListeners).to.be.called
 **Using `cy.spy()`**
 
 {% note info %}
-{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Alias a spy
@@ -120,6 +120,6 @@ When clicking on the `spy-1` event within the command log, the console outputs t
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}
 - {% url `cy.stub()` stub %}

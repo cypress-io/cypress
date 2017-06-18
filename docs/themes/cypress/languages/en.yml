@@ -31,7 +31,7 @@ sidebar:
     overview-of-the-gui: Overview of the GUI
     debugging: Debugging
     aliases-and-references: Aliases and References
-    stubs-spies-clocks: Stubs, Spies, and Clocks
+    stubs-spies-and-clocks: Stubs, Spies, and Clocks
     network-requests: Network Requests
     screenshots-and-videos: Screenshots and Videos
     guides: Guides
@@ -166,7 +166,7 @@ sidebar:
     logging-in: Logging In
     testing-the-dom: Testing the DOM
     working-with-the-backend: Working with the Backend
-    spies-stubs-and-clocks: Spies, Stubs, and Clocks
+    stubs-spies-and-clocks-recipe: Spies, Stubs, and Clocks
     extending-cypress: Extending Cypress
     applications: Applications
     kitchen-sink: Kitchen Sink

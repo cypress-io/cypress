@@ -99,7 +99,7 @@ cy.wait('@postUser')
 **Setup route to `POST` to login**
 
 {% note info %}
-{% url "Check out our example recipe using `cy.route()` to POST for login" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js  %}
+{% url "Check out our example recipe using `cy.route()` to POST for login" logging-in  %}
 {% endnote %}
 
 **Wait on `url` matching glob**
@@ -315,7 +315,7 @@ cy.route({
 **Setup route to error on POST to login**
 
 {% note info %}
-{% url "Check out our example recipe using `cy.route()` to simulate a `503` on `POST` to login" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
+{% url "Check out our example recipe using `cy.route()` to simulate a `503` on `POST` to login" logging-in %}
 {% endnote %}
 
 **Change `headers`**
@@ -462,6 +462,6 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 - {% url `.as()` as %}
 - {% url `cy.fixture()` fixture %}
 - {% url 'Network Requests' network-requests %}
-- {% url 'Recipe: Logging in - XHR Web Form' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %}
+- {% url 'Recipe: Logging in - XHR Web Form' logging-in %}
 - {% url `cy.server()` server %}
 - {% url `cy.wait()` wait %}
