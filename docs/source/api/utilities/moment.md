@@ -3,7 +3,7 @@ title: Cypress.moment
 comments: false
 ---
 
-Cypress automatically proxies [`moment.js`](http://momentjs.com/) and exposes it as `Cypress.moment`.
+Cypress automatically includes {% url 'moment.js' http://momentjs.com/ %} and exposes it as `Cypress.moment`.
 
 Use `Cypress.moment` to help format or parse dates.
 

@@ -3,7 +3,7 @@ title: Cypress.Promise
 comments: false
 ---
 
-Cypress automatically proxies [`Bluebird`](https://github.com/petkaantonov/bluebird) and exposes it as `Cypress.Promise`.
+Cypress automatically includes {% url 'Bluebird' https://github.com/petkaantonov/bluebird %} and exposes it as `Cypress.Promise`.
 
 Instantiate a new bluebird promise.
 

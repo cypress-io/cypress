@@ -3,7 +3,7 @@ title: Cypress.Blob
 comments: false
 ---
 
-Cypress proxies a [`Blob Utilities`](https://github.com/nolanlawson/blob-util) library and exposes it as `Cypress.Blob`.
+Cypress automatically includes a {% url 'Blob' https://github.com/nolanlawson/blob-util %} library and exposes it as `Cypress.Blob`.
 
 Use `Cypress.Blob` to convert `base64` strings to `blob` objects. Useful for testing uploads.
 
