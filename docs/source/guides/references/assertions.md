@@ -141,6 +141,17 @@ These chainers are used on assertions with {% url `cy.stub()` stub %} and {% url
 | threw | `expect(spy).to.have.thrown(errorObjOrErrorTypeStringOrNothing)` |
 | alwaysThrew | `expect(spy).to.have.always.thrown(errorObjOrErrorTypeStringOrNothing)` |
 
+# Adding New Assertions
+
+Because we are using `chai`, that means you can extend it however you'd like. Cypress will automatically "just work" with new assertions added to `chai`. You can simply:
+
+1. Write your own `chai` assertions as {% url 'documented here' http://chaijs.com/api/plugins/ %}.
+2. NPM install any existing `chai` library and import into your test file or support file.
+
+{% note info %}
+{% url 'Check out our example recipe extending chai with new assertions.' extending-cypress %}
+{% endnote %}
+
 # Common Assertions
 
 Here is a list of common element assertions.
