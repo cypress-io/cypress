@@ -159,7 +159,7 @@ function findFileBySource (sidebar, href) {
   return flattened[href] || property()
 }
 
-function getLocalFile (sidebar, href) {
+function getLocalFile (sidebar, href, source) {
   // get the resolve path to the file
   // cypress-101 -> guides/core-concepts/cypress-101.html
   const pathToFile = findFileBySource(sidebar, href)
@@ -177,14 +177,19 @@ function getLocalFile (sidebar, href) {
   }
 
   return Promise.reject(
-    new Error(`Could not find a valid doc file in the sidebar.yml for: ${href}`)
+    new Error(`Constructing {% url %} tag helper failed
+
+    > The source file was: ${source}
+
+    > Could not find a valid doc file in the sidebar.yml for: ${href}
+    `)
   )
 }
 
 function validateLocalFile (sidebar, href, source, render) {
   const hash = extractHash(href)
 
-  return getLocalFile(sidebar, stripHash(href))
+  return getLocalFile(sidebar, stripHash(href), source)
   .spread((pathToFile, str) => {
     if (hash) {
       // if we have a hash then render
