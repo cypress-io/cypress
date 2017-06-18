@@ -22,7 +22,6 @@ An alias of {% url `.and()` and %}
 .should(callbackFn)
 ```
 
-
 ## Usage
 
 `.should()` requires being chained off another cy command.
@@ -40,12 +39,11 @@ cy.contains('Login').should('be.visible')  // Assert that el is visible
 cy.should('eq', '42')   // Errors, cannot be chained off 'cy'
 ```
 
-
 ## Arguments
 
 **{% fa fa-angle-right %} chainers** ***(String)***
 
-Chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
+Any valid chainer that comes from {% url 'Chai' assertions#Chai %} or {% url 'Chai-jQuery' assertions#Chai-jQuery %} or {% url 'Sinon-Chai' assertions#Sinon-Chai %}.
 
 **{% fa fa-angle-right %} value** ***(String)***
 
