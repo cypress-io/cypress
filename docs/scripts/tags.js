@@ -20,7 +20,7 @@ hexo.extend.tag.register('note', function (args, content) {
   // </blockquote>
 
   const iconLookup = {
-    info: 'info',
+    info: 'info-circle',
     warning: 'exclamation',
     success: 'check',
     danger: 'times',
