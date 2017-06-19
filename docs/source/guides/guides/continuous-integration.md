@@ -73,6 +73,7 @@ If you don't use this image you must install all of the {% url 'linux dependenci
 * [GitLab](https://gitlab.com/cypress-io/cypress-example-docker-gitlab)
 * [Codeship](https://github.com/cypress-io/cypress-example-docker-codeship)
 * [CircleCI](https://github.com/cypress-io/cypress-example-docker-circle)
+* [CircleCI with Workflows](https://github.com/cypress-io/cypress-example-docker-circle-workflows)
 
 ## Other
 
