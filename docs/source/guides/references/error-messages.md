@@ -312,6 +312,10 @@ it('does not forget to return a promise', function(){
 })
 ```
 
+**{% fa fa-exclamation-triangle red %} `cy.visit()` failed because you are attempting to visit a second unique domain**
+
+See {% url "`cy.visit()`" visit %} documentation.
+
 # CI Errors
 
 **{% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.**
