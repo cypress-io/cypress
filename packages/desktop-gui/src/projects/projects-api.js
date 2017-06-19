@@ -156,7 +156,11 @@ const openProject = (project) => {
           return specsStore.setChosenSpec(config.specChanged)
         }
 
-        project.clearError()
+        if (project.error && !err) {
+          project.clearError()
+          reopenProject(project)
+          return
+        }
 
         if (err) {
           return setProjectError(err)
