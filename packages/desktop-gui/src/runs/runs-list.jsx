@@ -139,7 +139,7 @@ class RunsList extends Component {
 
     // everything's good, there are runs to show!
     return (
-      <div id='runs-list-page' className='runs'>
+      <div className='runs'>
         <header>
           <h5>Runs
           <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
@@ -214,7 +214,7 @@ class RunsList extends Component {
 
   _empty () {
     return (
-      <div id='runs-list-page'>
+      <div>
         <div className='first-run-instructions'>
           <h4>
             To record your first run...

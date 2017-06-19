@@ -22,7 +22,7 @@ export default class ProjectNotSetup extends Component {
 
   render () {
     return (
-      <div id='runs-list-page'>
+      <div>
         <div className="empty">
           {
             this.props.isValid ?

@@ -37,7 +37,9 @@ const loadProjects = (shouldLoad = true) => {
     saveToLocalStorage()
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
-  .catch(projectsStore.setError)
+  .catch((err) => {
+    projectsStore.setError(err)
+  })
 }
 
 const addProject = (path) => {
@@ -51,7 +53,9 @@ const addProject = (path) => {
     saveToLocalStorage()
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
-  .catch(project.setError)
+  .catch((err) => {
+    project.setError(err)
+  })
   .return(project)
 }
 
@@ -115,7 +119,9 @@ const openProject = (project) => {
   specsStore.loading(true)
 
   const setProjectError = (err) => {
-    project.setLoading(false)
+    if (err.type !== 'warning') {
+      project.setLoading(false)
+    }
     project.setError(err)
   }
 
@@ -125,7 +131,9 @@ const openProject = (project) => {
       project.update(projectDetails)
     })
     .catch(ipc.isUnauthed, ipc.handleUnauthed)
-    .catch(project.setError)
+    .catch((err) => {
+      project.setApiError(err)
+    })
   }
 
   const updateConfig = (config) => {

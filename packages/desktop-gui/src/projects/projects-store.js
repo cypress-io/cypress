@@ -67,7 +67,7 @@ class ProjectsStore {
     })
   }
 
-  @action setError = (err) => {
+  @action setError = (err = {}) => {
     this.error = err.message || err
   }
 

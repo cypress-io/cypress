@@ -23,7 +23,6 @@ const validProps = cacheProps.concat([
   'onBoardingModalOpen',
   'browserState',
   'resolvedConfig',
-  'error',
   'parentTestsFolderDisplay',
   'integrationExampleName',
   'scaffoldedFiles',
@@ -56,6 +55,8 @@ export default class Project {
   @observable browserState = "closed"
   @observable resolvedConfig
   @observable error
+  @observable warning
+  @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable scaffoldedFiles = []
@@ -182,16 +183,28 @@ export default class Project {
     this.resolvedConfig = resolved
   }
 
-  @action setError = (err = {}) => {
-    this.error = err
+  @action setError (err = {}) {
+    if (err && err.isWarning) {
+      this.warning = err
+    } else {
+      this.error = err
+    }
+  }
+
+  @action clearError () {
+    this.error = null
+  }
+
+  @action clearWarning () {
+    this.warning = null
+  }
+
+  @action setApiError = (err = {}) => {
+    this.apiError = err
   }
 
   setChosenBrowserByName (name) {
     const browser = _.find(this.browsers, { name }) || this.defaultBrowser
     this.setChosenBrowser(browser)
-  }
-
-  @action clearError () {
-    this.error = undefined
   }
 }

@@ -34,12 +34,15 @@ class Project extends Component {
   render () {
     if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (this.props.project.error !== undefined) return this._error()
+    // if (this.props.project.error) return this._error()
 
     return (
       <div>
         <ProjectNav project={this.props.project}/>
-        {this._currentView()}
+        <div className='project-content'>
+          {this._warning()}
+          {this._currentView()}
+        </div>
         <OnBoarding project={this.props.project}/>
       </div>
     )
@@ -56,7 +59,28 @@ class Project extends Component {
     }
   }
 
-  _error = () => {
+  _warning () {
+    const { warning } = this.props.project
+
+    if (!warning) return null
+
+    return (
+      <div className='alert alert-warning'>
+        <p>
+          <i className='fa fa-warning'></i>{' '}
+          <strong>Warning</strong>
+        </p>
+        <p dangerouslySetInnerHTML={{
+          __html: warning.message.split('\n').join('<br />'),
+        }} />
+        <button className='btn btn-link close' onClick={this._removeWarning}>
+          <i className='fa fa-remove' />
+        </button>
+      </div>
+    )
+  }
+
+  _error () {
     let err = this.props.project.error
 
     return (
@@ -65,11 +89,9 @@ class Project extends Component {
           <i className='fa fa-warning'></i>{' '}
           <strong>Can't start server</strong>
         </p>
-        <p>
-          <span dangerouslySetInnerHTML={{
-            __html: err.message.split('\n').join('<br />'),
-          }} />
-        </p>
+        <p dangerouslySetInnerHTML={{
+          __html: err.message.split('\n').join('<br />'),
+        }} />
         {err.portInUse && (
           <div>
             <hr />
@@ -85,6 +107,10 @@ class Project extends Component {
         </button>
       </div>
     )
+  }
+
+  _removeWarning = () => {
+    this.props.project.clearWarning()
   }
 
   _reopenProject = () => {

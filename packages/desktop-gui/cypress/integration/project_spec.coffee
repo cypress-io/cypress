@@ -39,6 +39,20 @@ describe "Project Mode", ->
         @getProjectStatus.reject({name: "", message: "", statusCode: 401})
         cy.shouldBeOnLogin()
 
+    describe "warnings", ->
+      beforeEach ->
+        cy.shouldBeOnProjectSpecs().then =>
+          @ipc.openProject.yield({isWarning: true, message: "Some warning\nmessage"})
+
+      it "shows warning", ->
+        cy.get(".alert-warning")
+          .should("be.visible")
+          .should("contain", "Some warning")
+
+      it "can dismiss the warning", ->
+        cy.get(".alert-warning button").click()
+        cy.get(".alert-warning").should("not.exist")
+
   describe "polling", ->
     beforeEach ->
       @ipc.getProjectStatus.resolves(@projectStatuses[0])
