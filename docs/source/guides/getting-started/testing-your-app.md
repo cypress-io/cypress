@@ -189,9 +189,29 @@ Combine this technique with the login advice above to create a user in the datab
 
 One final strategy that Cypress enables is complete isolation from your server via route stubbing. This is an absolute ninja trick, especially for web projects that have already separated their front-ends from their back-ends: separate repositories that get deployed to completely different places and only communicate over HTTP(S).
 
-Cypress anticipates these kinds of projects and enables network stubbing via the {% url "`cy.server()`" server %} and {% url "`cy.route()`" route %} commands. You can declare the API calls you expect your application to make, then capture them before they hit the network and provide your own custom responses.
+Cypress anticipates these kinds of projects and enables network stubbing via the {% url "`cy.server()`" server %} and {% url "`cy.route()`" route %} commands. With these, you can declare the API calls you expect your application to make, then capture them before they hit the network and provide your own custom responses.
 
-Since it skips the network and all of the code on the server, _this is fast_. It's also easier to maintain, as your tests can live with your front-end project and never need to coordinate spinning up a development server for another project. {% url "Continuous Integration" continuous-integration %} is simpler because it doesn't need to package up the API server project. All of the login logic is simplified because it is no longer coordinating with the back-end, but rather reacting to canned responses.
+A brief example:
+```js
+// cy.server() and cy.route() must be called before cy.visit()
+// starts Cypress's mock HTTP server
+cy.server()
+// prepare intercept post creation requests and return simple data
+cy.route('POST', '/posts', { id: 1, title: 'My First Post' })
+
+// start the test code as normal
+cy.visit("/posts/new")
+// ...now fill in and submit the new post form. Easy!
+```
+
+{% note success Benefits of to this approach: %}
+- **Speed:** It skips the network and all server code, so it's fast!
+- **Easy Setup:** Otherwise you may need to coordinate 2 projects.
+- **Easy CI:** Same, since we have to set up our environment for Continuous Integration
+- **Relaxed Auth:** This may be easier than coordinating logins.
+{% endnote %}
+
+If this sounds like something you want to take advantage of, please {% url "read the Network Requests guide" network-requests %}!
 
 # Running Headlessly
 
