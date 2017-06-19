@@ -10,6 +10,7 @@ const debug = require('debug')('cypress:cli')
 const { formErrorText, errors } = require('./errors')
 const { stripIndent } = require('common-tags')
 const R = require('ramda')
+const pkg = require('../../package.json')
 
 const unzip = require('./unzip')
 const utils = require('./utils')
@@ -134,8 +135,15 @@ const logErr = (options) => (err) => {
     .then(printAndFail)
 }
 
+const truePwd = () => {
+  const cwd = process.cwd()
+  return _.endsWith(cwd, pkg.name) ? path.join('..', '..') : cwd
+}
+
 const logFinish = (options) => {
-  const relativeExecutable = path.relative(process.cwd(), options.executable)
+  const currDirectory = truePwd()
+  debug('Current caller directory %s', currDirectory)
+  const relativeExecutable = path.relative(currDirectory, options.executable)
 
   /* eslint-disable no-console */
   console.log(
