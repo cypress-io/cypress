@@ -91,7 +91,7 @@ describe('Some Tests', function(){
 
 Simply move those Cypress commands into an `it(...)` block and everything will work correctly.
 
-If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url 'Examples' examples/recipes/unit-testing %}, {% open_an_issue 'open an issue' %>, or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
+If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url "Examples" examples/recipes/unit-testing %}, {% url "chat with someone in our chat" https://gitter.im/cypress-io/cypress %}, or {% open_an_issue %}.
 
 ***
 
@@ -168,7 +168,7 @@ You may see a variation of this message for 4 different reasons:
 
 Cypress runs several calculations to ensure an element can *actually* be interacted with like a real user would. If you're seeing this error, the solution is often obvious. You may need to *guard* your commands (due to a timing or an animation issue).
 
-There have been situations where Cypress does not correctly allow you to interact with an element that should be interactable. If that's the case, {% open_an_issue 'open an issue' %>.
+There have been situations where Cypress does not correctly allow you to interact with an element that should be interactable. If that's the case, {% open_an_issue %}.
 
 If you'd like to override these built-in checks, provide the `{force: true}` option to the action itself. Refer to each command for their available options, additional use cases, and argument usage.
 
@@ -311,6 +311,10 @@ it('does not forget to return a promise', function(){
   })
 })
 ```
+
+**{% fa fa-exclamation-triangle red %} `cy.visit()` failed because you are attempting to visit a second unique domain**
+
+See {% url "`cy.visit()`" visit %} documentation.
 
 # CI Errors
 

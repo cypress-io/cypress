@@ -56,6 +56,9 @@ hexo.extend.tag.register('fa', function (args) {
 })
 
 hexo.extend.tag.register('open_an_issue', function (args) {
+  // {% open_an_issue %}
+  // {% open_an_issue 'here' %}
+
   const attrs = {
     href: 'https://github.com/cypress-io/cypress/issues/new',
     target: '_blank',
@@ -67,6 +70,8 @@ hexo.extend.tag.register('open_an_issue', function (args) {
 })
 
 hexo.extend.tag.register('issue', function (args) {
+  // {% issue 74 'not currently supported' %}
+  
   const num = args[0]
 
   const attrs = {
@@ -80,6 +85,8 @@ hexo.extend.tag.register('issue', function (args) {
 })
 
 hexo.extend.tag.register('urlHash', function (args) {
+  // {% urlHash 'Standard Output' Standard-Output %}
+
   const content = this.content
   const text = args[0]
   const hash = `#${args[1]}`

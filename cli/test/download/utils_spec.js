@@ -158,7 +158,7 @@ describe('utils', function () {
 
     it('rejects on anything else', function () {
       this.sandbox.stub(os, 'platform').returns('win32')
-      expect(() => utils.getPathToUserExecutable()).to.throw(`Platform: 'win32' is not supported.`)
+      expect(() => utils.getPathToUserExecutable()).to.throw('Platform: "win32" is not supported.')
     })
   })
 
@@ -282,7 +282,7 @@ describe('utils', function () {
       it('logs and runs when current version has not been verified', function () {
         return fs.outputJsonAsync(path.join(utils.getInstallationDir(), 'info.json'), {
           version: packageVersion,
-          verifiedVersion: "different version",
+          verifiedVersion: 'different version',
         })
         .then(() => {
           return utils.verify()
@@ -302,7 +302,7 @@ describe('utils', function () {
 
         return fs.outputJsonAsync(infoFilePath, {
           version: packageVersion,
-          verifiedVersion: "different version",
+          verifiedVersion: 'different version',
         })
         .then(() => {
           return utils.verify()
@@ -316,7 +316,7 @@ describe('utils', function () {
       it('logs success message and writes version when it succeeds', function () {
         return fs.outputJsonAsync(infoFilePath, {
           version: packageVersion,
-          verifiedVersion: "different version",
+          verifiedVersion: 'different version',
         })
         .then(() => {
           return utils.verify()
@@ -336,7 +336,7 @@ describe('utils', function () {
 
           return fs.outputJsonAsync(infoFilePath, {
             version: packageVersion,
-            verifiedVersion: "different version",
+            verifiedVersion: 'different version',
           })
         })
 

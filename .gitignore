@@ -37,3 +37,6 @@ docs/themes/cypress/source/css/vendor
 docs/themes/cypress/source/js/vendor
 docs/themes/cypress/source/fonts/vendor
 docs/support
+
+# CLI tool
+cli/build

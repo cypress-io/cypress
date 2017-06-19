@@ -3,6 +3,15 @@ title: Changelog
 comments: false
 ---
 
+# 0.19.4
+
+*Released 06/18/2017*
+
+**Bugfixes:**
+
+Fixed {% url "`.type()`" type %} not firing `input` event for {% url "React" https://facebook.github.io/react/ %} on versions {% url "15.6.x" https://github.com/facebook/react/releases/tag/v15.6.0 %}. Fixes {% issue 536 '#536' %}.
+
+
 # 0.19.3
 
 *Released 06/14/2017*
