@@ -1,6 +1,6 @@
 # cypress
 
-> Testing the way to should be
+> Testing the way it should be
 
 ## Install
 
