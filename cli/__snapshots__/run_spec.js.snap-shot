@@ -2,7 +2,7 @@ exports['passes --browser option 1'] = [
   "--project",
   null,
   "--cli-version",
-  "0.19.2",
+  "0.0.0",
   "--browser",
   "test browser"
 ]
@@ -22,7 +22,7 @@ exports['passes --record option 1'] = [
   "--record",
   "my record id",
   "--cli-version",
-  "0.19.2"
+  "0.0.0"
 ]
 
 exports['does not remove --record option when using --browser 1'] = [
@@ -31,7 +31,7 @@ exports['does not remove --record option when using --browser 1'] = [
   "--record",
   "foo",
   "--cli-version",
-  "0.19.2",
+  "0.0.0",
   "--browser",
   "test browser"
 ]
