@@ -1,5 +1,6 @@
 ---
 title: Writing Your First Test
+comments: false
 ---
 
 {% note info %}
