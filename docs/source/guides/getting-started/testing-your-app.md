@@ -100,34 +100,74 @@ Cypress has many more configuration options you can use to customize its behavio
 
 # Think Through Your Testing Strategy
 
-You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advise to give you. What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you and your team.
+You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advise to give you. What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you, your application, and your team.
 
-That said, modern web testing has a few wrinkles that every team experiences, so here's some quick tips on common situations you're likely to run into sooner than later.
+That said, modern web testing has a few wrinkles that every team experiences, so here's some quick tips on common situations you're more likely to run into sooner than later.
 
 ## Logging In with Speed and Grace
 
-Nothing slows a test suite like having to log in, but all the good parts of your application most likely require an authenticated user! Here's some tips.
+Nothing slows down a test suite like having to log in, but typically the best parts of your application require an authenticated user! Here's some tips.
 
 ### Fully Test the Login Flow, _Once_
 
 It's a great idea to get your signup and login flow under test coverage since it is very important to all of your users and you never want it to break. We recommend you test signup and login the way you test most things in Cypress:
 
-1. `cy.visit()` the page with the login form
-2. `cy.get()` the username and password inputs and `.type()` into them
-3. `cy.get()` the login form and `.submit()` it
-4. make an appropriate assertion about the next page
+> 1. `cy.visit()` the page with the login form
+> 2. `cy.get()` the username and password inputs and `.type()` into them
+> 3. submit the form somehow (`.type("{enter}")` or `cy.get('form').submit()`)
+> 4. make appropriate assertions about the next page
 
-You can quickly test your app's behavior like this for a number of scenarios. For the "happy path", you might include signing up before logging in. Next, incorrect usernames and passwords are obvious scenarios to test, and furthermore you might include edge cases like locked or deleted accounts, username or email already exists at signup, etc. Whatever you need assurances about, get it under coverage!
+Here's an example:
+
+```js
+it('sets auth cookie when logging in via form submission', function(){
+  cy.visit('/login')
+
+  cy.get('input[name=username]').type('jane.lane')
+  // {enter} causes the form to submit
+  cy.get('input[name=password]').type('password123{enter}')
+
+  // we should be redirected to /dashboard
+  cy.url().should('include', '/dashboard')
+  // UI should reflect this user being logged in
+  cy.get('h1').should('contain', 'jane.lane')
+  // our auth cookie should be present
+  cy.getCookie('cypress-session-cookie').should('exist')
+})
+```
+
+You can quickly test your app's behavior like this for a number of scenarios. For the "happy path", you might include signing up, as well. Next, incorrect usernames and passwords are obvious scenarios to test, and furthermore you might include edge cases like locked or deleted accounts, username or email already exists at signup, etc. Whatever you need assurances about, get it under coverage!
 
 But don't try to reuse this login test for every other test...
 
 ### Short-Circuit the Login Flow Everywhere Else
 
-Now that the signup and login flow are covered, we want to avoid them for tests that aren't specifically about them. For this, we can leverage `cy.request()`, which makes a web request _just like the browser, but outside of the browser_. Cypress will send all the appropriate cookies and headers, just like the browser would, but without engaging all of the graphical overhead of the browser.
+Now that the signup and login flow are covered, we want to avoid them for the remainder of our tests because they are slow. For this, we can leverage {% url `cy.request()` request %}, which makes a web request _just like the browser, but outside of the browser_. Cypress will send all the appropriate cookies and headers, just like the browser would, but without engaging all of the graphical overhead of the browser itself.
 
-This is where your own knowledge of your web app comes in: What does a login request look like for your app? You want to emulate that with `cy.request()` outright, instead of filling out a form and submitting it manually.
+This is where knowledge of your web app comes in: What does a login request look like for your app? You'll emulate that with {% url `cy.request()` request %} directly, instead of filling out a form and submitting it manually.
 
-If you need help getting started with this, you could open up the dev tools and see what the form actually submits. Look at it to see what data you need to send, then do it directly. Keeping your tests fast depends on it!
+Let's revisit the example from above:
+
+```js
+it('sets auth cookie when logging in via cy.request()', function(){
+  // Emulate a proper login post
+  cy.request('POST', '/login', { username: 'jane.lane', password: 'password123' })
+    // Do something with the response, if needed
+    .then(function(response){
+      // response.body is serialized to JSON
+      expect(response.body).to.have.property('name', 'Jane')
+  })
+
+  // Cookies still get set by cy.request()
+  cy.getCookie('cypress-session-cookie').should('exist')
+})
+```
+
+If you need help getting started with this, open the dev tools, manually do a form submission, and see what the actually gets sent to and received from the server. Now you can see what to extract into a {% url `cy.request()` request %} call, and how to ensure it worked. Keeping your tests fast depends on it!
+
+{% note info Authentication Recipes %}
+Need more guidance about logging in with Cypress? No problem! We've created {% url 'a number of helpful recipes', logging-in %} that explore testing various authentication styles in Cypress.
+{% endnote %}
 
 ## Preparing and Cleaning Up Test Data
 
