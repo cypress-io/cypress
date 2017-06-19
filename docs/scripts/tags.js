@@ -21,9 +21,9 @@ hexo.extend.tag.register('note', function (args, content) {
 
   const iconLookup = {
     info: 'info-circle',
-    warning: 'exclamation',
-    success: 'check',
-    danger: 'times',
+    warning: 'exclamation-circle',
+    success: 'check-circle',
+    danger: 'times-circle',
   }
 
   let header = ''
