@@ -68,7 +68,7 @@ class ProjectsStore {
   }
 
   @action setError = (err = {}) => {
-    this.error = err.message || err
+    this.error = err
   }
 
   setChosen (project) {

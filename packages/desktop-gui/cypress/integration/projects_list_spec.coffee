@@ -169,6 +169,18 @@ describe "Global Mode", ->
         cy.get(".project-drop button").click().then =>
           expect(@getLocalStorageProjects().length).to.equal(5)
 
+    describe "errors", ->
+      beforeEach ->
+        @getProjects.resolve(@projects)
+        @getProjectStatuses.reject({
+          name: ""
+          message: "Failed to get project statuses"
+        })
+
+      it "displays error above list", ->
+        cy.get(".alert").should("contain", "Failed to get project statuses")
+        cy.get(".projects-list li").should("have.length", @projects.length)
+
   describe "if user becomes unauthenticated", ->
     beforeEach ->
       @unauthError = {name: "", message: "", statusCode: 401}

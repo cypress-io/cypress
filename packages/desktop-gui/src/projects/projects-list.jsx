@@ -34,7 +34,24 @@ class ProjectsList extends Component {
     return (
       <div className='projects-list'>
         <h3>Recent Projects</h3>
+        {this._error()}
         {this._content()}
+      </div>
+    )
+  }
+
+  _error () {
+    if (!projectsStore.error) return null
+
+    return (
+      <div className='alert alert-danger'>
+        <p>
+          <i className='fa fa-warning'></i>{' '}
+          <strong>Error</strong>
+        </p>
+        <p dangerouslySetInnerHTML={{
+          __html: projectsStore.error.message.split('\n').join('<br />'),
+        }} />
       </div>
     )
   }
