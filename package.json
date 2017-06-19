@@ -13,7 +13,7 @@
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "link": "node ./scripts/link-packages.js",
-    "postinstall": "CYPRESS_DOWNLOAD=0 npm run link && npm run all install && npm run build",
+    "postinstall": "npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
     "docker": "./scripts/run-docker-local.sh",
     "lint": "eslint --fix scripts/*.js",
