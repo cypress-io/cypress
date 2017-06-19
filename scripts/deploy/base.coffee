@@ -1,7 +1,5 @@
-require("../gulpfile.coffee")
-
 _            = require("lodash")
-$            = require("gulp-load-plugins")()
+gulpCoffee   = require("gulp-coffee")
 fs           = require("fs-extra")
 cp           = require("child_process")
 path         = require("path")
@@ -15,10 +13,10 @@ runSequence  = require("run-sequence")
 cypressElectron = require("@packages/electron")
 log          = require("./log")
 meta         = require("./meta")
-pkg          = require("../package.json")
-konfig       = require("../lib/konfig")
-appData      = require("../lib/util/app_data")
-Fixtures     = require("../test/support/helpers/fixtures")
+pkg          = require("../../package.json")
+konfig       = require("@packages/server/lib/konfig")
+appData      = require("@packages/server/lib/util/app_data")
+Fixtures     = require("@packages/server/test/support/helpers/fixtures")
 
 # pkgr     = Promise.promisify(pkgr)
 fs       = Promise.promisifyAll(fs)
@@ -126,7 +124,7 @@ class Base
     ## convert to js
     new Promise (resolve, reject) =>
       gulp.src(@distDir("src/**/*.coffee"))
-        .pipe $.coffee()
+        .pipe gulpCoffee()
         .pipe gulp.dest(@distDir("src"))
         .on "end", resolve
         .on "error", reject

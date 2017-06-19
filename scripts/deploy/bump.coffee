@@ -1,9 +1,11 @@
 _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
-bumpercar = require("cypress-bumpercar")
+bumpercar = require("@cypress/bumpercar")
+path      = require("path")
 
-creds = fs.readJsonSync("./support/ci.json", "utf8")
+ciJson = path.join(__dirname, "support/ci.json")
+creds = fs.readJsonSync(ciJson, "utf8")
 
 ## configure a new Bumpercar
 car = bumpercar.create({

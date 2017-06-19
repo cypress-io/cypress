@@ -1,12 +1,17 @@
-$       = require("gulp-load-plugins")()
+awspublish = require('gulp-awspublish')
+rename = require('gulp-rename')
+debug = require('gulp-debug')
 fs      = require("fs-extra")
 cp      = require("child_process")
 path    = require("path")
 gulp    = require("gulp")
 human   = require("human-interval")
-konfig  = require("konfig")()
+konfig  = require("@packages/server/lib/konfig")()
 Promise = require("bluebird")
 meta    = require("./meta")
+
+# TODO please do not hardcode me
+# CDN_URL = "https://cdn.cypress.io"
 
 fs = Promise.promisifyAll(fs)
 
@@ -14,7 +19,7 @@ module.exports = {
   getPublisher: ->
     aws = @getAwsObj()
 
-    $.awspublish.create
+    awspublish.create
       httpOptions: {
         timeout: human("10 minutes")
       }
@@ -38,7 +43,7 @@ module.exports = {
       uploadOsName = platform.uploadOsName
       zipName      = platform.zipName
 
-      url = [konfig.app.cdn_url, "desktop", version, uploadOsName, zipName].join("/")
+      url = [konfig('cdn_url'), "desktop", version, uploadOsName, zipName].join("/")
 
       cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
         return reject(err) if err
@@ -53,7 +58,7 @@ module.exports = {
 
     getUrl = (uploadOsName) ->
       {
-        url: [konfig.app.cdn_url, folder, version, uploadOsName, zipName].join("/")
+        url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
       }
 
     obj = {
@@ -80,12 +85,12 @@ module.exports = {
     new Promise (resolve, reject) =>
       @createRemoteManifest(aws.folder, version).then (src) ->
         gulp.src(src)
-        .pipe $.rename (p) ->
+        .pipe rename (p) ->
           p.dirname = aws.folder + "/" + p.dirname
           p
-        .pipe $.debug()
+        .pipe debug()
         .pipe publisher.publish(headers)
-        .pipe $.awspublish.reporter()
+        .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
@@ -103,12 +108,12 @@ module.exports = {
         headers["Cache-Control"] = "no-cache"
 
         gulp.src(pathToZipFile)
-        .pipe $.rename (p) =>
+        .pipe rename (p) =>
           p.dirname = @getUploadDirName(platform)
           p
-        .pipe $.debug()
+        .pipe debug()
         .pipe publisher.publish(headers)
-        .pipe $.awspublish.reporter()
+        .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
