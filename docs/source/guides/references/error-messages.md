@@ -91,7 +91,7 @@ describe('Some Tests', function(){
 
 Simply move those Cypress commands into an `it(...)` block and everything will work correctly.
 
-If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url 'Examples' examples/recipes/unit-testing %}, {% open_an_issue 'open an issue' %>, or [chat with someone in our chat](https://gitter.im/cypress-io/cypress).
+If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url "Examples" examples/recipes/unit-testing %}, {% url "chat with someone in our chat" https://gitter.im/cypress-io/cypress %}, or {% open_an_issue %}.
 
 ***
 
