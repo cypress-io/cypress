@@ -1,3 +1,3 @@
 require('../packages/coffee/register')
 
-require('./deploy/index')
+require('./deploy/index').deploy()

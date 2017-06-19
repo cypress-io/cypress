@@ -50,6 +50,7 @@
     "gulp-rename": "^1.2.2",
     "human-interval": "^0.1.6",
     "husky": "^0.13.4",
+    "inquirer": "^3.1.1",
     "konfig": "^0.2.1",
     "lint-staged": "^3.6.0",
     "obfuscator": "^0.5.4",
