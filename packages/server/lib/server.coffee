@@ -192,16 +192,21 @@ class Server
           ## and make sure the server is connectable!
           if baseUrl
             connect.ensureUrl(baseUrl)
+            .return(null)
             .catch (err) =>
-              reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)
-        .then =>
+              if config.isHeadless
+                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+              else
+                errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+
+        .then (warning) =>
           ## once we open set the domain
           ## to root by default
           ## which prevents a situation where navigating
           ## to http sites redirects to /__/ cypress
           @_onDomainSet(baseUrl ? "<root>")
 
-          resolve(port)
+          resolve([port, warning])
 
   _port: ->
     @_server?.address()?.port

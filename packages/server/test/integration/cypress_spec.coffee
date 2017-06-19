@@ -520,10 +520,11 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
 
-    it "logs error when browser cannot be found", ->
-    cypress.start(["--project=#{@idsPath}", "--browser=foo"])
-    .then =>
-      @expectExitWithErr("BROWSER_NOT_FOUND", "browser foo")
+    ## FIXME
+    it.skip "logs error when browser cannot be found", ->
+      cypress.start(["--run-project=#{@idsPath}", "--browser=foo"])
+      .then =>
+        @expectExitWithErr("BROWSER_NOT_FOUND", "browser foo")
 
     it "logs error and exits when spec file was specified and does not exist", ->
       Project.add(@todosPath)
@@ -1009,7 +1010,7 @@ describe "lib/cypress", ->
 
     it "passes filtered options to Project#open and sets cli config", ->
       getConfig = @sandbox.spy(Project.prototype, "getConfig")
-      open      = @sandbox.stub(Server.prototype, "open").resolves()
+      open      = @sandbox.stub(Server.prototype, "open").resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = "foo"
       process.env.CYPRESS_BASE_URL = "localhost"
@@ -1084,6 +1085,26 @@ describe "lib/cypress", ->
           value: "baz"
           from: "cli"
         })
+
+    it "sends warning when baseUrl cannot be verified", ->
+      event = {
+        sender: {
+          send: @sandbox.stub()
+        }
+      }
+
+      warning = {
+        isWarning: true,
+        message: "Blah blah baseUrl blah blah"
+      }
+      open = @sandbox.stub(Server.prototype, "open").resolves([2121, warning])
+
+      cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
+      .then =>
+        options = Events.start.firstCall.args[0]
+        Events.handleEvent(options, {}, event, 123, "open:project", @todosPath)
+      .then ->
+        expect(event.sender.send.withArgs("response").firstCall.args[1].__error).to.eql(warning)
 
   context "no args", ->
     beforeEach ->

@@ -200,10 +200,14 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
         bus.emit("focus:tests")
 
+      onWarning = (warning) ->
+        sendErr(warning)
+
       openProject.create(arg, options, {
         onFocusTests: onFocusTests
         onSpecChanged: onSpecChanged
         onSettingsChanged: onSettingsChanged
+        onWarning: onWarning
       })
       .call("getConfig")
       .then(send)

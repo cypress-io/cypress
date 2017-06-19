@@ -134,7 +134,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSupportFile").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(Server.prototype, "open").resolves()
+      @sandbox.stub(Server.prototype, "open").resolves([])
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
