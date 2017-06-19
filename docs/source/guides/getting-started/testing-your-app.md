@@ -24,13 +24,13 @@ $ npm install cypress --save-dev
 
 ...and make yourself an `npm` script in `package.json` to run it easily (we named it "test-cypress" this time because we're assuming you already have a "test" script, but the name is arbitrary):
 
+***package.json***
+
 ```json
 {
-  ...
   "scripts": {
     "test-cypress": "cypress open"
   }
-  ...
 }
 ```
 
@@ -70,6 +70,7 @@ Once you get your server booted, refresh the Cypress browser and you should see 
 If you think ahead, you'll quickly realize that you're going to be typing this URL a lot, since every test is going to need to visit some page of your application. Luckily, Cypress provides a {% url "configuration option" configuration %} for it. Let's leverage that now.
 
 Open up `cypress.json`, which you will find in your project root (where you installed Cypress.) It starts out empty:
+
 
 ```json
 {}
