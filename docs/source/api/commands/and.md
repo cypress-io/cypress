@@ -3,7 +3,7 @@ title: and
 comments: false
 ---
 
-Make an assertion.
+Create an assertion. Assertions are automatically retried until they pass or time out. Use them to describe the state your app must be in before proceeding.
 
 {% note info %}
 An alias of {% url `.should()` should %}
@@ -29,7 +29,7 @@ An alias of {% url `.should()` should %}
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty & hidden
+cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty and hidden
 cy.contains('Login').and('be.visible')               // Assert el is visible
 ```
 
@@ -244,5 +244,6 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # See also
 
-- {% url 'Assertions' introduction-to-cypress#Assertions %}
 - {% url `.should()` should %}
+- {% url 'Guide: Introduction to Cypress' introduction-to-cypress#Assertions %}
+- {% url 'Reference: List of Assertions' assertions %}
