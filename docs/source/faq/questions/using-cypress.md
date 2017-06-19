@@ -18,9 +18,9 @@ You can read more about parallelization {% issue 64 'here' %}.
 
 ## {% fa fa-angle-right %} Can I run a single test or group of tests?
 
-You can run a group of tests or a single test by placing an {% url `.only` organizing-tests#Excluding-and-Including-Tests %} on a test suite or specific test.
+You can run a group of tests or a single test by placing an {% url `.only` writing-and-organizing-tests#Excluding-and-Including-Tests %} on a test suite or specific test.
 
-You can run a single test file headlessly by passing the `--spec` flag to {% url '`cypress run`' cli-tool#cypress-run %}.
+You can run a single test file headlessly by passing the `--spec` flag to {% url '`cypress run`' command-line#cypress-run %}.
 
 Currently there is no way to specify a group of test files to run headlessly. You can read more {% issue 263 'here' %}.
 
@@ -30,7 +30,7 @@ It is possible to upload files in your application but it's different based on h
 
 ## {% fa fa-angle-right %} What is the projectId for?
 
-Once you {% url "setup your tests to record" dashboard-runs %}, we generate a unique `projectId` for your project and automatically insert it into your `cypress.json` file.
+Once you {% url "setup your tests to record" runs %}, we generate a unique `projectId` for your project and automatically insert it into your `cypress.json` file.
 
 **The `projectId` is a 6 character string in your cypress.json:**
 
@@ -44,7 +44,7 @@ This is how we uniquely identify your project. If you manually alter this, *Cypr
 
 ## {% fa fa-angle-right %} What is a Record Key?
 
-Once you're {% url "setup to record test runs" dashboard-runs %}, we automatically generate a *Record Key* for the project.
+Once you're {% url "setup to record test runs" runs %}, we automatically generate a *Record Key* for the project.
 
 **A record key is a GUID that looks like this:**
 
@@ -119,7 +119,7 @@ You can *not* currently preserve localStorage across tests and can read more {% 
 
 ## {% fa fa-angle-right %} Some of my elements animate in, how do I work around that?
 
-Oftentimes you can usually account for animation by asserting {% url "`.should('be.visible')`" should %} or {% url "another assertion" cypress-in-a-nutshell#Assertions %} on one of the elements you expect to be animated in.
+Oftentimes you can usually account for animation by asserting {% url "`.should('be.visible')`" should %} or {% url "another assertion" introduction-to-cypress#Assertions %} on one of the elements you expect to be animated in.
 
 ```javascript
 // assuming a click event causes the animation
@@ -142,7 +142,7 @@ Cypress does not and may never have multi-tab support for various reasons.
 
 Luckily there are lots of easy and safe workarounds that enable you to test this behavior in your application.
 
-[Read through this recipe to see how to test anchor links.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)
+{% url 'Read through this recipe to see how to test anchor links.' testing-the-dom %}
 
 
 <!-- ## How do I run my tests in another browser? -->
@@ -215,10 +215,10 @@ if (window.Cypress) {
 
 ## {% fa fa-angle-right %} Do you allow before, beforeEach, after, or afterEach hooks?
 
-Yes. You can read more {% url "here" organizing-tests#Hooks %}.
+Yes. You can read more {% url "here" writing-and-organizing-tests#Hooks %}.
 
 ## {% fa fa-angle-right %} I tried to install Cypress in my CI, but I get the error: `EACCES: permission denied`.
 
-First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" cli-tool %}.
+First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" command-line %}.
 
 Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress-cli`.

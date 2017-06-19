@@ -1,4 +1,5 @@
 guides: /guides/getting-started/why-cypress.html
-api: /api/welcome/api.html
-examples: /examples/index.html
-faq: /faq/index.html
+api: /api/introduction/api.html
+examples: /examples/recipes/unit-testing.html
+dashboard: /dashboard/overview/features.html
+faq: /faq/questions/general-questions.html

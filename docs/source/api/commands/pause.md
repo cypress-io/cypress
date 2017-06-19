@@ -72,33 +72,33 @@ cy.get('#action-canvas')
 
 The commands above will display in the GUI as:
 
-![Pause command on intial pause](/img/api/commands/pause/initial-pause-in-gui-highlights-the-pause-command.png)
+![Pause command on intial pause](/img/api/pause/initial-pause-in-gui-highlights-the-pause-command.png)
 
 When clicking on "Next: 'click'" at the top of the Command Log, the Command Log will run only the next command and pause again.
 
 ***Click "Next"***
 
-![Pause command after clicking next](/img/api/commands/pause/next-goes-on-to-next-command-during-pause.png)
+![Pause command after clicking next](/img/api/pause/next-goes-on-to-next-command-during-pause.png)
 
 ***Click "Next" again***
 
-![Continue to next command during pause](/img/api/commands/pause/continue-in-pause-command-just-like-debugger.png)
+![Continue to next command during pause](/img/api/pause/continue-in-pause-command-just-like-debugger.png)
 
 ***Click "Next" again***
 
-![Pause command](/img/api/commands/pause/pause-goes-to-show-next-click.png)
+![Pause command](/img/api/pause/pause-goes-to-show-next-click.png)
 
 ***Click "Next" again***
 
-![Pause command](/img/api/commands/pause/clicking-on-canvas-continues-as-we-click-next.png)
+![Pause command](/img/api/pause/clicking-on-canvas-continues-as-we-click-next.png)
 
 ***Click "Next" again***
 
-![Pause command](/img/api/commands/pause/last-next-click-before-out-test-is-finished.png)
+![Pause command](/img/api/pause/last-next-click-before-out-test-is-finished.png)
 
 ***Click "Next" again, then 'Resume'***
 
-![Pause command](/img/api/commands/pause/next-then-resume-shows-our-test-has-ended.png)
+![Pause command](/img/api/pause/next-then-resume-shows-our-test-has-ended.png)
 
 # See also
 

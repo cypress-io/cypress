@@ -4,7 +4,7 @@ comments: false
 containerClass: examples
 ---
 
-{% fa fa-github %} {% url "https://github.com/cypress-io/cypress-example-kitchensink" https://github.com/cypress-io/cypress-example-kitchensink %}
+{% fa fa-github %} {% url  https://github.com/cypress-io/cypress-example-kitchensink %}
 
 ## Overview
 

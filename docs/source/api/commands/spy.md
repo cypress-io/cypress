@@ -5,6 +5,10 @@ comments: false
 
 Wrap a method in a spy in order to record calls to and arguments of the function.
 
+{% note info %}
+**Note:** `.spy()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-and-clocks %}
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -55,7 +59,7 @@ expect(util.addListeners).to.be.called
 **Using `cy.spy()`**
 
 {% note info %}
-{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Alias a spy
@@ -89,7 +93,7 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 
 **Assertion Support**
 
-Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" available-assertions#Sinon-Chai %} can be used without any configuration.
+Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" assertions#Sinon-Chai %} can be used without any configuration.
 
 # Command Log
 
@@ -106,16 +110,16 @@ expect(spy).to.be.called
 
 The command above will display in the command log as:
 
-![Command Log spy](/img/api/commands/spy/spying-shows-any-aliases-and-also-any-assertions-made.png)
+![Command Log spy](/img/api/spy/spying-shows-any-aliases-and-also-any-assertions-made.png)
 
 When clicking on the `spy-1` event within the command log, the console outputs the following:
 
-![Command Log](/img/api/commands/spy/console-shows-spy-arguments-calls-and-the-object-being-spied.png)
+![Command Log](/img/api/spy/console-shows-spy-arguments-calls-and-the-object-being-spied.png)
 
 # See also
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}
 - {% url `cy.stub()` stub %}

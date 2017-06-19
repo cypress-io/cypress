@@ -318,11 +318,11 @@ cy.get('h1').contains('New User')
 
 The commands above will display in the command log as:
 
-![Command Log contains](/img/api/commands/contains/find-el-that-contains-text.png)
+![Command Log contains](/img/api/contains/find-el-that-contains-text.png)
 
 When clicking on the `contains` command within the command log, the console outputs the following:
 
-![console.log contains](/img/api/commands/contains/see-elements-found-from-contains-in-console.png)
+![console.log contains](/img/api/contains/see-elements-found-from-contains-in-console.png)
 
 # See also
 

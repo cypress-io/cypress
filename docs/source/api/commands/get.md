@@ -3,7 +3,7 @@ title: get
 comments: false
 ---
 
-Get one or more DOM elements by selector or {% url 'alias' aliases %}.
+Get one or more DOM elements by selector or {% url 'alias' aliases-and-references %}.
 
 # Syntax
 
@@ -37,7 +37,7 @@ An alias as defined using the {% url `.as()` as %} command and referenced with t
 Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before {% url `.as()` as %} to find it again.
 
 {% note info %}
-{% url 'Read more about aliases here' aliases %}
+{% url 'Read more about aliases here' aliases-and-references %}
 {% endnote %}
 
 **{% fa fa-angle-right %} options** ***(Object)***
@@ -94,7 +94,7 @@ cy.get('form').within(function(){
 
 ## Alias
 
-For a detailed explanation of aliasing, {% url 'read more about aliasing here' aliases %}.
+For a detailed explanation of aliasing, {% url 'read more about aliasing here' aliases-and-references %}.
 
 **Get the aliased 'todos' elements**
 
@@ -129,11 +129,11 @@ cy.get('input[name="firstName"]').should('have.value', 'Homer')
 
 The commands above will display in the command log as:
 
-![Command Log get](/img/api/commands/get/get-element-and-make-an-assertion.png)
+![Command Log get](/img/api/get/get-element-and-make-an-assertion.png)
 
 When clicking on the `get` command within the command log, the console outputs the following:
 
-![Console Log get](/img/api/commands/get/console-log-get-command-and-elements-found.png)
+![Console Log get](/img/api/get/console-log-get-command-and-elements-found.png)
 
 # See also
 

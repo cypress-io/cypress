@@ -3,7 +3,7 @@ title: Cypress.minimatch
 comments: false
 ---
 
-Cypress automatically proxies {% url "minimatch" bundled-tools#Other-Library-Utilities %} and exposes it as `Cypress.minimatch`.
+Cypress automatically includes {% url "minimatch" https://github.com/isaacs/minimatch %} and exposes it as `Cypress.minimatch`.
 
 Use `Cypress.minimatch` to test out glob patterns against strings.
 
@@ -49,7 +49,7 @@ Cypress.minimatch("/users/1/comments/2", "/users/*/comments", {
 })
 ```
 
-We're adding the `{matchBase: true}` option because under the hood Cypress actually uses that option by default.
+We're adding the `{ matchBase: true }` option because under the hood Cypress actually uses that option by default.
 
 Now let's test out `**` support.
 

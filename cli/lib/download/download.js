@@ -25,7 +25,8 @@ const getOs = () => {
     case 'darwin': return 'mac'
     case 'linux': return 'linux64'
     case 'win32': return 'win'
-    default: throw new Error(`Platform: '${platform}' is not supported.`)
+    // TODO handle this error using our standard
+    default: throw new Error(`Platform: "${platform}" is not supported.`)
   }
 }
 

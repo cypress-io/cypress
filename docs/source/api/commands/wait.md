@@ -38,7 +38,7 @@ The amount of time to wait in milliseconds.
 An aliased route as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
 
 {% note info %}
-{% url 'Read about using aliases here.' aliases %}
+{% url 'Read about using aliases here.' aliases-and-references %}
 {% endnote %}
 
 **{% fa fa-angle-right %} aliases** ***(Array)***
@@ -205,13 +205,13 @@ The first period waits for a matching request to leave the browser. This duratio
 
 This means that when you begin waiting for an aliased XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
 
-![Error for no matching XHR](/img/api/commands/wait/error-for-no-matching-route-when-waiting-in-test.png)
+![Error for no matching XHR](/img/api/wait/error-for-no-matching-route-when-waiting-in-test.png)
 
 Once Cypress detects that a matching XHR has begun its request, it then switches over to the 2nd waiting period. This duration is configured by {% url `responseTimeout` configuration#Timeouts %} - which has a default of `20000` ms.
 
 This means Cypress will now wait up to 20 seconds for the external server to respond to this XHR. If no response is detected, you will get an error message that looks like this:
 
-![Timeout error for XHR wait](/img/api/commands/wait/timeout-error-when-waiting-for-route-response.png)
+![Timeout error for XHR wait](/img/api/wait/timeout-error-when-waiting-for-route-response.png)
 
 This gives you the best of both worlds - a fast error feedback loop when requests never go out and a much longer duration for the actual external response.
 
@@ -228,11 +228,11 @@ cy.wait('@userPut').its('url').should('include', 'users')
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/wait/command-log-when-waiting-for-aliased-route.png)
+![Command Log](/img/api/wait/command-log-when-waiting-for-aliased-route.png)
 
 When clicking on `wait` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/wait/wait-console-log-displays-all-the-data-of-the-route-request-and-response.png)
+![Console Log](/img/api/wait/wait-console-log-displays-all-the-data-of-the-route-request-and-response.png)
 
 # See also
 

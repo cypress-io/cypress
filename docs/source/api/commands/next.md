@@ -101,11 +101,11 @@ cy.get('.left-nav').find('li.active').next()
 
 The commands above will display in the command log as:
 
-![Command Log next](/img/api/commands/next/find-next-element-when-testing-dom.png)
+![Command Log next](/img/api/next/find-next-element-when-testing-dom.png)
 
 When clicking on `next` within the command log, the console outputs the following:
 
-![Console log next](/img/api/commands/next/elements-next-command-applied-to.png)
+![Console log next](/img/api/next/elements-next-command-applied-to.png)
 
 # See also
 

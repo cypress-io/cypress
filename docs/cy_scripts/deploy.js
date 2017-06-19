@@ -10,6 +10,7 @@ const Promise    = require('bluebird')
 const inquirer   = require('inquirer')
 const awspublish = require('gulp-awspublish')
 const parallelize = require('concurrent-transform')
+const scrape     = require('./scrape')
 
 const distDir = path.resolve('public')
 
@@ -126,7 +127,7 @@ function commitMessage (env, branch) {
 
   console.log(
     '\n',
-    'Commiting and pushing to remote origin:',
+    'Committing and pushing to remote origin:',
     '\n',
     chalk.green(`(${branch})`),
     chalk.cyan(msg)
@@ -140,6 +141,41 @@ function commitMessage (env, branch) {
     // and push it to the origin with the current branch
     return repo.remote_pushAsync("origin", branch)
   })
+}
+
+function scrapeDocs (env, branch) {
+  console.log('')
+
+  // if we aren't on master do nothing
+  if (branch !== 'master') {
+    console.log('Skipping doc scraping because you are not on branch:', chalk.cyan('master'))
+
+    return
+  }
+
+  // if we arent deploying to production return
+  if (env !== 'production') {
+    console.log('Skipping doc scraping because you deployed to:', chalk.cyan('production'))
+
+    return
+  }
+
+  return prompt({
+    type: 'list',
+    name: 'scrape',
+    message: 'Would you like to scrape the docs? (You only need to do this if they have changed on this deployment)',
+    choices: [
+      { name: 'Yes', value: true },
+      { name: 'No',  value: false },
+    ],
+  })
+  .get('scrape')
+  .then((bool) => {
+    if (bool) {
+      return scrape()
+    }
+  })
+
 }
 
 getS3Credentials()
@@ -168,6 +204,9 @@ getS3Credentials()
     return uploadToS3(env)
     .then(() => {
       return commitMessage(env, branch)
+    })
+    .then(() => {
+      return scrapeDocs(env, branch)
     })
   })
 })

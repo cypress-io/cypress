@@ -78,11 +78,11 @@ cy.get('form').find('input').first()
 
 The commands above will display in the command log as:
 
-![Command Log first](/img/api/commands/first/get-the-first-in-list-of-elements.png)
+![Command Log first](/img/api/first/get-the-first-in-list-of-elements.png)
 
 When clicking on `first` within the command log, the console outputs the following:
 
-![console.log first](/img/api/commands/first/console-log-the-first-element.png)
+![console.log first](/img/api/first/console-log-the-first-element.png)
 
 # See also
 

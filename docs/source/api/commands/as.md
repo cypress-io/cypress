@@ -6,7 +6,7 @@ comments: false
 Assign an alias for later use. Reference the alias later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command with a `@` prefix.
 
 {% note info %}
-**Note:** `.as()` assumes you are already familiar with core concepts such as {% url 'aliases' aliases %}
+**Note:** `.as()` assumes you are already familiar with core concepts such as {% url 'aliases' aliases-and-references %}
 {% endnote %}
 
 # Syntax
@@ -88,10 +88,10 @@ cy.route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
 
 Aliases of routes display in the routes instrument panel:
 
-![Command log for route](/img/api/commands/as/routes-table-in-command-log.png)
+![Command log for route](/img/api/as/routes-table-in-command-log.png)
 
 # See also
 
 - {% url `cy.get()` get %}
-- {% url 'Aliases' aliases %}
+- {% url 'Aliases' aliases-and-references %}
 - {% url `cy.wait()` wait %}

@@ -4,7 +4,7 @@ comments: false
 containerClass: examples
 ---
 
-{% fa fa-github %} {% url "https://github.com/cypress-io/cypress-example-piechopper" https://github.com/cypress-io/cypress-example-piechopper %}
+{% fa fa-github %} {% url  https://github.com/cypress-io/cypress-example-piechopper %}
 
 ## Overview
 

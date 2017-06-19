@@ -81,11 +81,11 @@ cy.get('li.active').parents('.nav')
 cy.get('li.active').parents()
 ```
 
-![Command Log parents](/img/api/commands/parents/get-all-parents-of-a-dom-element.png)
+![Command Log parents](/img/api/parents/get-all-parents-of-a-dom-element.png)
 
 When clicking on the `parents` command within the command log, the console outputs the following:
 
-![Console Log parents](/img/api/commands/parents/parents-elements-displayed-in-devtools-console.png)
+![Console Log parents](/img/api/parents/parents-elements-displayed-in-devtools-console.png)
 
 # See also
 

@@ -6,37 +6,33 @@ guides:
     testing-your-app: testing-your-app.html
     # next-steps: next-steps.html
   core-concepts:
-    cypress-in-a-nutshell: cypress-in-a-nutshell.html
-    organizing-tests: organizing-tests.html
-    overview-of-the-gui-tool: overview-of-the-gui-tool.html
-    aliases: aliases.html
-    dead-simple-debugging: dead-simple-debugging.html
-    stubs-spies-clocks: stubs-spies-clocks.html
+    introduction-to-cypress: introduction-to-cypress.html
+    writing-and-organizing-tests: writing-and-organizing-tests.html
+    overview-of-the-gui: overview-of-the-gui.html
+    aliases-and-references: aliases-and-references.html
+    screenshots-and-videos: screenshots-and-videos.html
+    launching-browsers: launching-browsers.html
+  guides:
+    command-line: command-line.html
+    debugging: debugging.html
     network-requests: network-requests.html
-    taking-screenshots-and-recording-videos: taking-screenshots-and-recording-videos.html
-  integrating-cypress:
-    cli-tool: cli-tool.html
     continuous-integration: continuous-integration.html
     environment-variables: environment-variables.html
+    stubs-spies-and-clocks: stubs-spies-and-clocks.html
+    web-security: web-security.html
     reporters: reporters.html
-    browser-management: browser-management.html
-    dashboard-features: dashboard-features.html
-    dashboard-projects: dashboard-projects.html
-    dashboard-runs: dashboard-recorded-runs.html
-    dashboard-organizations: dashboard-organizations.html
-  advanced-cypress:
+  # advanced-cypress:
     # the-cypress-workflow: the-cypress-workflow.html
     # coming-from-selenium: coming-from-selenium.html
     # custom-commands: custom-commands.html
-    web-security: web-security.html
     # how-cypress-really-works: how-cypress-really-works.html
     # talking-to-your-backend: talking-to-your-backend.html
     # spawning-processes: spawning-processes.html
-  appendices:
+  references:
+    assertions: assertions.html
     configuration: configuration.html
     error-messages: error-messages.html
     bundled-tools: bundled-tools.html
-    available-assertions: available-assertions.html
     # creating-fixtures: creating-fixtures.html
     # best-practices: best-practices.html
     # anti-patterns: anti-patterns.html
@@ -49,7 +45,7 @@ guides:
     # all-videos: all-videos.html
 
 api:
-  welcome:
+  introduction:
     api: api.html
   commands:
     and: and.html
@@ -152,13 +148,20 @@ examples:
     logging-in: logging-in.html
     testing-the-dom: testing-the-dom.html
     working-with-the-backend: working-with-the-backend.html
-    spies-stubs-and-clocks: spies-stubs-and-clocks.html
+    stubs-spies-and-clocks-recipe: stubs-spies-and-clocks.html
     extending-cypress: extending-cypress.html
   applications:
     kitchen-sink: kitchen-sink.html
     todo-mvc: todo-mvc.html
     pie-chopper: pie-chopper.html
     phonecat: phonecat.html
+
+dashboard:
+  overview:
+    features: features.html
+    projects: projects.html
+    runs: runs.html
+    organizations: organizations.html
 
 faq:
   questions:

@@ -5,6 +5,10 @@ comments: false
 
 Replace a function, record its usage and control its behavior.
 
+{% note info %}
+**Note:** `.stub()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-and-clocks %}
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -100,7 +104,7 @@ expect(removeStub).to.be.called
 **Using cy.stub**
 
 {% note info %}
-{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Alias a stub
@@ -121,7 +125,7 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![stubs with aliases](/img/api/commands/stub/stubs-with-aliases-and-error-in-command-log.png)
+![stubs with aliases](/img/api/stub/stubs-with-aliases-and-error-in-command-log.png)
 
 # Notes
 
@@ -152,17 +156,17 @@ expect(stub).to.be.called
 
 The command above will display in the command log as:
 
-![Command Log](/img/api/commands/stub/stub-in-command-log.png)
+![Command Log](/img/api/stub/stub-in-command-log.png)
 
 When clicking on the `(stub-1)` event within the command log, the console outputs the following:
 
-![Command Log](/img/api/commands/stub/inspect-the-stubbed-object-and-any-calls-or-arguments-made.png)
+![Command Log](/img/api/stub/inspect-the-stubbed-object-and-any-calls-or-arguments-made.png)
 
 # See also
 
 - {% url `.as()` as %}
 - {% url `cy.clock()` clock %}
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
-- {% url "Recipe: Unit Test - Stubbing Dependencies" https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies %}
 - {% url `cy.spy()` spy %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}
+- {% url "Recipe: Unit Test - Stubbing Dependencies" unit-testing %}

@@ -141,7 +141,7 @@ cy
 **Using fixtures to bootstrap data**
 
 {% note info %}
-{% url 'Check out our example recipe using cy.fixture to bootstrap data for our application.' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js %}
+{% url 'Check out our example recipe using cy.fixture to bootstrap data for our application.' working-with-the-backend %}
 {% endnote %}
 
 **Using an alias to access a fixture**
@@ -222,6 +222,6 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 # See also
 
 - {% url `cy.readFile()` readfile %}
-- {% url 'Recipe: Bootstrapping App Test Data' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js%}
+- {% url 'Recipe: Bootstrapping App Test Data' working-with-the-backend%}
 - {% url `cy.route()` route %}
 - {% url `.then()` then %}

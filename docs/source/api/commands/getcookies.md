@@ -85,11 +85,11 @@ cy.getCookies().should('have.length', 1).then(function(cookies) {
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/getcookies/get-browser-cookies-and-inspect-all-properties.png)
+![Command Log](/img/api/getcookies/get-browser-cookies-and-inspect-all-properties.png)
 
 When clicking on `getCookies` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/getcookies/test-application-cookies.png)
+![Console Log](/img/api/getcookies/test-application-cookies.png)
 
 # See also
 

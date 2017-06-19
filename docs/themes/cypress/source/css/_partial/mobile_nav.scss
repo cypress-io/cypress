@@ -30,7 +30,7 @@
     }
   }
   #container {
-    transform: translateX(260px);
+    transform: translateX($mobile-nav-width);
     overflow: hidden;
   }
   #mobile-nav-dimmer {
@@ -58,7 +58,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 40px;
+  left: 20px;
   width: 25px;
   height: 20px;
   margin: auto;
@@ -152,7 +152,6 @@
   position: absolute;
   top: 0;
   left: 100%;
-  width: 100%;
   height: 100%;
   background: $black;
   opacity: 0;

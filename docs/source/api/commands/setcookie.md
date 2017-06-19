@@ -86,11 +86,11 @@ cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/setcookie/set-cookie-on-browser-for-testing.png)
+![Command Log](/img/api/setcookie/set-cookie-on-browser-for-testing.png)
 
 When clicking on `setCookie` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/setcookie/see-cookie-properties-expiry-domain-and-others-in-test.png)
+![Console Log](/img/api/setcookie/see-cookie-properties-expiry-domain-and-others-in-test.png)
 
 # See also
 

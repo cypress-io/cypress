@@ -1,6 +1,11 @@
 {
   "name": "cypress-monorepo",
+  "version": "0.19.4",
+  "description": "Cypress.io end to end testing tool",
   "private": true,
+  "engines": {
+    "node": ">=6.5.0"
+  },
   "scripts": {
     "start": "node ./scripts/start.js",
     "watch": "npm run all watch",

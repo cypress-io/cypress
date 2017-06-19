@@ -6,7 +6,7 @@ comments: false
 Move time after overriding a native time function with {% url `cy.clock()` clock %}.
 
 {% note warning %}
-{% url `cy.clock()` clock %} must be called before `cy.tick` in order to override native time functions first.
+{% url `cy.clock()` clock %} must be called before `cy.tick()` in order to override native time functions first.
 {% endnote %}
 
 # Syntax
@@ -72,7 +72,7 @@ cy.get('#header').should('have.text', 'Hello, World')
 **Using `cy.clock()` and `cy.tick()`**
 
 {% note info %}
-{% url "Check out our example recipe testing spying, stubbing and time" https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 # Command Log
@@ -86,16 +86,16 @@ cy.tick(1000)
 
 The command above will display in the command log as:
 
-![Command Log](/img/api/commands/tick/tick-machine-clock-1-second-in-time.png)
+![Command Log](/img/api/tick/tick-machine-clock-1-second-in-time.png)
 
 When clicking on the `tick` command within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/tick/console-shows-same-clock-object-as-clock-command.png)
+![Console Log](/img/api/tick/console-shows-same-clock-object-as-clock-command.png)
 
 # See also
 
 - {% url `cy.clock()` clock %}
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-clocks %}
-- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks %}
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}

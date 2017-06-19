@@ -72,11 +72,11 @@ cy.window()
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/window/window-command-log-for-cypress-tests.png)
+![Command Log](/img/api/window/window-command-log-for-cypress-tests.png)
 
 When clicking on `window` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/window/console-shows-the-applications-window-object-being-tested.png)
+![Console Log](/img/api/window/console-shows-the-applications-window-object-being-tested.png)
 
 # See also
 

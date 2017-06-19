@@ -4,7 +4,7 @@
       {{ menu('main') }}
       <a href="https://github.com/{{ config.github }}" class="main-nav-link" rel="external" target="_blank">GitHub</a>
     </ul>
-    {% if page.layout == 'page' %}
+    {% if page.layout == 'page' || page.layout == 'faq' %}
       {{ doc_sidebar('mobile-nav') }}
     {% endif %}
   </div>

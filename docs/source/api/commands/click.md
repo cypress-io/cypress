@@ -41,7 +41,7 @@ cy.window().click()         // Errors, 'window' does not yield DOM element
 
 The position where the click should be issued. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
-![cypress-command-positions-diagram](/img/api/commands/coordinates-diagram.jpg)
+![cypress-command-positions-diagram](/img/api/coordinates-diagram.jpg)
 
 **{% fa fa-angle-right %} x** ***(Number)***
 
@@ -129,7 +129,7 @@ cy.get('button').click(5, 60, { force: true })
 **Hover and clicking hidden elements**
 
 {% note info %}
-{% url 'Check out our example recipe on testing hover and working with hidden elements.' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements_spec.js %}
+{% url 'Check out our example recipe on testing hover and working with hidden elements.' testing-the-dom %}
 {% endnote %}
 
 **Click all buttons found on the page**
@@ -198,11 +198,11 @@ cy.get('form').find('button').contains('Create User').click()
 
 The commands above will display in the command log as:
 
-![Command log for click](/img/api/commands/click/click-button-in-form-during-test.png)
+![Command log for click](/img/api/click/click-button-in-form-during-test.png)
 
 When clicking on `click` within the command log, the console outputs the following:
 
-![console.log for click](/img/api/commands/click/click-coords-and-events-in-console.png)
+![console.log for click](/img/api/click/click-coords-and-events-in-console.png)
 
 # See also
 

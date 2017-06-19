@@ -3,14 +3,14 @@ title: should
 comments: false
 ---
 
-Make an assertion.
+Create an assertion. Assertions are automatically retried until they pass or time out. Use them to describe the state your app must be in before proceeding.
 
 {% note info %}
 An alias of {% url `.and()` and %}
 {% endnote %}
 
 {% note info %}
-**Note:** `.should()` assumes you are already familiar with core concepts such as {% url 'assertions' cypress-in-a-nutshell#Assertions %}
+**Note:** `.should()` assumes you are already familiar with core concepts such as {% url 'assertions' introduction-to-cypress#Assertions %}
 {% endnote %}
 
 # Syntax
@@ -21,7 +21,6 @@ An alias of {% url `.and()` and %}
 .should(chainers, method, value)
 .should(callbackFn)
 ```
-
 
 ## Usage
 
@@ -40,12 +39,11 @@ cy.contains('Login').should('be.visible')  // Assert that el is visible
 cy.should('eq', '42')   // Errors, cannot be chained off 'cy'
 ```
 
-
 ## Arguments
 
 **{% fa fa-angle-right %} chainers** ***(String)***
 
-Chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
+Any valid chainer that comes from {% url 'Chai' assertions#Chai %} or {% url 'Chai-jQuery' assertions#Chai-jQuery %} or {% url 'Sinon-Chai' assertions#Sinon-Chai %}.
 
 **{% fa fa-angle-right %} value** ***(String)***
 
@@ -281,13 +279,14 @@ cy.get('.left-nav>.nav').children().should('have.length', 8)
 
 The commands above will display in the command log as:
 
-![Command Log should](/img/api/commands/should/should-command-shows-up-as-assert-for-each-assertion.png)
+![Command Log should](/img/api/should/should-command-shows-up-as-assert-for-each-assertion.png)
 
 When clicking on `assert` within the command log, the console outputs the following:
 
-![Console Log should](/img/api/commands/should/assertion-in-console-log-shows-actual-versus-expected-data.png)
+![Console Log should](/img/api/should/assertion-in-console-log-shows-actual-versus-expected-data.png)
 
 # See also
 
 - {% url `.and()` and %}
-- {% url 'Assertions' cypress-in-a-nutshell#Assertions %}
+- {% url 'Guide: Introduction to Cypress' introduction-to-cypress#Assertions %}
+- {% url 'Reference: List of Assertions' assertions %}

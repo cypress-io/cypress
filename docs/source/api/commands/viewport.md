@@ -187,11 +187,11 @@ cy.get('.nav').find('a').should('be.visible')
 
 The commands above will display in the command log as:
 
-![Command Log viewport](/img/api/commands/viewport/viewport-size-width-and-height-changes-and-is-shown-in-the-commands.png)
+![Command Log viewport](/img/api/viewport/viewport-size-width-and-height-changes-and-is-shown-in-the-commands.png)
 
 When clicking on `viewport` within the command log, the console outputs the following:
 
-![Console log viewport](/img/api/commands/viewport/console-log-shows-width-and-height-of-tested-viewport.png)
+![Console log viewport](/img/api/viewport/console-log-shows-width-and-height-of-tested-viewport.png)
 
 # See also
 

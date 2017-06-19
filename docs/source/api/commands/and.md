@@ -3,14 +3,14 @@ title: and
 comments: false
 ---
 
-Make an assertion.
+Create an assertion. Assertions are automatically retried until they pass or time out. Use them to describe the state your app must be in before proceeding.
 
 {% note info %}
 An alias of {% url `.should()` should %}
 {% endnote %}
 
 {% note info %}
-**Note:** `.and()` assumes you are already familiar with core concepts such as {% url 'assertions' cypress-in-a-nutshell#Assertions %}
+**Note:** `.and()` assumes you are already familiar with core concepts such as {% url 'assertions' introduction-to-cypress#Assertions %}
 {% endnote %}
 
 # Syntax
@@ -29,7 +29,7 @@ An alias of {% url `.should()` should %}
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty & hidden
+cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty and hidden
 cy.contains('Login').and('be.visible')               // Assert el is visible
 ```
 
@@ -43,7 +43,7 @@ cy.and('eq', '42')   // Errors, cannot be chained off 'cy'
 
 **{% fa fa-angle-right %} chainers** ***(String)***
 
-Chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %}
+Any valid chainer that comes from {% url 'Chai' assertions#Chai %} or {% url 'Chai-jQuery' assertions#Chai-jQuery %} or {% url 'Sinon-Chai' assertions#Sinon-Chai %}.
 
 **{% fa fa-angle-right %} value** ***(String)***
 
@@ -236,13 +236,14 @@ cy
 
 The commands above will display in the command log as:
 
-![Command log for assertions](/img/api/commands/and/cypress-and-command-log.png)
+![Command log for assertions](/img/api/and/cypress-and-command-log.png)
 
 When clicking on `assert` within the command log, the console outputs the following:
 
-![console.log for assertions](/img/api/commands/and/cypress-assertions-console-log.png)
+![console.log for assertions](/img/api/and/cypress-assertions-console-log.png)
 
 # See also
 
-- {% url 'Assertions' cypress-in-a-nutshell#Assertions %}
 - {% url `.should()` should %}
+- {% url 'Guide: Introduction to Cypress' introduction-to-cypress#Assertions %}
+- {% url 'Reference: List of Assertions' assertions %}

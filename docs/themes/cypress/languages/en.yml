@@ -3,6 +3,7 @@ menu:
   api: API
   faq: FAQ
   examples: Examples
+  dashboard: Dashboard
   search: Search
 
 index:
@@ -25,24 +26,20 @@ sidebar:
     testing-your-app: Testing Your App
     next-steps: Next Steps
     core-concepts: Core Concepts
-    cypress-in-a-nutshell: Cypress in a Nutshell
-    organizing-tests: Organizing Tests
-    overview-of-the-gui-tool: Overview of the GUI Tool
-    dead-simple-debugging: Dead Simple Debugging
-    aliases: Aliases&#58; Variables in an Async World
-    stubs-spies-clocks: Stubs, Spies, and Clocks
+    introduction-to-cypress: Introduction to Cypress
+    writing-and-organizing-tests: Writing and Organizing Tests
+    overview-of-the-gui: Overview of the GUI
+    debugging: Debugging
+    aliases-and-references: Aliases and References
+    stubs-spies-and-clocks: Stubs, Spies, and Clocks
     network-requests: Network Requests
-    taking-screenshots-and-recording-videos: Taking Screenshots and Recording Videos
-    integrating-cypress: Integration
-    cli-tool: CLI Tool
+    screenshots-and-videos: Screenshots and Videos
+    guides: Guides
+    command-line: Command Line
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
     reporters: Reporters
-    browser-management: Browser Management
-    dashboard-features: The Cypress Dashboard
-    dashboard-projects: Dashboard&#58; Projects
-    dashboard-runs: Dashboard&#58; Recorded Runs
-    dashboard-organizations: Dashboard&#58; Organizations
+    launching-browsers: Launching Browsers
     advanced-cypress: Advanced
     the-cypress-workflow: The Cypress Workflow
     coming-from-selenium: Coming from Selenium?
@@ -51,11 +48,11 @@ sidebar:
     how-cypress-really-works: How Cypress Really Works
     talking-to-your-backend: Talking to Your Backend
     spawning-processes: Spawning Processes
-    appendices: Appendices
+    references: References
     configuration: Configuration
     error-messages: Error Messages
     bundled-tools: Bundled Tools
-    available-assertions: Available Assertions
+    assertions: Assertions
     creating-fixtures: Creating Fixtures
     best-practices: Best Practices
     anti-patterns: Anti-patterns
@@ -67,8 +64,8 @@ sidebar:
     cypress-api-design: API Design
     all-videos: Videos
   api:
-    welcome: Welcome
-    api: api
+    introduction: Introduction
+    api: API
     commands: Commands
     and: and
     as: as
@@ -169,13 +166,19 @@ sidebar:
     logging-in: Logging In
     testing-the-dom: Testing the DOM
     working-with-the-backend: Working with the Backend
-    spies-stubs-and-clocks: Spies, Stubs, and Clocks
+    stubs-spies-and-clocks-recipe: Spies, Stubs, and Clocks
     extending-cypress: Extending Cypress
     applications: Applications
     kitchen-sink: Kitchen Sink
     todo-mvc: TodoMVC
     pie-chopper: PieChopper
     phonecat: Phonecat
+  dashboard:
+    overview: Dashboard
+    features: Features
+    projects: Projects
+    runs: Recorded Runs
+    organizations: Organizations
   faq:
     questions: FAQ
     general-questions: General Questions

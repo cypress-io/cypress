@@ -72,7 +72,7 @@ cy.getCookie('session_id')
 **Using `cy.getCookie()` to test logging in**
 
 {% note info %}
-Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js %}, {% url 'logging in using XHR web forms' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js %} and {% url 'logging in with single sign on' https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js %}
+Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in %}, {% url 'logging in using XHR web forms' logging-in %} and {% url 'logging in with single sign on' logging-in %}
 {% endnote %}
 
 # Command Log
@@ -85,11 +85,11 @@ cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/getcookie/get-browser-cookie-and-make-assertions-about-object.png)
+![Command Log](/img/api/getcookie/get-browser-cookie-and-make-assertions-about-object.png)
 
 When clicking on `getCookie` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/getcookie/inspect-cookie-object-properties-in-console.png)
+![Console Log](/img/api/getcookie/inspect-cookie-object-properties-in-console.png)
 
 # See also
 

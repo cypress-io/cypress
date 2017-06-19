@@ -68,11 +68,11 @@ cy.wrap({ amount: 10 })
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/wrap/wrapped-object-in-cypress-tests.png)
+![Command Log](/img/api/wrap/wrapped-object-in-cypress-tests.png)
 
 When clicking on the `wrap` command within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/wrap/console-log-only-shows-yield-of-wrap.png)
+![Console Log](/img/api/wrap/console-log-only-shows-yield-of-wrap.png)
 
 # See also
 

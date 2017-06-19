@@ -440,6 +440,7 @@
   line-height: 1em;
   padding-top: 2em;
   position: relative;
+  overflow: auto;
 
   &:before {
     content: "";
@@ -458,7 +459,10 @@
   text-decoration: none;
   font-weight: 400;
   font-family: $font-title;
-  position: absolute;
+  left: auto;
+  display: inline-block;
+  width: 50%;
+  border-bottom: 0 !important;
 
   &:hover {
     color: $color-link-hover;
@@ -474,11 +478,13 @@
 }
 
 .article-footer-prev {
-  left: 0;
+  text-align: left;
+  float: left;
 }
 
 .article-footer-next {
-  right: 0;
+  text-align: right;
+  float: right;
 }
 
 .article-footer-updated {
@@ -522,7 +528,7 @@
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 1.9em;
+  font-size: 2.1em;
   font-weight: bold;
   text-decoration: none;
   color: $color-default;

@@ -96,11 +96,11 @@ cy
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/go/test-showing-go-back-browser-button.png)
+![Command Log](/img/api/go/test-showing-go-back-browser-button.png)
 
 When clicking on the `go` command within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/go/window-is-logged-when-go-back-in-browser-history.png)
+![Console Log](/img/api/go/window-is-logged-when-go-back-in-browser-history.png)
 
 # See also
 

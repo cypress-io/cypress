@@ -98,11 +98,11 @@ cy
 
 The commands above will display in the command log as:
 
-![Command Log](/img/api/commands/uncheck/test-unchecking-a-checkbox.png)
+![Command Log](/img/api/uncheck/test-unchecking-a-checkbox.png)
 
 When clicking on `uncheck` within the command log, the console outputs the following:
 
-![Console Log](/img/api/commands/uncheck/console-shows-events-from-clicking-the-checkbox.png)
+![Console Log](/img/api/uncheck/console-shows-events-from-clicking-the-checkbox.png)
 
 # See also
 
