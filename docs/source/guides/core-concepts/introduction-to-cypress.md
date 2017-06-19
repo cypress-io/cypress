@@ -59,11 +59,11 @@ This is a relatively simple, straightforward test, but consider how much code ha
 
 For the remainder of this guide, we'll explore the basics of Cypress that make this example work. We'll demystify the rules Cypress follows so you can productively test your application to act as much like a user as possible, as well as discuss how to take shortcuts when it's useful.
 
-# Finding Elements
+# Querying Elements
 
 ## Cypress is Like jQuery
 
-If you've used {% url 'jQuery' https://jquery.com/ %} before, you may be used to looking up elements like this:
+If you've used {% url 'jQuery' https://jquery.com/ %} before, you may be used to querying for elements like this:
 
 ```js
 $('.my-selector')
@@ -166,7 +166,7 @@ Cypress wraps all DOM queries with robust retry-and-timeout logic that better su
 In Cypress, when you want to interact with a DOM element directly, call {% url `.then()` then %} and pass a callback function to it that will receive the element as it's first argument. When you need to skip the retry-and-timeout functionality entirely and perform a traditional, synchronous query, you can still use {% url `Cypress.$` $ %}.
 {% endnote %}
 
-## Finding Elements by Their Contents
+## Querying by Text Content
 
 Another way to locate things -- a more human way -- is to look them up by their contents, by what the user would see on the page. For this, there's the handy {% url `cy.contains()` contains %}, for example:
 
@@ -184,7 +184,7 @@ This is helpful when writing tests from the perspective of a user interacting wi
 If your app is translated into multiple languages, make sure you consider the implications of using user-facing text to find DOM elements!
 {% endnote %}
 
-## What If An Element Is Not Found?
+## When Elements Are Missing
 
 As we showed above, Cypress anticipates the asynchronous nature of web applications and doesn't fail immediately when the first time an element is not found. Instead, Cypress gives your app a window of time to finish whatever it may be doing!
 
@@ -245,7 +245,7 @@ This also helps prevent flake when interacting with your application in tests. Y
 Cypress exposes common user interactions as commands, making it simple to encapsulate the behaviors you're looking to create. It also expects these commands to be acting on an element that can be interacted with.
 {% endnote %}
 
-## Asserting Things About Elements
+## Asserting About Elements
 
 Assertions let you do things like ensuring an element is visible or has a particular attribute, CSS class, or child. Assertions are just commands that enable you to describe the **desired** state of your application. Cypress will automatically wait until your elements reach this state, or halt the test if the assertions don't pass.  Here's a quick look at assertions in action:
 
@@ -261,7 +261,7 @@ In each of these examples, its important to note that Cypress will automatically
 
 We'll learn more about assertions later in this guide.
 
-## Subjects
+## Subject Management
 
 A new Cypress chain always starts with `cy.[command]`, where what is yielded by the `command` establishes what other commands can be called next (chained).
 
@@ -587,7 +587,7 @@ Cypress anticipates the chaos of modern web development and {% url 'visualizes i
 
 As such, it may help to relax your test-obsessed mind and take a leisurely drive through your application: visit some pages, click some links, type into some fields, submit a form, and call it a day. You can rest assured that _so many things must be working_ in order for you to be able to navigate from Page A to Page Z without error. If anything is fishy, Cypress will tell you about it... with laser focus!
 
-## What Assertions Are Available?
+## List of Assertions
 
 Cypress wraps `Chai`, `Chai-jQuery`, and `Sinon-Chai` to provide the built-in assertions. You can learn more in {% url 'the list of assertions reference' assertions %}. You can also write your own assertions as Chai plugins and use them in Cypress.
 
@@ -603,7 +603,7 @@ Cypress bundles {% url 'popular assertion libraries' assertions %} for you, and 
 
 {% endnote %}
 
-## Implicit Subjects with {% url `.should()` should %} or {% url `.and()` and %}
+## Implicit Subjects
 
 Using {% url `.should()` should %} or {% url `.and()` and %} commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
 
@@ -643,7 +643,7 @@ cy.get('tbody tr:first').should(function($tr) {
 
 The implicit form is much shorter! So when would you want to use the explicit form?
 
-## Explicit Subjects with `expect`
+## Explicit Subjects
 
 Using `expect` allows you to pass in a specific subject and make an assertion about it. This is probably how you're used to seeing assertions written as it is very common in unit tests:
 
