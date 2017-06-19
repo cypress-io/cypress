@@ -1,5 +1,8 @@
+## clean out build
+rm -rf build
+
 ## copy over binary
-mkdir -p build/bin || true
+mkdir -p build/bin
 cp bin/cypress build/bin/cypress
 
 ## copy readme
