@@ -445,8 +445,86 @@ Big difference! The Promise demonstration is not real code (so don't try it), bu
 Normal assertions would fail instantly and you'd get inconsistent (flaky) results. By embracing Cypress's API you can rest assured that we're doing everything in our power to prevent flake.
 
 {% note success Core Concept %}
-Cypress is built using Promises internally, but the developer testing with Cypress should not have need for their own Promises in tests the vast majority of the time.
+Cypress is built using Promises internally (with Bluebird), but you (the developer testing with Cypress) should not have to wrap or reach for your own custom Promises the vast majority of the time.
+{% endnote %}
 
+## Commands Are Not Promises
+
+The Cypress API is not an exact 1:1 implementation of Promises. They have Promise like qualities and yet there are important differences you should be aware of.
+
+1. You cannot **race** or run multiple commands at the same time (in parallel)
+2. You cannot 'accidentally' forget to return or chain a command
+3. You cannot add a `.catch` error handler to a failed command
+
+There are *very* specific reasons these limitations are built into the Cypress API (it's not like we just forgot to implement those features).
+
+The whole point of Cypress (and what makes it very different from other tools) is to create consistent, non-flaky tests that perform identically from one run to next. Making this happen isn't free - there are some trade-offs we must make that may initially seem unfamiliar to developers accustom to working with Promises.
+
+Let's take a look at each one in depth:
+
+***You cannot race or run multiple commands at the same time***
+
+Cypress gives us **guarantee** that it will execute all of its commands **deterministically** and identically the same way every single time.
+
+Most Cypress commands *mutate* the state of the browser in some way.
+
+- {% url `cy.request()` request %} automatically gets + sets cookies to and from the remote server
+- {% url `cy.clearCookies()` clearcookies %} will clear all of the browser cookies
+- {% url `.click()` click %} will cause your application to react to click events
+
+None of the above commands are **idempotent**, they all cause side effects. It makes no sense to race commands because commands must be run in a controlled, serial manner in order to create consistency. Because integration and e2e tests primarily represent the actions of a real user, Cypress models its command execution model after a real user working step by step.
+
+***You cannot accidentally forget to return or chain a command***
+
+In real promises it's very easy to 'lose' a nested Promise if you don't return it and chain it correctly.
+
+Let's imagine the following `node.js` code
+
+```js
+// assuming we've promisified our fs module
+return fs.readFile('/foo.txt', 'utf8')
+.then((txt) => {
+  // oops we forgot to chain / return this Promise
+  // so it essentially becomes 'untrackable and lost'.
+  // this can create bizarre race conditions and
+  // bugs that are incredibly difficult to track down
+  fs.writeFile('/foo.txt', txt.replace("foo", "bar"))
+
+  return fs.readFile("/bar.json")
+  .then((json) => {
+    ...
+  })
+})
+```
+
+The reason this is even possible to do in the Promise world is because you have the power to execute multiple asynchronous actions in parallel.
+
+Under the hood, each promise 'chain' returns a promise instance which tracks the relationship between linked parent and child instances.
+
+Because Cypress enforces commands to run *only* serially, this concern does not exist in Cypress. Instead we enqueue all commands onto a **global** singleton. Because there is only ever a single command queue instance, its impossible for commands to ever be *untracked or lost*.
+
+You can simply think of Cypress as "queueing" every command you issue. Eventually they'll get run and in the exact order they were called, 100% of the time.
+
+There is no need to ever `return` Cypress commands.
+
+***You cannot add a `.catch` error handler to a failed command***
+
+In Cypress there **is no error recovery from a failed command**. A command and its assertions all **eventually** pass, or if one fails, all remaining commands are not run, and the test fails.
+
+We are regularly asked:
+
+> How do I create control flow (if / else) where if an element does (or doesn't) exist, I do something different?
+
+While that may seem like a reasonable question, it's actually completely non-deterministic and it's impossible for a script (or robot) to follow this logic 100% consistently.
+
+In general, there are only a handful of very specific situations where you **can** create control flow.
+
+Asking to recover from errors is actually just asking for another `if/else` control flow.
+
+With that said, as long as you are aware of the potential pit falls with control flow, it is possible to do this in Cypress!
+
+{% note info %}
+We are working on a new guide to better explain what we mean. We'll provide specific examples where you **can** create deterministic control flow without slowing down your tests or recovering from errors. Sit tight, details to come!
 {% endnote %}
 
 # Assertions
