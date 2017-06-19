@@ -14,6 +14,25 @@ comments: false
 
 We covered Cypress in a tutorial app, now let's integrate it into your *real* app!
 
+# Adding Your Project
+
+After successfully logging in, you will need to add the project(s) you want to write Cypress tests in.
+
+- Click {% fa fa-plus %} Add Project.
+
+![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
+
+{% note info %}
+Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are {% url "setup to be recorded" projects#Set-up-a-Project-to-Record %}.
+{% endnote %}
+
+**To run tests:**
+
+- Click on the project.
+- You will then come to a page listing all files in your project's `cypress/integration` folder. If it's a new project, you'll see a message about the folder structure generated for you and also an `example_spec.js` file.
+- Click on the test file you want to run or click "Run All Tests".
+
+<!--
 # Add Cypress to Your App
 
 Add Cypress to your app as we did before with `npm`:
@@ -38,7 +57,7 @@ Now you can run Cypress from the command line by typing `npm run test-cypress`, 
 
 {% note info Which Project To Install To? %}
 Does your application have multiple project repositories? Many modern applications do! Cypress should be installed with your *front-end project*, wherever you serve the front-end files for development.
-{% endnote %}
+{% endnote %} -->
 
 # Visit Your Development URL
 
@@ -146,6 +165,25 @@ One final strategy that Cypress enables is complete isolation from your server v
 Cypress anticipates these kinds of projects and enables network stubbing via the {% url "`cy.server()`" server %} and {% url "`cy.route()`" route %} commands. You can declare the API calls you expect your application to make, then capture them before they hit the network and provide your own custom responses.
 
 Since it skips the network and all of the code on the server, _this is fast_. It's also easier to maintain, as your tests can live with your front-end project and never need to coordinate spinning up a development server for another project. {% url "Continuous Integration" continuous-integration %} is simpler because it doesn't need to package up the API server project. All of the login logic is simplified because it is no longer coordinating with the back-end, but rather reacting to canned responses.
+
+# Running Headlessly
+
+While you'll find yourself working primarily in the GUI, it is helpful to be able to run your tests headlessly.
+
+Once you have the {% url "Cypress CLI Tool installed" command-line#cypress-install %}, you can simply execute:
+
+```shell
+cypress run
+```
+
+Additionally you can specify:
+
+- A single test file to run.
+- {% url "A specific reporter and reporter options" reporters %}
+- A different port to run tests from.
+- Environment variables
+
+You can {% url "read about all of these options" command-line#cypress-run %} which are documented on the CLI tool.
 
 # Get Started!
 
