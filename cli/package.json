@@ -16,7 +16,8 @@
     "lint": "$(bin-up eslint) --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prebuild": "./scripts/build.sh",
     "build": "node ./scripts/build.js",
-    "release": "cd build && releaser",
+    "prerelease": "npm run build",
+    "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
   "dependencies": {
@@ -38,11 +39,11 @@
     "request-progress": "^0.3.1",
     "tmp": "0.0.31",
     "url": "^0.11.0",
-    "xvfb": "cypress-io/node-xvfb",
+    "xvfb": "cypress-io/node-xvfb#22e3783c31d81ebe64d8c0df491ea00cdc74726a",
     "yauzl": "^2.8.0"
   },
   "devDependencies": {
-    "@cypress/releaser": "^0.1.12",
+    "@cypress/releaser": "^0.2.1",
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
     "bin-up": "^1.0.1",
