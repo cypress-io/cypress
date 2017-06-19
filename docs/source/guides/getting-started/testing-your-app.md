@@ -160,16 +160,30 @@ it('sets auth cookie when logging in via cy.request()', function(){
 If you need help getting started with this, open the dev tools, manually do a form submission, and see what the actually gets sent to and received from the server. Now you can see what to extract into a {% url `cy.request()` request %} call, and how to ensure it worked. Keeping your tests fast depends on it!
 
 {% note info Authentication Recipes %}
-Need more guidance about logging in with Cypress? No problem! We've created {% url 'a number of helpful recipes', logging-in %} that explore testing various authentication styles in Cypress.
+Need more guidance about logging in with Cypress? No problem! We've created {% url 'a number of helpful recipes', logging-in %} that explore testing various authentication styles in Cypress, including how to wrap your short-form login logic into a custom Cypress command.
 {% endnote %}
 
 ## Preparing and Cleaning Up Test Data
 
-If you're familiar with server-side unit testing, you're probably used to using fixtures or factories to build up state in the database before each test, and cleaning it up after. You may decide you want this flow for your client-side tests, as well. In that case, you'll need to bridge Cypress to your back-end, and again we'll use {% url "`cy.request()`" request %} for this task.
+If you're familiar with server-side unit testing, you're probably used to using fixtures or factories to build up state in the database before each test, and cleaning it up after. Your team may decide it wants to use the same utilities for client-side tests, as well. In that case, you'll need to bridge Cypress to your back-end, and again we'll use {% url "`cy.request()`" request %} for this task.
 
-You'll want to add some routes to your application that only exist in the `test` environment so that you know they never exist in production. These routes simply take commands about the data you want to test against, bridging over to your fixtures and factories, or your "clear the data store" mechanism.
+Imagine some requests:
+```js
+// invoke the default User factory
+cy.request("POST", "/test/factories/user")
+// invoke the Post factory with custom attributes
+cy.request("POST", "/test/factories/post", { title: 'First Post', authorId: 1, body: "..." })
+// invoke a special route for clearing the database entirely
+cy.request("POST", "/test/clear_database")
+```
 
-You might use this with the login advice above to create a user in the database before you log in, allowing you to skip the signup flow step (particularly useful for skipping email confirmation if you require it before the first login!) It's also easy to imagine building up different quantities of your business objects for testing the {% url "5 states of any user interface element: empty, partial, full, loading, and error." http://scotthurff.com/posts/why-your-user-interface-is-awkward-youre-ignoring-the-ui-stack %}
+We just made these up, but you could implement them on your server rather easily. The idea is to bridge the routes to your fixture or factory names and invoke them. You can make these routes narrow, just calling named, pre-made items (more like fixtures), or broad and dynamic, passing in custom attributes to change or entire objects to create from scratch.
+
+{% note danger Be Careful %}
+Make very sure that these routes only exist in the `test` environment for your app, never in production! Modern frameworks should make this very easy to do in an automated fashion. For good measure, you could also have the special controller or its routes blow up if it ever executes in the `production` environment.
+{% endnote %}
+
+Combine this technique with the login advice above to create a user in the database before you log in, allowing you to skip the signup flow step (particularly useful for skipping email confirmation if you require it before the first login!)
 
 ## Isolation from the Back-end with Network Stubbing
 
