@@ -159,7 +159,7 @@ jobs:
       - run: npm run build
 
       - persist_to_workspace:
-          root: /home/root
+          root: /home/person
           paths:
             - cypress-monorepo
 
@@ -168,9 +168,40 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: /home/root
+          at: /home/person
       - npm run lint
       - npm run all lint
+
+  unit-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /home/person
+      - npm run all test -- --package cli
+      - npm run all test -- --package coffee
+      - npm run all test -- --package desktop-gui
+      - npm run all test -- --package electron
+      - npm run all test -- --package extension
+      - npm run all test -- --package https-proxy
+      - npm run all test -- --package launcher
+      - npm run all test -- --package reporter
+      - npm run all test -- --package runner
+      - npm run all test -- --package socket
+      - npm run all test -- --package static
+
+  sever-unit-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /home/person
+      - npm run all test-unit -- --package server
+
+  sever-integration-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /home/person
+      - npm run all test-integration -- --package server
 
 workflows:
   version: 2
@@ -180,17 +211,13 @@ workflows:
       - lint:
           requires:
             - build
+      - unit-tests:
+          requires:
+            - build
+      - server-unit-tests:
+          requires:
+            - build
 
-      # #
-      # # things to run in the 1st CI container
-      # #
-      # - run:
-      #     name: Running linters
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 0 ]; then
-      #         npm run lint
-      #         npm run all lint
-      #       fi
 
       # - run:
       #     name: Fast unit tests
