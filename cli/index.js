@@ -1,5 +1,6 @@
 const minimist = require('minimist')
 const debug = require('debug')('cypress:cli')
+const _ = require('lodash')
 const args = minimist(process.argv.slice(2))
 
 const reportError = (err) => {
@@ -23,8 +24,11 @@ switch (args.exec) {
       .catch(reportError)
     break
   case 'open':
+    // require('./lib/exec/open').start()
+    _.remove(process.argv, (arg) => arg === '--exec')
     debug('opening Cypress application')
-    require('./lib/exec/open').start()
+    debug('CLI arguments', process.argv)
+    require('./lib/cli').init()
     break
   default:
     // export our node module interface
