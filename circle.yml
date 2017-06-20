@@ -157,23 +157,15 @@ jobs:
       ## now go build all of subpackages
       - run: npm run build
 
+      ## save entire folder as artifact for other jobs to continue
       - save_cache:
           key: cypress-monorepo-v1-{{ .Branch }}
           paths:
             - /home/person/cypress-monorepo
 
-      # - persist_to_workspace:
-      #     root: /home/person/cypress-monorepo
-      #     paths:
-      #       - packages/*/package.json
-      #       - packages/*/lib/
-      #       - packages/*/node_modules/
-
   lint:
     <<: *defaults
     steps:
-      # - attach_workspace:
-      #     at: /home/person
       - restore_cache:
           key: cypress-monorepo-v1-{{ .Branch }}
       - run: npm run lint
@@ -182,8 +174,8 @@ jobs:
   unit-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: /home/person
+      - restore_cache:
+          key: cypress-monorepo-v1-{{ .Branch }}
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package coffee
       - run: npm run all test -- --package desktop-gui
@@ -199,15 +191,15 @@ jobs:
   sever-unit-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: /home/person
+      - restore_cache:
+          key: cypress-monorepo-v1-{{ .Branch }}
       - run: npm run all test-unit -- --package server
 
   sever-integration-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: /home/person
+      - restore_cache:
+          key: cypress-monorepo-v1-{{ .Branch }}
       - run: npm run all test-integration -- --package server
 
 workflows:
@@ -218,15 +210,15 @@ workflows:
       - lint:
           requires:
             - build
-      # - unit-tests:
-      #     requires:
-      #       - build
-      # - server-unit-tests:
-      #     requires:
-      #       - build
-      # - server-integration-tests:
-      #     requires:
-      #       - build
+      - unit-tests:
+          requires:
+            - build
+      - server-unit-tests:
+          requires:
+            - build
+      - server-integration-tests:
+          requires:
+            - build
 
 
       # - run:
