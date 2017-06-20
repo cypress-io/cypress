@@ -11,7 +11,7 @@ log('register TypeScript project %s fast? %s', project, fast)
 
 require('ts-node').register({
   project,
-  fast
+  fast,
 })
 
 // do we need to prevent any other TypeScript hooks?
