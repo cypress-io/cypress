@@ -157,18 +157,25 @@ jobs:
       ## now go build all of subpackages
       - run: npm run build
 
-      - persist_to_workspace:
-          root: /home/person/cypress-monorepo
+      - save_cache:
+          key: cypress-monorepo-v1-{{ .Branch }}
           paths:
-            - packages/*/package.json
-            - packages/*/lib/
-            - packages/*/node_modules/
+            - /home/person/cypress-monorepo
+
+      # - persist_to_workspace:
+      #     root: /home/person/cypress-monorepo
+      #     paths:
+      #       - packages/*/package.json
+      #       - packages/*/lib/
+      #       - packages/*/node_modules/
 
   lint:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: /home/person
+      # - attach_workspace:
+      #     at: /home/person
+      - restore_cache:
+          key: cypress-monorepo-v1-{{ .Branch }}
       - run: npm run lint
       - run: npm run all lint
 
@@ -211,12 +218,15 @@ workflows:
       - lint:
           requires:
             - build
-      - unit-tests:
-          requires:
-            - build
-      - server-unit-tests:
-          requires:
-            - build
+      # - unit-tests:
+      #     requires:
+      #       - build
+      # - server-unit-tests:
+      #     requires:
+      #       - build
+      # - server-integration-tests:
+      #     requires:
+      #       - build
 
 
       # - run:
