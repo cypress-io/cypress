@@ -73,9 +73,9 @@ class Settings extends Component {
           </tbody>
         </table>
         <pre className='config-vars'>
-          { `{` }
+          { '{' }
           { this._display(config) }
-          { `}` }
+          { '}' }
         </pre>
       </Panel>
     )
@@ -99,7 +99,7 @@ class Settings extends Component {
   }
 
   _getString (val) {
-    return _.isString(val) ? "'" : ""
+    return _.isString(val) ? '\'' : ''
   }
 
   _getComma (hasComma) {
@@ -128,10 +128,10 @@ class Settings extends Component {
         <span className='nested'>
           <span className='key'>{key}</span>
           <span className='colon'>:</span>{' '}
-          { `{` }
+          { '{' }
           { this._display(value) }
         </span>
-        <span className='line'>{`}`}{this._getComma(hasComma)}</span>
+        <span className='line'>{'}'}{this._getComma(hasComma)}</span>
         <br />
       </span>
     )
@@ -160,9 +160,9 @@ class Settings extends Component {
           It identifies your project and should not be changed.
         </p>
         <pre className='line-nums'>
-          <span>{`{`}</span>
+          <span>{'{'}</span>
           <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
-          <span>{`}`}</span>
+          <span>{'}'}</span>
         </pre>
       </Panel>
     )

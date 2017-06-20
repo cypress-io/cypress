@@ -26,7 +26,7 @@ const ErrorMessage = observer(({ error }) => {
 
   return (
     <div className='runs-list-error'>
-      <div className="empty">
+      <div className='empty'>
         <h4>
           <i className='fa fa-warning red'></i>{' '}
           Runs Could Not Be Loaded

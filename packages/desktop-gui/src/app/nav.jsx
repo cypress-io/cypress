@@ -78,7 +78,7 @@ export default class Nav extends Component {
         <ul className='dropdown-menu'>
           <li>
             <a href='#' onClick={this._logout}>
-              <i className="fa fa-sign-out"></i>{' '}
+              <i className='fa fa-sign-out'></i>{' '}
               Log Out
             </a>
           </li>

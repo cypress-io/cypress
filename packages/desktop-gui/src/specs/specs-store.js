@@ -43,7 +43,7 @@ export class SpecsStore {
   }
 
   getFilesSplitByDirectory (specs) {
-    return _.map(specs, (spec) => (spec.name.split("/")))
+    return _.map(specs, (spec) => (spec.name.split('/')))
   }
 
   resetToTreeView (specs) {

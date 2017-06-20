@@ -10,7 +10,7 @@ import specsStore from './specs-store'
 @observer
 class Specs extends Component {
   render () {
-    if (specsStore.isLoading) return <Loader color="#888" scale={0.5}/>
+    if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
     if (!specsStore.specs.length) return this._empty()
 
@@ -100,7 +100,7 @@ class Specs extends Component {
   _empty () {
     return (
       <div id='tests-list-page'>
-        <div className="empty-well">
+        <div className='empty-well'>
           <h5>
             No files found in
             <code onClick={this._openIntegrationFolder.bind(this)}>

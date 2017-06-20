@@ -97,7 +97,7 @@ class Updates extends Component {
   }
 
   _getHtmlState = () => {
-    return { __html: updater.stateFormatted.split('\n').join("<br />") }
+    return { __html: updater.stateFormatted.split('\n').join('<br />') }
   }
 
   _notFinished = () => {
