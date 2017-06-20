@@ -20,7 +20,7 @@ describe('exec open', function () {
     it('calls spawn with correct options', function () {
       return open.start().then(() => {
         expect(spawn.start).to.be.calledWith([], {
-          detached: true,
+          detached: false,
           stdio: ['ignore', 'ignore', 'ignore'],
         })
       })
