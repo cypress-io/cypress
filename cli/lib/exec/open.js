@@ -20,7 +20,7 @@ module.exports = {
     return downloadUtils.verify()
     .then(() => {
       return spawn.start(args, {
-        detached: true,
+        detached: false,
         stdio: ['ignore', 'ignore', 'ignore'],
       })
     })
