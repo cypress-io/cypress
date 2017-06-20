@@ -26,6 +26,8 @@
   {{ css('css/cypress') }}
   <!-- endbuild -->
 
+  {{ partial('error-reporting') }}
+
   <!-- Open Graph http://ogp.me/ -->
   {{ open_graph({
     type: website,
