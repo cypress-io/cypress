@@ -92,6 +92,10 @@ google:
   optimize_id: GTM-MVNP9PH
   tag_manager_id: GTM-KNKBWLD
 
+# Crash reporting
+raygun:
+  apiKey: SG5ZJfQICgeechPbpRE1DQ==
+
 ## Algolia Search
 ## https://github.com/LouisBarranqueiro/hexo-algoliasearch
 algolia:
