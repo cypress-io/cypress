@@ -16,12 +16,11 @@ defaults: &defaults
 
 test-defaults: &test-defaults
 
-
 jobs:
   ## code checkout and NPM installs
   build:
     <<: *defaults
-    parallelism: 4
+    # parallelism: 4
     steps:
       - checkout
 
@@ -159,10 +158,10 @@ jobs:
       - run: npm run build
 
       - persist_to_workspace:
-          root: /home/person
+          root: /home/person/cypress-monorepo
           paths:
-            - cypress-monorepo
-
+            - packages/*/package.json
+            - packages/*/lib
 
   lint:
     <<: *defaults
