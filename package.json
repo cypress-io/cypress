@@ -39,17 +39,5 @@
     "lodash": "^4.17.4",
     "pre-git": "^3.15.0"
   },
-  "config": {
-    "pre-git": {
-      "pre-commit": [
-        "npm run lint",
-        "npm run all lint"
-      ],
-      "pre-push": [],
-      "post-commit": [],
-      "post-checkout": [],
-      "post-merge": []
-    }
-  },
   "license": "MIT"
 }

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import ipc from '../lib/ipc'
-import SetupProject from "./setup-project-modal"
+import SetupProject from './setup-project-modal'
 
 @observer
 export default class ProjectNotSetup extends Component {

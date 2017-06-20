@@ -2,17 +2,24 @@ import { action, computed, observable } from 'mobx'
 
 class AppStore {
   @observable projectPath = null
-  @observable updateAvailable = false
   @observable version
+  @observable newVersion
 
   @computed get isGlobalMode () {
-    return !!this.projectPath
+    return !this.projectPath
+  }
+
+  @computed get updateAvailable () {
+    return this.version !== this.newVersion
   }
 
   @action set (props) {
     if (props.projectPath != null) this.projectPath = props.projectPath
-    if (props.updateAvailable != null) this.updateAvailable = props.updateAvailable
-    if (props.version != null) this.version = props.version
+    if (props.version != null) this.version = this.newVersion = props.version
+  }
+
+  @action setNewVersion (newVersion) {
+    this.newVersion = newVersion
   }
 }
 

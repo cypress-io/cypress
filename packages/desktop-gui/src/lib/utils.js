@@ -3,22 +3,22 @@ import moment from 'moment'
 import gravatar from 'gravatar'
 
 const osNameLookup = {
-  darwin: "apple",
+  darwin: 'apple',
 }
 
 const osIconLookup = {
-  windows: "windows",
-  darwin: "apple",
-  linux: "linux",
+  windows: 'windows',
+  darwin: 'apple',
+  linux: 'linux',
 }
 
 const browserNameLookup = {}
 
 const browserIconLookup = {
-  chrome: "chrome",
-  Electron: "chrome",
-  firefox: "firefox",
-  safari: "safari",
+  chrome: 'chrome',
+  Electron: 'chrome',
+  firefox: 'firefox',
+  safari: 'safari',
 }
 
 module.exports = {

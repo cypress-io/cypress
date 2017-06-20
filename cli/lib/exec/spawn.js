@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const cp = require('child_process')
-// const chalk = require('chalk')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 

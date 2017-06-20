@@ -20,7 +20,7 @@ class Project extends Component {
 
     project.setLoading(true)
 
-    document.title = appStore.isGlobalMode ? project.path : project.displayName
+    document.title = appStore.isGlobalMode ? project.displayName : project.path
 
     projectsApi.openProject(project)
   }

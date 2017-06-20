@@ -4,7 +4,7 @@ export default class ApplyingUpdates extends Component {
 
   render () {
     return (
-      <div id="login">
+      <div id='login'>
         <div className='login-img-wrapper'>
           <img src='img/cypress-inverse.png' />
         </div>
@@ -18,4 +18,3 @@ export default class ApplyingUpdates extends Component {
     )
   }
 }
-

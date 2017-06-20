@@ -52,7 +52,7 @@ export default class Project {
   @observable isNew = false
   @observable browsers = []
   @observable onBoardingModalOpen = false
-  @observable browserState = "closed"
+  @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
   @observable warning
@@ -134,15 +134,15 @@ export default class Project {
   }
 
   @action browserOpening () {
-    this.browserState = "opening"
+    this.browserState = 'opening'
   }
 
   @action browserOpened () {
-    this.browserState = "opened"
+    this.browserState = 'opened'
   }
 
   @action browserClosed () {
-    this.browserState = "closed"
+    this.browserState = 'closed'
   }
 
   @action setBrowsers (browsers = []) {
