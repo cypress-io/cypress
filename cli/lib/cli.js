@@ -1,12 +1,13 @@
 const _ = require('lodash')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
+const debug = require('debug')('cypress:cli')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = (opts) => _.pick(opts, 'spec', 'reporter', 'reporterOptions', 'path', 'destination', 'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser')
+const parseOpts = (opts) => _.pick(opts, 'spec', 'reporter', 'reporterOptions', 'path', 'destination', 'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached')
 
 const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -21,6 +22,7 @@ const descriptions = {
     runs Cypress in the browser with the given name.
     note: using an external browser will cancel video recording of tests.
   `,
+  detached: 'runs Cypress application in detached mode',
 }
 
 const text = (description) => {
@@ -57,6 +59,7 @@ module.exports = {
       .option('-p, --port <port>',         text('port'))
       .option('-e, --env <env>',           text('env'))
       .option('-c, --config <config>',     text('config'))
+      .option('-d, --detached [bool]',     text('detached'), coerceFalse)
       .action((opts) => require('./exec/open').start(parseOpts(opts)))
 
     program
@@ -69,6 +72,7 @@ module.exports = {
       .description('Verifies that Cypress is installed correctly and executable')
       .action(() => require('./download/utils').verify({ force: true }))
 
+    debug('cli starts with arguments %j', process.argv)
     program.parse(process.argv)
 
     //# if the process.argv.length
