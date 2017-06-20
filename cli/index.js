@@ -24,7 +24,6 @@ switch (args.exec) {
       .catch(reportError)
     break
   case 'open':
-    // require('./lib/exec/open').start()
     _.remove(process.argv, (arg) => arg === '--exec')
     debug('opening Cypress application')
     debug('CLI arguments', process.argv)
