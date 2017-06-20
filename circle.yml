@@ -158,8 +158,10 @@ jobs:
       - run: npm run build
 
       ## save entire folder as artifact for other jobs to continue
+      ## hmm, do not see a good way to cache it, since all code
+      ## might change
       - save_cache:
-          key: cypress-monorepo-v1-{{ .Branch }}
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
           paths:
             - /home/person/cypress-monorepo
 
@@ -167,7 +169,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-v1-{{ .Branch }}
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run lint
       - run: npm run all lint
 
@@ -175,7 +177,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-v1-{{ .Branch }}
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package coffee
       - run: npm run all test -- --package desktop-gui
@@ -188,19 +190,41 @@ jobs:
       - run: npm run all test -- --package socket
       - run: npm run all test -- --package static
 
-  "sever-unit-tests":
+  "server-unit-tests":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-v1-{{ .Branch }}
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-unit -- --package server
 
-  "sever-integration-tests":
+  "server-integration-tests":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-v1-{{ .Branch }}
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-integration -- --package server
+
+  "server-e2e-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-e2e -- --package server
+
+  "docs-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && npm run test-e2e
+
+  "driver-unit-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: chrome --version
+      - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
 
 workflows:
   version: 2
@@ -219,43 +243,23 @@ workflows:
       - server-integration-tests:
           requires:
             - build
+      - server-e2e-tests:
+          requires:
+            - build
+      - docs-tests:
+          requires:
+            - build
+      - driver-unit-tests:
+          requires:
+            - build
 
-      # #
-      # # things to run in the 2nd CI container
-      # #
-      # - run:
-      #     name: Server E2E tests (electron)
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 1 ]; then
-      #         npm run all test-e2e -- --package server
-      #       fi
-      # #
-      # # things to run in the 3rd CI container
-      # #
-      # - run:
-      #     name: Docs - running E2E tests
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 2 ]; then
-      #         cd docs
-      #         npm run test-e2e
-      #       fi
-      # #
-      # # things to run in the 4th CI container
-      # #
-      # - run:
-      #     name: Driver unit tests
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
-      #         chrome --version
-      #         xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
-      #       fi
-      # #
-      # # things to run in the 4th CI container
-      # #
-      # # - run:
-      # #     name: Example e2e tests
-      # #     command: |
-      # #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
-      # #         # ./bin/cypress --project=./packages/example --path-to-cypress
-      # #         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
-      # #       fi
+#
+# things to run in the 4th CI container
+#
+# - run:
+#     name: Example e2e tests
+#     command: |
+#       if [ $CIRCLE_NODE_INDEX == 3 ]; then
+#         # ./bin/cypress --project=./packages/example --path-to-cypress
+#         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+#       fi
