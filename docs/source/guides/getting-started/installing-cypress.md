@@ -6,85 +6,82 @@ comments: false
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- How to install Cypress on your project using `npm`
+- How to install the Cypress Desktop Application
 - How to run Cypress via the command line
 - How to version and automate Cypress via `package.json`
 
 {% endnote %}
 
-# Installing Cypress via `npm`
+# System Requirements
 
-Installing Cypress is easy:
+Cypress is a desktop application. This desktop application is the equivalent replacement of Selenium Server and must be running to test in Cypress.
 
-```shell
-$ cd /your/project/path
-$ npm install cypress --save-dev
-```
-
-This will install Cypress locally for this project, which is ideal for a few reasons:
-- Cypress is a versioned dependency like any other
-- Multiple versions of Cypress can co-exist on the same machine on a per-project basis
-- Simplifies things when you're setting up Continuous Integration
-
-{% note info What is `npm`? %}
-If you've never set up a NodeJS project before, this is all probably a bit confusing! We recommend heading over to [the NodeJS website](https://nodejs.org/) and digging in, we'll wait.
+{% note info %}
+The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application
 {% endnote %}
 
-{% note danger Windows: Coming Soon %}
-A big, hearty thanks to all of our patient early adopters avidly awaiting the development of the Windows version of Cypress! If this is you, feel free to follow {% issue 74 'this issue' %} to be notified when Windows support lands.
-{% endnote %}
+The desktop application can be installed in the following operating systems:
 
-# Running Cypress via the CLI
 
-Cypress has now been installed to our `./node_modules` directory, with its binary executable accessible from `./node_modules/.bin`. This means we can call it from our project root like so:
+OS | Path
+:--- | :---
+Mac  | `/Applications/Cypress.app`
+Linux  | `/home/<user>/.cypress/Cypress`
+Windows  | {% issue 74 'not currently supported' %}
 
-```bash
-# the long way with the full path
-$ ./node_modules/.bin/cypress open
-# same, shortcut using `npm bin`
-$ $(npm bin)/cypress open
-```
+There are no dependencies to install the Desktop Application, although if you want to {% url "use Cypress from the Command Line" https://github.com/cypress-io/cypress-cli %} you will need to have `node` installed.
 
-After a moment, the Cypress graphical application will launch. If this is your first time running Cypress in this project, it will generate some files to help you get started. These files live in the new `./cypress` directory (also generated for you), and are very user friendly so don't be afraid have a look through them!
+# Installing
 
-![Cypress First Run Experience](/img/guides/generated-files.png)
+You can install Cypress in 2 different ways:
 
-# Managing Cypress with `package.json`
+* {% url "Cypress CLI Tool" command-line %}
+* {% urlHash "Direct Download" Direct-Download %}
 
-Take a look at your `package.json` file, which is where `npm` is configured for your project.
+## Command Line Tool
 
-## Versioning Cypress
-
-You should see that Cypress has been added as a development dependency versioned to the latest available version. If you need to install a specific version of Cypress, you can do so by modifying this version string and running `npm install`.
-
-```json
-{
-  ...
-  "devDependencies": {
-    "cypress": "^0.20.0"
-  }
-  ...
-}
-```
-
-## Automating Cypress
-
-In order to run Cypress easily, we recommend having `npm` execute a simple script for you. Do this by adding a `scripts` key to `package.json` with a nested key for the name of the script. For starters, name this script `test`, and have it simply call `cypress open`:
-
-```json
-{
-  ...
-  "scripts": {
-    "test": "cypress open"
-  }
-  ...
-}
-```
-
-Now you can invoke this command like so:
+**Install the Cypress CLI tool**
 
 ```shell
-$ npm test
+npm install -g cypress-cli
 ```
 
-...and Cypress will open right up for you!
+**Install the Desktop Cypress app**
+
+```shell
+cypress install
+```
+
+![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
+
+{% note info %}
+The Cypress CLI Tool contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
+{% endnote %}
+
+
+## Direct Download
+
+You can download Cypress directly {% url "here" http://download.cypress.io/desktop %}.
+
+{% note danger "Woops, I got an error installing" %}
+The vast majority of the time, Cypress will install correctly. But if you're on Linux you {% url "might have to install some other dependencies" continuous-integration#Other %}.
+{% endnote %}
+
+# Logging In
+
+After installing, you will need to login to Cypress. Login currently requires a {% url "Github" https://github.com/ %} account, if you do not have an account, you will have to {% url "create one" https://github.com/join %} to use Cypress.
+
+**To Login:**
+
+- Open the Cypress App -- just double click the app from your OS application's folder.
+- Click "Log In with GitHub".
+- Authorize GitHub access to your account.
+
+![Log In to Cypress](https://cloud.githubusercontent.com/assets/1271364/18134962/38a6c3d8-6f6e-11e6-998b-9884496cb898.png)
+
+## Your email has not been authorized.
+
+While in beta, the Cypress team has to whitelist the email address associated with your GitHub account in order for you to use Cypress.
+
+- If you received this error and have never filled out our {% url "Early Adopter Access form" http://goo.gl/forms/4vEMwj8LNT %}, fill out this form with the email in the error so we can whitelist it. You will receive an invite during one of our future Beta invites.
+- If you received this error after receiving a Beta invite email from Cypress, please send an email to **support@cypress.io** telling us the email in the error so we can whitelist it.

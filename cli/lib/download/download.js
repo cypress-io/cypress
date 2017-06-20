@@ -10,6 +10,7 @@ const debug = require('debug')('cypress:cli')
 const { formErrorText, errors } = require('./errors')
 const { stripIndent } = require('common-tags')
 const R = require('ramda')
+const pkg = require('../../package.json')
 
 const unzip = require('./unzip')
 const utils = require('./utils')
@@ -49,6 +50,7 @@ const download = (options = {}) => {
 
     // nuke the bar on error
     const terminate = (err) => {
+      debug('problem downloading: %s', err.message)
       bar.clear = true
       bar.terminate()
       reject(err)
@@ -79,9 +81,15 @@ const download = (options = {}) => {
       throttle: options.throttle,
     })
     .on('response', (response) => {
-      // if our status code doesnt start with 200
+      // if our status code does not start with 200
       if (!(/^2/.test(response.statusCode))) {
-        terminate(_.pick(response, 'statusCode', 'statusMessage'))
+        debug('response code %d', response.statusCode)
+        const err = new Error(stripIndent`
+          Could not download Cypress binary.
+          response code: ${response.statusCode}
+          response message: ${response.statusMessage}
+        `)
+        terminate(err)
       }
     })
     .on('error', terminate)
@@ -111,18 +119,31 @@ const download = (options = {}) => {
 const statusMessage = (err) =>
   err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
 
+const printAndFail = (text) => {
+  console.log(text) //eslint-disable-line no-console
+  process.exit(1)
+}
+
 const logErr = (options) => (err) => {
+  debug('logging download error')
   const msg = stripIndent`
     URL: ${getUrl(options.version)}
     Server response: ${statusMessage(err)}
   `
+  debug(msg)
   return formErrorText(errors.failedDownload, new Error(msg))
-    .then(console.log) //eslint-disable-line no-console
-    .then(process.exit(1))
+    .then(printAndFail)
+}
+
+const truePwd = () => {
+  const cwd = process.cwd()
+  return _.endsWith(cwd, pkg.name) ? path.join('..', '..') : cwd
 }
 
 const logFinish = (options) => {
-  const relativeExecutable = path.relative(process.cwd(), options.executable)
+  const currDirectory = truePwd()
+  debug('Current caller directory %s', currDirectory)
+  const relativeExecutable = path.relative(currDirectory, options.executable)
 
   /* eslint-disable no-console */
   console.log(
