@@ -16,9 +16,9 @@ comments: false
 **This is the single most important guide** for understanding how to test with Cypress. Read it. Understand it. Ask questions about it so that we can improve it.
 {% endnote %}
 
-# Cypress Is Expressive
+# Cypress Is Simple
 
-Expressivity is all about getting more done with less typing. Let's look at an example:
+Simplicity is all about getting more done with less typing. Let's look at an example:
 
 ```js
 describe('Post Resource', function() {
@@ -205,6 +205,8 @@ To match the behavior of web applications, Cypress is asynchronous and relies on
 There is a performance tradeoff here: **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their expected criteria is met, so working tests will be performed as fast as your application allows. A test that fails due to timeout will consume the entire timeout period, by design. This means that while you _may_ want to increase your timeout period to suit specific parts of your app, you _don't_ want to make it "extra long, just in case".
 {% endnote %}
 
+Later in this guide we'll go into much more detail about {% urlHash 'Default Assertions' Default-Assertions %} and {% urlHash 'Timeouts' Timeouts %}
+
 # Chains of Commands
 
 It's very important to understand the mechanism Cypress uses to chain commands together. It manages a Promise chain on your behalf, with each command yielding a subject to the next command, until the chain ends or an error is encountered. The developer should not need to use Promises directly, but understanding how they work is very helpful!
@@ -367,7 +369,7 @@ You purposefully **cannot** do anything useful with the return value from a comm
 We've designed our API's this way because the DOM is a highly mutable object which constantly goes stale. For Cypress to prevent flake, and know when to proceed, it must manage commands in a highly controlled deterministic way.
 {% endnote %}
 
-## Commands Execute Serially
+## Commands Run Serially
 
 After a test function is finished running, Cypress goes to work executing the commands that were enqueued using the `cy.*` command chains. The test above would cause an execution in this order:
 
@@ -692,3 +694,76 @@ cy
 When using a function passed to {% url `.should()` should %}, be sure that the entire function can be executed multiple times without issue. Cypress applies its retry logic to these functions: so long as there's a failure, it will repeatedly try again until the timeout is reached. That means your code should be retry-safe. The technical term for this means your code must be **idempotent**.
 
 {% endnote %}
+
+## Default Assertions
+
+Many commands have a default, built-in assertion, or rather have requirements that may cause it to fail without an assertion you've written.
+
+For instance:
+
+- {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code
+- {% url `cy.request()` request %} expects the remote server to exist and provide a response
+- {% url `cy.get()` get %} expects the element to eventually exist in the DOM
+- {% url `.find()` find %} also expects the element to eventually exist in the DOM
+- {% url `.type()` type %} expects the element to eventually be *typeable*
+- {% url `.click()` click %} expects the element to eventually be in an *actionable* state
+
+Certain commands may have a specific requirement that causes them to immediately fail: such as {% url `cy.request()` request %}. Others, such as DOM based commands will automatically retry and wait for the DOM to reach the desired state before failing.
+
+{% note success Core Concept %}
+In fact, all DOM based commands automatically wait for their elements to exist in the DOM.
+{% endnote %}
+
+These rules are pretty intuitive, and most commands give you flexibility to override or bypass the default ways they can fail, typically by passing the `{ force: true }` option.
+
+Here's an example what Cypress is checking under the hood:
+
+```js
+cy
+  // there is a default assertion that this
+  // button must exist in the DOM before proceeding
+  .get('button')
+
+  // before issuing the click, this button must be "actionable"
+  // it cannot be disabled, covered, or hidden from view.
+  .click()
+```
+
+Cypress will automatically **wait** for elements to reach stable states before giving up and failing. Just like with regular assertions you've added, these default assertions all share the **same** timeout values.
+
+***Reversing the Default Assertion for Elements***
+
+Most of the time, when querying for elements you expect them to eventually exist. But sometimes you wish to wait until they **don't** exist.
+
+All you have to do is simply add that assertion and Cypress will *reverse* its rules waiting for elements to exist.
+
+```js
+// now Cypress will wait until this
+// <button.close> is removed from the
+// DOM after the click
+cy.get('button.close').click().should('not.exist')
+
+// make sure this <#modal>
+// does not exist in the DOM and
+// automatically wait until it's gone!
+cy.get('#modal').should('not.exist')
+```
+
+# Timeouts
+All commands that **do** something can time out.
+
+All assertions, whether they're the default ones, or whether they've been added by you **all share the same timeout values**.
+
+Because assertions are used to describe the state of the proceeding command - that's where the timeout values go.
+
+Example #1:
+
+```js
+
+```
+
+# Actions
+
+## Visibility Rules
+
+## Actionable Rules
