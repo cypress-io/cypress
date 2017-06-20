@@ -161,46 +161,47 @@ jobs:
           root: /home/person/cypress-monorepo
           paths:
             - packages/*/package.json
-            - packages/*/lib
+            - packages/*/lib/
+            - packages/*/node_modules/
 
   lint:
     <<: *defaults
     steps:
       - attach_workspace:
           at: /home/person
-      - npm run lint
-      - npm run all lint
+      - run: npm run lint
+      - run: npm run all lint
 
   unit-tests:
     <<: *defaults
     steps:
       - attach_workspace:
           at: /home/person
-      - npm run all test -- --package cli
-      - npm run all test -- --package coffee
-      - npm run all test -- --package desktop-gui
-      - npm run all test -- --package electron
-      - npm run all test -- --package extension
-      - npm run all test -- --package https-proxy
-      - npm run all test -- --package launcher
-      - npm run all test -- --package reporter
-      - npm run all test -- --package runner
-      - npm run all test -- --package socket
-      - npm run all test -- --package static
+      - run: npm run all test -- --package cli
+      - run: npm run all test -- --package coffee
+      - run: npm run all test -- --package desktop-gui
+      - run: npm run all test -- --package electron
+      - run: npm run all test -- --package extension
+      - run: npm run all test -- --package https-proxy
+      - run: npm run all test -- --package launcher
+      - run: npm run all test -- --package reporter
+      - run: npm run all test -- --package runner
+      - run: npm run all test -- --package socket
+      - run: npm run all test -- --package static
 
   sever-unit-tests:
     <<: *defaults
     steps:
       - attach_workspace:
           at: /home/person
-      - npm run all test-unit -- --package server
+      - run: npm run all test-unit -- --package server
 
   sever-integration-tests:
     <<: *defaults
     steps:
       - attach_workspace:
           at: /home/person
-      - npm run all test-integration -- --package server
+      - run: npm run all test-integration -- --package server
 
 workflows:
   version: 2
