@@ -15,8 +15,6 @@ defaults: &defaults
         # need to set unsafe perm to be able to do `npm postinstall`
         npm_config_unsafe-perm: true
 
-test-defaults: &test-defaults
-
 jobs:
   ## code checkout and NPM installs
   build:
