@@ -1,7 +1,7 @@
 version: 2
 
 defaults: &defaults
-  parallelism: 4
+  parallelism: 1
   working_directory: ~/cypress-monorepo
   docker:
     # the Docker image with Cypress dependencies and Chrome browser
@@ -175,6 +175,7 @@ jobs:
 
   "unit-tests":
     <<: *defaults
+    parallelism: 2
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
@@ -192,6 +193,7 @@ jobs:
 
   "server-unit-tests":
     <<: *defaults
+    parallelism: 2
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
@@ -199,6 +201,7 @@ jobs:
 
   "server-integration-tests":
     <<: *defaults
+    parallelism: 2
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
@@ -220,6 +223,7 @@ jobs:
 
   "driver-unit-tests":
     <<: *defaults
+    parallelism: 2
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
