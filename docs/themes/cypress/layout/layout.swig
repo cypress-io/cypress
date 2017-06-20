@@ -3,11 +3,7 @@
 {{ partial('partial/head') }}
 <body>
   <script type="text/javascript">
-    if (window.Cypress) {
-      window.env = 'test'
-    } else {
-      window.env = '{{env.NODE_ENV}}'
-    }
+    window.env = window.Cypress ? 'test' : '{{env.NODE_ENV}}'
   </script>
   {{ partial('partial/google-tag-manager-noscript')}}
   <div id="container">
