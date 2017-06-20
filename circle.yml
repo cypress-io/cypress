@@ -171,7 +171,7 @@ jobs:
       - run: npm run lint
       - run: npm run all lint
 
-  unit-tests:
+  "unit-tests":
     <<: *defaults
     steps:
       - restore_cache:
@@ -188,14 +188,14 @@ jobs:
       - run: npm run all test -- --package socket
       - run: npm run all test -- --package static
 
-  sever-unit-tests:
+  "sever-unit-tests":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-v1-{{ .Branch }}
       - run: npm run all test-unit -- --package server
 
-  sever-integration-tests:
+  "sever-integration-tests":
     <<: *defaults
     steps:
       - restore_cache:
@@ -220,36 +220,6 @@ workflows:
           requires:
             - build
 
-
-      # - run:
-      #     name: Fast unit tests
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 0 ]; then
-      #         npm run all test -- --package cli
-      #         npm run all test -- --package coffee
-      #         npm run all test -- --package desktop-gui
-      #         npm run all test -- --package electron
-      #         npm run all test -- --package extension
-      #         npm run all test -- --package https-proxy
-      #         npm run all test -- --package launcher
-      #         npm run all test -- --package reporter
-      #         npm run all test -- --package runner
-      #         npm run all test -- --package socket
-      #         npm run all test -- --package static
-      #       fi
-      # - run:
-      #     name: Server unit tests
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 0 ]; then
-      #         npm run all test-unit -- --package server
-      #       fi
-      # - run:
-      #     name: Server integration tests
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 0 ]; then
-      #         whoami
-      #         npm run all test-integration -- --package server
-      #       fi
       # #
       # # things to run in the 2nd CI container
       # #
