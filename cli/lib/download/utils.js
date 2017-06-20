@@ -196,6 +196,10 @@ const logFailed = () => {
   log()
 }
 
+const logWarning = (text) => {
+  log(chalk.yellow(`! ${text}`))
+}
+
 function testVersion (version) {
   return writeVerifiedVersion(null)
     .then(runSmokeTest)
@@ -244,9 +248,10 @@ const verify = (options = {}) => {
     if (!installedVersion) {
       return explainAndFail(errors.missingApp)(new Error('Missing install'))
     } else if (installedVersion !== packageVersion) {
-      // TODO does this fail if we installed with CYPRESS_VERSION ?!
+      // warn if we installed with CYPRESS_VERSION or changed version
+      // in the package.json
       const msg = `Installed version (${installedVersion}) does not match package version (${packageVersion})`
-      return explainAndFail(errors.versionMismatch)(new Error(msg))
+      logWarning(msg)
     }
   })
   .then(() => {
