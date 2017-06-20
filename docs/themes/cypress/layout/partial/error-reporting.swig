@@ -1,6 +1,6 @@
 {% if config.raygun %}
   <script type="text/javascript">
-    if (window.env !== 'test') {
+    if (window.env === 'production') {
       !function(a,b,c,d,e,f,g,h){a.RaygunObject=e,a[e]=a[e]||function(){
       (a[e].o=a[e].o||[]).push(arguments)},f=b.createElement(c),g=b.getElementsByTagName(c)[0],
       f.async=1,f.src=d,g.parentNode.insertBefore(f,g),h=a.onerror,a.onerror=function(b,c,d,f,g){
