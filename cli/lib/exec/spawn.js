@@ -1,11 +1,18 @@
 const _ = require('lodash')
 const cp = require('child_process')
-const chalk = require('chalk')
+// const chalk = require('chalk')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 
 const downloadUtils = require('../download/utils')
 const xvfb = require('./xvfb')
+const { formErrorText, errors } = require('../download/errors')
+
+const logAndFail = (info) => (err) => {
+  const text = formErrorText(info, err)
+  console.log(text) // eslint-disable-line no-console
+  process.exit(1)
+}
 
 module.exports = {
   start (args, options = {}) {
@@ -49,15 +56,7 @@ module.exports = {
     if (needsXvfb) {
       return xvfb.start()
       .then(spawn)
-      .catch(() => {
-        /* eslint-disable no-console */
-        console.log('')
-        console.log(chalk.bgRed.white(' -Error- '))
-        console.log(chalk.red.underline('Could not start Cypress headlessly. Your CI provider must support XVFB.'))
-        console.log('')
-        process.exit(1)
-        /* eslint-enable no-console */
-      })
+      .catch(logAndFail(errors.missingXvfb))
     } else {
       return spawn()
     }
