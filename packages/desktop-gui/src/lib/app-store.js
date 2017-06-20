@@ -6,7 +6,7 @@ class AppStore {
   @observable version
 
   @computed get isGlobalMode () {
-    return !!this.projectPath
+    return !this.projectPath
   }
 
   @action set (props) {

@@ -43,21 +43,26 @@ export default class Nav extends Component {
   _leftNav = () => {
     const project = viewStore.currentView.project
 
-    if (appStore.isGlobalMode) {
+    // project mode
+    if (!appStore.isGlobalMode) {
       return <div>{project && project.displayName}</div>
-    } else if (project) {
+    }
+
+    // global mode, on project page
+    if (appStore.isGlobalMode && project) {
       return (
         <Link to={routes.intro()}>
-          <i className="fa fa-chevron-left"></i> Back
+          <i className='fa fa-chevron-left'></i> Back
         </Link>
       )
-    } else {
-      return (
-        <div className='logo'>
-          <img src='img/cypress-inverse.png' />
-        </div>
-      )
     }
+
+    // global mode, on intro page
+    return (
+      <div className='logo'>
+        <img src='img/cypress-inverse.png' />
+      </div>
+    )
   }
 
   _userStateButton = () => {
