@@ -1,6 +1,7 @@
 version: 2
 
 defaults: &defaults
+  parallelism: 4
   working_directory: ~/cypress-monorepo
   docker:
     # the Docker image with Cypress dependencies and Chrome browser
@@ -20,7 +21,6 @@ jobs:
   ## code checkout and NPM installs
   build:
     <<: *defaults
-    # parallelism: 4
     steps:
       - checkout
 
