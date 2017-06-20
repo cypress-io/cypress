@@ -67,7 +67,7 @@
     "hexo-server": "0.2.0",
     "lodash": "4.17.4",
     "lunr": "2.0.1",
-    "menuspy": "1.0.1",
+    "menuspy": "github:cypress-io/menuspy#afb7cbfc5fb7d032cabba2a4608710605848f874",
     "scrollingelement": "1.5.2"
   }
 }
