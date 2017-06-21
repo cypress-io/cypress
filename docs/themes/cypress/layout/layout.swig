@@ -2,9 +2,6 @@
 <html lang="{{ page.lang }}">
 {{ partial('partial/head') }}
 <body>
-  <script type="text/javascript">
-    window.env = window.Cypress ? 'test' : '{{env.NODE_ENV}}'
-  </script>
   {{ partial('partial/google-tag-manager-noscript')}}
   <div id="container">
     {{ partial('partial/header') }}

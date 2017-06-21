@@ -3,7 +3,7 @@ title: select
 comments: false
 ---
 
-Select an `<option>` within a `<select>` DOM element.
+Select an `<option>` within a `<select>`.
 
 # Syntax
 

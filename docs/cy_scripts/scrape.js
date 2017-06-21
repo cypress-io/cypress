@@ -15,7 +15,7 @@ function getCircleCredentials () {
   }, null, 2)
 
   return fs.readJsonAsync(pathToCircleCreds)
-  .catch({ code: "ENOENT" }, () => {
+  .catch({ code: 'ENOENT' }, () => {
     return {}
   })
   .then((json) => {
