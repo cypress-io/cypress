@@ -16,15 +16,13 @@ comments: false
 
 Some commands in Cypress are for interacting with the DOM such as:
 
-- {% url `.click()` click %} - Click a DOM element.
-- {% url `.dblclick()` dblclick %} - Double-click a DOM element.
-- {% url `.type()` type %} - Type into a DOM element.
-- {% url `.clear()` clear %} - Clear the value of an input or textarea.
-- {% url `.blur()` blur %} - Make a focused DOM element blur.
-- {% url `.focus()` focus %} - Focus on a DOM element.
-- {% url `.check()` check %} - Check checkbox(es) or radio(s).
-- {% url `.uncheck()` uncheck %} - Uncheck checkbox(es).
-- {% url `.select()` select %} - Select an `<option>` within a `<select>`.
+- {% url `.click()` click %}
+- {% url `.dblclick()` dblclick %}
+- {% url `.type()` type %}
+- {% url `.clear()` clear %}
+- {% url `.check()` check %}
+- {% url `.uncheck()` uncheck %}
+- {% url `.select()` select %}
 
 These commands simulate a user interacting with your application. Under the hood Cypress fires the events a browser would fire thus causing your application's event bindings to fire.
 
@@ -69,9 +67,9 @@ We don't look at whether an element has property `readonly` (but we probably sho
 
 ## Animations
 
-To calculate whether an element is animating we take a sample of the last few coordinates and calculate the element's slope. You might remember this from 8th grade algebra 😉
+To calculate whether an element is animating we take a sample of the last positions it was at and calculate the element's slope. You might remember this from 8th grade algebra. 😉
 
-If the element's slope (the distance in pixels that exceeds the {% url `animationDistanceThreshold` configuration#Animations %}) then we consider the element to be animating.
+If the element's slope (the distance between its previous position and its current position) exceeds the {% url `animationDistanceThreshold` configuration#Animations %} then we consider the element to be animating.
 
 When coming up with this value, we did a few experiments to find a speed that "feels" too fast for a user to interact with. You can always {% url "increase or decrease this threshold" configuration#Animations %}.
 
@@ -101,7 +99,7 @@ Oftentimes either the `<i>` or `<span>` element is covering the exact coordinate
 Before interacting with an element we will *always* scroll it into view (including any of its parent containers).
 
 {% note info %}
-Remember, this logic only applies to {% urlHash "commands that are actionable" Actionability %}. We do **not** scroll to find elements when traversing the DOM, in a {% url "`cy.get()`" get %} or {% url "`.find()`" find %} command for example.
+This scrolling logic only applies to {% urlHash "commands that are actionable above" Actionability %}. **We do not scroll elements** into view when using DOM commands such as {% url "`cy.get()`" get %} or {% url "`.find()`" find %}.
 {% endnote %}
 
 However, the scrolling algorithm works by scrolling the very top pixel to the highest scrollable point. Remember, Cypress tests are meant to be deterministic. Tests should always run the same way every time. Even if an element is 'already' visible, it could be in that position indeterminately, and therefore we always scroll it the same way.
