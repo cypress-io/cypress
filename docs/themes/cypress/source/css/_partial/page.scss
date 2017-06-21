@@ -213,6 +213,10 @@
 
     &>a {
       font-weight: 500;
+
+      &:hover {
+        border-bottom: 0;
+      }
     }
 
     &+h2 {
@@ -229,6 +233,12 @@
     margin: 1.5em 0 15px;
     font-family: $font-title;
     border-bottom: 1px solid #eee;
+
+    &>a {
+      &:hover {
+        border-bottom: 0;
+      }
+    }
 
     code {
       font-weight: bold;

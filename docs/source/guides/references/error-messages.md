@@ -308,7 +308,38 @@ it('does not forget to return a promise', function(){
 
 See {% url "`cy.visit()`" visit %} documentation.
 
-# CI Errors
+## {% fa fa-exclamation-triangle red %} Passing `cy.server({stub: false})` is now deprecated
+
+In previous versions of Cypress, to prevent Cypress from stubbing routes you had to explicitly tell your server not to stub routes like this:
+
+```javascript
+cy.server({stub: false})
+cy.route(...)
+```
+
+You no longer have to do this. Whether a {% url "`cy.route()`" route %} is stubbed or not is simply based on whether or not you specified a response in {% url "`cy.route()`" route %}.
+
+## {% fa fa-exclamation-triangle red %} Passing `cy.route({stub: false})` is now deprecated
+
+In previous versions of Cypress, {% url "`cy.route()`" route %} would require a `response` unless you specified `stub: false` in its options.
+
+You used to have to write this:
+
+```javascript
+cy.server()
+cy.route({url: /posts/, stub: false})
+```
+
+This is now deprecated because Cypress automatically stubs {% url "`cy.route()`" route %} based on whether or not it has a `response` property.
+
+```javascript
+cy.server()
+cy.route(/users/, [{}, {}])               // stubbed because this has a response argument
+cy.route({url: /comments/, response: []}) // stubbed because this has a response property
+cy.route(/posts/)                         // not stubbed because there is no response argument or property
+```
+
+# CLI Errors
 
 ## {% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.
 
@@ -320,7 +351,7 @@ You can get your project's record key by locating it in your settings tab in the
 
 You will want to then {% url 'add the key to your config file or as an environment variable' continuous-integration#Record-Key %}.
 
-## {% fa fa-exclamation-triangle red %} The 'cypress ci' command has been deprecated
+## {% fa fa-exclamation-triangle red %} The `cypress ci` command has been deprecated
 
 As of version {% url `0.19.0` changelog#0-19-0 %} and CLI versions `0.13.0`, the `cypress ci` command has been deprecated. We did this to make it clearer what the difference was between a *regular test run* and a *recorded test run*.
 
@@ -345,6 +376,25 @@ cypress run --record
 ```
 
 We will automatically apply the record key environment variable.
+
+## {% fa fa-exclamation-triangle red %}  Cypress Package Renamed
+
+<img width="638" alt="screen shot 2016-03-26 at 2 06 48 pm" src="https://cloud.githubusercontent.com/assets/1268976/14061658/0f675e30-f35c-11e5-9765-ab0049a2653d.png">
+
+In previous versions of Cypress (below `0.15.0`) we distributed our CLI Tools under the package: `cypress`.
+
+As of `0.15.0` the CLI Tools have now been renamed to the package `cypress-cli`.
+
+Please update your scripts to use: `npm install -g cypress-cli`
+
+This change was made for two reasons:
+
+- Users were confused thinking they were actually installing cypress when in fact they were installing the CLI tools.
+- Once we open source the Desktop Application it will be distributed under the `cypress` package
+
+Hopefully this change will lead to less confusion over the versioning of both the `CLI Tools` and the `Cypress Desktop Application`.
+
+Once `cypress` is open sourced you'll be able to set `cypress` as a `devDependency` and will not have to fuss with downloading or managing the Desktop Application.
 
 # Page Load Errors
 
