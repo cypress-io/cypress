@@ -17,7 +17,7 @@ const distDir = path.resolve('public')
 const fs = Promise.promisifyAll(require('fs-extra'))
 
 // initialize on existing repo
-const repo = Promise.promisifyAll(gift(path.resolve("..")))
+const repo = Promise.promisifyAll(gift(path.resolve('..')))
 
 console.log()
 console.log(chalk.yellow('Cypress Docs Deployinator'))
@@ -27,7 +27,7 @@ function getS3Credentials () {
   const pathToAwsCreds = path.resolve('support', '.aws-credentials.json')
 
   return fs.readJsonAsync(pathToAwsCreds)
-  .catch({ code: "ENOENT" }, (err) => {
+  .catch({ code: 'ENOENT' }, (err) => {
     console.log(chalk.red(`Cannot deploy.\n\nYou are missing your AWS credentials.\n\nPlease add your credentials here: ${pathToAwsCreds}\n`))
 
     throw err
@@ -86,7 +86,7 @@ function publishToS3 (publisher) {
   const headers = {}
 
   return new Promise((resolve, reject) => {
-    const files = path.join(distDir, "**", "*")
+    const files = path.join(distDir, '**', '*')
 
     return gulp.src(files)
     .pipe(parallelize(publisher.publish(headers), 100))
@@ -139,7 +139,7 @@ function commitMessage (env, branch) {
   })
   .then(function () {
     // and push it to the origin with the current branch
-    return repo.remote_pushAsync("origin", branch)
+    return repo.remote_pushAsync('origin', branch)
   })
 }
 
