@@ -96,21 +96,17 @@ Oftentimes either the `<i>` or `<span>` element is covering the exact coordinate
 
 ## Scrolling
 
-Before interacting with an element we will *always* scroll it into view (including any of its parent containers).
+Before interacting with an element we will *always* scroll it into view (including any of its parent containers). Even if the element was visible without scrolling, we perform the scrolling algorithm in order to reproduce the same behavior every time the command is run.
 
 {% note info %}
 This scrolling logic only applies to {% urlHash "commands that are actionable above" Actionability %}. **We do not scroll elements** into view when using DOM commands such as {% url "`cy.get()`" get %} or {% url "`.find()`" find %}.
 {% endnote %}
 
-However, the scrolling algorithm works by scrolling the very top pixel to the highest scrollable point. Remember, Cypress tests are meant to be deterministic. Tests should always run the same way every time. Even if an element is 'already' visible, it could be in that position indeterminately, and therefore we always scroll it the same way.
+The scrolling algorithm works by scrolling the top, leftmost point of the element we issued the command on to the top, leftmost scrollable point of it's scrollable container.
 
-However, when we "scroll" the page that can actually create other issues that we account for.
+However, this scrolling behavior can sometimes create other issues. For instance, when Cypress calculates that the element to interact with is being covered by a parent element, then we "nudge" it's container by scrolling it a tiny bit.
 
-For instance, when we calculate that the element is currently being covered by a parent element, then we'll actually "nudge" the page by scrolling it a tiny bit.
-
-This most often happens when you have a "sticky nav" that is fixed to the top of the page. By scrolling the element to the top, it can sometimes end up "underneath" this nav.
-
-Our algorithm *should* detect this and will continually "nudge" the page by scrolling the page over and over until the element is no longer hidden.
+This most often happens when you have a "sticky nav" that is fixed to the top of the page. By Cypress scrolling the element to the top, it can sometimes end up "underneath" this nav. Our algorithm *should* detect this and scroll until the element is no longer covered.
 
 ## Coordinates
 
