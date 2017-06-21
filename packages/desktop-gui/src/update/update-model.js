@@ -53,7 +53,7 @@ class Updater {
         result = 'An error occurred updating: \nYou can manually update Cypress by running \'cypress install\' from your terminal or by downloading it again.'
         break
       default:
-        result = ""
+        result = ''
     }
 
     return result
@@ -70,12 +70,12 @@ class Updater {
 
   openUpdateWindow () {
     return ipc.windowOpen({
-      position: "center",
+      position: 'center',
       width: 300,
       height: 240,
       toolbar: false,
-      title: "Updates",
-      type: "UPDATES",
+      title: 'Updates',
+      type: 'UPDATES',
     })
   }
 }
