@@ -23,10 +23,11 @@
     "test-e2e": "run-p --race start cypress",
     "test": "mocha --compilers coffee:@packages/coffee/register --recursive",
     "test-watch": "npm run test --silent -- --watch",
-    "lint": "../node_modules/.bin/eslint --fix *.js cy_scripts/*.js scripts/*.js"
+    "lint": "$(bin-up eslint) --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
     "beeper": "^1.1.1",
+    "bin-up": "^1.0.1",
     "chai": "^4.0.2",
     "cheerio": "^1.0.0-rc.1",
     "colors": "^1.1.2",
