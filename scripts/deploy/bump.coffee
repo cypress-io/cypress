@@ -4,20 +4,7 @@ Promise   = require("bluebird")
 bumpercar = require("@cypress/bumpercar")
 path      = require("path")
 
-ciJson = path.join(__dirname, "support/ci.json")
-creds = fs.readJsonSync(ciJson, "utf8")
-
-## configure a new Bumpercar
-car = bumpercar.create({
-  providers: {
-    travis: {
-      githubToken: creds.githubToken
-    }
-    circle: {
-      circleToken: creds.circleToken
-    }
-  }
-})
+fs = Promise.promisifyAll(fs)
 
 PROVIDERS = {
   circle: [
@@ -43,11 +30,27 @@ PROVIDERS = {
 }
 
 awaitEachProjectAndProvider = (fn) ->
-  promises = _.map PROVIDERS, (projects, provider) ->
-    Promise.map projects, (project) ->
-      fn(project, provider)
+  ciJson = path.join(__dirname, "support/ci.json")
+  creds = fs.readJsonSync(ciJson, "utf8")
 
-  Promise.all(promises)
+  fs.readJsonAsync(ciJson)
+  .then (creds) ->
+    ## configure a new Bumpercar
+    car = bumpercar.create({
+      providers: {
+        travis: {
+          githubToken: creds.githubToken
+        }
+        circle: {
+          circleToken: creds.circleToken
+        }
+      }
+    })
+  .then ->
+    _.map PROVIDERS, (projects, provider) ->
+      Promise.map projects, (project) ->
+        fn(project, provider)
+  .all()
 
 module.exports = {
   version: (version) ->
