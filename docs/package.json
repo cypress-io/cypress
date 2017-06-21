@@ -26,6 +26,7 @@
     "lint": "../node_modules/.bin/eslint --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
+    "beeper": "^1.1.1",
     "chai": "^4.0.2",
     "cheerio": "^1.0.0-rc.1",
     "colors": "^1.1.2",

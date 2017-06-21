@@ -1,9 +1,18 @@
 'use strict'
 const path = require('path')
 const util = require('hexo-util')
+const chalk = require('chalk')
+const beeper = require('beeper')
 const urlGenerator = require('../lib/url_generator')
 
 /* global hexo */
+
+function beepAndLog (err) {
+  beeper(1)
+
+  /* eslint-disable no-console */
+  console.error(chalk.red(err.stack))
+}
 
 hexo.extend.tag.register('note', function (args, content) {
   // {% note info Want to see Cypress in action? %}
@@ -41,6 +50,7 @@ hexo.extend.tag.register('note', function (args, content) {
   .then((markdown) => {
     return `<blockquote class="note ${className}">${header}${markdown}</blockquote>`
   })
+  .catch(beepAndLog)
 }, { async: true, ends: true })
 
 hexo.extend.tag.register('fa', function (args) {
@@ -71,7 +81,7 @@ hexo.extend.tag.register('open_an_issue', function (args) {
 
 hexo.extend.tag.register('issue', function (args) {
   // {% issue 74 'not currently supported' %}
-  
+
   const num = args[0]
 
   const attrs = {
@@ -133,9 +143,9 @@ hexo.extend.tag.register('url', function (args) {
   .then((markdown) => {
     // remove <p> and </p> and \n
     markdown = markdown
-    .split("<p>").join("")
-    .split("</p>").join("")
-    .split("\n").join("")
+    .split('<p>').join('')
+    .split('</p>').join('')
+    .split('\n').join('')
 
     const attrs = {
       href: props.url,
@@ -157,6 +167,7 @@ hexo.extend.tag.register('url', function (args) {
 
       return util.htmlTag('a', attrs, markdown)
     })
+    .catch(beepAndLog)
 
   })
 
@@ -166,4 +177,5 @@ hexo.extend.tag.register('partial', (fileName) => {
   const pathToFile = path.resolve('source', '_partial', `${fileName}.md`)
 
   return hexo.render.render({ path: pathToFile, engine: 'markdown' })
+  .catch(beepAndLog)
 }, { async: true })
