@@ -42,8 +42,7 @@
     "fs-extra": "^2.1.2",
     "husky": "^0.13.4",
     "lint-staged": "^3.6.0",
-    "lodash": "^4.17.4",
-    "pre-git": "^3.15.0"
+    "lodash": "^4.17.4"
   },
   "license": "MIT"
 }

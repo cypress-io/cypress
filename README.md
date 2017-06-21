@@ -151,11 +151,3 @@ $ npm run docker
 cd packages/desktop-gui
 npm rebuild node-sass
 ```
-
-## Git hooks
-
-Pre-commit hook enabled using [pre-git](https://github.com/bahmutov/pre-git#readme),
-configured in [package.json](package.json) and can be skipped
-
-- pre-commit using `-n` option
-- pre-push using `--no-verify` option
