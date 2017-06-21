@@ -1,5 +1,5 @@
 ---
-layout: faq
+layout: toc-top
 title: General Questions
 comments: false
 containerClass: faq

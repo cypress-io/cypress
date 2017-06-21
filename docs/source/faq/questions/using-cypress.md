@@ -1,5 +1,5 @@
 ---
-layout: faq
+layout: toc-top
 title: Using Cypress
 comments: false
 containerClass: faq
