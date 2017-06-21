@@ -148,33 +148,33 @@ cy.get('#my-nonexistent-selector')
 
 ```
 
-This makes Cypress robust and immune to dozens of common problems that occur in other testing tools. Consider all the circumstances that could cause the querying a DOM element to fail:
+This makes Cypress robust and immune to dozens of common problems that occur in other testing tools. Consider all the circumstances that could cause querying a DOM element to fail:
 
 - The DOM has not loaded yet.
 - Your framework hasn't finished bootstrapping.
-- An XHR hasn't completed.
+- An XHR request hasn't responded.
 - An animation hasn't completed.
 - and on and on...
 
-Before, you'd be forced to write custom code to protect against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your code. Not in Cypress! With built-in retrying and {% url 'customizable timeouts' configuration#Timeouts %}, Cypress sidesteps all of these flaky issues.
+Before, you'd be forced to write custom code to protect against any and all of these issues: a nasty mashup of arbitrary waits, conditional retries, and null checks littering your tests. Not in Cypress! With built-in retrying and {% url 'customizable timeouts' configuration#Timeouts %}, Cypress sidesteps all of these flaky issues.
 
 {% note success Core Concept %}
-Cypress wraps all DOM queries with robust retry-and-timeout logic that better suits how real web apps work. We trade a minor change in how we find DOM elements for a major stability upgrade to all our tests. Banishing flake for good!
+Cypress wraps all DOM queries with robust retry-and-timeout logic that better suits how real web apps work. We trade a minor change in how we find DOM elements for a major stability upgrade to all of our tests. Banishing flake for good!
 {% endnote %}
 
 {% note info %}
-In Cypress, when you want to interact with a DOM element directly, call {% url `.then()` then %} and pass a callback function to it that will receive the element as it's first argument. When you need to skip the retry-and-timeout functionality entirely and perform a traditional, synchronous query, you can still use {% url `Cypress.$` $ %}.
+In Cypress, when you want to interact with a DOM element directly, call {% url `.then()` then %} with a callback function that receives the element as it's first argument. When you want to skip the retry-and-timeout functionality entirely and perform traditional work, use {% url `Cypress.$` $ %}.
 {% endnote %}
 
 ## Querying by Text Content
 
-Another way to locate things -- a more human way -- is to look them up by their contents, by what the user would see on the page. For this, there's the handy {% url `cy.contains()` contains %}, for example:
+Another way to locate things -- a more human way -- is to look them up by their content, by what the user would see on the page. For this, there's the handy {% url `cy.contains()` contains %} command, for example:
 
 ```js
 // Find an element in the document containing the text 'New Post'
 cy.contains('New Post')
 
-// Find a child element of the '.main' element containing the text 'New Post'
+// Find an element within '.main' containing the text 'New Post'
 cy.get('.main').contains('New Post')
 ```
 
@@ -186,12 +186,12 @@ If your app is translated into multiple languages, make sure you consider the im
 
 ## When Elements Are Missing
 
-As we showed above, Cypress anticipates the asynchronous nature of web applications and doesn't fail immediately when the first time an element is not found. Instead, Cypress gives your app a window of time to finish whatever it may be doing!
+As we showed above, Cypress anticipates the asynchronous nature of web applications and doesn't fail immediately the first time an element is not found. Instead, Cypress gives your app a window of time to finish whatever it may be doing!
 
-This is known as a `timeout`, and most commands may be customized with specific timeout periods ({% url 'the default timeout is 4 seconds' configuration#Timeouts %}). These Commands will list a `timeout` option in their API documentation, detailing how to set the number of milliseconds you want to continue to try finding the element.
+This is known as a `timeout`, and most commands can be customized with specific timeout periods ({% url 'the default timeout is 4 seconds' configuration#Timeouts %}). These Commands will list a `timeout` option in their API documentation, detailing how to set the number of milliseconds you want to continue to try finding the element.
 
 ```js
-// Give this selector 10 seconds to appear
+// Give this element 10 seconds to appear
 cy.get('.my-slow-selector', { timeout: 10000 })
 ```
 
@@ -220,22 +220,21 @@ cy.get('textarea.post-body')
   .type('This is an excellent post.')
 ```
 
-We're chaining the {% url `.type()` type %} onto the {% url `cy.get()` get %}, applying it to the "subject" yielded from the {% url `cy.get()` get %} command, which will be a DOM element.
+We're chaining the {% url `.type()` type %} onto the {% url `cy.get()` get %}, telling it to type into the "subject" yielded from the {% url `cy.get()` get %} command, which will be a DOM element.
 
 Here are even more action commands Cypress provides to interact with your app:
 
-> {% url `.blur()` blur %}
-> {% url `.focus()` focus %}
-> {% url `.type()` type %}
-> {% url `.clear()` clear %}
-> {% url `.check()` check %}
-> {% url `.uncheck()` uncheck %}
-> {% url `.select()` select %}
-> {% url `.dblclick()` dblclick %}
+- {% url `.blur()` blur %} - Make a focused DOM element blur.
+- {% url `.focus()` focus %} - Focus on a DOM element.
+- {% url `.clear()` clear %} - Clear the value of an input or textarea.
+- {% url `.check()` check %} - Check checkbox(es) or radio(s).
+- {% url `.uncheck()` uncheck %} - Uncheck checkbox(es).
+- {% url `.select()` select %} - Select an `<option>` within a `<select>`.
+- {% url `.dblclick()` dblclick %} - Double-click a DOM element.
 
-These commands make some assumptions about the what the state of the elements should be.
+These commands make {% url "some assumptions" interacting-with-elements %} about what the state of the elements should be.
 
-For examples, when writing a `.click()` command, Cypress ensures that the element is able to be interacted with and will fail in some situations it deems not this is not the case like the element:
+For example, when writing a {% url `.click()` click %} command, Cypress ensures that the element is able to be interacted with and will fail in some situations it deems not this is not the case like the element:
 
 - Not being visible
 - Being covered by another element
@@ -243,13 +242,17 @@ For examples, when writing a `.click()` command, Cypress ensures that the elemen
 
 This also helps prevent flake when interacting with your application in tests. You can usually override this behavior with a `force` option.
 
+{% note info %}
+{% url "Read about how Cypress works when interacting with elements." interacting-with-elements %}
+{% endnote %}
+
 {% note success Core Concept %}
 Cypress exposes common user interactions as commands, making it simple to encapsulate the behaviors you're looking to create. It also expects these commands to be acting on an element that can be interacted with.
 {% endnote %}
 
 ## Asserting About Elements
 
-Assertions let you do things like ensuring an element is visible or has a particular attribute, CSS class, or child. Assertions are just commands that enable you to describe the **desired** state of your application. Cypress will automatically wait until your elements reach this state, or halt the test if the assertions don't pass.  Here's a quick look at assertions in action:
+Assertions let you do things like ensuring an element is visible or has a particular attribute, CSS class, or state. Assertions are just commands that enable you to describe the *desired* state of your application. Cypress will automatically wait until your elements reach this state, or fail the test if the assertions don't pass.  Here's a quick look at assertions in action:
 
 ```js
 cy.get(':checkbox').should('be.disabled')
@@ -272,26 +275,26 @@ Some methods yield `null` and thus cannot be chained, such as {% url `cy.clearCo
 Some methods, such as {% url `cy.get()` get %} or {% url `cy.contains()` contains %}, yield a DOM element, allowing further commands to be chained onto them (assuming they expect a DOM subject) like {% url `.click()` click %} or even {% url `cy.contains()` contains %} again.
 
 ***Some commands can be chained:***
-- From `cy` only, meaning they don't operate on a subject: {% url `cy.clearCookies()` clearcookies %}
-- From commands yielding particular kinds of subjects (like DOM elements): {% url `.type()` type %}
-- From both `cy` *or* from a subject-yielding command: {% url `cy.contains()` contains %}
+- From `cy` only, meaning they don't operate on a subject: {% url `cy.clearCookies()` clearcookies %}.
+- From commands yielding particular kinds of subjects (like DOM elements): {% url `.type()` type %}.
+- From both `cy` *or* from a subject-yielding command: {% url `cy.contains()` contains %}.
 
 
 ***Some commands yield:***
-- `null`, meaning no command can be chained after the command: {% url `.screenshot()` screenshot %}
-- The same subject they were originally yielded: {% url `.then()` then %}
-- A new subject, as appropriate for the command {% url `.wait()` wait %}
+- `null`, meaning no command can be chained after the command: {% url `.screenshot()` screenshot %}.
+- The same subject they were originally yielded: {% url `.then()` then %}.
+- A new subject, as appropriate for the command {% url `.wait()` wait %}.
 
 This is actually much more intuitive than how it sounds.
 
-Examples:
+***Examples:***
 
 ```js
-cy.clearCookies()             // Done: 'null' was yielded, thus no chaining possible
+cy.clearCookies()         // Done: 'null' was yielded, no chaining possible
 
-cy.get('.main-container')     // Yields an array of matching DOM elements
-  .contains('Headlines')      // Yields the first DOM element containing content
-  .click()                    // Yields same DOM element from previous command
+cy.get('.main-container') // Yields an array of matching DOM elements
+  .contains('Headlines')  // Yields the first DOM element containing content
+  .click()                // Yields same DOM element from previous command
 ```
 
 {% note success Core Concept %}
@@ -304,9 +307,9 @@ To work around the need to reference elements, Cypress has a feature {% url 'kno
 
 **Using {% url `.then()` then %} To Act On A Subject**
 
-Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a {% url '`.then((subject) => { ... })`' type %} to your command chain. When the previous command resolves, it will call your callback function with the yielded subject as the first argument.
+Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a {% url '`.then(() => {...})`' type %} to your command chain. When the previous command resolves, it will call your callback function with the yielded subject as the first argument.
 
-If you wish to continue chaining commands after your {% url `.then()` then %}, you'll need to specify the subject you want to yield to those commands, which you can achieve by a simple return value other than `null` or `undefined`. Cypress will yield that to the next command for you.
+If you wish to continue chaining commands after your {% url `.then()` then %}, you'll need to specify the subject you want to yield to those commands, which you can achieve with a simple return value other than `null` or `undefined`. Cypress will yield that to the next command for you.
 
 ***Let's look at an example:***
 
@@ -322,7 +325,7 @@ cy.get('#some-link') // Find the el with id 'some-link'
 
 **Using Aliases to Refer to Previous Subjects**
 
-Cypress has some added functionality for quickly referring back to past DOM element subjects called [Aliases](/guides.html). It looks something like this:
+Cypress has some added functionality for quickly referring back to past subjects called [Aliases](/guides.html). It looks something like this:
 
 ```js
 cy.get('.my-selector')
@@ -331,11 +334,11 @@ cy.get('.my-selector')
 
 /* many more actions */
 
-cy.get('@myElement') // re-queries the DOM as before only if necessary
+cy.get('@myElement') // re-queries the DOM as before (only if necessary)
   .click()
 ```
 
-This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us when it is not in the DOM. This is particularly helpful when dealing with front-end frameworks that do a lot of re-rendering!
+This lets us reuse our DOM queries for faster tests when the element is still in the DOM, and it automatically handles re-querying the DOM for us when it is not immediately found in the DOM. This is particularly helpful when dealing with front-end frameworks that do a lot of re-rendering!
 
 ## Commands Are Asynchronous
 
@@ -366,35 +369,32 @@ Each Cypress command (and chain of commands) returns immediately, having only ap
 
 You purposefully **cannot** do anything useful with the return value from a command. Commands are enqueued and managed entirely behind the scenes.
 
-We've designed our API's this way because the DOM is a highly mutable object which constantly goes stale. For Cypress to prevent flake, and know when to proceed, it must manage commands in a highly controlled deterministic way.
+We've designed our API this way because the DOM is a highly mutable object that constantly goes stale. For Cypress to prevent flake, and know when to proceed, we manage commands in a highly controlled deterministic way.
 {% endnote %}
 
 ## Commands Run Serially
 
 After a test function is finished running, Cypress goes to work executing the commands that were enqueued using the `cy.*` command chains. The test above would cause an execution in this order:
 
-1. Visit a URL
-2. Find an element by its selector
-3. Perform a click action on that element
-4. Grab the URL
-5. Assert the URL to include a specific *string*
+1. Visit a URL.
+2. Find an element by its selector.
+3. Perform a click action on that element.
+4. Grab the URL.
+5. Assert the URL to include a specific *string*.
 
-These actions will always happen serially (one after the other), never in parallel (at the same time). Why? To illustrate this, let's revisit that list of actions and expose some of the hidden magic Cypress does for us at each step:
+These actions will always happen serially (one after the other), never in parallel (at the same time). Why?
 
-1. Visit a URL
-  - **and wait for the `onload` event to fire after all external resources have loaded**
-2. Find an element by its selector
-  - **and retry repeatedly until it is found in the DOM**
-3. Perform a click action on that element
-  - **after we first ensure that element is 'actionable' by not being covered, hidden, or disabled**
-4. Grab the URL
-  - **then pass this URL to the subsequent assertion**
-5. Assert the URL to include a specific *string*
-  - **and retry repeatedly until the assertion passes**
+To illustrate this, let's revisit that list of actions and expose some of the hidden ✨magic✨ Cypress does for us at each step:
+
+1. Visit a URL ✨**and wait for the `onload` event to fire after all external resources have loaded**✨
+2. Find an element by its selector ✨**and retry repeatedly until it is found in the DOM**✨
+3. Perform a click action on that element ✨**after we first ensure that element is {% url "'actionable'" interacting-with-elements %} by not being covered, hidden, or disabled**✨
+4. Grab the URL ✨**then pass this URL to the subsequent assertion**✨
+5. Assert the URL to include a specific *string* ✨**and retry repeatedly until the assertion passes**✨
 
 As you can see, Cypress does a lot of extra work to ensure the state of the application matches what our commands expect about it. Each command may resolve quickly (so fast you won't see them in a pending state) but others may take seconds, or even dozens of seconds to resolve.
 
-While most commands time out after a few seconds, other specialized commands that expect particular things to take much longer like {% url `cy.visit` visit %} will naturally wait considerably longer before timing out.
+While most commands time out after a few seconds, other specialized commands that expect particular things to take much longer like {% url `cy.visit()` visit %} will naturally wait longer before timing out.
 
 These commands have their own particular timeout values which are documented in our {% url 'configuration' configuration %}.
 
@@ -442,91 +442,87 @@ it('changes the URL when "awesome" is clicked', function() {
 })
 ```
 
-Big difference! The Promise demonstration is not real code (so don't try it), but it gives an idea the magnitude of what Cypress handles for you behind the scenes. In reality, Cypress does more than this, because Promises themselves have no concepts of retry-ability.
+Big difference! The Promise demonstration is not real code (so don't try it), but it gives an idea of the magnitude of what Cypress handles for you behind the scenes. In reality, Cypress does more than this, because Promises themselves have no concepts of retry-ability.
 
 Normal assertions would fail instantly and you'd get inconsistent (flaky) results. By embracing Cypress's API you can rest assured that we're doing everything in our power to prevent flake.
 
 {% note success Core Concept %}
-Cypress is built using Promises internally (with Bluebird), but you (the developer testing with Cypress) should not have to wrap or reach for your own custom Promises the vast majority of the time.
+Cypress is built using Promises internally (with {% url "Bluebird" http://bluebirdjs.com/ %}), but you (the developer testing with Cypress) should not have to wrap or include your own custom Promises the vast majority of the time.
 {% endnote %}
 
 ## Commands Are Not Promises
 
 The Cypress API is not an exact 1:1 implementation of Promises. They have Promise like qualities and yet there are important differences you should be aware of.
 
-1. You cannot **race** or run multiple commands at the same time (in parallel)
-2. You cannot 'accidentally' forget to return or chain a command
-3. You cannot add a `.catch` error handler to a failed command
+1. You cannot **race** or run multiple commands at the same time (in parallel).
+2. You cannot 'accidentally' forget to return or chain a command.
+3. You cannot add a `.catch` error handler to a failed command.
 
-There are *very* specific reasons these limitations are built into the Cypress API (it's not like we just forgot to implement those features).
+There are *very* specific reasons these limitations are built into the Cypress API.
 
-The whole point of Cypress (and what makes it very different from other tools) is to create consistent, non-flaky tests that perform identically from one run to next. Making this happen isn't free - there are some trade-offs we must make that may initially seem unfamiliar to developers accustom to working with Promises.
+The whole intention of Cypress (and what makes it very different from other testing tools) is to create consistent, non-flaky tests that perform identically from one run to the next. Making this happen isn't free - there are some trade-offs we make that may initially seem unfamiliar to developers accustom to working with Promises.
 
-Let's take a look at each one in depth:
+Let's take a look at each trade-off in depth:
 
 ***You cannot race or run multiple commands at the same time***
 
-Cypress gives us **guarantee** that it will execute all of its commands **deterministically** and identically the same way every single time.
+Cypress guarantees that it will execute all of its commands *deterministically* and identically every time they are run.
 
-Most Cypress commands *mutate* the state of the browser in some way.
+A lot of Cypress commands *mutate* the state of the browser in some way.
 
-- {% url `cy.request()` request %} automatically gets + sets cookies to and from the remote server
-- {% url `cy.clearCookies()` clearcookies %} will clear all of the browser cookies
-- {% url `.click()` click %} will cause your application to react to click events
+- {% url `cy.request()` request %} automatically gets + sets cookies to and from the remote server.
+- {% url `cy.clearCookies()` clearcookies %} clears all of the browser cookies.
+- {% url `.click()` click %} causes your application to react to click events.
 
-None of the above commands are **idempotent**, they all cause side effects. It makes no sense to race commands because commands must be run in a controlled, serial manner in order to create consistency. Because integration and e2e tests primarily represent the actions of a real user, Cypress models its command execution model after a real user working step by step.
+None of the above commands are *idempotent*, they all cause side effects. Racing commands is not possible because commands are run in a controlled, serial manner in order to create consistency. Because integration and e2e tests primarily mimic the actions of a real user, Cypress models its command execution model after a real user working step by step.
 
 ***You cannot accidentally forget to return or chain a command***
 
-In real promises it's very easy to 'lose' a nested Promise if you don't return it and chain it correctly.
+In real promises it's very easy to 'lose' a nested Promise if you don't return it or chain it correctly.
 
-Let's imagine the following `node.js` code
+Let's imagine the following `node.js` code:
 
 ```js
 // assuming we've promisified our fs module
 return fs.readFile('/foo.txt', 'utf8')
 .then((txt) => {
   // oops we forgot to chain / return this Promise
-  // so it essentially becomes 'untrackable and lost'.
+  // so it essentially becomes 'lost'.
   // this can create bizarre race conditions and
-  // bugs that are incredibly difficult to track down
+  // bugs that are difficult to track down
   fs.writeFile('/foo.txt', txt.replace("foo", "bar"))
 
   return fs.readFile("/bar.json")
   .then((json) => {
-    ...
+    // ...
   })
 })
 ```
 
-The reason this is even possible to do in the Promise world is because you have the power to execute multiple asynchronous actions in parallel.
+The reason this is even possible to do in the Promise world is because you have the power to execute multiple asynchronous actions in parallel. Under the hood, each promise 'chain' returns a promise instance that tracks the relationship between linked parent and child instances.
 
-Under the hood, each promise 'chain' returns a promise instance which tracks the relationship between linked parent and child instances.
+Because Cypress enforces commands to run *only* serially, you do not need to be concerned with this in Cypress. We enqueue all commands onto a *global* singleton. Because there is only ever a single command queue instance, its impossible for commands to ever be *'lost'*.
 
-Because Cypress enforces commands to run *only* serially, this concern does not exist in Cypress. Instead we enqueue all commands onto a **global** singleton. Because there is only ever a single command queue instance, its impossible for commands to ever be *untracked or lost*.
-
-You can simply think of Cypress as "queueing" every command you issue. Eventually they'll get run and in the exact order they were called, 100% of the time.
+You can think of Cypress as "queueing" every command. Eventually they'll get run and in the exact order they were used, 100% of the time.
 
 There is no need to ever `return` Cypress commands.
 
 ***You cannot add a `.catch` error handler to a failed command***
 
-In Cypress there **is no error recovery from a failed command**. A command and its assertions all **eventually** pass, or if one fails, all remaining commands are not run, and the test fails.
+In Cypress there is no built in error recovery from a failed command. A command and its assertions all *eventually* pass, or if one fails, all remaining commands are not run, and the test fails.
 
-We are regularly asked:
+You might be wondering:
 
-> How do I create control flow (if / else) where if an element does (or doesn't) exist, I do something different?
+> How do I create control flow, using if/else? So that if an element does (or doesn't) exist, I choose what to do?
 
-While that may seem like a reasonable question, it's actually completely non-deterministic and it's impossible for a script (or robot) to follow this logic 100% consistently.
+But, this control flow ends up being non-deterministic and, for a script (or robot), is impossible to follow 100% consistently.
 
-In general, there are only a handful of very specific situations where you **can** create control flow.
-
-Asking to recover from errors is actually just asking for another `if/else` control flow.
+In general, there are only a handful of very specific situations where you *can* create control flow. Asking to recover from errors is actually just asking for another `if/else` control flow.
 
 With that said, as long as you are aware of the potential pit falls with control flow, it is possible to do this in Cypress!
 
-{% note info %}
-We are working on a new guide to better explain what we mean. We'll provide specific examples where you **can** create deterministic control flow without slowing down your tests or recovering from errors. Sit tight, details to come!
+{% note success Core Concept %}
+Cypress is built using Promises internally (with {% url "Bluebird" http://bluebirdjs.com/ %}), but you (the developer testing with Cypress) should not have to wrap or include your own custom Promises the vast majority of the time.
 {% endnote %}
 
 # Assertions
@@ -541,12 +537,12 @@ cy.get('button').click().should('have.class', 'active')
 
 ...or...
 
-> After making an HTTP request to my server, I expect the response body to equal `{ name: 'Bob' }`
+> After making an HTTP request to my server, I expect the response body to equal `{name: 'Jane'}`
 
 ...and in code...
 
 ```js
-cy.request("/users/1").its('body').should('deep.eq', { name: 'Bob' })
+cy.request("/users/1").its('body').should('deep.eq', {name: 'Jane'})
 ```
 
 The idea is to throw an error if the condition is ever _not_ true.
@@ -573,10 +569,12 @@ cy.get('form')
 
 Without a single explicit assertion, there are dozens of ways this test can fail! Here's a few:
 
-- The initial visit url could respond with something other than success
-- Any of the {% url `cy.get()` get %} commands could fail to find their elements
-- Form submission could result in a non-success HTTP code
-- The in-page JS (the application under test) could throw an error
+- The initial visit url could respond with something other than success.
+- Any of the {% url `cy.get()` get %} commands could fail to find their elements in the DOM.
+- The element we want to {% url `.click()` click %} on could be covered by another element.
+- The input we want to {% url `.type()` type %} into could be disabled.
+- Form submission could result in a non-success HTTP code.
+- The in-page JS (the application under test) could throw an error.
 
 Can you think of any more?
 
@@ -591,13 +589,13 @@ As such, it may help to relax your test-obsessed mind and take a leisurely drive
 
 ## List of Assertions
 
-Cypress wraps `Chai`, `Chai-jQuery`, and `Sinon-Chai` to provide the built-in assertions. You can learn more in {% url 'the list of assertions reference' assertions %}. You can also write your own assertions as Chai plugins and use them in Cypress.
+Cypress wraps {% url "`Chai`" bundled-tools#Chai %}, {% url "`Chai-jQuery`" bundled-tools#Chai-jQuery %}, and {% url "`Sinon-Chai`" bundled-tools#Sinon-Chai %} to provide built-in assertions. You can learn more in {% url 'the list of assertions reference' assertions %}. You can also {% url "write your own assertions as Chai plugins" extending-cypress %} and use them in Cypress.
 
 ## Writing Assertions
 
 There are two ways to write assertions in Cypress:
 
-1. **Implicit Subjects:** Using {% url `.should()` should %} or {% url `.and()` and %}
+1. **Implicit Subjects:** Using {% url `.should()` should %} or {% url `.and()` and %}.
 2. **Explicit Subjects:** Using `expect`.
 
 {% note info Assertion Libraries %}
@@ -607,7 +605,7 @@ Cypress bundles {% url 'popular assertion libraries' assertions %} for you, and 
 
 ## Implicit Subjects
 
-Using {% url `.should()` should %} or {% url `.and()` and %} commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the current subject in the command chain.
+Using {% url `.should()` should %} or {% url `.and()` and %} commands is the preferred way of making assertions in Cypress. These are typical Cypress commands, which means they apply to the currently yielded subject in the command chain.
 
 ```javascript
 // the implicit subject here is the first <tr>
@@ -623,15 +621,15 @@ cy.get('#header a')
   .and('have.attr', 'href', '/users')
 ```
 
-Because `.should('have.class', ...)` does not change the subject, the `.and('have.attr', ...)` is executed against the same element. This is handy when you need to assert multiple things against a single subject quickly, but there are pitfalls...
+Because {% url "`.should('have.class', ...)`" should %} does not change the subject, the {% url "`.and('have.attr', ...)`" and %} is executed against the same element. This is handy when you need to assert multiple things against a single subject quickly, but there are pitfalls...
 
 {% note danger Beware: Assertions That Change The Subject %}
-Some assertions modify the current subject unexpectedly. For example, the line `cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `<a>` element to the string `"/users"`. This is because Cypress honors the return value of the assertion, and `have.attr` is a `Chai-jQuery` assertion that returns the matched string instead of the original subject. This can be surprising!
+Some assertions modify the current subject unexpectedly. For example,
+`cy.get('a').should('have.attr', 'href', '/users')` modifies the subject from the `<a>` element to the string `"/users"`.
 
-**Note:** This behavior is actually going away in the next release: `0.20.0`. We'll update these docs once that change is in.
+This is because Cypress honors the return value of the assertion, and `have.attr` is a {% url "`Chai-jQuery`" assertions#Chai-jQuery %} assertion that returns the matched string instead of the original subject. This can be surprising!
 
-Whenever you have failing assertions and don't understand why, click the line in the Cypress Command Log on the left side of the GUI. Cypress will print details to the browser console to help you troubleshoot what is going on.
-
+Whenever you have failing assertions and don't understand why, click the command in the Cypress {% url "Command Log" overview-of-the-gui#Command-Log %}. Cypress will print details to the browser console to help you troubleshoot what is going on.
 {% endnote %}
 
 If we wrote this assertion in the explicit form "the long way", it would look like this:
@@ -660,10 +658,10 @@ Check out our example recipes for {% url 'unit testing' unit-testing %} and {% u
 
 Explicit assertions are great when you want to:
 
-- Perform custom logic prior to making the assertion
-- Make multiple assertions against the same subject
+- Perform custom logic prior to making the assertion.
+- Make multiple assertions against the same subject.
 
-The {% url `.should()` should %} command allows us to pass a function that will be yielded the subject. This works just like {% url `.then()` then %}, except Cypress will automatically wait for the everything inside of the callback function to pass.
+The {% url `.should()` should %} command allows us to pass a callback function that takes the yielded subject as it's first argument. This works just like {% url `.then()` then %}, except Cypress automatically waits for everything inside of the callback function to pass before moving on in the command chain.
 
 ```javascript
 cy
@@ -675,13 +673,13 @@ cy
     })
 
     // jquery map returns jquery object
-    // and .get() convert this to simple array
+    // and .get() converts this to a simple array
     var texts = texts.get()
 
     // array should have length of 3
     expect(texts).to.have.length(3)
 
-    // set this specific subject
+    // with this specific content
     expect(texts).to.deep.eq([
       'Some text from first p',
       'More text from second p',
@@ -691,31 +689,30 @@ cy
 ```
 
 {% note danger Make sure `.should()` is safe %}
-When using a function passed to {% url `.should()` should %}, be sure that the entire function can be executed multiple times without issue. Cypress applies its retry logic to these functions: so long as there's a failure, it will repeatedly try again until the timeout is reached. That means your code should be retry-safe. The technical term for this means your code must be **idempotent**.
-
+When using a callback function with {% url `.should()` should %}, be sure that the entire function can be executed multiple times without side effects. Cypress applies its retry logic to these functions: if there's a failure, it will repeatedly rerun the assertions until the timeout is reached. That means your code should be retry-safe. The technical term for this means your code must be **idempotent**.
 {% endnote %}
 
 ## Default Assertions
 
-Many commands have a default, built-in assertion, or rather have requirements that may cause it to fail without an assertion you've written.
+Many commands have a default, built-in assertion, or rather have requirements that may cause it to fail without an explicit assertion you've written.
 
-For instance:
+**For instance:**
 
-- {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code
-- {% url `cy.request()` request %} expects the remote server to exist and provide a response
-- {% url `cy.get()` get %} expects the element to eventually exist in the DOM
-- {% url `.find()` find %} also expects the element to eventually exist in the DOM
-- {% url `.type()` type %} expects the element to eventually be *typeable*
-- {% url `.click()` click %} expects the element to eventually be in an *actionable* state
-- {% url `.its()` its %} expects to find a property on the current subject
+- {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code.
+- {% url `cy.request()` request %} expects the remote server to exist and provide a response.
+- {% url `cy.get()` get %} expects the element to exist in the DOM.
+- {% url `.find()` find %} also expects the element to exist in the DOM.
+- {% url `.type()` type %} expects the element to be in a *typeable* state.
+- {% url `.click()` click %} expects the element to be in an *actionable* state.
+- {% url `.its()` its %} expects to find a property on the current subject.
 
-Certain commands may have a specific requirement that causes them to immediately fail: such as {% url `cy.request()` request %}. Others, such as DOM based commands will automatically retry and wait for the DOM to reach the desired state before failing.
+Certain commands may have a specific requirement that causes them to immediately fail: such as {% url `cy.request()` request %}. Others, such as DOM based commands will automatically retry and wait for the DOM to {% url "reach the desired state" interacting-with-elements %} before failing.
 
 {% note success Core Concept %}
-All DOM based commands automatically wait for their elements to exist in the DOM.
+All DOM based commands automatically wait for their elements to exist in the DOM. So you should **never** need to write {% url "`.should('exist')`" should %}.
 {% endnote %}
 
-These rules are pretty intuitive, and most commands give you flexibility to override or bypass the default ways they can fail, typically by passing the `{ force: true }` option.
+These rules are pretty intuitive, and most commands give you flexibility to override or bypass the default ways they can fail, typically by passing a `{force: true}` option.
 
 ***Example #1: Existence and Actionability***
 
@@ -730,23 +727,21 @@ cy
   .click()
 ```
 
-Cypress will automatically **wait** for elements to reach stable states before giving up and failing. Just like with regular assertions you've added, these default assertions all share the **same** timeout values.
+Cypress will automatically *wait* for elements to {% url "reach a desired state" interacting-with-elements %} before giving up and failing. Just like with regular assertions you've added, these default assertions all share the *same* timeout values.
 
 ***Example #2: Reversing the Default Assertion***
 
-Most of the time, when querying for elements you expect them to eventually exist. But sometimes you wish to wait until they **don't** exist.
+Most of the time, when querying for elements you expect them to eventually exist. But sometimes you wish to wait until they *don't* exist.
 
-All you have to do is simply add that assertion and Cypress will *reverse* its rules waiting for elements to exist.
+All you have to do is add that assertion and Cypress will *reverse* its rules waiting for elements to exist.
 
 ```js
 // now Cypress will wait until this
-// <button.close> is removed from the
-// DOM after the click
+// <button> is not in the DOM after the click
 cy.get('button.close').click().should('not.exist')
 
-// and now make sure this <#modal>
-// does not exist in the DOM and
-// automatically wait until it's gone!
+// and now make sure this #modal does not exist in the DOM
+// and automatically wait until it's gone!
 cy.get('#modal').should('not.exist')
 ```
 
@@ -756,15 +751,12 @@ cy.get('#modal').should('not.exist')
 // create an empty object
 const obj = {}
 
-// set the 'foo' property
-// after 1 second
+// set the 'foo' property after 1 second
 setTimeout(() => {
   obj.foo = 'bar'
 }, 1000)
 
-// .its() will wait until
-// the 'foo' property is
-// on the object
+// .its() will wait until the 'foo' property is on the object
 cy.wrap(obj).its('foo')
 ```
 
@@ -776,29 +768,26 @@ All assertions, whether they're the default ones or whether they've been added b
 
 ## Applying Timeouts
 
-You can modify a commands timeout which affect both its default assertions (if any) or specific assertions you've added.
+You can modify a command's timeout. This timeout affects both it's default assertions (if any) and any specific assertions you've added.
 
-Remember because assertions are used to describe a condition of the proceeding commands - the `timeout` modification goes on those commands **not the assertions**.
+Remember because assertions are used to describe a condition of the previous commands - the `timeout` modification goes on the previous commands *not the assertions*.
 
 ***Example #1: Default Assertion***
 
 ```js
-// because this has a default assertion
-// that this element must exist, then
-// it can time out and fail
+// because .get() has a default assertion
+// that this element exists, it can time out and fail
 cy.get('.mobile-nav')
 ```
 
 Under the hood Cypress:
 
-- Queries for the element: `.mobile-nav`
-  - **...and waits up to 4 seconds for it to exist in the DOM**
+- Gets the element `.mobile-nav` ✨**and waits up to 4 seconds for it to exist in the DOM**✨
 
 ***Example #2: Additional Assertions***
 
 ```js
-// we've added 2 new assertions
-// that we wrote ourselves
+// we've added 2 assertions to our test
 cy
   .get('.mobile-nav')
   .should('be.visible')
@@ -807,20 +796,19 @@ cy
 
 Under the hood Cypress:
 
-- Queries for the element: `.mobile-nav`
-  - **...and waits up to 4 seconds for it to exist in the DOM**
-  - **...and waits up to 4 seconds for it to be visible**
-  - **...and waits up to 4 seconds for it to contain the text: 'Home'**
+- Gets the element `.mobile-nav`
+  ✨**and waits up to 4 seconds for it to exist in the DOM**✨
+  ✨**and waits up to 4 seconds for it to be visible**✨
+  ✨**and waits up to 4 seconds for it to contain the text: 'Home'**✨
 
-The **total** amount of time Cypress will wait for **all** of the assertions to pass is **4 seconds**.
+The *total* amount of time Cypress will wait for *all* of the assertions to pass is for the duration of the {% url "`cy.get()`" get %} `timeout` (which is 4 seconds).
 
-Timeouts can be modified per command and this will affect all default assertions **and any assertions chained to that command**.
+Timeouts can be modified per command and this will affect all default assertions and any assertions chained after that command.
 
 ***Example #3: Modifying Timeouts***
 
 ```js
-// we've modified the timeout which
-// affects default + added assertions
+// we've modified the timeout which affects default + added assertions
 cy
   .get('.mobile-nav', { timeout: 10000 })
   .should('be.visible')
@@ -829,41 +817,36 @@ cy
 
 Under the hood Cypress:
 
-- Queries for the element: `.mobile-nav`
-  - **...and waits up to 10 seconds for it to exist in the DOM**
-  - **...and waits up to 10 seconds for it to be visible**
-  - **...and waits up to 10 seconds for it to contain the text: 'Home'**
+- Gets the element `.mobile-nav`
+  ✨**and waits up to 10 seconds for it to exist in the DOM**✨
+  ✨**and waits up to 10 seconds for it to be visible**✨
+  ✨**and waits up to 10 seconds for it to contain the text: 'Home'**✨
 
-Notice that this timeout has flowed down to all assertions and Cypress will now wait **up to 10 seconds total** for all of them to pass.
+Notice that this timeout has flowed down to all assertions and Cypress will now wait *up to 10 seconds total* for all of them to pass.
 
 ## Default Values
 
-Cypress offers several different timeout values based on different types of commands.
+Cypress offers several different timeout values based on the type of command.
 
-We've optimized their timeouts based on how long we expect certain actions to take.
+We've set their default timeout durations based on how long we expect certain actions to take.
 
 For instance:
-- {% url `cy.visit()` visit %} loads a remote page and does not resolve *until all of the external resources complete their loading phase*. This may take awhile and its why its timeout is set to `60000ms`.
-- {% url `cy.exec()` exec %} runs a system command such as *seeding a database*. We expect this to potentially take a long time, and its timeout is set to `60000ms`.
-- {% url `cy.wait()` wait %} actually uses **two** different timeouts. When waiting for a {% url 'routing alias' aliases-and-references#Aliasing-Routes %} we wait first for a matching request `5000ms`, and then additionally for the server's response `30000ms`. These are different because their context is different. We expect your application to make a matching request quickly, but we expect the server's response to potentially take much longer.
+- {% url `cy.visit()` visit %} loads a remote page and does not resolve *until all of the external resources complete their loading phase*. This may take awhile, so it's default timeout is set to `60000ms`.
+- {% url `cy.exec()` exec %} runs a system command such as *seeding a database*. We expect this to potentially take a long time, and it's default timeout is set to `60000ms`.
+- {% url `cy.wait()` wait %} actually uses 2 different timeouts. When waiting for a {% url 'routing alias' aliases-and-references#Aliasing-Routes %}, we wait for a matching request for `5000ms`, and then additionally for the server's response for `30000ms`. We expect your application to make a matching request quickly, but we expect the server's response to potentially take much longer.
 
-That leaves most other commands including all DOM based commands to time out after only **4000ms**.
+That leaves most other commands including all DOM based commands to time out by default after 4000ms.
 
-{% note info Why only 4 seconds? That sounds low! %}
-Many of our users who have used other testing frameworks often remark at how low this value is. In fact we regularly see our own users increasing it sometimes up to 25x!
+**Why only 4 seconds? That sounds low!**
 
-**So why is it so low?**
-
-We are subtly trying to communicate to you how to properly test your application.
+If you've used other testing frameworks, you might wonder why this value is so low. In fact we regularly see our some users initially increasing it sometimes up to 25x!
 
 You shouldn't need to wait for your application to render DOM elements for more than 4 seconds!
 
 Let's look at why you're likely wanting to increase this, and some best practices.
 
-The most common scenario is that DOM elements render **after** a series of network requests. The network requests themselves must go over the internet, leaving them susceptible to be potentially slow.
+The most common scenario is that DOM elements render *after* a series of network requests. The network requests themselves must go over the internet, leaving them susceptible to be potentially slow.
 
 One of the typical anti-patterns we see is not properly
 
-One of the typical hurdles you will need to overcome is **slow tests**.
-
-{% endnote %}
+One of the typical hurdles you will need to overcome is *slow tests*.
