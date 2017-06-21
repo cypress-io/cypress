@@ -71,6 +71,23 @@
   }
 }
 
+#article-toc-top {
+  margin-top: 2em;
+  font-size: 0.9em;
+  text-decoration: none;
+  color: $color-link;
+  display: block;
+  margin-bottom: 40px;
+  font-family: $font-sans;
+  &:hover {
+    color: $color-link-hover;
+  }
+}
+
+.toc, .toc-item {
+  list-style: none;
+}
+
 .active>.toc-link {
   font-weight: 500;
   border-left: 4px solid $color-link;
