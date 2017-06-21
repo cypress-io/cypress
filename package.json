@@ -9,6 +9,8 @@
   "scripts": {
     "start": "node ./scripts/start.js",
     "watch": "npm run all watch",
+    "deps": "deps-ok",
+    "prebuild": "npm run deps",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
@@ -22,13 +24,17 @@
     "precommit-lint": "eslint --fix --rule 'no-only-tests/no-only-tests: 2'"
   },
   "lint-staged": {
-    "*.js": ["precommit-lint", "git add"]
+    "*.js": [
+      "precommit-lint",
+      "git add"
+    ]
   },
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.4",
     "ascii-table": "0.0.9",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.5",
+    "deps-ok": "^1.2.0",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-no-only-tests": "levibuzolic/eslint-plugin-no-only-tests#dbb7270c4f48e33081729c0ef076441b39f35487",
