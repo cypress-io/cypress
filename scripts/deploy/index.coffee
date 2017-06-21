@@ -1,3 +1,6 @@
+## store the cwd
+cwd = process.cwd()
+
 _        = require("lodash")
 os       = require("os")
 chalk    = require("chalk")
@@ -17,6 +20,9 @@ success = (str) ->
 
 fail = (str) ->
   console.log chalk.bgRed(" " + chalk.black(str) + " ")
+
+## hack for server modifying cwd
+process.chdir(cwd)
 
 deploy = {
   zip:    zip
@@ -82,22 +88,22 @@ deploy = {
     ## read off the argv
     options = @parseOptions(process.argv)
 
-    ask.whichPlatform()
+    ask.whichPlatform(options.platform)
     .then (o) =>
-      ask.deployNewVersion()
+      ask.deployNewVersion(options.version)
       .then (version) =>
         options.version = version
 
         @getPlatform(o, options).deploy()
-      .then (platform) =>
-        zip.ditto(platform)
-        .then =>
-          upload.toS3(platform)
-          .then ->
-            success("Dist Complete")
-          .catch (err) ->
-            fail("Dist Failed")
-            console.log(err)
+      # .then (platform) =>
+        # zip.ditto(platform)
+        # .then =>
+        #   upload.toS3(platform)
+        #   .then ->
+        #     success("Dist Complete")
+        #   .catch (err) ->
+        #     fail("Dist Failed")
+        #     console.log(err)
 
 }
 

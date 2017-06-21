@@ -91,7 +91,9 @@ module.exports = {
       }]
     }]
 
-  deployNewVersion: ->
+  deployNewVersion: (version) ->
+    return Promise.resolve(version) if version
+
     fs.readJsonAsync("./package.json")
     .then (json) =>
       prompt(@getQuestions(json.version))
@@ -128,7 +130,9 @@ module.exports = {
       prompt(@getReleases(versions))
       .get("release")
 
-  whichPlatform: ->
+  whichPlatform: (platform) ->
+    return Promise.resolve(platform) if platform
+
     prompt(@getPlatformQuestion())
     .get("platform")
 

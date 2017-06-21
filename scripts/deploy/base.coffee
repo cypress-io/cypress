@@ -20,7 +20,13 @@ Fixtures     = require("@packages/server/test/support/helpers/fixtures")
 
 # pkgr     = Promise.promisify(pkgr)
 fs       = Promise.promisifyAll(fs)
+glob     = Promise.promisify(glob)
 zipName  = "cypress.zip"
+
+DEFAULT_PATHS = "node_modules package.json".split(" ")
+
+pathToPackageJson = (pkg) ->
+  path.join(pkg, "package.json")
 
 class Base
   constructor: (os, @options = {}) ->
@@ -47,8 +53,10 @@ class Base
   getVersion: ->
     @options.version ? fs.readJsonSync(@distDir("package.json")).version
 
-  copyFiles: ->
-    @log("#copyFiles")
+  copyPackages: ->
+    @log("#copyPackages")
+
+    dist = @distDir()
 
     copy = (src, dest) =>
       dest ?= src
@@ -56,81 +64,105 @@ class Base
 
       fs.copyAsync(src, dest)
 
+    copyRelativePathToDist = (relative) ->
+      dest = path.join(dist, relative)
+
+      console.log(relative, "->", dest)
+
+      # copy = ->
+      #   new Promise (resolve, reject) ->
+      #     cp.spawn("cp", ["-R", relative, dest], {stdio: "inherit"})
+      #     .on "error", reject
+      #     .on "exit", resolve
+
+      # if relative.includes(".")
+      #   copy()
+      # else
+      #   fs.ensureDirAsync(dest)
+      #   .then(copy)
+
+      fs.copyAsync(relative, dest)
+
+    copyPackage = (pkg) ->
+      ## copies the package to dist
+      ## including the default paths
+      ## and any specified in package.json files
+      fs.readJsonAsync(pathToPackageJson(pkg))
+      .then (json) ->
+        ## grab all the files
+        ## and default included paths
+        ## and convert to relative paths
+        DEFAULT_PATHS
+        .concat(json.files or [])
+        .map (file) ->
+          path.join(pkg, file)
+      .map(copyRelativePathToDist, {concurrency: 1})
+
+    ## fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
+    ## 1/1  41688
+    ## 1/5  42218
+    ## 1/10 42566
+    ## 2/1  45041
+    ## 2/2  43589
+    ## 3/3  51399
+
+    ## cp -R concurrency tests
+    ## 1/1 65811
+
+    started = new Date()
+
     fs
-      .removeAsync(@distDir())
+      .removeAsync(dist)
       .bind(@)
       .then ->
-        fs.ensureDirAsync(@distDir())
+        fs.ensureDirAsync(dist)
       .then ->
-        [
-          ## copy root files
-          copy("./package.json")
-          copy("./config/app.yml")
-          copy("./lib/html")
-          copy("./lib/public")
-          copy("./lib/scaffold")
-          copy("./lib/ipc")
+        glob("./packages/*")
+        .map(copyPackage, {concurrency: 1})
+      .then ->
+        console.log("Finished Copying", new Date() - started)
 
-          ## copy entry point
-          copy("./index.js", "/src/index.js")
+  prunePackages: ->
+    pathToDistPackages = @distDir("packages", "*")
 
-          ## copy coffee src files
-          copy("./lib/automation",          "/src/lib/automation")
-          copy("./lib/browsers",            "/src/lib/browsers")
-          copy("./lib/controllers",         "/src/lib/controllers")
-          copy("./lib/gui",                 "/src/lib/gui")
-          copy("./lib/modes",               "/src/lib/modes")
-          copy("./lib/util",                "/src/lib/util")
-          copy("./lib/api.coffee",          "/src/lib/api.coffee")
-          copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
-          copy("./lib/config.coffee",       "/src/lib/config.coffee")
-          copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
-          copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
-          copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
-          copy("./lib/errors.coffee",       "/src/lib/errors.coffee")
-          copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
-          copy("./lib/exec.coffee",         "/src/lib/exec.coffee")
-          copy("./lib/file_server.coffee",  "/src/lib/file_server.coffee")
-          copy("./lib/files.coffee",        "/src/lib/files.coffee")
-          copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
-          copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
-          copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
-          copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
-          copy("./lib/open_project.coffee", "/src/lib/open_project.coffee")
-          copy("./lib/project.coffee",      "/src/lib/project.coffee")
-          copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
-          copy("./lib/request.coffee",      "/src/lib/request.coffee")
-          copy("./lib/routes.coffee",       "/src/lib/routes.coffee")
-          copy("./lib/saved_state.coffee",  "/src/lib/saved_state.coffee")
-          copy("./lib/scaffold.coffee",     "/src/lib/scaffold.coffee")
-          copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
-          copy("./lib/server.coffee",       "/src/lib/server.coffee")
-          copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
-          copy("./lib/stats.coffee",        "/src/lib/stats.coffee")
-          copy("./lib/stdout.coffee",       "/src/lib/stdout.coffee")
-          copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
-          copy("./lib/upload.coffee",       "/src/lib/upload.coffee")
-          copy("./lib/user.coffee",         "/src/lib/user.coffee")
-          copy("./lib/video.coffee",        "/src/lib/video.coffee")
-          copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
+    ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
+    ## 313,416,512 bytes (376.6 MB on disk) for 23,576 items
 
-        ]
-      .all()
+    prune = (pkg) ->
+      console.log("prune", pkg)
 
-  convertToJs: ->
-    @log("#convertToJs")
+      new Promise (resolve, reject) ->
+        cp.spawn("npm", ["prune", "--production"], {
+          cwd: pkg
+          stdio: "inherit"
+        })
+        .on("error", reject)
+        .on("exit", (code) ->
+          if code is 0
+            resolve()
+          else
+            reject(new Error("'npm prune --production' on #{pkg} failed with exit code: #{code}"))
+        )
+
+    ## prunes out all of the devDependencies
+    ## from what was copied
+    glob(pathToDistPackages)
+    .map(prune)
+
+  convertCoffeeToJs: ->
+    @log("#convertCoffeeToJs")
 
     ## grab everything in src
     ## convert to js
     new Promise (resolve, reject) =>
-      gulp.src(@distDir("src/**/*.coffee"))
+      gulp.src(@distDir("lib", "**", "*.coffee"))
         .pipe gulpCoffee()
-        .pipe gulp.dest(@distDir("src"))
-        .on "end", resolve
-        .on "error", reject
+        .pipe gulp.dest(@distDir("lib"))
+        .on("end", resolve)
+        .on("error", reject)
 
-  distDir: (src) ->
-    args = _.compact [meta.distDir, @osName, src]
+  distDir: (args...) ->
+    args = _.compact [meta.distDir, @osName, args...]
     path.join args...
 
   obfuscate: ->
@@ -170,23 +202,54 @@ class Base
 
     cleanup().catch(cleanup)
 
-  ## add tests around this method
-  updatePackage: ->
-    @log("#updatePackage")
+  symlinkPackages: ->
+    @log("#symlinkPackages")
 
+    dist = @distDir()
+    pathToPackages = path.join('node_modules', '@')
+    pathToDistPackages = @distDir("packages", "*")
+
+    symlink = (pkg) ->
+      # console.log(pkg, dist)
+      ## strip off the initial './'
+      ## ./packages/foo -> node_modules/@packages/foo
+      dest = path.join(dist, "node_modules", "@packages", path.basename(pkg))
+
+      fs.ensureSymlinkAsync(pkg, dest)
+
+    glob(pathToDistPackages)
+    .map(symlink)
+
+    # // glob all of the names of packages
+    # glob('./packages/*')
+    # .map((folder) => {
+    #   // strip off the initial './'
+    #   // ./packages/foo -> node_modules/@packages/foo
+    #   const dest = pathToPackages + folder.slice(2)
+    #
+    #   console.log('symlinking', folder, '->', dest)
+    #
+    #   return fs.ensureSymlinkAsync(folder, dest)
+    # })
+
+  ## add tests around this method
+  createRootPackage: ->
     version = @options.version
 
-    fs.readJsonAsync(@distDir("package.json")).then (json) =>
-      json.env = "production"
-      json.version = version if version
-      json.scripts = {}
+    @log("#createRootPackage #{version}")
 
-      @log("#settingVersion: #{json.version}")
+    fs.outputJsonAsync(@distDir("package.json"), {
+      name: "cypress"
+      productName: "Cypress",
+      version: version
+      main: "index.js"
+      scripts: {}
+      env: "production"
+    })
+    .then =>
+      str = "require('./packages/server')"
 
-      delete json.devDependencies
-      delete json.bin
-
-      fs.writeJsonAsync(@distDir("package.json"), json)
+      fs.outputFileAsync(@distDir("index.js"), str)
 
   npmInstall: ->
     @log("#npmInstall")
@@ -245,12 +308,21 @@ class Base
   log: ->
     log.apply(@, arguments)
 
-  gulpBuild: ->
-    @log("#gulpBuild")
+  buildPackages: ->
+    @log("#buildPackages")
 
     new Promise (resolve, reject) ->
-      runSequence "app:build", (err) ->
-        if err then reject(err) else resolve()
+      console.log(process.cwd())
+
+      ## build all the packages except for
+      ## cli and docs
+      cp.spawn("npm", ["run", "all", "build", "--", "--skip-packages", "cli,docs"], { stdio: "inherit" })
+      .on "error", reject
+      .on "exit", (code) ->
+        if code is 0
+          resolve()
+        else
+          reject(new Error("'npm run build' failed with exit code: #{code}"))
 
   _runProjectTest: ->
     @log("#runProjectTest")
@@ -346,22 +418,24 @@ class Base
   build: ->
     Promise
     .bind(@)
-    .then(@cleanupPlatform)
-    .then(@gulpBuild)
-    .then(@copyFiles)
-    .then(@updatePackage)
-    .then(@convertToJs)
-    .then(@obfuscate)
-    .then(@cleanupSrc)
-    .then(@npmInstall)
-    .then(@npmInstall)
-    .then(@elBuilder)
-    .then(@runSmokeTest)
-    .then(@runProjectTest)
-    .then(@runFailingProjectTest)
-    .then(@cleanupCy)
-    .then(@codeSign) ## codesign after running smoke tests due to changing .cy
-    .then(@verifyAppCanOpen)
+    # .then(@cleanupPlatform)
+    # .then(@buildPackages)
+    # .then(@copyPackages)
+    # .then(@prunePackages)
+    .then(@createRootPackage)
+    .then(@symlinkPackages)
+    # .then(@convertCoffeeToJs)
+    # .then(@obfuscate)
+    # .then(@cleanupSrc)
+    # .then(@npmInstall)
+    # .then(@npmInstall)
+    # .then(@elBuilder)
+    # .then(@runSmokeTest)
+    # .then(@runProjectTest)
+    # .then(@runFailingProjectTest)
+    # .then(@cleanupCy)
+    # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
+    # .then(@verifyAppCanOpen)
     .return(@)
 
 module.exports = Base
