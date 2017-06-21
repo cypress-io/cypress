@@ -139,7 +139,7 @@ In other words, you cannot get a correct visual representation of what Cypress "
 
 The only way for you to easily "see" and debug why Cypress thought an element was not visible is to use a `debugger` statement.
 
-We recommend placing `debugger` or using the {% url `.debug()` debug %} command directly BEFORE and AFTER the action.
+We recommend placing `debugger` or using the {% url `.debug()` debug %} command directly BEFORE the action.
 
 Make sure your **Developer Tools** are open and you can get pretty close to "seeing" the calculations Cypress is performing.
 
