@@ -8,7 +8,8 @@
   },
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",
-    "prebuild": "npm run clean",
+    "deps": "$(bin-up deps-ok)",
+    "prebuild": "npm run clean && npm run deps",
     "build": "node --stack-size=4096 ./index.js generate",
     "postbuild": "gulp post:build",
     "clean": "hexo clean",

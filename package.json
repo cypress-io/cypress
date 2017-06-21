@@ -9,6 +9,8 @@
   "scripts": {
     "start": "node ./scripts/start.js",
     "watch": "npm run all watch",
+    "deps": "deps-ok",
+    "prebuild": "npm run deps",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
