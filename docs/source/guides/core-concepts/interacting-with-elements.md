@@ -14,77 +14,76 @@ comments: false
 
 # Actionability
 
-Cypress gives you a set of commands for interacting with the DOM such as:
+Some commands in Cypress are for interacting with the DOM such as:
 
-- {% url `.click()` click %}
-- {% url `.dblclick()` dblclick %}
-- {% url `.type()` type %}
-- {% url `.check()` check %}
-- {% url `.uncheck()` uncheck %}
-- {% url `.select()` select %}
+- {% url `.click()` click %} - Click a DOM element.
+- {% url `.dblclick()` dblclick %} - Double-click a DOM element.
+- {% url `.type()` type %} - Type into a DOM element.
+- {% url `.clear()` clear %} - Clear the value of an input or textarea.
+- {% url `.blur()` blur %} - Make a focused DOM element blur.
+- {% url `.focus()` focus %} - Focus on a DOM element.
+- {% url `.check()` check %} - Check checkbox(es) or radio(s).
+- {% url `.uncheck()` uncheck %} - Uncheck checkbox(es).
+- {% url `.select()` select %} - Select an `<option>` within a `<select>`.
 
-These commands simulate a user interacting with your application. Under the hood we fire the events a browser will fire thus causing your application and its event bindings to fire.
+These commands simulate a user interacting with your application. Under the hood Cypress fires the events a browser would fire thus causing your application's event bindings to fire.
 
-Prior to issuing any of the commands, we run the following algorithms for ensuring the element is "ready" to receive actions.
+Prior to issuing any of the commands, we check the current state of the DOM and take some actions to ensure the DOM element is "ready" to receive the action.
 
-Cypress will wait for the element to pass all of these checks as per the {% url `defaultCommandTimeout` configuration#Timeouts %} described in depth in the {% url 'Default Assertions' introduction-to-cypress#Default-Assertions %} core concept guide.
+Cypress will wait for the element to pass all of these checks for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} (described in depth in the {% url 'Default Assertions' introduction-to-cypress#Default-Assertions %} core concept guide).
 
-***Algorithm***
+***Checks and Actions Performed***
 
-- {% urlHash 'Scroll the element into view' Scrolling %}
-- {% urlHash 'Ensure the element is not hidden' Visibility %}
-- {% urlHash 'Ensure the element is not disabled' Disability %}
-- {% urlHash 'Ensure the element is not animating' Animations %}
-- {% urlHash 'Ensure the element is not covered' Covering %}
-- {% urlHash 'Scroll the page if still covered by an element with fixed position' Scrolling %}
-- {% urlHash 'Fire the event at a specific coordinate'  Coordinates %}
+- {% urlHash 'Scroll the element into view.' Scrolling %}
+- {% urlHash 'Ensure the element is not hidden.' Visibility %}
+- {% urlHash 'Ensure the element is not disabled.' Disability %}
+- {% urlHash 'Ensure the element is not animating.' Animations %}
+- {% urlHash 'Ensure the element is not covered.' Covering %}
+- {% urlHash 'Scroll the page if still covered by an element with fixed position.' Scrolling %}
+- {% urlHash 'Fire the event at a specific coordinate.'  Coordinates %}
 
-Whenever Cypress cannot interact with an element, it could fail at any of these particular steps, and generally tells you exactly why it didn't think the element was actionable.
+Whenever Cypress cannot interact with an element, it could fail at any of the above steps. You will usually get an error explaining why the element was not found to be actionable.
 
 ## Visibility
 
-We've worked very hard to come up with one of (if not the most robust) algorithm of any test framework to determine an element's visibility.
+Cypress checks a lot of things to determine an element's visibility.
 
-An element is considered hidden if:
-- its `offsetWidth` or `offsetHeight` is `0`
-- its CSS property is `visibility: hidden`
-- its CSS property is `display: none`
+**An element is considered hidden if:**
 
-Additionally an element is considered hidden if any of its parent ancestors:
-- have a CSS property `overflow: hidden` AND...
-- ...have an `offsetWidth` or `offsetHeight` of `0` AND...
-- ...an element between all of the parents and the element has `position: fixed` or `position: absolute`
-- OR its content is being 'clipped' by a parent element with `overflow: hidden`, or `overflow: scroll`, or `overflow: auto`
+- Its `offsetWidth` or `offsetHeight` is `0`.
+- Its CSS property is `visibility: hidden`.
+- Its CSS property is `display: none`.
 
-An element with 'clipped' content means that it's been positioned outside the visible bounds of a parent.
+**Additionally an element is considered hidden if:**
+
+- Any of its parent ancestors have a CSS property `overflow: hidden`
+  - AND have an `offsetWidth` or `offsetHeight` of `0`
+  - AND an element between all of the parents and the element has `position: fixed` or `position: absolute`.
+- Its content is outside the boundaries of a parent ancestor with `overflow: hidden`, `overflow: scroll`, or `overflow: auto`.
 
 ## Disability
 
-We simply look at whether an element's property `disabled` is `true`.
+Cypress checks whether an element's `disabled` property is `true`.
 
-We don't look at whether an element has property `readonly` (and we should). {% open_an_issue %} if you'd like us to add this.
+We don't look at whether an element has property `readonly` (but we probably should). {% open_an_issue %} if you'd like us to add this.
 
 ## Animations
 
-To calculate whether an element is animating we take a sample of the last few coordinates and calculate the element's slope. You might remember this from 8th grade algebra ;-)
+To calculate whether an element is animating we take a sample of the last few coordinates and calculate the element's slope. You might remember this from 8th grade algebra 😉
 
-If the element's slope (the distance in pixels which exceeds the configurable: {% url `animationDistanceThreshold` configuration#Animations %}) then we consider the element to be animating.
+If the element's slope (the distance in pixels that exceeds the {% url `animationDistanceThreshold` configuration#Animations %}) then we consider the element to be animating.
 
-When coming up with this value, we did a few experiments to find a speed that "feels" too fast for a user to interact with. Generally this threshold will be exceeded on typical animations you've seen from dialogs sliding / animating in, or gallery banners "changing positions".
+When coming up with this value, we did a few experiments to find a speed that "feels" too fast for a user to interact with. You can always {% url "increase or decrease this threshold" configuration#Animations %}.
 
-You can always increase or decrease this threshold if you'd like.
-
-You can also turn off waiting for any kind animation with the configuration option {% url `waitForAnimations` configuration#Animations %}.
+You can also turn off our checks for animations with the configuration option {% url `waitForAnimations` configuration#Animations %}.
 
 ## Covering
 
-One of the last checks we do is to ensure that the element isn't being covered by an element which **is not** a descendent.
+We also ensure that the element we're attempting to interact with isn't covered by a parent element.
 
-For instance, an element will pass all of the previous checks, but a giant dialog could be covering the entire screen and make interacting with the element impossible.
+For instance, an element could pass all of the previous checks, but a giant dialog could be covering the entire screen making interacting with the element impossible for any real user.
 
-However, if a **descendent / child** of the element is covering it - that's okay. In fact we'll automatically issue the events we fire to that child.
-
-This happens pretty frequently. When we calculate the coordinate to fire the event, it's usually the center of an element.
+If a *child* of the element is covering it - that's okay. In fact we'll automatically issue the events we fire to that child.
 
 Imagine you have a button:
 
@@ -95,23 +94,25 @@ Imagine you have a button:
 </button>
 ```
 
-Oftentimes either the `<i>` or `<span>` element is covering the coordinate we're attempting to interact with. In those cases, its totally fine and we'll even provide note this for you in the Command Log.
+Oftentimes either the `<i>` or `<span>` element is covering the exact coordinate we're attempting to interact with. In those cases, the event fires on the child. We even note this for you in the {% url "Command Log" overview-of-the-gui#Command-Log %}.
 
 ## Scrolling
 
-Before interacting with an element we will *always* scroll it into view (including all of its parent containers).
+Before interacting with an element we will *always* scroll it into view (including any of its parent containers).
+
+{% note info %}
+Remember, this logic only applies to {% urlHash "commands that are actionable" Actionability %}. We do **not** scroll to find elements when traversing the DOM, in a {% url "`cy.get()`" get %} or {% url "`.find()`" find %} command for example.
+{% endnote %}
 
 However, the scrolling algorithm works by scrolling the very top pixel to the highest scrollable point. Remember, Cypress tests are meant to be deterministic. Tests should always run the same way every time. Even if an element is 'already' visible, it could be in that position indeterminately, and therefore we always scroll it the same way.
 
 However, when we "scroll" the page that can actually create other issues that we account for.
 
-For instance, when we calculate that the element is currently being covered by an element other than its direct descendants / children, then we'll actually "nudge" the page by scrolling it a tiny bit.
+For instance, when we calculate that the element is currently being covered by a parent element, then we'll actually "nudge" the page by scrolling it a tiny bit.
 
 This most often happens when you have a "sticky nav" that is fixed to the top of the page. By scrolling the element to the top, it can sometimes end up "underneath" this nav.
 
 Our algorithm *should* detect this and will continually "nudge" the page by scrolling the page over and over until the element is no longer hidden.
-
-This should match a real users behavior.
 
 ## Coordinates
 
@@ -123,25 +124,23 @@ cy.get('button').click({ position: 'topLeft' })
 
 # Debugging
 
-It can be difficult for you (the developer) to debug problems where elements are not considered actionable by Cypress.
+It can be difficult to debug problems when elements are not considered actionable by Cypress.
 
-Although we *should* provide a nice error message, including a screenshot, nothing beats visually inspecting and poking at the DOM to understand the reason why.
+Although you *should* see a nice error message, nothing beats visually inspecting and poking at the DOM yourself to understand the reason why.
 
-When you use the Command Log to "hover" over a command, you'll notice that we will always scroll the element the command was applied to into view. Please note that this is **NOT** using the same algorithms as what we described above.
+When you use the {% url "Command Log" overview-of-the-gui#Command-Log %} to hover over a command, you'll notice that we will always scroll the element the command was applied to into view. Please note that this is *NOT* using the same algorithms that we described above.
 
-{% note success Core Concept %}
-In fact we only ever scroll elements into view (when your commands are running) using the above algorithms on **action commands**. We **do not** scroll elements into view on regular DOM commands like {% url `cy.get()` get %} or {% url `.find()` find %}.
+In fact we only ever scroll elements into view when actionable commands are running using the above algorithms. We *do not* scroll elements into view on regular DOM commands like {% url `cy.get()` get %} or {% url `.find()` find %}.
 
-The reason we scroll an element into view when hovering over a snapshot is just to help you (the developer) to see which element(s) were found by that corresponding commands. It's a purely visual debugging feature and does not necessarily 100% accurately reflect what your page looked at when that command ran.
-{% endnote %}
+The reason we scroll an element into view when hovering over a snapshot is just to help you to see which element(s) were found by that corresponding command. It's a purely visual feature and does not necessarily reflect what your page looked like when the command ran.
 
-In other words, you cannot get a correct visual representation of what Cypress "saw" when reverting to a previous snapshot.
+In other words, you cannot get a correct visual representation of what Cypress "saw" when looking at a previous snapshot.
 
 The only way for you to easily "see" and debug why Cypress thought an element was not visible is to use a `debugger` statement.
 
 We recommend placing `debugger` or using the {% url `.debug()` debug %} command directly BEFORE the action.
 
-Make sure your **Developer Tools** are open and you can get pretty close to "seeing" the calculations Cypress is performing.
+Make sure your Developer Tools are open and you can get pretty close to "seeing" the calculations Cypress is performing.
 
 ```js
 // break on a debugger before the action command
@@ -150,30 +149,34 @@ cy.get('button').debug().click()
 
 # Bypassing
 
-While the above checks are super helpful at finding situations and bugs which would prevent your users from interacting with elements - sometimes they can really get in the way!
+While the above checks are super helpful at finding situations that would prevent your users from interacting with elements - sometimes they can get in the way!
 
-Often it's **not worth** trying to "act like a user" and get a robot to do the exact steps a user would take to interact with an element.
+Sometimes it's not worth trying to "act like a user" to get a robot to do the exact steps a user would to interact with an element.
 
-Imagine you have a nested navigation structure where the user must hover over and move the mouse in a specific pattern to reach the desired link.
+Imagine you have a nested navigation structure where the user must hover over and move the mouse in a very specific pattern to reach the desired link.
 
 Is this worth trying to replicate when you're testing?
 
-No way! For these scenarios (and more) we give you a simple escape hatch to bypass all of these checks and just force events to happen!
+Maybe not! For these scenarios  we give you a simple escape hatch to bypass all of the checks above and just force events to happen!
 
-You can simply pass `{ force: true }` to any action command.
+You can simply pass `{force: true}` to most action commands.
 
 ```js
 // force the click and all subsequent events
-// to fire even if this element isn't 'actionable'
+// to fire even if this element isn't considered 'actionable'
 cy.get('button').click({ force: true })
 ```
 
 {% note info "What's the difference?" %}
-When you force an event to happen we'll still attempt to scroll the element into view, and still issue all applicable events, and still fire them at the right coordinates, or potentially to children descendants covering up your element.
+When you force an event to happen we still
 
-All `{ force: true }` does is bypass the above checks for ensuring an element is in an actionable state. Therefore you still get a high degree of confidence your application is responding to events correctly.
+- Attempt to scroll the element into view
+- Issue all applicable events
+- Fire them at the right coordinates
+
+All `{force: true}` does is bypass the other checks for ensuring an element is in an actionable state. Therefore you still get a high degree of confidence your application is responding to events correctly.
 {% endnote %}
 
-# Firing Events
+<!-- # Firing Events
 
-- Talk about change events, focus, blur, input, mousedown, mouseup, keyboard, etc
+- Talk about change events, focus, blur, input, mousedown, mouseup, keyboard, etc -->
