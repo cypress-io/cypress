@@ -24,6 +24,7 @@ sidebar:
     installing-cypress: Installing Cypress
     writing-your-first-test: Writing Your First Test
     testing-your-app: Testing Your App
+    interacting-with-elements: Interacting with Elements
     next-steps: Next Steps
     core-concepts: Core Concepts
     introduction-to-cypress: Introduction to Cypress

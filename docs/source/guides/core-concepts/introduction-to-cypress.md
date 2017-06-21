@@ -866,11 +866,4 @@ One of the typical anti-patterns we see is not properly
 
 One of the typical hurdles you will need to overcome is **slow tests**.
 
-
 {% endnote %}
-
-# Action Rules
-
-## Visibility
-
-## Interactibility
