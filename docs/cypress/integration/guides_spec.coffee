@@ -6,11 +6,6 @@ GUIDES_PATH = '/guides/getting-started/why-cypress.html'
 FIRST_PAGE = "why-cypress.html"
 NEXT_PAGE = "installing-cypress.html"
 
-MAILTO_REGEX = /mailto:/
-
-Cypress.isHeadless = true
-window.top.$Cypress.isHeadless = true
-
 describe "Guides", ->
   context "Main Menu", ->
     it "Menu goes straight to 'Why Cypress?'", ->
@@ -133,7 +128,3 @@ describe "Guides", ->
       it "clicking on Prev link should go back to original page", ->
         cy.get(".article-footer-prev").click()
         cy.url().should("contain", FIRST_PAGE)
-
-  context "Comments", ->
-    it "displays comments section", ->
-      cy.get("#comments")

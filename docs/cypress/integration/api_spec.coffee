@@ -1,16 +1,11 @@
 YAML = require('yamljs')
 _ = require('lodash')
 
-API_PATH = "/api/welcome/api"
+API_PATH = "/api/introduction/api"
 API_HTML = API_PATH + '.html'
 
 FIRST_PAGE = "api.html"
 NEXT_PAGE = "and.html"
-
-MAILTO_REGEX = /mailto:/
-
-# Cypress.isHeadless = true
-# window.top.$Cypress.isHeadless = true
 
 describe "API", ->
   context "Main Menu", ->
@@ -134,7 +129,3 @@ describe "API", ->
       it "clicking on Prev link should go back to original page", ->
         cy.get(".article-footer-prev").click()
         cy.url().should("contain", FIRST_PAGE)
-
-  context "Comments", ->
-    it "displays comments section", ->
-      cy.get("#comments")

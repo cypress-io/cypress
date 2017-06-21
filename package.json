@@ -53,24 +53,12 @@
     "inquirer": "^3.1.1",
     "konfig": "^0.2.1",
     "lint-staged": "^3.6.0",
+    "lodash": "^4.17.4",
     "obfuscator": "^0.5.4",
     "plist": "^2.1.0",
-    "pre-git": "^3.15.0",
     "run-sequence": "^1.2.2",
     "vagrant": "0.0.1",
     "xvfb": "^0.2.3"
-  },
-  "config": {
-    "pre-git": {
-      "pre-commit": [
-        "npm run lint",
-        "npm run all lint"
-      ],
-      "pre-push": [],
-      "post-commit": [],
-      "post-checkout": [],
-      "post-merge": []
-    }
   },
   "license": "MIT"
 }

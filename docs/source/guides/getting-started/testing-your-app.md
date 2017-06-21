@@ -14,31 +14,23 @@ comments: false
 
 We covered Cypress in a tutorial app, now let's integrate it into your *real* app!
 
-# Add Cypress to Your App
+# Adding Your Project
 
-Add Cypress to your app as we did before with `npm`:
+After successfully logging in, you will need to add the project(s) you want to write Cypress tests in.
 
-```shell
-$ npm install cypress --save-dev
-```
+- Click {% fa fa-plus %} Add Project.
 
-...and make yourself an `npm` script in `package.json` to run it easily (we named it "test-cypress" this time because we're assuming you already have a "test" script, but the name is arbitrary):
+![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 
-***package.json***
-
-```json
-{
-  "scripts": {
-    "test-cypress": "cypress open"
-  }
-}
-```
-
-Now you can run Cypress from the command line by typing `npm run test-cypress`, do so now. Cypress will open and generate the needed files to get started. (You may delete `./cypress/integration/example_spec.js` if you wish, it is only provided as, you guessed it, an example.)
-
-{% note info Which Project To Install To? %}
-Does your application have multiple project repositories? Many modern applications do! Cypress should be installed with your *front-end project*, wherever you serve the front-end files for development.
+{% note info %}
+Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are {% url "set up to be recorded" projects#Set-up-a-Project-to-Record %}.
 {% endnote %}
+
+**To run tests:**
+
+- Click on the project.
+- You will then come to a page listing all files in your project's `cypress/integration` folder. If it's a new project, you'll see a message about the folder structure generated for you and also an `example_spec.js` file.
+- Click on the test file you want to run or click "Run All Tests".
 
 # Visit Your Development URL
 
@@ -102,9 +94,9 @@ Cypress has many more configuration options you can use to customize its behavio
 
 # Think Through Your Testing Strategy
 
-You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advice to give you. What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you and your team.
+You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advise to give you. What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you, your application, and your team.
 
-That said, modern web testing has a few wrinkles that every team experiences, so here are some quick tips on common situations you'll likely run into sooner than later.
+That said, modern web testing has a few wrinkles that every team experiences, so here's some quick tips on common situations you're more likely to run into sooner than later.
 
 ## Logging In with Speed and Grace
 
@@ -114,38 +106,131 @@ Nothing slows a test suite like having to log in, but all the good parts of your
 
 It's a great idea to get your signup and login flow under test coverage since it is very important to all of your users and you never want it to break. We recommend you test signup and login the way you test most things in Cypress:
 
-1. {% url "`cy.visit()`" visit %} the page with the login form.
-2. {% url "`cy.get()`" get %} the username and password `<input>` and {% url "`.type()`" type %} into them.
-3. {% url `cy.get()` get %} the login `<form>` and {% url "`.submit()`" submit %} it.
-4. Make an assertion about what the next page should be.
+> 1. {% url "`cy.visit()`" visit %} the page with the login form.
+> 2. {% url "`cy.get()`" get %} the username and password `<input>` and {% url "`.type()`" type %} > into them.
+> 3. Submit the form somehow ({% url `.type("{enter}")` type %} or {% url `cy.get('form').submit()` submit })
+> 4. Make an assertion about what the next page should be.
 
-You can quickly test your app's behavior like this for a number of scenarios. For the "happy path", you might include signing up before logging in. Next, incorrect usernames and passwords are obvious scenarios to test, and furthermore you might include edge cases like locked or deleted accounts, username or email already exists at signup, etc. Whatever you need assurances about, get it under coverage!
+Here's an example:
+
+```js
+it('sets auth cookie when logging in via form submission', function(){
+  cy.visit('/login')
+
+  cy.get('input[name=username]').type('jane.lane')
+  // {enter} causes the form to submit
+  cy.get('input[name=password]').type('password123{enter}')
+
+  // we should be redirected to /dashboard
+  cy.url().should('include', '/dashboard')
+  // UI should reflect this user being logged in
+  cy.get('h1').should('contain', 'jane.lane')
+  // our auth cookie should be present
+  cy.getCookie('cypress-session-cookie').should('exist')
+})
+```
+
+You can quickly test your app's behavior like this for a number of scenarios. For the "happy path", you might include signing up, as well. Next, incorrect usernames and passwords are obvious scenarios to test, and furthermore you might include edge cases like locked or deleted accounts, username or email already exists at signup, etc. Whatever you need assurances about, get it under coverage!
 
 But don't try to reuse this login test for every single test...
 
 **Short-Circuit the Login Flow Everywhere Else**
 
-Now that the signup and login flow are covered, we want to avoid logging in for tests that aren't specifically about testing our login. For this, we can leverage {% url "`cy.request()`" request %}, which makes a web request _just like the browser, but outside of the browser_. Cypress sends all the appropriate `cookies` and `headers`, just like the browser would, but without engaging all of the graphical overhead of the browser.
+Now that the signup and login flow are covered, we want to avoid them for the remainder of our tests because they are slow. For this, we can leverage {% url `cy.request()` request %}, which makes a web request _just like the browser, but outside of the browser_. Cypress will send all the appropriate `cookies` and `headers`, just like the browser would, but without engaging all of the graphical overhead of the browser itself.
 
-This is where your own knowledge of your web app comes in: What does a login request look like for your app? You want to emulate that with {% url "`cy.request()`" request %} outright, instead of filling out a form and submitting it manually.
+This is where knowledge of your web app comes in: What does a login request look like for your app? You'll emulate that with {% url `cy.request()` request %} directly, instead of filling out a form and submitting it manually.
 
-If you need help getting started with this, you could open up the dev tools and see what the form actually submits. Look at it to see what data you need to send, then do it directly. Keeping your tests fast depends on it!
+Let's revisit the example from above:
+
+```js
+it('sets auth cookie when logging in via cy.request()', function(){
+  // Emulate a proper login post
+  cy.request('POST', '/login', { username: 'jane.lane', password: 'password123' })
+    // Do something with the response, if needed
+    .then(function(response){
+      // response.body is serialized to JSON
+      expect(response.body).to.have.property('name', 'Jane')
+  })
+
+  // Cookies still get set by cy.request()
+  cy.getCookie('cypress-session-cookie').should('exist')
+})
+```
+
+If you need help getting started with this, open the dev tools, manually do a form submission, and see what the actually gets sent to and received from the server. Now you can see what to extract into a {% url `cy.request()` request %} call, and how to ensure it worked. Keeping your tests fast depends on it!
+
+{% note info Authentication Recipes %}
+Need more guidance about logging in with Cypress? No problem! We've created {% url 'a number of helpful recipes', logging-in %} that explore testing various authentication styles in Cypress, including how to wrap your short-form login logic into a custom Cypress command.
+{% endnote %}
 
 ## Preparing and Cleaning Up Test Data
 
-If you're familiar with server-side unit testing, you're probably used to using fixtures or factories to build up state in the database before each test, and cleaning it up after. You may decide you want this flow for your client-side tests, as well. In that case, you'll need to bridge Cypress to your back-end, and again we'll use {% url "`cy.request()`" request %} for this task.
+If you're familiar with server-side unit testing, you're probably used to using fixtures or factories to build up state in the database before each test, and cleaning it up after. Your team may decide it wants to use the same utilities for client-side tests, as well. In that case, you'll need to bridge Cypress to your back-end, and again we'll use {% url "`cy.request()`" request %} for this task.
 
-You'll want to add some routes to your application that only exist in the `test` environment so that you know they never exist in production. These routes simply take commands about the data you want to test against, bridging over to your fixtures and factories, or your "clear the data store" mechanism.
+Imagine some requests:
+```js
+// invoke the default User factory
+cy.request("POST", "/test/factories/user")
+// invoke the Post factory with custom attributes
+cy.request("POST", "/test/factories/post", { title: 'First Post', authorId: 1, body: "..." })
+// invoke a special route for clearing the database entirely
+cy.request("POST", "/test/clear_database")
+```
 
-You might use this with the login advice above to create a user in the database before you log in, allowing you to skip the signup flow step (particularly useful for skipping email confirmation if you require it before the first login!) It's also easy to imagine building up different quantities of your business objects for testing the {% url "5 states of any user interface element: empty, partial, full, loading, and error." http://scotthurff.com/posts/why-your-user-interface-is-awkward-youre-ignoring-the-ui-stack %}
+We just made these up, but you could implement them on your server rather easily. The idea is to bridge the routes to your fixture or factory names and invoke them. You can make these routes narrow, just calling named, pre-made items (more like fixtures), or broad and dynamic, passing in custom attributes to change or entire objects to create from scratch.
+
+{% note danger Be Careful %}
+Make very sure that these routes only exist in the `test` environment for your app, never in production! Modern frameworks should make this very easy to do in an automated fashion. For good measure, you could also have the special controller or its routes blow up if it ever executes in the `production` environment.
+{% endnote %}
+
+Combine this technique with the login advice above to create a user in the database before you log in, allowing you to skip the signup flow step (particularly useful for skipping email confirmation if you require it before the first login!)
 
 ## Isolation from the Back-end with Network Stubbing
 
 One final strategy that Cypress enables is complete isolation from your server via route stubbing. This is an absolute ninja trick, especially for web projects that have already separated their front-ends from their back-ends: separate repositories that get deployed to completely different places and only communicate over HTTP(S).
 
-Cypress anticipates these kinds of projects and enables network stubbing via the {% url "`cy.server()`" server %} and {% url "`cy.route()`" route %} commands. You can declare the API calls you expect your application to make, then capture them before they hit the network and provide your own custom responses.
+Cypress anticipates these kinds of projects and enables network stubbing via the {% url "`cy.server()`" server %} and {% url "`cy.route()`" route %} commands. With these, you can declare the API calls you expect your application to make, then capture them before they hit the network and provide your own custom responses.
 
-Since it skips the network and all of the code on the server, _this is fast_. It's also easier to maintain, as your tests can live with your front-end project and never need to coordinate spinning up a development server for another project. {% url "Continuous Integration" continuous-integration %} is simpler because it doesn't need to package up the API server project. All of the login logic is simplified because it is no longer coordinating with the back-end, but rather reacting to canned responses.
+A brief example:
+```js
+// cy.server() and cy.route() must be called before cy.visit()
+// starts Cypress's mock HTTP server
+cy.server()
+// prepare intercept post creation requests and return simple data
+cy.route('POST', '/posts', { id: 1, title: 'My First Post' })
+
+// start the test code as normal
+cy.visit("/posts/new")
+// ...now fill in and submit the new post form. Easy!
+```
+
+{% note success Benefits of to this approach: %}
+- **Speed:** It skips the network and all server code, so it's fast!
+- **Easy Setup:** Otherwise you may need to coordinate 2 projects.
+- **Easy CI:** Same, since we have to set up our environment for Continuous Integration
+- **Relaxed Auth:** This may be easier than coordinating logins.
+{% endnote %}
+
+If this sounds like something you want to take advantage of, please {% url "read the Network Requests guide" network-requests %}!
+
+# Running Headlessly
+
+While you'll find yourself working primarily in the GUI, it is helpful to be able to run your tests headlessly.
+
+Once you have the {% url "Cypress CLI Tool installed" command-line#cypress-install %}, you can simply execute:
+
+```shell
+cypress run
+```
+
+Additionally you can specify:
+
+- A single test file to run.
+- {% url "A specific reporter and reporter options" reporters %}
+- A different port to run tests from.
+- Environment variables
+
+You can {% url "read about all of these options" command-line#cypress-run %} which are documented on the CLI tool.
 
 # Get Started!
 

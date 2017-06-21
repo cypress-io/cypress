@@ -67,7 +67,7 @@ class Project extends EE
       process.chdir(@projectRoot)
 
       @server.open(cfg, @)
-      .then (port) =>
+      .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
         ## open the server
@@ -80,6 +80,10 @@ class Project extends EE
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        if warning
+          warning.isWarning = true
+          options.onWarning(warning)
 
         options.onSavedStateChanged = (state) =>
           @saveState(state)
@@ -94,13 +98,13 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  getBuilds: ->
+  getRuns: ->
     Promise.all([
       @getProjectId(),
       user.ensureAuthToken()
     ])
     .spread (projectId, authToken) ->
-      api.getProjectBuilds(projectId, authToken)
+      api.getProjectRuns(projectId, authToken)
 
   close: ->
     debug("closing project instance %s", @projectRoot)

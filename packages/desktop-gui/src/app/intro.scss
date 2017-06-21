@@ -1,0 +1,120 @@
+.intro {
+  bottom: 18px;
+  left: 0;
+  margin-bottom: 0;
+  padding: 20px 40px;
+  position: fixed;
+  overflow: auto;
+  right: 0;
+  top: 40px;
+
+  h2 {
+    font-size: 20px;
+    margin-top: 0;
+  }
+}
+
+.project-drop {
+  align-items: center;
+  background: #f8f8f8;
+  border: solid 2px #d3d3d3;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  height: 150px;
+  justify-content: center;
+
+  p {
+    color: #555;
+    font-size: 1.4em;
+  }
+
+  &.is-dragging-over {
+    background: #eee;
+    border-color: $brand-primary;
+  }
+}
+
+.projects-list {
+  margin-top: 15px;
+  min-height: 50px; // for loader
+  position: relative;
+
+  h3 {
+    font-size: 16px;
+    margin: 10px 0 6px;
+
+    a {
+      font-size: 12px;
+      position: relative;
+      top: -4px;
+    }
+  }
+
+  .alert {
+    margin-bottom: 0;
+  }
+
+  ul {
+    padding: 0;
+  }
+
+  li {
+    border-top: solid 1px #eee;
+    list-style: none;
+    margin: 0;
+    padding: 0 25px 0 0;
+    position: relative;
+
+    &:first-child {
+      border-top: none;
+    }
+
+    a {
+      display: block;
+      padding: 5px 0;
+      text-decoration: none;
+    }
+
+    button {
+      background: none;
+      border: none;
+      bottom: 0;
+      color: #d3d3d3;
+      position: absolute;
+      right: 0;
+      top: 0;
+
+      &:hover {
+        color: $red-primary;
+      }
+    }
+  }
+
+  .project-name,
+  .project-path {
+    display: inline-block;
+    line-height: 16px;
+  }
+
+  .project-name {
+    color: #666;
+    font-size: 14px;
+  }
+
+  a:hover,
+  a:active,
+  a:focus {
+    .project-name,
+    .project-path {
+      color: $brand-primary;
+    }
+  }
+
+  .project-path {
+    color: #8e8e8e;
+    font-size: 12px;
+    font-style: italic;
+    margin-left: 8px;
+  }
+}

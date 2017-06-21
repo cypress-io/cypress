@@ -1,5 +1,5 @@
-@import 'lib/variables';
-@import 'lib/mixins';
-@import 'lib/vendor';
-@import 'lib/components/*';
-@import '!(lib)*/**/*';
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/vendor';
+@import 'styles/components/*';
+@import '!(styles)*/**/*';

@@ -38,7 +38,7 @@ ipc.on("response", (event, obj = {}) => {
   }
 })
 
-const appIpc = (...args) => {
+const ipcBus = (...args) => {
   if (args.length === 0) { return msgs }
 
   // our ipc interface can either be a standard
@@ -94,7 +94,7 @@ const appIpc = (...args) => {
   return fn()
 }
 
-appIpc.offById = removeMsgById
-appIpc.off = removeMsgsByEvent
+ipcBus.offById = removeMsgById
+ipcBus.off = removeMsgsByEvent
 
-export default appIpc
+export default ipcBus

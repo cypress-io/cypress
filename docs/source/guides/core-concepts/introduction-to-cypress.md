@@ -6,19 +6,19 @@ comments: false
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- What Cypress looks like
-- How Cypress queries the DOM differently than other testing frameworks
+- How Cypress queries the DOM
 - How Cypress manages subjects and chains of commands
 - What assertions look like and how they work
+- How timeouts are applied to commands
 {% endnote %}
 
 {% note success Important! %}
 **This is the single most important guide** for understanding how to test with Cypress. Read it. Understand it. Ask questions about it so that we can improve it.
 {% endnote %}
 
-# Cypress Is Expressive
+# Cypress Is Simple
 
-Expressivity is all about getting more done with less typing. Let's look at an example:
+Simplicity is all about getting more done with less typing. Let's look at an example:
 
 ```js
 describe('Post Resource', function() {
@@ -195,7 +195,7 @@ This is known as a `timeout`, and most commands may be customized with specific 
 cy.get('.my-slow-selector', { timeout: 10000 })
 ```
 
-You can also set the timeout globally via [the configuration setting:  `defaultCommandTimeout`](/guides/appendices/configuration.html#Timeouts).
+You can also set the timeout globally via the {% url 'configuration setting: `defaultCommandTimeout`' configuration#Timeouts %}.
 
 {% note success Core Concept %}
 To match the behavior of web applications, Cypress is asynchronous and relies on timeouts to know when to stop waiting on an app to get into the expected state. Timeouts can be configured globally, or on a per-command basis.
@@ -204,6 +204,8 @@ To match the behavior of web applications, Cypress is asynchronous and relies on
 {% note info Timeouts and Performance %}
 There is a performance tradeoff here: **tests that have longer timeout periods take longer to fail**. Commands always proceed as soon as their expected criteria is met, so working tests will be performed as fast as your application allows. A test that fails due to timeout will consume the entire timeout period, by design. This means that while you _may_ want to increase your timeout period to suit specific parts of your app, you _don't_ want to make it "extra long, just in case".
 {% endnote %}
+
+Later in this guide we'll go into much more detail about {% urlHash 'Default Assertions' Default-Assertions %} and {% urlHash 'Timeouts' Timeouts %}
 
 # Chains of Commands
 
@@ -367,7 +369,7 @@ You purposefully **cannot** do anything useful with the return value from a comm
 We've designed our API's this way because the DOM is a highly mutable object which constantly goes stale. For Cypress to prevent flake, and know when to proceed, it must manage commands in a highly controlled deterministic way.
 {% endnote %}
 
-## Commands Execute Serially
+## Commands Run Serially
 
 After a test function is finished running, Cypress goes to work executing the commands that were enqueued using the `cy.*` command chains. The test above would cause an execution in this order:
 
@@ -690,5 +692,178 @@ cy
 
 {% note danger Make sure `.should()` is safe %}
 When using a function passed to {% url `.should()` should %}, be sure that the entire function can be executed multiple times without issue. Cypress applies its retry logic to these functions: so long as there's a failure, it will repeatedly try again until the timeout is reached. That means your code should be retry-safe. The technical term for this means your code must be **idempotent**.
+
+{% endnote %}
+
+## Default Assertions
+
+Many commands have a default, built-in assertion, or rather have requirements that may cause it to fail without an assertion you've written.
+
+For instance:
+
+- {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code
+- {% url `cy.request()` request %} expects the remote server to exist and provide a response
+- {% url `cy.get()` get %} expects the element to eventually exist in the DOM
+- {% url `.find()` find %} also expects the element to eventually exist in the DOM
+- {% url `.type()` type %} expects the element to eventually be *typeable*
+- {% url `.click()` click %} expects the element to eventually be in an *actionable* state
+- {% url `.its()` its %} expects to find a property on the current subject
+
+Certain commands may have a specific requirement that causes them to immediately fail: such as {% url `cy.request()` request %}. Others, such as DOM based commands will automatically retry and wait for the DOM to reach the desired state before failing.
+
+{% note success Core Concept %}
+All DOM based commands automatically wait for their elements to exist in the DOM.
+{% endnote %}
+
+These rules are pretty intuitive, and most commands give you flexibility to override or bypass the default ways they can fail, typically by passing the `{ force: true }` option.
+
+***Example #1: Existence and Actionability***
+
+```js
+cy
+  // there is a default assertion that this
+  // button must exist in the DOM before proceeding
+  .get('button')
+
+  // before issuing the click, this button must be "actionable"
+  // it cannot be disabled, covered, or hidden from view.
+  .click()
+```
+
+Cypress will automatically **wait** for elements to reach stable states before giving up and failing. Just like with regular assertions you've added, these default assertions all share the **same** timeout values.
+
+***Example #2: Reversing the Default Assertion***
+
+Most of the time, when querying for elements you expect them to eventually exist. But sometimes you wish to wait until they **don't** exist.
+
+All you have to do is simply add that assertion and Cypress will *reverse* its rules waiting for elements to exist.
+
+```js
+// now Cypress will wait until this
+// <button.close> is removed from the
+// DOM after the click
+cy.get('button.close').click().should('not.exist')
+
+// and now make sure this <#modal>
+// does not exist in the DOM and
+// automatically wait until it's gone!
+cy.get('#modal').should('not.exist')
+```
+
+***Example #3: Other Default Assertions***
+
+```js
+// create an empty object
+const obj = {}
+
+// set the 'foo' property
+// after 1 second
+setTimeout(() => {
+  obj.foo = 'bar'
+}, 1000)
+
+// .its() will wait until
+// the 'foo' property is
+// on the object
+cy.wrap(obj).its('foo')
+```
+
+# Timeouts
+
+Almost all commands can time out in some way.
+
+All assertions, whether they're the default ones or whether they've been added by you all share the same timeout values.
+
+## Applying Timeouts
+
+You can modify a commands timeout which affect both its default assertions (if any) or specific assertions you've added.
+
+Remember because assertions are used to describe a condition of the proceeding commands - the `timeout` modification goes on those commands **not the assertions**.
+
+***Example #1: Default Assertion***
+
+```js
+// because this has a default assertion
+// that this element must exist, then
+// it can time out and fail
+cy.get('.mobile-nav')
+```
+
+Under the hood Cypress:
+
+- Queries for the element: `.mobile-nav`
+  - **...and waits up to 4 seconds for it to exist in the DOM**
+
+***Example #2: Additional Assertions***
+
+```js
+// we've added 2 new assertions
+// that we wrote ourselves
+cy
+  .get('.mobile-nav')
+  .should('be.visible')
+  .and('contain', 'Home')
+```
+
+Under the hood Cypress:
+
+- Queries for the element: `.mobile-nav`
+  - **...and waits up to 4 seconds for it to exist in the DOM**
+  - **...and waits up to 4 seconds for it to be visible**
+  - **...and waits up to 4 seconds for it to contain the text: 'Home'**
+
+The **total** amount of time Cypress will wait for **all** of the assertions to pass is **4 seconds**.
+
+Timeouts can be modified per command and this will affect all default assertions **and any assertions chained to that command**.
+
+***Example #3: Modifying Timeouts***
+
+```js
+// we've modified the timeout which
+// affects default + added assertions
+cy
+  .get('.mobile-nav', { timeout: 10000 })
+  .should('be.visible')
+  .and('contain', 'Home')
+```
+
+Under the hood Cypress:
+
+- Queries for the element: `.mobile-nav`
+  - **...and waits up to 10 seconds for it to exist in the DOM**
+  - **...and waits up to 10 seconds for it to be visible**
+  - **...and waits up to 10 seconds for it to contain the text: 'Home'**
+
+Notice that this timeout has flowed down to all assertions and Cypress will now wait **up to 10 seconds total** for all of them to pass.
+
+## Default Values
+
+Cypress offers several different timeout values based on different types of commands.
+
+We've optimized their timeouts based on how long we expect certain actions to take.
+
+For instance:
+- {% url `cy.visit()` visit %} loads a remote page and does not resolve *until all of the external resources complete their loading phase*. This may take awhile and its why its timeout is set to `60000ms`.
+- {% url `cy.exec()` exec %} runs a system command such as *seeding a database*. We expect this to potentially take a long time, and its timeout is set to `60000ms`.
+- {% url `cy.wait()` wait %} actually uses **two** different timeouts. When waiting for a {% url 'routing alias' aliases-and-references#Aliasing-Routes %} we wait first for a matching request `5000ms`, and then additionally for the server's response `30000ms`. These are different because their context is different. We expect your application to make a matching request quickly, but we expect the server's response to potentially take much longer.
+
+That leaves most other commands including all DOM based commands to time out after only **4000ms**.
+
+{% note info Why only 4 seconds? That sounds low! %}
+Many of our users who have used other testing frameworks often remark at how low this value is. In fact we regularly see our own users increasing it sometimes up to 25x!
+
+**So why is it so low?**
+
+We are subtly trying to communicate to you how to properly test your application.
+
+You shouldn't need to wait for your application to render DOM elements for more than 4 seconds!
+
+Let's look at why you're likely wanting to increase this, and some best practices.
+
+The most common scenario is that DOM elements render **after** a series of network requests. The network requests themselves must go over the internet, leaving them susceptible to be potentially slow.
+
+One of the typical anti-patterns we see is not properly
+
+One of the typical hurdles you will need to overcome is **slow tests**.
 
 {% endnote %}

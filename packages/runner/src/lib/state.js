@@ -1,4 +1,4 @@
-import { asReference, computed, observable } from 'mobx'
+import { computed, observable } from 'mobx'
 import automation from './automation'
 
 const _defaults = {
@@ -21,7 +21,7 @@ export default class State {
   @observable messageTitle = _defaults.messageTitle
   @observable messageDescription = _defaults.messageDescription
   @observable messageType = _defaults.messageType
-  @observable messageControls = asReference(_defaults.messageControls)
+  @observable.ref messageControls = _defaults.messageControls
 
   @observable snapshot = {
     showingHighlights: true,
@@ -47,7 +47,7 @@ export default class State {
 
   @observable automation = automation.CONNECTING
 
-  @observable scriptError = asReference(null)
+  @observable.ref scriptError = null
 
   constructor (reporterWidth = _defaults.reporterWidth) {
     this.reporterWidth = reporterWidth
@@ -76,7 +76,7 @@ export default class State {
     return Math.floor(this.scale * 100)
   }
 
-  @computed({ asStructure: true }) get messageStyles () {
+  @computed.struct get messageStyles () {
     const actualHeight = this.height * this.scale
     const messageHeight = 33
     const nudge = 10

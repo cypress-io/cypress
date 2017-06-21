@@ -9,20 +9,23 @@
   }
 
   .navbar-nav {
-    &>.open {
-      &>a, &>a:hover {
+    > .open {
+      > a, > a:hover {
         background-color: #dedede;
         color: #262626;
       }
     }
 
-    &>li {
-      &>a {
+    > li {
+      > div,
+      > a {
         font-size: 13px;
         color: #444;
         padding: 1px 20px 0 20px;
         line-height: 35px;
+      }
 
+      > a {
         &:hover, &:focus {
           cursor: pointer;
           background-color: #f3f3f3;
@@ -42,13 +45,12 @@
         }
       }
 
-      &.dropdown>a {
+      &.dropdown > a {
         padding-left: 15px;
         padding-right: 15px;
       }
     }
   }
-
 }
 
 
@@ -64,12 +66,6 @@
 .navbar .container-fluid {
   padding: 0;
 
-  .navbar-brand {
-    font-size: 14px;
-    margin-left: 0;
-
-  }
-
   a:hover {
     cursor: pointer;
   }
@@ -84,22 +80,28 @@
   min-height: 40px;
   z-index: 1040;
 
-  .navbar-brand {
-    height: 40px;
-    line-height: 30px;
+  .logo {
+    padding: 5px 0;
+
+    img {
+      height: 30px;
+    }
   }
 
   .nav.navbar-nav {
-    &>.open {
-      &>a, &>a:hover, &>a:focus {
+    > .open {
+      > a, > a:hover, > a:focus {
         background-color: #111;
         color: #fff;
       }
     }
 
-    &>li>a {
+    > li > div,
+    > li > a {
+      color: $navbar-inverse-link-color;
       line-height: 30px;
       font-size: 14px;
+      padding: 5px 15px;
     }
   }
 }
@@ -134,5 +136,11 @@
   svg {
     fill: #ececec;
     stroke: #c7c7c7;
+  }
+}
+
+.close-browser {
+  .btn {
+    margin-top: 7px;
   }
 }

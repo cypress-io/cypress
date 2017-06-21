@@ -4,22 +4,20 @@ import moment from 'moment'
 
 import Run from './run-model'
 
-export class RunsCollection {
+export class RunsStore {
   @observable runs = []
   @observable error = null
   @observable isLoading = false
   @observable isLoaded = false
   @observable lastUpdated
 
-  @action loading (bool) {
-    this.isLoading = bool
+  @action setLoading (isLoading) {
+    this.isLoading = isLoading
     this.error = null
   }
 
   @action setRuns (runs) {
-    this.runs = _.map(runs, (run) => (
-      new Run(run)
-    ))
+    this.runs = _.map(runs, (run) => new Run(run))
 
     this.lastUpdated = moment().format("h:mm:ssa")
     this.error = null
@@ -33,4 +31,4 @@ export class RunsCollection {
   }
 }
 
-export default RunsCollection
+export default RunsStore

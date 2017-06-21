@@ -1,31 +1,29 @@
-import { action } from 'mobx'
-
 import ipc from '../lib/ipc'
 
 let pollId
 
-const getRuns = (runsCollection) => {
-  runsCollection.loading(true)
+const loadRuns = (runsStore) => {
+  runsStore.setLoading(true)
 
-  ipc.getBuilds()
-  .then(action('got:runs', (runs) => {
-    runsCollection.setRuns(runs)
+  ipc.getRuns()
+  .then((runs) => {
+    runsStore.setRuns(runs)
     return null
-  }))
+  })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {
-    runsCollection.setError(err)
+    runsStore.setError(err)
     return null
   })
 
   return null
 }
 
-const pollRuns = (runsCollection) => {
+const pollRuns = (runsStore) => {
   if (pollId) return
 
   pollId = setInterval(() => {
-    getRuns(runsCollection)
+    loadRuns(runsStore)
   }, 10000)
 }
 
@@ -34,8 +32,8 @@ const stopPollingRuns = () => {
   pollId = null
 }
 
-export {
-  getRuns,
+export default {
+  loadRuns,
   pollRuns,
   stopPollingRuns,
 }

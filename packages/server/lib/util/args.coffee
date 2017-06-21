@@ -42,7 +42,7 @@ module.exports = {
         "get-key":     "getKey"
         "new-key":     "generateKey"
         "clear-logs":  "clearLogs"
-        "run-project": "project"
+        "run-project": "runProject"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
         "env":         "environmentVariables"
@@ -98,8 +98,11 @@ module.exports = {
       _.extend options, config.whitelist(c)
 
     ## normalize project to projectPath
-    if p = options.project
+    if p = options.project or options.runProject
       options.projectPath = path.resolve(cwd(), p)
+
+    if options.runProject
+      options.run = true
 
     if options.smokeTest
       options.pong = options.ping

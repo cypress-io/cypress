@@ -31,12 +31,3 @@
   padding: 20px;
   margin: 80px 60px 60px;
 }
-
-.alert-in-projects {
-  top: 40px;
-  position: relative;
-
-  + .projects-list {
-    top: 97px;
-  }
-}

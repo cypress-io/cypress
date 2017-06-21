@@ -4,26 +4,26 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
-import { runSpec } from '../projects/projects-api'
-import specsCollection from './specs-collection'
+import projectsApi from '../projects/projects-api'
+import specsStore from './specs-store'
 
 @observer
 class Specs extends Component {
   render () {
-    if (specsCollection.isLoading) return <Loader color="#888" scale={0.5}/>
+    if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (!specsCollection.specs.length) return this._empty()
+    if (!specsStore.specs.length) return this._empty()
 
-    let allActiveClass = specsCollection.allSpecsChosen ? 'active' : ''
+    let allActiveClass = specsStore.allSpecsChosen ? 'active' : ''
 
     return (
       <div id='tests-list-page'>
         <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
-          <i className={`fa fa-fw ${this._allSpecsIcon(specsCollection.allSpecsChosen)}`}></i>{' '}
+          <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
           Run All Tests
         </a>
         <ul className='outer-files-container list-as-table'>
-          { _.map(specsCollection.specs, (spec) => (
+          { _.map(specsStore.specs, (spec) => (
             this.specItem(spec)
           ))}
         </ul>
@@ -90,17 +90,17 @@ class Specs extends Component {
   _selectSpec (specPath, e) {
     e.preventDefault()
 
-    specsCollection.setChosenSpec(specPath)
+    specsStore.setChosenSpec(specPath)
 
     let project = this.props.project
 
-    runSpec(project, specPath, project.chosenBrowser.name)
+    projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
   }
 
   _empty () {
     return (
       <div id='tests-list-page'>
-        <div className="empty-well">
+        <div className='empty-well'>
           <h5>
             No files found in
             <code onClick={this._openIntegrationFolder.bind(this)}>

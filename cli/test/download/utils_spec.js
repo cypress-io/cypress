@@ -206,14 +206,14 @@ describe('utils', function () {
       })
     })
 
-    it('logs error and exits when installed version does not match package version', function () {
+    it('logs warning when installed version does not match package version', function () {
       return utils.writeInstalledVersion('bloop')
       .then(() => {
         return utils.verify()
       })
       .then(() => {
-        expect(this.log).to.be.calledWith('Installed version does not match package version')
-        expect(process.exit).to.be.calledWith(1)
+        const warning = chalk.yellow('! Installed version (bloop) does not match package version (0.0.0)')
+        expect(this.log).to.be.calledWith(warning)
       })
     })
 

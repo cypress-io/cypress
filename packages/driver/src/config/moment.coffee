@@ -1,6 +1,6 @@
 moment = require("moment")
 
-moment.locale("en", {
+moment.updateLocale("en", {
   relativeTime: {
       future: "in %s",
       past:   "%s ago",

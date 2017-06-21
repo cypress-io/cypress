@@ -1,15 +1,15 @@
 import _ from 'lodash'
 
-import App from './app'
+import ipcBus from './ipc-bus'
 import errors from './errors'
-import state from './state'
+import authStore from './auth-store'
 
 const ipc = {
   isUnauthed (error) {
     return errors.isUnauthenticated(error)
   },
   handleUnauthed () {
-    state.setUser(null)
+    authStore.setUser(null)
 
     ipc.clearGithubCookies()
     ipc.logOut()
@@ -17,9 +17,12 @@ const ipc = {
 }
 
 const register = (eventName, isPromiseApi = true) => {
-  ipc[_.camelCase(eventName)] = (...args) => App.ipc(eventName, ...args)
+  ipc[_.camelCase(eventName)] = (...args) => {
+    // console.log('ipc', eventName, 'called with', args) // NOTE: uncomment to debug ipc
+    return ipcBus(eventName, ...args)
+  }
   if (!isPromiseApi) {
-    ipc[_.camelCase(`off:${eventName}`)] = () => App.ipc.off(eventName)
+    ipc[_.camelCase(`off:${eventName}`)] = () => ipcBus.off(eventName)
   }
 }
 
@@ -31,7 +34,7 @@ register('external:open')
 register('get:current:user')
 register('get:orgs')
 register('gui:error')
-register('get:builds')
+register('get:runs')
 register('get:options')
 register('get:projects')
 register('get:project:statuses')

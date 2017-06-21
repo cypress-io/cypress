@@ -1,20 +1,24 @@
 version: 2
 
-jobs:
-  build:
-    docker:
-      # the Docker image with Cypress dependencies and Chrome browser
-      - image: cypress/internal:chrome58
-        environment:
-          ## this enables colors + fixes failing unit tests
-          TERM: xterm
+defaults: &defaults
+  parallelism: 1
+  working_directory: ~/cypress-monorepo
+  docker:
+    # the Docker image with Cypress dependencies and Chrome browser
+    - image: cypress/internal:chrome58
+      environment:
+        ## this enables colors + fixes failing unit tests
+        TERM: xterm
 
-          npm_config_loglevel: warn
-          # even when running as non-root user
-          # need to set unsafe perm to be able to do `npm postinstall`
-          npm_config_unsafe-perm: true
-    working_directory: ~/cypress-monorepo
-    parallelism: 4
+        npm_config_loglevel: warn
+        # even when running as non-root user
+        # need to set unsafe perm to be able to do `npm postinstall`
+        npm_config_unsafe-perm: true
+
+jobs:
+  ## code checkout and NPM installs
+  build:
+    <<: *defaults
     steps:
       - checkout
 
@@ -151,82 +155,113 @@ jobs:
       ## now go build all of subpackages
       - run: npm run build
 
-      #
-      # things to run in the 1st CI container
-      #
-      - run:
-          name: Running linters
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run lint
-              npm run all lint
-            fi
+      ## save entire folder as artifact for other jobs to continue
+      ## hmm, do not see a good way to cache it, since all code
+      ## might change
+      - save_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /home/person/cypress-monorepo
 
-      - run:
-          name: Fast unit tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run all test -- --package cli
-              npm run all test -- --package coffee
-              npm run all test -- --package desktop-gui
-              npm run all test -- --package electron
-              npm run all test -- --package extension
-              npm run all test -- --package https-proxy
-              npm run all test -- --package launcher
-              npm run all test -- --package reporter
-              npm run all test -- --package runner
-              npm run all test -- --package socket
-              npm run all test -- --package static
-            fi
-      - run:
-          name: Server unit tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              npm run all test-unit -- --package server
-            fi
-      - run:
-          name: Server integration tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 0 ]; then
-              whoami
-              npm run all test-integration -- --package server
-            fi
-      #
-      # things to run in the 2nd CI container
-      #
-      - run:
-          name: Server E2E tests (electron)
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 1 ]; then
-              npm run all test-e2e -- --package server
-            fi
-      #
-      # things to run in the 3rd CI container
-      #
-      - run:
-          name: Docs - running E2E tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 2 ]; then
-              cd docs
-              npm run test-e2e
-            fi
-      #
-      # things to run in the 4th CI container
-      #
-      - run:
-          name: Driver unit tests
-          command: |
-            if [ $CIRCLE_NODE_INDEX == 3 ]; then
-              chrome --version
-              xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
-            fi
-      #
-      # things to run in the 4th CI container
-      #
-      # - run:
-      #     name: Example e2e tests
-      #     command: |
-      #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
-      #         # ./bin/cypress --project=./packages/example --path-to-cypress
-      #         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
-      #       fi
+  lint:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run lint
+      - run: npm run all lint
+
+  "unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test -- --package cli
+      - run: npm run all test -- --package coffee
+      - run: npm run all test -- --package desktop-gui
+      - run: npm run all test -- --package electron
+      - run: npm run all test -- --package extension
+      - run: npm run all test -- --package https-proxy
+      - run: npm run all test -- --package launcher
+      - run: npm run all test -- --package reporter
+      - run: npm run all test -- --package runner
+      - run: npm run all test -- --package socket
+      - run: npm run all test -- --package static
+
+  "server-unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-unit -- --package server
+
+  "server-integration-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-integration -- --package server
+
+  "server-e2e-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-e2e -- --package server
+
+  "docs-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && npm run test-e2e
+
+  "driver-unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: chrome --version
+      - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - lint:
+          requires:
+            - build
+      - unit-tests:
+          requires:
+            - build
+      - server-unit-tests:
+          requires:
+            - build
+      - server-integration-tests:
+          requires:
+            - build
+      - server-e2e-tests:
+          requires:
+            - build
+      - docs-tests:
+          requires:
+            - build
+      - driver-unit-tests:
+          requires:
+            - build
+
+#
+# things to run in the 4th CI container
+#
+# - run:
+#     name: Example e2e tests
+#     command: |
+#       if [ $CIRCLE_NODE_INDEX == 3 ]; then
+#         # ./bin/cypress --project=./packages/example --path-to-cypress
+#         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+#       fi

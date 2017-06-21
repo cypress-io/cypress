@@ -1,6 +1,6 @@
 {% if config.google %}
   <script type="text/javascript">
-    if (window.env !== 'test') {
+    if (window.env === 'production') {
       // Google Optimize: This snippet ensures that users only
       // see your variant content, minimizing page flicker.
       (function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;

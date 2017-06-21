@@ -1,10 +1,11 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
-import state from '../lib/state'
+import authStore from '../lib/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
@@ -13,8 +14,8 @@ import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizatio
 @observer
 class SetupProject extends Component {
   static propTypes = {
-    project: React.PropTypes.object,
-    onSetup: React.PropTypes.func.isRequired,
+    project: PropTypes.object,
+    onSetup: PropTypes.func.isRequired,
   }
 
   constructor (...args) {
@@ -22,7 +23,7 @@ class SetupProject extends Component {
 
     this.state = {
       error: null,
-      projectName: this._initialProjectName(),
+      projectName: this.props.project.displayName,
       public: null,
       owner: null,
       orgId: null,
@@ -130,7 +131,7 @@ class SetupProject extends Component {
                     className='user-avatar'
                     height='13'
                     width='13'
-                    src={`${gravatarUrl(state.user && state.user.email)}`}
+                    src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
                   />
                   {' '}Me
               </label>
@@ -272,17 +273,6 @@ class SetupProject extends Component {
 
   _formNotFilled () {
     return _.isNull(this.state.public) || !this.state.projectName
-  }
-
-  _initialProjectName = () => {
-    let project = this.props.project
-
-    if (project.name) {
-      return project.name
-    } else {
-      let splitName = _.last(project.path.split('/'))
-      return _.truncate(splitName, { length: 60 })
-    }
   }
 
   _error () {

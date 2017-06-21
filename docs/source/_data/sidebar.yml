@@ -9,6 +9,7 @@ guides:
     introduction-to-cypress: introduction-to-cypress.html
     writing-and-organizing-tests: writing-and-organizing-tests.html
     overview-of-the-gui: overview-of-the-gui.html
+    interacting-with-elements: interacting-with-elements.html
     aliases-and-references: aliases-and-references.html
     screenshots-and-videos: screenshots-and-videos.html
     launching-browsers: launching-browsers.html

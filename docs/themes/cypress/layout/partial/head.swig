@@ -14,6 +14,10 @@
       <link rel="alternative" hreflang="{{ loop.key }}" href="{{ canonical_url(loop.key) }}">
     {% endfor %}
   {% endif %}
+  <script type="text/javascript">
+    window.env = window.Cypress ? 'test' : '{{env.NODE_ENV}}'
+  </script>
+
   <!-- Icon -->
   <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="16x16" />
 
@@ -25,6 +29,8 @@
   {{ css('css/vendor/docsearch') }}
   {{ css('css/cypress') }}
   <!-- endbuild -->
+
+  {{ partial('error-reporting') }}
 
   <!-- Open Graph http://ogp.me/ -->
   {{ open_graph({

@@ -1,10 +1,10 @@
 import ipc from './ipc'
-import state from './state'
+import authStore from './auth-store'
 import updater from '../update/update-model'
 
 const appApi = {
   logOut () {
-    state.setUser(null)
+    authStore.setUser(null)
 
     ipc.clearGithubCookies()
     ipc.logOut()

@@ -2,8 +2,6 @@ _         = require("lodash")
 Promise   = require("bluebird")
 files     = require("./controllers/files")
 config    = require("./config")
-errors    = require("./errors")
-cache     = require("./cache")
 Project   = require("./project")
 browsers  = require("./browsers")
 log       = require('./log')
@@ -31,7 +29,7 @@ create = ->
 
     getRecordKeys: tryToCall("getRecordKeys")
 
-    getBuilds: tryToCall("getBuilds")
+    getRuns: tryToCall("getRuns")
 
     requestAccess: tryToCall("requestAccess")
 

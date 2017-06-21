@@ -1,127 +1,87 @@
-import _ from 'lodash'
-import Promise from 'bluebird'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { withRouter, Link } from 'react-router'
+import Loader from 'react-loader'
 
-import ipc from '../lib/ipc'
-import projectsStore from '../projects/projects-store'
+import C from '../lib/constants'
+import projectsApi from '../projects/projects-api'
+import appStore from '../lib/app-store'
+import viewStore from '../lib/view-store'
+
+import Settings from '../settings/settings'
+import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
-import { closeProject, openProject } from '../projects/projects-api'
-import OnBoarding from "./onboarding"
-import Loader from "react-loader"
+import Runs from '../runs/runs-list'
+import SpecsList from '../specs/specs-list'
 
-const NoBrowsers = ({ projectClientId }) => {
-  let _closeProject = () => {
-    closeProject(projectClientId)
-  }
-
-  return (
-    <div className='full-alert alert alert-danger error'>
-      <p>
-        <i className='fa fa-warning'></i>{' '}
-        <strong>Can't Launch Any Browsers</strong>
-      </p>
-      <p>
-        We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
-      </p>
-      <Link
-        to='/projects'
-        onClick={_closeProject}
-        className='btn btn-default btn-sm'
-      >
-        <i className="fa fa-chevron-left"></i>{' '}
-        Go Back to Projects
-      </Link>
-      <a onClick={downloadBrowser} className='btn btn-primary btn-sm'>
-        <i className='fa fa-chrome'></i>{' '}
-        Download Chrome
-      </a>
-    </div>
-  )
-}
-
-const downloadBrowser = function (e) {
-  e.preventDefault()
-  ipc.externalOpen('https://www.google.com/chrome/browser/desktop')
-}
-
-const PortInUse = () => {
-  return (
-    <div>
-      <hr />
-      <p>To fix, stop the other running process or change the port in cypress.json</p>
-    </div>
-  )
-}
-
-@withRouter
 @observer
 class Project extends Component {
-  constructor (props) {
-    super(props)
+  componentDidMount () {
+    const { project } = this.props
 
-    this.project = projectsStore.getProjectByClientId(props.params.clientId)
+    project.setLoading(true)
 
-    if (!this.project) {
-      return props.router.push('/projects')
-    }
+    document.title = appStore.isGlobalMode ? project.displayName : project.path
 
-    this.project.loading(true)
-
-  }
-
-  componentWillMount () {
-    // delay opening the project so
-    // we give the UI some time to render
-    // and not block due to sync require's
-    // in the main process
-    return Promise.delay(100)
-    .then(() => {
-      return openProject(this.project)
-    })
+    projectsApi.openProject(project)
   }
 
   componentWillUnmount () {
     document.title = 'Cypress'
+
+    projectsApi.closeProject(this.props.project)
   }
 
   render () {
-    document.title = `${this._projectName()}`
+    if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
-
-    if (!(this.project.error === undefined)) return this._error()
-
-    if (!this.project.browsers.length) return <NoBrowsers projectClientId={this.project.clientId}/>
+    if (this.props.project.error) return this._error()
 
     return (
       <div>
-        <ProjectNav project={this.project}/>
-        { React.cloneElement(this.props.children, { project: this.project }) }
-        <OnBoarding project={this.project}/>
+        <ProjectNav project={this.props.project}/>
+        <div className='project-content'>
+          {this._warning()}
+          {this._currentView()}
+        </div>
+        <OnBoarding project={this.props.project}/>
       </div>
     )
   }
 
-  _projectName () {
-    let project = this.project
-
-    if (project.name) {
-      return (project.name)
-    } else {
-      let splitName = _.last(project.path.split('/'))
-      return _.truncate(splitName, { length: 60 })
+  _currentView () {
+    switch (viewStore.currentView.name) {
+      case C.PROJECT_RUNS:
+        return <Runs project={this.props.project} />
+      case C.PROJECT_SETTINGS:
+        return <Settings project={this.props.project} />
+      default:
+        return <SpecsList project={this.props.project} />
     }
   }
 
-  _error = () => {
-    let err = this.project.error
-    let portInUse
+  _warning () {
+    const { warning } = this.props.project
 
-    if (err.portInUse) {
-      portInUse = <PortInUse />
-    }
+    if (!warning) return null
+
+    return (
+      <div className='alert alert-warning'>
+        <p>
+          <i className='fa fa-warning'></i>{' '}
+          <strong>Warning</strong>
+        </p>
+        <p dangerouslySetInnerHTML={{
+          __html: warning.message.split('\n').join('<br />'),
+        }} />
+        <button className='btn btn-link close' onClick={this._removeWarning}>
+          <i className='fa fa-remove' />
+        </button>
+      </div>
+    )
+  }
+
+  _error () {
+    let err = this.props.project.error
 
     return (
       <div className='full-alert alert alert-danger error'>
@@ -129,34 +89,32 @@ class Project extends Component {
           <i className='fa fa-warning'></i>{' '}
           <strong>Can't start server</strong>
         </p>
-        <p>
-          { this._errorMessage(err.message) }
-        </p>
-        { portInUse }
-        <Link
-          to='/projects'
-          onClick={this._closeProject}
+        <p dangerouslySetInnerHTML={{
+          __html: err.message.split('\n').join('<br />'),
+        }} />
+        {err.portInUse && (
+          <div>
+            <hr />
+            <p>To fix, stop the other running process or change the port in cypress.json</p>
+          </div>
+        )}
+        <button
           className='btn btn-default btn-sm'
+          onClick={this._reopenProject}
         >
-          <i className="fa fa-chevron-left"></i>{' '}
-          Go Back to Projects
-        </Link>
+          <i className='fa fa-refresh'></i>{' '}
+          Try Again
+        </button>
       </div>
     )
   }
 
-  _errorMessage (message) {
-    const html = {
-      __html: message.split('\n').join('<br />'),
-    }
-
-    return (
-      <span dangerouslySetInnerHTML={html} />
-    )
+  _removeWarning = () => {
+    this.props.project.clearWarning()
   }
 
-  _closeProject = function () {
-    closeProject(this.projectId)
+  _reopenProject = () => {
+    projectsApi.reopenProject(this.props.project)
   }
 }
 

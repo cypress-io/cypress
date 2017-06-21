@@ -7,7 +7,7 @@ const packagePath = path.join(__dirname, '..', '..', 'package.json')
 const pkg = require(packagePath)
 
 const processRunOptions = (options = {}) => {
-  const args = ['--project', options.project]
+  const args = ['--run-project', options.project]
 
   //// if key is set use that - else attempt to find it by env var
   if (options.key == null) {

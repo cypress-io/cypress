@@ -1,4 +1,4 @@
-import { action, asStructure, observable } from 'mobx'
+import { action, observable } from 'mobx'
 
 import Err from '../lib/err-model'
 import Instrument from '../instruments/instrument-model'
@@ -6,7 +6,7 @@ import Instrument from '../instruments/instrument-model'
 const LONG_RUNNING_THRESHOLD = 1000
 
 export default class Command extends Instrument {
-  @observable renderProps = asStructure({})
+  @observable.struct renderProps = {}
   @observable err = new Err({})
   @observable event = false
   @observable isLongRunning = false

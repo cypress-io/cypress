@@ -9,6 +9,7 @@ config        = require("#{root}lib/config")
 logger        = require("#{root}lib/logger")
 Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
+connect       = require("#{root}lib/util/connect")
 
 morganFn = ->
 mockery.registerMock("morgan", -> morganFn)
@@ -98,8 +99,15 @@ describe "lib/server", ->
 
     it "resolves with http server port", ->
       @server.createServer(@app, {port: @port})
-      .then (port) =>
+      .spread (port) =>
         expect(port).to.eq(@port)
+
+    it "resolves with warning if cannot connect to baseUrl", ->
+      @sandbox.stub(connect, "ensureUrl").rejects()
+      @server.createServer(@app, {port: @port, baseUrl: "http://localhost:#{@port}"})
+      .spread (port, warning) =>
+        expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING")
+        expect(warning.message).to.include(@port)
 
     context "errors", ->
       it "rejects with portInUse", ->

@@ -31,9 +31,13 @@ Option | Default | Description
 
 ## Timeouts
 
+{% note success Core Concept %}
+{% url 'Timeouts are a core concept' introduction-to-cypress#Default-Values %} you should understand well. The default values listed here are meaningful.
+{% endnote %}
+
 Option | Default | Description
 ----- | ---- | ----
-`defaultCommandTimeout` | `4000` | Time, in milliseconds, to wait until a cy command is considered timed out
+`defaultCommandTimeout` | `4000` | Time, in milliseconds, to wait until most DOM based commands are considered timed out
 `execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during a {% url `cy.exec()` exec %} command
 `pageLoadTimeout` | `60000` | Time, in milliseconds, to wait until {% url `cy.visit()` visit %}, {% url `cy.go()` go %}, {% url `cy.reload()` reload %} commands or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request to go out in a {% url `cy.wait()` wait %} command

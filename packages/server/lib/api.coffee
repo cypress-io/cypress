@@ -76,10 +76,10 @@ module.exports = {
       }
     })
 
-  getProjectBuilds: (projectId, authToken, options = {}) ->
+  getProjectRuns: (projectId, authToken, options = {}) ->
     options.page ?= 1
     rp.get({
-      url: Routes.projectBuilds(projectId)
+      url: Routes.projectRuns(projectId)
       json: true
       timeout: options.timeout ? 10000
       auth: {
@@ -88,9 +88,9 @@ module.exports = {
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  createBuild: (options = {}) ->
+  createRun: (options = {}) ->
     rp.post({
-      url: Routes.builds()
+      url: Routes.runs()
       json: true
       timeout: options.timeout ? 10000
       headers: {

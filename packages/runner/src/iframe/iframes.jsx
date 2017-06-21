@@ -67,7 +67,7 @@ export default class Iframes extends Component {
       detachDom: () => {
         const Cypress = eventManager.getCypress()
         if (Cypress) {
-          this.autIframe.detachDom(Cypress)
+          return this.autIframe.detachDom(Cypress)
         }
       },
       snapshotControls: (snapshotProps) => (

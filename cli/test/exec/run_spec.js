@@ -105,7 +105,7 @@ describe('exec run', function () {
 
       return run.start({ port: '1234' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--port', '1234', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--port', '1234', '--cli-version', pkg.version])
       })
     })
 
@@ -114,7 +114,7 @@ describe('exec run', function () {
 
       return run.start({ env: 'host=http://localhost:1337,name=brian' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--env', 'host=http://localhost:1337,name=brian', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--env', 'host=http://localhost:1337,name=brian', '--cli-version', pkg.version])
       })
     })
 
@@ -123,7 +123,7 @@ describe('exec run', function () {
 
       return run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--config', 'watchForFileChanges=false,baseUrl=localhost', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--config', 'watchForFileChanges=false,baseUrl=localhost', '--cli-version', pkg.version])
       })
     })
 
@@ -132,7 +132,7 @@ describe('exec run', function () {
 
       return run.start({ record: false })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--record', false, '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--record', false, '--cli-version', pkg.version])
       })
     })
 
@@ -141,7 +141,7 @@ describe('exec run', function () {
 
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--output-path', '/path/to/output', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--output-path', '/path/to/output', '--cli-version', pkg.version])
       })
     })
   })

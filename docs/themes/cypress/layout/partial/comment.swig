@@ -3,7 +3,7 @@
     <div id="disqus_thread"></div>
   </section>
   <script type="text/javascript">
-    if (window.env !== 'test') {
+    if (window.env === 'production') {
       var disqus_shortname = '{{ config.disqus_shortname }}';
       var disqus_url = '{{ url }}';
       var disqus_title = {{ JSON.stringify(page.title) }};

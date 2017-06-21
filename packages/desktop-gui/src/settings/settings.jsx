@@ -6,17 +6,17 @@ import Collapse, { Panel } from 'rc-collapse'
 
 import ipc from '../lib/ipc'
 import Project from '../project/project-model'
-import { getRecordKeys } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 
 @observer
-class Config extends Component {
+class Settings extends Component {
   state = {
     keys: [],
     isLoadingKeys: true,
   }
 
   componentWillMount () {
-    getRecordKeys().then((keys = []) => {
+    projectsApi.getRecordKeys().then((keys = []) => {
       this.setState({
         keys,
         isLoadingKeys: false,
@@ -26,8 +26,8 @@ class Config extends Component {
 
   render () {
     return (
-      <div id='config'>
-        <div className='config-wrapper'>
+      <div id='settings'>
+        <div className='settings-wrapper'>
           <Collapse>
             {this._configSection()}
             {this._projectIdSection()}
@@ -42,7 +42,7 @@ class Config extends Component {
     const config = this.props.project.resolvedConfig
 
     return (
-      <Panel header='Configuration' key='config' className='form-horizontal'>
+      <Panel header='Configuration' key='config' className='form-horizontal settings-config'>
         <a href='#' className='learn-more' onClick={this._openHelp}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn more
@@ -73,9 +73,9 @@ class Config extends Component {
           </tbody>
         </table>
         <pre className='config-vars'>
-          { `{` }
+          { '{' }
           { this._display(config) }
-          { `}` }
+          { '}' }
         </pre>
       </Panel>
     )
@@ -99,7 +99,7 @@ class Config extends Component {
   }
 
   _getString (val) {
-    return _.isString(val) ? "'" : ""
+    return _.isString(val) ? '\'' : ''
   }
 
   _getComma (hasComma) {
@@ -128,10 +128,10 @@ class Config extends Component {
         <span className='nested'>
           <span className='key'>{key}</span>
           <span className='colon'>:</span>{' '}
-          { `{` }
+          { '{' }
           { this._display(value) }
         </span>
-        <span className='line'>{`}`}{this._getComma(hasComma)}</span>
+        <span className='line'>{'}'}{this._getComma(hasComma)}</span>
         <br />
       </span>
     )
@@ -151,7 +151,7 @@ class Config extends Component {
     if (!this.props.project.id) return null
 
     return (
-      <Panel header='Project ID' key='projectId' className='form-horizontal'>
+      <Panel header='Project ID' key='projectId' className='form-horizontal settings-project-id'>
         <a href='#' className='learn-more' onClick={this._openProjectIdHelp}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn more
@@ -160,9 +160,9 @@ class Config extends Component {
           It identifies your project and should not be changed.
         </p>
         <pre className='line-nums'>
-          <span>{`{`}</span>
+          <span>{'{'}</span>
           <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
-          <span>{`}`}</span>
+          <span>{'}'}</span>
         </pre>
       </Panel>
     )
@@ -173,7 +173,7 @@ class Config extends Component {
     if (this._notSetupForCi() || this._doesNotHavePermission()) return null
 
     return (
-      <Panel header='Record Key' key='record-keys' className='form-horizontal config-record-keys'>
+      <Panel header='Record Key' key='record-keys' className='form-horizontal settings-record-keys'>
         <a href='#' className='learn-more' onClick={this._openRecordKeyGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
@@ -257,4 +257,4 @@ class Config extends Component {
   }
 }
 
-export default Config
+export default Settings

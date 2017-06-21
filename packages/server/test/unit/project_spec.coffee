@@ -134,7 +134,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSupportFile").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(Server.prototype, "open").resolves()
+      @sandbox.stub(Server.prototype, "open").resolves([])
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -203,17 +203,17 @@ describe "lib/project", ->
     it "can close when server + watchers arent open", ->
       @project.close()
 
-  context "#getBuilds", ->
+  context "#getRuns", ->
     beforeEach ->
       @project = Project(@todosPath)
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
-      @sandbox.stub(api, "getProjectBuilds").resolves('builds')
+      @sandbox.stub(api, "getProjectRuns").resolves('runs')
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
-    it "calls api.getProjectBuilds with project id + session", ->
-      @project.getBuilds().then (builds) ->
-        expect(api.getProjectBuilds).to.be.calledWith("id-123", "auth-token-123")
-        expect(builds).to.equal("builds")
+    it "calls api.getProjectRuns with project id + session", ->
+      @project.getRuns().then (runs) ->
+        expect(api.getProjectRuns).to.be.calledWith("id-123", "auth-token-123")
+        expect(runs).to.equal("runs")
 
   context "#scaffold", ->
     beforeEach ->

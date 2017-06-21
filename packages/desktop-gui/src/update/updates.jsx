@@ -12,10 +12,10 @@ const openChangelog = (e) => {
 
 @observer
 class Updates extends Component {
-  constructor (props) {
-    super(props)
-
-    updater.setVersion(props.options.version)
+  componentDidMount () {
+    ipc.getOptions().then((options = {}) => {
+      updater.setVersion(options.version)
+    })
 
     ipc.updaterRun((err, data = {}) => {
       switch (data.event) {
@@ -78,7 +78,6 @@ class Updates extends Component {
   }
 
   _state = () => {
-
     let errClass
     if (updater.state === 'error') {
       errClass = 'text-danger'
@@ -98,7 +97,7 @@ class Updates extends Component {
   }
 
   _getHtmlState = () => {
-    return { __html: updater.stateFormatted.split('\n').join("<br />") }
+    return { __html: updater.stateFormatted.split('\n').join('<br />') }
   }
 
   _notFinished = () => {

@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import ipc from '../lib/ipc'
-import SetupProject from "./setup-project-modal"
+import SetupProject from './setup-project-modal'
 
 @observer
 export default class ProjectNotSetup extends Component {
   static propTypes = {
-    project: React.PropTypes.object,
+    project: PropTypes.object,
   }
 
   constructor (props) {
@@ -21,7 +22,7 @@ export default class ProjectNotSetup extends Component {
 
   render () {
     return (
-      <div id='runs-list-page'>
+      <div>
         <div className="empty">
           {
             this.props.isValid ?
