@@ -204,7 +204,7 @@ cy
 
 # Notes
 
-**Similarities to Chai**
+***Similarities to Chai***
 
 If you've worked in {% url "Chai" http://chaijs.com/ %} before, you will recognize that `.and()` matches the same fluent assertion syntax.
 
@@ -216,7 +216,7 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 
 `.and()` reproduces this same assertion behavior.
 
-**How do I know which assertions change the subject and which keep it the same?**
+***How do I know which assertions change the subject and which keep it the same?***
 
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 

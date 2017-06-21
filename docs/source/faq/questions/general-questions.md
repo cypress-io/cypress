@@ -5,20 +5,15 @@ comments: false
 containerClass: faq
 ---
 
-<!-- ## What is Cypress? -->
-
-
-<!-- ## Hasn’t this been done before? -->
-
 ## {% fa fa-angle-right %} How is this different from 'X' testing tool?
 
 Cypress is kind of a hybrid application/framework/service all rolled into one. It takes a little bit of other testing tools, brings them together and improves on them.
 
-**Mocha**
+***Mocha***
 
  Mocha is a testing framework for JavaScript. {% url "Mocha" http://mochajs.org/ %} gives you the `it`, `describe`, `beforeEach` methods. Cypress isn't **different** from Mocha, it actually **uses** Mocha under the hood. All of your tests will be written on top of Mocha's `bdd` interface.
 
-**Karma**
+***Karma***
 
 A unit testing runner for JavaScript, {% url "Karma" http://karma-runner.github.io/ %}, works with either {% url "Jasmine" https://jasmine.github.io/ %}, {% url "Mocha" http://mochajs.org/ %}, or any other JavaScript testing framework.
 
@@ -26,7 +21,7 @@ Karma also watches your JavaScript files, live reloads when they change, and is 
 
 Cypress essentially replaces Karma because it does all of this already and much more.
 
-**Capybara**
+***Capybara***
 
 The a `Ruby` specific tool that allows you to write integration tests for your web application is {% url "Capybara" http://teamcapybara.github.io/capybara/ %}. In the Rails world, this is the *go-to* tool for testing your application. It uses {% url "SauceLabs" https://saucelabs.com/ %} (or another headless driver) to interact with browsers. It's API consists of commands that query for DOM elements, perform user actions, navigate around, etc.
 
@@ -34,7 +29,7 @@ Cypress essentially replaces Capybara because it does all of these things and mu
 
 Oftentimes Capybara begins to not work as well in complex JavaScript applications. Additionally, trying to TDD your application is often difficult. You often have to resort to writing your application code first (typically manually refreshing your browser after changes) until you get it working. From there you write tests, but lose the entire value of TDD.
 
-**Protractor**
+***Protractor***
 
 Using {% url "Protractor" http://www.protractortest.org/ %} provides a nice Promise-based interface on top of Selenium, which makes it easy to deal with asynchronous code. Protractor comes with all of the features of Capybara and essentially suffers from the same problems.
 
@@ -42,7 +37,7 @@ Cypress replaces Protractor because it does all of these things and much more. O
 
 Also, Protractor is very much focused on `AngularJS`, whereas Cypress is designed to work with any JavaScript framework. Protractor, because it's based on Selenium, is still pretty slow, and is prohibitive when trying to TDD your application. Cypress, on the other hand, runs at the speed your browser and application are capable of serving and rendering, there is no additional bloat.
 
-**SauceLabs**
+***SauceLabs***
 
 Using {% url "SauceLabs" https://saucelabs.com/ %} enables Selenium-based tests to be run across various browsers and operating systems. Additionally, they have a JavaScript Unit Testing tool that isn't Selenium focused.
 
@@ -52,7 +47,7 @@ Cypress's API is written to be completely compatible with SauceLabs, even though
 
 Ultimately SauceLabs and Cypress offer very different value propositions. SauceLabs doesn't help you write your tests, it takes your existing tests and runs them across different browsers and aggregates the results for you.
 
-Cypress on the other hand *helps* you write your tests. You would use Cypress every day, building and testing your application, and then use SauceLabs to ensure your application works on every browser.
+Cypress on the other hand **helps** you write your tests. You would use Cypress every day, building and testing your application, and then use SauceLabs to ensure your application works on every browser.
 
 ## {% fa fa-angle-right %} Is Cypress free?
 
@@ -94,11 +89,6 @@ All of these technologies together are coordinated and enable Cypress to work, w
 
 Yes.
 
-<!-- ## What are good use cases for Cypress? -->
-
-
-<!-- ## What are bad use cases for Cypress? -->
-
 ## {% fa fa-angle-right %} We have the craziest most insane authentication system ever, will Cypress work with that?
 
 If you're using some crazy thumb-print, retinal-scan, time-based, key-changing, microphone, audial, decoding mechanism to log in your users, then no, Cypress won't work with that.  But seriously, Cypress is a *development* tool, which makes it easy to test your web applications. If your application is doing 100x things to make it extremely difficult to access, Cypress won't magically make it any easier.
@@ -117,9 +107,6 @@ No. There are already lots of tools to do that. Using Cypress to test against a 
 
 There is nothing currently built into Cypress to do this. Adding code coverage around end to end tests is much harder than unit tests and it may not be feasible to do in a generic way. You can read in more detail about code coverage {% issue 346 'here' %}.
 
-<!-- ## What kind of tests do I write in Cypress? -->
-
-
 ## {% fa fa-angle-right %} Does Cypress use Selenium / Webdriver?
 
 No. In fact Cypress' architecture is very different from Selenium in a few critical ways:
@@ -131,16 +118,26 @@ No. In fact Cypress' architecture is very different from Selenium in a few criti
 
 Cypress does *not* utilize WebDriver for testing, so does not use or have any notion of driver bindings.
 
-<!-- ## Does Cypress have an equivalent to Selenium IDE? -->
-
 ## {% fa fa-angle-right %} Is Cypress open source?
 
 We are working on open sourcing Cypress. You can read more {% url "here" https://www.cypress.io/blog/2017/05/04/cypress-is-going-open-source/ %}.
-
-<!-- ## How can I contribute to Cypress? -->
 
 ## {% fa fa-angle-right %} I found a bug! What do I do?
 
 - Search existing {% url "open issues" https://github.com/cypress-io/cypress/issues %}, it may already be reported!
 - Update Cypress. Your issue may have {% url "already been fixed" changelog %}.
 - {% open_an_issue %}. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.
+
+<!-- ## What is Cypress? -->
+
+<!-- ## Hasn’t this been done before? -->
+
+<!-- ## What are good use cases for Cypress? -->
+
+<!-- ## What are bad use cases for Cypress? -->
+
+<!-- ## What kind of tests do I write in Cypress? -->
+
+<!-- ## Does Cypress have an equivalent to Selenium IDE? -->
+
+<!-- ## How can I contribute to Cypress? -->

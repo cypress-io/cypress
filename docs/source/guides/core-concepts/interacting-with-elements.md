@@ -46,13 +46,13 @@ Whenever Cypress cannot interact with an element, it could fail at any of the ab
 
 Cypress checks a lot of things to determine an element's visibility.
 
-**An element is considered hidden if:**
+***An element is considered hidden if:***
 
 - Its `offsetWidth` or `offsetHeight` is `0`.
 - Its CSS property is `visibility: hidden`.
 - Its CSS property is `display: none`.
 
-**Additionally an element is considered hidden if:**
+***Additionally an element is considered hidden if:***
 
 - Any of its parent ancestors have a CSS property `overflow: hidden`
   - AND have an `offsetWidth` or `offsetHeight` of `0`

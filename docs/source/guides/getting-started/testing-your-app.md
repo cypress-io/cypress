@@ -20,13 +20,13 @@ After successfully logging in, you will need to add the project(s) you want to w
 
 - Click {% fa fa-plus %} Add Project.
 
-![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
+![Add Project in LeftHand Corner](/img/guides/add-your-first-project-in-guid.png)
 
 {% note info %}
 Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are {% url "set up to be recorded" projects#Set-up-a-Project-to-Record %}.
 {% endnote %}
 
-**To run tests:**
+***To run tests:***
 
 - Click on the project.
 - You will then come to a page listing all files in your project's `cypress/integration` folder. If it's a new project, you'll see a message about the folder structure generated for you and also an `example_spec.js` file.
@@ -44,7 +44,7 @@ describe("The Home Page", function() {
 })
 ```
 
-**You'll need to do 2 things for this example to work:**
+***You'll need to do 2 things for this example to work:***
 
 1. Where does your dev server run? Change `http://localhost:8080/` to the correct URL for your environment.
 2. You'll have to also start your server! If Cypress tries to visit before you've started your server, you'll see the error pictured below:
@@ -102,7 +102,7 @@ That said, modern web testing has a few wrinkles that every team experiences, so
 
 Nothing slows a test suite like having to log in, but all the good parts of your application most likely require an authenticated user! Here are some tips.
 
-**Fully Test the Login Flow, Once**
+***Fully Test the Login Flow, Once***
 
 It's a great idea to get your signup and login flow under test coverage since it is very important to all of your users and you never want it to break. We recommend you test signup and login the way you test most things in Cypress:
 
@@ -134,7 +134,7 @@ You can quickly test your app's behavior like this for a number of scenarios. Fo
 
 But don't try to reuse this login test for every single test...
 
-**Short-Circuit the Login Flow Everywhere Else**
+***Short-Circuit the Login Flow Everywhere Else***
 
 Now that the signup and login flow are covered, we want to avoid them for the remainder of our tests because they are slow. For this, we can leverage {% url `cy.request()` request %}, which makes a web request _just like the browser, but outside of the browser_. Cypress will send all the appropriate `cookies` and `headers`, just like the browser would, but without engaging all of the graphical overhead of the browser itself.
 

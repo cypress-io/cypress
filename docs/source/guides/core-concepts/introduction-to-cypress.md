@@ -305,7 +305,7 @@ Cypress commands do not **return** their subjects, they **yield** them. Remember
 To work around the need to reference elements, Cypress has a feature {% url 'known as aliasing' aliases-and-references %}. Aliasing  helps you to **store** and **save** element references for future use.
 {% endnote %}
 
-**Using {% url `.then()` then %} To Act On A Subject**
+***Using {% url `.then()` then %} To Act On A Subject***
 
 Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a {% url '`.then(() => {...})`' type %} to your command chain. When the previous command resolves, it will call your callback function with the yielded subject as the first argument.
 
@@ -323,7 +323,7 @@ cy.get('#some-link') // Find the el with id 'some-link'
   }).should('equal', 'http://example.com') // .should works against Strings!
 ```
 
-**Using Aliases to Refer to Previous Subjects**
+***Using Aliases to Refer to Previous Subjects***
 
 Cypress has some added functionality for quickly referring back to past subjects called [Aliases](/guides.html). It looks something like this:
 
@@ -696,7 +696,7 @@ When using a callback function with {% url `.should()` should %}, be sure that t
 
 Many commands have a default, built-in assertion, or rather have requirements that may cause it to fail without an explicit assertion you've written.
 
-**For instance:**
+***For instance:***
 
 - {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code.
 - {% url `cy.request()` request %} expects the remote server to exist and provide a response.
@@ -837,7 +837,7 @@ For instance:
 
 That leaves most other commands including all DOM based commands to time out by default after 4000ms.
 
-**Why only 4 seconds? That sounds low!**
+***Why only 4 seconds? That sounds low!***
 
 If you've used other testing frameworks, you might wonder why this value is so low. In fact we regularly see our some users initially increasing it sometimes up to 25x!
 

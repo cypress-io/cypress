@@ -25,17 +25,17 @@ After adding a new project, Cypress will automatically scaffold out a suggested 
 
 Cypress also adds placeholder files to help get you started with examples in each folder.
 
-**Example JSON fixture**
+***Example JSON fixture***
 ```text
 /cypress/fixtures/example.json
 ```
 
-**Example Integration Test**
+***Example Integration Test***
 ```text
 /cypress/integration/example_spec.js
 ```
 
-**Example JavaScript Support Files**
+***Example JavaScript Support Files***
 ```text
 /cypress/support/commands.js
 /cypress/support/defaults.js
@@ -46,7 +46,7 @@ Cypress also adds placeholder files to help get you started with examples in eac
 {% url 'Check out our example recipe using support files to import common utilities' extending-cypress %}
 {% endnote %}
 
-**Configuring Folder Structure**
+***Configuring Folder Structure***
 
 While Cypress allows for configuration of where your tests, fixtures, and support files are located, if you're starting your first project, we recommend you use the above structure.
 
@@ -62,7 +62,7 @@ Cypress supports ES2015, ES2016, ES2017, and JSX. ES2015 modules and CommonJS mo
 {% url 'Check out our example recipe using ES2015 and CommonJS modules' extending-cypress %}
 {% endnote %}
 
-To see an example of every command used in Cypress, open the [`example_spec.js`](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/example_spec.js) within your `cypress/integration` folder.
+To see an example of every command used in Cypress, open the {% url "`example_spec.js`" https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/example_spec.js%} within your `cypress/integration` folder.
 
 To start writing tests for your app, simply create a new file like `app_spec.js` within your `cypress/integration` folder. Refresh your tests list in the Cypress GUI and your new file should have appeared in the list.
 
@@ -149,7 +149,7 @@ describe('Hooks', function() {
 })
 ```
 
-**The order of hook and test execution is as follows:**
+***The order of hook and test execution is as follows:***
 
 - All `before()` hooks run (once)
 - Any `beforeEach()` hooks run

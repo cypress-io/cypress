@@ -70,7 +70,7 @@ cy.wait('@userPut')
 
 # Notes
 
-**Alias names cannot match some reserved words.**
+***Alias names cannot match some reserved words.***
 
 Some strings are not allowed as alias names since they are reserved words in Cypress. These words include: `test`, `runnable`, `timeout`, `slow`, `skip`, and `inspect`.
 

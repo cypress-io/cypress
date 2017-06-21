@@ -66,7 +66,7 @@ cy.stub(obj, "method").rejects(new Error("foo"))
 
 You generally stub a function when it has side effects you are trying to control.
 
-**Common Scenarios:**
+***Common Scenarios:***
 
 - You have a function that accepts a callback, and want to invoke the callback.
 - Your function returns a `Promise`, and you want to automatically resolve or reject it.
@@ -104,7 +104,7 @@ There are situations when it is useful to control your applications `date` and `
 - `setTimeout`
 - `setInterval`
 
-**Common Scenarios:**
+***Common Scenarios:***
 
 - You're polling something in your application with `setInterval` and want to control that.
 - You have **throttled** or **debounced** functions which you want to control.
@@ -179,7 +179,7 @@ expect(user.fail).to.have.thrown("Error")                  // true
 
 Beyond just integrating these tools together we have also extended and improved the collaboration of these tools.
 
-Some examples:
+***Some examples:***
 
 - We replaced Sinon's argument stringifier for a much less noisy, more performant, custom version.
 - We improved the `sinon-chai` assertion output by changing what displays during a passing vs failing test.
@@ -188,7 +188,7 @@ Some examples:
 
 We also integrated all of these API's directly into the Command Log so you can visually see what's happening in your application.
 
-We visually indicate when:
+***We visually indicate when:***
 
 - A `stub` is called
 - A `spy` is called
@@ -200,7 +200,7 @@ When stubs are created by calling the method `.withArgs(...)` we also visually l
 
 When you click on a stub or spy we also output **incredibly** helpful debugging information.
 
-For instance we automatically display:
+***For instance we automatically display:***
 
 - The call count (and total number of calls)
 - The arguments without transforming them (they are the real arguments)

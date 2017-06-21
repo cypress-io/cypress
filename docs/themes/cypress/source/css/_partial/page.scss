@@ -273,13 +273,13 @@
     margin: 1em 0;
     font-family: $font-title;
   }
-
-  &>p>strong {
-    display: inline-block;
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 1.2em;
-  }
+  //
+  // &>p>strong {
+  //   display: inline-block;
+  //   margin-top: 15px;
+  //   font-weight: bold;
+  //   font-size: 1.2em;
+  // }
 
   &>h2+p>strong, &>h1+p>strong {
     margin-top: 0;
@@ -313,6 +313,7 @@
     font-style: normal;
     font-weight: 500;
     padding-bottom: 2px;
+    font-size: 1.1em;
     border-bottom: 1px dotted #ccc;
   }
 
