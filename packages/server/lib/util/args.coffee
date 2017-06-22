@@ -102,6 +102,10 @@ module.exports = {
     if p = options.project or options.runProject
       options.projectPath = path.resolve(cwd(), p)
 
+    ## normalize output path from current working directory
+    if p = options.outputPath
+      options.outputPath = path.resolve(cwd(), p)
+
     if options.runProject
       options.run = true
 
