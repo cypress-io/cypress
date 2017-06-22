@@ -8,7 +8,7 @@ Promise = require("bluebird")
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
 
-DEFAULT_PATHS = "node_modules package.json".split(" ")
+DEFAULT_PATHS = "package.json".split(" ")
 
 pathToPackageJson = (pkg) ->
   path.join(pkg, "package.json")
@@ -72,9 +72,11 @@ copyAllToDist = (distDir) ->
     console.log("Finished Copying", new Date() - started)
   .delay(10000)
 
-pruneAll = (pathToPackages) ->
+npmInstallAll = (pathToPackages) ->
   ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
   ## 313,416,512 bytes (376.6 MB on disk) for 23,576 items
+
+  started = new Date()
 
   retryGlobbing = ->
     glob(pathToPackages)
@@ -84,14 +86,14 @@ pruneAll = (pathToPackages) ->
       .delay(1000)
       .then(retryGlobbing)
 
-  prune = (pkg) ->
-    console.log("pruning", pkg)
+  npmInstall = (pkg) ->
+    console.log("npm installing", pkg)
 
     new Promise (resolve, reject) ->
       reject = _.once(reject)
 
       ## ignore node_modules/.bin due to symlinking
-      cp.spawn("npm", ["prune", "--production", "--ignore", "node_modules/\.bin"], {
+      cp.spawn("npm", ["install", "--production"], {
         cwd: pkg
         stdio: "inherit"
       })
@@ -100,16 +102,16 @@ pruneAll = (pathToPackages) ->
         if code is 0
           resolve()
         else
-          reject(new Error("'npm prune --production' on #{pkg} failed with exit code: #{code}"))
+          reject(new Error("'npm install --production' on #{pkg} failed with exit code: #{code}"))
       )
 
-  retryPrune = (pkg) ->
-    prune(pkg)
+  retryNpmInstall = (pkg) ->
+    npmInstall(pkg)
     .catch {code: "EMFILE"}, ->
       Promise
       .delay(1000)
       .then ->
-        retryPrune(pkg)
+        retryNpmInstall(pkg)
     .catch (err) ->
       console.log(err, err.code)
       throw err
@@ -117,7 +119,9 @@ pruneAll = (pathToPackages) ->
   ## prunes out all of the devDependencies
   ## from what was copied
   retryGlobbing()
-  .map(retryPrune, {concurrency: 1})
+  .map(retryNpmInstall)
+  .then ->
+    console.log("Finished NPM Installing", new Date() - started)
 
 symlinkAll = (distDir) ->
   pathToPackages = path.join('node_modules', '@')
@@ -139,7 +143,7 @@ module.exports = {
 
   copyAllToDist
 
-  pruneAll
+  npmInstallAll
 
   symlinkAll
 }

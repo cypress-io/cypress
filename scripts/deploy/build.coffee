@@ -32,10 +32,10 @@ module.exports = (platform, version) ->
 
     packages.copyAllToDist(distDir())
 
-  prunePackages = ->
-    log("#prunePackages", platform)
+  npmInstallPackages = ->
+    log("#npmInstallPackages", platform)
 
-    packages.pruneAll(distDir("packages", "*"))
+    packages.npmInstallAll(distDir("packages", "*"))
 
   createRootPackage = ->
     log("#createRootPackage", platform, version)
@@ -63,7 +63,7 @@ module.exports = (platform, version) ->
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
-  .then(prunePackages)
+  .then(npmInstallPackages)
   .then(createRootPackage)
   .then(symlinkPackages)
   # .then(@convertCoffeeToJs)
