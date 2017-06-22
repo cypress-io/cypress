@@ -46,6 +46,9 @@ collectTestResults = (obj) ->
   }
 
 module.exports = {
+  ## makes stubbing in tests simple
+  _fs: fs
+
   getId: ->
     ## return a random id
     random.generate({
