@@ -49,7 +49,7 @@ module.exports = {
         "headless":    "isHeadless"
         "show-headless-gui":"showHeadlessGui"
         "exit-with-code": "exitWithCode"
-        "reporter-options": "reporterOptions",
+        "reporter-options": "reporterOptions"
         "output-path": "outputPath"
       }
     })
@@ -103,8 +103,8 @@ module.exports = {
       options.projectPath = path.resolve(cwd(), p)
 
     ## normalize output path from current working directory
-    if p = options.outputPath
-      options.outputPath = path.resolve(cwd(), p)
+    if op = options.outputPath
+      options.outputPath = path.resolve(cwd(), op)
 
     if options.runProject
       options.run = true
