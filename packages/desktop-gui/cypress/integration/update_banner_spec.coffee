@@ -61,7 +61,7 @@ describe "Update Banner", ->
     it "modal has info about downloading new version", ->
       cy.get(".modal").contains("Download the new version")
 
-    it.only "opens download link when Download is clicked", ->
+    it "opens download link when Download is clicked", ->
       cy.contains("Download the new version").click().then =>
         expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop?os=linux64")
 

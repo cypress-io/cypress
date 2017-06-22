@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const os = require('os')
-const { errors, formError, formErrorText } = require('../../lib/download/errors')
+const { errors, formError, formErrorText } = require('../../lib/errors')
 const snapshot = require('snap-shot')
 const { omit } = require('ramda')
 

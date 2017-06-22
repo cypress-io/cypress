@@ -4,7 +4,7 @@ const os = require('os')
 const Promise = require('bluebird')
 const readline = require('readline')
 const yauzl = require('yauzl')
-const { formErrorText, errors } = require('./errors')
+const { formErrorText, errors } = require('../errors')
 const utils = require('./utils')
 
 const fs = Promise.promisifyAll(require('fs-extra'))
