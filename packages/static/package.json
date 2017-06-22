@@ -1,5 +1,6 @@
 {
   "name": "@packages/static",
+  "version": "0.0.0",
   "main": "index.js",
   "private": true,
   "scripts": {

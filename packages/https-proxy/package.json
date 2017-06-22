@@ -1,7 +1,6 @@
 {
   "name": "@packages/https-proxy",
-  "version": "0.1.5",
-  "description": "",
+  "version": "0.0.0",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -12,16 +11,6 @@
     "https": "node https.js",
     "release": "releaser"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-https-proxy.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-https-proxy/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-https-proxy#readme",
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
     "chai": "^3.5.0",

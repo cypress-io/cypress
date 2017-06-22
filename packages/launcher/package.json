@@ -1,7 +1,6 @@
 {
   "name": "@packages/launcher",
-  "version": "0.1.1",
-  "description": "Internal lib for spawning browser processes",
+  "version": "0.0.0",
   "private": true,
   "main": "index.js",
   "types": "../ts/index.d.ts",
@@ -15,16 +14,6 @@
     "lint-coffee": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/**/*.coffee",
     "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-launcher.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-launcher/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
     "@types/bluebird": "^3.5.3",

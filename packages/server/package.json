@@ -1,9 +1,7 @@
 {
   "name": "@packages/server",
-  "productName": "Cypress",
-  "version": "0.19.2",
+  "version": "0.0.0",
   "private": true,
-  "description": "Javascript Test Engine",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -25,16 +23,6 @@
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress",
   "devDependencies": {
     "body-parser": "1.12.4",
     "chokidar-cli": "^1.2.0",

@@ -1,17 +1,8 @@
 {
   "name": "@packages/runner",
-  "version": "0.3.11",
+  "version": "0.0.0",
   "main": "lib/runner.js",
   "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-runner.git"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-runner/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
     "build": "node ./scripts/build-dev.js",

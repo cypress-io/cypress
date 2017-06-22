@@ -1,7 +1,6 @@
 {
   "name": "@packages/driver",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/driver needs: npm run build'",
