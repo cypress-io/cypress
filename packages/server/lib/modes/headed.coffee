@@ -85,15 +85,11 @@ module.exports = {
     .then (state) =>
       Windows.open(@getWindowArgs(state))
       .then (win) =>
-        ## cause the browser window instance
-        ## to receive focus when we"ve been
-        ## told to focus on the tests!
-        options.onFocusTests = ->
-          win.focus()
-
-        options.os = os.platform()
-
-        Events.start(options, bus)
+        Events.start(_.extend({}, options, {
+          env: process.env["CYPRESS_ENV"]
+          onFocusTests: -> win.focus()
+          os: os.platform()
+        }), bus)
 
         return win
 

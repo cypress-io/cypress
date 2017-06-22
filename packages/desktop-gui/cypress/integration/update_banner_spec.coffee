@@ -43,10 +43,12 @@ describe "Update Banner", ->
       cy.get(".footer").should("be.visible")
 
     it "opens modal on click of Update link", ->
+      @updaterCheck.resolve("1.3.4")
       cy.contains("Update").click()
       cy.get(".modal").should("be.visible")
 
     it "closes modal when X is clicked", ->
+      @updaterCheck.resolve("1.3.4")
       cy.contains("Update").click()
       cy.get(".close").click()
       cy.get(".modal").should("not.be.visible")

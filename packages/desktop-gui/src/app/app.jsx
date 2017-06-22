@@ -22,7 +22,7 @@ class App extends Component {
 
     ipc.getOptions()
     .then((options = {}) => {
-      appStore.set(_.pick(options, 'os', 'projectPath', 'version'))
+      appStore.set(_.pick(options, 'env', 'os', 'projectPath', 'version'))
 
       return ipc.getCurrentUser()
     })

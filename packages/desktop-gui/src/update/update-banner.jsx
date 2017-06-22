@@ -11,15 +11,19 @@ class UpdateBanner extends Component {
   @observable showingModal = false
 
   componentDidMount () {
-    this.checkId = setInterval(this._checkForUpdate, (5 * 60 * 1000))
-    this._checkForUpdate()
+    if (!appStore.isDev) {
+      this.checkId = setInterval(this._checkForUpdate, (5 * 60 * 1000))
+      this._checkForUpdate()
+    }
   }
 
   componentWillUnmount () {
     document.getElementsByTagName('html')[0].classList.remove('has-updates')
 
-    ipc.offUpdaterCheck()
-    clearInterval(this.checkId)
+    if (!appStore.isDev) {
+      ipc.offUpdaterCheck()
+      clearInterval(this.checkId)
+    }
   }
 
   render () {
@@ -43,7 +47,7 @@ class UpdateBanner extends Component {
             <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
             <h4>Update to the latest version</h4>
             <p>
-              Version <strong>{appStore.newVersion}</strong> is now available (currently running <strong>{appStore.version}</strong>).{' '}
+              Version <strong>{appStore.newVersion}</strong> is now available (currently running <strong>{appStore.displayVersion}</strong>).{' '}
               <a href='#' onClick={this._openChangelog}>Changelog</a>
             </p>
             {this._instructions()}
