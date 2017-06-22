@@ -10,6 +10,7 @@ zip      = require("./zip")
 ask      = require("./ask")
 bump     = require("./bump")
 meta     = require("./meta")
+build    = require("./build")
 upload   = require("./upload")
 Base     = require("./base")
 Linux    = require("./linux")
@@ -21,8 +22,26 @@ success = (str) ->
 fail = (str) ->
   console.log chalk.bgRed(" " + chalk.black(str) + " ")
 
-## hack for server modifying cwd
+## hack for @packages/server modifying cwd
 process.chdir(cwd)
+
+askWhichPlatform = (platform) ->
+  ## if we already have a platform
+  ## just resolve with that
+  if platform
+    return Promise.resolve(platform)
+
+  ## else go ask for it!
+  ask.whichPlatform()
+
+askWhichVersion = (version) ->
+  ## if we already have a version
+  ## just resolve with that
+  if version
+    return Promise.resolve(version)
+
+  ## else go ask for it!
+  ask.deployNewVersion()
 
 deploy = {
   zip:    zip
@@ -33,27 +52,27 @@ deploy = {
   Darwin: Darwin
   Linux:  Linux
 
-  getPlatform: (platform, options) ->
-    platform ?= os.platform()
-
-    Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
-
-    throw new Error("Platform: '#{platform}' not found") if not Platform
-
-    options ?= @parseOptions(process.argv.slice(2))
-
-    (new Platform(platform, options))
+  # getPlatform: (platform, options) ->
+  #   platform ?= os.platform()
+  #
+  #   Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
+  #
+  #   throw new Error("Platform: '#{platform}' not found") if not Platform
+  #
+  #   options ?= @parseOptions(process.argv.slice(2))
+  #
+  #   (new Platform(platform, options))
 
   parseOptions: (argv) ->
     opts = minimist(argv)
     opts.runTests = false if opts["skip-tests"]
     opts
 
-  build: (platform) ->
-    ## read off the argv
-    options = @parseOptions(process.argv)
-
-    @getPlatform(platform?.osName, options).build()
+  # build: (platform) ->
+  #   ## read off the argv
+  #   options = @parseOptions(process.argv)
+  #
+  #   @getPlatform(platform?.osName, options).build()
 
   bump: ->
     ask.whichBumpTask()
@@ -88,13 +107,17 @@ deploy = {
     ## read off the argv
     options = @parseOptions(process.argv)
 
-    ask.whichPlatform(options.platform)
-    .then (o) =>
-      ask.deployNewVersion(options.version)
-      .then (version) =>
-        options.version = version
+    askWhichPlatform(options.platform)
+    .then (platform) ->
+      askWhichVersion(options.version)
+      .then (version) ->
+        # options.version = version
 
-        @getPlatform(o, options).deploy()
+        build(platform, version)
+        # .return([platform, version])
+    # .spread (platform, version) ->
+
+        # @getPlatform(plat, options).deploy()
       # .then (platform) =>
         # zip.ditto(platform)
         # .then =>
