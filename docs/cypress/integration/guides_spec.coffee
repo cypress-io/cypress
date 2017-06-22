@@ -13,7 +13,7 @@ describe "Guides", ->
 
       cy.contains('Guides')
         .click()
-        .contains('h1', "Why Cypress?")
+      cy.contains('h1', "Why Cypress?")
 
       cy.url()
         .should('include', GUIDES_PATH)
@@ -49,30 +49,26 @@ describe "Guides", ->
           @english = YAML.parse(yamlString)
 
     it "displays current page as highlighted", ->
-      cy
-        .get("#sidebar").find(".current")
+      cy.get("#sidebar").find(".current")
         .should("have.attr", "href").and("include", "why-cypress.html")
 
     it "displays English titles in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-title").each (displayedTitle, i) ->
-            englishTitle  = @english.sidebar.guides[@sidebarTitles[i]]
-            expect(displayedTitle.text()).to.eq(englishTitle)
+      cy.get("#sidebar")
+        .find(".sidebar-title").each (displayedTitle, i) ->
+          englishTitle  = @english.sidebar.guides[@sidebarTitles[i]]
+          expect(displayedTitle.text()).to.eq(englishTitle)
 
     it "displays English link names in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-link").first(5).each (displayedLink, i) ->
-            englishLink  = @english.sidebar.guides[@sidebarLinkNames[i]]
-            expect(displayedLink.text().trim()).to.eq(englishLink)
+      cy.get("#sidebar")
+        .find(".sidebar-link").first(5).each (displayedLink, i) ->
+          englishLink  = @english.sidebar.guides[@sidebarLinkNames[i]]
+          expect(displayedLink.text().trim()).to.eq(englishLink)
 
     it "displays English links in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-link").each (displayedLink, i) ->
-            sidebarLink  = @sidebarLinks[i]
-            expect(displayedLink.attr('href')).to.include(sidebarLink)
+      cy.get("#sidebar")
+        .find(".sidebar-link").each (displayedLink, i) ->
+          sidebarLink  = @sidebarLinks[i]
+          expect(displayedLink.attr('href')).to.include(sidebarLink)
 
   ## This is running too slow to include for now
   ## Issue #431 Needs to be fixed first
