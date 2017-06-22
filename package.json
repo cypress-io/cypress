@@ -1,5 +1,6 @@
 {
-  "name": "cypress-monorepo",
+  "name": "cypress",
+  "productName": "Cypresss",
   "version": "0.19.4",
   "description": "Cypress.io end to end testing tool",
   "private": true,
@@ -60,5 +61,14 @@
     "vagrant": "0.0.1",
     "xvfb": "^0.2.3"
   },
-  "license": "MIT"
+  "author": "Brian Mann",
+  "license": "MIT",
+  "homepage": "https://github.com/cypress-io/cypress",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress/issues"
+  }
 }

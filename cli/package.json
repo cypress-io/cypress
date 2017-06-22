@@ -1,12 +1,11 @@
 {
   "name": "cypress",
   "version": "0.0.0",
-  "description": "dev build project for Cypress NPM package",
   "main": "index.js",
+  "private": true,
   "bin": {
     "cypress": "bin/cypress"
   },
-  "private": true,
   "scripts": {
     "pretest": "npm run lint && npm run test-dependencies",
     "test": "npm run test-unit",
@@ -61,15 +60,5 @@
     "bin",
     "lib",
     "index.js"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress"
+  ]
 }
