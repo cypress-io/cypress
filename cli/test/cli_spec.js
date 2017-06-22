@@ -1,5 +1,6 @@
 require('./spec_helper')
 
+const _ = require('lodash')
 const cli = require('../lib/cli')
 const download = require('../lib/download')
 const downloadUtils = require('../lib/download/utils')
@@ -8,11 +9,21 @@ const open = require('../lib/exec/open')
 
 describe('cli', function () {
   beforeEach(function () {
+    this.sandbox.stub(process, 'exit')
     this.exec = (args) => cli.init().parse(`node test ${args}`.split(' '))
   })
 
+  it('exits when done', function (done) {
+    this.sandbox.stub(run, 'start').resolves()
+    this.exec('run --port 7878')
+    _.defer(() => {
+      expect(process.exit).to.be.calledOnce
+      done()
+    })
+  })
+
   it('run calls run#start with options', function () {
-    this.sandbox.stub(run, 'start')
+    this.sandbox.stub(run, 'start').resolves()
     this.exec('run --port 7878')
     expect(run.start).to.be.calledWith({ port: '7878' })
   })

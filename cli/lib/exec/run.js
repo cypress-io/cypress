@@ -1,5 +1,5 @@
 const _ = require('lodash')
-
+const debug = require('debug')('cypress:cli')
 const downloadUtils = require('../download/utils')
 const spawn = require('./spawn')
 const path = require('path')
@@ -76,11 +76,13 @@ const processRunOptions = (options = {}) => {
 
 const run = (options) => () => {
   const args = processRunOptions(options)
+  debug('run to spawn.start args %j', args)
   return spawn.start(args)
 }
 
 module.exports = {
   processRunOptions,
+  // resolves with the number of failed tests
   start (options = {}) {
     _.defaults(options, {
       key: null,
@@ -90,7 +92,6 @@ module.exports = {
       project: process.cwd(),
     })
 
-    return downloadUtils.verify()
-    .then(run(options))
+    return downloadUtils.verify().then(run(options))
   },
 }

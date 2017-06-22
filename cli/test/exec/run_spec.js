@@ -40,8 +40,7 @@ describe('exec run', function () {
 
   context('cli interface', function () {
     beforeEach(function () {
-      this.sandbox.stub(run, 'start')
-
+      this.sandbox.stub(run, 'start').resolves()
       this.parse = (args) => cli.init().parse(`node test ${args}`.split(' '))
     })
 

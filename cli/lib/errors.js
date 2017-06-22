@@ -120,9 +120,18 @@ function formErrorText (info, error) {
   `)
 }
 
+const raise = (text) => {
+  throw new Error(text)
+}
+
+const throwDetailedError = (info) => (error) =>
+  formErrorText(info, error)
+  .then(raise)
+
 module.exports = {
   formError,
   formErrorText,
+  throwDetailedError,
   errors: {
     missingXvfb,
     missingApp,

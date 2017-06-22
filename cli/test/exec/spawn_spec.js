@@ -1,7 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
-const EE = require('events').EventEmitter
 const cp = require('child_process')
 
 const downloadUtils = require('../../lib/download/utils')
@@ -11,8 +9,9 @@ const spawn = require('../../lib/exec/spawn')
 describe('exec spawn', function () {
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
-    this.spawnedProcess = _.extend(new EE(), {
-      unref: this.sandbox.stub(),
+    this.spawnedProcess = this.sandbox.stub({
+      on: () => {},
+      unref: () => {},
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
     this.sandbox.stub(xvfb, 'start').resolves()
@@ -23,12 +22,14 @@ describe('exec spawn', function () {
 
   context('#spawn', function () {
     it('passes args + options to spawn', function () {
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       return spawn.start('--foo', { foo: 'bar' }).then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', ['--foo'], { foo: 'bar' })
       })
     })
 
     it('starts xvfb when needed', function () {
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       return spawn.start('--foo').then(() => {
         expect(xvfb.start).to.be.calledOnce
       })
@@ -37,32 +38,50 @@ describe('exec spawn', function () {
     it('does not start xvfb when its not needed', function () {
       xvfb.isNeeded.returns(false)
 
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       return spawn.start('--foo').then(() => {
         expect(xvfb.start).not.to.be.called
       })
     })
 
     it('stops xvfb when spawn closes', function () {
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
+      this.spawnedProcess.on.withArgs('close').yields()
       return spawn.start('--foo').then(() => {
-        this.spawnedProcess.emit('close')
         expect(xvfb.stop).to.be.calledOnce
       })
     })
 
-    it('exits with spawned exit code', function () {
-      return spawn.start('--foo').then(() => {
-        this.spawnedProcess.emit('exit', 10)
-        expect(process.exit).to.be.calledWith(10)
+    it('resolves with spawned exit code in the message', function () {
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(10)
+
+      return spawn.start('--foo')
+      .then((code) => {
+        expect(code).to.equal(10)
+      })
+    })
+
+    it('rejects with error from spawn', function () {
+      const msg = 'the error message'
+      this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
+
+      return spawn.start('--foo')
+      .then(() => {
+        throw new Error('should have hit error handler but did not')
+      }, (e) => {
+        expect(e.message).to.include(msg)
       })
     })
 
     it('unrefs if options.detached is true', function () {
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       return spawn.start(null, { detached: true }).then(() => {
         expect(this.spawnedProcess.unref).to.be.calledOnce
       })
     })
 
     it('does not unref by default', function () {
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       return spawn.start().then(() => {
         expect(this.spawnedProcess.unref).not.to.be.called
       })

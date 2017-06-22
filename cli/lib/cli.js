@@ -50,7 +50,9 @@ module.exports = {
       .option('-e, --env <env>',                           text('env'))
       .option('-c, --config <config>',                     text('config'))
       .option('-b, --browser <browser name>',              text('browser'))
-      .action((opts) => require('./exec/run').start(parseOpts(opts)))
+      .action((opts) =>
+        require('./exec/run').start(parseOpts(opts)).then(process.exit)
+      )
 
     program
       .command('open')
