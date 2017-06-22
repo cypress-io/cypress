@@ -33,6 +33,18 @@ haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## and (record or ci) hasn't been set to true or false
   (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
+collectTestResults = (obj) ->
+  {
+    tests:       obj.tests
+    passes:      obj.passes
+    pending:     obj.pending
+    failures:    obj.failures
+    duration:    humanTime(obj.duration)
+    screenshots: obj.screenshots and obj.screenshots.length
+    video:       !!obj.video
+    version:     pkg.version
+  }
+
 module.exports = {
   getId: ->
     ## return a random id
@@ -132,6 +144,8 @@ module.exports = {
 
     obj
 
+  collectTestResults
+
   displayStats: (obj = {}) ->
     bgColor = if obj.failures then "bgRed" else "bgGreen"
     color   = if obj.failures then "red"   else "green"
@@ -144,16 +158,7 @@ module.exports = {
 
     console.log("")
 
-    stats.display(color, {
-      tests:       obj.tests
-      passes:      obj.passes
-      pending:     obj.pending
-      failures:    obj.failures
-      duration:    humanTime(obj.duration)
-      screenshots: obj.screenshots and obj.screenshots.length
-      video:       !!obj.video
-      version:     pkg.version
-    })
+    stats.display(color, obj)
 
   displayScreenshots: (screenshots = []) ->
     console.log("")
@@ -322,7 +327,7 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, gui, screenshots, started, end, name, cname, videoCompression } = options
+    { project, gui, screenshots, started, end, name, cname, videoCompression, outputPath } = options
 
     @listenForProjectEnd(project, gui)
     .then (obj) =>
@@ -339,7 +344,11 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
-      @displayStats(obj)
+      testResults = collectTestResults(obj)
+      @displayStats(testResults)
+      if outputPath
+        log("saving results as %s", outputPath)
+        fs.writeJsonSync(outputPath, testResults, "utf8")
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
@@ -401,6 +410,8 @@ module.exports = {
 
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
+    log("runTests with options %j", Object.keys(options))
+
     browser ?= "electron"
     log "runTests for browser #{browser}"
 
@@ -443,6 +454,7 @@ module.exports = {
             gui:              options.gui
             project:          options.project
             videoCompression: options.videoCompression
+            outputPath:       options.outputPath
             end
             name
             cname
@@ -463,7 +475,7 @@ module.exports = {
         })
 
   ready: (options = {}) ->
-    log("headless mode ready with options %j", options)
+    log("headless mode ready with options %j", Object.keys(options))
     id = @getId()
 
     ## verify this is an added project
@@ -502,6 +514,7 @@ module.exports = {
             spec:             options.spec
             gui:              options.showHeadlessGui
             browser:          options.browser
+            outputPath:       options.outputPath
           })
         .get("stats")
         .finally =>

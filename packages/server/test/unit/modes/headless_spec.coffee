@@ -302,7 +302,8 @@ describe "lib/modes/headless", ->
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
 
-        expect(headless.displayStats).to.be.calledWith(obj)
+        results = headless.collectTestResults(obj)
+        expect(headless.displayStats).to.be.calledWith(results)
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
@@ -345,7 +346,8 @@ describe "lib/modes/headless", ->
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
 
-        expect(headless.displayStats).to.be.calledWith(obj)
+        results = headless.collectTestResults(obj)
+        expect(headless.displayStats).to.be.calledWith(results)
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
