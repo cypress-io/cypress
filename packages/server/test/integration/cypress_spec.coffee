@@ -22,6 +22,7 @@ record     = require("#{root}lib/modes/record")
 headed     = require("#{root}lib/modes/headed")
 headless   = require("#{root}lib/modes/headless")
 api        = require("#{root}lib/api")
+cwd        = require("#{root}lib/cwd")
 user       = require("#{root}lib/user")
 config     = require("#{root}lib/config")
 cache      = require("#{root}lib/cache")
@@ -508,6 +509,36 @@ describe "lib/cypress", ->
       .then =>
         expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
+
+    it "writes json results when passed outputPath", ->
+      obj = {
+        tests:       1
+        passes:      2
+        pending:     3
+        failures:    4
+        duration:    5
+        video:       6
+        version:     7
+        screenshots: []
+      }
+
+      outputPath = "./.results/results.json"
+
+      headless.listenForProjectEnd.resolves(_.clone(obj))
+
+      Project.add(@todosPath)
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--output-path=#{outputPath}"])
+      .then =>
+        @expectExitWith(4)
+
+        fs.readJsonAsync(cwd(outputPath))
+        .then (json) ->
+          expect(json).to.deep.eq(
+            headless.collectTestResults(obj)
+          )
+      .finally =>
+        fs.removeAsync(cwd(path.dirname(outputPath)))
 
     it "logs error when supportFile doesn't exist", ->
       Promise.all([

@@ -46,8 +46,7 @@ collectTestResults = (obj) ->
   }
 
 module.exports = {
-  ## makes stubbing in tests simple
-  _fs: fs
+  collectTestResults
 
   getId: ->
     ## return a random id
@@ -146,8 +145,6 @@ module.exports = {
         write(image.toJPEG(100))
 
     obj
-
-  collectTestResults
 
   displayStats: (obj = {}) ->
     bgColor = if obj.failures then "bgRed" else "bgGreen"
@@ -334,13 +331,6 @@ module.exports = {
 
     @listenForProjectEnd(project, gui)
     .then (obj) =>
-      finish = ->
-        project
-        .getConfig()
-        .then (cfg) ->
-          obj.config = cfg
-        .return(obj)
-
       if end
         obj.video = name
 
@@ -348,10 +338,25 @@ module.exports = {
         obj.screenshots = screenshots
 
       testResults = collectTestResults(obj)
-      @displayStats(testResults)
-      if outputPath
+
+      writeOutput = ->
+        if not outputPath
+          return Promise.resolve()
+
         log("saving results as %s", outputPath)
-        fs.writeJsonSync(outputPath, testResults, "utf8")
+
+        fs.outputJsonAsync(outputPath, testResults)
+
+      finish = ->
+        writeOutput()
+        .then ->
+          project
+          .getConfig()
+          .then (cfg) ->
+            obj.config = cfg
+          .return(obj)
+
+      @displayStats(testResults)
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)

@@ -268,41 +268,6 @@ describe "lib/modes/headless", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({})
 
-    it "saves results in JSON file if passed outputPath option", ->
-      started = new Date
-      end = ->
-      stats = {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        failingTests: [4,5,6]
-      }
-
-      @sandbox.stub(Reporter, "setVideoTimestamp").withArgs(started, stats.failingTests).returns([1,2,3])
-      @sandbox.stub(headless, "postProcessRecording").resolves()
-      @sandbox.spy(headless,  "displayStats")
-      @sandbox.spy(headless,  "displayScreenshots")
-      @sandbox.stub(headless._fs, "writeJsonSync")
-
-      process.nextTick =>
-        @projectInstance.emit("end", stats)
-
-      headless.waitForTestsToFinishRunning({
-        outputPath: "results.json"
-        project: @projectInstance,
-        name: "foo.mp4"
-        cname: "foo-compressed.mp4"
-        videoCompression: 32
-        gui: false
-        started
-        end
-      })
-      .then (obj) ->
-        results = headless.collectTestResults(obj)
-        expect(headless._fs.writeJsonSync).to.be.calledWith("results.json", results, "utf8")
-
     it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
       started = new Date
       screenshots = [{}, {}, {}]
