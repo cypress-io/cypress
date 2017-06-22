@@ -9,7 +9,6 @@ cyIcons    = require("@cypress/icons")
 user       = require("../user")
 errors     = require("../errors")
 savedState = require("../saved_state")
-Updater    = require("../updater")
 logs       = require("../gui/logs")
 menu       = require("../gui/menu")
 Events     = require("../gui/events")
@@ -78,9 +77,6 @@ module.exports = {
     ## instance here instead of callback functions
     menu.set({
       withDevTools: isDev()
-      onUpdatesClicked: ->
-        bus.emit("menu:item:clicked", "check:for:updates")
-
       onLogOutClicked: ->
         bus.emit("menu:item:clicked", "log:out")
     })
@@ -96,9 +92,6 @@ module.exports = {
           win.focus()
 
         Events.start(options, bus)
-
-        if options.updating
-          Updater.install(options)
 
         return win
 

@@ -9,16 +9,6 @@ class ViewStore {
     name: C.LOADING,
   }
 
-  @action showApplyingUpdates () {
-    this.currentView = {
-      name: C.APPLYING_UPDATES,
-    }
-  }
-
-  isApplyingUpdates () {
-    return this._isView(C.APPLYING_UPDATES)
-  }
-
   @action showLoading () {
     this.currentView = {
       name: C.LOADING,

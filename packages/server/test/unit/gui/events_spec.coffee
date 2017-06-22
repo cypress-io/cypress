@@ -193,35 +193,6 @@ describe "lib/gui/events", ->
         @handleEvent("updater:check")
         @expectSendCalledWith(false)
 
-    describe "updater:run", ->
-      beforeEach ->
-        @once = @sandbox.stub()
-        @sandbox.stub(Windows, "getByWebContents").withArgs(@event.sender).returns({once: @once})
-
-      it "calls cancel when win is closed", ->
-        cancel = @sandbox.spy()
-        run    = @sandbox.stub(Updater, "run").returns({cancel: cancel})
-        @once.withArgs("closed").yields()
-        @handleEvent("updater:run")
-        expect(cancel).to.be.calledOnce
-
-      _.each {
-        onStart: "start"
-        onApply: "apply"
-        onError: "error"
-        onDone:  "done"
-        onNone:  "none"
-      }, (val, key) ->
-        it "returns #{val} on #{key}", ->
-          @sandbox.stub(Updater, "run").yieldsTo(key)
-          @handleEvent("updater:run")
-          @expectSendCalledWith({event: val, version: undefined})
-
-      it "returns down + version on onDownload", ->
-        @sandbox.stub(Updater, "run").yieldsTo("onDownload", "0.14.0")
-        @handleEvent("updater:run")
-        @expectSendCalledWith({event: "download", version: "0.14.0"})
-
   context "log events", ->
     describe "get:logs", ->
       it "returns array of logs", ->

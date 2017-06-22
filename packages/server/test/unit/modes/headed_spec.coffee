@@ -92,7 +92,6 @@ describe "gui/headed", ->
 
       @sandbox.stub(menu, "set")
       @sandbox.stub(Events, "start")
-      @sandbox.stub(Updater, "install")
       @sandbox.stub(Windows, "open").resolves(@win)
       @sandbox.stub(Windows, "trackState")
 
@@ -104,14 +103,6 @@ describe "gui/headed", ->
 
       headed.ready(opts).then ->
         expect(Events.start).to.be.calledWith(opts)
-
-    it "calls Updater.install if options.updating", ->
-      headed.ready({updating: true}).then ->
-        expect(Updater.install).to.be.calledOnce
-
-    it "does not call Updater.install", ->
-      headed.ready({}).then ->
-        expect(Updater.install).not.to.be.called
 
     it "calls menu.set", ->
       headed.ready({}).then ->

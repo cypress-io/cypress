@@ -20,8 +20,6 @@ getUrl = (type) ->
       cyDesktop.getPathToAbout()
     when "DEBUG"
       cyDesktop.getPathToDebug()
-    when "UPDATES"
-      cyDesktop.getPathToUpdates()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
