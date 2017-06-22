@@ -16,10 +16,6 @@ getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
       user.getLoginUrl()
-    when "ABOUT"
-      cyDesktop.getPathToAbout()
-    when "DEBUG"
-      cyDesktop.getPathToDebug()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
