@@ -14,8 +14,10 @@ PROVIDERS = {
     "cypress-io/cypress-example-kitchensink"
     "cypress-io/cypress-example-todomvc"
     "cypress-io/cypress-example-piechopper"
-    "cypress-io/cypress-example-recipes",
+    "cypress-io/cypress-example-recipes"
     "cypress-io/cypress-example-node-versions"
+    "cypress-io/cypress-example-module-api"
+    "cypress-io/cypress-test-ci-environments"
   ]
 
   travis: [
