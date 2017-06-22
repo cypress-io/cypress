@@ -144,12 +144,12 @@ describe "Global Mode", ->
 
       it "puts project at start when selected", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop button").click().then =>
+        cy.get(".project-drop a").click().then =>
           @assertOrder(["id-bar", "id-a", "id-b"])
 
       it "puts project at start when selected and it already exists", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves("/project/b")
-        cy.get(".project-drop button").click().then =>
+        cy.get(".project-drop a").click().then =>
           @assertOrder(["id-b", "id-a"])
 
       it "puts project at start when clicked on in list", ->
@@ -166,7 +166,7 @@ describe "Global Mode", ->
 
       it "limits to 5 when selected", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop button").click().then =>
+        cy.get(".project-drop a").click().then =>
           expect(@getLocalStorageProjects().length).to.equal(5)
 
     describe "errors", ->

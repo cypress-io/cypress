@@ -52,7 +52,7 @@ describe "Global Mode", ->
       cy.get(".nav .logo img").should("have.attr", "src", "img/cypress-inverse.png")
 
     it "shows message about using Cypress locally", ->
-      cy.contains("Verbiage about local Cypress usage")
+      cy.contains("Run this command")
 
     it "displays help link", ->
       cy.contains("a", "Need help?")
@@ -62,8 +62,8 @@ describe "Global Mode", ->
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/adding-new-project")
 
     it "shows project drop area with button to select project", ->
-      cy.get(".project-drop p:first").should("have.text", "Drag your project here")
-      cy.get(".project-drop button").should("have.text", "Select Project")
+      cy.get(".project-drop p:first").should("contain", "Drag your project here")
+      cy.get(".project-drop a").should("have.text", "select manually")
 
     describe "dragging and dropping project", ->
       it "highlights/unhighlights drop area when dragging over it/leaving it", ->
@@ -89,18 +89,18 @@ describe "Global Mode", ->
     describe "selecting project", ->
       it "adds project and opens it when selected", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop button").click().then =>
+        cy.get(".project-drop a").click().then =>
           expect(@ipc.showDirectoryDialog).to.be.called
           cy.shouldBeOnProjectSpecs()
 
       it "updates local storage", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop button").click().should =>
+        cy.get(".project-drop a").click().should =>
           expect(@getLocalStorageProjects()[0].id).to.equal(@projects[0].id)
 
       it "does nothing when user cancels", ->
         cy.stub(@ipc, "showDirectoryDialog").resolves()
-        cy.get(".project-drop button").click()
+        cy.get(".project-drop a").click()
         cy.shouldBeOnIntro()
 
     describe "going to project", ->
