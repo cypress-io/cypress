@@ -15,7 +15,7 @@
   },
   "files": [
     "dist",
-    "lib/runner.js"
+    "lib"
   ],
   "devDependencies": {
     "@cypress/react-tooltip": "^0.2.4",

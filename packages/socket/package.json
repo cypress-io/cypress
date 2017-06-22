@@ -8,6 +8,9 @@
     "test-watch": "NODE_ENV=test mocha --watch",
     "clean-deps": "rm -rf node_modules"
   },
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "socket.io": "1.4.5",
     "socket.io-client": "1.4.5"

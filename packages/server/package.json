@@ -23,6 +23,10 @@
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee"
   },
+  "files": [
+    "config",
+    "lib"
+  ],
   "devDependencies": {
     "body-parser": "1.12.4",
     "chokidar-cli": "^1.2.0",

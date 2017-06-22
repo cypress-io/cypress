@@ -60,12 +60,12 @@ module.exports = (platform, version) ->
 
   Promise
   .bind(@)
-  .then(cleanupPlatform)
-  .then(buildPackages)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
   .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(symlinkPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(symlinkPackages)
   # .then(@convertCoffeeToJs)
   # .then(@obfuscate)
   # .then(@cleanupSrc)

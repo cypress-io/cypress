@@ -16,6 +16,10 @@
     "lint": "$(bin-up eslint) --fix *.js bin/*.js lib/*.js test/*.js",
     "pretest": "npm run lint"
   },
+  "files": [
+    "cypress",
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
     "bin-up": "^1.0.1",

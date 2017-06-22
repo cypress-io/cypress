@@ -47,6 +47,7 @@ copyAllToDist = (distDir) ->
       ## and convert to relative paths
       DEFAULT_PATHS
       .concat(json.files or [])
+      .concat(json.main or [])
       .map (file) ->
         path.join(pkg, file)
       .map(copyRelativePathToDist, {concurrency: 1})
@@ -70,7 +71,6 @@ copyAllToDist = (distDir) ->
     .map(copyPackage, {concurrency: 1})
   .then ->
     console.log("Finished Copying", new Date() - started)
-  .delay(10000)
 
 npmInstallAll = (pathToPackages) ->
   ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items

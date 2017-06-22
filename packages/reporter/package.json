@@ -2,7 +2,7 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
-  "main": "lib/reporter",
+  "main": "lib/reporter.js",
   "browser": "src/main",
   "scripts": {
     "postinstall": "echo '@packages/reporter needs: npm run build'",
@@ -14,6 +14,10 @@
     "test": "node ./scripts/test.js",
     "lint": "$(bin-up eslint) --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
   },
+  "files": [
+    "lib",
+    "dist"
+  ],
   "browserify": {
     "transform": [
       [

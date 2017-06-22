@@ -14,6 +14,9 @@
     "lint-coffee": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/**/*.coffee",
     "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts"
   },
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
     "@types/bluebird": "^3.5.3",

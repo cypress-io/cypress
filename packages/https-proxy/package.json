@@ -11,6 +11,9 @@
     "https": "node https.js",
     "release": "releaser"
   },
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
     "chai": "^3.5.0",
