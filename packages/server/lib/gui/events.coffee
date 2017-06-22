@@ -113,7 +113,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "updater:check"
       Updater.check({
-        onNewVersion: ->   send(true)
+        onNewVersion: ({ version }) -> send(version)
         onNoNewVersion: -> send(false)
       })
 

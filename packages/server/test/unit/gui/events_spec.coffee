@@ -183,10 +183,10 @@ describe "lib/gui/events", ->
 
   context "updating", ->
     describe "updater:check", ->
-      it "returns true when new version", ->
-        @sandbox.stub(Updater, "check").yieldsTo("onNewVersion")
+      it "returns version when new version", ->
+        @sandbox.stub(Updater, "check").yieldsTo("onNewVersion", {version: "1.2.3"})
         @handleEvent("updater:check")
-        @expectSendCalledWith(true)
+        @expectSendCalledWith("1.2.3")
 
       it "returns false when no new version", ->
         @sandbox.stub(Updater, "check").yieldsTo("onNoNewVersion")

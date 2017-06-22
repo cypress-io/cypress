@@ -79,7 +79,7 @@ class UpdateBanner extends Component {
     ipc.offUpdaterCheck()
     ipc.updaterCheck()
     .then((version) => {
-      appStore.setNewVersion(version)
+      if (version) appStore.setNewVersion(version)
     })
     .catch((error) => {
       console.warn('Error checking for updates:', error) // eslint-disable-line no-console
