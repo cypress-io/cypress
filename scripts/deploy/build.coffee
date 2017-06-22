@@ -1,7 +1,13 @@
 fs = require("fs-extra")
+del = require("del")
 path = require("path")
+gulp = require("gulp")
 chalk = require("chalk")
 Promise = require("bluebird")
+gulpDebug = require("gulp-debug")
+gulpCoffee = require("gulp-coffee")
+vinylPaths = require("vinyl-paths")
+coffee = require("@packages/coffee")
 packages = require("./util/packages")
 
 fs = Promise.promisifyAll(fs)
@@ -58,15 +64,37 @@ module.exports = (platform, version) ->
 
     packages.symlinkAll(distDir)
 
+  convertCoffeeToJs = ->
+    log("#convertCoffeeToJs", platform)
+
+    ## grab everything in src
+    ## convert to js
+    new Promise (resolve, reject) =>
+      gulp.src([
+        ## include coffee files of packages
+        distDir("**", "*.coffee")
+
+        ## except those in node_modules
+        "!" + distDir("**", "node_modules", "**", "*.coffee")
+      ])
+      .pipe vinylPaths(del)
+      .pipe(gulpDebug())
+      .pipe gulpCoffee({
+        coffee: coffee
+      })
+      .pipe gulp.dest(distDir())
+      .on("end", resolve)
+      .on("error", reject)
+
   Promise
   .bind(@)
-  # .then(cleanupPlatform)
-  # .then(buildPackages)
+  .then(cleanupPlatform)
+  .then(buildPackages)
   .then(copyPackages)
-  # .then(npmInstallPackages)
-  # .then(createRootPackage)
-  # .then(symlinkPackages)
-  # .then(@convertCoffeeToJs)
+  .then(npmInstallPackages)
+  .then(createRootPackage)
+  .then(symlinkPackages)
+  .then(convertCoffeeToJs)
   # .then(@obfuscate)
   # .then(@cleanupSrc)
   # .then(@npmInstall)
