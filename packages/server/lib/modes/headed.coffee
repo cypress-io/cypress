@@ -91,6 +91,8 @@ module.exports = {
         options.onFocusTests = ->
           win.focus()
 
+        options.os = os.platform()
+
         Events.start(options, bus)
 
         return win

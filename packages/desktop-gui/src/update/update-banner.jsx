@@ -34,34 +34,45 @@ class UpdateBanner extends Component {
           <i className='fa fa-download'></i>{' '}
           Update
         </strong>
-        {this._modal()}
+        <BootstrapModal
+          show={this.showingModal}
+          onHide={() => this._toggleModal(false)}
+          backdrop='static'
+        >
+          <div className='update-modal modal-body os-dialog'>
+            <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+            <h4>Update to the latest version</h4>
+            <p>
+              Version <strong>{appStore.newVersion}</strong> is now available (currently running <strong>{appStore.version}</strong>).{' '}
+              <a href='#' onClick={this._openChangelog}>Changelog</a>
+            </p>
+            {this._instructions()}
+          </div>
+        </BootstrapModal>
       </div>
     )
   }
 
-  _modal () {
-    return (
-      <BootstrapModal
-        show={this.showingModal}
-        onHide={() => this._toggleModal(false)}
-        backdrop='static'
-      >
-        <div className='update-modal modal-body os-dialog'>
-          <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-          <h4>Update to the latest version</h4>
-          <p>
-            Version <strong>{appStore.newVersion}</strong> is now available (currently running <strong>{appStore.version}</strong>).{' '}
-            <a href='#' onClick={this._openChangelog}>Changelog</a>
-          </p>
-          <ol>
-            <li>Quit this app</li>
-            <li> Run <code>npm install -D cypress@{appStore.newVersion}</code>
-            </li>
-            <li>Run <code>cypress open</code> to open the new version of the app</li>
-          </ol>
-        </div>
-      </BootstrapModal>
-    )
+  _instructions () {
+    if (appStore.isGlobalMode) {
+      return (
+        <ol>
+          <li>
+            <a href='#' onClick={this._openDownload}>Download the new version</a>
+          </li>
+          <li>Quit this app</li>
+          <li>Extract the download and replace the existing app</li>
+        </ol>
+      )
+    } else {
+      return (
+        <ol>
+          <li>Quit this app</li>
+          <li>Run <code>npm install -D cypress@{appStore.newVersion}</code></li>
+          <li>Run <code>cypress open</code> to open the new version of the app</li>
+        </ol>
+      )
+    }
   }
 
   _checkForUpdate () {
@@ -82,6 +93,20 @@ class UpdateBanner extends Component {
   _openChangelog (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/changelog')
+  }
+
+  _openDownload = (e) => {
+    e.preventDefault()
+    ipc.externalOpen(`https://download.cypress.io/desktop${this._os()}`)
+  }
+
+  _os () {
+    switch (appStore.os) {
+      case 'darwin': return '?os=mac'
+      case 'linux':  return '?os=linux64'
+      case 'win32':  return '?os=win'
+      default:       return ''
+    }
   }
 }
 

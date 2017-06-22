@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Loader from 'react-loader'
@@ -21,10 +22,7 @@ class App extends Component {
 
     ipc.getOptions()
     .then((options = {}) => {
-      appStore.set({
-        version: options.version,
-        projectPath: options.projectPath,
-      })
+      appStore.set(_.pick(options, 'os', 'projectPath', 'version'))
 
       return ipc.getCurrentUser()
     })

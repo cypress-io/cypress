@@ -51,6 +51,20 @@ describe "Update Banner", ->
       cy.get(".close").click()
       cy.get(".modal").should("not.be.visible")
 
+  describe "in global mode", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: "1.3.3", os: "linux"})
+      @start()
+      @updaterCheck.resolve("1.3.4")
+      cy.contains("Update").click()
+
+    it "modal has info about downloading new version", ->
+      cy.get(".modal").contains("Download the new version")
+
+    it.only "opens download link when Download is clicked", ->
+      cy.contains("Download the new version").click().then =>
+        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop?os=linux64")
+
   describe "in project mode", ->
     beforeEach ->
       cy.stub(@ipc, "getOptions").resolves({version: "1.3.3", projectPath: "/foo/bar"})
@@ -58,8 +72,7 @@ describe "Update Banner", ->
       @updaterCheck.resolve("1.3.4")
       cy.contains("Update").click()
 
-    it.only "modal has info about updating package.json", ->
-      cy.get(".modal").contains("Quit this app")
+    it "modal has info about updating package.json", ->
       cy.get(".modal").contains("npm install -D cypress@1.3.4")
 
     it "opens changelog when Changelog is clicked", ->

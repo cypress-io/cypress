@@ -98,11 +98,14 @@ describe "gui/headed", ->
       state = savedState()
       @sandbox.stub(state, "get").resolves(@state)
 
-    it "calls Events.start with options", ->
+    it "calls Events.start with options, adding onFocusTests and os", ->
+      @sandbox.stub(os, "platform").returns("darwin")
       opts = {}
 
       headed.ready(opts).then ->
-        expect(Events.start).to.be.calledWith(opts)
+        expect(Events.start).to.be.called
+        expect(Events.start.lastCall.args[0].onFocusTests).to.be.a("function")
+        expect(Events.start.lastCall.args[0].os).to.equal("darwin")
 
     it "calls menu.set", ->
       headed.ready({}).then ->
