@@ -15,7 +15,7 @@ This is a single page application with a decent amount of features. The tests in
 - Check checkboxes using {% url `cy.check()` check %}
 - Stub responses from our backend using {% url `cy.route()` route %}
 
-![piechopper-gif](https://cloud.githubusercontent.com/assets/1268976/12985444/ad14159c-d0c0-11e5-8e50-2b64a1d389ac.gif)
+![piechopper-gif](/img/examples/piechopper-tests-running.gif)
 
 ## Stack
 

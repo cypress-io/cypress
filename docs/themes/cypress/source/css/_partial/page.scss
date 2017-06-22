@@ -49,7 +49,7 @@
   }
 
 }
-.article-content, .faq .article {
+.article-content, .toc-top .article {
   line-height: $line-height;
 
   hr {
@@ -213,6 +213,10 @@
 
     &>a {
       font-weight: 500;
+
+      &:hover {
+        border-bottom: 0;
+      }
     }
 
     &+h2 {
@@ -229,6 +233,12 @@
     margin: 1.5em 0 15px;
     font-family: $font-title;
     border-bottom: 1px solid #eee;
+
+    &>a {
+      &:hover {
+        border-bottom: 0;
+      }
+    }
 
     code {
       font-weight: bold;
@@ -263,13 +273,13 @@
     margin: 1em 0;
     font-family: $font-title;
   }
-
-  &>p>strong {
-    display: inline-block;
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 1.2em;
-  }
+  //
+  // &>p>strong {
+  //   display: inline-block;
+  //   margin-top: 15px;
+  //   font-weight: bold;
+  //   font-size: 1.2em;
+  // }
 
   &>h2+p>strong, &>h1+p>strong {
     margin-top: 0;
@@ -303,6 +313,7 @@
     font-style: normal;
     font-weight: 500;
     padding-bottom: 2px;
+    font-size: 1.1em;
     border-bottom: 1px dotted #ccc;
   }
 

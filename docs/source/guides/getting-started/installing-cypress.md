@@ -40,24 +40,23 @@ You can install Cypress in 2 different ways:
 
 ## Command Line Tool
 
-**Install the Cypress CLI tool**
+***Install the Cypress CLI tool***
 
 ```shell
 npm install -g cypress-cli
 ```
 
-**Install the Desktop Cypress app**
+***Install the Desktop Cypress app***
 
 ```shell
 cypress install
 ```
 
-![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
+![cypress-cli](/img/guides/install-cypress-in-command-line.gif)
 
 {% note info %}
 The Cypress CLI Tool contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
 {% endnote %}
-
 
 ## Direct Download
 
@@ -71,13 +70,13 @@ The vast majority of the time, Cypress will install correctly. But if you're on 
 
 After installing, you will need to login to Cypress. Login currently requires a {% url "Github" https://github.com/ %} account, if you do not have an account, you will have to {% url "create one" https://github.com/join %} to use Cypress.
 
-**To Login:**
+***To Login:***
 
 - Open the Cypress App -- just double click the app from your OS application's folder.
 - Click "Log In with GitHub".
 - Authorize GitHub access to your account.
 
-![Log In to Cypress](https://cloud.githubusercontent.com/assets/1271364/18134962/38a6c3d8-6f6e-11e6-998b-9884496cb898.png)
+![Log In to Cypress](/img/guides/log-in-to-cypress-screen.png)
 
 ## Your email has not been authorized.
 

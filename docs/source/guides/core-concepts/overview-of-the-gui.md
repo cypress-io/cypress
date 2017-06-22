@@ -26,7 +26,7 @@ The lefthand side of the test runner is a visual representation of your test sui
 
 {% img /img/guides/command-log.png 436 Cypress Test Runner %}
 
-**Hovering on Commands**
+***Hovering on Commands***
 
 Each command and assertion, when hovered over, restores the Application Under Test (righthand side) to the state it was in when that command executed. This allows you to 'time-travel' back to previous states of your application when testing.
 
@@ -34,7 +34,7 @@ Each command and assertion, when hovered over, restores the Application Under Te
 By default, Cypress keeps 50 tests worth of snapshots and command data for time traveling. If you are seeing extremely high memory consumption in your browser, you may want to lower the `numTestsKeptInMemory` in your {% url 'configuration' configuration#Global %}.
 {% endnote %}
 
-**Clicking on Commands**
+***Clicking on Commands***
 
 Each command, assertion, or error, when clicked on, displays extra information in the dev tools console. Clicking also 'pins' the Application Under Test (righthand side) to it's previous state when the command executed.
 
@@ -73,7 +73,7 @@ In the corresponding Application Preview below, you can see `https://example.cyp
 
 {% img /img/guides/application-under-test.png Application Under Test %}
 
-The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the {% url `cy.viewport()` viewport %} command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#section-viewport). If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
+The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the {% url `cy.viewport()` viewport %} command or in your {% url "Cypress configuration" configuration#Viewport %}. If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
 
 The current size and scale of the AUT is displayed in the top right corner of the window.
 

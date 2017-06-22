@@ -36,13 +36,13 @@ Mac  | `/Applications/Cypress.app`
 Linux  | `/home/<user>/.cypress/Cypress`
 Windows  | {% issue 74 'not currently supported' %}
 
-**Install the latest version**
+***Install the latest version***
 
 ```shell
 cypress install
 ```
 
-**Install a specific version**
+***Install a specific version***
 ```shell
 cypress install --cypress-version 0.13.0
 ```
@@ -67,49 +67,49 @@ You can use this command when working locally or when {% url 'running Cypress in
 
 Cypress checks to see that the Desktop Application is installed and automatically installs it prior to running (if necessary).
 
-**Run tests from current path**
+***Run tests from current path***
 
 ```shell
 cypress run
 ```
 
-**Run tests specifying path to the project**
+***Run tests specifying path to the project***
 
 ```shell
 cypress run /users/john/projects/TodoMVC
 ```
 
-**Run tests specifying a port (overrides values in `cypress.json`)**
+***Run tests specifying a port (overrides values in `cypress.json`)***
 
 ```shell
 cypress run --port 8080
 ```
 
-**Run tests specifying a mocha reporter**
+***Run tests specifying a mocha reporter***
 
 ```shell
 cypress run --reporter json
 ```
 
-**Run tests specifying mochas reporter options**
+***Run tests specifying mochas reporter options***
 
 ```shell
 cypress run --reporter-options mochaFile=result.xml,toConsole=true
 ```
 
-**Run tests specifying a single test file to run instead of all tests**
+***Run tests specifying a single test file to run instead of all tests***
 
 ```shell
 cypress run --spec cypress/integration/app_spec.js
 ```
 
-**Run tests specifying environment variables**
+***Run tests specifying environment variables***
 
 ```shell
 cypress run --env host=api.dev.local
 ```
 
-**Run tests specifying configuration (overrides values in `cypress.json`)**
+***Run tests specifying configuration (overrides values in `cypress.json`)***
 
 ```shell
 cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
@@ -128,7 +128,7 @@ You'd typically record your runs in {% url 'Continuous Integration' continuous-i
 
 After setting up your project you will be given a **Record Key**.
 
-**Run and record tests specifying record key**
+***Run and record tests specifying record key***
 
 ```shell
 cypress run --record --key <record_key>
@@ -136,13 +136,13 @@ cypress run --record --key <record_key>
 
 If you set the **Record Key** as the environment variable `CYPRESS_RECORD_KEY`, you can omit the `--key` flag.
 
-**Set environment variable (typically in {% url 'Continuous Integration' continuous-integration %}).**
+***Set environment variable (typically in {% url 'Continuous Integration' continuous-integration %}).***
 
 ```shell
 export CYPRESS_RECORD_KEY=abc-key-123
 ```
 
-**Omit `--key` flag when env var set.**
+***Omit `--key` flag when env var set.***
 
 ```shell
 cypress run --record
@@ -156,19 +156,19 @@ Open the Cypress GUI application. This is the same thing as double-clicking the 
 
 Arguments you pass to `cypress open` will automatically be applied to the project you open. These persist on all projects until you quit the Cypress Desktop Application.
 
-**Open Cypress projects specifying port (overrides values in `cypress.json`)**
+***Open Cypress projects specifying port (overrides values in `cypress.json`)***
 
 ```shell
 cypress open --port 8080
 ```
 
-**Open Cypress projects specifying configuration (overrides values in `cypress.json`)**
+***Open Cypress projects specifying configuration (overrides values in `cypress.json`)***
 
 ```shell
 cypress open --config pageLoadTimeout=100000,watchForFileChanges=false
 ```
 
-**Open Cypress projects specifying environment variables (overrides values in `cypress.json`)**
+***Open Cypress projects specifying environment variables (overrides values in `cypress.json`)***
 
 ```shell
 cypress open --env host=api.dev.local
@@ -182,7 +182,7 @@ Get the path Cypress will be installed to. Additionally checks to see if Cypress
 cypress get:path
 ```
 
-**Example Output**
+***Example Output***
 
 ```shell
 Path to Cypress: /Applications/Cypress.app
@@ -197,7 +197,7 @@ Verify that the Cypress application is found.
 cypress verify
 ```
 
-**Example Output**
+***Example Output***
 
 ```shell
 Cypress application is valid and should be okay to run: /Applications/Cypress.app
@@ -211,7 +211,7 @@ Output both the version of the CLI Tool and the installed Cypress application.
 cypress version
 ```
 
-**Example Output**
+***Example Output***
 
 ```shell
 Cypress CLI: 0.13.1

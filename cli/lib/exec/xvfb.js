@@ -1,6 +1,6 @@
 const os = require('os')
 const Promise = require('bluebird')
-const Xvfb = require('xvfb')
+const Xvfb = require('@cypress/xvfb')
 const R = require('ramda')
 const debug = require('debug')('cypress:cli')
 
