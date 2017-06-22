@@ -25,7 +25,7 @@ This will install this repo's direct dependencies as well as the dependencies fo
 Then, build all the packages and start the app:
 
 ```bash
-npm run all build-dev
+npm run all build
 npm start
 ```
 
