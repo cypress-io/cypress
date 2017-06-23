@@ -58,7 +58,7 @@ describe "lib/reporter", ->
   context ".create", ->
     it "can create mocha-teamcity-reporter", ->
       teamCityFn = @sandbox.stub()
-      mockery.registerMock("mocha-teamcity-reporter", teamCityFn)
+      mockery.registerMock("@cypress/mocha-teamcity-reporter", teamCityFn)
 
       reporter = Reporter.create("teamcity")
       reporter.setRunnables(@root)
