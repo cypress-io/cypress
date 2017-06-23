@@ -21,13 +21,14 @@
     "test-debug": "NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts test/support/mocha.opts --watch",
     "codecov": "codecov",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "lint": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee"
+    "lint": "$(bin-up coffeelint) test/*.coffee test/unit/*.coffee test/integration/*.coffee"
   },
   "files": [
     "config",
     "lib"
   ],
   "devDependencies": {
+    "bin-up": "^1.0.1",
     "body-parser": "1.12.4",
     "chokidar-cli": "^1.2.0",
     "cloudflare-cli": "^1.5.2",

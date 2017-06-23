@@ -30,8 +30,9 @@ pathToPackageJson = (pkg) ->
 
 class Base
   constructor: (os, @options = {}) ->
-    _.defaults @options,
-      version:          null
+    _.defaults @options, {
+      version: null
+    }
 
     @zipName      = zipName
     @osName       = os

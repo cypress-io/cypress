@@ -19,7 +19,7 @@ module.exports = {
   getPublisher: ->
     aws = @getAwsObj()
 
-    awspublish.create
+    awspublish.create {
       httpOptions: {
         timeout: human("10 minutes")
       }
@@ -28,6 +28,7 @@ module.exports = {
       }
       accessKeyId:     aws.key
       secretAccessKey: aws.secret
+    }
 
   getAwsObj: ->
     fs.readJsonSync("./support/aws-credentials.json")
