@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
-let fs = require('fs')
-let path = require('path')
-let glob = require('glob')
+/* eslint-disable quotes */
+
+const fs = require('fs')
+const path = require('path')
+const glob = require('glob')
 
 function replaceStringsIn (file) {
   fs.readFile(file, 'utf8', function (err, str) {
     if (err) throw err
 
-    let replace = function (source, dest) {
+    const replace = function (source, dest) {
       str = str.split(source).join(dest)
     }
 

@@ -40,3 +40,4 @@ docs/support
 
 # CLI tool
 cli/build
+scripts/deploy/support/

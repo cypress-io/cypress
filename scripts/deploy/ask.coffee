@@ -4,7 +4,10 @@ glob     = require("glob")
 Promise  = require("bluebird")
 inquirer = require("inquirer")
 
-throw new Error("TODO: upgrade inquirer to promise interface")
+glob = Promise.promisify(glob)
+
+prompt = (questions) ->
+  Promise.resolve(inquirer.prompt(questions))
 
 fs = Promise.promisifyAll(fs)
 
@@ -89,55 +92,48 @@ module.exports = {
     }]
 
   deployNewVersion: ->
-    new Promise (resolve, reject) =>
-      fs.readJsonAsync("./package.json").then (json) =>
-        inquirer.prompt @getQuestions(json.version), (answers) =>
-          ## set the new version if we're publishing!
-          ## update our own local package.json as well
-          if answers.publish
-            # @updateLocalPackageJson(answers.version, json).then ->
-            resolve(answers.version)
-          else
-            resolve(json.version)
+    fs.readJsonAsync("./package.json")
+    .then (json) =>
+      prompt(@getQuestions(json.version))
+      .then (answers) ->
+        ## set the new version if we're publishing!
+        ## update our own local package.json as well
+        if answers.publish
+          # @updateLocalPackageJson(answers.version, json).then ->
+          answers.version
+        else
+          json.version
 
   whichVersion: (distDir) ->
-    new Promise (resolve, reject) =>
-      ## realpath returns the absolute full path
-      glob "*/package.json", {cwd: distDir, realpath: true}, (err, pkgs) =>
-        return reject(err) if err
+    ## realpath returns the absolute full path
+    glob("*/package.json", {cwd: distDir, realpath: true})
+    .map (pkg) =>
+      fs.readJsonAsync(pkg)
+      .get("version")
+    .then (versions) =>
+      versions = _.uniq(versions)
 
-        Promise
-        .map pkgs, (pkg) ->
-          fs.readJsonAsync(pkg).get("version")
-        .then (versions) =>
-          versions = _.uniq(versions)
-
-          inquirer.prompt @getVersions(versions), (answers) =>
-            resolve(answers.version)
+      prompt(@getVersions(versions))
+      .get("version")
 
   whichRelease: (distDir) ->
-    new Promise (resolve, reject) =>
-      ## realpath returns the absolute full path
-      glob "*/package.json", {cwd: distDir, realpath: true}, (err, pkgs) =>
-        return reject(err) if err
+    ## realpath returns the absolute full path
+    glob("*/package.json", {cwd: distDir, realpath: true})
+    .map (pkg) =>
+      fs.readJsonAsync(pkg)
+      .get("version")
+    .then (versions) =>
+      versions = _.uniq(versions)
 
-        Promise
-        .map pkgs, (pkg) ->
-          fs.readJsonAsync(pkg).get("version")
-        .then (versions) =>
-          versions = _.uniq(versions)
-
-          inquirer.prompt @getReleases(versions), (answers) =>
-            resolve(answers.release)
+      prompt(@getReleases(versions))
+      .get("release")
 
   whichPlatform: ->
-    new Promise (resolve, reject) =>
-      inquirer.prompt @getPlatformQuestion(), (answers) =>
-        resolve(answers.platform)
+    prompt(@getPlatformQuestion())
+    .get("platform")
 
   whichBumpTask: ->
-    new Promise (resolve, reject) =>
-      inquirer.prompt @getBumpTasks(), (answers) =>
-        resolve(answers.task)
+    prompt(@getBumpTasks())
+    .get("task")
 
 }

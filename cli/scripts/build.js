@@ -5,7 +5,15 @@ const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs-extra'))
 
 // grab the current version from the root monorepo package.json
-const { version, description } = require('../../package.json')
+const {
+ version,
+ description,
+ author,
+ homepage,
+ license,
+ bugs,
+ repository,
+} = require('../../package.json')
 
 const packageJsonSrc = path.join('package.json')
 const packageJsonDest = path.join('build', 'package.json')
@@ -19,6 +27,11 @@ function preparePackageForNpmRelease (json) {
   _.extend(json, {
     version,
     description,
+    author,
+    homepage,
+    license,
+    bugs,
+    repository,
     scripts: {
       postinstall: 'node index.js --exec install',
       size: 't=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";',

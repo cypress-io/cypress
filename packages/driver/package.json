@@ -1,7 +1,6 @@
 {
   "name": "@packages/driver",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/driver needs: npm run build'",
@@ -10,6 +9,10 @@
     "clean-deps": "rm -rf node_modules",
     "test": "gulp test"
   },
+  "files": [
+    "dist",
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
     "angular": "^1.3.1",
