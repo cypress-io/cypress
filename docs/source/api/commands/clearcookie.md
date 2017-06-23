@@ -42,11 +42,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.clearCookie()` command to be processed
 
-## Yields
+## Yields {% yields %}
 
 `cy.clearCookie()` yields `null`.
 
-## Timeout
+## Timeout {% timeout %}
 
 `cy.clearCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process the command.
 

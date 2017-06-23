@@ -53,11 +53,11 @@ Option | Default | Notes
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the select
 
 
-## Yields
+## Yields {% yields %}
 
 `.select()` yields the new DOM elements selected.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.select()` will continue to select the options for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

@@ -40,7 +40,7 @@ Pass a function that is invoked with the following arguments:
 - `index`
 - `collection`
 
-## Yields
+## Yields {% yields %}
 
 `.each()` yields the original array.
 

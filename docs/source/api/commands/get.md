@@ -49,11 +49,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields
+## Yields {% yields %}
 
 `cy.get()` yields the new DOM element(s) found by the command.
 
-## Timeout
+## Timeout {% timeout %}
 
 `cy.get()` will continue to look for the elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

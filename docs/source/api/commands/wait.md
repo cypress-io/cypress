@@ -56,13 +56,13 @@ Option | Default | Notes
 
 You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the {% url 'configuration' configuration %}.
 
-## Yields
+## Yields {% yields %}
 
 When given a `time` argument, `cy.wait()` yields the previous commands yield.
 
 When given an `alias` argument, `cy.wait()` yields the XHR object of the aliased route.
 
-## Timeout
+## Timeout {% timeout %}
 
 `cy.wait()` will wait for the request the duration of the {% url `requestTimeout` configuration#Timeouts %} and wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
 

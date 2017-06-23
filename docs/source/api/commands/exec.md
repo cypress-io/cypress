@@ -39,7 +39,7 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `execTimeout` configuration#Timeouts %} | Total time to allow the command to execute
 
-## Yields
+## Yields {% yields %}
 
 `cy.exec()` yields an object with the following properties:
 
@@ -47,7 +47,7 @@ Option | Default | Notes
 - `stdout`
 - `stderr`
 
-## Timeout
+## Timeout {% timeout %}
 
 `cy.exec()` will allow the command to execute for the duration of the {% url `execTimeout` configuration#Timeouts %} or the `timeout` passed into the command's options.
 

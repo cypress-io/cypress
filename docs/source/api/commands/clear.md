@@ -49,11 +49,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the clear
 
-## Yields
+## Yields {% yields %}
 
 `.clear()` yields the `input` or `textarea` that was cleared.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.clear()` will continue to look for the `input` or `textarea` for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

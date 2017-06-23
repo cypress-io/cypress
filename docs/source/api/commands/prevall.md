@@ -46,11 +46,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields
+## Yields {% yields %}
 
 `.prevAll()` yields the new DOM element(s) found by the command.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.prevAll()` will continue to look for the previous elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

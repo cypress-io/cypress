@@ -43,9 +43,9 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `false` | Display command in command log
 
-## Yields
+## Yields {% yields %}
 
-## Timeout
+## Timeout {% timeout %}
 
 # Examples
 

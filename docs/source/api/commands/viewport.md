@@ -68,11 +68,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields
+## Yields {% yields %}
 
 `cy.viewport()` yields `null`.
 
-## Timeout
+## Timeout {% timeout %}
 
 # Examples
 

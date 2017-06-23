@@ -37,11 +37,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields
+## Yields {% yields %}
 
 `.pause()` yields the previous command's yield.
 
-## Timeout
+## Timeout {% timeout %}
 
 # Examples
 

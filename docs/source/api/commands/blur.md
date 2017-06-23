@@ -3,7 +3,7 @@ title: blur
 comments: false
 ---
 
-Make a focused DOM element blur.
+Blur a focused element.
 
 # Syntax
 
@@ -14,7 +14,9 @@ Make a focused DOM element blur.
 
 ## Usage
 
-`.blur()` requires being chained off another cy command that *yields* a DOM element that is currently in focus. If you want to ensure an element is focused before blurring, try using {% url `.focus()` focus %} before `.blur()`.
+`.blur()` requires being chained off another cy command that *yields* a DOM element.
+
+This element must currently be in focus. If you want to ensure an element is focused before blurring, try using {% url `.focus()` focus %} before `.blur()`.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -41,11 +43,11 @@ Option | Default | Notes
 `force` | `false` | Forces blur, disables checking if el is focusable or focused
 `log` | `true` | Whether to display command in Command Log
 
-## Yields
+## Yields {% yields %}
 
 `.blur()` yields the DOM element that was blurred.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.blur()` will continue to look for the focusable element to blur for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
