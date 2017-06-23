@@ -7,7 +7,6 @@ import handleGlobalErrors from './lib/handle-global-errors'
 import momentOverrides from './lib/configure-moment'
 
 import App from './app/app'
-import Updates from './update/updates'
 
 useStrict(true)
 
@@ -23,9 +22,5 @@ window.App = {
 
   start () {
     render(<App />, document.getElementById('app'))
-  },
-
-  startUpdateApp () {
-    render(<Updates />, document.getElementById('updates'))
   },
 }

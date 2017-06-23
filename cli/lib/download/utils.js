@@ -11,7 +11,7 @@ const { stripIndent } = require('common-tags')
 const ProgressBar = require('progress')
 
 const xvfb = require('../exec/xvfb')
-const { formErrorText, errors } = require('./errors')
+const { formErrorText, errors } = require('../errors')
 const packagePath = path.join(__dirname, '..', '..', 'package.json')
 const packageVersion = require(packagePath).version
 

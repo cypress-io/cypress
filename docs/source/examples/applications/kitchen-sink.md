@@ -17,7 +17,7 @@ This is an example app is used to showcase every command available in Cypress.
 - {% url "`cy.route()`" route %} network requests, {% url "`cy.wait()`" wait %} on responses, and stub response data using {% url "`cy.fixture()`" fixture %}.
 - Inspect and manipulate cookies and localStorage.
 
-![kitchensink running](https://cloud.githubusercontent.com/assets/1268976/14084252/e309e370-f4e7-11e5-9562-24f516563ac9.gif)
+![kitchensink running](/img/examples/kitchen-sink-tests-running.gif)
 
 ## Stack
 

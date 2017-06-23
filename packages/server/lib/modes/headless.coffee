@@ -33,7 +33,21 @@ haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## and (record or ci) hasn't been set to true or false
   (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
+collectTestResults = (obj) ->
+  {
+    tests:       obj.tests
+    passes:      obj.passes
+    pending:     obj.pending
+    failures:    obj.failures
+    duration:    humanTime(obj.duration)
+    screenshots: obj.screenshots and obj.screenshots.length
+    video:       !!obj.video
+    version:     pkg.version
+  }
+
 module.exports = {
+  collectTestResults
+
   getId: ->
     ## return a random id
     random.generate({
@@ -144,16 +158,7 @@ module.exports = {
 
     console.log("")
 
-    stats.display(color, {
-      tests:       obj.tests
-      passes:      obj.passes
-      pending:     obj.pending
-      failures:    obj.failures
-      duration:    humanTime(obj.duration)
-      screenshots: obj.screenshots and obj.screenshots.length
-      video:       !!obj.video
-      version:     pkg.version
-    })
+    stats.display(color, obj)
 
   displayScreenshots: (screenshots = []) ->
     console.log("")
@@ -322,24 +327,36 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, gui, screenshots, started, end, name, cname, videoCompression } = options
+    { project, gui, screenshots, started, end, name, cname, videoCompression, outputPath } = options
 
     @listenForProjectEnd(project, gui)
     .then (obj) =>
-      finish = ->
-        project
-        .getConfig()
-        .then (cfg) ->
-          obj.config = cfg
-        .return(obj)
-
       if end
         obj.video = name
 
       if screenshots
         obj.screenshots = screenshots
 
-      @displayStats(obj)
+      testResults = collectTestResults(obj)
+
+      writeOutput = ->
+        if not outputPath
+          return Promise.resolve()
+
+        log("saving results as %s", outputPath)
+
+        fs.outputJsonAsync(outputPath, testResults)
+
+      finish = ->
+        writeOutput()
+        .then ->
+          project
+          .getConfig()
+          .then (cfg) ->
+            obj.config = cfg
+          .return(obj)
+
+      @displayStats(testResults)
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
@@ -401,6 +418,8 @@ module.exports = {
 
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
+    log("runTests with options %j", Object.keys(options))
+
     browser ?= "electron"
     log "runTests for browser #{browser}"
 
@@ -443,6 +462,7 @@ module.exports = {
             gui:              options.gui
             project:          options.project
             videoCompression: options.videoCompression
+            outputPath:       options.outputPath
             end
             name
             cname
@@ -463,7 +483,7 @@ module.exports = {
         })
 
   ready: (options = {}) ->
-    log("headless mode ready with options %j", options)
+    log("headless mode ready with options %j", Object.keys(options))
     id = @getId()
 
     ## verify this is an added project
@@ -502,6 +522,7 @@ module.exports = {
             spec:             options.spec
             gui:              options.showHeadlessGui
             browser:          options.browser
+            outputPath:       options.outputPath
           })
         .get("stats")
         .finally =>

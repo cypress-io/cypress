@@ -10,6 +10,8 @@
   "scripts": {
     "start": "node ./scripts/start.js",
     "watch": "npm run all watch",
+    "deps": "deps-ok",
+    "prebuild": "npm run deps",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
@@ -40,6 +42,7 @@
     "chai": "^4.0.2",
     "del": "^3.0.0",
     "electron-osx-sign": "^0.4.6",
+    "deps-ok": "^1.2.0",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-no-only-tests": "levibuzolic/eslint-plugin-no-only-tests#dbb7270c4f48e33081729c0ef076441b39f35487",

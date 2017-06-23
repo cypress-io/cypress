@@ -18,9 +18,18 @@ module.exports = {
       options.outputPath = outputPath
 
       return run.start(options)
-      .then(() => {
-        return fs.readJsonAsync(outputPath)
-      })
+      .then((failedTests) =>
+        fs.readJsonAsync(outputPath, { throws: false })
+          .then((output) => {
+            if (!output) {
+              return {
+                failures: failedTests,
+                message: 'Could not find Cypress test run results',
+              }
+            }
+            return output
+          })
+      )
     })
   },
 }

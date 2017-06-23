@@ -16,7 +16,7 @@ comments: false
 
 Because all commands in Cypress are asynchronous, it can be difficult to refer back to work done in previous commands. Cypress provides a special DSL for doing just that, and it's called Aliasing. Let's look at some examples to illustrate what we mean.
 
-**Imagine the following synchronous example in jQuery:**
+***Imagine the following synchronous example in jQuery:***
 
 ```javascript
 var body = $('body')
@@ -53,7 +53,7 @@ Of course, this is *not good*. It's clunky and difficult to figure out what is g
 
 **Aliasing** was designed to solve async referencing issues and DOM Element re-querying, routing requests and responses, server integration, and automated error handling. Aliasing also gives you a human readable word for a potentially complex series of events. Aliasing is prominently displayed in the Cypress Command Log, making it even easier to understand relationships.
 
-**Aliasing is incredibly powerful but very simple to use:**
+***Aliasing is incredibly powerful but very simple to use:***
 
 * Create an alias with the {% url `.as()` as %} command.
 * Reference an alias with the {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command.
@@ -101,7 +101,7 @@ In many single-page JavaScript applications, the DOM re-renders parts of the app
 
 Let's imagine when we click the `.edit` button that our `<li>` is re-rendered in the DOM. Instead of displaying the edit button, it instead displays an `<input />` text field allowing you to edit the todo. The previous `<li>` has been *completely* removed from the DOM, and a new `<li>` is rendered in its place.
 
-**Cypress calculates stale alias references.**
+***Cypress calculates stale alias references.***
 
 ```javascript
 cy.get('#todos li').first().as('firstTodo')
@@ -153,7 +153,7 @@ cy.wait('@postUser')
 cy.get('.success').contains('User successfully created!')
 ```
 
-**Telling Cypress to wait for an AJAX request that matches an aliased route has enormous advantages.**
+***Telling Cypress to wait for an AJAX request that matches an aliased route has enormous advantages.***
 
 1. Waiting for an explicit route reference is less flaky. Instead of waiting for an arbitrary period of time, waiting for a specific aliased route is much more predictable.
 2. Cypress will resolve if there's already been a request that matches the alias.

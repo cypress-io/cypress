@@ -14,7 +14,7 @@ describe "FAQ", ->
 
       cy.contains('FAQ')
         .click()
-        .contains('h1', "General Questions")
+      cy.contains('h1', "General Questions")
 
       cy.url()
         .should('include', FAQ_PATH)
@@ -37,31 +37,26 @@ describe "FAQ", ->
           @english = YAML.parse(yamlString)
 
     it "displays current page as highlighted", ->
-      cy
-        .get("#sidebar").find(".current")
+      cy.get("#sidebar").find(".current")
         .should("have.attr", "href").and("include", FAQ_PATH + ".html")
 
     it "displays English titles in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-title").each (displayedTitle, i) ->
-            englishTitle  = @english.sidebar.faq[@sidebarTitles[i]]
-            expect(displayedTitle.text()).to.eq(englishTitle)
+      cy.get("#sidebar")
+        .find(".sidebar-title").each (displayedTitle, i) ->
+          englishTitle  = @english.sidebar.faq[@sidebarTitles[i]]
+          expect(displayedTitle.text()).to.eq(englishTitle)
 
     it "displays English link names in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-link").first(5).each (displayedLink, i) ->
-            englishLink  = @english.sidebar.faq[@sidebarLinkNames[i]]
-            expect(displayedLink.text().trim()).to.eq(englishLink)
+      cy.get("#sidebar")
+        .find(".sidebar-link").first(5).each (displayedLink, i) ->
+          englishLink  = @english.sidebar.faq[@sidebarLinkNames[i]]
+          expect(displayedLink.text().trim()).to.eq(englishLink)
 
     it "displays English links in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-link").each (displayedLink, i) ->
-            sidebarLink  = @sidebarLinks[i]
-            expect(displayedLink.attr('href')).to.include(sidebarLink)
-
+      cy.get("#sidebar")
+        .find(".sidebar-link").each (displayedLink, i) ->
+          sidebarLink  = @sidebarLinks[i]
+          expect(displayedLink.attr('href')).to.include(sidebarLink)
 
   context "Table of Contents", ->
     it "displays toc links", ->

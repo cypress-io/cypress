@@ -1,16 +1,9 @@
 ---
-layout: faq
+layout: toc-top
 title: Using Cypress
 comments: false
 containerClass: faq
 ---
-
-<!-- ## How do I wait for an element not to exist? -->
-
-
-
-<!-- ## How do I do different things depending on what’s currently in the dom/url/cookies/localstore? -->
-
 
 ## {% fa fa-angle-right %} How can I parallelize my runs?
 
@@ -32,7 +25,7 @@ It is possible to upload files in your application but it's different based on h
 
 Once you {% url "setup your tests to record" runs %}, we generate a unique `projectId` for your project and automatically insert it into your `cypress.json` file.
 
-**The `projectId` is a 6 character string in your cypress.json:**
+***The `projectId` is a 6 character string in your cypress.json:***
 
 ```json
 {
@@ -46,7 +39,7 @@ This is how we uniquely identify your project. If you manually alter this, *Cypr
 
 Once you're {% url "setup to record test runs" runs %}, we automatically generate a *Record Key* for the project.
 
-**A record key is a GUID that looks like this:**
+***A record key is a GUID that looks like this:***
 
 ```text
 f4466038-70c2-4688-9ed9-106bf013cd73
@@ -58,8 +51,7 @@ You can create multiple Record Keys for a project, or delete existing ones from 
 
 You can also find your Record Key inside of the *Settings* tab in our Desktop Application.
 
-![Settings Tab of Desktop](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
-
+![Settings Tab of Desktop](/img/dashboard/record-key-shown-in-desktop-gui-configuration.png)
 
 ## {% fa fa-angle-right %} How do I get the native DOM reference of an element found using Cypress?
 
@@ -70,8 +62,6 @@ cy.get('button').then(($el) => {
   $el.get(0)
 })
 ```
-
-<!-- ## How do I make Cypress wait for an XHR request? -->
 
 ## {% fa fa-angle-right %} How do I wait for multiple XHR requests to the same url?
 
@@ -87,15 +77,11 @@ cy.wait('@getUsers')  // Wait for second GET to /users/
 cy.get('#list>li').should('have.length', 20)
 ```
 
-<!-- ## How do I test drag-n-drop? -->
-
 ## {% fa fa-angle-right %} How do I seed / reset my database?
 
 You can use either {% url `cy.request()` request %} or {% url `cy.exec()` exec %} to talk to your backend to seed data.
 
 You could also just stub XHR requests directly using {% url `cy.route()` route %} which avoids ever even needing to fuss with your database.
-
-<!-- ## How do I pass data to my webserver from Cypress? -->
 
 ## {% fa fa-angle-right %} How do I test content inside an iframe?
 
@@ -115,7 +101,7 @@ Cypress.Cookies.defaults({
 })
 ```
 
-You can *not* currently preserve localStorage across tests and can read more {% issue 461 'here' %}.
+You can **not** currently preserve localStorage across tests and can read more {% issue 461 'here' %}.
 
 ## {% fa fa-angle-right %} Some of my elements animate in, how do I work around that?
 
@@ -145,26 +131,6 @@ Luckily there are lots of easy and safe workarounds that enable you to test this
 {% url 'Read through this recipe to see how to test anchor links.' testing-the-dom %}
 
 
-<!-- ## How do I run my tests in another browser? -->
-
-
-<!-- ## Where do I get the key to run my tests in CI? -->
-
-
-<!-- ## Can I create more than one key for CI? -->
-
-
-<!-- ## I have an app that needs to be tested across multiple user sessions, like a chat app across 2 browsers. How do I test that? -->
-
-
-<!-- ## I want to test clicking a link that navigates, how do I wait and check the resulting location url? -->
-
-
-<!-- ## Is there a way to watch for an xhr request and assert that the response code came back a certain way? -->
-
-
-<!-- ## I’m running a lot of tests that appear to slow down as they run, is there a way to fix this? -->
-
 ## {% fa fa-angle-right %} How do I get an input's value in Cypress?
 
 DOM elements yielded in Cypress are just jQuery elements so you can use any method available in jQuery. Below are some examples of working with an input's value.
@@ -182,8 +148,6 @@ cy.get('input').then(($input) => {
 // make an assertion on the value
 cy.get('input').should('have.value', 'abc')
 ```
-
-<!-- ## How do I make conditional based assertions / control flow? -->
 
 ## {% fa fa-angle-right %} How do I require X node module in Cypress?
 
@@ -211,8 +175,6 @@ if (window.Cypress) {
 }
 ```
 
-<!-- ## is there CLI option to run in chrome? Or is electron the only way to run headlessly? -->
-
 ## {% fa fa-angle-right %} Do you allow before, beforeEach, after, or afterEach hooks?
 
 Yes. You can read more {% url "here" writing-and-organizing-tests#Hooks %}.
@@ -222,3 +184,40 @@ Yes. You can read more {% url "here" writing-and-organizing-tests#Hooks %}.
 First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" command-line %}.
 
 Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress-cli`.
+
+<!-- ## How do I make Cypress wait for an XHR request? -->
+
+<!-- ## is there CLI option to run in chrome? Or is electron the only way to run headlessly? -->
+
+<!-- ## How do I make conditional based assertions / control flow? -->
+
+
+<!-- ## How do I run my tests in another browser? -->
+
+
+<!-- ## Where do I get the key to run my tests in CI? -->
+
+
+<!-- ## Can I create more than one key for CI? -->
+
+
+<!-- ## I have an app that needs to be tested across multiple user sessions, like a chat app across 2 browsers. How do I test that? -->
+
+
+<!-- ## I want to test clicking a link that navigates, how do I wait and check the resulting location url? -->
+
+
+<!-- ## Is there a way to watch for an xhr request and assert that the response code came back a certain way? -->
+
+
+<!-- ## I’m running a lot of tests that appear to slow down as they run, is there a way to fix this? -->
+
+
+<!-- ## How do I pass data to my webserver from Cypress? -->
+
+<!-- ## How do I test drag-n-drop? -->
+
+
+<!-- ## How do I wait for an element not to exist? -->
+
+<!-- ## How do I do different things depending on what’s currently in the dom/url/cookies/localstore? -->

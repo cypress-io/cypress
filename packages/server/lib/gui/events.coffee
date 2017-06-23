@@ -113,29 +113,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "updater:check"
       Updater.check({
-        onNewVersion: ->   send(true)
+        onNewVersion: ({ version }) -> send(version)
         onNoNewVersion: -> send(false)
       })
-
-    when "updater:run"
-      echo = (event, version) ->
-        send({event: event, version: version})
-
-      upd = Updater.run({
-        onStart: -> echo("start")
-        onApply: -> echo("apply")
-        onError: -> echo("error")
-        onDone: ->  echo("done")
-        onNone: ->  echo("none")
-        onDownload: (version) ->
-          echo("download", version)
-      })
-
-      ## TODO: there is no note here, what if the window
-      ## is closed once the updater finishes?
-      win = Windows.getByWebContents(event.sender)
-      win.once "closed", ->
-        upd.cancel()
 
     when "get:logs"
       logs.get()

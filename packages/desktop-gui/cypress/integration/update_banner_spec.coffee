@@ -18,7 +18,7 @@ describe "Update Banner", ->
 
   describe "general behavior", ->
     beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getOptions").resolves({version: "1.3.3"})
       @start()
 
     it "does not display update banner when no update available", ->
@@ -42,41 +42,41 @@ describe "Update Banner", ->
       @updaterCheck.reject({name: "foo", message: "Something bad happened"})
       cy.get(".footer").should("be.visible")
 
-  describe "in global mode", ->
-    beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({})
-      @start()
-
-    it "opens updates window on click of Update link", ->
+    it "opens modal on click of Update link", ->
       @updaterCheck.resolve("1.3.4")
-      cy.contains("Update").click().then ->
-        expect(@ipc.windowOpen).to.be.calledWith({
-          position: "center"
-          width: 300
-          height: 240
-          toolbar: false
-          title: "Updates"
-          type: "UPDATES"
-        })
-
-  describe "in project mode", ->
-    beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
-      @start()
-      @updaterCheck.resolve("1.3.4")
-
-    it "opens modal with info on click of Update link", ->
       cy.contains("Update").click()
       cy.get(".modal").should("be.visible")
 
-    describe "update modal", ->
-      beforeEach ->
-        cy.contains("Update").click()
+    it "closes modal when X is clicked", ->
+      @updaterCheck.resolve("1.3.4")
+      cy.contains("Update").click()
+      cy.get(".close").click()
+      cy.get(".modal").should("not.be.visible")
 
-      it.only "opens changelog when Changelog is clicked", ->
-        cy.get(".modal").contains("Changelog").click().then =>
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")
+  describe "in global mode", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: "1.3.3", os: "linux"})
+      @start()
+      @updaterCheck.resolve("1.3.4")
+      cy.contains("Update").click()
 
-      it "closes modal when X is clicked", ->
-        cy.get(".close").click()
-        cy.get(".modal").should("not.be.visible")
+    it "modal has info about downloading new version", ->
+      cy.get(".modal").contains("Download the new version")
+
+    it "opens download link when Download is clicked", ->
+      cy.contains("Download the new version").click().then =>
+        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop?os=linux64")
+
+  describe "in project mode", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: "1.3.3", projectPath: "/foo/bar"})
+      @start()
+      @updaterCheck.resolve("1.3.4")
+      cy.contains("Update").click()
+
+    it "modal has info about updating package.json", ->
+      cy.get(".modal").contains("npm install -D cypress@1.3.4")
+
+    it "opens changelog when Changelog is clicked", ->
+      cy.get(".modal").contains("Changelog").click().then =>
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")

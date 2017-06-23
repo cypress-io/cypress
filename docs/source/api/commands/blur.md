@@ -71,7 +71,7 @@ cy.get('input:first').blur({ force: true })
 
 # Notes
 
-**`.blur()` can time out because your browser did not receive any blur events.**
+***`.blur()` can time out because your browser did not receive any blur events.***
 
 If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
 

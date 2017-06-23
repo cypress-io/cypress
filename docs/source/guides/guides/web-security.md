@@ -9,7 +9,7 @@ Because Cypress works from within the browser, Cypress must be able to directly 
 
 To get around these restrictions, Cypress implements some strategies involving JavaScript code, the browser's internal APIs, and `network proxying` to *play by the rules* of `same-origin policy`. It is our goal to fully automate the application under test without you needing to modify your application's code - and we are *mostly* able to do this.
 
-**Examples of what Cypress does under the hood:**
+***Examples of what Cypress does under the hood:***
 
   - Injects {% url "`document.domain`" https://developer.mozilla.org/en-US/docs/Web/API/Document/domain %} into `text/html` pages.
   - Proxies all `HTTP`/`HTTPS` traffic.
@@ -26,7 +26,7 @@ Cypress does some pretty interesting things under the hood to make testing HTTPs
 
 # Limitations
 
-It's important to note that although we do our *very best* to ensure your application works normally inside of Cypress, there *are* some limitations you need to be aware of.
+It's important to note that although we do our **very best** to ensure your application works normally inside of Cypress, there *are* some limitations you need to be aware of.
 
 ## One Superdomain per Test
 
@@ -46,7 +46,7 @@ cy.visit('https://google.com')      // this will immediately error
 
 Although Cypress tries to enforce this limitation, it is possible for your application to bypass Cypress's ability to detect this.
 
-**Examples of test cases that will error due to superdomain limitations:**
+***Examples of test cases that will error due to superdomain limitations:***
 
 1. {% url `.click()` click %} an `<a>` with an `href` to a different superdomain.
 2. {% url `.submit()` submit %} a `<form>` that causes your web server to redirect to you a different superdomain.
@@ -60,7 +60,7 @@ Read on to learn about {% url "working around these common problems" web-securit
 
 If your site embeds an `<iframe>` that is a cross-origin frame, Cypress will not be able to automate or communicate with this `<iframe>`.
 
-**Examples of uses for cross-origin iframes:**
+***Examples of uses for cross-origin iframes:***
 
 - Embedding a Vimeo or Youtube video.
 - Displaying a credit card form from Stripe or Braintree.
@@ -77,7 +77,7 @@ Other than that, you'll have to wait for us to implement API's to support this (
 
 Because of the way Cypress is designed, if you are testing an `HTTPS` site, Cypress will error anytime you attempt to navigate back to an `HTTP` site. This behavior helps highlight a *pretty serious security problem* with your application.
 
-**Example of accessing insecure content:**
+***Example of accessing insecure content:***
 
 ***Test code***
 
@@ -114,7 +114,7 @@ However, the truth is, Cypress is exposing a *security vulnerability* in your ap
 
 This security vulnerability exists **even if** your webserver forces a `301 redirect` back to the `HTTPS` site. The original `HTTP` request was still made once, exposing insecure session information.
 
-**The Solution**
+***The Solution***
 
 Simply update your `HTML` or `JavaScript` code to not navigate to an insecure `HTTP` page and instead only use `HTTPS`. Additionally make sure that cookies have their `secure` flag set to `true`.
 
@@ -128,7 +128,7 @@ Let's investigate how you might encounter `cross origin` errors in your test cod
 
 The most common situation where you might encounter this error is when you click on an `<a>` that navigates to another superdomain.
 
-**Application code that is served at `localhost:8080`**
+***Application code that is served at `localhost:8080`***
 
 ```html
 <html>
@@ -136,7 +136,7 @@ The most common situation where you might encounter this error is when you click
 </html>
 ```
 
-**Test code**
+***Test code***
 
 ```javascript
 cy.visit('http://localhost:8080') // where your webserver + HTML is hosted
@@ -172,7 +172,7 @@ Still not satisfied? Do you really want to click through to another application?
 
 When you submit a regular HTML form, the browser will follow this `HTTP(s) request`.
 
-**Application code that is served at `localhost:8080`**
+***Application code that is served at `localhost:8080`***
 
 ```html
 <html>
@@ -250,7 +250,7 @@ To start, you will need to understand that *not all browsers expose a way to tur
 
 Still here? That's cool, let's disable web security!
 
-**Set `chromeWebSecurity` to `false` in `cypress.json` and we'll take care of the rest.**
+***Set `chromeWebSecurity` to `false` in `cypress.json` and we'll take care of the rest.***
 
 ```json
 {

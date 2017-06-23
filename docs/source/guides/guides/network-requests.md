@@ -18,7 +18,7 @@ comments: false
 
 Cypress makes it easy to test the entire lifecycle of AJAX / XHR requests within your application. Cypress provides you direct access to the XHR objects, enabling you to make assertions about its properties. Additionally you can even stub and mock a request's response.
 
-**Common testing scenarios:**
+***Common testing scenarios:***
 
 - Asserting on a request's body
 - Asserting on a request's url
@@ -41,7 +41,7 @@ Requests that are not stubbed actually reach your server. By *not* stubbing your
 
 In other words, you can have confidence your server is sending the correct data in the correct structure to your client to consume. It is a good idea to have *end to end* tests around your application's *critical paths*. These typically include user login, signup, or other critical paths such as billing.
 
-**There are downsides to not stubbing responses you should be aware of:**
+***There are downsides to not stubbing responses you should be aware of:***
 
 - Since no responses are stubbed, that means **your server has to actually send real responses**. This can be problematic because you may have to *seed a database* before every test to generate state. For instance, if you were testing *pagination*, you'd have to seed the database with every object that it takes to replicate this feature in your application.
 - Since real responses go through every single layer of your server (controllers, models, views, etc) the tests are often **much slower** than stubbed responses.
@@ -97,7 +97,7 @@ You don't have to do any work on the server. Your application will have no idea 
 
 Cypress makes it easy to stub a response and control the `body`, `status`, `headers`, or even delay.
 
-**To begin stubbing responses you need to do two things.**
+***To begin stubbing responses you need to do two things.***
 
 1. Start a {% url `cy.server()` server %}
 2. Provide a {% url `cy.route()` route %}
@@ -210,7 +210,7 @@ cy.get('h1').should('contain', 'Dashboard')
 
 One advantage of declaratively waiting for responses is that it decreases test flake. You can think of {% url `cy.wait()` wait %} as a guard that indicates to Cypress when you expect a request to be made that matches a specific routing alias. This prevents the next commands from running until responses come back and it guards against situations where your requests are initially delayed.
 
-**Auto-complete Example:**
+***Auto-complete Example:***
 
 What makes this example below so powerful is that Cypress will automatically wait for a request that matches the `getSearch` alias. Instead of forcing Cypress to test the *side effect* of a successful request (the display of the Book results), you can test the actual *cause* of the results.
 
@@ -237,7 +237,7 @@ cy.get('#results')
 
 In our example above, we added an assertion to the display of the search results.
 
-**The search results working are coupled to a few things in our application:**
+***The search results working are coupled to a few things in our application:***
 
 1. Our application making a request to the correct URL.
 2. Our application correctly processing the response.
@@ -273,7 +273,7 @@ cy.get('#results')
   .and('contain', 'Book 2')
 ```
 
-**The XHR object that {% url `cy.wait()` wait %} yields you has everything you need to make assertions including:**
+***The XHR object that {% url `cy.wait()` wait %} yields you has everything you need to make assertions including:***
 
 - URL
 - Method
