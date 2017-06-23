@@ -80,7 +80,7 @@ module.exports = (platform, version) ->
   symlinkPackages = ->
     log("#symlinkPackages", platform)
 
-    packages.symlinkAll(distDir)
+    packages.symlinkAll(distDir("packages", "*", "package.json"), distDir)
 
   removeTypeScript = ->
     ## remove the .ts files in our packages

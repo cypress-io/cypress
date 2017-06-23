@@ -13,11 +13,11 @@ DEFAULT_PATHS = "package.json".split(" ")
 pathToPackageJson = (pkg) ->
   path.join(pkg, "package.json")
 
-runAll = (args) ->
+npmRun = (args, cwd) ->
   new Promise (resolve, reject) ->
     reject = _.once(reject)
 
-    cp.spawn("npm", args, { stdio: "inherit" })
+    cp.spawn("npm", args, { stdio: "inherit", cwd })
     .on "error", reject
     .on "exit", (code) ->
       if code is 0
@@ -27,13 +27,13 @@ runAll = (args) ->
         reject(new Error(msg))
 
 
-runAllBuildJs = _.partial(runAll, ["run", "all", "build-js"])
+runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js"])
 
 # removes transpiled JS files in the original package folders
-runAllCleanJs = _.partial(runAll, ["run", "all", "clean-js"])
+runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js"])
 
 # builds all the packages except for cli and docs
-runAllBuild = _.partial(runAll, ["run", "all", "build", "--", "--skip-packages", "cli,docs"])
+runAllBuild = _.partial(npmRun, ["run", "all", "build", "--", "--skip-packages", "cli,docs"])
 
 copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
@@ -93,25 +93,9 @@ npmInstallAll = (pathToPackages) ->
       .delay(1000)
       .then(retryGlobbing)
 
-  npmInstall = (pkg) ->
-    console.log("npm installing", pkg)
-
-    new Promise (resolve, reject) ->
-      reject = _.once(reject)
-
-      ## ignore node_modules/.bin due to symlinking
-      cp.spawn("npm", ["install", "--production"], {
-        cwd: pkg
-        stdio: "inherit"
-      })
-      .on("error", reject)
-      .on "exit", (code) ->
-        if code is 0
-          resolve()
-        else
-          reject(new Error("'npm install --production' on #{pkg} failed with exit code: #{code}"))
 
   retryNpmInstall = (pkg) ->
+    npmInstall = _.partial(npmRun, ["install", "--production"])
     npmInstall(pkg)
     .catch {code: "EMFILE"}, ->
       Promise
@@ -129,7 +113,7 @@ npmInstallAll = (pathToPackages) ->
   .then ->
     console.log("Finished NPM Installing", new Date() - started)
 
-symlinkAll = (pathTo) ->
+symlinkAll = (pathToDistPackages, pathTo) ->
   symlink = (pkg) ->
     # console.log(pkg, dist)
     ## strip off the initial './'
