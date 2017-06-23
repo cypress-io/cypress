@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Loader from 'react-loader'
@@ -9,7 +10,6 @@ import appStore from '../lib/app-store'
 import authStore from '../lib/auth-store'
 import viewStore from '../lib/view-store'
 
-import ApplyingUpdates from './applying-updates'
 import Intro from './intro'
 import Layout from './layout'
 import Login from '../login/login'
@@ -22,26 +22,17 @@ class App extends Component {
 
     ipc.getOptions()
     .then((options = {}) => {
-      appStore.set({
-        version: options.version,
-        projectPath: options.projectPath,
-      })
+      appStore.set(_.pick(options, 'env', 'os', 'projectPath', 'version'))
 
-      if (options.updating) {
-        viewStore.showApplyingUpdates()
-        // mobx can trigger a synchronous re-render, which executes
-        // componentDidMount, etc in other components, making bluebird
-        // think another promise was created but not returned
-        // return null to prevent bluebird warning about it
-        // same goes for other `return null`s below
-        return null
-      } else {
-        return ipc.getCurrentUser()
-      }
+      return ipc.getCurrentUser()
     })
     .then((user) => {
-      if (viewStore.isApplyingUpdates()) return
       authStore.setUser(user)
+      // mobx can trigger a synchronous re-render, which executes
+      // componentDidMount, etc in other components, making bluebird
+      // think another promise was created but not returned
+      // return null to prevent bluebird warning about it
+      // same goes for other `return null`s below
       return null
     })
     .catch(ipc.isUnauthed, () => {
@@ -56,8 +47,6 @@ class App extends Component {
         return <Loader color='#888' scale={0.5} />
       case C.LOGIN:
         return <Login />
-      case C.APPLYING_UPDATES:
-        return <ApplyingUpdates />
       case C.INTRO:
         return (
           <Layout>

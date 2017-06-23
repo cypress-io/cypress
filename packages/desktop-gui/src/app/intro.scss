@@ -8,30 +8,60 @@
   right: 0;
   top: 40px;
 
-  h2 {
-    font-size: 20px;
-    margin-top: 0;
+  h1 {
+    color: #636668;
+    font-family: "Fira Sans";
+    font-weight: 100;
+    margin-top: 15px;
+    text-align: center;
+  }
+
+  p {
+    margin: 10px 0;
+    color: #636668;
+    font-size: 14px;
+    line-height: 21px;
+  }
+
+  pre {
+    clear: both;
+    border: 0;
+    background-color: #252831;
+    border-radius: 3px;
+    color: #eee;
+    margin-bottom: 15px;
   }
 }
 
 .project-drop {
   align-items: center;
-  background: #f8f8f8;
-  border: solid 2px #d3d3d3;
-  border-radius: 2px;
+  background: #F6F7F8;
+  border: dashed 2px #e3e4e5;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
-  height: 150px;
   justify-content: center;
+  margin-bottom: 40px;
+  height: 150px;
+
+  .fa-cloud-upload {
+    font-size: 50px;
+    color: #d3d6d8;
+  }
+
+  a {
+    border-bottom: 1px dotted lighten($brand-primary, 30%);
+    color: lighten($brand-primary, 12%);
+  }
 
   p {
-    color: #555;
+    color: #939698;
     font-size: 1.4em;
   }
 
   &.is-dragging-over {
-    background: #eee;
-    border-color: $brand-primary;
+    background: #F6F7F8;
+    border: 2px solid lighten($brand-primary, 30%);
   }
 }
 

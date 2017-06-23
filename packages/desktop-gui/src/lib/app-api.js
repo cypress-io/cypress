@@ -1,6 +1,5 @@
 import ipc from './ipc'
 import authStore from './auth-store'
-import updater from '../update/update-model'
 
 const appApi = {
   logOut () {
@@ -15,9 +14,6 @@ const appApi = {
       switch (item) {
         case 'log:out':
           this.logOut()
-          break
-        case 'check:for:updates':
-          updater.openUpdateWindow()
           break
         default:
           return

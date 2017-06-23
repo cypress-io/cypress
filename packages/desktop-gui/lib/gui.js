@@ -8,8 +8,4 @@ module.exports = {
   getPathToIndex () {
     return file('index.html')
   },
-
-  getPathToUpdates () {
-    return file('updates.html')
-  },
 }

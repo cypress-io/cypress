@@ -14,7 +14,7 @@ describe "Dashboard", ->
 
       cy.contains('Dashboard')
         .click()
-        .contains('h1', "The Cypress Dashboard")
+      cy.contains('h1', "The Cypress Dashboard")
 
       cy.url()
         .should('include', DASHBOARD_PATH)
@@ -25,7 +25,7 @@ describe "Dashboard", ->
       # cy.get("@editLink").should("have.attr", "href")
       #     .and("include", GUIDES_PATH + ".md")
       cy.get("@editLink").should("have.attr", "href")
-          .and("include", "https://github.com/cypress-io/cypress/issues/new")
+        .and("include", "https://github.com/cypress-io/cypress/issues/new")
 
   context "Sidebar", ->
     beforeEach ->
@@ -45,27 +45,23 @@ describe "Dashboard", ->
           @english = YAML.parse(yamlString)
 
     it "displays current page as highlighted", ->
-      cy
-        .get("#sidebar").find(".current")
+      cy.get("#sidebar").find(".current")
         .should("have.attr", "href").and("include", DASHBOARD_PATH + ".html")
 
     it "displays English titles in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-title").each (displayedTitle, i) ->
-            englishTitle  = @english.sidebar.dashboard[@sidebarTitles[i]]
-            expect(displayedTitle.text()).to.eq(englishTitle)
+      cy.get("#sidebar")
+        .find(".sidebar-title").each (displayedTitle, i) ->
+          englishTitle  = @english.sidebar.dashboard[@sidebarTitles[i]]
+          expect(displayedTitle.text()).to.eq(englishTitle)
 
     it "displays English link names in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-link").first(5).each (displayedLink, i) ->
-            englishLink  = @english.sidebar.dashboard[@sidebarLinkNames[i]]
-            expect(displayedLink.text().trim()).to.eq(englishLink)
+      cy.get("#sidebar")
+        .find(".sidebar-link").first(5).each (displayedLink, i) ->
+          englishLink  = @english.sidebar.dashboard[@sidebarLinkNames[i]]
+          expect(displayedLink.text().trim()).to.eq(englishLink)
 
     it "displays English links in sidebar", ->
-      cy
-        .get("#sidebar")
-          .find(".sidebar-link").each (displayedLink, i) ->
-            sidebarLink  = @sidebarLinks[i]
-            expect(displayedLink.attr('href')).to.include(sidebarLink)
+      cy.get("#sidebar")
+        .find(".sidebar-link").each (displayedLink, i) ->
+          sidebarLink  = @sidebarLinks[i]
+          expect(displayedLink.attr('href')).to.include(sidebarLink)

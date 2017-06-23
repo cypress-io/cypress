@@ -22,24 +22,25 @@ class Default extends Component {
   render () {
     return (
       <div className='intro'>
-        <h2>Welcome to Cypress!</h2>
-        <p>Verbiage about local Cypress usage</p>
-        <p>Verbiage about local Cypress usage</p>
-        <p>Verbiage about local Cypress usage</p>
+        <h1>To Get Started...</h1>
         <p>
-          <a onClick={this._openHelp} className='helper-docs-link'>
+          Run this command in your Console (or Terminal) in the project you want to test:
+          <a onClick={this._openHelp} className='helper-docs-link pull-right'>
             <i className='fa fa-question-circle' /> Need help?
           </a>
         </p>
+        <p>
+          <pre><code>npm install this thang</code></pre>
+        </p>
+        <p>Or you can just drag your project here to run it:</p>
         <div
           className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
           onDragOver={this._dragover}
           onDragLeave={this._dragleave}
           onDrop={this._drop}
         >
-          <p>Drag your project here</p>
-          <p>- or -</p>
-          <button className='btn btn-xs btn-black' onClick={this._selectProject}>Select Project</button>
+          <i className='fa fa-cloud-upload'></i>
+          <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
         </div>
         <ProjectsList onSelect={this._projectSelected} />
       </div>
@@ -51,7 +52,8 @@ class Default extends Component {
     document.removeEventListener('drop', this._nope)
   }
 
-  _selectProject = () => {
+  _selectProject = (e) => {
+    e.preventDefault()
     ipc.showDirectoryDialog().then((path) => {
       if (!path) return // user cancelled
 

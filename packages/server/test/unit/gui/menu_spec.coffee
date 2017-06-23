@@ -71,13 +71,12 @@ describe "gui/menu", ->
         expect(getMenuItem("Cypress")).to.be.undefined
 
   context "File", ->
-    it "contains changelog, check for updates, logout, close window", ->
+    it "contains changelog, logout, close window", ->
       menu.set()
       labels = getLabels(getMenuItem("File").submenu)
 
       expect(labels).to.eql([
         "Changelog"
-        "Check for Updates"
         "Manage Account"
         "Log Out"
         "View App Data"
@@ -88,23 +87,6 @@ describe "gui/menu", ->
       menu.set()
       getSubMenuItem(getMenuItem("File"), "Changelog").click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/changelog")
-
-    it "calls updates callback when Check for Updates is clicked", ->
-      onUpdatesClicked = @sandbox.stub()
-      menu.set({onUpdatesClicked})
-      getSubMenuItem(getMenuItem("File"), "Check for Updates").click()
-      expect(onUpdatesClicked).to.be.called
-
-    it "calls original updates callback when menu is reset without new callback", ->
-      onUpdatesClicked = @sandbox.stub()
-      menu.set({onUpdatesClicked})
-      menu.set()
-      getSubMenuItem(getMenuItem("File"), "Check for Updates").click()
-      expect(onUpdatesClicked).to.be.called
-
-    it "is noop when Check for Updates is clicked with no callback", ->
-      menu.set()
-      expect(-> getSubMenuItem(getMenuItem("File"), "Check for Updates").click()).not.to.throw()
 
     it "opens dashboard when Manage Account is clicked", ->
       menu.set()

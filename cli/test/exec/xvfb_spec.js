@@ -1,10 +1,27 @@
 require('../spec_helper')
 
+const os = require('os')
 const xvfb = require('../../lib/exec/xvfb')
 
-const os = require('os')
-
 describe('exec xvfb', function () {
+  context('#start', function () {
+    it('passes', function () {
+      this.sandbox.stub(xvfb._xvfb, 'startAsync').resolves()
+      return xvfb.start()
+    })
+
+    it('fails with error message', function () {
+      const message = 'nope'
+      this.sandbox.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
+      return xvfb.start()
+        .then(() => {
+          throw new Error('Should have thrown an error')
+        }, (err) => {
+          expect(err.message).to.include(message)
+        })
+    })
+  })
+
   context('#isNeeded', function () {
     afterEach(() => delete process.env.DISPLAY)
 

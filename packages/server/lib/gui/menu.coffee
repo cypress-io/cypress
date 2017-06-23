@@ -6,7 +6,6 @@ shell = require("electron").shell
 appData = require("../util/app_data")
 open    = require("../util/open")
 
-onUpdatesClicked = ->
 onLogOutClicked = ->
 
 module.exports = {
@@ -15,11 +14,8 @@ module.exports = {
       withDevTools: false
     })
 
-    ## these are set by modes/headed.coffee and need to be preserved
-    ## if the menu is set again by launcher.coffee when the Electron
-    ## browser is run
-    if options.onUpdatesClicked
-      onUpdatesClicked = options.onUpdatesClicked
+    ## this set by modes/headed.coffee and needs to be preserved if the menu
+    ## is set again by launcher.coffee when the Electron browser is run
     if options.onLogOutClicked
       onLogOutClicked = options.onLogOutClicked
 
@@ -31,10 +27,6 @@ module.exports = {
             label: "Changelog"
             click: ->
               shell.openExternal("https://on.cypress.io/changelog")
-          }
-          {
-            label: "Check for Updates"
-            click: onUpdatesClicked
           }
           {
             type: "separator"

@@ -49,35 +49,12 @@ describe "App", ->
   context "on:menu:clicked", ->
     beforeEach ->
       cy.stub(@ipc, "logOut")
-      cy.stub(@ipc, "windowOpen")
 
       @start()
 
     it "calls log:out", ->
       @ipc.onMenuClicked.yield(null, "log:out")
       expect(@ipc.logOut).to.be.called
-
-    it "checks for updates", ->
-      @ipc.onMenuClicked.yield(null, "check:for:updates")
-      expect(@ipc.windowOpen).to.be.calledWithExactly({
-        position: "center",
-        width: 300,
-        height: 240,
-        toolbar: false,
-        title: "Updates",
-        type: "UPDATES",
-      })
-
-  context "on updates being applied", ->
-    beforeEach ->
-      @ipc.getOptions.resolves({"updating": true})
-
-      @start()
-
-    it "shows updates being applied view", ->
-      cy
-        .get("#login").contains("Applying updates")
-        .get("img").should("have.attr", "src", "img/cypress-inverse.png")
 
   context "getting current user", ->
     beforeEach ->

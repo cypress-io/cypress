@@ -1,19 +1,19 @@
 ---
+layout: toc-top
 title: Error Messages
 comments: false
 ---
 
 # Test File Errors
 
-**{% fa fa-exclamation-triangle red %} No tests found in your file**
+## {% fa fa-exclamation-triangle red %} No tests found in your file
 
 This message means that Cypress was unable to find tests in the specified file. You'll likely get this message if you have an empty test file and have not yet written any tests.
 
 {% img /img/guides/no-tests-found.png No tests found %}
 
-***
 
-**{% fa fa-exclamation-triangle red %} We found an error preparing your test file**
+## {% fa fa-exclamation-triangle red %} We found an error preparing your test file
 
 This message means that Cypress encountered an error when compiling and/or bundling your test file. Cypress automatically compiles and bundles your test code so you can use ES2015, CoffeeScript, modules, etc.
 
@@ -27,7 +27,7 @@ When the error is fixed in your test file, your tests will automatically re-run.
 
 # Support File Errors
 
-**{% fa fa-exclamation-triangle red %} Support file missing or invalid**
+## {% fa fa-exclamation-triangle red %} Support file missing or invalid
 
 The `supportFolder` option was removed from Cypress in version {% url `0.18.0` changelog#0-18-0 %} and was replaced by module support and the {% url `supportFile` configuration#Folders %} configuration option.
 
@@ -60,7 +60,7 @@ Just like with your test files, the {% url `supportFile` configuration#Folders %
 
 # Command Errors
 
-**{% fa fa-exclamation-triangle red %} Cypress cannot execute commands outside a running test**
+## {% fa fa-exclamation-triangle red %} Cypress cannot execute commands outside a running test
 
 {% img /img/guides/cypress-cannot-execute.png Cannot Execute Commands %}
 
@@ -93,9 +93,7 @@ Simply move those Cypress commands into an `it(...)` block and everything will w
 
 If you are purposefully writing commands outside of a test, there is probably a better way to accomplish what you're trying to do. Read through the {% url "Examples" examples/recipes/unit-testing %}, {% url "chat with someone in our chat" https://gitter.im/cypress-io/cypress %}, or {% open_an_issue %}.
 
-***
-
-**{% fa fa-exclamation-triangle red %} `cy...()` failed because the element you are chaining off of has become detached or removed from the dom**
+## {% fa fa-exclamation-triangle red %} `cy...()` failed because the element you are chaining off of has become detached or removed from the dom
 
 Getting this errors means you've tried to interact with a "dead" DOM element - meaning it's been detached or completely removed from the DOM.
 
@@ -155,9 +153,7 @@ When we say *guard*, this usually means:
 - Writing an assertion
 - Waiting on an XHR
 
-***
-
-**{% fa fa-exclamation-triangle red %} `cy....()` failed because the element cannot be interacted with**
+## {% fa fa-exclamation-triangle red %} `cy....()` failed because the element cannot be interacted with
 
 You may see a variation of this message for 4 different reasons:
 
@@ -180,9 +176,7 @@ cy.get('[disabled]').click({force: true}).
 
 *Be careful with this option. It's possible to force your tests to pass when the element is actually not interactable in your application.*
 
-***
-
-**{% fa fa-exclamation-triangle red %} `cy....()` failed because the element is currently animating**
+## {% fa fa-exclamation-triangle red %} `cy....()` failed because the element is currently animating
 
 {% img /img/guides/cy-method-failed-element-is-animating.png cy.method() failed because element is animating %}
 
@@ -209,9 +203,7 @@ You can globally disable animation error checking, or increase the threshold by 
 }
 ```
 
-***
-
-**{% fa fa-exclamation-triangle red %} The test has finished but Cypress still has commands in its queue**
+## {% fa fa-exclamation-triangle red %} The test has finished but Cypress still has commands in its queue
 
 Let's examine several different ways you may get this error message. In every situation, you'll need to change something in your test code to prevent the error.
 
@@ -312,13 +304,44 @@ it('does not forget to return a promise', function(){
 })
 ```
 
-**{% fa fa-exclamation-triangle red %} `cy.visit()` failed because you are attempting to visit a second unique domain**
+## {% fa fa-exclamation-triangle red %} `cy.visit()` failed because you are attempting to visit a second unique domain
 
 See {% url "`cy.visit()`" visit %} documentation.
 
-# CI Errors
+## {% fa fa-exclamation-triangle red %} Passing `cy.server({stub: false})` is now deprecated
 
-**{% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.**
+In previous versions of Cypress, to prevent Cypress from stubbing routes you had to explicitly tell your server not to stub routes like this:
+
+```javascript
+cy.server({stub: false})
+cy.route(...)
+```
+
+You no longer have to do this. Whether a {% url "`cy.route()`" route %} is stubbed or not is simply based on whether or not you specified a response in {% url "`cy.route()`" route %}.
+
+## {% fa fa-exclamation-triangle red %} Passing `cy.route({stub: false})` is now deprecated
+
+In previous versions of Cypress, {% url "`cy.route()`" route %} would require a `response` unless you specified `stub: false` in its options.
+
+You used to have to write this:
+
+```javascript
+cy.server()
+cy.route({url: /posts/, stub: false})
+```
+
+This is now deprecated because Cypress automatically stubs {% url "`cy.route()`" route %} based on whether or not it has a `response` property.
+
+```javascript
+cy.server()
+cy.route(/users/, [{}, {}])               // stubbed because this has a response argument
+cy.route({url: /comments/, response: []}) // stubbed because this has a response property
+cy.route(/posts/)                         // not stubbed because there is no response argument or property
+```
+
+# CLI Errors
+
+## {% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.
 
 You may receive this error when trying to run Cypress tests in {% url 'Continuous Integration' continuous-integration %}. This means that you did not pass a specific record key to: {% url '`cypress run --record`' command-line#cypress-run-record %}.
 
@@ -328,9 +351,7 @@ You can get your project's record key by locating it in your settings tab in the
 
 You will want to then {% url 'add the key to your config file or as an environment variable' continuous-integration#Record-Key %}.
 
-***
-
-**{% fa fa-exclamation-triangle red %} The 'cypress ci' command has been deprecated**
+## {% fa fa-exclamation-triangle red %} The `cypress ci` command has been deprecated
 
 As of version {% url `0.19.0` changelog#0-19-0 %} and CLI versions `0.13.0`, the `cypress ci` command has been deprecated. We did this to make it clearer what the difference was between a *regular test run* and a *recorded test run*.
 
@@ -356,9 +377,28 @@ cypress run --record
 
 We will automatically apply the record key environment variable.
 
+## {% fa fa-exclamation-triangle red %}  Cypress Package Renamed
+
+<img width="638" alt="screen shot 2016-03-26 at 2 06 48 pm" src="https://cloud.githubusercontent.com/assets/1268976/14061658/0f675e30-f35c-11e5-9765-ab0049a2653d.png">
+
+In previous versions of Cypress (below `0.15.0`) we distributed our CLI Tools under the package: `cypress`.
+
+As of `0.15.0` the CLI Tools have now been renamed to the package `cypress-cli`.
+
+Please update your scripts to use: `npm install -g cypress-cli`
+
+This change was made for two reasons:
+
+- Users were confused thinking they were actually installing cypress when in fact they were installing the CLI tools.
+- Once we open source the Desktop Application it will be distributed under the `cypress` package
+
+Hopefully this change will lead to less confusion over the versioning of both the `CLI Tools` and the `Cypress Desktop Application`.
+
+Once `cypress` is open sourced you'll be able to set `cypress` as a `devDependency` and will not have to fuss with downloading or managing the Desktop Application.
+
 # Page Load Errors
 
-**{% fa fa-exclamation-triangle red %} Cypress detected a cross origin error happened on page load**
+## {% fa fa-exclamation-triangle red %} Cypress detected a cross origin error happened on page load
 
 {% note info %}
 For a more thorough explanation of Cypress's Web Security model, {% url 'please read our dedicated guide to it' web-security %}.
@@ -386,7 +426,7 @@ If you find yourself stuck and can't work around these issues you can just set t
 
 # Browser Errors
 
-**{% fa fa-exclamation-triangle red %} The Chromium Renderer process just crashed**
+## {% fa fa-exclamation-triangle red %} The Chromium Renderer process just crashed
 
 Browsers are enormously complex pieces of software, and from time to time they will inconsistently crash *for no good reason*. Crashes are just a part of running automated tests.
 

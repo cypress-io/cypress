@@ -1,5 +1,5 @@
 ---
-layout: faq
+layout: toc-top
 title: Dashboard
 comments: false
 containerClass: faq
@@ -7,7 +7,7 @@ containerClass: faq
 
 ## {% fa fa-angle-right %} What is the Dashboard?
 
-![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
+![Dashboard Screenshot](/img/dashboard/dashboard-runs-list.png)
 
 The {% url 'Dashboard' https://on.cypress.io/dashboard %} is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your {% url "CI provider" continuous-integration %}. The Dashboard provides you insight into what happened during your tests run.
 
@@ -79,7 +79,6 @@ We have already begun the implementation for capturing even more things from you
 These will be added in subsequent releases.
 
 <!-- ## How many recordings can I store? -->
-
 
 <!-- ## Can't I just record my app running, without the Cypress runner? -->
 

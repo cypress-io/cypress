@@ -19,7 +19,7 @@ const removeMsgById = (id) => {
 }
 
 const createIpc = () => {
-  console.warn("Missing 'ipc'. Polyfilling in development mode.") // eslint-disable-line no-console
+  console.warn('Missing "ipc". Polyfilling in development mode.') // eslint-disable-line no-console
   return {
     on () {},
     send () {},
@@ -28,7 +28,7 @@ const createIpc = () => {
 
 const ipc = window.ipc != null ? window.ipc : (window.ipc = createIpc())
 
-ipc.on("response", (event, obj = {}) => {
+ipc.on('response', (event, obj = {}) => {
   const { id, __error, data } = obj
   const msg = msgs[id]
 
@@ -89,7 +89,7 @@ const ipcBus = (...args) => {
   }
 
   // pass in request, id, and remaining args
-  ipc.send(...["request", id].concat(args))
+  ipc.send(...['request', id].concat(args))
 
   return fn()
 }
