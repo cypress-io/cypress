@@ -114,13 +114,22 @@ npmInstallAll = (pathToPackages) ->
     console.log("Finished NPM Installing", new Date() - started)
 
 symlinkAll = (pathToDistPackages, pathTo) ->
+  console.log("symlink these packages", pathToDistPackages)
+  baseDir = path.dirname(pathTo())
+  toBase = path.relative.bind(null, baseDir)
+
   symlink = (pkg) ->
     # console.log(pkg, dist)
     ## strip off the initial './'
     ## ./packages/foo -> node_modules/@packages/foo
     dest = pathTo("node_modules", "@packages", path.basename(pkg))
 
+    console.log(toBase(pkg), "link ->", toBase(dest))
     fs.ensureSymlinkAsync(pkg, dest)
+    .catch((err) ->
+      if not err.message.includes "EEXIST"
+        throw err
+    )
 
   glob(pathToDistPackages)
   .map(symlink)

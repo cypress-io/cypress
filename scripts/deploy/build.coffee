@@ -103,12 +103,18 @@ module.exports = (platform, version) ->
   symlinkBuildPackages = ->
     log("#symlinkBuildPackages", platform)
 
-    packages.symlinkAll(buildAppDir)
+    packages.symlinkAll(
+      buildAppDir("packages", "*", "package.json"),
+      buildAppDir
+    )
 
   symlinkDistPackages = ->
     log("#symlinkDistPackages", platform)
 
-    packages.symlinkAll(distDir)
+    packages.symlinkAll(
+      distDir("packages", "*", "package.json"),
+      distDir
+    )
 
   cleanJs = ->
     log("#cleanJs", platform)
@@ -149,22 +155,22 @@ module.exports = (platform, version) ->
 
   Promise
   .bind(@)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(symlinkPackages)
-  .then(convertCoffeeToJs)
-  .then(removeTypeScript)
-  .then(cleanJs)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
+  # .then(copyPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(symlinkPackages)
+  # .then(convertCoffeeToJs)
+  # .then(removeTypeScript)
+  # .then(cleanJs)
   .then(symlinkDistPackages)
   # .then(@obfuscate)
   # .then(@cleanupSrc)
   # .then(@npmInstall)
   # .then(@npmInstall)
   # .then(@elBuilder)
-  .then(elBuilder)
+  # .then(elBuilder)
   .then(symlinkBuildPackages)
   # .then(@runSmokeTest)
   # .then(@runProjectTest)
