@@ -8,6 +8,7 @@ gulpDebug = require("gulp-debug")
 gulpCoffee = require("gulp-coffee")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
+electron = require("@packages/electron")
 packages = require("./util/packages")
 
 fs = Promise.promisifyAll(fs)
@@ -16,8 +17,22 @@ log = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
 module.exports = (platform, version) ->
+  ## returns a path into the /dist directory
   distDir = (args...) ->
     path.resolve("dist", platform, args...)
+
+  ## returns a path into the /build directory
+  buildDir = (args...) ->
+    path.resolve("build", platform, args...)
+
+  ## returns a path into the /build/*/app directory
+  ## specific to each platform
+  buildAppDir = (args...) ->
+    switch platform
+      when "darwin"
+        buildDir("Cypress.app", "Contents", "resources", "app", args...)
+      when "linux"
+        buildDir("Cypress", "resources", "app", args...)
 
   cleanupPlatform = ->
     log("#cleanupPlatform", platform)
@@ -59,8 +74,13 @@ module.exports = (platform, version) ->
 
       fs.outputFileAsync(distDir("index.js"), str)
 
-  symlinkPackages = ->
-    log("#symlinkPackages", platform)
+  symlinkBuildPackages = ->
+    log("#symlinkBuildPackages", platform)
+
+    packages.symlinkAll(buildAppDir)
+
+  symlinkDistPackages = ->
+    log("#symlinkDistPackages", platform)
 
     packages.symlinkAll(distDir)
 
@@ -86,6 +106,17 @@ module.exports = (platform, version) ->
       .on("end", resolve)
       .on("error", reject)
 
+
+  elBuilder = ->
+    log("#elBuilder", platform)
+
+    electron.install({
+      dir: distDir()
+      dist: buildDir()
+      platform: platform
+      "app-version": version
+    })
+
   Promise
   .bind(@)
   .then(cleanupPlatform)
@@ -93,13 +124,14 @@ module.exports = (platform, version) ->
   .then(copyPackages)
   .then(npmInstallPackages)
   .then(createRootPackage)
-  .then(symlinkPackages)
+  .then(symlinkDistPackages)
   .then(convertCoffeeToJs)
   # .then(@obfuscate)
   # .then(@cleanupSrc)
   # .then(@npmInstall)
   # .then(@npmInstall)
-  # .then(@elBuilder)
+  .then(elBuilder)
+  .then(symlinkBuildPackages)
   # .then(@runSmokeTest)
   # .then(@runProjectTest)
   # .then(@runFailingProjectTest)

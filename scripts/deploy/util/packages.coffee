@@ -123,15 +123,14 @@ npmInstallAll = (pathToPackages) ->
   .then ->
     console.log("Finished NPM Installing", new Date() - started)
 
-symlinkAll = (distDir) ->
-  pathToPackages = path.join('node_modules', '@')
-  pathToDistPackages = distDir("packages", "*")
+symlinkAll = (pathTo) ->
+  pathToDistPackages = pathTo("packages", "*")
 
   symlink = (pkg) ->
     # console.log(pkg, dist)
     ## strip off the initial './'
     ## ./packages/foo -> node_modules/@packages/foo
-    dest = path.join(distDir(), "node_modules", "@packages", path.basename(pkg))
+    dest = path.join(pathTo(), "node_modules", "@packages", path.basename(pkg))
 
     fs.ensureSymlinkAsync(pkg, dest)
 
