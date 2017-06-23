@@ -14,6 +14,34 @@ function beepAndLog (err) {
   console.error(chalk.red(err.stack))
 }
 
+function renderUrl (href, text) {
+  const sidebar = this.site.data.sidebar
+
+  // onRender callback to generate
+  // the markdown for each internal document
+  const onRender = (text) => {
+    return hexo.render.render({ text, engine: 'markdown' })
+  }
+
+  return urlGenerator.validateAndGetUrl(sidebar, href, this.full_source, text, onRender)
+  .catch(beepAndLog)
+}
+
+function helperIconUrl (href) {
+  const icon = '<i class="fa fa-question-circle"></i>'
+
+  const attrs = {
+    href,
+  }
+
+  return renderUrl.call(this, attrs.href, icon)
+  .then((href) => {
+    attrs.href = href
+
+    return util.htmlTag('a', attrs, icon)
+  })
+}
+
 hexo.extend.tag.register('note', function (args, content) {
   // {% note info Want to see Cypress in action? %}
   // Explore talks, blogs, and podcasts about testing in Cypress.
@@ -94,6 +122,24 @@ hexo.extend.tag.register('issue', function (args) {
   return util.htmlTag('a', attrs, text)
 })
 
+hexo.extend.tag.register('default_assertion', function () {
+  // {% default_assertion %}
+
+  return helperIconUrl.call(this, 'introduction-to-cypress#Default-Assertions')
+}, { async: true })
+
+hexo.extend.tag.register('timeout', function () {
+  // {% timeout %}
+
+  return helperIconUrl.call(this, 'introduction-to-cypress#Timeouts')
+}, { async: true })
+
+hexo.extend.tag.register('yields', function () {
+  // {% yields %}
+
+  return helperIconUrl.call(this, 'introduction-to-cypress#Subject-Management')
+}, { async: true })
+
 hexo.extend.tag.register('urlHash', function (args) {
   // {% urlHash 'Standard Output' Standard-Output %}
 
@@ -131,8 +177,6 @@ hexo.extend.tag.register('url', function (args) {
   // <a href="/guides/getting-started/why-cypress.html#Benefits">Benefits</a>
   // <a href="http://foo.com">http://foo.com</a>
 
-  const sidebar = this.site.data.sidebar
-
   const props = {
     text: args[0],
     url: args[1] || args[0],
@@ -155,20 +199,12 @@ hexo.extend.tag.register('url', function (args) {
       attrs.target = '_blank'
     }
 
-    // onRender callback to generate
-    // the markdown for each internal document
-    const onRender = (text) => {
-      return hexo.render.render({ text, engine: 'markdown' })
-    }
-
-    return urlGenerator.validateAndGetUrl(sidebar, attrs.href, this.full_source, props.text, onRender)
+    return renderUrl.call(this, attrs.href, props.text)
     .then((href) => {
       attrs.href = href
 
       return util.htmlTag('a', attrs, markdown)
     })
-    .catch(beepAndLog)
-
   })
 
 }, { async: true })
