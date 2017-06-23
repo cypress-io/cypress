@@ -308,7 +308,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "open")
         @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("open:finder", "path")
         .then =>
@@ -360,30 +360,30 @@ describe "lib/gui/events", ->
 
     describe "add:project", ->
       it "adds project + returns result", ->
-        @sandbox.stub(Project, "add").withArgs("path/to/project").resolves("result")
+        @sandbox.stub(Project, "add").withArgs("/_test-output/path/to/project").resolves("result")
 
-        @handleEvent("add:project", "path/to/project").then =>
+        @handleEvent("add:project", "/_test-output/path/to/project").then =>
           @expectSendCalledWith("result")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Project, "add").withArgs("path/to/project").rejects(err)
+        @sandbox.stub(Project, "add").withArgs("/_test-output/path/to/project").rejects(err)
 
-        @handleEvent("add:project", "path/to/project").then =>
+        @handleEvent("add:project", "/_test-output/path/to/project").then =>
           @expectSendErrCalledWith(err)
 
     describe "remove:project", ->
       it "remove project + returns arg", ->
-        @sandbox.stub(cache, "removeProject").withArgs("path/to/project").resolves()
+        @sandbox.stub(cache, "removeProject").withArgs("/_test-output/path/to/project").resolves()
 
-        @handleEvent("remove:project", "path/to/project").then =>
-          @expectSendCalledWith("path/to/project")
+        @handleEvent("remove:project", "/_test-output/path/to/project").then =>
+          @expectSendCalledWith("/_test-output/path/to/project")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(cache, "removeProject").withArgs("path/to/project").rejects(err)
+        @sandbox.stub(cache, "removeProject").withArgs("/_test-output/path/to/project").rejects(err)
 
-        @handleEvent("remove:project", "path/to/project").then =>
+        @handleEvent("remove:project", "/_test-output/path/to/project").then =>
           @expectSendErrCalledWith(err)
 
     describe "open:project", ->
@@ -401,7 +401,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "open")
         @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @expectSendCalledWith({some: "config"})
 
@@ -409,7 +409,7 @@ describe "lib/gui/events", ->
         err = new Error("foo")
         @sandbox.stub(Project.prototype, "open").rejects(err)
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @expectSendErrCalledWith(err)
 
@@ -431,7 +431,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "getConfig").resolves({})
         @sandbox.stub(Project.prototype, "open").withArgs({sync: true}).resolves()
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           ## it should store the opened project
           expect(openProject.getProject()).not.to.be.null

@@ -76,7 +76,7 @@ module.exports = {
     _.defaults options, { autoOpen: true }
 
     if not options.project
-      throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project path/to/project'\n\n")
+      throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project /path/to/project'\n\n")
 
     if options.debug
       args.debug = "--debug"

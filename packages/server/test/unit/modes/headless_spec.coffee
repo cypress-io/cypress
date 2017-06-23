@@ -13,7 +13,7 @@ openProject = require("#{root}../lib/open_project")
 
 describe "lib/modes/headless", ->
   beforeEach ->
-    @projectInstance = Project("path/to/project")
+    @projectInstance = Project("/_test-output/path/to/project")
 
   context ".getId", ->
     it "returns random.generate string", ->
@@ -35,21 +35,21 @@ describe "lib/modes/headless", ->
       @sandbox.stub(Project, "exists").resolves(true)
       @sandbox.spy(Project, "add")
 
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
+      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
       .then ->
         expect(Project.add).not.to.be.called
-        expect(openProject.create).to.be.calledWith("path/to/project")
+        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
 
     it "prompts to add the project if it doesnt exist at projectPath", ->
       @sandbox.stub(Project, "exists").resolves(false)
       @sandbox.spy(Project, "add")
       @sandbox.spy(console, "log")
 
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
+      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
       .then ->
-        expect(console.log).to.be.calledWithMatch("Added this project:", "path/to/project")
-        expect(Project.add).to.be.calledWith("path/to/project")
-        expect(openProject.create).to.be.calledWith("path/to/project")
+        expect(console.log).to.be.calledWithMatch("Added this project:", "/_test-output/path/to/project")
+        expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
+        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
 
   context ".openProject", ->
     it "calls openProject.create with projectPath + options", ->
@@ -58,14 +58,14 @@ describe "lib/modes/headless", ->
       options = {
         port: 8080
         environmentVariables: {foo: "bar"}
-        projectPath: "path/to/project/foo"
+        projectPath: "/_test-output/path/to/project/foo"
       }
 
       headless.openProject(1234, options)
       .then ->
-        expect(openProject.create).to.be.calledWithMatch("path/to/project/foo", {
+        expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
           port: 8080
-          projectPath: "path/to/project/foo"
+          projectPath: "/_test-output/path/to/project/foo"
           environmentVariables: {foo: "bar"}
         }, {
           morgan: false

@@ -183,7 +183,7 @@ describe "lib/project", ->
 
   context "#close", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
 
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
@@ -217,7 +217,7 @@ describe "lib/project", ->
 
   context "#scaffold", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @sandbox.stub(scaffold, "integration").resolves()
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
@@ -238,7 +238,7 @@ describe "lib/project", ->
 
   context "#watchSettings", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
       @watch = @sandbox.stub(@project.watchers, "watch")
 
@@ -280,7 +280,7 @@ describe "lib/project", ->
 
   context "#watchSupportFile", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
       @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
       @config = {
@@ -312,7 +312,7 @@ describe "lib/project", ->
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @project.watchers = {}
       @project.server = @sandbox.stub({startWebsockets: ->})
       @sandbox.stub(@project, "watchSettings")
@@ -339,7 +339,7 @@ describe "lib/project", ->
       delete process.env.CYPRESS_PROJECT_ID
 
     beforeEach ->
-      @project         = Project("path/to/project")
+      @project         = Project("/_test-output/path/to/project")
       @verifyExistence = @sandbox.stub(Project.prototype, "verifyExistence").resolves()
 
     it "resolves with process.env.CYPRESS_PROJECT_ID if set", ->
@@ -370,7 +370,7 @@ describe "lib/project", ->
         throw new Error("expected to fail, but did not")
       .catch (err) ->
         expect(err.type).to.eq("NO_PROJECT_ID")
-        expect(err.message).to.include("path/to/project")
+        expect(err.message).to.include("/_test-output/path/to/project")
 
     it "bubbles up Settings.read errors", ->
       err = new Error()
@@ -386,7 +386,7 @@ describe "lib/project", ->
 
   context "#writeProjectId", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
 
       @sandbox.stub(settings, "write")
         .withArgs(@project.projectRoot, {projectId: "id-123"})
@@ -490,7 +490,7 @@ describe "lib/project", ->
 
   context "#createCiProject", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @newProject = { id: "project-id-123" }
 
       @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
@@ -547,8 +547,8 @@ describe "lib/project", ->
       @sandbox.stub(cache, "removeProject").resolves()
 
     it "calls cache.removeProject with path", ->
-      Project.remove("path/to/project").then ->
-        expect(cache.removeProject).to.be.calledWith("path/to/project")
+      Project.remove("/_test-output/path/to/project").then ->
+        expect(cache.removeProject).to.be.calledWith("/_test-output/path/to/project")
 
   context ".exists", ->
     beforeEach ->
@@ -645,11 +645,11 @@ describe "lib/project", ->
         { id: "id-123", lastBuildStatus: "passing" }
       ])
 
-      Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+      Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses[0]).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           lastBuildStatus: "passing"
           state: "VALID"
         })
@@ -657,10 +657,10 @@ describe "lib/project", ->
     it "returns client project when it has no id", ->
       @sandbox.stub(api, "getProjects").resolves([])
 
-      Project.getProjectStatuses([{ path: "/path/to/project" }])
+      Project.getProjectStatuses([{ path: "/_test-output/path/to/project" }])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses[0]).to.eql({
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           state: "VALID"
         })
 
@@ -671,33 +671,33 @@ describe "lib/project", ->
       it "marks project as invalid if api 404s", ->
         @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
           expect(projectsWithStatuses[0]).to.eql({
             id: "id-123"
-            path: "/path/to/project"
+            path: "/_test-output/path/to/project"
             state: "INVALID"
           })
 
       it "marks project as unauthorized if api 403s", ->
         @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
           expect(projectsWithStatuses[0]).to.eql({
             id: "id-123"
-            path: "/path/to/project"
+            path: "/_test-output/path/to/project"
             state: "UNAUTHORIZED"
           })
 
       it "merges in project details and marks valid if somehow project exists and is authorized", ->
         @sandbox.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
           expect(projectsWithStatuses[0]).to.eql({
             id: "id-123"
-            path: "/path/to/project"
+            path: "/_test-output/path/to/project"
             lastBuildStatus: "passing"
             state: "VALID"
           })
@@ -706,7 +706,7 @@ describe "lib/project", ->
         error = {name: "", message: ""}
         @sandbox.stub(api, "getProject").rejects(error)
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then =>
           throw new Error("Should throw error")
         .catch (err) ->
@@ -716,7 +716,7 @@ describe "lib/project", ->
     beforeEach ->
       @clientProject = {
         id: "id-123",
-        path: "/path/to/project"
+        path: "/_test-output/path/to/project"
       }
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
@@ -736,7 +736,7 @@ describe "lib/project", ->
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           lastBuildStatus: "passing"
           state: "VALID"
         })
@@ -748,7 +748,7 @@ describe "lib/project", ->
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           state: "INVALID"
         })
 
@@ -759,7 +759,7 @@ describe "lib/project", ->
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           state: "UNAUTHORIZED"
         })
 

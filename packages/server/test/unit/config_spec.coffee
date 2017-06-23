@@ -17,7 +17,7 @@ describe "lib/config", ->
 
   context ".get", ->
     beforeEach ->
-      @projectPath = "path/to/project"
+      @projectPath = "/_test-output/path/to/project"
       @setup = (cypressJson = {}, cypressEnvJson = {}) =>
         @sandbox.stub(settings, "read").withArgs(@projectPath).resolves(cypressJson)
         @sandbox.stub(settings, "readEnv").withArgs(@projectPath).resolves(cypressEnvJson)
@@ -782,13 +782,13 @@ describe "lib/config", ->
   context ".setScaffoldPaths", ->
     it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
       obj = {
-        integrationFolder: "/path/to/project/cypress/integration"
+        integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
       @sandbox.stub(scaffold, "fileTree").returns([])
 
       expect(config.setScaffoldPaths(obj)).to.deep.eq({
-        integrationFolder: "/path/to/project/cypress/integration"
-        integrationExampleFile: "/path/to/project/cypress/integration/example_spec.js"
+        integrationFolder: "/_test-output/path/to/project/cypress/integration"
+        integrationExampleFile: "/_test-output/path/to/project/cypress/integration/example_spec.js"
         integrationExampleName: "example_spec.js"
         scaffoldedFiles: []
       })
@@ -796,7 +796,7 @@ describe "lib/config", ->
   context ".setSupportFileAndFolder", ->
     it "does nothing if supportFile is false", ->
       obj = {
-        projectRoot: "/path/to/project"
+        projectRoot: "/_test-output/path/to/project"
       }
 
       expect(config.setSupportFileAndFolder(obj)).to.eql(obj)
@@ -842,27 +842,27 @@ describe "lib/config", ->
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->
       obj = {
-        projectRoot:       "/path/to/project"
-        integrationFolder: "/path/to/project/cypress/integration"
+        projectRoot:       "/_test-output/path/to/project"
+        integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
 
       expect(config.setParentTestsPaths(obj)).to.deep.eq({
-        projectRoot:       "/path/to/project"
-        integrationFolder: "/path/to/project/cypress/integration"
-        parentTestsFolder: "/path/to/project/cypress"
+        projectRoot:       "/_test-output/path/to/project"
+        integrationFolder: "/_test-output/path/to/project/cypress/integration"
+        parentTestsFolder: "/_test-output/path/to/project/cypress"
         parentTestsFolderDisplay: "project/cypress"
       })
 
     it "sets parentTestsFolderDisplay to parentTestsFolder if they are the same", ->
       obj = {
-        projectRoot:       "/path/to/project"
-        integrationFolder: "/path/to/project/tests"
+        projectRoot:       "/_test-output/path/to/project"
+        integrationFolder: "/_test-output/path/to/project/tests"
       }
 
       expect(config.setParentTestsPaths(obj)).to.deep.eq({
-        projectRoot:       "/path/to/project"
-        integrationFolder: "/path/to/project/tests"
-        parentTestsFolder: "/path/to/project"
+        projectRoot:       "/_test-output/path/to/project"
+        integrationFolder: "/_test-output/path/to/project/tests"
+        parentTestsFolder: "/_test-output/path/to/project"
         parentTestsFolderDisplay: "project"
       })
 
@@ -872,13 +872,13 @@ describe "lib/config", ->
 
     # it "resolves fileServerFolder with projectRoot", ->
     #   obj = {
-    #     projectRoot: "/path/to/project"
+    #     projectRoot: "/_test-output/path/to/project"
     #     fileServerFolder: "foo"
     #   }
 
     #   expect(config.setAbsolutePaths(obj)).to.deep.eq({
-    #     projectRoot: "/path/to/project"
-    #     fileServerFolder: "/path/to/project/foo"
+    #     projectRoot: "/_test-output/path/to/project"
+    #     fileServerFolder: "/_test-output/path/to/project/foo"
     #   })
 
     it "does not mutate existing obj", ->
@@ -887,7 +887,7 @@ describe "lib/config", ->
 
     it "ignores non special *folder properties", ->
       obj = {
-        projectRoot: "/path/to/project"
+        projectRoot: "/_test-output/path/to/project"
         blehFolder: "some/rando/path"
         foo: "bar"
         baz: "quux"
@@ -899,13 +899,13 @@ describe "lib/config", ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {
-          projectRoot: "/path/to/project"
+          projectRoot: "/_test-output/path/to/project"
         }
         obj[folder] = "foo/bar"
 
         expected = {
-          projectRoot: "/path/to/project"
+          projectRoot: "/_test-output/path/to/project"
         }
-        expected[folder] = "/path/to/project/foo/bar"
+        expected[folder] = "/_test-output/path/to/project/foo/bar"
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)

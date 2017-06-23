@@ -69,7 +69,7 @@ describe "lib/modes/record", ->
     it "calls api.createRun with args", ->
       api.createRun.resolves()
 
-      record.generateProjectBuildId("id-123", "path/to/project", "project", "key-123").then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
         expect(api.createRun).to.be.calledWith({
           projectId: "id-123"
           recordKey: "key-123"
@@ -334,19 +334,19 @@ describe "lib/modes/record", ->
       @sandbox.spy(Project, "add")
 
     it "ensures id", ->
-      record.run({projectPath: "path/to/project"})
+      record.run({projectPath: "/_test-output/path/to/project"})
       .then ->
-        expect(Project.id).to.be.calledWith("path/to/project")
+        expect(Project.id).to.be.calledWith("/_test-output/path/to/project")
 
     it "adds project with projectPath", ->
-      record.run({projectPath: "path/to/project"})
+      record.run({projectPath: "/_test-output/path/to/project"})
       .then ->
-        expect(Project.add).to.be.calledWith("path/to/project")
+        expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
 
     it "passes id + projectPath + options.key to generateProjectBuildId", ->
-      record.run({projectPath: "path/to/project", key: "key-foo"})
+      record.run({projectPath: "/_test-output/path/to/project", key: "key-foo"})
       .then ->
-        expect(record.generateProjectBuildId).to.be.calledWith("id-123", "path/to/project", "projectName", "key-foo")
+        expect(record.generateProjectBuildId).to.be.calledWith("id-123", "/_test-output/path/to/project", "projectName", "key-foo")
 
     it "passes buildId + options.spec to createInstance", ->
       record.run({spec: "foo/bar/spec"})
