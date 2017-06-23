@@ -7,10 +7,11 @@ Promise = require("bluebird")
 gulpDebug = require("gulp-debug")
 gulpCoffee = require("gulp-coffee")
 gulpTypeScript = require("gulp-typescript")
+pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
+electron = require("@packages/electron")
 packages = require("./util/packages")
-pluralize = require("pluralize")
 
 fs = Promise.promisifyAll(fs)
 
@@ -18,8 +19,22 @@ log = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
 module.exports = (platform, version) ->
+  ## returns a path into the /dist directory
   distDir = (args...) ->
     path.resolve("dist", platform, args...)
+
+  ## returns a path into the /build directory
+  buildDir = (args...) ->
+    path.resolve("build", platform, args...)
+
+  ## returns a path into the /build/*/app directory
+  ## specific to each platform
+  buildAppDir = (args...) ->
+    switch platform
+      when "darwin"
+        buildDir("Cypress.app", "Contents", "resources", "app", args...)
+      when "linux"
+        buildDir("Cypress", "resources", "app", args...)
 
   cleanupPlatform = ->
     log("#cleanupPlatform", platform)
@@ -38,9 +53,8 @@ module.exports = (platform, version) ->
 
   copyPackages = ->
     log("#copyPackages", platform)
-    destination = distDir()
 
-    packages.copyAllToDist(destination)
+    packages.copyAllToDist(distDir())
 
   npmInstallPackages = ->
     log("#npmInstallPackages", platform)
@@ -78,11 +92,28 @@ module.exports = (platform, version) ->
       ## except those in node_modules
       "!" + distDir("**", "node_modules", "**", "*.ts")
     ])
-    .then((paths) ->
-      console.log("deleted %d TS %s",
-        paths.length, pluralize("file", paths.length))
+    .then (paths) ->
+      console.log(
+        "deleted %d TS %s",
+        paths.length,
+        pluralize("file", paths.length)
+      )
       console.log(paths)
-    )
+
+  symlinkBuildPackages = ->
+    log("#symlinkBuildPackages", platform)
+
+    packages.symlinkAll(buildAppDir)
+
+  symlinkDistPackages = ->
+    log("#symlinkDistPackages", platform)
+
+    packages.symlinkAll(distDir)
+
+  cleanJs = ->
+    log("#cleanJs", platform)
+
+    packages.runAllCleanJs()
 
   convertCoffeeToJs = ->
     log("#convertCoffeeToJs", platform)
@@ -106,7 +137,16 @@ module.exports = (platform, version) ->
       .on("end", resolve)
       .on("error", reject)
 
-  log("#distDir", "building into folder #{distDir()}")
+  elBuilder = ->
+    log("#elBuilder", platform)
+
+    electron.install({
+      dir: distDir()
+      dist: buildDir()
+      platform: platform
+      "app-version": version
+    })
+
   Promise
   .bind(@)
   .then(cleanupPlatform)
@@ -117,12 +157,15 @@ module.exports = (platform, version) ->
   .then(symlinkPackages)
   .then(convertCoffeeToJs)
   .then(removeTypeScript)
-  .then(packages.runAllCleanJs)
+  .then(cleanJs)
+  .then(symlinkDistPackages)
   # .then(@obfuscate)
   # .then(@cleanupSrc)
   # .then(@npmInstall)
   # .then(@npmInstall)
   # .then(@elBuilder)
+  .then(elBuilder)
+  .then(symlinkBuildPackages)
   # .then(@runSmokeTest)
   # .then(@runProjectTest)
   # .then(@runFailingProjectTest)
@@ -130,4 +173,3 @@ module.exports = (platform, version) ->
   # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(@verifyAppCanOpen)
   .return(@)
-
