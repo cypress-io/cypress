@@ -6,9 +6,11 @@ chalk = require("chalk")
 Promise = require("bluebird")
 gulpDebug = require("gulp-debug")
 gulpCoffee = require("gulp-coffee")
+gulpTypeScript = require("gulp-typescript")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
 packages = require("./util/packages")
+pluralize = require("pluralize")
 
 fs = Promise.promisifyAll(fs)
 
@@ -32,11 +34,13 @@ module.exports = (platform, version) ->
     log("#buildPackages", platform)
 
     packages.runAllBuild()
+    .then(packages.runAllBuildJs)
 
   copyPackages = ->
     log("#copyPackages", platform)
+    destination = distDir()
 
-    packages.copyAllToDist(distDir())
+    packages.copyAllToDist(destination)
 
   npmInstallPackages = ->
     log("#npmInstallPackages", platform)
@@ -64,6 +68,22 @@ module.exports = (platform, version) ->
 
     packages.symlinkAll(distDir)
 
+  removeTypeScript = ->
+    ## remove the .ts files in our packages
+    log("#removeTypeScript", platform)
+    del([
+      ## include coffee files of packages
+      distDir("**", "*.ts")
+
+      ## except those in node_modules
+      "!" + distDir("**", "node_modules", "**", "*.ts")
+    ])
+    .then((paths) ->
+      console.log("deleted %d TS %s",
+        paths.length, pluralize("file", paths.length))
+      console.log(paths)
+    )
+
   convertCoffeeToJs = ->
     log("#convertCoffeeToJs", platform)
 
@@ -86,6 +106,7 @@ module.exports = (platform, version) ->
       .on("end", resolve)
       .on("error", reject)
 
+  log("#distDir", "building into folder #{distDir()}")
   Promise
   .bind(@)
   .then(cleanupPlatform)
@@ -95,6 +116,8 @@ module.exports = (platform, version) ->
   .then(createRootPackage)
   .then(symlinkPackages)
   .then(convertCoffeeToJs)
+  .then(removeTypeScript)
+  .then(packages.runAllCleanJs)
   # .then(@obfuscate)
   # .then(@cleanupSrc)
   # .then(@npmInstall)
@@ -106,4 +129,5 @@ module.exports = (platform, version) ->
   # .then(@cleanupCy)
   # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(@verifyAppCanOpen)
-  # .return(@)
+  .return(@)
+

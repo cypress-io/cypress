@@ -1,0 +1,3 @@
+# transpiled JS files
+lib/*.js
+lib/**/*.js

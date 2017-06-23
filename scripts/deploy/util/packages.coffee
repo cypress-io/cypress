@@ -13,22 +13,39 @@ DEFAULT_PATHS = "package.json".split(" ")
 pathToPackageJson = (pkg) ->
   path.join(pkg, "package.json")
 
-runAllBuild = ->
+runAll = (args) ->
   new Promise (resolve, reject) ->
     reject = _.once(reject)
 
-    ## build all the packages except for
-    ## cli and docs
-    cp.spawn("npm", ["run", "all", "build", "--", "--skip-packages", "cli,docs"], { stdio: "inherit" })
+    cp.spawn("npm", args, { stdio: "inherit" })
     .on "error", reject
     .on "exit", (code) ->
       if code is 0
         resolve()
       else
-        reject(new Error("'npm run build' failed with exit code: #{code}"))
+        msg = "npm " + args.join(" ") + " failed with exit code: #{code}"
+        reject(new Error(msg))
 
+# transpile projects in place that need TypeScrpt -> JavaScript conversion
+runAllBuildJs = _.partial(runAll, ["run", "all", "build-js"])
+
+# removes transpiled JS files in the original package folders
+runAllCleanJs = _.partial(runAll, ["run", "all", "clean-js"])
+
+# builds all the packages except for cli and docs
+runAllBuild = _.partial(runAll, ["run", "all", "build", "--", "--skip-packages", "cli,docs"])
 
 copyAllToDist = (distDir) ->
+  collectAllPaths = (json) ->
+      ## grab all the files
+      ## and default included paths
+      ## and convert to relative paths
+      DEFAULT_PATHS
+      .concat(json.files or [])
+      .concat(json.main or [])
+      .map (file) ->
+        path.join(pkg, file)
+
   copyRelativePathToDist = (relative) ->
     dest = path.join(distDir, relative)
 
@@ -68,6 +85,8 @@ copyAllToDist = (distDir) ->
   fs.ensureDirAsync(distDir)
   .then ->
     glob("./packages/*")
+    .filter((name) ->
+      name.includes("launcher"))
     .map(copyPackage, {concurrency: 1})
   .then ->
     console.log("Finished Copying", new Date() - started)
@@ -141,9 +160,13 @@ symlinkAll = (distDir) ->
 module.exports = {
   runAllBuild
 
+  runAllBuildJs
+
   copyAllToDist
 
   npmInstallAll
 
   symlinkAll
+
+  runAllCleanJs
 }

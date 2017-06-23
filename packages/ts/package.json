@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
+  "files": [
+    "tsconfig.json"
+  ],
   "scripts": {
     "test": "node test"
   },
