@@ -14,7 +14,27 @@ function beepAndLog (err) {
   console.error(chalk.red(err.stack))
 }
 
-function renderUrl (href, text) {
+function rawRender (text, options = {}) {
+  const { engine } = options
+
+  // renders using the low level hexo methods
+  // which enables us to nest async tags
+  // in renderable strings
+  return hexo.extend.tag.render(text, this)
+  .then((text) => {
+    if (!engine) {
+      return text
+    }
+
+    return hexo.render.render({
+      text,
+      engine,
+    })
+  })
+  .catch(beepAndLog)
+}
+
+function getUrlProps (href, text) {
   const sidebar = this.site.data.sidebar
 
   // onRender callback to generate
@@ -27,18 +47,14 @@ function renderUrl (href, text) {
   .catch(beepAndLog)
 }
 
-function helperIconUrl (href) {
+function helperIconUrl (url) {
   const icon = '<i class="fa fa-question-circle"></i>'
 
-  const attrs = {
-    href,
-  }
+  url = `{% url -placeholder- ${url} %}`
 
-  return renderUrl.call(this, attrs.href, icon)
-  .then((href) => {
-    attrs.href = href
-
-    return util.htmlTag('a', attrs, icon)
+  return rawRender.call(this, url)
+  .then((markdown) => {
+    return markdown.replace('-placeholder-', icon)
   })
 }
 
@@ -199,7 +215,7 @@ hexo.extend.tag.register('url', function (args) {
       attrs.target = '_blank'
     }
 
-    return renderUrl.call(this, attrs.href, props.text)
+    return getUrlProps.call(this, attrs.href, props.text)
     .then((href) => {
       attrs.href = href
 
