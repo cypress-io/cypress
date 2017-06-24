@@ -26,7 +26,7 @@ function fa (hexo, args) {
 function yields (hexo) {
   // {% yields %}
 
-  return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Timeouts')
+  return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Subject-Management')
 }
 
 function timeout (hexo) {
