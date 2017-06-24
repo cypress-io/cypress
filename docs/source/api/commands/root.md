@@ -5,24 +5,23 @@ comments: false
 
 Get the root element.
 
-
 # Syntax
 
 ```javascript
-.root()
-.root(options)
+cy.root()
+cy.root(options)
 ```
 
 ## Usage
 
-`.root()` should be chained off another cy command.
+`cy.root()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('footer').root()       // Yield root element (document)
+cy.root()   // Yield root element (document)
 cy.get('nav').within(function(nav) {
-  cy.get('a').first().root()  // Yield root element (nav)
+  cy.root()  // Yield root element (nav)
 })
 ```
 
