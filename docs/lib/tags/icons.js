@@ -20,12 +20,12 @@ function helperIcon (hexo, args) {
   const type = args[0]
 
   const urlTo = (u) => {
-    const icon = '<i class="fa fa-question-circle"></i>'
+    const str = `{% url -placeholder- ${u} %}`
 
-    u = `{% url -placeholder- ${u} %}`
-
-    return rawRender.call(this, hexo, u)
+    return rawRender.call(this, hexo, str)
     .then((markdown) => {
+      const icon = '<i class="fa fa-question-circle"></i>'
+
       return markdown.replace('-placeholder-', icon)
     })
   }
