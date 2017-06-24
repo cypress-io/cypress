@@ -23,6 +23,8 @@ Each document attempts to cover the essentials of each method including:
 
 - **Yields:** What is yielded (and in rare cases, returned) from the method.
 
+- **Default:** What default assertions (if any) are automatically applied.
+
 - **Timeout:** If defined, the amount of time the method allows to execute before throwing.
 
 - **Examples:** Real world examples of using the methods.
