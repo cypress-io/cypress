@@ -39,11 +39,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the automation server to process the command.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.screenshot()` yields `null`.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.screenshot()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 

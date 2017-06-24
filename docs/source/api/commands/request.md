@@ -85,7 +85,7 @@ Option | Default | Notes
 
 You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in {% url 'configuration' configuration %}.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.request()` yields the `response` as an object literal containing properties such as:
 
@@ -94,7 +94,7 @@ You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` glob
 - `headers`
 - `duration`.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.request()` will wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or the `timeout` passed in the options object of the command.
 

@@ -51,11 +51,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.eq()` yields the new DOM elements found by the command.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.eq()` will continue to look for the element at the specified index for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

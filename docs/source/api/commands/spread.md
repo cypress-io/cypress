@@ -38,11 +38,11 @@ cy.location().spread()   // Errors, 'location' does not yield an array
 
 Pass a function that expands the array into it's arguments.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 Whatever was passed to the function is what is yielded.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 # Examples
 

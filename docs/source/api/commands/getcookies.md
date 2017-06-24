@@ -33,7 +33,7 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.getCookies()` command to be processed
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.getCookies()` yields an array cookie objects. Each cookie object has the following properties:
 
@@ -45,7 +45,7 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.getCookies()` will continue to look for cookies for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

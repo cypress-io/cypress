@@ -32,11 +32,11 @@ cy.clearLocalStorage()  // clear all local storage
 
 Specify keys to be cleared in local storage.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.clearLocalStorage()` yields the remove local storage object.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.clearLocalStorage()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} to process this command.
 

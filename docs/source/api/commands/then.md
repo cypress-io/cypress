@@ -37,7 +37,7 @@ Option | Default | Notes
 --- | --- | ---
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to yield the then
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.then()` is modeled identically to the way Promises work in JavaScript.  Whatever is returned from the callback function becomes the new subject and will flow into the next command (with the exception of `null` and `undefined`).
 
@@ -45,7 +45,7 @@ When `null` or `undefined` are returned by the callback function, the subject wi
 
 Just like Promises, you can return any compatible "thenable" (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.then()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 

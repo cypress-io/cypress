@@ -47,11 +47,11 @@ Option | Default | Notes
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the elements
 
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.parents()` yields the new DOM element(s) found by the command.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.parents()` will continue to look for the next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

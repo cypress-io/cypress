@@ -38,11 +38,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.url()` yields the current URL as a string.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 # Examples
 

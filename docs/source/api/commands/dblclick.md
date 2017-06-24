@@ -41,11 +41,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.dblclick()` yields the DOM element that was double clicked.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.dblclick()` will wait for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

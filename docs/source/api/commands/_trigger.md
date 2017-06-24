@@ -67,11 +67,11 @@ Option | Default | Notes
 
 You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and they will be attached to the event. Passing in coordinate arguments (`clientX`, `pageX`, etc) will override the position coordinates.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.trigger()` yields the DOM subject chained from the previous command.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.trigger()` will wait until the element is in an 'interactable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

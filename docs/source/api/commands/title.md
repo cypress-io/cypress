@@ -33,11 +33,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.title()` yields the `document` title as a string.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.title()` will continue to retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
 

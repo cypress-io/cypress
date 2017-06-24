@@ -48,11 +48,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.not()` yields the new DOM element(s) without the selector provided in the command's argument.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.not()` will continue to look for the element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

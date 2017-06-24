@@ -38,11 +38,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 # Examples
 

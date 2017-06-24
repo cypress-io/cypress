@@ -39,11 +39,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.focus()` yields the new DOM element that was focused.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.focus()` will continue to try to focus the element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

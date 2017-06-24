@@ -40,11 +40,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to retry the navigation
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.go()` yields the `window` object.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.go()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

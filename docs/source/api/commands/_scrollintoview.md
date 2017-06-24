@@ -44,11 +44,11 @@ Option | Default | Notes
 `offset` | `{top: 0, left: 0}` | Amount to scroll after the element has been scrolled into view
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.scrollIntoView()` yields the DOM element that was scrolled into view.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.scrollIntoView()` will continue to scroll the element into view for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

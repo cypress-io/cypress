@@ -35,11 +35,11 @@ cy.get('input').submit()  // Errors, 'input' does not yield a form
 
 Pass in an options object to change the default behavior of `.submit()`.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.submit()` yields the form that was submitted.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.submit()` will continue to try to submit the form for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

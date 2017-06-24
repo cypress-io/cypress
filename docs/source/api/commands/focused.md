@@ -32,11 +32,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.focused()` yields the DOM element that is currently focused.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.focused()` will continue to look for the focused element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

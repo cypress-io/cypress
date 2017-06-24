@@ -9,7 +9,7 @@ const note = require('../lib/tags/note')
 const usageOptions = require('../lib/tags/usage')
 const { issue, openAnIssue } = require('../lib/tags/issues')
 const { url, urlHash } = require('../lib/tags/url')
-const { fa, yields, timeout, defaultAssertion } = require('../lib/tags/icons')
+const { fa, helperIcon } = require('../lib/tags/icons')
 
 const tags = {
   // partials
@@ -21,9 +21,7 @@ const tags = {
 
   // icons
   fa: fa,
-  yields: yields,
-  timeout: timeout,
-  default_assertion: defaultAssertion,
+  helper_icon: helperIcon,
 
   // usage_options
   usage_options: usageOptions,

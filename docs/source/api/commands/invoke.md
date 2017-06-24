@@ -44,11 +44,11 @@ Name of function to be invoked.
 
 Additional arguments to be given to the function call. There is no limit to the number of arguments.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.invoke()` yields the return value of the invoked property.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 # Examples
 

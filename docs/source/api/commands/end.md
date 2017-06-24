@@ -28,7 +28,7 @@ cy.contains('ul').end()   // Yield 'null' instead of 'ul' element
 cy.end()                  // Does not make sense to chain off 'cy'
 ```
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.end()` yields `null`.
 

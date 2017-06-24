@@ -63,11 +63,11 @@ Option | Default | Notes
 --- | --- | ---
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.fixture` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the server to process the command.
 

@@ -56,11 +56,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.scrollTo()` yields the window or DOM element that was scrolled.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

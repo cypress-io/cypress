@@ -54,11 +54,11 @@ Option | Default | Notes
 --- | --- | ---
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.readFile()` yields the contents of the file.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.readFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to process the command.
 

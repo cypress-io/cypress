@@ -46,11 +46,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.nextAll()` yields the new DOM elements found by the command.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.nextAll()` will continue to look for all next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

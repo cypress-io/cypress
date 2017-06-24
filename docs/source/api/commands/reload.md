@@ -37,11 +37,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to reload the page
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.reload()` yields the `window` object of the newly loaded page.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.reload()` will wait for the load event of the newly loaded page for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

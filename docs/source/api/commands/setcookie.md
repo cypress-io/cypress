@@ -46,7 +46,7 @@ Option | Default | Notes
 `secure` | `false` | Whether the cookie is a secure cookie
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.setCookie()` command to be processed
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.setCookie()` yields a cookie object literal with the following properties:
 
@@ -58,7 +58,7 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.setCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 

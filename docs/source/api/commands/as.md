@@ -40,11 +40,11 @@ cy.as('foo')   // Errors, cannot be chained off 'cy'
 
 The name of the alias to be referenced later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command using a `@` prefix.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.as()` yields the DOM element or route chained from the previous command.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.as()` will retry the chain of commands before the `.as()` command for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
 

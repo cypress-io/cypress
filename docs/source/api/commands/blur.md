@@ -43,11 +43,11 @@ Option | Default | Notes
 `force` | `false` | Forces blur, disables checking if el is focusable or focused
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.blur()` yields the DOM element that was blurred.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.blur()` will continue to look for the focusable element to blur for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

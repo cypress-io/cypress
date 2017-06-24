@@ -32,11 +32,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.window()` yields the `window` object.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.window()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

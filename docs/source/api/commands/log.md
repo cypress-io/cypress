@@ -32,11 +32,11 @@ Message to be printed to Cypress Command Log.
 
 Additional arguments to be printed to the Cypress Command Log. There is no limit to the number of arguments.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.log()` yields `null`.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 # Examples
 

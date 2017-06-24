@@ -23,30 +23,31 @@ function fa (hexo, args) {
   return `<i class="fa ${classNames}"></i>`
 }
 
-function yields (hexo) {
-  // {% yields %}
+function helperIcon (hexo, args) {
+  // {% helper_icon yields %}
+  // {% helper_icon timeout %}
+  // {% helper_icon defaultAssertion %}
 
-  return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Subject-Management')
-}
+  const type = args[0]
 
-function timeout (hexo) {
-  // {% timeout %}
+  switch (type) {
+    case 'yields':
+      return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Subject-Management')
 
-  return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Timeouts')
-}
+    case 'timeout':
+      return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Timeouts')
 
-function defaultAssertion (hexo) {
-  // {% default_assertion %}
+    case 'defaultAssertion':
+      return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Default-Assertions')
 
-  return helperIconUrl.call(this, hexo, 'introduction-to-cypress#Default-Assertions')
+    default:
+      // error when an invalid usage option was provided
+      throw new Error(`{% helper_icon %} tag helper was provided an invalid type: ${type}`)
+  }
 }
 
 module.exports = {
   fa,
 
-  yields,
-
-  timeout,
-
-  defaultAssertion,
+  helperIcon,
 }

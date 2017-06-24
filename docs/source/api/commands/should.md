@@ -57,7 +57,7 @@ A method to be called on the chainer.
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 In most cases, `.should()` yields the previous cy command's yield.
 
@@ -76,7 +76,7 @@ cy
   .should('have.css', 'font-family')   // yields 'sans-serif'
 ```
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.should()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
 

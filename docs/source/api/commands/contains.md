@@ -50,11 +50,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry finding an element containing the content
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.contains()` yields the *first*, *deepest* DOM element containing the text.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `cy.contains()` will try to find the content within the DOM for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

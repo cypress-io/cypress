@@ -63,11 +63,11 @@ Option | Default | Notes
 `multiple` | `false` | Enable serially clicking multiple elements
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the click
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.click()` yields the element that was clicked.
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 `.click()` will wait until the element is in a 'clickable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

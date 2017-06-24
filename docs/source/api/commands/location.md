@@ -38,7 +38,7 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.location()` yields the location object with the following properties:
 
@@ -53,7 +53,7 @@ Option | Default | Notes
 - `search`
 - `toString`
 
-## Timeout {% timeout %}
+## Timeout {% helper_icon timeout %}
 
 # Examples
 
