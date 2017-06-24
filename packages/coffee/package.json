@@ -9,6 +9,5 @@
     "test": "echo 'Nothing to test for the coffee package'"
   },
   "devDependencies": {
-    "coffeelint": "^1.16.0"
   }
 }

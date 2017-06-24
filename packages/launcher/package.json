@@ -13,7 +13,7 @@
     "lint": "npm run format-ts && npm run lint-ts && npm run lint-coffee && npm run lint-js",
     "lint-js": "$(bin-up eslint) --fix *.js",
     "lint-ts": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts",
-    "lint-coffee": "../coffee/node_modules/.bin/coffeelint test/*.coffee test/**/*.coffee",
+    "lint-coffee": "$(bin-up coffeelint) test/*.coffee test/**/*.coffee",
     "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts",
     "build-js": "tsc",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
