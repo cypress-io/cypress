@@ -52,7 +52,8 @@ Pass in an options object to change the default behavior of `cy.readFile()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.readFile %}
 
 ## Yields {% helper_icon yields %}
 

@@ -59,11 +59,10 @@ Pass in an options object to change the default behavior of `.trigger()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `bubbles` | `true` | Whether the event bubbles
 `cancelable` | `true` | Whether the event is cancelable
-`interval` | `16` | Interval which to retry triggering the event
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry triggering the event
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .trigger %}
 
 You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and they will be attached to the event. Passing in coordinate arguments (`clientX`, `pageX`, etc) will override the position coordinates.
 

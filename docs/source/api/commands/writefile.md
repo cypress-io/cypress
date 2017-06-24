@@ -56,7 +56,8 @@ Pass in an options object to change the default behavior of `cy.writeFile()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed.
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.writeFile %}
 
 ## Yields {% helper_icon yields %}
 

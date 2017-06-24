@@ -38,11 +38,11 @@ Pass in an options object to change the default behavior of `.scrollIntoView()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
-`log` | `true` | Whether to display command in Command Log
 `offset` | `{top: 0, left: 0}` | Amount to scroll after the element has been scrolled into view
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .scrollIntoView %}
 
 ## Yields {% helper_icon yields %}
 

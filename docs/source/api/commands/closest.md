@@ -41,8 +41,8 @@ Pass in an options object to change the default behavior of `.closest()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .closest %}
 
 ## Yields {% helper_icon yields %}
 

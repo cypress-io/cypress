@@ -44,10 +44,9 @@ Pass in an options object to change the default behavior of `.clear()`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Force clear, disables error checking prior to clear
-`interval` | `16` | Interval which to retry clear
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the clear
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force clear %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .clear %}
 
 ## Yields {% helper_icon yields %}
 

@@ -51,10 +51,10 @@ Pass in an options object to change the default behavior of `cy.scrollTo()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .scrollTo %}
 
 ## Yields {% helper_icon yields %}
 

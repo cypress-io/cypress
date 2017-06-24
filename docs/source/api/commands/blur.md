@@ -40,8 +40,9 @@ Pass in an options object to change the default behavior of `.blur`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Forces blur, disables checking if el is focusable or focused
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`force` | `false` | Forces the action, disables checking if element is focused
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .blur %}
 
 ## Yields {% helper_icon yields %}
 

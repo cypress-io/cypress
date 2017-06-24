@@ -34,8 +34,8 @@ Whether to reload the current page without using the cache. `true` forces the re
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to reload the page
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.reload %}
 
 ## Yields {% helper_icon yields %}
 

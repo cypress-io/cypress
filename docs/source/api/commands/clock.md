@@ -50,7 +50,7 @@ Pass in an options object to change the default behavior of `cy.clock()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
 
 ## Yields {% helper_icon yields %}
 

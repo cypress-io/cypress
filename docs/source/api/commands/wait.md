@@ -51,10 +51,8 @@ Pass in an options object to change the default behavior of `cy.wait()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `requestTimeout` configuration#Timeouts %}, {% url `responseTimeout` configuration#Timeouts %} | Override the default requestTimeout and responseTimeout (in ms)
-
-You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the {% url 'configuration' configuration %}.
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `requestTimeout` configuration#Timeouts %}, {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.wait %}
 
 ## Yields {% helper_icon yields %}
 

@@ -34,10 +34,10 @@ Pass in an options object to change the default behavior of `cy.exec()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. `{USERNAME: 'johndoe'}`). Will be merged with existing system environment variables
 `failOnNonZeroExit` | `true` | whether to fail if the command exits with a non-zero code
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `execTimeout` configuration#Timeouts %} | Total time to allow the command to execute
+`timeout` | {% url `execTimeout` configuration#Timeouts %} | {% usage_options timeout cy.exec %}
 
 ## Yields {% helper_icon yields %}
 

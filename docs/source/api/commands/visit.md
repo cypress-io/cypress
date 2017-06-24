@@ -34,10 +34,10 @@ Pass in an options object to change the default behavior of `cy.visit()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
-`onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to wait until `cy.visit()` resolves
+`onLoad` | `function` | Called once your page has fired its load event.
+`timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.visit %}
 
 You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in {% url 'configuration' configuration %}.
 

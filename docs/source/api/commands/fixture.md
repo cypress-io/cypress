@@ -61,7 +61,7 @@ Pass in an options object to change the default behavior of `cy.fixture()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.fixture %}
 
 ## Yields {% helper_icon yields %}
 

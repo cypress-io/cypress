@@ -47,8 +47,8 @@ Pass in an options object to change the default behavior of `cy.contains()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry finding an element containing the content
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .contains %}
 
 ## Yields {% helper_icon yields %}
 

@@ -38,13 +38,13 @@ Pass in an options object to change the default behavior of `cy.setCookie()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `domain` | `window.location.hostname` | The domain the cookie is visible to
 `expiry` | 20 years into the future | When the cookie expires, specified in seconds since {% url 'Unix Epoch' https://en.wikipedia.org/wiki/Unix_time %}.
 `httpOnly` | `false` | Whether the cookie is an HTTP only cookie
-`log` | `true` | Whether to display command in Command Log
 `path` | `/` | The cookie path
 `secure` | `false` | Whether the cookie is a secure cookie
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.setCookie()` command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.setCookie %}
 
 ## Yields {% helper_icon yields %}
 

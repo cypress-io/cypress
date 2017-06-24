@@ -65,12 +65,11 @@ Pass in an options object to change the default behavior of `.type()`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `delay` | `10` | Delay after each keypress
-`force` | `false` | Forces type, disables error checking prior to type
-`interval` | `16` | Interval to retry type
-`log` | `true` | Whether to display command in Command Log
+`force` | `false` | {% usage_options force type %}
 `release` | `true` | Keep a modifier activated between commands
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the type
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .type %}
 
 ## Yields {% helper_icon yields %}
 

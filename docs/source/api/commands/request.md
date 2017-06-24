@@ -70,6 +70,9 @@ Pass in an options object to change the default behavior of `cy.request`.
 
 Option | Default | Notes
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
+`url` | `null` | The URL to make the request to
+`method` | `GET` | The HTTP method to use in the request
 `auth` | `null` | Any auth to send; Accepts object literal
 `body` | `null` | Body to send along with the request
 `failOnStatusCode` | `true` | Whether to fail on response codes other than `2xx` and `3xx`
@@ -77,11 +80,8 @@ Option | Default | Notes
 `form` | `false` | Whether to convert the `body` values to url encoded content and set the `x-www-form-urlencoded` header
 `gzip` | `true` | Whether to accept the `gzip` encoding
 `headers` | `null` | Additional headers to send; Accepts object literal
-`log` | `true` | Whether to log the request in the Command Log
-`method` | `GET` | The HTTP method to use in the request
 `qs` | `null` | Query parameters to append to the `url` of the request
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for a response (in ms)
-`url` | `null` | The URL to make the request to
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.request %}
 
 You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in {% url 'configuration' configuration %}.
 

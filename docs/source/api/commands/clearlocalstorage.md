@@ -13,7 +13,9 @@ Cypress automatically runs this command *before* each test to prevent state from
 
 ```javascript
 cy.clearLocalStorage()
-cy.clearLocalStorage(keys)
+cy.clearLocalStorage(key)
+cy.clearLocalStorage(options)
+cy.clearLocalStorage(keys, options)
 ```
 
 ## Usage
@@ -30,7 +32,16 @@ cy.clearLocalStorage()  // clear all local storage
 
 **{% fa fa-angle-right %} keys** ***(String, RegExp)***
 
-Specify keys to be cleared in local storage.
+Specify key to be cleared in local storage.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.clearCookies()`.
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.clearLocalStorage %}
 
 ## Yields {% helper_icon yields %}
 

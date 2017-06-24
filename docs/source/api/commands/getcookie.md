@@ -34,8 +34,8 @@ Pass in an options object to change the default behavior of `cy.getCookie()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.getCookie()` command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.getCookie %}
 
 ## Yields {% helper_icon yields %}
 

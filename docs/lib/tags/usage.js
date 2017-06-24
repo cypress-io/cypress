@@ -8,18 +8,22 @@ module.exports = function usageOptions (hexo, args) {
     /* eslint-disable quotes */
     const url = `{% url 'Command Log' overview-of-the-gui#Command-Log %}`
 
-    return rawRender.call(this, hexo, `Whether to display the command in the ${url}`)
+    return rawRender.call(this, hexo, `Displays the command in the ${url}`)
   }
 
   const force = () => {
     /* eslint-disable quotes */
     const url = `{% url 'waiting for actionability' interacting-with-elements#Bypassing %}`
 
-    return rawRender.call(this, hexo, `Forces the <code>${type}</code>, disables ${url}`)
+    return rawRender.call(this, hexo, `Forces the action, disables  ${url}`)
   }
 
   const timeout = () => {
-    return `Total time to wait until the <code>${type}</code> times out and errors`
+    return `Time to wait for <code>${type}()</code> to resolve before timing out`
+  }
+
+  const multiple = () => {
+    return 'Serially click multiple elements'
   }
 
   switch (opt) {
@@ -27,6 +31,8 @@ module.exports = function usageOptions (hexo, args) {
       return log()
     case 'force':
       return force()
+    case 'multiple':
+      return multiple()
     case 'timeout':
       return timeout()
     default:

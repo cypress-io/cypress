@@ -37,8 +37,8 @@ Pass in an options object to change the default behavior of `cy.go()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to retry the navigation
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.go %}
 
 ## Yields {% helper_icon yields %}
 

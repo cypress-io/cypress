@@ -41,7 +41,7 @@ Pass in an options object to change the default behavior of `.within()`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `false` | Display command in command log
+`log` | `true` | {% usage_options log %}
 
 ## Yields {% helper_icon yields %}
 

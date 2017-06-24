@@ -50,11 +50,13 @@ Pass in an options object to change the default behavior of `.check()`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Forces check, disables error checking prior to check
-`interval` | `16` | Interval which to retry a check
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the check
-## Yields {% yields %}
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force check %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .check %}
+
+## Yields {% helper_icon yields %}
+
+`.check()` yields the same subject from the previous command.
 
 ## Default {% helper_icon defaultAssertion %}
 

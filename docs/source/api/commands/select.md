@@ -47,11 +47,9 @@ Pass in an options object to change the default behavior of `.select()`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Forces select, disables error checking prior to select
-`interval` | `50` | Interval which to retry a select
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the select
-
+`log` | `true` | {% usage_options log %}
+`force` | `false` | `log` | `true` | {% usage_options force select %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .select %}
 
 ## Yields {% helper_icon yields %}
 

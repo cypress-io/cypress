@@ -12,7 +12,8 @@ Similar to {% url `.then()` then %}, but always expects an array as it's subject
 # Syntax
 
 ```javascript
-.spread(fn)
+.spread(callbackFn)
+.spread(options, callbackFn)
 ```
 
 ## Usage
@@ -37,6 +38,14 @@ cy.location().spread()   // Errors, 'location' does not yield an array
 **{% fa fa-angle-right %} fn** ***(Function)***
 
 Pass a function that expands the array into it's arguments.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.spread()`.
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .spread %}
 
 ## Yields {% helper_icon yields %}
 

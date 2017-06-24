@@ -57,11 +57,10 @@ Pass in an options object to change the default behavior of `.click()`.
 
 Option | Default | Notes
 --- | --- | ---
-`force` | `false` | Force click, disables error checking prior to click
-`interval` | `16` | Interval which to retry a click
-`log` | `true` | Whether to display command in Command Log
-`multiple` | `false` | Enable serially clicking multiple elements
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the click
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force click %}
+`multiple` | `false` | {% usage_options multiple click %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .click %}
 
 ## Yields {% helper_icon yields %}
 

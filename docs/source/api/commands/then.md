@@ -35,7 +35,7 @@ Pass in an options object to change the default behavior of `.then()`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to yield the then
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .then %}
 
 ## Yields {% helper_icon yields %}
 
