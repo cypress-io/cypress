@@ -67,7 +67,7 @@ cy
   .should('be.visible')             // yields <nav>
 ```
 
-Although some chainers change what is yielded. In the example below, the second `.should()` yields the String 'sans-serif' because the chainer `have.css, 'font-family'` yields a string.
+However, some chainers change the subject. In the example below, the second `.should()` yields the string `sans-serif` because the chainer `have.css, 'font-family'` changes the subject.
 
 ```javascript
 cy
