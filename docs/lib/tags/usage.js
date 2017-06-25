@@ -15,11 +15,14 @@ module.exports = function usageOptions (hexo, args) {
     /* eslint-disable quotes */
     const url = `{% url 'waiting for actionability' interacting-with-elements#Bypassing %}`
 
-    return rawRender.call(this, hexo, `Forces the action, disables  ${url}`)
+    return rawRender.call(this, hexo, `Forces the action, disables ${url}`)
   }
 
   const timeout = () => {
-    return `Time to wait for <code>${type}()</code> to resolve before timing out`
+    /* eslint-disable quotes */
+    const url = `{% urlHash 'timing out' Timeout %}`
+
+    return rawRender.call(this, hexo, `Time to wait for <code>${type}()</code> to resolve before ${url}`)
   }
 
   const multiple = () => {
