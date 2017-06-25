@@ -282,7 +282,7 @@ Some methods, such as {% url `cy.get()` get %} or {% url `cy.contains()` contain
 
 ***Some commands yield:***
 - `null`, meaning no command can be chained after the command: {% url `.screenshot()` screenshot %}.
-- The same subject they were originally yielded: {% url `.then()` then %}.
+- The same subject they were originally yielded: {% url `.click()` click %}.
 - A new subject, as appropriate for the command {% url `.wait()` wait %}.
 
 This is actually much more intuitive than how it sounds.
