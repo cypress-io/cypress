@@ -45,6 +45,8 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
+{% yields same_subject .within %}
+
 ## Timeouts {% helper_icon timeout %}
 
 # Examples

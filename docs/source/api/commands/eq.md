@@ -53,7 +53,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.eq()` yields the new DOM elements found by the command.
+{% yields changes_dom_subject .eq %}
 
 ## Timeouts {% helper_icon timeout %}
 

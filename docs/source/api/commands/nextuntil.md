@@ -59,7 +59,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.nextUntil()` yields the new DOM element(s) found by the command.
+{% yields changes_dom_subject .nextUntil %}
 
 ## Timeouts {% helper_icon timeout %}
 

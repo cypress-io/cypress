@@ -35,7 +35,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.title()` yields the `document` title as a string.
+{% yields new_subject cy.title 'yields the `document.title` of the current page' %}
 
 ## Timeouts {% helper_icon timeout %}
 

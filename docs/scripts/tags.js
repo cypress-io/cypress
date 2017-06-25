@@ -6,6 +6,7 @@ const Promise = require('bluebird')
 const beepAndLog = require('../lib/beep')
 const partial = require('../lib/tags/partial')
 const note = require('../lib/tags/note')
+const yields = require('../lib/tags/yields')
 const usageOptions = require('../lib/tags/usage')
 const { issue, openAnIssue } = require('../lib/tags/issues')
 const { url, urlHash } = require('../lib/tags/url')
@@ -29,6 +30,9 @@ const tags = {
   // url
   url: url,
   urlHash: urlHash,
+
+  // yields
+  yields: yields,
 }
 
 // tags which require ending

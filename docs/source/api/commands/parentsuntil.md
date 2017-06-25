@@ -58,7 +58,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.parentsUntil()` yields the new DOM element(s) found by the command.
+{% yields changes_dom_subject .parentsUntil %}
 
 ## Timeouts {% helper_icon timeout %}
 

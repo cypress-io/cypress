@@ -48,7 +48,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.children()` yields the new DOM element(s) found by the command.
+{% yields changes_dom_subject .children %}
 
 ## Defaults {% helper_icon defaultAssertion %}
 

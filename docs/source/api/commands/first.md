@@ -42,7 +42,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.first()` yields the new DOM element found by the command.
+{% yields changes_dom_subject .first %}
 
 ## Timeouts {% helper_icon timeout %}
 

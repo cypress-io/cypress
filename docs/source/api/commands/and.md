@@ -3,7 +3,7 @@ title: and
 comments: false
 ---
 
-Create an assertion. Assertions are automatically retried until they pass or time out. Use them to describe the state your app must be in before proceeding.
+Create an assertion. Assertions are automatically retried until they pass or time out.
 
 {% note info %}
 An alias of {% url `.should()` should %}
@@ -29,8 +29,11 @@ An alias of {% url `.should()` should %}
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty').and('be.hidden') // Assert '.error' is empty and hidden
-cy.contains('Login').and('be.visible')               // Assert el is visible
+cy.get('.error').should('be.empty').and('be.hidden')  // Assert '.error' is empty and hidden
+cy.contains('Login').and('be.visible')                // Assert el is visible
+cy.wrap({ foo: 'bar' })
+  .should('have.property', 'foo')                     // Assert the 'foo' property exists
+  .and('eq', 'bar')                                   // Assert the 'foo' property equals 'bar'
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -59,7 +62,7 @@ Pass a function that can have any number of explicit assertions within it. Whate
 
 ## Yields {% helper_icon yields %}
 
-In most cases, `.and()` yields the subject from the previous command.
+{% yields assertion_indeterminate .and %}
 
 ```javascript
 cy
@@ -74,6 +77,7 @@ cy
   .get('nav')                       // yields <nav>
   .should('be.visible')             // yields <nav>
   .and('have.css', 'font-family')   // yields 'sans-serif'
+  .and('match', /serif/)            // yields 'sans-serif'
 ```
 
 ## Defaults {% helper_icon defaultAssertion %}

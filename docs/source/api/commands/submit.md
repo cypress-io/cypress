@@ -42,7 +42,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.submit()` yields the form that was submitted.
+{% yields same_subject .submit %}
 
 ## Timeouts {% helper_icon timeout %}
 

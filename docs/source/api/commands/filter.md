@@ -50,7 +50,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.filter()` yields the new DOM elements found by the command.
+{% yields changes_dom_subject .filter %}
 
 ## Timeouts {% helper_icon timeout %}
 

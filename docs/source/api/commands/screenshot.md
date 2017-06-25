@@ -41,7 +41,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.screenshot()` yields `null`.
+{% yields null cy.screenshot %}
 
 ## Timeouts {% helper_icon timeout %}
 

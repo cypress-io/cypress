@@ -39,7 +39,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.getCookie()` yields a cookie object literal with the following properties:
+`cy.getCookie()` yields a cookie object with the following properties:
 
 - `name`
 - `value`

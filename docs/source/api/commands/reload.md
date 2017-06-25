@@ -39,7 +39,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.reload()` yields the `window` object of the newly loaded page.
+{% yields new_subject cy.reload 'yields the `window` object after the page finishes loading' %}
 
 ## Timeouts {% helper_icon timeout %}
 

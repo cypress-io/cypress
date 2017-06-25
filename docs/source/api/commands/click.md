@@ -64,7 +64,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.click()` yields the element that was clicked.
+{% yields same_subject .click %}
 
 ## Timeouts {% helper_icon timeout %}
 

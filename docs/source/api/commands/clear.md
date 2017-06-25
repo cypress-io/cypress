@@ -50,7 +50,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.clear()` yields the `input` or `textarea` that was cleared.
+{% yields same_subject .clear %}
 
 ## Timeouts {% helper_icon timeout %}
 

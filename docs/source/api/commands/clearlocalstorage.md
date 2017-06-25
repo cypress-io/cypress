@@ -45,7 +45,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.clearLocalStorage()` yields the remove local storage object.
+{% yields null cy.clearLocalStorage %}
 
 ## Timeouts {% helper_icon timeout %}
 

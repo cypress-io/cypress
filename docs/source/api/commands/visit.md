@@ -43,7 +43,7 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 ## Yields {% helper_icon yields %}
 
-`cy.visit()` yields the remote `window` object.
+{% yields new_subject cy.visit 'yields the `window` object after the page finishes loading' %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -70,7 +70,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.viewport()` yields `null`.
+{% yields null cy.viewport %}
 
 ## Timeouts {% helper_icon timeout %}
 

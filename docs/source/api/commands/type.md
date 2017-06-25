@@ -73,7 +73,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.type()` yields the DOM element that was typed into.
+{% yields same_subject .type %}
 
 ## Timeouts {% helper_icon timeout %}
 

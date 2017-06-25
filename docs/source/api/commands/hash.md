@@ -41,7 +41,13 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
+**When the current URL contains a hash:**
+
+{% yields new_subject cy.hash "yields the current URL's hash (including the `#` character)" %}
+
+**When the current URL does not contain a hash:**
+
+{% yields new_subject cy.hash "yields an empty string" %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -35,7 +35,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.focused()` yields the DOM element that is currently focused.
+{% yields new_dom_subject cy.focused %}
 
 ## Timeouts {% helper_icon timeout %}
 

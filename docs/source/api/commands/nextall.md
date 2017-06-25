@@ -48,7 +48,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.nextAll()` yields the new DOM elements found by the command.
+{% yields changes_dom_subject .nextAll %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -56,9 +56,13 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-When given a `time` argument, `cy.wait()` yields the previous commands yield.
+**When given a time argument:**
 
-When given an `alias` argument, `cy.wait()` yields the XHR object of the aliased route.
+{% yields same_subject cy.wait %}
+
+**When given an alias argument:**
+
+{% yields new_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
 
 ## Timeouts {% helper_icon timeout %}
 

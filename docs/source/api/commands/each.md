@@ -42,7 +42,7 @@ Pass a function that is invoked with the following arguments:
 
 ## Yields {% helper_icon yields %}
 
-`.each()` yields the same subject passed to it (the current array).
+{% yields same_subject .each %}
 
 ## Timeouts {% helper_icon timeout %}
 

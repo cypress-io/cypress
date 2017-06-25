@@ -42,7 +42,7 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 
 ## Yields {% helper_icon yields %}
 
-`.as()` yields the subject from the previous command.
+{% yields same_subject .as %}
 
 ## Defaults {% helper_icon defaultAssertion %}
 

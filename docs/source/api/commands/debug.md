@@ -39,7 +39,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.debug()` yields the previous command's yield.
+{% yields same_subject .debug %}
 
 ## Timeouts {% helper_icon timeout %}
 

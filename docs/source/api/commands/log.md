@@ -34,7 +34,7 @@ Additional arguments to be printed to the Cypress Command Log. There is no limit
 
 ## Yields {% helper_icon yields %}
 
-`cy.log()` yields `null`.
+{% yields null cy.log %}
 
 ## Timeouts {% helper_icon timeout %}
 

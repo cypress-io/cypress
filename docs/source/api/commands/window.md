@@ -35,7 +35,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.window()` yields the `window` object of the application you're currently visiting.
+{% yields new_subject cy.window 'yields the `window` object' %}
 
 ## Timeouts {% helper_icon timeout %}
 

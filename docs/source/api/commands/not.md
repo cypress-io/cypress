@@ -50,7 +50,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.not()` yields the new DOM element(s) without the selector provided in the command's argument.
+{% yields changes_dom_subject .not %}
 
 ## Timeouts {% helper_icon timeout %}
 

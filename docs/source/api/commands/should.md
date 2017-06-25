@@ -3,7 +3,7 @@ title: should
 comments: false
 ---
 
-Create an assertion. Assertions are automatically retried until they pass or time out. Use them to describe the state your app must be in before proceeding.
+Create an assertion. Assertions are automatically retried until they pass or time out.
 
 {% note info %}
 An alias of {% url `.and()` and %}
@@ -29,8 +29,10 @@ An alias of {% url `.and()` and %}
 **{% fa fa-check-circle green %} Valid Usage**
 
 ```javascript
-cy.get('.error').should('be.empty')        // Assert that '.error' is empty
-cy.contains('Login').should('be.visible')  // Assert that el is visible
+cy.get('.error').should('be.empty')                    // Assert that '.error' is empty
+cy.contains('Login').should('be.visible')              // Assert that el is visible
+cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar') // Assert the 'foo' property equals 'bar'
+
 ```
 
 **{% fa fa-exclamation-triangle red %} Invalid Usage**
@@ -59,7 +61,7 @@ Pass a function that can have any number of explicit assertions within it. Whate
 
 ## Yields {% helper_icon yields %}
 
-In most cases, `.should()` yields the previous cy command's yield.
+{% yields assertion_indeterminate .should %}
 
 ```javascript
 cy
@@ -71,9 +73,10 @@ However, some chainers change the subject. In the example below, the second `.sh
 
 ```javascript
 cy
-  .get('nav')                          // yields <nav>
-  .should('be.visible')                // yields <nav>
-  .should('have.css', 'font-family')   // yields 'sans-serif'
+  .get('nav')                       // yields <nav>
+  .should('be.visible')             // yields <nav>
+  .and('have.css', 'font-family')   // yields 'sans-serif'
+  .and('match', /serif/)            // yields 'sans-serif'
 ```
 
 ## Timeouts {% helper_icon timeout %}

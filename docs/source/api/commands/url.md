@@ -6,7 +6,7 @@ comments: false
 Get the current URL.
 
 {% note info %}
-This is an alias of {% url `cy.location.href` location %}
+This is an alias of {% url "`cy.location('href')`" location %}
 {% endnote %}
 
 # Syntax
@@ -41,7 +41,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.url()` yields the current URL as a string.
+{% yields new_subject cy.url 'yields the current URL as a string' %}
 
 ## Timeouts {% helper_icon timeout %}
 
@@ -57,13 +57,13 @@ cy.get('#user-edit a').click()
 cy.url().should('eq', 'http://localhost:8000/users/1/edit') // => true
 ```
 
-**Url is a shortcut for `cy.location().href`**
+**Url is a shortcut for `cy.location('href')`**
 
 `cy.url()` uses `href` under the hood.
 
 ```javascript
 cy.url()                  // these yield the same string
-cy.location().its('href') // these yield the same string
+cy.location('href')       // these yield the same string
 ```
 
 **Url versus href**
@@ -71,9 +71,9 @@ cy.location().its('href') // these yield the same string
 Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
 ```javascript
-cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
+cy.location('href').should('eq', 'http://localhost:8000/index.html')
 
-cy.location().invoke('toString').should('eq', 'http://localhost:8000/index.html')
+cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
 
 cy.url().should('eq', 'http://localhost:8000/index.html')
 ```

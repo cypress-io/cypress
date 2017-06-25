@@ -46,7 +46,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.blur()` yields the subject from the previous command for additional chaining.
+{% yields same_subject .blur %}
 
 ## Defaults {% helper_icon defaultAssertion %}
 

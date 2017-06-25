@@ -53,7 +53,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.select()` yields the new DOM elements selected.
+{% yields same_subject .select %}
 
 ## Timeouts {% helper_icon timeout %}
 

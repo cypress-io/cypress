@@ -61,7 +61,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.server()` yields the Cypress server instance.
+{% yields new_subject cy.server 'yields the internal Cypress server instance' %}
 
 ## Timeouts {% helper_icon timeout %}
 

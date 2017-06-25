@@ -46,7 +46,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.find()` yields the new DOM elements found by the command.
+{% yields changes_dom_subject .find %}
 
 ## Timeouts {% helper_icon timeout %}
 

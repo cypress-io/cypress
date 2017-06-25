@@ -39,7 +39,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.clearCookies()` yields `null`.
+{% yields null cy.clearCookies %}
 
 ## Timeouts {% helper_icon timeout %}
 

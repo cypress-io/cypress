@@ -51,7 +51,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.get()` yields the new DOM element(s) found by the command.
+{% yields new_dom_subject cy.get %}
 
 ## Timeouts {% helper_icon timeout %}
 

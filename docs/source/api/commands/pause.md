@@ -39,7 +39,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.pause()` yields the previous command's yield.
+{% yields same_subject .pause %}
 
 ## Timeouts {% helper_icon timeout %}
 

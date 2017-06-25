@@ -69,6 +69,8 @@ You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` a
 
 ## Yields {% helper_icon yields %}
 
+{% yields null cy.route %}
+
 ## Timeouts {% helper_icon timeout %}
 
 # Examples

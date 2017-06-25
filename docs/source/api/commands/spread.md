@@ -49,7 +49,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-Whatever was passed to the function is what is yielded.
+{% yields maybe_changes_subject .spread 'yields the return value of your callback function' %}
 
 ## Timeouts {% helper_icon timeout %}
 

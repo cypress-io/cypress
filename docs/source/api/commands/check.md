@@ -58,7 +58,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.check()` yields the same subject from the previous command.
+{% yields same_subject .check %}
 
 ## Defaults {% helper_icon defaultAssertion %}
 

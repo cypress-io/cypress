@@ -61,7 +61,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.writeFile()` yields the contents written to the file.
+{% yields new_subject cy.writeFile 'yields the contents written to the file' %}
 
 ## Timeouts {% helper_icon timeout %}
 

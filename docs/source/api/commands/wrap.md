@@ -39,7 +39,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.wrap()` yields the object that was passed into the command.
+{% yields new_subject cy.wrap 'yields the object it was called with' %}
 
 ## Timeouts {% helper_icon timeout %}
 

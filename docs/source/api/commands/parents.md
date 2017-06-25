@@ -46,10 +46,9 @@ Option | Default | Description
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parents %}
 
-
 ## Yields {% helper_icon yields %}
 
-`.parents()` yields the new DOM element(s) found by the command.
+{% yields changes_dom_subject .parents %}
 
 ## Timeouts {% helper_icon timeout %}
 

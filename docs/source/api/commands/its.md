@@ -41,7 +41,7 @@ Name of property or nested properties (with dot notation) to get.
 
 ## Yields {% helper_icon yields %}
 
-`.invoke()` yields the value of the property.
+{% yields changes_subject .its 'yields the value of the property' }
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -52,7 +52,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.contains()` yields the *first*, *deepest* DOM element containing the text.
+{% yields changes_dom_subject .contains %}
 
 ## Timeouts {% helper_icon timeout %}
 

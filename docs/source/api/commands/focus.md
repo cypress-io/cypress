@@ -42,7 +42,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.focus()` yields the new DOM element that was focused.
+{% yields same_subject .focus %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -35,7 +35,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.getCookies()` yields an array cookie objects. Each cookie object has the following properties:
+`cy.getCookies()` yields an array of cookie objects. Each cookie object has the following properties:
 
 - `name`
 - `value`

@@ -44,7 +44,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.dblclick()` yields the DOM element that was double clicked.
+{% yields same_subject .dblclick %}
 
 ## Timeouts {% helper_icon timeout %}
 

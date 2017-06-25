@@ -42,7 +42,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.go()` yields the `window` object.
+{% yields new_subject cy.go 'yields the `window` object after the page finishes loading' %}
 
 ## Timeouts {% helper_icon timeout %}
 

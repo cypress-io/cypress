@@ -46,7 +46,7 @@ Additional arguments to be given to the function call. There is no limit to the 
 
 ## Yields {% helper_icon yields %}
 
-`.invoke()` yields the return value of the invoked property.
+{% yields changes_subject .invoke 'yields the return value of the invoked function' }
 
 ## Timeouts {% helper_icon timeout %}
 

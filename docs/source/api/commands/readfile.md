@@ -57,7 +57,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.readFile()` yields the contents of the file.
+{% yields new_subject cy.readFile 'yields the contents of the file' %}
 
 ## Timeouts {% helper_icon timeout %}
 

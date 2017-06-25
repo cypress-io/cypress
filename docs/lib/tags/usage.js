@@ -4,25 +4,29 @@ module.exports = function usageOptions (hexo, args) {
   const opt = args[0]
   const type = args[1]
 
+  const render = (str) => {
+    return rawRender.call(this, hexo, str)
+  }
+
   const log = () => {
     /* eslint-disable quotes */
     const url = `{% url 'Command Log' overview-of-the-gui#Command-Log %}`
 
-    return rawRender.call(this, hexo, `Displays the command in the ${url}`)
+    return render(`Displays the command in the ${url}`)
   }
 
   const force = () => {
     /* eslint-disable quotes */
     const url = `{% url 'waiting for actionability' interacting-with-elements#Bypassing %}`
 
-    return rawRender.call(this, hexo, `Forces the action, disables ${url}`)
+    return render(`Forces the action, disables ${url}`)
   }
 
   const timeout = () => {
     /* eslint-disable quotes */
     const url = `{% urlHash 'timing out' Timeouts %}`
 
-    return rawRender.call(this, hexo, `Time to wait for <code>${type}()</code> to resolve before ${url}`)
+    return render(`Time to wait for <code>${type}()</code> to resolve before ${url}`)
   }
 
   const multiple = () => {

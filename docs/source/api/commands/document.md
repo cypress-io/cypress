@@ -35,7 +35,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.document()` yields the `window.document` object.
+{% yields new_subject cy.document 'yields the `window.document` object' %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -49,7 +49,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.siblings()` yields the new DOM elements found by the command.
+{% yields changes_dom_subject .siblings %}
 
 ## Timeouts {% helper_icon timeout %}
 

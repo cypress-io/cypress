@@ -30,7 +30,7 @@ cy.end()                  // Does not make sense to chain off 'cy'
 
 ## Yields {% helper_icon yields %}
 
-`.end()` yields `null`.
+{% yields null .end %}
 
 ## Timeouts {% helper_icon timeout %}
 
