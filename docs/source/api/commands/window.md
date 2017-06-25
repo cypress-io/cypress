@@ -28,7 +28,7 @@ cy.window()
 
 Pass in an options object to change the default behavior of `cy.window()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.window %}
@@ -37,7 +37,7 @@ Option | Default | Notes
 
 `cy.window()` yields the `window` object.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.window()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

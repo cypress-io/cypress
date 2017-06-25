@@ -32,7 +32,7 @@ The system command to be executed from the project root (the directory that cont
 
 Pass in an options object to change the default behavior of `cy.exec()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. `{USERNAME: 'johndoe'}`). Will be merged with existing system environment variables
@@ -47,7 +47,7 @@ Option | Default | Notes
 - `stdout`
 - `stderr`
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.exec()` will allow the command to execute for the duration of the {% url `execTimeout` configuration#Timeouts %} or the `timeout` passed into the command's options.
 

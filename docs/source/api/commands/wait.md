@@ -49,7 +49,7 @@ An array of aliased routes as defined using the {% url `.as()` as %} command and
 
 Pass in an options object to change the default behavior of `cy.wait()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `requestTimeout` configuration#Timeouts %}, {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.wait %}
@@ -60,7 +60,7 @@ When given a `time` argument, `cy.wait()` yields the previous commands yield.
 
 When given an `alias` argument, `cy.wait()` yields the XHR object of the aliased route.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.wait()` will wait for the request the duration of the {% url `requestTimeout` configuration#Timeouts %} and wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
 

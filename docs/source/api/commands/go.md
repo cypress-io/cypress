@@ -35,7 +35,7 @@ You can use `back` or `forward` to go one step back or forward. You could also n
 
 Pass in an options object to change the default behavior of `cy.go()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.go %}
@@ -44,7 +44,7 @@ Option | Default | Notes
 
 `cy.go()` yields the `window` object.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.go()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

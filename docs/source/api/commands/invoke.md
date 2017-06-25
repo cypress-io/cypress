@@ -48,7 +48,7 @@ Additional arguments to be given to the function call. There is no limit to the 
 
 `.invoke()` yields the return value of the invoked property.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

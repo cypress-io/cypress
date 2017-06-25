@@ -32,7 +32,7 @@ The name of the cookie to get.
 
 Pass in an options object to change the default behavior of `cy.getCookie()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.getCookie %}
@@ -49,7 +49,7 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.getCookie()` will continue to look for the cookie for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

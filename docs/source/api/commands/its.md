@@ -43,7 +43,7 @@ Name of property or nested properties (with dot notation) to get.
 
 `.invoke()` yields the value of the property.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

@@ -75,6 +75,8 @@ function validateExternalUrl (href, source) {
 
   hrefs.push(href)
 
+  return Promise.resolve()
+
   return request({
     method: hash ? 'GET' : 'HEAD', // if we have a hash, use GET, else HEAD
     url: href,

@@ -49,7 +49,7 @@ The distance in pixels from window/element's top or percentage of the window/ele
 
 Pass in an options object to change the default behavior of `cy.scrollTo()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `duration` | `0` | Scrolls over the duration (in ms)
@@ -60,7 +60,7 @@ Option | Default | Notes
 
 `cy.scrollTo()` yields the window or DOM element that was scrolled.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

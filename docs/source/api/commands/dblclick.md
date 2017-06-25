@@ -37,7 +37,7 @@ cy.window().click()         // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.dblclick()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .dblclick %}
@@ -46,7 +46,7 @@ Option | Default | Notes
 
 `.dblclick()` yields the DOM element that was double clicked.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.dblclick()` will wait for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

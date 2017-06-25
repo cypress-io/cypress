@@ -44,7 +44,7 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 
 `.as()` yields the DOM element or route chained from the previous command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.as()` will retry the chain of commands before the `.as()` command for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
 

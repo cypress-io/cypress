@@ -55,7 +55,7 @@ The distance in pixels from the element's top to issue the click.
 
 Pass in an options object to change the default behavior of `.click()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `force` | `false` | {% usage_options force click %}
@@ -66,7 +66,7 @@ Option | Default | Notes
 
 `.click()` yields the element that was clicked.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.click()` will wait until the element is in a 'clickable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

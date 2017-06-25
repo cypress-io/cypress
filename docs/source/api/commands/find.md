@@ -39,7 +39,7 @@ A selector used to filter matching descendent DOM elements.
 
 Pass in an options object to change the default behavior of `.find()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .find %}
@@ -48,7 +48,7 @@ Option | Default | Notes
 
 `.find()` yields the new DOM elements found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.find()` will continue to look for the filtered element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

@@ -48,7 +48,7 @@ Option | Default | Notes
 
 `.blur()` yields the DOM element that was blurred.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.blur()` will continue to look for the focusable element to blur for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

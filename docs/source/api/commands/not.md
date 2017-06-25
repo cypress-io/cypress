@@ -43,7 +43,7 @@ A selector used to remove matching DOM elements.
 
 Pass in an options object to change the default behavior of `.not()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .not %}
@@ -52,7 +52,7 @@ Option | Default | Notes
 
 `.not()` yields the new DOM element(s) without the selector provided in the command's argument.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.not()` will continue to look for the element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

@@ -34,7 +34,7 @@ Pass in an options object to change the default behavior of `cy.hash()`.
 
 **cy.hash( *options* )**
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.hash %}
@@ -43,7 +43,7 @@ Option | Default | Notes
 
 `cy.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

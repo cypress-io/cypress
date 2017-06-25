@@ -52,7 +52,7 @@ Set a route by returning an object literal from a callback function. Functions t
 
 Pass in an options object to change the default behavior of `cy.route()`. By default `cy.route()` inherits its options from {% url `cy.server()` server %}.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `delay` | `0` | Delay for stubbed responses (in ms)
 `force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing {% url `cy.route()` route %}.
@@ -69,7 +69,7 @@ You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` a
 
 ## Yields {% helper_icon yields %}
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

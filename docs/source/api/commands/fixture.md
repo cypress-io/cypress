@@ -59,7 +59,7 @@ The encoding to be used when reading the file. The following encodings are suppo
 
 Pass in an options object to change the default behavior of `cy.fixture()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.fixture %}
 
@@ -67,7 +67,7 @@ Option | Default | Notes
 
 `cy.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.fixture` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the server to process the command.
 

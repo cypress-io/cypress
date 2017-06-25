@@ -63,7 +63,7 @@ Sequence | Notes
 
 Pass in an options object to change the default behavior of `.type()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `delay` | `10` | Delay after each keypress
@@ -75,7 +75,7 @@ Option | Default | Notes
 
 `.type()` yields the DOM element that was typed into.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.type()` will continue to retry typing for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

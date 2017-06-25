@@ -42,7 +42,7 @@ cy.url().clear()          // Errors, 'url' doesn't yield DOM element
 
 Pass in an options object to change the default behavior of `.clear()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `force` | `false` | {% usage_options force clear %}
@@ -52,7 +52,7 @@ Option | Default | Notes
 
 `.clear()` yields the `input` or `textarea` that was cleared.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.clear()` will continue to look for the `input` or `textarea` for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

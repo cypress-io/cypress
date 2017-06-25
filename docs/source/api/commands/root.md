@@ -31,7 +31,7 @@ cy.get('nav').within(function(nav) {
 
 Pass in an options object to change the default behavior of `.root()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.root %}
@@ -42,7 +42,7 @@ Option | Default | Notes
 
 The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a {% url `.within()` within %} command, the root element yielded is the yielded subject of the {% url `.within()` within %} command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.root()` will continue to look for the root element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

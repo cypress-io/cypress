@@ -39,7 +39,7 @@ Pass in an options object to change the default behavior of `cy.server()`. These
 
 ***The following options are merged in as default options to {% url `cy.route()` route %}***
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `delay` | `0` | delay for stubbed responses (in ms)
 `headers` | `null` | response headers for stubbed routes
@@ -52,7 +52,7 @@ Option | Default | Notes
 
 ***The following options control the behavior of the server affecting all requests:***
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `enable` | `true` | pass `false` to disable existing route stubs
 `force404` | `false` | forcibly send XHR's a 404 status when the XHR's do not match any existing
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 `cy.server()` yields the Cypress server instance.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 
 # Examples

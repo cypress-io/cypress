@@ -36,7 +36,7 @@ The value of the cookie to set.
 
 Pass in an options object to change the default behavior of `cy.setCookie()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `domain` | `window.location.hostname` | The domain the cookie is visible to
@@ -58,7 +58,7 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.setCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 

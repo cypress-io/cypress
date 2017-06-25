@@ -45,7 +45,7 @@ An array of `values` or text contents of the `<option>`s to be selected.
 
 Pass in an options object to change the default behavior of `.select()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `force` | `false` | `log` | `true` | {% usage_options force select %}
@@ -55,7 +55,7 @@ Option | Default | Notes
 
 `.select()` yields the new DOM elements selected.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.select()` will continue to select the options for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

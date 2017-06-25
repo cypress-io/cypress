@@ -28,7 +28,7 @@ cy.document()     // yield the window.document object
 
 Pass in an options object to change the default behavior of `cy.document()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.document %}
@@ -37,7 +37,7 @@ Option | Default | Notes
 
 `cy.document()` yields the `window.document` object.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.document()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

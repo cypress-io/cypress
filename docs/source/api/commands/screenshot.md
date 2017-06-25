@@ -34,7 +34,7 @@ A name for the image file. By default the filename will be the title of the test
 
 Pass in an options object to change the default behavior of `cy.screenshot()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.screenshot %}
@@ -43,7 +43,7 @@ Option | Default | Notes
 
 `cy.screenshot()` yields `null`.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.screenshot()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 

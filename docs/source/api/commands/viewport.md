@@ -64,7 +64,7 @@ The orientation of the screen. The *default orientation* is `portrait`. Pass `la
 
 Pass in an options object to change the default behavior of `cy.viewport()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 
@@ -72,7 +72,7 @@ Option | Default | Notes
 
 `cy.viewport()` yields `null`.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

@@ -47,7 +47,7 @@ Values of checkboxes that should be unchecked.
 
 Pass in an options object to change the default behavior of `.uncheck()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `force` | `false` | {% usage_options force uncheck %}

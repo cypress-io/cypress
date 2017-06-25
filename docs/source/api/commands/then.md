@@ -33,7 +33,7 @@ Pass a function that takes the previously yielded subject as it's first argument
 
 Pass in an options object to change the default behavior of `.then()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .then %}
 
@@ -45,7 +45,7 @@ When `null` or `undefined` are returned by the callback function, the subject wi
 
 Just like Promises, you can return any compatible "thenable" (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.then()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 

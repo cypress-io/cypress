@@ -32,6 +32,7 @@ cy.end()                  // Does not make sense to chain off 'cy'
 
 `.end()` yields `null`.
 
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

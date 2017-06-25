@@ -54,7 +54,7 @@ The encoding to be used when writing to the file. The following encodings are su
 
 Pass in an options object to change the default behavior of `cy.writeFile()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.writeFile %}
@@ -63,7 +63,7 @@ Option | Default | Notes
 
 `cy.writeFile()` yields the contents written to the file.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.writeFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to write to the file.
 

@@ -41,7 +41,7 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.nextAll()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .nextAll %}
@@ -50,7 +50,7 @@ Option | Default | Notes
 
 `.nextAll()` yields the new DOM elements found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.nextAll()` will continue to look for all next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

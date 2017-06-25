@@ -41,7 +41,7 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.children()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .children %}
@@ -50,7 +50,7 @@ Option | Default | Notes
 
 `.children()` yields the new DOM element(s) found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.children()` will continue to look for the children elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

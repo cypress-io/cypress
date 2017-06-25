@@ -43,7 +43,7 @@ Pass a function that expands the array into it's arguments.
 
 Pass in an options object to change the default behavior of `.spread()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .spread %}
 
@@ -51,7 +51,7 @@ Option | Default | Notes
 
 Whatever was passed to the function is what is yielded.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

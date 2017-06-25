@@ -42,7 +42,7 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.siblings()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .siblings %}
@@ -51,7 +51,7 @@ Option | Default | Notes
 
 `.siblings()` yields the new DOM elements found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.siblings()` will continue to look for the sibling element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

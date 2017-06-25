@@ -32,7 +32,7 @@ Whether to reload the current page without using the cache. `true` forces the re
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.reload %}
@@ -41,7 +41,7 @@ Option | Default | Notes
 
 `cy.reload()` yields the `window` object of the newly loaded page.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.reload()` will wait for the load event of the newly loaded page for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

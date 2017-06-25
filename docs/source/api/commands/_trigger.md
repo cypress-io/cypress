@@ -57,7 +57,7 @@ The distance in pixels from element's top to trigger the event.
 
 Pass in an options object to change the default behavior of `.trigger()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `bubbles` | `true` | Whether the event bubbles
@@ -70,7 +70,7 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 `.trigger()` yields the DOM subject chained from the previous command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.trigger()` will wait until the element is in an 'interactable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

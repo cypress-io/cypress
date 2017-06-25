@@ -28,7 +28,7 @@ cy.getCookies()    // Get all cookies
 
 Pass in an options object to change the default behavior of `cy.getCookies()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.getCookies %}
@@ -45,7 +45,7 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.getCookies()` will continue to look for cookies for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

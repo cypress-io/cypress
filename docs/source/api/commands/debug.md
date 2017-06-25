@@ -33,7 +33,7 @@ cy.get('nav').debug()       // Debug the `get` command's yield
 
 Pass in an options object to change the default behavior of `.debug()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 
@@ -41,7 +41,7 @@ Option | Default | Notes
 
 `.debug()` yields the previous command's yield.
 
-## Timeout
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

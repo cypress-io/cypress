@@ -36,7 +36,7 @@ cy.window().scrollIntoView()  // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.scrollIntoView()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `duration` | `0` | Scrolls over the duration (in ms)
@@ -48,7 +48,7 @@ Option | Default | Notes
 
 `.scrollIntoView()` yields the DOM element that was scrolled into view.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.scrollIntoView()` will continue to scroll the element into view for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

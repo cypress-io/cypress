@@ -35,7 +35,7 @@ cy.window().focus()  // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.focus()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .focus %}
@@ -44,7 +44,7 @@ Option | Default | Notes
 
 `.focus()` yields the new DOM element that was focused.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.focus()` will continue to try to focus the element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

@@ -33,7 +33,7 @@ cy.get('nav').pause()       // Pause after the 'get' commands yield
 
 Pass in an options object to change the default behavior of `.pause()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 
@@ -41,7 +41,7 @@ Option | Default | Notes
 
 `.pause()` yields the previous command's yield.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

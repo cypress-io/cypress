@@ -50,7 +50,7 @@ The encoding to be used when reading the file. The following encodings are suppo
 
 Pass in an options object to change the default behavior of `cy.readFile()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.readFile %}
@@ -59,7 +59,7 @@ Option | Default | Notes
 
 `cy.readFile()` yields the contents of the file.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.readFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to process the command.
 

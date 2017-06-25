@@ -35,7 +35,7 @@ cy.getCookies().last()     // Errors, 'getCookies' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.last()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .last %}
@@ -44,7 +44,7 @@ Option | Default | Notes
 
 `.last()` yields the new DOM element found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.last()` will continue to look for the last element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

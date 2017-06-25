@@ -34,7 +34,7 @@ A key on the location object.
 
 Pass in an options object to change the default behavior of `cy.location()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.location %}
@@ -54,7 +54,7 @@ Option | Default | Notes
 - `search`
 - `toString`
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

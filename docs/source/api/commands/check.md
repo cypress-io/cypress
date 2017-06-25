@@ -48,7 +48,7 @@ Values of checkboxes or radios that should be checked.
 
 Pass in an options object to change the default behavior of `.check()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `force` | `false` | {% usage_options force check %}
@@ -58,7 +58,7 @@ Option | Default | Notes
 
 `.check()` yields the same subject from the previous command.
 
-## Default {% helper_icon defaultAssertion %}
+## Defaults {% helper_icon defaultAssertion %}
 
 `.check()` yields the DOM element(s) that were checked.
 

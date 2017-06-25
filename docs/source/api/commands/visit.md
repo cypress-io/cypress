@@ -32,7 +32,7 @@ The url to visit. The url provided will be prefixed with the `baseUrl` configure
 
 Pass in an options object to change the default behavior of `cy.visit()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
@@ -45,7 +45,7 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 `cy.visit()` yields the remote `window` object.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.visit()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 

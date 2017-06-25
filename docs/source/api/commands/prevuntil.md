@@ -51,7 +51,7 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.prevUntil()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .prevUntil %}
@@ -60,7 +60,7 @@ Option | Default | Notes
 
 `.prevUntil()` yields the new DOM element(s) found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.prevUntil()` will continue to look for the previous element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

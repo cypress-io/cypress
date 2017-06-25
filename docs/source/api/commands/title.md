@@ -28,7 +28,7 @@ cy.title()
 
 Pass in an options object to change the default behavior of `cy.title()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.title %}
@@ -37,7 +37,7 @@ Option | Default | Notes
 
 `cy.title()` yields the `document` title as a string.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.title()` will continue to retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
 

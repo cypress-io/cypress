@@ -32,7 +32,7 @@ An object to be yielded.
 
 Pass in an options object to change the default behavior of `cy.wrap()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.wrap %}
@@ -41,7 +41,7 @@ Option | Default | Notes
 
 `cy.wrap()` yields the object that was passed into the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

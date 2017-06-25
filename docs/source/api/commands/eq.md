@@ -46,7 +46,7 @@ A negative number indicating the index position from the end to find the element
 
 Pass in an options object to change the default behavior of `.eq()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .eq %}
@@ -55,7 +55,7 @@ Option | Default | Notes
 
 `.eq()` yields the new DOM elements found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.eq()` will continue to look for the element at the specified index for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

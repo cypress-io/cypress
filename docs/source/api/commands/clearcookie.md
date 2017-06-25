@@ -37,7 +37,7 @@ The name of the cookie to be cleared.
 
 Pass in an options object to change the default behavior of `cy.clearCookie()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.clearCookie %}
@@ -46,7 +46,7 @@ Option | Default | Notes
 
 `cy.clearCookie()` yields `null`.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.clearCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process the command.
 

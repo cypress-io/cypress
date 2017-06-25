@@ -20,7 +20,7 @@ module.exports = function usageOptions (hexo, args) {
 
   const timeout = () => {
     /* eslint-disable quotes */
-    const url = `{% urlHash 'timing out' Timeout %}`
+    const url = `{% urlHash 'timing out' Timeouts %}`
 
     return rawRender.call(this, hexo, `Time to wait for <code>${type}()</code> to resolve before ${url}`)
   }

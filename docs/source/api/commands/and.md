@@ -76,7 +76,7 @@ cy
   .and('have.css', 'font-family')   // yields 'sans-serif'
 ```
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.and()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
 

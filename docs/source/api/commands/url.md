@@ -34,7 +34,7 @@ Pass in an options object to change the default behavior of `cy.url()`.
 
 **cy.hash( *options* )**
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.url %}
@@ -43,7 +43,7 @@ Option | Default | Notes
 
 `cy.url()` yields the current URL as a string.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

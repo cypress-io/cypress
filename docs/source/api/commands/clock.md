@@ -48,7 +48,7 @@ Name of native functions that clock should override.
 
 Pass in an options object to change the default behavior of `cy.clock()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 
@@ -66,7 +66,7 @@ Option | Default | Notes
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
-## Timeout
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

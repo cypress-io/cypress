@@ -45,7 +45,7 @@ Specify a selector to filter DOM elements containing the text. Cypress will *ign
 
 Pass in an options object to change the default behavior of `cy.contains()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .contains %}
@@ -54,7 +54,7 @@ Option | Default | Notes
 
 `cy.contains()` yields the *first*, *deepest* DOM element containing the text.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.contains()` will try to find the content within the DOM for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

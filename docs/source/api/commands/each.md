@@ -44,7 +44,7 @@ Pass a function that is invoked with the following arguments:
 
 `.each()` yields the same subject passed to it (the current array).
 
-## Timeout
+## Timeouts {% helper_icon timeout %}
 
 # Examples
 

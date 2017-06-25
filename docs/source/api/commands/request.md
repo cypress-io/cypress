@@ -68,7 +68,7 @@ Make a request using a specific method (`GET`, `POST`, `PUT`, etc). If no method
 Pass in an options object to change the default behavior of `cy.request`.
 
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `url` | `null` | The URL to make the request to
@@ -94,7 +94,7 @@ You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` glob
 - `headers`
 - `duration`.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.request()` will wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or the `timeout` passed in the options object of the command.
 

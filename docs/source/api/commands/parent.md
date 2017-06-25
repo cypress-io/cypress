@@ -41,7 +41,7 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.parent()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parent %}
@@ -50,7 +50,7 @@ Option | Default | Notes
 
 `.parent()` yields the new DOM element(s) found by the command.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `.parent()` will continue to look for the parent element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
