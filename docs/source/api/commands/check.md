@@ -18,7 +18,9 @@ Check checkbox(es) or radio(s).
 
 ## Usage
 
-`.check()` requires being chained off another cy command that *yields* a DOM element of type `checkbox` or `radio`.
+`.check()` requires being chained off another cy command that *yields* an `<input>` DOM element.
+
+These `<input>` elements must have type `checkbox` or `radio`.
 
 **{% fa fa-check-circle green %} Valid Usage**
 
@@ -60,11 +62,11 @@ Option | Default | Description
 
 ## Defaults {% helper_icon defaultAssertion %}
 
-`.check()` yields the DOM element(s) that were checked.
+`.check()` will automatically wait until the element reaches an {% url 'actionable state' interacting-with-elements#Actionability %} before checking the element.
 
-## Timeout {% helper_icon timeout %}
+## Timeouts {% helper_icon timeout %}
 
-`.check` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+`.check()` will wait for the duration of its `timeout` option for its default assertion and any additional assertions to pass.
 
 # Examples
 

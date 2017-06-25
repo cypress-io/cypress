@@ -43,6 +43,8 @@ Option | Default | Description
 
 ## Timeouts {% helper_icon timeout %}
 
+`.debug()` cannot timeout.
+
 # Examples
 
 ## Debug

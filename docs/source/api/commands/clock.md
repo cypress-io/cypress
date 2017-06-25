@@ -68,6 +68,8 @@ You can also access the `clock` object via `this.clock` in a {% url `.then()` th
 
 ## Timeouts {% helper_icon timeout %}
 
+`cy.clock()` cannot timeout.
+
 # Examples
 
 ## Clock
@@ -204,8 +206,8 @@ When clicking on the `clock` command within the command log, the console outputs
 
 # See also
 
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
-- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' stubs-spies-and-clocks-recipe %}
 - {% url `cy.tick()` tick %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' stubs-spies-and-clocks-recipe %}

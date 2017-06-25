@@ -42,7 +42,11 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 
 ## Yields {% helper_icon yields %}
 
-`.as()` yields the DOM element or route chained from the previous command.
+`.as()` yields the subject from the previous command.
+
+## Defaults {% helper_icon defaultAssertion %}
+
+`.as()` has no default assertions.
 
 ## Timeouts {% helper_icon timeout %}
 

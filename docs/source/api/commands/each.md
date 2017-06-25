@@ -46,6 +46,8 @@ Pass a function that is invoked with the following arguments:
 
 ## Timeouts {% helper_icon timeout %}
 
+`.each()` cannot timeout.
+
 # Examples
 
 ## DOM Elements

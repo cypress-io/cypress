@@ -59,7 +59,7 @@ Pass a function that can have any number of explicit assertions within it. Whate
 
 ## Yields {% helper_icon yields %}
 
-In most cases, `.and()` yields the previous cy command's yield.
+In most cases, `.and()` yields the subject from the previous command.
 
 ```javascript
 cy
@@ -75,6 +75,10 @@ cy
   .should('be.visible')             // yields <nav>
   .and('have.css', 'font-family')   // yields 'sans-serif'
 ```
+
+## Defaults {% helper_icon defaultAssertion %}
+
+`.and()` has no default assertions other than what you specify.
 
 ## Timeouts {% helper_icon timeout %}
 

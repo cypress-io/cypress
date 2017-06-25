@@ -38,7 +38,7 @@ cy.window().blur()            // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.blur`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
 `force` | `false` | Forces the action, disables checking if element is focused
@@ -46,7 +46,11 @@ Option | Default | Notes
 
 ## Yields {% helper_icon yields %}
 
-`.blur()` yields the DOM element that was blurred.
+`.blur()` yields the subject from the previous command for additional chaining.
+
+## Defaults {% helper_icon defaultAssertion %}
+
+`.blur()` has no default assertions.
 
 ## Timeouts {% helper_icon timeout %}
 

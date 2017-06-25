@@ -50,6 +50,10 @@ Option | Default | Description
 
 `.children()` yields the new DOM element(s) found by the command.
 
+## Defaults {% helper_icon defaultAssertion %}
+
+`.children()` will automatically wait until the element(s) can be found in the DOM.
+
 ## Timeouts {% helper_icon timeout %}
 
 `.children()` will continue to look for the children elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.

@@ -34,6 +34,8 @@ cy.end()                  // Does not make sense to chain off 'cy'
 
 ## Timeouts {% helper_icon timeout %}
 
+`.end()` cannot timeout.
+
 # Examples
 
 `.end()` is useful when you want to end a chain of commands and force the next command to not receive what was yielded in the previous command.

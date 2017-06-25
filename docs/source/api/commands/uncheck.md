@@ -53,6 +53,14 @@ Option | Default | Description
 `force` | `false` | {% usage_options force uncheck %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .uncheck %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+`.uncheck()` will automatically wait until the element reaches an {% url 'actionable state' interacting-with-elements#Actionability %} before unchecking the element.
+
+## Timeouts {% helper_icon timeout %}
+
+`.uncheck()` will wait for the duration of its `timeout` option for its default assertion and any additional assertions to pass.
+
 # Examples
 
 ## Uncheck
