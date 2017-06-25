@@ -68,7 +68,7 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 ## Yields {% helper_icon yields %}
 
-`.trigger()` yields the DOM subject chained from the previous command.
+{% yields same_subject .trigger %}
 
 ## Timeouts {% helper_icon timeout %}
 

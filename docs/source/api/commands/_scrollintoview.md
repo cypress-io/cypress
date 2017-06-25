@@ -46,7 +46,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.scrollIntoView()` yields the DOM element that was scrolled into view.
+{% yields same_subject .scrollIntoView %}
 
 ## Timeouts {% helper_icon timeout %}
 

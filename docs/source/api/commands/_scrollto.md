@@ -58,7 +58,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`cy.scrollTo()` yields the window or DOM element that was scrolled.
+{% yields same_subject cy.scrollTo %}
 
 ## Timeouts {% helper_icon timeout %}
 
