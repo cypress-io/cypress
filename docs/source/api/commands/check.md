@@ -60,9 +60,9 @@ Option | Default | Description
 
 {% yields same_subject .check %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults checkability .check %}
+{% requirements checkability .check %}
 
 ## Timeouts {% helper_icon timeout %}
 

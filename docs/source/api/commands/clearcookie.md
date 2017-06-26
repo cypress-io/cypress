@@ -46,9 +46,9 @@ Option | Default | Description
 
 {% yields null cy.clearCookie %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none cy.clearCookie %}
+{% requirements none cy.clearCookie %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -52,9 +52,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .filter %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .filter %}
+{% requirements existence .filter %}
 
 ## Timeouts {% helper_icon timeout %}
 

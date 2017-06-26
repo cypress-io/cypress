@@ -32,9 +32,9 @@ cy.end()                  // Does not make sense to chain off 'cy'
 
 {% yields null .end %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none .end %}
+{% requirements none .end %}
 
 ## Timeouts {% helper_icon timeout %}
 

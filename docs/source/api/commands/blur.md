@@ -48,9 +48,9 @@ Option | Default | Description
 
 {% yields same_subject .blur %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults blurability .blur %}
+{% requirements blurability .blur %}
 
 ## Timeouts {% helper_icon timeout %}
 

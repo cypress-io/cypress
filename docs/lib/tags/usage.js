@@ -17,7 +17,7 @@ module.exports = function usageOptions (hexo, args) {
 
   const force = () => {
     /* eslint-disable quotes */
-    const url = `{% urlHash 'waiting for actionability' Defaults %}`
+    const url = `{% urlHash 'waiting for actionability' Requirements %}`
 
     return render(`Forces the action, disables ${url}`)
   }

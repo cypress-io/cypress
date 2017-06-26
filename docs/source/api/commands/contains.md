@@ -54,9 +54,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .contains %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .contains %}
+{% requirements existence .contains %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -60,9 +60,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prevUntil %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .prevUntil %}
+{% requirements existence .prevUntil %}
 
 ## Timeouts {% helper_icon timeout %}
 

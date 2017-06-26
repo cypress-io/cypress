@@ -57,9 +57,9 @@ Option | Default | Description
 
 {% yields same_subject .uncheck %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults checkability .uncheck %}
+{% requirements checkability .uncheck %}
 
 ## Timeouts {% helper_icon timeout %}
 

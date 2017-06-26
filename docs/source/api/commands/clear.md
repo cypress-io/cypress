@@ -52,9 +52,9 @@ Option | Default | Description
 
 {% yields same_subject .clear %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults actionability .clear %}
+{% requirements actionability .clear %}
 
 ## Timeouts {% helper_icon timeout %}
 

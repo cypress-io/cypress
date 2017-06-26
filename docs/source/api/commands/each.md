@@ -44,9 +44,9 @@ Pass a function that is invoked with the following arguments:
 
 {% yields same_subject .each %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none .each %}
+{% requirements none .each %}
 
 ## Timeouts {% helper_icon timeout %}
 

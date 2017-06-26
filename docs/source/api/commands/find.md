@@ -48,9 +48,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .find %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .find %}
+{% requirements existence .find %}
 
 ## Timeouts {% helper_icon timeout %}
 

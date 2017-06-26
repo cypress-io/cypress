@@ -46,9 +46,9 @@ Option | Default | Description
 
 {% yields null cy.clearLocalStorage %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none cy.clearLocalStorage %}
+{% requirements none cy.clearLocalStorage %}
 
 ## Timeouts {% helper_icon timeout %}
 

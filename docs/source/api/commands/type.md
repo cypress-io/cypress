@@ -75,9 +75,9 @@ Option | Default | Description
 
 {% yields same_subject .type %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults actionability .type %}
+{% requirements actionability .type %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -53,9 +53,9 @@ Option | Default | Description
 
 {% yields new_dom_subject cy.get %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence cy.get %}
+{% requirements existence cy.get %}
 
 ## Timeouts {% helper_icon timeout %}
 

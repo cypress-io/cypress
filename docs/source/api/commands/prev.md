@@ -50,9 +50,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prev %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .prev %}
+{% requirements existence .prev %}
 
 ## Timeouts {% helper_icon timeout %}
 

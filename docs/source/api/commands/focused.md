@@ -37,9 +37,9 @@ Option | Default | Description
 
 {% yields new_dom_subject cy.focused %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence cy.focused %}
+{% requirements existence cy.focused %}
 
 ## Timeouts {% helper_icon timeout %}
 

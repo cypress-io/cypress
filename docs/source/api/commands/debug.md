@@ -41,9 +41,9 @@ Option | Default | Description
 
 {% yields same_subject .debug %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none .debug %}
+{% requirements none .debug %}
 
 ## Timeouts {% helper_icon timeout %}
 

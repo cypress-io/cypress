@@ -61,9 +61,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .nextUntil %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .nextUntil %}
+{% requirements existence .nextUntil %}
 
 ## Timeouts {% helper_icon timeout %}
 

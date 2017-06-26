@@ -44,7 +44,7 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 
 {% yields same_subject .as %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
 `.as()` has no default assertions.
 

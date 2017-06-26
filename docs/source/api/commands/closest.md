@@ -48,9 +48,9 @@ Option | Default | Description
 
 {% yields changes_dom_subject .closest %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults existence .closest %}
+{% requirements existence .closest %}
 
 ## Timeouts {% helper_icon timeout %}
 

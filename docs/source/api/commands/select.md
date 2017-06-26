@@ -55,9 +55,9 @@ Option | Default | Description
 
 {% yields same_subject .select %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults actionability .select %}
+{% requirements actionability .select %}
 
 ## Timeouts {% helper_icon timeout %}
 

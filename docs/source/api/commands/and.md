@@ -80,7 +80,7 @@ cy
   .and('match', /serif/)            // yields 'sans-serif'
 ```
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
 `.and()` has no default assertions other than what you specify.
 

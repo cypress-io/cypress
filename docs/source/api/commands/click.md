@@ -66,9 +66,9 @@ Option | Default | Description
 
 {% yields same_subject .click %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults actionability .click %}
+{% requirements actionability .click %}
 
 ## Timeouts {% helper_icon timeout %}
 

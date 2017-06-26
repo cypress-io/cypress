@@ -53,9 +53,9 @@ Option | Default | Description
 
 `cy.getCookie()` yields `null`.
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none cy.getCookie %}
+{% requirements none cy.getCookie %}
 
 ## Timeouts {% helper_icon timeout %}
 

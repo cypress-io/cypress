@@ -71,13 +71,13 @@ Option | Default | Description
 - `stdout`
 - `stderr`
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults exec cy.exec %}
+{% requirements exec cy.exec %}
 
 **When `failOnNonZeroExit` is `true`**
 
-{% defaults exec_code cy.exec %}
+{% requirements exec_code cy.exec %}
 
 ## Timeouts {% helper_icon timeout %}
 

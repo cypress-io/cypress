@@ -1,12 +1,12 @@
 const rawRender = require('../raw_render')
 
 module.exports = function yields (hexo, args) {
-  // {% defaults none cy.clearCookies %}
-  // {% defaults blurability .blur %}
-  // {% defaults focusability .blur %}
-  // {% defaults checkability .click %}
-  // {% defaults actionability .click %}
-  // {% defaults existence .children %}
+  // {% requirements none cy.clearCookies %}
+  // {% requirements blurability .blur %}
+  // {% requirements focusability .blur %}
+  // {% requirements checkability .click %}
+  // {% requirements actionability .click %}
+  // {% requirements existence .children %}
 
   const type = args[0]
   const cmd = `<code>${args[1]}()</code>`
@@ -92,6 +92,6 @@ module.exports = function yields (hexo, args) {
       return execCode()
     default:
       // error when an invalid usage option was provided
-      throw new Error(`{% defaults %} tag helper was provided an invalid option: ${type}`)
+      throw new Error(`{% requirements %} tag helper was provided an invalid option: ${type}`)
   }
 }

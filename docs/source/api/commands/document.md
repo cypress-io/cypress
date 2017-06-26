@@ -37,9 +37,9 @@ Option | Default | Description
 
 {% yields new_subject cy.document 'yields the `window.document` object' %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults none cy.document %}
+{% requirements none cy.document %}
 
 ## Timeouts {% helper_icon timeout %}
 

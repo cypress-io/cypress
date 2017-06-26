@@ -44,9 +44,9 @@ Option | Default | Description
 
 {% yields same_subject .focus %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults focusability .focus %}
+{% requirements focusability .focus %}
 
 ## Timeouts {% helper_icon timeout %}
 

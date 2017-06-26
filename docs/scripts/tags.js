@@ -7,7 +7,7 @@ const beepAndLog = require('../lib/beep')
 const partial = require('../lib/tags/partial')
 const note = require('../lib/tags/note')
 const yields = require('../lib/tags/yields')
-const defaults = require('../lib/tags/defaults')
+const requirements = require('../lib/tags/requirements')
 const timeouts = require('../lib/tags/timeouts')
 const usageOptions = require('../lib/tags/usage')
 const { issue, openAnIssue } = require('../lib/tags/issues')
@@ -37,7 +37,7 @@ const tags = {
   yields: yields,
 
   // default assertions
-  defaults: defaults,
+  requirements: requirements,
 
   // timeouts
   timeouts: timeouts,

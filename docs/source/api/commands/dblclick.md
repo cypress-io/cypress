@@ -46,9 +46,9 @@ Option | Default | Description
 
 {% yields same_subject .dblclick %}
 
-## Defaults {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon defaultAssertion %}
 
-{% defaults actionability .dblclick %}
+{% requirements actionability .dblclick %}
 
 ## Timeouts {% helper_icon timeout %}
 
