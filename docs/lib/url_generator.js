@@ -123,7 +123,7 @@ function normalizeNestedPaths (data) {
         return flatten(value, memo, parents.concat(key))
       }
 
-      memo[key] = parents.concat(value).join("/")
+      memo[key] = parents.concat(value).join('/')
 
       return memo
     }, memo)
@@ -135,7 +135,7 @@ function normalizeNestedPaths (data) {
         return expand(value, parents.concat(key))
       }
 
-      return parents.concat(value).join("/")
+      return parents.concat(value).join('/')
     })
   }
 
