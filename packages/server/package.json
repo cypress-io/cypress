@@ -147,7 +147,6 @@
     "tough-cookie": "2.3.0",
     "trash": "4.0.0",
     "underscore": "^1.8.3",
-    "underscore.inflection": "cypress-io/underscore.inflection#81a565ad35bfce330f513a1d0de94a0eff29611e",
     "underscore.string": "3.3.4",
     "url-parse": "^1.1.7",
     "watchify": "^3.9.0",
