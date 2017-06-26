@@ -60,9 +60,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .parentsUntil %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .parentsUntil %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.parentsUntil()` will continue to look for the parent element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .parentsUntil %}
 
 # Examples
 

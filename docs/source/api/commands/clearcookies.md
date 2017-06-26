@@ -41,9 +41,13 @@ Option | Default | Description
 
 {% yields null cy.clearCookies %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.clearCookies %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.clearCookies()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
+{% timeouts automation cy.clearCookies %}
 
 # Examples
 

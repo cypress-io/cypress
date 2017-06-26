@@ -36,20 +36,23 @@ Specify key to be cleared in local storage.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.clearCookies()`.
+Pass in an options object to change the default behavior of `cy.clearLocalStorage()`.
 
 Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.clearLocalStorage %}
 
 ## Yields {% helper_icon yields %}
 
 {% yields null cy.clearLocalStorage %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.clearLocalStorage %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.clearLocalStorage()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} to process this command.
+{% timeouts none cy.clearLocalStorage %}
 
 # Examples
 

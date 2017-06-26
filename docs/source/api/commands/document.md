@@ -37,9 +37,13 @@ Option | Default | Description
 
 {% yields new_subject cy.document 'yields the `window.document` object' %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.document %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.document()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts assertions cy.document %}
 
 # Examples
 

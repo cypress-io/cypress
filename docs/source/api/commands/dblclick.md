@@ -46,9 +46,13 @@ Option | Default | Description
 
 {% yields same_subject .dblclick %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults actionability .dblclick %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.dblclick()` will wait for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts actionability .dblclick %}
 
 # Examples
 

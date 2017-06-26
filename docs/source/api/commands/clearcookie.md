@@ -3,7 +3,7 @@ title: clearCookie
 comments: false
 ---
 
-Clear a browser cookie.
+Clear a specific browser cookie.
 
 {% note warning %}
 Cypress automatically clears all cookies *before* each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies inside a single test.
@@ -46,9 +46,13 @@ Option | Default | Description
 
 {% yields null cy.clearCookie %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.clearCookie %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.clearCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process the command.
+{% timeouts automation cy.clearCookie %}
 
 # Examples
 

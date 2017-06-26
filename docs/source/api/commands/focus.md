@@ -44,9 +44,13 @@ Option | Default | Description
 
 {% yields same_subject .focus %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults focusability .focus %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.focus()` will continue to try to focus the element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts assertions .focus %}
 
 # Examples
 

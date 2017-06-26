@@ -41,9 +41,13 @@ Option | Default | Description
 
 {% yields same_subject .debug %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none .debug %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.debug()` cannot timeout.
+{% timeouts none .debug %}
 
 # Examples
 

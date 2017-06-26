@@ -60,9 +60,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prevUntil %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .prevUntil %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.prevUntil()` will continue to look for the previous element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .prevUntil %}
 
 # Examples
 

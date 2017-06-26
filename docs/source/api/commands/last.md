@@ -44,9 +44,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .last %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .last %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.last()` will continue to look for the last element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .last %}
 
 # Examples
 

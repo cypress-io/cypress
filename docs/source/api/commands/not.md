@@ -52,9 +52,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .not %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .not %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.not()` will continue to look for the element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .not %}
 
 # Examples
 

@@ -45,9 +45,13 @@ Option | Default | Description
 - `secure`
 - `expiry`
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.getCookies %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.getCookies()` will continue to look for cookies for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts automation cy.getCookies %}
 
 # Examples
 

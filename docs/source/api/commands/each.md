@@ -44,9 +44,13 @@ Pass a function that is invoked with the following arguments:
 
 {% yields same_subject .each %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none .each %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.each()` cannot timeout.
+{% timeouts none .each %}
 
 # Examples
 

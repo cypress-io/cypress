@@ -50,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prev %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .prev %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.prev()` will continue to look for the previous element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .prev %}
 
 # Examples
 

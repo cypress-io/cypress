@@ -75,9 +75,13 @@ Option | Default | Description
 
 {% yields same_subject .type %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults actionability .type %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.type()` will continue to retry typing for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts actionability .type %}
 
 # Examples
 

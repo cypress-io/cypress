@@ -66,9 +66,13 @@ Option | Default | Description
 
 {% yields same_subject .click %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults actionability .click %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.click()` will wait until the element is in a 'clickable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% timeouts actionability .click %}
 
 # Examples
 

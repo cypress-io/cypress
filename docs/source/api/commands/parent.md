@@ -50,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .parent %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .parent %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.parent()` will continue to look for the parent element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .parent %}
 
 # Examples
 

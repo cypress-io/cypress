@@ -59,11 +59,11 @@ Option | Default | Description
 
 ## Defaults {% helper_icon defaultAssertion %}
 
-`.uncheck()` will automatically wait until the element reaches an {% url 'actionable state' interacting-with-elements#Actionability %} before unchecking the element.
+{% defaults checkability .uncheck %}
 
 ## Timeouts {% helper_icon timeout %}
 
-`.uncheck()` will wait for the duration of its `timeout` option for its default assertion and any additional assertions to pass.
+{% timeouts actionability .uncheck %}
 
 # Examples
 

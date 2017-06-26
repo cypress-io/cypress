@@ -50,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .nextAll %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .nextAll %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.nextAll()` will continue to look for all next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .nextAll %}
 
 # Examples
 

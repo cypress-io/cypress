@@ -61,9 +61,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .nextUntil %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .nextUntil %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.nextUntil()` will continue to look for the next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .nextUntil %}
 
 # Examples
 

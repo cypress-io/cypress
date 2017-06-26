@@ -48,16 +48,20 @@ Pass in an options object to change the default behavior of `.select()`.
 Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
-`force` | `false` | `log` | `true` | {% usage_options force select %}
+`force` | `false` | {% usage_options force select %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .select %}
 
 ## Yields {% helper_icon yields %}
 
 {% yields same_subject .select %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults actionability .select %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.select()` will continue to select the options for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts actionability .select %}
 
 # Examples
 

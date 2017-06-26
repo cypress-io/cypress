@@ -53,9 +53,13 @@ Option | Default | Description
 
 {% yields new_dom_subject cy.get %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence cy.get %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.get()` will continue to look for the elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence cy.get %}
 
 # Examples
 

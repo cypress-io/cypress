@@ -49,9 +49,17 @@ Option | Default | Description
 - `secure`
 - `expiry`
 
+**When a cookie matching the name could not be found:**
+
+`cy.getCookie()` yields `null`.
+
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.getCookie %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.getCookie()` will continue to look for the cookie for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts automation cy.getCookie %}
 
 # Examples
 

@@ -66,9 +66,13 @@ Option | Default | Description
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.clock %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.clock()` cannot timeout.
+{% timeouts none cy.clock %}
 
 # Examples
 

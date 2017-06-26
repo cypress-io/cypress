@@ -44,9 +44,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .first %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .first %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.first()` will continue to look for the first element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .first %}
 
 # Examples
 

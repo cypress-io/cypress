@@ -52,9 +52,13 @@ Option | Default | Description
 
 {% yields same_subject .clear %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults actionability .clear %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.clear()` will continue to look for the `input` or `textarea` for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts actionability .clear %}
 
 # Examples
 

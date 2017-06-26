@@ -54,9 +54,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .contains %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .contains %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.contains()` will try to find the content within the DOM for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .contains %}
 
 # Examples
 

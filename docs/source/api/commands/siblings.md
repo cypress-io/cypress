@@ -51,9 +51,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .siblings %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .siblings %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.siblings()` will continue to look for the sibling element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .siblings %}
 
 # Examples
 

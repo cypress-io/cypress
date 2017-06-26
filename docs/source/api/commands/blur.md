@@ -50,11 +50,11 @@ Option | Default | Description
 
 ## Defaults {% helper_icon defaultAssertion %}
 
-`.blur()` has no default assertions.
+{% defaults blurability .blur %}
 
 ## Timeouts {% helper_icon timeout %}
 
-`.blur()` will continue to look for the focusable element to blur for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts assertions .blur %}
 
 # Examples
 

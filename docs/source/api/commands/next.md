@@ -50,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .next %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .next %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.next()` will continue to look for the next element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .next %}
 
 # Examples
 

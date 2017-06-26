@@ -55,9 +55,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .eq %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .eq %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.eq()` will continue to look for the element at the specified index for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .eq %}
 
 # Examples
 

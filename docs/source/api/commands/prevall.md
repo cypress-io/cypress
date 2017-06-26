@@ -50,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prevAll %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .prevAll %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.prevAll()` will continue to look for the previous elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .prevAll %}
 
 # Examples
 

@@ -52,9 +52,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .filter %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .filter %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.filter()` will continue to look for the filtered element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .filter %}
 
 # Examples
 

@@ -37,9 +37,13 @@ Option | Default | Description
 
 {% yields new_dom_subject cy.focused %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence cy.focused %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.focused()` will continue to look for the focused element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence cy.focused %}
 
 # Examples
 

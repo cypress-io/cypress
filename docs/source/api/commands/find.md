@@ -48,9 +48,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .find %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .find %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.find()` will continue to look for the filtered element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .find %}
 
 # Examples
 

@@ -67,9 +67,13 @@ Option | Default | Description
 
 `cy.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults none cy.fixture %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.fixture` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the server to process the command.
+{% timeouts automation cy.fixture %}
 
 # Examples
 

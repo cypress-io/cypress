@@ -48,9 +48,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .closest %}
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults existence .closest %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.closest()` will continue to look for the closest element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts existence .closest %}
 
 # Examples
 

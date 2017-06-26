@@ -62,11 +62,11 @@ Option | Default | Description
 
 ## Defaults {% helper_icon defaultAssertion %}
 
-`.check()` will automatically wait until the element reaches an {% url 'actionable state' interacting-with-elements#Actionability %} before checking the element.
+{% defaults checkability .check %}
 
 ## Timeouts {% helper_icon timeout %}
 
-`.check()` will wait for the duration of its `timeout` option for its default assertion and any additional assertions to pass.
+{% timeouts actionability .check %}
 
 # Examples
 

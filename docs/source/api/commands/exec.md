@@ -71,9 +71,17 @@ Option | Default | Description
 - `stdout`
 - `stderr`
 
+## Defaults {% helper_icon defaultAssertion %}
+
+{% defaults exec cy.exec %}
+
+**When `failOnNonZeroExit` is `true`**
+
+{% defaults exec_code cy.exec %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.exec()` will allow the command to execute for the duration of the {% url `execTimeout` configuration#Timeouts %} or the `timeout` passed into the command's options.
+{% timeouts exec cy.exec %}
 
 # Examples
 
