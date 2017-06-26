@@ -72,7 +72,13 @@ Option | Default | Description
 
 {% yields null cy.viewport %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.viewport %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.viewport %}
 
 # Examples
 

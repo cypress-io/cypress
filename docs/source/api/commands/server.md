@@ -63,8 +63,13 @@ Option | Default | Description
 
 {% yields new_subject cy.server 'yields the internal Cypress server instance' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.server %}
+
 ## Timeouts {% helper_icon timeout %}
 
+{% timeouts none cy.server %}
 
 # Examples
 

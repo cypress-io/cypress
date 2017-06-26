@@ -3,7 +3,7 @@ title: window
 comments: false
 ---
 
-Get the global `window` object of the remote application that was visited in {% url `cy.visit()` visit %}.
+Get the global `window` object of the page that was visited in {% url `cy.visit()` visit %}.
 
 # Syntax
 
@@ -37,9 +37,13 @@ Option | Default | Description
 
 {% yields new_subject cy.window 'yields the `window` object' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.window %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.window()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts assertions cy.window %}
 
 # Examples
 

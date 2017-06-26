@@ -43,9 +43,13 @@ Option | Default | Description
 
 {% yields null cy.screenshot %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.screenshot %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.screenshot()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
+{% timeouts automation cy.screenshot %}
 
 # Examples
 

@@ -37,9 +37,13 @@ Option | Default | Description
 
 {% yields new_subject cy.title 'yields the `document.title` of the current page' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.title %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.title()` will continue to retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
+{% timeouts assertions cy.title %}
 
 # Examples
 

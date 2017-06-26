@@ -71,7 +71,13 @@ You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` a
 
 {% yields null cy.route %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.route %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.route %}
 
 # Examples
 

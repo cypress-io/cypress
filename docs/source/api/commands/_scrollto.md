@@ -64,6 +64,14 @@ Option | Default | Description
 
 `cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements scrollability .scrollTo %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .scrollTo %}
+
 # Examples
 
 ## Position

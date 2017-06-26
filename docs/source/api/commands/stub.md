@@ -47,7 +47,11 @@ Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (
 
 `cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
 
+{% requirements none cy.stub %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.stub %}
 
 # Examples
 

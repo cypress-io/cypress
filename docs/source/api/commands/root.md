@@ -42,9 +42,13 @@ Option | Default | Description
 
 The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a {% url `.within()` within %} command, the root element yielded is the yielded subject of the {% url `.within()` within %} command.
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.root %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.root()` will continue to look for the root element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts assertions cy.root %}
 
 # Examples
 

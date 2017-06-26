@@ -41,9 +41,13 @@ Option | Default | Description
 
 {% yields new_subject cy.reload 'yields the `window` object after the page finishes loading' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements page cy.reload %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.reload()` will wait for the load event of the newly loaded page for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% timeouts page cy.reload %}
 
 # Examples
 
@@ -86,5 +90,4 @@ When clicking on `reload` within the command log, the console outputs the follow
 # See also
 
 - {% url `cy.go()` go %}
-- {% url `cy.location()` location %}
 - {% url `cy.visit()` visit %}

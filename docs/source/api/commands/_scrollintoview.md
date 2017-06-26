@@ -48,9 +48,13 @@ Option | Default | Description
 
 {% yields same_subject .scrollIntoView %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none .scrollToIntoView %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.scrollIntoView()` will continue to scroll the element into view for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% timeouts assertions .scrollToIntoView %}
 
 # Examples
 

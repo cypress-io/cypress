@@ -86,6 +86,15 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const page = () => {
+    return render(`<ul>
+      <li><p>${cmd} requires the response to be <code>content-type: text/html</code>.</p></li>
+      <li><p>${cmd} requires the response code to be <code>2xx</code> after following redirects.</p></li>
+      <li><p>${cmd} requires the load <code>load</code> event to eventually fire.</p></li>
+      <li><p>${actionable}.</p></li>
+    </ul>`)
+  }
+
   switch (type) {
     case 'none':
       return none()
@@ -107,6 +116,8 @@ module.exports = function yields (hexo, args) {
       return readFile()
     case 'write_file':
       return writeFile()
+    case 'page':
+      return page()
     default:
       // error when an invalid usage option was provided
       throw new Error(`{% requirements %} tag helper was provided an invalid option: ${type}`)

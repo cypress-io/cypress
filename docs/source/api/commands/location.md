@@ -54,7 +54,13 @@ Option | Default | Description
 - `search`
 - `toString`
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.location %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.location %}
 
 # Examples
 

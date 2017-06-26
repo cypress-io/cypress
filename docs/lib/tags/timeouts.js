@@ -63,6 +63,13 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const page = () => {
+    return `<ul>
+    <li><p>${cmd} can time out waiting for the page to fire its <code>load</code> event.</p></li>
+    <li><p>${assertion}.</p></li>
+    </ul>`
+  }
+
   switch (type) {
     case 'assertions':
       return assertions()
@@ -76,6 +83,8 @@ module.exports = function yields (hexo, args) {
       return exec()
     case 'none':
       return none()
+    case 'page':
+      return page()
     default:
       // error when an invalid usage option was provided
       throw new Error(`{% timeouts %} tag helper was provided an invalid option: ${type}`)

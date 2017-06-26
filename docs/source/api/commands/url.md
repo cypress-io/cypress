@@ -43,7 +43,13 @@ Option | Default | Description
 
 {% yields new_subject cy.url 'yields the current URL as a string' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.url %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.url %}
 
 # Examples
 

@@ -45,9 +45,13 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 {% yields new_subject cy.visit 'yields the `window` object after the page finishes loading' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements page cy.visit %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.visit()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
+{% timeouts page cy.visit %}
 
 # Examples
 
@@ -206,7 +210,7 @@ When clicking on `visit` within the command log, the console outputs the followi
 # See also
 
 - {% url `cy.go()` go %}
+- {% url `cy.reload()` reload %}
+- {% url `cy.request()` request %}
 - {% url "Recipe: Bootstrapping App Test Data" working-with-the-backend %}
 - {% url "Recipe: Logging In - Single Sign on" logging-in %}
-- {% url `cy.request()` request %}
-- {% url `cy.server()` server %}

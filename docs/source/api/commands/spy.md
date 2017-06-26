@@ -41,7 +41,13 @@ Unlike most Cypress commands, `cy.spy()` is *synchronous* and returns a value (t
 
 `cy.spy()` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported.
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.spy %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.spy %}
 
 # Examples
 

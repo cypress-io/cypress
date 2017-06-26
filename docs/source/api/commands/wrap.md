@@ -41,7 +41,13 @@ Option | Default | Description
 
 {% yields new_subject cy.wrap 'yields the object it was called with' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.wrap %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.wrap %}
 
 # Examples
 

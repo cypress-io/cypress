@@ -60,6 +60,7 @@ Pass in an options object to change the default behavior of `.trigger()`.
 Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force trigger %}
 `bubbles` | `true` | Whether the event bubbles
 `cancelable` | `true` | Whether the event is cancelable
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .trigger %}
@@ -70,9 +71,13 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 {% yields same_subject .trigger %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements actionability .trigger %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`.trigger()` will wait until the element is in an 'interactable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% timeouts actionability .trigger %}
 
 # Examples
 

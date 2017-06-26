@@ -49,7 +49,13 @@ Option | Default | Description
 
 {% yields new_subject cy.hash "yields an empty string" %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements none cy.hash %}
+
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.hash %}
 
 # Examples
 

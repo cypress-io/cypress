@@ -44,9 +44,13 @@ Option | Default | Description
 
 {% yields new_subject cy.go 'yields the `window` object after the page finishes loading' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements page cy.go %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.go()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% timeouts page cy.go %}
 
 # Examples
 
