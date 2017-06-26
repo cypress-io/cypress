@@ -3,7 +3,7 @@ global.Promise = require('bluebird')
 const sinon = require('sinon')
 
 require('chai')
-  .use(require('sinon-chai'))
+  .use(require('@cypress/sinon-chai'))
 
 beforeEach(function () {
   this.sandbox = sinon.sandbox.create()

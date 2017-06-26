@@ -28,6 +28,7 @@
     "lib"
   ],
   "devDependencies": {
+    "@cypress/sinon-chai": "^1.0.0",
     "bin-up": "^1.0.1",
     "body-parser": "1.12.4",
     "chokidar-cli": "^1.2.0",
@@ -138,7 +139,6 @@
     "signal-exit": "^3.0.2",
     "sinon": "1.17.7",
     "sinon-as-promised": "3.0.1",
-    "sinon-chai": "cypress-io/sinon-chai#84d1085cac68f85c838471577e9d8cc811ca325d",
     "string-to-stream": "^1.0.1",
     "strip-ansi": "^3.0.1",
     "syntax-error": "^1.1.4",

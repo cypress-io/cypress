@@ -3,7 +3,7 @@ $ = require("jquery")
 Backbone = require("backbone")
 chai = require("chai")
 chaijQuery = require("chai-jquery")
-sinonChai = require("sinon-chai")
+sinonChai = require("@cypress/sinon-chai")
 
 $Dom = require("./dom")
 $Utils = require("./utils")
