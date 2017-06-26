@@ -73,6 +73,19 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const writeFile = () => {
+    return `<ul>
+      <li><p>${cmd} requires the file be successfully written to disk. Anything preventing this such as OS permission issues will cause it to fail.</p></li>
+    </ul>`
+  }
+
+  const readFile = () => {
+    return `<ul>
+      <li><p>${cmd} requires the file must exist.</p></li>
+      <li><p>${cmd} requires the file be successfully read from disk. Anything preventing this such as OS permission issues will cause it to fail.</p></li>
+    </ul>`
+  }
+
   switch (type) {
     case 'none':
       return none()
@@ -90,6 +103,10 @@ module.exports = function yields (hexo, args) {
       return exec()
     case 'exec_code':
       return execCode()
+    case 'read_file':
+      return readFile()
+    case 'write_file':
+      return writeFile()
     default:
       // error when an invalid usage option was provided
       throw new Error(`{% requirements %} tag helper was provided an invalid option: ${type}`)

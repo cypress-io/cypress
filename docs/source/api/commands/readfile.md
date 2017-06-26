@@ -53,15 +53,19 @@ Pass in an options object to change the default behavior of `cy.readFile()`.
 Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.readFile %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.readFile %}
 
 ## Yields {% helper_icon yields %}
 
 {% yields new_subject cy.readFile 'yields the contents of the file' %}
 
+## Requirements {% helper_icon defaultAssertion %}
+
+{% requirements read_file cy.readFile %}
+
 ## Timeouts {% helper_icon timeout %}
 
-`cy.readFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to process the command.
+{% timeouts assertions cy.readFile %}
 
 # Examples
 
@@ -135,7 +139,7 @@ cy.readFile('path/to/logo.png', 'base64').then(function (logo) {
 
 # Notes
 
-**Implicit file existence assertion**
+**Default Assertions: file existence**
 
 By default, `cy.readFile()` asserts that the file exists and will fail if it does not exist. It will retry reading the file if it does not initially exist until the file exists or the command times out.
 
@@ -150,7 +154,17 @@ You can assert that a file does not exist like so:
 
 ```javascript
 // will pass if the file does not exist
-cy.readFile('does-not-exist.yaml').should("not.exist")
+cy.readFile('does-not-exist.yaml').should('not.exist')
+```
+
+**Automatic Retries**
+
+`cy.readFile()` will continue to read the file until it passes all of its assertions.
+
+```javascript
+// if this assertion fails cy.readFile will poll the file
+// until it eventually passes its assertions (or time out)
+cy.readFile('some/nested/path/story.txt').should('eq', 'Once upon a time...')
 ```
 
 # Command Log
