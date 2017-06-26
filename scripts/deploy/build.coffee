@@ -13,11 +13,25 @@ coffee = require("@packages/coffee")
 electron = require("@packages/electron")
 packages = require("./util/packages")
 Darwin = require("./darwin")
+Linux = require("./linux")
 
 fs = Promise.promisifyAll(fs)
 
 log = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
+
+runDarwinSmokeTest = ->
+  darwin = new Darwin("darwin")
+  darwin.runSmokeTest()
+
+runLinuxSmokeTest = ->
+  linux = new Linux("linux")
+  linux.runSmokeTest()
+
+smokeTests = {
+  darwin: runDarwinSmokeTest,
+  linux: runLinuxSmokeTest
+}
 
 module.exports = (platform, version) ->
   ## returns a path into the /dist directory
@@ -35,7 +49,7 @@ module.exports = (platform, version) ->
       when "darwin"
         buildDir("Cypress.app", "Contents", "resources", "app", args...)
       when "linux"
-        buildDir("Cypress", "resources", "app", args...)
+        buildDir("resources", "app", args...)
 
   cleanupPlatform = ->
     log("#cleanupPlatform", platform)
@@ -74,7 +88,10 @@ module.exports = (platform, version) ->
       env: "production"
     })
     .then =>
-      str = "require('./packages/server')"
+      str = """
+      process.env.CYPRESS_ENV = 'production'
+      require('./packages/server')
+      """
 
       fs.outputFileAsync(distDir("index.js"), str)
 
@@ -156,8 +173,9 @@ module.exports = (platform, version) ->
 
   runSmokeTest = ->
     log("#runSmokeTest", platform)
-    darwin = new Darwin(platform)
-    darwin.runSmokeTest()
+    # console.log("skipping smoke test for now")
+    smokeTest = smokeTests[platform]
+    smokeTest()
 
   Promise
   .bind(@)

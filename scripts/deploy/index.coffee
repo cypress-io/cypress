@@ -105,6 +105,9 @@ deploy = {
 
   deploy: ->
     ## read off the argv
+    # to skip further questions like platform and version
+    # pass these as options like this
+    #   npm run deploy -- --platform darwin --version 0.20.0
     options = @parseOptions(process.argv)
 
     askWhichPlatform(options.platform)

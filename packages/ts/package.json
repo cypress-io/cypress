@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "files": [
-    "tsconfig.json"
+    "register.js"
   ],
   "scripts": {
     "test": "node test"

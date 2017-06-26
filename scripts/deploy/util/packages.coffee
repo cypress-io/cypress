@@ -113,6 +113,14 @@ npmInstallAll = (pathToPackages) ->
   .then ->
     console.log("Finished NPM Installing", new Date() - started)
 
+removePackageJson = (filename) ->
+  if filename.endsWith("/package.json") then path.dirname(filename) else filename
+
+ensureFoundSomething = (files) ->
+  if files.length == 0
+    throw new Error("Could not find any files")
+  files
+
 symlinkAll = (pathToDistPackages, pathTo) ->
   console.log("symlink these packages", pathToDistPackages)
   baseDir = path.dirname(pathTo())
@@ -122,6 +130,7 @@ symlinkAll = (pathToDistPackages, pathTo) ->
     # console.log(pkg, dist)
     ## strip off the initial './'
     ## ./packages/foo -> node_modules/@packages/foo
+    pkg = removePackageJson(pkg)
     dest = pathTo("node_modules", "@packages", path.basename(pkg))
 
     console.log(toBase(pkg), "link ->", toBase(dest))
@@ -132,6 +141,7 @@ symlinkAll = (pathToDistPackages, pathTo) ->
     )
 
   glob(pathToDistPackages)
+  .then(ensureFoundSomething)
   .map(symlink)
 
 module.exports = {

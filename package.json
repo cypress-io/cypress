@@ -19,6 +19,7 @@
     "postinstall": "npm run link && npm run all install && npm run build",
     "clean-deps": "npm run all clean-deps",
     "docker": "./scripts/run-docker-local.sh",
+    "build-linux-binary": "./scripts/build-linux-binary.sh",
     "lint-js": "eslint --fix scripts/*.js",
     "lint-coffee": "coffeelint scripts/*.coffee scripts/**/*.coffee",
     "lint": "npm run lint-js && npm run lint-coffee",
@@ -26,6 +27,7 @@
     "precommit": "lint-staged",
     "precommit-lint": "eslint --fix --rule 'no-only-tests/no-only-tests: 2'",
     "bump": "gulp bump",
+    "no-predeploy": "echo 'Just to be safe, rebuilding Sass binary' && npm rebuild node-sass",
     "deploy": "node ./scripts/deploy.js",
     "release": "gulp release"
   },

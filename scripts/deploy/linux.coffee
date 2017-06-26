@@ -18,7 +18,7 @@ class Linux extends Base
     @buildPathToApp()
 
   buildPathToApp: ->
-    path.join @buildPathToAppFolder(), "Cypress"
+    path.join @buildPathToAppFolder() #, "Cypress"
 
   buildPathToAppExecutable: ->
     path.join @buildPathToApp(), "Cypress"
@@ -40,12 +40,15 @@ class Linux extends Base
       @tryXvfb(@_runFailingProjectTest)
 
   tryXvfb: (p) ->
+    console.log("tryXvfb")
     xvfb = new Xvfb()
     xvfb = Promise.promisifyAll(xvfb)
     xvfb.startAsync()
-    .then (xvfxProcess) =>
+    .then (xvfbProcess) =>
+      console.log("executing in xvfb process %j", xvfbProcess)
       Promise.try(p.bind(@))
       .finally ->
+        console.log("stopping xvfb")
         xvfb.stopAsync()
 
   runSmokeTest: ->
