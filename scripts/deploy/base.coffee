@@ -386,7 +386,12 @@ class Base
       new Promise (resolve, reject) =>
         rand = "" + Math.random()
 
-        cp.exec "#{@buildPathToAppExecutable()} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
+        options = {
+          env: {
+            CYPRESS_ENV: "production"
+          }
+        }
+        cp.exec "#{@buildPathToAppExecutable()} --smoke-test --ping=#{rand}", options, (err, stdout, stderr) ->
           stdout = stdout.replace(/\s/, "")
 
           return reject(err) if err
