@@ -29,6 +29,7 @@
     "bump": "gulp bump",
     "no-predeploy": "echo 'Just to be safe, rebuilding Sass binary' && npm rebuild node-sass",
     "deploy": "node ./scripts/deploy.js deploy",
+    "upload": "node ./scripts/deploy.js upload",
     "release": "gulp release"
   },
   "lint-staged": {

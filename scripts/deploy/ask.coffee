@@ -13,6 +13,13 @@ fs = Promise.promisifyAll(fs)
 
 module.exports = {
 
+  getZipFile: ->
+    [{
+      name: "zipFile"
+      type: "string"
+      message: "Which zip file should we upload?"
+    }]
+
   getPlatformQuestion: ->
     [{
       name: "platform"
@@ -103,6 +110,10 @@ module.exports = {
           answers.version
         else
           json.version
+
+  whichZipFile: () ->
+    prompt(@getZipFile())
+    .get("zipFile")
 
   whichVersion: (distDir) ->
     ## realpath returns the absolute full path
