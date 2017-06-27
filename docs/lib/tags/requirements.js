@@ -14,7 +14,6 @@ module.exports = function yields (hexo, args) {
   const parentCmd = `${cmd} requires being chained off of <code>cy</code>`
   const childCmd = `${cmd} requires being chained off a previous command`
   const childCmdDom = `${cmd} requires being chained off a command that yields DOM element(s)`
-  const dualCmd = `${cmd} can be chained off of <code>cy</code> or off a command that yeilds DOM element(s)`
 
   const parentOrChild = () => {
     return (args[1] === 'cy.get' || args[1] === 'cy.focused') ? parentCmd : childCmdDom
@@ -85,6 +84,18 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const dual = () => {
+    return `<ul>
+      <li><p>${cmd} can be chained off of <code>cy</code> or off another command.</p></li>
+    </ul>`
+  }
+
+  const dualExistence = () => {
+    return `<ul>
+      <li><p>${cmd} can be chained off of <code>cy</code> or off a command that yields DOM element(s).</p></li>
+    </ul>`
+  }
+
   const exec = () => {
     return `<ul>
       <li><p>${cmd} requires the executed system command to eventually exit.</p></li>
@@ -129,6 +140,10 @@ module.exports = function yields (hexo, args) {
       return child()
     case 'child_dom':
       return childDom()
+    case 'dual':
+      return dual()
+    case 'dual_existence':
+      return dualExistence()
     case 'clearability':
       return clearability()
     case 'blurability':

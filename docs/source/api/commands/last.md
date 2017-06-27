@@ -42,18 +42,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .last %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .last %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .last %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .last %}
-
 # Examples
 
 ## Last element
@@ -73,6 +61,20 @@ Option | Default | Description
 // yields <li class="four">Knick knack on my door</li>
 cy.get('li').last()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .last %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .last %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .last %}
 
 # Command Log
 

@@ -20,8 +20,6 @@ cy.viewport(preset, orientation, options)
 
 ## Usage
 
-`cy.viewport()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -71,14 +69,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 {% yields null cy.viewport %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.viewport %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none cy.viewport %}
 
 # Examples
 
@@ -175,6 +165,20 @@ By default, if your screen is not large enough to display all of the current dim
 Scaling the app should not affect any calculations or behavior of your application (in fact it won't even know it's being scaled).
 
 The upsides to this are that tests should consistently pass or fail regardless of a developers' screen size. Tests will also consistently run in `CI` because all of the viewports will be the same no matter what machine Cypress runs on.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.viewport %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.viewport %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.viewport %}
 
 # Command Log
 

@@ -48,18 +48,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .next %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .next %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .next %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .next %}
-
 # Examples
 
 ## Next
@@ -96,6 +84,20 @@ cy.get('.second').next()
 // yields <li>pineapples</li>
 cy.get('li').next('.selected')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .next %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .next %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .next %}
 
 # Command Log
 

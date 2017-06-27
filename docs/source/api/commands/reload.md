@@ -16,8 +16,6 @@ cy.reload(forceReload, options)
 
 ## Usage
 
-`cy.reload()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -41,14 +39,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.reload 'yields the `window` object after the page finishes loading' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements page cy.reload %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts page cy.reload %}
-
 # Examples
 
 ## Reload
@@ -70,6 +60,20 @@ cy.get('#undo-btn').click().should('not.be.visible')
 cy.visit('http://localhost:3000/admin')
 cy.reload(true)
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements page cy.reload %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.reload %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts page cy.reload %}
 
 # Command Log
 

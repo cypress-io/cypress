@@ -42,18 +42,6 @@ Option | Default | Description
 
 {% yields same_subject .focus %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements focusability .focus %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions wait .focus %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions .focus %}
-
 # Examples
 
 ## Focus
@@ -84,6 +72,20 @@ Ensure the element you are trying to call `.focus()` on is a {% url 'focusable e
 **Can time out because your browser did not receive any focus events.**
 
 If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements focusability .focus %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .focus %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .focus %}
 
 # Command Log
 

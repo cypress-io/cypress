@@ -14,8 +14,6 @@ End a chain of commands.
 
 ## Usage
 
-`.end()` should be chained off another cy command.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -31,14 +29,6 @@ cy.end()                  // Does not make sense to chain off 'cy'
 ## Yields {% helper_icon yields %}
 
 {% yields null .end %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements none .end %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none .end %}
 
 # Examples
 
@@ -57,6 +47,20 @@ Alternatively, you can always start a new chain of commands of of `cy`.
 cy.contains('User: Cheryl').click()
 cy.contains('User: Charles').click()  // contains looks for content in document now
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .end %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none .end %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .end %}
 
 # Command Log
 

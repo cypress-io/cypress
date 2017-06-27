@@ -48,18 +48,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .children %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .children %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .children %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .children %}
-
 # Examples
 
 ## Children
@@ -112,6 +100,20 @@ cy.get('ul.secondary-nav').children()
 // yields [<li class="active">Unit Testing</li>]
 cy.get('ul').children('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .children %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .children %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .children %}
 
 # Command Log
 

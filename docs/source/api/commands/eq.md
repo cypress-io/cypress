@@ -53,18 +53,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .eq %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .eq %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .eq %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .eq %}
-
 # Examples
 
 ## Index
@@ -102,6 +90,20 @@ cy.get('li').eq(1).should('contain', 'siamese') // true
 ```javascript
 cy.get('li').eq(-2).should('contain', 'sphynx') // true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .eq %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .eq %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .eq %}
 
 # Command Log
 

@@ -18,8 +18,6 @@ You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
 
 ## Usage
 
-`.debug()` can be chained off of `cy` or any cy command.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -41,14 +39,6 @@ Option | Default | Description
 
 {% yields same_subject .debug %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements none .debug %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none .debug %}
-
 # Examples
 
 ## Debug
@@ -58,6 +48,20 @@ Option | Default | Description
 ```javascript
 cy.get('a').debug().should('have.attr', 'href')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual .debug %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none .debug %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .debug %}
 
 # Command Log
 

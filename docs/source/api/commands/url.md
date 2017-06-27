@@ -41,18 +41,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.url 'yields the current URL as a string' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.url %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions retry cy.url %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.url %}
-
 # Examples
 
 ## Url
@@ -91,6 +79,20 @@ cy.url().should('eq', 'http://localhost:8000/index.html')
 But you may be wondering where the `url` property comes from.  Per the `window.location` spec, there actually isn't a `url` property on the `location` object.
 
 `cy.url()` exists because it's what most developers naturally assume would return them the full current URL.  We almost never refer to the URL as an `href`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.url %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.url %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.url %}
 
 # Command Log
 

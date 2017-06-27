@@ -48,18 +48,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prev %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .prev %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .prev %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .prev %}
-
 # Examples
 
 ## Previous
@@ -99,6 +87,20 @@ cy.get('.active').prev()
 // yields <li>Cockatoos</li>
 cy.get('li').prev('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .prev %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prev %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prev %}
 
 # Command Log
 

@@ -14,8 +14,6 @@ cy.title(options)
 
 ## Usage
 
-`cy.title()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -37,6 +35,18 @@ Option | Default | Description
 
 {% yields sets_subject cy.title 'yields the `document.title` property of the current page' %}
 
+# Examples
+
+## Title
+
+**Assert that the document's title is "My Awesome Application"**
+
+```javascript
+cy.title().should('eq', 'My Awesome Application')
+```
+
+# Rules
+
 ## Requirements {% helper_icon requirements %}
 
 {% requirements parent cy.title %}
@@ -48,16 +58,6 @@ Option | Default | Description
 ## Timeouts {% helper_icon timeout %}
 
 {% timeouts assertions cy.title %}
-
-# Examples
-
-## Title
-
-**Assert that the document's title is "My Awesome Application"**
-
-```javascript
-cy.title().should('eq', 'My Awesome Application')
-```
 
 # Command Log
 

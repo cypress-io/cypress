@@ -16,8 +16,6 @@ cy.fixture(filePath, encoding, options)
 
 ## Usage
 
-`cy.fixture()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -66,14 +64,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 `cy.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.fixture %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.fixture %}
 
 # Examples
 
@@ -218,6 +208,20 @@ Cypress automatically determines the encoding for the following file types:
 * `.zip`
 
 For other types of files, they will be read as `utf8` by default, unless specified in the second argument of `cy.fixture()`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.fixture %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.fixture %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.fixture %}
 
 # Command Log
 

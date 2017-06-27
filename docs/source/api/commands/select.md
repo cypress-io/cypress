@@ -53,18 +53,6 @@ Option | Default | Description
 
 {% yields same_subject .select %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements selectability .select %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions actions .select %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .select %}
-
 # Examples
 
 ## Text Content
@@ -130,6 +118,20 @@ cy.get('select').select(['apples', 'bananas'])
 ```javascript
 cy.get('select').select(['456', '457'])
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements selectability .select %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .select %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .select %}
 
 # Command Log
 

@@ -52,18 +52,6 @@ Option | Default | Description
 
 {% yields same_subject .clear %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements clearability .clear %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions actions .clear %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .clear %}
-
 # Examples
 
 ## Clear
@@ -75,6 +63,20 @@ Prior to clearing, if the element isn't currently focused, Cypress issues a {% u
 ```javascript
 cy.get('textarea').clear().type('Hello, World')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements clearability .clear %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .clear %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .clear %}
 
 # Command Log
 

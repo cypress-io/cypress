@@ -51,18 +51,6 @@ Option | Default | Description
 
 `cy.getCookie()` yields `null`.
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.getCookie %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions once cy.getCookie %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.getCookie %}
-
 # Examples
 
 ## Get Cookie
@@ -84,6 +72,20 @@ cy.getCookie('session_id')
 {% note info %}
 Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in %}, {% url 'logging in using XHR web forms' logging-in %} and {% url 'logging in with single sign on' logging-in %}
 {% endnote %}
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.getCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.getCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.getCookie %}
 
 # Command Log
 

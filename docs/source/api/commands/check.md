@@ -60,18 +60,6 @@ Option | Default | Description
 
 {% yields same_subject .check %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements checkability .check %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions actions .check %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .check %}
-
 # Examples
 
 ## Check
@@ -120,6 +108,20 @@ You can ignore Cypress' default behavior of checking that the element is visible
 cy.get('.action-checkboxes').should('not.be.visible') // Passes
   .check({ force: true }).should('be.checked')        // Passes
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements checkability .check %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .check %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .check %}
 
 # Command Log
 

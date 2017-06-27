@@ -18,8 +18,6 @@ This does not set a `debugger` in your code, unlike {% url `.debug()` debug %}
 
 ## Usage
 
-`.pause()` can be chained off of `cy` or any cy command.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -41,8 +39,6 @@ Option | Default | Description
 
 {% yields same_subject .pause %}
 
-## Timeouts {% helper_icon timeout %}
-
 # Examples
 
 ## Pause
@@ -53,6 +49,20 @@ Option | Default | Description
 cy.get('a').should('have.attr', 'href').and('match', /dashboard/).pause()
 cy.get('button').should('not.be.disabled')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual .pause %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none .pause %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .pause %}
 
 # Command Log
 

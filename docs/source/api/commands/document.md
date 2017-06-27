@@ -14,8 +14,6 @@ cy.document(options)
 
 ## Usage
 
-`cy.document()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -37,14 +35,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.document 'yields the `window.document` object' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.document %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.document %}
-
 # Examples
 
 ## Document
@@ -62,6 +52,20 @@ cy.document().then(function(document) {
 ```javascript
 cy.document().its('contentType').should('eq', 'text/html')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.document %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.document %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.document %}
 
 # Command Log
 

@@ -51,18 +51,6 @@ Option | Default | Description
 
 {% yields sets_dom_subject cy.get %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence cy.get %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence cy.get %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence cy.get %}
-
 # Examples
 
 ## Selector
@@ -124,6 +112,20 @@ it('disables on click', function(){
   cy.get('@submitBtn').should('be.disabled')
 })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence cy.get %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.get %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence cy.get %}
 
 # Command Log
 

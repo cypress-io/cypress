@@ -73,18 +73,6 @@ Option | Default | Description
 
 {% yields same_subject .type %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements child_dom .type %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions actions .type %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .type %}
-
 # Examples
 
 ## Input/Textarea
@@ -405,6 +393,20 @@ However, when Cypress is run in `cross browser mode`, Cypress uses the actual `O
 This strategy works well because when you are in development you are working in Chrome.  Using simulated events is extremely fast, the browser window does *not* need to be in focus. Because we simulate events identically to their native counterpart, your application code won't be able to tell the difference.
 
 In other words, you get the best of both worlds: simulated when its practical to do so, and native when it needs to run across browsers.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child_dom .type %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .type %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .type %}
 
 # Command Log
 

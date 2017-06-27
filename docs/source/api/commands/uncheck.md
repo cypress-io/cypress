@@ -18,8 +18,6 @@ Uncheck checkbox(es).
 
 ## Usage
 
-`.uncheck()` requires being chained off another cy command that *yields* a DOM element of type `checkbox`.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -57,14 +55,6 @@ Option | Default | Description
 
 {% yields same_subject .uncheck %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements checkability .uncheck %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .uncheck %}
-
 # Examples
 
 ## Uncheck
@@ -96,6 +86,20 @@ cy.get('input[type="checkbox"]').uncheck(['ga'])
 ```javascript
 cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])
 ```
+
+# Notes
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements checkability .uncheck %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .uncheck %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .uncheck %}
 
 # Command Log
 

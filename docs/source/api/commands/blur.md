@@ -48,18 +48,6 @@ Option | Default | Description
 
 {% yields same_subject .blur %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements blurability .blur %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions wait .blur %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions .blur %}
-
 # Examples
 
 ## Blur
@@ -79,6 +67,20 @@ Setting `force` to `true` in the options disables checking whether the input is 
 ```javascript
 cy.get('input:first').blur({ force: true })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements blurability .blur %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .blur %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .blur %}
 
 # Notes
 

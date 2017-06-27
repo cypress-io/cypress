@@ -64,14 +64,6 @@ Option | Default | Description
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.clock %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none cy.clock %}
-
 # Examples
 
 ## Clock
@@ -188,6 +180,20 @@ Note that `cy.clock()` only applies to the `top` window on a web page. It will n
 **clock behavior before `cy.visit()`**
 
 If you call `cy.clock()` before visiting a page with {% url `cy.visit()` visit %}, the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via {% url `cy.tick()` tick %}. This also applies if, during the course of a test, the page under test is reloaded or changed.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clock %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clock %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.clock %}
 
 # Command Log
 

@@ -44,18 +44,6 @@ Option | Default | Description
 
 {% yields null cy.clearLocalStorage %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.clearLocalStorage %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions none cy.clearLocalStorage %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none cy.clearLocalStorage %}
-
 # Examples
 
 ## Clear Local Storage
@@ -79,6 +67,20 @@ cy.clearLocalStorage('appName')
 ```javascript
 cy.clearLocalStorage(/app-/)
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clearLocalStorage %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearLocalStorage %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.clearLocalStorage %}
 
 # Command Log
 

@@ -13,8 +13,6 @@ Scopes all subsequent cy commands to within this element. Useful when working wi
 
 ## Usage
 
-`.within()` requires being chained off another cy command that *yields* a DOM element.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript

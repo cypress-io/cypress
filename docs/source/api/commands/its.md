@@ -41,18 +41,6 @@ Name of property or nested properties (with dot notation) to get.
 
 {% yields changes_subject .its 'yields the value of the property' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements child .its %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions its .its %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts its .its %}
-
 # Examples
 
 ## Plain Objects
@@ -142,6 +130,20 @@ var user = {
 
 cy.wrap(user).its('contacts.work.name').should('eq', 'Kamil') // true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .its %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions its .its %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts its .its %}
 
 # Command Log
 

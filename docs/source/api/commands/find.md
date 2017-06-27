@@ -46,18 +46,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .find %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .find %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .find %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .find %}
-
 # Examples
 
 ## Selector
@@ -75,6 +63,20 @@ Option | Default | Description
 // yields [<li class="first"></li>, <li class="second"></li>]
 cy.get('#parent').find('li')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .find %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .find %}
 
 # Command Log
 

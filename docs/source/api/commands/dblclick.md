@@ -44,6 +44,18 @@ Option | Default | Description
 
 {% yields same_subject .dblclick %}
 
+# Examples
+
+## Double Click
+
+**Double click an anchor link**
+
+```javascript
+cy.get('a#nav1').dblclick() // yields the <a>
+```
+
+# Rules
+
 ## Requirements {% helper_icon requirements %}
 
 {% requirements child_dom .dblclick %}
@@ -55,16 +67,6 @@ Option | Default | Description
 ## Timeouts {% helper_icon timeout %}
 
 {% timeouts actions .dblclick %}
-
-# Examples
-
-## Double Click
-
-**Double click an anchor link**
-
-```javascript
-cy.get('a#nav1').dblclick() // yields the <a>
-```
 
 # Command Log
 

@@ -48,18 +48,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .parent %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .parent %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .parent %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .parent %}
-
 # Examples
 
 ## Parent
@@ -77,6 +65,20 @@ cy.get('li.active').parent()
 ```javascript
 cy.get('li.active').parent('.nav')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .parent %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parent %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parent %}
 
 # Command Log
 

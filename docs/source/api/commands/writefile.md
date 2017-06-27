@@ -16,8 +16,6 @@ cy.writeFile(filePath, contents, encoding, options)
 
 ## Usage
 
-`cy.writeFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -61,14 +59,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 {% yields sets_subject cy.writeFile 'yields the contents written to the file' %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements write_file cy.writeFile %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.writeFile %}
 
 # Examples
 
@@ -140,6 +130,20 @@ cy.writeFile('path/to/ascii.txt', 'Hello World', 'ascii'))
 ```text
 Hello World
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements write_file cy.writeFile %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.writeFile %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.writeFile %}
 
 # Command Log
 

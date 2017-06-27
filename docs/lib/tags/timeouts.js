@@ -66,7 +66,7 @@ module.exports = function yields (hexo, args) {
 
   const none = () => {
     return `<ul>
-      <li><p>${cmd} can not time out, nor can you add any assertions.</p></li>
+      <li><p>${cmd} can not time out.</p></li>
     </ul>`
   }
 

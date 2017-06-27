@@ -18,8 +18,6 @@ If you want to get a property that is not a function on the previously yielded s
 
 ## Usage
 
-`.invoke()` requires being chained off another cy command that *yields* an object with function properties.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -47,8 +45,6 @@ Additional arguments to be given to the function call. There is no limit to the 
 ## Yields {% helper_icon yields %}
 
 {% yields changes_subject .invoke 'yields the return value of the invoked function' }
-
-## Timeouts {% helper_icon timeout %}
 
 # Examples
 
@@ -140,6 +136,20 @@ cy
   .get('img').invoke('attr', 'src')
     .should('include', 'myLogo')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .invoke %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry .invoke %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .invoke %}
 
 # Command Log
 

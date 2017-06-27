@@ -47,18 +47,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.hash "yields an empty string" %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.hash %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions retry cy.hash %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.hash %}
-
 # Examples
 
 ## Hash
@@ -84,6 +72,20 @@ cy.hash().should('eq', '#/users/1') // => true
 cy.get('#users li').find('a').click()
 cy.hash().should('match', /users\/.+$/) // => true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.hash %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.hash %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.hash %}
 
 # Command Log
 

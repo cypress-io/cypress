@@ -49,18 +49,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .siblings %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .siblings %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .siblings %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .siblings %}
-
 # Examples
 
 ## Siblings
@@ -89,6 +77,20 @@ cy.get('.active').siblings()
 // yields <li class="active">Services</li>
 cy.get('li').siblings('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .siblings %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .siblings %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .siblings %}
 
 # Command Log
 

@@ -48,18 +48,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prevAll %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .prevAll %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .prevAll %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .prevAll %}
-
 # Examples
 
 ## All Previous
@@ -99,6 +87,20 @@ cy.get('.third').prevAll()
 // yields <li>pineapples</li>
 cy.get('li').prevAll('.selected')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .prevAll %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prevAll %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prevAll %}
 
 # Command Log
 

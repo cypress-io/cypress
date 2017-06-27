@@ -13,8 +13,6 @@ Iterate through an array like structure (arrays or objects with a `length` prope
 
 ## Usage
 
-`.each()` requires being chained off another cy command that *yields* an array like structure (arrays or objects with a `length` property).
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -43,14 +41,6 @@ Pass a function that is invoked with the following arguments:
 ## Yields {% helper_icon yields %}
 
 {% yields same_subject .each %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements none .each %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none .each %}
 
 # Examples
 
@@ -109,6 +99,20 @@ cy.wrap([1,2,3]).each(function(num, i, array){
 **Stop `each` prematurely**
 
 You can stop the `.each()` loop early by returning `false` in the callback function.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements none .each %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once .each %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .each %}
 
 # Command Log
 

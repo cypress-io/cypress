@@ -15,8 +15,6 @@ cy.go(direction, options)
 
 ## Usage
 
-`cy.go()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -43,14 +41,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 {% yields sets_subject cy.go 'yields the `window` object after the page finishes loading' %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements page cy.go %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts page cy.go %}
 
 # Examples
 
@@ -87,6 +77,20 @@ cy.go(1)        // equivalent to clicking forward button
 **Refreshing and loading the page**
 
 If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements page cy.go %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.go %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts page cy.go %}
 
 # Command Log
 

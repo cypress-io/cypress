@@ -45,18 +45,6 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 {% yields sets_subject cy.visit 'yields the `window` object after the page finishes loading' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements page cy.visit %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions wait cy.visit %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts page cy.visit %}
-
 # Examples
 
 ## Visit
@@ -195,6 +183,20 @@ cy.visit('http://localhost:8000/#/app')
 
 Cypress will automatically apply the server and routes to the very next `cy.visit()` and does so immediately before any of your application code runs.
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements page cy.visit %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.visit %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts page cy.visit %}
+
 # Command Log
 
 **Visit example application in a `beforeEach`**
@@ -212,7 +214,6 @@ The commands above will display in the command log as:
 When clicking on `visit` within the command log, the console outputs the following:
 
 ![Console log visit](/img/api/visit/visit-shows-any-redirect-or-cookies-set-in-the-console.png)
-
 
 # See also
 

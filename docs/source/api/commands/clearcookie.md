@@ -11,7 +11,6 @@ Cypress automatically clears all cookies *before* each test to prevent state fro
 
 # Syntax
 
-
 ```javascript
 cy.clearCookie(name)
 cy.clearCookie(name, options)
@@ -44,18 +43,6 @@ Option | Default | Description
 
 {% yields null cy.clearCookie %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.clearCookie %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions none cy.clearCookie %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.clearCookie %}
-
 # Examples
 
 ## Clear Cookie
@@ -72,6 +59,20 @@ cy.clearCookie('session_id')
 cy.visit('/dashboard') // we should be redirected back to login
 cy.url().should('include', 'login')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clearCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.clearCookie %}
 
 # Command Log
 

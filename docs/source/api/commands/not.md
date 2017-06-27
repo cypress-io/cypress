@@ -50,6 +50,18 @@ Option | Default | Description
 
 {% yields changes_dom_subject .not %}
 
+# Examples
+
+## Selector
+
+**Yield the elements that do not have class `active`.**
+
+```javascript
+cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
+```
+
+# Rules
+
 ## Requirements {% helper_icon requirements %}
 
 {% requirements existence .not %}
@@ -61,16 +73,6 @@ Option | Default | Description
 ## Timeouts {% helper_icon timeout %}
 
 {% timeouts existence .not %}
-
-# Examples
-
-## Selector
-
-**Yield the elements that do not have class `active`.**
-
-```javascript
-cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
-```
 
 # Command Log
 

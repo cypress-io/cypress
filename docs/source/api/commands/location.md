@@ -58,18 +58,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.location 'yields the value of the location property as a string' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.location %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions retry cy.location %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.location %}
-
 # Examples
 
 ## Location Properties
@@ -143,6 +131,20 @@ cy.location().then(function(location){
 ```
 
 ![Console Log of Cypress location command](/img/api/location/special-cypress-location-object-logged-in-console-output.png)
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.location %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.location %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.location %}
 
 # Command Log
 

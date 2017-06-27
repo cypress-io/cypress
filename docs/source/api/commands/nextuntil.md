@@ -59,18 +59,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .nextUntil %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .nextUntil %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .nextUntil %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .nextUntil %}
-
 # Examples
 
 ## Selector
@@ -98,6 +86,20 @@ Option | Default | Description
 //returns [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
 cy.get('#veggies').nextUntil('#nuts')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .nextUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .nextUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .nextUntil %}
 
 # Command Log
 

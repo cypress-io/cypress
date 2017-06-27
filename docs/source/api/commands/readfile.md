@@ -57,18 +57,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.readFile 'yields the contents of the file' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements read_file cy.readFile %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions retry cy.readFile %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.readFile %}
-
 # Examples
 
 ## Text
@@ -168,6 +156,20 @@ cy.readFile('does-not-exist.yaml').should('not.exist')
 // until it eventually passes its assertions (or time out)
 cy.readFile('some/nested/path/story.txt').should('eq', 'Once upon a time...')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements read_file cy.readFile %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.readFile %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.readFile %}
 
 # Command Log
 

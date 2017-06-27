@@ -58,18 +58,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .parentsUntil %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .parentsUntil %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .parentsUntil %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .parentsUntil %}
-
 # Examples
 
 ## Selector
@@ -96,6 +84,20 @@ Option | Default | Description
 // yields [ul.menu, li]
 cy.get('.active').parentsUntil('.nav')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .parentsUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parentsUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parentsUntil %}
 
 # Command Log
 

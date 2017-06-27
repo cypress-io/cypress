@@ -15,8 +15,6 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 
 ## Usage
 
-`.contains()` can be chained off of `cy` to find content within the entire document or chained off another cy command that *yields* a DOM element - limiting it's search of content to within yielded element.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -53,14 +51,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 {% yields changes_dom_subject .contains %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .contains %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .contains %}
 
 # Examples
 
@@ -311,6 +301,20 @@ You could also chain the second contains off of a parent command (such as {% url
 cy.contains('Delete User').click()
 cy.get('#dialog').contains('Yes, Delete!').click()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual_existence .contains %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .contains %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .contains %}
 
 # Command Log
 

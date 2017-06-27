@@ -11,7 +11,7 @@ comments: false
 
 - **{% url 'Cypress API:' cypress-commands %}** Configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
 
-# Definitions
+# Rules
 
 Each document attempts to cover the essentials of each method including:
 

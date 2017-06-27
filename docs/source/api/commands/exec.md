@@ -68,18 +68,6 @@ Option | Default | Description
 - `stdout`
 - `stderr`
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements exec cy.exec %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions once cy.exec %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts exec cy.exec %}
-
 # Examples
 
 ## Prepping data
@@ -168,6 +156,20 @@ cy
 - Any process that needs to be manually interrupted to stop
 
 A command must exit within the `execTimeout` or Cypress will kill the command's process and fail the current test.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements exec cy.exec %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.exec %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts exec cy.exec %}
 
 # Command Log
 

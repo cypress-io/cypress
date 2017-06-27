@@ -42,18 +42,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .first %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .first %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .find %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .first %}
-
 # Examples
 
 ## First element
@@ -73,6 +61,20 @@ Option | Default | Description
 // yields <li class="one">Knick knack on my thumb</li>
 cy.get('li').first()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .first %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .first %}
 
 # Command Log
 

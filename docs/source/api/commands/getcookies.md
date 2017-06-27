@@ -14,8 +14,6 @@ cy.getCookies(options)
 
 ## Usage
 
-`cy.getCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -45,14 +43,6 @@ Option | Default | Description
 - `secure`
 - `expiry`
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.getCookies %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.getCookies %}
-
 # Examples
 
 ## Get Cookies
@@ -71,6 +61,20 @@ cy.getCookies()
     expect(cookies[0]).to.have.property('name', 'session_id')
   })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.getCookies %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.getCookies %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.getCookies %}
 
 # Command Log
 

@@ -14,8 +14,6 @@ cy.wrap(subject, options)
 
 ## Usage
 
-`cy.wrap()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -41,14 +39,6 @@ Option | Default | Description
 
 {% yields sets_subject cy.wrap 'yields the object it was called with' %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.wrap %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.wrap %}
-
 # Examples
 
 ## Wrap
@@ -62,6 +52,20 @@ var getName = function() {
 
 cy.wrap({name: getName}).invoke('name').should('eq', 'Jane Lane') // true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.wrap %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.wrap %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.wrap %}
 
 # Command Log
 

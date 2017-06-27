@@ -64,18 +64,6 @@ Option | Default | Description
 
 {% yields same_subject .click %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements child_dom .click %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions actions .click %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .click %}
-
 # Examples
 
 ## Click
@@ -192,6 +180,20 @@ However, sometimes when dealing with 3rd party plugins that animate, Cypress' lo
 Cypress attempts to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event.
 
 These situations are rare, but if you're having a difficult time clicking an element or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with {% url 'cy.wait()' wait %}. It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child_dom .click %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .click %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .click %}
 
 # Command Log
 

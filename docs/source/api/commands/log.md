@@ -14,8 +14,6 @@ cy.log(message, args...)
 
 ## Usage
 
-`cy.log()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -36,8 +34,6 @@ Additional arguments to be printed to the Cypress Command Log. There is no limit
 
 {% yields null cy.log %}
 
-## Timeouts {% helper_icon timeout %}
-
 # Examples
 
 ## Message
@@ -57,6 +53,20 @@ cy.log('Login successful')
 ```javascript
 cy.log('events triggered', events)
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.log %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.log %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.log %}
 
 # Command Log
 

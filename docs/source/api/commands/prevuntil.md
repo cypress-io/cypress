@@ -58,18 +58,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prevUntil %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .prevUntil %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .prevUntil %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .prevUntil %}
-
 # Examples
 
 ## Selector
@@ -97,6 +85,20 @@ Option | Default | Description
 // yields [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
 cy.get('#nuts').prevUntil('#veggies')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .prevUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prevUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prevUntil %}
 
 # Command Log
 

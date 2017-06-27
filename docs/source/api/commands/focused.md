@@ -35,18 +35,6 @@ Option | Default | Description
 
 {% yields sets_dom_subject cy.focused %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence cy.focused %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence cy.focused %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence cy.focused %}
-
 # Examples
 
 ## Focused
@@ -70,6 +58,20 @@ cy.focused().blur()
 ```javascript
 cy.focused().should('have.attr', 'name', 'username')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence cy.focused %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.focused %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence cy.focused %}
 
 # Command Log
 

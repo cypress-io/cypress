@@ -39,18 +39,6 @@ Option | Default | Description
 
 {% yields null cy.clearCookies %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.clearCookies %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions none cy.clearCookies %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.clearCookies %}
-
 # Examples
 
 ## Clear Cookies
@@ -67,6 +55,20 @@ cy.clearCookies()
 cy.visit('/dashboard') // we should be redirected back to login
 cy.url().should('include', 'login')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clearCookies %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearCookies %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.clearCookies %}
 
 # Command Log
 

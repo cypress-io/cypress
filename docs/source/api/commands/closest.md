@@ -46,6 +46,18 @@ Option | Default | Description
 
 {% yields changes_dom_subject .closest %}
 
+# Examples
+
+## Closest
+
+**Find the closest element of the 'error' with the class 'banner'**
+
+```javascript
+cy.get('p.error').closest('.banner')
+```
+
+# Rules
+
 ## Requirements {% helper_icon requirements %}
 
 {% requirements existence .closest %}
@@ -57,16 +69,6 @@ Option | Default | Description
 ## Timeouts {% helper_icon timeout %}
 
 {% timeouts existence .closest %}
-
-# Examples
-
-## Closest
-
-**Find the closest element of the 'error' with the class 'banner'**
-
-```javascript
-cy.get('p.error').closest('.banner')
-```
 
 # Command Log
 

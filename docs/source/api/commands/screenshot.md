@@ -16,8 +16,6 @@ cy.screenshot(fileName, options)
 
 ## Usage
 
-`cy.screenshot()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -42,14 +40,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 {% yields null cy.screenshot %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.screenshot %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts automation cy.screenshot %}
 
 # Examples
 
@@ -98,6 +88,20 @@ If you're using Travis, you'll need to upload artifacts to an s3 bucket as per t
 Taking a screenshot is an asynchronous action that takes around `100ms` to complete. By the time the screenshot is taken, it's possible something in your application may have changed. It's important to realize that the screenshot may not reflect 100% of what your application looked like when the command was issued.
 
 For example - say a command we wrote times outs: {% url '`cy.get('#element')`' get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
+
+# Notes
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.screenshot %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.screenshot %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.screenshot %}
 
 # Command Log
 

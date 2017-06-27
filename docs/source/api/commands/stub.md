@@ -47,14 +47,6 @@ Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (
 
 `cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.stub %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none cy.stub %}
-
 # Examples
 
 ## Stub
@@ -146,6 +138,20 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 **Assertion Support**
 
 Cypress has built-in {% url "sinon-as-promised" https://github.com/bendrucker/sinon-as-promised %} support, so the stubs returned by `cy.stub()` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.stub %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.stub %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.stub %}
 
 # Command Log
 

@@ -50,18 +50,6 @@ Option | Default | Description
 
 {% yields changes_dom_subject .filter %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements existence .filter %}
-
-## Assertions {% helper_icon assertions %}
-
-{% assertions existence .filter %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts existence .filter %}
-
 # Examples
 
 ## Selector
@@ -82,6 +70,20 @@ Option | Default | Description
 // yields <li>About</li>
 cy.get('ul').find('>li').filter('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements existence .filter %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .filter %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .filter %}
 
 # Command Log
 
