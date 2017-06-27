@@ -38,11 +38,11 @@ askWhichVersion = (version) ->
   ## else go ask for it!
   ask.deployNewVersion()
 
-askZipFile = (zipFile) ->
+askZipFile = (zip) ->
   ## if we already have a zip filename
   ## just resolve with that
-  if zipFile
-    return Promise.resolve(path.resolve(zipFile))
+  if zip
+    return Promise.resolve(path.resolve(zip))
 
   ## else go ask for it!
   ask.whichZipFile()
@@ -51,7 +51,7 @@ askZipFile = (zipFile) ->
 questions = {
   platform: askWhichPlatform,
   version: askWhichVersion,
-  zipFile: askZipFile
+  zip: askZipFile
 }
 
 success = (str) ->
@@ -152,16 +152,16 @@ deploy = {
   upload: ->
     console.log('#upload')
     options = @parseOptions(process.argv)
-    askMissingOptions(['version', 'platform', 'zipFile'])(options)
+    askMissingOptions(['version', 'platform', 'zip'])(options)
     .then (options) =>
-      la(check.unemptyString(options.zipFile),
+      la(check.unemptyString(options.zip),
         "missing zipped filename", options)
-      console.log("Need to upload file %s", options.zipFile)
+      console.log("Need to upload file %s", options.zip)
       console.log("for platform %s version %s",
         options.platform, options.version)
 
       # upload.toS3({
-      #   zipFile: options.zipFile,
+      #   zipFile: options.zip,
       #   version: options.version,
       #   platform: options.platform
       # })
