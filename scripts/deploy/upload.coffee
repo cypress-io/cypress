@@ -9,8 +9,12 @@ human   = require("human-interval")
 konfig  = require("@packages/server/lib/konfig")()
 Promise = require("bluebird")
 meta    = require("./meta")
+la      = require("lazy-ass")
+check   = require("check-more-types")
 
 fs = Promise.promisifyAll(fs)
+
+isValidPlatform = check.oneOf(["darwin", "linux"])
 
 module.exports = {
   getPublisher: ->
@@ -30,25 +34,23 @@ module.exports = {
   getAwsObj: ->
     fs.readJsonSync("./support/aws-credentials.json")
 
-  getUploadDirName: (platform) ->
+  getUploadDirName: ({version, osName}) ->
     aws = @getAwsObj()
+    dirName = [aws.folder, version, osName, null].join("/")
+    console.log("target directory %s", dirName)
+    dirName
 
-    [aws.folder, platform.getVersion(), platform.uploadOsName, null].join("/")
-
-  purgeCache: (platform) ->
+  purgeCache: ({zipFile, version, osName}) ->
     new Promise (resolve, reject) =>
-      version      = platform.getVersion()
-      uploadOsName = platform.uploadOsName
-      zipName      = platform.zipName
+      zipName      = path.basename(zipFile)
 
-      url = [konfig('cdn_url'), "desktop", version, uploadOsName, zipName].join("/")
-
-      cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
-        return reject(err) if err
-
-        platform.log("#purgeCache: #{url}")
-
-        resolve()
+      url = [konfig('cdn_url'), "desktop", version, osName, zipName].join("/")
+      console.log("purging url", url)
+      resolve()
+      # cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
+      #   return reject(err) if err
+      #   platform.log("#purgeCache: #{url}")
+      #   resolve()
 
   createRemoteManifest: (folder, version) ->
     ## TODO: refactor this
@@ -92,30 +94,30 @@ module.exports = {
         .on "error", reject
         .on "end", resolve
 
-  toS3: (platform) ->
-    platform.log("#uploadToS3")
+  toS3: ({zipFile, version, osName}) ->
+    console.log("#uploadToS3 ⏳")
+    la(check.unemptyString(version), "expected version string", version)
+    la(check.unemptyString(zipFile), "expected zip filename", zipFile)
+    la(isValidPlatform(osName), "invalid osName", osName)
 
     upload = =>
       new Promise (resolve, reject) =>
-
-        pathToZipFile = platform.buildPathToZip()
-
         publisher = @getPublisher()
 
         headers = {}
         headers["Cache-Control"] = "no-cache"
 
-        gulp.src(pathToZipFile)
+        gulp.src(zipFile)
         .pipe rename (p) =>
-          p.dirname = @getUploadDirName(platform)
+          p.dirname = @getUploadDirName({version, osName})
           p
         .pipe debug()
-        .pipe publisher.publish(headers)
-        .pipe awspublish.reporter()
+        # .pipe publisher.publish(headers)
+        # .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
     upload()
     .then =>
-      @purgeCache(platform)
+      @purgeCache({zipFile, version, osName})
 }
