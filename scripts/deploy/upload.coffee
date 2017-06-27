@@ -6,7 +6,7 @@ cp      = require("child_process")
 path    = require("path")
 gulp    = require("gulp")
 human   = require("human-interval")
-konfig  = require("@packages/server/lib/konfig")()
+konfig  = require("@packages/server/lib/konfig")
 Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
@@ -41,16 +41,19 @@ module.exports = {
     dirName
 
   purgeCache: ({zipFile, version, platform}) ->
+    la(check.unemptyString(platform), "missing platform", platform)
     new Promise (resolve, reject) =>
-      zipName      = path.basename(zipFile)
+      zipName = path.basename(zipFile)
 
       url = [konfig('cdn_url'), "desktop", version, platform, zipName].join("/")
       console.log("purging url", url)
-      resolve()
-      # cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
-      #   return reject(err) if err
-      #   platform.log("#purgeCache: #{url}")
-      #   resolve()
+      cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
+        if err
+          console.error("Could not purge #{url}")
+          console.error(err.message)
+          return reject(err)
+        console.log("#purgeCache: #{url}")
+        resolve()
 
   createRemoteManifest: (folder, version) ->
     ## TODO: refactor this
@@ -112,12 +115,12 @@ module.exports = {
           p.dirname = @getUploadDirName({version, platform})
           p
         .pipe debug()
-        # .pipe publisher.publish(headers)
-        # .pipe awspublish.reporter()
+        .pipe publisher.publish(headers)
+        .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
     upload()
     .then =>
-      @purgeCache({zipFile, version, osName})
+      @purgeCache({zipFile, version, platform})
 }

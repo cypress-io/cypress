@@ -160,11 +160,11 @@ deploy = {
       console.log("for platform %s version %s",
         options.platform, options.version)
 
-      # upload.toS3({
-      #   zipFile: options.zip,
-      #   version: options.version,
-      #   platform: options.platform
-      # })
+      upload.toS3({
+        zipFile: options.zip,
+        version: options.version,
+        platform: options.platform
+      })
 
   # goes through the entire pipeline:
   #   - build
