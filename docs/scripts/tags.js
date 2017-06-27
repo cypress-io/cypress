@@ -8,6 +8,7 @@ const partial = require('../lib/tags/partial')
 const note = require('../lib/tags/note')
 const yields = require('../lib/tags/yields')
 const requirements = require('../lib/tags/requirements')
+const assertions = require('../lib/tags/assertions')
 const timeouts = require('../lib/tags/timeouts')
 const usageOptions = require('../lib/tags/usage')
 const { issue, openAnIssue } = require('../lib/tags/issues')
@@ -36,8 +37,11 @@ const tags = {
   // yields
   yields: yields,
 
-  // default assertions
+  // requirements
   requirements: requirements,
+
+  // assertions
+  assertions: assertions,
 
   // timeouts
   timeouts: timeouts,

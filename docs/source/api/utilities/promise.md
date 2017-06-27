@@ -17,13 +17,13 @@ new Cypress.Promise(fn)
 
 `.Promise` requires being chained off `Cypress`.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 new Cypress.Promise
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 new cy.Promise  // Errors, cannot be chained off 'cy'

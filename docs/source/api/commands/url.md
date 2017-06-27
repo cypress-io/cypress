@@ -18,12 +18,10 @@ cy.url(options)
 
 ## Usage
 
-`cy.url()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.url()    // Get url
+cy.url()    // Yields the current url as a string
 ```
 
 ## Arguments
@@ -41,11 +39,15 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.url 'yields the current URL as a string' %}
+{% yields sets_subject cy.url 'yields the current URL as a string' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.url %}
+{% requirements parent cy.url %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.url %}
 
 ## Timeouts {% helper_icon timeout %}
 
@@ -108,7 +110,5 @@ When clicking on `url` within the command log, the console outputs the following
 
 # See also
 
-- {% url `cy.document()` document %}
 - {% url `cy.hash()` hash %}
 - {% url `cy.location()` location %}
-- {% url `cy.window()` window %}

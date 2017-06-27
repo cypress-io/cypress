@@ -14,15 +14,13 @@ Type into a DOM element.
 
 ## Usage
 
-`.type()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('input').type('Hello, World') // Type 'Hello, World' into the 'input'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.type('Welcome')               // Errors, cannot be chained off 'cy'
@@ -75,13 +73,17 @@ Option | Default | Description
 
 {% yields same_subject .type %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements actionability .type %}
+{% requirements child_dom .type %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .type %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .type %}
+{% timeouts actions .type %}
 
 # Examples
 

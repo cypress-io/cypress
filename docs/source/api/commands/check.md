@@ -5,6 +5,10 @@ comments: false
 
 Check checkbox(es) or radio(s).
 
+{% note warning %}
+This element must be an `<input>` with type `checkbox` or `radio`.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -18,18 +22,14 @@ Check checkbox(es) or radio(s).
 
 ## Usage
 
-`.check()` requires being chained off another cy command that *yields* an `<input>` DOM element.
-
-These `<input>` elements must have type `checkbox` or `radio`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="checkbox"]').check()       // Check checkbox element
 cy.get('[type="radio"]').first().check()  // Check first radio element
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.check('[type="checkbox"]') // Errors, cannot be chained off 'cy'
@@ -60,13 +60,17 @@ Option | Default | Description
 
 {% yields same_subject .check %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements checkability .check %}
 
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .check %}
+
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .check %}
+{% timeouts actions .check %}
 
 # Examples
 

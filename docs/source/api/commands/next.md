@@ -16,15 +16,13 @@ Get the immediately following sibling of each DOM element within a set of DOM el
 
 ## Usage
 
-`.next()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav a:first').next() // Yield next link in nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.next()                // Errors, cannot be chained off 'cy'
@@ -50,9 +48,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .next %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .next %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .next %}
 
 ## Timeouts {% helper_icon timeout %}
 

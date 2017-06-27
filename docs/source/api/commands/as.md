@@ -19,7 +19,7 @@ Assign an alias for later use. Reference the alias later within a {% url `cy.get
 
 `.as()` should be chained off another cy command.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.main-nav').find('li').first().as('firstNav') // Alias first 'li' as @firstNav
@@ -28,7 +28,7 @@ cy.stub(api, 'onUnauth').as('unauth')                 // Alias 'stub' as @unauth
 cy.spy(win, 'fetch').as('winFetch')                   // Alias 'spy' as @winFetch  
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.as('foo')   // Errors, cannot be chained off 'cy'
@@ -44,13 +44,13 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 
 {% yields same_subject .as %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-`.as()` has no default assertions.
+{% requirements none .as %}
 
 ## Timeouts {% helper_icon timeout %}
 
-`.as()` will retry the chain of commands before the `.as()` command for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
+{% timeouts assertions .as %}
 
 # Examples
 

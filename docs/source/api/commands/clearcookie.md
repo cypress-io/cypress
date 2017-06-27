@@ -19,9 +19,7 @@ cy.clearCookie(name, options)
 
 ## Usage
 
-`cy.clearCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clearCookie('authId')    // clear the 'authId' cookie
@@ -46,9 +44,13 @@ Option | Default | Description
 
 {% yields null cy.clearCookie %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.clearCookie %}
+{% requirements parent cy.clearCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearCookie %}
 
 ## Timeouts {% helper_icon timeout %}
 

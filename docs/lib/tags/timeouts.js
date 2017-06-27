@@ -3,12 +3,12 @@ const rawRender = require('../raw_render')
 /* eslint-disable quotes */
 const urls = {
   action: `{% url 'actionable state' interacting-with-elements %}`,
-  exist: `{% url 'found in the dom' introduction-to-cypress#Default-Assertions %}`,
+  exist: `{% url 'exist in the DOM' introduction-to-cypress#Default-Assertions %}`,
 }
 
 module.exports = function yields (hexo, args) {
   // {% timeouts assertions .blur %}
-  // {% timeouts actionability .check %}
+  // {% timeouts actions .check %}
   // {% timeouts existence cy.get %}
   // {% timeouts automation cy.clearCookie %}
   // {% timeouts none .debug %}
@@ -16,7 +16,7 @@ module.exports = function yields (hexo, args) {
   const type = args[0]
   const cmd = `<code>${args[1]}()</code>`
 
-  const assertion = `${cmd} can time out waiting for any assertion's you've added to pass`
+  const assertion = `${cmd} can time out waiting for assertions you've added to pass`
 
   const render = (str) => {
     return rawRender.call(this, hexo, str)
@@ -28,7 +28,7 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
-  const actionability = () => {
+  const actions = () => {
     return render(`<ul>
       <li><p>${cmd} can time out waiting for the element to reach an ${urls.action}.</p></li>
       <li><p>${assertion}.</p></li>
@@ -37,7 +37,7 @@ module.exports = function yields (hexo, args) {
 
   const existence = () => {
     return render(`<ul>
-      <li><p>${cmd} can time out waiting for the element to be ${urls.exist}.</p></li>
+      <li><p>${cmd} can time out waiting for the element(s) to ${urls.exist}.</p></li>
       <li><p>${assertion}.</p></li>
     </ul>`)
   }
@@ -49,6 +49,13 @@ module.exports = function yields (hexo, args) {
       {% note warning %}
       Because ${cmd} is asynchronous it is technically possible for there to be a time out while talking to the internal Cypress automation API's. But for practical purposes it should never happen.
       {% endnote %}`)
+  }
+
+  const its = () => {
+    return `<ul>
+      <li><p>${cmd} can time out waiting for the property to exist.</p></li>
+      <li><p>${assertion}.</p></li>
+    </ul>`
   }
 
   const exec = () => {
@@ -73,12 +80,14 @@ module.exports = function yields (hexo, args) {
   switch (type) {
     case 'assertions':
       return assertions()
-    case 'actionability':
-      return actionability()
+    case 'actions':
+      return actions()
     case 'existence':
       return existence()
     case 'automation':
       return automation()
+    case 'its':
+      return its()
     case 'exec':
       return exec()
     case 'none':

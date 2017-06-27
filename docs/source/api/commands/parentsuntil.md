@@ -18,15 +18,13 @@ Get all ancestors of each DOM element in a set of matched DOM elements up to, bu
 
 ## Usage
 
-`.parentsUntil()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('p').parentsUntil('.article') // Yield parents of 'p' until '.article'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.parentsUntil()                  // Errors, cannot be chained off 'cy'
@@ -60,9 +58,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .parentsUntil %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .parentsUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parentsUntil %}
 
 ## Timeouts {% helper_icon timeout %}
 

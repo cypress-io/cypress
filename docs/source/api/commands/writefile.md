@@ -18,7 +18,7 @@ cy.writeFile(filePath, contents, encoding, options)
 
 `cy.writeFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.writeFile('menu.json')    
@@ -60,9 +60,9 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.writeFile 'yields the contents written to the file' %}
+{% yields sets_subject cy.writeFile 'yields the contents written to the file' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements write_file cy.writeFile %}
 

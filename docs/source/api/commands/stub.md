@@ -21,7 +21,7 @@ cy.stub(object, method, replacerFn)
 
 `cy.stub()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.stub(user, 'addFriend')    
@@ -47,7 +47,9 @@ Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (
 
 `cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
 
-{% requirements none cy.stub %}
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.stub %}
 
 ## Timeouts {% helper_icon timeout %}
 

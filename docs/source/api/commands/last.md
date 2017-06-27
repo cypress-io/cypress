@@ -14,15 +14,13 @@ Get the last DOM element within a set of DOM elements.
 
 ## Usage
 
-`.last()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav a').last()     // Yield last link in nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.last()                  // Errors, cannot be chained off 'cy'
@@ -44,9 +42,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .last %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .last %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .last %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -23,7 +23,9 @@ Each document attempts to cover the essentials of each method including:
 
 - **Yields:** What is yielded (and in rare cases, returned) from the method.
 
-- **Requirements:** What requirements and default assertions are automatically applied.
+- **Requirements:** What built in requirements the command has.
+
+- **Assertions:** How assertions are handled, and whether default ones are applied.
 
 - **Timeout:** If defined, the amount of time the method allows to execute before throwing.
 

@@ -18,15 +18,13 @@ Opposite of {% url `.not()` not %}
 
 ## Usage
 
-`.filter()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('td').filter('.users') // Yield all el's with class '.users'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.filter('.animated')  // Errors, cannot be chained off 'cy'
@@ -52,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .filter %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .filter %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .filter %}
 
 ## Timeouts {% helper_icon timeout %}
 

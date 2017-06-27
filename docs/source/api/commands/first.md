@@ -14,15 +14,13 @@ Get the first DOM element within a set of DOM elements.
 
 ## Usage
 
-`.first()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav a').first()     // Yield first link in nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.first()                  // Errors, cannot be chained off 'cy'
@@ -44,9 +42,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .first %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .first %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
 
 ## Timeouts {% helper_icon timeout %}
 

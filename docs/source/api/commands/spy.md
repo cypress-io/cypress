@@ -19,7 +19,7 @@ cy.spy(object, method)
 
 `cy.spy()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.spy(user, 'addFriend')    
@@ -41,9 +41,9 @@ Unlike most Cypress commands, `cy.spy()` is *synchronous* and returns a value (t
 
 `cy.spy()` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported.
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.spy %}
+{% requirements parent cy.spy %}
 
 ## Timeouts {% helper_icon timeout %}
 

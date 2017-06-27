@@ -23,7 +23,7 @@ Cypress.Cookies.defaults(options)
 
 `Cookies.debug()`, `Cookies.preserveOnce()` and `Cookies.defaults()` require being chained off `Cypress`.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 Cypress.Cookies.debug()
@@ -31,7 +31,7 @@ Cypress.Cookies.preserveOnce('appId')
 Cypress.Cookies.defaults()
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.Cookies.debug() // Errors, cannot be chained off 'cy'

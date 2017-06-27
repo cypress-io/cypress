@@ -20,7 +20,7 @@ cy.wait(aliases, options)
 
 `cy.wait()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wait(500)    
@@ -62,7 +62,7 @@ Option | Default | Description
 
 **When given an alias argument:**
 
-{% yields new_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
+{% yields sets_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
 
 ## Timeouts {% helper_icon timeout %}
 

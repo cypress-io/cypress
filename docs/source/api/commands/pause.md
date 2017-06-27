@@ -20,7 +20,7 @@ This does not set a `debugger` in your code, unlike {% url `.debug()` debug %}
 
 `.pause()` can be chained off of `cy` or any cy command.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.pause().getCookie('app') // Pause at the beginning of commands

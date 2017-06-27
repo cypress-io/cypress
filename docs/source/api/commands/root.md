@@ -16,7 +16,7 @@ cy.root(options)
 
 `cy.root()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.root()   // Yield root element (document)
@@ -42,9 +42,9 @@ Option | Default | Description
 
 The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a {% url `.within()` within %} command, the root element yielded is the yielded subject of the {% url `.within()` within %} command.
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.root %}
+{% requirements parent cy.root %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -15,7 +15,7 @@ function fa (hexo, args) {
 function helperIcon (hexo, args) {
   // {% helper_icon yields %}
   // {% helper_icon timeout %}
-  // {% helper_icon defaultAssertion %}
+  // {% helper_icon requirements %}
 
   const type = args[0]
 
@@ -37,8 +37,11 @@ function helperIcon (hexo, args) {
     case 'timeout':
       return urlTo('introduction-to-cypress#Timeouts')
 
-    case 'defaultAssertion':
-      return urlTo('introduction-to-cypress#Default-Assertions')
+    case 'assertions':
+      return urlTo('introduction-to-cypress#Assertions')
+
+    case 'requirements':
+      return urlTo('introduction-to-cypress#Chains-of-Commands')
 
     default:
       // error when an invalid usage option was provided

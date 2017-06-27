@@ -16,7 +16,7 @@ cy.title(options)
 
 `cy.title()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.title()    
@@ -35,11 +35,11 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.title 'yields the `document.title` of the current page' %}
+{% yields sets_subject cy.title 'yields the `document.title` of the current page' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.title %}
+{% requirements parent cy.title %}
 
 ## Timeouts {% helper_icon timeout %}
 

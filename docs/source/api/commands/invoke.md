@@ -20,14 +20,14 @@ If you want to get a property that is not a function on the previously yielded s
 
 `.invoke()` requires being chained off another cy command that *yields* an object with function properties.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wrap({animate: fn}).invoke('animate') // Invoke the 'animate' function
 cy.get('.modal').invoke('show')          // Invoke the jQuery 'show' function
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.invoke('convert')                   // Errors, cannot be chained off 'cy'

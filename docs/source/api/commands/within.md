@@ -15,13 +15,13 @@ Scopes all subsequent cy commands to within this element. Useful when working wi
 
 `.within()` requires being chained off another cy command that *yields* a DOM element.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.list').within(function(list) {}) // Yield the `.list` and scope all commands within it
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.within(function() {})              // Errors, cannot be chained off 'cy'
@@ -46,7 +46,7 @@ Option | Default | Description
 
 {% yields same_subject .within %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements none .within %}
 

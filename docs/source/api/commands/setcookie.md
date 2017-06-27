@@ -16,7 +16,7 @@ cy.setCookie(name, value, options)
 
 `cy.setCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.setCookie('auth_key', '123key') // Set the 'auth_key' cookie to '123key'

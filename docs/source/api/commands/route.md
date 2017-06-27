@@ -24,7 +24,7 @@ cy.route(options)
 
 `cy.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.route('/users/**')  
@@ -71,9 +71,9 @@ You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` a
 
 {% yields null cy.route %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.route %}
+{% requirements parent cy.route %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -18,15 +18,13 @@ Get all previous siblings of each DOM element in a set of matched DOM elements u
 
 ## Usage
 
-`.prevUntil()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('p').prevUntil('.intro') // Yield siblings before 'p' until '.intro'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.prevUntil()                  // Errors, cannot be chained off 'cy'
@@ -60,9 +58,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .prevUntil %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .prevUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prevUntil %}
 
 ## Timeouts {% helper_icon timeout %}
 

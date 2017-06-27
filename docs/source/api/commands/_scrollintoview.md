@@ -17,13 +17,13 @@ Scroll an element into view.
 
 `.scrollIntoView()` requires being chained off another cy command that *yields* a DOM element.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('footer').scrollIntoView() // Scrolls 'footer' into view
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.scrollIntoView('footer')   // Errors, cannot be chained off 'cy'
@@ -48,7 +48,7 @@ Option | Default | Description
 
 {% yields same_subject .scrollIntoView %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements none .scrollToIntoView %}
 

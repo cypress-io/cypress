@@ -16,15 +16,13 @@ Get the children of each DOM element within a set of DOM elements.
 
 ## Usage
 
-`.children()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav').children()     // Yield children of nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.children()                // Errors, cannot be chained off 'cy'
@@ -50,9 +48,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .children %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .children %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .children %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -16,19 +16,19 @@ cy.location(key, options)
 
 ## Usage
 
-`cy.location()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.location()       // Get location object
+cy.location('host') // Get the host of the location object
+cy.location('port') // Get the port of the location object
 ```
 
 ## Arguments
 
 **{% fa fa-angle-right %} key** ***(String)***
 
-A key on the location object.
+A key on the location object. Returns this value instead of the full location object.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
@@ -54,9 +54,13 @@ Option | Default | Description
 - `search`
 - `toString`
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.location %}
+{% requirements parent cy.location %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.location %}
 
 ## Timeouts {% helper_icon timeout %}
 
@@ -97,9 +101,11 @@ cy.location().should(function(location){
 })
 ```
 
-## Key
+## Key Shorthand
 
 **Assert that a redirect works**
+
+Grab only the `pathname` and add an assertion.
 
 ```javascript
 cy.visit('http://localhost:3000/admin')

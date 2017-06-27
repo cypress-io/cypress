@@ -18,9 +18,7 @@ Click a DOM element.
 
 ## Usage
 
-`.click()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('button').click()          // Click on button
@@ -28,7 +26,7 @@ cy.focused().click()              // Click on el with focus
 cy.contains('Welcome').click()    // Click on first el containing 'Welcome'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.click('button')          // Errors, cannot be chained off 'cy'
@@ -66,13 +64,17 @@ Option | Default | Description
 
 {% yields same_subject .click %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements actionability .click %}
+{% requirements child_dom .click %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .click %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .click %}
+{% timeouts actions .click %}
 
 # Examples
 

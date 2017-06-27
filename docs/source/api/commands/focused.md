@@ -14,12 +14,10 @@ cy.focused(options)
 
 ## Usage
 
-`cy.focused()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.focused()   
+cy.focused()    // Yields the element currently in focus
 ```
 
 ## Arguments
@@ -35,11 +33,15 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_dom_subject cy.focused %}
+{% yields sets_dom_subject cy.focused %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence cy.focused %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.focused %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -20,7 +20,7 @@ You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
 
 `.debug()` can be chained off of `cy` or any cy command.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.debug().getCookie('app') // Pause to debug at beginning of commands
@@ -41,7 +41,7 @@ Option | Default | Description
 
 {% yields same_subject .debug %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements none .debug %}
 

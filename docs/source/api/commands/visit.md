@@ -3,7 +3,7 @@ title: visit
 comments: false
 ---
 
-Visit a remote url.
+Visit a remote URL.
 
 # Syntax
 
@@ -14,9 +14,7 @@ cy.visit(url, options)
 
 ## Usage
 
-`cy.visit()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.visit('http://localhost:3000')    
@@ -26,7 +24,9 @@ cy.visit('http://localhost:3000')
 
 **{% fa fa-angle-right %} url** ***(String)***
 
-The url to visit. The url provided will be prefixed with the `baseUrl` configured in your {% url 'network options' configuration#Global %}.
+The URL to visit.
+
+Cypress will be prefix the URL with the `baseUrl` configured in your {% url 'network options' configuration#Global %} if you've set one.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
@@ -43,11 +43,15 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.visit 'yields the `window` object after the page finishes loading' %}
+{% yields sets_subject cy.visit 'yields the `window` object after the page finishes loading' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements page cy.visit %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.visit %}
 
 ## Timeouts {% helper_icon timeout %}
 

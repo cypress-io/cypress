@@ -16,15 +16,13 @@ Select an `<option>` within a `<select>`.
 
 ## Usage
 
-`.select()` requires being chained off another cy command that *yields* a `<select>` DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('select').select('user-1') // Select the 'user-1' option
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.select('John Adams')  // Errors, cannot be chained off 'cy'
@@ -55,13 +53,17 @@ Option | Default | Description
 
 {% yields same_subject .select %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements actionability .select %}
+{% requirements selectability .select %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .select %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .select %}
+{% timeouts actions .select %}
 
 # Examples
 

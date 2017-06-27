@@ -16,9 +16,7 @@ cy.readFile(filePath, encoding, options)
 
 ## Usage
 
-`cy.readFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.readFile('menu.json')    
@@ -57,11 +55,15 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.readFile 'yields the contents of the file' %}
+{% yields sets_subject cy.readFile 'yields the contents of the file' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements read_file cy.readFile %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.readFile %}
 
 ## Timeouts {% helper_icon timeout %}
 

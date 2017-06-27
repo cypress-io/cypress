@@ -14,9 +14,7 @@ cy.getCookie(name, options)
 
 ## Usage
 
-`cy.getCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.getCookie('auth_key')     // Get cookie with name 'auth_key'
@@ -53,9 +51,13 @@ Option | Default | Description
 
 `cy.getCookie()` yields `null`.
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.getCookie %}
+{% requirements parent cy.getCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.getCookie %}
 
 ## Timeouts {% helper_icon timeout %}
 

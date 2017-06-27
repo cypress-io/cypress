@@ -14,9 +14,7 @@ Double-click a DOM element.
 
 ## Usage
 
-`.dblclick()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('button').dblclick()          // Double click on button
@@ -24,7 +22,7 @@ cy.focused().dblclick()              // Double click on el with focus
 cy.contains('Welcome').dblclick()    // Double click on first el containing 'Welcome'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.click('button')          // Errors, cannot be chained off 'cy'
@@ -46,13 +44,17 @@ Option | Default | Description
 
 {% yields same_subject .dblclick %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements actionability .dblclick %}
+{% requirements child_dom .dblclick %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .dblclick %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .dblclick %}
+{% timeouts actions .dblclick %}
 
 # Examples
 

@@ -16,13 +16,13 @@ Submit a form.
 
 `.submit()` requires being chained off another cy command that *yields* a form.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('form').submit()   // Submit a form
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.submit()               // Errors, cannot be chained off 'cy'

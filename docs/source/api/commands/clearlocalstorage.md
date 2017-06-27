@@ -20,9 +20,7 @@ cy.clearLocalStorage(keys, options)
 
 ## Usage
 
-`cy.clearLocalStorage()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clearLocalStorage()  // clear all local storage
@@ -46,9 +44,13 @@ Option | Default | Description
 
 {% yields null cy.clearLocalStorage %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.clearLocalStorage %}
+{% requirements parent cy.clearLocalStorage %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearLocalStorage %}
 
 ## Timeouts {% helper_icon timeout %}
 

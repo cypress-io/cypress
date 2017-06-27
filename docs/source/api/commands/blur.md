@@ -5,6 +5,10 @@ comments: false
 
 Blur a focused element.
 
+{% note warning %}
+This element must currently be in focus. If you want to ensure an element is focused before blurring, try using {% url `.focus()` focus %} before `.blur()`.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -14,18 +18,14 @@ Blur a focused element.
 
 ## Usage
 
-`.blur()` requires being chained off another cy command that *yields* a DOM element.
-
-This element must currently be in focus. If you want to ensure an element is focused before blurring, try using {% url `.focus()` focus %} before `.blur()`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="email"]').type('me@email.com').blur() // Blur email input
 cy.get('[tabindex="1"]').focus().blur()              // Blur el with tabindex
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.blur('input')              // Errors, cannot be chained off 'cy'
@@ -41,16 +41,20 @@ Pass in an options object to change the default behavior of `.blur`.
 Option | Default | Description
 --- | --- | ---
 `log` | `true` | {% usage_options log %}
-`force` | `false` | Forces the action, disables checking if element is focused
+`force` | `false` | Forces the action, disables checking if {% urlHash 'element is focused' Requirements %}
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .blur %}
 
 ## Yields {% helper_icon yields %}
 
 {% yields same_subject .blur %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements blurability .blur %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .blur %}
 
 ## Timeouts {% helper_icon timeout %}
 

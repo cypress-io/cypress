@@ -26,9 +26,7 @@ cy.clock(now, functionNames, options)
 
 ## Usage
 
-`cy.clock()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clock()
@@ -66,9 +64,9 @@ Option | Default | Description
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.clock %}
+{% requirements parent cy.clock %}
 
 ## Timeouts {% helper_icon timeout %}
 

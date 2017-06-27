@@ -16,15 +16,13 @@ Get all following siblings of each DOM element in a set of matched DOM elements.
 
 ## Usage
 
-`.nextAll()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.active').nextAll() // Yield all links next to `.active`
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.nextAll()                // Errors, cannot be chained off 'cy'
@@ -50,9 +48,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .nextAll %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .nextAll %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .nextAll %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -22,13 +22,13 @@ Cypress.config(object)
 
 `.config()` requires being chained off `Cypress`.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 Cypress.config() // Get configuration options
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.config()  // Errors, cannot be chained off 'cy'

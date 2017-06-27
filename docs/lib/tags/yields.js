@@ -5,8 +5,8 @@ module.exports = function yields (hexo, args) {
   // {% yields changes_subject .invoke 'yields the return value' %}
   // {% yields maybe_changes_subject .then 'yields the return value' %}
   // {% yields changes_dom_subject .children %}
-  // {% yields new_dom_subject .get %}
-  // {% yields new_subject cy.readFile 'yields the contents of the file' %}
+  // {% yields sets_dom_subject .get %}
+  // {% yields sets_subject cy.readFile 'yields the contents of the file' %}
   // {% yields null cy.clearCookies %}
   // {% yields assertion_indeterminate .should %}
 
@@ -27,9 +27,7 @@ module.exports = function yields (hexo, args) {
 
   const sameSubject = () => {
     return `<ul>
-      <li><p>${cmd} does not change the subject.</p></li>
       <li><p>${cmd} yields the same subject it was given from the previous command.</p></li>
-      <li><p>${cmd} can have additional commands chained to it.</p></li>
     </ul>`
   }
 
@@ -37,9 +35,7 @@ module.exports = function yields (hexo, args) {
     return render(arg)
     .then((html) => {
       return `<ul>
-        <li><p>${cmd} changes the subject.</p></li>
         <li><p>${cmd} ${html}.</p></li>
-        <li><p>${cmd} can have additional commands chained to it.</p></li>
       </ul>`
     })
   }
@@ -50,33 +46,28 @@ module.exports = function yields (hexo, args) {
       return `<ul>
         <li><p>${cmd} ${html}.</p></li>
         <li><p>${cmd} will not change the subject if <code>null</code> or <code>undefined</code> is returned.</p></li>
-        <li><p>${cmd} can have additional commands chained to it.</p></li>
       </ul>`
     })
   }
 
-  const newSubject = () => {
+  const setsSubject = () => {
     return render(arg)
     .then((html) => {
       return `<ul>
         <li><p>${cmd} ${html}.</p></li>
-        <li><p>${cmd} can have additional commands chained to it.</p></li>
       </ul>`
     })
   }
 
   const changesDomSubject = () => {
     return `<ul>
-      <li><p>${cmd} changes the subject.</p></li>
       <li><p>${cmd} yields the new DOM element(s) it found.</p></li>
-      <li><p>${cmd} can have additional commands chained to it.</p></li>
     </ul>`
   }
 
-  const newDomSubject = () => {
+  const setsDomSubject = () => {
     return `<ul>
       <li><p>${cmd} yields the DOM element(s) it found.</p></li>
-      <li><p>${cmd} can have additional commands chained to it.</p></li>
     </ul>`
   }
 
@@ -96,10 +87,10 @@ module.exports = function yields (hexo, args) {
       return maybeChangesSubject()
     case 'changes_dom_subject':
       return changesDomSubject()
-    case 'new_dom_subject':
-      return newDomSubject()
-    case 'new_subject':
-      return newSubject()
+    case 'sets_dom_subject':
+      return setsDomSubject()
+    case 'sets_subject':
+      return setsSubject()
     case 'null':
       return _null()
     case 'assertion_indeterminate':

@@ -26,7 +26,7 @@ An alias of {% url `.should()` should %}
 
 `.and()` requires being chained off another cy command.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.error').should('be.empty').and('be.hidden')  // Assert '.error' is empty and hidden
@@ -36,7 +36,7 @@ cy.wrap({ foo: 'bar' })
   .and('eq', 'bar')                                   // Assert the 'foo' property equals 'bar'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.and('eq', '42')   // Errors, cannot be chained off 'cy'
@@ -80,7 +80,7 @@ cy
   .and('match', /serif/)            // yields 'sans-serif'
 ```
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 `.and()` has no default assertions other than what you specify.
 

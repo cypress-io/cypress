@@ -19,7 +19,7 @@ cy.tick(milliseconds)
 
 `cy.tick()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.tick(500)
@@ -45,6 +45,13 @@ The number of `milliseconds` to move the clock. Any timers within the affected r
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
 
+## Requirements {% helper_icon requirements %}
+
+{% requirements tick cy.tick %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.tick %}
 
 # Examples
 

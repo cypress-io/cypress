@@ -20,13 +20,13 @@ Trigger an event on a DOM element.
 
 `.trigger()` requires being chained off another cy command that *yields* a DOM element.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('a').trigger('mousedown') // Trigger mousedown event on link
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.trigger('touchstart')             // Errors, cannot be chained off 'cy'
@@ -71,13 +71,13 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 {% yields same_subject .trigger %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements actionability .trigger %}
+{% requirements child_dom .trigger %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .trigger %}
+{% timeouts actions .trigger %}
 
 # Examples
 

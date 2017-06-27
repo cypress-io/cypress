@@ -16,9 +16,7 @@ cy.get(alias, options)
 
 ## Usage
 
-`cy.get()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.list>li')    // Yield the li's in '.list'
@@ -51,11 +49,15 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_dom_subject cy.get %}
+{% yields sets_dom_subject cy.get %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence cy.get %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.get %}
 
 ## Timeouts {% helper_icon timeout %}
 

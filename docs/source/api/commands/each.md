@@ -15,14 +15,14 @@ Iterate through an array like structure (arrays or objects with a `length` prope
 
 `.each()` requires being chained off another cy command that *yields* an array like structure (arrays or objects with a `length` property).
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('ul>li').each(function(){...}) // Iterate through each 'li'
 cy.getCookies().each(function(){...}) // Iterate through each cookie
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 
@@ -44,7 +44,7 @@ Pass a function that is invoked with the following arguments:
 
 {% yields same_subject .each %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements none .each %}
 

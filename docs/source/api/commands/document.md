@@ -16,7 +16,7 @@ cy.document(options)
 
 `cy.document()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.document()     // yield the window.document object
@@ -35,11 +35,11 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.document 'yields the `window.document` object' %}
+{% yields sets_subject cy.document 'yields the `window.document` object' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.document %}
+{% requirements parent cy.document %}
 
 ## Timeouts {% helper_icon timeout %}
 

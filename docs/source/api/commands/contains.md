@@ -17,14 +17,14 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 
 `.contains()` can be chained off of `cy` to find content within the entire document or chained off another cy command that *yields* a DOM element - limiting it's search of content to within yielded element.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.nav').contains('About')  // Yield el in .nav containing 'About'
 cy.contains('Hello')              // Yield first el in document containing 'Hello'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.title().contains('My App')        // Errors, 'title' does not yield DOM element
@@ -54,7 +54,7 @@ Option | Default | Description
 
 {% yields changes_dom_subject .contains %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .contains %}
 

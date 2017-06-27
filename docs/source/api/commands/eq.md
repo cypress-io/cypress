@@ -16,16 +16,14 @@ Get A DOM element at a specific index in an array of elements.
 
 ## Usage
 
-`.eq()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
 cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.eq(0)                  // Errors, cannot be chained off 'cy'
@@ -55,9 +53,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .eq %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .eq %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .eq %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -16,7 +16,7 @@ cy.wrap(subject, options)
 
 `cy.wrap()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wrap({name: "Jane Lane"})    
@@ -39,11 +39,11 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.wrap 'yields the object it was called with' %}
+{% yields sets_subject cy.wrap 'yields the object it was called with' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.wrap %}
+{% requirements parent cy.wrap %}
 
 ## Timeouts {% helper_icon timeout %}
 

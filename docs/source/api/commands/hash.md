@@ -6,7 +6,7 @@ comments: false
 Get the current URL hash.
 
 {% note info %}
-This is an alias of {% url `cy.location('hash')` location %}
+This is an alias of {% url "`cy.location('hash')`" location %}
 {% endnote %}
 
 # Syntax
@@ -18,9 +18,7 @@ cy.hash(options)
 
 ## Usage
 
-`cy.hash()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.hash()     // Get the url hash
@@ -43,15 +41,19 @@ Option | Default | Description
 
 **When the current URL contains a hash:**
 
-{% yields new_subject cy.hash "yields the current URL's hash (including the `#` character)" %}
+{% yields sets_subject cy.hash "yields the current URL's hash (including the `#` character)" %}
 
 **When the current URL does not contain a hash:**
 
-{% yields new_subject cy.hash "yields an empty string" %}
+{% yields sets_subject cy.hash "yields an empty string" %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.hash %}
+{% requirements parent cy.hash %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.hash %}
 
 ## Timeouts {% helper_icon timeout %}
 

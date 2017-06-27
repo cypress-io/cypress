@@ -3,7 +3,7 @@ title: its
 comments: false
 ---
 
-Get a property on the previously yielded subject.
+Get a property's value on the previously yielded subject.
 
 {% note info %}
 If you want to call a function on the previously yielded subject, use {% url `.invoke()` invoke %}.
@@ -17,16 +17,14 @@ If you want to call a function on the previously yielded subject, use {% url `.i
 
 ## Usage
 
-`.its()` requires being chained off another cy command that *yields* an object with properties.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wrap({width: '50'}).its('width') // Get the 'width' property
-cy.location().its('href')           // Get the 'href' property
+cy.window().its('angular')          // Get the 'angular' property
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.its('window')                // Errors, cannot be chained off 'cy'
@@ -41,9 +39,19 @@ Name of property or nested properties (with dot notation) to get.
 
 ## Yields {% helper_icon yields %}
 
-{% yields changes_subject .its 'yields the value of the property' }
+{% yields changes_subject .its 'yields the value of the property' %}
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .its %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions its .its %}
 
 ## Timeouts {% helper_icon timeout %}
+
+{% timeouts its .its %}
 
 # Examples
 
@@ -74,7 +82,6 @@ cy
 ```javascript
 cy.title().its('length').should('eq', 24)
 ```
-
 
 ## Functions
 

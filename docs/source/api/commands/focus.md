@@ -14,15 +14,13 @@ Focus on a DOM element.
 
 ## Usage
 
-`.focus()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('input').first().focus() // Focus on the first input
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.focus('#search')  // Errors, cannot be chained off 'cy'
@@ -44,9 +42,13 @@ Option | Default | Description
 
 {% yields same_subject .focus %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements focusability .focus %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .focus %}
 
 ## Timeouts {% helper_icon timeout %}
 

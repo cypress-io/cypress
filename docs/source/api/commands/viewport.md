@@ -22,7 +22,7 @@ cy.viewport(preset, orientation, options)
 
 `cy.viewport()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.viewport(550, 750)    // Set viewport to 550px x 750px
@@ -72,9 +72,9 @@ Option | Default | Description
 
 {% yields null cy.viewport %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.viewport %}
+{% requirements parent cy.viewport %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -1,26 +1,23 @@
-const rawRender = require('../raw_render')
-
 module.exports = function yields (hexo, args) {
-  // {% requirements none cy.clearCookies %}
+  // {% requirements parent cy.clearCookies %}
   // {% requirements blurability .blur %}
   // {% requirements focusability .blur %}
   // {% requirements checkability .click %}
-  // {% requirements actionability .click %}
+  // {% requirements child_dom .click %}
   // {% requirements existence .children %}
 
   const type = args[0]
   const cmd = `<code>${args[1]}()</code>`
 
-  /* eslint-disable quotes */
-  const actionable = `${cmd} requires the element to be in an {% url 'actionable state' interacting-with-elements %}`
-
-  /* eslint-disable quotes */
-  const exist = `${cmd} requires the element(s) to be {% url 'found in the dom' introduction-to-cypress#Default-Assertions %}`
-
   const focus = `${cmd} requires the element to be able to receive focus`
 
-  const render = (str) => {
-    return rawRender.call(this, hexo, str)
+  const parentCmd = `${cmd} requires being chained off of <code>cy</code>`
+  const childCmd = `${cmd} requires being chained off a previous command`
+  const childCmdDom = `${cmd} requires being chained off a command that yields DOM element(s)`
+  const dualCmd = `${cmd} can be chained off of <code>cy</code> or off a command that yeilds DOM element(s)`
+
+  const parentOrChild = () => {
+    return (args[1] === 'cy.get' || args[1] === 'cy.focused') ? parentCmd : childCmdDom
   }
 
   const none = () => {
@@ -29,14 +26,27 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
-  const actionability = () => {
-    return render(`<ul>
-      <li><p>${actionable}.</p></li>
-    </ul>`)
+  const child = () => {
+    return `<ul>
+      <li><p>${childCmd}.</p></li>
+    </ul>`
+  }
+
+  const childDom = () => {
+    return `<ul>
+      <li><p>${childCmdDom}.</p></li>
+    </ul>`
+  }
+
+  const parent = () => {
+    return `<ul>
+      <li><p>${parentCmd}.</p></li>
+    </ul>`
   }
 
   const blurability = () => {
     return `<ul>
+      <li><p>${childCmdDom}.</p></li>
       <li><p>${cmd} requires the element to currently have focus.</p></li>
       <li><p>${focus}.</p></li>
     </ul>`
@@ -48,28 +58,37 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const clearability = () => {
+    return `<ul>
+      <li><p>${childCmdDom}.</p></li>
+      <li><p>${cmd} requires the element to be an <code>input</code> or <code>textarea</code>.</p></li>
+    </ul>`
+  }
+
   const checkability = () => {
-    return render(`<ul>
+    return `<ul>
+      <li><p>${childCmdDom}.</p></li>
       <li><p>${cmd} requires the element to have type <code>checkbox</code> or <code>radio</code>.</p></li>
-      <li><p>${actionable}.</p></li>
-    </ul>`)
+    </ul>`
+  }
+
+  const selectability = () => {
+    return `<ul>
+      <li><p>${childCmdDom}.</p></li>
+      <li><p>${cmd} requires the element to be a <code>select</code>.</p></li>
+    </ul>`
   }
 
   const existence = () => {
-    return render(`<ul>
-      <li><p>${exist}.</p></li>
-    </ul>`)
+    return `<ul>
+      <li><p>${parentOrChild()}.</p></li>
+    </ul>`
   }
 
   const exec = () => {
-    return render(`<ul>
-      <li><p>${cmd} requires the executed system command to eventually exit.</p></li>
-    </ul>`)
-  }
-
-  const execCode = () => {
     return `<ul>
-      <li><p>${cmd} requires that the exit code be <code>0</code>.</p></li>
+      <li><p>${cmd} requires the executed system command to eventually exit.</p></li>
+      <li><p>${cmd} requires that the exit code be <code>0</code> when <code>failOnNonZeroExit</code> is <code>true</code>.</p></li>
     </ul>`
   }
 
@@ -87,37 +106,51 @@ module.exports = function yields (hexo, args) {
   }
 
   const page = () => {
-    return render(`<ul>
+    return `<ul>
+      <li><p>${parentCmd}.</p></li>
       <li><p>${cmd} requires the response to be <code>content-type: text/html</code>.</p></li>
       <li><p>${cmd} requires the response code to be <code>2xx</code> after following redirects.</p></li>
       <li><p>${cmd} requires the load <code>load</code> event to eventually fire.</p></li>
-      <li><p>${actionable}.</p></li>
-    </ul>`)
+    </ul>`
+  }
+
+  const tick = () => {
+    return `<ul>
+      <li><p>${cmd} requires that <code>cy.clock()</code> be called before it.</p></li>
+    </ul>`
   }
 
   switch (type) {
     case 'none':
       return none()
-    case 'actionability':
-      return actionability()
+    case 'parent':
+      return parent()
+    case 'child':
+      return child()
+    case 'child_dom':
+      return childDom()
+    case 'clearability':
+      return clearability()
     case 'blurability':
       return blurability()
     case 'focusability':
       return focusability()
     case 'checkability':
       return checkability()
+    case 'selectability':
+      return selectability()
     case 'existence':
       return existence()
     case 'exec':
       return exec()
-    case 'exec_code':
-      return execCode()
     case 'read_file':
       return readFile()
     case 'write_file':
       return writeFile()
     case 'page':
       return page()
+    case 'tick':
+      return tick()
     default:
       // error when an invalid usage option was provided
       throw new Error(`{% requirements %} tag helper was provided an invalid option: ${type}`)

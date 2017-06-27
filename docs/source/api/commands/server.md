@@ -21,7 +21,7 @@ cy.server(options)
 
 `cy.server()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.server()    
@@ -61,11 +61,11 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.server 'yields the internal Cypress server instance' %}
+{% yields sets_subject cy.server 'yields the internal Cypress server instance' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.server %}
+{% requirements parent cy.server %}
 
 ## Timeouts {% helper_icon timeout %}
 

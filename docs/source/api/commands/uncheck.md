@@ -20,13 +20,13 @@ Uncheck checkbox(es).
 
 `.uncheck()` requires being chained off another cy command that *yields* a DOM element of type `checkbox`.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="checkbox"]').uncheck()   // Unchecks checkbox element
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.uncheck('[type="checkbox"]') // Errors, cannot be chained off 'cy'
@@ -57,13 +57,13 @@ Option | Default | Description
 
 {% yields same_subject .uncheck %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements checkability .uncheck %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .uncheck %}
+{% timeouts actions .uncheck %}
 
 # Examples
 

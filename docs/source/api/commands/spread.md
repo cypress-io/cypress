@@ -20,13 +20,13 @@ Similar to {% url `.then()` then %}, but always expects an array as it's subject
 
 `.spread()` requires being chained off another cy command that *yields* an array.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.getCookies.spread(function() {}) // Yield all cookies
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.spread(function() {}) // Errors, cannot be chained off 'cy'

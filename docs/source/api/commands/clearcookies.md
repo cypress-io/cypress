@@ -18,9 +18,7 @@ cy.clearCookies(options)
 
 ## Usage
 
-`cy.clearCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clearCookies()     // clear all cookies
@@ -41,9 +39,13 @@ Option | Default | Description
 
 {% yields null cy.clearCookies %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements none cy.clearCookies %}
+{% requirements parent cy.clearCookies %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearCookies %}
 
 ## Timeouts {% helper_icon timeout %}
 

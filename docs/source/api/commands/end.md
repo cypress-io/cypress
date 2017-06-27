@@ -16,13 +16,13 @@ End a chain of commands.
 
 `.end()` should be chained off another cy command.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.contains('ul').end()   // Yield 'null' instead of 'ul' element
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.end()                  // Does not make sense to chain off 'cy'
@@ -32,7 +32,7 @@ cy.end()                  // Does not make sense to chain off 'cy'
 
 {% yields null .end %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements none .end %}
 

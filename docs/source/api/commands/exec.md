@@ -38,9 +38,7 @@ cy.exec(command, options)
 
 ## Usage
 
-`cy.exec()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.exec('npm run build')    
@@ -66,18 +64,17 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 `cy.exec()` yields an object with the following properties:
-
 - `code`
 - `stdout`
 - `stderr`
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements exec cy.exec %}
 
-**When `failOnNonZeroExit` is `true`**
+## Assertions {% helper_icon assertions %}
 
-{% requirements exec_code cy.exec %}
+{% assertions once cy.exec %}
 
 ## Timeouts {% helper_icon timeout %}
 

@@ -16,15 +16,13 @@ Get the parent DOM element of a set of DOM elements.
 
 ## Usage
 
-`.parent()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('header').parent() // Yield parent el of `header`
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.parent()            // Errors, cannot be chained off 'cy'
@@ -50,9 +48,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .parent %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .parent %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parent %}
 
 ## Timeouts {% helper_icon timeout %}
 

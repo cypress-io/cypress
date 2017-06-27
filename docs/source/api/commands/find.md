@@ -14,15 +14,13 @@ Get the descendent DOM elements of a specific selector.
 
 ## Usage
 
-`.find()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.article').find('footer') // Yield 'footer' within '.article'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.find('.progress')          // Errors, cannot be chained off 'cy'
@@ -48,9 +46,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .find %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .find %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
 
 ## Timeouts {% helper_icon timeout %}
 

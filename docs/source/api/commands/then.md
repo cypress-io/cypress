@@ -16,7 +16,7 @@ Yield the previously yielded subject as the first argument of a function.
 
 `.then()` should be chained off another cy command.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.nav').then(function(nav) {})  // Yields .nav as first arg

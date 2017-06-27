@@ -18,15 +18,13 @@ Opposite of {% url `.filter()` filter %}
 
 ## Usage
 
-`.not()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('input').not('.required') // Yield all inputs without class '.required'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.not('.icon')      // Errors, cannot be chained off 'cy'
@@ -52,9 +50,13 @@ Option | Default | Description
 
 {% yields changes_dom_subject .not %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements existence .not %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .not %}
 
 ## Timeouts {% helper_icon timeout %}
 

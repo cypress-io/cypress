@@ -17,7 +17,7 @@ cy.go(direction, options)
 
 `cy.go()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.go('back')    
@@ -42,9 +42,9 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields new_subject cy.go 'yields the `window` object after the page finishes loading' %}
+{% yields sets_subject cy.go 'yields the `window` object after the page finishes loading' %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements page cy.go %}
 

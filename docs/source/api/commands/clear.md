@@ -20,7 +20,7 @@ An alias for {% url `.type('{selectall}{backspace}')` type %}
 
 `.clear()` requires being chained off another cy command that *yields* an `input` or `textarea`.
 
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="text"]').clear()        // Clear text input
@@ -28,7 +28,7 @@ cy.get('textarea').type('Hi!').clear() // Clear textarea
 cy.focused().clear()                   // Clear focused input/textarea
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.clear()                // Errors, cannot be chained off 'cy'
@@ -52,13 +52,17 @@ Option | Default | Description
 
 {% yields same_subject .clear %}
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
-{% requirements actionability .clear %}
+{% requirements clearability .clear %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .clear %}
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts actionability .clear %}
+{% timeouts actions .clear %}
 
 # Examples
 

@@ -23,7 +23,7 @@ cy.scrollTo(0, 500)                     // Scroll the window 500px down
 cy.get('.sidebar').scrollTo('bottom')   // Scroll 'sidebar' to it's bottom
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.title().scrollTo('My App')  // Errors, 'title' does not yield DOM element
@@ -64,7 +64,7 @@ Option | Default | Description
 
 `cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 
-## Requirements {% helper_icon defaultAssertion %}
+## Requirements {% helper_icon requirements %}
 
 {% requirements scrollability .scrollTo %}
 
