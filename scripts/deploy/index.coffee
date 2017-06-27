@@ -20,34 +20,6 @@ Base     = require("./base")
 Linux    = require("./linux")
 Darwin   = require("./darwin")
 
-success = (str) ->
-  console.log chalk.bgGreen(" " + chalk.black(str) + " ")
-
-fail = (str) ->
-  console.log chalk.bgRed(" " + chalk.black(str) + " ")
-
-zippedFilename = (platform) ->
-  # TODO use .tar.gz for linux archive. For now to preserve
-  # same file format as before use .zip
-  if platform == "linux" then "cypress.zip" else "cypress.zip"
-
-# resolves with all relevant options set
-askMissingOptions = (options = {}) ->
-  askWhichPlatform(options.platform)
-  .then((platform) ->
-    options.platform = platform
-    options
-  )
-  .then ->
-    askWhichVersion(options.version)
-  .then((version) ->
-    options.version = version
-    options
-  )
-
-## hack for @packages/server modifying cwd
-process.chdir(cwd)
-
 askWhichPlatform = (platform) ->
   ## if we already have a platform
   ## just resolve with that
@@ -66,11 +38,43 @@ askWhichVersion = (version) ->
   ## else go ask for it!
   ask.deployNewVersion()
 
+questions = {
+  platform: askWhichPlatform,
+  version: askWhichVersion
+}
+
+success = (str) ->
+  console.log chalk.bgGreen(" " + chalk.black(str) + " ")
+
+fail = (str) ->
+  console.log chalk.bgRed(" " + chalk.black(str) + " ")
+
+zippedFilename = (platform) ->
+  # TODO use .tar.gz for linux archive. For now to preserve
+  # same file format as before use .zip
+  if platform == "linux" then "cypress.zip" else "cypress.zip"
+
+# goes through the list of properties and asks relevant question
+# resolves with all relevant options set
+askMissingOptions = (properties) -> (options = {}) ->
+  properties.reduce((prev, property) ->
+    question = questions[property]
+    if (!check.fn(question)) then return prev
+    la(check.fn(question), "cannot find question for property", property)
+    prev.then(() ->
+      question(options[property])
+      .then((answer) ->
+        options[property] = answer
+        options
+      )
+    )
+  , Promise.resolve())
+
+## hack for @packages/server modifying cwd
+process.chdir(cwd)
+
 deploy = {
-  zip:    zip
-  ask:    ask
   meta:   meta
-  upload: upload
   Base:   Base
   Darwin: Darwin
   Linux:  Linux
@@ -90,12 +94,6 @@ deploy = {
     opts = minimist(argv)
     opts.runTests = false if opts["skip-tests"]
     opts
-
-  # build: (platform) ->
-  #   ## read off the argv
-  #   options = @parseOptions(process.argv)
-  #
-  #   @getPlatform(platform?.osName, options).build()
 
   bump: ->
     ask.whichBumpTask()
@@ -126,20 +124,23 @@ deploy = {
       ask.whichRelease(meta.distDir)
       .then(release)
 
-  deploy: ->
-    ## read off the argv
-    # to skip further questions like platform and version
-    # pass these as options like this
-    #   npm run deploy -- --platform darwin --version 0.20.0
+  build: ->
     options = @parseOptions(process.argv)
     askMissingOptions(options)
-    # .then (version) ->
-    #   build(platform, version)
-    # .then (built) =>
-    #   console.log(built)
-    #   src  = built.buildDir
+    .then (version) ->
+      build(platform, version)
+
+  zip: ->
+    # TODO only ask for built folder name
+    options = @parseOptions(process.argv)
+    askMissingOptions(options)
+    # .then ({platform, buildDir}) =>
     #   dest = path.resolve(zippedFilename(platform))
-    #   zip.ditto(src, dest)
+    #   zip.ditto(buildDir, dest)
+
+  upload: ->
+    options = @parseOptions(process.argv)
+    askMissingOptions(options)
     .then () ->
       path.resolve("cypress.zip")
     .then (zippedFilename) =>
@@ -152,12 +153,39 @@ deploy = {
         version: options.version,
         osName: options.platform
       })
-    .then ->
-      success("✅ deploy completed")
-    .catch (err) ->
-      fail("🔥 deploy error")
-      console.log(err)
 
+  # goes through the entire pipeline:
+  #   - build
+  #   - zip
+  #   - upload
+  deploy: ->
+    ## read off the argv
+    # to skip further questions like platform and version
+    # pass these as options like this
+    #   npm run deploy -- --platform darwin --version 0.20.0
+    options = @parseOptions(process.argv)
+    askMissingOptions(['version', 'platform'])(options)
+    .then(console.log)
+    # .then (version) ->
+    #   build(platform, version)
+    # .then (built) =>
+    #   console.log(built)
+    #   src  = built.buildDir
+    #   dest = path.resolve(zippedFilename(platform))
+    #   zip.ditto(src, dest)
+    # .then () ->
+      # path.resolve("cypress.zip")
+    # .then () =>
+    #   la(check.unemptyString(options.zipFile),
+    #     "missing zipped filename", options)
+    #   console.log("Need to upload file %s", options.zipFile)
+    #   console.log("for platform %s version %s",
+    #     options.platform, options.version)
+    #   upload.toS3({
+    #     zipFile: options.zipFile,
+    #     version: options.version,
+    #     platform: options.platform
+    #   })
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))

@@ -34,17 +34,17 @@ module.exports = {
   getAwsObj: ->
     fs.readJsonSync("./support/aws-credentials.json")
 
-  getUploadDirName: ({version, osName}) ->
+  getUploadDirName: ({version, platform}) ->
     aws = @getAwsObj()
-    dirName = [aws.folder, version, osName, null].join("/")
+    dirName = [aws.folder, version, platform, null].join("/")
     console.log("target directory %s", dirName)
     dirName
 
-  purgeCache: ({zipFile, version, osName}) ->
+  purgeCache: ({zipFile, version, platform}) ->
     new Promise (resolve, reject) =>
       zipName      = path.basename(zipFile)
 
-      url = [konfig('cdn_url'), "desktop", version, osName, zipName].join("/")
+      url = [konfig('cdn_url'), "desktop", version, platform, zipName].join("/")
       console.log("purging url", url)
       resolve()
       # cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
@@ -94,11 +94,11 @@ module.exports = {
         .on "error", reject
         .on "end", resolve
 
-  toS3: ({zipFile, version, osName}) ->
+  toS3: ({zipFile, version, platform}) ->
     console.log("#uploadToS3 ⏳")
     la(check.unemptyString(version), "expected version string", version)
     la(check.unemptyString(zipFile), "expected zip filename", zipFile)
-    la(isValidPlatform(osName), "invalid osName", osName)
+    la(isValidPlatform(platform), "invalid platform", platform)
 
     upload = =>
       new Promise (resolve, reject) =>
@@ -109,7 +109,7 @@ module.exports = {
 
         gulp.src(zipFile)
         .pipe rename (p) =>
-          p.dirname = @getUploadDirName({version, osName})
+          p.dirname = @getUploadDirName({version, platform})
           p
         .pipe debug()
         # .pipe publisher.publish(headers)
