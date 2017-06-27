@@ -3,7 +3,7 @@ title: window
 comments: false
 ---
 
-Get the global `window` object of the page that was visited in {% url `cy.visit()` visit %}.
+Get the `window` object of the page that is currently active.
 
 # Syntax
 

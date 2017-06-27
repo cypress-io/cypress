@@ -3,7 +3,7 @@ title: document
 comments: false
 ---
 
-Get the document.
+Get the `window.document` of the page that is currently active.
 
 # Syntax
 

@@ -3,7 +3,7 @@ title: clearLocalStorage
 comments: false
 ---
 
-Clear all data in local storage.
+Clear data in local storage.
 
 {% note warning %}
 Cypress automatically runs this command *before* each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear localStorage inside a single test.

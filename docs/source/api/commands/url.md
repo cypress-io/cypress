@@ -3,7 +3,7 @@ title: url
 comments: false
 ---
 
-Get the current URL.
+Get the current URL of the page that is currently active.
 
 {% note info %}
 This is an alias of {% url "`cy.location('href')`" location %}

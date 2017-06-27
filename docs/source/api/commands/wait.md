@@ -56,11 +56,11 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-**When given a time argument:**
+**When given a `time` argument:**
 
 {% yields same_subject cy.wait %}
 
-**When given an alias argument:**
+**When given an `alias` argument:**
 
 {% yields sets_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
 

@@ -3,7 +3,7 @@ title: hash
 comments: false
 ---
 
-Get the current URL hash.
+Get the current URL hash of the page that is currently active.
 
 {% note info %}
 This is an alias of {% url "`cy.location('hash')`" location %}

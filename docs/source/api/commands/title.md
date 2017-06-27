@@ -3,7 +3,7 @@ title: title
 comments: false
 ---
 
-Get the title of the document.
+Get the title of the `document.title` of the page that is currently active.
 
 # Syntax
 

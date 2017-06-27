@@ -3,7 +3,7 @@ title: location
 comments: false
 ---
 
-Get the remote `window.location` as an object.
+Get the global `window.location` object of the page that is currently active.
 
 # Syntax
 
@@ -53,6 +53,10 @@ Option | Default | Description
 - `protocol`
 - `search`
 - `toString`
+
+**When given a `key` argument:**
+
+{% yields sets_subject cy.location 'yields the value of the location property as a string' %}
 
 ## Requirements {% helper_icon requirements %}
 
@@ -162,4 +166,3 @@ When clicking on `location` within the command log, the console outputs the foll
 
 - {% url `cy.hash()` hash %}
 - {% url `cy.url()` url %}
-- {% url `cy.window()` window %}
