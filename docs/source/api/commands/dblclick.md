@@ -25,8 +25,8 @@ cy.contains('Welcome').dblclick()    // Double click on first el containing 'Wel
 **{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
-cy.click('button')          // Errors, cannot be chained off 'cy'
-cy.window().click()         // Errors, 'window' does not yield DOM element
+cy.dblclick('button')          // Errors, cannot be chained off 'cy'
+cy.window().dblclick()         // Errors, 'window' does not yield DOM element
 ```
 
 ## Arguments

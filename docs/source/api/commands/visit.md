@@ -17,7 +17,7 @@ cy.visit(url, options)
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.visit('http://localhost:3000')    
+cy.visit('http://localhost:3000')    // Yields the window of the remote page
 ```
 
 ## Arguments
@@ -127,7 +127,10 @@ cy.visit('http://localhost:3000/#dashboard', {
 **Using onBeforeLoad**
 
 {% note info %}
-{% url "Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to help bootstrap app data" working-with-the-backend %}, to {% url "set a token to `localStorage` for login" logging-in %} and to {% url "stub `window.fetch`" stubs-spies-and-clocks-recipe %}
+Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to:
+  - {% url 'Bootstrap app data' working-with-the-backend %}
+  - {% url 'Set a token to `localStorage` for login' logging-in %}
+  - {% url 'Stub `window.fetch`' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 **Provide an `onLoad` callback function**
@@ -218,3 +221,4 @@ When clicking on `visit` within the command log, the console outputs the followi
 - {% url `cy.request()` request %}
 - {% url "Recipe: Bootstrapping App Test Data" working-with-the-backend %}
 - {% url "Recipe: Logging In - Single Sign on" logging-in %}
+- {% url "Recipe: Stubbing `window.fetch`" stubs-spies-and-clocks-recipe %}

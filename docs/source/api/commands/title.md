@@ -3,7 +3,7 @@ title: title
 comments: false
 ---
 
-Get the title of the `document.title` of the page that is currently active.
+Get the `document.title` property of the page that is currently active.
 
 # Syntax
 
@@ -19,7 +19,7 @@ cy.title(options)
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.title()    
+cy.title()    // Yields the documents title as a string
 ```
 
 ## Arguments
@@ -35,11 +35,15 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields sets_subject cy.title 'yields the `document.title` of the current page' %}
+{% yields sets_subject cy.title 'yields the `document.title` property of the current page' %}
 
 ## Requirements {% helper_icon requirements %}
 
 {% requirements parent cy.title %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.title %}
 
 ## Timeouts {% helper_icon timeout %}
 
