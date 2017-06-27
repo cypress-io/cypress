@@ -28,7 +28,7 @@
     "precommit-lint": "eslint --fix --rule 'no-only-tests/no-only-tests: 2'",
     "bump": "gulp bump",
     "no-predeploy": "echo 'Just to be safe, rebuilding Sass binary' && npm rebuild node-sass",
-    "deploy": "node ./scripts/deploy.js",
+    "deploy": "node ./scripts/deploy.js deploy",
     "release": "gulp release"
   },
   "lint-staged": {
