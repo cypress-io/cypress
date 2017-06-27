@@ -156,6 +156,10 @@ examples:
     todo-mvc: todo-mvc.html
     pie-chopper: pie-chopper.html
     phonecat: phonecat.html
+  docker:
+    images: images.html
+    circle-ci: circle-ci.html
+    codeship: codeship.html
 
 dashboard:
   overview:
