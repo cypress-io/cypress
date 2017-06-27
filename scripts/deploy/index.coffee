@@ -1,6 +1,7 @@
 ## store the cwd
 cwd = process.cwd()
 
+path     = require("path")
 _        = require("lodash")
 os       = require("os")
 chalk    = require("chalk")
@@ -21,6 +22,11 @@ success = (str) ->
 
 fail = (str) ->
   console.log chalk.bgRed(" " + chalk.black(str) + " ")
+
+zippedFilename = (platform) ->
+  # TODO use .tar.gz for linux archive. For now to preserve
+  # same file format as before use .zip
+  if platform == "linux" then "cypress.zip" else "cypress.zip"
 
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)
@@ -115,16 +121,20 @@ deploy = {
       askWhichVersion(options.version)
       .then (version) ->
         # options.version = version
-
         build(platform, version)
         # .return([platform, version])
     # .spread (platform, version) ->
 
         # @getPlatform(plat, options).deploy()
       # .then (platform) =>
-        # zip.ditto(platform)
-        # .then =>
-        #   upload.toS3(platform)
+      .then (built) =>
+        console.log(built)
+        src  = built.buildDir
+        dest = path.resolve(zippedFilename(platform))
+        zip.ditto(src, dest)
+      .then (zippedFilename) =>
+        console.log("Need to upload file %s", zippedFilename)
+        # upload.toS3(platform)
         #   .then ->
         #     success("Dist Complete")
         #   .catch (err) ->

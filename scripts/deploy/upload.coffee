@@ -10,9 +10,6 @@ konfig  = require("@packages/server/lib/konfig")()
 Promise = require("bluebird")
 meta    = require("./meta")
 
-# TODO please do not hardcode me
-# CDN_URL = "https://cdn.cypress.io"
-
 fs = Promise.promisifyAll(fs)
 
 module.exports = {

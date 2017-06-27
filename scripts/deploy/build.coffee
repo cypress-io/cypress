@@ -39,8 +39,13 @@ module.exports = (platform, version) ->
     path.resolve("dist", platform, args...)
 
   ## returns a path into the /build directory
+  ## the output folder should have top level "Cypress" folder
+  ## build/
+  ##   <platform>/ = linux or darwin
+  ##     Cypress/
+  ##       ... platform-specific files
   buildDir = (args...) ->
-    path.resolve("build", platform, args...)
+    path.resolve("build", platform, "Cypress", args...)
 
   ## returns a path into the /build/*/app directory
   ## specific to each platform
@@ -177,8 +182,9 @@ module.exports = (platform, version) ->
     smokeTest = smokeTests[platform]
     smokeTest()
 
-  Promise
-  .bind(@)
+  # Promise
+  # .bind(@)
+  Promise.resolve()
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
@@ -197,9 +203,14 @@ module.exports = (platform, version) ->
   .then(elBuilder)
   .then(symlinkBuildPackages)
   .then(runSmokeTest)
+
+  # older build steps
   # .then(@runProjectTest)
   # .then(@runFailingProjectTest)
   # .then(@cleanupCy)
   # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(@verifyAppCanOpen)
-  .return(@)
+  # .return(@)
+  .return({
+    buildDir: buildDir()
+  })
