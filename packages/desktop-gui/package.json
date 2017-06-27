@@ -1,7 +1,6 @@
 {
   "name": "@packages/desktop-gui",
-  "version": "0.4.9",
-  "description": "Desktop GUI for managing Cypress projects.",
+  "version": "0.0.0",
   "main": "lib/gui.js",
   "private": true,
   "scripts": {
@@ -17,16 +16,6 @@
     "test": "echo 'No unit tests to run, but there are e2e tests'",
     "pretest": "npm run lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress-core-desktop-gui.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-desktop-gui/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "files": [
     "dist",
     "lib"

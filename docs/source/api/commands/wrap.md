@@ -36,11 +36,11 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields
+## Yields {% yields %}
 
 `cy.wrap()` yields the object that was passed into the command.
 
-## Timeout
+## Timeout {% timeout %}
 
 # Examples
 

@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-inflection = require("underscore.inflection")(_)
+inflection = require("@cypress/underscore.inflection")(_)
 
 ## only export exactly what we need, nothing more!
 _.mixin({

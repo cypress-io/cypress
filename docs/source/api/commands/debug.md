@@ -37,7 +37,7 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields
+## Yields {% yields %}
 
 `.debug()` yields the previous command's yield.
 

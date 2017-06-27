@@ -72,11 +72,11 @@ Option | Default | Notes
 `release` | `true` | Keep a modifier activated between commands
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the type
 
-## Yields
+## Yields {% yields %}
 
 `.type()` yields the DOM element that was typed into.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.type()` will continue to retry typing for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

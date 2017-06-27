@@ -58,11 +58,11 @@ Option | Default | Notes
 --- | --- | ---
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed.
 
-## Yields
+## Yields {% yields %}
 
 `cy.writeFile()` yields the contents written to the file.
 
-## Timeout
+## Timeout {% timeout %}
 
 `cy.writeFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to write to the file.
 

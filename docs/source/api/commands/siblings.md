@@ -47,11 +47,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields
+## Yields {% yields %}
 
 `.siblings()` yields the new DOM elements found by the command.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.siblings()` will continue to look for the sibling element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 

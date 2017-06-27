@@ -17,7 +17,7 @@ global.fs = fs = Promise.promisifyAll(global.fs)
 agent = require("superagent")
 
 require("chai")
-.use(require("sinon-chai"))
+.use(require("@cypress/sinon-chai"))
 
 mockery.enable({
   warnOnUnregistered: false

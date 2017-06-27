@@ -54,12 +54,13 @@ Option | Default | Notes
 `interval` | `16` | Interval which to retry a check
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the check
+## Yields {% yields %}
 
-## Yields
+## Default {% default_assertion %}
 
 `.check()` yields the DOM element(s) that were checked.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.check` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
 

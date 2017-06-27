@@ -782,7 +782,8 @@ cy.get('.mobile-nav')
 
 Under the hood Cypress:
 
-- Gets the element `.mobile-nav` ✨**and waits up to 4 seconds for it to exist in the DOM**✨
+- Queries for the element `.mobile-nav`
+  ✨**and waits up to 4 seconds for it to exist in the DOM**✨
 
 ***Example #2: Additional Assertions***
 
@@ -796,7 +797,7 @@ cy
 
 Under the hood Cypress:
 
-- Gets the element `.mobile-nav`
+- Queries for the element `.mobile-nav`
   ✨**and waits up to 4 seconds for it to exist in the DOM**✨
   ✨**and waits up to 4 seconds for it to be visible**✨
   ✨**and waits up to 4 seconds for it to contain the text: 'Home'**✨

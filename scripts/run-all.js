@@ -32,13 +32,27 @@ const getDirs = () => {
   .map((dir) => path.join(process.cwd(), dir).replace(/\/$/, ''))
 }
 
+const packageNameInArray = (dir, packages) => {
+  const packageName = packageNameFromPath(dir)
+  return _.includes(packages, packageName)
+}
+
 const filterDirsByPackage = (dirs, filter) => {
   if (!filter) return dirs
 
   return dirs.filter((dir) => {
-    const packageName = packageNameFromPath(dir)
-    return _.includes(filter, packageName)
+    return packageNameInArray(dir, filter)
   })
+}
+
+const rejectDirsByPackage = (dirs, rejected) => {
+  if (!rejected) return dirs
+
+  if (rejected && rejected.length) {
+    return _.reject(dirs, (dir) => {
+      return packageNameInArray(dir, rejected)
+    })
+  }
 }
 
 const filterDirsByCmd = (dirs, cmd) => {
@@ -123,10 +137,12 @@ function keepDirsWithPackageJson (dirs) {
 
 module.exports = (cmd, options) => {
   const packagesFilter = options.package || options.packages
+  const packagesReject = options['skip-package'] || options['skip-packages']
 
   return getDirs()
   .then(keepDirsWithPackageJson)
   .then((dirs) => filterDirsByPackage(dirs, packagesFilter))
+  .then((dirs) => rejectDirsByPackage(dirs, packagesReject))
   .then((dirs) => checkDirsLength(dirs, `No packages were found with the filter '${packagesFilter}'`))
   .then((dirs) => filterDirsByCmd(dirs, cmd))
   .then((dirs) => {

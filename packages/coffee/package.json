@@ -5,10 +5,12 @@
   "dependencies": {
     "coffee-script": "1.12.5"
   },
+  "files": [
+    "register.js"
+  ],
   "scripts": {
     "test": "echo 'Nothing to test for the coffee package'"
   },
   "devDependencies": {
-    "coffeelint": "^1.16.0"
   }
 }

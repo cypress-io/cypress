@@ -41,11 +41,11 @@ Option | Default | Notes
 
 You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in {% url 'configuration' configuration %}.
 
-## Yields
+## Yields {% yields %}
 
 `cy.visit()` yields the remote `window` object.
 
-## Timeout
+## Timeout {% timeout %}
 
 `cy.visit()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 

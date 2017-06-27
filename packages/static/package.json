@@ -1,5 +1,6 @@
 {
   "name": "@packages/static",
+  "version": "0.0.0",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -7,6 +8,10 @@
     "build": "gulp build",
     "test": "echo 'Nothing to test yet'"
   },
+  "files": [
+    "dist",
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/icons": "0.5.4",
     "gulp": "^3.9.1"

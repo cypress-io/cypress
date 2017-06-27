@@ -39,11 +39,11 @@ cy.clearCookies().its('length') // Errors, 'clearCookies' does not yield Object
 
 Name of property or nested properties (with dot notation) to get.
 
-## Yields
+## Yields {% yields %}
 
 `.invoke()` yields the value of the property.
 
-## Timeout
+## Timeout {% timeout %}
 
 # Examples
 

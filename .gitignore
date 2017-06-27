@@ -6,6 +6,7 @@ node_modules
 *.orig
 dist
 dist-*
+build
 .vscode
 .publish
 _test-output
@@ -41,3 +42,7 @@ docs/support
 
 # CLI tool
 cli/build
+
+# Building app binary
+scripts/deploy/support/
+support

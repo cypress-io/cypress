@@ -67,9 +67,9 @@ Option | Default | Notes
 
 You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` and `responseTimeout` globally in {% url 'configuration' configuration %} to control how long to wait for the request and response of a supplied route.
 
-## Yields
+## Yields {% yields %}
 
-## Timeout
+## Timeout {% timeout %}
 
 # Examples
 

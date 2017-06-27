@@ -59,11 +59,11 @@ Option | Default | Notes
 `urlMatchingOptions` | `{ matchBase: true }` | The default options passed to `minimatch` when using glob strings to match URLs
 `whitelist` | function | Callback function that whitelists requests from ever being logged or stubbed. By default this matches against asset-like requests such as for `.js`, `.jsx`, `.html`, and `.css` files.
 
-## Yields
+## Yields {% yields %}
 
 `cy.server()` yields the Cypress server instance.
 
-## Timeout
+## Timeout {% timeout %}
 
 
 # Examples

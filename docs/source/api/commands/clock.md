@@ -52,7 +52,7 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | Whether to display command in Command Log
 
-## Yields
+## Yields {% yields %}
 
 `cy.clock()` yields a `clock` object with the following methods:
 

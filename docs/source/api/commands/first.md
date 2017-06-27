@@ -40,11 +40,11 @@ Option | Default | Notes
 `log` | `true` | Whether to display command in Command Log
 `timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
 
-## Yields
+## Yields {% yields %}
 
 `.first()` yields the new DOM element found by the command.
 
-## Timeout
+## Timeout {% timeout %}
 
 `.first()` will continue to look for the first element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
