@@ -38,9 +38,20 @@ askWhichVersion = (version) ->
   ## else go ask for it!
   ask.deployNewVersion()
 
+askZipFile = (zipFile) ->
+  ## if we already have a zip filename
+  ## just resolve with that
+  if zipFile
+    return Promise.resolve(path.resolve(zipFile))
+
+  ## else go ask for it!
+  ask.whichZipFile()
+  .then(path.resolve)
+
 questions = {
   platform: askWhichPlatform,
-  version: askWhichVersion
+  version: askWhichVersion,
+  zipFile: askZipFile
 }
 
 success = (str) ->
@@ -139,20 +150,21 @@ deploy = {
     #   zip.ditto(buildDir, dest)
 
   upload: ->
+    console.log('#upload')
     options = @parseOptions(process.argv)
-    askMissingOptions(options)
-    .then () ->
-      path.resolve("cypress.zip")
-    .then (zippedFilename) =>
-      la(check.unemptyString(zippedFilename), "missing zipped filename")
-      console.log("Need to upload file %s", zippedFilename)
+    askMissingOptions(['version', 'platform', 'zipFile'])(options)
+    .then (options) =>
+      la(check.unemptyString(options.zipFile),
+        "missing zipped filename", options)
+      console.log("Need to upload file %s", options.zipFile)
       console.log("for platform %s version %s",
         options.platform, options.version)
-      upload.toS3({
-        zipFile: zippedFilename,
-        version: options.version,
-        osName: options.platform
-      })
+
+      # upload.toS3({
+      #   zipFile: options.zipFile,
+      #   version: options.version,
+      #   platform: options.platform
+      # })
 
   # goes through the entire pipeline:
   #   - build
