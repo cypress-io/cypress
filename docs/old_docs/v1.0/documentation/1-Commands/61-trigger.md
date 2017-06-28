@@ -28,13 +28,7 @@ Trigger the event named `eventName` on the DOM element.
 
 Triggers event on the element at the specified position. The `center` position is the default position.
 
-Position | Default | Notes
---- | --- | ---
-`center` | Yes | The exact center of the element
-`topLeft` | No | The top left corner of the element
-`topRight` | No | The top right corner of the element
-`bottomLeft` | No | The bottom left corner of the element
-`bottomRight` | No | The bottom right corner of the element
+Triggers event on the element at the specified position. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
 ***
 
