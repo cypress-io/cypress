@@ -6,11 +6,19 @@ const readline = require('readline')
 const yauzl = require('yauzl')
 const { formErrorText, errors } = require('../errors')
 const utils = require('./utils')
+const debug = require('debug')('cypress:cli')
 
 const fs = Promise.promisifyAll(require('fs-extra'))
 
 // expose this function for simple testing
-const _unzip = ({zipDestination, destination, width}) => () => {
+const _unzip = ({ zipDestination, destination, width }) => () => {
+  debug('unzipping %s', zipDestination)
+  debug('into %s', destination)
+
+  if (!zipDestination) {
+    throw new Error('Missing zip filename')
+  }
+
   return new Promise((resolve, reject) => {
     return yauzl.open(zipDestination, (err, zipFile) => {
       if (err) return reject(err)
@@ -114,5 +122,5 @@ module.exports = {
   cleanup,
   logErr,
   start,
-  _unzip
+  _unzip,
 }

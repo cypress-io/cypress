@@ -1,9 +1,12 @@
+const path = require('path')
 const _ = require('lodash')
 const chalk = require('chalk')
+const fs = require('fs')
+const debug = require('debug')('cypress:cli')
 const download = require('./download')
 const utils = require('./utils')
-const debug = require('debug')('cypress:cli')
-const path = require('path')
+const unzip = require('./unzip')
+
 const packagePath = path.join(__dirname, '..', '..', 'package.json')
 const packageVersion = require(packagePath).version
 
@@ -48,6 +51,16 @@ const install = (options = {}) => {
       utils.log(err.message)
     }
     utils.log(chalk.green(`Installing Cypress (version: ${needVersion}).`))
+
+    if (fs.existsSync(needVersion)) {
+      utils.log('Installing local Cypress binary from %s', needVersion)
+      return unzip.start({
+        zipDestination: needVersion,
+        destination: utils.getInstallationDir(),
+        executable: utils.getPathToUserExecutable(),
+      })
+      .then(() => utils.writeInstalledVersion('unknown'))
+    }
 
     return download.start({
       displayOpen: false,
