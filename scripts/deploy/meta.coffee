@@ -1,4 +1,8 @@
 path = require("path")
+la = require("lazy-ass")
+check = require("check-more-types")
+
+isValidPlatform = check.oneOf(["darwin", "linux"])
 
 ## returns a path into the /build directory
 ## the output folder should look something like this
@@ -6,7 +10,12 @@ path = require("path")
 ##   <platform>/ = linux or darwin
 ##     ... platform-specific files
 buildDir = (platform, args...) ->
-  path.resolve("build", platform, args...)
+  la(isValidPlatform(platform), "invalid platform", platform)
+  switch platform
+    when "darwin"
+      path.resolve("build", platform, args...)
+    when "linux"
+      path.resolve("build", platform, "Cypress", args...)
 
 ## returns a path into the /dist directory
 distDir = (platform, args...) ->
@@ -18,18 +27,19 @@ zipDir = (platform) ->
     when "darwin"
       buildDir(platform, "Cypress.app")
     when "linux"
-      buildDir(platform, "Cypress")
+      buildDir(platform)
 
 ## returns a path into the /build/*/app directory
 ## specific to each platform
 buildAppDir = (platform, args...) ->
   switch platform
     when "darwin"
-      buildDir("Cypress.app", "Contents", "resources", "app", args...)
+      buildDir(platform, "Cypress.app", "Contents", "resources", "app", args...)
     when "linux"
-      buildDir("resources", "app", args...)
+      buildDir(platform, "resources", "app", args...)
 
 module.exports = {
+  isValidPlatform
   buildDir
   distDir
   zipDir

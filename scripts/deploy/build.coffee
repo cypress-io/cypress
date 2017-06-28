@@ -109,9 +109,10 @@ module.exports = (platform, version) ->
 
   symlinkBuildPackages = ->
     log("#symlinkBuildPackages", platform)
-
+    wildCard = buildAppDir("packages", "*", "package.json")
+    console.log("packages", wildCard)
     packages.symlinkAll(
-      buildAppDir("packages", "*", "package.json"),
+      wildCard,
       buildAppDir
     )
 
@@ -152,11 +153,15 @@ module.exports = (platform, version) ->
 
   elBuilder = ->
     log("#elBuilder", platform)
+    dir = distDir()
+    dist = buildDir()
+    console.log("from #{dir}")
+    console.log("into #{dist}")
 
     electron.install({
-      dir: distDir()
-      dist: buildDir()
-      platform: platform
+      dir
+      dist
+      platform
       "app-version": version
     })
 
@@ -166,8 +171,6 @@ module.exports = (platform, version) ->
     smokeTest = smokeTests[platform]
     smokeTest()
 
-  # Promise
-  # .bind(@)
   Promise.resolve()
   .then(cleanupPlatform)
   .then(buildPackages)
@@ -183,7 +186,6 @@ module.exports = (platform, version) ->
   .then(@cleanupSrc)
   .then(@npmInstall)
   .then(@npmInstall)
-  .then(@elBuilder)
   .then(elBuilder)
   .then(symlinkBuildPackages)
   .then(runSmokeTest)
@@ -194,7 +196,6 @@ module.exports = (platform, version) ->
   # .then(@cleanupCy)
   # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(@verifyAppCanOpen)
-  # .return(@)
   .return({
     buildDir: buildDir()
   })

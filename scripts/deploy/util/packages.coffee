@@ -4,6 +4,8 @@ cp = require("child_process")
 path = require("path")
 glob = require("glob")
 Promise = require("bluebird")
+la = require("lazy-ass")
+check = require("check-more-types")
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -83,6 +85,8 @@ npmInstallAll = (pathToPackages) ->
   ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
   ## 313,416,512 bytes (376.6 MB on disk) for 23,576 items
 
+  console.log("npmInstallAll packages in #{pathToPackages}")
+
   started = new Date()
 
   retryGlobbing = ->
@@ -123,6 +127,9 @@ ensureFoundSomething = (files) ->
 
 symlinkAll = (pathToDistPackages, pathTo) ->
   console.log("symlink these packages", pathToDistPackages)
+  la(check.unemptyString(pathToDistPackages),
+    "missing paths to dist packages", pathToDistPackages)
+
   baseDir = path.dirname(pathTo())
   toBase = path.relative.bind(null, baseDir)
 
