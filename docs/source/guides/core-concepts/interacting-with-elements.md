@@ -54,10 +54,11 @@ Cypress checks a lot of things to determine an element's visibility.
 
 ***Additionally an element is considered hidden if:***
 
-- Any of its parent ancestors have a CSS property `overflow: hidden`
+- Any of its ancestors have a CSS property `overflow: hidden`
   - AND have an `offsetWidth` or `offsetHeight` of `0`
-  - AND an element between all of the parents and the element has `position: fixed` or `position: absolute`.
-- Its content is outside the boundaries of a parent ancestor with `overflow: hidden`, `overflow: scroll`, or `overflow: auto`.
+  - AND an element between that ancestor and the element has `position: fixed` or `position: absolute`
+- Any of its ancestors have `overflow: hidden`, `overflow: scroll`, or `overflow: auto`
+  - AND it is positioned outside that ancestor's bounds
 
 ## Disability
 

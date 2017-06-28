@@ -82,7 +82,6 @@ describe "Settings", ->
           .get(".nested").eq(1)
             .contains("*.foobar.com")
 
-      ## FIXME
       it "opens help link on click", ->
         cy
           .get(".settings-config .learn-more").click().then ->
@@ -102,7 +101,6 @@ describe "Settings", ->
       it "displays record keys section", ->
         cy.contains("A Record Key sends")
 
-      ## FIXME
       it "opens ci guide when learn more is clicked", ->
         cy
           .get(".settings-record-keys").contains("Learn More").click().then ->
