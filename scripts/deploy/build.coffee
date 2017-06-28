@@ -11,6 +11,8 @@ pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
 electron = require("@packages/electron")
+
+meta = require("./meta")
 packages = require("./util/packages")
 Darwin = require("./darwin")
 Linux = require("./linux")
@@ -34,6 +36,10 @@ smokeTests = {
 }
 
 module.exports = (platform, version) ->
+  distDir = meta.distDir.bind(null, platform)
+  buildDir = meta.buildDir.bind(null, platform)
+  buildAppDir = meta.buildAppDir.bind(null, platform)
+
   cleanupPlatform = ->
     log("#cleanupPlatform", platform)
 
