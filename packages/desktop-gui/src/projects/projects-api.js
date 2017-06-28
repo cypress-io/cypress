@@ -35,6 +35,7 @@ const loadProjects = (shouldLoad = true) => {
   .then((projectsWithStatuses) => {
     projectsStore.updateProjectsWithStatuses(projectsWithStatuses)
     saveToLocalStorage()
+    return null
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {

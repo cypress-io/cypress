@@ -75,6 +75,7 @@ class Login extends Component {
     })
     .then((user) => {
       authStore.setUser(user)
+      return null
     })
     .catch(alreadyOpen, () => {
       return // do nothing if we're already open!
