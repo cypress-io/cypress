@@ -110,6 +110,7 @@ const start = (options = {}) => {
 }
 
 const cleanup = (options) => {
+  debug('removing zip file %s', options.zipDestination)
   return fs.removeAsync(options.zipDestination)
 }
 

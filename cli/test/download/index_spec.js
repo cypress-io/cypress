@@ -4,6 +4,8 @@ const chalk = require('chalk')
 const download = require('../../lib/download/download')
 const index = require('../../lib/download/index')
 const utils = require('../../lib/download/utils')
+const unzip = require('../../lib/download/unzip')
+const fs = require('fs')
 
 const packageVersion = require('../../package').version
 
@@ -23,6 +25,8 @@ describe('index', function () {
       this.sandbox.stub(utils, 'log')
       this.sandbox.stub(download, 'start').resolves()
       this.sandbox.stub(utils, 'getInstalledVersion').resolves()
+      this.sandbox.stub(utils, 'writeInstalledVersion').resolves()
+      this.sandbox.stub(utils, 'clearVersionState').resolves()
     })
 
     describe('override version', function () {
@@ -43,6 +47,23 @@ describe('index', function () {
               version,
               cypressVersion: version,
             })
+          })
+      })
+
+      it('can install local binary zip file without download', function () {
+        const version = '/tmp/local/file.zip'
+        process.env.CYPRESS_VERSION = version
+        this.sandbox.stub(fs, 'existsSync').withArgs(version).returns(true)
+        this.sandbox.stub(unzip, 'start').resolves()
+
+        return index.install()
+          .then(() => {
+            expect(unzip.start).calledWith({
+              zipDestination: version,
+              destination: utils.getInstallationDir(),
+              executable: utils.getPathToUserExecutable(),
+            })
+            expect(utils.writeInstalledVersion).calledWith('unknown')
           })
       })
     })
@@ -107,7 +128,6 @@ describe('index', function () {
 
     describe('with force: true', function () {
       beforeEach(function () {
-        this.sandbox.stub(utils, 'clearVersionState').resolves()
         utils.getInstalledVersion.resolves(packageVersion)
         return index.install({ force: true })
       })
