@@ -249,8 +249,6 @@ The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-
 
 # Rules
 
-# Rules
-
 ## Requirements {% helper_icon requirements %}
 
 {% requirements child .should %}

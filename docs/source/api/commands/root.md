@@ -47,7 +47,7 @@ The root element yielded is `<html>` by default. However, when calling `.root()`
 **Get the root element**
 
 ```javascript
-cy.root() // yields document
+cy.root() // yields <html>
 ```
 
 ## Root in {% url `.within()` within %}
