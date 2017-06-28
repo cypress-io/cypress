@@ -106,8 +106,8 @@ module.exports = {
           p.dirname = aws.folder + "/" + p.dirname
           p
         .pipe debug()
-        # .pipe publisher.publish(headers)
-        # .pipe awspublish.reporter()
+        .pipe publisher.publish(headers)
+        .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
