@@ -121,9 +121,9 @@ deploy = {
     options = @parseOptions(process.argv)
     askMissingOptions(['platform'])(options)
     .then (options) ->
-      buildDir = meta.buildDir(options.platform)
+      zipDir = meta.zipDir(options.platform)
       dest = path.resolve(zippedFilename(options.platform))
-      zip.ditto(buildDir, dest)
+      zip.ditto(zipDir, dest)
 
   upload: ->
     console.log('#upload')
