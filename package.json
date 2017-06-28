@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "productName": "Cypresss",
+  "productName": "Cypress",
   "version": "0.19.4",
   "description": "Cypress.io end to end testing tool",
   "private": true,

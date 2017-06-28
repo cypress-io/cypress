@@ -2,6 +2,7 @@ fs      = require("fs-extra")
 path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
+log     = require("debug")("cypress:server:appdata")
 cwd     = require("../cwd")
 pkg     = require("../../package.json")
 
@@ -36,7 +37,9 @@ module.exports = {
     fs.removeAsync(cwd(".cy")).catch(->)
 
   path: (paths...) ->
-    path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
+    p = path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
+    log("path: %s", p)
+    p
 
   remove: ->
     Promise.join(
