@@ -35,9 +35,7 @@ describe "CLI Interface", ->
       expect(parse(stdout)).to.eq("12345")
       done()
 
-  ## productName moved to root package.json repo
-  ## TODO: update the test / read package from the root, not from the server
-  it.skip "writes out package.json and exits", (done) ->
+  it "writes out package.json and exits", (done) ->
     cp.exec "npm start -- --return-pkg", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
