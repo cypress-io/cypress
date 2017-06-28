@@ -39,13 +39,12 @@ module.exports = (platform, version) ->
     path.resolve("dist", platform, args...)
 
   ## returns a path into the /build directory
-  ## the output folder should have top level "Cypress" folder
+  ## the output folder should look something like this
   ## build/
   ##   <platform>/ = linux or darwin
-  ##     Cypress/
-  ##       ... platform-specific files
+  ##     ... platform-specific files
   buildDir = (args...) ->
-    path.resolve("build", platform, "Cypress", args...)
+    path.resolve("build", platform, args...)
 
   ## returns a path into the /build/*/app directory
   ## specific to each platform
