@@ -66,7 +66,7 @@ cy.get('li').first()
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .first %}
+{% requirements dom .first %}
 
 ## Assertions {% helper_icon assertions %}
 

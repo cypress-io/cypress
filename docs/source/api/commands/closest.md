@@ -60,7 +60,7 @@ cy.get('p.error').closest('.banner')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .closest %}
+{% requirements dom .closest %}
 
 ## Assertions {% helper_icon assertions %}
 

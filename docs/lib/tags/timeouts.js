@@ -77,6 +77,12 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const timeouts = () => {
+    return `<ul>
+    <li><p>${cmd} will continue to retry its specified assertions until it times out.</p></li>
+    </ul>`
+  }
+
   switch (type) {
     case 'assertions':
       return assertions()
@@ -94,6 +100,8 @@ module.exports = function yields (hexo, args) {
       return none()
     case 'page':
       return page()
+    case 'timeouts':
+      return timeouts()
     default:
       // error when an invalid usage option was provided
       throw new Error(`{% timeouts %} tag helper was provided an invalid option: ${type}`)

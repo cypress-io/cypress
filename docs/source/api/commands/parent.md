@@ -70,7 +70,7 @@ cy.get('li.active').parent('.nav')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .parent %}
+{% requirements dom .parent %}
 
 ## Assertions {% helper_icon assertions %}
 

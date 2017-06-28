@@ -91,7 +91,7 @@ cy.get('#veggies').nextUntil('#nuts')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .nextUntil %}
+{% requirements dom .nextUntil %}
 
 ## Assertions {% helper_icon assertions %}
 

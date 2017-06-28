@@ -5,8 +5,8 @@ module.exports = function yields (hexo, args) {
   // {% requirements blurability .blur %}
   // {% requirements focusability .blur %}
   // {% requirements checkability .click %}
-  // {% requirements child_dom .click %}
-  // {% requirements existence .children %}
+  // {% requirements dom .click %}
+  // {% requirements dom .children %}
 
   const type = args[0]
   const cmd = `<code>${args[1]}()</code>`
@@ -51,6 +51,13 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const utility = () => {
+    return `<ul>
+      <li><p>${cmd} is a utility command.</p></li>
+      <li><p>${cmd} will not run assertions. Assertions will pass through as if this command did not exist.</p></li>
+    </ul>`
+  }
+
   const its = () => {
     return `<ul>
       <li><p>${cmd} will automatically retry itself until the property exists on the subject.</p></li>
@@ -81,6 +88,8 @@ module.exports = function yields (hexo, args) {
       return wait()
     case 'retry':
       return retry()
+    case 'utility':
+      return utility()
     case 'its':
       return its()
     case 'existence':

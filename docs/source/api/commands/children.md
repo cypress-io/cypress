@@ -105,7 +105,7 @@ cy.get('ul').children('.active')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .children %}
+{% requirements dom .children %}
 
 ## Assertions {% helper_icon assertions %}
 

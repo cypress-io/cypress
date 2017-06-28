@@ -82,7 +82,7 @@ cy.get('li').siblings('.active')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .siblings %}
+{% requirements dom .siblings %}
 
 ## Assertions {% helper_icon assertions %}
 

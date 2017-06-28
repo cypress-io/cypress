@@ -58,7 +58,7 @@ cy.get('a#nav1').dblclick() // yields the <a>
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements child_dom .dblclick %}
+{% requirements dom .dblclick %}
 
 ## Assertions {% helper_icon assertions %}
 

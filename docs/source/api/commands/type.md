@@ -398,7 +398,7 @@ In other words, you get the best of both worlds: simulated when its practical to
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements child_dom .type %}
+{% requirements dom .type %}
 
 ## Assertions {% helper_icon assertions %}
 

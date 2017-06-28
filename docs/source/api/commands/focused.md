@@ -63,7 +63,7 @@ cy.focused().should('have.attr', 'name', 'username')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence cy.focused %}
+{% requirements dom cy.focused %}
 
 ## Assertions {% helper_icon assertions %}
 

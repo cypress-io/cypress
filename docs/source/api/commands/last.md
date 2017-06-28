@@ -66,7 +66,7 @@ cy.get('li').last()
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .last %}
+{% requirements dom .last %}
 
 ## Assertions {% helper_icon assertions %}
 

@@ -64,7 +64,7 @@ cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .not %}
+{% requirements dom .not %}
 
 ## Assertions {% helper_icon assertions %}
 

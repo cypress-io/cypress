@@ -80,7 +80,7 @@ cy.get('#header').should('have.text', 'Hello, World')
 
 ## Assertions {% helper_icon assertions %}
 
-{% assertions none cy.tick %}
+{% assertions utility cy.tick %}
 
 ## Timeouts {% helper_icon timeout %}
 

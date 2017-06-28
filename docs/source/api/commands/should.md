@@ -24,8 +24,6 @@ An alias of {% url `.and()` and %}
 
 ## Usage
 
-`.should()` requires being chained off another cy command.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -77,29 +75,6 @@ cy
   .should('be.visible')             // yields <nav>
   .and('have.css', 'font-family')   // yields 'sans-serif'
   .and('match', /serif/)            // yields 'sans-serif'
-```
-
-## Timeouts {% helper_icon timeout %}
-
-`.should()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
-
-```javascript
-cy.get('input', {timeout: 10000}).should('have.value', '10')
-                                    ↲
-  // timeout here will be passed down to the '.should()'
-  // and it will retry for up to 10 secs
-```
-
-```javascript
-cy.get('input', {timeout: 10000}).should(function($input)){
-                                    ↲
-  // timeout here will be passed down to the '.should()'
-  // unless an assertion throws earlier,
-  // ALL of the assertions will retry for up to 10 secs
-  expect($input).to.not.be('disabled')
-  expect($input).to.not.have.class('error')
-  expect($input).to.have.value('US')
-})
 ```
 
 # Examples
@@ -271,6 +246,37 @@ cy.get('button').click()
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 {% partial then_should_difference %}
+
+# Rules
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .should %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts timeouts .should %}
+
+```javascript
+cy.get('input', {timeout: 10000}).should('have.value', '10')
+                         ↲
+  // timeout here will be passed down to the '.should()'
+  // and it will retry for up to 10 secs
+```
+
+```javascript
+cy.get('input', {timeout: 10000}).should(function($input)){
+                         ↲
+  // timeout here will be passed down to the '.should()'
+  // unless an assertion throws earlier,
+  // ALL of the assertions will retry for up to 10 secs
+  expect($input).to.not.be('disabled')
+  expect($input).to.not.have.class('error')
+  expect($input).to.have.value('US')
+})
+```
 
 # Command Log
 

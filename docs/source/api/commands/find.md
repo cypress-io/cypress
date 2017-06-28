@@ -68,7 +68,7 @@ cy.get('#parent').find('li')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .find %}
+{% requirements dom .find %}
 
 ## Assertions {% helper_icon assertions %}
 

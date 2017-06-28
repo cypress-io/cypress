@@ -57,7 +57,7 @@ cy.get('a').debug().should('have.attr', 'href')
 
 ## Assertions {% helper_icon assertions %}
 
-{% assertions none .debug %}
+{% assertions utility .debug %}
 
 ## Timeouts {% helper_icon timeout %}
 

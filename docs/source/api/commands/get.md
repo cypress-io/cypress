@@ -117,7 +117,7 @@ it('disables on click', function(){
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence cy.get %}
+{% requirements dom cy.get %}
 
 ## Assertions {% helper_icon assertions %}
 

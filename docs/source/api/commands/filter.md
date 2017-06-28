@@ -75,7 +75,7 @@ cy.get('ul').find('>li').filter('.active')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .filter %}
+{% requirements dom .filter %}
 
 ## Assertions {% helper_icon assertions %}
 

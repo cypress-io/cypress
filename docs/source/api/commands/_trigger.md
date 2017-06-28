@@ -18,8 +18,6 @@ Trigger an event on a DOM element.
 
 ## Usage
 
-`.trigger()` requires being chained off another cy command that *yields* a DOM element.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -70,14 +68,6 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 ## Yields {% helper_icon yields %}
 
 {% yields same_subject .trigger %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements child_dom .trigger %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts actions .trigger %}
 
 # Examples
 
@@ -155,6 +145,20 @@ cy.get('button').trigger('mousemove', {clientX: 200, clientY: 300})
 **What event should I fire?**
 
 `cy.trigger` is meant to be a low-level utility that makes triggering events easier than manually constructing and dispatching them. Since any arbitrary event can be triggered, Cypress tries not to make any assumptions about how it should be triggered. This means you'll need to know the implementation details (which may be in a 3rd party library) of the event handler(s) receiving the event and provide the necessary properties.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .trigger %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .trigger %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .trigger %}
 
 # Command Log
 

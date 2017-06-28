@@ -89,7 +89,7 @@ cy.get('.active').parentsUntil('.nav')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .parentsUntil %}
+{% requirements dom .parentsUntil %}
 
 ## Assertions {% helper_icon assertions %}
 

@@ -95,7 +95,7 @@ cy.get('li').eq(-2).should('contain', 'sphynx') // true
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .eq %}
+{% requirements dom .eq %}
 
 ## Assertions {% helper_icon assertions %}
 

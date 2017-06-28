@@ -15,8 +15,6 @@ Scroll an element into view.
 
 ## Usage
 
-`.scrollIntoView()` requires being chained off another cy command that *yields* a DOM element.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -48,14 +46,6 @@ Option | Default | Description
 
 {% yields same_subject .scrollIntoView %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements none .scrollToIntoView %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions .scrollToIntoView %}
-
 # Examples
 
 # Notes
@@ -63,6 +53,20 @@ Option | Default | Description
 **Snapshots do not reflect scroll behavior**
 
 *Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos.html#Videos %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .scrollToIntoView %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .scrollToIntoView %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .scrollToIntoView %}
 
 # Command Log
 

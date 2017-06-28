@@ -58,7 +58,7 @@ cy.get('button').should('not.be.disabled')
 
 ## Assertions {% helper_icon assertions %}
 
-{% assertions none .pause %}
+{% assertions utility .pause %}
 
 ## Timeouts {% helper_icon timeout %}
 

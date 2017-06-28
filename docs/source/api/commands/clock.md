@@ -189,7 +189,7 @@ If you call `cy.clock()` before visiting a page with {% url `cy.visit()` visit %
 
 ## Assertions {% helper_icon assertions %}
 
-{% assertions none cy.clock %}
+{% assertions utility cy.clock %}
 
 ## Timeouts {% helper_icon timeout %}
 

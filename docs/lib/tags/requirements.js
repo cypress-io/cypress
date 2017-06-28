@@ -3,8 +3,8 @@ module.exports = function yields (hexo, args) {
   // {% requirements blurability .blur %}
   // {% requirements focusability .blur %}
   // {% requirements checkability .click %}
-  // {% requirements child_dom .click %}
-  // {% requirements existence .children %}
+  // {% requirements dom .click %}
+  // {% requirements dom .children %}
 
   const type = args[0]
   const cmd = `<code>${args[1]}()</code>`
@@ -31,9 +31,9 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
-  const childDom = () => {
+  const dom = () => {
     return `<ul>
-      <li><p>${childCmdDom}.</p></li>
+      <li><p>${parentOrChild()}.</p></li>
     </ul>`
   }
 
@@ -75,12 +75,6 @@ module.exports = function yields (hexo, args) {
     return `<ul>
       <li><p>${childCmdDom}.</p></li>
       <li><p>${cmd} requires the element to be a <code>select</code>.</p></li>
-    </ul>`
-  }
-
-  const existence = () => {
-    return `<ul>
-      <li><p>${parentOrChild()}.</p></li>
     </ul>`
   }
 
@@ -138,8 +132,8 @@ module.exports = function yields (hexo, args) {
       return parent()
     case 'child':
       return child()
-    case 'child_dom':
-      return childDom()
+    case 'dom':
+      return dom()
     case 'dual':
       return dual()
     case 'dual_existence':
@@ -154,8 +148,6 @@ module.exports = function yields (hexo, args) {
       return checkability()
     case 'selectability':
       return selectability()
-    case 'existence':
-      return existence()
     case 'exec':
       return exec()
     case 'read_file':

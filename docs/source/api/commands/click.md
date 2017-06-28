@@ -185,7 +185,7 @@ These situations are rare, but if you're having a difficult time clicking an ele
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements child_dom .click %}
+{% requirements dom .click %}
 
 ## Assertions {% helper_icon assertions %}
 

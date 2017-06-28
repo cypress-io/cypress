@@ -92,7 +92,7 @@ cy.get('li').prev('.active')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .prev %}
+{% requirements dom .prev %}
 
 ## Assertions {% helper_icon assertions %}
 

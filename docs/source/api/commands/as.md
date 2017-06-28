@@ -17,8 +17,6 @@ Assign an alias for later use. Reference the alias later within a {% url `cy.get
 
 ## Usage
 
-`.as()` should be chained off another cy command.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -43,14 +41,6 @@ The name of the alias to be referenced later within a {% url `cy.get()` get %} o
 ## Yields {% helper_icon yields %}
 
 {% yields same_subject .as %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements none .as %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions .as %}
 
 # Examples
 
@@ -78,6 +68,20 @@ cy.wait('@userPut')
 
 Some strings are not allowed as alias names since they are reserved words in Cypress. These words include: `test`, `runnable`, `timeout`, `slow`, `skip`, and `inspect`.
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .as %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility .as %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .as %}
+
 # Command Log
 
 **Alias several routes**
@@ -97,5 +101,5 @@ Aliases of routes display in the routes instrument panel:
 # See also
 
 - {% url `cy.get()` get %}
-- {% url 'Aliases' aliases-and-references %}
 - {% url `cy.wait()` wait %}
+- {% url 'Guides: Aliases' aliases-and-references %}

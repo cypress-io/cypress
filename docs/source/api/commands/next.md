@@ -89,7 +89,7 @@ cy.get('li').next('.selected')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .next %}
+{% requirements dom .next %}
 
 ## Assertions {% helper_icon assertions %}
 

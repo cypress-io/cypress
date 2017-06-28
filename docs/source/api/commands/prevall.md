@@ -92,7 +92,7 @@ cy.get('li').prevAll('.selected')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .prevAll %}
+{% requirements dom .prevAll %}
 
 ## Assertions {% helper_icon assertions %}
 

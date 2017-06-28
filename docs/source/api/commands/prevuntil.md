@@ -90,7 +90,7 @@ cy.get('#nuts').prevUntil('#veggies')
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements existence .prevUntil %}
+{% requirements dom .prevUntil %}
 
 ## Assertions {% helper_icon assertions %}
 
