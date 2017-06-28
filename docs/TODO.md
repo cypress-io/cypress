@@ -183,3 +183,10 @@ FIX -spies,stubs and stubs,spies
       - like you called .type() on an array or didnt pass in the right arguments
       - a default assertion will automatically retry until the state matches and will wait
         - its like its been added as an assertion after the command
+
+What's left?
+  - each
+  - within
+  - then
+  - spread
+  - wait
