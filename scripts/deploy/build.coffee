@@ -34,27 +34,6 @@ smokeTests = {
 }
 
 module.exports = (platform, version) ->
-  ## returns a path into the /dist directory
-  distDir = (args...) ->
-    path.resolve("dist", platform, args...)
-
-  ## returns a path into the /build directory
-  ## the output folder should look something like this
-  ## build/
-  ##   <platform>/ = linux or darwin
-  ##     ... platform-specific files
-  buildDir = (args...) ->
-    path.resolve("build", platform, args...)
-
-  ## returns a path into the /build/*/app directory
-  ## specific to each platform
-  buildAppDir = (args...) ->
-    switch platform
-      when "darwin"
-        buildDir("Cypress.app", "Contents", "resources", "app", args...)
-      when "linux"
-        buildDir("resources", "app", args...)
-
   cleanupPlatform = ->
     log("#cleanupPlatform", platform)
 
