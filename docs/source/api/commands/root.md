@@ -3,7 +3,7 @@ title: root
 comments: false
 ---
 
-Get the root element.
+Get the root DOM element.
 
 # Syntax
 
@@ -14,14 +14,12 @@ cy.root(options)
 
 ## Usage
 
-`cy.root()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.root()   // Yield root element (document)
+cy.root()   // Yield root element <html>
 cy.get('nav').within(function(nav) {
-  cy.root()  // Yield root element (nav)
+  cy.root()  // Yield root element <nav>
 })
 ```
 
@@ -38,26 +36,18 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-`.root()` yields the root element regardless of what was yielded from a previous command.
+`.root()` yields the root DOM element.
 
-The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a {% url `.within()` within %} command, the root element yielded is the yielded subject of the {% url `.within()` within %} command.
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.root %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions cy.root %}
+The root element yielded is `<html>` by default. However, when calling `.root()` from a {% url `.within()` within %} command, the root element will point to the element you are "within".
 
 # Examples
 
-## Document
+## HTML
 
 **Get the root element**
 
 ```javascript
-cy.get('aside').root() // yields document
+cy.root() // yields document
 ```
 
 ## Root in {% url `.within()` within %}
@@ -65,12 +55,26 @@ cy.get('aside').root() // yields document
 **Get the root element in a `.within()` callback function**
 
 ```javascript
-cy.get('form').within(function (form) {
+cy.get('form').within(function ($form) {
   cy.get('input[name="email"]').type('john.doe@email.com')
   cy.get('input[name="password"]').type('password')
   cy.root().submit() // submits the form yielded from 'within'
 })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.root %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.root %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.root %}
 
 # Command Log
 
