@@ -46,6 +46,8 @@ module.exports = {
   getAwsObj: ->
     fs.readJsonSync("./support/aws-credentials.json")
 
+  # store uploaded application in subfolders by platform and version
+  # something like desktop/0.20.1/osx64/
   getUploadDirName: ({version, platform}) ->
     aws = @getAwsObj()
     osName = getUploadNameByOs(platform)
@@ -135,6 +137,6 @@ module.exports = {
         .on "end", resolve
 
     upload()
-    # .then =>
-    #   @purgeCache({zipFile, version, platform})
+    .then =>
+      @purgeCache({zipFile, version, platform})
 }

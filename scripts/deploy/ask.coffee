@@ -11,29 +11,30 @@ prompt = (questions) ->
 
 fs = Promise.promisifyAll(fs)
 
+getZipFile = ->
+  [{
+    name: "zipFile"
+    type: "string"
+    message: "Which zip file should we upload?"
+  }]
+
+getPlatformQuestion = ->
+  [{
+    name: "platform"
+    type: "list"
+    message: "Which OS should we deploy?"
+    choices: [{
+      name: "Mac"
+      value: "darwin"
+    },{
+      name: "Linux"
+      value: "linux"
+    }]
+  }]
+
 module.exports = {
-
-  getZipFile: ->
-    [{
-      name: "zipFile"
-      type: "string"
-      message: "Which zip file should we upload?"
-    }]
-
-  getPlatformQuestion: ->
-    [{
-      name: "platform"
-      type: "list"
-      message: "Which OS should we deploy?"
-      choices: [{
-        name: "Mac"
-        value: "darwin"
-      },{
-        name: "Linux"
-        value: "linux"
-      }]
-    }]
-
+  getZipFile
+  getPlatformQuestion
   getQuestions: (version) ->
     [{
       name: "publish"
@@ -140,7 +141,7 @@ module.exports = {
       .get("release")
 
   whichPlatform: ->
-    prompt(@getPlatformQuestion())
+    prompt(getPlatformQuestion())
     .get("platform")
 
   whichBumpTask: ->

@@ -20,40 +20,6 @@ Base     = require("./base")
 Linux    = require("./linux")
 Darwin   = require("./darwin")
 
-askWhichPlatform = (platform) ->
-  ## if we already have a platform
-  ## just resolve with that
-  if platform
-    return Promise.resolve(platform)
-
-  ## else go ask for it!
-  ask.whichPlatform()
-
-askWhichVersion = (version) ->
-  ## if we already have a version
-  ## just resolve with that
-  if version
-    return Promise.resolve(version)
-
-  ## else go ask for it!
-  ask.deployNewVersion()
-
-askZipFile = (zip) ->
-  ## if we already have a zip filename
-  ## just resolve with that
-  if zip
-    return Promise.resolve(path.resolve(zip))
-
-  ## else go ask for it!
-  ask.whichZipFile()
-  .then(path.resolve)
-
-questions = {
-  platform: askWhichPlatform,
-  version: askWhichVersion,
-  zip: askZipFile
-}
-
 success = (str) ->
   console.log chalk.bgGreen(" " + chalk.black(str) + " ")
 
@@ -67,8 +33,17 @@ zippedFilename = (platform) ->
 
 # goes through the list of properties and asks relevant question
 # resolves with all relevant options set
+# if the property already exists, skips the question
 askMissingOptions = (properties) -> (options = {}) ->
+  questions = {
+    platform: ask.whichPlatform,
+    version: ask.deployNewVersion,
+    # note: zip file might not be absolute
+    zip: ask.whichZipFile
+  }
+
   properties.reduce((prev, property) ->
+    if (check.has(options, property)) then return prev
     question = questions[property]
     if (!check.fn(question)) then return prev
     la(check.fn(question), "cannot find question for property", property)
@@ -79,7 +54,7 @@ askMissingOptions = (properties) -> (options = {}) ->
         options
       )
     )
-  , Promise.resolve())
+  , Promise.resolve(options))
 
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)
@@ -145,7 +120,7 @@ deploy = {
     # TODO only ask for built folder name
     options = @parseOptions(process.argv)
     askMissingOptions(['platform'])(options)
-    .then (options) =>
+    .then (options) ->
       buildDir = meta.buildDir(options.platform)
       dest = path.resolve(zippedFilename(options.platform))
       zip.ditto(buildDir, dest)
@@ -154,9 +129,12 @@ deploy = {
     console.log('#upload')
     options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform', 'zip'])(options)
-    .then (options) =>
+    .then (options) ->
       la(check.unemptyString(options.zip),
         "missing zipped filename", options)
+      options.zip = path.resolve(options.zip)
+      options
+    .then (options) ->
       console.log("Need to upload file %s", options.zip)
       console.log("for platform %s version %s",
         options.platform, options.version)
