@@ -144,8 +144,9 @@ deploy = {
   zip: ->
     # TODO only ask for built folder name
     options = @parseOptions(process.argv)
-    askMissingOptions(['version', 'platform'])(options)
+    askMissingOptions(['platform'])(options)
     .then (options) =>
+      buildDir = meta.buildDir(options.platform)
       dest = path.resolve(zippedFilename(options.platform))
       zip.ditto(buildDir, dest)
 
