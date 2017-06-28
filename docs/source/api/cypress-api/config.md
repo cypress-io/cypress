@@ -54,9 +54,10 @@ Set multiple configuration options with an object literal.
 
 **Get all configuration options.**
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "defaultCommandTimeout": 10000
 }
@@ -70,9 +71,10 @@ Cypress.config() // => {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ..
 
 **Return just a single configuration option value.**
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "pageLoadTimeout": 60000
 }
@@ -90,9 +92,10 @@ Cypress.config("pageLoadTimeout") // => 60000
 Any value you change will be permanently changed for the remainder of your tests.
 {% endnote %}
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "viewportWidth": 1280,
   "viewportHeight": 720
@@ -115,9 +118,10 @@ Cypress.config("viewportWidth") // => 800
 
 **You can set multiple values by passing an object literal.**
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "defaultCommandTimeout": 4000,
   "pageLoadTimeout": 30000,

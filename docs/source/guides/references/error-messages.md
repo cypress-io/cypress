@@ -194,9 +194,9 @@ cy.get('#modal button').click({waitForAnimations: false})
 
 You can globally disable animation error checking, or increase the threshold by modifying the {% url 'configuration' configuration %} in your {% url 'configuration' configuration %}.
 
-***cypress.json***
+```javascript
+// cypress.json
 
-```json
 {
   "waitForAnimations": false,
   "animationDistanceThreshold": 50
@@ -308,37 +308,6 @@ it('does not forget to return a promise', function(){
 
 See {% url "`cy.visit()`" visit %} documentation.
 
-## {% fa fa-exclamation-triangle red %} Passing `cy.server({stub: false})` is now deprecated
-
-In previous versions of Cypress, to prevent Cypress from stubbing routes you had to explicitly tell your server not to stub routes like this:
-
-```javascript
-cy.server({stub: false})
-cy.route(...)
-```
-
-You no longer have to do this. Whether a {% url "`cy.route()`" route %} is stubbed or not is simply based on whether or not you specified a response in {% url "`cy.route()`" route %}.
-
-## {% fa fa-exclamation-triangle red %} Passing `cy.route({stub: false})` is now deprecated
-
-In previous versions of Cypress, {% url "`cy.route()`" route %} would require a `response` unless you specified `stub: false` in its options.
-
-You used to have to write this:
-
-```javascript
-cy.server()
-cy.route({url: /posts/, stub: false})
-```
-
-This is now deprecated because Cypress automatically stubs {% url "`cy.route()`" route %} based on whether or not it has a `response` property.
-
-```javascript
-cy.server()
-cy.route(/users/, [{}, {}])               // stubbed because this has a response argument
-cy.route({url: /comments/, response: []}) // stubbed because this has a response property
-cy.route(/posts/)                         // not stubbed because there is no response argument or property
-```
-
 # CLI Errors
 
 ## {% fa fa-exclamation-triangle red %} You passed the `--record` flag but did not provide us your Record Key.
@@ -416,9 +385,9 @@ When your application navigates to a superdomain outside of the current origin-p
 
 If you find yourself stuck and can't work around these issues you can just set this in your `cypress.json` file. But before doing so you should really understand and {% url 'read about the reasoning here' web-security %}.
 
-***cypress.json***
-
 ```javascript
+// cypress.json
+
 {
   "chromeWebSecurity": false
 }
