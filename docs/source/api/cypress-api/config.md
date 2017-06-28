@@ -20,8 +20,6 @@ Cypress.config(object)
 
 ## Usage
 
-`.config()` requires being chained off `Cypress`.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript

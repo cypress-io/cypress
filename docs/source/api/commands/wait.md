@@ -18,8 +18,6 @@ cy.wait(aliases, options)
 
 ## Usage
 
-`cy.wait()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -63,10 +61,6 @@ Option | Default | Description
 **When given an `alias` argument:**
 
 {% yields sets_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
-
-## Timeouts {% helper_icon timeout %}
-
-`cy.wait()` will wait for the request the duration of the {% url `requestTimeout` configuration#Timeouts %} and wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -216,6 +210,20 @@ This means Cypress will now wait up to 20 seconds for the external server to res
 ![Timeout error for XHR wait](/img/api/wait/timeout-error-when-waiting-for-route-response.png)
 
 This gives you the best of both worlds - a fast error feedback loop when requests never go out and a much longer duration for the actual external response.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.wait %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.wait %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts wait cy.wait %}
 
 # Command Log
 

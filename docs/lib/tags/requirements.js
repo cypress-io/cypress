@@ -79,6 +79,13 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const submitability = () => {
+    return `<ul>
+      <li><p>${childCmdDom}.</p></li>
+      <li><p>${cmd} requires the element to be a <code>form</code>.</p></li>
+    </ul>`
+  }
+
   const dual = () => {
     return `<ul>
       <li><p>${cmd} can be chained off of <code>cy</code> or off another command.</p></li>
@@ -161,6 +168,8 @@ module.exports = function yields (hexo, args) {
       return checkability()
     case 'selectability':
       return selectability()
+    case 'submitability':
+      return submitability()
     case 'exec':
       return exec()
     case 'read_file':

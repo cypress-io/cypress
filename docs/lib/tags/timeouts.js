@@ -83,6 +83,13 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const wait = () => {
+    return `<ul>
+      <li><p>${cmd} can time out waiting for request to go out.</p></li>
+      <li><p>${cmd} can time out waiting for response to return.</p></li>
+    </ul>`
+  }
+
   const timeouts = () => {
     return `<ul>
     <li><p>${cmd} will continue to retry its specified assertions until it times out.</p></li>
@@ -108,6 +115,8 @@ module.exports = function yields (hexo, args) {
       return page()
     case 'request':
       return request()
+    case 'wait':
+      return wait()
     case 'timeouts':
       return timeouts()
     default:

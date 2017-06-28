@@ -5,6 +5,10 @@ comments: false
 
 Submit a form.
 
+{% note warning %}
+This element must be an `<form>`.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -13,8 +17,6 @@ Submit a form.
 ```
 
 ## Usage
-
-`.submit()` requires being chained off another cy command that *yields* a form.
 
 **{% fa fa-check-circle green %} Correct Usage**
 
@@ -44,10 +46,6 @@ Option | Default | Description
 
 {% yields same_subject .submit %}
 
-## Timeouts {% helper_icon timeout %}
-
-`.submit()` will continue to try to submit the form for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
-
 # Example
 
 ## Submit a form
@@ -64,6 +62,20 @@ Option | Default | Description
 ```javascript
 cy.get('#contact').submit()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements submitability .submit %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .submit %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .submit %}
 
 # Command Log
 

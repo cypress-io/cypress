@@ -18,8 +18,6 @@ An alias for {% url `.type('{selectall}{backspace}')` type %}
 
 ## Usage
 
-`.clear()` requires being chained off another cy command that *yields* an `input` or `textarea`.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript

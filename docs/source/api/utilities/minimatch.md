@@ -15,8 +15,6 @@ Cypress.minimatch()
 
 ## Usage
 
-`.minimatch()` requires being chained off `Cypress`.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript

@@ -15,8 +15,6 @@ Cypress.Blob.method()
 
 ## Usage
 
-`.Blob.method()` requires being chained off `Cypress`.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
