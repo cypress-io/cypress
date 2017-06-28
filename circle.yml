@@ -231,8 +231,8 @@ jobs:
   "build-binary":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - checkout
+      - run: npm install --ignore-scripts
       - run: npm run binary-build -- --platform linux --version 0.0.0-{{ .Branch }}-{{ .Revision }}
 
 workflows:
