@@ -73,8 +73,15 @@ module.exports = function yields (hexo, args) {
 
   const _null = () => {
     return `<ul>
-    <li><p>${cmd} yields <code>null</code>.</p></li>
-    <li><p>${cmd} cannot be chained further.</p></li>
+      <li><p>${cmd} yields <code>null</code>.</p></li>
+      <li><p>${cmd} cannot be chained further.</p></li>
+    </ul>`
+  }
+
+  const nullAlias = () => {
+    return `<ul>
+      <li><p>${cmd} yields <code>null</code>.</p></li>
+      <li><p>${cmd} can but aliased but otherwise cannot be chained further.</p></li>
     </ul>`
   }
 
@@ -93,6 +100,8 @@ module.exports = function yields (hexo, args) {
       return setsSubject()
     case 'null':
       return _null()
+    case 'null_alias':
+      return nullAlias()
     case 'assertion_indeterminate':
       return assertion()
     default:

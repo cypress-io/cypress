@@ -19,8 +19,6 @@ cy.server(options)
 
 ## Usage
 
-`cy.server()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -61,15 +59,7 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-{% yields sets_subject cy.server 'yields the internal Cypress server instance' %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.server %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none cy.server %}
+{% yields null cy.server %}
 
 # Examples
 
@@ -234,6 +224,20 @@ When a new test runs, any outstanding requests still in flight are automatically
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a {% url `cy.visit()` visit %}. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
 You can {% url 'read more about XHR strategy here' network-requests %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.server %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.server %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.server %}
 
 # Command Log
 

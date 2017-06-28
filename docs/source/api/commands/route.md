@@ -22,8 +22,6 @@ cy.route(options)
 
 ## Usage
 
-`cy.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
@@ -69,15 +67,7 @@ You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` a
 
 ## Yields {% helper_icon yields %}
 
-{% yields null cy.route %}
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements parent cy.route %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none cy.route %}
+{% yields null_alias cy.route %}
 
 # Examples
 
@@ -444,6 +434,20 @@ cy.server({force404: true})
 
 You can {% url 'read more about this here.' server#Options %}
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.route %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.route %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.route %}
+
 # Command Log
 
 ```javascript
@@ -469,7 +473,7 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 - {% url `.as()` as %}
 - {% url `cy.fixture()` fixture %}
-- {% url 'Network Requests' network-requests %}
-- {% url 'Recipe: Logging in - XHR Web Form' logging-in %}
 - {% url `cy.server()` server %}
 - {% url `cy.wait()` wait %}
+- {% url 'Guide: Network Requests' network-requests %}
+- {% url 'Recipe: Logging in - XHR Web Form' logging-in %}
