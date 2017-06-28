@@ -2,6 +2,7 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
+log           = require("debug")("cypress:server:browsers")
 savedState    = require("../saved_state")
 utils         = require("./utils")
 errors        = require("../errors")
@@ -58,8 +59,10 @@ module.exports = {
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
+      log("open browser %s", name)
       browser.open(name, url, options, automation)
       .then (i) ->
+        log("browser opened")
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
 
