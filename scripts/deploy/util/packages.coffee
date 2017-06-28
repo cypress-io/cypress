@@ -35,7 +35,8 @@ runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js"])
 runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js"])
 
 # builds all the packages except for cli and docs
-runAllBuild = _.partial(npmRun, ["run", "all", "build", "--", "--skip-packages", "cli,docs"])
+runAllBuild = _.partial(npmRun,
+  ["run", "all", "build", "--", "--serial", "--skip-packages", "cli,docs"])
 
 copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
