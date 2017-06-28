@@ -14,8 +14,6 @@ check   = require("check-more-types")
 
 fs = Promise.promisifyAll(fs)
 
-isValidPlatform = check.oneOf(["darwin", "linux"])
-
 uploadNames = {
   darwin: "osx64"
   linux:  "linux64"
@@ -117,7 +115,7 @@ module.exports = {
     console.log("#uploadToS3 ⏳")
     la(check.unemptyString(version), "expected version string", version)
     la(check.unemptyString(zipFile), "expected zip filename", zipFile)
-    la(isValidPlatform(platform), "invalid platform", platform)
+    la(meta.isValidPlatform(platform), "invalid platform", platform)
 
     upload = =>
       new Promise (resolve, reject) =>
