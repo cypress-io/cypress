@@ -6,7 +6,7 @@ comments: false
 Expand an array into multiple arguments.
 
 {% note info %}
-Similar to {% url `.then()` then %}, but always expects an array as it's subject.
+Identical to {% url `.then()` then %}, but always expects an array-like structure as it's subject.
 {% endnote %}
 
 # Syntax
@@ -17,8 +17,6 @@ Similar to {% url `.then()` then %}, but always expects an array as it's subject
 ```
 
 ## Usage
-
-`.spread()` requires being chained off another cy command that *yields* an array.
 
 **{% fa fa-check-circle green %} Correct Usage**
 
@@ -51,8 +49,6 @@ Option | Default | Description
 
 {% yields maybe_changes_subject .spread 'yields the return value of your callback function' %}
 
-## Timeouts {% helper_icon timeout %}
-
 # Examples
 
 ## Aliased Routes
@@ -80,13 +76,25 @@ cy.getCookies().spread(function(cookie1, cookie2, cookie3){
 })
 ```
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements spread .spread %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once .spread %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts promises .spread %}
+
 # Command Log
 
-**`spread` does *not* log in the command log**
+`.spread()` does *not* log in the command log
 
 # See also
 
 - {% url `.each()` each %}
-- {% url `cy.getCookies()` getcookies %}
 - {% url `.then()` then %}
-- {% url `cy.wait()` wait %}

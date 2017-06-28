@@ -98,6 +98,13 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const spread = () => {
+    return `<ul>
+      <li><p>${childCmd}.</p></li>
+      <li><p>${cmd} requires being chained off of a command that yields an array-like structure.</p></li>
+    </ul>`
+  }
+
   const exec = () => {
     return `<ul>
       <li><p>${parentCmd}.</p></li>
@@ -170,6 +177,8 @@ module.exports = function yields (hexo, args) {
       return selectability()
     case 'submitability':
       return submitability()
+    case 'spread':
+      return spread()
     case 'exec':
       return exec()
     case 'read_file':
