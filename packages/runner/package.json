@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
+    "prebuild": "rebuild-node-sass",
     "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "watch": "node ./scripts/watch.js",
@@ -36,6 +37,7 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
+    "rebuild-node-sass": "^1.0.1",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "zunder": "^4.1.1"
