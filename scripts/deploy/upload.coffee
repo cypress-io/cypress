@@ -16,6 +16,18 @@ fs = Promise.promisifyAll(fs)
 
 isValidPlatform = check.oneOf(["darwin", "linux"])
 
+uploadNames = {
+  darwin: "osx64"
+  linux:  "linux64"
+  win32:  "win64"
+}
+
+getUploadNameByOs = (os) ->
+  name = uploadNames[os]
+  if not name
+    throw new Error("Cannot find upload name for OS #{os}")
+  name
+
 module.exports = {
   getPublisher: ->
     aws = @getAwsObj()
@@ -36,7 +48,8 @@ module.exports = {
 
   getUploadDirName: ({version, platform}) ->
     aws = @getAwsObj()
-    dirName = [aws.folder, version, platform, null].join("/")
+    osName = getUploadNameByOs(platform)
+    dirName = [aws.folder, version, osName, null].join("/")
     console.log("target directory %s", dirName)
     dirName
 
@@ -47,7 +60,8 @@ module.exports = {
 
       url = [konfig('cdn_url'), "desktop", version, platform, zipName].join("/")
       console.log("purging url", url)
-      cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
+      configFile = path.resolve("support", ".cfcli.yml")
+      cp.exec "cfcli purgefile -c #{configFile} #{url}", (err, stdout, stderr) ->
         if err
           console.error("Could not purge #{url}")
           console.error(err.message)
@@ -92,8 +106,8 @@ module.exports = {
           p.dirname = aws.folder + "/" + p.dirname
           p
         .pipe debug()
-        .pipe publisher.publish(headers)
-        .pipe awspublish.reporter()
+        # .pipe publisher.publish(headers)
+        # .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
@@ -121,6 +135,6 @@ module.exports = {
         .on "end", resolve
 
     upload()
-    .then =>
-      @purgeCache({zipFile, version, platform})
+    # .then =>
+    #   @purgeCache({zipFile, version, platform})
 }

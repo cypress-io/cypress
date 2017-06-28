@@ -137,17 +137,17 @@ deploy = {
 
   build: ->
     options = @parseOptions(process.argv)
-    askMissingOptions(options)
-    .then (version) ->
-      build(platform, version)
+    askMissingOptions(['version', 'platform'])(options)
+    .then () ->
+      build(options.platform, options.version)
 
   zip: ->
     # TODO only ask for built folder name
     options = @parseOptions(process.argv)
-    askMissingOptions(options)
-    # .then ({platform, buildDir}) =>
-    #   dest = path.resolve(zippedFilename(platform))
-    #   zip.ditto(buildDir, dest)
+    askMissingOptions(['version', 'platform'])(options)
+    .then (options) =>
+      dest = path.resolve(zippedFilename(options.platform))
+      zip.ditto(buildDir, dest)
 
   upload: ->
     console.log('#upload')
