@@ -29,9 +29,9 @@ class Default extends Component {
             <i className='fa fa-question-circle' /> Need help?
           </a>
         </p>
-        <p>
+        <div>
           <pre><code>npm install this thang</code></pre>
-        </p>
+        </div>
         <p>Or you can just drag your project here to run it:</p>
         <div
           className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
