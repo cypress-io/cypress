@@ -228,6 +228,13 @@ jobs:
       - run: chrome --version
       - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
 
+  "build-binary":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run binary-build -- --platform linux --version 0.0.0-{{ .Branch }}-{{ .Revision }}
+
 workflows:
   version: 2
   build_and_test:
@@ -254,6 +261,7 @@ workflows:
       - driver-unit-tests:
           requires:
             - build
+      - build-binary
 
 #
 # things to run in the 4th CI container
