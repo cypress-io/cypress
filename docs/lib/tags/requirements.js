@@ -53,6 +53,7 @@ module.exports = function yields (hexo, args) {
 
   const focusability = () => {
     return `<ul>
+      <li><p>${childCmdDom}.</p></li>
       <li><p>${focus}.</p></li>
     </ul>`
   }
@@ -92,6 +93,7 @@ module.exports = function yields (hexo, args) {
 
   const exec = () => {
     return `<ul>
+      <li><p>${parentCmd}.</p></li>
       <li><p>${cmd} requires the executed system command to eventually exit.</p></li>
       <li><p>${cmd} requires that the exit code be <code>0</code> when <code>failOnNonZeroExit</code> is <code>true</code>.</p></li>
     </ul>`
@@ -99,12 +101,14 @@ module.exports = function yields (hexo, args) {
 
   const writeFile = () => {
     return `<ul>
+      <li><p>${parentCmd}.</p></li>
       <li><p>${cmd} requires the file be successfully written to disk. Anything preventing this such as OS permission issues will cause it to fail.</p></li>
     </ul>`
   }
 
   const readFile = () => {
     return `<ul>
+      <li><p>${parentCmd}.</p></li>
       <li><p>${cmd} requires the file must exist.</p></li>
       <li><p>${cmd} requires the file be successfully read from disk. Anything preventing this such as OS permission issues will cause it to fail.</p></li>
     </ul>`
@@ -121,7 +125,16 @@ module.exports = function yields (hexo, args) {
 
   const tick = () => {
     return `<ul>
+      <li><p>${parentCmd}.</p></li>
       <li><p>${cmd} requires that <code>cy.clock()</code> be called before it.</p></li>
+    </ul>`
+  }
+
+  const request = () => {
+    return `<ul>
+      <li><p>${parentCmd}.</p></li>
+      <li><p>${cmd} requires that the server send a response.</p></li>
+      <li><p>${cmd} requires that the response status code be <code>2xx</code> or <code>3xx</code> when <code>failOnStatusCode</code> is <code>true</code>.</p></li>
     </ul>`
   }
 
@@ -158,6 +171,8 @@ module.exports = function yields (hexo, args) {
       return page()
     case 'tick':
       return tick()
+    case 'request':
+      return request()
     default:
       // error when an invalid usage option was provided
       throw new Error(`{% requirements %} tag helper was provided an invalid option: ${type}`)

@@ -72,8 +72,14 @@ module.exports = function yields (hexo, args) {
 
   const page = () => {
     return `<ul>
-    <li><p>${cmd} can time out waiting for the page to fire its <code>load</code> event.</p></li>
-    <li><p>${assertion}.</p></li>
+      <li><p>${cmd} can time out waiting for the page to fire its <code>load</code> event.</p></li>
+      <li><p>${assertion}.</p></li>
+    </ul>`
+  }
+
+  const request = () => {
+    return `<ul>
+      <li><p>${cmd} can time out waiting for the server to respond.</p></li>
     </ul>`
   }
 
@@ -100,6 +106,8 @@ module.exports = function yields (hexo, args) {
       return none()
     case 'page':
       return page()
+    case 'request':
+      return request()
     case 'timeouts':
       return timeouts()
     default:
