@@ -231,8 +231,8 @@ jobs:
   "build-binary":
     <<: *defaults
     steps:
-      - checkout
-      - run: npm install --ignore-scripts
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run binary-build -- --platform linux --version 0.0.0-{{ .Branch }}-{{ .Revision }}
 
 workflows:
@@ -261,7 +261,9 @@ workflows:
       - driver-unit-tests:
           requires:
             - build
-      - build-binary
+      - build-binary:
+          requires:
+            - build
 
 #
 # things to run in the 4th CI container
