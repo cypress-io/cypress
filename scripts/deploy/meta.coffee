@@ -12,6 +12,14 @@ buildDir = (platform, args...) ->
 distDir = (platform, args...) ->
   path.resolve("dist", platform, args...)
 
+## returns folder to zip before uploading
+zipDir = (platform) ->
+  switch platform
+    when "darwin"
+      buildDir(platform, "Cypress.app")
+    when "linux"
+      buildDir(platform, "Cypress")
+
 ## returns a path into the /build/*/app directory
 ## specific to each platform
 buildAppDir = (platform, args...) ->
@@ -24,8 +32,7 @@ buildAppDir = (platform, args...) ->
 module.exports = {
   buildDir
   distDir
+  zipDir
   buildAppDir
-  # distDir:  path.join(process.cwd(), "dist")
-  # buildDir: path.join(process.cwd(), "build")
   cacheDir: path.join(process.cwd(), "cache")
 }

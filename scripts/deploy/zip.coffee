@@ -18,6 +18,7 @@ macZip = (src, dest) ->
     #     foo/
     #        ...
     zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
+    console.log(zip)
     cp.exec zip, {}, (err, stdout, stderr) ->
       return reject(err) if err
 
