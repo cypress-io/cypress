@@ -110,24 +110,25 @@ deploy = {
       ask.whichRelease(meta.distDir)
       .then(release)
 
-  build: ->
-    options = @parseOptions(process.argv)
+  build: (options) ->
+    console.log('#build')
+    if !options then options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform'])(options)
     .then () ->
       build(options.platform, options.version)
 
-  zip: ->
-    # TODO only ask for built folder name
-    options = @parseOptions(process.argv)
+  zip: (options) ->
+    console.log('#zip')
+    if !options then options = @parseOptions(process.argv)
     askMissingOptions(['platform'])(options)
     .then (options) ->
       zipDir = meta.zipDir(options.platform)
-      dest = path.resolve(zippedFilename(options.platform))
-      zip.ditto(zipDir, dest)
+      options.zip = path.resolve(zippedFilename(options.platform))
+      zip.ditto(zipDir, options.zip)
 
-  upload: ->
+  upload: (options) ->
     console.log('#upload')
-    options = @parseOptions(process.argv)
+    if !options then options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform', 'zip'])(options)
     .then (options) ->
       la(check.unemptyString(options.zip),
@@ -150,33 +151,12 @@ deploy = {
   #   - zip
   #   - upload
   deploy: ->
-    ## read off the argv
-    # to skip further questions like platform and version
-    # pass these as options like this
-    #   npm run deploy -- --platform darwin --version 0.20.0
     options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform'])(options)
-    .then(console.log)
-    # .then (version) ->
-    #   build(platform, version)
-    # .then (built) =>
-    #   console.log(built)
-    #   src  = built.buildDir
-    #   dest = path.resolve(zippedFilename(platform))
-    #   zip.ditto(src, dest)
-    # .then () ->
-      # path.resolve("cypress.zip")
-    # .then () =>
-    #   la(check.unemptyString(options.zipFile),
-    #     "missing zipped filename", options)
-    #   console.log("Need to upload file %s", options.zipFile)
-    #   console.log("for platform %s version %s",
-    #     options.platform, options.version)
-    #   upload.toS3({
-    #     zipFile: options.zipFile,
-    #     version: options.version,
-    #     platform: options.platform
-    #   })
+    .then(build)
+    .then(() -> zip(options))
+    # assumes options.zip contains the zipped filename
+    .then(upload)
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))
