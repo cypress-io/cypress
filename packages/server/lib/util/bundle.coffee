@@ -29,7 +29,7 @@ module.exports = {
     builtFiles = {}
 
   outputPath: (projectRoot = "", filePath) ->
-    appData.path(toHashName(projectRoot), "bundles", filePath)
+    appData.projectsPath(toHashName(projectRoot), "bundles", filePath)
 
   build: (filePath, config) ->
     if config.isHeadless and built = builtFiles[filePath]

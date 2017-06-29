@@ -41,6 +41,9 @@ module.exports = {
     log("path: %s", p)
     p
 
+  projectsPath: (paths...) ->
+    @path("projects", paths...)
+
   remove: ->
     Promise.join(
       fs.removeAsync(@path())

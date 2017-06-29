@@ -21,8 +21,8 @@ stateFiles = {}
 #   state should have width = 200
 
 findSavedSate = (projectPath) ->
-  statePath = savedStateUtil.formStatePath projectPath
-  fullStatePath = appData.path(statePath)
+  statePath = savedStateUtil.formStatePath(projectPath)
+  fullStatePath = appData.projectsPath(statePath)
   log('full state path %s', fullStatePath)
   return stateFiles[fullStatePath] if stateFiles[fullStatePath]
 
