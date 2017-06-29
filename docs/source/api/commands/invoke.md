@@ -42,10 +42,6 @@ Name of function to be invoked.
 
 Additional arguments to be given to the function call. There is no limit to the number of arguments.
 
-## Yields {% helper_icon yields %}
-
-{% yields changes_subject .invoke 'yields the return value of the invoked function' }
-
 # Examples
 
 ## Function
@@ -171,7 +167,5 @@ When clicking on `invoke` within the command log, the console outputs the follow
 # See also
 
 - {% url `.its()` its %}
-- {% url `cy.spy()` spy %}
-- {% url `cy.stub()` stub %}
 - {% url `.then()` then %}
 - {% url `cy.wrap()` wrap %}

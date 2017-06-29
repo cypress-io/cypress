@@ -104,7 +104,7 @@ You can stop the `.each()` loop early by returning `false` in the callback funct
 
 ## Requirements {% helper_icon requirements %}
 
-{% requirements none .each %}
+{% requirements child .each %}
 
 ## Assertions {% helper_icon assertions %}
 
@@ -112,7 +112,7 @@ You can stop the `.each()` loop early by returning `false` in the callback funct
 
 ## Timeouts {% helper_icon timeout %}
 
-{% timeouts none .each %}
+{% timeouts promises .each %}
 
 # Command Log
 

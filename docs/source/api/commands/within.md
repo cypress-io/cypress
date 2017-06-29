@@ -44,14 +44,6 @@ Option | Default | Description
 
 {% yields same_subject .within %}
 
-## Requirements {% helper_icon requirements %}
-
-{% requirements none .within %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts none .within %}
-
 # Examples
 
 ## Within
@@ -75,6 +67,20 @@ cy.get('form').within(function(form){
   cy.wrap(form).submit()
 })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .within %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once .within %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .within %}
 
 # Command Log
 

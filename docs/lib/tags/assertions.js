@@ -12,10 +12,10 @@ module.exports = function yields (hexo, args) {
   const cmd = `<code>${args[1]}()</code>`
 
   /* eslint-disable commas */
-  const waitAssertions = `${cmd} will automatically wait for assertions you've added to pass`
+  const waitAssertions = `${cmd} will automatically wait for assertions you've chained to pass`
 
   /* eslint-disable commas */
-  const retryAssertions = `${cmd} will automatically retry itself until assertions you've added all pass`
+  const retryAssertions = `${cmd} will automatically retry itself until assertions you've chained all pass`
 
   /* eslint-disable quotes */
   const exist = `${cmd} will automatically retry itself until the element(s) {% url 'exist in the DOM' introduction-to-cypress#Default-Assertions %}`
@@ -29,7 +29,7 @@ module.exports = function yields (hexo, args) {
 
   const none = () => {
     return `<ul>
-      <li><p>${cmd} cannot have any assertions added.</p></li>
+      <li><p>${cmd} cannot have any assertions chained.</p></li>
     </ul>`
   }
 
@@ -47,7 +47,7 @@ module.exports = function yields (hexo, args) {
 
   const once = () => {
     return `<ul>
-      <li><p>${cmd} will only run assertions you've added once, and will not retry.</p></li>
+      <li><p>${cmd} will only run assertions you've chained once, and will not retry.</p></li>
     </ul>`
   }
 
