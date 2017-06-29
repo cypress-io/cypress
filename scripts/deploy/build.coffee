@@ -1,3 +1,4 @@
+_ = require("lodash")
 fs = require("fs-extra")
 del = require("del")
 path = require("path")
@@ -19,7 +20,7 @@ Linux = require("./linux")
 
 fs = Promise.promisifyAll(fs)
 
-log = (msg, platform) ->
+logger = (msg) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
 runDarwinSmokeTest = ->
@@ -36,12 +37,14 @@ smokeTests = {
 }
 
 module.exports = (platform, version) ->
-  distDir = meta.distDir.bind(null, platform)
-  buildDir = meta.buildDir.bind(null, platform)
-  buildAppDir = meta.buildAppDir.bind(null, platform)
+  distDir = _.partial(meta.distDir, platform)
+  buildDir = _.partial(meta.buildDir, platform)
+  buildAppDir = _.partial(meta.buildAppDir, platform)
+
+  log = _.partialRight(logger, platform)
 
   cleanupPlatform = ->
-    log("#cleanupPlatform", platform)
+    log("#cleanupPlatform")
 
     cleanup = =>
       fs.removeAsync(distDir())
@@ -50,18 +53,18 @@ module.exports = (platform, version) ->
     .catch(cleanup)
 
   buildPackages = ->
-    log("#buildPackages", platform)
+    log("#buildPackages")
 
     packages.runAllBuild()
     .then(packages.runAllBuildJs)
 
   copyPackages = ->
-    log("#copyPackages", platform)
+    log("#copyPackages")
 
     packages.copyAllToDist(distDir())
 
   npmInstallPackages = ->
-    log("#npmInstallPackages", platform)
+    log("#npmInstallPackages")
 
     packages.npmInstallAll(distDir("packages", "*"))
 
@@ -85,13 +88,13 @@ module.exports = (platform, version) ->
       fs.outputFileAsync(distDir("index.js"), str)
 
   symlinkPackages = ->
-    log("#symlinkPackages", platform)
+    log("#symlinkPackages")
 
     packages.symlinkAll(distDir("packages", "*", "package.json"), distDir)
 
   removeTypeScript = ->
     ## remove the .ts files in our packages
-    log("#removeTypeScript", platform)
+    log("#removeTypeScript")
     del([
       ## include coffee files of packages
       distDir("**", "*.ts")
@@ -108,7 +111,7 @@ module.exports = (platform, version) ->
       console.log(paths)
 
   symlinkBuildPackages = ->
-    log("#symlinkBuildPackages", platform)
+    log("#symlinkBuildPackages")
     wildCard = buildAppDir("packages", "*", "package.json")
     console.log("packages", wildCard)
     packages.symlinkAll(
@@ -117,7 +120,7 @@ module.exports = (platform, version) ->
     )
 
   symlinkDistPackages = ->
-    log("#symlinkDistPackages", platform)
+    log("#symlinkDistPackages")
 
     packages.symlinkAll(
       distDir("packages", "*", "package.json"),
@@ -125,12 +128,12 @@ module.exports = (platform, version) ->
     )
 
   cleanJs = ->
-    log("#cleanJs", platform)
+    log("#cleanJs")
 
     packages.runAllCleanJs()
 
   convertCoffeeToJs = ->
-    log("#convertCoffeeToJs", platform)
+    log("#convertCoffeeToJs")
 
     ## grab everything in src
     ## convert to js
@@ -152,7 +155,7 @@ module.exports = (platform, version) ->
       .on("error", reject)
 
   elBuilder = ->
-    log("#elBuilder", platform)
+    log("#elBuilder")
     dir = distDir()
     dist = buildDir()
     console.log("from #{dir}")
@@ -166,7 +169,7 @@ module.exports = (platform, version) ->
     })
 
   runSmokeTest = ->
-    log("#runSmokeTest", platform)
+    log("#runSmokeTest")
     # console.log("skipping smoke test for now")
     smokeTest = smokeTests[platform]
     smokeTest()
@@ -182,10 +185,6 @@ module.exports = (platform, version) ->
   .then(removeTypeScript)
   .then(cleanJs)
   .then(symlinkDistPackages)
-  .then(@obfuscate)
-  .then(@cleanupSrc)
-  .then(@npmInstall)
-  .then(@npmInstall)
   .then(elBuilder)
   .then(symlinkBuildPackages)
   .then(runSmokeTest)
