@@ -20,7 +20,7 @@ Linux = require("./linux")
 
 fs = Promise.promisifyAll(fs)
 
-logger = (msg) ->
+logger = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
 runDarwinSmokeTest = ->
