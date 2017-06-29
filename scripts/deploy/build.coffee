@@ -11,6 +11,8 @@ pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
 electron = require("@packages/electron")
+
+meta = require("./meta")
 packages = require("./util/packages")
 Darwin = require("./darwin")
 Linux = require("./linux")
@@ -34,27 +36,9 @@ smokeTests = {
 }
 
 module.exports = (platform, version) ->
-  ## returns a path into the /dist directory
-  distDir = (args...) ->
-    path.resolve("dist", platform, args...)
-
-  ## returns a path into the /build directory
-  ## the output folder should have top level "Cypress" folder
-  ## build/
-  ##   <platform>/ = linux or darwin
-  ##     Cypress/
-  ##       ... platform-specific files
-  buildDir = (args...) ->
-    path.resolve("build", platform, "Cypress", args...)
-
-  ## returns a path into the /build/*/app directory
-  ## specific to each platform
-  buildAppDir = (args...) ->
-    switch platform
-      when "darwin"
-        buildDir("Cypress.app", "Contents", "resources", "app", args...)
-      when "linux"
-        buildDir("resources", "app", args...)
+  distDir = meta.distDir.bind(null, platform)
+  buildDir = meta.buildDir.bind(null, platform)
+  buildAppDir = meta.buildAppDir.bind(null, platform)
 
   cleanupPlatform = ->
     log("#cleanupPlatform", platform)
@@ -125,9 +109,10 @@ module.exports = (platform, version) ->
 
   symlinkBuildPackages = ->
     log("#symlinkBuildPackages", platform)
-
+    wildCard = buildAppDir("packages", "*", "package.json")
+    console.log("packages", wildCard)
     packages.symlinkAll(
-      buildAppDir("packages", "*", "package.json"),
+      wildCard,
       buildAppDir
     )
 
@@ -168,11 +153,15 @@ module.exports = (platform, version) ->
 
   elBuilder = ->
     log("#elBuilder", platform)
+    dir = distDir()
+    dist = buildDir()
+    console.log("from #{dir}")
+    console.log("into #{dist}")
 
     electron.install({
-      dir: distDir()
-      dist: buildDir()
-      platform: platform
+      dir
+      dist
+      platform
       "app-version": version
     })
 
@@ -182,8 +171,6 @@ module.exports = (platform, version) ->
     smokeTest = smokeTests[platform]
     smokeTest()
 
-  # Promise
-  # .bind(@)
   Promise.resolve()
   .then(cleanupPlatform)
   .then(buildPackages)
@@ -199,7 +186,6 @@ module.exports = (platform, version) ->
   .then(@cleanupSrc)
   .then(@npmInstall)
   .then(@npmInstall)
-  .then(@elBuilder)
   .then(elBuilder)
   .then(symlinkBuildPackages)
   .then(runSmokeTest)
@@ -210,7 +196,6 @@ module.exports = (platform, version) ->
   # .then(@cleanupCy)
   # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(@verifyAppCanOpen)
-  # .return(@)
   .return({
     buildDir: buildDir()
   })

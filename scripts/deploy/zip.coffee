@@ -6,6 +6,8 @@ execa   = require("execa")
 # resolves with zipped filename
 macZip = (src, dest) ->
   new Promise (resolve, reject) =>
+    if os.platform() != "darwin"
+      throw new Error("Can only zip on Mac platform")
     # Ditto (Mac) options
     # http://www.unix.com/man-page/OSX/1/ditto/
     # -c create archive
@@ -18,6 +20,7 @@ macZip = (src, dest) ->
     #     foo/
     #        ...
     zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
+    console.log(zip)
     cp.exec zip, {}, (err, stdout, stderr) ->
       return reject(err) if err
 

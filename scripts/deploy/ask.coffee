@@ -11,22 +11,30 @@ prompt = (questions) ->
 
 fs = Promise.promisifyAll(fs)
 
-module.exports = {
+getZipFile = ->
+  [{
+    name: "zipFile"
+    type: "string"
+    message: "Which zip file should we upload?"
+  }]
 
-  getPlatformQuestion: ->
-    [{
-      name: "platform"
-      type: "list"
-      message: "Which OS should we deploy?"
-      choices: [{
-        name: "Mac"
-        value: "darwin"
-      },{
-        name: "Linux"
-        value: "linux"
-      }]
+getPlatformQuestion = ->
+  [{
+    name: "platform"
+    type: "list"
+    message: "Which OS should we deploy?"
+    choices: [{
+      name: "Mac"
+      value: "darwin"
+    },{
+      name: "Linux"
+      value: "linux"
     }]
+  }]
 
+module.exports = {
+  getZipFile
+  getPlatformQuestion
   getQuestions: (version) ->
     [{
       name: "publish"
@@ -104,6 +112,10 @@ module.exports = {
         else
           json.version
 
+  whichZipFile: () ->
+    prompt(@getZipFile())
+    .get("zipFile")
+
   whichVersion: (distDir) ->
     ## realpath returns the absolute full path
     glob("*/package.json", {cwd: distDir, realpath: true})
@@ -129,7 +141,7 @@ module.exports = {
       .get("release")
 
   whichPlatform: ->
-    prompt(@getPlatformQuestion())
+    prompt(getPlatformQuestion())
     .get("platform")
 
   whichBumpTask: ->

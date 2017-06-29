@@ -7,6 +7,9 @@ os       = require("os")
 chalk    = require("chalk")
 Promise  = require("bluebird")
 minimist = require("minimist")
+la       = require("lazy-ass")
+check    = require("check-more-types")
+
 zip      = require("./zip")
 ask      = require("./ask")
 bump     = require("./bump")
@@ -28,32 +31,36 @@ zippedFilename = (platform) ->
   # same file format as before use .zip
   if platform == "linux" then "cypress.zip" else "cypress.zip"
 
+# goes through the list of properties and asks relevant question
+# resolves with all relevant options set
+# if the property already exists, skips the question
+askMissingOptions = (properties) -> (options = {}) ->
+  questions = {
+    platform: ask.whichPlatform,
+    version: ask.deployNewVersion,
+    # note: zip file might not be absolute
+    zip: ask.whichZipFile
+  }
+
+  properties.reduce((prev, property) ->
+    if (check.has(options, property)) then return prev
+    question = questions[property]
+    if (!check.fn(question)) then return prev
+    la(check.fn(question), "cannot find question for property", property)
+    prev.then(() ->
+      question(options[property])
+      .then((answer) ->
+        options[property] = answer
+        options
+      )
+    )
+  , Promise.resolve(options))
+
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)
 
-askWhichPlatform = (platform) ->
-  ## if we already have a platform
-  ## just resolve with that
-  if platform
-    return Promise.resolve(platform)
-
-  ## else go ask for it!
-  ask.whichPlatform()
-
-askWhichVersion = (version) ->
-  ## if we already have a version
-  ## just resolve with that
-  if version
-    return Promise.resolve(version)
-
-  ## else go ask for it!
-  ask.deployNewVersion()
-
 deploy = {
-  zip:    zip
-  ask:    ask
   meta:   meta
-  upload: upload
   Base:   Base
   Darwin: Darwin
   Linux:  Linux
@@ -73,12 +80,6 @@ deploy = {
     opts = minimist(argv)
     opts.runTests = false if opts["skip-tests"]
     opts
-
-  # build: (platform) ->
-  #   ## read off the argv
-  #   options = @parseOptions(process.argv)
-  #
-  #   @getPlatform(platform?.osName, options).build()
 
   bump: ->
     ask.whichBumpTask()
@@ -109,38 +110,53 @@ deploy = {
       ask.whichRelease(meta.distDir)
       .then(release)
 
+  build: (options) ->
+    console.log('#build')
+    if !options then options = @parseOptions(process.argv)
+    askMissingOptions(['version', 'platform'])(options)
+    .then () ->
+      build(options.platform, options.version)
+
+  zip: (options) ->
+    console.log('#zip')
+    if !options then options = @parseOptions(process.argv)
+    askMissingOptions(['platform'])(options)
+    .then (options) ->
+      zipDir = meta.zipDir(options.platform)
+      options.zip = path.resolve(zippedFilename(options.platform))
+      zip.ditto(zipDir, options.zip)
+
+  upload: (options) ->
+    console.log('#upload')
+    if !options then options = @parseOptions(process.argv)
+    askMissingOptions(['version', 'platform', 'zip'])(options)
+    .then (options) ->
+      la(check.unemptyString(options.zip),
+        "missing zipped filename", options)
+      options.zip = path.resolve(options.zip)
+      options
+    .then (options) ->
+      console.log("Need to upload file %s", options.zip)
+      console.log("for platform %s version %s",
+        options.platform, options.version)
+
+      upload.toS3({
+        zipFile: options.zip,
+        version: options.version,
+        platform: options.platform
+      })
+
+  # goes through the entire pipeline:
+  #   - build
+  #   - zip
+  #   - upload
   deploy: ->
-    ## read off the argv
-    # to skip further questions like platform and version
-    # pass these as options like this
-    #   npm run deploy -- --platform darwin --version 0.20.0
     options = @parseOptions(process.argv)
-
-    askWhichPlatform(options.platform)
-    .then (platform) ->
-      askWhichVersion(options.version)
-      .then (version) ->
-        # options.version = version
-        build(platform, version)
-        # .return([platform, version])
-    # .spread (platform, version) ->
-
-        # @getPlatform(plat, options).deploy()
-      # .then (platform) =>
-      .then (built) =>
-        console.log(built)
-        src  = built.buildDir
-        dest = path.resolve(zippedFilename(platform))
-        zip.ditto(src, dest)
-      .then (zippedFilename) =>
-        console.log("Need to upload file %s", zippedFilename)
-        # upload.toS3(platform)
-        #   .then ->
-        #     success("Dist Complete")
-        #   .catch (err) ->
-        #     fail("Dist Failed")
-        #     console.log(err)
-
+    askMissingOptions(['version', 'platform'])(options)
+    .then(build)
+    .then(() -> zip(options))
+    # assumes options.zip contains the zipped filename
+    .then(upload)
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))
