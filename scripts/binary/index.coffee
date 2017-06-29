@@ -9,6 +9,7 @@ Promise  = require("bluebird")
 minimist = require("minimist")
 la       = require("lazy-ass")
 check    = require("check-more-types")
+debug    = require("debug")("cypress:binary")
 
 zip      = require("./zip")
 ask      = require("./ask")
@@ -77,11 +78,21 @@ deploy = {
   #   (new Platform(platform, options))
 
   parseOptions: (argv) ->
-    opts = minimist(argv)
+    opts = minimist(argv, {
+      boolean: ["skip-clean"]
+      default: {
+        "skip-clean": false
+      }
+      alias: {
+        skipClean: "skip-clean"
+      }
+    })
     opts.runTests = false if opts["skip-tests"]
     if not opts.platform and os.platform() == "linux"
       # only can build Linux on Linux
       opts.platform = "linux"
+    debug("parsed command line options")
+    debug(opts)
     opts
 
   bump: ->
@@ -118,7 +129,7 @@ deploy = {
     if !options then options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform'])(options)
     .then () ->
-      build(options.platform, options.version)
+      build(options.platform, options.version, options)
 
   zip: (options) ->
     console.log('#zip')

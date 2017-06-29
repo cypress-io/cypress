@@ -188,3 +188,6 @@ You can pass options to each command to avoid answering questions, for example
 npm run binary-deploy -- --platform darwin --version 0.20.0
 npm run binary-upload -- --platform darwin --version 0.20.0 --zip cypress.zip
 ```
+
+If something goes wrong, see debug messages using `DEBUG=cypress:binary ...` environment
+variable

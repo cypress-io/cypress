@@ -36,7 +36,10 @@ smokeTests = {
   linux: runLinuxSmokeTest
 }
 
-module.exports = (platform, version) ->
+# can pass options to better control the build
+# for example
+#   skipClean - do not delete "dist" folder before build
+module.exports = (platform, version, options = {}) ->
   distDir = _.partial(meta.distDir, platform)
   buildDir = _.partial(meta.buildDir, platform)
   buildAppDir = _.partial(meta.buildAppDir, platform)
@@ -45,6 +48,10 @@ module.exports = (platform, version) ->
 
   cleanupPlatform = ->
     log("#cleanupPlatform")
+
+    if options.skipClean
+      log("skipClean")
+      return
 
     cleanup = =>
       fs.removeAsync(distDir())
@@ -175,20 +182,16 @@ module.exports = (platform, version) ->
     smokeTest()
 
   Promise.resolve()
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(symlinkPackages)
-  .then(convertCoffeeToJs)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(symlinkDistPackages)
-  .then(@obfuscate)
-  .then(@cleanupSrc)
-  .then(@npmInstall)
-  .then(@npmInstall)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
+  # .then(copyPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(symlinkPackages)
+  # .then(convertCoffeeToJs)
+  # .then(removeTypeScript)
+  # .then(cleanJs)
+  # .then(symlinkDistPackages)
   .then(elBuilder)
   .then(symlinkBuildPackages)
   .then(runSmokeTest)
