@@ -5,7 +5,7 @@ const download = require('../../lib/download/download')
 const index = require('../../lib/download/index')
 const utils = require('../../lib/download/utils')
 const unzip = require('../../lib/download/unzip')
-const fs = require('fs')
+const fse = require('fs-extra')
 
 const packageVersion = require('../../package').version
 
@@ -53,7 +53,7 @@ describe('index', function () {
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
         process.env.CYPRESS_VERSION = version
-        this.sandbox.stub(fs, 'existsSync').withArgs(version).returns(true)
+        this.sandbox.stub(fse, 'statAsync').withArgs(version).resolves()
         this.sandbox.stub(unzip, 'start').resolves()
 
         return index.install()
