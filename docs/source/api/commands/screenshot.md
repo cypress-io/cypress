@@ -89,7 +89,7 @@ Taking a screenshot is an asynchronous action that takes around `100ms` to compl
 
 For example - say a command we wrote times outs: {% url '`cy.get('#element')`' get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
 
-# Notes
+# Rules
 
 ## Requirements {% helper_icon requirements %}
 

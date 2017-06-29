@@ -41,7 +41,7 @@
     color: #eee;
     margin: 0;
     padding: 10px;
-    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-family: $font-mono;
 
     .envFile:hover, .env:hover, .config:hover, .cli:hover, .default:hover {
       border-bottom: 1px dotted #777;
@@ -74,7 +74,7 @@
   }
 
   .envFile, .env, .config, .cli, .default {
-    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-family: $font-mono;
 
     padding: 2px;
   }
@@ -109,7 +109,7 @@
     background-color: #252831;
     color: #eee;
     padding: 10px;
-    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-family: $font-mono;
     border: 0;
   }
 

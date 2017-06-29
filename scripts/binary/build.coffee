@@ -1,3 +1,4 @@
+_ = require("lodash")
 fs = require("fs-extra")
 del = require("del")
 path = require("path")
@@ -11,13 +12,15 @@ pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
 electron = require("@packages/electron")
+
+meta = require("./meta")
 packages = require("./util/packages")
 Darwin = require("./darwin")
 Linux = require("./linux")
 
 fs = Promise.promisifyAll(fs)
 
-log = (msg, platform) ->
+logger = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
 runDarwinSmokeTest = ->
@@ -34,30 +37,14 @@ smokeTests = {
 }
 
 module.exports = (platform, version) ->
-  ## returns a path into the /dist directory
-  distDir = (args...) ->
-    path.resolve("dist", platform, args...)
+  distDir = _.partial(meta.distDir, platform)
+  buildDir = _.partial(meta.buildDir, platform)
+  buildAppDir = _.partial(meta.buildAppDir, platform)
 
-  ## returns a path into the /build directory
-  ## the output folder should have top level "Cypress" folder
-  ## build/
-  ##   <platform>/ = linux or darwin
-  ##     Cypress/
-  ##       ... platform-specific files
-  buildDir = (args...) ->
-    path.resolve("build", platform, "Cypress", args...)
-
-  ## returns a path into the /build/*/app directory
-  ## specific to each platform
-  buildAppDir = (args...) ->
-    switch platform
-      when "darwin"
-        buildDir("Cypress.app", "Contents", "resources", "app", args...)
-      when "linux"
-        buildDir("resources", "app", args...)
+  log = _.partialRight(logger, platform)
 
   cleanupPlatform = ->
-    log("#cleanupPlatform", platform)
+    log("#cleanupPlatform")
 
     cleanup = =>
       fs.removeAsync(distDir())
@@ -66,18 +53,18 @@ module.exports = (platform, version) ->
     .catch(cleanup)
 
   buildPackages = ->
-    log("#buildPackages", platform)
+    log("#buildPackages")
 
     packages.runAllBuild()
     .then(packages.runAllBuildJs)
 
   copyPackages = ->
-    log("#copyPackages", platform)
+    log("#copyPackages")
 
     packages.copyAllToDist(distDir())
 
   npmInstallPackages = ->
-    log("#npmInstallPackages", platform)
+    log("#npmInstallPackages")
 
     packages.npmInstallAll(distDir("packages", "*"))
 
@@ -101,13 +88,13 @@ module.exports = (platform, version) ->
       fs.outputFileAsync(distDir("index.js"), str)
 
   symlinkPackages = ->
-    log("#symlinkPackages", platform)
+    log("#symlinkPackages")
 
     packages.symlinkAll(distDir("packages", "*", "package.json"), distDir)
 
   removeTypeScript = ->
     ## remove the .ts files in our packages
-    log("#removeTypeScript", platform)
+    log("#removeTypeScript")
     del([
       ## include coffee files of packages
       distDir("**", "*.ts")
@@ -124,15 +111,16 @@ module.exports = (platform, version) ->
       console.log(paths)
 
   symlinkBuildPackages = ->
-    log("#symlinkBuildPackages", platform)
-
+    log("#symlinkBuildPackages")
+    wildCard = buildAppDir("packages", "*", "package.json")
+    console.log("packages", wildCard)
     packages.symlinkAll(
-      buildAppDir("packages", "*", "package.json"),
+      wildCard,
       buildAppDir
     )
 
   symlinkDistPackages = ->
-    log("#symlinkDistPackages", platform)
+    log("#symlinkDistPackages")
 
     packages.symlinkAll(
       distDir("packages", "*", "package.json"),
@@ -140,12 +128,12 @@ module.exports = (platform, version) ->
     )
 
   cleanJs = ->
-    log("#cleanJs", platform)
+    log("#cleanJs")
 
     packages.runAllCleanJs()
 
   convertCoffeeToJs = ->
-    log("#convertCoffeeToJs", platform)
+    log("#convertCoffeeToJs")
 
     ## grab everything in src
     ## convert to js
@@ -167,23 +155,25 @@ module.exports = (platform, version) ->
       .on("error", reject)
 
   elBuilder = ->
-    log("#elBuilder", platform)
+    log("#elBuilder")
+    dir = distDir()
+    dist = buildDir()
+    console.log("from #{dir}")
+    console.log("into #{dist}")
 
     electron.install({
-      dir: distDir()
-      dist: buildDir()
-      platform: platform
+      dir
+      dist
+      platform
       "app-version": version
     })
 
   runSmokeTest = ->
-    log("#runSmokeTest", platform)
+    log("#runSmokeTest")
     # console.log("skipping smoke test for now")
     smokeTest = smokeTests[platform]
     smokeTest()
 
-  # Promise
-  # .bind(@)
   Promise.resolve()
   .then(cleanupPlatform)
   .then(buildPackages)
@@ -199,7 +189,6 @@ module.exports = (platform, version) ->
   .then(@cleanupSrc)
   .then(@npmInstall)
   .then(@npmInstall)
-  .then(@elBuilder)
   .then(elBuilder)
   .then(symlinkBuildPackages)
   .then(runSmokeTest)
@@ -210,7 +199,6 @@ module.exports = (platform, version) ->
   # .then(@cleanupCy)
   # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(@verifyAppCanOpen)
-  # .return(@)
   .return({
     buildDir: buildDir()
   })

@@ -283,9 +283,9 @@ API = {
         """
       when "CANNOT_CONNECT_BASE_URL_WARNING"
         """
-        Cypress could not verify this server is running: #{arg1}
+        Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
 
-        We run this check because this server has been set as your 'baseUrl'. You likely forgot to boot this web server prior to running Cypress.
+        Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
         """
 
   get: (type, arg1, arg2) ->

@@ -33,7 +33,6 @@
     "bin-up": "^1.0.1",
     "body-parser": "1.12.4",
     "chokidar-cli": "^1.2.0",
-    "cloudflare-cli": "^1.5.2",
     "codecov": "^1.0.1",
     "coffee-coverage": "^1.0.1",
     "cors": "^2.8.3",

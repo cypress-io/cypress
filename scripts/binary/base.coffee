@@ -39,7 +39,7 @@ class Base
     @uploadOsName = @getUploadNameByOs(os)
 
   buildPathToAppFolder: ->
-    path.join meta.buildDir, @osName
+    meta.buildDir(@osName)
 
   buildPathToZip: ->
     path.join @buildPathToAppFolder(), @zipName
@@ -385,8 +385,10 @@ class Base
     smokeTest = =>
       new Promise (resolve, reject) =>
         rand = "" + Math.random()
+        executable = @buildPathToAppExecutable()
+        console.log("executable path #{executable}")
 
-        cp.exec "#{@buildPathToAppExecutable()} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
+        cp.exec "#{executable} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
           stdout = stdout.replace(/\s/, "")
 
           if err
