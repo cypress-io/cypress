@@ -7,7 +7,7 @@ if (!command) {
   process.exit(1)
 }
 
-const commands = require('./deploy/index')
+const commands = require('./binary/index')
 const fn = commands[command]
 if (!fn) {
   console.error('Invalid deploy command %s 🚫', command)
