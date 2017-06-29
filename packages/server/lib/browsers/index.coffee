@@ -3,7 +3,6 @@ fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
 log           = require("debug")("cypress:server:browsers")
-savedState    = require("../saved_state")
 utils         = require("./utils")
 errors        = require("../errors")
 

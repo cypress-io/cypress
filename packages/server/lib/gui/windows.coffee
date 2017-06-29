@@ -171,7 +171,7 @@ module.exports = {
       options.onNewWindow.apply(win, arguments)
 
     if ts = options.trackState
-      @trackState(win, ts)
+      @trackState(options.projectPath, win, ts)
 
     ## open dev tools if they're true
     if options.devTools
@@ -281,7 +281,7 @@ module.exports = {
       else
         Promise.resolve(win)
 
-  trackState: (win, keys) ->
+  trackState: (projectPath, win, keys) ->
     isDestroyed = ->
       win.isDestroyed()
 
@@ -295,7 +295,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState().set(newState)
+      savedState(projectPath).set(newState)
     , 500
 
     win.on "moved", _.debounce ->
@@ -305,17 +305,17 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState().set(newState)
+      savedState(projectPath).set(newState)
     , 500
 
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState().set(newState)
+      savedState(projectPath).set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState().set(newState)
+      savedState(projectPath).set(newState)
 
 }

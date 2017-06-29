@@ -14,7 +14,6 @@ errors        = require("./errors")
 logger        = require("./logger")
 browsers      = require("./browsers")
 automation    = require("./automation")
-savedState    = require("./saved_state")
 log           = require('debug')('cypress:server:socket')
 
 existingState = null
