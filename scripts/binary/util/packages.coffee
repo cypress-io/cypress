@@ -140,9 +140,10 @@ symlinkAll = (pathToDistPackages, pathTo) ->
     ## ./packages/foo -> node_modules/@packages/foo
     pkg = removePackageJson(pkg)
     dest = pathTo("node_modules", "@packages", path.basename(pkg))
+    relativeDest = path.relative(dest + '/..', pkg)
 
-    console.log(toBase(pkg), "link ->", toBase(dest))
-    fs.ensureSymlinkAsync(pkg, dest)
+    console.log(relativeDest, "link ->", dest)
+    fs.ensureSymlinkAsync(relativeDest, dest)
     .catch((err) ->
       if not err.message.includes "EEXIST"
         throw err

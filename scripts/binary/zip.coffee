@@ -33,7 +33,7 @@ linuxZip = (src, dest) ->
   console.log("linux zip: #{cmd}")
   execa.shell(cmd)
   .then((result) ->
-    console.log("✅ tar finished")
+    console.log("✅ zip finished")
     dest
   )
   .catch((err) ->
@@ -43,9 +43,7 @@ linuxZip = (src, dest) ->
   )
 
 zippers = {
-  # until the CLI tool can unzip both ".zip" and ".tar.gz" files,
-  # must use Mac platform to build the .zip file
-  linux: macZip,
+  linux: linuxZip
   darwin: macZip
 }
 
