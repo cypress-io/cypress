@@ -9,6 +9,8 @@ import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
 
+import Dropdown from '../dropdown/dropdown'
+
 @observer
 export default class Nav extends Component {
   render () {
@@ -69,27 +71,44 @@ export default class Nav extends Component {
     if (!authStore.isAuthenticated) return null
 
     return (
-      <li className='dropdown'>
-        <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+      <Dropdown
+        className='dropdown-toggle'
+        chosen={{ id: 'user' }}
+        others={[{ id: 'logout' }]}
+        onSelect={this._select}
+        renderItem={this._item}
+        keyProperty='id'
+      />
+    )
+  }
+
+  _item (item) {
+    if (item.id === 'user') {
+      return (
+        <span>
           <img
             className='user-avatar'
             height='13'
             width='13'
             src={`${gravatarUrl(authStore.user.email)}`}
           />
-        {' '}{ authStore.user.displayName }{' '}
-          <span className='caret'></span>
-        </a>
-        <ul className='dropdown-menu'>
-          <li>
-            <a href='#' onClick={this._logout}>
-              <i className='fa fa-sign-out'></i>{' '}
-              Log Out
-            </a>
-          </li>
-        </ul>
-      </li>
-    )
+          {' '}{ authStore.user.displayName }
+        </span>
+      )
+    } else {
+      return (
+        <span>
+          <i className='fa fa-sign-out'></i>{' '}
+          Log Out
+        </span>
+      )
+    }
+  }
+
+  _select = (item) => {
+    if (item.id === 'logout') {
+      appApi.logOut()
+    }
   }
 
   _openDocs (e) {
@@ -100,11 +119,5 @@ export default class Nav extends Component {
   _openChat (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/chat')
-  }
-
-  _logout = (e) => {
-    e.preventDefault()
-
-    appApi.logOut()
   }
 }

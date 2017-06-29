@@ -88,19 +88,19 @@ describe "Navigation", ->
 
         it "triggers logout on click of logout", ->
           cy.contains("Jane Lane").click()
-          cy.contains("a", "Log Out").click().then ->
+          cy.contains("Log Out").click().then ->
             expect(@ipc.logOut).to.be.called
 
         it.skip "displays login button", ->
           cy.contains("Jane Lane").click()
-          cy.contains("a", "Log Out").click()
+          cy.contains("Log Out").click()
           cy
             .get("nav a").should ($a) ->
               expect($a).to.contain("Log In")
 
         it "displays login screen", ->
           cy.contains("Jane Lane").click()
-          cy.contains("a", "Log Out").click()
+          cy.contains("Log Out").click()
           cy.shouldBeOnLogin()
 
   context "when current user has no name", ->

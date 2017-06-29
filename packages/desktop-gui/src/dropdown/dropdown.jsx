@@ -21,11 +21,7 @@ class Dropdown extends Component {
     disabled: PropTypes.bool,
   }
 
-  constructor (props) {
-    super(props)
-
-    this.state = { open: false }
-  }
+  state = { open: false }
 
   componentDidMount () {
     this.outsideClickHandler = (e) => {
@@ -34,21 +30,6 @@ class Dropdown extends Component {
       }
     }
     document.body.addEventListener('click', this.outsideClickHandler)
-
-  }
-
-  componentDidUpdate () {
-    let icon
-
-    if (this.props.browserState === 'opening') {
-      icon = 'refresh fa-spin'
-    } else if (this.props.browserState === 'opened') {
-      icon = 'check-circle-o green'
-    } else {
-      icon = 'chrome'
-    }
-
-    findDOMNode(this).getElementsByTagName('i')[0].setAttribute('class', `fa fa-${icon}`)
   }
 
   componentWillUnmount () {
@@ -65,11 +46,9 @@ class Dropdown extends Component {
   }
 
   _button () {
-    let disabledClass = this.props.disabled ? 'disabled' : ''
-
     if (this.props.others.length) {
       return (
-        <a onClick={this._toggleOpen} className={disabledClass}>
+        <a onClick={this._toggleOpen} className={this.props.disabled ? 'disabled' : ''}>
           {this._buttonContent()}
         </a>
       )
@@ -89,15 +68,6 @@ class Dropdown extends Component {
         {this._caret()}
       </span>
     )
-  }
-
-  _icon () {
-    if (this.props.icon) {
-      return (
-        <i className={`fa fa-${this.props.icon}`}></i>
-      )
-    }
-
   }
 
   _caret () {

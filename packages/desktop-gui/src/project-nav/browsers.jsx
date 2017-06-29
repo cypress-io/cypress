@@ -52,22 +52,24 @@ export default class Browsers extends Component {
   }
 
   _browser = (browser) => {
+    const project = this.props.project
+    let icon
     let prefixText
 
-    switch (this.props.project.browserState) {
-      case 'opening':
-        prefixText = 'Opening'
-        break
-      case 'opened':
-        prefixText = 'Running'
-        break
-      default:
-        prefixText = ''
+    if (project.browserState === 'opening') {
+      icon = 'refresh fa-spin'
+      prefixText = 'Opening'
+    } else if (project.browserState === 'opened') {
+      icon = 'check-circle-o green'
+      prefixText = 'Running'
+    } else {
+      icon = browser.icon
+      prefixText = ''
     }
 
     return (
       <span className={browser.name}>
-        <i className={`fa fa-${browser.icon}`}></i>{' '}
+        <i className={`fa fa-${icon}`}></i>{' '}
         { prefixText }{' '}
         { browser.displayName }{' '}
         { browser.majorVersion }
