@@ -5,6 +5,10 @@ comments: false
 
 Check checkbox(es) or radio(s).
 
+{% note warning %}
+This element must be an `<input>` with type `checkbox` or `radio`.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -18,16 +22,14 @@ Check checkbox(es) or radio(s).
 
 ## Usage
 
-`.check()` requires being chained off another cy command that *yields* a DOM element of type `checkbox` or `radio`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="checkbox"]').check()       // Check checkbox element
 cy.get('[type="radio"]').first().check()  // Check first radio element
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.check('[type="checkbox"]') // Errors, cannot be chained off 'cy'
@@ -48,21 +50,15 @@ Values of checkboxes or radios that should be checked.
 
 Pass in an options object to change the default behavior of `.check()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Forces check, disables error checking prior to check
-`interval` | `16` | Interval which to retry a check
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the check
-## Yields {% yields %}
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force check %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .check %}
 
-## Default {% default_assertion %}
+## Yields {% helper_icon yields %}
 
-`.check()` yields the DOM element(s) that were checked.
-
-## Timeout {% timeout %}
-
-`.check` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% yields same_subject .check %}
 
 # Examples
 
@@ -112,6 +108,20 @@ You can ignore Cypress' default behavior of checking that the element is visible
 cy.get('.action-checkboxes').should('not.be.visible') // Passes
   .check({ force: true }).should('be.checked')        // Passes
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements checkability .check %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .check %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .check %}
 
 # Command Log
 

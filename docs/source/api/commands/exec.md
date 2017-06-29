@@ -5,6 +5,30 @@ comments: false
 
 Execute a system command.
 
+{% note warning 'Web Server Processes' %}
+We do NOT recommend trying to start your backend web server from within Cypress.
+
+`cy.exec()` can only run commands which eventually exit.
+
+Trying to start a web server from `cy.exec()` causes all kinds of problems because:
+
+- You have to background the process
+- You lose access to it via terminal
+- You don't have access to its `stdout` or logs
+- Every time your tests run, you'd have to work out the complexity around starting an already running web server.
+- You would likely encounter constant port conflicts
+
+**Why can't I shut down the process in an `after` hook?**
+
+Because there is no guarantee that code running in an `after` will always run.
+
+While working in the Cypress GUI you can always restart / refresh while in the middle of a test. When that happens, code in an `after` won't execute.
+
+**What should I do then?**
+
+Simple. Start your web server before running Cypress. That's it!
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -14,9 +38,7 @@ cy.exec(command, options)
 
 ## Usage
 
-`cy.exec()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.exec('npm run build')    
@@ -32,24 +54,19 @@ The system command to be executed from the project root (the directory that cont
 
 Pass in an options object to change the default behavior of `cy.exec()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. `{USERNAME: 'johndoe'}`). Will be merged with existing system environment variables
 `failOnNonZeroExit` | `true` | whether to fail if the command exits with a non-zero code
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `execTimeout` configuration#Timeouts %} | Total time to allow the command to execute
+`timeout` | {% url `execTimeout` configuration#Timeouts %} | {% usage_options timeout cy.exec %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.exec()` yields an object with the following properties:
-
 - `code`
 - `stdout`
 - `stderr`
-
-## Timeout {% timeout %}
-
-`cy.exec()` will allow the command to execute for the duration of the {% url `execTimeout` configuration#Timeouts %} or the `timeout` passed into the command's options.
 
 # Examples
 
@@ -139,6 +156,20 @@ cy
 - Any process that needs to be manually interrupted to stop
 
 A command must exit within the `execTimeout` or Cypress will kill the command's process and fail the current test.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements exec cy.exec %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.exec %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts exec cy.exec %}
 
 # Command Log
 

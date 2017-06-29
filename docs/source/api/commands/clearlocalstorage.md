@@ -3,7 +3,7 @@ title: clearLocalStorage
 comments: false
 ---
 
-Clear all data in local storage.
+Clear data in local storage.
 
 {% note warning %}
 Cypress automatically runs this command *before* each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear localStorage inside a single test.
@@ -13,14 +13,14 @@ Cypress automatically runs this command *before* each test to prevent state from
 
 ```javascript
 cy.clearLocalStorage()
-cy.clearLocalStorage(keys)
+cy.clearLocalStorage(key)
+cy.clearLocalStorage(options)
+cy.clearLocalStorage(keys, options)
 ```
 
 ## Usage
 
-`cy.clearLocalStorage()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clearLocalStorage()  // clear all local storage
@@ -30,15 +30,19 @@ cy.clearLocalStorage()  // clear all local storage
 
 **{% fa fa-angle-right %} keys** ***(String, RegExp)***
 
-Specify keys to be cleared in local storage.
+Specify key to be cleared in local storage.
 
-## Yields {% yields %}
+**{% fa fa-angle-right %} options** ***(Object)***
 
-`cy.clearLocalStorage()` yields the remove local storage object.
+Pass in an options object to change the default behavior of `cy.clearLocalStorage()`.
 
-## Timeout {% timeout %}
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
 
-`cy.clearLocalStorage()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} to process this command.
+## Yields {% helper_icon yields %}
+
+{% yields null cy.clearLocalStorage %}
 
 # Examples
 
@@ -63,6 +67,20 @@ cy.clearLocalStorage('appName')
 ```javascript
 cy.clearLocalStorage(/app-/)
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clearLocalStorage %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearLocalStorage %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.clearLocalStorage %}
 
 # Command Log
 

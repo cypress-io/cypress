@@ -15,15 +15,13 @@ Scroll an element into view.
 
 ## Usage
 
-`.scrollIntoView()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('footer').scrollIntoView() // Scrolls 'footer' into view
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.scrollIntoView('footer')   // Errors, cannot be chained off 'cy'
@@ -36,21 +34,17 @@ cy.window().scrollIntoView()  // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.scrollIntoView()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
-`log` | `true` | Whether to display command in Command Log
 `offset` | `{top: 0, left: 0}` | Amount to scroll after the element has been scrolled into view
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .scrollIntoView %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.scrollIntoView()` yields the DOM element that was scrolled into view.
-
-## Timeout {% timeout %}
-
-`.scrollIntoView()` will continue to scroll the element into view for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .scrollIntoView %}
 
 # Examples
 
@@ -59,6 +53,20 @@ Option | Default | Notes
 **Snapshots do not reflect scroll behavior**
 
 *Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos.html#Videos %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .scrollToIntoView %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .scrollToIntoView %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .scrollToIntoView %}
 
 # Command Log
 

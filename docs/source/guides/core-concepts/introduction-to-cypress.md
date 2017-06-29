@@ -282,7 +282,7 @@ Some methods, such as {% url `cy.get()` get %} or {% url `cy.contains()` contain
 
 ***Some commands yield:***
 - `null`, meaning no command can be chained after the command: {% url `.screenshot()` screenshot %}.
-- The same subject they were originally yielded: {% url `.then()` then %}.
+- The same subject they were originally yielded: {% url `.click()` click %}.
 - A new subject, as appropriate for the command {% url `.wait()` wait %}.
 
 This is actually much more intuitive than how it sounds.
@@ -386,11 +386,15 @@ These actions will always happen serially (one after the other), never in parall
 
 To illustrate this, let's revisit that list of actions and expose some of the hidden ✨magic✨ Cypress does for us at each step:
 
-1. Visit a URL ✨**and wait for the `onload` event to fire after all external resources have loaded**✨
-2. Find an element by its selector ✨**and retry repeatedly until it is found in the DOM**✨
-3. Perform a click action on that element ✨**after we first ensure that element is {% url "'actionable'" interacting-with-elements %} by not being covered, hidden, or disabled**✨
-4. Grab the URL ✨**then pass this URL to the subsequent assertion**✨
-5. Assert the URL to include a specific *string* ✨**and retry repeatedly until the assertion passes**✨
+1. Visit a URL
+  ✨ **and wait for the page `load` event to fire after all external resources have loaded**✨
+2. Find an element by its selector
+  ✨ **and retry repeatedly until it is found in the DOM** ✨
+3. Perform a click action on that element
+  ✨ **after we wait for the element to reach an {% url 'actionable state' interacting-with-elements %}** ✨
+4. Grab the URL and...
+5. Assert the URL to include a specific *string*
+  ✨ **and retry repeatedly until the assertion passes** ✨
 
 As you can see, Cypress does a lot of extra work to ensure the state of the application matches what our commands expect about it. Each command may resolve quickly (so fast you won't see them in a pending state) but others may take seconds, or even dozens of seconds to resolve.
 
@@ -700,11 +704,11 @@ Many commands have a default, built-in assertion, or rather have requirements th
 
 - {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code.
 - {% url `cy.request()` request %} expects the remote server to exist and provide a response.
-- {% url `cy.get()` get %} expects the element to exist in the DOM.
-- {% url `.find()` find %} also expects the element to exist in the DOM.
-- {% url `.type()` type %} expects the element to be in a *typeable* state.
-- {% url `.click()` click %} expects the element to be in an *actionable* state.
-- {% url `.its()` its %} expects to find a property on the current subject.
+- {% url `cy.get()` get %} expects the element to eventually exist in the DOM.
+- {% url `.find()` find %} also expects the element to eventually exist in the DOM.
+- {% url `.type()` type %} expects the element to eventually be in a *typeable* state.
+- {% url `.click()` click %} expects the element to eventually be in an *actionable* state.
+- {% url `.its()` its %} expects to eventually find a property on the current subject.
 
 Certain commands may have a specific requirement that causes them to immediately fail: such as {% url `cy.request()` request %}. Others, such as DOM based commands will automatically retry and wait for the DOM to {% url "reach the desired state" interacting-with-elements %} before failing.
 

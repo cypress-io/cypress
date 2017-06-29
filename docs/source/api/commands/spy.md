@@ -17,9 +17,7 @@ cy.spy(object, method)
 
 ## Usage
 
-`cy.spy()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.spy(user, 'addFriend')    
@@ -35,13 +33,11 @@ The `object` that has the `method` to be wrapped.
 
 The name of the `method` on the `object` to be wrapped.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 Unlike most Cypress commands, `cy.spy()` is *synchronous* and returns a value (the spy) instead of a Promise-like chain-able object.
 
 `cy.spy()` returns a [Sinon.js spy](http://sinonjs.org/docs/#spies). All [methods](http://sinonjs.org/docs/#spies-api) found on Sinon.JS spies are supported.
-
-## Timeout {% timeout %}
 
 # Examples
 
@@ -94,6 +90,20 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 **Assertion Support**
 
 Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" assertions#Sinon-Chai %} can be used without any configuration.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.spy %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.spy %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.spy %}
 
 # Command Log
 

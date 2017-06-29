@@ -22,9 +22,7 @@ cy.route(options)
 
 ## Usage
 
-`cy.route()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.route('/users/**')  
@@ -52,7 +50,7 @@ Set a route by returning an object literal from a callback function. Functions t
 
 Pass in an options object to change the default behavior of `cy.route()`. By default `cy.route()` inherits its options from {% url `cy.server()` server %}.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `delay` | `0` | Delay for stubbed responses (in ms)
 `force404` | `false` | Forcibly send XHR's a 404 status when the XHR's do not match any existing {% url `cy.route()` route %}.
@@ -67,9 +65,9 @@ Option | Default | Notes
 
 You can also set options for all {% url `cy.wait()` wait %}'s `requestTimeout` and `responseTimeout` globally in {% url 'configuration' configuration %} to control how long to wait for the request and response of a supplied route.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-## Timeout {% timeout %}
+{% yields null_alias cy.route %}
 
 # Examples
 
@@ -436,6 +434,20 @@ cy.server({force404: true})
 
 You can {% url 'read more about this here.' server#Options %}
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.route %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.route %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.route %}
+
 # Command Log
 
 ```javascript
@@ -461,7 +473,7 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 - {% url `.as()` as %}
 - {% url `cy.fixture()` fixture %}
-- {% url 'Network Requests' network-requests %}
-- {% url 'Recipe: Logging in - XHR Web Form' logging-in %}
 - {% url `cy.server()` server %}
 - {% url `cy.wait()` wait %}
+- {% url 'Guide: Network Requests' network-requests %}
+- {% url 'Recipe: Logging in - XHR Web Form' logging-in %}

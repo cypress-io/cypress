@@ -16,15 +16,13 @@ Get the children of each DOM element within a set of DOM elements.
 
 ## Usage
 
-`.children()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav').children()     // Yield children of nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.children()                // Errors, cannot be chained off 'cy'
@@ -41,18 +39,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.children()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .children %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.children()` yields the new DOM element(s) found by the command.
-
-## Timeout {% timeout %}
-
-`.children()` will continue to look for the children elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .children %}
 
 # Examples
 
@@ -106,6 +100,20 @@ cy.get('ul.secondary-nav').children()
 // yields [<li class="active">Unit Testing</li>]
 cy.get('ul').children('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .children %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .children %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .children %}
 
 # Command Log
 

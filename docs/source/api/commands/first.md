@@ -14,15 +14,13 @@ Get the first DOM element within a set of DOM elements.
 
 ## Usage
 
-`.first()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav a').first()     // Yield first link in nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.first()                  // Errors, cannot be chained off 'cy'
@@ -35,18 +33,14 @@ cy.getCookies().first()     // Errors, 'getCookies' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.first()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .first %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.first()` yields the new DOM element found by the command.
-
-## Timeout {% timeout %}
-
-`.first()` will continue to look for the first element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .first %}
 
 # Examples
 
@@ -67,6 +61,20 @@ Option | Default | Notes
 // yields <li class="one">Knick knack on my thumb</li>
 cy.get('li').first()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .first %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .first %}
 
 # Command Log
 

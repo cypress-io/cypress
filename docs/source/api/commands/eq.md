@@ -16,16 +16,14 @@ Get A DOM element at a specific index in an array of elements.
 
 ## Usage
 
-`.eq()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
 cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.eq(0)                  // Errors, cannot be chained off 'cy'
@@ -46,18 +44,14 @@ A negative number indicating the index position from the end to find the element
 
 Pass in an options object to change the default behavior of `.eq()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .eq %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.eq()` yields the new DOM elements found by the command.
-
-## Timeout {% timeout %}
-
-`.eq()` will continue to look for the element at the specified index for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .eq %}
 
 # Examples
 
@@ -96,6 +90,20 @@ cy.get('li').eq(1).should('contain', 'siamese') // true
 ```javascript
 cy.get('li').eq(-2).should('contain', 'sphynx') // true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .eq %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .eq %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .eq %}
 
 # Command Log
 

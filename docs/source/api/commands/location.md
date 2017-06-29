@@ -3,7 +3,7 @@ title: location
 comments: false
 ---
 
-Get the remote `window.location` as an object.
+Get the global `window.location` object of the page that is currently active.
 
 # Syntax
 
@@ -16,29 +16,30 @@ cy.location(key, options)
 
 ## Usage
 
-`cy.location()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.location()       // Get location object
+cy.location('host') // Get the host of the location object
+cy.location('port') // Get the port of the location object
 ```
 
 ## Arguments
 
 **{% fa fa-angle-right %} key** ***(String)***
 
-A key on the location object.
+A key on the location object. Returns this value instead of the full location object.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.location()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.location %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.location()` yields the location object with the following properties:
 
@@ -53,7 +54,9 @@ Option | Default | Notes
 - `search`
 - `toString`
 
-## Timeout {% timeout %}
+**When given a `key` argument:**
+
+{% yields sets_subject cy.location 'yields the value of the location property as a string' %}
 
 # Examples
 
@@ -90,9 +93,11 @@ cy.location().should(function(location){
 })
 ```
 
-## Key
+## Key Shorthand
 
 **Assert that a redirect works**
+
+Grab only the `pathname` and add an assertion.
 
 ```javascript
 cy.visit('http://localhost:3000/admin')
@@ -127,6 +132,20 @@ cy.location().then(function(location){
 
 ![Console Log of Cypress location command](/img/api/location/special-cypress-location-object-logged-in-console-output.png)
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.location %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.location %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.location %}
+
 # Command Log
 
 **Assert on the location's href**
@@ -149,4 +168,3 @@ When clicking on `location` within the command log, the console outputs the foll
 
 - {% url `cy.hash()` hash %}
 - {% url `cy.url()` url %}
-- {% url `cy.window()` window %}

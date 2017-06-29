@@ -5,6 +5,10 @@ comments: false
 
 Blur a focused element.
 
+{% note warning %}
+This element must currently be in focus. If you want to ensure an element is focused before blurring, try using {% url `.focus()` focus %} before `.blur()`.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -14,18 +18,14 @@ Blur a focused element.
 
 ## Usage
 
-`.blur()` requires being chained off another cy command that *yields* a DOM element.
-
-This element must currently be in focus. If you want to ensure an element is focused before blurring, try using {% url `.focus()` focus %} before `.blur()`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="email"]').type('me@email.com').blur() // Blur email input
 cy.get('[tabindex="1"]').focus().blur()              // Blur el with tabindex
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.blur('input')              // Errors, cannot be chained off 'cy'
@@ -38,18 +38,15 @@ cy.window().blur()            // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.blur`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Forces blur, disables checking if el is focusable or focused
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`force` | `false` | Forces the action, disables checking if {% urlHash 'element is focused' Requirements %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .blur %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.blur()` yields the DOM element that was blurred.
-
-## Timeout {% timeout %}
-
-`.blur()` will continue to look for the focusable element to blur for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .blur %}
 
 # Examples
 
@@ -70,6 +67,20 @@ Setting `force` to `true` in the options disables checking whether the input is 
 ```javascript
 cy.get('input:first').blur({ force: true })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements blurability .blur %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .blur %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .blur %}
 
 # Notes
 

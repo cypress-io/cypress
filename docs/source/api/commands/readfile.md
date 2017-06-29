@@ -16,9 +16,7 @@ cy.readFile(filePath, encoding, options)
 
 ## Usage
 
-`cy.readFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.readFile('menu.json')    
@@ -50,17 +48,14 @@ The encoding to be used when reading the file. The following encodings are suppo
 
 Pass in an options object to change the default behavior of `cy.readFile()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.readFile %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.readFile()` yields the contents of the file.
-
-## Timeout {% timeout %}
-
-`cy.readFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to process the command.
+{% yields sets_subject cy.readFile 'yields the contents of the file' %}
 
 # Examples
 
@@ -134,7 +129,7 @@ cy.readFile('path/to/logo.png', 'base64').then(function (logo) {
 
 # Notes
 
-**Implicit file existence assertion**
+**Default Assertions: file existence**
 
 By default, `cy.readFile()` asserts that the file exists and will fail if it does not exist. It will retry reading the file if it does not initially exist until the file exists or the command times out.
 
@@ -149,8 +144,32 @@ You can assert that a file does not exist like so:
 
 ```javascript
 // will pass if the file does not exist
-cy.readFile('does-not-exist.yaml').should("not.exist")
+cy.readFile('does-not-exist.yaml').should('not.exist')
 ```
+
+**Automatic Retries**
+
+`cy.readFile()` will continue to read the file until it passes all of its assertions.
+
+```javascript
+// if this assertion fails cy.readFile will poll the file
+// until it eventually passes its assertions (or time out)
+cy.readFile('some/nested/path/story.txt').should('eq', 'Once upon a time...')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements read_file cy.readFile %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.readFile %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.readFile %}
 
 # Command Log
 

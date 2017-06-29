@@ -19,9 +19,7 @@ cy.stub(object, method, replacerFn)
 
 ## Usage
 
-`cy.stub()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.stub(user, 'addFriend')    
@@ -41,13 +39,11 @@ The name of the `method` on the `object` to be wrapped.
 
 The function used to replace the `method` on the `object`.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (the stub) instead of a Promise-like chain-able object.
 
 `cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
-
-## Timeout {% timeout %}
 
 # Examples
 
@@ -140,6 +136,20 @@ The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `c
 **Assertion Support**
 
 Cypress has built-in {% url "sinon-as-promised" https://github.com/bendrucker/sinon-as-promised %} support, so the stubs returned by `cy.stub()` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.stub %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.stub %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.stub %}
 
 # Command Log
 

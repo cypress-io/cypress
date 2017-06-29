@@ -18,16 +18,14 @@ If you want to get a property that is not a function on the previously yielded s
 
 ## Usage
 
-`.invoke()` requires being chained off another cy command that *yields* an object with function properties.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wrap({animate: fn}).invoke('animate') // Invoke the 'animate' function
 cy.get('.modal').invoke('show')          // Invoke the jQuery 'show' function
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.invoke('convert')                   // Errors, cannot be chained off 'cy'
@@ -43,12 +41,6 @@ Name of function to be invoked.
 **{% fa fa-angle-right %} args...**
 
 Additional arguments to be given to the function call. There is no limit to the number of arguments.
-
-## Yields {% yields %}
-
-`.invoke()` yields the return value of the invoked property.
-
-## Timeout {% timeout %}
 
 # Examples
 
@@ -141,6 +133,20 @@ cy
     .should('include', 'myLogo')
 ```
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .invoke %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry .invoke %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .invoke %}
+
 # Command Log
 
 **Invoke jQuery show method on element**
@@ -161,7 +167,5 @@ When clicking on `invoke` within the command log, the console outputs the follow
 # See also
 
 - {% url `.its()` its %}
-- {% url `cy.spy()` spy %}
-- {% url `cy.stub()` stub %}
 - {% url `.then()` then %}
 - {% url `cy.wrap()` wrap %}

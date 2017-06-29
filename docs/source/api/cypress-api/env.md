@@ -20,15 +20,13 @@ Cypress.env(object)
 
 ## Usage
 
-`.env()` requires being chained off `Cypress`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 Cypress.env() // Get environment variables
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.env()  // Errors, cannot be chained off 'cy'
@@ -54,9 +52,10 @@ Set multiple environment variables with an object literal.
 
 **Get all environment variables.**
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "env": {
     "foo": "bar",
@@ -73,9 +72,10 @@ Cypress.env() // => {foo: "bar", baz: "quux"}
 
 **Return just a single environment variable value.**
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "env": {
     "foo": "bar",
@@ -97,9 +97,10 @@ Cypress.env("baz") // => quux
 Any value you change will be permanently changed for the remainder of your tests.
 {% endnote %}
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "env": {
     "foo": "bar",
@@ -118,9 +119,10 @@ Cypress.env("host") // => http://server.dev.local
 
 **You can set multiple values by passing an object literal.**
 
-***cypress.json***
 
-```json
+```javascript
+// cypress.json
+
 {
   "env": {
     "foo": "bar",

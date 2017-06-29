@@ -14,15 +14,13 @@ Focus on a DOM element.
 
 ## Usage
 
-`.focus()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('input').first().focus() // Focus on the first input
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.focus('#search')  // Errors, cannot be chained off 'cy'
@@ -35,17 +33,14 @@ cy.window().focus()  // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.focus()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .focus %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.focus()` yields the new DOM element that was focused.
-
-## Timeout {% timeout %}
-
-`.focus()` will continue to try to focus the element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .focus %}
 
 # Examples
 
@@ -77,6 +72,20 @@ Ensure the element you are trying to call `.focus()` on is a {% url 'focusable e
 **Can time out because your browser did not receive any focus events.**
 
 If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements focusability .focus %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .focus %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .focus %}
 
 # Command Log
 

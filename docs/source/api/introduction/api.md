@@ -11,7 +11,7 @@ comments: false
 
 - **{% url 'Cypress API:' cypress-commands %}** Configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
 
-# Definitions
+# Rules
 
 Each document attempts to cover the essentials of each method including:
 
@@ -22,6 +22,10 @@ Each document attempts to cover the essentials of each method including:
 - **Arguments:** Definition of arguments including types accepted.
 
 - **Yields:** What is yielded (and in rare cases, returned) from the method.
+
+- **Requirements:** What built in requirements the command has.
+
+- **Assertions:** How assertions are handled, and whether default ones are applied.
 
 - **Timeout:** If defined, the amount of time the method allows to execute before throwing.
 

@@ -18,9 +18,7 @@ An alias for {% url `.type('{selectall}{backspace}')` type %}
 
 ## Usage
 
-`.clear()` requires being chained off another cy command that *yields* an `input` or `textarea`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="text"]').clear()        // Clear text input
@@ -28,7 +26,7 @@ cy.get('textarea').type('Hi!').clear() // Clear textarea
 cy.focused().clear()                   // Clear focused input/textarea
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.clear()                // Errors, cannot be chained off 'cy'
@@ -42,20 +40,15 @@ cy.url().clear()          // Errors, 'url' doesn't yield DOM element
 
 Pass in an options object to change the default behavior of `.clear()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Force clear, disables error checking prior to clear
-`interval` | `16` | Interval which to retry clear
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the clear
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force clear %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .clear %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.clear()` yields the `input` or `textarea` that was cleared.
-
-## Timeout {% timeout %}
-
-`.clear()` will continue to look for the `input` or `textarea` for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .clear %}
 
 # Examples
 
@@ -68,6 +61,20 @@ Prior to clearing, if the element isn't currently focused, Cypress issues a {% u
 ```javascript
 cy.get('textarea').clear().type('Hello, World')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements clearability .clear %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .clear %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .clear %}
 
 # Command Log
 

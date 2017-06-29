@@ -18,15 +18,13 @@ Get all ancestors of each DOM element in a set of matched DOM elements up to, bu
 
 ## Usage
 
-`.parentsUntil()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('p').parentsUntil('.article') // Yield parents of 'p' until '.article'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.parentsUntil()                  // Errors, cannot be chained off 'cy'
@@ -51,18 +49,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.parentsUntil()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parentsUntil %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.parentsUntil()` yields the new DOM element(s) found by the command.
-
-## Timeout {% timeout %}
-
-`.parentsUntil()` will continue to look for the parent element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .parentsUntil %}
 
 # Examples
 
@@ -90,6 +84,20 @@ Option | Default | Notes
 // yields [ul.menu, li]
 cy.get('.active').parentsUntil('.nav')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .parentsUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parentsUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parentsUntil %}
 
 # Command Log
 

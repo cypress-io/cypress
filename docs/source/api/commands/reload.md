@@ -16,9 +16,7 @@ cy.reload(forceReload, options)
 
 ## Usage
 
-`cy.reload()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.reload()    
@@ -32,18 +30,14 @@ Whether to reload the current page without using the cache. `true` forces the re
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to reload the page
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.reload %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.reload()` yields the `window` object of the newly loaded page.
-
-## Timeout {% timeout %}
-
-`cy.reload()` will wait for the load event of the newly loaded page for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% yields sets_subject cy.reload 'yields the `window` object after the page finishes loading' %}
 
 # Examples
 
@@ -67,6 +61,20 @@ cy.visit('http://localhost:3000/admin')
 cy.reload(true)
 ```
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements page cy.reload %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.reload %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts page cy.reload %}
+
 # Command Log
 
 **Reload the page**
@@ -86,5 +94,4 @@ When clicking on `reload` within the command log, the console outputs the follow
 # See also
 
 - {% url `cy.go()` go %}
-- {% url `cy.location()` location %}
 - {% url `cy.visit()` visit %}

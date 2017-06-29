@@ -14,15 +14,13 @@ Get the last DOM element within a set of DOM elements.
 
 ## Usage
 
-`.last()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('nav a').last()     // Yield last link in nav
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.last()                  // Errors, cannot be chained off 'cy'
@@ -35,18 +33,14 @@ cy.getCookies().last()     // Errors, 'getCookies' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.last()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .last %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.last()` yields the new DOM element found by the command.
-
-## Timeout {% timeout %}
-
-`.last()` will continue to look for the last element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .last %}
 
 # Examples
 
@@ -67,6 +61,20 @@ Option | Default | Notes
 // yields <li class="four">Knick knack on my door</li>
 cy.get('li').last()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .last %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .last %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .last %}
 
 # Command Log
 

@@ -18,15 +18,13 @@ Get all previous siblings of each DOM element in a set of matched DOM elements u
 
 ## Usage
 
-`.prevUntil()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('p').prevUntil('.intro') // Yield siblings before 'p' until '.intro'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.prevUntil()                  // Errors, cannot be chained off 'cy'
@@ -51,18 +49,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.prevUntil()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .prevUntil %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.prevUntil()` yields the new DOM element(s) found by the command.
-
-## Timeout {% timeout %}
-
-`.prevUntil()` will continue to look for the previous element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .prevUntil %}
 
 # Examples
 
@@ -91,6 +85,20 @@ Option | Default | Notes
 // yields [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
 cy.get('#nuts').prevUntil('#veggies')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .prevUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prevUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prevUntil %}
 
 # Command Log
 

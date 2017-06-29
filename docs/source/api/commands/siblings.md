@@ -16,16 +16,14 @@ Get sibling DOM elements.
 
 ## Usage
 
-`.siblings()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('td').siblings()           // Yield all td's siblings
 cy.get('li').siblings('.active')  // Yield all li's siblings with class '.active'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.siblings('.error')     // Errors, cannot be chained off 'cy'
@@ -42,18 +40,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.siblings()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .siblings %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.siblings()` yields the new DOM elements found by the command.
-
-## Timeout {% timeout %}
-
-`.siblings()` will continue to look for the sibling element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .siblings %}
 
 # Examples
 
@@ -83,6 +77,20 @@ cy.get('.active').siblings()
 // yields <li class="active">Services</li>
 cy.get('li').siblings('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .siblings %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .siblings %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .siblings %}
 
 # Command Log
 

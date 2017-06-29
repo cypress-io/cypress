@@ -142,7 +142,7 @@ Make sure your Developer Tools are open and you can get pretty close to "seeing"
 cy.get('button').debug().click()
 ```
 
-# Bypassing
+# Forcing
 
 While the above checks are super helpful at finding situations that would prevent your users from interacting with elements - sometimes they can get in the way!
 

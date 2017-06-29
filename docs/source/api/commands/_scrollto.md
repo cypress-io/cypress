@@ -3,6 +3,8 @@ title: scrollTo
 comments: false
 ---
 
+THIS DOCUMENT NEEDS ITS USAGE, REQUIREMENTS, ASSERTIONS, AND TIMEOUTS FIXED
+
 Scroll to a specific position.
 
 # Syntax
@@ -23,7 +25,7 @@ cy.scrollTo(0, 500)                     // Scroll the window 500px down
 cy.get('.sidebar').scrollTo('bottom')   // Scroll 'sidebar' to it's bottom
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.title().scrollTo('My App')  // Errors, 'title' does not yield DOM element
@@ -49,20 +51,28 @@ The distance in pixels from window/element's top or percentage of the window/ele
 
 Pass in an options object to change the default behavior of `cy.scrollTo()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `duration` | `0` | Scrolls over the duration (in ms)
 `easing` | `swing` | Will scroll with the easing animation
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the scroll
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .scrollTo %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.scrollTo()` yields the window or DOM element that was scrolled.
+{% yields same_subject cy.scrollTo %}
 
-## Timeout {% timeout %}
+## Timeouts {% helper_icon timeout %}
 
 `cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements scrollability .scrollTo %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .scrollTo %}
 
 # Examples
 

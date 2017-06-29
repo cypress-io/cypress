@@ -3,10 +3,10 @@ title: hash
 comments: false
 ---
 
-Get the current URL hash.
+Get the current URL hash of the page that is currently active.
 
 {% note info %}
-This is an alias of {% url `cy.location('hash')` location %}
+This is an alias of {% url "`cy.location('hash')`" location %}
 {% endnote %}
 
 # Syntax
@@ -18,9 +18,7 @@ cy.hash(options)
 
 ## Usage
 
-`cy.hash()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.hash()     // Get the url hash
@@ -34,15 +32,20 @@ Pass in an options object to change the default behavior of `cy.hash()`.
 
 **cy.hash( *options* )**
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.hash %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.hash()` yields the current URL hash as a string including the `#` character. If no `#` character is present in the URL, then an empty string will be returned.
+**When the current URL contains a hash:**
 
-## Timeout {% timeout %}
+{% yields sets_subject cy.hash "yields the current URL's hash (including the `#` character)" %}
+
+**When the current URL does not contain a hash:**
+
+{% yields sets_subject cy.hash "yields an empty string" %}
 
 # Examples
 
@@ -69,6 +72,20 @@ cy.hash().should('eq', '#/users/1') // => true
 cy.get('#users li').find('a').click()
 cy.hash().should('match', /users\/.+$/) // => true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.hash %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.hash %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.hash %}
 
 # Command Log
 

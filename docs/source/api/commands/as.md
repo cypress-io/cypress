@@ -17,9 +17,7 @@ Assign an alias for later use. Reference the alias later within a {% url `cy.get
 
 ## Usage
 
-`.as()` should be chained off another cy command.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.main-nav').find('li').first().as('firstNav') // Alias first 'li' as @firstNav
@@ -28,7 +26,7 @@ cy.stub(api, 'onUnauth').as('unauth')                 // Alias 'stub' as @unauth
 cy.spy(win, 'fetch').as('winFetch')                   // Alias 'spy' as @winFetch  
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.as('foo')   // Errors, cannot be chained off 'cy'
@@ -40,13 +38,9 @@ cy.as('foo')   // Errors, cannot be chained off 'cy'
 
 The name of the alias to be referenced later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command using a `@` prefix.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.as()` yields the DOM element or route chained from the previous command.
-
-## Timeout {% timeout %}
-
-`.as()` will retry the chain of commands before the `.as()` command for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
+{% yields same_subject .as %}
 
 # Examples
 
@@ -74,6 +68,20 @@ cy.wait('@userPut')
 
 Some strings are not allowed as alias names since they are reserved words in Cypress. These words include: `test`, `runnable`, `timeout`, `slow`, `skip`, and `inspect`.
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .as %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility .as %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .as %}
+
 # Command Log
 
 **Alias several routes**
@@ -93,5 +101,5 @@ Aliases of routes display in the routes instrument panel:
 # See also
 
 - {% url `cy.get()` get %}
-- {% url 'Aliases' aliases-and-references %}
 - {% url `cy.wait()` wait %}
+- {% url 'Guides: Aliases' aliases-and-references %}

@@ -3,7 +3,7 @@ title: title
 comments: false
 ---
 
-Get the title of the document.
+Get the `document.title` property of the page that is currently active.
 
 # Syntax
 
@@ -14,12 +14,10 @@ cy.title(options)
 
 ## Usage
 
-`cy.title()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.title()    
+cy.title()    // Yields the documents title as a string
 ```
 
 ## Arguments
@@ -28,18 +26,14 @@ cy.title()
 
 Pass in an options object to change the default behavior of `cy.title()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.title %}
 
+## Yields {% helper_icon yields %}
 
-## Yields {% yields %}
-
-`cy.title()` yields the `document` title as a string.
-
-## Timeout {% timeout %}
-
-`cy.title()` will continue to retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}
+{% yields sets_subject cy.title 'yields the `document.title` property of the current page' %}
 
 # Examples
 
@@ -50,6 +44,20 @@ Option | Default | Notes
 ```javascript
 cy.title().should('eq', 'My Awesome Application')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.title %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.title %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.title %}
 
 # Command Log
 

@@ -19,9 +19,7 @@ cy.server(options)
 
 ## Usage
 
-`cy.server()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.server()    
@@ -39,7 +37,7 @@ Pass in an options object to change the default behavior of `cy.server()`. These
 
 ***The following options are merged in as default options to {% url `cy.route()` route %}***
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `delay` | `0` | delay for stubbed responses (in ms)
 `headers` | `null` | response headers for stubbed routes
@@ -52,19 +50,16 @@ Option | Default | Notes
 
 ***The following options control the behavior of the server affecting all requests:***
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
 `enable` | `true` | pass `false` to disable existing route stubs
 `force404` | `false` | forcibly send XHR's a 404 status when the XHR's do not match any existing
 `urlMatchingOptions` | `{ matchBase: true }` | The default options passed to `minimatch` when using glob strings to match URLs
 `whitelist` | function | Callback function that whitelists requests from ever being logged or stubbed. By default this matches against asset-like requests such as for `.js`, `.jsx`, `.html`, and `.css` files.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.server()` yields the Cypress server instance.
-
-## Timeout {% timeout %}
-
+{% yields null cy.server %}
 
 # Examples
 
@@ -229,6 +224,20 @@ When a new test runs, any outstanding requests still in flight are automatically
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a {% url `cy.visit()` visit %}. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
 You can {% url 'read more about XHR strategy here' network-requests %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.server %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.server %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.server %}
 
 # Command Log
 

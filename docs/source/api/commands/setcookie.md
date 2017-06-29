@@ -14,9 +14,7 @@ cy.setCookie(name, value, options)
 
 ## Usage
 
-`cy.setCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.setCookie('auth_key', '123key') // Set the 'auth_key' cookie to '123key'
@@ -36,17 +34,17 @@ The value of the cookie to set.
 
 Pass in an options object to change the default behavior of `cy.setCookie()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `domain` | `window.location.hostname` | The domain the cookie is visible to
 `expiry` | 20 years into the future | When the cookie expires, specified in seconds since {% url 'Unix Epoch' https://en.wikipedia.org/wiki/Unix_time %}.
 `httpOnly` | `false` | Whether the cookie is an HTTP only cookie
-`log` | `true` | Whether to display command in Command Log
 `path` | `/` | The cookie path
 `secure` | `false` | Whether the cookie is a secure cookie
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.setCookie()` command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.setCookie %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.setCookie()` yields a cookie object literal with the following properties:
 
@@ -57,10 +55,6 @@ Option | Default | Notes
 - `httpOnly`
 - `secure`
 - `expiry`
-
-## Timeout {% timeout %}
-
-`cy.setCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
 
 # Examples
 
@@ -73,6 +67,20 @@ cy.getCookies().should('be.empty')
 cy.setCookie('session_id', '189jd09sufh33aaiidhf99d09')
 cy.getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.setCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.setCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.setCookie %}
 
 # Command Log
 

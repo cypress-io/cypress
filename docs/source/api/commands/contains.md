@@ -15,16 +15,14 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 
 ## Usage
 
-`.contains()` can be chained off of `cy` to find content within the entire document or chained off another cy command that *yields* a DOM element - limiting it's search of content to within yielded element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.nav').contains('About')  // Yield el in .nav containing 'About'
 cy.contains('Hello')              // Yield first el in document containing 'Hello'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.title().contains('My App')        // Errors, 'title' does not yield DOM element
@@ -45,18 +43,14 @@ Specify a selector to filter DOM elements containing the text. Cypress will *ign
 
 Pass in an options object to change the default behavior of `cy.contains()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry finding an element containing the content
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .contains %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.contains()` yields the *first*, *deepest* DOM element containing the text.
-
-## Timeout {% timeout %}
-
-`cy.contains()` will try to find the content within the DOM for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .contains %}
 
 # Examples
 
@@ -307,6 +301,20 @@ You could also chain the second contains off of a parent command (such as {% url
 cy.contains('Delete User').click()
 cy.get('#dialog').contains('Yes, Delete!').click()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual_existence .contains %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .contains %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .contains %}
 
 # Command Log
 

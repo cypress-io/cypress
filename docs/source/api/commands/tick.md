@@ -17,9 +17,7 @@ cy.tick(milliseconds)
 
 ## Usage
 
-`cy.tick()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.tick(500)
@@ -31,7 +29,7 @@ cy.tick(500)
 
 The number of `milliseconds` to move the clock. Any timers within the affected range of time will be called.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.tick()` yields a `clock` object with the following methods:
 
@@ -44,7 +42,6 @@ The number of `milliseconds` to move the clock. Any timers within the affected r
   Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
-
 
 # Examples
 
@@ -74,6 +71,20 @@ cy.get('#header').should('have.text', 'Hello, World')
 {% note info %}
 {% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements tick cy.tick %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility cy.tick %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.tick %}
 
 # Command Log
 

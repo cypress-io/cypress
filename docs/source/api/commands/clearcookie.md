@@ -3,14 +3,13 @@ title: clearCookie
 comments: false
 ---
 
-Clear a browser cookie.
+Clear a specific browser cookie.
 
 {% note warning %}
 Cypress automatically clears all cookies *before* each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies inside a single test.
 {% endnote %}
 
 # Syntax
-
 
 ```javascript
 cy.clearCookie(name)
@@ -19,9 +18,7 @@ cy.clearCookie(name, options)
 
 ## Usage
 
-`cy.clearCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clearCookie('authId')    // clear the 'authId' cookie
@@ -37,18 +34,14 @@ The name of the cookie to be cleared.
 
 Pass in an options object to change the default behavior of `cy.clearCookie()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.clearCookie()` command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.clearCookie %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.clearCookie()` yields `null`.
-
-## Timeout {% timeout %}
-
-`cy.clearCookie()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process the command.
+{% yields null cy.clearCookie %}
 
 # Examples
 
@@ -66,6 +59,20 @@ cy.clearCookie('session_id')
 cy.visit('/dashboard') // we should be redirected back to login
 cy.url().should('include', 'login')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clearCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.clearCookie %}
 
 # Command Log
 

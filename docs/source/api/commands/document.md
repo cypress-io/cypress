@@ -3,7 +3,7 @@ title: document
 comments: false
 ---
 
-Get the document.
+Get the `window.document` of the page that is currently active.
 
 # Syntax
 
@@ -14,9 +14,7 @@ cy.document(options)
 
 ## Usage
 
-`cy.document()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.document()     // yield the window.document object
@@ -28,17 +26,14 @@ cy.document()     // yield the window.document object
 
 Pass in an options object to change the default behavior of `cy.document()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.document %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.document()` yields the `window.document` object.
-
-## Timeout {% timeout %}
-
-`cy.document()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields sets_subject cy.document 'yields the `window.document` object' %}
 
 # Examples
 
@@ -57,6 +52,20 @@ cy.document().then(function(document) {
 ```javascript
 cy.document().its('contentType').should('eq', 'text/html')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.document %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.document %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.document %}
 
 # Command Log
 

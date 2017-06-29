@@ -14,9 +14,7 @@ cy.getCookie(name, options)
 
 ## Usage
 
-`cy.getCookie()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.getCookie('auth_key')     // Get cookie with name 'auth_key'
@@ -32,14 +30,14 @@ The name of the cookie to get.
 
 Pass in an options object to change the default behavior of `cy.getCookie()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.getCookie()` command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.getCookie %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.getCookie()` yields a cookie object literal with the following properties:
+`cy.getCookie()` yields a cookie object with the following properties:
 
 - `name`
 - `value`
@@ -49,9 +47,9 @@ Option | Default | Notes
 - `secure`
 - `expiry`
 
-## Timeout {% timeout %}
+**When a cookie matching the name could not be found:**
 
-`cy.getCookie()` will continue to look for the cookie for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+`cy.getCookie()` yields `null`.
 
 # Examples
 
@@ -74,6 +72,20 @@ cy.getCookie('session_id')
 {% note info %}
 Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in %}, {% url 'logging in using XHR web forms' logging-in %} and {% url 'logging in with single sign on' logging-in %}
 {% endnote %}
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.getCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.getCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.getCookie %}
 
 # Command Log
 

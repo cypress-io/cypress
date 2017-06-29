@@ -17,9 +17,7 @@ cy.request(options)
 
 ## Usage
 
-`cy.request()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.request('http://dev.local/seed')    
@@ -27,7 +25,7 @@ cy.request('http://dev.local/seed')
 
 ## Arguments
 
-**{% fa fa-angle-right %} url** ***(String, Glob, RegExp)***
+**{% fa fa-angle-right %} url** ***(String)***
 
 The `url` to make the request to.
 
@@ -42,8 +40,9 @@ If you provide a non fully qualified domain name (FQDN), Cypress will make its b
 
 2. If you make a `cy.request()` prior to visiting a page, Cypress uses the host configured as the `baseUrl` property inside of `cypress.json`.
 
-  ***cypress.json***
   ```json
+  // cypress.json
+
   {
     "baseUrl": "http://localhost:1234"
   }
@@ -68,8 +67,11 @@ Make a request using a specific method (`GET`, `POST`, `PUT`, etc). If no method
 Pass in an options object to change the default behavior of `cy.request`.
 
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
+`url` | `null` | The URL to make the request to
+`method` | `GET` | The HTTP method to use in the request
 `auth` | `null` | Any auth to send; Accepts object literal
 `body` | `null` | Body to send along with the request
 `failOnStatusCode` | `true` | Whether to fail on response codes other than `2xx` and `3xx`
@@ -77,26 +79,19 @@ Option | Default | Notes
 `form` | `false` | Whether to convert the `body` values to url encoded content and set the `x-www-form-urlencoded` header
 `gzip` | `true` | Whether to accept the `gzip` encoding
 `headers` | `null` | Additional headers to send; Accepts object literal
-`log` | `true` | Whether to log the request in the Command Log
-`method` | `GET` | The HTTP method to use in the request
 `qs` | `null` | Query parameters to append to the `url` of the request
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for a response (in ms)
-`url` | `null` | The URL to make the request to
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.request %}
 
 You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in {% url 'configuration' configuration %}.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.request()` yields the `response` as an object literal containing properties such as:
 
 - `status`
 - `body`
 - `headers`
-- `duration`.
-
-## Timeout {% timeout %}
-
-`cy.request()` will wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or the `timeout` passed in the options object of the command.
+- `duration`
 
 # Examples
 
@@ -209,6 +204,19 @@ Before sending the HTTP request, we automatically attach cookies that would have
 
 In other words, `cy.request()` transparently performs all of the underlying functions as if it came from the browser.
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements request cy.request %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.request %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts request cy.request %}
 
 # Command Log
 
@@ -234,8 +242,8 @@ When clicking on `request` within the command log, the console outputs the follo
 # See also
 
 - {% url `cy.exec()` exec %}
+- {% url `cy.visit()` visit %}
 - {% url "Recipe: Logging In - CSRF Tokens" logging-in %}
 - {% url "Recipe: Logging In - HTML Web Form" logging-in %}
 - {% url "Recipe: Logging In - Single Sign on" logging-in %}
 - {% url "Recipe: Logging In - XHR Web Form" logging-in %}
-- {% url `cy.visit()` visit %}

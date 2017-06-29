@@ -18,15 +18,13 @@ Trigger an event on a DOM element.
 
 ## Usage
 
-`.trigger()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('a').trigger('mousedown') // Trigger mousedown event on link
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.trigger('touchstart')             // Errors, cannot be chained off 'cy'
@@ -57,23 +55,19 @@ The distance in pixels from element's top to trigger the event.
 
 Pass in an options object to change the default behavior of `.trigger()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force trigger %}
 `bubbles` | `true` | Whether the event bubbles
 `cancelable` | `true` | Whether the event is cancelable
-`interval` | `16` | Interval which to retry triggering the event
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry triggering the event
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .trigger %}
 
 You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and they will be attached to the event. Passing in coordinate arguments (`clientX`, `pageX`, etc) will override the position coordinates.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.trigger()` yields the DOM subject chained from the previous command.
-
-## Timeout {% timeout %}
-
-`.trigger()` will wait until the element is in an 'interactable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% yields same_subject .trigger %}
 
 # Examples
 
@@ -151,6 +145,20 @@ cy.get('button').trigger('mousemove', {clientX: 200, clientY: 300})
 **What event should I fire?**
 
 `cy.trigger` is meant to be a low-level utility that makes triggering events easier than manually constructing and dispatching them. Since any arbitrary event can be triggered, Cypress tries not to make any assumptions about how it should be triggered. This means you'll need to know the implementation details (which may be in a 3rd party library) of the event handler(s) receiving the event and provide the necessary properties.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .trigger %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .trigger %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .trigger %}
 
 # Command Log
 

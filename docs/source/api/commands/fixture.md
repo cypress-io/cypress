@@ -16,9 +16,7 @@ cy.fixture(filePath, encoding, options)
 
 ## Usage
 
-`cy.fixture()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.fixture('users').as('usersJson')  // load data from users.json
@@ -59,17 +57,13 @@ The encoding to be used when reading the file. The following encodings are suppo
 
 Pass in an options object to change the default behavior of `cy.fixture()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.fixture %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.fixture()` yields the contents of the file. Formatting is determined by it's file extension.
-
-## Timeout {% timeout %}
-
-`cy.fixture` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the server to process the command.
 
 # Examples
 
@@ -214,6 +208,20 @@ Cypress automatically determines the encoding for the following file types:
 * `.zip`
 
 For other types of files, they will be read as `utf8` by default, unless specified in the second argument of `cy.fixture()`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.fixture %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.fixture %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.fixture %}
 
 # Command Log
 

@@ -18,9 +18,7 @@ Click a DOM element.
 
 ## Usage
 
-`.click()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('button').click()          // Click on button
@@ -28,7 +26,7 @@ cy.focused().click()              // Click on el with focus
 cy.contains('Welcome').click()    // Click on first el containing 'Welcome'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.click('button')          // Errors, cannot be chained off 'cy'
@@ -55,21 +53,16 @@ The distance in pixels from the element's top to issue the click.
 
 Pass in an options object to change the default behavior of `.click()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Force click, disables error checking prior to click
-`interval` | `16` | Interval which to retry a click
-`log` | `true` | Whether to display command in Command Log
-`multiple` | `false` | Enable serially clicking multiple elements
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the click
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force click %}
+`multiple` | `false` | {% usage_options multiple click %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .click %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.click()` yields the element that was clicked.
-
-## Timeout {% timeout %}
-
-`.click()` will wait until the element is in a 'clickable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% yields same_subject .click %}
 
 # Examples
 
@@ -187,6 +180,20 @@ However, sometimes when dealing with 3rd party plugins that animate, Cypress' lo
 Cypress attempts to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event.
 
 These situations are rare, but if you're having a difficult time clicking an element or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with {% url 'cy.wait()' wait %}. It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .click %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .click %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .click %}
 
 # Command Log
 

@@ -16,15 +16,13 @@ Select an `<option>` within a `<select>`.
 
 ## Usage
 
-`.select()` requires being chained off another cy command that *yields* a `<select>` DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('select').select('user-1') // Select the 'user-1' option
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.select('John Adams')  // Errors, cannot be chained off 'cy'
@@ -45,21 +43,15 @@ An array of `values` or text contents of the `<option>`s to be selected.
 
 Pass in an options object to change the default behavior of `.select()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Forces select, disables error checking prior to select
-`interval` | `50` | Interval which to retry a select
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the select
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force select %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .select %}
 
+## Yields {% helper_icon yields %}
 
-## Yields {% yields %}
-
-`.select()` yields the new DOM elements selected.
-
-## Timeout {% timeout %}
-
-`.select()` will continue to select the options for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .select %}
 
 # Examples
 
@@ -126,6 +118,20 @@ cy.get('select').select(['apples', 'bananas'])
 ```javascript
 cy.get('select').select(['456', '457'])
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements selectability .select %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .select %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .select %}
 
 # Command Log
 

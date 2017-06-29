@@ -14,15 +14,13 @@ Get the first DOM element that matches the selector (whether it be itself or one
 
 ## Usage
 
-`.closest()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('td').closest('.filled') // Yield closest el with class '.filled'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.closest('.active')  // Errors, cannot be chained off 'cy'
@@ -39,18 +37,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.closest()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .closest %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.closest()` yields the new DOM elements found by the command.
-
-## Timeout {% timeout %}
-
-`.closest()` will continue to look for the closest element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .closest %}
 
 # Examples
 
@@ -61,6 +55,20 @@ Option | Default | Notes
 ```javascript
 cy.get('p.error').closest('.banner')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .closest %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .closest %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .closest %}
 
 # Command Log
 

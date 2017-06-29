@@ -3,26 +3,23 @@ title: root
 comments: false
 ---
 
-Get the root element.
-
+Get the root DOM element.
 
 # Syntax
 
 ```javascript
-.root()
-.root(options)
+cy.root()
+cy.root(options)
 ```
 
 ## Usage
 
-`.root()` should be chained off another cy command.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.get('footer').root()       // Yield root element (document)
+cy.root()   // Yield root element <html>
 cy.get('nav').within(function(nav) {
-  cy.get('a').first().root()  // Yield root element (nav)
+  cy.root()  // Yield root element <nav>
 })
 ```
 
@@ -32,28 +29,25 @@ cy.get('nav').within(function(nav) {
 
 Pass in an options object to change the default behavior of `.root()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.root %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.root()` yields the root element regardless of what was yielded from a previous command.
+`.root()` yields the root DOM element.
 
-The root element yielded is `document` by default. However, when calling `.root()` from within the callback function of a {% url `.within()` within %} command, the root element yielded is the yielded subject of the {% url `.within()` within %} command.
-
-## Timeout {% timeout %}
-
-`.root()` will continue to look for the root element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+The root element yielded is `<html>` by default. However, when calling `.root()` from a {% url `.within()` within %} command, the root element will point to the element you are "within".
 
 # Examples
 
-## Document
+## HTML
 
 **Get the root element**
 
 ```javascript
-cy.get('aside').root() // yields document
+cy.root() // yields <html>
 ```
 
 ## Root in {% url `.within()` within %}
@@ -61,12 +55,26 @@ cy.get('aside').root() // yields document
 **Get the root element in a `.within()` callback function**
 
 ```javascript
-cy.get('form').within(function (form) {
+cy.get('form').within(function ($form) {
   cy.get('input[name="email"]').type('john.doe@email.com')
   cy.get('input[name="password"]').type('password')
   cy.root().submit() // submits the form yielded from 'within'
 })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.root %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.root %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.root %}
 
 # Command Log
 

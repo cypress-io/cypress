@@ -2,8 +2,7 @@
 title: within
 comments: false
 ---
-
-Set the scope of the containing commands to the previously yielded subject and pass that as an argument to the callback function.
+Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
 
 # Syntax
 
@@ -14,15 +13,13 @@ Set the scope of the containing commands to the previously yielded subject and p
 
 ## Usage
 
-`.within()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.list').within(function(list) {}) // Yield the `.list` and scope all commands within it
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.within(function() {})              // Errors, cannot be chained off 'cy'
@@ -39,13 +36,13 @@ Pass a function that takes the current yielded subject as it's first argument.
 
 Pass in an options object to change the default behavior of `.within()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `false` | Display command in command log
+`log` | `true` | {% usage_options log %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-## Timeout {% timeout %}
+{% yields same_subject .within %}
 
 # Examples
 
@@ -70,6 +67,20 @@ cy.get('form').within(function(form){
   cy.wrap(form).submit()
 })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .within %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once .within %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .within %}
 
 # Command Log
 

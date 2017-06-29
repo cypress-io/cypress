@@ -3,7 +3,7 @@ title: should
 comments: false
 ---
 
-Create an assertion. Assertions are automatically retried until they pass or time out. Use them to describe the state your app must be in before proceeding.
+Create an assertion. Assertions are automatically retried until they pass or time out.
 
 {% note info %}
 An alias of {% url `.and()` and %}
@@ -24,16 +24,16 @@ An alias of {% url `.and()` and %}
 
 ## Usage
 
-`.should()` requires being chained off another cy command.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.get('.error').should('be.empty')        // Assert that '.error' is empty
-cy.contains('Login').should('be.visible')  // Assert that el is visible
+cy.get('.error').should('be.empty')                    // Assert that '.error' is empty
+cy.contains('Login').should('be.visible')              // Assert that el is visible
+cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar') // Assert the 'foo' property equals 'bar'
+
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.should('eq', '42')   // Errors, cannot be chained off 'cy'
@@ -57,9 +57,9 @@ A method to be called on the chainer.
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-In most cases, `.should()` yields the previous cy command's yield.
+{% yields assertion_indeterminate .should %}
 
 ```javascript
 cy
@@ -67,36 +67,14 @@ cy
   .should('be.visible')             // yields <nav>
 ```
 
-Although some chainers change what is yielded. In the example below, the second `.should()` yields the String 'sans-serif' because the chainer `have.css, 'font-family'` yields a string.
+However, some chainers change the subject. In the example below, the second `.should()` yields the string `sans-serif` because the chainer `have.css, 'font-family'` changes the subject.
 
 ```javascript
 cy
-  .get('nav')                          // yields <nav>
-  .should('be.visible')                // yields <nav>
-  .should('have.css', 'font-family')   // yields 'sans-serif'
-```
-
-## Timeout {% timeout %}
-
-`.should()` will continue to retry until none of the assertions throw for the duration of the previous cy commands `timeout`.
-
-```javascript
-cy.get('input', {timeout: 10000}).should('have.value', '10')
-                                    ↲
-  // timeout here will be passed down to the '.should()'
-  // and it will retry for up to 10 secs
-```
-
-```javascript
-cy.get('input', {timeout: 10000}).should(function($input)){
-                                    ↲
-  // timeout here will be passed down to the '.should()'
-  // unless an assertion throws earlier,
-  // ALL of the assertions will retry for up to 10 secs
-  expect($input).to.not.be('disabled')
-  expect($input).to.not.have.class('error')
-  expect($input).to.have.value('US')
-})
+  .get('nav')                       // yields <nav>
+  .should('be.visible')             // yields <nav>
+  .and('have.css', 'font-family')   // yields 'sans-serif'
+  .and('match', /serif/)            // yields 'sans-serif'
 ```
 
 # Examples
@@ -268,6 +246,35 @@ cy.get('button').click()
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
 
 {% partial then_should_difference %}
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .should %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts timeouts .should %}
+
+```javascript
+cy.get('input', {timeout: 10000}).should('have.value', '10')
+                         ↲
+  // timeout here will be passed down to the '.should()'
+  // and it will retry for up to 10 secs
+```
+
+```javascript
+cy.get('input', {timeout: 10000}).should(function($input)){
+                         ↲
+  // timeout here will be passed down to the '.should()'
+  // unless an assertion throws earlier,
+  // ALL of the assertions will retry for up to 10 secs
+  expect($input).to.not.be('disabled')
+  expect($input).to.not.have.class('error')
+  expect($input).to.have.value('US')
+})
+```
 
 # Command Log
 

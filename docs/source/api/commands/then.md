@@ -3,7 +3,7 @@ title: then
 comments: false
 ---
 
-Yield the previously yielded subject as the first argument of a function.
+Enables you to work with the subject yielded from the previous command.
 
 # Syntax
 
@@ -14,12 +14,10 @@ Yield the previously yielded subject as the first argument of a function.
 
 ## Usage
 
-`.then()` should be chained off another cy command.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.get('.nav').then(function(nav) {})  // Yields .nav as first arg
+cy.get('.nav').then(function($nav) {})  // Yields .nav as first arg
 cy.location().then(function(loc) {})   // Yields location object as first arg
 ```
 
@@ -33,21 +31,17 @@ Pass a function that takes the previously yielded subject as it's first argument
 
 Pass in an options object to change the default behavior of `.then()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to yield the then
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .then %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `.then()` is modeled identically to the way Promises work in JavaScript.  Whatever is returned from the callback function becomes the new subject and will flow into the next command (with the exception of `null` and `undefined`).
 
 When `null` or `undefined` are returned by the callback function, the subject will not be modified and will instead carry over to the next command.
 
 Just like Promises, you can return any compatible "thenable" (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
-
-## Timeout {% timeout %}
-
-`.then()` will retry for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
 
 # Examples
 
@@ -68,9 +62,10 @@ cy.get('form').find('input').then(function($input){
 ```javascript
 cy.then(function(){
   return {id: 123}
-}).then(function(obj){
+})
+.then(function(obj){
   // subject is now the obj {id: 123}
-  obj.id === 123 // true
+  expect(obj.id).to.eq(123) // true
 })
 ```
 
@@ -82,7 +77,8 @@ cy
     console.log('form is:', $form)
     // undefined is returned here, but $form will be
     // yielded to allow for continued chaining
-  }).find('input').then(function($input){
+  })
+  .find('input').then(function($input){
     // we have our $input element here since
     // our form element was yielded and we called
     // .find('input') on it
@@ -101,7 +97,7 @@ cy.get('button').click().then(function($button){
 
   setTimeout(function(){
     p.resolve()
-  }, 5000)
+  }, 1000)
 
   return p.promise
 })
@@ -111,7 +107,7 @@ cy.get('button').click().then(function($button){
 
 ```javascript
 cy.get('button').click().then(function($button){
-  return Promise.delay(5000)
+  return Promise.delay(1000)
 })
 ```
 
@@ -123,7 +119,7 @@ cy.get('button').click().then(function($button){
 
   setTimeout(function(){
     df.resolve()
-  }, 5000)
+  }, 1000)
 
   return df
 })
@@ -132,6 +128,20 @@ cy.get('button').click().then(function($button){
 # Notes
 
 {% partial then_should_difference %}
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .then %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once .then %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts promises .then %}
 
 # Command Log
 
@@ -142,7 +152,7 @@ cy.get('button').click().then(function($button){
 - {% url `.and()` and %}
 - {% url `.each()` each %}
 - {% url `.invoke()` invoke %}
-- {% url 'Chains of Commands' introduction-to-cypress#Chains-of-Commands %}
 - {% url `.its()` its %}
 - {% url `.should()` should %}
 - {% url `.spread()` spread %}
+- {% url 'Guide: Chains of Commands' introduction-to-cypress#Chains-of-Commands %}
