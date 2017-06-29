@@ -18,15 +18,13 @@ Uncheck checkbox(es).
 
 ## Usage
 
-`.uncheck()` requires being chained off another cy command that *yields* a DOM element of type `checkbox`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('[type="checkbox"]').uncheck()   // Unchecks checkbox element
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.uncheck('[type="checkbox"]') // Errors, cannot be chained off 'cy'
@@ -47,12 +45,15 @@ Values of checkboxes that should be unchecked.
 
 Pass in an options object to change the default behavior of `.uncheck()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Forces check, disables error checking prior to check
-`interval` | `16` | Interval which to retry a check
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the check
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force uncheck %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .uncheck %}
+
+## Yields {% helper_icon yields %}
+
+{% yields same_subject .uncheck %}
 
 # Examples
 
@@ -85,6 +86,20 @@ cy.get('input[type="checkbox"]').uncheck(['ga'])
 ```javascript
 cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])
 ```
+
+# Notes
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements checkability .uncheck %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .uncheck %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .uncheck %}
 
 # Command Log
 

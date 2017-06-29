@@ -21,10 +21,10 @@ TODO:
 FAQ
   - add support question in Company?
 
-API
-  - question marks next to Yields / Timeout?
+<!-- API -->
+  <!-- - question marks next to Yields / Timeout? -->
 
-Timeout
+<!-- Timeout
   X command will first wait for the element [to become actionable], and then wait for. It has an implicit/default (what do we call this?) assertion that the element *must* exist.
 
   1. First for the element [to become actionable]
@@ -44,9 +44,9 @@ Timeout
   `cy.window` will time out after waiting for `defaultCommandTimeout` for:
 
   1. Until the window is accessible
-  2. And all assertions you've added pass
+  2. And all assertions you've added pass -->
 
-Types of Commands
+<!-- Types of Commands
   - action Commands
     - waits for element to become actionable
       - adding assertions for this is unnecessary
@@ -58,7 +58,7 @@ Types of Commands
     - nothing implicit
     - waits for assertions to pass
   - route
-    - cannot timeout, no assertions  
+    - cannot timeout, no assertions   -->
 
 Intro to Cypress
   - we don't ever describe assertions as 'blocking / guarding state'
@@ -87,6 +87,9 @@ Command Creation
   - automatically add stuff about it existing
   - Cypress.Commands.add('foo', { assertionRequirements: 'dom / exists' })
   - Cypress.Commands.add('foo', { timeout: 60000 })
+  - Cypress.Commands.add('foo', { allowsAliasing: true }) // can be aliased
+  - Cypress.Commands.add('foo', { commandsAllowed: ['as'] }) // allow specific commands
+  - Cypress.Commands.add('foo', { chainable: false }) // dont allow chaining
   - need to also take into accounts timeout
     - with the default being defaultCommandTimeout
 
@@ -158,7 +161,7 @@ FIX -spies,stubs and stubs,spies
     - this should be linking to a section within assertions
 
 - API
-  - make sure we have consistent nomenclature
+  <!-- - make sure we have consistent nomenclature
     - Usage
       `.check()` requires being chained off another cy command that *yields* an `<input>` DOM element.
 
@@ -177,7 +180,7 @@ FIX -spies,stubs and stubs,spies
     - Timeout
       - `.check()` will wait for the duration of its `timeout` option for its default assertion and any additional assertions to pass.
   - blur  
-    this should retry until the element is in focus instead of immediately dieing
+    this should retry until the element is in focus instead of immediately dieing -->
   - What's the difference between a default assertion and an error?
     - an error will fire IMMEDIATELY without waiting
       - like you called .type() on an array or didnt pass in the right arguments

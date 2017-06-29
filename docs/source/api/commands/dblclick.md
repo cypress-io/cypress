@@ -14,9 +14,7 @@ Double-click a DOM element.
 
 ## Usage
 
-`.dblclick()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('button').dblclick()          // Double click on button
@@ -24,11 +22,11 @@ cy.focused().dblclick()              // Double click on el with focus
 cy.contains('Welcome').dblclick()    // Double click on first el containing 'Welcome'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
-cy.click('button')          // Errors, cannot be chained off 'cy'
-cy.window().click()         // Errors, 'window' does not yield DOM element
+cy.dblclick('button')          // Errors, cannot be chained off 'cy'
+cy.window().dblclick()         // Errors, 'window' does not yield DOM element
 ```
 
 ## Arguments
@@ -37,17 +35,14 @@ cy.window().click()         // Errors, 'window' does not yield DOM element
 
 Pass in an options object to change the default behavior of `.dblclick()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .dblclick %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.dblclick()` yields the DOM element that was double clicked.
-
-## Timeout {% timeout %}
-
-`.dblclick()` will wait for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .dblclick %}
 
 # Examples
 
@@ -58,6 +53,20 @@ Option | Default | Notes
 ```javascript
 cy.get('a#nav1').dblclick() // yields the <a>
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .dblclick %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .dblclick %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .dblclick %}
 
 # Command Log
 

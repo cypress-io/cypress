@@ -17,15 +17,13 @@ Cypress.Server.defaults(options)
 
 ## Usage
 
-`Server.defaults()` requires being chained off `Cypress`.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 Cypress.Server.defaults({}) // Set server defaults
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.Server.defaults({})  // Errors, cannot be chained off 'cy'

@@ -14,15 +14,13 @@ Type into a DOM element.
 
 ## Usage
 
-`.type()` requires being chained off another cy command that *yields* a DOM element.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('input').type('Hello, World') // Type 'Hello, World' into the 'input'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.type('Welcome')               // Errors, cannot be chained off 'cy'
@@ -63,22 +61,17 @@ Sequence | Notes
 
 Pass in an options object to change the default behavior of `.type()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
+`log` | `true` | {% usage_options log %}
 `delay` | `10` | Delay after each keypress
-`force` | `false` | Forces type, disables error checking prior to type
-`interval` | `16` | Interval to retry type
-`log` | `true` | Whether to display command in Command Log
+`force` | `false` | {% usage_options force type %}
 `release` | `true` | Keep a modifier activated between commands
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry the type
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .type %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.type()` yields the DOM element that was typed into.
-
-## Timeout {% timeout %}
-
-`.type()` will continue to retry typing for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .type %}
 
 # Examples
 
@@ -400,6 +393,20 @@ However, when Cypress is run in `cross browser mode`, Cypress uses the actual `O
 This strategy works well because when you are in development you are working in Chrome.  Using simulated events is extremely fast, the browser window does *not* need to be in focus. Because we simulate events identically to their native counterpart, your application code won't be able to tell the difference.
 
 In other words, you get the best of both worlds: simulated when its practical to do so, and native when it needs to run across browsers.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .type %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .type %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .type %}
 
 # Command Log
 

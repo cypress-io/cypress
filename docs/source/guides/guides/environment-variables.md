@@ -41,9 +41,9 @@ When your tests are running, you can use the {% url `Cypress.env` env %} functio
 
 Any key/value you set in your {% url 'configuration' configuration %} under the `env` key will become an environment variable.
 
-***cypress.json***
+```javascript
+// cypress.json
 
-```json
 {
   "projectId": "128076ed-9868-4e98-9cef-98dd8b705d75",
   "env": {
@@ -77,9 +77,9 @@ You can create your own `cypress.env.json` file that Cypress will automatically 
 
 This strategy is useful because if you add `cypress.env.json` to your `.gitignore` file, the values in here can be different for each developer machine.
 
-***cypress.env.json***
+```javascript
+// cypress.env.json
 
-```json
 {
   "host": "veronica.dev.local",
   "api_server": "http://localhost:8888/api/v1/"

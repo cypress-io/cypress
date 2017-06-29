@@ -18,9 +18,7 @@ cy.wait(aliases, options)
 
 ## Usage
 
-`cy.wait()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wait(500)    
@@ -49,22 +47,20 @@ An array of aliased routes as defined using the {% url `.as()` as %} command and
 
 Pass in an options object to change the default behavior of `cy.wait()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `requestTimeout` configuration#Timeouts %}, {% url `responseTimeout` configuration#Timeouts %} | Override the default requestTimeout and responseTimeout (in ms)
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `requestTimeout` configuration#Timeouts %}, {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.wait %}
 
-You can also change the `requestTimeout` and `responseTimeout` globally for all `cy.wait()` commands in the {% url 'configuration' configuration %}.
+## Yields {% helper_icon yields %}
 
-## Yields {% yields %}
+**When given a `time` argument:**
 
-When given a `time` argument, `cy.wait()` yields the previous commands yield.
+{% yields same_subject cy.wait %}
 
-When given an `alias` argument, `cy.wait()` yields the XHR object of the aliased route.
+**When given an `alias` argument:**
 
-## Timeout {% timeout %}
-
-`cy.wait()` will wait for the request the duration of the {% url `requestTimeout` configuration#Timeouts %} and wait for the response for the duration of the {% url `responseTimeout` configuration#Timeouts %} or it will wait for the duration of both the request and response for the `timeout` specified in the command's [options](#options).
+{% yields sets_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
 
 # Examples
 
@@ -214,6 +210,20 @@ This means Cypress will now wait up to 20 seconds for the external server to res
 ![Timeout error for XHR wait](/img/api/wait/timeout-error-when-waiting-for-route-response.png)
 
 This gives you the best of both worlds - a fast error feedback loop when requests never go out and a much longer duration for the actual external response.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.wait %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.wait %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts wait cy.wait %}
 
 # Command Log
 

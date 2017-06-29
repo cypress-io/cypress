@@ -5,6 +5,10 @@ comments: false
 
 Submit a form.
 
+{% note warning %}
+This element must be an `<form>`.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -14,15 +18,13 @@ Submit a form.
 
 ## Usage
 
-`.submit()` requires being chained off another cy command that *yields* a form.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('form').submit()   // Submit a form
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.submit()               // Errors, cannot be chained off 'cy'
@@ -35,13 +37,14 @@ cy.get('input').submit()  // Errors, 'input' does not yield a form
 
 Pass in an options object to change the default behavior of `.submit()`.
 
-## Yields {% yields %}
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .submit %}
 
-`.submit()` yields the form that was submitted.
+## Yields {% helper_icon yields %}
 
-## Timeout {% timeout %}
-
-`.submit()` will continue to try to submit the form for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields same_subject .submit %}
 
 # Example
 
@@ -59,6 +62,20 @@ Pass in an options object to change the default behavior of `.submit()`.
 ```javascript
 cy.get('#contact').submit()
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements submitability .submit %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .submit %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .submit %}
 
 # Command Log
 

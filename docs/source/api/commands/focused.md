@@ -14,12 +14,10 @@ cy.focused(options)
 
 ## Usage
 
-`cy.focused()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.focused()   
+cy.focused()    // Yields the element currently in focus
 ```
 
 ## Arguments
@@ -28,17 +26,14 @@ cy.focused()
 
 Pass in an options object to change the default behavior of `cy.focused()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.focused %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.focused()` yields the DOM element that is currently focused.
-
-## Timeout {% timeout %}
-
-`cy.focused()` will continue to look for the focused element for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields sets_dom_subject cy.focused %}
 
 # Examples
 
@@ -63,6 +58,20 @@ cy.focused().blur()
 ```javascript
 cy.focused().should('have.attr', 'name', 'username')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom cy.focused %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.focused %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence cy.focused %}
 
 # Command Log
 

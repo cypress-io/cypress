@@ -3,10 +3,10 @@ title: url
 comments: false
 ---
 
-Get the current URL.
+Get the current URL of the page that is currently active.
 
 {% note info %}
-This is an alias of {% url `cy.location.href` location %}
+This is an alias of {% url "`cy.location('href')`" location %}
 {% endnote %}
 
 # Syntax
@@ -18,12 +18,10 @@ cy.url(options)
 
 ## Usage
 
-`cy.url()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.url()    // Get url
+cy.url()    // Yields the current url as a string
 ```
 
 ## Arguments
@@ -34,15 +32,14 @@ Pass in an options object to change the default behavior of `cy.url()`.
 
 **cy.hash( *options* )**
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.url %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.url()` yields the current URL as a string.
-
-## Timeout {% timeout %}
+{% yields sets_subject cy.url 'yields the current URL as a string' %}
 
 # Examples
 
@@ -56,13 +53,13 @@ cy.get('#user-edit a').click()
 cy.url().should('eq', 'http://localhost:8000/users/1/edit') // => true
 ```
 
-**Url is a shortcut for `cy.location().href`**
+**Url is a shortcut for `cy.location('href')`**
 
 `cy.url()` uses `href` under the hood.
 
 ```javascript
 cy.url()                  // these yield the same string
-cy.location().its('href') // these yield the same string
+cy.location('href')       // these yield the same string
 ```
 
 **Url versus href**
@@ -70,9 +67,9 @@ cy.location().its('href') // these yield the same string
 Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
 ```javascript
-cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
+cy.location('href').should('eq', 'http://localhost:8000/index.html')
 
-cy.location().invoke('toString').should('eq', 'http://localhost:8000/index.html')
+cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
 
 cy.url().should('eq', 'http://localhost:8000/index.html')
 ```
@@ -82,6 +79,20 @@ cy.url().should('eq', 'http://localhost:8000/index.html')
 But you may be wondering where the `url` property comes from.  Per the `window.location` spec, there actually isn't a `url` property on the `location` object.
 
 `cy.url()` exists because it's what most developers naturally assume would return them the full current URL.  We almost never refer to the URL as an `href`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.url %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.url %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.url %}
 
 # Command Log
 
@@ -101,7 +112,5 @@ When clicking on `url` within the command log, the console outputs the following
 
 # See also
 
-- {% url `cy.document()` document %}
 - {% url `cy.hash()` hash %}
 - {% url `cy.location()` location %}
-- {% url `cy.window()` window %}

@@ -14,15 +14,13 @@ Get the descendent DOM elements of a specific selector.
 
 ## Usage
 
-`.find()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.article').find('footer') // Yield 'footer' within '.article'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.find('.progress')          // Errors, cannot be chained off 'cy'
@@ -39,18 +37,14 @@ A selector used to filter matching descendent DOM elements.
 
 Pass in an options object to change the default behavior of `.find()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .find %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.find()` yields the new DOM elements found by the command.
-
-## Timeout {% timeout %}
-
-`.find()` will continue to look for the filtered element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .find %}
 
 # Examples
 
@@ -69,6 +63,20 @@ Option | Default | Notes
 // yields [<li class="first"></li>, <li class="second"></li>]
 cy.get('#parent').find('li')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .find %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .find %}
 
 # Command Log
 

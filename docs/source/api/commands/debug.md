@@ -18,9 +18,7 @@ You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
 
 ## Usage
 
-`.debug()` can be chained off of `cy` or any cy command.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.debug().getCookie('app') // Pause to debug at beginning of commands
@@ -33,15 +31,13 @@ cy.get('nav').debug()       // Debug the `get` command's yield
 
 Pass in an options object to change the default behavior of `.debug()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.debug()` yields the previous command's yield.
-
-## Timeout
+{% yields same_subject .debug %}
 
 # Examples
 
@@ -52,6 +48,20 @@ Option | Default | Notes
 ```javascript
 cy.get('a').debug().should('have.attr', 'href')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual .debug %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility .debug %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .debug %}
 
 # Command Log
 

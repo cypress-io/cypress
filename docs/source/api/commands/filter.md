@@ -18,15 +18,13 @@ Opposite of {% url `.not()` not %}
 
 ## Usage
 
-`.filter()` requires being chained off another cy command that *yields* a DOM element or DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('td').filter('.users') // Yield all el's with class '.users'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.filter('.animated')  // Errors, cannot be chained off 'cy'
@@ -43,18 +41,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.filter()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .filter %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.filter()` yields the new DOM elements found by the command.
-
-## Timeout {% timeout %}
-
-`.filter()` will continue to look for the filtered element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .filter %}
 
 # Examples
 
@@ -76,6 +70,20 @@ Option | Default | Notes
 // yields <li>About</li>
 cy.get('ul').find('>li').filter('.active')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .filter %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .filter %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .filter %}
 
 # Command Log
 

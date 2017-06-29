@@ -18,9 +18,7 @@ cy.clearCookies(options)
 
 ## Usage
 
-`cy.clearCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clearCookies()     // clear all cookies
@@ -32,18 +30,14 @@ cy.clearCookies()     // clear all cookies
 
 Pass in an options object to change the default behavior of `cy.clearCookies()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.clearCookies()` command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.clearCookies %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.clearCookies()` yields `null`.
-
-## Timeout {% timeout %}
-
-`cy.clearCookies()` will wait up for the duration of {% url `responseTimeout` configuration#Timeouts %} for the automation server to process this command.
+{% yields null cy.clearCookies %}
 
 # Examples
 
@@ -61,6 +55,20 @@ cy.clearCookies()
 cy.visit('/dashboard') // we should be redirected back to login
 cy.url().should('include', 'login')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clearCookies %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.clearCookies %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.clearCookies %}
 
 # Command Log
 

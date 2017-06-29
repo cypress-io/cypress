@@ -15,9 +15,7 @@ cy.go(direction, options)
 
 ## Usage
 
-`cy.go()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.go('back')    
@@ -35,18 +33,14 @@ You can use `back` or `forward` to go one step back or forward. You could also n
 
 Pass in an options object to change the default behavior of `cy.go()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to retry the navigation
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.go %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.go()` yields the `window` object.
-
-## Timeout {% timeout %}
-
-`cy.go()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
+{% yields sets_subject cy.go 'yields the `window` object after the page finishes loading' %}
 
 # Examples
 
@@ -83,6 +77,20 @@ cy.go(1)        // equivalent to clicking forward button
 **Refreshing and loading the page**
 
 If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements page cy.go %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.go %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts page cy.go %}
 
 # Command Log
 

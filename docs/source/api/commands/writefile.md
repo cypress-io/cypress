@@ -16,9 +16,7 @@ cy.writeFile(filePath, contents, encoding, options)
 
 ## Usage
 
-`cy.writeFile()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.writeFile('menu.json')    
@@ -54,17 +52,13 @@ The encoding to be used when writing to the file. The following encodings are su
 
 Pass in an options object to change the default behavior of `cy.writeFile()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to wait for the command to be processed.
+`log` | `true` | {% usage_options log %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.writeFile()` yields the contents written to the file.
-
-## Timeout {% timeout %}
-
-`cy.writeFile()` will wait up for the duration of {% url `defaultCommandTimeout` configuration#Timeouts %} for the server to write to the file.
+{% yields sets_subject cy.writeFile 'yields the contents written to the file' %}
 
 # Examples
 
@@ -136,6 +130,20 @@ cy.writeFile('path/to/ascii.txt', 'Hello World', 'ascii'))
 ```text
 Hello World
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements write_file cy.writeFile %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.writeFile %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.writeFile %}
 
 # Command Log
 

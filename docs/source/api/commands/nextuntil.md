@@ -19,15 +19,13 @@ Get all following siblings of each DOM element in a set of matched DOM elements 
 
 ## Usage
 
-`.nextUntil()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('div').nextUntil('.warning') // Yield siblings after 'div' until '.warning'
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.nextUntil()                  // Errors, cannot be chained off 'cy'
@@ -52,18 +50,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.nextUntil()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element(s)
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .nextUntil %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.nextUntil()` yields the new DOM element(s) found by the command.
-
-## Timeout {% timeout %}
-
-`.nextUntil()` will continue to look for the next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .nextUntil %}
 
 # Examples
 
@@ -92,6 +86,20 @@ Option | Default | Notes
 //returns [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
 cy.get('#veggies').nextUntil('#nuts')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .nextUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .nextUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .nextUntil %}
 
 # Command Log
 

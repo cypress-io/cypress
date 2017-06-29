@@ -14,9 +14,7 @@ cy.wrap(subject, options)
 
 ## Usage
 
-`cy.wrap()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.wrap({name: "Jane Lane"})    
@@ -32,15 +30,14 @@ An object to be yielded.
 
 Pass in an options object to change the default behavior of `cy.wrap()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.wrap %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.wrap()` yields the object that was passed into the command.
-
-## Timeout {% timeout %}
+{% yields sets_subject cy.wrap 'yields the object it was called with' %}
 
 # Examples
 
@@ -55,6 +52,20 @@ var getName = function() {
 
 cy.wrap({name: getName}).invoke('name').should('eq', 'Jane Lane') // true
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.wrap %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.wrap %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.wrap %}
 
 # Command Log
 

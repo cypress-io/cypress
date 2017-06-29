@@ -14,9 +14,7 @@ cy.getCookies(options)
 
 ## Usage
 
-`cy.getCookies()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.getCookies()    // Get all cookies
@@ -28,14 +26,14 @@ cy.getCookies()    // Get all cookies
 
 Pass in an options object to change the default behavior of `cy.getCookies()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `responseTimeout` configuration#Timeouts %} | Total time to wait for the `cy.getCookies()` command to be processed
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.getCookies %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.getCookies()` yields an array cookie objects. Each cookie object has the following properties:
+`cy.getCookies()` yields an array of cookie objects. Each cookie object has the following properties:
 
 - `name`
 - `value`
@@ -44,10 +42,6 @@ Option | Default | Notes
 - `httpOnly`
 - `secure`
 - `expiry`
-
-## Timeout {% timeout %}
-
-`cy.getCookies()` will continue to look for cookies for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
 
 # Examples
 
@@ -67,6 +61,20 @@ cy.getCookies()
     expect(cookies[0]).to.have.property('name', 'session_id')
   })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.getCookies %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.getCookies %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.getCookies %}
 
 # Command Log
 

@@ -16,15 +16,13 @@ Get the parent DOM elements of a set of DOM elements.
 
 ## Usage
 
-`.parents()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('aside').parents()  // Yield parents of aside
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.parents()              // Errors, cannot be chained off 'cy'
@@ -41,19 +39,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.parents()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the elements
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parents %}
 
+## Yields {% helper_icon yields %}
 
-## Yields {% yields %}
-
-`.parents()` yields the new DOM element(s) found by the command.
-
-## Timeout {% timeout %}
-
-`.parents()` will continue to look for the next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .parents %}
 
 # Examples
 
@@ -72,6 +65,20 @@ cy.get('li.active').parents()
 ```javascript
 cy.get('li.active').parents('.nav')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .parents %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parents %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parents %}
 
 # Command Log
 

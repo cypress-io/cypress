@@ -3,7 +3,7 @@ title: visit
 comments: false
 ---
 
-Visit a remote url.
+Visit a remote URL.
 
 # Syntax
 
@@ -14,40 +14,36 @@ cy.visit(url, options)
 
 ## Usage
 
-`cy.visit()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.visit('http://localhost:3000')    
+cy.visit('http://localhost:3000')    // Yields the window of the remote page
 ```
 
 ## Arguments
 
 **{% fa fa-angle-right %} url** ***(String)***
 
-The url to visit. The url provided will be prefixed with the `baseUrl` configured in your {% url 'network options' configuration#Global %}.
+The URL to visit.
+
+Cypress will be prefix the URL with the `baseUrl` configured in your {% url 'network options' configuration#Global %} if you've set one.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.visit()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
-`onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | {% url `pageLoadTimeout` configuration#Timeouts %} | Total time to wait until `cy.visit()` resolves
+`onLoad` | `function` | Called once your page has fired its load event.
+`timeout` | {% url `pageLoadTimeout` configuration#Timeouts %} | {% usage_options timeout cy.visit %}
 
 You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` globally in {% url 'configuration' configuration %}.
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.visit()` yields the remote `window` object.
-
-## Timeout {% timeout %}
-
-`cy.visit()` will retry for the duration of the {% url `pageLoadTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's [options](#options).
+{% yields sets_subject cy.visit 'yields the `window` object after the page finishes loading' %}
 
 # Examples
 
@@ -119,7 +115,10 @@ cy.visit('http://localhost:3000/#dashboard', {
 **Using onBeforeLoad**
 
 {% note info %}
-{% url "Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to help bootstrap app data" working-with-the-backend %}, to {% url "set a token to `localStorage` for login" logging-in %} and to {% url "stub `window.fetch`" stubs-spies-and-clocks-recipe %}
+Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to:
+  - {% url 'Bootstrap app data' working-with-the-backend %}
+  - {% url 'Set a token to `localStorage` for login' logging-in %}
+  - {% url 'Stub `window.fetch`' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 **Provide an `onLoad` callback function**
@@ -184,6 +183,20 @@ cy.visit('http://localhost:8000/#/app')
 
 Cypress will automatically apply the server and routes to the very next `cy.visit()` and does so immediately before any of your application code runs.
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements page cy.visit %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait cy.visit %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts page cy.visit %}
+
 # Command Log
 
 **Visit example application in a `beforeEach`**
@@ -202,11 +215,11 @@ When clicking on `visit` within the command log, the console outputs the followi
 
 ![Console log visit](/img/api/visit/visit-shows-any-redirect-or-cookies-set-in-the-console.png)
 
-
 # See also
 
 - {% url `cy.go()` go %}
+- {% url `cy.reload()` reload %}
+- {% url `cy.request()` request %}
 - {% url "Recipe: Bootstrapping App Test Data" working-with-the-backend %}
 - {% url "Recipe: Logging In - Single Sign on" logging-in %}
-- {% url `cy.request()` request %}
-- {% url `cy.server()` server %}
+- {% url "Recipe: Stubbing `window.fetch`" stubs-spies-and-clocks-recipe %}

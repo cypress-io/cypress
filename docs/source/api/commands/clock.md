@@ -26,9 +26,7 @@ cy.clock(now, functionNames, options)
 
 ## Usage
 
-`cy.clock()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.clock()
@@ -48,11 +46,11 @@ Name of native functions that clock should override.
 
 Pass in an options object to change the default behavior of `cy.clock()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
 `cy.clock()` yields a `clock` object with the following methods:
 
@@ -65,8 +63,6 @@ Option | Default | Notes
   Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
 
 You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
-
-## Timeout
 
 # Examples
 
@@ -185,6 +181,20 @@ Note that `cy.clock()` only applies to the `top` window on a web page. It will n
 
 If you call `cy.clock()` before visiting a page with {% url `cy.visit()` visit %}, the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via {% url `cy.tick()` tick %}. This also applies if, during the course of a test, the page under test is reloaded or changed.
 
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.clock %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility cy.clock %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.clock %}
+
 # Command Log
 
 **Create a clock and tick it 1 second**
@@ -204,8 +214,8 @@ When clicking on the `clock` command within the command log, the console outputs
 
 # See also
 
-- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
 - {% url `cy.spy()` spy %}
 - {% url `cy.stub()` stub %}
-- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' stubs-spies-and-clocks-recipe %}
 - {% url `cy.tick()` tick %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url 'Recipe: Controlling Behavior with Spies, Stubs, and Clocks' stubs-spies-and-clocks-recipe %}

@@ -16,15 +16,13 @@ Get all following siblings of each DOM element in a set of matched DOM elements.
 
 ## Usage
 
-`.nextAll()` requires being chained off another cy command that *yields* a DOM element or set of DOM elements.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.active').nextAll() // Yield all links next to `.active`
 ```
 
-**{% fa fa-exclamation-triangle red %} Invalid Usage**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
 cy.nextAll()                // Errors, cannot be chained off 'cy'
@@ -41,18 +39,14 @@ A selector used to filter matching DOM elements.
 
 Pass in an options object to change the default behavior of `.nextAll()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .nextAll %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.nextAll()` yields the new DOM elements found by the command.
-
-## Timeout {% timeout %}
-
-`.nextAll()` will continue to look for all next element(s) for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields changes_dom_subject .nextAll %}
 
 # Examples
 
@@ -93,6 +87,20 @@ cy.get('.second').nextAll()
 // yields <li>pineapples</li>
 cy.get('li').nextAll('.selected')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .nextAll %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .nextAll %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .nextAll %}
 
 # Command Log
 

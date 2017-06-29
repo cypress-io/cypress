@@ -18,9 +18,7 @@ This does not set a `debugger` in your code, unlike {% url `.debug()` debug %}
 
 ## Usage
 
-`.pause()` can be chained off of `cy` or any cy command.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.pause().getCookie('app') // Pause at the beginning of commands
@@ -33,15 +31,13 @@ cy.get('nav').pause()       // Pause after the 'get' commands yield
 
 Pass in an options object to change the default behavior of `.pause()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
+`log` | `true` | {% usage_options log %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`.pause()` yields the previous command's yield.
-
-## Timeout {% timeout %}
+{% yields same_subject .pause %}
 
 # Examples
 
@@ -53,6 +49,20 @@ Option | Default | Notes
 cy.get('a').should('have.attr', 'href').and('match', /dashboard/).pause()
 cy.get('button').should('not.be.disabled')
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual .pause %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility .pause %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .pause %}
 
 # Command Log
 

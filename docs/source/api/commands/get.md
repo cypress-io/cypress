@@ -16,9 +16,7 @@ cy.get(alias, options)
 
 ## Usage
 
-`cy.get()` cannot be chained off any other cy commands, so should be chained off of `cy` for clarity.
-
-**{% fa fa-check-circle green %} Valid Usage**
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.get('.list>li')    // Yield the li's in '.list'
@@ -44,18 +42,14 @@ Internally, Cypress keeps a cache of all aliased elements.  If the element curre
 
 Pass in an options object to change the default behavior of `cy.get()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | Whether to display command in Command Log
-`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.get %}
 
-## Yields {% yields %}
+## Yields {% helper_icon yields %}
 
-`cy.get()` yields the new DOM element(s) found by the command.
-
-## Timeout {% timeout %}
-
-`cy.get()` will continue to look for the elements for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %}.
+{% yields sets_dom_subject cy.get %}
 
 # Examples
 
@@ -118,6 +112,20 @@ it('disables on click', function(){
   cy.get('@submitBtn').should('be.disabled')
 })
 ```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom cy.get %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.get %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence cy.get %}
 
 # Command Log
 

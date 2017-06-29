@@ -28,9 +28,9 @@ Say you have the following directory structure:
 
 ***To specify the path to your custom reporter:***
 
-***cypress.json***
+```javascript
+// cypress.json
 
-```json
 {
   "reporter": "reporters/custom.js"
 }
@@ -46,9 +46,9 @@ cypress run --reporter reporters/custom.js
 
 If you installed a custom reporter through npm, specify the package name:
 
-***cypress.json***
+```javascript
+// cypress.json
 
-```json
 {
   "reporter": "mochawesome"
 }
@@ -68,9 +68,9 @@ You need to install any peer dependencies the reporter requires, even if they're
 
 Some reporters accept options that customize their behavior. These can be specified in your `cypress.json` or via the command line:
 
-***cypress.json***
+```javascript
+// cypress.json
 
-```json
 {
   "reporter": "junit",
   "reporterOptions": {
