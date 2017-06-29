@@ -1,6 +1,7 @@
+const zunder = require('zunder')
 const cyIcons = require('@cypress/icons')
 
-module.exports = function (zunder) {
+module.exports = () => {
   const staticGlobs = {
     'node_modules/fira/woff/**/*': '/woff',
     'node_modules/font-awesome/fonts/*.+(eot|svg|ttf|woff|woff2|otf)': '/fonts',
