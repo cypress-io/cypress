@@ -29,32 +29,32 @@ fail = (str) ->
 zippedFilename = (platform) ->
   # TODO use .tar.gz for linux archive. For now to preserve
   # same file format as before use .zip
-  if platform == "linux" then "cypress.zip" else "cypress.zip"
+  if platform is "linux" then "cypress.zip" else "cypress.zip"
 
 # goes through the list of properties and asks relevant question
 # resolves with all relevant options set
 # if the property already exists, skips the question
-askMissingOptions = (properties) -> (options = {}) ->
-  questions = {
-    platform: ask.whichPlatform,
-    version: ask.deployNewVersion,
-    # note: zip file might not be absolute
-    zip: ask.whichZipFile
-  }
+askMissingOptions = (properties = []) ->
+  return (options = {}) ->
+    questions = {
+      platform: ask.whichPlatform,
+      version: ask.deployNewVersion,
+      # note: zip file might not be absolute
+      zip: ask.whichZipFile
+    }
 
-  properties.reduce((prev, property) ->
-    if (check.has(options, property)) then return prev
-    question = questions[property]
-    if (!check.fn(question)) then return prev
-    la(check.fn(question), "cannot find question for property", property)
-    prev.then(() ->
-      question(options[property])
-      .then((answer) ->
-        options[property] = answer
-        options
-      )
-    )
-  , Promise.resolve(options))
+    reducer = (memo, property) ->
+      if (check.has(memo, property)) then return memo
+      question = questions[property]
+      if (!check.fn(question)) then return memo
+      la(check.fn(question), "cannot find question for property", property)
+
+      question(memo[property])
+      .then (answer) ->
+        memo[property] = answer
+        memo
+
+    Promise.reduce(properties, reducer, options)
 
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)
@@ -154,7 +154,7 @@ deploy = {
     options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform'])(options)
     .then(build)
-    .then(() -> zip(options))
+    .then(() => @zip(options))
     # assumes options.zip contains the zipped filename
     .then(upload)
 }
