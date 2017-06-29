@@ -45,11 +45,12 @@ class UpdateBanner extends Component {
         >
           <div className='update-modal modal-body os-dialog'>
             <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-            <h4>Update to the latest version</h4>
+            <h4><i className='fa fa-download'></i> Update Available</h4>
             <p>
-              Version <strong>{appStore.newVersion}</strong> is now available (currently running <strong>{appStore.displayVersion}</strong>).{' '}
-              <a href='#' onClick={this._openChangelog}>Changelog</a>
+              <a href='#' onClick={this._openChangelog}><strong>Version {appStore.newVersion}</strong></a> is now available (currently running <strong>Version {appStore.displayVersion}</strong>)
             </p>
+            <hr />
+            <p><strong>To update Cypress:</strong></p>
             {this._instructions()}
           </div>
         </BootstrapModal>
@@ -62,18 +63,30 @@ class UpdateBanner extends Component {
       return (
         <ol>
           <li>
-            <a href='#' onClick={this._openDownload}>Download the new version</a>
+            <span>
+              <a href='#' onClick={this._openDownload}><i className='fa fa-download'></i> Download the new version.</a>
+            </span>
           </li>
-          <li>Quit this app</li>
-          <li>Extract the download and replace the existing app</li>
+          <li>
+            <span>Quit this app.</span>
+          </li>
+          <li>
+            <span>Extract the download and replace the existing app.</span>
+          </li>
         </ol>
       )
     } else {
       return (
         <ol>
-          <li>Quit this app</li>
-          <li>Run <code>npm install -D cypress@{appStore.newVersion}</code></li>
-          <li>Run <code>cypress open</code> to open the new version of the app</li>
+          <li>
+            <span>Quit this app.</span>
+          </li>
+          <li>
+            <span>Run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
+          </li>
+          <li>
+            <span>Run <code>cypress open</code> to open the new version of the app.</span>
+          </li>
         </ol>
       )
     }

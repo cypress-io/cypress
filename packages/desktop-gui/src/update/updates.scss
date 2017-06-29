@@ -29,11 +29,21 @@ html.has-updates {
 }
 
 .update-modal {
+  a:hover {
+    cursor: pointer !important;
+  }
+
   ol {
     padding-left: 20px;
 
     li {
-      line-height: 2;
+      line-height: 2em;
+      color: #999;
+
+      &>span {
+        color: #555;
+        padding-left: 3px;
+      }
     }
   }
 
@@ -44,5 +54,11 @@ html.has-updates {
     padding: 10px;
     font-family: Consolas, Monaco, 'Andale Mono', monospace;
     border: 0;
+  }
+
+  code {
+    border-radius: 3px;
+    padding: 3px 8px;
+    color: #333;
   }
 }
