@@ -22,27 +22,29 @@ class Default extends Component {
   render () {
     return (
       <div className='intro'>
-        <h1>To Get Started...</h1>
-        <p>
-          Run this command in your Console (or Terminal) in the project you want to test:
-          <a onClick={this._openHelp} className='helper-docs-link pull-right'>
-            <i className='fa fa-question-circle' /> Need help?
-          </a>
-        </p>
-        <div>
-          <pre><code>npm install this thang</code></pre>
+        <div className='alert alert-info alert-dismissible'>
+          <p>
+            <i className='fa fa-info-circle'></i>{' '}
+            We recommend installing Cypress locally per project. Just run <code>npm install --save-dev cypress</code> in your Console from the project you want to test.{' '}
+            <a onClick={this._openHelp} className='helper-docs-link'>
+              <i className='fa fa-question-circle' /> Need help?
+            </a>
+          </p>
+          <button className="close" onClick={this._removeIntro}><span>&times;</span></button>
         </div>
-        <p>Or you can just drag your project here to run it:</p>
-        <div
-          className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
-          onDragOver={this._dragover}
-          onDragLeave={this._dragleave}
-          onDrop={this._drop}
-        >
-          <i className='fa fa-cloud-upload'></i>
-          <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
+        <div className='intro-content'>
+          <h3>Add your project below to get started:</h3>
+          <div
+            className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
+            onDragOver={this._dragover}
+            onDragLeave={this._dragleave}
+            onDrop={this._drop}
+          >
+            <i className='fa fa-cloud-upload'></i>
+            <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
+          </div>
+          <ProjectsList onSelect={this._projectSelected} />
         </div>
-        <ProjectsList onSelect={this._projectSelected} />
       </div>
     )
   }
@@ -50,6 +52,10 @@ class Default extends Component {
   componentWillUnmount () {
     document.removeEventListener('dragover', this._nope)
     document.removeEventListener('drop', this._nope)
+  }
+
+  _removeIntro = () => {
+    this.props.project.clearIntro()
   }
 
   _selectProject = (e) => {

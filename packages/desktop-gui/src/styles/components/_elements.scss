@@ -18,6 +18,11 @@ html, body {
 
 a {
   color: $blue-primary;
+  cursor: pointer;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 a, button {

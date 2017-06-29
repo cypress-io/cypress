@@ -2,11 +2,22 @@
   bottom: 18px;
   left: 0;
   margin-bottom: 0;
-  padding: 20px 40px;
   position: fixed;
   overflow: auto;
   right: 0;
   top: 40px;
+
+  .alert {
+    margin-bottom: 20px;
+    p {
+      line-height: 1.5em;
+    }
+  }
+
+  h3 {
+    font-size: 16px;
+    margin: 10px 0 6px;
+  }
 
   h1 {
     color: #636668;
@@ -14,9 +25,10 @@
     font-weight: 100;
     margin-top: 15px;
     text-align: center;
+    font-size: 22px;
   }
 
-  p {
+  &>p {
     margin: 10px 0;
     color: #636668;
     font-size: 14px;
@@ -30,6 +42,10 @@
     border-radius: 3px;
     color: #eee;
     margin-bottom: 15px;
+  }
+
+  .intro-content {
+    padding: 0 40px 10px;
   }
 }
 
@@ -49,9 +65,14 @@
     color: #d3d6d8;
   }
 
-  a {
+  p>a {
     border-bottom: 1px dotted lighten($brand-primary, 30%);
     color: lighten($brand-primary, 12%);
+
+    &:hover, &:focus, &:active {
+      text-decoration: none;
+      cursor: pointer !important;
+    }
   }
 
   p {
