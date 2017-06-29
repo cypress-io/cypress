@@ -6,6 +6,7 @@
   "browser": "src/main",
   "scripts": {
     "postinstall": "echo '@packages/reporter needs: npm run build'",
+    "prebuild": "rebuild-node-sass",
     "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "watch": "node ./scripts/watch.js",
@@ -15,7 +16,6 @@
     "lint": "$(bin-up eslint) --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
   },
   "files": [
-    "lib",
     "dist"
   ],
   "browserify": {
@@ -36,9 +36,6 @@
       ]
     ]
   },
-  "files": [
-    "dist"
-  ],
   "devDependencies": {
     "@cypress/react-tooltip": "^0.2.4",
     "@cypress/releaser": "0.1.12",
@@ -59,6 +56,7 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
+    "rebuild-node-sass": "^1.0.1",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "zunder": "^4.1.1"
