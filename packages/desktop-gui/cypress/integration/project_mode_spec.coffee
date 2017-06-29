@@ -4,7 +4,7 @@ describe "Project Mode", ->
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
-    cy.visit("/").then (win) =>
+    cy.visitIndex().then (win) =>
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "onMenuClicked")

@@ -8,7 +8,7 @@ describe "Setup Project", ->
     cy.fixture("organizations").as("orgs")
     cy.fixture("keys").as("keys")
 
-    cy.visit("/").then (win) ->
+    cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})

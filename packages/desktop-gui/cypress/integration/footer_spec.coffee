@@ -2,7 +2,7 @@ describe "Footer", ->
   beforeEach ->
     cy.fixture("user").as("user")
 
-    cy.visit("/").then (win) ->
+    cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
       @version = "1.0.0"

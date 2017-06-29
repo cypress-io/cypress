@@ -1,6 +1,6 @@
 describe "App", ->
   beforeEach ->
-    cy.visit("/").then (@win) ->
+    cy.visitIndex().then (@win) ->
       { @start, @ipc } = @win.App
 
       cy.stub(@ipc, "getOptions").resolves({})

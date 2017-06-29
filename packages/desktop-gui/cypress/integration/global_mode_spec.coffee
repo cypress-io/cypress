@@ -18,7 +18,7 @@ describe "Global Mode", ->
     @setLocalStorageProjects = (projects) ->
       localStorage.projects = JSON.stringify(projects)
 
-    cy.visit("/").then (win) ->
+    cy.visitIndex().then (win) ->
       { @start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({})

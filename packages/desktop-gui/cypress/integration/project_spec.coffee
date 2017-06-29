@@ -5,7 +5,7 @@ describe "Project Mode", ->
     cy.fixture("specs").as("specs")
     cy.fixture("projects_statuses").as("projectStatuses")
 
-    cy.visit("/").then (win) =>
+    cy.visitIndex().then (win) =>
       { @start, @ipc } = win.App
 
       cy.stub(@ipc, "onMenuClicked")

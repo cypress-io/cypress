@@ -2,7 +2,7 @@ describe "Navigation", ->
   beforeEach ->
     cy.fixture("user").as("user")
 
-    cy.visit("/").then (win) ->
+    cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({})

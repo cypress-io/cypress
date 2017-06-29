@@ -5,11 +5,9 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
-    "build": "zunder build-dev",
+    "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
-    "run-prod": "npm run build-prod && npm run server",
-    "watch": "zunder watch",
-    "server": "zunder serve-prod --port 8000",
+    "watch": "node ./scripts/watch.js",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
