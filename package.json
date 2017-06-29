@@ -27,10 +27,10 @@
     "precommit": "lint-staged",
     "precommit-lint": "eslint --fix --rule 'no-only-tests/no-only-tests: 2'",
     "bump": "gulp bump",
-    "binary-build": "node ./scripts/deploy.js build",
-    "binary-zip": "node ./scripts/deploy.js zip",
-    "binary-upload": "node ./scripts/deploy.js upload",
-    "binary-deploy": "node ./scripts/deploy.js deploy",
+    "binary-build": "node ./scripts/binary.js build",
+    "binary-zip": "node ./scripts/binary.js zip",
+    "binary-upload": "node ./scripts/binary.js upload",
+    "binary-deploy": "node ./scripts/binary.js deploy",
     "release": "gulp release"
   },
   "lint-staged": {
