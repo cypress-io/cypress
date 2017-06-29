@@ -155,6 +155,7 @@ const logFinish = (options) => {
   /* eslint-enable no-console */
 }
 
+// Why is download displaying instructions how to run things?
 const displayOpeningApp = () => {
   //// TODO: this isn't necessarily true if installed locally
   utils.log(
@@ -193,6 +194,7 @@ const start = (options) => {
   return utils.ensureInstallationDir()
   .then(() => download(options))
   .catch(logErr(options))
+  // Why is download also unzipping? It should only download
   .then(unzip.start)
   .catch((err) => {
     unzip.logErr(err)
