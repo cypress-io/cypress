@@ -185,6 +185,17 @@ First, make sure you have {% url "`node`" https://nodejs.org %} installed on you
 
 Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress-cli`.
 
+## {% fa fa-angle-right %} Is there a way to test that a file got downloaded? I want to test that a button click triggers a download.
+
+There are a lot of ways to test this, so it depends. You'll need to be aware of what actually causes the download, then think of a way to test that mechanism.
+
+If your server sends specific disposition headers which cause a browser to prompt for download, you can figure out what URL this request is made to, and use {% url "cy.request()" request %} to hit that directly. Then you can test that the server send the right response headers. 
+
+If it's just an anchor that initiates the download, you could just test that it has the right `href` property. As long as you can verify that clicking the button is going to make the right HTTP request, there's nothing else to test for.
+
+In the end, it's up to you to know your implementation and to test just enough to cover everything.
+
+
 <!-- ## How do I make Cypress wait for an XHR request? -->
 
 <!-- ## is there CLI option to run in chrome? Or is electron the only way to run headlessly? -->
