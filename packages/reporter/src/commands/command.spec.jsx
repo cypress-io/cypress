@@ -193,8 +193,8 @@ describe('<Command />', () => {
 
       it('renders the right tooltip title for each alias it references', () => {
         const tooltips = aliases.find('Tooltip')
-        expect(tooltips.first()).to.have.prop('title', "Found an alias for: 'barAlias'")
-        expect(tooltips.last()).to.have.prop('title', "Found an alias for: 'bazAlias'")
+        expect(tooltips.first()).to.have.prop('title', 'Found an alias for: \'barAlias\'')
+        expect(tooltips.last()).to.have.prop('title', 'Found an alias for: \'bazAlias\'')
       })
     })
 
@@ -219,7 +219,7 @@ describe('<Command />', () => {
         })
 
         it('renders the alias tooltip with the right title', () => {
-          expect(aliases.find('Tooltip').first()).to.have.prop('title', "The message aliased as: 'fooAlias'")
+          expect(aliases.find('Tooltip').first()).to.have.prop('title', 'The message aliased as: \'fooAlias\'')
         })
       })
 

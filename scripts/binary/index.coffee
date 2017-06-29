@@ -79,6 +79,9 @@ deploy = {
   parseOptions: (argv) ->
     opts = minimist(argv)
     opts.runTests = false if opts["skip-tests"]
+    if not opts.platform and os.platform() == "linux"
+      # only can build Linux on Linux
+      opts.platform = "linux"
     opts
 
   bump: ->
