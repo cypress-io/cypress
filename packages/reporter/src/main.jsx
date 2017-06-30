@@ -16,6 +16,29 @@ import Runnables from './runnables/runnables'
 
 @observer
 class Reporter extends Component {
+  static propTypes = {
+    autoScrollingEnabled: PropTypes.bool,
+    error: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      link: PropTypes.string,
+      callout: PropTypes.string,
+      message: PropTypes.string.isRequired,
+    }),
+    runner: PropTypes.shape({
+      emit: PropTypes.func.isRequired,
+      on: PropTypes.func.isRequired,
+    }).isRequired,
+    specPath: PropTypes.string.isRequired,
+  }
+
+  static defaultProps = {
+    appState,
+    events,
+    runnablesStore,
+    scroller,
+    statsStore,
+  }
+
   componentWillMount () {
     const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
 
@@ -52,29 +75,6 @@ class Reporter extends Component {
   componentDidMount () {
     EQ.init()
   }
-}
-
-Reporter.propTypes = {
-  autoScrollingEnabled: PropTypes.bool,
-  error: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    link: PropTypes.string,
-    callout: PropTypes.string,
-    message: PropTypes.string.isRequired,
-  }),
-  runner: PropTypes.shape({
-    emit: PropTypes.func.isRequired,
-    on: PropTypes.func.isRequired,
-  }).isRequired,
-  specPath: PropTypes.string.isRequired,
-}
-
-Reporter.defaultProps = {
-  appState,
-  events,
-  runnablesStore,
-  scroller,
-  statsStore,
 }
 
 export default { Reporter }

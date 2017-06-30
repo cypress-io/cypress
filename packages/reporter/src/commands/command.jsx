@@ -58,6 +58,12 @@ const Message = observer(({ model }) => (
 
 @observer
 class Command extends Component {
+  static defaultProps = {
+    appState,
+    events,
+    runnablesStore,
+  }
+
   render () {
     const { model } = this.props
 
@@ -187,12 +193,6 @@ class Command extends Component {
       }, 50)
     }
   }
-}
-
-Command.defaultProps = {
-  appState,
-  events,
-  runnablesStore,
 }
 
 export { Aliases, AliasesReferences, Message }
