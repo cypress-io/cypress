@@ -54,11 +54,11 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-**When given a `time` argument:**
+***When given a `time` argument:***
 
 {% yields same_subject cy.wait %}
 
-**When given an `alias` argument:**
+***When given an `alias` argument:***
 
 {% yields sets_subject cy.wait 'yields an object containing the HTTP request and response properties of the XHR' %}
 
@@ -68,9 +68,9 @@ Option | Default | Description
 
 In Cypress, you almost never need to use `cy.wait()` for an arbitrary amount of time. If you are finding yourself doing this, there is likely a much better, simpler way.
 
-**Let's imagine the following examples:**
+***Let's imagine the following examples:***
 
-***Unnecessary wait for `cy.request()`***
+**Unnecessary wait for `cy.request()`**
 
 Waiting here is unnecessary since the {% url `cy.request()` request %} command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the {% url `cy.request()` request %} has already resolved.
 
@@ -79,7 +79,7 @@ cy.request("http://localhost:8080/db/seed")
 cy.wait(5000)     // <--- this is unnecessary
 ```
 
-***Unnecessary wait for `cy.visit()`***
+**Unnecessary wait for `cy.visit()`**
 
 Waiting for this is unnecessary because the {% url '`cy.visit()`' visit %} resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
 
@@ -88,7 +88,7 @@ cy.visit("http://localhost/8080")
 cy.wait(5000)     // <--- this is unnecessary
 ```
 
-***Unnecessary wait for `cy.get()`***
+**Unnecessary wait for `cy.get()`**
 
 Waiting for the {% url `cy.get()` get %} below is unncessary because {% url `cy.get()` get %} automatically retries until the table's `tr` has a length of 2.
 
@@ -114,7 +114,7 @@ cy.get("table tr").should("have.length", 2)
 
 ## Alias
 
-**Wait for a specific XHR to respond**
+***Wait for a specific XHR to respond***
 
 ```javascript
 // Wait for the route aliased as 'getAccount' to respond
@@ -129,7 +129,7 @@ cy.wait('@getAccount').then(function(xhr){
 })
 ```
 
-**Wait automatically increments responses**
+***Wait automatically increments responses***
 
 Each time we use `cy.wait()` for an alias, Cypress waits for the next nth matching request.
 
@@ -161,7 +161,7 @@ cy.get('#book-results').should('have.length', 1)
 
 ## Aliases
 
-**You can pass an array of aliases that will be waited on before resolving.**
+***You can pass an array of aliases that will be waited on before resolving.***
 
 ```javascript
 cy.server()
@@ -178,7 +178,7 @@ cy.wait(['@getUsers', '@getActivities', 'getComments']).then(function(xhrs){
 })
 ```
 
-**Using {% url `.spread()` spread %} to spread the array into multiple arguments.**
+***Using {% url `.spread()` spread %} to spread the array into multiple arguments.***
 
 ```javascript
 cy.server()
@@ -193,7 +193,9 @@ cy.wait(['@getUsers', '@getActivities', 'getComments'])
 
 # Notes
 
-**requestTimeout and responseTimeout**
+## Timeouts
+
+***requestTimeout and responseTimeout***
 
 When used with an alias, `cy.wait()` goes through two separate "waiting" periods.
 
@@ -227,7 +229,7 @@ This gives you the best of both worlds - a fast error feedback loop when request
 
 # Command Log
 
-**Wait for the PUT to users to resolve.**
+***Wait for the PUT to users to resolve.***
 
 ```javascript
 cy.server()

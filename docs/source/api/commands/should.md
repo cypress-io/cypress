@@ -81,45 +81,45 @@ cy
 
 ## Chainers
 
-**Assert the checkbox is disabled**
+***Assert the checkbox is disabled***
 
 ```javascript
 cy.get(':checkbox').should('be.disabled')
 ```
 
-**The current DOM element is yielded**
+***The current DOM element is yielded***
 
 ```javascript
-cy.get('option:first').should('be.selected').then(function($option)){
+cy.get('option:first').should('be.selected').then(($option) => {
   // $option is yielded
 })
 ```
 
-## Chainers with Value
+## Value
 
-**Assert the class is 'form-horizontal'**
+***Assert the class is 'form-horizontal'***
 
 ```javascript
 cy.get('form').should('have.class', 'form-horizontal')
 ```
 
-**Assert the value is not 'Jane'**
+***Assert the value is not 'Jane'***
 
 ```javascript
 cy.get('input').should('not.have.value', 'Jane')
 ```
 
-**The current subject is yielded**
+***The current subject is yielded***
 
 ```javascript
-cy.get('button').should('have.id', 'new-user').then(function($button){
+cy.get('button').should('have.id', 'new-user').then(($button) =>{
   // $button is yielded
 })
 ```
 
-## Chainers with Method and Value
+## Method and Value
 
-**Assert the href is equal to '/users'**
+***Assert the href is equal to '/users'***
 
 ```javascript
 // have.attr comes from chai-jquery
@@ -128,7 +128,7 @@ cy.get('#header a').should('have.attr', 'href', '/users')
 
 ## Function
 
-**Verify length, content, and classes from multiple `<p>`**
+***Verify length, content, and classes from multiple `<p>`***
 
 Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to *massage* what you'd like to assert on.
 
@@ -145,7 +145,7 @@ Just be sure *not* to include any code that has side effects in your callback fu
 ```javascript
 cy
   .get('p')
-  .should(function($p){
+  .should(($p) =>{
     // should have found 3 elements
     expect($p).to.have.length(3)
 
@@ -155,7 +155,7 @@ cy
     // use jquery's map to grab all of their classes
     // jquery's map returns a new jquery object
     var classes = $p.map(function(i, el){
-      return cy.$(el).attr('class')
+      return Cypress.$(el).attr('class')
     })
 
     // call classes.get() to make this a plain array
@@ -167,7 +167,7 @@ cy
   })
 ```
 
-**Assert explicitly within `.should()`**
+***Assert explicitly within `.should()`***
 
 Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
 
@@ -180,7 +180,7 @@ Any errors raised by failed assertions will immediately bubble up and cause the 
 ```
 
 ```javascript
-cy.get('#todos li').should(function($lis){
+cy.get('#todos li').should(($lis) => {
   expect($lis).to.have.length(3)
   expect($lis.eq(0)).to.contain('Walk the dog')
   expect($lis.eq(1)).to.contain('Feed the cat')
@@ -188,25 +188,9 @@ cy.get('#todos li').should(function($lis){
 })
 ```
 
-
-**Using a callback function will not change what is yielded**
-
-Whatever is returned in the function is ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)
-
-```javascript
-cy
-  .get('button').should(function($button){
-    expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
-    return {foo: 'bar'} // return is ignored, .should() yields <button>
-  })
-  .then(function($button){
-    // do anything we want with <button>
-  })
-```
-
 ## Multiple Assertions
 
-**Chaining multiple assertions**
+***Chaining multiple assertions***
 
 Cypress makes it easy to chain assertions together.
 
@@ -224,10 +208,10 @@ Cypress won't resolve your commands until all of its assertions pass.
 
 ```javascript
 // Application Code
-$('button').click(function(){
+$('button').click(() => {
   $button = $(this)
 
-  setTimeout(function(){
+  setTimeout(() => {
     $button.removeClass('inactive').addClass('active')
   }, 1000)
 })
@@ -241,9 +225,28 @@ cy.get('button').click()
 
 # Notes
 
-**How do I know which assertions change the subject and which keep it the same?**
+## Subjects
+
+***How do I know which assertions change the subject and which keep it the same?***
 
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
+
+***Using a callback function will not change what is yielded***
+
+Whatever is returned in the function is ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)
+
+```javascript
+cy
+  .get('button').should(($button) =>{
+    expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
+    return {foo: 'bar'} // return is ignored, .should() yields <button>
+  })
+  .then(($button) => {
+    // do anything we want with <button>
+  })
+```
+
+## Differences
 
 {% partial then_should_difference %}
 
@@ -265,7 +268,7 @@ cy.get('input', {timeout: 10000}).should('have.value', '10')
 ```
 
 ```javascript
-cy.get('input', {timeout: 10000}).should(function($input)){
+cy.get('input', {timeout: 10000}).should(($input) => {
                          ↲
   // timeout here will be passed down to the '.should()'
   // unless an assertion throws earlier,
@@ -278,7 +281,7 @@ cy.get('input', {timeout: 10000}).should(function($input)){
 
 # Command Log
 
-**Assert that there should be 8 children in a nav**
+***Assert that there should be 8 children in a nav***
 
 ```javascript
 cy.get('.left-nav>.nav').children().should('have.length', 8)

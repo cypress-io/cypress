@@ -78,13 +78,13 @@ Option | Default | Description
 
 ## Position
 
-**Scroll to the bottom of the window**
+***Scroll to the bottom of the window***
 
 ```javascript
 cy.scrollTo('bottom')
 ```
 
-**Scroll to the center of the list**
+***Scroll to the center of the list***
 
 ```javascript
 cy.get('#movies-list').scrollTo('center')
@@ -92,19 +92,19 @@ cy.get('#movies-list').scrollTo('center')
 
 ## Coordinates
 
-**Scroll 500px down the list**
+***Scroll 500px down the list***
 
 ```javascript
 cy.get('#infinite-scroll-list').scrollTo(0, 500)
 ```
 
-**Scroll the window 500px to the right**
+***Scroll the window 500px to the right***
 
 ```javascript
 cy.scrollTo('500px')
 ```
 
-**Scroll 25% down the element's height**
+***Scroll 25% down the element's height***
 
 ```javascript
  cy.get('.user-photo').scrollTo('0%', '25%')
@@ -112,13 +112,13 @@ cy.scrollTo('500px')
 
 ## Options
 
-**Use linear easing animation to scroll**
+***Use linear easing animation to scroll***
 
 ```javascript
 cy.get('.documentation').scrollTo('top', { easing: 'linear'} )
 ```
 
-**Scroll to the right over 2000ms**
+***Scroll to the right over 2000ms***
 
 ```javascript
 cy.get('#slider').scrollTo('right', { duration: 2000} )
@@ -126,13 +126,15 @@ cy.get('#slider').scrollTo('right', { duration: 2000} )
 
 # Notes
 
-**Snapshots do not reflect scroll behavior**
+## Snapshots
+
+***Snapshots do not reflect scroll behavior***
 
 *Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos.html#Videos %}.
 
 # Command Log
 
-**Scroll to the bottom of the window then scroll the element to the "right"**
+***Scroll to the bottom of the window then scroll the element to the "right"***
 
 ```javascript
 cy.scrollTo('bottom')

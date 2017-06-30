@@ -50,7 +50,7 @@ Option | Default | Description
 
 ## Selector
 
-**Get li's within parent**
+***Get li's within parent***
 
 ```html
 <ul id="parent">
@@ -80,7 +80,7 @@ cy.get('#parent').find('li')
 
 # Command Log
 
-**Find the li's within the nav**
+***Find the li's within the nav***
 
 ```javascript
 cy.get('.left-nav>.nav').find('>li')

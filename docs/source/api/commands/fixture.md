@@ -20,7 +20,7 @@ cy.fixture(filePath, encoding, options)
 
 ```javascript
 cy.fixture('users').as('usersJson')  // load data from users.json
-cy.fixture('logo.png').then(function(logo){
+cy.fixture('logo.png').then((logo) => {
   // load data from logo.png
 })  
 ```
@@ -69,13 +69,13 @@ Option | Default | Description
 
 ## JSON
 
-**Load a `users.json` fixture**
+***Load a `users.json` fixture***
 
 ```javascript
 cy.fixture('users.json').as('usersData')
 ```
 
-**Omit the fixture file's extension**
+***Omit the fixture file's extension***
 
 When no extension is passed to `cy.fixture()`, Cypress will search for files with the specified name within the {% url `fixturesFolder` configuration#Folders %} (which defaults to `cypress/fixtures`) and resolve the first one.
 
@@ -85,36 +85,36 @@ cy.fixture('admin').as('adminJSON')
 
 The example above would resolve in the following order:
 
-1. `{fixturesFolder}/admin.json`
-2. `{fixturesFolder}/admin.js`
-3. `{fixturesFolder}/admin.coffee`
-4. `{fixturesFolder}/admin.html`
-5. `{fixturesFolder}/admin.txt`
-6. `{fixturesFolder}/admin.csv`
-7. `{fixturesFolder}/admin.png`
-8. `{fixturesFolder}/admin.jpg`
-9. `{fixturesFolder}/admin.jpeg`
-10. `{fixturesFolder}/admin.gif`
-11. `{fixturesFolder}/admin.tif`
-12. `{fixturesFolder}/admin.tiff`
-13. `{fixturesFolder}/admin.zip`
+1. `cypress/fixtures/admin.json`
+2. `cypress/fixtures/admin.js`
+3. `cypress/fixtures/admin.coffee`
+4. `cypress/fixtures/admin.html`
+5. `cypress/fixtures/admin.txt`
+6. `cypress/fixtures/admin.csv`
+7. `cypress/fixtures/admin.png`
+8. `cypress/fixtures/admin.jpg`
+9. `cypress/fixtures/admin.jpeg`
+10. `cypress/fixtures/admin.gif`
+11. `cypress/fixtures/admin.tif`
+12. `cypress/fixtures/admin.tiff`
+13. `cypress/fixtures/admin.zip`
 
 ## Images
 
-**Image fixtures are sent as `base64`**
+***Image fixtures are sent as `base64`***
 
 ```javascript
-cy.fixture('images/logo.png').then(function(logo){
+cy.fixture('images/logo.png').then((logo) => {
   // logo will be encoded as base64
   // and should look something like this:
   // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==...
 })
 ```
 
-**Change encoding of Image fixture**
+***Change encoding of Image fixture***
 
 ```javascript
-cy.fixture('images/logo.png', 'binary').then(function(logo){
+cy.fixture('images/logo.png', 'binary').then((logo) => {
   // logo will be encoded as binary
   // and should look something like this:
   // 000000000000000000000000000000000000000000...
@@ -123,22 +123,22 @@ cy.fixture('images/logo.png', 'binary').then(function(logo){
 
 ## Accessing Fixture Data
 
-**Using .then() to access fixture data**
+***Using .then() to access fixture data***
 
 ```javascript
 cy
-  .fixture('users').then(function(json){
+  .fixture('users').then((json) => {
     cy.route('GET', '/users/**', json)
   })
 ```
 
-**Using fixtures to bootstrap data**
+***Using fixtures to bootstrap data***
 
 {% note info %}
-{% url 'Check out our example recipe using cy.fixture to bootstrap data for our application.' working-with-the-backend %}
+{% url 'Check out our example recipe using `cy.fixture()` to bootstrap data for our application.' working-with-the-backend %}
 {% endnote %}
 
-**Using an alias to access a fixture**
+***Using an alias to access a fixture***
 
 You can make use of aliasing, {% url `.as()` as %}, instead of working directly with the yielded data.
 
@@ -150,31 +150,33 @@ cy.route('GET', '/users/**', '@usersJSON')
 
   // ...later on...
 
-cy.get('#email').then(function(){
+cy.get('#email').then(() => {
   // we have access to this.usersJSON since it was aliased
   this.usersJSON
 })
 ```
 
-**Modifying fixture data before using it**
+***Modifying fixture data before using it***
 
 You can modify fixture data directly before passing it along to a route.
 
 ```javascript
-cy.fixture('user').then(function(user) {
+cy.fixture('user').then((user)  => {
   user.firstName = 'Jane'
   cy.route('GET', '/users/1', user).as('getUser')
 })
 
 cy.visit('/users')
-cy.wait('@getUser').then(function(xhr) {
+cy.wait('@getUser').then((xhr)  => {
   expect(xhr.requestBody.firstName).to.eq('Jane')
 })
 ```
 
-## Fixture Shortcuts
+# Notes
 
-**Using `fixture` or `fx` shortcuts**
+## Shortcuts
+
+***Using `fixture` or `fx` shortcuts***
 
 Fixtures can also be referenced directly without using the `.fixture()` command by using the special keywords: `fixture:` or `fx:` within {% url `cy.route()` route %}.
 
@@ -183,13 +185,15 @@ cy.route('GET', '/users/**', 'fixture:users') // this works
 cy.route('GET', '/users/**', 'fx:users')      // this also works
 ```
 
-# Notes
+## Validation
 
-**Validation and Formatting**
+***Validation and Formatting***
 
 Cypress automatically validates and formats your fixtures. If your `.json`, `.js`, or `.coffee` files contain syntax errors, they will be shown in the Command Log.
 
-**Default Encoding**
+## Encoding
+
+***Default Encoding***
 
 Cypress automatically determines the encoding for the following file types:
 
@@ -225,11 +229,10 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 
 # Command Log
 
-**`cy.fixture()` does *not* log in the command log**
+- `cy.fixture()` does *not* log in the command log
 
 # See also
 
-- {% url `cy.readFile()` readfile %}
-- {% url 'Recipe: Bootstrapping App Test Data' working-with-the-backend%}
 - {% url `cy.route()` route %}
 - {% url `.then()` then %}
+- {% url 'Recipe: Bootstrapping App Test Data' working-with-the-backend%}

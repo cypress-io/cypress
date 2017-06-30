@@ -44,9 +44,9 @@ Option | Default | Description
 
 # Examples
 
-## First element
+## No Args
 
-**Get the first list item in a list.**
+***Get the first list item in a list.***
 
 ```html
 <ul>
@@ -78,7 +78,7 @@ cy.get('li').first()
 
 # Command Log
 
-**Find the first input in the form**
+***Find the first input in the form***
 
 ```javascript
 cy.get('form').find('input').first()

@@ -54,7 +54,7 @@ Option | Default | Description
 
 ## Selector
 
-**Filter the current subject to the elements with the class 'active'.**
+***Filter the current subject to the elements with the class 'active'.***
 
 ```html
 <ul>
@@ -87,7 +87,7 @@ cy.get('ul').find('>li').filter('.active')
 
 # Command Log
 
-**Filter the li's to the li with the class 'active'.**
+***Filter the li's to the li with the class 'active'.***
 
 ```javascript
 cy.get('.left-nav>.nav').find('>li').filter('.active')

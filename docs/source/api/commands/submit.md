@@ -48,9 +48,9 @@ Option | Default | Description
 
 # Example
 
-## Submit a form
+## No Args
 
-**Submit can only be called on a single form.**
+***Submit can only be called on a single form.***
 
 ```html
 <form id="contact">
@@ -62,6 +62,20 @@ Option | Default | Description
 ```javascript
 cy.get('#contact').submit()
 ```
+
+# Notes
+
+## Actionability
+
+***Submit is not an action command***
+
+`.submit()` is not implemented like other action commands, and does not follow the same rules of {% url 'waiting for actionability' interacting-with-elements %}.
+
+`.submit()` is just a helpful command which is a simple shortcut. Normally a user has to perform a different "action" to submit a form. It could be clicking a submit `<button>`, or pressing `enter` on a keyboard.
+
+Oftentimes its must simpler and conveys what you're trying to test by just using `.submit()` directly.
+
+If you want the other guarantees of waiting for an element to become actionable, you should use a different command like {% url `.click()` click %} or {% url `.type()` type %}.
 
 # Rules
 
@@ -79,7 +93,7 @@ cy.get('#contact').submit()
 
 # Command Log
 
-**Submit a form**
+***Submit a form***
 
 ```javascript
 cy.route('POST', '/users', 'fixture:user').as('userSuccess')

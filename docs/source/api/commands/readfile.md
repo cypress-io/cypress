@@ -61,66 +61,67 @@ Option | Default | Description
 
 ## Text
 
-**Read a `txt` file**
+***Read a `txt` file***
 
 For any file other than JSON, the contents of the file are returned.
 
-***message.txt***
 ```text
+// path/to/message.txt
+
 Hello World
 ```
 
-***test file***
 ```javascript
-cy.readFile('path/to/message.txt').then(function (text) {
-  expect(text).to.equal('Hello World')   // true
-})
+cy.readFile('path/to/message.txt').should('eq', 'Hello World') // true
 ```
 
 ## JSON
 
 For JSON, the contents yielded are parsed into JavaScript and returned.
 
-***Data.json***
+```javascript
+// data.json
 
-```json
 {
   "name": "Eliza",
   "email": "eliza@example.com"
 }
 ```
 
-***test file***
 ```javascript
-cy.readFile('path/to/data.json').then(function (user) {
-  expect(user.name).to.equal('Eliza') // true
-})
+cy.readFile('path/to/data.json').its('name').should('eq', 'Eliza') // true
 ```
 
 ## YAML
 
-**Get translation data from Yaml file**
+***Get translation data from Yaml file***
 
 ```javascript
-YAML = require('yamljs')
+const YAML = require('yamljs')
 
-cy.readFile("languages/en.yml").then(function (yamlString) {
-  this.english = YAML.parse(yamlString)
-})
+cy
+  .readFile("languages/en.yml")
+  .then((str) => {
+    // parse the string into object literal
+    const english = YAML.parse(str)
 
-cy.get("#sidebar").find(".sidebar-title")
-  .each(function (displayedTitle, i) {
-    englishTitle = this.english.sidebar[@sidebarTitles[i]]
-    expect(displayedTitle.text()).to.eq(englishTitle)
+    cy
+      .get("#sidebar")
+      .find(".sidebar-title")
+      .each(($el, i) => {
+        englishTitle = english.sidebar[i]
+
+        expect($el.text()).to.eq(englishTitle)
+      })
   })
 ```
 
 ## Encoding
 
-**Specify the encoding with the second argument.**
+***Specify the encoding with the second argument.***
 
 ```javascript
-cy.readFile('path/to/logo.png', 'base64').then(function (logo) {
+cy.readFile('path/to/logo.png', 'base64').then((logo) => {
   // logo will be encoded as base64
   // and should look something like this:
   // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==...
@@ -129,7 +130,9 @@ cy.readFile('path/to/logo.png', 'base64').then(function (logo) {
 
 # Notes
 
-**Default Assertions: file existence**
+## Existence
+
+***Default Assertions: file existence***
 
 By default, `cy.readFile()` asserts that the file exists and will fail if it does not exist. It will retry reading the file if it does not initially exist until the file exists or the command times out.
 
@@ -138,7 +141,7 @@ By default, `cy.readFile()` asserts that the file exists and will fail if it doe
 cy.readFile('does-not-exist.yaml')
 ```
 
-**Asserting file non-existence**
+***Asserting file non-existence***
 
 You can assert that a file does not exist like so:
 
@@ -147,7 +150,9 @@ You can assert that a file does not exist like so:
 cy.readFile('does-not-exist.yaml').should('not.exist')
 ```
 
-**Automatic Retries**
+## Retries
+
+***Automatic Retries***
 
 `cy.readFile()` will continue to read the file until it passes all of its assertions.
 
@@ -173,7 +178,7 @@ cy.readFile('some/nested/path/story.txt').should('eq', 'Once upon a time...')
 
 # Command Log
 
-**List the contents of cypress.json**
+***List the contents of cypress.json***
 
 ```javascript
 cy.readFile('cypress.json')

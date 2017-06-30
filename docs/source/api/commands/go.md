@@ -44,15 +44,15 @@ Option | Default | Description
 
 # Examples
 
-## Back / Forward
+## Direction
 
-**Go back in browser's history**
+***Go back in browser's history***
 
 ```javascript
 cy.go('back')   // equivalent to clicking back button
 ```
 
-**Go forward in browser's history**
+***Go forward in browser's history***
 
 ```javascript
 cy.go('forward') // equivalent to clicking forward button
@@ -60,13 +60,13 @@ cy.go('forward') // equivalent to clicking forward button
 
 ## Number
 
-**Go back in browser's history**
+***Go back in browser's history***
 
 ```javascript
 cy.go(-1)       // equivalent to clicking back button
 ```
 
-**Go forward in browser's history**
+***Go forward in browser's history***
 
 ```javascript
 cy.go(1)        // equivalent to clicking forward button
@@ -74,9 +74,11 @@ cy.go(1)        // equivalent to clicking forward button
 
 # Notes
 
-**Refreshing and loading the page**
+***Refreshing and loading the page***
 
-If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
+If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands.
+
+Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
 
 # Rules
 
@@ -94,7 +96,7 @@ If going forward or back causes a full page refresh, Cypress will wait for the n
 
 # Command Log
 
-**Go back in browser's history**
+***Go back in browser's history***
 
 ```javascript
 cy

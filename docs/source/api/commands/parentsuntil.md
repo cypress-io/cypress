@@ -62,7 +62,7 @@ Option | Default | Description
 
 ## Selector
 
-**Find all of the `.active` element's ancestors until `.nav`**
+***Find all of the `.active` element's ancestors until `.nav`***
 
 ```html
 <ul class="nav">
@@ -101,7 +101,7 @@ cy.get('.active').parentsUntil('.nav')
 
 # Command Log
 
-**Find all of the `active` element's ancestors until `.nav`**
+***Find all of the `active` element's ancestors until `.nav`***
 
 ```javascript
 cy.get('.active').parentsUntil('.nav')

@@ -47,9 +47,9 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 
 # Examples
 
-## Visit
+## Url
 
-**Visit a local server running on `http://localhost:8000`**
+***Visit a local server running on `http://localhost:8000`***
 
 `cy.visit()` resolves when the remote page fires its `load` event.
 
@@ -57,50 +57,16 @@ You can also set all `cy.visit()` commands' `pageLoadTimeout` and `baseUrl` glob
 cy.visit('http://localhost:8000')
 ```
 
-**Protocol can be omitted from common hosts**
-
-Cypress automatically prepends the `http://` protocol to common hosts.  If you're not using one of these 3 hosts, then make sure to provide the protocol.
-
-```javascript
-cy.visit('localhost:3000') // Visits http://localhost:3000
-cy.visit('0.0.0.0:3000')   // Visits http://0.0.0.0:3000
-cy.visit('127.0.0.1:3000') // Visits http://127.0.0.1:3000
-```
-
-**Cypress can optionally act as your web server**
-
-Cypress will automatically attempt to serve your files if you don't provide a host. The path should be relative to your project's root folder (where `cypress.json` is located).
-
-Having Cypress serve your files is useful in simple projects and example apps, but isn't recommended for real apps.  It is always better to run your own server and provide the url to Cypress.
-
-```javascript
-cy.visit('app/index.html')
-```
-
-**Visit is automatically prefixed with `baseUrl`.**
-
-Configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit()` command. Read more about {% url 'configuration' configuration %}.
-
-```json
-{
-  "baseUrl": "http://localhost:3000/#/"
-}
-```
-
-```javascript
-cy.visit('dashboard') // Visits http://localhost:3000/#/dashboard
-```
-
 ## Options
 
-**Change the default timeout**
+***Change the default timeout***
 
 ```javascript
 // Wait 30 seconds for page 'load' event
 cy.visit('/index.html', { timeout: 30000 })
 ```
 
-**Provide an `onBeforeLoad` callback function**
+***Provide an `onBeforeLoad` callback function***
 
 `onBeforeLoad` is called as soon as possible, before your page has loaded all of its resources. Your scripts will not be ready at this point, but it's a great hook to potentially manipulate the page.
 
@@ -112,7 +78,7 @@ cy.visit('http://localhost:3000/#dashboard', {
 })
 ```
 
-**Using onBeforeLoad**
+***Using onBeforeLoad***
 
 {% note info %}
 Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to:
@@ -121,7 +87,7 @@ Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to:
   - {% url 'Stub `window.fetch`' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
-**Provide an `onLoad` callback function**
+***Provide an `onLoad` callback function***
 
 `onLoad` is called once your page has fires its `load` event. All of the scripts, stylesheets, html and other resources are guaranteed to be available at this point.
 
@@ -138,15 +104,9 @@ cy.visit('http://localhost:3000/#/users', {
 
 # Notes
 
-**Visit will always yield the remote page's window object when it resolves**
+## Redirects
 
-```javascript
-cy.visit('index.html').then(function(contentWindow)){
-  // contentWindow is the remote page's window object
-})
-```
-
-**Visit will automatically follow redirects**
+***Visit will automatically follow redirects***
 
 ```javascript
 // we aren't logged in, so our webserver
@@ -155,7 +115,59 @@ cy.visit('http://localhost3000/admin')
 cy.url().should('match', /login/)
 ```
 
-**Preventing XHR / AJAX requests before a remote page initially loads**
+## Protocol
+
+***Protocol can be omitted from common hosts***
+
+Cypress automatically prepends the `http://` protocol to common hosts.  If you're not using one of these 3 hosts, then make sure to provide the protocol.
+
+```javascript
+cy.visit('localhost:3000') // Visits http://localhost:3000
+cy.visit('0.0.0.0:3000')   // Visits http://0.0.0.0:3000
+cy.visit('127.0.0.1:3000') // Visits http://127.0.0.1:3000
+```
+
+## Web Server
+
+***Cypress can optionally act as your web server***
+
+Cypress will automatically attempt to serve your files if you don't provide a host. The path should be relative to your project's root folder (where `cypress.json` is located).
+
+Having Cypress serve your files is useful in simple projects and example apps, but isn't recommended for real apps.  It is always better to run your own server and provide the url to Cypress.
+
+```javascript
+cy.visit('app/index.html')
+```
+
+## Prefixes
+
+***Visit is automatically prefixed with `baseUrl`.***
+
+Configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit()` command. Read more about {% url 'configuration' configuration %}.
+
+```json
+{
+  "baseUrl": "http://localhost:3000/#/"
+}
+```
+
+```javascript
+cy.visit('dashboard') // Visits http://localhost:3000/#/dashboard
+```
+
+## Window
+
+***Visit will always yield the remote page's window object when it resolves***
+
+```javascript
+cy.visit('index.html').then(function(contentWindow)){
+  // contentWindow is the remote page's window object
+})
+```
+
+## Routing
+
+***Preventing XHR / AJAX requests before a remote page initially loads***
 
 One common scenario Cypress supports is visiting a remote page and also preventing any AJAX requests from immediately going out.
 
@@ -199,7 +211,7 @@ Cypress will automatically apply the server and routes to the very next `cy.visi
 
 # Command Log
 
-**Visit example application in a `beforeEach`**
+***Visit example application in a `beforeEach`***
 
 ```javascript
 beforeEach(function(){

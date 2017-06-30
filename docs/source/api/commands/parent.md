@@ -50,9 +50,9 @@ Option | Default | Description
 
 # Examples
 
-## Parent
+## No Args
 
-**Get the parent of the active li**
+***Get the parent of the active li***
 
 ```javascript
 cy.get('li.active').parent()
@@ -60,7 +60,7 @@ cy.get('li.active').parent()
 
 ## Selector
 
-**Get the parent with class `nav` of the active li**
+***Get the parent with class `nav` of the active li***
 
 ```javascript
 cy.get('li.active').parent('.nav')
@@ -82,7 +82,7 @@ cy.get('li.active').parent('.nav')
 
 # Command Log
 
-**Assert on the parent of the active li**
+***Assert on the parent of the active li***
 
 ```javascript
 cy.get('li.active').parent().should('have.class', 'nav')

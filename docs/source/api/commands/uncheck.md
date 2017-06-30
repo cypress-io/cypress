@@ -57,15 +57,15 @@ Option | Default | Description
 
 # Examples
 
-## Uncheck
+## No Args
 
-**Uncheck all checkboxes**
+***Uncheck all checkboxes***
 
 ```javascript
 cy.get(':checkbox').uncheck()
 ```
 
-**Uncheck element with the id 'saveUserName'**
+***Uncheck element with the id 'saveUserName'***
 
 ```javascript
 cy.get('#saveUserName').uncheck()
@@ -73,7 +73,7 @@ cy.get('#saveUserName').uncheck()
 
 ## Value
 
-**Uncheck the checkbox with the value of 'ga'**
+***Uncheck the checkbox with the value of 'ga'***
 
 ```javascript
 cy.get('input[type="checkbox"]').uncheck(['ga'])
@@ -81,13 +81,21 @@ cy.get('input[type="checkbox"]').uncheck(['ga'])
 
 ## Values
 
-**Uncheck the checkboxes with the values 'ga' and 'ca'**
+***Uncheck the checkboxes with the values 'ga' and 'ca'***
 
 ```javascript
 cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])
 ```
 
 # Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.uncheck()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+# Rules
 
 ## Requirements {% helper_icon requirements %}
 
@@ -103,7 +111,7 @@ cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])
 
 # Command Log
 
-**Uncheck the first checkbox**
+***Uncheck the first checkbox***
 
 ```javascript
 cy

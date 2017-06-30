@@ -64,7 +64,7 @@ cy.contains('User: Charles').click()  // contains looks for content in document 
 
 # Command Log
 
-**`.end()` does *not* log in the command log**
+- `.end()` does *not* log in the command log
 
 # See also
 

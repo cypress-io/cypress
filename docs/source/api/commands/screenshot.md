@@ -47,9 +47,9 @@ The screenshot will be stored in the `cypress/screenshots` folder by default.
 
 You can change the directory where screenshots are saved in your {% url 'configuration' configuration#Folders %}.
 
-## Screenshot
+## No Args
 
-**Take a screenshot**
+***Take a screenshot***
 
 ```javascript
 describe('my tests', function(){
@@ -61,7 +61,7 @@ describe('my tests', function(){
 
 ## Filename
 
-**Take a screenshot and save as specific filename**
+***Take a screenshot and save as specific filename***
 
 ```javascript
 // screenshot will be saved as
@@ -71,11 +71,15 @@ cy.screenshot('clickingOnNav')
 
 # Notes
 
-**Automatic screenshots on test failure**
+## Test Failures
+
+***Automatic screenshots on test failure***
 
 When running headlessly or in {% url 'Continuous Integration' continuous-integration %}, Cypress automatically takes a screenshot when a test fails. You can optionally turn this off by setting `screenshotOnHeadlessFailure` to `false` in your {% url 'configuration' configuration %}.
 
-**Screenshots in CI**
+## Viewing Screenshots
+
+***Screenshots in CI***
 
 You can see screenshots taken during a CI run in the {% url 'Dashboard' https://on.cypress.io/dashboard %} without any extra work.
 
@@ -83,11 +87,17 @@ Alternatively, to see screenshots in the {% url 'Circle CI' https://circleci.com
 
 If you're using Travis, you'll need to upload artifacts to an s3 bucket as per their {% url 'uploading artifacts doc' https://docs.travis-ci.com/user/uploading-artifacts/ %} to see screenshots outside of the Cypress Dashboard.
 
-**Understanding when a screenshot happens**
+## Asynchronous
+
+***Understanding when a screenshot happens***
 
 Taking a screenshot is an asynchronous action that takes around `100ms` to complete. By the time the screenshot is taken, it's possible something in your application may have changed. It's important to realize that the screenshot may not reflect 100% of what your application looked like when the command was issued.
 
-For example - say a command we wrote times outs: {% url '`cy.get('#element')`' get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
+For example - say a command we wrote times out: {% url '`cy.get('#element')`' get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
+
+Another potential problem to be aware of is that our own Reporter's UI is using `react` under the hood and thus renders asynchronously. It's possible you can see screenshots of errors before the renderer has updated and displayed the error. This is also why we take a video - to show you the complete failure.
+
+It's possible for us to synchronize taking a screenshot with our renderer, but it may be the screenshot is delayed and thus may not accurately reflect what your application looked like when the failure occurred.
 
 # Rules
 
@@ -105,7 +115,7 @@ For example - say a command we wrote times outs: {% url '`cy.get('#element')`' g
 
 # Command Log
 
-**Take a screenshot with a specific filename**
+***Take a screenshot with a specific filename***
 
 ```javascript
 cy.screenshot('my-image')

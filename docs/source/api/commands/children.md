@@ -50,42 +50,43 @@ Option | Default | Description
 
 # Examples
 
-## Children
+## No Args
 
-**Get the children of the "secondary-nav"**
+***Get the children of the "secondary-nav"***
 
 ```html
-<ul class="primary-nav">
-  <li class="about">About</li>
-  <li class="services">Services
+<ul>
+  <li>About</li>
+  <li>Services
     <ul class="secondary-nav">
       <li class="services-1">Web Design</li>
-      <li class="services-2">Print Design
+      <li class="services-2">Logo Design</li>
+      <li class="services-3">
+        Print Design
         <ul class="tertiary-nav">
-          <li class="item-1">Signage</li>
-          <li class="item-2">T-Shirt</li>
-          <li class="item-3">Business Cards</li>
+          <li>Signage</li>
+          <li>T-Shirt</li>
+          <li>Business Cards</li>
         </ul>
       </li>
-      <li class="services-3">Logo Design</li>
     </ul>
   </li>
-  <li class="Contact">Contact</li>
+  <li>Contact</li>
 </ul>
 ```
 
 ```javascript
 // yields [
-//  <li class="services-1"></li>,
-//  <li class="services-2"></li>,
-//  <li class="services-3"></li>
+//  <li class="services-1">Web Design</li>,
+//  <li class="services-2">Logo Design</li>,
+//  <li class="services-3">Print Design</li>
 // ]
 cy.get('ul.secondary-nav').children()
 ```
 
 ## Selector
 
-**Get the children with class 'active'**
+***Get the children with class 'active'***
 
 ```html
 <div>
@@ -97,7 +98,9 @@ cy.get('ul.secondary-nav').children()
 ```
 
 ```javascript
-// yields [<li class="active">Unit Testing</li>]
+// yields [
+//  <li class="active">Unit Testing</li>
+// ]
 cy.get('ul').children('.active')
 ```
 

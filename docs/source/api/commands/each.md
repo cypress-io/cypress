@@ -46,7 +46,7 @@ Pass a function that is invoked with the following arguments:
 
 ## DOM Elements
 
-**Iterate over an array of DOM elements**
+***Iterate over an array of DOM elements***
 
 ```javascript
 cy
@@ -63,7 +63,7 @@ cy
   })
 ```
 
-**The original array is always yielded**
+***The original array is always yielded***
 
 No matter what is returned in the callback function, `.each()` will always yield the original array.
 
@@ -80,7 +80,7 @@ cy
 
 ## Promises
 
-**Promises are awaited**
+***Promises are awaited***
 
 If your callback function returns a `Promise`, it will be awaited before iterating over the next element in the collection.
 
@@ -96,7 +96,9 @@ cy.wrap([1,2,3]).each(function(num, i, array){
 
 # Notes
 
-**Stop `each` prematurely**
+## Return early
+
+***Stop `each` prematurely***
 
 You can stop the `.each()` loop early by returning `false` in the callback function.
 
@@ -116,7 +118,7 @@ You can stop the `.each()` loop early by returning `false` in the callback funct
 
 # Command Log
 
-**`cy.each()` does *not* log in the command log**
+- `cy.each()` does *not* log in the command log
 
 # See also
 

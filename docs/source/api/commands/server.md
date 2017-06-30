@@ -63,9 +63,9 @@ Option | Default | Description
 
 # Examples
 
-## Start Server
+## No Args
 
-**After starting a server:**
+***After starting a server:***
 
 - Any request that does not match a {% url `cy.route()` route %} will be sent a `404` status code.
 - Any request that matches the `options.whitelist` function will **NOT** be logged or stubbed. In other words it is "whitelisted" and ignored.
@@ -77,7 +77,7 @@ cy.server()
 
 ## Options
 
-**Change defaults for {% url `cy.route()` route %}**
+***Change defaults for {% url `cy.route()` route %}***
 
 By default {% url `cy.route()` route %} inherits some of its options from `cy.server()`.
 
@@ -94,7 +94,7 @@ cy.server({
 cy.route('/users/', {errors: 'Name cannot be blank'})
 ```
 
-**Change the default delay for all routes**
+***Change the default delay for all routes***
 
 Adding delay can help simulate real world network latency. Normally stubbed responses return in under 20ms. Adding a delay can help you visualize how your application's state reacts to requests that are in flight.
 
@@ -103,7 +103,7 @@ Adding delay can help simulate real world network latency. Normally stubbed resp
 cy.server({delay: 1500})
 ```
 
-**Prevent sending 404's to unmatched requests**
+***Prevent sending 404's to unmatched requests***
 
 If you'd like Cypress to automatically send requests that do *NOT* match routes the following:
 
@@ -129,7 +129,7 @@ $(function(){
 })
 ```
 
-**Change the default response headers for all routes**
+***Change the default response headers for all routes***
 
 When you stub requests, you can automatically control their response `headers`. This is useful when you want to send back meta data in the `headers`, such as *pagination* or *token* information.
 
@@ -165,7 +165,7 @@ xhr.onload = function(){
 xhr.send()
 ```
 
-**Change the default whitelisting**
+***Change the default whitelisting***
 
 `cy.server()` comes with a `whitelist` function that by default filters out any requests that are for static assets like `.html`, `.js`, `.jsx`, and `.css`.
 
@@ -173,7 +173,7 @@ Any request that passes the `whitelist` will be ignored - it will not be logged 
 
 The idea is that we never want to interfere with static assets that are fetched via AJAX.
 
-***The default whitelist function in Cypress is:***
+**The default whitelist function in Cypress is:**
 
 ```javascript
 var whitelist = function(xhr){
@@ -183,7 +183,7 @@ var whitelist = function(xhr){
 }
 ```
 
-***You can override this function with your own specific logic:***
+**You can override this function with your own specific logic:**
 
 ```javascript
 cy.server({
@@ -197,7 +197,7 @@ cy.server({
 
 If you would like to change the default option for **ALL** `cy.server()` you [can change this option permanently](#permanently-override-default-server-options).
 
-**Turn off the server after you've started it**
+***Turn off the server after you've started it***
 
 You can disable all stubbing and its effects and restore it to the default behavior as a test is running. By setting `enable` to `false`, this disables stubbing routes and XHR's will no longer show up as (XHR Stub) in the Command Log. However, routing aliases can continue to be used and will continue to match requests, but will not affect responses.
 
@@ -209,17 +209,17 @@ cy.server({enable: false})
 
 # Notes
 
-**Server persists until the next test runs**
+***Server persists until the next test runs***
 
 Cypress automatically continues to persist the server and routing configuration even after a test ends. This means you can continue to use your application and still benefit from stubbing or other server configuration.
 
 However between tests, when a new test runs, the previous configuration is restored to a clean state. No configuration leaks between tests.
 
-**Outstanding requests are automatically aborted between tests**
+***Outstanding requests are automatically aborted between tests***
 
 When a new test runs, any outstanding requests still in flight are automatically aborted. In fact this happens by default whether or not you've even started a `cy.server()`.
 
-**Server can be started before you {% url `cy.visit()` visit %}**
+***Server can be started before you {% url `cy.visit()` visit %}***
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a {% url `cy.visit()` visit %}. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
@@ -241,7 +241,7 @@ You can {% url 'read more about XHR strategy here' network-requests %}.
 
 # Command Log
 
-**`cy.server()` does *not* log in the command log**
+- `cy.server()` does *not* log in the command log
 
 # See also
 

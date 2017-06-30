@@ -62,21 +62,21 @@ Option | Default | Description
 
 # Examples
 
-## Check
+## No Args
 
-**Check all checkboxes**
+***Check all checkboxes***
 
 ```javascript
 cy.get('[type="checkbox"]').check()
 ```
 
-**Check all radios**
+***Check all radios***
 
 ```javascript
 cy.get('[type="radio"]').check()
 ```
 
-**Check the element with id of 'saveUserName'**
+***Check the element with id of 'saveUserName'***
 
 ```javascript
 cy.get('#saveUserName').check()
@@ -84,7 +84,7 @@ cy.get('#saveUserName').check()
 
 ## Value
 
-**Select the radio with the value of 'US'**
+***Select the radio with the value of 'US'***
 
 ```javascript
 cy.get('[type="radio"]').check('US')
@@ -92,7 +92,7 @@ cy.get('[type="radio"]').check('US')
 
 ## Values
 
-**Check the checkboxes with the values 'ga' and 'ca'**
+***Check the checkboxes with the values 'ga' and 'ca'***
 
 ```javascript
 cy.get('[type="checkbox"]').check(['ga', 'ca'])
@@ -100,7 +100,7 @@ cy.get('[type="checkbox"]').check(['ga', 'ca'])
 
 ## Options
 
-**Check an invisible checkbox**
+***Check an invisible checkbox***
 
 You can ignore Cypress' default behavior of checking that the element is visible, clickable and not disabled by setting `force` to `true` in the options.
 
@@ -108,6 +108,14 @@ You can ignore Cypress' default behavior of checking that the element is visible
 cy.get('.action-checkboxes').should('not.be.visible') // Passes
   .check({ force: true }).should('be.checked')        // Passes
 ```
+
+# Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.check()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
 
 # Rules
 

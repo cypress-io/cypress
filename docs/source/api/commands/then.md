@@ -17,8 +17,8 @@ Enables you to work with the subject yielded from the previous command.
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.get('.nav').then(function($nav) {})  // Yields .nav as first arg
-cy.location().then(function(loc) {})   // Yields location object as first arg
+cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+cy.location().then((loc) => {})   // Yields location object as first arg
 ```
 
 ## Arguments
@@ -45,40 +45,40 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 
 # Examples
 
-## Work with DOM element
+## DOM element
 
-**The element `input` is yielded**
+***The element `input` is yielded***
 
 ```javascript
-cy.get('form').find('input').then(function($input){
+cy.get('form').find('input').then(($input) => {
   // work with $input here
 })
 ```
 
 ## Change subject
 
-**The subject is changed by returning**
+***The subject is changed by returning***
 
 ```javascript
-cy.then(function(){
+cy.then(() => {
   return {id: 123}
 })
-.then(function(obj){
+.then((obj) =>{
   // subject is now the obj {id: 123}
   expect(obj.id).to.eq(123) // true
 })
 ```
 
-**Returning `null` or `undefined` will not modify the yielded subject**
+***Returning `null` or `undefined` will not modify the yielded subject***
 
 ```javascript
 cy
-  .get('form').then(function($form){
+  .get('form').then(($form) => {
     console.log('form is:', $form)
     // undefined is returned here, but $form will be
     // yielded to allow for continued chaining
   })
-  .find('input').then(function($input){
+  .find('input').then(($input) =>{
     // we have our $input element here since
     // our form element was yielded and we called
     // .find('input') on it
@@ -87,15 +87,15 @@ cy
 
 ## Promises
 
-**Cypress waits for the Promise to resolve before continuing**
+Cypress waits for Promises to resolve before continuing
 
 ***Example using Q***
 
 ```javascript
-cy.get('button').click().then(function($button){
+cy.get('button').click().then(($button) => {
   var p = Q.defer()
 
-  setTimeout(function(){
+  setTimeout(() => {
     p.resolve()
   }, 1000)
 
@@ -106,7 +106,7 @@ cy.get('button').click().then(function($button){
 ***Example using bluebird***
 
 ```javascript
-cy.get('button').click().then(function($button){
+cy.get('button').click().then(($button) => {
   return Promise.delay(1000)
 })
 ```
@@ -114,10 +114,10 @@ cy.get('button').click().then(function($button){
 ***Example using jQuery deferred's***
 
 ```javascript
-cy.get('button').click().then(function($button){
+cy.get('button').click().then(($button) => {
   var df = $.Deferred()
 
-  setTimeout(function(){
+  setTimeout(() => {
     df.resolve()
   }, 1000)
 
@@ -145,7 +145,7 @@ cy.get('button').click().then(function($button){
 
 # Command Log
 
-**`cy.then()` does *not* log in the command log**
+- `cy.then()` does *not* log in the command log
 
 # See also
 

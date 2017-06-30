@@ -64,6 +64,8 @@ cy.wait('@userPut')
 
 # Notes
 
+## Reserved Words
+
 ***Alias names cannot match some reserved words.***
 
 Some strings are not allowed as alias names since they are reserved words in Cypress. These words include: `test`, `runnable`, `timeout`, `slow`, `skip`, and `inspect`.
@@ -84,7 +86,7 @@ Some strings are not allowed as alias names since they are reserved words in Cyp
 
 # Command Log
 
-**Alias several routes**
+***Alias several routes***
 
 ```javascript
 cy.route(/company/, 'fixture:company').as('companyGet')

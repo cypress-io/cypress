@@ -63,7 +63,7 @@ Option | Default | Description
 
 ## Selector
 
-**Find all of the element's siblings following `#veggies` until `#nuts`**
+***Find all of the element's siblings following `#veggies` until `#nuts`***
 
 ```html
 <ul>
@@ -103,7 +103,7 @@ cy.get('#veggies').nextUntil('#nuts')
 
 # Command Log
 
-**Find all of the element's siblings following `#veggies` until `#nuts`**
+***Find all of the element's siblings following `#veggies` until `#nuts`***
 
 ```javascript
 cy.get('#veggies').nextUntil('#nuts')

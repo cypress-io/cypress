@@ -48,9 +48,9 @@ Option | Default | Description
 
 # Examples
 
-## Closest
+## No Args
 
-**Find the closest element of the 'error' with the class 'banner'**
+***Find the closest element of the 'error' with the class 'banner'***
 
 ```javascript
 cy.get('p.error').closest('.banner')
@@ -72,7 +72,7 @@ cy.get('p.error').closest('.banner')
 
 # Command Log
 
-**Find the closest element of 'active li' with the class 'nav'**
+***Find the closest element of 'active li' with the class 'nav'***
 
 ```javascript
 cy.get('li.active').closest('.nav')

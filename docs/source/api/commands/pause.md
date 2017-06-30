@@ -41,7 +41,7 @@ Option | Default | Description
 
 # Examples
 
-## Pause
+## No Args
 
 **Pause after assertion**
 

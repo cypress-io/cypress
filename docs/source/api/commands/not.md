@@ -54,7 +54,7 @@ Option | Default | Description
 
 ## Selector
 
-**Yield the elements that do not have class `active`.**
+***Yield the elements that do not have class `active`.***
 
 ```javascript
 cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
@@ -76,7 +76,7 @@ cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
 
 # Command Log
 
-**Find all buttons that are not of type submit**
+***Find all buttons that are not of type submit***
 
 ```javascript
 cy.get('form').find('button').not('[type="submit"]')

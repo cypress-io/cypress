@@ -39,26 +39,26 @@ Option | Default | Description
 
 ## Yields {% helper_icon yields %}
 
-**When the current URL contains a hash:**
+***When the current URL contains a hash:***
 
 {% yields sets_subject cy.hash "yields the current URL's hash (including the `#` character)" %}
 
-**When the current URL does not contain a hash:**
+***When the current URL does not contain a hash:***
 
 {% yields sets_subject cy.hash "yields an empty string" %}
 
 # Examples
 
-## Hash
+## No Args
 
-**Assert that hash is `#/users/1` given remote URL: `http://localhost:8000/app/#/users/1`**
+***Assert that hash is `#/users/1` given remote URL: `http://localhost:8000/app/#/users/1`***
 
 ```javascript
 // yields #/users/1
 cy.hash().should('eq', '#/users/1') // => true
 ```
 
-**Assert that the hash matches via RegExp**
+***Assert that the hash matches via RegExp***
 
 ```html
 <ul id="users">
@@ -89,7 +89,7 @@ cy.hash().should('match', /users\/.+$/) // => true
 
 # Command Log
 
-**Assert that the hash matches `#users/new`**
+***Assert that the hash matches `#users/new`***
 
 ```javascript
 cy.hash().should('eq', '#users/new')

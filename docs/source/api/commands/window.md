@@ -37,9 +37,9 @@ Option | Default | Description
 
 # Examples
 
-## Window
+## No Args
 
-**Returns the remote window object**
+***Yields the remote window object***
 
 ```javascript
 cy.visit('http://localhost:8080/app')
@@ -51,7 +51,7 @@ cy.window().then(function(win){
 
 ## Options
 
-**Passes timeout through to {% url `.should()` should %} assertion**
+***Passes timeout through to {% url `.should()` should %} assertion***
 
 ```javascript
 cy.window({ timeout: 10000 }).should('have.property', 'foo')
@@ -73,7 +73,7 @@ cy.window({ timeout: 10000 }).should('have.property', 'foo')
 
 # Command Log
 
-**Get the window**
+***Get the window***
 
 ```javascript
 cy.window()

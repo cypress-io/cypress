@@ -44,18 +44,18 @@ The root element yielded is `<html>` by default. However, when calling `.root()`
 
 ## HTML
 
-**Get the root element**
+***Get the root element***
 
 ```javascript
 cy.root() // yields <html>
 ```
 
-## Root in {% url `.within()` within %}
+## Within
 
-**Get the root element in a `.within()` callback function**
+***Get the root element in a {% url `.within()` within %} callback function***
 
 ```javascript
-cy.get('form').within(function ($form) {
+cy.get('form').within(($form) => {
   cy.get('input[name="email"]').type('john.doe@email.com')
   cy.get('input[name="password"]').type('password')
   cy.root().submit() // submits the form yielded from 'within'
@@ -78,7 +78,7 @@ cy.get('form').within(function ($form) {
 
 # Command Log
 
-**Get root element**
+***Get root element***
 
 ```javascript
 cy.root().should('match', 'html')

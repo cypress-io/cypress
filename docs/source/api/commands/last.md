@@ -44,9 +44,9 @@ Option | Default | Description
 
 # Examples
 
-## Last element
+## No Args
 
-**Get the last list item in a list.**
+***Get the last list item in a list.***
 
 ```html
 <ul>
@@ -78,7 +78,7 @@ cy.get('li').last()
 
 # Command Log
 
-**Find the last button in the form**
+***Find the last button in the form***
 
 ```javascript
 cy.get('form').find('button').last()

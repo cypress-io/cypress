@@ -50,9 +50,9 @@ Option | Default | Description
 
 # Examples
 
-## All Next
+## No Args
 
-**Find all of the element's siblings following `.second`**
+***Find all of the element's siblings following `.second`***
 
 ```html
 <ul>
@@ -71,7 +71,7 @@ cy.get('.second').nextAll()
 
 ## Selector
 
-**Find all of the following siblings of each li. Keep only the ones with a class `selected`.**
+***Find all of the following siblings of each li. Keep only the ones with a class `selected`.***
 
 ```html
 <ul>
@@ -104,7 +104,7 @@ cy.get('li').nextAll('.selected')
 
 # Command Log
 
-**Find all elements following the `.active` li**
+***Find all elements following the `.active` li***
 
 ```javascript
 cy.get('.left-nav').find('li.active').nextAll()

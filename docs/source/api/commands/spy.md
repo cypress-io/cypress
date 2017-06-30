@@ -41,9 +41,9 @@ Unlike most Cypress commands, `cy.spy()` is *synchronous* and returns a value (t
 
 # Examples
 
-## Spy
+## Method
 
-**Wrap a method with a spy**
+***Wrap a method with a spy***
 
 ```javascript
 // assume App.start calls util.addListeners
@@ -52,13 +52,13 @@ App.start()
 expect(util.addListeners).to.be.called
 ```
 
-**Using `cy.spy()`**
+***Using `cy.spy()`***
 
 {% note info %}
 {% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
-## Alias a spy
+## Aliases
 
 Adding an alias using {% url `.as()` as %} to spies makes them easier to identify in error messages and Cypress' command log.
 
@@ -79,15 +79,21 @@ You will see the following in the command log:
 
 # Notes
 
-**Automatic reset/restore between tests**
+## Restores
+
+***Automatic reset/restore between tests***
 
 `cy.spy()` creates spies in a [sandbox](http://sinonjs.org/docs/#sandbox), so all spies created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
-**Difference between cy.spy() and cy.stub()**
+## Differences
+
+***Difference between cy.spy() and cy.stub()***
 
 The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `cy.spy()` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
 
-**Assertion Support**
+## Assertions
+
+***Assertion Support***
 
 Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} support, so any {% url "assertions supported by `sinon-chai`" assertions#Sinon-Chai %} can be used without any configuration.
 
@@ -107,7 +113,7 @@ Cypress has also built-in {% url "sinon-chai" bundled-tools#Sinon-Chai %} suppor
 
 # Command Log
 
-**Create a spy, alias it, and call it**
+***Create a spy, alias it, and call it***
 
 ```javascript
 const obj = {

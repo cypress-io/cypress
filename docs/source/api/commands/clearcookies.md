@@ -41,9 +41,9 @@ Option | Default | Description
 
 # Examples
 
-## Clear Cookies
+## No Args
 
-**Clear all cookies after logging in**
+***Clear all cookies after logging in***
 
 In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies()` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
 
@@ -72,7 +72,7 @@ cy.url().should('include', 'login')
 
 # Command Log
 
-**Clear cookies after getting cookies**
+***Clear cookies after getting cookies***
 
 ```javascript
 cy.getCookies().should('have.length', 1)

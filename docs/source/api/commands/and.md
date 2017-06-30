@@ -82,15 +82,15 @@ cy
 
 ## Chainers
 
-**Chain assertions on the same subject**
+***Chain assertions on the same subject***
 
 ```javascript
 cy.get('button').should('have.class', 'active').and('not.be.disabled')
 ```
 
-## Chainers with Value
+## Value
 
-**Chain assertions when yield changes**
+***Chain assertions when yield changes***
 
 ```html
 <!-- App Code -->
@@ -110,9 +110,9 @@ cy
   .and('not.include', '#')        // yields string value of href
 ```
 
-## Chainers with Method and Value
+## Method and Value
 
-**Assert the href is equal to '/users'**
+***Assert the href is equal to '/users'***
 
 ```javascript
 cy
@@ -123,7 +123,7 @@ cy
 
 ## Function
 
-**Verify length, content, and classes from multiple `<p>`**
+***Verify length, content, and classes from multiple `<p>`***
 
 Passing a function to `.and()` enables you to assert on the yielded subject. This gives you the opportunity to *massage* what you'd like to assert.
 
@@ -153,7 +153,7 @@ cy
     // use jquery's map to grab all of their classes
     // jquery's map returns a new jquery object
     var classes = $p.map(function(i, el){
-      return cy.$(el).attr('class')
+      return Cypress.$(el).attr('class')
     })
 
     // call classes.get() to make this a plain array
@@ -165,24 +165,13 @@ cy
   })
 ```
 
-**Using a callback function will not change what is yielded**
-
-Whatever is returned in the function is ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)
-
-```javascript
-cy
-  .get('button')
-  .should('be.active')
-  .and(function($button){
-    expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
-    return {foo: 'bar'} // return is ignored, .and() yields <button>
-  })
-  .then(function($button){
-    // do anything we want with <button>
-  })
-```
+{% note info %}
+Using a callback function {% urlHash 'will not change the subject' Subjects %}
+{% endnote %}
 
 # Notes
+
+## Chai
 
 ***Similarities to Chai***
 
@@ -196,9 +185,30 @@ expect({foo: 'bar'}).to.have.property('foo').and.eq('bar')
 
 `.and()` reproduces this same assertion behavior.
 
+## Subjects
+
 ***How do I know which assertions change the subject and which keep it the same?***
 
 The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-jQuery' bundled-tools#Chai-jQuery %} will always document what they return.
+
+***Using a callback function will not change what is yielded***
+
+Whenever you use a callback function, its return value is always ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)
+
+```javascript
+cy
+  .get('button')
+  .should('be.active')
+  .and(($button) => {
+    expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
+    return {foo: 'bar'} // return is ignored, .and() yields <button>
+  })
+  .then(($button) => {
+    // do anything we want with <button>
+  })
+```
+
+## Differences
 
 {% partial then_should_difference %}
 
@@ -220,7 +230,7 @@ cy.get('input', {timeout: 10000}).should('have.value', '10').and('have.class', '
 ```
 
 ```javascript
-cy.get('input', {timeout: 10000}).should('have.value', 'US').and(function($input)){
+cy.get('input', {timeout: 10000}).should('have.value', 'US').and(($input) => {
                          ↲
   // timeout here will be passed down to the '.and()'
   // unless an assertion throws earlier,

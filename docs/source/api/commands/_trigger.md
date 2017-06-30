@@ -73,7 +73,7 @@ You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and
 
 ## Mouse Events
 
-**Trigger a `mouseover` on the button**
+***Trigger a `mouseover` on the button***
 
 The DOM element must be in an "interactable" state prior to the triggered event happening (it must be visible and not disabled).
 
@@ -81,7 +81,7 @@ The DOM element must be in an "interactable" state prior to the triggered event 
 cy.get('button').trigger('mouseover') // yields 'button'
 ```
 
-**Drag and Drop**
+***Drag and Drop***
 
 {% note info %}
 {% url 'Check out our example recipe triggering mouse and drag events to test dragging and dropping' drag-and-drop %}
@@ -89,7 +89,7 @@ cy.get('button').trigger('mouseover') // yields 'button'
 
 ## Change Event
 
-**Interact with a range input (slider**)
+***Interact with a range input (slider)***
 
 To interact with a range input (slider), we need to set its value and
 then trigger the appropriate event to signal it has changed.
@@ -108,7 +108,7 @@ cy.get('@range').siblings('p').should('have.text', '25')
 
 ## Position
 
-**Trigger a `mousedown` on the top right of a button**
+***Trigger a `mousedown` on the top right of a button***
 
 ```javascript
 cy.get('button').trigger('mousedown', 'topRight')
@@ -116,7 +116,7 @@ cy.get('button').trigger('mousedown', 'topRight')
 
 ## Coordinates
 
-**Specify explicit coordinates relative to the top left corner**
+***Specify explicit coordinates relative to the top left corner***
 
 ```javascript
 cy.get('button').trigger('contextmenu', 15, 40)
@@ -124,7 +124,7 @@ cy.get('button').trigger('contextmenu', 15, 40)
 
 ## Options
 
-**Specify that the event should not bubble**
+***Specify that the event should not bubble***
 
 By default, the event will bubble up the DOM tree. This will prevent the event from bubbling.
 
@@ -132,7 +132,7 @@ By default, the event will bubble up the DOM tree. This will prevent the event f
 cy.get('button').trigger('mouseover', { bubbles: false })
 ```
 
-**Specify the exact `clientX` and `clientY` the event should have**
+***Specify the exact `clientX` and `clientY` the event should have***
 
 This overrides the default auto-positioning based on the element itself. Useful for events like `mousemove` where you need the position to be outside the element itself.
 
@@ -142,9 +142,37 @@ cy.get('button').trigger('mousemove', {clientX: 200, clientY: 300})
 
 # Notes
 
-**What event should I fire?**
+## Actionability
+
+***The element must first reach actionability***
+
+`.trigger()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+## Events
+
+***What event should I fire?***
 
 `cy.trigger` is meant to be a low-level utility that makes triggering events easier than manually constructing and dispatching them. Since any arbitrary event can be triggered, Cypress tries not to make any assumptions about how it should be triggered. This means you'll need to know the implementation details (which may be in a 3rd party library) of the event handler(s) receiving the event and provide the necessary properties.
+
+## Differences
+
+***What's the difference between triggering and event and calling the corresponding cypress command?***
+
+In other words, what's the difference between:
+
+```javascript
+cy.get('button').trigger('focus')
+cy.get('button').focus()
+
+// ... or ...
+
+cy.get('button').trigger('click')
+cy.get('button').click()
+```
+
+Both types commands will first verify element actionability, but only the "true" action commands will implement all of the default actions of the browser, and perform additional low level actions to fulfill what's defined in the spec.
+
+`.trigger()` essentially will *only* fire the corresponding event and do nothing else.
 
 # Rules
 
@@ -162,7 +190,7 @@ cy.get('button').trigger('mousemove', {clientX: 200, clientY: 300})
 
 # Command Log
 
-**Trigger a `mouseover` event on the first button**
+***Trigger a `mouseover` event on the first button***
 
 ```javascript
 cy.get('button').first().trigger('mouseover')

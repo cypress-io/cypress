@@ -47,9 +47,9 @@ Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (
 
 # Examples
 
-## Stub
+## Method
 
-**Create a stub and manually replace a function**
+***Create a stub and manually replace a function***
 
 ```javascript
 // assume App.start calls util.addListeners
@@ -59,7 +59,7 @@ App.start()
 expect(util.addListeners).to.be.called
 ```
 
-**Replace a method with a stub**
+***Replace a method with a stub***
 
 ```javascript
 // assume App.start calls util.addListeners
@@ -69,7 +69,7 @@ App.start()
 expect(util.addListeners).to.be.called
 ```
 
-**Replace a method with a function**
+***Replace a method with a function***
 
 ```javascript
 // assume App.start calls util.addListeners
@@ -83,7 +83,7 @@ App.start()
 expect(listenersAdded).to.be.true
 ```
 
-**Specify the return value of a stubbed method**
+***Specify the return value of a stubbed method***
 
 ```javascript
 // assume App.start calls util.addListeners, which returns a function
@@ -97,13 +97,13 @@ App.stop()
 expect(removeStub).to.be.called
 ```
 
-**Using cy.stub**
+***Using cy.stub***
 
 {% note info %}
 {% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
-## Alias a stub
+## Aliases
 
 Adding an alias using {% url `.as()` as %} to stubs makes them easier to identify in error messages and Cypress' command log.
 
@@ -125,15 +125,21 @@ You will see the following in the command log:
 
 # Notes
 
-**Automatic reset/restore between tests**
+## Restores
+
+***Automatic reset/restore between tests***
 
 `cy.stub()` creates stubs in a {% url "sandbox" http://sinonjs.org/releases/v2.0.0/sandbox/ %}, so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
-**Difference between cy.spy() and cy.stub()**
+## Differences
+
+***Difference between cy.spy() and cy.stub()***
 
 The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `cy.spy()` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
 
-**Assertion Support**
+## Assertions
+
+***Assertion Support***
 
 Cypress has built-in {% url "sinon-as-promised" https://github.com/bendrucker/sinon-as-promised %} support, so the stubs returned by `cy.stub()` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
 
@@ -153,7 +159,7 @@ Cypress has built-in {% url "sinon-as-promised" https://github.com/bendrucker/si
 
 # Command Log
 
-**Create a stub, alias it, and call it**
+***Create a stub, alias it, and call it***
 
 ```javascript
 const obj = {
