@@ -3,6 +3,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import { render } from 'react-dom'
 import EQ from 'css-element-queries/src/ElementQueries'
 
 import appState from './lib/app-state'
@@ -74,6 +75,12 @@ class Reporter extends Component {
 
   componentDidMount () {
     EQ.init()
+  }
+}
+
+if (window.Cypress) {
+  window.render = (props) => {
+    render(<Reporter {...props} />, document.getElementById('app'))
   }
 }
 

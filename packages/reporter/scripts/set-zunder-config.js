@@ -13,5 +13,8 @@ module.exports = function setZunderConfig (zunder) {
     resolutions: commonScripts,
     scriptName: 'reporter.js',
     stylesheetName: 'reporter.css',
+    staticGlobs: {
+      'node_modules/font-awesome/fonts/**': '/fonts',
+    },
   })
 }
