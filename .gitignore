@@ -28,6 +28,7 @@ packages/example/cypress/fixtures/users.json
 
 # from server
 packages/server/.cy
+packages/server/support
 
 # from docs
 docs/public
@@ -44,4 +45,4 @@ docs/support
 cli/build
 
 # Building app binary
-scripts/deploy/support/
+scripts/binary/support
