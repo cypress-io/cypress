@@ -1,5 +1,5 @@
 _ = require("lodash")
-fs = require("fs-extra")
+fse = require("fs-extra")
 del = require("del")
 path = require("path")
 gulp = require("gulp")
@@ -13,12 +13,13 @@ vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
 electron = require("@packages/electron")
 
+linkPackages = require('../link-packages')
 meta = require("./meta")
 packages = require("./util/packages")
 Darwin = require("./darwin")
 Linux = require("./linux")
 
-fs = Promise.promisifyAll(fs)
+fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
@@ -94,10 +95,16 @@ module.exports = (platform, version, options = {}) ->
 
       fs.outputFileAsync(distDir("index.js"), str)
 
-  symlinkPackages = ->
-    log("#symlinkPackages")
-
-    packages.symlinkAll(distDir("packages", "*", "package.json"), distDir)
+  copyPackageProxies = (destinationFolder) ->
+    () ->
+      log("#copyPackageProxies")
+      dest = destinationFolder("node_modules", "@packages")
+      source = path.join(process.cwd(), "node_modules", "@packages")
+      fs.unlinkAsync(dest).catch(_.noop)
+      .then(() ->
+        console.log("Copying #{source} to #{dest}")
+        fs.copyAsync(source, dest)
+      )
 
   removeTypeScript = ->
     ## remove the .ts files in our packages
@@ -116,23 +123,6 @@ module.exports = (platform, version, options = {}) ->
         pluralize("file", paths.length)
       )
       console.log(paths)
-
-  symlinkBuildPackages = ->
-    log("#symlinkBuildPackages")
-    wildCard = buildAppDir("packages", "*", "package.json")
-    console.log("packages", wildCard)
-    packages.symlinkAll(
-      wildCard,
-      buildAppDir
-    )
-
-  symlinkDistPackages = ->
-    log("#symlinkDistPackages")
-
-    packages.symlinkAll(
-      distDir("packages", "*", "package.json"),
-      distDir
-    )
 
   cleanJs = ->
     log("#cleanJs")
@@ -187,13 +177,12 @@ module.exports = (platform, version, options = {}) ->
   .then(copyPackages)
   .then(npmInstallPackages)
   .then(createRootPackage)
-  .then(symlinkPackages)
+  .then(copyPackageProxies(distDir))
   .then(convertCoffeeToJs)
   .then(removeTypeScript)
   .then(cleanJs)
-  .then(symlinkDistPackages)
   .then(elBuilder)
-  .then(symlinkBuildPackages)
+  .then(copyPackageProxies(buildAppDir))
   .then(runSmokeTest)
 
   # older build steps
