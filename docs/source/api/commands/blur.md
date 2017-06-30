@@ -68,6 +68,12 @@ Setting `force` to `true` in the options disables checking whether the input is 
 cy.get('input:first').blur({ force: true })
 ```
 
+# Notes
+
+***`.blur()` can time out because your browser did not receive any blur events.***
+
+If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
+
 # Rules
 
 ## Requirements {% helper_icon requirements %}
@@ -81,12 +87,6 @@ cy.get('input:first').blur({ force: true })
 ## Timeouts {% helper_icon timeout %}
 
 {% timeouts assertions .blur %}
-
-# Notes
-
-***`.blur()` can time out because your browser did not receive any blur events.***
-
-If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
 
 # Command Log
 
