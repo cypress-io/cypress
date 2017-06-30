@@ -13,10 +13,13 @@ obfuscator   = require("obfuscator")
 cypressElectron = require("@packages/electron")
 log          = require("./log")
 meta         = require("./meta")
-pkg          = require("../../package.json")
-konfig       = require("@packages/server/lib/konfig")
-appData      = require("@packages/server/lib/util/app_data")
-Fixtures     = require("@packages/server/test/support/helpers/fixtures")
+
+root         = "../.."
+pkg          = require(path.join(root, "package.json"))
+fromPackages = _.partial(path.join, root, "packages")
+konfig       = require(fromPackages("server/lib/konfig"))
+appData      = require(fromPackages("server/lib/util/app_data"))
+Fixtures     = require(fromPackages("server/test/support/helpers/fixtures"))
 
 # pkgr     = Promise.promisify(pkgr)
 fs       = Promise.promisifyAll(fs)

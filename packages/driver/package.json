@@ -10,7 +10,9 @@
     "clean-deps": "rm -rf node_modules",
     "test": "gulp test"
   },
+  "main": "index.js",
   "files": [
+    "index.js",
     "dist",
     "lib"
   ],
