@@ -45,4 +45,3 @@ cli/build
 
 # Building app binary
 scripts/deploy/support/
-support
