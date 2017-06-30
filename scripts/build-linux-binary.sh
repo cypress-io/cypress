@@ -1,4 +1,4 @@
-set e+x
+#!/bin/bash
 
 echo "This script should be run from monorepo's root"
 
@@ -9,6 +9,7 @@ docker pull $name
 
 echo "Starting Docker image with monorepo volume attached"
 echo "In order to build Cypress Linux binary"
+echo Command npm run binary-build -- "$@"
 
 # for now just run shell in the Docker container
 # and then the user can go through the deploy
@@ -17,9 +18,8 @@ docker run \
   -v $PWD:/home/person/cypress-monorepo \
   -w /home/person/cypress-monorepo \
   -it $name \
-  /bin/bash
+  npm run binary-build -- "$@"
 
-
+# /bin/bash
 # todo: grab / compute the version to build
-# npm run deploy -- --platform linux --version 0.20.0
 

@@ -1,5 +1,6 @@
 _ = require("lodash")
 fse = require("fs-extra")
+os = require("os")
 del = require("del")
 path = require("path")
 cp = require("child_process")
@@ -44,12 +45,30 @@ smokeTests = {
 # can pass options to better control the build
 # for example
 #   skipClean - do not delete "dist" folder before build
-module.exports = (platform, version, options = {}) ->
+buildCypressApp = (platform, version, options = {}) ->
   distDir = _.partial(meta.distDir, platform)
   buildDir = _.partial(meta.buildDir, platform)
   buildAppDir = _.partial(meta.buildAppDir, platform)
 
   log = _.partialRight(logger, platform)
+
+  canBuildInDocker = ->
+    platform == "linux" && os.platform() == "darwin"
+
+  badPlatformMismatch = ->
+    console.error("⛔️  cannot build #{platform} from #{os.platform()}")
+    console.error("⛔️  should use matching platform to build it")
+    console.error("program arguments")
+    console.error(process.argv)
+
+  checkPlatform = ->
+    log("#checkPlatform")
+    if platform == os.platform() then return
+
+    console.log("trying to build #{platform} from #{os.platform()}")
+    if platform == "linux" && os.platform() == "darwin"
+      console.log("try running ./scripts/build-linux-binary.sh")
+    Promise.reject(new Error("Build platform mismatch"))
 
   cleanupPlatform = ->
     log("#cleanupPlatform")
@@ -215,6 +234,7 @@ module.exports = (platform, version, options = {}) ->
           reject new Error("Verifying App via GateKeeper failed")
 
   Promise.resolve()
+  .then(checkPlatform)
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
@@ -238,3 +258,5 @@ module.exports = (platform, version, options = {}) ->
   .return({
     buildDir: buildDir()
   })
+
+module.exports = buildCypressApp

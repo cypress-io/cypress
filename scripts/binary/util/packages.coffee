@@ -29,10 +29,10 @@ npmRun = (args, cwd) ->
         reject(new Error(msg))
 
 
-runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js"])
+runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js", "--skip-packages", "cli,docs"])
 
 # removes transpiled JS files in the original package folders
-runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js"])
+runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js", "--skip-packages", "cli,docs"])
 
 # builds all the packages except for cli and docs
 runAllBuild = _.partial(npmRun,
@@ -100,7 +100,7 @@ npmInstallAll = (pathToPackages) ->
 
 
   retryNpmInstall = (pkg) ->
-    npmInstall = _.partial(npmRun, ["install", "--production"])
+    npmInstall = _.partial(npmRun, ["install", "--production", "--quiet"])
     npmInstall(pkg)
     .catch {code: "EMFILE"}, ->
       Promise
@@ -114,7 +114,7 @@ npmInstallAll = (pathToPackages) ->
   ## prunes out all of the devDependencies
   ## from what was copied
   retryGlobbing()
-  .map(retryNpmInstall)
+  .mapSeries(retryNpmInstall)
   .then ->
     console.log("Finished NPM Installing", new Date() - started)
 

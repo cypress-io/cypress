@@ -43,7 +43,7 @@ linuxZip = (src, dest) ->
   )
 
 zippers = {
-  linux: linuxZip
+  linux: macZip
   darwin: macZip
 }
 
