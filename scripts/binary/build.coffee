@@ -2,6 +2,7 @@ _ = require("lodash")
 fse = require("fs-extra")
 del = require("del")
 path = require("path")
+cp = require("child_process")
 gulp = require("gulp")
 chalk = require("chalk")
 Promise = require("bluebird")
@@ -12,6 +13,8 @@ pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
 electron = require("@packages/electron")
+signOsxApp = require("electron-osx-sign")
+debug = require("debug")("cypress:binary")
 
 linkPackages = require('../link-packages')
 meta = require("./meta")
@@ -19,6 +22,7 @@ packages = require("./util/packages")
 Darwin = require("./darwin")
 Linux = require("./linux")
 
+sign  = Promise.promisify(signOsxApp)
 fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
@@ -165,11 +169,50 @@ module.exports = (platform, version, options = {}) ->
       "app-version": version
     })
 
+  removeDevElectronApp = ->
+    log("#removeDevElectronApp")
+    # when we copy packages/electron, we get the "dist" folder with
+    # empty Electron app, symlinked to our server folder
+    # in production build, we do not need this link, and it
+    # would not work anyway with code signing
+
+    # hint: you can see all symlinks in the build folder
+    # using "find build/darwin/Cypress.app/ -type l -ls"
+    electronDistFolder = meta.buildAppDir(platform, "packages", "electron", "dist")
+    console.log("Removing unnecessary folder #{electronDistFolder}")
+    fs.removeAsync(electronDistFolder).catch(_.noop)
+
   runSmokeTest = ->
     log("#runSmokeTest")
     # console.log("skipping smoke test for now")
     smokeTest = smokeTests[platform]
     smokeTest()
+
+  codeSign = ->
+    if (platform != "darwin") then return Promise.resolve()
+
+    appFolder = meta.zipDir(platform)
+    log("#codeSign", appFolder)
+    sign({
+      app: appFolder
+      platform
+      verbose: true
+    })
+
+  verifyAppCanOpen = ->
+    if (platform != "darwin") then return Promise.resolve()
+
+    appFolder = meta.zipDir(platform)
+    log("#verifyAppCanOpen", appFolder)
+    new Promise (resolve, reject) =>
+      args = ["-a", "-vvvv", appFolder]
+      debug("cmd: spctl #{args.join(' ')}")
+      sp = cp.spawn "spctl", args, {stdio: "inherit"}
+      sp.on "exit", (code) ->
+        if code is 0
+          resolve()
+        else
+          reject new Error("Verifying App via GateKeeper failed")
 
   Promise.resolve()
   .then(cleanupPlatform)
@@ -182,15 +225,16 @@ module.exports = (platform, version, options = {}) ->
   .then(removeTypeScript)
   .then(cleanJs)
   .then(elBuilder)
+  .then(removeDevElectronApp)
   .then(copyPackageProxies(buildAppDir))
   .then(runSmokeTest)
 
   # older build steps
-  # .then(@runProjectTest)
+  # .then(@runProjectTest) # if run larger tests need to cleanup symlinks
   # .then(@runFailingProjectTest)
   # .then(@cleanupCy)
-  # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
-  # .then(@verifyAppCanOpen)
+  .then(codeSign) ## codesign after running smoke tests due to changing .cy
+  .then(verifyAppCanOpen)
   .return({
     buildDir: buildDir()
   })
