@@ -261,13 +261,19 @@ cy.get('input[type=text]').type('Test all the things', { force: true })
 
 ## Actionability
 
-`.click()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+`.type()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
 
 ## Events
 
+***When element is not in focus***
+
+If the element is currently not in focus, before issuing any keystrokes Cypress will first issue a {% url `.click()` click %} to the element to bring it into focus.
+
+All of the normal events documented on {% url `.click()` click %} will fire.
+
 ***Events that fire***
 
-Cypress implements all events that Chrome fires as part of typing in a real keyboard. Read the section: "Simulated Events vs Native Events" below for more information.
+Once the element is in focus, Cypress will begin firing keyboard events.
 
 The following events will be fired based on what key was pressed identical to the event spec:
 
