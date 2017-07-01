@@ -127,6 +127,8 @@ cy.get('button').click().then(($button) => {
 
 # Notes
 
+## Differences
+
 {% partial then_should_difference %}
 
 # Rules
