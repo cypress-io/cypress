@@ -170,9 +170,11 @@ cy.get('button').trigger('click')
 cy.get('button').click()
 ```
 
-Both types commands will first verify element actionability, but only the "true" action commands will implement all of the default actions of the browser, and perform additional low level actions to fulfill what's defined in the spec.
+Both types commands will first verify element actionability, but only the "true" action commands will implement all of the default actions of the browser, and additionally perform low level actions to fulfill what's defined in the spec.
 
-`.trigger()` essentially will *only* fire the corresponding event and do nothing else.
+`.trigger()` will *only* fire the corresponding event and do nothing else.
+
+That means that your event listener callbacks will be invoked, but don't expect the browser to actually "do" anything for these events. For the most part, it shouldn't matter, which is why `.trigger()` is an excellent stop-gap if the command / event you're looking for hasn't been implemented yet.
 
 # Rules
 
