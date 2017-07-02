@@ -65,6 +65,7 @@ Cypress comes fully baked, batteries included.
 - **No Changes to your Code.** You don't need to change your code and Cypress doesn't need to modify your code.
 - **No Dependencies.** There's no need to download Selenium, Webdriver, Node, or any other code dependencies to get your tests up and running.
 - **ES2015 Friendly:** Write modern code with zero configuration.
+- **Launch Browsers.** Cypress can automatically launch your locally installed `Chrome` browsers, but also comes baked with the ability to run headlessly using `Electron`.
 
 {% img /img/guides/setup-tests.gif %}
 
