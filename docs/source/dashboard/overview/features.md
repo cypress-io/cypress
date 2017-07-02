@@ -3,9 +3,9 @@ title: The Cypress Dashboard
 comments: false
 ---
 
-{% url 'The Cypress Dashboard' https://on.cypress.io/dashboard %} is a  service we've created that gives you access to recorded tests - typically when running Cypress tests from your {% url 'CI provider' continuous-integration %}. The Dashboard provides you insight into what happened when your tests ran.
+The {% url 'Cypress Dashboard' https://on.cypress.io/dashboard %} is a service we've created that gives you access to recorded tests - typically when running Cypress tests from your {% url 'CI provider' continuous-integration %}. The Dashboard provides you insight into what happened when your tests ran.
 
-![Dashboard Screenshot](/img/dashboard/dashboard-runs-list.png)
+{% img /img/guides/maintain-tests.gif %}
 
 # Overview
 
@@ -19,7 +19,7 @@ comments: false
 
 ***See Tests Runs in Desktop***
 
-Additionally we've integrated the test runs into the Cypress {% url 'Desktop Application' installing-cypress %}). This means you can see the test runs in the *Runs* tab from within every project.
+Additionally we've integrated the test runs into the Cypress {% url 'Desktop Application' installing-cypress %}. This means you can see the test runs in the *Runs* tab from within every project.
 
 ![Runs List](/img/dashboard/runs-list-in-desktop-gui.png)
 
