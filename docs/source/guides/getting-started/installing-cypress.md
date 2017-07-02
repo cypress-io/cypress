@@ -13,14 +13,13 @@ comments: false
 
 # System Requirements
 
-Cypress is a desktop application. This desktop application is the equivalent replacement of Selenium Server and must be running to test in Cypress.
+Cypress is a desktop application that is locally installed on your computer.
 
 {% note info %}
 The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application
 {% endnote %}
 
 The desktop application can be installed in the following operating systems:
-
 
 OS | Path
 :--- | :---

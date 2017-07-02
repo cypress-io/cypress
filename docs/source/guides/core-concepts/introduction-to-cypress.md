@@ -75,7 +75,7 @@ In Cypress, querying elements is the same:
 cy.get('.my-selector')
 ```
 
-In fact, Cypress {% url 'wraps jQuery' bundled-tools#Other-Library-Utilities %} and exposes many of its DOM traversal methods to you so you can work with complex HTML structures with ease using API's you're already familiar with.
+In fact, Cypress {% url 'bundles jQuery' bundled-tools#Other-Library-Utilities %} and exposes many of its DOM traversal methods to you so you can work with complex HTML structures with ease using API's you're already familiar with.
 
 ```js
 // Each method is equivalent to its jQuery counterpart. Use what you know!
@@ -726,7 +726,7 @@ cy.wrap(obj).its('foo')
 
 ## List of Assertions
 
-Cypress wraps {% url "`Chai`" bundled-tools#Chai %}, {% url "`Chai-jQuery`" bundled-tools#Chai-jQuery %}, and {% url "`Sinon-Chai`" bundled-tools#Sinon-Chai %} to provide built-in assertions. You can see a comprehensive list of them in {% url 'the list of assertions reference' assertions %}. You can also {% url "write your own assertions as Chai plugins" extending-cypress %} and use them in Cypress.
+Cypress bundles {% url "`Chai`" bundled-tools#Chai %}, {% url "`Chai-jQuery`" bundled-tools#Chai-jQuery %}, and {% url "`Sinon-Chai`" bundled-tools#Sinon-Chai %} to provide built-in assertions. You can see a comprehensive list of them in {% url 'the list of assertions reference' assertions %}. You can also {% url "write your own assertions as Chai plugins" extending-cypress %} and use them in Cypress.
 
 ## Writing Assertions
 
