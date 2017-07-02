@@ -5,6 +5,10 @@ comments: false
 
 Get the last DOM element within a set of DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.last()` http://api.jquery.com/last %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

@@ -5,6 +5,10 @@ comments: false
 
 Get all previous siblings of each DOM element in a set of matched DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prevAll()` http://api.jquery.com/prevAll %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

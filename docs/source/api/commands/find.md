@@ -5,6 +5,10 @@ comments: false
 
 Get the descendent DOM elements of a specific selector.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.find()` http://api.jquery.com/find %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

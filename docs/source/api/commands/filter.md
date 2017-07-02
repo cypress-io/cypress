@@ -9,6 +9,10 @@ Get the DOM elements that match a specific selector.
 Opposite of {% url `.not()` not %}
 {% endnote %}
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.filter()` http://api.jquery.com/filter %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

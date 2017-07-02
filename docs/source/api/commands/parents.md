@@ -5,6 +5,10 @@ comments: false
 
 Get the parent DOM elements of a set of DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parents()` http://api.jquery.com/parents %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

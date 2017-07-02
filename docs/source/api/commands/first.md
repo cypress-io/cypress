@@ -5,6 +5,10 @@ comments: false
 
 Get the first DOM element within a set of DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.first()` http://api.jquery.com/first %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

@@ -5,6 +5,10 @@ comments: false
 
 Get one or more DOM elements by selector or {% url 'alias' aliases-and-references %}.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `$(...)` http://api.jquery.com/jQuery/ %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

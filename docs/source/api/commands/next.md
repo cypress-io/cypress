@@ -5,6 +5,10 @@ comments: false
 
 Get the immediately following sibling of each DOM element within a set of DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.next()` http://api.jquery.com/next %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

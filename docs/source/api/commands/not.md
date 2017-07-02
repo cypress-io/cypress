@@ -9,6 +9,10 @@ Filter DOM element(s) from a set of DOM elements.
 Opposite of {% url `.filter()` filter %}
 {% endnote %}
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.not()` http://api.jquery.com/not %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

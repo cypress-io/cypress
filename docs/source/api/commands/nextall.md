@@ -5,6 +5,10 @@ comments: false
 
 Get all following siblings of each DOM element in a set of matched DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.nextAll()` http://api.jquery.com/nextAll %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

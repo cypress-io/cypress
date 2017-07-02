@@ -5,6 +5,10 @@ comments: false
 
 Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parentsUntil()` http://api.jquery.com/parentsUntil %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript

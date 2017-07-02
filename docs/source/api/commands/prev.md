@@ -5,6 +5,10 @@ comments: false
 
 Get the immediately preceding sibling of each element in a set of the elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prev()` http://api.jquery.com/prev %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
