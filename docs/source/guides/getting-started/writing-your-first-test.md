@@ -6,24 +6,91 @@ comments: false
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
+- How to create a new project in Cypress
 - Where test files go and what they look like
-- Basics of testing
+- The basics of testing
 - Testing web navigation, DOM selection, and making assertions
 {% endnote %}
 
+# An Empty Folder
+
+To get started, let's do a few simple steps together.
+
+We're going to:
+
+1. Open up Cypress
+2. Create an empty folder
+3. Add this folder to Cypress
+
+Assuming you've successfully {% url 'installed' installing-cypress %} the Desktop Application let's go ahead and open up the app by double clicking on it or running `cypress open` from your terminal.
+
+Once Cypress is open, let's create a folder using Finder, your favorite IDE, or the terminal:
+
+```shell
+mkdir playground
+```
+
+Great! Now let's add this folder to Cypress by clicking: `{% fa fa-plus %} Add Project`
+
+Once you've added this folder, you'll be greeted with a message explaining that we've seeded this empty project with a few folders and an `example_spec.js` file.
+
+{% note info %}
+This `example_spec.js` file is just for reference - it tests our {% url 'Kitchen Sink' kitchen-sink %} application and provides you with a glimpse into all the commands you can run with Cypress.
+{% endnote %}
+
+***ANIMATED GIF OF ADDING PROJECT TO CYPRESS***
+
+# An Empty File
+
+Now it's time to write our first spec file.
+
+We're going to:
+
+1. Create our own `simple_spec.js` file
+2. Watch Cypress update our list of specs
+2. Launch our browser into the Cypress GUI
+
+Let's create a new file using your text editor or from the terminal:
+
+```bash
+touch playground/cypress/integration/simple_spec.js
+```
+
+Once we've created that file, you should see the Cypress Desktop Application immediately display it in the list of spec files. Cypress will continuously monitor your spec files for any changes and display them.
+
+Even though we haven't written any code yet - that's okay - let's click on the `simple_spec.js` and watch Cypress launch your browser.
+
+We are now officially in the {% url 'Cypress GUI' overview-of-the-gui %}. This is where we'll spend the majority of our time testing.
+
+{% note info %}
+Notice Cypress displays the message that it couldn't find any tests. This is normal - we haven't yet written any tests! Sometimes you'll also see this message if there was an error parsing your test file. You can always open your **Chrome Dev Tools** to inspect the Console for any syntax or parsing errors that prevents Cypress from reading in your tests.
+{% endnote %}
+
+***ANIMATED GIF OF CREATING AN EMPTY FILE***
+
 # A Simple Test
 
-Let's start with something simple. Open up your favorite IDE and create a new file at `./cypress/integration/simple_spec.js`. We'll fill it in with an outline to demonstrate how Cypress works:
+Now it's time to write our first test.
+
+We're going to:
+
+1. Write our first passing test
+2. Write our first failing test
+3. Watch Cypress reload in real time
+
+As we save this test you will see the browser respond to changes in real time.
+
+Open up your favorite IDE and edit this file at `playground/cypress/integration/simple_spec.js`. We'll fill it in with a single test to demonstrate how Cypress works.
 
 ```js
-describe("My First Test", function() {
-  it("Doesn't do much!", function() {
+describe('My First Test', function() {
+  it('Does not do much!', function() {
     expect(true).to.equal(true)
   })
 })
 ```
 
-Though it doesn't do anything useful, this is a valid test! If we open Cypress (via `npm test` if you created the shortcut in the previous guide) it will list our new spec file next to the generated `example_spec.js`:
+Though it doesn't do anything useful, this is a valid test!
 
 {% img /img/guides/a-simple-test.png %}
 
@@ -34,6 +101,8 @@ Click on `simple_spec.js` and Cypress will run the test suite defined in that fi
 {% note info Where do the `describe()` and `it()` functions come from? %}
 Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support. Your other favorites, `context()`, `before()`, `beforeEach()`, `after()`, and `afterEach()` are available too!
 {% endnote %}
+
+***ANIMATED GIF OF ADDING WRITING FIRST PASSING / FAILING TEST***
 
 # Structure of a Test
 
