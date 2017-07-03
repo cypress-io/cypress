@@ -14,6 +14,9 @@ You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
 ```javascript
 .debug()
 .debug(options)
+
+cy.debug()
+cy.debug(options)
 ```
 
 ## Usage
