@@ -650,6 +650,7 @@ Many commands have a default, built-in assertion, or rather have requirements th
 
 - {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code.
 - {% url `cy.request()` request %} expects the remote server to exist and provide a response.
+- {% url `cy.contains()` get %} expects the element with content to eventually exist in the DOM.
 - {% url `cy.get()` get %} expects the element to eventually exist in the DOM.
 - {% url `.find()` find %} also expects the element to eventually exist in the DOM.
 - {% url `.type()` type %} expects the element to eventually be in a *typeable* state.
