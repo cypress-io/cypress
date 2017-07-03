@@ -80,7 +80,7 @@ We're going to:
 
 As we save this test you will see the browser respond to changes in real time.
 
-Open up your favorite IDE and edit this file at `playground/cypress/integration/simple_spec.js`. We'll fill it in with a single test to demonstrate how Cypress works.
+Open up your favorite IDE and edit this file: `playground/cypress/integration/simple_spec.js`.
 
 ```js
 describe('My First Test', function() {
@@ -90,16 +90,39 @@ describe('My First Test', function() {
 })
 ```
 
-Though it doesn't do anything useful, this is a valid test!
+Once you saved that file you should have seen the browser reload.
 
-{% img /img/guides/a-simple-test.png %}
+Though it doesn't do anything useful, this is our first passing test!
 
-Click on `simple_spec.js` and Cypress will run the test suite defined in that file. Below, you can see how Cypress sees that test and visualizes it in the Command Log. Admittedly, the test doesn't do much, but hey, it's green!
+Over in the {% url 'Command Log' overview-of-the-gui %} you'll now see Cypress display the `suite`, the `test` and your first `assertion` which should be passing in green.
 
 {% img /img/guides/simple-spec.png %}
 
-{% note info Where do the `describe()` and `it()` functions come from? %}
-Cypress uses the nested, functional style of organizing tests made popular by the {% url 'RSpec' http://rspec.info/ %}, {% url 'Jasmine' https://jasmine.github.io/ %}, and {% url 'Mocha' https://mochajs.org/ %} communities. In fact, Cypress {% url 'bundles and improves on Mocha' bundled-tools#Mocha %} to provide this support. Your other favorites, `context()`, `before()`, `beforeEach()`, `after()`, and `afterEach()` are available too!
+{% note info %}
+Notice Cypress displays a message about this being the default page. Cypress assumes you're going to go out and test a URL on the internet - but it can also work just fine without that.
+{% endnote %}
+
+Now let's write our first failing test.
+
+```js
+describe('My First Test', function() {
+  it('Does not do much!', function() {
+    expect(true).to.equal(false)
+  })
+})
+```
+
+Once you save again, you'll see Cypress display the failing test in red since `true` does not equal `false`.
+
+Cypress provides a nice GUI that gives you a visual structure of suites, tests, assertions. Soon you'll also see commands, page events, and network requests.
+
+{% note info What are describe, it, and expect? %}
+All of these functions come from {% url 'Bundled Tools' bundled-tools %} that Cypress bakes in.
+
+- `describe` and `it` come from {% url 'Mocha' https://mochajs.org %}
+- `expect` comes from {% url 'Chai' http://chaijs.com %}
+
+Cypress builds on these popular tools and frameworks that you *hopefully* already have some familiarity and knowledge of. If not, that's okay too.
 {% endnote %}
 
 ***ANIMATED GIF OF ADDING WRITING FIRST PASSING / FAILING TEST***
@@ -117,108 +140,197 @@ You might also see this phrased as "Given, When, Then", or "Arrange, Act, Assert
 Today, we'll take a narrow view of these steps and map them cleanly to Cypress commands:
 
 1. Visit a web page.
-2. Select and interact with an element on the page.
-3. Assert something about the content on the page.
+2. Query for an element.
+4. Interact that element.
+3. Assert about the content on the page.
 
 ## {% fa fa-globe %} Step 1: Visit a Page
 
-First, let's visit a web page. We will visit our {% url 'Kitchen Sink application' 'https://example.cypress.io/' %} in this example so that you can try Cypress out without needing to worry about finding a project to test.
+First, let's visit a web page. We will visit our {% url 'Kitchen Sink' kitchen-sink %} application in this example so that you can try Cypress out without needing to worry about finding a page to test.
 
 Using {% url `cy.visit()` visit %} is easy, we just pass it the URL we want to visit. Let's replace our previous test with a new one that actually visits a page:
 
 ```js
-describe("My First Test", function() {
-  it("Visits the Kitchen Sink", function() {
-    cy.visit('https://example.cypress.io/')
+describe('My First Test', function() {
+  it('Visits the Kitchen Sink', function() {
+    cy.visit('https://example.cypress.io')
   })
 })
 ```
 
-Save the file and switch back over to the Cypress browser (or start it back up again if you closed it.) You might notice a few things:
+Save the file and switch back over to the Cypress browser. You might notice a few things:
 
-1. Cypress detected that the test file changed, automatically reloaded and re-ran it.
-2. The Command Log now shows the new `VISIT` action.
-3. The Kitchen Sink application has been loaded into the app preview pane.
-4. The test is green, even though we made no assertions.
+1. The Command Log now shows the new `VISIT` action.
+2. The Kitchen Sink application has been loaded into the {% url 'App Preview' overview-of-the-gui#Overview %} pane.
+3. The test is green, even though we made no assertions.
+4. The `VISIT` displays a **blue pending state** until the page finishes loading.
+
+Had this request come back with a non `2xx` status code such as `404` or `500`, or if there was a JavaScript error in the application's code, the test would have failed.
 
 {% img /img/guides/visit-a-page.png %}
 
-{% note danger Warning: Do Not Test Production Apps %}
-Visiting non-development URLs (as we just did above) is an anti-pattern: don't do this for your real tests, you should ALWAYS be testing against a development build that you have full control over. Cypress is not a general web automation tool and is poorly suited to scripting live, production websites.
+{% note danger Only Tests Apps You Control %}
+Although in this guide we are testing our example application: {% url `https://example.cypress.io` https://example.cypress.io %} - you **shouldn't** test applications you **don't control**. Why?
+
+- They are liable to change at any moment which will break tests
+- They may do A/B testing which makes it impossible to get consistent results
+- They may detect you are a script and block your access (Google does this)
+- They may have security features enabled which prevent Cypress from working
+
+The point of Cypress is to be a tool you use every day to build and test **your own applications**.
+
+Cypress is not a **general purpose** web automation tool. It is poorly suited for scripting live, production websites not under your control.
 {% endnote %}
 
-## {% fa fa-mouse-pointer %} Step 2: Click an Element
+## {% fa fa-search %} Step 2: Query for an Element
 
-Now that we've got a page loading, we need to take some action on it. Why don't we click a link on the page? Sounds easy enough, let's go look for one we like... how about "type" under the "Actions" heading?
+Now that we've got a page loading, we need to take some action on it. Why don't we click a link on the page? Sounds easy enough, let's go look for one we like... how about `type` under the `Actions` header?
 
-To find this element by its contents, we'll use {% url `cy.contains` contains %}, like this `cy.contains("type")`. Let's add it to our test and see what happens:
+To find this element by its contents, we'll use {% url `cy.contains()` contains %}.
+
+Let's add it to our test and see what happens:
 
 ```js
-describe("My First Test", function() {
-  it("finds 'type'", function() {
-    cy.visit("https://example.cypress.io/")
+describe('My First Test', function() {
+  it('finds the content "type"', function() {
+    cy.visit('https://example.cypress.io')
 
-    cy.contains("type")
+    cy.contains('type')
   })
 })
 ```
 
-...and the test is still green. We know that Cypress found something because it will fail if anything isn't in place the way we say it is. To verify this, replace "type" with something not on the page, like "hype", and rerun the test. It goes red! Cypress verifies everything for us as we go, and fails a test if anything is out of order.
+Our test should now display `CONTAINS` in the Command Log and still be green.
+
+Even without adding an assertion, we know that everything is okay! This is because many commands are built to fail if they don't find what they're expecting to find. This is known as a {% url 'Default Assertion' introduction-to-cypress#Default-Assertions %}.
+
+To verify this, replace `type` with something not on the page, like `hype`. You'll notice the test goes red, but only after about 4 seconds!
+
+**SCREENSHOT OF FAILED TEST**.
+
+Can you see what Cypress is doing under the hood? It's automatically waiting and retrying because it expects the content to **eventually** be found in the DOM. It doesn't immediately fail!
+
+{% note warning 'Error Messages' %}
+We've taken care at Cypress to write hundreds of custom error messages that attempt to explain in simple terms what went wrong. In this case Cypress **timed out retrying** to find the content: `hype` within the entire page.
+{% endnote %}
+
+Before we add another command - let's get this test back to passing. Replace `hype` with `type`.
+
+***ANIMATED GIF FINDING CONTENT AND FAILING TEST***
+
+## {% fa fa-mouse-pointer %} Step 3: Click an Element
 
 Ok, now how do we click on the link we found? You could almost guess this one: just add a `.click()` to the end of the previous command, like so:
 
 ```js
-describe("My First Test", function() {
-  it("clicks 'type'", function() {
-    cy.visit("https://example.cypress.io/")
+describe('My First Test', function() {
+  it('clicks the link "type"', function() {
+    cy.visit('https://example.cypress.io')
 
-    cy.contains("type").click()
+    cy.contains('type').click()
   })
 })
 ```
 
-You can almost read it like a little story! Cypress calls this "chaining", and we chain together commands to build up great-looking tests that really express what the app does in declarative language.
+You can almost read it like a little story! Cypress calls this "chaining", and we chain together commands to build up great-looking tests that really express what the app does in a declarative language.
 
-Also note that the app preview pane has updated further after the click, following the link and showing the destination page:
+Also note that the {% url 'App Preview' overview-of-the-gui#Overview %} pane has updated further after the click, following the link and showing the destination page:
 
 {% img /img/guides/find-and-click-element.png %}
 
 Now we can declare something about this new page!
 
-## {% fa fa-check-square-o %} Step 3: Make an Assertion
+## {% fa fa-check-square-o %} Step 4: Make an Assertion
 
-Finally, let's find something to assert something about the new page. Perhaps we'd like to make sure the proper headings are present. We can do that by looking up the appropriate tags and chaining assertions to them with `.should()`.
+Finally, let's make an assertion about something on this new page. Perhaps we'd like to make sure the proper headings are present. We can do that by looking up the appropriate tags and chaining assertions to them with `.should()`.
 
 Here's what that looks like:
 
 ```js
-describe("My First Test", function() {
+describe('My First Test', function() {
   it("clicking 'type' shows the right headings", function() {
-    cy.visit("https://example.cypress.io/")
+    cy.visit('https://example.cypress.io')
 
-    cy.contains("type").click()
+    cy.contains('type').click()
+
+    // Should be on a new URL which includes '/commands/actions'
+    cy.url().should('include', '/commands/actions')
 
     // Should see the main header "Actions"
-    cy.get("h1").should('contain', "Actions")
+    cy.get('h1').should('contain', 'Actions')
+
     // Should also see a sub-header about the type command
-    cy.get("h4").should('contain', "cy.type()")
+    cy.get('h4').should('contain', 'cy.type()')
   })
 })
 ```
 
-And there you have it: a simple test in Cypress that visits a page, finds and clicks a link, then verifies the contents of the resulting page. If we read it out loud, it might sound like:
+And there you have it: a simple test in Cypress that visits a page, finds and clicks a link, then verifies the URL and resulting contents of the new page. If we read it out loud, it might sound like:
 
-> Visit example.cypress.io, find and click on something labeled "type", then we should see an H1 tag containing "Actions" and an H4 tag containing "cy.type()".
+> 1. Visit: `https://example.cypress.io`
+> 2. Find the element with content: `type`
+> 3. Click on it
+> 4. Get the URL
+> 5. Assert it includes: `/commands/actions`
+> 6. Then find: `<h1>`
+> 7. Assert it has the content: `Actions`
+> 8. Then find an: `<h4>`
+> 9. Assert it has the content: `cy.type()`
 
 Or in the Given, When, Then syntax:
 
-> 1. Given a user visits example.cypress.io
-> 2. When they click the link labeled "type"
-> 3. Then they should see a heading of "Actions" and a subheading of "cy.type()"
+> 1. Given a user visits `https://example.cypress.io`
+> 2. When they click the link labeled `type`
+> 3. Then URL should include `/commands/actions`
+> 4. And they should see a heading of `Actions` and a subheading of `cy.type()`
 
 Even your non-technical collaborators can appreciate the way this reads!
 
 And hey, this is a very clean test! We didn't have to say anything about *how* things work, just that we'd like to verify a particular series of events and outcomes.
+
+{% note info %}
+Although this test seems pretty simple - there's actually quite a bit of complexity behind the scenes to make this test pass consistently.
+
+In this test we actually loaded two different pages - but we never had to express this to Cypress. If you're coming from other testing tools, you may be surprised by this.
+
+Cypress automatically detects things like a `page transition event` and will automatically **pause** running commands until the **next page** has finishing loading.
+
+Had the **next page** errored during its page loading phase, Cypress would have halted and errored.
+
+This also means you never have to worry about commands accidentally running on an invalid page with invalid content.
+{% endnote %}
+
+## {% fa fa-check-square-o %} Step 5: Debug the Commands
+
+It's important to also note that Cypress comes with a host of debugging tools at your fingertips to help understand what happened during a test.
+
+For instance we give you the ability to:
+
+- Travel back in time to each command's snapshot
+- See special `page events` which happen
+- Receive additional output about each command
+- Step forward / backward between multiple command snapshots
+- Pause commands and step through them iteratively
+- Visualize when hidden or multiple elements are found
+
+Take you mouse and **hover over** the `CONTAINS` in the Command Log.
+
+Do you see what happened?
+
+Cypress automatically traveled back in time to a snapshot of when that command resolved. Additionally, since {% url `cy.contains()` contains %} finds DOM elements on the page, Cypress also highlighted the element.
+
+Notice the URL also updated to reflect the page we were on when this command resolved.
+
+Why is the page white after the click? Because when the click resolved, the page was currently under transition (it was downloading the new content from the server).
+
+When we hover over the `PAGE LOAD` event, we can see that although we didn't issue this command, we still logged it because its useful.
+
+We log other important bits (and take snapshots) such as:
+
+- Network Requests (from XHR's)
+- URL Changes (such as hashchanges)
+
+You can also freeze this snapshot to further inspect the DOM. Just simply **click** on any Command and you'll get a new menu for interacting with the snapshot. Also - if you open your **Chrome Dev Tools**, when clicking on any snapshot we will output helpful debugging information related to the command.
 
 <!-- ## Bonus Step: Refactor
 
@@ -233,17 +345,17 @@ Regardless of how you feel about writing tests first, the refactor step is very 
 To make this concrete, imagine we added a second, similar test to this suite:
 
 ```js
-describe("My First Test", function() {
+describe('My First Test', function() {
   it("clicking type shows the heading Actions", function() {
-    cy.visit("https://example.cypress.io/")
+    cy.visit('https://example.cypress.io')
 
-    cy.contains("type").click()
+    cy.contains('type').click()
 
     cy.get("h1").should('have.value', "Actions")
   })
 
   it("clicking focus shows the heading Focus Command", function() {
-    cy.visit("https://example.cypress.io/")
+    cy.visit('https://example.cypress.io')
 
     cy.contains("focus").click()
 
@@ -255,13 +367,13 @@ describe("My First Test", function() {
 We've got some duplication here and could probably make a number of refactoring moves, but for this brief tutorial we'll do a simple and common one. Let's move that initial visit out into a `beforeEach()` block.
 
 ```js
-describe("My First Test", function() {
+describe('My First Test', function() {
   beforeEach(function() {
-    cy.visit("https://example.cypress.io/")    
+    cy.visit('https://example.cypress.io')    
   })
 
   it("clicking type shows the heading Actions", function() {
-    cy.contains("type").click()
+    cy.contains('type').click()
 
     cy.get("h1").should('have.value', "Actions")
   })
