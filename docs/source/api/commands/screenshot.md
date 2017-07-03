@@ -93,11 +93,13 @@ If you're using Travis, you'll need to upload artifacts to an s3 bucket as per t
 
 Taking a screenshot is an asynchronous action that takes around `100ms` to complete. By the time the screenshot is taken, it's possible something in your application may have changed. It's important to realize that the screenshot may not reflect 100% of what your application looked like when the command was issued.
 
-For example - say a command we wrote times out: {% url '`cy.get('#element')`' get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
+For example - say a command we wrote times out: {% url "`cy.get('#element')`" get %}. This causes your test to fail. Cypress then takes a screenshot when the test fails, but it's possible something in your application changed within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely, but theoretically possible.
 
-Another potential problem to be aware of is that our own Reporter's UI is using `react` under the hood and thus renders asynchronously. It's possible you can see screenshots of errors before the renderer has updated and displayed the error. This is also why we take a video - to show you the complete failure.
+Another potential problem to be aware of is that our own Reporter's UI is using `react` under the hood and only rendering asynchronously during an animation frame. It's possible you will see screenshots taken before our Reporter has rendered. This means you may not see the **error displayed** in the screenshot. But this is also why we take a video - to show you the complete failure.
 
-It's possible for us to synchronize taking a screenshot with our renderer, but it may be the screenshot is delayed and thus may not accurately reflect what your application looked like when the failure occurred.
+It's possible for us to synchronize taking a screenshot with our renderer, but it would delay taking the screenshot. The trade off here is that adding an artificial delay would mean then there's a greater chance your own application's state is not accurate.
+
+{% open_an_issue %} if you'd like us to add support for synchronizing the screenshot with our Reporter.
 
 # Rules
 
