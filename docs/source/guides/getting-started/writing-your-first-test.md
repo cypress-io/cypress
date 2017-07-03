@@ -291,57 +291,148 @@ Even your non-technical collaborators can appreciate the way this reads!
 
 And hey, this is a very clean test! We didn't have to say anything about *how* things work, just that we'd like to verify a particular series of events and outcomes.
 
-{% note info %}
-Although this test seems pretty simple - there's actually quite a bit of complexity behind the scenes to make this test pass consistently.
+{% note info 'Page Transitions' %}
+Worth noting is that this test transitioned across two different pages.
 
-In this test we actually loaded two different pages - but we never had to express this to Cypress. If you're coming from other testing tools, you may be surprised by this.
+1. The initial `cy.visit()`
+2. The `.click()` to a new page
 
-Cypress automatically detects things like a `page transition event` and will automatically **pause** running commands until the **next page** has finishing loading.
+Cypress automatically detects things like a `page transition event` and will automatically **halt** running commands until the next page has **finishing** loading.
 
-Had the **next page** errored during its page loading phase, Cypress would have halted and errored.
+Had the **next page** not finish its loading phase, Cypress would have ended the test and presented this error.
 
-This also means you never have to worry about commands accidentally running on a stale page, nor do you have to worry about the subsequent page being fully loaded.
+Under the hood - this means you don't have to worry about commands accidentally running against a stale page, nor do you have to worry about running commands against a partially loaded page.
 
-We mentioned previously that Cypress waited **4 seconds** before timing out finding a DOM element - but in this case, when Cypress detects a `page transition event` it automatically increased this timeout to **60 seconds**.
+We mentioned previously that Cypress waited **4 seconds** before timing out finding a DOM element - but in this case, when Cypress detected a `page transition event` it automatically increased this timeout to **60 seconds** for this single `PAGE LOAD` event.
 
-In other words, based on the commands and the events happening, Cypress will automatically alter its expected timeouts to match expected scenarios.
+In other words, based on the commands and the events happening, Cypress will automatically alter its expected timeouts to match web application behavior.
 
-These various timeouts are expressed
+These various timeouts are defined in the {% url 'Configuration' configuration#Timeouts %} document.
 {% endnote %}
 
 {% img /img/guides/first-test-assertions-30fps.gif %}
 
-## {% fa fa-bug %} Step 5: Debug the Commands
+# Debugging
 
-It's important to also note that Cypress comes with a host of debugging tools at your fingertips to help understand what happened during a test.
+Cypress comes with a host of debugging tools to help you understand a test.
 
 For instance we give you the ability to:
 
 - Travel back in time to each command's snapshot
-- See special `page events` which happen
+- See special `page events` which happened
 - Receive additional output about each command
 - Step forward / backward between multiple command snapshots
 - Pause commands and step through them iteratively
 - Visualize when hidden or multiple elements are found
 
+Let's see some of this in action using our existing test code.
+
+## Time Travel
+
 Take you mouse and **hover over** the `CONTAINS` in the Command Log.
 
 Do you see what happened?
 
-Cypress automatically traveled back in time to a snapshot of when that command resolved. Additionally, since {% url `cy.contains()` contains %} finds DOM elements on the page, Cypress also highlighted the element.
+{% img /img/guides/first-test-hover-contains.png %}
 
-Notice the URL also updated to reflect the page we were on when this command resolved.
+Cypress automatically traveled back in time to a snapshot of when that command resolved. Additionally, since {% url `cy.contains()` contains %} finds DOM elements on the page, Cypress also highlighted the element and scrolled it into view (to the top of the page).
 
-Why is the page white after the click? Because when the click resolved, the page was currently under transition (it was downloading the new content from the server).
+Now if you remember at the end of the test we ended up on this URL:
 
-When we hover over the `PAGE LOAD` event, we can see that although we didn't issue this command, we still logged it because its useful.
+> https://example.cypress.io/commands/querying
 
-We log other important bits (and take snapshots) such as:
+But as we hover over the `CONTAINS`, Cypress additionally will revert back to the URL that was present when our snapshot was taken.
 
-- Network Requests (from XHR's)
-- URL Changes (such as hashchanges)
+{% img /img/guides/first-test-url-revert.png %}
 
-You can also freeze this snapshot to further inspect the DOM. Just simply **click** on any Command and you'll get a new menu for interacting with the snapshot. Also - if you open your **Chrome Dev Tools**, when clicking on any snapshot we will output helpful debugging information related to the command.
+## Snapshots
+
+Commands are also interactive. Go ahead and click on the `CLICK` command.
+
+{% img /img/guides/first-test-click-revert.png %}
+
+Notice it highlights in purple. This did three things worth noting...
+
+***1. Pinned Snapshots***
+We have now **pinned** this snapshot. Hovering over other commands will not revert to them. This gives us a chance to manually inspect the DOM at the time this snapshot was taken.
+
+***2. Event Hitbox***
+Since {% url `.click()` click %} is an action command, that means we also display a red hitbox to indicate the coordinates this event took place.
+
+***3. Snapshot Menu Panel***
+There is also a new menu panel. Some commands (like action commands) will take multiple snapshots: **before** and **after**. We can now cycle through these.
+
+The **before** snapshot is taken prior to the click event firing. The **after** snapshot is taken immediately after the click event. Although this click event caused our browser to load a new page, it's not an instantaneous transition. Depending on how fast your page loaded, you may see still see the same page, or a blank screen as the page is unloading and in transition.
+
+## Page Events
+
+Notice there is also a funny looking Command Log called: `(PAGE LOAD)`. This wasn't a command that we issued - rather Cypress itself will log out important events from your application. Notice these look different (they are gray and without a number).
+
+{% img /img/guides/first-test-page-load.png %}
+
+Cypress currently logs out page events for:
+
+- Network XHR Requests
+- URL hash changes
+- Page Loads
+- Form Submissions
+
+## Console Output
+
+Besides Commands being interactive, they will also output additional debugging information to your console.
+
+Open up your Dev Tools and click on the `GET` for the `h4`.
+
+{% img /img/guides/first-test-console-output.png %}
+
+We can see Cypress output additional fields:
+
+- Command (that was issued)
+- Returned (what was returned by this command)
+- Elements (the number of elements found)
+- Selector (the argument we used)
+
+We can even expand what was returned and inspect each individual element or even right click and inspect them in the Elements panel!
+
+## Special Commands
+
+In addition to having a helpful UI, there are even special commands dedicated to the task of debugging.
+
+For instance there is:
+
+- {% url `cy.pause()` pause %}
+- {% url `cy.debug()` debug %}
+
+Let's add a `cy.pause()` to our test code and see what happens.
+
+```js
+describe('My First Test', function() {
+  it("clicking 'root' shows the right headings", function() {
+    cy.visit('https://example.cypress.io')
+
+    cy.pause()
+
+    cy.contains('root').click()
+
+    // Should be on a new URL which includes '/commands/querying'
+    cy.url().should('include', '/commands/querying')
+
+    // Should find the main header "Querying"
+    cy.get('h1').should('contain', 'Querying')
+
+    // Should also find a sub-header about the contains command
+    cy.get('h4').should('contain', 'cy.contains()')
+  })
+})
+```
+
+Now Cypress provides us a UI to step forward to each command.
+
+{% img /img/guides/first-test-paused.png %}
+
+## In Action
+
+{% img /img/guides/first-test-debugging-30fps.gif %}
 
 <!-- ## Bonus Step: Refactor
 
