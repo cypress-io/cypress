@@ -72,7 +72,7 @@ Option | Default | Description
 
 ## Command
 
-`cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test outside the scope of Cypress. This is great for:
+`cy.exec()` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test outside the scope of Cypress. This is great for:
 
 - Running build scripts
 - Seeding your test database

@@ -81,7 +81,7 @@ cy.visit('http://localhost:3000/#dashboard', {
 ***Using onBeforeLoad***
 
 {% note info %}
-Check out our example recipes using `cy.visit`'s `onBeforeLoad` option to:
+Check out our example recipes using `cy.visit()`'s `onBeforeLoad` option to:
   - {% url 'Bootstrap app data' working-with-the-backend %}
   - {% url 'Set a token to `localStorage` for login' logging-in %}
   - {% url 'Stub `window.fetch`' stubs-spies-and-clocks-recipe %}

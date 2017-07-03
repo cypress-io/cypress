@@ -3,7 +3,7 @@ title: route
 comments: false
 ---
 
-Use `cy.route` to manage the behavior of network requests.
+Use `cy.route()` to manage the behavior of network requests.
 
 {% note info %}
 **Note:** `cy.route()` assumes you are already familiar with core concepts such as {% url 'network requests' network-requests %}
