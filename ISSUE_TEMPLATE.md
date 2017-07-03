@@ -1,24 +1,19 @@
-<!--
-Thanks for opening an issue!
+<!-- Want a bug fixed quickly? Please provide a repository to reproduce the issue. -->
 
-- Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.
-- If you need general advice, join our chat: https://gitter.im/cypress-io/cypress
--->
+- Operating System:
+- Cypress Version:
+- Browser Version:
 
-* Operating System:
-* Cypress Version:
-* Browser/Browser Version:
-
-### Are you requesting a feature or reporting a bug?
+### Is this a Feature or Bug?
 
 
 ### Current behavior:
 
 
-### Expected behavior:
+### Desired behavior:
 
 
-### How to reproduce the current behavior:
+### How to reproduce:
 
 
 #### Test code:
@@ -27,5 +22,5 @@ Thanks for opening an issue!
 
 ```
 
-### Additional Info (images, notes, stack traces, etc)
+### Additional Info (images, stack traces, etc)
 
