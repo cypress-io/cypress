@@ -45,15 +45,15 @@ Each command, assertion, or error, when clicked on, displays extra information i
 
 For certain commands like {% url `cy.route()` route %}, {% url `cy.stub()` stub %}, and {% url `cy.spy()` spy %}, an extra instrument panel is displayed above the test to give more information about the state of your tests.
 
-*Routes*
+***Routes:***
 
 {% img /img/guides/instrument-panel-routes.png Routes Instrument Panel %}
 
-*Stubs*
+***Stubs:***
 
 {% img /img/guides/instrument-panel-stubs.png Stubs Instrument Panel %}
 
-*Spies*
+***Spies:***
 
 {% img /img/guides/instrument-panel-spies.png Spies Instrument Panel %}
 
