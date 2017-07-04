@@ -186,7 +186,7 @@ sidebar:
     organizations: Organizations
   faq:
     questions: FAQ
-    general-questions: General Questions
-    using-cypress: Using Cypress
-    dashboard: Dashboard
-    company: Company
+    general-questions-faq: General Questions
+    using-cypress-faq: Using Cypress
+    dashboard-faq: Dashboard
+    company-faq: Company

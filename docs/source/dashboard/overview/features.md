@@ -37,4 +37,4 @@ Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %
 
 # Frequently Asked Questions
 
-Want to know more? {% url "We've answered common questions here" dashboard %}.
+Want to know more? {% url "We've answered common questions here" dashboard-faq %}.

@@ -171,7 +171,7 @@ dashboard:
 
 faq:
   questions:
-    general-questions: general-questions.html
-    using-cypress: using-cypress.html
-    dashboard: dashboard.html
-    company: company.html
+    general-questions-faq: general-questions-faq.html
+    using-cypress-faq: using-cypress-faq.html
+    dashboard-faq: dashboard-faq.html
+    company-faq: company-faq.html
