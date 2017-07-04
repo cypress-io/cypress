@@ -70,7 +70,7 @@ cy.getCookie('session_id')
 ***Using `cy.getCookie()` to test logging in***
 
 {% note info %}
-Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in %}, {% url 'logging in using XHR web forms' logging-in %} and {% url 'logging in with single sign on' logging-in %}
+Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in-recipe %}, {% url 'logging in using XHR web forms' logging-in-recipe %} and {% url 'logging in with single sign on' logging-in-recipe %}
 {% endnote %}
 
 # Rules

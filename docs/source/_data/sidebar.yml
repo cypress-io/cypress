@@ -146,19 +146,19 @@ api:
 
 examples:
   recipes:
-    unit-testing: unit-testing.html
-    logging-in: logging-in.html
-    testing-the-dom: testing-the-dom.html
-    working-with-the-backend: working-with-the-backend.html
-    stubs-spies-and-clocks-recipe: stubs-spies-and-clocks.html
-    extending-cypress: extending-cypress.html
+    unit-testing-recipe: unit-testing-recipe.html
+    logging-in-recipe: logging-in-recipe.html
+    testing-the-dom-recipe: testing-the-dom-recipe.html
+    working-with-the-backend-recipe: working-with-the-backend-recipe.html
+    stubs-spies-and-clocks-recipe: stubs-spies-and-clocks-recipe.html
+    extending-cypress-recipe: extending-cypress-recipe.html
   applications:
     kitchen-sink: kitchen-sink.html
     todo-mvc: todo-mvc.html
     pie-chopper: pie-chopper.html
     phonecat: phonecat.html
   docker:
-    images: images.html
+    docker-images: docker-images.html
     circle-ci: circle-ci.html
     codeship: codeship.html
 

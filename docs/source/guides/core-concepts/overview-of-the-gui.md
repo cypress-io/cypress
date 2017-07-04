@@ -17,7 +17,6 @@ Cypress runs tests in a unique interactive runner that allows you to see command
 
 {% img no-border /img/guides/gui-diagram.png Cypress Test Runner %}
 
-
 # Test Runner Components:
 
 ## Command Log

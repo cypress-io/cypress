@@ -179,7 +179,7 @@ cy.getCookie('cypress-session-cookie').should('exist')
 ***Using cy.request for HTML Forms***
 
 {% note info %}
-{% url "Check out our example recipe using `cy.request()` for HTML form submissions" logging-in %}
+{% url "Check out our example recipe using `cy.request()` for HTML form submissions" logging-in-recipe %}
 {% endnote %}
 
 # Notes
@@ -249,7 +249,7 @@ When clicking on `request` within the command log, the console outputs the follo
 
 - {% url `cy.exec()` exec %}
 - {% url `cy.visit()` visit %}
-- {% url "Recipe: Logging In - CSRF Tokens" logging-in %}
-- {% url "Recipe: Logging In - HTML Web Form" logging-in %}
-- {% url "Recipe: Logging In - Single Sign on" logging-in %}
-- {% url "Recipe: Logging In - XHR Web Form" logging-in %}
+- {% url "Recipe: Logging In - CSRF Tokens" logging-in-recipe %}
+- {% url "Recipe: Logging In - HTML Web Form" logging-in-recipe %}
+- {% url "Recipe: Logging In - Single Sign on" logging-in-recipe %}
+- {% url "Recipe: Logging In - XHR Web Form" logging-in-recipe %}

@@ -86,7 +86,7 @@ cy.get('textarea').type('Hello world') // yields <textarea>
 ***Type into a login form***
 
 {% note info %}
-{% url "Check out our example recipe of logging in by typing username and password" logging-in %}
+{% url "Check out our example recipe of logging in by typing username and password" logging-in-recipe %}
 {% endnote %}
 
 ***Mimic user typing behavior***

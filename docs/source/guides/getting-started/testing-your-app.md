@@ -397,7 +397,7 @@ Logging in can be more complex than what we've just covered.
 
 We've created several recipes covering additional scenarios like dealing with CSRF tokens, or testing XHR based login forms.
 
-Feel free to {% url 'explore these additional logging in' logging-in %} recipes.
+Feel free to {% url 'explore these additional logging in' logging-in-recipe %} recipes.
 {% endnote %}
 
 # Get Started

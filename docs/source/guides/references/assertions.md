@@ -149,7 +149,7 @@ Because we are using `chai`, that means you can extend it however you'd like. Cy
 2. NPM install any existing `chai` library and import into your test file or support file.
 
 {% note info %}
-{% url 'Check out our example recipe extending chai with new assertions.' extending-cypress %}
+{% url 'Check out our example recipe extending chai with new assertions.' extending-cypress-recipe %}
 {% endnote %}
 
 # Common Assertions

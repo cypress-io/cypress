@@ -23,7 +23,7 @@ cy.get('.content').invoke('show').click()
 ```
 
 {% note info %}
-{% url 'Check out our example recipe on testing hover and working with hidden elements' testing-the-dom %}
+{% url 'Check out our example recipe on testing hover and working with hidden elements' testing-the-dom-recipe %}
 {% endnote %}
 
 You can also force the action to be performed on the element regardless of whether the element is visible or not.
@@ -53,4 +53,4 @@ cy.get('.content').trigger('mouseover')
 
 - {% url `.invoke()` invoke %}
 - {% url `cy.wrap()` wrap %}
-- {% url 'Recipe: Dealing with Hover and Hidden Elements' testing-the-dom %}
+- {% url 'Recipe: Dealing with Hover and Hidden Elements' testing-the-dom-recipe %}

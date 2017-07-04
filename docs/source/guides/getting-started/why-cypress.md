@@ -61,7 +61,7 @@ Cypress comes fully baked, batteries included.
 
 ## Setup Tests
 
-- **Get Started in Minutes.** Don't spend days setting up a test environment. Just {% url "install our desktop app" installing-cypress %}, {% url "add your project" testing-your-app#Adding-Your-Project %} and {% url "start testing" writing-your-first-test %}!
+- **Get Started in Minutes.** Don't spend days setting up a test environment. Just {% url "install our desktop app" installing-cypress %}, {% url "add your project" writing-your-first-test %} and {% url "start testing" testing-your-app %}!
 - **No Changes to your Code.** You don't need to change your code and Cypress doesn't need to modify your code.
 - **No Dependencies.** There's no need to download Selenium, Webdriver, Node, or any other code dependencies to get your tests up and running.
 - **ES2015 Friendly:** Write modern code with zero configuration.
@@ -83,7 +83,7 @@ Cypress comes fully baked, batteries included.
 ## Maintain Tests
 
 - **Consistent Results.** Our architecture doesn't use Selenium or Webdriver. Say goodbye to slow, brittle, and flaky tests.
-- **Continuous Integration.** Cypress supports {% url "TravisCI" https://travis-ci.org/ %}, {% url "Jenkins" https://jenkins.io/ %}, {% url "CircleCI" https://circleci.com/ %}, {% url "Codeship" https://codeship.com/ %}, or any service running {% url 'Docker' images %}.
+- **Continuous Integration.** Cypress supports {% url "TravisCI" https://travis-ci.org/ %}, {% url "Jenkins" https://jenkins.io/ %}, {% url "CircleCI" https://circleci.com/ %}, {% url "Codeship" https://codeship.com/ %}, or any service running {% url 'Docker' docker-images %}.
 - **Screenshots & Videos:** Cypress automatically takes {% url 'screenshots' screenshots-and-videos %} on failed tests and records a {% url 'video' screenshots-and-videos %} of headless runs.
 - **Understand Failures:** Our {% url 'Dashboard Service' features %} can record all of your tests and help you pinpoint and understand failures.
 - **Excellent Support.** Get stuck? We're here to help you. {% open_an_issue "Open an issue" %}, join us in {% url "our Gitter chat" https://gitter.im/cypress-io/cypress %}, [email us](mailto:support@cypress.io), or {% url "ask a question on Stackoverflow" https://stackoverflow.com/search?q=cypress.io %}.

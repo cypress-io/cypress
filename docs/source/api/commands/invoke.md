@@ -59,7 +59,7 @@ cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 ***Use `.invoke()` to test HTML content***
 
 {% note info %}
-{% url "Check out our example recipe where we use `cy.invoke('text')` to test against HTML content" working-with-the-backend %}
+{% url "Check out our example recipe where we use `cy.invoke('text')` to test against HTML content" working-with-the-backend-recipe %}
 {% endnote %}
 
 ***Properties that are functions are invoked***
@@ -77,7 +77,7 @@ cy.get('div.container').should('be.hidden') // true
 ***Use `.invoke('show')` and `.invoke('trigger')`***
 
 {% note info %}
-{% url "Check out our example recipe where we use `cy.invoke('show')` and `cy.invoke('trigger')` to click an element that is only visible on hover" testing-the-dom %}
+{% url "Check out our example recipe where we use `cy.invoke('show')` and `cy.invoke('trigger')` to click an element that is only visible on hover" testing-the-dom-recipe %}
 {% endnote %}
 
 ## Function with Arguments
@@ -99,7 +99,7 @@ cy
 ***Use `cy.invoke('removeAttr', 'target')` to get around new tab***
 
 {% note info %}
-{% url "Check out our example recipe where we use `cy.invoke('removeAttr', 'target')` to test clicking on a link without opening in a new tab" testing-the-dom%}
+{% url "Check out our example recipe where we use `cy.invoke('removeAttr', 'target')` to test clicking on a link without opening in a new tab" testing-the-dom-recipe %}%}
 {% endnote %}
 
 ***Arguments are automatically forwarded to the function***

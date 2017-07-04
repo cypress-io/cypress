@@ -47,7 +47,7 @@ We're going to:
 
 1. Create our own `simple_spec.js` file
 2. Watch Cypress update our list of specs
-2. Launch our browser into the Cypress GUI
+3. Launch our browser into the Cypress GUI
 
 Let's create a new file using your text editor or from the terminal:
 

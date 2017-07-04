@@ -82,8 +82,8 @@ cy.visit('http://localhost:3000/#dashboard', {
 
 {% note info %}
 Check out our example recipes using `cy.visit()`'s `onBeforeLoad` option to:
-  - {% url 'Bootstrap app data' working-with-the-backend %}
-  - {% url 'Set a token to `localStorage` for login' logging-in %}
+  - {% url 'Bootstrap app data' working-with-the-backend-recipe %}
+  - {% url 'Set a token to `localStorage` for login' logging-in-recipe %}
   - {% url 'Stub `window.fetch`' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
@@ -232,6 +232,6 @@ When clicking on `visit` within the command log, the console outputs the followi
 - {% url `cy.go()` go %}
 - {% url `cy.reload()` reload %}
 - {% url `cy.request()` request %}
-- {% url "Recipe: Bootstrapping App Test Data" working-with-the-backend %}
-- {% url "Recipe: Logging In - Single Sign on" logging-in %}
+- {% url "Recipe: Bootstrapping App Test Data" working-with-the-backend-recipe %}
+- {% url "Recipe: Logging In - Single Sign on" logging-in-recipe %}
 - {% url "Recipe: Stubbing `window.fetch`" stubs-spies-and-clocks-recipe %}

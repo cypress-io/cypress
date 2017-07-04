@@ -128,7 +128,7 @@ Cypress does not and may never have multi-tab support for various reasons.
 
 Luckily there are lots of easy and safe workarounds that enable you to test this behavior in your application.
 
-{% url 'Read through this recipe to see how to test anchor links.' testing-the-dom %}
+{% url 'Read through this recipe to see how to test anchor links.' testing-the-dom-recipe %}
 
 
 ## {% fa fa-angle-right %} How do I get an input's value in Cypress?
@@ -189,7 +189,7 @@ Next, you'd want to check that you have the proper permissions for installing on
 
 There are a lot of ways to test this, so it depends. You'll need to be aware of what actually causes the download, then think of a way to test that mechanism.
 
-If your server sends specific disposition headers which cause a browser to prompt for download, you can figure out what URL this request is made to, and use {% url "cy.request()" request %} to hit that directly. Then you can test that the server send the right response headers. 
+If your server sends specific disposition headers which cause a browser to prompt for download, you can figure out what URL this request is made to, and use {% url "cy.request()" request %} to hit that directly. Then you can test that the server send the right response headers.
 
 If it's just an anchor that initiates the download, you could just test that it has the right `href` property. As long as you can verify that clicking the button is going to make the right HTTP request, there's nothing else to test for.
 

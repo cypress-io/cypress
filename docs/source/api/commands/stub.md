@@ -185,4 +185,4 @@ When clicking on the `(stub-1)` event within the command log, the console output
 - {% url `cy.spy()` spy %}
 - {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
 - {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}
-- {% url "Recipe: Unit Test - Stubbing Dependencies" unit-testing %}
+- {% url "Recipe: Unit Test - Stubbing Dependencies" unit-testing-recipe %}

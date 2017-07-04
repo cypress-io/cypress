@@ -135,7 +135,7 @@ cy
 ***Using fixtures to bootstrap data***
 
 {% note info %}
-{% url 'Check out our example recipe using `cy.fixture()` to bootstrap data for our application.' working-with-the-backend %}
+{% url 'Check out our example recipe using `cy.fixture()` to bootstrap data for our application.' working-with-the-backend-recipe %}
 {% endnote %}
 
 ***Using an alias to access a fixture***
@@ -235,4 +235,4 @@ For other types of files, they will be read as `utf8` by default, unless specifi
 
 - {% url `cy.route()` route %}
 - {% url `.then()` then %}
-- {% url 'Recipe: Bootstrapping App Test Data' working-with-the-backend%}
+- {% url 'Recipe: Bootstrapping App Test Data' working-with-the-backend-recipe %}
