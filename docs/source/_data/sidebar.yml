@@ -33,6 +33,7 @@ guides:
     assertions: assertions.html
     configuration: configuration.html
     error-messages: error-messages.html
+    best-practices: best-practices.html
     bundled-tools: bundled-tools.html
     # creating-fixtures: creating-fixtures.html
     # best-practices: best-practices.html

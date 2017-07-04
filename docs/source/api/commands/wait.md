@@ -66,51 +66,19 @@ Option | Default | Description
 
 ## Time
 
-In Cypress, you almost never need to use `cy.wait()` for an arbitrary amount of time. If you are finding yourself doing this, there is likely a much better, simpler way.
+***Wait for an arbitrary period of milliseconds:***
 
-***Let's imagine the following examples:***
-
-**Unnecessary wait for `cy.request()`**
-
-Waiting here is unnecessary since the {% url `cy.request()` request %} command will not resolve until it receives a response from your server. Adding the wait here only adds 5 seconds after the {% url `cy.request()` request %} has already resolved.
-
-```javascript
-cy.request("http://localhost:8080/db/seed")
-cy.wait(5000)     // <--- this is unnecessary
+```js
+cy.wait(2000) // wait for 2 seconds
 ```
 
-**Unnecessary wait for `cy.visit()`**
+{% note warning 'Anti-Pattern' %}
+You almost **never** need to wait for an arbitrary period of time. There are always better ways to express this in Cypress.
 
-Waiting for this is unnecessary because the {% url '`cy.visit()`' visit %} resolves once the page fires its `load` event. By that time all of your assets have been loaded including javascript, stylesheets, and html.
+Passing a number to `cy.wait()` exists because its sometimes helpful when debugging to isolate a test failure you're trying to temporarily understand.
 
-```javascript
-cy.visit("http://localhost/8080")
-cy.wait(5000)     // <--- this is unnecessary
-```
-
-**Unnecessary wait for `cy.get()`**
-
-Waiting for the {% url `cy.get()` get %} below is unncessary because {% url `cy.get()` get %} automatically retries until the table's `tr` has a length of 2.
-
-Whenever commands have an assertion they will not resolve until their associated assertions pass. This enables you to simply describe the state of your application without having to worry about when it gets there.
-
-```javascript
-cy.server()
-cy.route("GET", /users/, [{"name": "Maggy"}, {"name": "Joan"}])
-cy.get("#fetch").click()
-cy.wait(4000)     // <--- this is unnecessary
-cy.get("table tr").should("have.length", 2)
-```
-
-Alternatively a better solution to this problem is by waiting explicitly for an aliased route.
-
-```javascript
-cy.server()
-cy.route("GET", /users/, [{"name": "Maggy"}, {"name": "Joan"}]).as("getUsers")
-cy.get("#fetch").click()
-cy.wait("@getUsers")     // <--- wait explicitly for this route to finish
-cy.get("table tr").should("have.length", 2)
-```
+Read about {% url 'best practices' best-practices#Unnecessary-Waiting %} here.
+{% endnote %}
 
 ## Alias
 

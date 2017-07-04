@@ -5,28 +5,10 @@ comments: false
 
 Execute a system command.
 
-{% note warning 'Web Server Processes' %}
-We do NOT recommend trying to start your backend web server from within Cypress.
+{% note warning 'Anti-Pattern' %}
+Don't try to start a web server from `cy.exec()`.
 
-`cy.exec()` can only run commands which eventually exit.
-
-Trying to start a web server from `cy.exec()` causes all kinds of problems because:
-
-- You have to background the process
-- You lose access to it via terminal
-- You don't have access to its `stdout` or logs
-- Every time your tests run, you'd have to work out the complexity around starting an already running web server.
-- You would likely encounter constant port conflicts
-
-**Why can't I shut down the process in an `after` hook?**
-
-Because there is no guarantee that code running in an `after` will always run.
-
-While working in the Cypress GUI you can always restart / refresh while in the middle of a test. When that happens, code in an `after` won't execute.
-
-**What should I do then?**
-
-Simple. Start your web server before running Cypress. That's it!
+Read about {% url 'best practices' best-practices#Web-Servers %} here.
 {% endnote %}
 
 # Syntax
