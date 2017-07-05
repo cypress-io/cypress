@@ -16,4 +16,14 @@ describe "controls", ->
       @runner.emit("runnables:ready", @runnables)
       @runner.emit("reporter:start", {})
 
-  it "shows reporter", ->
+  describe "responsive design", ->
+    describe ">= 400px wide", ->
+      it "shows 'Tests'", ->
+        cy.get(".focus-tests span").should("be.visible")
+
+    describe "< 400px wide", ->
+      beforeEach ->
+        cy.viewport(399, 450)
+
+      it "hides 'Tests'", ->
+        cy.get(".focus-tests span").should("not.be.visible")
