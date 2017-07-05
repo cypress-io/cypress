@@ -18,6 +18,24 @@ Some, like `core-https-proxy` and `core-launcher`, run solely in node and suppor
 
 [CLI Documentation](https://on.cypress.io/cli)
 
+## Badges
+
+Let the world know your project is using Cypress.io to test with this cool badge
+
+[![badge](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+
+### Markdown
+
+```
+[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+```
+
+### SVG image
+
+```
+https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
+```
+
 ## Development
 
 ### Getting Started
