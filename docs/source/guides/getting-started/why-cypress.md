@@ -40,10 +40,10 @@ Cypress can test anything that runs in a browser.
 
 # Cypress Ecosystem
 
-Cypress is a free, open source, {% url "locally installed" installing-cypress %} testing tool **and** a service for {% url 'recording your tests' features %}.
+Cypress is a free, open source, {% url "locally installed" installing-cypress %} testing tool **and** a service for {% url 'recording your tests' features-dashboard %}.
 
 - ***First:*** Cypress makes it easy to setup and start writing tests every day while you build your application locally. *TDD at its best!*
-- ***Later:*** After building up a suite of tests and {% url "integrating Cypress" continuous-integration %} with your CI Provider, our  {% url 'Dashboard' features %} can record your test runs. You'll never have to wonder: *Why did this fail?*
+- ***Later:*** After building up a suite of tests and {% url "integrating Cypress" continuous-integration %} with your CI Provider, our  {% url 'Dashboard' features-dashboard %} can record your test runs. You'll never have to wonder: *Why did this fail?*
 
 # Our Mission
 
@@ -85,7 +85,7 @@ Cypress comes fully baked, batteries included.
 - **Consistent Results.** Our architecture doesn't use Selenium or Webdriver. Say goodbye to slow, brittle, and flaky tests.
 - **Continuous Integration.** Cypress supports {% url "TravisCI" https://travis-ci.org/ %}, {% url "Jenkins" https://jenkins.io/ %}, {% url "CircleCI" https://circleci.com/ %}, {% url "Codeship" https://codeship.com/ %}, or any service running {% url 'Docker' docker-images %}.
 - **Screenshots & Videos:** Cypress automatically takes {% url 'screenshots' screenshots-and-videos %} on failed tests and records a {% url 'video' screenshots-and-videos %} of headless runs.
-- **Understand Failures:** Our {% url 'Dashboard Service' features %} can record all of your tests and help you pinpoint and understand failures.
+- **Understand Failures:** Our {% url 'Dashboard Service' features-dashboard %} can record all of your tests and help you pinpoint and understand failures.
 - **Excellent Support.** Get stuck? We're here to help you. {% open_an_issue "Open an issue" %}, join us in {% url "our Gitter chat" https://gitter.im/cypress-io/cypress %}, [email us](mailto:support@cypress.io), or {% url "ask a question on Stackoverflow" https://stackoverflow.com/search?q=cypress.io %}.
 
 {% img /img/guides/maintain-tests.gif %}

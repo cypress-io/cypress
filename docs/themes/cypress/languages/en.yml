@@ -180,10 +180,10 @@ sidebar:
     codeship: Codeship
   dashboard:
     overview: Dashboard
-    features: Features
-    projects: Projects
-    runs: Recorded Runs
-    organizations: Organizations
+    features-dashboard: Features
+    projects-dashboard: Projects
+    runs-dashboard: Recorded Runs
+    organizations-dashboard: Organizations
   faq:
     questions: FAQ
     general-questions-faq: General Questions

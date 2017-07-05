@@ -74,7 +74,7 @@ Fixed {% url "`.type()`" type %} not firing `input` event for {% url "React" htt
 **Notes:**
 
 - We have updated all of the docs related to these changes. The {% url 'CI Docs' continuous-integration %} got a much needed facelift.
-- There is a new docs section related to the {% url 'Dashboard' features %} and the new features.
+- There is a new docs section related to the {% url 'Dashboard' features-dashboard %} and the new features.
 
 **Overview:**
 

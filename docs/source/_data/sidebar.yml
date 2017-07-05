@@ -164,10 +164,10 @@ examples:
 
 dashboard:
   overview:
-    features: features.html
-    projects: projects.html
-    runs: runs.html
-    organizations: organizations.html
+    features-dashboard: features-dashboard.html
+    projects-dashboard: projects-dashboard.html
+    runs-dashboard: runs-dashboard.html
+    organizations-dashboard: organizations-dashboard.html
 
 faq:
   questions:

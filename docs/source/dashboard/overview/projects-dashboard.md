@@ -33,7 +33,7 @@ During a run we record all failing tests, logs, screenshots, and videos and make
 
 **3. Choose who owns the project. You can personally own it or select an organization you've created.**
 
-Organizations work just like they do in Github. They enable you to separate your personal and work projects. {% url 'Read more about organizations' organizations %}.
+Organizations work just like they do in Github. They enable you to separate your personal and work projects. {% url 'Read more about organizations' organizations-dashboard %}.
 
 ![Chosen Organization to Own](/img/dashboard/select-organization-who-should-own-project.png)
 
@@ -127,7 +127,7 @@ If your Record Key is accidentally exposed, you should remove it and generate a 
 
 - **Public** means that anyone can see the recorded test runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
 
-- **Private** means that only {% url 'users' organizations#Inviting-Users %} you explicitly invite to your {% url 'organization' organizations %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
+- **Private** means that only {% url 'users' organizations-dashboard#Inviting-Users %} you explicitly invite to your {% url 'organization' organizations-dashboard %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
 
 # Transfer Ownership of Project
 

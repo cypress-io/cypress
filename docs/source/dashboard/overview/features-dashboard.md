@@ -25,7 +25,7 @@ Additionally we've integrated the test runs into the Cypress {% url 'Desktop App
 
 # Example Projects
 
-Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %} you can view any {% url "public project" projects#Public-vs-Private-Projects %}.
+Once you're logged into the {% url 'Dashboard' https://on.cypress.io/dashboard %} you can view any {% url "public project" projects-dashboard#Public-vs-Private-Projects %}.
 
 **Here are some of our own public projects you can view:**
 

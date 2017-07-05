@@ -23,7 +23,7 @@ It is possible to upload files in your application but it's different based on h
 
 ## {% fa fa-angle-right %} What is the projectId for?
 
-Once you {% url "setup your tests to record" runs %}, we generate a unique `projectId` for your project and automatically insert it into your `cypress.json` file.
+Once you {% url "setup your tests to record" runs-dashboard %}, we generate a unique `projectId` for your project and automatically insert it into your `cypress.json` file.
 
 ***The `projectId` is a 6 character string in your cypress.json:***
 
@@ -37,7 +37,7 @@ This is how we uniquely identify your project. If you manually alter this, *Cypr
 
 ## {% fa fa-angle-right %} What is a Record Key?
 
-Once you're {% url "setup to record test runs" runs %}, we automatically generate a *Record Key* for the project.
+Once you're {% url "setup to record test runs" runs-dashboard %}, we automatically generate a *Record Key* for the project.
 
 ***A record key is a GUID that looks like this:***
 
