@@ -5,28 +5,10 @@ comments: false
 
 Execute a system command.
 
-{% note warning 'Web Server Processes' %}
-We do NOT recommend trying to start your backend web server from within Cypress.
+{% note warning 'Anti-Pattern' %}
+Don't try to start a web server from `cy.exec()`.
 
-`cy.exec()` can only run commands which eventually exit.
-
-Trying to start a web server from `cy.exec()` causes all kinds of problems because:
-
-- You have to background the process
-- You lose access to it via terminal
-- You don't have access to its `stdout` or logs
-- Every time your tests run, you'd have to work out the complexity around starting an already running web server.
-- You would likely encounter constant port conflicts
-
-**Why can't I shut down the process in an `after` hook?**
-
-Because there is no guarantee that code running in an `after` will always run.
-
-While working in the Cypress GUI you can always restart / refresh while in the middle of a test. When that happens, code in an `after` won't execute.
-
-**What should I do then?**
-
-Simple. Start your web server before running Cypress. That's it!
+Read about {% url 'best practices' best-practices#Web-Servers %} here.
 {% endnote %}
 
 # Syntax
@@ -70,16 +52,16 @@ Option | Default | Description
 
 # Examples
 
-## Prepping data
+## Command
 
-`cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test outside the scope of Cypress. This is great for:
+`cy.exec()` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test outside the scope of Cypress. This is great for:
 
 - Running build scripts
 - Seeding your test database
 - Starting processes
 - Killing processes
 
-**Run a build command**
+***Run a build command***
 
 ```javascript
 cy.exec('npm run build').then(function (result) {
@@ -92,19 +74,19 @@ cy.exec('npm run build').then(function (result) {
 })
 ```
 
-**Seed the database and assert it was successful**
+***Seed the database and assert it was successful***
 
 ```javascript
 cy.exec('rake db:seed').its('code').should('eq', 0)
 ```
 
-**Run an arbitrary script and assert its output**
+***Run an arbitrary script and assert its output***
 
 ```javascript
 cy.exec('npm run my-script').its('stdout').should('contain', 'Done running the script')
 ```
 
-**Write to a file to create a fixture from response body**
+***Write to a file to create a fixture from response body***
 ```javascript
 cy.server()
 cy.route('POST', '/comments').as('postComment')
@@ -117,7 +99,7 @@ cy.wait('@postComment').then(function(xhr){
 
 ## Options
 
-**Change the timeout**
+***Change the timeout***
 
 You can increase the time allowed to execute the command, although *we don't recommend executing commands that take a long time to exit*.
 
@@ -128,7 +110,7 @@ Cypress will *not* continue running any other commands until `cy.exec()` has fin
 cy.exec('npm run build', { timeout: 20000 });
 ```
 
-**Choose to not fail on non-zero exit and assert on code and stderr**
+***Choose to not fail on non-zero exit and assert on code and stderr***
 
 ```javascript
 cy
@@ -137,7 +119,7 @@ cy
   .its('stderr').should('contain', 'No manual entry for bear')
 ```
 
-**Specify environment variables**
+***Specify environment variables***
 
 ```javascript
 cy
@@ -147,7 +129,9 @@ cy
 
 # Notes
 
-**Commands that do not exit are not supported**
+## Commands Must Exit
+
+***Commands that do not exit are not supported***
 
 `cy.exec()` does not support commands that don't exit, such as:
 
@@ -173,7 +157,7 @@ A command must exit within the `execTimeout` or Cypress will kill the command's 
 
 # Command Log
 
-**List the contents of cypress.json**
+***List the contents of cypress.json***
 
 ```javascript
 cy.exec('cat cypress.json')

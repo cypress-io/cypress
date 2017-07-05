@@ -18,53 +18,62 @@ After adding a new project, Cypress will automatically scaffold out a suggested 
 
 ```text
 /cypress
-/cypress/fixtures
-/cypress/integration
-/cypress/support
+  /fixtures
+    - example.json
+
+  /integration
+    - example_spec.js
+
+  /support
+    - commands.js
+    - defaults.js
+    - index.js
 ```
-
-Cypress also adds placeholder files to help get you started with examples in each folder.
-
-***Example JSON fixture***
-```text
-/cypress/fixtures/example.json
-```
-
-***Example Integration Test***
-```text
-/cypress/integration/example_spec.js
-```
-
-***Example JavaScript Support Files***
-```text
-/cypress/support/commands.js
-/cypress/support/defaults.js
-/cypress/support/index.js
-```
-
-{% note info Using Support files for common functionality %}
-{% url 'Check out our example recipe using support files to import common utilities' extending-cypress %}
-{% endnote %}
 
 ***Configuring Folder Structure***
 
-While Cypress allows for configuration of where your tests, fixtures, and support files are located, if you're starting your first project, we recommend you use the above structure.
+While Cypress allows to configure where your tests, fixtures, and support files are located, if you're starting your first project, we recommend you use the above structure.
 
 You can modify the folder configuration in your `cypress.json`. See {% url 'configuration' configuration %} for more detail.
 
-# Test Files
+## Test Files
 
-Test files may be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
+Test files may be written as:
 
-Cypress supports ES2015, ES2016, ES2017, and JSX. ES2015 modules and CommonJS modules are also supported, so you can `import` or `require` both npm packages and local modules.
+- `.js`
+- `.jsx`
+- `.coffee`
+- `.cjsx`
 
-{% note info Importing ES2015 or CommonJS modules %}
-{% url 'Check out our example recipe using ES2015 and CommonJS modules' extending-cypress %}
+Cypress also supports `ES2015` out of the box. You can use either `ES2015 modules` or `CommonJS modules`. This means you can `import` or `require` both **npm packages** and **local relative modules**.
+
+{% note info Example Recipe %}
+Check out our recipe using {% url 'ES2015 and CommonJS modules' extending-cypress-recipe %}.
 {% endnote %}
 
-To see an example of every command used in Cypress, open the {% url "`example_spec.js`" https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/example_spec.js%} within your `cypress/integration` folder.
+To see an example of every command used in Cypress, open the {% url "`example_spec.js`" https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/example_spec.js %} within your `cypress/integration` folder.
 
 To start writing tests for your app, simply create a new file like `app_spec.js` within your `cypress/integration` folder. Refresh your tests list in the Cypress GUI and your new file should have appeared in the list.
+
+## Support Files
+
+By default Cypress will automatically include the support file `cypress/support/index.js` **before** every single spec file it runs. We do this purely as a convenience mechanism so you don't have to import this file in every single one of your spec files.
+
+The support file is a great place to put reusable behavior such as Custom Commands or global overrides that you want applied and available to all of your spec files.
+
+From your support file you should also `import` or `require` other files to keep things organized.
+
+We automatically seed you an example support file, which has several commented out examples.
+
+{% note info Example Recipe %}
+Our {% url 'Extending Cypress recipes' extending-cypress-recipe %} show you how to modify the support file.
+{% endnote %}
+
+## Fixture Files
+
+Fixtures are used as external pieces of static data that can be used by your tests.
+
+You would typically use them with the {% url `cy.fixture()` fixture %} command and most often when you're stubbing {% url 'Network Requests' network-requests %}.
 
 # How to Write Tests
 
@@ -72,7 +81,7 @@ Cypress is built on top of {% url 'Mocha' bundled-tools#Mocha %} and uses its `b
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
-We're still working on introductory docs and videos. If you want to see Cypress in action, %{ url 'check out some examples' kitchen-sink %} of applications using Cypress tests and {% url "check out some example recipes we've written" unit-testing %} for special use cases.
+We're still working on introductory docs and videos. If you want to see Cypress in action, %{ url 'check out some examples' kitchen-sink %} of applications using Cypress tests and {% url "check out some example recipes we've written" unit-testing-recipe %} for special use cases.
 
 ## BDD Interface
 
@@ -180,24 +189,24 @@ function fizzbuzz (num) {
 
 // -- Start: Our Cypress Tests --
 describe('Unit Test FizzBuzz', function(){
-  beforeEach(function(){
-    this.numsExpectedToEq = (arr, expected) =>
-      arr.forEach((num) => {
-        expect(fizzbuzz(num)).to.eq(expected)
-      })
-  })
+  function numsExpectedToEq (arr, expected) {
+    // loop through the array of nums and make
+    // sure they equal what is expected
+    arr.forEach((num) => {
+      expect(fizzbuzz(num)).to.eq(expected)
+    })
+  }
 
-  // Only this test and it's beforeEach code would run
   it.only('returns "fizz" when number is multiple of 3', function(){
-    this.numsExpectedToEq([9, 12, 18], "fizz")
+    numsExpectedToEq([9, 12, 18], "fizz")
   })
 
   it('returns "buzz" when number is multiple of 5', function(){
-    this.numsExpectedToEq([10, 20, 25], "buzz")
+    numsExpectedToEq([10, 20, 25], "buzz")
   })
 
   it('returns "fizzbuzz" when number is multiple of both 3 and 5', function(){
-    this.numsExpectedToEq([15, 30, 60], "fizzbuzz")
+    numsExpectedToEq([15, 30, 60], "fizzbuzz")
   })
 })
 
@@ -207,7 +216,7 @@ To skip a specified suite or test simply append `.skip()` to the function. All n
 
 ```javascript
 it.skip('returns "fizz" when number is multiple of 3', function(){
-  this.numsExpectedToEq([9, 12, 18], "fizz")
+  numsExpectedToEq([9, 12, 18], "fizz")
 })
 ```
 

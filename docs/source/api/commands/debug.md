@@ -14,6 +14,9 @@ You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
 ```javascript
 .debug()
 .debug(options)
+
+cy.debug()
+cy.debug(options)
 ```
 
 ## Usage
@@ -43,7 +46,7 @@ Option | Default | Description
 
 ## Debug
 
-**Pause with debugger after `.get()`**
+***Pause with debugger after `.get()`***
 
 ```javascript
 cy.get('a').debug().should('have.attr', 'href')
@@ -65,7 +68,7 @@ cy.get('a').debug().should('have.attr', 'href')
 
 # Command Log
 
-**Log out the current subject for debugging**
+***Log out the current subject for debugging***
 
 ```javascript
 cy.get(".ls-btn").click({ force: true }).debug()

@@ -5,6 +5,9 @@ comments: false
 
 Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.nextUntil()` http://api.jquery.com/nextUntil %} works in jQuery.
+{% endnote %}
 
 # Syntax
 
@@ -63,7 +66,7 @@ Option | Default | Description
 
 ## Selector
 
-**Find all of the element's siblings following `#veggies` until `#nuts`**
+***Find all of the element's siblings following `#veggies` until `#nuts`***
 
 ```html
 <ul>
@@ -103,7 +106,7 @@ cy.get('#veggies').nextUntil('#nuts')
 
 # Command Log
 
-**Find all of the element's siblings following `#veggies` until `#nuts`**
+***Find all of the element's siblings following `#veggies` until `#nuts`***
 
 ```javascript
 cy.get('#veggies').nextUntil('#nuts')

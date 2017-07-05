@@ -37,9 +37,9 @@ Option | Default | Description
 
 # Examples
 
-## Title
+## No Args
 
-**Assert that the document's title is "My Awesome Application"**
+***Assert that the document's title is "My Awesome Application"***
 
 ```javascript
 cy.title().should('eq', 'My Awesome Application')
@@ -61,7 +61,7 @@ cy.title().should('eq', 'My Awesome Application')
 
 # Command Log
 
-**Assert that the document's title includes 'New User'**
+***Assert that the document's title includes 'New User'***
 
 ```javascript
 cy.title().should('include', 'New User')

@@ -68,6 +68,8 @@ We don't look at whether an element has property `readonly` (but we probably sho
 
 ## Animations
 
+Cypress will automatically determine if an element is animating and wait until it stops.
+
 To calculate whether an element is animating we take a sample of the last positions it was at and calculate the element's slope. You might remember this from 8th grade algebra. 😉
 
 If the element's slope (the distance between its previous position and its current position) exceeds the {% url `animationDistanceThreshold` configuration#Animations %} then we consider the element to be animating.
@@ -111,11 +113,19 @@ This most often happens when you have a "sticky nav" that is fixed to the top of
 
 ## Coordinates
 
-After we verify the element is actionable, Cypress will then fire all of the appropriate events. Usually these events' coordinates are fired at the center of the element, but most commands enable you to change the position it's fired to.
+After we verify the element is actionable, Cypress will then fire all of the appropriate events and corresponding default actions. Usually these events' coordinates are fired at the center of the element, but most commands enable you to change the position it's fired to.
 
 ```js
 cy.get('button').click({ position: 'topLeft' })
 ```
+
+The coordinates we fired the event at will generally be available when clicking the command in the {% url 'Command Log' overview-of-the-gui %}.
+
+![event coordinates](/img/guides/coords.png)
+
+Additionally we'll display a red "hitbox" - which is a dot indicating the coordinates of the event.
+
+![hitbox](/img/guides/hitbox.png)
 
 # Debugging
 

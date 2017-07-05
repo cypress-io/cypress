@@ -5,6 +5,10 @@ comments: false
 
 Get the immediately preceding sibling of each element in a set of the elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prev()` http://api.jquery.com/prev %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -50,9 +54,9 @@ Option | Default | Description
 
 # Examples
 
-## Previous
+## No Args
 
-**Find the previous element of the element with class of `active`**
+***Find the previous element of the element with class of `active`***
 
 ```html
 <ul>
@@ -71,7 +75,7 @@ cy.get('.active').prev()
 
 ## Selector
 
-**Find the previous element with a class of `active`**
+***Find the previous element with a class of `active`***
 
 ```html
 <ul>
@@ -104,7 +108,7 @@ cy.get('li').prev('.active')
 
 # Command Log
 
-**Find the previous element of the active `li`**
+***Find the previous element of the active `li`***
 
 ```javascript
 cy.get('.left-nav').find('li.active').prev()

@@ -58,9 +58,9 @@ Option | Default | Description
 
 # Examples
 
-## Set Value
+## Name Value
 
-**Set a cookie**
+***Set a cookie***
 
 ```javascript
 cy.getCookies().should('be.empty')
@@ -83,8 +83,6 @@ cy.getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidh
 {% timeouts automation cy.setCookie %}
 
 # Command Log
-
-**Set a cookie**
 
 ```javascript
 cy.getCookies().should('be.empty')

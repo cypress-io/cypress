@@ -50,9 +50,9 @@ Option | Default | Description
 
 # Examples
 
-## Blur
+## No Args
 
-**Blur the comment input.**
+***Blur the comment input.***
 
 ```javascript
 cy.get('[name="comment"]').type('Nice Product!').blur()
@@ -60,13 +60,33 @@ cy.get('[name="comment"]').type('Nice Product!').blur()
 
 ## Options
 
-**Blur the first input**
+***Blur the first input***
 
 Setting `force` to `true` in the options disables checking whether the input is focusable or currently has focus.
 
 ```javascript
 cy.get('input:first').blur({ force: true })
 ```
+
+# Notes
+
+## Actionability
+
+***Blur is not an action command***
+
+`.blur()` is not implemented like other action commands, and does not follow the same rules of {% url 'waiting for actionability' interacting-with-elements %}.
+
+`.blur()` is just a helpful command which is a simple shortcut. Normally there's no way for a user to simply "blur" an element. Typically the user would have to perform **another** action like clicking or tabbing to a different element. Needing to perform a separate action like this is very indirect.
+
+Therefore it's oftentimes much easier and simpler to test the blur behavior directly with `.blur()`.
+
+## Timeouts
+
+***`.blur()` can time out because your browser did not receive any blur events.***
+
+If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
+
+Internally Cypress does account for this, and will polyfill the blur events when necessary to replicate what the browser does. Unfortunately the browser will still behave differently when not in focus - for instance it may throttle async events. Your best bet here is to keep Cypress focused when working on a test.
 
 # Rules
 
@@ -81,12 +101,6 @@ cy.get('input:first').blur({ force: true })
 ## Timeouts {% helper_icon timeout %}
 
 {% timeouts assertions .blur %}
-
-# Notes
-
-***`.blur()` can time out because your browser did not receive any blur events.***
-
-If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is run.
 
 # Command Log
 

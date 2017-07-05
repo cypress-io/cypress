@@ -5,6 +5,10 @@ comments: false
 
 Get the immediately following sibling of each DOM element within a set of DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.next()` http://api.jquery.com/next %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -50,9 +54,9 @@ Option | Default | Description
 
 # Examples
 
-## Next
+## No Args
 
-**Find the element next to `.second`**
+***Find the element next to `.second`***
 
 ```html
 <ul>
@@ -69,7 +73,7 @@ cy.get('.second').next()
 
 ## Selector
 
-**Find the very next sibling of each li. Keep only the ones with a class `selected`.**
+***Find the very next sibling of each li. Keep only the ones with a class `selected`.***
 
 ```html
 <ul>
@@ -101,7 +105,7 @@ cy.get('li').next('.selected')
 
 # Command Log
 
-**Find the element next to the `.active` li**
+***Find the element next to the `.active` li***
 
 ```javascript
 cy.get('.left-nav').find('li.active').next()

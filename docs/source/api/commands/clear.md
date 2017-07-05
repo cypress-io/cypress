@@ -52,15 +52,27 @@ Option | Default | Description
 
 # Examples
 
-## Clear
+## No Args
 
 **Clear the input and type a new value.**
-
-Prior to clearing, if the element isn't currently focused, Cypress issues a {% url `.click()` click %} on the element, which causes the element to receive focus.
 
 ```javascript
 cy.get('textarea').clear().type('Hello, World')
 ```
+
+# Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.clear()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+## Documentation
+
+`.clear()` is just an alias for {% url `.type({selectall}{backspace})` type %}.
+
+Please read the {% url `.type()` type %} documentation for more details.
 
 # Rules
 

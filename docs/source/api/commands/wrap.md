@@ -17,7 +17,7 @@ cy.wrap(subject, options)
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.wrap({name: "Jane Lane"})    
+cy.wrap({ name: "Jane Lane" })    
 ```
 
 ## Arguments
@@ -41,16 +41,45 @@ Option | Default | Description
 
 # Examples
 
-## Wrap
+## Objects
 
-**Invokes the function on the subject in wrap and returns the new value.**
+***Invokes the function on the subject in wrap and returns the new value.***
 
 ```javascript
-var getName = function() {
+const getName = () => {
   return 'Jane Lane'
 }
 
-cy.wrap({name: getName}).invoke('name').should('eq', 'Jane Lane') // true
+cy.wrap({ name: getName }).invoke('name').should('eq', 'Jane Lane') // true
+```
+
+## Elements
+
+***Wrap elements to continue executing commands***
+
+```javascript
+cy.get('form').within(($form) => {
+  // ... more commands
+
+  cy.wrap($form).should('have.class', 'form-container')
+})
+```
+
+***Conditionally wrap elements***
+
+```javascript
+cy
+  .get('button')
+  .then(($button) => {
+    // $el is a wrapped jQuery element
+    if ($button.someMethod() === 'something') {
+      // wrap this element so we can
+      // use cypress commands on it
+      cy.wrap($button).click()
+    } else {
+      // do something else
+    }
+  })
 ```
 
 # Rules

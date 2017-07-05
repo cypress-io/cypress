@@ -74,7 +74,7 @@ Sinon-as-Promised gives you the ability to stub methods that return Promises. To
 
 Cypress also bundles the following tools on the `Cypress` object. These can be used anywhere inside of your tests.
 
-- {% url `Cypress._` _ %} (Underscore)
+- {% url `Cypress._` _ %} (lodash)
 - {% url `Cypress.$` $ %} (jQuery)
 - {% url `Cypress.minimatch` minimatch %} (minimatch.js)
 - {% url `Cypress.moment` moment %} (moment.js)

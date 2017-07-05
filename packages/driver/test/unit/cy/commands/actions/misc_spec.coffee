@@ -10,7 +10,7 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
     it "throws when invoking", (done) ->
       @cy.on "fail", (err) ->
         expect(err.message).to.include "cy.hover() is not currently implemented."
-        expect(err.message).to.include "https://on.cypress.io/api/hover"
+        expect(err.message).to.include "https://on.cypress.io/hover"
         done()
 
       @cy.get("button").hover()

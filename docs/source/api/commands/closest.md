@@ -5,6 +5,10 @@ comments: false
 
 Get the first DOM element that matches the selector (whether it be itself or one of it's ancestors).
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.closest()` http://api.jquery.com/closest %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -48,9 +52,9 @@ Option | Default | Description
 
 # Examples
 
-## Closest
+## No Args
 
-**Find the closest element of the 'error' with the class 'banner'**
+***Find the closest element of the 'error' with the class 'banner'***
 
 ```javascript
 cy.get('p.error').closest('.banner')
@@ -72,7 +76,7 @@ cy.get('p.error').closest('.banner')
 
 # Command Log
 
-**Find the closest element of 'active li' with the class 'nav'**
+***Find the closest element of 'active li' with the class 'nav'***
 
 ```javascript
 cy.get('li.active').closest('.nav')

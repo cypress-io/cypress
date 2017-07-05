@@ -45,7 +45,7 @@ Name of property or nested properties (with dot notation) to get.
 
 ## Plain Objects
 
-**Get property**
+***Get property***
 
 ```javascript
 cy.wrap({age: 52}).its('age').should('eq', 52) // true
@@ -53,7 +53,7 @@ cy.wrap({age: 52}).its('age').should('eq', 52) // true
 
 ## DOM Elements
 
-**Get the `length` property of a DOM element**
+***Get the `length` property of a DOM element***
 
 ```javascript
 cy
@@ -65,7 +65,7 @@ cy
 
 ## Strings
 
-**Get `length` of title**
+***Get `length` of title***
 
 ```javascript
 cy.title().its('length').should('eq', 24)
@@ -73,7 +73,7 @@ cy.title().its('length').should('eq', 24)
 
 ## Functions
 
-**Get function property**
+***Get function as property***
 
 ```javascript
 var fn = function(){
@@ -83,7 +83,7 @@ var fn = function(){
 cy.wrap({getNum: fn}).its('getNum').should('be.a', 'function')
 ```
 
-**Inspect function**
+***Access function properties***
 
 You can access functions to then drill into their own properties instead of invoking them.
 
@@ -109,7 +109,7 @@ cy
   .invoke('create', 'arg')  // now invoke properties on it
 ```
 
-**Use `.its()` to test `window.fetch`**
+***Use `.its()` to test `window.fetch`***
 
 {% note info %}
 {% url "Check out our example recipe on testing `window.fetch` using `.its()`" stubs-spies-and-clocks-recipe %}
@@ -147,7 +147,7 @@ cy.wrap(user).its('contacts.work.name').should('eq', 'Kamil') // true
 
 # Command Log
 
-**Get `responseBody` of aliased route**
+***Get `responseBody` of aliased route***
 
 ```javascript
 cy.server()

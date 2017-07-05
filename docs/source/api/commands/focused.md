@@ -37,9 +37,9 @@ Option | Default | Description
 
 # Examples
 
-## Focused
+## No Args
 
-**Get the element that is focused**
+***Get the element that is focused***
 
 ```javascript
 cy.focused().then(function($el) {
@@ -47,13 +47,13 @@ cy.focused().then(function($el) {
 })
 ```
 
-**Blur the element with focus**
+***Blur the element with focus***
 
 ```javascript
 cy.focused().blur()
 ```
 
-**Make an assertion on the focused element**
+***Make an assertion on the focused element***
 
 ```javascript
 cy.focused().should('have.attr', 'name', 'username')
@@ -75,7 +75,7 @@ cy.focused().should('have.attr', 'name', 'username')
 
 # Command Log
 
-**Make an assertion on the focused element**
+***Make an assertion on the focused element***
 
 ```javascript
 cy.focused().should('have.attr', 'name').and('eq', 'num')

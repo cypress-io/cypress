@@ -3,7 +3,7 @@ title: contains
 comments: false
 ---
 
-Get the DOM element containing the text. DOM elements can contain *more* than the desired text and still match. Additionally, Cypress [prefers some DOM elements](#Notes) over the deepest element found.
+Get the DOM element containing the text. DOM elements can contain *more* than the desired text and still match. Additionally, Cypress {% urlHash 'prefers some DOM elements' Notes %} over the deepest element found.
 
 # Syntax
 
@@ -11,6 +11,12 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 .contains(content)
 .contains(selector, content)
 .contains(selector, content, options)
+
+// ---or---
+
+cy.contains(content)
+cy.contains(selector, content)
+cy.contains(selector, content, options)
 ```
 
 ## Usage
@@ -37,11 +43,11 @@ Get the DOM element containing the content.
 
 **{% fa fa-angle-right %} selector** ***(String selector)***
 
-Specify a selector to filter DOM elements containing the text. Cypress will *ignore* it's [default preference order](#Notes) for the specified selector. Using a selector allows you to return more *shallow* elements in the tree that contain the specific text.
+Specify a selector to filter DOM elements containing the text. Cypress will *ignore* it's {% urlHash 'default preference order' Notes %} for the specified selector. Using a selector allows you to return more *shallow* elements (higher in the tree) that contain the specific text.
 
 **{% fa fa-angle-right %} options** ***(Object)***
 
-Pass in an options object to change the default behavior of `cy.contains()`.
+Pass in an options object to change the default behavior of `.contains()`.
 
 Option | Default | Description
 --- | --- | ---
@@ -54,9 +60,9 @@ Option | Default | Description
 
 # Examples
 
-## String
+## Content
 
-**Find the first element containing some text**
+***Find the first element containing some text***
 
 ```html
 <ul>
@@ -71,7 +77,7 @@ Option | Default | Description
 cy.contains('apples')
 ```
 
-**Find the input[type='submit'] by value**
+***Find the input[type='submit'] by value***
 
 Get the form element and search in its descendants for the content "submit the form!"
 
@@ -96,67 +102,112 @@ Get the form element and search in its descendants for the content "submit the f
 cy.get('form').contains('submit the form!').click()
 ```
 
-**Favor of `<button>` over other deeper elements**
+## Number
 
-Even though the `<span>` is the deepest element that contains "Search", Cypress yields `<button>` elements over spans.
+***Find the first element containing a number***
+
+Even though the `<span>` is the deepest element that contains a "4", Cypress automatically yields `<button>` elements over spans.
 
 ```html
-<form>
-  <button>
-    <i class="fa fa-search"></i>
-    <span>Search</span>
-  </button>
-</form>
+<button class="btn btn-primary" type="button">
+  Messages <span class="badge">4</span>
+</button>
 ```
 
 ```javascript
 // yields <button>
-cy.contains('Search').children('i').should('have.class', 'fa-search')
+cy.contains(4)
 ```
 
-**Favor of `<a>` over other deeper elements**
+## Regular Expression
 
-Even though the `<span>` is the deepest element that contains "Sign Out", Cypress yields anchor elements over spans.
+***Find the first element with text matching the regular expression***
 
 ```html
-<nav>
-  <a href="/users">
-    <span>Users</span>
-  </a>
-  <a href="/signout">
-    <span>Sign Out</span>
-  </a>
-</nav>
+<ul>
+  <li>apples</li>
+  <li>oranges</li>
+  <li>bananas</li>
+</ul>
 ```
 
 ```javascript
-// yields <a>
-cy.get('nav').contains('Sign Out').should('have.attr', 'href', '/signout')
+// yields <li>bananas</li>
+cy.contains(/^b\w+/)
 ```
 
-**Favor of `<label>` over other deeper elements**
+## Selector
 
-Even though the `<span>` is the deepest element that contains "Age", Cypress yields `<label>` elements over `<span>`.
+***Specify a selector to return a specific element***
+
+Technically the `<html>`, `<body>`, `<ul>`, and first `<li>` in the example below all contain "apples".
+
+Normally Cypress would return the first `<li>` since that is the *deepest* element that contains: "apples"
+
+To override the element that is yielded, we can pass 'ul' as the selector.
 
 ```html
-<form>
-  <label>
-    <span>Name:</span>
-    <input name="name" />
-  </label>
-  <label>
-    <span>Age:</span>
-    <input name="age" />
-  </label>
-</form>
+<html>
+  <body>
+    <ul>
+      <li>apples</li>
+      <li>oranges</li>
+      <li>bananas</li>
+    </ul>
+  </body>
+</html>
 ```
 
 ```javascript
-// yields label
-cy.contains('Age').find('input').type('29')
+// yields <ul>...</ul>
+cy.contains('ul', 'apples')
 ```
 
-**Only the *first* matched element will be returned**
+# Notes
+
+## Scopes
+
+`.contains()` acts differently whether its starting a series of commands or being chained off of an existing.
+
+***When starting a series of commands:***
+
+This queries the entire `document` for the content.
+
+```javascript
+cy.contains('Log In')
+```
+
+***When chained to an existing series of commands:***
+
+This will query inside of the `<#checkout-container>` element.
+
+```javascript
+cy.get('#checkout-container').contains('Buy Now')
+```
+
+***Be wary of chaining multiple contains***
+
+Let's imagine a scenario where you click a button to delete a user and a dialog appears asking you to confirm this deletion.
+
+```javascript
+// This doesn't work as intended
+cy.contains('Delete User').click().contains('Yes, Delete!').click()
+```
+
+Because the second `.contains()` is chained off of a command that yielded the `<button>`, Cypress will look inside of the `<button>` for the new content.
+
+In other words, Cypress will look inside of the `<button>` containing "Delete User" for the content: "Yes, Delete!", which is not what we intended.
+
+What you want to do is call `cy` again, which automatically creates a new chain scoped to the `document`.
+
+```javascript
+cy.contains('Delete User').click()
+cy.contains('Yes, Delete!').click()
+```
+
+## Single Element
+
+***Only the *first* matched element will be returned***
 
 ```html
 <ul id="header">
@@ -185,121 +236,75 @@ If you wanted to select the `<span>` instead, you could narrow the elements yiel
 cy.get('#main').contains('Jane Lane')
 ```
 
-## Number
+## Preferences
 
-**Find the first element containing a number**
+***Element preference order***
 
-Even though the `<span>` is the deepest element that contains a "4", Cypress automatically yields `<button>` elements over spans.
-
-```html
-<button class="btn btn-primary" type="button">
-  Messages <span class="badge">4</span>
-</button>
-```
-
-```javascript
-// yields <button>
-cy.contains(4)
-```
-
-## Regular Expression
-
-**Find the first element with text matching the regular expression**
-
-```html
-<ul>
-  <li>apples</li>
-  <li>oranges</li>
-  <li>bananas</li>
-</ul>
-```
-
-```javascript
-// yields <li>bananas</li>
-cy.contains(/^b\w+/)
-```
-
-## Selector
-
-**Specify a selector to return a specific element**
-
-Technically the `<html>`, `<body>`, `<ul>`, and first `<li>` in the example below all contain "apples".
-
-Normally Cypress would return the first `<li>` since that is the *deepest* element that contains: "apples"
-
-To override the element that is yielded, we can pass 'ul' as the selector.
-
-```html
-<html>
-  <body>
-    <ul>
-      <li>apples</li>
-      <li>oranges</li>
-      <li>bananas</li>
-    </ul>
-  </body>
-</html>
-```
-
-```javascript
-// yields <ul>...</ul>
-cy.contains('ul', 'apples')
-```
-
-# Notes
-
-**Element preference order**
+`.contains()` will always prefer elements higher in the tree when they are:
 
 - `input[type='submit']`
 - `button`
 - `a`
 - `label`
 
-**Can be chained off of `cy` or another cy command**
+***Favor of `<button>` over other deeper elements***
 
-`cy.contains()` can either *begin* a chain of commands or work off of an *existing* cy command.
+Even though the `<span>` is the deepest element that contains "Search", Cypress yields `<button>` elements over spans.
 
-***Start a chain of commands***
-
-Search for the content within the `document`.
-
-```javascript
-cy.contains('some content')
+```html
+<form>
+  <button>
+    <i class="fa fa-search"></i>
+    <span>Search</span>
+  </button>
+</form>
 ```
 
-***Find content within an existing scope***
-
-Search within an existing subject for the content. `.contains()` will be scoped to the `<aside>` element and will only search it's DOM descendants for the content.
-
 ```javascript
-cy.get('#main').find('aside').contains('Add a user')
+// yields <button>
+cy.contains('Search').children('i').should('have.class', 'fa-search')
 ```
 
-***Be wary of chaining multiple contains***
+***Favor of `<a>` over other deeper elements***
 
-Let's imagine a scenario where you click a button to delete a user and a dialog appears asking you to confirm this deletion.
+Even though the `<span>` is the deepest element that contains "Sign Out", Cypress yields anchor elements over spans.
 
-```javascript
-// This doesn't work as intended
-cy.contains('Delete User').click().contains('Yes, Delete!').click()
+```html
+<nav>
+  <a href="/users">
+    <span>Users</span>
+  </a>
+  <a href="/signout">
+    <span>Sign Out</span>
+  </a>
+</nav>
 ```
 
-Because the second `.contains()` is chained off of a command that yielded the `<button>`, Cypress will look inside of the `<button>` for the new content.
-
-In other words, Cypress will look inside of the `<button>` containing "Delete User" for the content: "Yes, Delete!", which is not what we intended.
-
-What you want to do is call `cy` again, which automatically creates a new chain from the `document`.
-
 ```javascript
-cy.contains('Delete User').click()
-cy.contains('Yes, Delete!').click()
+// yields <a>
+cy.get('nav').contains('Sign Out').should('have.attr', 'href', '/signout')
 ```
 
-You could also chain the second contains off of a parent command (such as {% url `cy.get()` get %}. This automatically changes the subject to `#dialog` which contains the content we're looking for.
+***Favor of `<label>` over other deeper elements***
+
+Even though the `<span>` is the deepest element that contains "Age", Cypress yields `<label>` elements over `<span>`.
+
+```html
+<form>
+  <label>
+    <span>Name:</span>
+    <input name="name" />
+  </label>
+  <label>
+    <span>Age:</span>
+    <input name="age" />
+  </label>
+</form>
+```
 
 ```javascript
-cy.contains('Delete User').click()
-cy.get('#dialog').contains('Yes, Delete!').click()
+// yields label
+cy.contains('Age').find('input').type('29')
 ```
 
 # Rules
@@ -318,7 +323,7 @@ cy.get('#dialog').contains('Yes, Delete!').click()
 
 # Command Log
 
-**Element contains text "New User"**
+***Element contains text "New User"***
 
 ```javascript
 cy.get('h1').contains('New User')

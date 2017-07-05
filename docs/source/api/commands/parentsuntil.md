@@ -5,6 +5,10 @@ comments: false
 
 Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parentsUntil()` http://api.jquery.com/parentsUntil %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -62,7 +66,7 @@ Option | Default | Description
 
 ## Selector
 
-**Find all of the `.active` element's ancestors until `.nav`**
+***Find all of the `.active` element's ancestors until `.nav`***
 
 ```html
 <ul class="nav">
@@ -101,7 +105,7 @@ cy.get('.active').parentsUntil('.nav')
 
 # Command Log
 
-**Find all of the `active` element's ancestors until `.nav`**
+***Find all of the `active` element's ancestors until `.nav`***
 
 ```javascript
 cy.get('.active').parentsUntil('.nav')

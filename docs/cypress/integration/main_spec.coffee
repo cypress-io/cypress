@@ -5,7 +5,7 @@ GUIDES_PATH = "/guides/getting-started/why-cypress"
 API_PATH = "/api/introduction/api"
 EXAMPLES_PATH = "/examples/recipes/unit-testing"
 DASHBOARD_PATH = "/dashboard/overview/features"
-FAQ_PATH = "/faq/questions/general-questions"
+FAQ_PATH = "/faq/questions/general-questions-faq"
 
 describe "Documentation", ->
   beforeEach ->

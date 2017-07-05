@@ -66,9 +66,9 @@ Option | Default | Description
 
 # Examples
 
-## Click
+## No Args
 
-**Click the button**
+***Click the button***
 
 ```javascript
 cy.get('button').click()
@@ -76,7 +76,7 @@ cy.get('button').click()
 
 ## Position
 
-**Specify a corner of the element to click**
+***Specify a corner of the element to click***
 
 Click the top right corner of the button.
 
@@ -86,7 +86,7 @@ cy.get('button').click('topRight')
 
 ## Coordinates
 
-**Specify explicit coordinates relative to the top left corner**
+***Specify explicit coordinates relative to the top left corner***
 
 The click below will be issued inside of the element (15px from the left and 40px from the top).
 
@@ -96,36 +96,29 @@ cy.get('button').click(15, 40)
 
 ## Options
 
-**Force a click regardless of visibility or other elements in front of the element**
+***Force a click regardless of its actionable state***
 
-Forcing a click is useful when you want the click issued no matter what. Forcing a click disables checking that this element is visible and in a clickable state before clicking.
+Forcing a click overrides the {% url 'actionable checks' interacting-with-elements#Forcing %} Cypress applies and will automatically fire the events.
 
 ```javascript
 cy.get('button').click({ force: true })
 ```
 
-{% note warning  %}
-Be careful with this option! It may allow the click to happen when it would be impossible for a real user to click.
-{% endnote %}
-
-**Force a click with position argument**
+***Force a click with position argument***
 
 ```javascript
 cy.get('button').click('bottomLeft', { force: true })
 ```
 
-**Force a click with relative coordinates**
+***Force a click with relative coordinates***
 
 ```javascript
 cy.get('button').click(5, 60, { force: true })
 ```
-**Hover and clicking hidden elements**
 
-{% note info %}
-{% url 'Check out our example recipe on testing hover and working with hidden elements.' testing-the-dom %}
-{% endnote %}
+***Click all buttons found on the page***
 
-**Click all buttons found on the page**
+By default, Cypress will error if you're trying to click multiple elements. By passing `{ multiple: true }` Cypress will iteratively apply the click to each element and will also log to the {% url 'Command Log' overview-of-the-gui#Command-Log %} multiple times.
 
 ```javascript
 cy.get('button').click({ multiple: true })
@@ -133,7 +126,15 @@ cy.get('button').click({ multiple: true })
 
 # Notes
 
-**Events that are fired**
+## Actionability
+
+***The element must first reach actionability***
+
+`.click()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+## Events
+
+***Events that are fired:***
 
 ```javascript
 cy.get('button').click()
@@ -149,37 +150,27 @@ At the moment, `mouseover` and `mouseout` events are *not* fired. {% open_an_iss
 
 Additionally if the `mousedown` event causes the element to be removed from the DOM, the remaining events should continue to be fired, but to the resulting element left below the removed element. This has also not been implemented. {% open_an_issue %} if you need this to be fixed.
 
-**Focus is given to the first focusable element**
+## Focus
 
-Clicking a `<span>`, for example, inside of a `<button>` gives the focus to the button, since that's what would happen in a real user scenario.
+***Focus is given to the first focusable element***
+
+For example, clicking a `<span>` inside of a `<button>` gives the focus to the button, since that's what would happen in a real user scenario.
 
 However, Cypress additionally handles situations where a child descendent is clicked inside of a focusable parent, but actually isn't visually inside the parent (per the CSS Object Model). In those cases if no focusable parent is found the window is given focus instead (which matches real browser behavior).
 
-**Mousedown cancellation will not cause focus**
+## Cancellation
+
+***Mousedown cancellation will not cause focus***
 
 If the mousedown event has its default action prevented (`e.preventDefault()`) then the element will not receive focus as per the spec.
 
-**Coordinates of a click**
-
-The coordinates of the click will be recorded the exact moment the click happens. When hovering over the `click` command, Cypress displays a red "hitbox" indicator on the snapshot showing you where the click event occurred on the page.
-
-**pointer-events: none**
-
-Cypress does not currently factor in `pointer-events: none` in its clicking algorithm. {% open_an_issue %} if you need this to be fixed.
-
-**Element removal during `mousedown` or `mouseup`**
+***Element removal during `mousedown` or `mouseup`***
 
 The spec states what should happen if the element clicked is removed from the DOM during `mousedown` or `mouseup`, but Cypress is not currently factoring this in. {% open_an_issue %} if you need this to be fixed.
 
-**Animations**
+***pointer-events: none***
 
-Unlike most testing frameworks, Cypress has built in logic for dealing with CSS and JavaScript animations. Cypress detects if an element is animating and waits until the element reaches a clickable state. You will never deal with a situation where Cypress accidentally clicks the *wrong* element.
-
-However, sometimes when dealing with 3rd party plugins that animate, Cypress' logic to scroll an element into view can be affected.
-
-Cypress attempts to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event.
-
-These situations are rare, but if you're having a difficult time clicking an element or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with {% url 'cy.wait()' wait %}. It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
+Cypress does not currently factor in `pointer-events: none` in its clicking algorithm. {% open_an_issue %} if you need this to be fixed.
 
 # Rules
 
@@ -197,7 +188,7 @@ These situations are rare, but if you're having a difficult time clicking an ele
 
 # Command Log
 
-**Click the button in the form that has text "Create User"**
+***Click the button in the form that has text "Create User"***
 
 ```javascript
 cy.get('form').find('button').contains('Create User').click()

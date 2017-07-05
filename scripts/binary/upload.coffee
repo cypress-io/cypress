@@ -6,7 +6,7 @@ cp      = require("child_process")
 path    = require("path")
 gulp    = require("gulp")
 human   = require("human-interval")
-konfig  = require("@packages/server/lib/konfig")
+konfig  = require("../../packages/server/lib/konfig")
 Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
@@ -42,7 +42,7 @@ module.exports = {
     }
 
   getAwsObj: ->
-    fs.readJsonSync("./support/aws-credentials.json")
+    fs.readJsonSync(path.join(__dirname, "support", "aws-credentials.json"))
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/

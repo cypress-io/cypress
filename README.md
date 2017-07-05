@@ -190,4 +190,8 @@ npm run binary-upload -- --platform darwin --version 0.20.0 --zip cypress.zip
 ```
 
 If something goes wrong, see debug messages using `DEBUG=cypress:binary ...` environment
-variable
+variable.
+
+Because we had many problems reliably zipping built binary, for now we need
+to build both Mac and Linux binary from Mac (Linux binary is built using
+a Docker container), then zip it **from Mac**, then upload it.

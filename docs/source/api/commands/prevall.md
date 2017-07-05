@@ -5,6 +5,10 @@ comments: false
 
 Get all previous siblings of each DOM element in a set of matched DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prevAll()` http://api.jquery.com/prevAll %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -50,9 +54,9 @@ Option | Default | Description
 
 # Examples
 
-## All Previous
+## No Args
 
-**Find all of the element's siblings before `.third`**
+***Find all of the element's siblings before `.third`***
 
 ```html
 <ul>
@@ -71,7 +75,7 @@ cy.get('.third').prevAll()
 
 ## Selector
 
-**Find all of the previous siblings of each li. Keep only the ones with a class `selected`.**
+***Find all of the previous siblings of each li. Keep only the ones with a class `selected`.***
 
 ```html
 <ul>
@@ -104,7 +108,7 @@ cy.get('li').prevAll('.selected')
 
 # Command Log
 
-**Find all elements before the `.active` li**
+***Find all elements before the `.active` li***
 
 ```javascript
 cy.get('.left-nav').find('li.active').prevAll()

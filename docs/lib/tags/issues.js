@@ -1,6 +1,6 @@
 const util = require('hexo-util')
 
-function issue (args) {
+function issue (hexo, args) {
   // {% issue 74 'not currently supported' %}
 
   const num = args[0]
@@ -15,7 +15,7 @@ function issue (args) {
   return util.htmlTag('a', attrs, text)
 }
 
-function openAnIssue (args) {
+function openAnIssue (hexo, args) {
   // {% open_an_issue %}
   // {% open_an_issue 'here' %}
 

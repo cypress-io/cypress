@@ -2,6 +2,7 @@
   "name": "@packages/driver",
   "version": "0.0.0",
   "private": true,
+  "main": "index.js",
   "scripts": {
     "postinstall": "echo '@packages/driver needs: npm run build'",
     "build": "gulp build",
@@ -9,6 +10,7 @@
     "clean-deps": "rm -rf node_modules",
     "test": "gulp test"
   },
+  "main": "index.js",
   "files": [
     "dist",
     "lib"

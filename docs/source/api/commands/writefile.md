@@ -64,7 +64,7 @@ Option | Default | Description
 
 ## Text
 
-**Write some text to a `txt` file**
+***Write some text to a `txt` file***
 
 If the path to the file does not exist, the file and it's path will be created. If the file already exists, it will be over-written.
 
@@ -84,7 +84,7 @@ cy
 
 ## JSON
 
-**Write JSON to a file**
+***Write JSON to a file***
 
 JavaScript arrays and objects are stringified and formatted into text.
 
@@ -104,7 +104,7 @@ cy.writeFile('path/to/data.json', { name: 'Eliza', email: 'eliza@example.com' })
 }
 ```
 
-**Write response data to a fixture file**
+***Write response data to a fixture file***
 
 ```javascript
 cy.request('https://jsonplaceholder.typicode.com/users').then(function(response){
@@ -119,7 +119,7 @@ cy.fixture('users').then(function(users){
 
 ## Encoding
 
-**Specify the encoding with the third argument.**
+***Specify the encoding with the third argument.***
 
 ```javascript
 cy.writeFile('path/to/ascii.txt', 'Hello World', 'ascii'))
@@ -147,7 +147,7 @@ Hello World
 
 # Command Log
 
-**Write an array to a file**
+***Write an array to a file***
 
 ```javascript
 cy.writeFile('info.log', ['foo', 'bar', 'baz'])
