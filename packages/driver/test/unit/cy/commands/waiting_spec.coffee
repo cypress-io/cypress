@@ -722,7 +722,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
-              "Returned": undefined
+              "Yielded": undefined
             }
 
         it "#consoleProps as a child", ->
@@ -732,7 +732,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
-              "Returned": btn
+              "Yielded": btn
             }
 
       describe "alias argument errors", ->
@@ -839,7 +839,7 @@ describe "$Cypress.Cy Waiting Commands", ->
               expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 "Waited For": "getFoo"
-                Returned: xhr
+                Yielded: xhr
               }
 
         it "#consoleProps waiting on multiple aliases", ->
@@ -855,7 +855,7 @@ describe "$Cypress.Cy Waiting Commands", ->
               expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 "Waited For": "getFoo, getBar"
-                Returned: [xhrs[0], xhrs[1]] ## explictly create the array here
+                Yielded: [xhrs[0], xhrs[1]] ## explictly create the array here
               }
 
       # describe "function argument", ->

@@ -49,7 +49,7 @@ module.exports = (Cypress, Commands) ->
       .timeout(options.timeout)
       .then (result) ->
         if options._log
-          _.extend(consoleOutput, { Returned: _.omit(result, "shell") })
+          _.extend(consoleOutput, { Yielded: _.omit(result, "shell") })
 
           consoleOutput["Shell Used"] = result.shell
 

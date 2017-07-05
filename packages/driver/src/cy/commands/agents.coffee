@@ -89,7 +89,7 @@ onInvoke = (obj, args) ->
       consoleObj[display(obj.name)] = obj.obj
       consoleObj.Arguments = obj.call.args
       consoleObj.Context =   obj.call.thisValue
-      consoleObj.Returned =  obj.call.returnValue
+      consoleObj.Yielded =  obj.call.returnValue
       if obj.error
         consoleObj.Error = obj.error.stack
 

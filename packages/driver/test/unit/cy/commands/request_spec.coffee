@@ -455,7 +455,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(@log.attributes.consoleProps()).to.deep.eq({
             Command: "request"
             Request: allRequestResponse
-            Returned: {
+            Yielded: {
               duration: 10
               status: 201
               body: {id: 123}
@@ -506,7 +506,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(@log.attributes.consoleProps()).to.deep.eq({
             Command: "request"
             Requests: allRequestResponses
-            Returned: {
+            Yielded: {
               duration: 10
               status: 201
               body: {id: 123}

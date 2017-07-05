@@ -166,7 +166,7 @@ module.exports = (Cypress, Commands) ->
             rr = if rr.length is 1 then rr[0] else rr
 
             obj[word] = rr
-            obj["Returned"] = _.pick(resp, "status", "duration", "body", "headers")
+            obj["Yielded"] = _.pick(resp, "status", "duration", "body", "headers")
 
             return obj
 
