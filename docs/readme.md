@@ -37,7 +37,7 @@ To link to a page on Guides:
 
 To link to a page on API:
 ```md
-[and](https://on.cypress.io/api/$slug)
+[and](https://on.cypress.io/$slug)
 ```
 
 #### Creating New Files
