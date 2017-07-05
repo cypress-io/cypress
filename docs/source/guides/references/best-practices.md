@@ -6,23 +6,72 @@ layout: toc-top
 
 ## Using your UI to Build Up State
 
+- use cy.request
+- seed the database
+- use stubbing
+- modify cookies
+- modify local storage
+- mock / stub methods
+
+Mostly WIP.
+
+Began {% url 'discussing here' testing-your-app#Testing-Strategies %}.
+
 ## Acting Too Much like a User
+
+WIP.
+
+## Testing like you did with Selenium
+
+WIP.
 
 ## Testing Across Domains
 
+WIP.
+
 ## Creating too many Abstractions
+
+WIP.
 
 ## Logging Out after each Test
 
+WIP.
+
 ## Overusing `.then()`
+
+WIP.
+
+## Avoid 3rd Party Services
+
+WIP.
 
 ## Adding Promises Unnecessarily
 
+WIP.
+
 ## Mutating State Between Tests
+
+WIP.
+
+## Running too many Tests at Once
+
+WIP.
 
 ## Putting up with Slow Tests
 
+WIP.
+
+## Writing E2E Tests only for Production
+
+WIP.
+
+## Running all the Tests in GUI Mode
+
+WIP.
+
 ## Splitting up the "One Giant Test"
+
+WIP.
 
 ## Unnecessary Waiting
 
