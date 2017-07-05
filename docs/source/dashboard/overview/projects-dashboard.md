@@ -43,7 +43,7 @@ Organizations work just like they do in Github. They enable you to separate your
 
 - **A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
 
-![Privacy of Project](c/img/dashboard/hoose-privacy-of-recorded-project.png)
+![Privacy of Project](/img/dashboard/choose-privacy-of-recorded-project.png)
 
 **5. Click "Setup Project".**
 
