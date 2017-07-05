@@ -91,7 +91,7 @@ const mapTasks = (cmd, packages) => {
       runCommand = `run ${cmd}`
   }
 
-  console.log("filtered packages:", packages.join(", "))
+  console.log('filtered packages:', packages.join(', '))
   return packages.map((dir, index) => {
     const packageName = packageNameFromPath(dir)
     return {

@@ -20,6 +20,11 @@ uploadNames = {
   win32:  "win64"
 }
 
+## TODO: refactor this
+# system expects desktop application to be inside a file
+# with this name
+zipName = "cypress.zip"
+
 getUploadNameByOs = (os) ->
   name = uploadNames[os]
   if not name
@@ -60,7 +65,7 @@ module.exports = {
 
       url = [konfig('cdn_url'), "desktop", version, platform, zipName].join("/")
       console.log("purging url", url)
-      configFile = path.resolve("support", ".cfcli.yml")
+      configFile = path.resolve(__dirname, "support", ".cfcli.yml")
       cp.exec "cfcli purgefile -c #{configFile} #{url}", (err, stdout, stderr) ->
         if err
           console.error("Could not purge #{url}")
@@ -70,9 +75,6 @@ module.exports = {
         resolve()
 
   createRemoteManifest: (folder, version) ->
-    ## TODO: refactor this
-    zipName = "cypress.zip"
-
     getUrl = (uploadOsName) ->
       {
         url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
@@ -126,6 +128,8 @@ module.exports = {
 
         gulp.src(zipFile)
         .pipe rename (p) =>
+          # rename to standard filename
+          p.basename = zipName
           p.dirname = @getUploadDirName({version, platform})
           p
         .pipe debug()
