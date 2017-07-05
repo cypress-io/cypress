@@ -12,9 +12,9 @@ comments: false
 - Effectively leveraging test data
 {% endnote %}
 
-We covered Cypress in a tutorial app, now let's integrate it into your *real* app!
+We {% url "covered Cypress in a simple app" writing-your-first-test %}, now let's integrate it into your *real* app!
 
-# Step 1: Add Your Project
+# {% fa fa-plus %} Step 1: Add Your Project
 
 Follow the {% url 'previous steps' writing-your-first-test#Setup-Add-a-New-Project %} except this time add your **real project folder**.
 
@@ -23,25 +23,23 @@ You should choose either:
 - The root folder of your project
 - ...or if its super large - a folder with all of your frontend assets in it
 
-# Step 2: Start Your Server
+# {% fa fa-terminal %} Step 2: Start Your Server
 
-Now to test your own application the first thing you'll want to do is start your local development server which hosts the application.
+Now to test your own application the first thing you'll want to do is start your local development server that hosts the application.
 
 It should look something like **http://localhost:8080**.
 
 {% note warning 'Anti-Pattern' %}
-Don't try to start a web server from within Cypress scripts.
-
-Read about {% url 'best practices' best-practices#Web-Servers %} here.
+Don't try to start a web server from within Cypress scripts. Read about {% url 'best practices' best-practices#Web-Servers %} here.
 {% endnote %}
 
 {% note info 'Why start a local development server?' %}
 
-You may be wondering - why can't I just visit the application that's already in production?
+You may be wondering - why can't I just visit my application that's already in production?
 
 While you certainly *can* test an application that's already deployed, that's not really the **sweet spot** of Cypress.
 
-Cypress is built, and optimized around being a tool for your daily local development. In fact, after you start using Cypress for awhile, we believe that you should do **all of your development** through it.
+Cypress is built, and optimized around being a tool for your daily local development. In fact, after you start using Cypress for awhile, we believe that you may find it useful to even do **all of your development** in it.
 
 Ultimately you'll not only be able to **test and develop** at the same time, but you'll actually be able to build your application **faster** while getting tests "for free".
 
@@ -49,7 +47,7 @@ What's more - since Cypress enables you to do things like **stub network request
 
 Last but not least - trying to shoehorn tests to an already built application is much more difficult than building it as you write tests. You'll likely encounter a series of initial up front challenges / hurdles that would have otherwise been avoided writing tests from the start.
 
-The last, and probably most important reason why you want to test against local servers is the ability to **control them**. When your application is running in production you can't control it.
+The last, and probably most important reason why you want to test against local servers, is the ability to **control them**. When your application is running in production you can't control it.
 
 When it's running in development you can easily:
 
@@ -64,17 +62,17 @@ With that said - you still have the option to have it **both ways**.
 Many of our users run the *majority* of their integration tests against a local development server, but then reserve a smaller set of **smoke tests** that run only against a deployed production app.
 {% endnote %}
 
-# Step 3: Visit Your Server
+# {% fa fa-globe %} Step 3: Visit Your Server
 
 Once your server is running, it's time to visit it.
 
-Let's first delete the `example_spec.js` Cypress creates for you, since we learned about this in the previous tutorial.
+Let's delete the `example_spec.js` that Cypress created for you, since we learned about this in the previous tutorial.
 
 ```shell
 rm cypress/integration/example_spec.js
 ```
 
-Now let's create our own spec file using your favorite text editor or from the terminal.
+Now let's create our own spec file called `home_page_spec.js`.
 
 ```shell
 touch cypress/integration/home_page_spec.js
@@ -84,7 +82,7 @@ Once that file is created, you should see it in the list of spec files.
 
 {% img 'no-border' /img/guides/testing-your-app-home-page-spec.png %}
 
-Let's edit this file in your text editor and add in the following test code:
+Now you'll need to add in the following code in your test file to visit your server:
 
 ```js
 describe('The Home Page', function() {
@@ -96,30 +94,26 @@ describe('The Home Page', function() {
 
 Now click on the `home_page_spec.js` file and watch Cypress open your browser.
 
-If you forgot to start your server you'll see Cypress error with the picture below:
+If you forgot to start your server you'll see the error below:
 
 {% img /img/guides/testing-your-app-visit-fail.png %}
 
 If you've started your server, then you should see your application loaded and working.
 
-# Step 4: Configure Cypress
+# {% fa fa-cogs %} Step 4: Configure Cypress
 
-If you think ahead, you'll quickly realize that you're going to be typing this URL a lot, since every test is going to need to visit some page of your application. Luckily, Cypress provides a {% url "configuration option" configuration %} for it. Let's leverage that now.
+If you think ahead, you'll quickly realize that you're going to be typing this URL a lot, since every test is going to need to visit some page of your application. Luckily, Cypress provides a {% url "configuration option" configuration %} for this. Let's leverage that now.
 
 Open up `cypress.json`, which you will find in your project root (where you installed Cypress.) It starts out empty:
 
 
-```javascript
-// cypress.json
-
+```json
 {}
 ```
 
 Let's add the `baseUrl` option.
 
-```javascript
-// cypress.json
-
+```json
 {
   "baseUrl": "http://localhost:8080"
 }
@@ -151,9 +145,11 @@ Check them out in {% url "Configuration" configuration %}!
 
 # Testing Strategies
 
-You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advise to give you. What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you, your application, and your team.
+You're about to embark on writing tests for your application, and only _you_ know your application, so we don't have a lot of specific advise to give you.
 
-That said, modern web testing has a few wrinkles that every team experiences, so here's some quick tips on common situations you're more likely to run into sooner than later.
+**What to test, where the edge cases and seams are, what regressions you're likely to run into, etc. are entirely up to you, your application, and your team.**
+
+That said, modern web testing has a few wrinkles that every team experiences, so here are some quick tips on common situations you're likely to run into.
 
 ## Seeding Data
 
@@ -163,13 +159,13 @@ Typically these days servers communicate with frontend apps via JSON, but you co
 
 Generally the server is responsible for sending responses that reflect some kind of **state** it holds - generally in a database.
 
-Traditionally when writing `e2e` tests using Selenium, before you automate the browser you generally do some kind of **setup and teardown** on the server.
+Traditionally when writing `e2e` tests using Selenium, before you automate the browser you do some kind of **setup and teardown** on the server.
 
-Perhaps you'll need to generate a user, and seed them with associations and records. You may be familiar with using these concepts such as fixtures or factories.
+Perhaps you'll need to generate a user, and seed them with associations and records. You may be familiar with using things such as fixtures or factories.
 
 To test various page states - like an empty view, or a pagination view, you'd need to seed the server so that this state can be tested.
 
-While there's a lot more to this strategy, you generally have two ways to facilitate this with Cypress:
+**While there's a lot more to this strategy, you generally have two ways to facilitate this with Cypress:**
 
 - {% url `cy.exec()` exec %} - to run system commands
 - {% url `cy.request()` request %} - to make HTTP requests
@@ -189,9 +185,9 @@ describe('The Home Page', function(){
 })
 ```
 
-Instead just executing a system command, you may want more flexibility and could expose a series of routes only when running in a test environment
+Instead of just executing a system command, you may want more flexibility and could expose a series of routes only when running in a test environment.
 
-For instance, you could compose several requests together to tell your server exactly what you want to create.
+**For instance, you could compose several requests together to tell your server exactly the state you want to create.**
 
 ```js
 describe('The Home Page', function(){
@@ -202,11 +198,12 @@ describe('The Home Page', function(){
     // seed a post in the DB that we control from our tests
     cy.request('POST', '/test/seed/post', {
       title: 'First Post',
-      authorId: 1, body: '...'
+      authorId: 1,
+      body: '...'
     })
 
     // seed a user in the DB that we can control from our tests
-    cy.request('POST', '/test/seed/user', { name: 'Brian' }).its('body').as('currentUser')
+    cy.request('POST', '/test/seed/user', { name: 'Jane' }).its('body').as('currentUser')
   })
 
   it('successfully loads', function() {
@@ -219,19 +216,19 @@ describe('The Home Page', function(){
 })
 ```
 
-While there's nothing really *wrong* with this approach, it does add a lot of complexity. You will be battling synchronizing the state between your server and your browser - and you'll always need to to setup / teardown this state before tests (which is slow).
+While there's nothing really *wrong* with this approach, it does add a lot of complexity. You will be battling synchronizing the state between your server and your browser - and you'll always need to setup / teardown this state before tests (which is slow).
 
 The good news is that we aren't Selenium, nor are we a traditional e2e testing tool. That means we're not bound to the same restrictions.
 
-With Cypress, there are several other approaches which can offer an arguably better and faster experience.
+**With Cypress, there are several other approaches that can offer an arguably better and faster experience.**
 
 ## Stubbing the Server
 
-Another valid approach opposed to seeding and talking to your server is much simpler - just bypass it altogether!
+Another valid approach opposed to seeding and talking to your server is to just bypass it altogether. Must simpler!
 
-While you'll still receive all of the regular HTML / JS / CSS assets from your server and you'll continue to {% url `cy.visit()` visit %} it in the same way - we can instead **stub** the JSON responses coming from it.
+While you'll still receive all of the regular HTML / JS / CSS assets from your server and you'll continue to {% url `cy.visit()` visit %} it in the same way - you can instead **stub** the JSON responses coming from it.
 
-This means that instead of resetting the database, or seeding it with the state we want, we can simply just force the server to respond with **whatever** we want it to. In this way, we not only prevent needing to synchronize the state between the server and browser, but we also prevent mutating state from our tests. That means tests won't build up state which may affect other tests.
+This means that instead of resetting the database, or seeding it with the state we want, you can simply just force the server to respond with **whatever** you want it to. In this way, we not only prevent needing to synchronize the state between the server and browser, but we also prevent mutating state from our tests. That means tests won't build up state that may affect other tests.
 
 Another upside is that this enables you to **build out your application** without needing the *contract* of the server to exist. You can build it the way you want the data to be structured, and even test all of the edge cases, without needing a server.
 
@@ -247,7 +244,7 @@ You could have the server generate all of the fixture stubs for you ahead of tim
 
 Another more balanced approach is just to integrate both strategies. You likely want to have a **single test** that takes a true `e2e` approach and stubs nothing. It'll use the feature for real - including seeding the database and setting up state.
 
-Once you've established its working you can then use stubs to test all of the edge cases and additional scenarios. There's no benefits to using real data in the vast majority of cases. We recommend that the vast majority of tests use stub data. They will be orders of magnitude faster, and much less complex.
+Once you've established it's working you can then use stubs to test all of the edge cases and additional scenarios. There are no benefits to using real data in the vast majority of cases. We recommend that the vast majority of tests use stub data. They will be orders of magnitude faster, and much less complex.
 
 {% note info 'Guide: Network Requests' %}
 Please read our {% url 'Guide on Network Requests' network-requests %} for a much more thorough analysis and approach to accomplishing this.
@@ -255,9 +252,9 @@ Please read our {% url 'Guide on Network Requests' network-requests %} for a muc
 
 ## Logging In
 
-One of the first (and arguably one of the hardest) hurdles you'll have to overcome is logging into your application.
+One of the first (and arguably one of the hardest) hurdles you'll have to overcome is testing logging into your application.
 
-Nothing slows a test suite like having to log in, but all the good parts of your application most likely require an authenticated user! Here are some tips.
+Nothing slows a test suite down like having to log in, but all the good parts of your application most likely require an authenticated user! Here are some tips.
 
 ***Fully Test the Login Flow -- But Only Once!***
 
@@ -275,8 +272,7 @@ describe('The Login Page', function(){
 
     // seed a user in the DB that we can control from our tests
     // assuming it generates a random password for us
-    cy
-      .request('POST', '/test/seed/user', { username: 'jane.lane' })
+    cy.request('POST', '/test/seed/user', { username: 'jane.lane' })
       .its('body')
       .as('currentUser')
   })
@@ -321,7 +317,7 @@ Now, once you have your login completely tested - you may be tempted to think:
 Do not use **your UI** to login before each test.
 {% endnote %}
 
-Let's investigate and tease apart these concepts.
+Let's investigate and tease apart why.
 
 ***Bypassing your UI***
 
@@ -333,7 +329,7 @@ Here's a more robust example:
 
 Imagine you're testing the functionality of a **Shopping Cart**. To test this, you  need the ability to add products to that cart. Well where do the products come from? Should you use your UI to login to the admin area, and then create all of the products including their descriptions, categories, and images? Once that's done should you then visit each product and add each one to the shopping cart?
 
-No. You wouldn't do that.
+No. You shouldn't do that.
 
 {% note warning 'Anti-Pattern' %}
 Don't use your UI to build up state! It's enormously slow, cumbersome, and unnecessary.
@@ -341,9 +337,9 @@ Don't use your UI to build up state! It's enormously slow, cumbersome, and unnec
 Read about {% url 'best practices' best-practices#Using-your-UI-to-Build-Up-State %} here.
 {% endnote %}
 
-Using your UI to **log in** is the *exact same scenario* as what we just described above. Logging in is such a prerequisite of state that comes before all of your other tests.
+Using your UI to **log in** is the *exact same scenario* as what we just described above. Logging in is just a prerequisite of state that comes before all of your other tests.
 
-Because Cypress isn't Selenium, we can actually take a huge short cut here and short circuit needing to use our UI by using {% url `cy.request()` request %}.
+Because Cypress isn't Selenium, we can actually take a huge short cut here and skip needing to use our UI by using {% url `cy.request()` request %}.
 
 Because {% url `cy.request()` request %} automatically gets and sets cookies under the hood, we can actually use it to build up state without using your browser's UI, yet still have it perform exactly as if it came from the browser!
 
@@ -386,9 +382,9 @@ describe('The Dashboard Page', function(){
 })
 ```
 
-Do you see the difference? We were able to login without needing to actually use our UI. This saves an enormous amount of time visiting the login page, filling out the username, password, and waiting for the server to redirect us.
+Do you see the difference? We were able to login without needing to actually use our UI. This saves an enormous amount of time visiting the login page, filling out the username, password, and waiting for the server to redirect us *before every test*.
 
-Because we previously tested the login system end to end without using any short cuts we have already received 100% confidence and guarantee its working correctly. Once we've established that, there is literally **no reason** to continue to use it "as a user would".
+Because we previously tested the login system end to end without using any short cuts we have already have 100% confidence it's working correctly.
 
 Use this methodology above when working with any area of your system that requires state to be set up elsewhere. Just remember - don't use your UI!
 
@@ -404,7 +400,7 @@ Feel free to {% url 'explore these additional logging in' logging-in-recipe %} r
 
 Ok, we're done talking for now, dive in and get started testing your app!
 
-From here you may want to dive into more guides:
+From here you may want to dive into some more of our guides:
 
 - {% url "Cypress API" api %} to learn what commands are available as you work
 - {% url "Introduction to Cypress" introduction-to-cypress %} explains how Cypress *really* works
