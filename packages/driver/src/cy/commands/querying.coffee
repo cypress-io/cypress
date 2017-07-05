@@ -36,7 +36,7 @@ module.exports = (Cypress, Commands) ->
               utils.getDomElements($el)
             else
               "--nothing--"
-            Returned: ret
+            Yielded: ret
             Elements: $el?.length ? 0
         })
 
@@ -128,16 +128,16 @@ module.exports = (Cypress, Commands) ->
           switch aliasType
             when "dom"
               _.extend consoleProps,
-                Returned: utils.getDomElements(value)
+                Yielded: utils.getDomElements(value)
                 Elements: value?.length
 
             when "primitive"
               _.extend consoleProps,
-                Returned: value
+                Yielded: value
 
             when "route"
               _.extend consoleProps,
-                Returned: value
+                Yielded: value
 
           return consoleProps
 
@@ -203,7 +203,7 @@ module.exports = (Cypress, Commands) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Returned = utils.getDomElements($el)
+        consoleProps.Yielded = utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -333,7 +333,7 @@ module.exports = (Cypress, Commands) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Returned = utils.getDomElements($el)
+        consoleProps.Yielded = utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})

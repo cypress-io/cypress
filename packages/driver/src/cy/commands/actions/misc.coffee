@@ -31,7 +31,7 @@ module.exports = (Cypress, Commands) ->
           $el: subject
           consoleProps: ->
             {
-              "Returned": subject
+              "Yielded": subject
               "Event options": eventOptions
             }
 

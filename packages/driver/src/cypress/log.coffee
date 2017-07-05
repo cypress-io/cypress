@@ -81,7 +81,7 @@ klassMethods = {
         else
           current.get("subject")
 
-        "Returned": ret
+        "Yielded": ret
 
     # if obj.isCurrent
       ## stringify the obj.message (if it exists) or current.get("args")
@@ -395,7 +395,7 @@ class $Log
       _.extend consoleObj, orig.apply(@, args)
 
       ## TODO: right here we need to automatically
-      ## merge in "Returned + Elemented" if there is an $el
+      ## merge in "Yielded + Element" if there is an $el
 
       ## and finally add error if one exists
       if err = _this.get("error")
