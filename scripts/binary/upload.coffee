@@ -60,7 +60,7 @@ module.exports = {
 
       url = [konfig('cdn_url'), "desktop", version, platform, zipName].join("/")
       console.log("purging url", url)
-      configFile = path.resolve("support", ".cfcli.yml")
+      configFile = path.resolve(__dirname, "support", ".cfcli.yml")
       cp.exec "cfcli purgefile -c #{configFile} #{url}", (err, stdout, stderr) ->
         if err
           console.error("Could not purge #{url}")
