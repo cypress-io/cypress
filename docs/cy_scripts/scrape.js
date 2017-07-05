@@ -39,7 +39,7 @@ function scrape () {
     }
 
     return request({
-      url: 'https://circleci.com/api/v1.1/project/github/cypress-io/cypress-docsearch-scraper/',
+      url: 'https://circleci.com/api/v1.1/project/github/cypress-io/docsearch-scraper/',
       method: 'POST',
       json: true,
       auth: {
