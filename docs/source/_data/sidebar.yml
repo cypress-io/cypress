@@ -161,6 +161,10 @@ examples:
     docker-images: docker-images.html
     circle-ci: circle-ci.html
     codeship: codeship.html
+  media:
+    blogs-media: blogs-media.html
+    talks-media: talks-media.html
+    podcasts-media: podcasts-media.html
 
 dashboard:
   overview:
