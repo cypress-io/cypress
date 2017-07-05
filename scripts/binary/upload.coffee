@@ -58,12 +58,16 @@ module.exports = {
     console.log("target directory %s", dirName)
     dirName
 
-  purgeCache: ({zipFile, version, platform}) ->
+  purgeCache: ({zipName, version, platform}) ->
     la(check.unemptyString(platform), "missing platform", platform)
-    new Promise (resolve, reject) =>
-      zipName = path.basename(zipFile)
+    la(check.unemptyString(zipName), "missing zip filename")
+    la(check.extension("zip", zipName),
+      "zip filename should end with .zip", zipName)
 
-      url = [konfig('cdn_url'), "desktop", version, platform, zipName].join("/")
+    new Promise (resolve, reject) =>
+      name = path.basename(zipName, ".zip")
+
+      url = [konfig("cdn_url"), "desktop", version, platform, name].join("/")
       console.log("purging url", url)
       configFile = path.resolve(__dirname, "support", ".cfcli.yml")
       cp.exec "cfcli purgefile -c #{configFile} #{url}", (err, stdout, stderr) ->
@@ -117,7 +121,11 @@ module.exports = {
     console.log("#uploadToS3 ⏳")
     la(check.unemptyString(version), "expected version string", version)
     la(check.unemptyString(zipFile), "expected zip filename", zipFile)
+    la(check.extension("zip", zipFile),
+      "zip filename should end with .zip", zipFile)
     la(meta.isValidPlatform(platform), "invalid platform", platform)
+
+    console.log("zip filename #{zipFile}")
 
     upload = =>
       new Promise (resolve, reject) =>
@@ -128,8 +136,8 @@ module.exports = {
 
         gulp.src(zipFile)
         .pipe rename (p) =>
-          # rename to standard filename
-          p.basename = zipName
+          # rename to standard filename zipName
+          p.basename = path.basename(zipName, p.extname)
           p.dirname = @getUploadDirName({version, platform})
           p
         .pipe debug()
@@ -140,5 +148,5 @@ module.exports = {
 
     upload()
     .then =>
-      @purgeCache({zipFile, version, platform})
+      @purgeCache({zipName, version, platform})
 }
