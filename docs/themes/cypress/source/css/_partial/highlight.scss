@@ -69,13 +69,38 @@ a code {
   }
 }
 
-.article pre.language-shell,
-.faq pre.language-shell{
-    border-left: 5px solid #000;
+.article pre.language-shell code,
+.faq pre.language-shell code {
+  padding-left: 3.8em;
 }
 
-.article pre.language-shell, .article pre.language-shell code,
-.faq pre.language-shell, .faq pre.language-shell  code {
+.article pre.language-shell,
+.faq pre.language-shell {
+  border-left: 5px solid #000;
+  background-color: #252831;
+  color: #f5f6f8;
+
+  code {
+    padding-left: 2em;
     background-color: #252831;
     color: #f5f6f8;
+  }
+
+  &:before{
+    content: '$';
+    z-index: 1;
+    display: block;
+    // position: absolute;
+    bottom: auto;
+    left: 10px;
+    width: auto;
+    height: auto;
+    max-height: 13em;
+    box-shadow: none;
+    -webkit-transform: rotate(0);
+    -moz-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
 }
