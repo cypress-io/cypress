@@ -7,7 +7,7 @@ comments: false
 # {% fa fa-graduation-cap %} What You'll Learn
 
 - How to install the Cypress Desktop Application
-- How to install the CLI tools
+- How to install the CLI tool
 
 {% endnote %}
 
@@ -16,7 +16,7 @@ comments: false
 Cypress is a desktop application that is locally installed on your computer.
 
 {% note info %}
-The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application
+The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application.
 {% endnote %}
 
 The desktop application can be installed in the following operating systems:
@@ -38,13 +38,13 @@ You can install Cypress in 2 different ways:
 
 ## Command Line Tool
 
-***Install the Cypress CLI tool***
+**Install the Cypress CLI tool**
 
 ```shell
 npm install -g cypress-cli
 ```
 
-***Install the Desktop Cypress app***
+**Install the Desktop Cypress app**
 
 ```shell
 cypress install
