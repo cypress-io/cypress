@@ -142,7 +142,7 @@ api:
     cookies: cookies.html
     dom: dom.html
     env: env.html
-    cypress-server: server.html
+    cypress-server: cypress-server.html
 
 examples:
   recipes:
