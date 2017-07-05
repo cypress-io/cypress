@@ -20,6 +20,11 @@ uploadNames = {
   win32:  "win64"
 }
 
+## TODO: refactor this
+# system expects desktop application to be inside a file
+# with this name
+zipName = "cypress.zip"
+
 getUploadNameByOs = (os) ->
   name = uploadNames[os]
   if not name
@@ -70,9 +75,6 @@ module.exports = {
         resolve()
 
   createRemoteManifest: (folder, version) ->
-    ## TODO: refactor this
-    zipName = "cypress.zip"
-
     getUrl = (uploadOsName) ->
       {
         url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
@@ -126,6 +128,8 @@ module.exports = {
 
         gulp.src(zipFile)
         .pipe rename (p) =>
+          # rename to standard filename
+          p.basename = zipName
           p.dirname = @getUploadDirName({version, platform})
           p
         .pipe debug()
