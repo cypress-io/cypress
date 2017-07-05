@@ -178,6 +178,10 @@ sidebar:
     docker-images: Images
     circle-ci: CicleCI
     codeship: Codeship
+    media: Media
+    talks-media: Talks
+    podcasts-media: Podcasts
+    blogs-media: Blogs
   dashboard:
     overview: Dashboard
     features-dashboard: Features
