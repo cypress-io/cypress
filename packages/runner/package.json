@@ -19,7 +19,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/react-tooltip": "^0.2.4",
+    "@cypress/react-tooltip": "^0.2.5",
     "@cypress/releaser": "0.1.12",
     "bin-up": "^1.0.0",
     "bluebird": "^3.4.0",

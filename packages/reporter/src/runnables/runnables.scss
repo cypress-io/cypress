@@ -1,13 +1,9 @@
 .reporter {
   .container {
-    bottom: 0;
     box-shadow: 0 1px 2px #aaa;
-    left: 0;
+    flex-grow: 2;
     overflow: auto;
     padding-bottom: 40px;
-    position: absolute;
-    right: 0;
-    top: $header-height;
   }
 
   .wrap {

@@ -156,19 +156,6 @@ describe "Global Mode", ->
         cy.get(".projects-list a").eq(1).click().then =>
           @assertOrder(["id-b", "id-a"])
 
-    describe "limit", ->
-      beforeEach ->
-        @getProjects.resolve(@projects)
-
-      it "limits to 5 when dropped", ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
-          expect(@getLocalStorageProjects().length).to.equal(5)
-
-      it "limits to 5 when selected", ->
-        cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop a").click().then =>
-          expect(@getLocalStorageProjects().length).to.equal(5)
-
     describe "errors", ->
       beforeEach ->
         @getProjects.resolve(@projects)

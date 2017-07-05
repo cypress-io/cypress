@@ -127,17 +127,17 @@ describe('<Test />', () => {
     let scroller
     beforeEach(() => {
       scroller = scrollerStub()
-
     })
 
     context('on mount', () => {
       it('scrolls into view if auto-scrolling is enabled, app is running, the model should render, and the model.isActive is null', () => {
         const component = mount(
           <Test
-          appState={appStateStub()}
-          model={model()}
-          scroller={scroller}
-          />)
+            appState={appStateStub()}
+            model={model()}
+            scroller={scroller}
+          />
+        )
         expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node)
       })
 
@@ -197,31 +197,33 @@ describe('<Test />', () => {
       })
 
       it('scrolls into view if auto-scrolling is enabled, app is running, the model should render, and the model.isActive is null', () => {
+        appState.id = 'fooo'
         appState.autoScrollingEnabled = true
         appState.isRunning = true
         testModel.isActive = true
-        component.update()
+        testModel.shouldRender = true
+        component.instance().componentDidUpdate()
         expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node)
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
         appState.isRunning = true
         testModel.isActive = true
-        component.update()
+        component.instance().componentDidUpdate()
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
       it('does not scroll into view if app is not running', () => {
         appState.autoScrollingEnabled = true
         testModel.isActive = true
-        component.update()
+        component.instance().componentDidUpdate()
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
       it('does not scroll into view if model.isActive is null', () => {
         appState.autoScrollingEnabled = true
         appState.isRunning = true
-        component.update()
+        component.instance().componentDidUpdate()
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
     })
