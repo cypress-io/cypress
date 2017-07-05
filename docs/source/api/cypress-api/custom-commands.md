@@ -1,5 +1,5 @@
 ---
-title: Cypress commands
+title: Custom Commands
 comments: false
 ---
 

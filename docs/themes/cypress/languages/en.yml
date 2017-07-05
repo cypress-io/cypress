@@ -157,7 +157,7 @@ sidebar:
     cypress-api: Cypress API
     config: config
     env: env
-    cypress-commands: Commands
+    custom-commands: Commands
     cookies: Cookies
     dom: Dom
     cypress-server: Server

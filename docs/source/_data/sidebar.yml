@@ -137,7 +137,7 @@ api:
     moment: moment.html
     promise: promise.html
   cypress-api:
-    cypress-commands: commands.html
+    custom-commands: custom-commands.html
     config: config.html
     cookies: cookies.html
     dom: dom.html
