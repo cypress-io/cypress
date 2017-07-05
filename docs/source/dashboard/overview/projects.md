@@ -107,7 +107,7 @@ You can create multiple Record Keys for a project, or delete existing ones from 
 
 ![Record Key in Configuration Tab](/img/dashboard/record-key-shown-in-desktop-gui-configuration.png)
 
-## Project ID & RecordKey Together
+## Authentication
 
 Cypress uses your `projectId` and *Record Key* together to uniquely identify projects.
 
