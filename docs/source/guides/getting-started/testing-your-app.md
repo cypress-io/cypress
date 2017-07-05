@@ -7,7 +7,7 @@ comments: false
 # {% fa fa-graduation-cap %} What You'll Learn
 
 - The relationship between Cypress and your back-end
-- Configuring Cypress to fit your app
+- How to configure Cypress to fit your app
 - Working with (or without!) your authentication mechanism
 - Effectively leveraging test data
 {% endnote %}
@@ -16,7 +16,7 @@ We covered Cypress in a tutorial app, now let's integrate it into your *real* ap
 
 # Step 1: Add Your Project
 
-Follow the {% url 'previous steps' writing-your-first-test#Setup-Empty-Folder %} except this time add your **real project folder**.
+Follow the {% url 'previous steps' writing-your-first-test#Setup-Add-a-New-Project %} except this time add your **real project folder**.
 
 You should choose either:
 
