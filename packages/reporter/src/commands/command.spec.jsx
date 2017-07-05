@@ -135,11 +135,6 @@ describe('<Command />', () => {
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The message')
     })
 
-    it('truncates the message when over 100 chars', () => {
-      const component = shallow(<Command model={model({ message: longText })} />)
-      expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(_.truncate(longText, { length: 100 }))
-    })
-
     it('renders the renderProps message when specified', () => {
       const component = shallow(<Command model={model({ renderProps: { message: 'The display message' } })} />)
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The display message')
