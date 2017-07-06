@@ -81,7 +81,7 @@ Cypress is built on top of {% url 'Mocha' bundled-tools#Mocha %} and uses its `b
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
-We're still working on introductory docs and videos. If you want to see Cypress in action, %{ url 'check out some examples' kitchen-sink %} of applications using Cypress tests and {% url "check out some example recipes we've written" unit-testing-recipe %} for special use cases.
+We're still working on introductory docs and videos. If you want to see Cypress in action, {% url 'check out some examples' kitchen-sink %} of applications using Cypress tests and {% url "check out some example recipes we've written" unit-testing-recipe %} for special use cases.
 
 ## BDD Interface
 
