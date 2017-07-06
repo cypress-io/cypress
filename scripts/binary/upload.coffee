@@ -126,6 +126,8 @@ module.exports = {
     la(meta.isValidPlatform(platform), "invalid platform", platform)
 
     console.log("zip filename #{zipFile}")
+    if !fs.existsSync(zipFile)
+      throw new Error("Cannot find zip file #{zipFile}")
 
     upload = =>
       new Promise (resolve, reject) =>
