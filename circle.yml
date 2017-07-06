@@ -219,14 +219,14 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd docs && npm run test-e2e
 
-  "driver-unit-tests":
-    <<: *defaults
-    parallelism: 2
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: chrome --version
-      - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
+  # "driver-unit-tests":
+  #   <<: *defaults
+  #   parallelism: 2
+  #   steps:
+  #     - restore_cache:
+  #         key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+  #     - run: chrome --version
+  #     - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
 
   "build-binary":
     <<: *defaults
@@ -260,9 +260,9 @@ workflows:
       - docs-tests:
           requires:
             - build
-      - driver-unit-tests:
-          requires:
-            - build
+      # - driver-unit-tests:
+      #     requires:
+      #       - build
       - build-binary:
           requires:
             - build
