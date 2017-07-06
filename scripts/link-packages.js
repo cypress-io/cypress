@@ -9,6 +9,8 @@ const is = require('check-more-types')
 const debug = require('debug')('cypress:link')
 const _ = require('lodash')
 
+const isRelative = (s) => !path.isAbsolute(s)
+
 const fs = Promise.promisifyAll(fse)
 const glob = Promise.promisify(globber)
 
@@ -22,16 +24,24 @@ function deleteOutputFolder () {
     .catch(_.noop)
 }
 
-function proxyModule (name, pathToMain) {
+function proxyModule (name, pathToMain, pathToBrowser) {
   la(is.unemptyString(name), 'missing name')
   la(is.unemptyString(pathToMain), 'missing path to main', pathToMain)
-  la(!path.isAbsolute(pathToMain), 'path to main should be relative', pathToMain)
-  return {
+  la(isRelative(pathToMain), 'path to main should be relative', pathToMain)
+
+  const pkg = {
     name,
     version: '0.0.0',
     description: `fake proxy module to packages/${name}`,
     main: pathToMain,
   }
+  if (pathToBrowser) {
+    la(isRelative(pathToBrowser),
+      'path to browser module should be relative', pathToBrowser)
+    pkg.browser = pathToBrowser
+  }
+
+  return pkg
 }
 
 function proxyRegister (name) {
@@ -63,7 +73,18 @@ function makeProxies () {
     const relativePathToMain = path.relative(destinationFolder, fullMain)
     debug('relative path to main', relativePathToMain)
 
-    const proxy = proxyModule(json.name, relativePathToMain)
+    // for browserify, some packages use "browser" field
+    // need to pass it as well
+    let relativePathToBrowser
+    if (is.unemptyString(json.browser)) {
+      debug('package has browser field %s', json.browser)
+      relativePathToBrowser = path.relative(destinationFolder,
+        path.resolve(dirname, json.browser)
+      )
+      debug('relative path to browser', relativePathToBrowser)
+    }
+
+    const proxy = proxyModule(json.name, relativePathToMain, relativePathToBrowser)
     console.log(path.dirname(destPackageFilename), '->', relativePathToMain)
 
     return fs.outputJsonAsync(destPackageFilename, proxy)
