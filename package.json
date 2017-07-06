@@ -74,6 +74,7 @@
     "obfuscator": "^0.5.4",
     "plist": "^2.1.0",
     "pluralize": "^5.0.0",
+    "prefixed-list": "^1.0.0",
     "typescript": "^2.3.4",
     "vagrant": "0.0.1",
     "vinyl-paths": "^2.1.0",
