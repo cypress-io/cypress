@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "main": "lib/reporter.js",
-  "browser": "src/main",
   "scripts": {
     "postinstall": "echo '@packages/reporter needs: npm run build'",
     "prebuild": "rebuild-node-sass",
