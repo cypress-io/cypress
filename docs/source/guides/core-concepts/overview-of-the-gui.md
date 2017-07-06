@@ -35,7 +35,7 @@ By default, Cypress keeps 50 tests worth of snapshots and command data for time 
 
 ***Clicking on Commands***
 
-Each command, assertion, or error, when clicked on, displays extra information in the dev tools console. Clicking also 'pins' the Application Under Test (righthand side) to it's previous state when the command executed.
+Each command, assertion, or error, when clicked on, displays extra information in the dev tools console. Clicking also 'pins' the Application Under Test (righthand side) to its previous state when the command executed.
 
 {% img /img/guides/clicking-commands.png Click to console.log and to pin %}
 
