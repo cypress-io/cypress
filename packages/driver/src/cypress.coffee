@@ -169,7 +169,7 @@ class $Cypress
     log      = $Log.create(@, cy)
 
     $Chai.create(specWindow, cy)
-    
+
     ## wire up command create to cy
     @Commands = $Commands.create(@, cy)
 
@@ -272,7 +272,6 @@ class $Cypress
   sinon: sinon
 
   lolex: lolex
-
 
   bililiteRange: bililiteRange
 

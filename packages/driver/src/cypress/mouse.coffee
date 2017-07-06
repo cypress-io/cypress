@@ -4,7 +4,7 @@ $Cypress = require("../cypress")
 $Keyboard = require("./keyboard")
 utils = require("./utils")
 
-stopPropagation = MouseEvent.prototype.stopPropagation
+stopPropagation = window.MouseEvent.prototype.stopPropagation
 
 module.exports = {
   mouseDown: ($elToClick, coords, win) ->
@@ -18,7 +18,7 @@ module.exports = {
       detail: 1
     })
 
-    mdownEvt = new MouseEvent "mousedown", mdownEvtProps
+    mdownEvt = new window.MouseEvent "mousedown", mdownEvtProps
 
     ## ensure this property exists on older chromium versions
     mdownEvt.buttons ?= 1

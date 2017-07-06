@@ -2,7 +2,9 @@ _ = require("lodash")
 Backbone = require("backbone")
 utils = require("./utils")
 
-Mocha = require("mocha").Mocha
+mocha = require("mocha")
+
+Mocha = mocha.Mocha ? mocha
 Runner = Mocha.Runner
 Runnable = Mocha.Runnable
 

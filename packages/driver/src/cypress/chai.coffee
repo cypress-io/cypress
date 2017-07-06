@@ -1,6 +1,5 @@
 _ = require("lodash")
 $ = require("jquery")
-Backbone = require("backbone")
 chai = require("chai")
 chaijQuery = require("chai-jquery")
 sinonChai = require("@cypress/sinon-chai")

@@ -17,8 +17,7 @@ describe "src/cypress/chai", ->
 
     Chai.create(@specWindow, @cy)
 
-  context.only ".setSpecWindowGlobals", ->
-
+  context ".setSpecWindowGlobals", ->
     it "sets chai, expect, and assert", ->
       expect(@specWindow.chai).not.to.be.undefined
       expect(@specWindow.expect).not.to.be.undefined
