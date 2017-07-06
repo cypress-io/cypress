@@ -8,9 +8,6 @@ describe "src/cypress", ->
   beforeEach ->
     @Cypress = $Cypress.create()
 
-  afterEach ->
-    @Cypress.stop()
-
   it ".extend", ->
     $Cypress.extend {foo: -> "foo"}
     expect(@Cypress.foo()).to.eq "foo"
@@ -29,37 +26,6 @@ describe "src/cypress", ->
     it "nulls cy, chai, mocha, runner", ->
       _.each ["cy", "chai", "mocha", "runner"], (prop) =>
         expect(@Cypress[prop]).to.be.null
-
-    it "sets Cypress on the window", ->
-      @Cypress.stop().then ->
-        expect(window.Cypress).to.be.undefined
-        Cypress = $Cypress.create()
-        Cypress.start()
-        expect(window.Cypress).to.eq Cypress
-
-  describe "#stop", ->
-    it "calls .abort()", ->
-      abort = @sandbox.spy(@Cypress, "abort")
-      @Cypress.stop().then ->
-        expect(abort).to.be.called
-
-    it "triggers stop", ->
-      trigger = @sandbox.spy(@Cypress, "trigger")
-      @Cypress.stop().then ->
-        expect(trigger).to.be.calledWith "stop"
-
-    it "unbinds all listeners", ->
-      @Cypress.on "foo", ->
-      expect(@Cypress._events).not.to.be.empty
-
-      offFn = @sandbox.spy(@Cypress, "off")
-      @Cypress.stop().then =>
-        expect(offFn).to.be.calledOnce
-        expect(@Cypress._events).to.be.empty
-
-    it "deletes Cypress from the window", ->
-      @Cypress.stop().then ->
-        expect(window.Cypress).to.be.undefined
 
   describe "#abort", ->
     it "waits for all aborts to resolve", (done) ->
@@ -81,14 +47,14 @@ describe "src/cypress", ->
 
   describe "#initialize", ->
     beforeEach ->
-      @trigger = @sandbox.spy @Cypress, "trigger"
+      @emit = @sandbox.spy @Cypress, "emit"
 
       @Cypress.runner = {}
       @Cypress.mocha = {options: @sandbox.spy()}
       @Cypress.initialize(1,2)
 
-    it "triggers 'initialize'", ->
-      expect(@trigger).to.be.calledWith "initialize", {
+    it "emits 'initialize'", ->
+      expect(@emit).to.be.calledWith "initialize", {
         specWindow: 1
         $remoteIframe: 2
       }
@@ -129,7 +95,7 @@ describe "src/cypress", ->
 
   describe "#setConfig", ->
     beforeEach ->
-      @trigger = @sandbox.spy @Cypress, "trigger"
+      @emit = @sandbox.spy @Cypress, "emit"
 
     it "instantiates env", ->
       expect(@Cypress).not.to.have.property("env")
@@ -153,9 +119,9 @@ describe "src/cypress", ->
 
       expect(@Cypress.env()).to.deep.eq({foo: "bar"})
 
-    it "triggers 'config'", ->
+    it "emits 'config'", ->
       @Cypress.setConfig({foo: "bar"})
-      expect(@trigger).to.be.calledWith("config", {foo: "bar"})
+      expect(@emit).to.be.calledWith("config", {foo: "bar"})
 
     it "passes config to SetterGetter.create", ->
       @Cypress.setConfig({foo: "bar"})
@@ -184,21 +150,24 @@ describe "src/cypress", ->
 
   describe "#onSpecWindow", ->
     beforeEach ->
-      @sandbox.stub($Cypress.prototype, "restore")
-      @sandbox.stub($Cypress.Cy, "create").returns({
+      @specWindow = {}
+      @cy = {
         onCommand: ->
         state: ->
-      })
+      }
+
+      @sandbox.stub($Cypress.prototype, "restore")
+      @sandbox.stub($Cypress.Cy, "create").returns(@cy)
       _.each ["Chai", "Mocha", "Runner"], (klass) =>
         @sandbox.stub($Cypress[klass], "create").returns(klass)
 
-      @Cypress.onSpecWindow({})
+      @Cypress.onSpecWindow(@specWindow)
 
     it "creates cy", ->
       expect($Cypress.Cy.create).to.be.calledWith(@Cypress, {})
 
     it "creates chai", ->
-      expect($Cypress.Chai.create).to.be.calledWith(@Cypress, {})
+      expect($Cypress.Chai.create).to.be.calledWith(@specWindow, @cy)
 
     it "creates mocha", ->
       expect($Cypress.Mocha.create).to.be.calledWith(@Cypress, {})

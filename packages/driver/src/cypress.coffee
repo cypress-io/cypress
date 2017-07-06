@@ -17,6 +17,7 @@ $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Dom = require("./cypress/dom")
+$Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
 $ErrorMessages = require("./cypress/error_messages")
 $Keyboard = require("./cypress/keyboard")
@@ -55,6 +56,7 @@ class $Cypress
     @runner   = null
     @Commands = null
 
+    $Events.extend(@)
 
   setConfig: (config = {}) ->
     ## config.remote
@@ -95,7 +97,7 @@ class $Cypress
 
     @Cookies = $Cookies.create(config.namespace, d)
 
-    @trigger("config", config)
+    @emit("config", config)
 
   initialize: (specWindow, $remoteIframe) ->
     ## push down the options
@@ -104,13 +106,13 @@ class $Cypress
 
     ## allow mocha + chai to initialize
     ## themselves or any other listeners
-    @trigger "initialize",
+    @emit "initialize",
       specWindow: specWindow
       $remoteIframe: $remoteIframe
 
     ## let the world know we're ready to
     ## rock and roll
-    @trigger "initialized",
+    @emit "initialized",
       cy: @cy
       runner: @runner
       mocha: @mocha
@@ -166,12 +168,14 @@ class $Cypress
     cy       = $Cy.create(@, specWindow)
     mocha    = $Mocha.create(@, specWindow)
     runner   = $Runner.create(@, specWindow, mocha)
-    log      = $Log.create(@, cy)
 
-    $Chai.create(specWindow, cy)
+    ## TODO: fix this
+    # @log     = $Log.create(@, cy)
 
     ## wire up command create to cy
     @Commands = $Commands.create(@, cy)
+
+    $Chai.create(specWindow, cy)
 
   onBeforeLoad: (contentWindow) ->
     ## should probably just trigger the "before:window:load"
@@ -182,45 +186,19 @@ class $Cypress
     @cy.bindWindowListeners(contentWindow)
     @cy._setWindowDocumentProps(contentWindow)
 
-    @trigger("before:window:load", contentWindow)
-
-  stop: ->
-    ## we immediately delete Cypress due to
-    ## abort being async. waiting for the async
-    ## event causes problems in other areas in
-    ## the system when we cannot tap into this async
-    ## method. (such as moving from remote manual
-    ## browser back to your own browser)
-    delete window.Cypress
-
-    @abort().then =>
-
-      @trigger "stop"
-
-      @off()
+    @emit("before:window:load", contentWindow)
 
   abort: ->
-    ## grab all the abort callbacks
-    ## instead of triggering them
-
-    ## coerce into an array
-    aborts = [].concat @invoke("abort")
-
-    aborts = _.reject aborts, (r) -> r is @cy
-
-    ## abort can be async so make sure
-    ## we wait until they all resolve!
-    Promise.all(aborts).then => @restore()
+    @emitThen("abort")
+    .then =>
+      @restore()
 
   ## restores cypress after each test run by
   ## removing the queue from the proto and
   ## removing additional own instance properties
   restore: ->
-    restores = [].concat @invoke("restore")
-
-    restores = _.reject restores, (r) -> r is @cy
-
-    Promise.all(restores).return(null)
+    @emitThen("restore")
+    .return(null)
 
   addChildCommand: (key, fn) ->
     throwDeprecatedCommandInterface(key, "addChildCommand")
@@ -277,8 +255,6 @@ class $Cypress
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
-  _.extend $Cypress.prototype, Backbone.Events
-
   @create = (options = {}) ->
     new $Cypress
 
@@ -286,7 +262,6 @@ class $Cypress
     _.extend @prototype, obj
 
 ## TODO: make these return object and do $Cypress.extend() here
-require("./cypress/events")($Cypress)
 require("./cypress/options")($Cypress)
 require("./cypress/snapshot")($Cypress)
 
@@ -300,6 +275,7 @@ $Cypress.Commands = $Commands
 $Cypress.Cookies = $Cookies
 $Cypress.Cy = $Cy
 $Cypress.Dom = $Cypress.prototype.Dom = $Dom
+$Cypress.Events = $Events
 $Cypress.ErrorMessages = $ErrorMessages
 $Cypress.Keyboard = $Keyboard
 $Cypress.Log = $Log
