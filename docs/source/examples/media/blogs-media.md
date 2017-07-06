@@ -4,6 +4,11 @@ comments: false
 containerClass: examples
 ---
 
+## [Cypress - a genuine alternative to Selenium at last?](https://red-badger.com/blog/2017/6/16/cypress-a-genuine-alternative-to-selenium-at-last)
+
+Published on [**Red Badger**](https://red-badger.com/blog) by Greg Dorward *(Jun 6, 2017)*
+![Robot fighting testing robot](/img/examples/robot-fights.png)
+
 ## {% url "Integration tests can be fun!" http://corgibytes.com/blog/2017/02/21/integration-tests-fun/ %}
 
 Published on [**Corgibytes**](http://corgibytes.com/blog) by Kamil Ogórek *(Feb 21, 2017)*
