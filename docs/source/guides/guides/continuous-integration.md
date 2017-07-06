@@ -64,7 +64,7 @@ test:
 
 ## Docker
 
-We have {% url "created" https://github.com/cypress-io/docker %} an official {% url "cypress/base" https://hub.docker.com/r/cypress/base/ %} container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete {% url "cypress/internal:cy" https://hub.docker.com/r/cypress/internal/tags/ %} image with pre-installed Cypress; just call {% url '`cypress run`' command-line#cypress-run %}.
+We have {% url 'created' https://github.com/cypress-io/docker %} an official {% url 'cypress/base' 'https://hub.docker.com/r/base' %} container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete {% url 'cypress/internal:cy' 'https://hub.docker.com/r/tags' %} image with pre-installed Cypress; just call {% url '`cypress run`' command-line#cypress-run %}.
 
 If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Dependencies %}. See {% issue 165 'this issue' %} for more information.
 

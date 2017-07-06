@@ -121,6 +121,13 @@ describe "lib/url_generator", ->
       .catch (err) ->
         expect(err.message).to.include("Request to: https://www.google.com/ failed. (Status Code 500)")
 
+    it "fails when URL is invalid", ->
+      urlGenerator.validateAndGetUrl(data, "https://hub.docker.com/[object Object]p>")
+      .then ->
+        throw new Error("should have caught error")
+      .catch (err) ->
+        expect(err.message).to.include("You must quote the URL: https://hub.docker.com")
+
     it "verifies local file and caches subsequent requests", ->
       markdown = "## Notes\nfoobarbaz"
 
