@@ -56,7 +56,7 @@ Once we've created that file, you should see the Cypress Desktop Application imm
 Even though we haven't written any tests yet - that's okay - let's click on the `simple_spec.js` and watch Cypress launch your browser.
 
 {% note info %}
-Cypress opens the test within a browser downloaded on your system. You can read more about how we do this in {% url "Launching Browsers" launching-browsers %}
+Cypress opens the test in a browser installed on your system. You can read more about how we do this in {% url "Launching Browsers" launching-browsers %}.
 {% endnote %}
 
 {% img /img/guides/empty-file-30fps.gif %}
