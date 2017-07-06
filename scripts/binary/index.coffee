@@ -88,9 +88,14 @@ deploy = {
       }
     })
     opts.runTests = false if opts["skip-tests"]
-    if not opts.platform and os.platform() == "linux"
+    if not opts.platform and os.platform() == meta.platforms.linux
       # only can build Linux on Linux
       opts.platform = "linux"
+
+    # be a little bit user-friendly and allow aliased values
+    if opts.platform == "mac"
+      opts.platform = meta.platforms.darwin
+
     debug("parsed command line options")
     debug(opts)
     opts

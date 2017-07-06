@@ -1,8 +1,15 @@
 path = require("path")
 la = require("lazy-ass")
 check = require("check-more-types")
+R = require("ramda")
 
-isValidPlatform = check.oneOf(["darwin", "linux"])
+# canonical platform names
+platforms = {
+  darwin: "darwin"
+  linux: "linux"
+}
+
+isValidPlatform = check.oneOf(R.values(platforms))
 
 ## returns a path into the /build directory
 ## the output folder should look something like this
@@ -44,5 +51,6 @@ module.exports = {
   distDir
   zipDir
   buildAppDir
-  cacheDir: path.join(process.cwd(), "cache")
+  cacheDir: path.join(process.cwd(), "cache"),
+  platforms
 }
