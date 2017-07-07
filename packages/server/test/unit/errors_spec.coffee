@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+style = require("ansi-styles")
 chalk  = require("chalk")
 errors = require("#{root}lib/errors")
 logger = require("#{root}lib/logger")
@@ -16,7 +17,7 @@ describe "lib/errors", ->
     it "uses red by default", ->
       err = errors.get("NOT_LOGGED_IN")
       errors.log(err).then =>
-        red = chalk.styles.red
+        red = style.color.red
 
         expect(@log).to.be.calledWithMatch(red.open)
         expect(@log).to.be.calledWithMatch(red.close)
@@ -24,7 +25,7 @@ describe "lib/errors", ->
     it "can change the color", ->
       err = errors.get("DEV_NO_SERVER")
       errors.log(err, "yellow").then =>
-        yellow = chalk.styles.yellow
+        yellow = style.color.yellow
 
         expect(@log).to.be.calledWithMatch(yellow.open)
         expect(@log).to.be.calledWithMatch(yellow.close)

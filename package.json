@@ -42,6 +42,7 @@
   "devDependencies": {
     "@cypress/bumpercar": "^1.0.6",
     "@cypress/npm-run-all": "^4.0.4",
+    "ansi-styles": "^3.1.0",
     "ascii-table": "0.0.9",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.5",
