@@ -71,18 +71,27 @@ module.exports = {
   isNewProject
 
   integration: (folder, config) ->
-    log "integration in folder #{folder}"
+    log "integration folder #{folder}"
+
+    ## skip if user has explicitly set integrationFolder
+    return Promise.resolve() if not isDefault(config, "integrationFolder")
+
     @verifyScaffolding folder, =>
       log "copying examples into #{folder}"
       @_copy(INTEGRATION_EXAMPLE_SPEC, folder, config)
 
   fixture: (folder, config) ->
+    log "fixture folder #{folder}"
+
+    ## skip if user has explicitly set fixturesFolder
+    return Promise.resolve() if not isDefault(config, "fixturesFolder")
+
     @verifyScaffolding folder, =>
       log "fixture needs to copy example.json"
       @_copy("example.json", folder, config)
 
   support: (folder, config) ->
-    log "support folder #{folder} support file #{config.supportFile}"
+    log "support folder #{folder}, support file #{config.supportFile}"
 
     ## skip if user has explicitly set supportFile
     return Promise.resolve() if not isDefault(config, "supportFile")

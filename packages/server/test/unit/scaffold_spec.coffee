@@ -89,16 +89,13 @@ describe "lib/scaffold", ->
 
   context ".integration", ->
     beforeEach ->
-      todosPath = Fixtures.projectPath("todos")
+      pristinePath = Fixtures.projectPath("pristine")
 
-      config.get(todosPath).then (@cfg) =>
+      config.get(pristinePath).then (@cfg) =>
         {@integrationFolder} = @cfg
 
     it "creates both integrationFolder and example_spec.js when integrationFolder does not exist", ->
-      ## todos has an integration folder so let's first nuke it and then scaffold
-      fs.removeAsync(@integrationFolder)
-      .then =>
-        scaffold.integration(@integrationFolder, @cfg)
+      scaffold.integration(@integrationFolder, @cfg)
       .then =>
         Promise.all([
           fs.statAsync(@integrationFolder + "/example_spec.js").get("size")
@@ -106,12 +103,18 @@ describe "lib/scaffold", ->
         ]).spread (size1, size2) ->
           expect(size1).to.eq(size2)
 
-    it "does not create example_spec.js if integrationFolder already exists", ->
-      ## first remove it
-      fs.removeAsync(@integrationFolder)
+    it "does not create any files if integrationFolder is not default", ->
+      @cfg.resolved.integrationFolder.from = "config"
+
+      scaffold.integration(@integrationFolder, @cfg)
       .then =>
-        ## create the integrationFolder ourselves manually
-        fs.ensureDirAsync(@integrationFolder)
+        glob("**/*", {cwd: @integrationFolder})
+      .then (files) ->
+        expect(files.length).to.eq(0)
+
+    it "does not create example_spec.js if integrationFolder already exists", ->
+      ## create the integrationFolder ourselves manually
+      fs.ensureDirAsync(@integrationFolder)
       .then =>
         ## now scaffold
         scaffold.integration(@integrationFolder, @cfg)
@@ -272,16 +275,13 @@ describe "lib/scaffold", ->
 
   context ".fixture", ->
     beforeEach ->
-      todosPath = Fixtures.projectPath("todos")
+      pristinePath = Fixtures.projectPath("pristine")
 
-      config.get(todosPath).then (@cfg) =>
+      config.get(pristinePath).then (@cfg) =>
         {@fixturesFolder} = @cfg
 
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
-      ## todos has a fixtures folder so let's first nuke it and then scaffold
-      fs.removeAsync(@fixturesFolder)
-      .then =>
-        scaffold.fixture(@fixturesFolder, @cfg)
+      scaffold.fixture(@fixturesFolder, @cfg)
       .then =>
         fs.readFileAsync(@fixturesFolder + "/example.json", "utf8")
       .then (str) ->
@@ -293,12 +293,18 @@ describe "lib/scaffold", ->
         }
         """
 
-    it "does not create example.json if fixturesFolder already exists", ->
-      ## first remove it
-      fs.removeAsync(@fixturesFolder)
+    it "does not create any files if fixturesFolder is not default", ->
+      @cfg.resolved.fixturesFolder.from = "config"
+
+      scaffold.fixture(@fixturesFolder, @cfg)
       .then =>
-        ## create the fixturesFolder ourselves manually
-        fs.ensureDirAsync(@fixturesFolder)
+        glob("**/*", {cwd: @fixturesFolder})
+      .then (files) ->
+        expect(files.length).to.eq(0)
+
+    it "does not create example.json if fixturesFolder already exists", ->
+      ## create the fixturesFolder ourselves manually
+      fs.ensureDirAsync(@fixturesFolder)
       .then =>
         ## now scaffold
         scaffold.fixture(@fixturesFolder, @cfg)
