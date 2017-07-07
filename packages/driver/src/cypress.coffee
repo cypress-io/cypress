@@ -262,7 +262,6 @@ class $Cypress
     _.extend @prototype, obj
 
 ## TODO: make these return object and do $Cypress.extend() here
-require("./cypress/options")($Cypress)
 require("./cypress/snapshot")($Cypress)
 
 ## attach these to the prototype
