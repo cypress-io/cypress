@@ -6,9 +6,9 @@
   "scripts": {
     "postinstall": "echo '@packages/driver needs: npm run build'",
     "build": "gulp build",
-    "test": "mocha",
-    "test-watch": "./test/support/watch",
-    "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
+    "test-unit": "mocha",
+    "test-unit-watch": "./test/support/watch",
+    "test-unit-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-integration": "gulp test",
     "test-integration-watch": "gulp watch",
     "clean-deps": "rm -rf node_modules"
