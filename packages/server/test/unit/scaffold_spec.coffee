@@ -138,33 +138,20 @@ describe "lib/scaffold", ->
       config.get(pristinePath).then (@cfg) =>
         {@supportFolder} = @cfg
 
-    it "does not create any files but index.js if supportFolder directory already exists", ->
-      ## create the supportFolder ourselves manually
-      fs.ensureDirAsync(@supportFolder)
+    it "does not create any files if supportFolder directory already exists", ->
+      ## first remove it
+      fs.removeAsync(@supportFolder)
+      .then =>
+        ## create the supportFolder ourselves manually
+        fs.ensureDirAsync(@supportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@supportFolder, @cfg)
+        scaffold.integration(@supportFolder, @cfg)
       .then =>
         glob("**/*", {cwd: @supportFolder})
       .then (files) ->
-        expect(files.length).to.eq(1)
-        expect(files[0]).to.include('index.js')
-
-    it "does not create any files if supportFolder and index.js already exist", ->
-      indexPath = path.join(@supportFolder, "index.js")
-      ## create the supportFolder ourselves manually
-      fs.ensureDirAsync(@supportFolder)
-      .then =>
-        ## now scaffold
-        scaffold.support(@supportFolder, @cfg).then =>
-          fs.outputFileAsync(indexPath, ";")
-      .then =>
-        glob("**/*", {cwd: @supportFolder})
-      .then (files) ->
-        fs.readFileAsync(indexPath).then (buffer) ->
-          expect(files.length).to.eq(1)
-          ## it doesn't change the contents of the existing index.js
-          expect(buffer.toString()).to.equal(";")
+        ## ensure no files exist
+        expect(files.length).to.eq(0)
 
     it "does not create any files if supportFile is not default", ->
       @cfg.resolved.supportFile.from = "config"
