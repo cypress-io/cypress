@@ -8,6 +8,7 @@ hbs       = require("hbs")
 cwd       = require("./cwd")
 log       = require("debug")("cypress:server:scaffold")
 { propEq, complement, equals, compose, head, isEmpty, always } = require("ramda")
+{ isDefault } = require("./util/config")
 
 glob = Promise.promisify(glob)
 fs = Promise.promisifyAll(fs)
@@ -87,9 +88,7 @@ module.exports = {
     log "support folder #{folder} support file #{config.resolved.supportFile.from}"
 
     ## skip if user has explicitly set supportFile
-    ## TODO: change this to use something like config.isDefault(supportFile)
-    ## instead of drilling into all of these resolved properties
-    return Promise.resolve() if config.resolved.supportFile.from isnt "default"
+    return Promise.resolve() if not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
       log "copying defaults and commands to #{folder}"
