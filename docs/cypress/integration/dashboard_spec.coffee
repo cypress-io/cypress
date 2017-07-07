@@ -1,7 +1,7 @@
 YAML = require('yamljs')
 _ = require('lodash')
 
-DASHBOARD_PATH = "/dashboard/overview/features"
+DASHBOARD_PATH = "/dashboard/overview/features-dashboard"
 
 describe "Dashboard", ->
   beforeEach ->
