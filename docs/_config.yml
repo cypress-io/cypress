@@ -17,7 +17,7 @@ permalink: :year/:month/:day/:title/
 permalink_defaults:
 
 logo: img/logo.png
-github: cypress-io/cypress-documentation
+github: cypress-io/cypress
 
 # Directory
 source_dir: source
