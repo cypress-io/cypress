@@ -133,16 +133,7 @@ watchSpecs = ->
   gulp.watch "test/**/*_spec.coffee", (event) ->
     server.runSpec(event.path)
 
-gulp.task "app:js", ->
-  compileJs()
-
-gulp.task "app:html", ->
-  gulp.src(["app/html/*"])
-    .pipe gulp.dest("lib/public")
-
-gulp.task "watch", ->
-  gulp.watch "app/html/index.html", ["app:html"]
-
+gulp.task "watch", ["ensure:dist:dir"], ->
   watchJs = bundleJs(jsOptions)
   watchIndex = bundleJs(specIndexOptions)
   watchRunner = bundleJs(specRunnerOptions)
@@ -153,8 +144,6 @@ gulp.task "watch", ->
     server.runSpecsContinuously()
 
   return watchJs.process
-
-gulp.task "server", -> require("./server/server.coffee")
 
 gulp.task "ensure:dist:dir", ->
   fs.ensureDirAsync(path.resolve("./dist-test"))
@@ -168,5 +157,4 @@ gulp.task "test", ["ensure:dist:dir"], ->
     server = require("#{__dirname}/test/support/server/server.coffee")
     server.runAllSpecsOnce()
 
-gulp.task "build", (cb) ->
-  runSequence ["app:js", "app:html"], cb
+gulp.task "build", compileJs

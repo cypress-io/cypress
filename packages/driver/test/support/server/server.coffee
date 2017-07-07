@@ -122,7 +122,7 @@ app.get "/", (req, res) ->
   })
 
 app.get "/spec_helper.js", (req, res) ->
-  sendJs(res, getSpec("support/spec_helper.coffee"), true)
+  sendJs(res, getSpec("support/integration_spec_helper.coffee"), true)
 
 app.get "*", (req, res) ->
   filePath = req.params[0].replace(/\/+$/, "")
@@ -135,7 +135,6 @@ app.use(require("errorhandler")())
 
 server.listen app.get("port"), ->
   console.log("Express server listening on port", app.get("port"))
-
 
 supportApp = express()
 supportServer = http.Server(app)
