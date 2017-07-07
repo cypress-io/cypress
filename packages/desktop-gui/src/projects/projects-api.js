@@ -123,9 +123,7 @@ const openProject = (project) => {
   specsStore.loading(true)
 
   const setProjectError = (err) => {
-    if (err.type !== 'warning') {
-      project.setLoading(false)
-    }
+    project.setLoading(false)
     project.setError(err)
   }
 
