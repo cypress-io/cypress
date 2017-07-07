@@ -24,12 +24,14 @@ describe "Runs List", ->
       cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
-      cy.stub(@ipc, "openProject").yields(null, @config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "getOrgs").resolves(@orgs)
       cy.stub(@ipc, "requestAccess")
       cy.stub(@ipc, "setupDashboardProject")
       cy.stub(@ipc, "externalOpen")
+
+      @openProject = @util.deferred()
+      cy.stub(@ipc, "openProject").returns(@openProject.promise)
 
       @getCurrentUser = @util.deferred()
       cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
@@ -45,6 +47,7 @@ describe "Runs List", ->
   context "displays page", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
       @getRuns.resolve(@runs)
       @goToRuns()
 
@@ -62,6 +65,7 @@ describe "Runs List", ->
 
     describe "permissions error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns()
 
       context "statusCode: 403", ->
@@ -171,6 +175,7 @@ describe "Runs List", ->
 
     describe "timed out error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "TIMED_OUT"})
 
@@ -179,6 +184,7 @@ describe "Runs List", ->
 
     describe "not found error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
 
@@ -187,6 +193,7 @@ describe "Runs List", ->
 
     describe "unauthenticated error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "", message: "", statusCode: 401})
 
@@ -195,6 +202,7 @@ describe "Runs List", ->
 
     describe "no project id error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @ipc.setupDashboardProject.resolves(@validCiProject)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
@@ -215,6 +223,7 @@ describe "Runs List", ->
 
     describe "unexpected error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: """
           {
@@ -228,6 +237,7 @@ describe "Runs List", ->
 
     describe "unauthorized project", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @getProjectStatus.resolve({
           state: "UNAUTHORIZED"
         })
@@ -239,6 +249,7 @@ describe "Runs List", ->
 
     describe "invalid project", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @ipc.setupDashboardProject.resolves(@validCiProject)
 
         @getProjectStatus.resolve({
@@ -270,7 +281,7 @@ describe "Runs List", ->
       context "having never setup CI", ->
         beforeEach ->
           @config.projectId = null
-          @ipc.openProject.yields(null, @config)
+          @openProject.resolve(@config)
 
           @goToRuns().then =>
             @getRuns.resolve([])
@@ -280,6 +291,7 @@ describe "Runs List", ->
 
     context "having previously setup CI", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.resolve([])
 
@@ -302,7 +314,7 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @config.projectId = @projects[0].id
-      @ipc.openProject.yields(null, @config)
+      @openProject.resolve(@config)
 
       timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
@@ -342,6 +354,7 @@ describe "Runs List", ->
   describe "polling runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
@@ -408,6 +421,7 @@ describe "Runs List", ->
   describe "manually refreshing runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 

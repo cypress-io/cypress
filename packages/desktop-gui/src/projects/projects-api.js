@@ -109,6 +109,9 @@ const closeProject = (project) => {
   ipc.offOpenProject()
   ipc.offGetSpecs()
   ipc.offOnFocusTests()
+  ipc.offOnSpecChanged()
+  ipc.offOnProjectWarning()
+  ipc.offOnConfigChanged()
 
   return Promise.join(
     closeBrowser(project),
@@ -127,7 +130,7 @@ const openProject = (project) => {
   }
 
   const updateProjectStatus = () => {
-    ipc.getProjectStatus(project.clientDetails())
+    return ipc.getProjectStatus(project.clientDetails())
     .then((projectDetails) => {
       project.update(projectDetails)
     })
@@ -144,55 +147,36 @@ const openProject = (project) => {
     project.setResolvedConfig(config.resolved)
   }
 
-  const open = () => {
-    return new Promise((resolve) => {
-      resolve = _.once(resolve)
+  ipc.onFocusTests(() => {
+    viewStore.showProjectSpecs(project)
+  })
 
-      ipc.onFocusTests(() => {
-        viewStore.showProjectSpecs(project)
-      })
+  ipc.onSpecChanged((__, spec) => {
+    specsStore.setChosenSpec(spec)
+  })
 
-      ipc.openProject(project.path, (err, config = {}) => {
-        if (config.specChanged) {
-          return specsStore.setChosenSpec(config.specChanged)
-        }
+  ipc.onConfigChanged(() => {
+    reopenProject(project)
+  })
 
-        if (project.error && !err) {
-          project.clearError()
-          reopenProject(project)
-          return
-        }
+  ipc.onProjectWarning((__, warning) => {
+    project.setWarning(warning)
+  })
 
-        if (err) {
-          return setProjectError(err)
-        }
-
-        updateConfig(config)
-
-         // this needs to be after updateConfig so that the project's id is set
-        updateProjectStatus()
-        projectPollingId = setInterval(updateProjectStatus, 10000)
-
-        resolve()
-      })
-    })
-  }
-
-  return Promise.all([
-    open(),
-    Promise.delay(500),
-  ])
-  .then(() => {
+  return ipc.openProject(project.path)
+  .then((config = {}) => {
+    updateConfig(config)
     project.setLoading(false)
-
     getSpecs(setProjectError)
 
-    return null
+    projectPollingId = setInterval(updateProjectStatus, 10000)
+    return updateProjectStatus()
   })
   .catch(setProjectError)
 }
 
 const reopenProject = (project) => {
+  project.clearError()
   return closeProject(project)
   .then(() => openProject(project))
 }

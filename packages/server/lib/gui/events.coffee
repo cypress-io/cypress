@@ -43,6 +43,15 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:focus:tests"
       onBus("focus:tests")
 
+    when "on:spec:changed"
+      onBus("spec:changed")
+
+    when "on:config:changed"
+      onBus("config:changed")
+
+    when "on:project:warning"
+      onBus("project:warning")
+
     when "gui:error"
       logs.error(arg)
       .then(sendNull)
@@ -167,22 +176,18 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "open:project"
       onSettingsChanged = ->
-        openProject.reboot()
-        .call("getConfig")
-        .then(send)
-        .catch(sendErr)
+        bus.emit("config:changed")
 
       onSpecChanged = (spec) ->
-        send({specChanged: spec})
+        bus.emit("spec:changed", spec)
 
       onFocusTests = ->
         if _.isFunction(options.onFocusTests)
           options.onFocusTests()
-
         bus.emit("focus:tests")
 
       onWarning = (warning) ->
-        sendErr(warning)
+        bus.emit("project:warning", errors.clone(warning, {html: true}))
 
       openProject.create(arg, options, {
         onFocusTests: onFocusTests

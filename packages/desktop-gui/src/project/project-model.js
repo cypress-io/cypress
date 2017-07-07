@@ -15,7 +15,6 @@ const cacheProps = [
 
 const validProps = cacheProps.concat([
   'state',
-  'clientId',
   'isChosen',
   'isLoading',
   'isNew',
@@ -46,7 +45,6 @@ export default class Project {
   // comes from ipc, but not persisted
   @observable state = Project.VALID
   // local state
-  @observable clientId
   @observable isChosen = false
   @observable isLoading = false
   @observable isNew = false
@@ -62,10 +60,11 @@ export default class Project {
   @observable scaffoldedFiles = []
   // should never change after first set
   @observable path
+  // not observable
+  dismissedWarnings = {}
 
   constructor (props) {
     this.path = props.path
-    this.clientId = encodeURIComponent(props.path)
 
     this.update(props)
   }
@@ -184,18 +183,21 @@ export default class Project {
   }
 
   @action setError (err = {}) {
-    if (err && err.isWarning) {
-      this.warning = err
-    } else {
-      this.error = err
-    }
+    this.error = err
   }
 
   @action clearError () {
     this.error = null
   }
 
+  @action setWarning (warning) {
+    if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
+      this.warning = warning
+    }
+  }
+
   @action clearWarning () {
+    this.dismissedWarnings[this._serializeWarning(this.warning)] = true
     this.warning = null
   }
 
@@ -206,5 +208,9 @@ export default class Project {
   setChosenBrowserByName (name) {
     const browser = _.find(this.browsers, { name }) || this.defaultBrowser
     this.setChosenBrowser(browser)
+  }
+
+  _serializeWarning (warning) {
+    return `${warning.type}:${warning.name}:${warning.message}`
   }
 }
