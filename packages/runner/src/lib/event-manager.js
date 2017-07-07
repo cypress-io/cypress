@@ -166,15 +166,15 @@ const eventManager = {
   },
 
   setup (config, specPath) {
-    Cypress = $Cypress.create({ loadModules: true })
+    Cypress = $Cypress.create(
+      _.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'version')
+    )
 
     // expose Cypress globally
     window.Cypress = Cypress
 
-    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'version'))
-
     this._addListeners(config)
-    
+
     channel.emit('watch:test:file', specPath)
   },
 

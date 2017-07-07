@@ -17,10 +17,12 @@ describe "src/cypress", ->
     it "returns new Cypress instance", ->
       expect(@Cypress).to.be.instanceof $Cypress
 
-    it "attaches klasses to $Cypress", ->
-      klasses = "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage".split(" ")
-      for klass in klasses
-        expect($Cypress[klass]).to.eq $Cypress[klass]
+    it "sets config", ->
+      config = {foo: 'bar'}
+
+      Cypress = $Cypress.create(config)
+
+      expect(Cypress.config('foo')).to.eq('bar')
 
   describe "#constructor", ->
     it "nulls cy, chai, mocha, runner", ->
@@ -98,18 +100,12 @@ describe "src/cypress", ->
       @emit = @sandbox.spy @Cypress, "emit"
 
     it "instantiates env", ->
-      expect(@Cypress).not.to.have.property("env")
-      @Cypress.setConfig({foo: "bar"})
       expect(@Cypress.env).to.be.a("function")
 
     it "instantiates config", ->
-      expect(@Cypress).not.to.have.property("config")
-      @Cypress.setConfig({foo: "bar"})
       expect(@Cypress.config).to.be.a("function")
 
     it "instantiates Cookies", ->
-      expect(@Cypress).not.to.have.property("Cookies")
-      @Cypress.setConfig({foo: "bar"})
       expect(@Cypress.Cookies).to.be.an("object")
 
     it "passes config.environmentVariables", ->
@@ -158,21 +154,32 @@ describe "src/cypress", ->
 
       @sandbox.stub($Cypress.prototype, "restore")
       @sandbox.stub($Cypress.Cy, "create").returns(@cy)
+
       _.each ["Chai", "Mocha", "Runner"], (klass) =>
         @sandbox.stub($Cypress[klass], "create").returns(klass)
 
+    it "creates cy", ->
+      expect(window.cy).to.be.undefined
+
       @Cypress.onSpecWindow(@specWindow)
 
-    it "creates cy", ->
-      expect($Cypress.Cy.create).to.be.calledWith(@Cypress, {})
+      expect($Cypress.Cy.create).to.be.calledWith({})
+
+      expect(window.cy).to.eq(@cy)
 
     it "creates chai", ->
+      @Cypress.onSpecWindow(@specWindow)
+
       expect($Cypress.Chai.create).to.be.calledWith(@specWindow, @cy)
 
     it "creates mocha", ->
+      @Cypress.onSpecWindow(@specWindow)
+
       expect($Cypress.Mocha.create).to.be.calledWith(@Cypress, {})
 
     it "creates runner", ->
+      @Cypress.onSpecWindow(@specWindow)
+
       expect($Cypress.Runner.create).to.be.calledWith(@Cypress, {}, "Mocha")
 
   describe "#addParentCommand", ->

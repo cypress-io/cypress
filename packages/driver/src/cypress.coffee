@@ -49,7 +49,7 @@ throwPrivateCommandInterface = (method) ->
   })
 
 class $Cypress
-  constructor: ->
+  constructor: (config = {}) ->
     @cy       = null
     @chai     = null
     @mocha    = null
@@ -57,6 +57,8 @@ class $Cypress
     @Commands = null
 
     $Events.extend(@)
+
+    @setConfig(config)
 
   setConfig: (config = {}) ->
     ## config.remote
@@ -255,8 +257,8 @@ class $Cypress
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
-  @create = (options = {}) ->
-    new $Cypress
+  @create = (config) ->
+    new $Cypress(config)
 
   @extend = (obj) ->
     _.extend @prototype, obj
