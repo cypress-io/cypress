@@ -1,7 +1,7 @@
 require("../../support/unit_spec_helper")
 
 chai = require("chai")
-Chai = require("#{src}/cypress/chai")
+$Chai = require("#{src}/cypress/chai")
 
 describe "src/cypress/chai", ->
   assert = chai.Assertion.prototype.assert
@@ -15,7 +15,7 @@ describe "src/cypress/chai", ->
       assert: @sandbox.stub()
     }
 
-    Chai.create(@specWindow, @cy)
+    $Chai.create(@specWindow, @cy)
 
   context ".setSpecWindowGlobals", ->
     it "sets chai, expect, and assert", ->

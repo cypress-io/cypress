@@ -28,7 +28,7 @@ $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
 
-utils = require("./cypress/utils")
+$utils = require("./cypress/utils")
 
 throwDeprecatedCommandInterface = (key, method) ->
   signature = switch method
@@ -39,12 +39,12 @@ throwDeprecatedCommandInterface = (key, method) ->
     when "addDualCommand"
       "'#{key}', { prevSubject: 'optional' }, function(){...}"
 
-  utils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
+  $utils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
     args: { method, signature }
   })
 
 throwPrivateCommandInterface = (method) ->
-  utils.throwErrByPath("miscellaneous.private_custom_command_interface", {
+  $utils.throwErrByPath("miscellaneous.private_custom_command_interface", {
     args: { method }
   })
 
@@ -108,22 +108,24 @@ class $Cypress
 
     ## allow mocha + chai to initialize
     ## themselves or any other listeners
-    @emit "initialize",
+    @emit("initialize", {
       specWindow: specWindow
       $remoteIframe: $remoteIframe
+    })
 
     ## let the world know we're ready to
     ## rock and roll
-    @emit "initialized",
+    @emit("initialized", {
       cy: @cy
       runner: @runner
       mocha: @mocha
       chai: @chai
+    })
 
     return @
 
   run: (fn) ->
-    utils.throwErrByPath("miscellaneous.no_runner") if not @runner
+    $utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
     @runner.run(fn)
 
@@ -167,7 +169,9 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
-    cy       = $Cy.create(@, specWindow)
+    ## create cy and expose globally
+    @cy = window.cy = $Cy.create(specWindow)
+
     mocha    = $Mocha.create(@, specWindow)
     runner   = $Runner.create(@, specWindow, mocha)
 
@@ -175,9 +179,9 @@ class $Cypress
     # @log     = $Log.create(@, cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, cy)
+    @Commands = $Commands.create(@, @cy)
 
-    $Chai.create(specWindow, cy)
+    $Chai.create(specWindow, @cy)
 
   onBeforeLoad: (contentWindow) ->
     ## should probably just trigger the "before:window:load"
@@ -218,13 +222,13 @@ class $Cypress
     throwPrivateCommandInterface("addUtilityCommand")
 
   command: (obj = {}) ->
-    utils.warning "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
+    $utils.warning "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
     $Log.command(obj)
 
   $: ->
     if not @cy
-      utils.throwErrByPath("miscellaneous.no_cy")
+      $utils.throwErrByPath("miscellaneous.no_cy")
 
     @cy.$$.apply(@cy, arguments)
 
@@ -237,7 +241,7 @@ class $Cypress
 
   Log: $Log
 
-  utils: utils
+  utils: $utils
 
   _: _
 
@@ -285,7 +289,7 @@ $Cypress.LocalStorage = $LocalStorage
 $Cypress.Mocha = $Mocha
 $Cypress.Runner = $Runner
 $Cypress.Server = $Cypress.prototype.Server = $Server
-$Cypress.utils = utils
+$Cypress.utils = $utils
 
 ## expose globally (temporarily for the runner)
 window.$Cypress = $Cypress

@@ -1,10 +1,10 @@
 require("../../support/unit_spec_helper")
 
-SetterGetter = require("#{src}/cypress/setter_getter")
+$SetterGetter = require("#{src}/cypress/setter_getter")
 
 describe "src/cypress/setter_getter", ->
   beforeEach ->
-    @sg = SetterGetter.create({})
+    @sg = $SetterGetter.create({})
 
   it "sets by key/val", ->
     @sg("foo", "bar")
