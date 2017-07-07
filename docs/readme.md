@@ -12,6 +12,8 @@ The documents in this repo are generated using [Hexo](https://hexo.io/).
 
 ### Installing Dependencies
 
+From the `docs` directory:
+
 ```shell
 npm install
 

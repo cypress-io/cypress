@@ -7,9 +7,11 @@
   },
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",
+    "root-install": "cd .. && npm install --ignore-scripts",
+    "predeps": "npm run root-install",
     "deps": "$(bin-up deps-ok)",
     "prebuild": "npm run clean && npm run deps",
-    "build": "node --stack-size=4096 ./index.js generate",
+    "build": "node --stack-size=5120 ./index.js generate",
     "postbuild": "gulp post:build",
     "clean": "hexo clean",
     "clean-deps": "rm -rf node_modules",
@@ -17,12 +19,13 @@
     "predeploy": "NODE_ENV=production npm run build",
     "deploy": "node ./cy_scripts/deploy.js",
     "scrape": "node ./cy_scripts/scrape.js",
-    "start": "node --stack-size=4096 ./index.js server --port 2222",
+    "start": "node --stack-size=5120 ./index.js server --port 2222",
     "precypress": "npm install cypress-cli && cypress install",
     "cypress": "cypress run --record --key $DOCS_RECORD_KEY",
     "test-e2e": "run-p --race start cypress",
     "test": "mocha --compilers coffee:@packages/coffee/register --recursive",
     "test-watch": "npm run test --silent -- --watch",
+    "prelint": "npm run root-install",
     "lint": "$(bin-up eslint) --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
