@@ -5,35 +5,7 @@ $Cypress = require("../../cypress")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
-$Cy.extend({
-  resume: (resumeAll = true) ->
-    onResume = @state("onResume")
-
-    ## dont do anything if this isnt a fn
-    return if not _.isFunction(onResume)
-
-    ## nuke this out so it can only
-    ## be called a maximum of 1 time
-    @state("onResume", null)
-
-    ## call the fn
-    onResume.call(@, resumeAll)
-
-  _getNextQueuedCommand: ->
-    ## gets the next command which
-    ## isnt skipped
-    search = (i) =>
-      cmd = @commands.at(i)
-
-      if cmd and cmd.get("skip")
-        search(i + 1)
-      else
-        return cmd
-
-    search(@state("index"))
-})
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "resume:next", ->
     @resume(false)
 
@@ -124,3 +96,35 @@ module.exports = (Cypress, Commands) ->
 
       return subject
   })
+
+  return {
+    resume: (resumeAll = true) ->
+      onResume = @state("onResume")
+
+      ## dont do anything if this isnt a fn
+      return if not _.isFunction(onResume)
+
+      ## nuke this out so it can only
+      ## be called a maximum of 1 time
+      @state("onResume", null)
+
+      ## call the fn
+      onResume.call(@, resumeAll)
+
+    _getNextQueuedCommand: ->
+      ## gets the next command which
+      ## isnt skipped
+      search = (i) =>
+        cmd = @commands.at(i)
+
+        if cmd and cmd.get("skip")
+          search(i + 1)
+        else
+          return cmd
+
+      search(@state("index"))
+  }
+
+module.exports = {
+  create
+}

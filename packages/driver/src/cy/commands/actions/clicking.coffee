@@ -4,6 +4,7 @@ Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
 $Mouse = require("../../../cypress/mouse")
+
 {
   delay,
   dispatchPrimedChangeEvents,
@@ -11,10 +12,10 @@ $Mouse = require("../../../cypress/mouse")
   getCoords,
   getPositionFromArguments
 } = require("./utils")
-utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+$utils = require("../../../cypress/utils")
 
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "dom" }, {
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
@@ -38,7 +39,7 @@ module.exports = (Cypress, Commands) ->
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
       if options.multiple is false and options.$el.length > 1
-        utils.throwErrByPath("click.multiple_elements", {
+        $utils.throwErrByPath("click.multiple_elements", {
           args: { num: options.$el.length }
         })
 
@@ -54,7 +55,7 @@ module.exports = (Cypress, Commands) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = utils.filterOutOptions(options)
+          deltaOptions = $utils.filterOutOptions(options)
 
           options._log = $Log.command({
             message: deltaOptions
@@ -64,7 +65,7 @@ module.exports = (Cypress, Commands) ->
           options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
-          utils.throwErrByPath "click.on_select_element", { onFail: options._log }
+          $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         isAttached = ($elToClick) =>
           @_contains($elToClick)
@@ -100,7 +101,7 @@ module.exports = (Cypress, Commands) ->
 
           consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
-              "Applied To":   utils.getDomElements($el)
+              "Applied To":   $utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
               "Options":      deltaOptions
@@ -108,7 +109,7 @@ module.exports = (Cypress, Commands) ->
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              consoleObj["Actual Element Clicked"] = utils.getDomElements($elToClick)
+              consoleObj["Actual Element Clicked"] = $utils.getDomElements($elToClick)
 
             consoleObj.groups = ->
               groups = [{
@@ -199,8 +200,8 @@ module.exports = (Cypress, Commands) ->
               if options._log
                 options._log.set consoleProps: ->
                   obj = {}
-                  obj["Tried to Click"]     = utils.getDomElements($el)
-                  obj["But its Covered By"] = utils.getDomElements($elToClick)
+                  obj["Tried to Click"]     = $utils.getDomElements($el)
+                  obj["But its Covered By"] = $utils.getDomElements($elToClick)
                   obj
 
               ## snapshot only on click failure
@@ -341,7 +342,7 @@ module.exports = (Cypress, Commands) ->
           log = $Log.command
             $el: $el
             consoleProps: ->
-              "Applied To":   utils.getDomElements($el)
+              "Applied To":   $utils.getDomElements($el)
               "Elements":     $el.length
 
         @ensureVisibility $el, log
@@ -384,3 +385,8 @@ module.exports = (Cypress, Commands) ->
           throw err
 
   })
+
+
+module.exports = {
+  create
+}

@@ -5,8 +5,30 @@ utils = require("../cypress/utils")
 aliasRe = /^@.+/
 aliasDisplayRe = /^([@]+)/
 
+blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
+
 module.exports = ($Cy) ->
-  $Cy.extend
+  $Cy.extend({
+    _validateAlias: (alias) ->
+      if not _.isString(alias)
+        utils.throwErrByPath "as.invalid_type"
+
+      if _.isBlank(alias)
+        utils.throwErrByPath "as.empty_string"
+
+      if alias in blacklist
+        utils.throwErrByPath "as.reserved_word", { args: { alias } }
+
+    _addAlias: (aliasObj) ->
+      {alias, subject} = aliasObj
+      aliases = @state("aliases") ? {}
+      aliases[alias] = aliasObj
+      @state("aliases", aliases)
+
+      remoteSubject = @_getRemotejQueryInstance(subject)
+      ## assign the subject to our runnable ctx
+      @assign(alias, remoteSubject ? subject)
+
     assign: (str, obj) ->
       @privateState("runnable").ctx[str] = obj
 
@@ -127,6 +149,7 @@ module.exports = ($Cy) ->
 
         , [initialCommand]
 
+  })
     # cy
     #   .server()
     #   .route("/users", {}).as("u")

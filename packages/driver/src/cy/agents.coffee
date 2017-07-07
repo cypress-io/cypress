@@ -2,9 +2,9 @@ _ = require("lodash")
 Promise = require("bluebird")
 sinonAsPromised = require("sinon-as-promised")
 
-$Cy = require("../../cypress/cy")
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+# $Cy = require("../../cypress/cy")
+$Log = require("../cypress/log")
+$utils = require("../cypress/utils")
 
 sinonAsPromised(Promise)
 
@@ -23,7 +23,7 @@ getName = (obj) ->
   "#{obj.name}-#{obj.count}"
 
 formatArgs = (args) ->
-  _.map args, (arg) -> utils.stringifyArg(arg)
+  _.map args, (arg) -> $utils.stringifyArg(arg)
 
 getMessage = (method, args) ->
   method ?= "function"
@@ -104,7 +104,7 @@ onInvoke = (obj, args) ->
   $Log.command(logProps)
 
 onError = (err) ->
-  utils.throwErr(err)
+  $utils.throwErr(err)
 
 wrap = (_cy, type, agent, obj, method, count) ->
   if not count
@@ -176,30 +176,36 @@ wrap = (_cy, type, agent, obj, method, count) ->
 
   return agent
 
-$Cy.extend({
-  spy: (obj, method) ->
-    spy = @_getSandbox().spy(obj, method)
-    wrap(@, "spy", spy, obj, method)
+## TODO: pass in the dependencies here lik
+## sandbox or aliases
+create = (cy) ->
+  counts = {
+    spy: 0
+    stub: 0
+    children: {}
+  }
 
-  stub: (obj, method, replacerFn) ->
-    stub = @_getSandbox().stub(obj, method, replacerFn)
-    wrap(@, "stub", stub, obj, method)
+  return {
+    spy: (obj, method) ->
+      spy = cy._getSandbox().spy(obj, method)
+      wrap(cy, "spy", spy, obj, method)
 
-  agents: ->
-    utils.warning "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
+    stub: (obj, method, replacerFn) ->
+      stub = cy._getSandbox().stub(obj, method, replacerFn)
+      wrap(cy, "stub", stub, obj, method)
 
-    {
-      stub: @stub.bind(@)
-      spy: @spy.bind(@)
-    }
-})
+    agents: ->
+      $utils.warning "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
 
-module.exports = (Cypress, Commands) ->
-  do resetCounts = ->
-    counts = {
-      spy: 0
-      stub: 0
-      children: {}
-    }
+      {
+        stub: @stub.bind(@)
+        spy: @spy.bind(@)
+      }
+  }
 
-  Cypress.on "restore", resetCounts
+module.exports = {
+  # spy
+  # stub
+  # agents
+  create
+}

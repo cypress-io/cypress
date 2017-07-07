@@ -2,7 +2,7 @@ _ = require("lodash")
 
 $LocalStorage = require("../../cypress/local_storage")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 clearLocalStorage = (keys) ->
   local = window.localStorage
@@ -20,7 +20,7 @@ clearLocalStorage = (keys) ->
   ## return the remote localStorage object
   return remote
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "test:before:hooks", ->
     try
       ## this may fail if the current
@@ -33,7 +33,7 @@ module.exports = (Cypress, Commands) ->
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
       if keys and not _.isString(keys) and not _.isRegExp(keys)
-        utils.throwErrByPath("clearLocalStorage.invalid_argument")
+        $utils.throwErrByPath("clearLocalStorage.invalid_argument")
 
       remote = clearLocalStorage.call(@, keys)
 
@@ -45,3 +45,7 @@ module.exports = (Cypress, Commands) ->
       ## return the remote local storage object
       return remote
   })
+
+module.exports = {
+  create
+}

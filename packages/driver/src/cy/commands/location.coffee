@@ -1,29 +1,11 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
 $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
-$Cy.extend({
-  __location: (win) ->
-    win.location.toString()
-
-  _getLocation: (key, win) ->
-    try
-      remoteUrl = @__location(win ? @privateState("window"))
-      location  = $Location.create(remoteUrl)
-
-      if key
-        location[key]
-      else
-        location
-    catch e
-      ""
-})
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addAll({
     url: (options = {}) ->
       _.defaults options, {log: true}
@@ -74,7 +56,7 @@ module.exports = (Cypress, Commands) ->
           ## use existential here because we only want to throw
           ## on null or undefined values (and not empty strings)
           location[key] ?
-            utils.throwErrByPath("location.invalid_key", { args: { key } })
+            $utils.throwErrByPath("location.invalid_key", { args: { key } })
         else
           location
 
@@ -88,3 +70,24 @@ module.exports = (Cypress, Commands) ->
             onRetry: resolveLocation
           })
   })
+
+  return {
+    __location: (win) ->
+      win.location.toString()
+
+    _getLocation: (key, win) ->
+      try
+        remoteUrl = @__location(win ? @privateState("window"))
+        location  = $Location.create(remoteUrl)
+
+        if key
+          location[key]
+        else
+          location
+      catch e
+        ""
+  }
+
+module.exports = {
+  create
+}

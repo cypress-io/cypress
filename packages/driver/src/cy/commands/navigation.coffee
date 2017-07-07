@@ -3,10 +3,9 @@ moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
 $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 commandCausingLoading = /^(visit|reload)$/
 
@@ -15,139 +14,12 @@ previousDomainVisited = false
 hasVisitedAboutBlank  = false
 
 timedOutWaitingForPageLoad = (ms, log) ->
-  utils.throwErrByPath("navigation.timed_out", {
+  $utils.throwErrByPath("navigation.timed_out", {
     onFail: log
     args: { ms }
   })
 
-$Cy.extend({
-  _href: (win, url) ->
-    win.location.href = url
-
-  _replace: (win, url) ->
-    win.location.replace(url)
-
-  _existing: ->
-    $Location.create(window.location.href)
-
-  _src: ($remoteIframe, url) ->
-    $remoteIframe.prop("src", url)
-
-  _resolveUrl: (url) ->
-    Cypress.triggerPromise("resolve:url", url)
-    .then (resp = {}) ->
-      switch
-        ## if we didn't even get an OK response
-        ## then immediately die
-        when not resp.isOkStatusCode
-          err = new Error
-          err.gotResponse = true
-          _.extend(err, resp)
-
-          throw err
-
-        when not resp.isHtml
-          ## throw invalid contentType error
-          err = new Error
-          err.invalidContentType = true
-          _.extend(err, resp)
-
-          throw err
-
-        else
-          resp
-
-  submitting: (e, options = {}) ->
-    ## even though our beforeunload event
-    ## should be firing shortly, lets just
-    ## set the pageChangeEvent to true because
-    ## there may be situations where it doesnt
-    ## fire fast enough
-    @state("pageChangeEvent", true)
-
-    $Log.command
-      type: "parent"
-      name: "form sub"
-      message: "--submitting form---"
-      event: true
-      end: true
-      snapshot: true
-      consoleProps: -> {
-        "Originated From": e.target
-      }
-
-  loading: (options = {}) ->
-    current = @state("current")
-
-    ## if we are visiting a page which caused
-    ## the beforeunload, then dont output this command
-    return if commandCausingLoading.test(current?.get("name"))
-
-    ## bail if we dont have a runnable
-    ## because beforeunload can happen at any time
-    ## we may no longer be testing and thus dont
-    ## want to fire a new loading event
-    ## TODO
-    ## this may change in the future since we want
-    ## to add debuggability in the chrome console
-    ## which at that point we may keep runnable around
-    return if not @privateState("runnable")
-
-    ## this tells the world that we're
-    ## handling a page load event
-    @state("pageChangeEvent", true)
-
-    _.defaults options,
-      timeout: Cypress.config("pageLoadTimeout")
-
-    options._log = $Log.command
-      type: "parent"
-      name: "page load"
-      message: "--waiting for new page to load---"
-      event: true
-      ## add a note here that loading nulled out the current subject?
-      consoleProps: -> {
-        "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
-      }
-
-    @_clearTimeout()
-
-    ready = @state("ready")
-
-    ready.promise
-      .cancellable()
-      .timeout(options.timeout)
-      .then =>
-        options._log.set("message", "--page loaded--").snapshot().end()
-
-        ## return null to prevent accidental chaining
-        return null
-      .catch Promise.CancellationError, (err) ->
-        ## dont do anything on cancellation errors
-        return
-      .catch Promise.TimeoutError, (err) =>
-        try
-          timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
-        catch e
-          ## must directly fail here else we potentially
-          ## get unhandled promise exception
-          @fail(e)
-      .catch (err) =>
-        try
-          {originPolicy} = $Location.create(window.location.href)
-
-          utils.throwErrByPath("navigation.cross_origin", {
-            onFail: options._log
-            args: {
-              message: err.message
-              originPolicy: originPolicy
-            }
-          })
-        catch e
-          @fail(e)
-})
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "test:before:run", (test) ->
     ## continuously reset this
     ## before each test run!
@@ -187,7 +59,7 @@ module.exports = (Cypress, Commands) ->
   Commands.addAll({
     reload: (args...) ->
       throwArgsErr = =>
-        utils.throwErrByPath("reload.invalid_arguments")
+        $utils.throwErrByPath("reload.invalid_arguments")
 
       switch args.length
         when 0
@@ -262,7 +134,7 @@ module.exports = (Cypress, Commands) ->
 
       goNumber = (num) =>
         if num is 0
-          utils.throwErrByPath("go.invalid_number", { onFail: options._log })
+          $utils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
         didUnload = false
         pending   = Promise.pending()
@@ -313,7 +185,7 @@ module.exports = (Cypress, Commands) ->
           when "forward" then goNumber(1)
           when "back"    then goNumber(-1)
           else
-            utils.throwErrByPath("go.invalid_direction", {
+            $utils.throwErrByPath("go.invalid_direction", {
               onFail: options._log
               args: { str }
             })
@@ -322,11 +194,11 @@ module.exports = (Cypress, Commands) ->
         when _.isFinite(numberOrString) then goNumber(numberOrString)
         when _.isString(numberOrString) then goString(numberOrString)
         else
-          utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
+          $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
       if not _.isString(url)
-        utils.throwErrByPath("visit.invalid_1st_arg")
+        $utils.throwErrByPath("visit.invalid_1st_arg")
 
       _.defaults options,
         log: true
@@ -373,7 +245,7 @@ module.exports = (Cypress, Commands) ->
 
         cannotVisit2ndDomain = (origin) ->
           try
-            utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
+            $utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
               onFail: options._log
               args: {
                 previousDomain: previousDomainVisited
@@ -555,13 +427,13 @@ module.exports = (Cypress, Commands) ->
                 when err.invalidContentType
                   "visit.loading_invalid_content_type"
 
-              utils.throwErrByPath(msg, {
+              $utils.throwErrByPath(msg, {
                 onFail: options._log
                 args: args
               })
           .catch (err) ->
             visitFailedByErr err, url, ->
-              utils.throwErrByPath("visit.loading_network_failed", {
+              $utils.throwErrByPath("visit.loading_network_failed", {
                 onFail: options._log
                 args: {
                   url:   url
@@ -592,3 +464,134 @@ module.exports = (Cypress, Commands) ->
         $remoteIframe.off("load")
         timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
   })
+
+  return {
+    _href: (win, url) ->
+      win.location.href = url
+
+    _replace: (win, url) ->
+      win.location.replace(url)
+
+    _existing: ->
+      $Location.create(window.location.href)
+
+    _src: ($remoteIframe, url) ->
+      $remoteIframe.prop("src", url)
+
+    _resolveUrl: (url) ->
+      Cypress.triggerPromise("resolve:url", url)
+      .then (resp = {}) ->
+        switch
+          ## if we didn't even get an OK response
+          ## then immediately die
+          when not resp.isOkStatusCode
+            err = new Error
+            err.gotResponse = true
+            _.extend(err, resp)
+
+            throw err
+
+          when not resp.isHtml
+            ## throw invalid contentType error
+            err = new Error
+            err.invalidContentType = true
+            _.extend(err, resp)
+
+            throw err
+
+          else
+            resp
+
+    submitting: (e, options = {}) ->
+      ## even though our beforeunload event
+      ## should be firing shortly, lets just
+      ## set the pageChangeEvent to true because
+      ## there may be situations where it doesnt
+      ## fire fast enough
+      @state("pageChangeEvent", true)
+
+      $Log.command
+        type: "parent"
+        name: "form sub"
+        message: "--submitting form---"
+        event: true
+        end: true
+        snapshot: true
+        consoleProps: -> {
+          "Originated From": e.target
+        }
+
+    loading: (options = {}) ->
+      current = @state("current")
+
+      ## if we are visiting a page which caused
+      ## the beforeunload, then dont output this command
+      return if commandCausingLoading.test(current?.get("name"))
+
+      ## bail if we dont have a runnable
+      ## because beforeunload can happen at any time
+      ## we may no longer be testing and thus dont
+      ## want to fire a new loading event
+      ## TODO
+      ## this may change in the future since we want
+      ## to add debuggability in the chrome console
+      ## which at that point we may keep runnable around
+      return if not @privateState("runnable")
+
+      ## this tells the world that we're
+      ## handling a page load event
+      @state("pageChangeEvent", true)
+
+      _.defaults options,
+        timeout: Cypress.config("pageLoadTimeout")
+
+      options._log = $Log.command
+        type: "parent"
+        name: "page load"
+        message: "--waiting for new page to load---"
+        event: true
+        ## add a note here that loading nulled out the current subject?
+        consoleProps: -> {
+          "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
+        }
+
+      @_clearTimeout()
+
+      ready = @state("ready")
+
+      ready.promise
+        .cancellable()
+        .timeout(options.timeout)
+        .then =>
+          options._log.set("message", "--page loaded--").snapshot().end()
+
+          ## return null to prevent accidental chaining
+          return null
+        .catch Promise.CancellationError, (err) ->
+          ## dont do anything on cancellation errors
+          return
+        .catch Promise.TimeoutError, (err) =>
+          try
+            timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
+          catch e
+            ## must directly fail here else we potentially
+            ## get unhandled promise exception
+            @fail(e)
+        .catch (err) =>
+          try
+            {originPolicy} = $Location.create(window.location.href)
+
+            $utils.throwErrByPath("navigation.cross_origin", {
+              onFail: options._log
+              args: {
+                message: err.message
+                originPolicy: originPolicy
+              }
+            })
+          catch e
+            @fail(e)
+  }
+
+module.exports = {
+  create
+}

@@ -3,10 +3,9 @@ Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
 { delay, dispatchPrimedChangeEvents, focusable } = require("./utils")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
-
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "dom" }, {
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -23,16 +22,16 @@ module.exports = (Cypress, Commands) ->
         options._log = $Log.command
           $el: options.$el
           consoleProps: ->
-            "Applied To": utils.getDomElements(options.$el)
+            "Applied To": $utils.getDomElements(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not (options.$el.is(focusable) or utils.hasWindow(options.$el))
+      if not (options.$el.is(focusable) or $utils.hasWindow(options.$el))
         return if options.error is false
 
-        node = utils.stringifyElement(options.$el)
-        utils.throwErrByPath("focus.invalid_element", {
+        node = $utils.stringifyElement(options.$el)
+        $utils.throwErrByPath("focus.invalid_element", {
           onFail: options._log
           args: { node }
         })
@@ -40,7 +39,7 @@ module.exports = (Cypress, Commands) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        utils.throwErrByPath("focus.multiple_elements", {
+        $utils.throwErrByPath("focus.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -131,7 +130,7 @@ module.exports = (Cypress, Commands) ->
 
           return if options.error is false
 
-          utils.throwErrByPath "focus.timed_out", { onFail: options._log }
+          $utils.throwErrByPath "focus.timed_out", { onFail: options._log }
         .then =>
           return options.$el if options.verify is false
 
@@ -152,20 +151,20 @@ module.exports = (Cypress, Commands) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options)
 
         options._log = $Log.command
           $el: options.$el
           message: deltaOptions
           consoleProps: ->
-            "Applied To": utils.getDomElements(options.$el)
+            "Applied To": $utils.getDomElements(options.$el)
 
       @ensureDom(options.$el, "blur", options._log)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        utils.throwErrByPath("blur.multiple_elements", {
+        $utils.throwErrByPath("blur.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -174,13 +173,13 @@ module.exports = (Cypress, Commands) ->
         if options.force isnt true and not $focused
           return if options.error is false
 
-          utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
+          $utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
 
         if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
-          node = utils.stringifyElement($focused)
-          utils.throwErrByPath("blur.wrong_focused_element", {
+          node = $utils.stringifyElement($focused)
+          $utils.throwErrByPath("blur.wrong_focused_element", {
             onFail: options._log
             args: { node }
           })
@@ -255,7 +254,7 @@ module.exports = (Cypress, Commands) ->
 
             return if options.error is false
 
-            utils.throwErrByPath "blur.timed_out", { onFail: command }
+            $utils.throwErrByPath "blur.timed_out", { onFail: command }
           .then =>
             return options.$el if options.verify is false
 
@@ -264,3 +263,7 @@ module.exports = (Cypress, Commands) ->
                 onRetry: verifyAssertions
           })
   })
+
+module.exports = {
+  create
+}

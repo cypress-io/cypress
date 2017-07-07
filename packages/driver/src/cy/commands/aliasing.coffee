@@ -1,33 +1,8 @@
 _ = require("lodash")
 
-$Cy = require("../../cypress/cy")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
-blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
-
-$Cy.extend({
-  _validateAlias: (alias) ->
-    if not _.isString(alias)
-      utils.throwErrByPath "as.invalid_type"
-
-    if _.isBlank(alias)
-      utils.throwErrByPath "as.empty_string"
-
-    if alias in blacklist
-      utils.throwErrByPath "as.reserved_word", { args: { alias } }
-
-  _addAlias: (aliasObj) ->
-    {alias, subject} = aliasObj
-    aliases = @state("aliases") ? {}
-    aliases[alias] = aliasObj
-    @state("aliases", aliases)
-
-    remoteSubject = @_getRemotejQueryInstance(subject)
-    ## assign the subject to our runnable ctx
-    @assign(alias, remoteSubject ? subject)
-})
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addUtility({
     as: (subject, str) ->
       @ensureParent()
@@ -60,10 +35,14 @@ module.exports = (Cypress, Commands) ->
 
           log.set({
             alias:     str
-            aliasType: if utils.hasElement(subject) then "dom" else "primitive"
+            aliasType: if $utils.hasElement(subject) then "dom" else "primitive"
           })
 
       @_addAlias({subject: subject, command: prev, alias: str})
 
       return subject
   })
+
+module.exports = {
+  create
+}

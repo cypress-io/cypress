@@ -1,9 +1,9 @@
 _ = require("lodash")
 
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "optional" }, {
     end: ->
       null
@@ -34,7 +34,7 @@ module.exports = (Cypress, Commands) ->
       if options.log isnt false
         options._log = $Log.command()
 
-        if utils.hasElement(arg)
+        if $utils.hasElement(arg)
           options._log.set({$el: arg})
 
       do resolveWrap = =>
@@ -42,3 +42,7 @@ module.exports = (Cypress, Commands) ->
           onRetry: resolveWrap
         })
   })
+
+module.exports = {
+  create
+}

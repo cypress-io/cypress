@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 priorityElement = "input[type='submit'], button, a, label"
 
@@ -14,7 +14,7 @@ $contains = $expr.contains
 restoreContains = ->
   $expr.contains = $contains
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "abort", restoreContains
 
   Commands.addAll({
@@ -33,7 +33,7 @@ module.exports = (Cypress, Commands) ->
           $el: $el
           consoleProps: ->
             ret = if $el
-              utils.getDomElements($el)
+              $utils.getDomElements($el)
             else
               "--nothing--"
             Yielded: ret
@@ -128,7 +128,7 @@ module.exports = (Cypress, Commands) ->
           switch aliasType
             when "dom"
               _.extend consoleProps,
-                Yielded: utils.getDomElements(value)
+                Yielded: $utils.getDomElements(value)
                 Elements: value?.length
 
             when "primitive"
@@ -151,7 +151,7 @@ module.exports = (Cypress, Commands) ->
         return do resolveAlias = =>
           switch
             ## if this is a DOM element
-            when utils.hasElement(subject)
+            when $utils.hasElement(subject)
               replayFrom = false
 
               replay = =>
@@ -203,7 +203,7 @@ module.exports = (Cypress, Commands) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Yielded = utils.getDomElements($el)
+        consoleProps.Yielded = $utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -269,7 +269,7 @@ module.exports = (Cypress, Commands) ->
     contains: (subject, filter, text, options = {}) ->
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
-      if subject and not utils.hasElement(subject)
+      if subject and not $utils.hasElement(subject)
         subject = null
 
       switch
@@ -285,18 +285,18 @@ module.exports = (Cypress, Commands) ->
 
       @ensureNoCommandOptions(options)
 
-      utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
-      utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
+      $utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
+      $utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
 
       getPhrase = (type, negated) ->
         switch
           when filter and subject
-            node = utils.stringifyElement(subject, "short")
+            node = $utils.stringifyElement(subject, "short")
             "within the element: #{node} and with the selector: '#{filter}' "
           when filter
             "within the selector: '#{filter}' "
           when subject
-            node = utils.stringifyElement(subject, "short")
+            node = $utils.stringifyElement(subject, "short")
             "within the element: #{node} "
           else
             ""
@@ -314,7 +314,7 @@ module.exports = (Cypress, Commands) ->
       if options.log isnt false
         consoleProps = {
           Content: text
-          "Applied To": utils.getDomElements(subject or @state("withinSubject"))
+          "Applied To": $utils.getDomElements(subject or @state("withinSubject"))
         }
 
         options._log = $Log.command
@@ -333,7 +333,7 @@ module.exports = (Cypress, Commands) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Yielded = utils.getDomElements($el)
+        consoleProps.Yielded = $utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -366,7 +366,7 @@ module.exports = (Cypress, Commands) ->
           ## taken from jquery's normal contains method
           text.test(elem.textContent or elem.innerText or $.text(elem))
       else
-        text = utils.escapeQuotes(text)
+        text = $utils.escapeQuotes(text)
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
@@ -399,7 +399,7 @@ module.exports = (Cypress, Commands) ->
               switch err.type
                 when "length"
                   if err.expected > 1
-                    utils.throwErrByPath "contains.length_option", { onFail: options._log }
+                    $utils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
                   err.displayMessage = getErr(err)
           })
@@ -427,7 +427,7 @@ module.exports = (Cypress, Commands) ->
           $el: subject
           message: ""
 
-      utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
+      $utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll
@@ -482,3 +482,8 @@ module.exports = (Cypress, Commands) ->
 
       return subject
   })
+
+
+module.exports = {
+  create
+}

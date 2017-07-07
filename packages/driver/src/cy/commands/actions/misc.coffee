@@ -3,12 +3,12 @@ Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
 { getCoords, getPositionFromArguments } = require("./utils")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "dom" }, {
     hover: (args) ->
-      utils.throwErrByPath("hover.not_implemented")
+      $utils.throwErrByPath("hover.not_implemented")
 
     ttrigger: (subject, eventName, positionOrX, y, options = {}) ->
       {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
@@ -40,13 +40,13 @@ module.exports = (Cypress, Commands) ->
       @ensureDom(options.$el)
 
       if not _.isString(eventName)
-        utils.throwErrByPath("trigger.invalid_argument", {
+        $utils.throwErrByPath("trigger.invalid_argument", {
           onFail: options._log
           args: { eventName }
         })
 
       if options.$el.length > 1
-        utils.throwErrByPath("trigger.multiple_elements", {
+        $utils.throwErrByPath("trigger.multiple_elements", {
           onFail: options._log
           args: { num: options.$el.length }
         })
@@ -61,8 +61,8 @@ module.exports = (Cypress, Commands) ->
           options._log.set({coords: coords})
 
         eventOptions = _.extend({
-          clientX: utils.getClientX(coords, win)
-          clientY: utils.getClientY(coords, win)
+          clientX: $utils.getClientX(coords, win)
+          clientY: $utils.getClientY(coords, win)
           pageX: coords.x
           pageY: coords.y
         }, eventOptions)
@@ -84,3 +84,8 @@ module.exports = (Cypress, Commands) ->
             onRetry: verifyAssertions
           })
   })
+
+
+module.exports = {
+  create
+}

@@ -3,14 +3,14 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
 findScrollableParent = ($el, win) ->
   $parent = $el.parent()
 
   ## if we're at the body, we just want to pass in
   ## window into jQuery scrollTo
-  if $parent.is("body,html") or utils.hasDocument($parent)
+  if $parent.is("body,html") or $utils.hasDocument($parent)
     return win
 
   return $parent if $Cypress.Dom.elIsScrollable($parent)
@@ -22,21 +22,20 @@ isNaNOrInfinity = (item) ->
 
   return _.isNaN(num) or !_.isFinite(num)
 
-module.exports = (Cypress, Commands) ->
-
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "dom" }, {
     scrollIntoView: (subject, options = {}) ->
       if !_.isObject(options)
-        utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
+        $utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
 
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...
       if subject is @privateState("window")
-        utils.throwErrByPath("scrollIntoView.subject_is_window")
+        $utils.throwErrByPath("scrollIntoView.subject_is_window")
 
       ## throw if we're trying to scroll to multiple elements
       if subject.length > 1
-        utils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
+        $utils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
 
       _.defaults options,
         $el: subject
@@ -47,7 +46,7 @@ module.exports = (Cypress, Commands) ->
         axis: "xy"
 
       ## figure out the options which actually change the behavior of clicks
-      deltaOptions = utils.filterOutOptions(options)
+      deltaOptions = $utils.filterOutOptions(options)
 
       ## here we want to figure out what has to actually
       ## be scrolled to get to this element, cause we need
@@ -63,13 +62,13 @@ module.exports = (Cypress, Commands) ->
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
       if isNaNOrInfinity(options.duration)
-        utils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }})
+        $utils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }})
 
       if !(options.easing is "swing" or options.easing is "linear")
-        utils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
+        $utils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
 
       if options.log
-        deltaOptions = utils.filterOutOptions(options, {duration: 0, easing: 'swing', offset: {left: 0, top: 0}})
+        deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing', offset: {left: 0, top: 0}})
 
         log = {
           $el: options.$el
@@ -77,8 +76,8 @@ module.exports = (Cypress, Commands) ->
           consoleProps: ->
             obj = {
               ## merge into consoleProps without mutating it
-              "Applied To": utils.getDomElements(options.$el)
-              "Scrolled Element": utils.getDomElements(options.$el)
+              "Applied To": $utils.getDomElements(options.$el)
+              "Scrolled Element": $utils.getDomElements(options.$el)
             }
 
             return obj
@@ -103,7 +102,7 @@ module.exports = (Cypress, Commands) ->
           fail: (animation, jumpedToEnd) ->
             ## its Promise object is rejected
             try
-              utils.throwErrByPath("scrollTo.animation_failed")
+              $utils.throwErrByPath("scrollTo.animation_failed")
             catch err
               reject(err)
           always: ->
@@ -116,7 +115,7 @@ module.exports = (Cypress, Commands) ->
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
       ## check for undefined or null values
       if not xOrPosition?
-        utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
+        $utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
         when _.isObject(yOrOptions)
@@ -186,7 +185,7 @@ module.exports = (Cypress, Commands) ->
 
       ## throw if we're trying to scroll multiple containers
       if $container.length > 1
-        utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
+        $utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
       _.defaults options,
         $el: $container
@@ -200,26 +199,26 @@ module.exports = (Cypress, Commands) ->
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
       if isNaNOrInfinity(options.duration)
-        utils.throwErrByPath("scrollTo.invalid_duration", {args: { duration: options.duration }})
+        $utils.throwErrByPath("scrollTo.invalid_duration", {args: { duration: options.duration }})
 
       if !(options.easing is "swing" or options.easing is "linear")
-        utils.throwErrByPath("scrollTo.invalid_easing", {args: { easing: options.easing }})
+        $utils.throwErrByPath("scrollTo.invalid_easing", {args: { easing: options.easing }})
 
       ## if we cannot parse an integer out of y or x
       ## which could be 50 or "50px" or "50%" then
       ## it's NaN/Infinity...throw
       if isNaNOrInfinity(options.y) or isNaNOrInfinity(options.x)
-        utils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
+        $utils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
 
       if options.log
-        deltaOptions = utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
+        deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
 
         log = {
           message: deltaOptions
           consoleProps: ->
             obj = {
               ## merge into consoleProps without mutating it
-              "Scrolled Element": utils.getDomElements(options.$el)
+              "Scrolled Element": $utils.getDomElements(options.$el)
             }
 
             return obj
@@ -251,7 +250,7 @@ module.exports = (Cypress, Commands) ->
             fail: (animation, jumpedToEnd) ->
               ## its Promise object is rejected
               try
-                utils.throwErrByPath("scrollTo.animation_failed")
+                $utils.throwErrByPath("scrollTo.animation_failed")
               catch err
                 reject(err)
           })
@@ -259,3 +258,7 @@ module.exports = (Cypress, Commands) ->
           if isWin
             delete options.$el.contentWindow
   })
+
+module.exports = {
+  create
+}

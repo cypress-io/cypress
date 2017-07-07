@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 ## hold a global reference to defaults
 viewportDefaults = null
@@ -22,7 +22,7 @@ viewports = {
 
 validOrientations = ["landscape", "portrait"]
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "test:before:hooks", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
@@ -68,7 +68,7 @@ module.exports = (Cypress, Commands) ->
 
       getWindow = =>
         window = @privateState("window")
-        utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
+        $utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window
 
@@ -96,7 +96,7 @@ module.exports = (Cypress, Commands) ->
       getDocument = =>
         win = @privateState("window")
         ## TODO: add failing test around logging twice
-        utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
+        $utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 
         return win.document
 
@@ -131,7 +131,7 @@ module.exports = (Cypress, Commands) ->
             obj
 
       throwErrBadArgs = =>
-        utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
+        $utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
 
       widthAndHeightAreValidNumbers = (width, height) ->
         _.every [width, height], (val) ->
@@ -143,7 +143,7 @@ module.exports = (Cypress, Commands) ->
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
-          utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
+          $utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
 
         when _.isString(presetOrWidth)
           getPresetDimensions = (preset) =>
@@ -151,7 +151,7 @@ module.exports = (Cypress, Commands) ->
               _.map(viewports[presetOrWidth].split("x"), Number)
             catch e
               presets = _.keys(viewports).join(", ")
-              utils.throwErrByPath "viewport.missing_preset", {
+              $utils.throwErrByPath "viewport.missing_preset", {
                 onFail: options._log
                 args: { preset, presets }
               }
@@ -159,7 +159,7 @@ module.exports = (Cypress, Commands) ->
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
               all = validOrientations.join("' or '")
-              utils.throwErrByPath "viewport.invalid_orientation", {
+              $utils.throwErrByPath "viewport.invalid_orientation", {
                 onFail: options._log
                 args: { all, orientation }
               }
@@ -183,7 +183,7 @@ module.exports = (Cypress, Commands) ->
           height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
-            utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
+            $utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
 
         else
           throwErrBadArgs()
@@ -200,3 +200,8 @@ module.exports = (Cypress, Commands) ->
 
       return null
   })
+
+
+module.exports = {
+  create
+}

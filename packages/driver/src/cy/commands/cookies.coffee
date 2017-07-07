@@ -2,10 +2,9 @@ _ = require("lodash")
 Promise = require("bluebird")
 moment = require("moment")
 
-$Cy = require("../../cypress/cy")
 $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 COOKIE_PROPS = "name value path secure httpOnly expiry domain".split(" ")
 
@@ -46,48 +45,7 @@ getAndClear = (log, timeout) ->
     cookies = Cypress.Cookies.getClearableCookies(resp)
     @_automateCookies("clear:cookies", cookies, log, timeout)
 
-$Cy.extend({
-  _addTwentyYears: ->
-    moment().add(20, "years").unix()
-
-  _automateCookies: (event, obj = {}, log, timeout) ->
-    automate = ->
-      new Promise (resolve, reject) ->
-        fn = (resp) ->
-          if e = resp.__error
-            err = utils.cypressErr(e)
-            err.name = resp.__name
-            err.stack = resp.__stack
-
-            try
-              utils.throwErr(err, { onFail: log })
-            catch e
-              reject(e)
-          else
-            resolve(resp.response)
-
-        Cypress.trigger(event, mergeDefaults(obj), fn)
-
-    if not timeout
-      automate()
-    else
-      ## need to remove the current timeout
-      ## because we're handling timeouts ourselves
-      @_clearTimeout()
-
-      automate()
-      .timeout(timeout)
-      .catch Promise.TimeoutError, (err) ->
-        utils.throwErrByPath "cookies.timed_out", {
-          onFail: log
-          args: {
-            cmd:     getCommandFromEvent(event)
-            timeout: timeout
-          }
-        }
-})
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "test:before:hooks", ->
     ## TODO: handle failure here somehow
     ## maybe by tapping into the Cypress reset
@@ -118,7 +76,7 @@ module.exports = (Cypress, Commands) ->
         })
 
       if not _.isString(name)
-        utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
+        $utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
 
       @_automateCookies("get:cookie", {name: name}, options._log, options.timeout)
       .then (resp) ->
@@ -180,7 +138,7 @@ module.exports = (Cypress, Commands) ->
         })
 
       if not _.isString(name) or not _.isString(value)
-        utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
+        $utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
 
       @_automateCookies("set:cookie", cookie, options._log, options.timeout)
       .then (resp) ->
@@ -212,7 +170,7 @@ module.exports = (Cypress, Commands) ->
         })
 
       if not _.isString(name)
-        utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
+        $utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
 
       ## TODO: prevent clearing a cypress namespace
       @_automateCookies("clear:cookie", {name: name}, options._log, options.timeout)
@@ -257,3 +215,48 @@ module.exports = (Cypress, Commands) ->
         err.message = err.message.replace("getCookies", "clearCookies")
         throw err
   })
+
+  return {
+    _addTwentyYears: ->
+      moment().add(20, "years").unix()
+
+    _automateCookies: (event, obj = {}, log, timeout) ->
+      automate = ->
+        new Promise (resolve, reject) ->
+          fn = (resp) ->
+            if e = resp.__error
+              err = $utils.cypressErr(e)
+              err.name = resp.__name
+              err.stack = resp.__stack
+
+              try
+                $utils.throwErr(err, { onFail: log })
+              catch e
+                reject(e)
+            else
+              resolve(resp.response)
+
+          Cypress.trigger(event, mergeDefaults(obj), fn)
+
+      if not timeout
+        automate()
+      else
+        ## need to remove the current timeout
+        ## because we're handling timeouts ourselves
+        @_clearTimeout()
+
+        automate()
+        .timeout(timeout)
+        .catch Promise.TimeoutError, (err) ->
+          $utils.throwErrByPath "cookies.timed_out", {
+            onFail: log
+            args: {
+              cmd:     getCommandFromEvent(event)
+              timeout: timeout
+            }
+          }
+  }
+
+module.exports = {
+  create
+}

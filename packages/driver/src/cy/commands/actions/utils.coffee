@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
 delay = 50
 
@@ -64,7 +64,7 @@ waitForAnimations = (cy, $el, options, coordsHistory = []) ->
     try
       coords = cy.getCoordinates($el, options.position)
     catch err
-      utils.throwErr(err, { onFail: options._log })
+      $utils.throwErr(err, { onFail: options._log })
 
   ## if we're forcing this click event
   ## just immediately send it up

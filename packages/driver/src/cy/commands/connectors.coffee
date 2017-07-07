@@ -2,7 +2,6 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
@@ -278,22 +277,7 @@ invokeFn = (subject, fn, args...) ->
         onRetry: resolveValue
       })
 
-$Cy.extend({
-  _isCommandFromThenable: (cmd) ->
-    args = cmd.get("args")
-
-    cmd.get("name") is "then" and
-      args.length is 3 and
-        _.every(args, _.isFunction)
-
-  _isCommandFromMocha: (cmd) ->
-    not cmd.get("next") and
-      cmd.get("args").length is 2 and
-        (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
-})
-
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: true }, {
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
@@ -391,3 +375,21 @@ module.exports = (Cypress, Commands) ->
     its: ->
       invokeFn.apply(@, arguments)
   })
+
+  return {
+    _isCommandFromThenable: (cmd) ->
+      args = cmd.get("args")
+
+      cmd.get("name") is "then" and
+        args.length is 3 and
+          _.every(args, _.isFunction)
+
+    _isCommandFromMocha: (cmd) ->
+      not cmd.get("next") and
+        cmd.get("args").length is 2 and
+          (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
+  }
+
+module.exports = {
+  create
+}

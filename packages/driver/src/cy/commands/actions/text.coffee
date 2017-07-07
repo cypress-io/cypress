@@ -6,7 +6,7 @@ moment = require("moment")
 { delay, waitForAnimations } = require("./utils")
 $Log = require("../../../cypress/log")
 $Keyboard = require("../../../cypress/keyboard")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
 textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
@@ -15,7 +15,7 @@ monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
     $Keyboard.resetModifiers(@privateState("document"), @privateState("window"))
 
@@ -35,7 +35,7 @@ module.exports = (Cypress, Commands) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options)
 
         table = {}
 
@@ -65,7 +65,7 @@ module.exports = (Cypress, Commands) ->
           $el: options.$el
           consoleProps: ->
             "Typed":      chars
-            "Applied To": utils.getDomElements(options.$el)
+            "Applied To": $utils.getDomElements(options.$el)
             "Options":    deltaOptions
             "table": ->
               {
@@ -90,33 +90,33 @@ module.exports = (Cypress, Commands) ->
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
       if not isBody and not isTextLike and not hasTabIndex
-        node = utils.stringifyElement(options.$el)
-        utils.throwErrByPath("type.not_on_text_field", {
+        node = $utils.stringifyElement(options.$el)
+        $utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
           args: { node }
         })
 
       if (num = options.$el.length) and num > 1
-        utils.throwErrByPath("type.multiple_elements", {
+        $utils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
-        utils.throwErrByPath("type.wrong_type", {
+        $utils.throwErrByPath("type.wrong_type", {
           onFail: options._log
           args: { chars }
         })
 
       if _.isBlank(chars)
-        utils.throwErrByPath("type.empty_string", { onFail: options._log })
+        $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       if isDate and (
         not _.isString(chars) or
         not dateRegex.test(chars) or
         not moment(chars).isValid()
       )
-        utils.throwErrByPath("type.invalid_date", {
+        $utils.throwErrByPath("type.invalid_date", {
           onFail: options._log
           args: { chars }
         })
@@ -125,7 +125,7 @@ module.exports = (Cypress, Commands) ->
         not _.isString(chars) or
         not monthRegex.test(chars)
       )
-        utils.throwErrByPath("type.invalid_month", {
+        $utils.throwErrByPath("type.invalid_month", {
           onFail: options._log
           args: { chars }
         })
@@ -134,7 +134,7 @@ module.exports = (Cypress, Commands) ->
         not _.isString(chars) or
         not weekRegex.test(chars)
       )
-        utils.throwErrByPath("type.invalid_week", {
+        $utils.throwErrByPath("type.invalid_week", {
           onFail: options._log
           args: { chars }
         })
@@ -143,7 +143,7 @@ module.exports = (Cypress, Commands) ->
         not _.isString(chars) or
         not timeRegex.test(chars)
       )
-        utils.throwErrByPath("type.invalid_time", {
+        $utils.throwErrByPath("type.invalid_time", {
           onFail: options._log
           args: { chars }
         })
@@ -293,9 +293,9 @@ module.exports = (Cypress, Commands) ->
 
           onNoMatchingSpecialChars: (chars, allChars) =>
             if chars is "{tab}"
-              utils.throwErrByPath("type.tab", { onFail: options._log })
+              $utils.throwErrByPath("type.tab", { onFail: options._log })
             else
-              utils.throwErrByPath("type.invalid", {
+              $utils.throwErrByPath("type.invalid", {
                 onFail: options._log
                 args: { chars, allChars }
               })
@@ -360,21 +360,21 @@ module.exports = (Cypress, Commands) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = utils.filterOutOptions(options)
+          deltaOptions = $utils.filterOutOptions(options)
 
           options._log = $Log.command
             message: deltaOptions
             $el: $el
             consoleProps: ->
-              "Applied To": utils.getDomElements($el)
+              "Applied To": $utils.getDomElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
 
-        node = utils.stringifyElement($el)
+        node = $utils.stringifyElement($el)
 
         if not $el.is(textLike)
-          word = utils.plural(subject, "contains", "is")
-          utils.throwErrByPath "clear.invalid_element", {
+          word = $utils.plural(subject, "contains", "is")
+          $utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log
             args: { word, node }
           }
@@ -402,3 +402,8 @@ module.exports = (Cypress, Commands) ->
               onRetry: verifyAssertions
             })
   })
+
+
+module.exports = {
+  create
+}

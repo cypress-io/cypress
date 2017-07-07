@@ -3,7 +3,7 @@ Promise = require("bluebird")
 
 $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
@@ -41,7 +41,7 @@ isValidJsonObj = (body) ->
 whichAreOptional = (val, key) ->
   val is null and key in OPTIONAL_OPTS
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   request = (options) =>
     Cypress.triggerPromise("request", options)
 
@@ -88,7 +88,7 @@ module.exports = (Cypress, Commands) ->
       options.method = options.method.toUpperCase()
 
       if _.has(options, "failOnStatus")
-        utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+        $utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
         options.failOnStatusCode = options.failOnStatus
 
       ## normalize followRedirects -> followRedirect
@@ -97,15 +97,15 @@ module.exports = (Cypress, Commands) ->
         options.followRedirect = options.followRedirects
 
       if not validHttpMethodsRe.test(options.method)
-        utils.throwErrByPath("request.invalid_method", {
+        $utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
 
       if not options.url
-        utils.throwErrByPath("request.url_missing")
+        $utils.throwErrByPath("request.url_missing")
 
       if not _.isString(options.url)
-        utils.throwErrByPath("request.url_wrong_type")
+        $utils.throwErrByPath("request.url_wrong_type")
 
       ## normalize the url by prepending it with our current origin
       ## or the baseUrl
@@ -120,7 +120,7 @@ module.exports = (Cypress, Commands) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        utils.throwErrByPath("request.url_invalid")
+        $utils.throwErrByPath("request.url_invalid")
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body
@@ -131,20 +131,20 @@ module.exports = (Cypress, Commands) ->
 
       if a = options.auth
         if not _.isObject(a)
-          utils.throwErrByPath("request.auth_invalid")
+          $utils.throwErrByPath("request.auth_invalid")
 
       if h = options.headers
         if _.isObject(h)
           options.headers = h
         else
-          utils.throwErrByPath("request.headers_invalid")
+          $utils.throwErrByPath("request.headers_invalid")
 
       if not _.isBoolean(options.gzip)
-        utils.throwErrByPath("request.gzip_invalid")
+        $utils.throwErrByPath("request.gzip_invalid")
 
       if f = options.form
         if not _.isBoolean(f)
-          utils.throwErrByPath("request.form_invalid")
+          $utils.throwErrByPath("request.form_invalid")
 
       ## clone the requestOpts and reduce them down
       ## to the bare minimum to send to lib/request
@@ -159,7 +159,7 @@ module.exports = (Cypress, Commands) ->
 
             obj = {}
 
-            word = utils.plural(rr.length, "Requests", "Request")
+            word = $utils.plural(rr.length, "Requests", "Request")
 
             ## if we have only a single request/response then
             ## flatten this to an object, else keep as array
@@ -197,7 +197,7 @@ module.exports = (Cypress, Commands) ->
 
         ## bomb if we should fail on non okay status code
         if options.failOnStatusCode and response.isOkStatusCode isnt true
-          utils.throwErrByPath("request.status_invalid", {
+          $utils.throwErrByPath("request.status_invalid", {
             onFail: options._log
             args: {
               method:          requestOpts.method
@@ -214,7 +214,7 @@ module.exports = (Cypress, Commands) ->
 
         return response
       .catch Promise.TimeoutError, (err) =>
-        utils.throwErrByPath "request.timed_out", {
+        $utils.throwErrByPath "request.timed_out", {
           onFail: options._log
           args: {
             url:     requestOpts.url
@@ -223,7 +223,7 @@ module.exports = (Cypress, Commands) ->
           }
         }
       .catch responseFailed, (err) ->
-        utils.throwErrByPath("request.loading_failed", {
+        $utils.throwErrByPath("request.loading_failed", {
           onFail: options._log
           args: {
             error:   err.message
@@ -233,3 +233,8 @@ module.exports = (Cypress, Commands) ->
           }
         })
   })
+
+
+module.exports = {
+  create
+}

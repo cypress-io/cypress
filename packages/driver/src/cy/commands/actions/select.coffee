@@ -3,10 +3,9 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
-
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "dom" }, {
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
@@ -20,7 +19,7 @@ module.exports = (Cypress, Commands) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options)
 
         options._log = $Log.command
           message: deltaOptions
@@ -28,7 +27,7 @@ module.exports = (Cypress, Commands) ->
           consoleProps: ->
             ## merge into consoleProps without mutating it
             _.extend {}, consoleProps,
-              "Applied To": utils.getDomElements(options.$el)
+              "Applied To": $utils.getDomElements(options.$el)
               "Options":    deltaOptions
 
         options._log.snapshot("before", {next: "after"})
@@ -45,11 +44,11 @@ module.exports = (Cypress, Commands) ->
       ## behavior
 
       if not options.$el.is("select")
-        node = utils.stringifyElement(options.$el)
-        utils.throwErrByPath "select.invalid_element", { args: { node } }
+        node = $utils.stringifyElement(options.$el)
+        $utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        utils.throwErrByPath "select.multiple_elements", { args: { num } }
+        $utils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -58,15 +57,15 @@ module.exports = (Cypress, Commands) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        utils.throwErrByPath "select.invalid_multiple"
+        $utils.throwErrByPath "select.invalid_multiple"
 
       getOptions = =>
         newLineRe = /\n/g
 
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
-          node = utils.stringifyElement(options.$el)
-          utils.throwErrByPath "select.disabled", { args: { node } }
+          node = $utils.stringifyElement(options.$el)
+          $utils.throwErrByPath "select.disabled", { args: { node } }
 
         values = []
         optionEls = []
@@ -109,19 +108,19 @@ module.exports = (Cypress, Commands) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          utils.throwErrByPath("select.multiple_matches", {
+          $utils.throwErrByPath("select.multiple_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         if not values.length
-          utils.throwErrByPath("select.no_matches", {
+          $utils.throwErrByPath("select.no_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
-            node = utils.stringifyElement($el)
-            utils.throwErrByPath("select.option_disabled", {
+            node = $utils.stringifyElement($el)
+            $utils.throwErrByPath("select.option_disabled", {
               args: { node }
             })
 
@@ -210,3 +209,8 @@ module.exports = (Cypress, Commands) ->
               onRetry: verifyAssertions
         })
   })
+
+
+module.exports = {
+  create
+}

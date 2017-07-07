@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## we're not handling conversion of values to strings
@@ -61,14 +61,14 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       matchingElements.push(el)
 
     consoleProps = {
-      "Applied To":   utils.getDomElements($el)
+      "Applied To":   $utils.getDomElements($el)
       "Elements":     $el.length
     }
 
     if options.log and isElActionable
 
       ## figure out the options which actually change the behavior of clicks
-      deltaOptions = utils.filterOutOptions(options)
+      deltaOptions = $utils.filterOutOptions(options)
 
       options._log = $Log.command
         message: deltaOptions
@@ -81,10 +81,10 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       options._log.snapshot("before", {next: "after"})
 
       if not isAcceptableElement($el)
-        node   = utils.stringifyElement($el)
-        word   = utils.plural(options.$el, "contains", "is")
+        node   = $utils.stringifyElement($el)
+        word   = $utils.plural(options.$el, "contains", "is")
         phrase = if type is "check" then " and :radio" else ""
-        utils.throwErrByPath "check_uncheck.invalid_element", {
+        $utils.throwErrByPath "check_uncheck.invalid_element", {
           onFail: options._log
           args: { node, word, phrase, cmd: type }
         }
@@ -139,8 +139,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
           onRetry: verifyAssertions
         })
 
-module.exports = (Cypress, Commands) ->
-
+create = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "dom" }, {
     check: (subject, values, options) ->
       checkOrUncheck.call(@, "check", subject, values, options)
@@ -148,3 +147,7 @@ module.exports = (Cypress, Commands) ->
     uncheck: (subject, values, options) ->
       checkOrUncheck.call(@, "uncheck", subject, values, options)
   })
+
+module.exports = {
+  create
+}

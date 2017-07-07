@@ -1,7 +1,6 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 

@@ -1,15 +1,14 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 fixturesRe = /^(fx:|fixture:)/
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   ## this is called at the beginning of run, so clear the cache
   cache = {}
 
@@ -54,7 +53,7 @@ module.exports = (Cypress, Commands) ->
       .timeout(options.timeout)
       .then (response) =>
         if err = response.__error
-          utils.throwErr(err)
+          $utils.throwErr(err)
         else
           ## add the fixture to the cache
           ## so it can just be returned next time
@@ -63,7 +62,11 @@ module.exports = (Cypress, Commands) ->
           ## return the cloned response
           return clone(response)
       .catch Promise.TimeoutError, (err) ->
-        utils.throwErrByPath "fixture.timed_out", {
+        $utils.throwErrByPath "fixture.timed_out", {
           args: { timeout: options.timeout }
         }
   })
+
+module.exports = {
+  create
+}

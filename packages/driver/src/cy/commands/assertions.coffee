@@ -3,7 +3,6 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Chai = require("../../cypress/chai")
-$Cy = require("../../cypress/cy")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
@@ -231,263 +230,7 @@ assertFn = (passed, message, value, actual, expected, error, verifying = false) 
 
   return null
 
-$Cy.extend({
-  verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
-    cmds = @getUpcomingAssertions()
-
-    @state("upcomingAssertions", cmds)
-
-    options.assertions ?= []
-
-    _.defaults callbacks, {
-      ensureExistenceFor: "dom"
-    }
-
-    ensureExistence = =>
-      ## by default, ensure existence for dom subjects,
-      ## but not non-dom subjects
-      switch callbacks.ensureExistenceFor
-        when "dom"
-          $el = determineEl(options.$el, subject)
-          return if not utils.isInstanceOf($el, $)
-
-          @ensureElExistence($el)
-
-        when "subject"
-          @ensureExistence(subject)
-
-    determineEl = ($el, subject) ->
-      ## prefer $el unless it is strickly undefined
-      if not _.isUndefined($el) then $el else subject
-
-    onPassFn = =>
-      if _.isFunction(callbacks.onPass)
-        callbacks.onPass.call(@, cmds, options.assertions)
-      else
-        subject
-
-    onFailFn = (err) =>
-      ## when we fail for whatever reason we need to
-      ## check to see if we would firstly fail if
-      ## we don't have an el in existence. what this
-      ## catches are assertions downstream about an
-      ## elements existence but the element never
-      ## exists in the first place. this will probably
-      ## ensure the error is about existence not about
-      ## the downstream assertion.
-      try
-        ensureExistence()
-      catch e2
-        err = e2
-
-      options.error = err
-
-      throw err if err.retry is false
-
-      onFail  = callbacks.onFail
-      onRetry = callbacks.onRetry
-
-      if not onFail and not onRetry
-        throw err
-
-      ## if our onFail throws then capture it
-      ## and finish the assertions and then throw
-      ## it again
-      try
-        onFail.call(@, err) if _.isFunction(onFail)
-      catch e3
-        @finishAssertions(options.assertions)
-        throw e3
-
-      @_retry(onRetry, options) if _.isFunction(onRetry)
-
-    ## bail if we have no assertions
-    if not cmds.length
-      return Promise
-        .try(ensureExistence)
-        .then(onPassFn)
-        .catch(onFailFn)
-
-    i = 0
-
-    cmdHasFunctionArg = (cmd) ->
-      _.isFunction(cmd.get("args")[0])
-
-    @assert = (args...) ->
-      do (cmd = cmds[i]) =>
-        setCommandLog = (log) =>
-          ## our next log may not be an assertion
-          ## due to page events so make sure we wait
-          ## until we see page events
-          return if log.get("name") isnt "assert"
-
-          ## when we do immediately unbind this function
-          @state("onBeforeLog", null)
-
-          insertNewLog = (log) ->
-            cmd.log(log)
-            options.assertions.push(log)
-
-          ## its possible a single 'should' will assert multiple
-          ## things such as the case with have.property. we can
-          ## detect when that is happening because cmd will be null.
-          ## if thats the case then just set cmd to be the previous
-          ## cmd and do not increase 'i'
-          ## this will prevent 2 logs from ever showing up but still
-          ## provide errors when the 1st assertion fails.
-          if not cmd
-            cmd = cmds[i - 1]
-          else
-            i += 1
-
-          ## if our command has a function argument
-          ## then we know it may contain multiple
-          ## assertions
-          if cmdHasFunctionArg(cmd)
-            index      = cmd.get("assertionIndex")
-            assertions = cmd.get("assertions")
-
-            incrementIndex = ->
-              ## always increase the assertionIndex
-              ## so our next assertion matches up
-              ## to the correct index
-              cmd.set("assertionIndex", index += 1)
-
-            ## if we dont have an assertion at this
-            ## index then insert a new log
-            if not assertion = assertions[index]
-              assertions.push(log)
-              incrementIndex()
-
-              return insertNewLog(log)
-            else
-              ## else just merge this log
-              ## into the previous assertion log
-              incrementIndex()
-              assertion.merge(log)
-
-              ## dont output a new log
-              return false
-
-          ## if we already have a log
-          ## then just update its attrs from
-          ## the new log
-          if l = cmd.getLastLog()
-            l.merge(log)
-
-            ## and make sure we return false
-            ## which prevents a new log from
-            ## being added
-            return false
-          else
-            insertNewLog(log)
-
-        @state("onBeforeLog", setCommandLog)
-
-      ## send verify=true as the last arg
-      assertFn.apply(@, args.concat(true))
-
-    fns = @_injectAssertionFns(cmds)
-
-    subjects = []
-
-    ## iterate through each subject
-    ## and force the assertion to return
-    ## this value so it does not get
-    ## invoked again
-    setSubjectAndSkip = ->
-      for subject, i in subjects
-        cmd  = cmds[i]
-        cmd.set("subject", subject)
-        cmd.skip()
-
-    assertions = (memo, fn, i) =>
-      fn(memo).then (subject) ->
-        subjects[i] = subject
-
-    restore = =>
-      @state("upcomingAssertions", [])
-
-      ## no matter what we need to
-      ## restore the assertions
-      @assert = assertFn
-
-    Promise
-      .reduce(fns, assertions, subject)
-      .then(restore)
-      .then(setSubjectAndSkip)
-      .then =>
-        @finishAssertions(options.assertions)
-      .then(onPassFn)
-      .cancellable()
-      .catch Promise.CancellationError, ->
-        restore()
-      .catch (err) =>
-        restore()
-
-        ## when we're told not to retry
-        if err.retry is false
-          ## finish the assertions
-          @finishAssertions(options.assertions)
-
-          ## and then push our command into this err
-          try
-            utils.throwErr(err, { onFail: options._log })
-          catch e
-            err = e
-
-        throw err
-      .catch(onFailFn)
-
-  finishAssertions: (assertions) ->
-    _.each assertions, (log) ->
-      log.snapshot()
-
-      if e = log.get("_error")
-        log.error(e)
-      else
-        log.end()
-
-  _injectAssertionFns: (cmds) ->
-    _.map cmds, _.bind(@_injectAssertion, @)
-
-  _injectAssertion: (cmd) ->
-    return (subject) =>
-      ## set assertions to itself or empty array
-      if not cmd.get("assertions")
-        cmd.set("assertions", [])
-
-      ## reset the assertion index back to 0
-      ## so we can track assertions and merge
-      ## them up with existing ones
-      cmd.set("assertionIndex", 0)
-      cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
-
-  getUpcomingAssertions: ->
-    current = @state("current")
-    index   = @state("index") + 1
-
-    assertions = []
-
-    ## grab the rest of the queue'd commands
-    for cmd in @queue.slice(index).get()
-      ## don't break on utilities, just skip over them
-      if cmd.is("utility")
-        continue
-
-      ## grab all of the queued commands which are
-      ## assertions and match our current chainerId
-      if cmd.is("assertion") and cmd.get("chainerId") is current.get("chainerId")
-        assertions.push(cmd)
-      else
-        break
-
-    assertions
-
-  assert: assertFn
-})
-
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addAssertion({
     should: ->
       shouldFn.apply(@, arguments)
@@ -495,3 +238,263 @@ module.exports = (Cypress, Commands) ->
     and: ->
       shouldFn.apply(@, arguments)
   })
+  
+  return {
+    verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
+      cmds = @getUpcomingAssertions()
+
+      @state("upcomingAssertions", cmds)
+
+      options.assertions ?= []
+
+      _.defaults callbacks, {
+        ensureExistenceFor: "dom"
+      }
+
+      ensureExistence = =>
+        ## by default, ensure existence for dom subjects,
+        ## but not non-dom subjects
+        switch callbacks.ensureExistenceFor
+          when "dom"
+            $el = determineEl(options.$el, subject)
+            return if not utils.isInstanceOf($el, $)
+
+            @ensureElExistence($el)
+
+          when "subject"
+            @ensureExistence(subject)
+
+      determineEl = ($el, subject) ->
+        ## prefer $el unless it is strickly undefined
+        if not _.isUndefined($el) then $el else subject
+
+      onPassFn = =>
+        if _.isFunction(callbacks.onPass)
+          callbacks.onPass.call(@, cmds, options.assertions)
+        else
+          subject
+
+      onFailFn = (err) =>
+        ## when we fail for whatever reason we need to
+        ## check to see if we would firstly fail if
+        ## we don't have an el in existence. what this
+        ## catches are assertions downstream about an
+        ## elements existence but the element never
+        ## exists in the first place. this will probably
+        ## ensure the error is about existence not about
+        ## the downstream assertion.
+        try
+          ensureExistence()
+        catch e2
+          err = e2
+
+        options.error = err
+
+        throw err if err.retry is false
+
+        onFail  = callbacks.onFail
+        onRetry = callbacks.onRetry
+
+        if not onFail and not onRetry
+          throw err
+
+        ## if our onFail throws then capture it
+        ## and finish the assertions and then throw
+        ## it again
+        try
+          onFail.call(@, err) if _.isFunction(onFail)
+        catch e3
+          @finishAssertions(options.assertions)
+          throw e3
+
+        @_retry(onRetry, options) if _.isFunction(onRetry)
+
+      ## bail if we have no assertions
+      if not cmds.length
+        return Promise
+          .try(ensureExistence)
+          .then(onPassFn)
+          .catch(onFailFn)
+
+      i = 0
+
+      cmdHasFunctionArg = (cmd) ->
+        _.isFunction(cmd.get("args")[0])
+
+      @assert = (args...) ->
+        do (cmd = cmds[i]) =>
+          setCommandLog = (log) =>
+            ## our next log may not be an assertion
+            ## due to page events so make sure we wait
+            ## until we see page events
+            return if log.get("name") isnt "assert"
+
+            ## when we do immediately unbind this function
+            @state("onBeforeLog", null)
+
+            insertNewLog = (log) ->
+              cmd.log(log)
+              options.assertions.push(log)
+
+            ## its possible a single 'should' will assert multiple
+            ## things such as the case with have.property. we can
+            ## detect when that is happening because cmd will be null.
+            ## if thats the case then just set cmd to be the previous
+            ## cmd and do not increase 'i'
+            ## this will prevent 2 logs from ever showing up but still
+            ## provide errors when the 1st assertion fails.
+            if not cmd
+              cmd = cmds[i - 1]
+            else
+              i += 1
+
+            ## if our command has a function argument
+            ## then we know it may contain multiple
+            ## assertions
+            if cmdHasFunctionArg(cmd)
+              index      = cmd.get("assertionIndex")
+              assertions = cmd.get("assertions")
+
+              incrementIndex = ->
+                ## always increase the assertionIndex
+                ## so our next assertion matches up
+                ## to the correct index
+                cmd.set("assertionIndex", index += 1)
+
+              ## if we dont have an assertion at this
+              ## index then insert a new log
+              if not assertion = assertions[index]
+                assertions.push(log)
+                incrementIndex()
+
+                return insertNewLog(log)
+              else
+                ## else just merge this log
+                ## into the previous assertion log
+                incrementIndex()
+                assertion.merge(log)
+
+                ## dont output a new log
+                return false
+
+            ## if we already have a log
+            ## then just update its attrs from
+            ## the new log
+            if l = cmd.getLastLog()
+              l.merge(log)
+
+              ## and make sure we return false
+              ## which prevents a new log from
+              ## being added
+              return false
+            else
+              insertNewLog(log)
+
+          @state("onBeforeLog", setCommandLog)
+
+        ## send verify=true as the last arg
+        assertFn.apply(@, args.concat(true))
+
+      fns = @_injectAssertionFns(cmds)
+
+      subjects = []
+
+      ## iterate through each subject
+      ## and force the assertion to return
+      ## this value so it does not get
+      ## invoked again
+      setSubjectAndSkip = ->
+        for subject, i in subjects
+          cmd  = cmds[i]
+          cmd.set("subject", subject)
+          cmd.skip()
+
+      assertions = (memo, fn, i) =>
+        fn(memo).then (subject) ->
+          subjects[i] = subject
+
+      restore = =>
+        @state("upcomingAssertions", [])
+
+        ## no matter what we need to
+        ## restore the assertions
+        @assert = assertFn
+
+      Promise
+        .reduce(fns, assertions, subject)
+        .then(restore)
+        .then(setSubjectAndSkip)
+        .then =>
+          @finishAssertions(options.assertions)
+        .then(onPassFn)
+        .cancellable()
+        .catch Promise.CancellationError, ->
+          restore()
+        .catch (err) =>
+          restore()
+
+          ## when we're told not to retry
+          if err.retry is false
+            ## finish the assertions
+            @finishAssertions(options.assertions)
+
+            ## and then push our command into this err
+            try
+              utils.throwErr(err, { onFail: options._log })
+            catch e
+              err = e
+
+          throw err
+        .catch(onFailFn)
+
+    finishAssertions: (assertions) ->
+      _.each assertions, (log) ->
+        log.snapshot()
+
+        if e = log.get("_error")
+          log.error(e)
+        else
+          log.end()
+
+    _injectAssertionFns: (cmds) ->
+      _.map cmds, _.bind(@_injectAssertion, @)
+
+    _injectAssertion: (cmd) ->
+      return (subject) =>
+        ## set assertions to itself or empty array
+        if not cmd.get("assertions")
+          cmd.set("assertions", [])
+
+        ## reset the assertion index back to 0
+        ## so we can track assertions and merge
+        ## them up with existing ones
+        cmd.set("assertionIndex", 0)
+        cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
+
+    getUpcomingAssertions: ->
+      current = @state("current")
+      index   = @state("index") + 1
+
+      assertions = []
+
+      ## grab the rest of the queue'd commands
+      for cmd in @queue.slice(index).get()
+        ## don't break on utilities, just skip over them
+        if cmd.is("utility")
+          continue
+
+        ## grab all of the queued commands which are
+        ## assertions and match our current chainerId
+        if cmd.is("assertion") and cmd.get("chainerId") is current.get("chainerId")
+          assertions.push(cmd)
+        else
+          break
+
+      assertions
+
+    assert: assertFn
+  }
+
+module.exports = {
+  create
+}

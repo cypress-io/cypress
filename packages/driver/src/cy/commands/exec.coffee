@@ -13,7 +13,7 @@ exec = (options) =>
       else
         resolve(resp)
 
-module.exports = (Cypress, Commands) ->
+create = (Cypress, Commands) ->
   Commands.addAll({
     exec: (cmd, options = {}) ->
       _.defaults options,
@@ -79,3 +79,7 @@ module.exports = (Cypress, Commands) ->
           args: { cmd, error }
         })
   })
+
+module.exports = {
+  create
+}
