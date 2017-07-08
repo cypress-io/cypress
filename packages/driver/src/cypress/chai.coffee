@@ -326,6 +326,17 @@ chai.use (chai, u) ->
     specWindow.expect = overrideExpect(cy)
     specWindow.assert = overrideAssert(cy)
 
+  create = (specWindow, cy) ->
+    # restoreOverrides()
+    restoreAsserts()
+
+    # overrideChai()
+    overrideChaiAsserts(cy)
+
+    setSpecWindowGlobals(specWindow, cy)
+
+    return null
+
   module.exports = {
     replaceArgMessages
 
@@ -343,14 +354,5 @@ chai.use (chai, u) ->
 
     overrideChaiAsserts
 
-    create: (specWindow, cy) ->
-      # restoreOverrides()
-      restoreAsserts()
-
-      # overrideChai()
-      overrideChaiAsserts(cy)
-
-      setSpecWindowGlobals(specWindow, cy)
-
-      return null
+    create
   }
