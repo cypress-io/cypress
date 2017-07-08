@@ -217,7 +217,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && npm run test-e2e
+      - run: cd docs && npm run build && npm run test-e2e
 
   "driver-unit-tests":
     <<: *defaults

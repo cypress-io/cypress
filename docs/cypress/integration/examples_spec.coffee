@@ -1,7 +1,7 @@
 YAML = require('yamljs')
 _ = require('lodash')
 
-EXAMPLES_PATH = "/examples/recipes/unit-testing"
+EXAMPLES_PATH = "/examples/recipes/unit-testing-recipe"
 
 describe "Examples", ->
   beforeEach ->

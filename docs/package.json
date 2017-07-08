@@ -7,6 +7,8 @@
   },
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",
+    "root-install": "cd .. && npm install --ignore-scripts",
+    "predeps": "npm run root-install",
     "deps": "$(bin-up deps-ok)",
     "prebuild": "npm run clean && npm run deps",
     "build": "node --stack-size=8192 ./index.js generate",
@@ -23,6 +25,7 @@
     "test-e2e": "run-p --race start cypress",
     "test": "mocha --compilers coffee:@packages/coffee/register --recursive",
     "test-watch": "npm run test --silent -- --watch",
+    "prelint": "npm run root-install",
     "lint": "$(bin-up eslint) --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {

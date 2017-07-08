@@ -25,7 +25,7 @@ describe "Global Mode", ->
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "logOut").resolves({})
       cy.stub(@ipc, "addProject").resolves(@projects[0])
-      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "offOpenProject")
       cy.stub(@ipc, "offGetSpecs")

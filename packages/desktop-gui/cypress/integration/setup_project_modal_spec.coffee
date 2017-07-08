@@ -16,7 +16,7 @@ describe "Setup Project", ->
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       @config.projectId = null
-      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "getRuns").resolves([])
       cy.stub(@ipc, "getRecordKeys").resolves(@keys)

@@ -15,11 +15,9 @@
 
 // Import commands.js and defaults.js
 // using ES2015 syntax:
-{{#each files}}
-import "./{{this}}"
-{{/each}}
+import "./commands"
+import "./defaults"
 
 // Alternatively you can use CommonJS syntax:
-{{#each files}}
-// require("./{{this}}")
-{{/each}}
+// require("./commands")
+// require("./defaults")

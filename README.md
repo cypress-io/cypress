@@ -213,3 +213,17 @@ variable.
 Because we had many problems reliably zipping built binary, for now we need
 to build both Mac and Linux binary from Mac (Linux binary is built using
 a Docker container), then zip it **from Mac**, then upload it.
+
+## Working on documentation (docs)
+
+If you need to work on documentation, switch to `docs` directory. You should
+be able to install tools, build and start local `hexo` site
+
+```sh
+cd docs
+npm install
+npm run build
+npm start
+```
+
+See [docs/readme.md](docs/readme.md) for details
