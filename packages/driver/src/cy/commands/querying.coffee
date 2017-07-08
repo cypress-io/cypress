@@ -14,7 +14,7 @@ $contains = $expr.contains
 restoreContains = ->
   $expr.contains = $contains
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "abort", restoreContains
 
   Commands.addAll({

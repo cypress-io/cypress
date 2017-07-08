@@ -230,7 +230,7 @@ assertFn = (passed, message, value, actual, expected, error, verifying = false) 
 
   return null
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAssertion({
     should: ->
       shouldFn.apply(@, arguments)

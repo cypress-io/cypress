@@ -20,7 +20,7 @@ clearLocalStorage = (keys) ->
   ## return the remote localStorage object
   return remote
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "test:before:hooks", ->
     try
       ## this may fail if the current

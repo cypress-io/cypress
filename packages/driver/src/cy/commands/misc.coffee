@@ -3,7 +3,7 @@ _ = require("lodash")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: "optional" }, {
     end: ->
       null

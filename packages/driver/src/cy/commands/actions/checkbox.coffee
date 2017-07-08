@@ -139,7 +139,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
           onRetry: verifyAssertions
         })
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: "dom" }, {
     check: (subject, values, options) ->
       checkOrUncheck.call(@, "check", subject, values, options)

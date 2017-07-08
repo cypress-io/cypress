@@ -7,7 +7,7 @@ $utils = require("../../cypress/utils")
 
 ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({
     ng: (type, selector, options = {}) ->
       ## what about requirejs / browserify?

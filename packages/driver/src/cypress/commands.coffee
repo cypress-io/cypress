@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-commands = [
+builtInCommands = [
   require("../cy/commands/actions/checkbox")
   require("../cy/commands/actions/clicking")
   require("../cy/commands/actions/focus")
@@ -9,7 +9,6 @@ commands = [
   require("../cy/commands/actions/scrolling")
   require("../cy/commands/actions/select")
   require("../cy/commands/actions/text")
-  require("../cy/commands/agents")
   require("../cy/commands/aliasing")
   require("../cy/commands/angular")
   require("../cy/commands/assertions")
@@ -45,42 +44,111 @@ getTypeByPrevSubject = (prevSubject) ->
     else
       "parent"
 
+create = (cy, events) ->
+  ## create a single instance
+  ## of commands
+  commands = {}
+  commandBackups = {}
+
+  store = (obj) ->
+    commands[obj.key] = obj
+
+  storeOverride = (key, fn) ->
+    ## grab the original function if its been backed up
+    ## or grab it from the command store
+    original = commandBackups[key] or commands[key]
+
+    if not original
+      $utils.throwErrByPath("miscellaneous.invalid_overwrite", {
+        args: {
+          name: key
+        }
+      })
+
+    ## store the backup again now
+    commandBackups[key] = original
+
+    originalFn = original.fn
+
+    overrideFn = _.wrap originalFn, ->
+      fn.apply(@, arguments)
+
+    original.fn = overrideFn
+
+  Commands = {
+    _commands: commands ## for testing
+
+    each: (fn) ->
+      ## perf loop
+      for key, command of commands
+        fn(command)
+
+      ## prevent loop comprehension
+      null
+
+    addAll: (options = {}, obj) ->
+      if not obj
+        obj = options
+        options = {}
+
+      ## perf loop
+      for key, fn of obj
+        Commands.add(key, options, fn)
+
+      ## prevent loop comprehension
+      null
+
+    add: (key, options, fn) ->
+      if _.isFunction(options)
+        fn = options
+        options = {}
+
+      type = getTypeByPrevSubject(options.prevSubject)
+
+      ## should we enforce the prev subject be DOM?
+      enforceDom = options.prevSubject is "dom"
+
+      store({
+        key
+        fn
+        type
+        enforceDom
+      })
+
+    addAssertion: (obj) ->
+      ## perf loop
+      for key, fn of obj
+        store({
+          key
+          fn,
+          type: "assertion"
+        })
+
+      ## prevent loop comprehension
+      null
+
+    addUtility: (obj) ->
+      ## perf loop
+      for key, fn of obj
+        store({
+          key
+          fn,
+          type: "utility"
+        })
+
+      ## prevent loop comprehension
+      null
+
+    overwrite: (key, fn) ->
+      storeOverride(key, fn)
+  }
+
+  ## perf loop
+  for cmd in builtInCommands
+    cmd.create(Commands, events, (->))
+
+  return Commands
+
 module.exports = {
-  create: (Cypress, cy) ->
-
-    obj = {
-      addAll: (options = {}, obj) ->
-        if not obj
-          obj = options
-          options = {}
-
-        _.each obj, (fn, key) =>
-          @add(key, options, fn)
-
-      add: (key, options, fn) ->
-        if _.isFunction(options)
-          fn = options
-          options = {}
-
-        type = getTypeByPrevSubject(options.prevSubject)
-
-        ## should we enforce the prev subject be DOM?
-        enforceDom = options.prevSubject is "dom"
-
-        cy.onCommand(key, fn, type, enforceDom)
-
-      addAssertion: (key, fn) ->
-        cy.onCommand(key, fn, "assertion")
-
-      addUtility: (key, fn) ->
-        cy.onCommand(key, fn, "utility")
-
-      overwrite: (key, fn) ->
-        cy.onOverwrite(key, fn)
-    }
-
-    _.each commands, (command) ->
-      command(Cypress, obj)
-
-    return obj
+  create
 }

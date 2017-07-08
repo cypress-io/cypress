@@ -4,7 +4,7 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: "optional" }, {
     wait: (subject, msOrFnOrAlias, options = {}) ->
       ## check to ensure options is an object

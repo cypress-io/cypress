@@ -5,7 +5,7 @@ $utils = require("../../cypress/utils")
 
 traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   _.each traversals, (traversal) ->
     Commands.add traversal, {prevSubject: "dom"}, (subject, arg1, arg2, options) ->
       if _.isObject(arg2)

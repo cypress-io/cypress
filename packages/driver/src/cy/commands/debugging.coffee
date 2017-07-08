@@ -5,7 +5,7 @@ $Cypress = require("../../cypress")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "resume:next", ->
     @resume(false)
 

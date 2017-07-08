@@ -4,7 +4,7 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   message = (msg, data, options = {}) ->
     throw new Error("method not yet implemented")
 
@@ -62,3 +62,7 @@ module.exports = (Cypress, Commands) ->
     message: ->
       message.apply(@, arguments)
   })
+
+module.exports = {
+  create
+}

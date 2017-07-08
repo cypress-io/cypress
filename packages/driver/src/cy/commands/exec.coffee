@@ -13,7 +13,7 @@ exec = (options) =>
       else
         resolve(resp)
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({
     exec: (cmd, options = {}) ->
       _.defaults options,

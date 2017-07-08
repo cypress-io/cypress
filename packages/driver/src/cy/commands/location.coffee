@@ -5,7 +5,7 @@ $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({
     url: (options = {}) ->
       _.defaults options, {log: true}

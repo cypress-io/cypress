@@ -45,7 +45,7 @@ getAndClear = (log, timeout) ->
     cookies = Cypress.Cookies.getClearableCookies(resp)
     @_automateCookies("clear:cookies", cookies, log, timeout)
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "test:before:hooks", ->
     ## TODO: handle failure here somehow
     ## maybe by tapping into the Cypress reset

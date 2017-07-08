@@ -20,7 +20,7 @@ writeFile = (file, contents, options) =>
       else
         resolve(resp)
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({
     readFile: (file, encoding, options = {}) ->
       if _.isObject(encoding)

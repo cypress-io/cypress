@@ -277,7 +277,7 @@ invokeFn = (subject, fn, args...) ->
         onRetry: resolveValue
       })
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: true }, {
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here

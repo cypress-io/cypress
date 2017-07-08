@@ -5,7 +5,7 @@ $Log = require("../../../cypress/log")
 { getCoords, getPositionFromArguments } = require("./utils")
 $utils = require("../../../cypress/utils")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: "dom" }, {
     hover: (args) ->
       $utils.throwErrByPath("hover.not_implemented")

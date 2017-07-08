@@ -22,7 +22,7 @@ viewports = {
 
 validOrientations = ["landscape", "portrait"]
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "test:before:hooks", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
@@ -94,7 +94,7 @@ create = (Cypress, Commands) ->
         options._log = $Log.command()
 
       getDocument = =>
-        win = @privateState("window")
+        win = @state("window")
         ## TODO: add failing test around logging twice
         $utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 

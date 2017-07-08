@@ -22,7 +22,7 @@ isNaNOrInfinity = (item) ->
 
   return _.isNaN(num) or !_.isFinite(num)
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: "dom" }, {
     scrollIntoView: (subject, options = {}) ->
       if !_.isObject(options)
@@ -51,9 +51,9 @@ create = (Cypress, Commands) ->
       ## here we want to figure out what has to actually
       ## be scrolled to get to this element, cause we need
       ## to scrollTo passing in that element.
-      options.$parent = findScrollableParent(options.$el, @privateState("window"))
+      options.$parent = findScrollableParent(options.$el, @state("window"))
 
-      if options.$parent is @privateState("window")
+      if options.$parent is @state("window")
         parentIsWin = true
         ## jQuery scrollTo looks for the prop contentWindow
         ## otherwise it'll use the wrong window to scroll :(
@@ -177,7 +177,7 @@ create = (Cypress, Commands) ->
         isWin = true
         ## if we don't have a subject, then we are a parent command
         ## assume they want to scroll the entire window.
-        $container = @privateState("window")
+        $container = @state("window")
 
         ## jQuery scrollTo looks for the prop contentWindow
         ## otherwise it'll use the wrong window to scroll :(

@@ -19,7 +19,7 @@ timedOutWaitingForPageLoad = (ms, log) ->
     args: { ms }
   })
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "test:before:run", (test) ->
     ## continuously reset this
     ## before each test run!
@@ -113,7 +113,7 @@ create = (Cypress, Commands) ->
 
         Cypress.on "load", loaded
 
-        @privateState("window").location.reload(forceReload)
+        @state("window").location.reload(forceReload)
 
       .timeout(options.timeout)
       .catch Promise.TimeoutError, (err) =>
@@ -130,7 +130,7 @@ create = (Cypress, Commands) ->
       if options.log
         options._log = $Log.command()
 
-      win = @privateState("window")
+      win = @state("window")
 
       goNumber = (num) =>
         if num is 0
@@ -161,7 +161,7 @@ create = (Cypress, Commands) ->
 
           ## make sure we resolve our go function
           ## with the remove window (just like cy.visit)
-          @privateState("window")
+          @state("window")
 
         Promise.delay(100)
         .then =>
@@ -225,9 +225,9 @@ create = (Cypress, Commands) ->
       ## clear the current timeout
       @_clearTimeout()
 
-      win           = @privateState("window")
-      $remoteIframe = @privateState("$remoteIframe")
-      runnable      = @privateState("runnable")
+      win           = @state("window")
+      $remoteIframe = @state("$remoteIframe")
+      runnable      = @state("runnable")
 
       v = null
 
@@ -536,7 +536,7 @@ create = (Cypress, Commands) ->
       ## this may change in the future since we want
       ## to add debuggability in the chrome console
       ## which at that point we may keep runnable around
-      return if not @privateState("runnable")
+      return if not @state("runnable")
 
       ## this tells the world that we're
       ## handling a page load event

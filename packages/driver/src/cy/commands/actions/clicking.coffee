@@ -15,7 +15,7 @@ $Mouse = require("../../../cypress/mouse")
 
 $utils = require("../../../cypress/utils")
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Commands.addAll({ prevSubject: "dom" }, {
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none

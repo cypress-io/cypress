@@ -8,7 +8,7 @@ fixturesRe = /^(fx:|fixture:)/
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   ## this is called at the beginning of run, so clear the cache
   cache = {}
 

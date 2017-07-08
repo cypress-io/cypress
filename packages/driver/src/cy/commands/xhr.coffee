@@ -75,7 +75,7 @@ defaults = {
   onResponse: undefined
 }
 
-create = (Cypress, Commands) ->
+create = (Commands, ee, state) ->
   Cypress.on "before:unload", ->
     ## if our page is going away due to
     ## a form submit / anchor click then

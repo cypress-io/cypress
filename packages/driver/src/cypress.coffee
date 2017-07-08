@@ -56,7 +56,7 @@ class $Cypress
     @runner   = null
     @Commands = null
 
-    $Events.extend(@)
+    @events = $Events.extend(@)
 
     @setConfig(config)
 
@@ -127,6 +127,9 @@ class $Cypress
   run: (fn) ->
     $utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
+    @Commands.each (cmd) =>
+      @cy.addCommand(cmd)
+
     @runner.run(fn)
 
   getStartTime: ->
@@ -170,16 +173,16 @@ class $Cypress
   ## at this point
   onSpecWindow: (specWindow) ->
     ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow)
+    @cy = window.cy = $Cy.create(specWindow, @events, @config)
 
-    mocha    = $Mocha.create(@, specWindow)
-    runner   = $Runner.create(@, specWindow, mocha)
+    @mocha = $Mocha.create(specWindow, @events)
+    @runner = $Runner.create(@mocha, @events)
 
     ## TODO: fix this
     # @log     = $Log.create(@, cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy)
+    @Commands = $Commands.create(@cy, @events)
 
     $Chai.create(specWindow, @cy)
 
