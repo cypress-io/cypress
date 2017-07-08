@@ -20,6 +20,7 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
+create = (specWindow, ee, config) ->
   state = $SetterGetter.create({})
 
   agents = $Agents.create()
