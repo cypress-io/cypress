@@ -35,6 +35,7 @@ alias:
   examples/index.html: examples/recipes/unit-testing-recipe.html
   dashboard/index.html: dashboard/overview/features-dashboard.html
   faq/index.html: faq/questions/general-questions-faq.html
+  docs/known-issues/: guides/references/known-issues.html
   # can also do outside page links here
   # plugins/index.html: https://github.com/cypress/cypress/wiki/Plugins
 
