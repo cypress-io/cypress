@@ -703,11 +703,11 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets hookName to prop hookName", (done) ->
-            @cy.privateState("hookName", "beforeEach")
+            @cy.state("hookName", "beforeEach")
 
             @Cypress.on "log", (obj) ->
               expect(obj.hookName).to.eq "beforeEach"
-              @privateState("hookName", null)
+              @state("hookName", null)
               done()
 
             @Cypress.Log.command({})
@@ -731,7 +731,7 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets url to private url", (done) ->
-            @cy.privateState("url", "www.github.com")
+            @cy.state("url", "www.github.com")
 
             @Cypress.on "log", (obj) ->
               expect(obj.url).to.eq "www.github.com"
@@ -740,11 +740,11 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets testId to runnable.id", (done) ->
-            @cy.privateState("runnable", {id: 123})
+            @cy.state("runnable", {id: 123})
 
             @Cypress.on "log", (obj) ->
               expect(obj.testId).to.eq 123
-              @privateState("runnable", null)
+              @state("runnable", null)
               done()
 
             @Cypress.Log.command({})

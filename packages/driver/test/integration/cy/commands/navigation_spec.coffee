@@ -11,7 +11,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.privateState("window", win)
+      @cy.state("window", win)
 
       @cy.reload()
 
@@ -22,7 +22,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.privateState("window", win)
+      @cy.state("window", win)
 
       @cy.reload(true)
 
@@ -33,7 +33,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.privateState("window", win)
+      @cy.state("window", win)
 
       @cy.reload(true, {})
 
@@ -44,7 +44,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.privateState("window", win)
+      @cy.state("window", win)
 
       @cy.reload({})
 
@@ -58,7 +58,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             expect(win).not.to.be.undefined
             expect(win.foo).to.be.undefined
 
-            expect(win).to.eq(@cy.privateState("window"))
+            expect(win).to.eq(@cy.state("window"))
 
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"
@@ -277,7 +277,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(trigger).to.be.calledWith("resolve:url", "http://localhost:3500/app")
 
     it "prepends hostname when visiting locally", ->
-      prop = @sandbox.spy(@cy.privateState("$remoteIframe"), "prop")
+      prop = @sandbox.spy(@cy.state("$remoteIframe"), "prop")
 
       @cy
         .visit("fixtures/sinon.html")
@@ -303,7 +303,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500/blank.html")
 
     it "can visit pages on different subdomain but same originPolicy", ->
-      $remoteIframe = @cy.privateState("$remoteIframe")
+      $remoteIframe = @cy.state("$remoteIframe")
 
       load = ->
         $remoteIframe.trigger("load")
@@ -348,8 +348,8 @@ describe "$Cypress.Cy Navigation Commands", ->
         count = 0
         urls = []
 
-        @cy.privateState("$remoteIframe").on "load", =>
-          urls.push @cy.privateState("window").location.href
+        @cy.state("$remoteIframe").on "load", =>
+          urls.push @cy.state("window").location.href
 
           count += 1
 
@@ -746,7 +746,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("http://google.com:3500/blank.html")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
-        $remoteIframe = @cy.privateState("$remoteIframe")
+        $remoteIframe = @cy.state("$remoteIframe")
 
         load = ->
           $remoteIframe.trigger("load")
@@ -1126,7 +1126,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.window().then (win) =>
         timeout = @sandbox.spy(@cy, "_timeout")
 
-        @cy.privateState("$remoteIframe").one "load", =>
+        @cy.state("$remoteIframe").one "load", =>
           @cy.state("ready").promise.then ->
             _.delay ->
               expect(timeout.callCount).to.eq(1)

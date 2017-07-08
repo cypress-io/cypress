@@ -42,7 +42,7 @@ create = (Cypress, Commands) ->
 
       getFocused = =>
         try
-          d = @privateState("document")
+          d = @state("document")
           forceFocusedEl = @state("forceFocusedEl")
           if forceFocusedEl
             if @_contains(forceFocusedEl)
@@ -442,7 +442,7 @@ create = (Cypress, Commands) ->
       prevWithinSubject = @state("withinSubject")
       @state("withinSubject", subject)
 
-      fn.call @privateState("runnable").ctx, subject
+      fn.call @state("runnable").ctx, subject
 
       stop = =>
         @off "command:start", setWithinSubject

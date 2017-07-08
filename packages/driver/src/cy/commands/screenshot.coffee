@@ -22,7 +22,7 @@ create = (Cypress, Commands) ->
         name = null
 
       ## TODO: handle hook titles
-      runnable = @privateState("runnable")
+      runnable = @state("runnable")
 
       _.defaults options, {
         log: true

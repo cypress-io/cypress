@@ -30,7 +30,7 @@ create = (Cypress, Commands) ->
 
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...
-      if subject is @privateState("window")
+      if subject is @state("window")
         $utils.throwErrByPath("scrollIntoView.subject_is_window")
 
       ## throw if we're trying to scroll to multiple elements
@@ -39,7 +39,7 @@ create = (Cypress, Commands) ->
 
       _.defaults options,
         $el: subject
-        $parent: @privateState("window")
+        $parent: @state("window")
         log: true
         duration: 0
         easing: "swing"

@@ -19,4 +19,4 @@ module.exports = ($Cy) ->
       if opt = @Cypress.option("jQuery")
         return opt
       else
-        @privateState("window").$
+        @state("window").$

@@ -52,7 +52,7 @@ create = (Cypress, Commands) ->
         options._log = $Log.command()
 
       do resolveTitle = =>
-        doc = @privateState("document")
+        doc = @state("document")
 
         title = (doc and doc.title) or ""
 
@@ -67,7 +67,7 @@ create = (Cypress, Commands) ->
         options._log = $Log.command()
 
       getWindow = =>
-        window = @privateState("window")
+        window = @state("window")
         $utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window

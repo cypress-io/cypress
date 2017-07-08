@@ -66,7 +66,7 @@ shouldFnWithCallback = (subject, fn) ->
   Promise
   .try =>
     remoteSubject = @_getRemotejQueryInstance(subject)
-    fn.call @privateState("runnable").ctx, remoteSubject ? subject
+    fn.call @state("runnable").ctx, remoteSubject ? subject
   .return(subject)
 
 shouldFn = (subject, chainers, args...) ->

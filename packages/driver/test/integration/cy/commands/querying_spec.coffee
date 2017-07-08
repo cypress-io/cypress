@@ -405,7 +405,7 @@ describe "$Cypress.Cy Querying Commands", ->
         expect(options._runnableTimeout).to.eq 10000
 
         ## we shouldnt have a timer either
-        expect(@cy.privateState("runnable")).not.to.have.property("timer")
+        expect(@cy.state("runnable")).not.to.have.property("timer")
 
       ## but wait 300ms
       _.delay =>
@@ -1007,7 +1007,7 @@ describe "$Cypress.Cy Querying Commands", ->
               @cy._timeout(1000)
 
               retry = _.after 3, _.once =>
-                @cy.privateState("window").$.getJSON("/json")
+                @cy.state("window").$.getJSON("/json")
 
               @cy.on "retry", retry
           .get("#get-json").as("getJsonButton").click()

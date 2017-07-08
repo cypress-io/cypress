@@ -51,7 +51,7 @@ create = (Cypress, Commands) ->
           args: { num: options.$el.length }
         })
 
-      win = @privateState("window")
+      win = @state("window")
       $el = options.$el.first()
       el = $el.get(0)
 

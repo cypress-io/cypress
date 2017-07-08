@@ -26,8 +26,8 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          clientX: coords.x - @cy.privateState("window").pageXOffset
-          clientY: coords.y - @cy.privateState("window").pageYOffset
+          clientX: coords.x - @cy.state("window").pageXOffset
+          clientY: coords.y - @cy.state("window").pageYOffset
           target: btn.get(0)
           type: "mouseover"
         }
@@ -37,24 +37,24 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
 
     it "bubbles up event by default", (done) ->
       mouseover = (e) =>
-        @cy.privateState("window").removeEventListener "mouseover", mouseover
+        @cy.state("window").removeEventListener "mouseover", mouseover
         done()
 
-      @cy.privateState("window").addEventListener "mouseover", mouseover
+      @cy.state("window").addEventListener "mouseover", mouseover
 
       @cy.get("#button").ttrigger("mouseover")
 
     it "does not bubble up event if specified", (done) ->
       mouseover = (e) =>
-        @cy.privateState("window").removeEventListener "mouseover", mouseover
+        @cy.state("window").removeEventListener "mouseover", mouseover
         done("Should not have bubbled to window listener")
 
-      @cy.privateState("window").addEventListener "mouseover", mouseover
+      @cy.state("window").addEventListener "mouseover", mouseover
 
       @cy.get("#button").ttrigger("mouseover", {bubbles: false})
 
       setTimeout ->
-        @cy.privateState("window").removeEventListener "mouseover", mouseover
+        @cy.state("window").removeEventListener "mouseover", mouseover
         done()
       , 500
 
@@ -81,7 +81,7 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       btn.get(0).addEventListener "mouseover", (e) =>
         expect(win.pageXOffset).to.be.gt(0)
@@ -95,7 +95,7 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       btn.get(0).addEventListener "mouseover", (e) =>
         expect(win.pageYOffset).to.be.gt(0)

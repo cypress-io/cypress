@@ -296,7 +296,7 @@ describe "$Cypress.Cy Text Commands", ->
             repeat: false
             shiftKey: false
             type: "keydown"
-            view: @cy.privateState("window")
+            view: @cy.state("window")
             which: 65 ## deprecated but fired by chrome
           }
           done()
@@ -325,7 +325,7 @@ describe "$Cypress.Cy Text Commands", ->
             repeat: false
             shiftKey: false
             type: "keypress"
-            view: @cy.privateState("window")
+            view: @cy.state("window")
             which: 97 ## deprecated
           }
           done()
@@ -354,7 +354,7 @@ describe "$Cypress.Cy Text Commands", ->
             repeat: false
             shiftKey: false
             type: "keyup"
-            view: @cy.privateState("window")
+            view: @cy.state("window")
             which: 65 ## deprecated but fired by chrome
           }
           done()
@@ -378,7 +378,7 @@ describe "$Cypress.Cy Text Commands", ->
             pageX: 0
             pageY: 0
             type: "textInput"
-            view: @cy.privateState("window")
+            view: @cy.state("window")
             which: 0
           }
           done()

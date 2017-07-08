@@ -248,7 +248,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       _.each extensions, (val, ext) ->
         it "filters out non ajax requests by default for extension: .#{ext}", (done) ->
-          @cy.privateState("window").$.get("/fixtures/app.#{ext}").done (res) ->
+          @cy.state("window").$.get("/fixtures/app.#{ext}").done (res) ->
             expect(res).to.eq val
             done()
 
@@ -1058,7 +1058,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "without sinon present", ->
       beforeEach ->
         ## force us to start from blank window
-        @cy.privateState("$remoteIframe").prop("src", "about:blank")
+        @cy.state("$remoteIframe").prop("src", "about:blank")
 
       it "can start server with no errors", ->
         @cy
@@ -1294,7 +1294,7 @@ describe "$Cypress.Cy XHR Commands", ->
           onRequest: -> done()
         })
         .then ->
-          @cy.privateState("window").$.post("/users", "name=brian")
+          @cy.state("window").$.post("/users", "name=brian")
 
     it "can accept response as a function", ->
       users = [{}, {}]
@@ -1888,7 +1888,7 @@ describe "$Cypress.Cy XHR Commands", ->
   context.skip "Cypress.on(before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window
-      @cy.privateState("$remoteIframe").prop("src", "about:blank")
+      @cy.state("$remoteIframe").prop("src", "about:blank")
 
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied

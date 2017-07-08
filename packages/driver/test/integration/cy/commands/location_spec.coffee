@@ -10,7 +10,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay =>
-        win = @cy.privateState("window")
+        win = @cy.state("window")
         win.location.href = "/foo/bar/baz.html"
       , 100
 
@@ -38,7 +38,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, _.once =>
-          win = @cy.privateState("window")
+          win = @cy.state("window")
           win.location.href = "/foo/bar/baz.html"
 
         @cy.url().should("match", /baz/).then ->
@@ -122,7 +122,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.privateState("window")
+        win = cy.state("window")
         win.location.hash = "users/1"
       , 100
 
@@ -143,7 +143,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, =>
-          win = cy.privateState("window")
+          win = cy.state("window")
           win.location.hash = "users/1"
 
         @cy.hash().should("match", /users/).then ->
@@ -232,7 +232,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.privateState("window")
+        win = cy.state("window")
         win.location.pathname = "users/1"
       , 100
 
@@ -253,7 +253,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, _.once =>
-          win = @cy.privateState("window")
+          win = @cy.state("window")
           win.location.pathname = "users/1"
 
         @cy.location("pathname").should("match", /users/).then ->

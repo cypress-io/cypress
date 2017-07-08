@@ -49,7 +49,7 @@ create = (Cypress, Commands) ->
 
     return if not current
 
-    runnable = @privateState("runnable")
+    runnable = @state("runnable")
 
     return if not runnable
 
@@ -109,7 +109,7 @@ create = (Cypress, Commands) ->
 
         loaded = =>
           cleanup()
-          resolve @privateState("window")
+          resolve @state("window")
 
         Cypress.on "load", loaded
 

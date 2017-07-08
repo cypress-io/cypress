@@ -216,7 +216,7 @@ create = (Cypress, Commands) ->
 
         if _.isFunction(o.response)
           getResponse = =>
-            o.response.call(@privateState("runnable").ctx, options)
+            o.response.call(@state("runnable").ctx, options)
 
           ## allow route to return a promise
           Promise.try(getResponse)
@@ -254,7 +254,7 @@ create = (Cypress, Commands) ->
 
       if _.isFunction(args[0])
         getArgs = =>
-          args[0].call(@privateState("runnable").ctx)
+          args[0].call(@state("runnable").ctx)
 
         Promise.try(getArgs)
         .then(parseArgs)

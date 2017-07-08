@@ -97,9 +97,9 @@ klassMethods = {
 
   log: (Cypress, cy, instrument, obj) ->
     _.defaults obj,
-      url:              cy.privateState("url")
-      hookName:         cy.privateState("hookName")
-      testId:           cy.privateState("runnable").id
+      url:              cy.state("url")
+      hookName:         cy.state("hookName")
+      testId:           cy.state("runnable").id
       viewportWidth:    Cypress.config("viewportWidth")
       viewportHeight:   Cypress.config("viewportHeight")
       referencesAlias:  undefined

@@ -67,7 +67,7 @@ create = (Cypress, Commands) ->
             }, consoleProps)
         })
 
-      clock = $Clock.create(@privateState("window"), now, methods)
+      clock = $Clock.create(@state("window"), now, methods)
 
       clock.tick = _.wrap clock.tick, (tick, ms) ->
         if ms? and not _.isNumber(ms)

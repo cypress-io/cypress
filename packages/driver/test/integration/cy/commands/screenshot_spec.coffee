@@ -80,7 +80,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
         @cy.screenshot().should("be.null")
 
       it "sets name to undefined when not passed name", (done) ->
-        runnable = @cy.privateState("runnable")
+        runnable = @cy.state("runnable")
         runnable.title = "foo bar"
 
         @Cypress.once "take:screenshot", (data) ->

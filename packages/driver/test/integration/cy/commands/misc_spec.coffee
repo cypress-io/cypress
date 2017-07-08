@@ -46,7 +46,7 @@ describe "$Cypress.Cy Misc Commands", ->
       ## remote window
       @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.privateState("window")
+      @remoteWindow = @cy.state("window")
 
       delete @remoteWindow.$.fn.foo
 

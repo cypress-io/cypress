@@ -43,7 +43,7 @@ describe "$Cypress.Cy Errors Extensions", ->
 
       err = new Error
       err.onFail = ->
-      @cy.privateState("runnable", {})
+      @cy.state("runnable", {})
       @cy.fail(err)
 
       expect(trigger).to.be.calledWith "fail", err, {}

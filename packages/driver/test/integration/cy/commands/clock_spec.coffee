@@ -2,7 +2,7 @@ describe "$Cypress.Cy Clock Commands", ->
   enterCommandTestingMode()
 
   beforeEach ->
-    @window = @cy.privateState("window")
+    @window = @cy.state("window")
 
     @setTimeoutSpy = @sandbox.spy(@window, "setTimeout")
     @setIntervalSpy = @sandbox.spy(@window, "setInterval")
@@ -128,7 +128,7 @@ describe "$Cypress.Cy Clock Commands", ->
       it "binds to default window before visit", ->
         @cy.clock(null, ["setTimeout"]).then (clock) =>
           onSetTimeout = @sandbox.spy()
-          @cy.privateState("window").setTimeout(onSetTimeout)
+          @cy.state("window").setTimeout(onSetTimeout)
           clock.tick()
           expect(onSetTimeout).to.be.called
 

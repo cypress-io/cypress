@@ -43,7 +43,7 @@ create = (Cypress, Commands) ->
           args: { num: options.$el.length }
         })
 
-      win  = @privateState("window")
+      win  = @state("window")
 
       clicks = []
 

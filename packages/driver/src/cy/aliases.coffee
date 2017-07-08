@@ -30,7 +30,7 @@ module.exports = ($Cy) ->
       @assign(alias, remoteSubject ? subject)
 
     assign: (str, obj) ->
-      @privateState("runnable").ctx[str] = obj
+      @state("runnable").ctx[str] = obj
 
     ## these are public because its expected other commands
     ## know about them and are expected to call them

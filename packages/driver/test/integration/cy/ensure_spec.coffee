@@ -95,7 +95,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
     it "defaults to current command if not specified", ->
       @cy.$$("body").html("<div>foo</div>")
-      win = @cy.privateState("window")
+      win = @cy.state("window")
       @cy.state("current", {
         get: -> "currentCmd"
       })
@@ -105,7 +105,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
       expect(fn).to.throw('cy.currentCmd() failed because this element is not scrollable:\n\n<window>\n')
 
     it "does not throw when window and body > window height", ->
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       fn = => @cy.ensureScrollability(win, "foo")
 
@@ -114,7 +114,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
     it "throws when window and body > window height", ->
       @cy.$$("body").html("<div>foo</div>")
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       fn = => @cy.ensureScrollability(win, "foo")
 

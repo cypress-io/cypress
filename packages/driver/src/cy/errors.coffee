@@ -75,7 +75,7 @@ module.exports = ($Cy) ->
       else
         @commandErr(err)
 
-      runnable = @privateState("runnable")
+      runnable = @state("runnable")
 
       @state("err", err)
 

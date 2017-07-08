@@ -44,12 +44,12 @@ module.exports = ($Cy) ->
       ## in the viewport, and therefore we must ensure to scroll the
       ## element into view prior to running this method or this will
       ## return null
-      win = @privateState("window")
+      win = @state("window")
 
       scrollX = x - win.pageXOffset
       scrollY = y - win.pageYOffset
 
-      el = @privateState("document").elementFromPoint(scrollX, scrollY)
+      el = @state("document").elementFromPoint(scrollX, scrollY)
 
       ## only wrap el if its non-null
       if el
@@ -62,7 +62,7 @@ module.exports = ($Cy) ->
       ## is factored into calculations
       ## which means we dont have to do any math, yay!
       if Element.prototype.getBoundingClientRect
-        win = @privateState("window")
+        win = @state("window")
 
         ## top/left are returned relative to viewport
         ## so we have to add in the scrolled amount

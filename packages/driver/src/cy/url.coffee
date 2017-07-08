@@ -20,7 +20,7 @@ module.exports = ($Cy) ->
 
       @state("urls", urls)
 
-      @privateState("url", url)
+      @state("url", url)
 
       _.defaults options,
         log: true

@@ -100,7 +100,7 @@ thenFn = (subject, options, fn) ->
     @on("next:subject:prepared", checkSubject)
 
   getRet = =>
-    ret = fn.apply(@privateState("runnable").ctx, args)
+    ret = fn.apply(@state("runnable").ctx, args)
 
     if @isCy(ret)
       ret = undefined

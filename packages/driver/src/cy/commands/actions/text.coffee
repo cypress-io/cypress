@@ -17,7 +17,7 @@ timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 create = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
-    $Keyboard.resetModifiers(@privateState("document"), @privateState("window"))
+    $Keyboard.resetModifiers(state("document"), state("window"))
 
   Commands.addAll({ prevSubject: "dom" }, {
     type: (subject, chars, options = {}) ->
@@ -227,7 +227,7 @@ create = (Cypress, Commands) ->
           chars:   options.chars
           delay:   options.delay
           release: options.release
-          window:  @privateState("window")
+          window:  @state("window")
 
           updateValue: (rng, key) ->
             if needSingleValueChange()

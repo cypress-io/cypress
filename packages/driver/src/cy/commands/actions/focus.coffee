@@ -89,12 +89,12 @@ create = (Cypress, Commands) ->
             ## todo handle relatedTarget's per the spec
             focusinEvt = new FocusEvent "focusin", {
               bubbles: true
-              view: @privateState("window")
+              view: @state("window")
               relatedTarget: null
             }
 
             focusEvt = new FocusEvent "focus", {
-              view: @privateState("window")
+              view: @state("window")
               relatedTarget: null
             }
 
@@ -233,14 +233,14 @@ create = (Cypress, Commands) ->
             focusoutEvt = new FocusEvent "focusout", {
               bubbles: true
               cancelable: false
-              view: @privateState("window")
+              view: @state("window")
               relatedTarget: null
             }
 
             blurEvt = new FocusEvent "blur", {
               bubble: false
               cancelable: false
-              view: @privateState("window")
+              view: @state("window")
               relatedTarget: null
             }
 

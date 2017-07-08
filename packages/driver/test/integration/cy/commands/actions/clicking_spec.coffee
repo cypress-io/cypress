@@ -14,9 +14,9 @@ describe "$Cypress.Cy Clicking Commands", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.privateState("window")
-          clientX: coords.x - @cy.privateState("window").pageXOffset
-          clientY: coords.y - @cy.privateState("window").pageYOffset
+          view: @cy.state("window")
+          clientX: coords.x - @cy.state("window").pageXOffset
+          clientY: coords.y - @cy.state("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -34,10 +34,10 @@ describe "$Cypress.Cy Clicking Commands", ->
 
     it "bubbles up native click event", (done) ->
       click = (e) =>
-        @cy.privateState("window").removeEventListener "click", click
+        @cy.state("window").removeEventListener "click", click
         done()
 
-      @cy.privateState("window").addEventListener "click", click
+      @cy.state("window").addEventListener "click", click
 
       @cy.get("#button").click()
 
@@ -46,7 +46,7 @@ describe "$Cypress.Cy Clicking Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       btn.get(0).addEventListener "mousedown", (e) =>
         obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -76,7 +76,7 @@ describe "$Cypress.Cy Clicking Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       btn.get(0).addEventListener "mouseup", (e) =>
         obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -118,7 +118,7 @@ describe "$Cypress.Cy Clicking Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       btn.get(0).addEventListener "click", (e) =>
         expect(win.pageXOffset).to.be.gt(0)
@@ -132,7 +132,7 @@ describe "$Cypress.Cy Clicking Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       btn.get(0).addEventListener "click", (e) =>
         expect(win.pageYOffset).to.be.gt(0)
@@ -640,7 +640,7 @@ describe "$Cypress.Cy Clicking Commands", ->
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
-            view: @cy.privateState("window")
+            view: @cy.state("window")
             ## chrome no longer fires pageX and pageY
             # pageX: 0
             # pageY: 0
@@ -661,7 +661,7 @@ describe "$Cypress.Cy Clicking Commands", ->
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
-            view: @cy.privateState("window")
+            view: @cy.state("window")
             # pageX: 0
             # pageY: 0
             which: 0
@@ -706,13 +706,13 @@ describe "$Cypress.Cy Clicking Commands", ->
           .focused().should("have.id", "button-covered-in-span")
 
       it "will give focus to the window if no element is focusable", (done) ->
-        $(@cy.privateState("window")).on "focus", -> done()
+        $(@cy.state("window")).on "focus", -> done()
 
         @cy.get("#nested-find").click()
 
       # it "events", ->
       #   btn = @cy.$$("button")
-      #   win = $(@cy.privateState("window"))
+      #   win = $(@cy.state("window"))
 
       #   _.each {"btn": btn, "win": win}, (type, key) ->
       #     _.each "focus mousedown mouseup click".split(" "), (event) ->

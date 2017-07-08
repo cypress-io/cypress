@@ -3,7 +3,7 @@ utils = require("../cypress/utils")
 module.exports = ($Cy) ->
   $Cy.extend
     _timeout: (ms, delta = false) ->
-      runnable = @privateState("runnable")
+      runnable = @state("runnable")
 
       if not runnable
         utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
@@ -18,7 +18,7 @@ module.exports = ($Cy) ->
         runnable.timeout()
 
     _clearTimeout: ->
-      runnable = @privateState("runnable")
+      runnable = @state("runnable")
 
       if not runnable
         utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })

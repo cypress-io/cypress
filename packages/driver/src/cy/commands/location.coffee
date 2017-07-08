@@ -77,7 +77,7 @@ create = (Cypress, Commands) ->
 
     _getLocation: (key, win) ->
       try
-        remoteUrl = @__location(win ? @privateState("window"))
+        remoteUrl = @__location(win ? @state("window"))
         location  = $Location.create(remoteUrl)
 
         if key

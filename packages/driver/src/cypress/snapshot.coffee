@@ -94,7 +94,7 @@ module.exports = ($Cypress) ->
           @cy.$$(stylesheet).text()
 
     _indexedStylesheets: ->
-      _.reduce @cy.privateState("document").styleSheets, (memo, stylesheet) ->
+      _.reduce @cy.state("document").styleSheets, (memo, stylesheet) ->
         memo[stylesheet.href] = stylesheet
         return memo
       , {}

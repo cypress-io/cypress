@@ -10,7 +10,7 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        @remoteWindow = @cy.privateState("window")
+        @remoteWindow = @cy.state("window")
 
         delete @remoteWindow.foo
 
@@ -54,9 +54,9 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.window().should("have.property", "foo", "bar")
 
       it "can still fail on window", (done) ->
-        win = @cy.privateState("window")
+        win = @cy.state("window")
 
-        @cy.privateState("window", undefined)
+        @cy.state("window", undefined)
 
         logs = []
 
@@ -64,7 +64,7 @@ describe "$Cypress.Cy Window Commands", ->
           logs.push(@log)
 
         @cy.on "fail", (err) =>
-          @cy.privateState("window", win)
+          @cy.state("window", win)
 
           @chai.restore()
 
@@ -158,7 +158,7 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        @remoteDocument = @cy.privateState("window").document
+        @remoteDocument = @cy.state("window").document
 
         delete @remoteDocument.foo
 
@@ -202,9 +202,9 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.document().should("have.property", "foo", "bar")
 
       it "can still fail on document", (done) ->
-        win = @cy.privateState("window")
+        win = @cy.state("window")
 
-        @cy.privateState("window", undefined)
+        @cy.state("window", undefined)
 
         logs = []
 
@@ -212,7 +212,7 @@ describe "$Cypress.Cy Window Commands", ->
           logs.push(@log)
 
         @cy.on "fail", (err) =>
-          @cy.privateState("window", win)
+          @cy.state("window", win)
 
           @chai.restore()
 
@@ -338,7 +338,7 @@ describe "$Cypress.Cy Window Commands", ->
       expect(title.length).to.eq(1)
       expect(title.text()).not.to.eq("foo")
 
-      @cy.privateState("document").title = "foo"
+      @cy.state("document").title = "foo"
 
       @cy.title().then (title) ->
         expect(title).to.eq("foo")

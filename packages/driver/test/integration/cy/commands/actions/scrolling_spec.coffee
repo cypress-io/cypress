@@ -7,7 +7,7 @@ describe "$Cypress.Cy Scrolling Commands", ->
 
   context "#scrollTo", ->
     beforeEach ->
-      @win          = @cy.privateState("window")
+      @win          = @cy.state("window")
       @scrollVert   = @cy.$$("#scroll-to-vertical")
       @scrollHoriz  = @cy.$$("#scroll-to-horizontal")
       @scrollBoth   = @cy.$$("#scroll-to-both")

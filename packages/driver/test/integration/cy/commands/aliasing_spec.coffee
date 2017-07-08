@@ -35,7 +35,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
         ## remote window
         @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.privateState("window")
+        @remoteWindow = @cy.state("window")
 
       afterEach ->
         ## restore back to the global $

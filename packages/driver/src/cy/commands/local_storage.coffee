@@ -6,7 +6,7 @@ $utils = require("../../cypress/utils")
 
 clearLocalStorage = (keys) ->
   local = window.localStorage
-  remote = @privateState("window").localStorage
+  remote = @state("window").localStorage
 
   ## set our localStorage and the remote localStorage
   $LocalStorage.setStorages(local, remote)

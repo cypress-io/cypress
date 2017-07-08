@@ -34,7 +34,7 @@ describe "$Cypress.jQuery Extensions", ->
         $(el).appendTo(@cy.$$("body"))
 
     it "returns true if window and body > window height", ->
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       fn = => $Cypress.Dom.elIsScrollable(win)
 
@@ -44,7 +44,7 @@ describe "$Cypress.jQuery Extensions", ->
 
       @cy.$$("body").html("<div>foo</div>")
 
-      win = @cy.privateState("window")
+      win = @cy.state("window")
 
       fn = => $Cypress.Dom.elIsScrollable(win)
 

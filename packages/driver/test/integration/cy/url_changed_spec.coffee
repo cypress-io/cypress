@@ -12,15 +12,15 @@ describe "$Cypress Url:Changed Events", ->
 
     it "triggers on page unload event", (done) ->
       ## when this finishes loading
-      @cy.privateState("$remoteIframe").on "load", =>
+      @cy.state("$remoteIframe").on "load", =>
         expect(@trigger).to.be.calledWith("page:loading", true)
         done()
 
       ## cause the unload event to fire
-      @cy.privateState("$remoteIframe").prop("contentWindow").location.href = "about:blank"
+      @cy.state("$remoteIframe").prop("contentWindow").location.href = "about:blank"
 
     it "triggers after page load event", ->
-      @cy.privateState("$remoteIframe").trigger("load")
+      @cy.state("$remoteIframe").trigger("load")
       expect(@trigger).to.be.calledWith("page:loading", false)
 
   describe "urlChanged", ->
@@ -49,8 +49,8 @@ describe "$Cypress Url:Changed Events", ->
 
     context "load event", ->
       it "fires during load event", ->
-        win = @cy.privateState("window")
-        @cy.privateState("$remoteIframe").trigger("load")
+        win = @cy.state("window")
+        @cy.state("$remoteIframe").trigger("load")
         @urlIs win.location.href
 
       it.skip "fires when remote page finished loading", ->

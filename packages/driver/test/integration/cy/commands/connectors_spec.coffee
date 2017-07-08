@@ -233,7 +233,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         ## remote window
         @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.privateState("window")
+        @remoteWindow = @cy.state("window")
 
       afterEach ->
         ## restore back to the global $
@@ -278,7 +278,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## remote window
       @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.privateState("window")
+      @remoteWindow = @cy.state("window")
 
     afterEach ->
       ## restore back to the global $
@@ -608,7 +608,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## remote window
       @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.privateState("window")
+      @remoteWindow = @cy.state("window")
 
     it "proxies to #invokeFn", ->
       fn = -> "bar"
