@@ -682,7 +682,7 @@ Fixed {% url "`.type()`" type %} not firing `input` event for {% url "React" htt
 
 **Overview:**
 
-- `0.16.0` marks a significant change for Cypress. Before this we only issued commands using regular JavaScript and coordinated these with the backend server which is running. As of `0.16.0` we are now tapping into the underlying browser automation libraries which enable us to exceed the limitations of the JavaScript sandbox. This means we have total control over the browser for more powerful automation tooling. The downside is that we have only implemented these API's for Chrome, and therefore running on multiple browsers will no longer work. This is a temporary setback as we'll be adding driver support for all of the other browsers over a period of time. You can read more about our browser management [here](https://docs.cypress.io/docs/launching-browsers).
+- `0.16.0` marks a significant change for Cypress. Before this we only issued commands using regular JavaScript and coordinated these with the backend server which is running. As of `0.16.0` we are now tapping into the underlying browser automation libraries which enable us to exceed the limitations of the JavaScript sandbox. This means we have total control over the browser for more powerful automation tooling. The downside is that we have only implemented these API's for Chrome, and therefore running on multiple browsers will no longer work. This is a temporary setback as we'll be adding driver support for all of the other browsers over a period of time. You can read more about our browser management {% url 'here' launching-browsers %}.
 
 **Breaking Changes:**
 
@@ -697,7 +697,7 @@ Fixed {% url "`.type()`" type %} not firing `input` event for {% url "React" htt
 **Features:**
 
 - When a project is initially run from the desktop app, you can now choose to run Cypress in a select number of browsers including: Chrome, Chromium, or Canary (depending on what's installed on your OS).
-- Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more [here](https://docs.cypress.io/docs/launching-browsers)
+- Browser sessions are spawned independently of your existing profiles and we've disabled things like password saving / prompting, JavaScript popup blocking, and other features which get in the way of testing. Read more {% url 'here' launching-browsers %}
 - We automatically spawn Chrome in a **custom theme** so you can visually distinguish the difference between browser sessions spawned with Cypress vs your normal sessions. We know this may feel a little jarring because you're used to running Cypress alongside your other tabs. You will now see 2 chrome icons in your dock and you'll need to switch between them. We know this is problematic and confusing and we're looking into **changing the icon** of the Chrome running Cypress so it's easier to tell the Chrome sessions apart.
 - Added new commands to handle getting, setting, and clearing cookies: {% url `cy.clearCookie()` clearcookie %}, {% url `cy.getCookie()` getcookie %}, and {% url `cy.setCookie()` setcookie %}.
 - All the `cy.cookie` commands have been upgraded to take new options and can do much more powerful things outside of the JavaScript sandbox.
@@ -1551,7 +1551,7 @@ Deprecations:
 
 - The internal retry loop of Cypress now runs at `60fps`, instead of `20fps`.
 - Cypress overrides chai's default inspection function for DOM elements meaning instead of seeing `{ Object (0, length, ...) }` you will now ee the nicely formatted Cypress DOM element like: `<button#primary.btn-large>`.
-- Cypress now overrides chai's `match` chainer and provides a specific error message when a non `regex` value is provided. Fixes [#58](../ssues/58).
+- Cypress now overrides chai's `match` chainer and provides a specific error message when a non `regex` value is provided. Fixes {% issue 58 '#58' %}.
 - Cypress now handles `length` and `exist` assertion chainers in a very specific way, providing a detailed message on failure, and utomatically slices out any stale element references.
 - The `contain` assertion chainer from `chai-jquery` has been extended to match the same selector logic as {% url `cy.contains()` contains %} - meaning it now checks the `value` of `input[type=submit]`.
 - Tweaked the label for displaying the number of elements a command resolved with (now displays 0 differently than > 1).
@@ -1841,7 +1841,7 @@ Deprecations:
 **Summary:**
 
 - {% url `.type()` type %} now implements all DOM events to simulate every aspect of typing on a real keyboard.
-- All of the [type docs have been updated](type) to reflect these changes.
+- All of the [type docs have been updated](/api/commands/type.html) to reflect these changes.
 
 **Features:**
 
@@ -2325,7 +2325,7 @@ Deprecations:
 
 **Features:**
 
-- The insanity that is URL parsing to figure out absolute, relative, absolute-path-relative, http, sub domains, and local files should work in most cases. In other words, Cypress has implemented the vast majority of url parsing based on the [w3c URL spec](http://www.w3.org/TR/rl-1/#url-parsing).
+- The insanity that is URL parsing to figure out absolute, relative, absolute-path-relative, http, sub domains, and local files should work in most cases. In other words, Cypress has implemented the vast majority of url parsing based on the {% url 'w3c URL spec' 'https://url.spec.whatwg.org' %}.
 
 **Bugfixes:**
 

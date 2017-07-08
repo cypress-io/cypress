@@ -44,7 +44,7 @@ So you're capturing screenshots and recording videos of your test runs, now what
 
 ## Share Them With Your Team
 
-Something you can take advantage of today is the [Cypress Dashboard](/guides/integrating-cypress/features.html): our companion enterprise service that stores your artifacts for you and lets you view them from any web browser, as well as share them with your team.
+Something you can take advantage of today is the {% url 'Cypress Dashboard' features-dashboard %}: our companion enterprise service that stores your artifacts for you and lets you view them from any web browser, as well as share them with your team.
 
 ## Visual Regression Test / Screenshot Diffing
 
