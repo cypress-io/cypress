@@ -15,15 +15,18 @@ module.exports = {
   extend: (obj) ->
     events = new EE
 
-    _.extend(obj, events, {
-      emitThen: (eventName, args...) ->
-        listeners = events.listeners(eventName)
+    events.emitThen = (eventName, args...) ->
+      listeners = events.listeners(eventName)
 
-        listener = (fn) ->
-          fn.apply(obj, args)
+      listener = (fn) ->
+        fn.apply(obj, args)
 
-        Promise.map(listeners, listener)
-    })
+      Promise.map(listeners, listener)
+
+    _.extend(obj, events)
+
+    ## return the events object
+    return events
 }
   # $Cypress.extend
   #   event: (name) ->
