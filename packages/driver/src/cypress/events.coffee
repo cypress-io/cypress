@@ -9,6 +9,7 @@
 
 _ = require("lodash")
 EE = require("events")
+log = require("debug")("cypress:driver")
 Promise = require("bluebird")
 
 module.exports = {
@@ -18,12 +19,29 @@ module.exports = {
     events.emitThen = (eventName, args...) ->
       listeners = events.listeners(eventName)
 
+      if log.enabled
+        log("emitted: '%s' to '%d' listeners - with args: %o", eventName, listeners.length, args...)
+
       listener = (fn) ->
         fn.apply(obj, args)
 
       Promise.map(listeners, listener)
 
     _.extend(obj, events)
+
+    ## override only if logging is enabled
+    if log.enabled
+      emit = events.emit
+
+      events.emit = (eventName, args...) ->
+        ret = emit.apply(events, [eventName].concat(args))
+
+        if args.length
+          log("emitted: '%s' - with args: %o", eventName, args...)
+        else
+          log("emitted: '%s'", eventName)
+
+        return ret
 
     ## return the events object
     return events
