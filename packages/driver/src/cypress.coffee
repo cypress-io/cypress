@@ -224,11 +224,6 @@ class $Cypress
   addUtilityCommand: (key, fn) ->
     throwPrivateCommandInterface("addUtilityCommand")
 
-  command: (obj = {}) ->
-    $utils.warning "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
-
-    $Log.command(obj)
-
   $: ->
     if not @cy
       $utils.throwErrByPath("miscellaneous.no_cy")
