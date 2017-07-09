@@ -55,6 +55,7 @@ class $Cypress
     @mocha    = null
     @runner   = null
     @Commands = null
+    @_RESUMED_AT_TEST = null
 
     @events = $Events.extend(@)
 
@@ -173,16 +174,16 @@ class $Cypress
   ## at this point
   onSpecWindow: (specWindow) ->
     ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow, @events, @config)
+    @cy = window.cy = $Cy.create(specWindow, Cypress, @config)
 
-    @mocha = $Mocha.create(specWindow, @events)
-    @runner = $Runner.create(@mocha, @events)
+    @mocha = $Mocha.create(specWindow, Cypress)
+    @runner = $Runner.create(@mocha, Cypress)
 
     ## TODO: fix this
     # @log     = $Log.create(@, cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@cy, @events)
+    @Commands = $Commands.create(@cy, Cypress)
 
     $Chai.create(specWindow, @cy)
 
@@ -196,6 +197,125 @@ class $Cypress
     @cy._setWindowDocumentProps(contentWindow)
 
     @emit("before:window:load", contentWindow)
+
+  action: (eventName, args...) ->
+    ## normalizes all the various ways
+    ## other objects communicate intent
+    ## and 'action' to Cypress
+    switch eventName
+      when "runner:start"
+        ## mocha runner has begun running the tests
+        @emit("run:start")
+
+        return if @_RESUMED_AT_TEST
+
+        if @isHeadless
+          @emit("mocha", "start")
+
+      when "runner:end"
+        ## mocha runner has finished running the tests
+
+        ## end may have been caused by an uncaught error
+        ## that happened inside of a hook.
+        ##
+        ## when this happens mocha aborts the entire run
+        ## and does not do the usual cleanup so that means
+        ## we have to fire the test:after:hooks and
+        ## test:after:run events ourselves
+        @emit("run:end")
+
+        if @isHeadless
+          @emit("mocha", "end")
+
+        @restore()
+
+        ## TODO: we may not need to do any of this
+        ## it appears only afterHooksAsync is needed
+        ## for taking a screenshot - which can likely
+        ## be done better (and likely doesnt need to wait
+        ## until after the hooks have run anyway!)
+        ##
+        ## the test:after:run event is only used for
+        ## cleaning up num tests kept in memory
+
+
+        ## if we have a test and err
+        # test = _this.test
+        # err  = test and test.err
+        #
+        # ## and this err is uncaught
+        # if err and err.uncaught
+        #
+        #   ## fire all the events
+        #   testEvents.afterHooksAsync(_this, test)
+        #   .then ->
+        #     testEvents.afterRun(_this, test)
+        #
+        #     end()
+        # else
+        #   end()
+
+      when "runner:set:runnable"
+        ## when there is a hook / test (runnable) that
+        ## is about to be invoked
+        @setRunnable(args...)
+
+      when "runner:suite:start"
+        ## mocha runner started processing a suite
+        if @isHeadless
+          @emit("mocha", "suite", args...)
+
+      when "runner:suite:end"
+        ## mocha runner finished processing a suite
+        if @isHeadless
+          @emit("mocha", "suite end", args...)
+
+      when "runner:hook:start"
+        ## mocha runner started processing a hook
+        if @isHeadless
+          @emit("mocha", "hook", args...)
+
+      when "runner:hook:end"
+        ## mocha runner finished processing a hook
+        if @isHeadless
+          @emit("mocha", "hook end", args...)
+
+      when "runner:test:start"
+        ## mocha runner started processing a hook
+        if @isHeadless
+          @emit("mocha", "test", args...)
+
+      when "runner:test:end"
+        ## mocha runner finished processing a hook
+        @checkForEndedEarly()
+
+        if @isHeadless
+          @emit("mocha", "test end", args...)
+
+      when "runner:pass"
+        ## mocha runner calculated a pass
+        if @isHeadless
+          @emit("mocha", "pass", args...)
+
+      when "runner:pending"
+        ## mocha runner calculated a pending test
+        if @isHeadless
+          @emit("mocha", "pending", args...)
+
+      when "runner:fail"
+        ## mocha runner calculated a failure
+        if @isHeadless
+          @emit("mocha", "fail", args...)
+
+      when "errors:fail"
+        ## comes from cypress errors fail()
+        @emit("fail", args...)
+
+        ## also emits this on cy
+        ## @cy.emit("fail", args...)
+
+      when "command:enqueue"
+        "asdf"
 
   abort: ->
     @emitThen("abort")
