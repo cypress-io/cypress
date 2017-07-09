@@ -136,6 +136,18 @@ create = (specWindow, ee, config) ->
       $Chainer.inject key, (chainerId, firstCall, args) ->
         cy.enqueue(key, wrap(firstCall), args, type, chainerId)
 
+    setRunnable: (runnable, hookName) ->
+      if _.isFinite(timeout = config("defaultCommandTimeout"))
+        runnable.timeout(timeout)
+
+      state("hookName", hookName)
+
+      ## we store runnable as a property because
+      ## we can't allow it to be reset with props
+      ## since it is long lived (page events continue)
+      ## after the tests have finished
+      state("runnable", runnable)
+
     checkForEndedEarly: ->
       ## if our index is above 0 but is below the commands.length
       ## then we know we've ended early due to a done() and

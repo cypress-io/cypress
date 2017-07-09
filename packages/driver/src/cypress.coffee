@@ -164,8 +164,8 @@ class $Cypress
     @cy.onUncaughtException.apply(@cy, arguments)
 
   ## TODO: TEST THIS
-  set: (runnable, hookName) ->
-    $Cypress.Cy.set(@, runnable, hookName)
+  setRunnable: (runnable, hookName) ->
+    @cy.setRunnable(runnable, hookName)
 
   ## onSpecWindow is called as the spec window
   ## is being served but BEFORE any of the actual
