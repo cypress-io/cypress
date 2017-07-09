@@ -1,7 +1,7 @@
-utils = require("../cypress/utils")
+$utils = require("../cypress/utils")
 
-module.exports = ($Cy) ->
-  $Cy.extend
+create = (Cypress, state, config) ->
+  return {
     ## submit a generic command error
     commandErr: (err) ->
       current = @state("current")
@@ -16,8 +16,8 @@ module.exports = ($Cy) ->
           ## and we can add Applied To if there is a prev command
           ## and it is a parent
           if current.get("type") isnt "parent" and prev = current.get("prev")
-            ret = if utils.hasElement(prev.get("subject"))
-              utils.getDomElements(prev.get("subject"))
+            ret = if $utils.hasElement(prev.get("subject"))
+              $utils.getDomElements(prev.get("subject"))
             else
               prev.get("subject")
 
@@ -37,9 +37,9 @@ module.exports = ($Cy) ->
 
       return @
 
-    endedEarlyErr: (index) ->
+    endedEarlyErr: (index, queue) ->
       ## return if we already have an error
-      return if @state("err")
+      return if state("err")
 
       commands = queue.slice(index).reduce (memo, cmd) =>
         if $utils.isCommandFromThenable(cmd) or $utils.isCommandFromMocha(cmd)
@@ -49,10 +49,12 @@ module.exports = ($Cy) ->
           memo
       , []
 
-      err = utils.cypressErr(utils.errMessageByPath("miscellaneous.dangling_commands", {
-        numCommands: commands.length
-        commands:    commands.join('\n')
-      }))
+      err = $utils.cypressErr(
+        $utils.errMessageByPath("miscellaneous.dangling_commands", {
+          numCommands: commands.length
+          commands:    commands.join('\n')
+        })
+      )
       err.onFail = ->
       @fail(err)
 
@@ -61,9 +63,9 @@ module.exports = ($Cy) ->
       ## promise since we could have hit this
       ## fail handler outside of a command chain
       ## and we want to ensure we don't continue retrying
-      @state("promise")?.cancel()
+      state("promise")?.cancel()
 
-      current = @state("current")
+      current = state("current")
 
       ## allow for our own custom onFail function
       if err.onFail
@@ -75,9 +77,15 @@ module.exports = ($Cy) ->
       else
         @commandErr(err)
 
-      runnable = @state("runnable")
+      runnable = state("runnable")
 
-      @state("err", err)
+      state("err", err)
 
-      @Cypress.trigger "fail", err, runnable
-      @trigger "fail", err, runnable
+      Cypress.action("errors:fail", err, runnable)
+      # @Cypress.trigger "fail", err, runnable
+      # @trigger "fail", err, runnable
+    }
+
+module.exports = {
+  create
+}

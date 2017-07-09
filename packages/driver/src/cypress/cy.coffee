@@ -6,9 +6,9 @@ Backbone = require("backbone")
 Promise = require("bluebird")
 
 # $Cypress = require("../cypress")
-# $Chainer = require("./chainer")
 $utils = require("./utils")
 $Agents = require("../cy/agents")
+$Errors = require("../cy/errors")
 $Chainer = require("./chainer")
 $CommandQueue = require("./command_queue")
 $SetterGetter = require("./setter_getter")
@@ -136,6 +136,13 @@ create = (specWindow, ee, config) ->
       $Chainer.inject key, (chainerId, firstCall, args) ->
         cy.enqueue(key, wrap(firstCall), args, type, chainerId)
 
+    checkForEndedEarly: ->
+      ## if our index is above 0 but is below the commands.length
+      ## then we know we've ended early due to a done() and
+      ## we should throw a very specific error message
+      index = state("index")
+      if index > 0 and index < queue.length
+        errors.endedEarlyErr(index, queue)
   }
 
   _.each privateProps, (obj, key) =>
