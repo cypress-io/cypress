@@ -3,7 +3,7 @@ _ = require("lodash")
 $Cy = require("../../cypress/cy")
 $Cypress = require("../../cypress")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 create = (Commands, ee, state) ->
   Cypress.on "resume:next", ->
@@ -55,7 +55,7 @@ create = (Commands, ee, state) ->
       @state "onPaused", (fn) ->
         next = @_getNextQueuedCommand()
 
-        if next and @_isCommandFromMocha(next)
+        if next and $utils.isCommandFromMocha(next)
           return fn.call(@)
 
         Cypress.trigger("paused", next?.get("name"))
@@ -82,10 +82,10 @@ create = (Commands, ee, state) ->
 
       previous = @state("current").get("prev")
 
-      utils.log("\n%c------------------------ Debug Info ------------------------", "font-weight: bold;")
-      utils.log("Command Name:    ", previous and previous.get("name"))
-      utils.log("Command Args:    ", previous and previous.get("args"))
-      utils.log("Current Subject: ", subject)
+      $utils.log("\n%c------------------------ Debug Info ------------------------", "font-weight: bold;")
+      $utils.log("Command Name:    ", previous and previous.get("name"))
+      $utils.log("Command Args:    ", previous and previous.get("args"))
+      $utils.log("Current Subject: ", subject)
 
       `
         ////// HOVER OVER TO INSPECT THE CURRENT SUBJECT //////

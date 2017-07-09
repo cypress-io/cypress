@@ -41,8 +41,8 @@ module.exports = ($Cy) ->
       ## return if we already have an error
       return if @state("err")
 
-      commands = @queue.slice(index).reduce (memo, cmd) =>
-        if @_isCommandFromThenable(cmd) or @_isCommandFromMocha(cmd)
+      commands = queue.slice(index).reduce (memo, cmd) =>
+        if $utils.isCommandFromThenable(cmd) or $utils.isCommandFromMocha(cmd)
           memo
         else
           memo.push "- " + cmd.stringify()

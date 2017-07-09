@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 returnFalseIfThenable = (key, args...) ->
   if key is "then" and _.isFunction(args[0]) and _.isFunction(args[1])
@@ -36,7 +36,7 @@ thenFn = (subject, options, fn) ->
   ## 'then' is called from a hook) - by defering it, we finish
   ## resolving our deferred.
   current = @state("current")
-  if @_isCommandFromMocha(current)
+  if utils.isCommandFromMocha(current)
     return @state("next", fn)
 
   _.defaults options,
@@ -106,9 +106,9 @@ thenFn = (subject, options, fn) ->
       ret = undefined
 
     if ret? and invokedCyCommand and not ret.then
-      utils.throwErrByPath("then.callback_mixes_sync_and_async", {
+      $utils.throwErrByPath("then.callback_mixes_sync_and_async", {
         onFail: options._log
-        args: { value: utils.stringify(ret) }
+        args: { value: $utils.stringify(ret) }
       })
 
     return ret
@@ -123,7 +123,7 @@ thenFn = (subject, options, fn) ->
     ## resolve with the existing subject
     return if _.isUndefined(ret) then subject else ret
   .catch Promise.TimeoutError, =>
-    utils.throwErrByPath "invoke_its.timed_out", {
+    $utils.throwErrByPath "invoke_its.timed_out", {
       onFail: options._log
       args: {
         cmd: name
@@ -141,7 +141,7 @@ invokeFn = (subject, fn, args...) ->
 
   getMessage = ->
     if name is "invoke"
-      ".#{fn}(" + utils.stringify(args) + ")"
+      ".#{fn}(" + $utils.stringify(args) + ")"
     else
       ".#{fn}"
 
@@ -152,35 +152,35 @@ invokeFn = (subject, fn, args...) ->
 
   options._log = $Log.command
     message: message
-    $el: if utils.hasElement(subject) then subject else null
+    $el: if $utils.hasElement(subject) then subject else null
     consoleProps: ->
       Subject: subject
 
   if not _.isString(fn)
-    utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+    $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
       onFail: options._log
       args: { cmd: name }
     })
 
   if name is "its" and args.length > 0
-    utils.throwErrByPath("invoke_its.invalid_num_of_args", {
+    $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
       onFail: options._log
       args: { cmd: name }
     })
 
   fail = (prop) =>
-    utils.throwErrByPath("invoke_its.invalid_property", {
+    $utils.throwErrByPath("invoke_its.invalid_property", {
       onFail: options._log
       args: { prop, cmd: name }
     })
 
   failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
-    utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
+    $utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
       args: { previousProp, currentProp, value, cmd: name }
     })
 
   failOnCurrentNullOrUndefinedValue = (prop, value) =>
-    utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
+    $utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
       args: { prop, value, cmd: name }
     })
 
@@ -230,14 +230,14 @@ invokeFn = (subject, fn, args...) ->
           if _.isFunction(prop)
             prop.apply(actualSubject, args)
           else
-            utils.throwErrByPath("invoke.invalid_type", {
+            $utils.throwErrByPath("invoke.invalid_type", {
               onFail: options._log
               args: { prop: fn }
             })
 
     getFormattedElement = ($el) ->
-      if utils.hasElement($el)
-        utils.getDomElements($el)
+      if $utils.hasElement($el)
+        $utils.getDomElements($el)
       else
         $el
 
@@ -282,7 +282,7 @@ create = (Commands, ee, state) ->
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
       if not _.isArray(subject)
-        utils.throwErrByPath("spread.invalid_type")
+        $utils.throwErrByPath("spread.invalid_type")
 
       subject._spreadArray = true
 
@@ -298,11 +298,11 @@ create = (Commands, ee, state) ->
         return subject
 
       if not _.isFunction(fn)
-        utils.throwErrByPath("each.invalid_argument")
+        $utils.throwErrByPath("each.invalid_argument")
 
       nonArray = ->
-        utils.throwErrByPath("each.non_array", {
-          args: {subject: utils.stringify(subject)}
+        $utils.throwErrByPath("each.non_array", {
+          args: {subject: $utils.stringify(subject)}
         })
 
       try
@@ -337,7 +337,7 @@ create = (Commands, ee, state) ->
       yieldItem = (el, index) =>
         return if endEarly
 
-        if utils.hasElement(el)
+        if $utils.hasElement(el)
           el = $(el)
 
         callback = ->
@@ -375,20 +375,6 @@ create = (Commands, ee, state) ->
     its: ->
       invokeFn.apply(@, arguments)
   })
-
-  return {
-    _isCommandFromThenable: (cmd) ->
-      args = cmd.get("args")
-
-      cmd.get("name") is "then" and
-        args.length is 3 and
-          _.every(args, _.isFunction)
-
-    _isCommandFromMocha: (cmd) ->
-      not cmd.get("next") and
-        cmd.get("args").length is 2 and
-          (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
-  }
 
 module.exports = {
   create
