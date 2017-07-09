@@ -1,6 +1,6 @@
 _ = require("lodash")
 Backbone = require("backbone")
-utils = require("./utils")
+$utils = require("./utils")
 
 mocha = require("mocha")
 
@@ -38,7 +38,7 @@ ui = (specWindow, _mocha) ->
     @_ui = Mocha.interfaces[name]
 
     if not @_ui
-      utils.throwErrByPath("mocha.invalid_interface", { args: { name } })
+      $utils.throwErrByPath("mocha.invalid_interface", { args: { name } })
 
     @_ui = @_ui(@suite)
 
@@ -112,24 +112,22 @@ patchRunnerFail = ->
 
     @emit("fail", runnable, err)
 
-patchRunnableRun = ->
-  _this = @
-  Cypress = @Cypress
-
+patchRunnableRun = (Cypress) ->
   Runnable::run = _.wrap runnableRun, (orig, args...) ->
-
     runnable = @
+
+    didInvoke = false
 
     ## if cy was enqueued within the test
     ## then we know we should forcibly return cy
-    invokedCy = _.once ->
-      runnable._invokedCy = true
+    invokedCy = ->
+      didInvoke = true
 
-    @fn = _.wrap @fn, (orig, args...) ->
-      _this.listenTo Cypress, "enqueue", invokedCy
+    runnable.fn = _.wrap runnable.fn, (orig, args...) ->
+      Cypress.once("command:enqueue", invokedCy)
 
       unbind = ->
-        _this.stopListening Cypress, "enqueue", invokedCy
+        Cypress.removeListener("command:enqueue", invokedCy)
         runnable.fn = orig
 
       try
@@ -143,8 +141,12 @@ patchRunnableRun = ->
 
         ## if we invoked cy in this function
         ## then forcibly return last cy chain
-        if runnable._invokedCy
-          return Cypress.cy.state("chain")
+        if didInvoke
+          ## TODO: if we didn't return the cypress
+          ## chainer or cy instance then explode here
+          ## if result is anything other than undefined
+          # return Cypress.cy.state("chain")
+          throw new Error("please write a good error message")
 
         ## else return regular result
         return result
@@ -170,7 +172,7 @@ patchRunnableResetTimeout = ->
         "mocha.timed_out"
 
     @timer = setTimeout ->
-      errMessage = utils.errMessageByPath(getErrPath(), { ms })
+      errMessage = $utils.errMessageByPath(getErrPath(), { ms })
       runnable.callback new Error(errMessage)
       runnable.timedOut = true
     , ms
@@ -181,15 +183,15 @@ restore = ->
   restoreRunnableRun()
   restoreRunnableResetTimeout()
 
-override = ->
+override = (Cypress) ->
   patchRunnerFail()
-  patchRunnableRun()
+  patchRunnableRun(Cypress)
   patchRunnableResetTimeout()
 
-create = (specWindow, ee, reporter) ->
+create = (specWindow, Cypress, reporter) ->
   restore()
 
-  override()
+  override(Cypress)
 
   reporter ?= ->
 
