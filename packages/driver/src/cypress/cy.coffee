@@ -24,6 +24,7 @@ create = (specWindow, ee, config) ->
   state = $SetterGetter.create({})
 
   agents = $Agents.create()
+  errors = $Errors.create(Cypress, state, config)
 
   commandFns = {}
   # commandFnsBackup = {}
