@@ -18,7 +18,7 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
-create = (specWindow, ee, config) ->
+create = (specWindow, Cypress, config) ->
   state = $SetterGetter.create({})
 
   agents = $Agents.create()
