@@ -1,3 +1,5 @@
+require("setimmediate")
+
 require("./config/jquery")
 require("./config/lodash")
 require("./config/moment")

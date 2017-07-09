@@ -1,5 +1,3 @@
-require("setimmediate")
-
 _ = require("lodash")
 $ = require("jquery")
 Backbone = require("backbone")
