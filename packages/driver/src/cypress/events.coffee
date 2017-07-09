@@ -27,8 +27,6 @@ module.exports = {
 
       Promise.map(listeners, listener)
 
-    _.extend(obj, events)
-
     ## override only if logging is enabled
     if log.enabled
       emit = events.emit
@@ -42,6 +40,8 @@ module.exports = {
           log("emitted: '%s'", eventName)
 
         return ret
+
+    _.extend(obj, events)
 
     ## return the events object
     return events
