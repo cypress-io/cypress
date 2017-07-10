@@ -12,6 +12,9 @@ EE = require("events")
 log = require("debug")("cypress:driver")
 Promise = require("bluebird")
 
+withoutFunctions = (arr) ->
+  _.reject(arr, _.isFunction)
+
 module.exports = {
   extend: (obj) ->
     events = new EE
@@ -35,7 +38,7 @@ module.exports = {
         ret = emit.apply(events, [eventName].concat(args))
 
         if args.length
-          log("emitted: '%s' - with args: %o", eventName, args...)
+          log("emitted: '%s' - with args: %o", eventName, withoutFunctions(args)...)
         else
           log("emitted: '%s'", eventName)
 
