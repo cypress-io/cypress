@@ -166,7 +166,7 @@ module.exports = (Cypress, Commands) ->
             rr = if rr.length is 1 then rr[0] else rr
 
             obj[word] = rr
-            obj["Returned"] = _.pick(resp, "status", "duration", "body", "headers")
+            obj["Yielded"] = _.pick(resp, "status", "duration", "body", "headers")
 
             return obj
 
@@ -181,7 +181,7 @@ module.exports = (Cypress, Commands) ->
             indicator ?= if options.response?.isOkStatusCode then "successful" else "bad"
 
             {
-              message: "#{options.method} #{status} #{_.truncate(options.url, { length: 25 })}"
+              message: "#{options.method} #{status} #{options.url}"
               indicator: indicator
             }
         })

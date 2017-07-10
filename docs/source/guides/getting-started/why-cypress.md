@@ -6,67 +6,87 @@ comments: false
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- Who Cypress is for and what can be done with Cypress
-- What benefits Cypress can bring to your team
-- What tradeoffs Cypress makes
+- What Cypress is and who you should use it
+- Our mission, and what we believe in
+- Key Cypress features
 {% endnote %}
 
-# Who is Cypress For
+# In a Nutshell
 
-Typically, our users are developers or QA engineers building web applications using modern JavaScript frameworks, although you can use Cypress to test *anything that runs in a web browser*. Cypress enables you to write:
+Cypress is a next generation front end testing tool built for the modern web. We address the key pain points developers and QA engineers face when testing modern applications.
+
+We make it simple to:
+
+- {% urlHash 'Setup tests' Setup-Tests %}
+- {% urlHash 'Write tests' Write-Tests %}
+- {% urlHash 'Maintain tests' Maintain-Tests %}
+
+Cypress is most often compared to Selenium; however Cypress is both fundamentally and architecturally different. Cypress is not  constrained by the same restrictions as Selenium.
+
+This enables you to **write faster**, **easier** and **more reliable** tests.
+
+# Who Uses Cypress?
+
+Our users are typically developers or QA engineers building web applications using modern JavaScript frameworks.
+
+Cypress enables you to write all types of tests:
 
 - End to end tests
 - Integration tests
 - Unit tests
 
-...all of which run directly in the browser.
+Cypress can test anything that runs in a browser.
 
-Cypress is an open source, {% url "locally installed" installing-cypress %} testing tool *and* a value-added service for {% url 'continuous integration' continuous-integration %}.
+# Cypress Ecosystem
 
-- **First:** Cypress is easy to setup and useful for writing tests *every day* as you build your application locally. TDD at its best!
-- **Later:** After {% url "integrating Cypress with your CI Provider" continuous-integration %}, the  {% url 'Dashboard' features %} records your test runs and presents the results so you never have to ask, "Why did this fail?".
+Cypress is a free, {% url "open source" https://www.cypress.io/blog/2017/05/04/cypress-is-going-open-source/ %}, {% url "locally installed" installing-cypress %} testing tool **and** a service for {% url 'recording your tests' features-dashboard %}.
+
+- ***First:*** Cypress makes it easy to setup and start writing tests every day while you build your application locally. *TDD at its best!*
+- ***Later:*** After building up a suite of tests and {% url "integrating Cypress" continuous-integration %} with your CI Provider, our  {% url 'Dashboard' features-dashboard %} can record your test runs. You'll never have to wonder: *Why did this fail?*
+
+# Our Mission
+
+Our mission is to build a thriving, open source ecosystem that enhances productivity, makes testing an enjoyable experience, and generates developer happiness. We hold ourselves accountable to champion a testing process **that actually works**.
+
+We believe our documentation should be simple and approachable. This means  enabling ours readers to fully understand not just the **what** but **why**.
+
+We want to help developers build a new generation of modern applications faster, better, and without the stress and anxiety associated with managing tests.
+
+We know that in order for us to be successful we must enable, nurture, and foster an ecosystem that thrives on open source. Every line of test code is an investment in **your codebase**, it will never be coupled to us as a paid service or company. Tests will be able to run and work independently, *always*.
+
+We believe testing needs a lot of {% fa fa-heart %} and we are here to build a tool, a service, and a community that everyone can learn and benefit from. We're solving the hardest pain points shared by every developer working on the web. We believe in this mission and hope that you will join us to make Cypress a lasting ecosystem that helps everyone happy.
 
 # Features
 
-## Setup Tests
+Cypress comes fully baked, batteries included.
 
-- **Automate your workflow.** Drive your application with automated tests instead of manually verifying that your app works.
-- **Get started in minutes.** Don't spend days setting up a test environment. Just {% url "download our desktop app" installing-cypress %}, {% url "add your project" testing-your-app#Adding-Your-Project %} and {% url "start testing" writing-your-first-test %}!
-- **No changes to your code.** You don't need to change your code and Cypress doesn't need to modify your code.
-- **Works with all languages & frameworks.** Test in any major language or framework. Does your app run in a browser? Yes? You can test it in Cypress.
+## {% fa fa-cog %} Setup Tests
+
+- **Get Started in Minutes.** Don't spend days setting up a test environment. Just {% url "install our desktop app" installing-cypress %}, {% url "add your project" writing-your-first-test %} and {% url "start testing" testing-your-app %}!
+- **No Changes to your Code.** You don't need to change your code and Cypress doesn't need to modify your code.
 - **No Dependencies.** There's no need to download Selenium, Webdriver, Node, or any other code dependencies to get your tests up and running.
 - **ES2015 Friendly:** Write modern code with zero configuration.
+- **Launch Browsers.** Cypress can automatically launch your locally installed `Chrome` browsers, but also comes baked with the ability to run headlessly using `Electron`.
 
-{% img /img/guides/setup-tests-graphic.jpg %}
+{% img /img/guides/setup-tests.gif %}
 
-## Run Tests
+## {% fa fa-code %} Write Tests
 
-- **Real-time command execution.** Cypress automatically reloads whenever you make changes. See commands execute in real-time in your app.
-- **Clear visibility.** Testing through a console obscures what caused failures. Cypress runs in the browser with your application always visible.
-- **Easily Debug.** Debug directly from familiar tools like [Chrome DevTools](https://developer.chrome.com/devtools). Our readable errors and stack traces make debugging lightning fast.
-- **No more async hell.** Handling complicated asynchronous logic in most SPAs is a nightmare. Not in Cypress. {% url "We utilize Promises for simple async testing." introduction-to-cypress#Commands-Are-Asynchronous %}
-- **Time Travel Snapshots:**{% url "Time travel to any command" overview-of-the-gui %}; step back through every test.
-- **Automatic waiting.** Never add waits or sleeps to your tests. {% url "Cypress automatically waits for commands and assertions before moving on." introduction-to-cypress#Default-Assertions %}"
-- **Intelligent network requests.** {% url "Handling AJAX/XHR is ridiculously simple." network-requests %} Our extensible API lets you control every aspect of every {% url "request" route %}. Easily mock edge cases or isolate from the back-end completely.
-- **Simple API.** Every method is in clear English. {% url "Every command" api %}  uses a familiar API to locate and verify elements on a page.
-- **Blazing Fast Runs:** Tests run as fast as your application and server can deliver the content.
+- **Time Travel Snapshots:** {% url "Step back through" overview-of-the-gui %} every command issued during a test.
+- **Easily Debug.** Use [Chrome DevTools](https://developer.chrome.com/devtools) while tests run. We even support {% url `debugger` debugging %} in both your test code and your application code.
+- **Real-time Updates.** Cypress automatically re-runs whenever you make changes.
+- **Automatic Waiting.** Never add waits or sleeps to your tests. {% url 'Cypress intelligently waits' introduction-to-cypress#Default-Assertions %} for commands to resolve before moving on.
+- **Control Network Traffic.** Easily {% url 'control, stub, and test edge cases' network-requests %} without involving your server. You can modify network traffic however you like.
+- **Simple API.** {% url "Every command" api %} uses a simple, readable, and familiar API to locate and verify elements on a page.
 
-{% img /img/guides/run-tests-graphic.jpg %}
+{% img /img/guides/write-tests.gif %}
 
-## Maintain Tests
+## {% fa fa-lightbulb-o %} Maintain Tests
 
-- **Consistent Results.** Our architecture runs {% url "inside the browser" launching-browsers %} instead of blindly driving actions outside of the browser like Selenium. This means less brittle, flaky tests.
-- **Continuous Integration Support.** Know as soon as there's a failure by {% url "using Cypress in CI" continuous-integration %}. Cypress supports {% url "TravisCI" https://travis-ci.org/ %}, {% url "Jenkins" https://jenkins.io/ %}, {% url "CircleCI" https://circleci.com/ %}, {% url "Codeship" https://codeship.com/ %}, and more.
-- **Screenshots & Videos:** {% url "View screenshots taken when tests fail" runs %} or {% url "watch a video of your entire headless test run" runs %}.
-- **Cypress {% fa fa-heart %}'s Open Source** We're free for open source projects and {% url "many of our tools are open source" https://github.com/cypress-io/cypress %} with constant improvements in our roadmap.
+- **Consistent Results.** Our architecture doesn't use Selenium or Webdriver. Say goodbye to slow, brittle, and flaky tests.
+- **Continuous Integration.** Cypress supports {% url "TravisCI" https://travis-ci.org/ %}, {% url "Jenkins" https://jenkins.io/ %}, {% url "CircleCI" https://circleci.com/ %}, {% url "Codeship" https://codeship.com/ %}, or any service running {% url 'Docker' docker-images %}.
+- **Screenshots & Videos:** Cypress automatically takes {% url 'screenshots' screenshots-and-videos %} on failed tests and records a {% url 'video' screenshots-and-videos %} of headless runs.
+- **Understand Failures:** Our {% url 'Dashboard Service' features-dashboard %} can record all of your tests and help you pinpoint and understand failures.
 - **Excellent Support.** Get stuck? We're here to help you. {% open_an_issue "Open an issue" %}, join us in {% url "our Gitter chat" https://gitter.im/cypress-io/cypress %}, [email us](mailto:support@cypress.io), or {% url "ask a question on Stackoverflow" https://stackoverflow.com/search?q=cypress.io %}.
 
-{% img /img/guides/maintain-tests-graphic.jpg %}
-
-# Trade Offs
-
-- **One Superdomain Per Test:** Cypress cannot navigate between multiple superdomains *inside a single test*.
-- **One Browser Window Per Test:** Cypress cannot control multiple browsers simultaneously.
-- **Not a Web Crawler:** Cypress is not intended to be a general automation tool.
-- **Not Ideal for Live Apps:** Cypress is best when integrated during development, it isn't best for testing a live website.
-- **Developer-focused:** Users of Cypress must understand (and probably should be able to modify) the app under test.
+{% img /img/guides/maintain-tests.gif %}

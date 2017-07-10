@@ -346,6 +346,12 @@
     max-width: 100%;
     border: 1px solid #ddd;
     margin: 15px 0;
+    box-shadow: 0 1px 2px #ddd;
+
+    &.no-border {
+      border: 0;
+      box-shadow: 0 0 0;
+    }
   }
 
   video {
@@ -500,8 +506,7 @@
 }
 
 .article-footer-updated {
-  margin: 3em 0;
-  border-top: 1px solid $color-border;
+  margin: 1em 0 3em;
   text-align: center;
   font-size: 0.9em;
   font-family: $font-title;

@@ -77,19 +77,19 @@ Option | Default | Description
 
 ## Input/Textarea
 
-**Type into a textarea.**
+***Type into a textarea.***
 
 ```javascript
 cy.get('textarea').type('Hello world') // yields <textarea>
 ```
 
-**Type into a login form**
+***Type into a login form***
 
 {% note info %}
-{% url "Check out our example recipe of logging in by typing username and password" logging-in %}
+{% url "Check out our example recipe of logging in by typing username and password" logging-in-recipe %}
 {% endnote %}
 
-**Mimic user typing behavior**
+***Mimic user typing behavior***
 
 Each keypress is delayed 10ms by default in order to simulate how a very fast user types!
 
@@ -97,9 +97,9 @@ Each keypress is delayed 10ms by default in order to simulate how a very fast us
 cy.get('[contenteditable]').type('some text!')
 ```
 
-## Not Input/Textarea
+## Tabindex
 
-**Type into a non-input or non-textarea element with `tabindex`**
+***Type into a non-input or non-textarea element with `tabindex`***
 
 ```html
 <body>
@@ -157,34 +157,18 @@ Where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999.
 
 Special characters (`{leftarrow}`, `{selectall}`, etc) are not permitted.
 
-## Options
-
-**Force a click to happen prior to type**
-
-Prior to typing, if the DOM element isn't currently focused, Cypress issues a {% url `.click()` click %} on the element, which causes the element to receive focus.
-
-Sometimes it is useful to force the click to happen in order to disables error checking, like whether the element is currently visible.
-
-```javascript
-cy.get('input[type=text]').type('Test all the things', { force: true })
-```
-
-{% note warning %}
-Be careful with the `force` option because it allows the type to happen where it might actually be impossible for a real user to type.
-{% endnote %}
-
 ## Key Combinations
 
 When using special character sequences, it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `.type()` command, and are released when all subsequent characters are typed, unless {% url '`{release: false}`' type#Options %} is passed as an {% url 'option' type#Key-Combinations %}. A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
 
-**Type a key combination**
+***Type a key combination***
 
 ```javascript
 // this is the same as a user holding down SHIFT and ALT, then pressing Q
 cy.get('input').type('{shift}{alt}Q')
 ```
 
-**Hold down modifier key and type a word**
+***Hold down modifier key and type a word***
 
 ```javascript
 // all characters after {ctrl} will have 'ctrlKey'
@@ -192,7 +176,7 @@ cy.get('input').type('{shift}{alt}Q')
 cy.get('input').type('{ctrl}test')
 ```
 
-**Release behavior**
+***Release behavior***
 
 By default, modifiers are released after each type command.
 
@@ -247,14 +231,14 @@ cy.get('button').click()
 
 To support this, the `body` can be used as the DOM element to type into (even though it's *not* a focusable element).
 
-**Use keyboard shortcuts in body**
+***Use keyboard shortcuts in body***
 
 ```javascript
 // all of the type events are fired on the body
 cy.get('body').type('{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba')
 ```
 
-**Do a shift + click**
+***Do a shift + click***
 
 ```javascript
 // execute a SHIFT + click on the first <li>
@@ -263,17 +247,98 @@ cy.get('body').type('{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightar
 cy.get('body').type('{shift}', {release: false}).get('li:first').click()
 ```
 
+## Options
+
+***Force typing regardless of its actionable state***
+
+Forcing typing overrides the {% url 'actionable checks' interacting-with-elements#Forcing %} Cypress applies and will automatically fire the events.
+
+```javascript
+cy.get('input[type=text]').type('Test all the things', { force: true })
+```
+
 # Notes
 
-**Typing `tab` key does not work**
+## Actionability
 
-Tabbing will be implemented as a separate command as `.tab()` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% open_an_issue %} if you need this to be fixed.
+`.type()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
 
-**Preventing `mousedown` does not prevent typing**
+## Events
+
+***When element is not in focus***
+
+If the element is currently not in focus, before issuing any keystrokes Cypress will first issue a {% url `.click()` click %} to the element to bring it into focus.
+
+All of the normal events documented on {% url `.click()` click %} will fire.
+
+***Events that fire***
+
+Once the element is in focus, Cypress will begin firing keyboard events.
+
+The following events will be fired based on what key was pressed identical to the event spec:
+
+- `keydown`
+- `keypress`
+- `textInput`
+- `input`
+- `keyup`
+
+`beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
+
+Additionally `change` events will be fired either when the `{enter}` key is pressed (and the value has changed since the last focus event), or whenever the element loses focus. This matches browser behavior.
+
+Events that should not fire on non input types such as elements with `tabindex` do not fire their `textInput` or `input` events. Only typing into elements which cause the actual value or text to change will fire those events.
+
+***Event Firing***
+
+The following rules have been implemented that match real browser behavior (and the spec):
+
+1. Cypress respects not firing subsequent events if previous ones were cancelled.
+2. Cypress will fire `keypress` *only* if that key is supposed to actually fire `keypress`.
+3. Cypress will fire `textInput` *only* if typing that key would have inserted an actual character.
+4. Cypress will fire `input` *only* if typing that key modifies or changes the value of the element.
+
+***Event Cancellation***
+
+Cypress respects all default browser behavior when events are cancelled.
+
+```javascript
+// prevent the characters from being inserted
+// by canceling keydown, keypress, or textInput
+$('#username').on('keydown', function(e){
+  e.preventDefault();
+})
+
+// Cypress will not insert any characters if keydown, keypress, or textInput
+// are cancelled - which matches the default browser behavior
+cy.get('#username').type('bob@gmail.com').should('have.value', '') // true
+```
+
+***Preventing `mousedown` does not prevent typing***
 
 In a real browser, preventing `mousedown` on a form field will prevent it from receiving focus and thus prevent it from being able to be typed into. Currently, Cypress does not factor this in. {% open_an_issue %} if you need this to be fixed.
 
-**Modifier effects**
+***Key Events Table***
+
+Cypress prints out a table of key events that detail the keys that were pressed when clicking on type within the {% url 'Command Log' type#Command-Log %}. Each character will contain the `which` character code and the events that happened as a result of that key press.
+
+Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
+
+Additionally, events that cause a `change` event to fire (such as typing `{enter}`) will display with the `change` event column as `true`.
+
+Any modifiers activated for the event are also listed in a `modifiers` column.
+
+![Cypress .type() key events table](/img/api/type/key-events-table-shown-in-console-for-testing-typing.png)
+
+## Tabbing
+
+***Typing `tab` key does not work***
+
+Tabbing will be implemented as a separate command as `.tab()` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% open_an_issue %} if you need this to be fixed.
+
+## Modifies
+
+***Modifier effects***
 
 In a real browser, if a user holds `SHIFT` and types `a`, a capital `A` will be typed into the input. Currently, Cypress does not simulate that behavior.
 
@@ -293,50 +358,9 @@ In the example above, a lowercase `a` will be typed, because that's the literal 
 
 This holds true for other special key combinations as well (that may be OS-specific). For example, on OSX, typing `ALT + SHIFT + K` creates the special character ``. Like with capitalization, `.type()` will not output ``, but simply the letter `k`. {% open_an_issue %} if you need modifier effects to be implemented.
 
-**Events that fire**
+## Form Submission
 
-Cypress implements all events that Chrome fires as part of typing in a real keyboard. Read the section: "Simulated Events vs Native Events" below for more information.
-
-The following events will be fired based on what key was pressed identical to the event spec:
-
-- keydown
-- keypress
-- textInput
-- input
-- keyup
-
-`beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
-
-Additionally `change` events will be fired either when the `{enter}` key is pressed (and the value has changed since the last focus event), or whenever the element loses focus. This matches browser behavior.
-
-Events that should not fire on non input types such as elements with `tabindex` do not fire their `textInput` or `input` events. Only typing into elements which cause the actual value or text to change will fire those events.
-
-**Event Firing**
-
-The following rules have been implemented that match real browser behavior (and the spec):
-
-1. Cypress respects not firing subsequent events if previous ones were cancelled.
-2. Cypress will fire `keypress` *only* if that key is supposed to actually fire `keypress`.
-3. Cypress will fire `textInput` *only* if typing that key would have inserted an actual character.
-4. Cypress will fire `input` *only* if typing that key modifies or changes the value of the element.
-
-**Event Cancellation**
-
-Cypress respects all default browser behavior when events are cancelled.
-
-```javascript
-// prevent the characters from being inserted
-// by canceling keydown, keypress, or textInput
-$('#username').on('keydown', function(e){
-  e.preventDefault();
-})
-
-// Cypress will not insert any characters if keydown, keypress, or textInput
-// are cancelled - which matches the default browser behavior
-cy.get('#username').type('bob@gmail.com').should('have.value', '') // true
-```
-
-**Implicit form submission behavior**
+***Implicit form submission behavior***
 
 Cypress automatically matches the spec and browser behavior for pressing the `{enter}` key when the input belongs to a `<form>`.
 
@@ -369,30 +393,6 @@ Additionally Cypress handles these 4 other situations as defined in the spec:
 4. Submits form and fires a synthetic `click` event to the `submit` when it exists.
 
 Of course if the form's `submit` event is `preventedDefault` the form will not actually be submitted.
-
-**Key Events Table**
-
-Cypress prints out a table of key events that detail the keys that were pressed when clicking on type within the {% url 'Command Log' type#Command-Log %}. Each character will contain the `which` character code and the events that happened as a result of that key press.
-
-Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
-
-Additionally, events that cause a `change` event to fire (such as typing `{enter}`) will display with the `change` event column as `true`.
-
-Any modifiers activated for the event are also listed in a `modifiers` column.
-
-![Cypress .type() key events table](/img/api/type/key-events-table-shown-in-console-for-testing-typing.png)
-
-**Simulated Events vs Native Events**
-
-When Cypress is running on your local computer, all events are simulated identically to real native events.
-
-There should be no distinguishable difference between these simulated events and real native events. We chose to model these simulated events to match what Chrome fires. In other words, using `.type()` should essentially match actually typing keys on your keyboard while in Chrome.
-
-However, when Cypress is run in `cross browser mode`, Cypress uses the actual `OS keyboard` to type, and therefore the browser will fire all of it's native events as you'd expect.
-
-This strategy works well because when you are in development you are working in Chrome.  Using simulated events is extremely fast, the browser window does *not* need to be in focus. Because we simulate events identically to their native counterpart, your application code won't be able to tell the difference.
-
-In other words, you get the best of both worlds: simulated when its practical to do so, and native when it needs to run across browsers.
 
 # Rules
 

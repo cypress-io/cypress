@@ -43,9 +43,9 @@ Option | Default | Description
 
 # Examples
 
-## Url
+## No Args
 
-**Assert the URL is `http://localhost:8000/users/1/edit`**
+***Assert the URL is `http://localhost:8000/users/1/edit`***
 
 ```javascript
 // clicking the anchor causes the browser to follow the link
@@ -53,7 +53,11 @@ cy.get('#user-edit a').click()
 cy.url().should('eq', 'http://localhost:8000/users/1/edit') // => true
 ```
 
-**Url is a shortcut for `cy.location('href')`**
+# Notes
+
+## Href Shorthand
+
+***Url is an alias for `cy.location('href')`***
 
 `cy.url()` uses `href` under the hood.
 
@@ -62,7 +66,9 @@ cy.url()                  // these yield the same string
 cy.location('href')       // these yield the same string
 ```
 
-**Url versus href**
+## Differences
+
+***Url versus href***
 
 Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
@@ -96,7 +102,7 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 # Command Log
 
-**Assert that the url contains "#users/new"**
+***Assert that the url contains "#users/new"***
 
 ```javascript
 cy.url().should('contain', '#users/new')

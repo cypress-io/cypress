@@ -21,7 +21,7 @@
 
   h1 {
     color: #636668;
-    font-family: "Fira Sans";
+    font-family: $font-title;
     font-weight: 100;
     margin-top: 15px;
     text-align: center;
@@ -92,7 +92,7 @@
   position: relative;
 
   h3 {
-    font-size: 16px;
+    font-size: $font-size;
     margin: 10px 0 6px;
 
     a {

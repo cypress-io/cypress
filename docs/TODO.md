@@ -61,16 +61,16 @@ FAQ
     - cannot timeout, no assertions   -->
 
 Intro to Cypress
-  - we don't ever describe assertions as 'blocking / guarding state'
-  - we need to mention this too in the `should` and `and` docs
-    - (there is a note for this below)
+  <!-- - we don't ever describe assertions as 'blocking / guarding state' -->
+  <!-- - we need to mention this too in the `should` and `and` docs -->
+    <!-- - (there is a note for this below) -->
   <!-- - we dont talk about needing to chain everything or return `cy` -->
-  - finish the new assertion bits
+  <!-- - finish the new assertion bits
     - implicit / default assertions
     - everything is retried
     - assertions act like guards
     - talk about 'not.exist' <-- this is completely missing!
-      - mention it in two places, 'up top / down below'
+      - mention it in two places, 'up top / down below' -->
   <!-- - add "Commands are not promises" to pair with the other one -->
     <!-- - they have promise like qualities but are different -->
 
@@ -97,11 +97,11 @@ Command Creation
   - add note in the readme that says
   - DO NOT LINK TO HASH TAGS FROM THE DESKTOP app
     - instead create a new link
-    - bad: https://on.cypress.io/guides/configuration#section-global
-    - good: https://on.cypress.io/guides/configuration-global
-  - always add the prefix
-    - bad: https://on.cypress.io/configuration
-    - good: https://on.cypress.io/guides/configuration
+    - bad: https://on.cypress.io/configuration#section-global
+    - good: https://on.cypress.ioconfiguration-global
+  - dont add the prefix
+    - bad: https://on.cypress.io/guides/configuration
+    - good: https://on.cypress.io/configuration
 
 <!-- - list of assertions
   - mention how to extend assertions
@@ -131,10 +131,10 @@ Command Creation
 FIX -spies,stubs and stubs,spies
  - append '-recipe' to the example/recipe -->
 
-- should / and
+<!-- - should / and
   <!-- - improve the "description" -->
   - talk about retrying
-  - make sure the intro to cypress explains this
+  - make sure the intro to cypress explains this -->
 
 - FAQ
   - Using Cypress dashboard questions -> move to dashboard
@@ -152,13 +152,13 @@ FIX -spies,stubs and stubs,spies
 <!-- - Implicit way to fail? -->
   <!-- - different than a default assertion? -->
 
-- Assertions
+<!-- - Assertions
   - Default assertions should move to the top of the assertion sections
     - this couples nicely with the "you dont have to write assertions"
     - then the next docs should be like: "okay so you want to write an assertion!"
   - We still don't do a good / clear job explaining that assertions block cypress until that state is reached
   - Why are we linking: "reach a desired state" to interacting with eleents?
-    - this should be linking to a section within assertions
+    - this should be linking to a section within assertions -->
 
 - API
   <!-- - make sure we have consistent nomenclature

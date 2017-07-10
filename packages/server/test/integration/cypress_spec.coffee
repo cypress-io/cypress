@@ -4,13 +4,14 @@ _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
 path       = require("path")
+{ EventEmitter } = require("events")
 { unlinkSync: rm, existsSync: exists } = require("fs")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
 Fixtures   = require("../support/helpers/fixtures")
 extension  = require("@packages/extension")
-pkg        = require("#{root}package.json")
+pkg        = require("@packages/root")
 git        = require("#{root}lib/util/git")
 bundle     = require("#{root}lib/util/bundle")
 connect    = require("#{root}lib/util/connect")
@@ -1118,24 +1119,18 @@ describe "lib/cypress", ->
         })
 
     it "sends warning when baseUrl cannot be verified", ->
-      event = {
-        sender: {
-          send: @sandbox.stub()
-        }
-      }
-
-      warning = {
-        isWarning: true,
-        message: "Blah blah baseUrl blah blah"
-      }
+      bus = new EventEmitter()
+      event = { sender: { send: @sandbox.stub() } }
+      warning = { message: "Blah blah baseUrl blah blah" }
       open = @sandbox.stub(Server.prototype, "open").resolves([2121, warning])
 
       cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, event, 123, "open:project", @todosPath)
+        Events.handleEvent(options, bus, event, 123, "on:project:warning")
+        Events.handleEvent(options, bus, event, 123, "open:project", @todosPath)
       .then ->
-        expect(event.sender.send.withArgs("response").firstCall.args[1].__error).to.eql(warning)
+        expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
 
   context "no args", ->
     beforeEach ->

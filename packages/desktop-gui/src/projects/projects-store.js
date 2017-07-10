@@ -2,8 +2,6 @@ import _ from 'lodash'
 import { computed, observable, action } from 'mobx'
 import Project from '../project/project-model'
 
-const MAX_PROJECTS = 5
-
 class ProjectsStore {
   @observable projects = []
   @observable error = null
@@ -43,10 +41,6 @@ class ProjectsStore {
     }
 
     this.projects.unshift(project)
-
-    if (this.projects.length > MAX_PROJECTS) {
-      this.projects.pop()
-    }
 
     return project
   }

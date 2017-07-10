@@ -7,7 +7,7 @@
 // commands for use throughout your tests.
 //
 // You can read more about custom commands here:
-// https://on.cypress.io/api/commands
+// https://on.cypress.io/custom-commands
 // ***********************************************
 //
 // Cypress.addParentCommand("login", function(email, password){

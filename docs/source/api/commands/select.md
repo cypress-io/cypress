@@ -57,7 +57,7 @@ Option | Default | Description
 
 ## Text Content
 
-**Select the option with the text `apples`**
+***Select the option with the text `apples`***
 
 ```html
 <select>
@@ -74,7 +74,7 @@ cy.get('select').select('apples')
 
 ## Value
 
-**Select the option with the value "456"**
+***Select the option with the value "456"***
 
 ```html
 <select>
@@ -91,7 +91,7 @@ cy.get('select').select('456')
 
 ## Select multiple options
 
-**Select the options with the texts "apples" and "bananas"**
+***Select the options with the texts "apples" and "bananas"***
 
 ```html
 <select multiple>
@@ -105,7 +105,7 @@ cy.get('select').select('456')
 cy.get('select').select(['apples', 'bananas'])
 ```
 
-**Select the options with the values "456" and "457"**
+***Select the options with the values "456" and "457"***
 
 ```html
 <select multiple>
@@ -118,6 +118,12 @@ cy.get('select').select(['apples', 'bananas'])
 ```javascript
 cy.get('select').select(['456', '457'])
 ```
+
+# Notes
+
+## Actionability
+
+`.select()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
 
 # Rules
 
@@ -135,7 +141,7 @@ cy.get('select').select(['456', '457'])
 
 # Command Log
 
-**Select the option with the text "Homer Simpson"**
+***Select the option with the text "Homer Simpson"***
 
 ```javascript
 cy.get('select').select('Homer Simpson')

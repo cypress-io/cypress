@@ -15,8 +15,7 @@ comments: false
 
 Cypress runs tests in a unique interactive runner that allows you to see commands as they execute while also viewing the application under test.
 
-{% img /img/guides/gui-diagram.png Cypress Test Runner %}
-
+{% img no-border /img/guides/gui-diagram.png Cypress Test Runner %}
 
 # Test Runner Components:
 
@@ -36,7 +35,7 @@ By default, Cypress keeps 50 tests worth of snapshots and command data for time 
 
 ***Clicking on Commands***
 
-Each command, assertion, or error, when clicked on, displays extra information in the dev tools console. Clicking also 'pins' the Application Under Test (righthand side) to it's previous state when the command executed.
+Each command, assertion, or error, when clicked on, displays extra information in the dev tools console. Clicking also 'pins' the Application Under Test (righthand side) to its previous state when the command executed.
 
 {% img /img/guides/clicking-commands.png Click to console.log and to pin %}
 
@@ -45,15 +44,15 @@ Each command, assertion, or error, when clicked on, displays extra information i
 
 For certain commands like {% url `cy.route()` route %}, {% url `cy.stub()` stub %}, and {% url `cy.spy()` spy %}, an extra instrument panel is displayed above the test to give more information about the state of your tests.
 
-*Routes*
+***Routes:***
 
 {% img /img/guides/instrument-panel-routes.png Routes Instrument Panel %}
 
-*Stubs*
+***Stubs:***
 
 {% img /img/guides/instrument-panel-stubs.png Stubs Instrument Panel %}
 
-*Spies*
+***Spies:***
 
 {% img /img/guides/instrument-panel-spies.png Spies Instrument Panel %}
 

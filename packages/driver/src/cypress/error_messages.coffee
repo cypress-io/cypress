@@ -251,7 +251,7 @@ module.exports = {
       #{cmd('hover')} is not currently implemented.\n
       However it is usually easy to workaround.\n
       Read the following document for a detailed explanation.\n
-      https://on.cypress.io/api/hover
+      https://on.cypress.io/hover
     """
 
   invoke:
@@ -358,7 +358,7 @@ module.exports = {
 
       Please go through the getter function: #{cmd(obj.name, "...")}
 
-      #{if obj.url then "https://on.cypress.io/api/#{obj.name}" else ""}
+      #{if obj.url then "https://on.cypress.io/#{obj.name}" else ""}
       """
     retry_timed_out: "Timed out retrying: {{error}}"
 

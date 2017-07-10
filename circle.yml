@@ -217,7 +217,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && npm run test-e2e
+      - run: cd docs && npm run build && npm run test-e2e
 
   "driver-unit-tests":
     <<: *defaults
@@ -227,6 +227,15 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: chrome --version
       - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
+
+  "build-binary":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      - run: ls -la build/linux/Cypress
 
 workflows:
   version: 2
@@ -252,6 +261,9 @@ workflows:
           requires:
             - build
       - driver-unit-tests:
+          requires:
+            - build
+      - build-binary:
           requires:
             - build
 

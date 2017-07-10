@@ -6,6 +6,7 @@ user     = require("./user")
 cache    = require("./cache")
 logger   = require("./logger")
 Settings = require("./util/settings")
+pkg      = require("@packages/root")
 
 ## POST https://api.cypress.io/exceptions
 ## sets request body
@@ -31,7 +32,7 @@ module.exports = {
     }
 
   getVersion: ->
-    fs.readJsonAsync("./package.json").get("version")
+    Promise.resolve(pkg.version)
 
   getBody: (err, settings) ->
     body = {err: @getErr(err)}

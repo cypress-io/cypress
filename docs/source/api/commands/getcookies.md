@@ -47,7 +47,7 @@ Option | Default | Description
 
 ## Get Cookies
 
-**Get cookies after logging in**
+***Get cookies after logging in***
 
 In this example, on first login our server sends us back a session cookie.
 
@@ -77,8 +77,6 @@ cy.getCookies()
 {% timeouts automation cy.getCookies %}
 
 # Command Log
-
-**Get cookies**
 
 ```javascript
 cy.getCookies().should('have.length', 1).then(function(cookies) {

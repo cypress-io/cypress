@@ -1,7 +1,7 @@
 YAML = require('yamljs')
 _ = require('lodash')
 
-FAQ_PATH = "/faq/questions/general-questions"
+FAQ_PATH = "/faq/questions/general-questions-faq"
 
 describe "FAQ", ->
   beforeEach ->

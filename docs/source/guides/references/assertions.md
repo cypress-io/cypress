@@ -145,11 +145,11 @@ These chainers are used on assertions with {% url `cy.stub()` stub %} and {% url
 
 Because we are using `chai`, that means you can extend it however you'd like. Cypress will automatically "just work" with new assertions added to `chai`. You can simply:
 
-1. Write your own `chai` assertions as {% url 'documented here' http://chaijs.com/api/plugins/ %}.
-2. NPM install any existing `chai` library and import into your test file or support file.
+- Write your own `chai` assertions as {% url 'documented here' http://chaijs.com/api/plugins/ %}.
+- ...or NPM install any existing `chai` library and import into your test file or support file.
 
 {% note info %}
-{% url 'Check out our example recipe extending chai with new assertions.' extending-cypress %}
+{% url 'Check out our example recipe extending chai with new assertions.' extending-cypress-recipe %}
 {% endnote %}
 
 # Common Assertions

@@ -157,36 +157,40 @@ sidebar:
     cypress-api: Cypress API
     config: config
     env: env
-    cypress-commands: Commands
+    custom-commands: Commands
     cookies: Cookies
     dom: Dom
     cypress-server: Server
   examples:
     recipes: Recipes
-    unit-testing: Unit Testing
-    logging-in: Logging In
-    testing-the-dom: Testing the DOM
-    working-with-the-backend: Working with the Backend
+    unit-testing-recipe: Unit Testing
+    logging-in-recipe: Logging In
+    testing-the-dom-recipe: Testing the DOM
+    working-with-the-backend-recipe: Working with the Backend
     stubs-spies-and-clocks-recipe: Spies, Stubs, and Clocks
-    extending-cypress: Extending Cypress
+    extending-cypress-recipe: Extending Cypress
     applications: Applications
     kitchen-sink: Kitchen Sink
     todo-mvc: TodoMVC
     pie-chopper: PieChopper
     phonecat: Phonecat
     docker: Docker
-    images: Images
+    docker-images: Images
     circle-ci: CicleCI
     codeship: Codeship
+    media: Media
+    talks-media: Talks
+    podcasts-media: Podcasts
+    blogs-media: Blogs
   dashboard:
     overview: Dashboard
-    features: Features
-    projects: Projects
-    runs: Recorded Runs
-    organizations: Organizations
+    features-dashboard: Features
+    projects-dashboard: Projects
+    runs-dashboard: Recorded Runs
+    organizations-dashboard: Organizations
   faq:
     questions: FAQ
-    general-questions: General Questions
-    using-cypress: Using Cypress
-    dashboard: Dashboard
-    company: Company
+    general-questions-faq: General Questions
+    using-cypress-faq: Using Cypress
+    dashboard-faq: Dashboard
+    company-faq: Company

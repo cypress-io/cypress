@@ -53,7 +53,7 @@ Option | Default | Description
 
 ## Aliased Routes
 
-**Expand the array of aliased routes**
+***Expand the array of aliased routes***
 
 ```javascript
 cy.server()
@@ -68,7 +68,7 @@ cy.wait(['@getUsers', '@getActivities', '@getComments'])
 
 ## Cookies
 
-**Expand the array of cookies**
+***Expand the array of cookies***
 
 ```javascript
 cy.getCookies().spread(function(cookie1, cookie2, cookie3){

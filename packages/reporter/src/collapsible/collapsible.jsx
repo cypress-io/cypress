@@ -2,6 +2,13 @@ import cs from 'classnames'
 import React, { Component } from 'react'
 
 class Collapsible extends Component {
+  static defaultProps = {
+    isOpen: false,
+    headerClass: '',
+    headerStyle: {},
+    contentClass: '',
+  }
+
   constructor (props) {
     super(props)
 
@@ -32,13 +39,6 @@ class Collapsible extends Component {
   _toggleOpen = () => {
     this.setState({ isOpen: !this.state.isOpen })
   }
-}
-
-Collapsible.defaultProps = {
-  isOpen: false,
-  headerClass: '',
-  headerStyle: {},
-  contentClass: '',
 }
 
 export default Collapsible

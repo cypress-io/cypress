@@ -73,6 +73,16 @@ function validateExternalUrl (href, source) {
     return Promise.resolve()
   }
 
+  if (href.includes('Object]')) {
+    return Promise.reject(
+      new Error(`Constructing {% url %} tag helper failed
+        > The source file was: ${source}
+
+        > You must quote the URL: ${href}
+      `)
+    )
+  }
+
   hrefs.push(href)
 
   return request({

@@ -21,7 +21,7 @@ module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  getWindowArgs: (state) ->
+  getWindowArgs: (state, options = {}) ->
     common = {
       backgroundColor: "#dfe2e4"
       width: state.appWidth or 800
@@ -39,6 +39,7 @@ module.exports = {
         y: "appY"
         devTools: "isAppDevToolsOpen"
       }
+      projectPath: options.projectPath
       onBlur: ->
         return if @webContents.isDevToolsOpened()
 
@@ -81,9 +82,9 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState().get()
+    savedState(options.projectPath).get()
     .then (state) =>
-      Windows.open(@getWindowArgs(state))
+      Windows.open(@getWindowArgs(state, options))
       .then (win) =>
         Events.start(_.extend({}, options, {
           env: process.env["CYPRESS_ENV"]

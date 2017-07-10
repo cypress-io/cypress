@@ -9,7 +9,7 @@ comments: false
 
 - **{% url 'Utilities:' _ %}** Access methods from other commonly used libraries.
 
-- **{% url 'Cypress API:' cypress-commands %}** Configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
+- **{% url 'Cypress API:' custom-commands %}** Configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
 
 # Rules
 

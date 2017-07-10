@@ -230,9 +230,9 @@ class RunsList extends Component {
             </a>
           </h5>
           <pre className='line-nums'>
-            <span>{`{`}</span>
+            <span>{'{'}</span>
             <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
-            <span>{`}`}</span>
+            <span>{'}'}</span>
           </pre>
           <h5>
             <span className='pull-left'>

@@ -5,6 +5,10 @@ comments: false
 
 Get the parent DOM elements of a set of DOM elements.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parents()` http://api.jquery.com/parents %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -50,9 +54,9 @@ Option | Default | Description
 
 # Examples
 
-## Parents
+## No Args
 
-**Get the parents of the active li**
+***Get the parents of the active li***
 
 ```javascript
 cy.get('li.active').parents()
@@ -60,7 +64,7 @@ cy.get('li.active').parents()
 
 ## Selector
 
-**Get the parents with class `nav` of the active li**
+***Get the parents with class `nav` of the active li***
 
 ```javascript
 cy.get('li.active').parents('.nav')
@@ -82,7 +86,7 @@ cy.get('li.active').parents('.nav')
 
 # Command Log
 
-**Get the parents of the active `li`**
+***Get the parents of the active `li`***
 
 ```javascript
 cy.get('li.active').parents()

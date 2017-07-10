@@ -54,15 +54,15 @@ Option | Default | Description
 - `search`
 - `toString`
 
-**When given a `key` argument:**
+***When given a `key` argument:***
 
 {% yields sets_subject cy.location 'yields the value of the location property as a string' %}
 
 # Examples
 
-## Location Properties
+## No Args
 
-**Make assertions about every location property**
+***Make assertions about every location property***
 
 ```javascript
 cy.visit('http://localhost:8000/app/index.html?q=dan#/users/123/edit')
@@ -81,7 +81,7 @@ cy.location().should(function(location) {
 })
 ```
 
-**Check location for query params and pathname**
+***Check location for query params and pathname***
 
 We can yield the location object within a {% url `.should()` should %} command and work with it directly.
 
@@ -93,9 +93,9 @@ cy.location().should(function(location){
 })
 ```
 
-## Key Shorthand
+## Key
 
-**Assert that a redirect works**
+***Assert that a redirect works***
 
 Grab only the `pathname` and add an assertion.
 
@@ -106,7 +106,9 @@ cy.location('pathname').should('eq', '/login')
 
 # Notes
 
-**No need to use `window.location`**
+## Native Location
+
+***No need to use `window.location`***
 
 Cypress automatically normalizes the `cy.location()` command and strips out extraneous values and properties found in `window.location`. Also, the object literal yielded by `cy.location()` is just a basic object literal, not the special `window.location` object.
 
@@ -148,7 +150,7 @@ cy.location().then(function(location){
 
 # Command Log
 
-**Assert on the location's href**
+***Assert on the location's href***
 
 ```javascript
 cy.location().should(function(location){

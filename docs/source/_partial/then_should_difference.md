@@ -1,4 +1,4 @@
-**What's the difference between `.then()` and `.should()`/`.and()`?**
+***What's the difference between `.then()` and `.should()`/`.and()`?***
 
 Using `.then()` simply allows you to use the yielded subject in a callback function and should be used when you need to manipulate some values or do some actions.
 

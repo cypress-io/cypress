@@ -18,6 +18,8 @@ const distDir = path.join(__dirname, '../../dist')
 const infoFilePath = path.join(distDir, 'info.json')
 
 describe('utils', function () {
+  const verifyingMessage = chalk.yellow('⧖ Verifying Cypress executable...')
+
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
     this.ensureEmptyInstallationDir = () => {
@@ -182,9 +184,11 @@ describe('utils', function () {
     beforeEach(function () {
       this.log = this.sandbox.spy(console, 'log')
       this.sandbox.stub(os, 'platform').returns('darwin')
+      this.stdout = new EE()
       this.spawnedProcess = _.extend(new EE(), {
         unref: this.sandbox.stub(),
         stderr: new EE(),
+        stdout: this.stdout,
       })
       this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
       this.sandbox.stub(xvfb, 'start').resolves()
@@ -233,17 +237,28 @@ describe('utils', function () {
     describe('with force: true', function () {
       beforeEach(function () {
         this.sandbox.stub(fs, 'statAsync').resolves()
-
+        this.sandbox.stub(_, 'random').returns('222')
+        this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
         return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
+      })
+
+      it('shows full path to executable when verifying', function () {
+        const executable = utils.getPathToExecutable()
+        const message1 = chalk.green('✓ Cypress executable found at:')
+        const message2 = chalk.cyan(executable)
+        return utils.verify({ force: true })
+        .then(() => {
+          expect(this.log).to.be.calledWith(message1, message2)
+        })
       })
 
       it('runs smoke test even if version already verified', function () {
         return utils.verify({ force: true })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
+          expect(this.log).to.be.calledWith(verifyingMessage)
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
-            '--project',
-            path.join(distDir, '../lib/download/project'),
+            '--smoke-test',
+            '--ping=222',
           ])
         })
       })
@@ -263,6 +278,8 @@ describe('utils', function () {
     describe('smoke test', function () {
       beforeEach(function () {
         this.sandbox.stub(fs, 'statAsync').resolves()
+        this.sandbox.stub(_, 'random').returns('222')
+        this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
       })
 
       it('logs and runs when no version has been verified', function () {
@@ -271,10 +288,10 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
+          expect(this.log).to.be.calledWith(verifyingMessage)
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
-            '--project',
-            path.join(distDir, '../lib/download/project'),
+            '--smoke-test',
+            '--ping=222',
           ])
         })
       })
@@ -288,8 +305,11 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
-          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), ['--project', path.join(__dirname, '../../lib/download/project')])
+          expect(this.log).to.be.calledWith(verifyingMessage)
+          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
+            '--smoke-test',
+            '--ping=222',
+          ])
         })
       })
 

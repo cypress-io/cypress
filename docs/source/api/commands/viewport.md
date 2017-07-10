@@ -74,13 +74,13 @@ Option | Default | Description
 
 ## Width, Height
 
-**Resize the viewport to 1024px x 768px**
+***Resize the viewport to 1024px x 768px***
 
 ```javascript
 cy.viewport(1024, 768)
 ```
 
-**Organize desktop vs mobile tests separately**
+***Organize desktop vs mobile tests separately***
 
 ```javascript
 describe('Nav Menus', function(){
@@ -117,7 +117,7 @@ describe('Nav Menus', function(){
 
 ## Preset
 
-**Resize the viewport to iPhone 6 width and height**
+***Resize the viewport to iPhone 6 width and height***
 
 ```javascript
 cy.viewport('iphone-6') // viewport will change to 414px x 736px
@@ -125,7 +125,7 @@ cy.viewport('iphone-6') // viewport will change to 414px x 736px
 
 ## Orientation
 
-**Change the orientation to landscape**
+***Change the orientation to landscape***
 
 ```javascript
 // the viewport will now be changed to 736px x 414px
@@ -135,15 +135,21 @@ cy.viewport('iphone-6', 'landscape')
 
 # Notes
 
-**`devicePixelRatio` is not simulated**
+## devicePixelRatio
+
+***`devicePixelRatio` is not simulated***
 
 This is something Cypress will eventually do, which will match how Chrome's responsive mobile browsing simulation works. {% open_an_issue %} if you need this to be fixed.
 
-**Cypress will restore the viewport in the snapshot**
+## Restores
+
+***Cypress will restore the viewport in the snapshot***
 
 When hovering over each command, Cypress will automatically display the snapshot in the viewport dimensions that existed when that command ran.
 
-**Default sizing**
+## Defaults
+
+***Default sizing***
 
 By default, until you issue a `cy.viewport()` command, Cypress sets the width to `1000px` and the height to `660px` by default.
 
@@ -158,7 +164,9 @@ You can {% url 'change these default dimensions' configuration#Viewport %} by ad
 
 Additionally, Cypress automatically sets the viewport to it's default size between each test.
 
-**Auto Scaling**
+## Scaling
+
+***Auto Scaling***
 
 By default, if your screen is not large enough to display all of the current dimension's pixels, Cypress will scale and center your application within the Cypress runner to accommodate.
 
@@ -182,7 +190,7 @@ The upsides to this are that tests should consistently pass or fail regardless o
 
 # Command Log
 
-**Change viewport size to test responsive nav**
+***Change viewport size to test responsive nav***
 
 ```javascript
 cy.get('#navbar').should('be.visible')

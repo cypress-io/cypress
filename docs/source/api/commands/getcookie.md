@@ -47,15 +47,15 @@ Option | Default | Description
 - `secure`
 - `expiry`
 
-**When a cookie matching the name could not be found:**
+***When a cookie matching the name could not be found:***
 
 `cy.getCookie()` yields `null`.
 
 # Examples
 
-## Get Cookie
+## No Args
 
-**Get `session_id` cookie after logging in**
+***Get `session_id` cookie after logging in***
 
 In this example, on first login, our server sends us back a session cookie.
 
@@ -67,10 +67,10 @@ cy.getCookie('session_id')
   .should('have.property', 'value', '189jd09su')
 ```
 
-**Using `cy.getCookie()` to test logging in**
+***Using `cy.getCookie()` to test logging in***
 
 {% note info %}
-Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in %}, {% url 'logging in using XHR web forms' logging-in %} and {% url 'logging in with single sign on' logging-in %}
+Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in-recipe %}, {% url 'logging in using XHR web forms' logging-in-recipe %} and {% url 'logging in with single sign on' logging-in-recipe %}
 {% endnote %}
 
 # Rules
@@ -88,8 +88,6 @@ Check out our example recipes using `cy.getCookie()` to test {% url 'logging in 
 {% timeouts automation cy.getCookie %}
 
 # Command Log
-
-**Get cookie**
 
 ```javascript
 cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')

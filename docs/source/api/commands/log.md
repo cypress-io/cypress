@@ -38,7 +38,7 @@ Additional arguments to be printed to the Cypress Command Log. There is no limit
 
 ## Message
 
-**Print a message to the Command Log.**
+***Print a message to the Command Log.***
 
 ```javascript
 cy.click('Login')
@@ -46,9 +46,9 @@ cy.url().should('not.include', 'login')
 cy.log('Login successful')
 ```
 
-## Arguments
+## Args
 
-**Print a message with arguments to the Command Log.**
+***Print a message with arguments to the Command Log.***
 
 ```javascript
 cy.log('events triggered', events)
@@ -70,7 +70,7 @@ cy.log('events triggered', events)
 
 # Command Log
 
-**Print messages with arguments to the Command Log.**
+***Print messages with arguments to the Command Log.***
 
 ```javascript
 cy.log('log out any message we want here')

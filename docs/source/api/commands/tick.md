@@ -45,9 +45,9 @@ You can also access the `clock` object via `this.clock` in a {% url `.then()` th
 
 # Examples
 
-## Move time
+## Milliseconds
 
-**Create a clock and move time to trigger a `setTimeout`**
+***Create a clock and move time to trigger a `setTimeout`***
 
 ```javascript
 // app code loaded by index.html
@@ -66,7 +66,7 @@ cy.tick(500)
 cy.get('#header').should('have.text', 'Hello, World')
 ```
 
-**Using `cy.clock()` and `cy.tick()`**
+***Using `cy.clock()` and `cy.tick()`***
 
 {% note info %}
 {% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
@@ -88,7 +88,7 @@ cy.get('#header').should('have.text', 'Hello, World')
 
 # Command Log
 
-**Create a clock and tick it 1 second**
+***Create a clock and tick it 1 second***
 
 ```javascript
 cy.clock()

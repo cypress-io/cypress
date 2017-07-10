@@ -35,6 +35,10 @@ function urlHash (hexo, args) {
   return util.htmlTag('a', attrs, text)
 }
 
+function isInvalidUrl (text) {
+  return text.indexOf('[object Object]') !== -1
+}
+
 function url (hexo, args) {
   // {% url `.and()` and %}
   // {% url `.should()` should#Notes %}
@@ -54,6 +58,14 @@ function url (hexo, args) {
     text: args[0],
     url: args[1] || args[0],
     external: args[2],
+  }
+
+  if (isInvalidUrl(props.url)) {
+    /* eslint-disable no-console */
+    console.error('invalid url', props.url)
+    console.error(args)
+    /* eslint-enable no-console */
+    throw new Error(`Invalid url from args ${JSON.stringify(args)}`)
   }
 
   return hexo.render.render({ text: props.text, engine: 'markdown' })

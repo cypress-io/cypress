@@ -36,7 +36,7 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 
 # Setting Up CI
 
-Depending on which CI provider you use, you may need a config file. You'll want to refer to your CI provider's documentation to know where to add the commands to install and run Cypress. For more example config files check out any of our {% url "example apps" unit-testing %}.
+Depending on which CI provider you use, you may need a config file. You'll want to refer to your CI provider's documentation to know where to add the commands to install and run Cypress. For more example config files check out any of our {% url "example apps" unit-testing-recipe %}.
 
 ## Travis
 
@@ -64,9 +64,9 @@ test:
 
 ## Docker
 
-We have {% url "created" https://github.com/cypress-io/docker %} an official {% url "cypress/base" https://hub.docker.com/r/cypress/base/ %} container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete {% url "cypress/internal:cy" https://hub.docker.com/r/cypress/internal/tags/ %} image with pre-installed Cypress; just call {% url '`cypress run`' command-line#cypress-run %}.
+We have {% url 'created' https://github.com/cypress-io/docker %} an official {% url 'cypress/base' 'https://hub.docker.com/r/cypress/base/' %} container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete {% url 'cypress/internal:cy' 'https://hub.docker.com/r/cypress/internal/tags/' %} image with pre-installed Cypress; just call {% url '`cypress run`' command-line#cypress-run %}.
 
-If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Other %}. See {% issue 165 'this issue' %} for more information.
+If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Dependencies %}. See {% issue 165 'this issue' %} for more information.
 
 ***Docker CI examples***
 
@@ -75,12 +75,12 @@ If you don't use this image you must install all of the {% url 'linux dependenci
 * {% url "CircleCI" https://github.com/cypress-io/cypress-example-docker-circle %}
 * {% url "CircleCI with Workflows" https://github.com/cypress-io/cypress-example-docker-circle-workflows %}
 
-## Other
+# Dependencies
 
-You must install these dependencies:
+If you are not using one of the above CI providers then make sure your system has these dependencies installed.
 
 ```shell
-apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
+apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound
 ```
 
 If you run {% url '`cypress run`' command-line#cypress-run %} and see no output {% url 'see this section for troubleshooting this known issue' continuous-integration#Troubleshooting %}.
@@ -98,10 +98,10 @@ Cypress can record your tests running and make them available in our {% url 'Das
 
 ***To record tests running:***
 
-1. {% url 'Setup your project to record' projects#Set-up-a-Project-to-Record %}
+1. {% url 'Setup your project to record' projects-dashboard#Set-up-a-Project-to-Record %}
 2. {% url 'Pass the `--record` flag to `cypress run`' command-line#cypress-run-record %}
 
-You can {% url 'read more about the Dashboard here' features %}.
+You can {% url 'read more about the Dashboard here' features-dashboard %}.
 
 # Environment Variables
 
@@ -109,7 +109,7 @@ You can set various environment variables to modify how Cypress runs.
 
 ## Record Key
 
-If you are {% url 'recording your runs' continuous-integration#Recording-Tests-in-CI %} on a public project, you'll want to protect your Record Key. {% url 'Learn why.' projects#Project-ID-amp-RecordKey-Together %}
+If you are {% url 'recording your runs' continuous-integration#Recording-Tests-in-CI %} on a public project, you'll want to protect your Record Key. {% url 'Learn why.' projects-dashboard#Authentication %}
 
 Instead of hard coding it into your run command like this:
 
@@ -217,7 +217,7 @@ You need to select their {% url "`Ubuntu 12.04` image" https://circleci.com/docs
 
 ## Jenkins
 
-You need to install all of the {% url 'linux dependencies' continuous-integration#Other %}.
+You need to install all of the {% url 'linux dependencies' continuous-integration#Dependencies %}.
 
 ## Docker
 
@@ -233,7 +233,7 @@ After executing {% url '`cypress run`' command-line#cypress-run %} you don't see
 
 ***Problem***
 
-You are missing  {% url 'a dependency' continuous-integration#Other %} above. *Please install all of the dependencies.*
+You are missing  {% url 'a dependency' continuous-integration#Dependencies %} above. *Please install all of the dependencies.*
 
 The reason you're not seeing any output is a longstanding issue with Cypress which {% issue 317 'there is an open issue for' %}. We are working on improving this experience!
 
@@ -244,5 +244,5 @@ Although running {% url '`cypress run`' command-line#cypress-run %} will yield n
 ***Invoke the Cypress binary directly***
 
 ```shell
-/home/<user>/.cypress/Cypress/Cypress
+/home/YOUR_USER/.cypress/Cypress/Cypress
 ```

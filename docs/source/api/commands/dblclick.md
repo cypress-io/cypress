@@ -46,13 +46,21 @@ Option | Default | Description
 
 # Examples
 
-## Double Click
+## No Args
 
-**Double click an anchor link**
+***Double click an anchor link***
 
 ```javascript
 cy.get('a#nav1').dblclick() // yields the <a>
 ```
+
+# Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.dblclick()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
 
 # Rules
 
@@ -70,7 +78,7 @@ cy.get('a#nav1').dblclick() // yields the <a>
 
 # Command Log
 
-**Double click on a calendar schedule**
+***Double click on a calendar schedule***
 
 ```javascript
 cy.get('[data-schedule-id="4529114"]:first').dblclick()

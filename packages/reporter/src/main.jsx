@@ -3,6 +3,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import { render } from 'react-dom'
 import EQ from 'css-element-queries/src/ElementQueries'
 
 import appState from './lib/app-state'
@@ -16,6 +17,29 @@ import Runnables from './runnables/runnables'
 
 @observer
 class Reporter extends Component {
+  static propTypes = {
+    autoScrollingEnabled: PropTypes.bool,
+    error: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      link: PropTypes.string,
+      callout: PropTypes.string,
+      message: PropTypes.string.isRequired,
+    }),
+    runner: PropTypes.shape({
+      emit: PropTypes.func.isRequired,
+      on: PropTypes.func.isRequired,
+    }).isRequired,
+    specPath: PropTypes.string.isRequired,
+  }
+
+  static defaultProps = {
+    appState,
+    events,
+    runnablesStore,
+    scroller,
+    statsStore,
+  }
+
   componentWillMount () {
     const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
 
@@ -54,27 +78,10 @@ class Reporter extends Component {
   }
 }
 
-Reporter.propTypes = {
-  autoScrollingEnabled: PropTypes.bool,
-  error: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    link: PropTypes.string,
-    callout: PropTypes.string,
-    message: PropTypes.string.isRequired,
-  }),
-  runner: PropTypes.shape({
-    emit: PropTypes.func.isRequired,
-    on: PropTypes.func.isRequired,
-  }).isRequired,
-  specPath: PropTypes.string.isRequired,
-}
-
-Reporter.defaultProps = {
-  appState,
-  events,
-  runnablesStore,
-  scroller,
-  statsStore,
+if (window.Cypress) {
+  window.render = (props) => {
+    render(<Reporter {...props} />, document.getElementById('app'))
+  }
 }
 
 export default { Reporter }

@@ -11,6 +11,7 @@ u.series(
   u.parallel(
     z.watchScripts,
     z.watchTests,
-    z.watchStylesheets
+    z.watchStylesheets,
+    z.watchStaticAssets
   )
 )()

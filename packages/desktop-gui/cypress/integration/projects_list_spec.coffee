@@ -26,7 +26,7 @@ describe "Global Mode", ->
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "logOut").resolves({})
       cy.stub(@ipc, "addProject").resolves(@projects[0])
-      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "removeProject")
 
@@ -155,19 +155,6 @@ describe "Global Mode", ->
       it "puts project at start when clicked on in list", ->
         cy.get(".projects-list a").eq(1).click().then =>
           @assertOrder(["id-b", "id-a"])
-
-    describe "limit", ->
-      beforeEach ->
-        @getProjects.resolve(@projects)
-
-      it "limits to 5 when dropped", ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
-          expect(@getLocalStorageProjects().length).to.equal(5)
-
-      it "limits to 5 when selected", ->
-        cy.stub(@ipc, "showDirectoryDialog").resolves("/foo/bar")
-        cy.get(".project-drop a").click().then =>
-          expect(@getLocalStorageProjects().length).to.equal(5)
 
     describe "errors", ->
       beforeEach ->

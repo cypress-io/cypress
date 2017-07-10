@@ -5,6 +5,10 @@ comments: false
 
 Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prevUntil()` http://api.jquery.com/prevUntil %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -62,7 +66,7 @@ Option | Default | Description
 
 ## Selector
 
-**Find all of the element's siblings before `#nuts` until `#veggies`**
+***Find all of the element's siblings before `#nuts` until `#veggies`***
 
 ```html
 <ul>
@@ -102,7 +106,7 @@ cy.get('#nuts').prevUntil('#veggies')
 
 # Command Log
 
-**Find all of the element's siblings before `#nuts` until `#veggies`**
+***Find all of the element's siblings before `#nuts` until `#veggies`***
 
 ```javascript
 cy.get('#nuts').prevUntil('#veggies')

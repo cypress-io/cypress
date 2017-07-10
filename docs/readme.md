@@ -12,8 +12,12 @@ The documents in this repo are generated using [Hexo](https://hexo.io/).
 
 ### Installing Dependencies
 
+From the `docs` directory:
+
 ```shell
 npm install
+
+npm run build
 ```
 
 ### Starting the server
@@ -30,25 +34,15 @@ Visit [http://localhost:2222/](http://localhost:2222/)
 
 Links are all handled through our [cypress.on](https://github.com/cypress-io/cypress-on) api.
 
-To link to a page on Guides:
-```md
-[Installing and Running](https://on.cypress.io/guides/$slug)
-```
+Link all pages but their name (property key) in `source/_data/sidebar.yml`
 
-To link to a page on API:
-```md
-[and](https://on.cypress.io/api/$slug)
-```
-
-#### Creating New Files
-
-When creating new files, each file requires a title followed by `---`:
-```md
-title: Making Assertions
-<!-- Set comments to true to add Disqus -->
-comments: true   
----
-```
+- https://on.cypress.io/NAME_OF_PAGE
+- https://on.cypress.io/and
+- https://on.cypress.io/visit
+- https://on.cypress.io/unit-testing-recipe
+- https://on.cypress.io/introduction-to-cypress
+- https://on.cypress.io/writing-your-first-test
+- https://on.cypress.io/general-questions-faq
 
 ### Deploying
 

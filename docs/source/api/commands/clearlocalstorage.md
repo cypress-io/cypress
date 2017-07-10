@@ -46,7 +46,7 @@ Option | Default | Description
 
 # Examples
 
-## Clear Local Storage
+## No Args
 
 **Clear all local storage**
 
@@ -54,15 +54,15 @@ Option | Default | Description
 cy.clearLocalStorage()
 ```
 
-## Clear Keys
+## Specific Key
 
-**Clear local storage with key 'appName'**
+***Clear local storage with key 'appName'***
 
 ```javascript
 cy.clearLocalStorage('appName')
 ```
 
-**Clear all local storage matching /app-/**
+***Clear all local storage matching /app-/***
 
 ```javascript
 cy.clearLocalStorage(/app-/)

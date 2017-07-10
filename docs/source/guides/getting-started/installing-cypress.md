@@ -7,21 +7,19 @@ comments: false
 # {% fa fa-graduation-cap %} What You'll Learn
 
 - How to install the Cypress Desktop Application
-- How to run Cypress via the command line
-- How to version and automate Cypress via `package.json`
+- How to install the CLI tool
 
 {% endnote %}
 
 # System Requirements
 
-Cypress is a desktop application. This desktop application is the equivalent replacement of Selenium Server and must be running to test in Cypress.
+Cypress is a desktop application that is locally installed on your computer.
 
 {% note info %}
-The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application
+The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application.
 {% endnote %}
 
 The desktop application can be installed in the following operating systems:
-
 
 OS | Path
 :--- | :---
@@ -38,15 +36,15 @@ You can install Cypress in 2 different ways:
 * {% url "Cypress CLI Tool" command-line %}
 * {% urlHash "Direct Download" Direct-Download %}
 
-## Command Line Tool
+## {% fa fa-terminal %} Command Line Tool
 
-***Install the Cypress CLI tool***
+**Install the Cypress CLI tool**
 
 ```shell
 npm install -g cypress-cli
 ```
 
-***Install the Desktop Cypress app***
+**Install the Desktop Cypress app**
 
 ```shell
 cypress install
@@ -58,29 +56,24 @@ cypress install
 The Cypress CLI Tool contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
 {% endnote %}
 
-## Direct Download
+## {% fa fa-download %} Direct Download
 
-You can download Cypress directly {% url "here" http://download.cypress.io/desktop %}.
+You can {% url "download Cypress directly here" http://download.cypress.io/desktop %}.
 
-{% note danger "Woops, I got an error installing" %}
-The vast majority of the time, Cypress will install correctly. But if you're on Linux you {% url "might have to install some other dependencies" continuous-integration#Other %}.
+## Continuous Integration
+
+{% note warning "I'm trying to install Cypress in CI" %}
+Please read our {% url 'Continuous Integration' continuous-integration %} docs for help installing Cypress in CI. When running in linux you'll need to install some {% url 'system dependencies' continuous-integration#Dependencies %}.
 {% endnote %}
 
 # Logging In
 
-After installing, you will need to login to Cypress. Login currently requires a {% url "Github" https://github.com/ %} account, if you do not have an account, you will have to {% url "create one" https://github.com/join %} to use Cypress.
+After installing, you will need to log in to Cypress. Logging in currently requires a {% url "Github" https://github.com/ %} account, if you do not have an account, you will have to {% url "create one" https://github.com/join %} to use Cypress.
 
 ***To Login:***
 
 - Open the Cypress App -- just double click the app from your OS application's folder.
-- Click "Log In with GitHub".
+- Click **Log In with GitHub**.
 - Authorize GitHub access to your account.
 
-![Log In to Cypress](/img/guides/log-in-to-cypress-screen.png)
-
-## Your email has not been authorized.
-
-While in beta, the Cypress team has to whitelist the email address associated with your GitHub account in order for you to use Cypress.
-
-- If you received this error and have never filled out our {% url "Early Adopter Access form" http://goo.gl/forms/4vEMwj8LNT %}, fill out this form with the email in the error so we can whitelist it. You will receive an invite during one of our future Beta invites.
-- If you received this error after receiving a Beta invite email from Cypress, please send an email to **support@cypress.io** telling us the email in the error so we can whitelist it.
+{% img no-border /img/guides/log-in-to-cypress-screen.png Log In to Cypress %}

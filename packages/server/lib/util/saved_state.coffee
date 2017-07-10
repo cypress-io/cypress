@@ -23,10 +23,13 @@ formStatePath = (projectPath) ->
       log('found cypress file %s', cypressJsonPath)
       projectPath = cwd()
 
-  statePath = "state.json"
+  fileName = "state.json"
   if projectPath
-    log "state path for project #{projectPath}"
-    statePath = join(toHashName(projectPath), statePath)
+    log("state path for project #{projectPath}")
+    statePath = join(toHashName(projectPath), fileName)
+  else
+    log("state path for global mode")
+    statePath = join("__global__", fileName)
 
   return statePath
 

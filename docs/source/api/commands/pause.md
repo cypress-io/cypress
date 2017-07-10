@@ -14,6 +14,9 @@ This does not set a `debugger` in your code, unlike {% url `.debug()` debug %}
 ```javascript
 .pause()
 .pause(options)
+
+cy.pause()
+cy.pause(options)
 ```
 
 ## Usage
@@ -41,7 +44,7 @@ Option | Default | Description
 
 # Examples
 
-## Pause
+## No Args
 
 **Pause after assertion**
 

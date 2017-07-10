@@ -45,7 +45,7 @@ form {
 }
 
 h3, h4 {
-  font-family: "Fira Sans";
+  font-family: $font-title;
 }
 
 h5 {
@@ -59,7 +59,7 @@ h4 {
 
 
 legend {
-  font-size: 16px;
+  font-size: $font-size;
   margin-bottom: 10px;
   border-bottom-color: #eee;
   color: #444;
@@ -72,7 +72,7 @@ legend {
 code {
   background-color: #f5f5f5;
   color: #555;
-  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  font-family: $font-mono;
   border: 1px solid #ddd;
 }
 

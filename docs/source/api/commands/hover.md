@@ -17,27 +17,27 @@ Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %
 
 ## Invoke
 
-**Example of showing an element in order to perform action**
+***Example of showing an element in order to perform action***
 ```javascript
 cy.get('.content').invoke('show').click()
 ```
 
 {% note info %}
-{% url 'Check out our example recipe on testing hover and working with hidden elements' testing-the-dom %}
+{% url 'Check out our example recipe on testing hover and working with hidden elements' testing-the-dom-recipe %}
 {% endnote %}
 
 You can also force the action to be performed on the element regardless of whether the element is visible or not.
 
 ## Force click
 
-**Example of clicking on a hidden element**
+***Example of clicking on a hidden element***
 ```javascript
-cy.get('.content').click({force: true})
+cy.get('.content').click({ force: true })
 ```
 
-**Example of checking a hidden element**
+***Example of checking a hidden element***
 ```javascript
-cy.get('.checkbox').check({force: true})
+cy.get('.checkbox').check({ force: true })
 ```
 <!--
 ## Trigger
@@ -53,4 +53,4 @@ cy.get('.content').trigger('mouseover')
 
 - {% url `.invoke()` invoke %}
 - {% url `cy.wrap()` wrap %}
-- {% url 'Recipe: Dealing with Hover and Hidden Elements' testing-the-dom %}
+- {% url 'Recipe: Dealing with Hover and Hidden Elements' testing-the-dom-recipe %}

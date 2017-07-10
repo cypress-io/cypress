@@ -5,6 +5,10 @@ comments: false
 
 Get the descendent DOM elements of a specific selector.
 
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.find()` http://api.jquery.com/find %} works in jQuery.
+{% endnote %}
+
 # Syntax
 
 ```javascript
@@ -50,7 +54,7 @@ Option | Default | Description
 
 ## Selector
 
-**Get li's within parent**
+***Get li's within parent***
 
 ```html
 <ul id="parent">
@@ -80,7 +84,7 @@ cy.get('#parent').find('li')
 
 # Command Log
 
-**Find the li's within the nav**
+***Find the li's within the nav***
 
 ```javascript
 cy.get('.left-nav>.nav').find('>li')

@@ -135,8 +135,6 @@ describe "$Cypress.Cy Text Commands", ->
       @cy.get("body").type("foo").then ->
         expect(bodyClicked).to.be.false
 
-    ## we will need extra tests and logic for input types date, time, month, & week
-    ## see issue https://github.com/cypress-io/cypress/issues/27
     describe "input types where no extra formatting required", ->
       _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
         it "accepts input [type=#{type}]", ->
@@ -147,6 +145,13 @@ describe "$Cypress.Cy Text Commands", ->
           @cy.get("#input-type-#{type}").type("1234").then ($input) ->
             expect($input).to.have.value "1234"
             expect($input.get(0)).to.eq input.get(0)
+
+        it "accepts type [type=#{type}], regardless of capitalization", ->
+          input = @cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
+
+          @cy.$$("body").append(input)
+
+          @cy.get("#input-type-#{type}").type("1234")
 
     describe "tabindex", ->
       beforeEach ->

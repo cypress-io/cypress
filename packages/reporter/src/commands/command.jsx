@@ -15,7 +15,6 @@ const md = new Markdown()
 
 const displayName = (model) => model.displayName || model.name
 const nameClassName = (name) => name.replace(/(\s+)/g, '-')
-const truncatedMessage = (message) => _.truncate(message, { length: 100 })
 const formattedMessage = (message) => message ? md.renderInline(message) : ''
 const visibleMessage = (model) => {
   if (model.visible) return ''
@@ -52,12 +51,19 @@ const Aliases = observer(({ model }) => {
 const Message = observer(({ model }) => (
   <span>
     <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
-    <span className='command-message-text' dangerouslySetInnerHTML={{ __html: formattedMessage(model.renderProps.message || truncatedMessage(model.message)) }} />
+    <span className='command-message-text' dangerouslySetInnerHTML={{ __html: formattedMessage(model.renderProps.message || model.message
+      ) }} />
   </span>
 ))
 
 @observer
 class Command extends Component {
+  static defaultProps = {
+    appState,
+    events,
+    runnablesStore,
+  }
+
   render () {
     const { model } = this.props
 
@@ -187,12 +193,6 @@ class Command extends Component {
       }, 50)
     }
   }
-}
-
-Command.defaultProps = {
-  appState,
-  events,
-  runnablesStore,
 }
 
 export { Aliases, AliasesReferences, Message }

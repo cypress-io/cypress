@@ -117,19 +117,27 @@ const appMissingError = (message) => {
 const runSmokeTest = () => {
   debug('running smoke test')
   let stderr = ''
+  let stdout = ''
   const needsXvfb = xvfb.isNeeded()
   debug('needs XVFB?', needsXvfb)
   const cypressExecPath = getPathToExecutable()
   debug('using Cypress executable %s', cypressExecPath)
-  const project = path.join(__dirname, 'project')
-  debug('test project %s', project)
 
+  // TODO switch to execa for this?
   const spawn = () => {
     return new Promise((resolve, reject) => {
-      const child = cp.spawn(cypressExecPath, ['--project', project])
+      const random = _.random(0, 1000)
+      const args = ['--smoke-test', `--ping=${random}`]
+      const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
+      debug('command:', smokeTestCommand)
+      const child = cp.spawn(cypressExecPath, args)
 
       child.stderr.on('data', (data) => {
         stderr += data.toString()
+      })
+
+      child.stdout.on('data', (data) => {
+        stdout += data.toString()
       })
 
       if (needsXvfb) {
@@ -149,10 +157,18 @@ const runSmokeTest = () => {
 
       child.on('exit', (code) => {
         if (code === 0) {
-          resolve()
-        } else {
-          reject(verificationError(stderr))
+          const smokeTestReturned = stdout.trim()
+          debug('smoke test output "%s"', smokeTestReturned)
+          if (smokeTestReturned !== String(random)) {
+            return reject(new Error(stripIndent`
+              Smoke test returned wrong code.
+              command was: ${smokeTestCommand}
+              returned: ${smokeTestReturned}
+            `))
+          }
+          return resolve()
         }
+        reject(verificationError(stderr))
       })
     })
   }
@@ -183,10 +199,9 @@ const runSmokeTest = () => {
 const differentFrom = (a) => (b) => a !== b
 
 const logStart = () =>
-  log(chalk.green('⧖ Verifying Cypress executable...'))
+  log(chalk.yellow('⧖ Verifying Cypress executable...'))
 
 const logSuccess = () => {
-  log()
   log(chalk.green('✓ Successfully verified Cypress executable'))
 }
 
@@ -256,12 +271,16 @@ const verify = (options = {}) => {
   })
   .then(() => {
     const executable = getPathToExecutable()
-    return fs.statAsync(executable).catch(() =>
-      explainAndFail(errors.missingApp)(new Error(stripIndent`
-        Cypress executable not found at
-        ${executable}
-      `))
-    )
+    return fs.statAsync(executable)
+      .then(() => {
+        log(chalk.green('✓ Cypress executable found at:'), chalk.cyan(executable))
+      })
+      .catch(() =>
+        explainAndFail(errors.missingApp)(new Error(stripIndent`
+          Cypress executable not found at
+          ${executable}
+        `))
+      )
   })
   .then(() => {
     return maybeVerify(options)

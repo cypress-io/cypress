@@ -46,9 +46,9 @@ Option | Default | Description
 
 # Examples
 
-## Within
+## Forms
 
-**Get inputs within a form and submit the form**
+***Get inputs within a form and submit the form***
 
 ```html
 <form>
@@ -59,12 +59,12 @@ Option | Default | Description
 ```
 
 ```javascript
-cy.get('form').within(function(form){
+cy.get('form').within(($form) => {
   // cy.get() will only search for elements within form,
   // not within the entire document
   cy.get('input[name="email"]').type('john.doe@email.com')
   cy.get('input[name="password"]').type('password')
-  cy.wrap(form).submit()
+  cy.root().submit()
 })
 ```
 
@@ -84,10 +84,10 @@ cy.get('form').within(function(form){
 
 # Command Log
 
-**Get the input within the form**
+***Get the input within the form***
 
 ```javascript
-cy.get('.query-form').within(function(el){
+cy.get('.query-form').within((el) => {
   cy.get('input:first')
 })
 ```

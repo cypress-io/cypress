@@ -18,6 +18,24 @@ Some, like `core-https-proxy` and `core-launcher`, run solely in node and suppor
 
 [CLI Documentation](https://on.cypress.io/cli)
 
+## Badges
+
+Let the world know your project is using Cypress.io to test with this cool badge
+
+[![badge](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+
+### Markdown
+
+```
+[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+```
+
+### SVG image
+
+```
+https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
+```
+
 ## Development
 
 ### Getting Started
@@ -159,3 +177,53 @@ $ npm run docker
 cd packages/desktop-gui
 npm rebuild node-sass
 ```
+
+## Deploy
+
+You can only deploy Cypress application and publish NPM module `cypress` if
+you are a member of `cypress` NPM organization.
+
+### Building the binary
+
+First, you need to build, zip and upload application binary to Cypress server.
+You can either specify each command separately
+
+```
+npm run binary-build
+npm run binary-zip
+npm run binary-upload
+```
+
+or use a single command
+
+```
+npm run binary-deploy
+```
+
+You can pass options to each command to avoid answering questions, for example
+
+```
+npm run binary-deploy -- --platform darwin --version 0.20.0
+npm run binary-upload -- --platform darwin --version 0.20.0 --zip cypress.zip
+```
+
+If something goes wrong, see debug messages using `DEBUG=cypress:binary ...` environment
+variable.
+
+Because we had many problems reliably zipping built binary, for now we need
+to build both Mac and Linux binary from Mac (Linux binary is built using
+a Docker container), then zip it **from Mac**, then upload it.
+
+## Working on documentation (docs)
+
+If you need to work on documentation, switch to `docs` directory. You should
+be able to install tools, build and start local `hexo` site
+
+```sh
+cd docs
+npm install
+npm run build
+npm start
+```
+
+See [docs/readme.md](docs/readme.md) for details
