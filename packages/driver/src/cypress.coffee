@@ -317,7 +317,7 @@ class $Cypress
       when "command:enqueue"
         "asdf"
 
-  actionAsync: (eventName, args...) ->
+  automation: (eventName, args...) ->
     ## wrap action in promise
     new Promise (resolve, reject) =>
       fn = (reply) ->
@@ -334,7 +334,7 @@ class $Cypress
         else
           resolve(reply.response)
 
-      @emit(eventName, args..., fn)
+      @emit("automation:request", eventName, args..., fn)
 
   abort: ->
     @emitThen("abort")

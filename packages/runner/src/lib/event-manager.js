@@ -18,9 +18,8 @@ channel.on('connect', () => {
 
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'fixture request history:entries exec resolve:url preserve:run:state read:file write:file'.split(' ')
+const driverToSocketEvents = 'fixture request history:entries exec resolve:url preserve:run:state read:file write:file automation:request mocha'.split(' ')
 const driverTestEvents = 'test:before:run test:after:run'.split(' ')
-const driverAutomationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie take:screenshot'.split(' ')
 const driverToLocalEvents = 'viewport config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
@@ -191,14 +190,13 @@ const eventManager = {
       Cypress.on(event, (...args) => channel.emit(event, ...args))
     })
 
-    Cypress.on('mocha', (event, ...args) => {
-      channel.emit('mocha', event, ...args)
-    })
+    // TODO: can't this just be a driverToSocketEvents?
+    // Cypress.on('mocha', (event, ...args) => {
+    //   channel.emit('mocha', event, ...args)
+    // })
 
-    _.each(driverAutomationEvents, (event) => {
-      Cypress.on(event, (...args) => channel.emit('automation:request', event, ...args))
-    })
-
+    // TODO: don't talk to runner here
+    // talk directly to Cypress
     Cypress.on('initialized', ({ runner }) => {
       Cypress.on('collect:run:state', () => new Promise((resolve) => {
         reporterBus.emit('reporter:collect:run:state', resolve)

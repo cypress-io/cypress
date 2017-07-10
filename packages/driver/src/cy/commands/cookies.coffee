@@ -37,7 +37,7 @@ mergeDefaults = (obj) ->
 module.exports = (Commands, Cypress, cy) ->
   automateCookies = (event, obj = {}, log, timeout) ->
     automate = ->
-      Cypress.actionAsync("automation", mergeDefaults(obj))
+      Cypress.automation(event, mergeDefaults(obj))
 
     if not timeout
       automate()
