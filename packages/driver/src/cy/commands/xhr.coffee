@@ -7,13 +7,12 @@ $Server = require("../../cypress/server")
 $utils = require("../../cypress/utils")
 
 validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i
-requestXhrRe       = /\.request$/
 validAliasApiRe    = /^(\d+|all)$/
 
 server = null
 
 getServer = ->
-  server ? unavailableErr.call(@)
+  server ? unavailableErr()
 
 abort = ->
   if server
@@ -36,20 +35,23 @@ stripOrigin = (url) ->
   location = $Location.create(url)
   url.replace(location.origin, "")
 
-setRequest = (xhr, alias) ->
-  requests = @state("requests") ? []
+getXhrServer = (cy) ->
+  cy.state("server") ? unavailableErr()
+
+setRequest = (cy, xhr, alias) ->
+  requests = cy.state("requests") ? []
 
   requests.push({
     xhr: xhr
     alias: alias
   })
 
-  @state("requests", requests)
+  cy.state("requests", requests)
 
-setResponse = (xhr) ->
-  obj = _.find @state("requests"), {xhr: xhr}
+setResponse = (cy, xhr) ->
+  obj = _.find cy.state("requests"), {xhr: xhr}
 
-  responses = @state("responses") ? []
+  responses = cy.state("responses") ? []
 
   ## we could be setting response from
   ## multiple places so this should first
@@ -60,7 +62,129 @@ setResponse = (xhr) ->
     alias: obj?.alias
   })
 
-  @state("responses", responses)
+  cy.state("responses", responses)
+
+startXhrServer = (cy, config) ->
+  logs = {}
+
+  cy.state "server", $Server.create({
+    xhrUrl: config("xhrUrl")
+    stripOrigin: stripOrigin
+
+    ## shouldnt these stubs be called routes?
+    ## rename everything related to stubs => routes
+    onSend: (xhr, stack, route) =>
+      alias = route?.alias
+
+      setRequest(cy, xhr, alias)
+
+      if rl = route and route.log
+        numResponses = rl.get("numResponses")
+        rl.set "numResponses", numResponses + 1
+
+      logs[xhr.id] = log = $Log.command({
+        message:   ""
+        name:      "xhr"
+        displayName: getDisplayName(route)
+        alias:     alias
+        aliasType: "route"
+        type:      "parent"
+        event:     true
+        consoleProps: =>
+          consoleObj = {
+            Alias:         alias
+            Method:        xhr.method
+            URL:           xhr.url
+            "Matched URL": route?.url
+            Status:        xhr.statusMessage
+            Duration:      xhr.duration
+            "Stubbed":     if route and route.response? then "Yes" else "No"
+            Request:       xhr.request
+            Response:      xhr.response
+            XHR:           xhr._getXhr()
+          }
+
+          if route and route.is404
+            consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
+
+          consoleObj.groups = ->
+            [
+              {
+                name: "Initiator"
+                items: [stack]
+                label: false
+              }
+            ]
+
+          consoleObj
+        renderProps: ->
+          status = switch
+            when xhr.aborted
+              indicator = "aborted"
+              "(aborted)"
+            when xhr.status > 0
+              xhr.status
+            else
+              indicator = "pending"
+              "---"
+
+          indicator ?= if /^2/.test(status) then "successful" else "bad"
+
+          {
+            message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
+            indicator: indicator
+          }
+      })
+
+      log.snapshot("request")
+
+    onLoad: (xhr) =>
+      setResponse(cy, xhr)
+
+      if log = logs[xhr.id]
+        log.snapshot("response").end()
+
+    onNetworkError: (xhr) ->
+      err = $utils.cypressErr($utils.errMessageByPath("xhr.network_error"))
+
+      if log = logs[xhr.id]
+        log.snapshot("failed").error(err)
+
+    onFixtureError: (xhr, err) ->
+      err = $utils.cypressErr(err)
+
+      @onError(xhr, err)
+
+    onError: (xhr, err) ->
+      err.onFail = ->
+
+      if log = logs[xhr.id]
+        log.snapshot("error").error(err)
+
+      cy.fail(err)
+
+    onXhrAbort: (xhr, stack) =>
+      setResponse(cy, xhr)
+
+      err = new Error $utils.errMessageByPath("xhr.aborted")
+      err.name = "AbortError"
+      err.stack = stack
+
+      if log = logs[xhr.id]
+        log.snapshot("aborted").error(err)
+
+    onAnyAbort: (route, xhr) =>
+      if route and _.isFunction(route.onAbort)
+        route.onAbort.call(cy, xhr)
+
+    onAnyRequest: (route, xhr) =>
+      if route and _.isFunction(route.onRequest)
+        route.onRequest.call(cy, xhr)
+
+    onAnyResponse: (route, xhr) =>
+      if route and _.isFunction(route.onResponse)
+        route.onResponse.call(cy, xhr)
+  })
 
 defaults = {
   method: undefined
@@ -75,29 +199,27 @@ defaults = {
   onResponse: undefined
 }
 
-create = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, config) ->
+  abort()
+
+  server = startXhrServer(cy, config)
+
   Cypress.on "before:unload", ->
     ## if our page is going away due to
     ## a form submit / anchor click then
     ## we need to cancel all outstanding
     ## XHR's so the command log displays
     ## correctly
-    if server
-      server.abort()
-
-  Cypress.on "abort", abort
-
-  Cypress.on "test:before:hooks", (test = {}) ->
     abort()
 
-    server = @startXhrServer(test.id)
+  Cypress.on "abort", abort
 
   Cypress.on "before:window:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
       $Server.bindTo contentWindow, _.bind(getServer, @)
     else
-      unavailableErr.call(@)
+      unavailableErr()
 
   Commands.addAll({
     server: (options) ->
@@ -112,9 +234,9 @@ create = (Commands, Cypress, cy) ->
 
       ## if we disable the server later make sure
       ## we cannot add cy.routes to it
-      @state("serverIsStubbed", options.enable)
+      cy.state("serverIsStubbed", options.enable)
 
-      @getXhrServer().set(options)
+      getXhrServer(cy).set(options)
 
     route: (args...) ->
       ## TODO:
@@ -130,12 +252,12 @@ create = (Commands, Cypress, cy) ->
       ## response from the user
       hasResponse = true
 
-      if not @state("serverIsStubbed")
+      if not cy.state("serverIsStubbed")
         $utils.throwErrByPath("route.failed_prerequisites")
 
       ## get the default options currently set
       ## on our server
-      options = o = @getXhrServer().getOptions()
+      options = o = getXhrServer(cy).getOptions()
 
       ## enable the entire routing definition to be a function
       parseArgs = (args...) =>
@@ -216,7 +338,7 @@ create = (Commands, Cypress, cy) ->
 
         if _.isFunction(o.response)
           getResponse = =>
-            o.response.call(@state("runnable").ctx, options)
+            o.response.call(cy.state("runnable").ctx, options)
 
           ## allow route to return a promise
           Promise.try(getResponse)
@@ -250,216 +372,14 @@ create = (Commands, Cypress, cy) ->
             Response: options.response
             Alias:    options.alias
 
-        return @getXhrServer().route(options)
+        return getXhrServer(cy).route(options)
 
       if _.isFunction(args[0])
         getArgs = =>
-          args[0].call(@state("runnable").ctx)
+          args[0].call(cy.state("runnable").ctx)
 
         Promise.try(getArgs)
         .then(parseArgs)
       else
         parseArgs(args...)
   })
-
-  return {
-    getXhrServer: ->
-      @state("server") ? unavailableErr.call(@)
-
-    startXhrServer: (testId) ->
-      logs = {}
-
-      cy = @
-
-      @state "server", $Server.create({
-        testId: testId
-        xhrUrl: @Cypress.config("xhrUrl")
-        stripOrigin: stripOrigin
-
-        ## shouldnt these stubs be called routes?
-        ## rename everything related to stubs => routes
-        onSend: (xhr, stack, route) =>
-          alias = route?.alias
-
-          setRequest.call(@, xhr, alias)
-
-          if rl = route and route.log
-            numResponses = rl.get("numResponses")
-            rl.set "numResponses", numResponses + 1
-
-          logs[xhr.id] = log = $Log.command({
-            message:   ""
-            name:      "xhr"
-            displayName: getDisplayName(route)
-            alias:     alias
-            aliasType: "route"
-            type:      "parent"
-            event:     true
-            consoleProps: =>
-              consoleObj = {
-                Alias:         alias
-                Method:        xhr.method
-                URL:           xhr.url
-                "Matched URL": route?.url
-                Status:        xhr.statusMessage
-                Duration:      xhr.duration
-                "Stubbed":     if route and route.response? then "Yes" else "No"
-                Request:       xhr.request
-                Response:      xhr.response
-                XHR:           xhr._getXhr()
-              }
-
-              if route and route.is404
-                consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
-
-              consoleObj.groups = ->
-                [
-                  {
-                    name: "Initiator"
-                    items: [stack]
-                    label: false
-                  }
-                ]
-
-              consoleObj
-            renderProps: ->
-              status = switch
-                when xhr.aborted
-                  indicator = "aborted"
-                  "(aborted)"
-                when xhr.status > 0
-                  xhr.status
-                else
-                  indicator = "pending"
-                  "---"
-
-              indicator ?= if /^2/.test(status) then "successful" else "bad"
-
-              {
-                message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
-                indicator: indicator
-              }
-          })
-
-          log.snapshot("request")
-
-        onLoad: (xhr) =>
-          setResponse.call(@, xhr)
-
-          if log = logs[xhr.id]
-            log.snapshot("response").end()
-
-        onNetworkError: (xhr) ->
-          err = $utils.cypressErr($utils.errMessageByPath("xhr.network_error"))
-
-          if log = logs[xhr.id]
-            log.snapshot("failed").error(err)
-
-        onFixtureError: (xhr, err) ->
-          err = $utils.cypressErr(err)
-
-          @onError(xhr, err)
-
-        onError: (xhr, err) =>
-          err.onFail = ->
-
-          if log = logs[xhr.id]
-            log.snapshot("error").error(err)
-
-          @fail(err)
-
-        onXhrAbort: (xhr, stack) =>
-          setResponse.call(@, xhr)
-
-          err = new Error $utils.errMessageByPath("xhr.aborted")
-          err.name = "AbortError"
-          err.stack = stack
-
-          if log = logs[xhr.id]
-            log.snapshot("aborted").error(err)
-
-        onAnyAbort: (route, xhr) =>
-          if route and _.isFunction(route.onAbort)
-            route.onAbort.call(@, xhr)
-
-        onAnyRequest: (route, xhr) =>
-          if route and _.isFunction(route.onRequest)
-            route.onRequest.call(@, xhr)
-
-        onAnyResponse: (route, xhr) =>
-          if route and _.isFunction(route.onResponse)
-            route.onResponse.call(@, xhr)
-      })
-
-    getPendingRequests: ->
-      return [] if not requests = @state("requests")
-
-      return requests if not responses = @state("responses")
-
-      _.difference requests, responses
-
-    getCompletedRequests: ->
-      @state("responses") ? []
-
-    _getLastXhrByAlias: (alias, prop) ->
-      ## find the last request or response
-      ## which hasnt already been used.
-      xhrs = @state(prop) ? []
-
-      ## allow us to handle waiting on both
-      ## the request or the response part of the xhr
-      privateProp = "_has#{prop}BeenWaitedOn"
-
-      for obj in xhrs
-        ## we want to return the first xhr which has
-        ## not already been waited on, and if its alias matches ours
-        if !obj[privateProp] and obj.alias is alias
-          obj[privateProp] = true
-          return obj.xhr
-
-    ## this should actually be getRequestsByAlias
-    ## since this will return all requests and not
-    ## responses
-    getResponsesByAlias: (alias) ->
-      [alias, prop] = alias.split(".")
-
-      if prop and not validAliasApiRe.test(prop)
-        $utils.throwErrByPath "get.alias_invalid", {
-          args: { prop }
-        }
-
-      if prop is "0"
-        $utils.throwErrByPath "get.alias_zero", {
-          args: { alias }
-        }
-
-      ## return an array of xhrs
-      matching = _.chain(@state("responses")).filter({alias: alias}).map("xhr").value()
-
-      ## return the whole array if prop is all
-      return matching if prop is "all"
-
-      ## else if prop its a digit and we need to return
-      ## the 1-based response from the array
-      return matching[_.toNumber(prop) - 1] if prop
-
-      ## else return the last matching response
-      return _.last(matching)
-
-    getLastXhrByAlias: (alias) ->
-      [str, prop] = alias.split(".")
-
-      if prop
-        if prop is "request"
-          return @_getLastXhrByAlias(str, "requests")
-        else
-          if prop isnt "response"
-            $utils.throwErrByPath "wait.alias_invalid", {
-              args: { prop, str }
-            }
-
-      @_getLastXhrByAlias(str, "responses")
-
-    getXhrTypeByAlias: (alias) ->
-      if requestXhrRe.test(alias) then "request" else "response"
-  }

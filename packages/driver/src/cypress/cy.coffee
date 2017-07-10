@@ -5,6 +5,7 @@ Promise = require("bluebird")
 
 # $Cypress = require("../cypress")
 $utils = require("./utils")
+$Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
 $Errors = require("../cy/errors")
 $Chainer = require("./chainer")
@@ -15,13 +16,42 @@ $SetterGetter = require("./setter_getter")
 crossOriginScriptRe = /^script error/i
 
 privateProps = {
-  props:    { name: "state",        url: true }
+  props:    { name: "state", url: true }
   privates: { name: "state", url: false }
 }
+
+# window.Cypress ($Cypress)
+#
+# Cypress.config(...)
+#
+# Cypress.Server.defaults()
+# Cypress.Keyboard.defaults()
+# Cypress.Mouse.defaults()
+# Cypress.Commands.add("login")
+#
+# Cypress.on "error"
+# Cypress.on "retry"
+# Cypress.on "uncaughtException"
+#
+# cy.on "error"
+#
+# # Cypress.Log.command()
+#
+# log = Cypress.log()
+#
+# log.snapshot().end()
+# log.set().get()
+#
+# cy.log()
+#
+# cy.foo (Cy)
+
+# { visit, get, find } = cy
 
 create = (specWindow, Cypress, config) ->
   state = $SetterGetter.create({})
 
+  xhrs = $Xhrs.create(state)
   agents = $Agents.create()
   errors = $Errors.create(Cypress, state, config)
   timeouts = $Timeouts.create(state)
@@ -45,6 +75,10 @@ create = (specWindow, Cypress, config) ->
     ## timeout sync methods
     timeout: timeouts.timeout
     clearTimeout: timeouts.clearTimeout
+
+    ## xhr sync methods
+    getLastXhrByAlias: xhrs.getLastXhrByAlias
+    getRequestsByAlias: xhrs.getRequestsByAlias
 
     # onCommand: (key, fn, type, enforceDom) ->
     #   $utils.throwErrByPath("add.type_missing") if not type
@@ -170,6 +204,7 @@ create = (specWindow, Cypress, config) ->
         })
     })
 
+  ## make cy global in the specWindow
   specWindow.cy = cy
 
   return cy

@@ -46,7 +46,6 @@ whitelist = (xhr) ->
   xhr.method is "GET" and regularResourcesRe.test(xhr.url)
 
 defaults = {
-  testId: ""
   xhrUrl: ""
   method: "GET"
   delay: 0

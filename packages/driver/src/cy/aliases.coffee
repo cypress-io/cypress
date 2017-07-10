@@ -4,11 +4,15 @@ utils = require("../cypress/utils")
 
 aliasRe = /^@.+/
 aliasDisplayRe = /^([@]+)/
+requestXhrRe = /\.request$/
 
 blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
 
 module.exports = ($Cy) ->
   $Cy.extend({
+    getXhrTypeByAlias: (alias) ->
+      if requestXhrRe.test(alias) then "request" else "response"
+
     _validateAlias: (alias) ->
       if not _.isString(alias)
         utils.throwErrByPath "as.invalid_type"

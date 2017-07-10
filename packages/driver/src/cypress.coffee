@@ -183,7 +183,7 @@ class $Cypress
     # @log     = $Log.create(@, cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@cy, Cypress)
+    @Commands = $Commands.create(Cypress, @cy, @config)
 
     $Chai.create(specWindow, @cy)
 
@@ -334,7 +334,7 @@ class $Cypress
         else
           resolve(reply.response)
 
-      @emit(eventName, mergeDefaults(obj), fn)
+      @emit(eventName, args..., fn)
 
   abort: ->
     @emitThen("abort")

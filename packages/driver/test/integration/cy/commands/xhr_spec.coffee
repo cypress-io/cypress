@@ -1919,27 +1919,6 @@ describe "$Cypress.Cy XHR Commands", ->
         cancel = @sandbox.spy @cy.state("server"), "cancel"
         @Cypress.trigger "abort"
 
-  context "#getPendingRequests", ->
-    it "returns [] if not requests", ->
-      expect(@cy.getPendingRequests()).to.deep.eq []
-
-    it "returns requests if not responses", ->
-      @cy.state("requests", ["foo", "bar"])
-      expect(@cy.getPendingRequests()).to.deep.eq ["foo", "bar"]
-
-    it "returns diff between requests + responses", ->
-      @cy.state("requests", ["foo", "bar", "baz"])
-      @cy.state("responses", ["bar"])
-      expect(@cy.getPendingRequests()).to.deep.eq ["foo", "baz"]
-
-  context "#getCompletedRequests", ->
-    it "returns [] if not responses", ->
-      expect(@cy.getCompletedRequests()).to.deep.eq []
-
-    it "returns responses", ->
-      @cy.state("responses", ["foo"])
-      expect(@cy.getCompletedRequests()).to.deep.eq ["foo"]
-
   context.skip "#respond", ->
     it "calls server#respond", ->
       respond = null

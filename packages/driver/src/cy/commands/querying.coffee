@@ -190,9 +190,9 @@ module.exports = (Commands, Cypress, cy) ->
             ## if this is a route command
             when command.get("name") is "route"
               alias = _.compact([alias, selector.split(".")[1]]).join(".")
-              responses = @getResponsesByAlias(alias) ? null
-              log(responses, "route")
-              return responses
+              requests = @getRequestsByAlias(alias) ? null
+              log(requests, "route")
+              return requests
             else
               ## log as primitive
               log(subject, "primitive")
