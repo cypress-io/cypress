@@ -23,6 +23,8 @@ packages = require("./util/packages")
 Darwin = require("./darwin")
 Linux = require("./linux")
 
+rootPackage = require("@packages/root")
+
 sign  = Promise.promisify(signOsxApp)
 fs = Promise.promisifyAll(fse)
 
@@ -105,6 +107,7 @@ buildCypressApp = (platform, version, options = {}) ->
     fs.outputJsonAsync(distDir("package.json"), {
       name: "cypress"
       productName: "Cypress",
+      description: rootPackage.description
       version: version
       main: "index.js"
       scripts: {}
@@ -248,11 +251,6 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(removeDevElectronApp)
   .then(copyPackageProxies(buildAppDir))
   .then(runSmokeTest)
-
-  # older build steps
-  # .then(@runProjectTest) # if run larger tests need to cleanup symlinks
-  # .then(@runFailingProjectTest)
-  # .then(@cleanupCy)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
   .return({

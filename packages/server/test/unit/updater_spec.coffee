@@ -6,6 +6,8 @@ nmi         = require("node-machine-id")
 cwd         = require("#{root}lib/cwd")
 request     = require("request")
 Updater     = require("#{root}lib/updater")
+pkg         = require("@packages/root")
+_           = require("lodash")
 
 describe "lib/updater", ->
   context "interface", ->
@@ -15,15 +17,17 @@ describe "lib/updater", ->
 
   context "#getPackage", ->
     beforeEach ->
-      @sandbox.stub(fs, "readJsonSync").returns({foo: "bar"})
-
+      pkg.foo = "bar"
       @updater = Updater({})
+    afterEach ->
+      delete pkg.foo
 
     it "inserts manifestUrl to package.json", ->
-      expect(@updater.getPackage()).to.deep.eq {
+      expected = _.extend({}, pkg, {
         foo: "bar"
         manifestUrl: "https://download.cypress.io/desktop.json"
-      }
+      })
+      expect(@updater.getPackage()).to.deep.eq expected
 
   context "#getClient", ->
     it "sets .client to new Updater", ->
