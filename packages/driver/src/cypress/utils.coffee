@@ -323,4 +323,7 @@ module.exports = {
     not cmd.get("next") and
       cmd.get("args").length is 2 and
         (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
+
+  addTwentyYears: ->
+    moment().add(20, "years").unix()
 }
