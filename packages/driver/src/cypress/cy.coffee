@@ -8,6 +8,7 @@ $utils = require("./utils")
 $Agents = require("../cy/agents")
 $Errors = require("../cy/errors")
 $Chainer = require("./chainer")
+$Timeouts = require("../cy/timeouts")
 $CommandQueue = require("./command_queue")
 $SetterGetter = require("./setter_getter")
 
@@ -23,6 +24,7 @@ create = (specWindow, Cypress, config) ->
 
   agents = $Agents.create()
   errors = $Errors.create(Cypress, state, config)
+  timeouts = $Timeouts.create(state)
 
   commandFns = {}
   # commandFnsBackup = {}
@@ -39,6 +41,10 @@ create = (specWindow, Cypress, config) ->
     spy: agents.spy
     stub: agents.stub
     agents: agents.agents
+
+    ## timeout sync methods
+    timeout: timeouts.timeout
+    clearTimeout: timeouts.clearTimeout
 
     # onCommand: (key, fn, type, enforceDom) ->
     #   $utils.throwErrByPath("add.type_missing") if not type
