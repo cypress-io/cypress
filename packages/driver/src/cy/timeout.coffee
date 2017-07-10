@@ -1,12 +1,12 @@
-utils = require("../cypress/utils")
+$utils = require("../cypress/utils")
 
-module.exports = ($Cy) ->
-  $Cy.extend
-    _timeout: (ms, delta = false) ->
-      runnable = @state("runnable")
+create = (state) ->
+  return {
+    timeout: (ms, delta = false) ->
+      runnable = state("runnable")
 
       if not runnable
-        utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
+        $utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
 
       if ms
         ## if delta is true then we add (or subtract) from the
@@ -17,12 +17,17 @@ module.exports = ($Cy) ->
       else
         runnable.timeout()
 
-    _clearTimeout: ->
-      runnable = @state("runnable")
+    clearTimeout: ->
+      runnable = state("runnable")
 
       if not runnable
-        utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
+        $utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
 
       runnable.clearTimeout()
 
       return @
+  }
+
+module.exports = {
+  create
+}
