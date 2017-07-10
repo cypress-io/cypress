@@ -18,7 +18,7 @@ const distDir = path.join(__dirname, '../../dist')
 const infoFilePath = path.join(distDir, 'info.json')
 
 describe('utils', function () {
-  const verifyingMessage = chalk.green('⧖ Verifying Cypress executable...')
+  const verifyingMessage = chalk.yellow('⧖ Verifying Cypress executable...')
 
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
@@ -240,6 +240,16 @@ describe('utils', function () {
         this.sandbox.stub(_, 'random').returns('222')
         this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
         return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
+      })
+
+      it('shows full path to executable when verifying', function () {
+        const executable = utils.getPathToExecutable()
+        const message1 = chalk.green('✓ Cypress executable found at:')
+        const message2 = chalk.cyan(executable)
+        return utils.verify({ force: true })
+        .then(() => {
+          expect(this.log).to.be.calledWith(message1, message2)
+        })
       })
 
       it('runs smoke test even if version already verified', function () {
