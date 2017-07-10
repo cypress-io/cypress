@@ -8,6 +8,7 @@ $utils = require("./utils")
 $Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
 $Errors = require("../cy/errors")
+$Asserts = require("../cy/asserts")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
 $CommandQueue = require("./command_queue")
@@ -53,6 +54,7 @@ create = (specWindow, Cypress, config) ->
 
   xhrs = $Xhrs.create(state)
   agents = $Agents.create()
+  asserts = $Asserts.create(state)
   errors = $Errors.create(Cypress, state, config)
   timeouts = $Timeouts.create(state)
 
@@ -66,6 +68,9 @@ create = (specWindow, Cypress, config) ->
 
     ## command queue instance
     queue: $CommandQueue.create()
+
+    ## assert sync method
+    assert: asserts.assert
 
     ## agent sync methods
     spy: agents.spy
