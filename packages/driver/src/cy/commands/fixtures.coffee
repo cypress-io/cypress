@@ -8,7 +8,7 @@ fixturesRe = /^(fx:|fixture:)/
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   ## this is called at the beginning of run, so clear the cache
   cache = {}
 
@@ -66,7 +66,3 @@ create = (Commands, ee, state) ->
           args: { timeout: options.timeout }
         }
   })
-
-module.exports = {
-  create
-}

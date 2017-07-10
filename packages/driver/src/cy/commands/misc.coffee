@@ -3,7 +3,7 @@ _ = require("lodash")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "optional" }, {
     end: ->
       null
@@ -42,7 +42,3 @@ create = (Commands, ee, state) ->
           onRetry: resolveWrap
         })
   })
-
-module.exports = {
-  create
-}

@@ -15,7 +15,7 @@ $Mouse = require("../../../cypress/mouse")
 
 $utils = require("../../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "dom" }, {
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
@@ -385,8 +385,3 @@ create = (Commands, ee, state) ->
           throw err
 
   })
-
-
-module.exports = {
-  create
-}

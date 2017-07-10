@@ -14,7 +14,7 @@ $contains = $expr.contains
 restoreContains = ->
   $expr.contains = $contains
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Cypress.on "abort", restoreContains
 
   Commands.addAll({
@@ -482,8 +482,3 @@ create = (Commands, ee, state) ->
 
       return subject
   })
-
-
-module.exports = {
-  create
-}

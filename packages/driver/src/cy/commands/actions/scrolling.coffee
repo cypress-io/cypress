@@ -22,7 +22,7 @@ isNaNOrInfinity = (item) ->
 
   return _.isNaN(num) or !_.isFinite(num)
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "dom" }, {
     scrollIntoView: (subject, options = {}) ->
       if !_.isObject(options)
@@ -258,7 +258,3 @@ create = (Commands, ee, state) ->
           if isWin
             delete options.$el.contentWindow
   })
-
-module.exports = {
-  create
-}

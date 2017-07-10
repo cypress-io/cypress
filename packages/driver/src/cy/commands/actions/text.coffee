@@ -15,7 +15,7 @@ monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   ee.on "test:before:run", ->
     $Keyboard.resetModifiers(state("document"), state("window"))
 
@@ -402,8 +402,3 @@ create = (Commands, ee, state) ->
               onRetry: verifyAssertions
             })
   })
-
-
-module.exports = {
-  create
-}

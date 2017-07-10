@@ -15,7 +15,7 @@ command = (name, args...) ->
 
   ctx[name].apply(ctx, args)
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   ## here we are extending both the Cy prototype
   ## and the Chainer prototype to allow 'cmd' and 'command'
   ## as chainable methods. However these avoid the inject
@@ -36,7 +36,3 @@ create = (Commands, ee, state) ->
     command: ->
       command.apply(@, arguments)
   }
-
-module.exports = {
-  create
-}

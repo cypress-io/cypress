@@ -4,7 +4,7 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "optional" }, {
     wait: (subject, msOrFnOrAlias, options = {}) ->
       ## check to ensure options is an object
@@ -195,7 +195,3 @@ create = (Commands, ee, state) ->
           _(xhrs).invoke("cancel")
           throw err
   }
-
-module.exports = {
-  create
-}

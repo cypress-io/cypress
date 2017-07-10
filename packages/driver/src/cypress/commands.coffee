@@ -44,7 +44,7 @@ getTypeByPrevSubject = (prevSubject) ->
     else
       "parent"
 
-create = (cy, events) ->
+create = (cy, Cypress) ->
   ## create a single instance
   ## of commands
   commands = {}
@@ -145,7 +145,7 @@ create = (cy, events) ->
 
   ## perf loop
   for cmd in builtInCommands
-    cmd.create(Commands, events, (->))
+    cmd(Commands, Cypress, cy)
 
   return Commands
 

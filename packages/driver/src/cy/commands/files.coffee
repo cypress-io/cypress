@@ -20,7 +20,7 @@ writeFile = (file, contents, options) =>
       else
         resolve(resp)
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({
     readFile: (file, encoding, options = {}) ->
       if _.isObject(encoding)
@@ -129,7 +129,3 @@ create = (Commands, ee, state) ->
           args: { cmd: "writeFile", action: "write", file: fileName, filePath: err.filePath, error: err.message }
         })
   })
-
-module.exports = {
-  create
-}

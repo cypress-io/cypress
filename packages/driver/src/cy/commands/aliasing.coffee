@@ -2,7 +2,7 @@ _ = require("lodash")
 
 $utils = require("../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addUtility({
     as: (subject, str) ->
       @ensureParent()
@@ -42,7 +42,3 @@ create = (Commands, ee, state) ->
 
       return subject
   })
-
-module.exports = {
-  create
-}

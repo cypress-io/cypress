@@ -230,7 +230,7 @@ assertFn = (passed, message, value, actual, expected, error, verifying = false) 
 
   return null
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAssertion({
     should: ->
       shouldFn.apply(@, arguments)
@@ -238,7 +238,7 @@ create = (Commands, ee, state) ->
     and: ->
       shouldFn.apply(@, arguments)
   })
-  
+
   return {
     verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
       cmds = @getUpcomingAssertions()
@@ -494,7 +494,3 @@ create = (Commands, ee, state) ->
 
     assert: assertFn
   }
-
-module.exports = {
-  create
-}

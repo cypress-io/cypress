@@ -5,7 +5,7 @@ Promise = require("bluebird")
 $Log = require("../../../cypress/log")
 $utils = require("../../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "dom" }, {
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
@@ -209,8 +209,3 @@ create = (Commands, ee, state) ->
               onRetry: verifyAssertions
         })
   })
-
-
-module.exports = {
-  create
-}

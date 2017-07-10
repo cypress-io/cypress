@@ -5,7 +5,7 @@ Promise = require("bluebird")
 $Log = require("../../../cypress/log")
 $utils = require("../../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "dom" }, {
     submit: (subject, options = {}) ->
       _.defaults options,
@@ -68,8 +68,3 @@ create = (Commands, ee, state) ->
       $utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
 
   })
-
-
-module.exports = {
-  create
-}

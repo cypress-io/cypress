@@ -19,7 +19,7 @@ timedOutWaitingForPageLoad = (ms, log) ->
     args: { ms }
   })
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Cypress.on "test:before:run", (test) ->
     ## continuously reset this
     ## before each test run!
@@ -591,7 +591,3 @@ create = (Commands, ee, state) ->
           catch e
             @fail(e)
   }
-
-module.exports = {
-  create
-}

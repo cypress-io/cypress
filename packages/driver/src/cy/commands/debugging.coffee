@@ -5,7 +5,7 @@ $Cypress = require("../../cypress")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Cypress.on "resume:next", ->
     @resume(false)
 
@@ -124,7 +124,3 @@ create = (Commands, ee, state) ->
 
       search(@state("index"))
   }
-
-module.exports = {
-  create
-}

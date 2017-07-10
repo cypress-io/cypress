@@ -7,7 +7,7 @@ $utils = require("../../cypress/utils")
 
 ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({
     ng: (type, selector, options = {}) ->
       ## what about requirejs / browserify?
@@ -99,7 +99,3 @@ create = (Commands, ee, state) ->
         .catch Promise.AggregateError, (err) =>
           $utils.throwErr error
   }
-
-module.exports = {
-  create: create
-}

@@ -75,7 +75,7 @@ defaults = {
   onResponse: undefined
 }
 
-create = (Commands, ee, state) ->
+create = (Commands, Cypress, cy) ->
   Cypress.on "before:unload", ->
     ## if our page is going away due to
     ## a form submit / anchor click then
@@ -463,7 +463,3 @@ create = (Commands, ee, state) ->
     getXhrTypeByAlias: (alias) ->
       if requestXhrRe.test(alias) then "request" else "response"
   }
-
-module.exports = {
-  create
-}

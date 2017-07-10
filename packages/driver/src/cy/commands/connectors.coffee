@@ -277,7 +277,7 @@ invokeFn = (subject, fn, args...) ->
         onRetry: resolveValue
       })
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: true }, {
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
@@ -375,7 +375,3 @@ create = (Commands, ee, state) ->
     its: ->
       invokeFn.apply(@, arguments)
   })
-
-module.exports = {
-  create
-}

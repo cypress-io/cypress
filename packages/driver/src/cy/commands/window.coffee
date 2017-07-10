@@ -22,7 +22,7 @@ viewports = {
 
 validOrientations = ["landscape", "portrait"]
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Cypress.on "test:before:hooks", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
@@ -200,8 +200,3 @@ create = (Commands, ee, state) ->
 
       return null
   })
-
-
-module.exports = {
-  create
-}

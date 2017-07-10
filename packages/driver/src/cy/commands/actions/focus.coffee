@@ -5,7 +5,7 @@ $Log = require("../../../cypress/log")
 { delay, dispatchPrimedChangeEvents, focusable } = require("./utils")
 $utils = require("../../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({ prevSubject: "dom" }, {
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -263,7 +263,3 @@ create = (Commands, ee, state) ->
                 onRetry: verifyAssertions
           })
   })
-
-module.exports = {
-  create
-}

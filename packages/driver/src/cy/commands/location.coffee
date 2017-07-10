@@ -5,7 +5,7 @@ $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   Commands.addAll({
     url: (options = {}) ->
       _.defaults options, {log: true}
@@ -87,7 +87,3 @@ create = (Commands, ee, state) ->
       catch e
         ""
   }
-
-module.exports = {
-  create
-}

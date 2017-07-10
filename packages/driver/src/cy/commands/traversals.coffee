@@ -5,7 +5,7 @@ $utils = require("../../cypress/utils")
 
 traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   _.each traversals, (traversal) ->
     Commands.add traversal, {prevSubject: "dom"}, (subject, arg1, arg2, options) ->
       if _.isObject(arg2)
@@ -64,8 +64,3 @@ create = (Commands, ee, state) ->
               node = $utils.stringifyElement(subject, "short")
               err.displayMessage += " Queried from element: #{node}"
         })
-
-
-module.exports = {
-  create
-}

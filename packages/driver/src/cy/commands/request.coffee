@@ -41,7 +41,7 @@ isValidJsonObj = (body) ->
 whichAreOptional = (val, key) ->
   val is null and key in OPTIONAL_OPTS
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   request = (options) =>
     Cypress.triggerPromise("request", options)
 
@@ -233,8 +233,3 @@ create = (Commands, ee, state) ->
           }
         })
   })
-
-
-module.exports = {
-  create
-}

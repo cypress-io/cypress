@@ -4,7 +4,7 @@ $Clock = require("../../cypress/clock")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-create = (Commands, ee, state) ->
+module.exports = (Commands, Cypress, cy) ->
   clock = null
 
   Cypress.on "test:before:run", ->
@@ -112,7 +112,3 @@ create = (Commands, ee, state) ->
     _setClock: (c) ->
       clock = c
   }
-
-module.exports = {
-  create
-}
