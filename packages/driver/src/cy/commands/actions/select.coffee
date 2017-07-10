@@ -80,13 +80,13 @@ module.exports = (Cypress, Commands) ->
             optionEls.push optEl
             values.push(value)
 
-
           ## replace new line chars, then trim spaces
           trimmedText = optEl.text().replace(newLineRe, "").trim()
 
           ## return the elements text + value
           {
             value: value
+            originalText: optEl.text()
             text: trimmedText
             $el: optEl
           }
@@ -95,11 +95,11 @@ module.exports = (Cypress, Commands) ->
         ## if we couldn't find anything by value then attempt
         ## to find it by text and insert its value into values arr
         if not values.length
-          ## if all the values are the same and the user is trying to
+          ## if any of the values are the same and the user is trying to
           ## select based on the text, setting the value won't work
-          ## `allSameValue` is used later to do the right thing
+          ## `notAllUniqueValues` is used later to do the right thing
           uniqueValues = _.chain(optionsObjects).map("value").uniq().value()
-          allSameValue = uniqueValues.length is 1
+          notAllUniqueValues = uniqueValues.length isnt optionsObjects.length
 
           _.each optionsObjects, (obj, index) ->
             if obj.text in valueOrText
@@ -125,7 +125,7 @@ module.exports = (Cypress, Commands) ->
               args: { node }
             })
 
-        {values: values, optionEls: optionEls, allSameValue: allSameValue}
+        {values, optionEls, optionsObjects, notAllUniqueValues}
 
       retryOptions = =>
         Promise
@@ -137,7 +137,7 @@ module.exports = (Cypress, Commands) ->
       Promise
       .try(retryOptions)
       .then (obj = {}) =>
-        {values, optionEls, allSameValue} = obj
+        {values, optionEls, optionsObjects, notAllUniqueValues} = obj
 
         ## preserve the selected values
         consoleProps.Selected = values
@@ -175,20 +175,31 @@ module.exports = (Cypress, Commands) ->
               })
             .cancellable()
             .then =>
-              if allSameValue
+              ## reset the selects value after we've
+              ## fired all the proper click events
+              ## for the options
+              ## TODO: shouldn't we be updating the values
+              ## as we click the <option> instead of
+              ## all afterwards?
+              options.$el.val(values)
+
+              if notAllUniqueValues
                 ## if all the values are the same and the user is trying to
                 ## select based on the text, setting the val() will just
                 ## select the first one
+                selectedIndex = 0
+                console.log("optionEls:", optionEls)
                 _.each optionEls, ($el) ->
+                  index = _.findIndex optionsObjects, (optionObject) ->
+                    $el.text() is optionObject.originalText
+                  console.log('index:', index)
+                  selectedIndex = index
                   $el.prop("selected", "selected")
-              else
-                ## reset the selects value after we've
-                ## fired all the proper click events
-                ## for the options
-                ## TODO: shouldn't we be updating the values
-                ## as we click the <option> instead of
-                ## all afterwards?
-                options.$el.val(values)
+
+                console.log("selectedIndex:", selectedIndex)
+                options.$el[0].selectedIndex = selectedIndex
+                console.log("selectedOptions:", _.map optionEls, ($el) -> $el.get())
+                options.$el[0].selectedOptions = _.map optionEls, ($el) -> $el.get()
 
               input = new Event "input", {
                 bubbles: true
