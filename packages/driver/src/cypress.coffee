@@ -317,6 +317,25 @@ class $Cypress
       when "command:enqueue"
         "asdf"
 
+  actionAsync: (eventName, args...) ->
+    ## wrap action in promise
+    new Promise (resolve, reject) =>
+      fn = (reply) ->
+        ## TODO: normalize this to reply.error and reply.response
+        if e = reply.__error
+          err = $utils.cypressErr(e)
+          err.name = reply.__name
+          err.stack = reply.__stack
+
+          try
+            $utils.throwErr(err, { onFail: log })
+          catch e
+            reject(e)
+        else
+          resolve(reply.response)
+
+      @emit(eventName, mergeDefaults(obj), fn)
+
   abort: ->
     @emitThen("abort")
     .then =>
