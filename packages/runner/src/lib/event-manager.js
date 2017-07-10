@@ -168,7 +168,7 @@ const eventManager = {
   setup (config, specPath) {
     Cypress = $Cypress.create({ loadModules: true })
 
-    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
+    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'fixturesFolder'))
     Cypress.setVersion(config.version)
     Cypress.start()
     this._addListeners(config)
