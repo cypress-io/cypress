@@ -12,6 +12,15 @@
     p {
       line-height: 1.5em;
     }
+
+    a {
+      border-bottom: 1px dotted lighten($brand-primary, 30%);
+    }
+  }
+
+  .mono {
+    font-family: $font-mono;
+    font-size: 1.1em;
   }
 
   h3 {
@@ -20,12 +29,11 @@
   }
 
   h1 {
-    color: #636668;
+    color: #555;
     font-family: $font-title;
-    font-weight: 100;
+    font-weight: 400;
     margin-top: 15px;
-    text-align: center;
-    font-size: 22px;
+    font-size: 20px;
   }
 
   &>p {
@@ -60,9 +68,29 @@
   margin-bottom: 40px;
   height: 150px;
 
-  .fa-cloud-upload {
-    font-size: 50px;
+  .fa-stack {
+  width: 3em;
+  height: 3em;
+  line-height: 3em;
+  }
+
+  .fa {
+    // font-size: 50px;
     color: #d3d6d8;
+
+    &.fa-stack-2x {
+      font-size: 3em;
+    }
+
+    &.fa-stack-1x {
+      font-size: 1.2em;
+    }
+
+    &[class*="fa-plus"] {
+      position: relative;
+      color: #fff;
+      top: 3px;
+    }
   }
 
   p>a {
@@ -91,15 +119,10 @@
   min-height: 50px; // for loader
   position: relative;
 
-  h3 {
-    font-size: $font-size;
-    margin: 10px 0 6px;
-
-    a {
-      font-size: 12px;
-      position: relative;
-      top: -4px;
-    }
+  h1 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0;
   }
 
   .alert {

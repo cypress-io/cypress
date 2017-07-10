@@ -23,24 +23,27 @@ class Default extends Component {
     return (
       <div className='intro'>
         <div className='alert alert-info alert-dismissible'>
-          <p>
+          <p className='text-center'>
             <i className='fa fa-info-circle'></i>{' '}
-            We recommend installing Cypress locally per project. Just run <code>npm install --save-dev cypress</code> in your Console from the project you want to test.{' '}
+            We recommend versioning Cypress per project and{' '}
             <a onClick={this._openHelp} className='helper-docs-link'>
-              <i className='fa fa-question-circle' /> Need help?
-            </a>
+              installing it via <span className='mono'>npm</span>
+            </a>.
           </p>
-          <button className="close" onClick={this._removeIntro}><span>&times;</span></button>
+          <button className="close" onClick={this._removeGlobalIntro}><span>&times;</span></button>
         </div>
         <div className='intro-content'>
-          <h3>Add your project below to get started:</h3>
+          <h1>To get started...</h1>
           <div
             className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
             onDragOver={this._dragover}
             onDragLeave={this._dragleave}
             onDrop={this._drop}
           >
-            <i className='fa fa-cloud-upload'></i>
+            <span className="fa-stack fa-lg">
+            <i className="fa fa-folder fa-stack-2x"></i>
+            <i className="fa fa-plus fa-stack-1x"></i>
+            </span>
             <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
           </div>
           <ProjectsList onSelect={this._projectSelected} />
@@ -54,8 +57,8 @@ class Default extends Component {
     document.removeEventListener('drop', this._nope)
   }
 
-  _removeIntro = () => {
-    this.props.project.clearIntro()
+  _removeGlobalIntro = () => {
+    // this should prob just be set in localStorage
   }
 
   _selectProject = (e) => {
