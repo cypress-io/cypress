@@ -274,6 +274,34 @@ $Dom = {
 
       else
         "Cypress could not determine why this element (#{node}) is not visible."
+
+  elIsTextLike: ($el) ->
+    isSel = (selector) => @elMatchesSelector($el, selector)
+    isType = (type) => @elIsType($el, type)
+
+    _.some([
+      isSel("textarea")
+      isSel(":text")
+      isSel("[contenteditable]")
+      isType("password")
+      isType("email")
+      isType("number")
+      isType("date")
+      isType("week")
+      isType("month")
+      isType("time")
+      isType("datetime")
+      isType("datetime-local")
+      isType("search")
+      isType("url")
+      isType("tel")
+    ])
+
+  elIsType: ($el, type) ->
+    ($el.attr("type") or "").toLowerCase() is type
+
+  elMatchesSelector: ($el, selector) ->
+    $el.is(selector)
 }
 
 module.exports = $Dom
