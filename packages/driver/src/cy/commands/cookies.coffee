@@ -38,6 +38,8 @@ module.exports = (Commands, Cypress, cy) ->
   automateCookies = (event, obj = {}, log, timeout) ->
     automate = ->
       Cypress.automation(event, mergeDefaults(obj))
+      .catch (err) ->
+        $utils.throwErr(err, { onFail: log })
 
     if not timeout
       automate()

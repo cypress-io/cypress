@@ -327,10 +327,7 @@ class $Cypress
           err.name = reply.__name
           err.stack = reply.__stack
 
-          try
-            $utils.throwErr(err, { onFail: log })
-          catch e
-            reject(e)
+          reject(err)
         else
           resolve(reply.response)
 
