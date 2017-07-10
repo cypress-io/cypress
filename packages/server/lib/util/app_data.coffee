@@ -3,12 +3,15 @@ path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
 log     = require("debug")("cypress:server:appdata")
+pkg     = require("@packages/root")
 cwd     = require("../cwd")
-pkg     = require("../../package.json")
 
 fs   = Promise.promisifyAll(fs)
 name = pkg.productName or pkg.name
 data = ospath.data()
+
+if not name
+  throw new Error("Root package is missing name")
 
 isProduction = ->
   process.env.CYPRESS_ENV is "production"

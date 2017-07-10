@@ -43,7 +43,7 @@ guides:
     known-issues: known-issues.html
     # contributing: contributing.html
     changelog: changelog.html
-    # roadmap: roadmap.html
+    roadmap: roadmap.html
     # all-videos: all-videos.html
 
 api:

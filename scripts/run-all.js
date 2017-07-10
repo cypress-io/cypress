@@ -77,7 +77,7 @@ const checkDirsLength = (dirs, errMessage) => {
 }
 
 const mapTasks = (cmd, packages) => {
-  const colors = 'green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite'.split(' ')
+  const colors = 'green yellow blue magenta cyan white gray bgGreen bgBlue bgMagenta bgCyan bgYellow bgWhite'.split(' ')
 
   let runCommand
 

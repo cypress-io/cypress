@@ -1,0 +1,6 @@
+{
+  "name": "@packages/root",
+  "version": "0.0.0",
+  "description": "dummy package pointing at the root package",
+  "main": "../../package.json"
+}
