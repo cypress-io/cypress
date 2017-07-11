@@ -226,12 +226,12 @@ const eventManager = {
       reporterBus.emit('reporter:collect:run:state', resolve)
     }))
 
-    Cypress.on('log', (log) => {
+    Cypress.on('log:added', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
-    Cypress.on('log:state:changed', (log) => {
+    Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })

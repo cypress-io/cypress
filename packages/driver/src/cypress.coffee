@@ -300,11 +300,12 @@ class $Cypress
       when "command:enqueue"
         "asdf"
 
-      when "log"
-        "asdf"
+      when "command:log:added"
+        @emit("log:added", args...)
 
-      when "log:state:changed"
+      when "command:log:changed"
         "asdf"
+        @emit("log:changed", args...)
 
   automation: (eventName, args...) ->
     ## wrap action in promise

@@ -105,7 +105,9 @@ create = (Cypress, cy, config, snapshot) ->
       Cypress.action(event, attrs, log)
 
   triggerLog = (log) ->
-    trigger(log, "log")
+    log._hasInitiallyLogged = true
+
+    trigger(log, "command:log:added")
 
   addToLogs = (log) ->
     id = log.get("id")
@@ -419,7 +421,7 @@ create = (Cypress, cy, config, snapshot) ->
     delay ?= setDelay(config("logAttrsDelay"))
 
     triggerStateChanged = ->
-      trigger(log, "log:state:changed")
+      trigger(log, "command:log:changed")
 
     ## only fire the log:state:changed event
     ## as fast as every 4ms
