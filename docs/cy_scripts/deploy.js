@@ -26,15 +26,51 @@ console.log()
 console.log(chalk.yellow('Cypress Docs Deployinator'))
 console.log(chalk.yellow('==============================\n'))
 
-function getS3Credentials () {
-  const pathToAwsCreds = path.resolve('support', '.aws-credentials.json')
+// environment variables set via shell have restrictions
+// so remove invalid characters from the filename
+// that cannot be there
+function filenameToShellVariable (filename) {
+  const rep = '_'
+  return filename.replace(/\//g, rep)
+    .replace(/\./g, rep)
+    .replace(/-/g, rep)
+}
+
+function maybeLoadFromVariable (filename) {
+  const key = filenameToShellVariable(filename)
+  console.log('checking environment variable "%s"', key)
+  if (process.env[key]) {
+    console.log('loading from variable', key)
+    return JSON.parse(process.env[key])
+  }
+}
+
+function loadFromFile (key) {
+  const pathToAwsCreds = path.resolve(key)
 
   return fs.readJsonAsync(pathToAwsCreds)
+  .then(() => {
+    console.log('loaded from file', key)
+  })
   .catch({ code: 'ENOENT' }, (err) => {
     console.log(chalk.red(`Cannot deploy.\n\nYou are missing your AWS credentials.\n\nPlease add your credentials here: ${pathToAwsCreds}\n`))
-
     throw err
   })
+}
+
+// resolves with S3 credentials object
+// first tries to load from ENV string
+// if not found, tries to load from a file
+function getS3Credentials () {
+  const key = path.join('support', '.aws-credentials.json')
+  return Promise.resolve()
+    .then(() => maybeLoadFromVariable(key))
+    .then((env) => {
+      if (env) {
+        return env
+      }
+      return loadFromFile(key)
+    })
 }
 
 function getCurrentBranch () {
