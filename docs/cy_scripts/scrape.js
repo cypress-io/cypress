@@ -38,6 +38,9 @@ function scrape () {
       return
     }
 
+    // hmm, how do we trigger workflow?
+    // seems this is not supported yet as of July 10th 2017
+    // https://discuss.circleci.com/t/trigger-workflow-through-rest-api/13931
     return request({
       url: 'https://circleci.com/api/v1.1/project/github/cypress-io/docsearch-scraper/',
       method: 'POST',

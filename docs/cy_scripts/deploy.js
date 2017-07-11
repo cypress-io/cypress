@@ -13,6 +13,7 @@ const parallelize = require('concurrent-transform')
 const minimist   = require('minimist')
 const questionsRemain = require('@cypress/questions-remain')
 const scrape     = require('./scrape')
+const shouldDeploy = require('./should-deploy')
 const R = require('ramda')
 
 const distDir = path.resolve('public')
@@ -21,10 +22,6 @@ const fs = Promise.promisifyAll(require('fs-extra'))
 
 // initialize on existing repo
 const repo = Promise.promisifyAll(gift(path.resolve('..')))
-
-console.log()
-console.log(chalk.yellow('Cypress Docs Deployinator'))
-console.log(chalk.yellow('==============================\n'))
 
 // environment variables set via shell have restrictions
 // so remove invalid characters from the filename
@@ -236,40 +233,60 @@ function scrapeDocs (env, branch) {
 
 }
 
-getS3Credentials()
-.then(getCurrentBranch)
-.then((branch) => {
-  console.log('On branch:', chalk.green(branch), '\n')
+function doDeploy () {
+  return getS3Credentials()
+  .then(getCurrentBranch)
+  .then((branch) => {
+    console.log('On branch:', chalk.green(branch), '\n')
 
-  return getDeployEnvironment()
-  .then((env) => {
-    if (env === 'staging') {
-      return env
-    }
-
-    if (env === 'production') {
-      if (branch !== 'master') {
-        throw new Error('Cannot deploy master to production. You are not on the \'master\' branch.')
+    return getDeployEnvironment()
+    .then((env) => {
+      if (env === 'staging') {
+        return env
       }
 
-      return ensureCleanWorkingDirectory()
-      .return(env)
-    } else {
-      throw new Error(`Unknown environment: ${env}`)
-    }
-  })
-  .then((env) => {
-    return uploadToS3(env)
-    .then(() => {
-      return commitMessage(env, branch)
+      if (env === 'production') {
+        if (branch !== 'master') {
+          throw new Error('Cannot deploy master to production. You are not on the \'master\' branch.')
+        }
+
+        return ensureCleanWorkingDirectory()
+        .return(env)
+      } else {
+        throw new Error(`Unknown environment: ${env}`)
+      }
     })
-    .then(() => {
-      return scrapeDocs(env, branch)
+    .then((env) => {
+      return uploadToS3(env)
+      .then(() => {
+        return commitMessage(env, branch)
+      })
+      .then(() => {
+        return scrapeDocs(env, branch)
+      })
     })
   })
-})
-.then(() => {
-  console.log(chalk.yellow('\n==============================\n'))
-  console.log(chalk.bgGreen(chalk.black(' Done Deploying ')))
-  console.log('')
-})
+  .then(() => {
+    console.log(chalk.yellow('\n==============================\n'))
+    console.log(chalk.bgGreen(chalk.black(' Done Deploying ')))
+    console.log('')
+  })
+}
+
+function deploy () {
+  console.log()
+  console.log(chalk.yellow('Cypress Docs Deployinator'))
+  console.log(chalk.yellow('==============================\n'))
+
+  return shouldDeploy()
+    .then((should) => {
+      if (!should) {
+        console.log('nothing to deploy')
+        return false
+      }
+      return doDeploy()
+    })
+
+}
+
+deploy()
