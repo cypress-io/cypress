@@ -271,13 +271,11 @@ API = {
         """
       when "CANNOT_CONNECT_BASE_URL"
         """
-        Cypress cannot start because we could not verify this server is running:
+        Cypress could not verify that the server set as your 'baseUrl' is running:
 
           > #{chalk.blue(arg1)}
 
-        We run this check because this server has been set as your 'baseUrl'.
-
-        You likely forgot to boot this web server prior to running Cypress.
+        Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
 
         Please start this server and then run Cypress again.
         """
