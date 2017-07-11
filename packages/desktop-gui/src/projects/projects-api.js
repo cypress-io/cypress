@@ -175,6 +175,7 @@ const openProject = (project) => {
 
 const reopenProject = (project) => {
   project.clearError()
+  project.clearWarning()
   return closeProject(project)
   .then(() => openProject(project))
 }
