@@ -156,6 +156,11 @@ describe "Specs List", ->
           .click()
           .should("have.class", "active")
 
+      it "maintains active selection if specs change", ->
+        cy.get("@firstSpec").click().then =>
+          @ipc.getSpecs.yield(null, @specs)
+        cy.get("@firstSpec").should("have.class", "active")
+
     context "spec running in browser", ->
       context "choose shallow spec", ->
         beforeEach ->
