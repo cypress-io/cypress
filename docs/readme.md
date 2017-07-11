@@ -49,3 +49,10 @@ Link all pages but their name (property key) in `source/_data/sidebar.yml`
 ```shell
 npm run deploy
 ```
+
+You can specify all options for deploying via command line arguments.
+For example to deploy to production and scrape the docs
+
+```shell
+npm run deploy -- --environment production --scrape
+```

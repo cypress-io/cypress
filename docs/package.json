@@ -29,6 +29,7 @@
     "lint": "$(bin-up eslint) --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
+    "@cypress/questions-remain": "^1.0.0",
     "beeper": "^1.1.1",
     "bin-up": "^1.0.1",
     "chai": "^4.0.2",
@@ -46,6 +47,7 @@
     "gulp-rev-all": "^0.9.7",
     "human-interval": "^0.1.6",
     "inquirer": "^3.1.0",
+    "minimist": "^1.2.0",
     "mocha": "^3.4.2",
     "nock": "^9.0.13",
     "npm-run-all": "^4.0.2",

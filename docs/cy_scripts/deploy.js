@@ -10,7 +10,10 @@ const Promise    = require('bluebird')
 const inquirer   = require('inquirer')
 const awspublish = require('gulp-awspublish')
 const parallelize = require('concurrent-transform')
+const minimist   = require('minimist')
+const questionsRemain = require('@cypress/questions-remain')
 const scrape     = require('./scrape')
+const R = require('ramda')
 
 const distDir = path.resolve('public')
 
@@ -51,6 +54,18 @@ function promptForDeployEnvironment () {
   })
   .get('strategy')
 }
+
+function cliOrAsk (property, ask, minimistOptions) {
+  // for now isolate the CLI/question logic
+  const askRemaining = questionsRemain({
+    [property]: ask,
+  })
+  const options = minimist(process.argv.slice(2), minimistOptions)
+  return askRemaining(options).then(R.prop(property))
+}
+
+const getDeployEnvironment = R.partial(cliOrAsk,
+  ['environment', promptForDeployEnvironment])
 
 function ensureCleanWorkingDirectory () {
   return repo.statusAsync()
@@ -143,6 +158,22 @@ function commitMessage (env, branch) {
   })
 }
 
+function prompToScrape () {
+  return prompt({
+    type: 'list',
+    name: 'scrape',
+    message: 'Would you like to scrape the docs? (You only need to do this if they have changed on this deployment)',
+    choices: [
+      { name: 'Yes', value: true },
+      { name: 'No',  value: false },
+    ],
+  })
+  .get('scrape')
+}
+
+const getScrapeDocs = R.partial(cliOrAsk,
+  ['scrape', prompToScrape, { boolean: 'scrape' }])
+
 function scrapeDocs (env, branch) {
   console.log('')
 
@@ -160,16 +191,7 @@ function scrapeDocs (env, branch) {
     return
   }
 
-  return prompt({
-    type: 'list',
-    name: 'scrape',
-    message: 'Would you like to scrape the docs? (You only need to do this if they have changed on this deployment)',
-    choices: [
-      { name: 'Yes', value: true },
-      { name: 'No',  value: false },
-    ],
-  })
-  .get('scrape')
+  return getScrapeDocs()
   .then((bool) => {
     if (bool) {
       return scrape()
@@ -183,7 +205,7 @@ getS3Credentials()
 .then((branch) => {
   console.log('On branch:', chalk.green(branch), '\n')
 
-  return promptForDeployEnvironment()
+  return getDeployEnvironment()
   .then((env) => {
     if (env === 'staging') {
       return env
