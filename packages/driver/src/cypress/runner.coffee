@@ -551,7 +551,7 @@ runnerListeners = (runner, Cypress, emissions, testsById, setTest) ->
     Cypress.action("runner:test:end", wrap(test))
 
   runner.on "pass", (test) ->
-    Cypress.action("runner:pass",@wrap(test))
+    Cypress.action("runner:pass", wrap(test))
 
   ## if a test is pending mocha will only
   ## emit the pending event instead of the test

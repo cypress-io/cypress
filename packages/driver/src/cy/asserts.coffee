@@ -3,7 +3,12 @@ _ = require("lodash")
 
 $utils = require("../cypress/utils")
 
+## TODO
+## bTagOpen + bTagClosed
+## are duplicated in assertions.coffee
 butRe = /,? but\b/
+bTagOpen = /\*\*/g
+bTagClosed = /\*\*/g
 
 ## Rules:
 ## 1. always remove value
