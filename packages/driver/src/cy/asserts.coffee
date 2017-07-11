@@ -93,7 +93,7 @@ create = (state) ->
       if error
         error.onFail = (err) ->
 
-      $Log.command obj
+      Cypress.log(obj)
 
       return null
   }

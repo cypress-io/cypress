@@ -49,7 +49,7 @@ privateProps = {
 
 # { visit, get, find } = cy
 
-create = (specWindow, Cypress, config) ->
+create = (specWindow, Cypress, config, log) ->
   state = $SetterGetter.create({})
 
   xhrs = $Xhrs.create(state)

@@ -175,14 +175,11 @@ class $Cypress
   ## at this point
   onSpecWindow: (specWindow) ->
     ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow, Cypress, @config)
-
-    @mocha = $Mocha.create(specWindow, Cypress)
-    @runner = $Runner.create(@mocha, Cypress)
-
-    ## TODO: fix this
-    # @log     = $Log.create(@, cy)
+    @cy = window.cy = $Cy.create(specWindow, @, @config)
     @snapshot = $Snapshot.create(@cy)
+    @mocha = $Mocha.create(specWindow, @)
+    @runner = $Runner.create(@mocha, @)
+    @log = $Log.create(@, @cy, @config, @snapshot)
 
     ## wire up command create to cy
     @Commands = $Commands.create(Cypress, @cy, @config)
@@ -319,6 +316,12 @@ class $Cypress
       when "command:enqueue"
         "asdf"
 
+      when "log"
+        "asdf"
+
+      when "log:state:changed"
+        "asdf"
+
   automation: (eventName, args...) ->
     ## wrap action in promise
     new Promise (resolve, reject) =>
@@ -402,9 +405,6 @@ class $Cypress
 
   @extend = (obj) ->
     _.extend @prototype, obj
-
-## TODO: make these return object and do $Cypress.extend() here
-require("./cypress/snapshot")($Cypress)
 
 ## attach these to the prototype
 ## instead of $Cypress
