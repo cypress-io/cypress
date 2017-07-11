@@ -52,13 +52,10 @@ describe "Global Mode", ->
       cy.get(".nav .logo img").should("have.attr", "src", "img/cypress-inverse.png")
 
     it "shows message about using Cypress locally", ->
-      cy.contains("Run this command")
+      cy.contains("versioning Cypress per project")
 
-    it "displays help link", ->
-      cy.contains("a", "Need help?")
-
-    it "opens link to docs on click of help link", ->
-      cy.contains("a", "Need help?").click().then ->
+    it "opens link to docs on click 'installing...'", ->
+      cy.contains("a", "installing it via").click().then ->
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/adding-new-project")
 
     it "shows project drop area with button to select project", ->
