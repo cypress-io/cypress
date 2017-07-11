@@ -137,7 +137,7 @@ class $Cypress
     @log = $Log.create(@, @cy, @config, @snapshot)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(Cypress, @cy, @config)
+    @Commands = $Commands.create(@, @cy, @config)
 
     $Chai.create(specWindow, @cy)
 
