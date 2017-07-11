@@ -63,7 +63,7 @@ const addProject = (path) => {
 const runSpec = (project, spec, browser) => {
   project.setChosenBrowserByName(browser)
 
-  let launchBrowser = () => {
+  const launchBrowser = () => {
     project.browserOpening()
 
     ipc.launchBrowser({ browser, spec }, (err, data = {}) => {
@@ -74,14 +74,14 @@ const runSpec = (project, spec, browser) => {
       if (data.browserClosed) {
         project.browserClosed()
 
-        specsStore.setChosenSpec('')
+        specsStore.setChosenSpec(null)
 
         ipc.offLaunchBrowser()
       }
     })
   }
 
-  let changeChosenSpec = () => {
+  const changeChosenSpec = () => {
     specsStore.setChosenSpec(spec)
   }
 
