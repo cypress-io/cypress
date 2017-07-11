@@ -1,6 +1,8 @@
 _ = require("lodash")
 $ = require("jquery")
 
+HIGHLIGHT_ATTR = "data-cypress-el"
+
 reduceText = (arr, fn) ->
   _.reduce arr, ((memo, item) -> memo += fn(item)), ""
 
@@ -16,17 +18,18 @@ getCssRulesString = (stylesheet) ->
   catch e
     null
 
-module.exports = ($Cypress) ->
-  $Cypress.extend
-    highlightAttr: "data-cypress-el"
+create = (cy) ->
+  return {
+    getHighlightAttr: ->
+      HIGHLIGHT_ATTR
 
     createSnapshot: ($el) ->
       ## create a unique selector for this el
       $el.attr(@highlightAttr, true) if $el?.attr
 
-      ## TODO: throw error here if @cy is undefined!
+      ## TODO: throw error here if cy is undefined!
 
-      body = @cy.$$("body").clone()
+      body = cy.$$("body").clone()
 
       ## for the head and body, get an array of all CSS,
       ## whether it's links or style tags
@@ -59,7 +62,7 @@ module.exports = ($Cypress) ->
       tmpHtmlEl = document.createElement("html")
 
       ## preserve attributes on the <html> tag
-      htmlAttrs = _.reduce @cy.$$("html")[0].attributes, (memo, attr) ->
+      htmlAttrs = _.reduce cy.$$("html")[0].attributes, (memo, attr) ->
         if attr.specified
           try
             ## if we can successfully set the attribute
@@ -83,7 +86,7 @@ module.exports = ($Cypress) ->
       }
 
     _getStylesFor: (location) ->
-      _.map @cy.$$(location).find("link[rel='stylesheet'],style"), (stylesheet) =>
+      _.map cy.$$(location).find("link[rel='stylesheet'],style"), (stylesheet) =>
         if stylesheet.href
           ## if there's an href, it's a link tag
           ## return the CSS rules as a string, or, if cross-domain,
@@ -91,10 +94,10 @@ module.exports = ($Cypress) ->
           getCssRulesString(@_stylesheets[stylesheet.href]) or {href: stylesheet.href}
         else
           ## otherwise, it's a style tag, and we can just grab its content
-          @cy.$$(stylesheet).text()
+          cy.$$(stylesheet).text()
 
     _indexedStylesheets: ->
-      _.reduce @cy.state("document").styleSheets, (memo, stylesheet) ->
+      _.reduce cy.state("document").styleSheets, (memo, stylesheet) ->
         memo[stylesheet.href] = stylesheet
         return memo
       , {}
@@ -115,7 +118,7 @@ module.exports = ($Cypress) ->
       ## but query from the actual document, since the cloned body
       ## iframes don't have proper styles applied
 
-      @cy.$$("iframe").each (idx, iframe) =>
+      cy.$$("iframe").each (idx, iframe) =>
         $iframe = $(iframe)
 
         remove = ->
@@ -161,3 +164,8 @@ module.exports = ($Cypress) ->
           <p>&lt;iframe&gt; placeholder for #{iframe.src}</p>
         """
         $placeholder[0].src = "data:text/html;charset=utf-8,#{encodeURI(contents)}"
+  }
+
+module.exports = {
+  create
+}

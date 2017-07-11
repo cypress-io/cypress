@@ -27,6 +27,7 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
+$Snapshot = require("./cypress/snapshot")
 
 $utils = require("./cypress/utils")
 
@@ -181,6 +182,7 @@ class $Cypress
 
     ## TODO: fix this
     # @log     = $Log.create(@, cy)
+    @snapshot = $Snapshot.create(@cy)
 
     ## wire up command create to cy
     @Commands = $Commands.create(Cypress, @cy, @config)
