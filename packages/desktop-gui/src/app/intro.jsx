@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 
+import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import viewStore from '../lib/view-store'
@@ -22,16 +23,7 @@ class Default extends Component {
   render () {
     return (
       <div className='intro'>
-        <div className='alert alert-info alert-dismissible'>
-          <p className='text-center'>
-            <i className='fa fa-info-circle'></i>{' '}
-            We recommend versioning Cypress per project and{' '}
-            <a onClick={this._openHelp} className='helper-docs-link'>
-              installing it via <span className='mono'>npm</span>
-            </a>.
-          </p>
-          <button className="close" onClick={this._removeGlobalIntro}><span>&times;</span></button>
-        </div>
+        {this._localNotice()}
         <div className='intro-content'>
           <h1>To get started...</h1>
           <div
@@ -52,13 +44,30 @@ class Default extends Component {
     )
   }
 
+  _localNotice () {
+    if (appStore.localInstallNoticeDismissed) return null
+
+    return (
+      <div className='local-install-notice alert alert-info alert-dismissible'>
+        <p className='text-center'>
+          <i className='fa fa-info-circle'></i>{' '}
+          We recommend versioning Cypress per project and{' '}
+          <a onClick={this._openHelp} className='helper-docs-link'>
+            installing it via <span className='mono'>npm</span>
+          </a>.
+        </p>
+        <button className="close" onClick={this._removeGlobalIntro}><span>&times;</span></button>
+      </div>
+    )
+  }
+
   componentWillUnmount () {
     document.removeEventListener('dragover', this._nope)
     document.removeEventListener('drop', this._nope)
   }
 
   _removeGlobalIntro = () => {
-    // this should prob just be set in localStorage
+    appStore.setLocalInstallNoticeDismissed(true)
   }
 
   _selectProject = (e) => {
