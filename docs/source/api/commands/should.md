@@ -262,14 +262,14 @@ cy
 
 ```javascript
 cy.get('input', {timeout: 10000}).should('have.value', '10')
-                         ↲
+  //                    ↲
   // timeout here will be passed down to the '.should()'
   // and it will retry for up to 10 secs
 ```
 
 ```javascript
 cy.get('input', {timeout: 10000}).should(($input) => {
-                         ↲
+  //                    ↲
   // timeout here will be passed down to the '.should()'
   // unless an assertion throws earlier,
   // ALL of the assertions will retry for up to 10 secs
