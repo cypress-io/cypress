@@ -58,7 +58,7 @@ describe "src/cypress", ->
     it "emits 'initialize'", ->
       expect(@emit).to.be.calledWith "initialize", {
         specWindow: 1
-        $remoteIframe: 2
+        $autIframe: 2
       }
 
     it "calls mocha#options with runner", ->

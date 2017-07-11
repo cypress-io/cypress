@@ -21,7 +21,7 @@ describe "$Cypress.LocalStorage API", ->
     # @emit = @sandbox.spy(Eclectus.Command.prototype, "emit")
 
     loadFixture("generic").done (iframe) =>
-      # Eclectus.patch {$remoteIframe: $(iframe)}
+      # Eclectus.patch {$autIframe: $(iframe)}
       @localStorage = window.localStorage
       @remoteStorage = iframe.contentWindow.localStorage
 

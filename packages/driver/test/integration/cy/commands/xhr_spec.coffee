@@ -1058,7 +1058,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "without sinon present", ->
       beforeEach ->
         ## force us to start from blank window
-        @cy.state("$remoteIframe").prop("src", "about:blank")
+        @cy.state("$autIframe").prop("src", "about:blank")
 
       it "can start server with no errors", ->
         @cy
@@ -1888,7 +1888,7 @@ describe "$Cypress.Cy XHR Commands", ->
   context.skip "Cypress.on(before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window
-      @cy.state("$remoteIframe").prop("src", "about:blank")
+      @cy.state("$autIframe").prop("src", "about:blank")
 
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied

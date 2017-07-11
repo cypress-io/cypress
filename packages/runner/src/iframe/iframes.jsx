@@ -96,8 +96,8 @@ export default class Iframes extends Component {
     eventManager.setup(config, specPath)
 
     this._loadIframes(specPath)
-    .then(([specWindow, $autIframe]) => {
-      eventManager.run(specWindow, $autIframe)
+    .then(($autIframe) => {
+      eventManager.initialize($autIframe, config)
     })
   }
 
@@ -118,7 +118,7 @@ export default class Iframes extends Component {
       }).appendTo($container)
 
       $specIframe.prop('src', specSrc).one('load', () => {
-        resolve([$specIframe[0].contentWindow, $autIframe])
+        resolve($autIframe)
       })
     })
   }

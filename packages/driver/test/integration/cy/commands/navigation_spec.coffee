@@ -277,7 +277,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(trigger).to.be.calledWith("resolve:url", "http://localhost:3500/app")
 
     it "prepends hostname when visiting locally", ->
-      prop = @sandbox.spy(@cy.state("$remoteIframe"), "prop")
+      prop = @sandbox.spy(@cy.state("$autIframe"), "prop")
 
       @cy
         .visit("fixtures/sinon.html")
@@ -303,13 +303,13 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500/blank.html")
 
     it "can visit pages on different subdomain but same originPolicy", ->
-      $remoteIframe = @cy.state("$remoteIframe")
+      $autIframe = @cy.state("$autIframe")
 
       load = ->
-        $remoteIframe.trigger("load")
+        $autIframe.trigger("load")
 
       ## whenever we're told to change the src
-      ## just fire the load event directly on the $remoteIframe
+      ## just fire the load event directly on the $autIframe
       @sandbox.stub(@cy, "_src", load)
 
       ## make it seem like we're already on www.foobar.com:3500
@@ -348,7 +348,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         count = 0
         urls = []
 
-        @cy.state("$remoteIframe").on "load", =>
+        @cy.state("$autIframe").on "load", =>
           urls.push @cy.state("window").location.href
 
           count += 1
@@ -746,13 +746,13 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("http://google.com:3500/blank.html")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
-        $remoteIframe = @cy.state("$remoteIframe")
+        $autIframe = @cy.state("$autIframe")
 
         load = ->
-          $remoteIframe.trigger("load")
+          $autIframe.trigger("load")
 
         ## whenever we're told to change the src
-        ## just fire the load event directly on the $remoteIframe
+        ## just fire the load event directly on the $autIframe
         @sandbox.stub(@cy, "_src", load)
 
         logs = []
@@ -1126,7 +1126,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.window().then (win) =>
         timeout = @sandbox.spy(@cy, "_timeout")
 
-        @cy.state("$remoteIframe").one "load", =>
+        @cy.state("$autIframe").one "load", =>
           @cy.state("ready").promise.then ->
             _.delay ->
               expect(timeout.callCount).to.eq(1)

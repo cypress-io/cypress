@@ -226,7 +226,7 @@ module.exports = (Commands, Cypress, cy) ->
       @_clearTimeout()
 
       win           = @state("window")
-      $remoteIframe = @state("$remoteIframe")
+      $autIframe = @state("$autIframe")
       runnable      = @state("runnable")
 
       v = null
@@ -314,7 +314,7 @@ module.exports = (Commands, Cypress, cy) ->
           ## for this, and so we need to resolve onLoad immediately
           ## and bypass the actual visit resolution stuff
           if bothUrlsMatchAndRemoteHasHash(current, remote)
-            @_src($remoteIframe, remote.href)
+            @_src($autIframe, remote.href)
             return onLoad()
 
           if existingHash
@@ -359,9 +359,9 @@ module.exports = (Commands, Cypress, cy) ->
 
               ## when the remote iframe's load event fires
               ## callback fn
-              $remoteIframe.one("load", onLoad)
+              $autIframe.one("load", onLoad)
 
-              @_src($remoteIframe, url)
+              @_src($autIframe, url)
             else
               ## if we've already visited a new superDomain
               ## then die else we'd be in a terrible endless loop
@@ -450,7 +450,7 @@ module.exports = (Commands, Cypress, cy) ->
         if not hasVisitedAboutBlank
           hasVisitedAboutBlank = true
 
-          $remoteIframe.one "load", =>
+          $autIframe.one "load", =>
             v = visit(win, url, options)
 
           @_href(win, "about:blank")
@@ -461,7 +461,7 @@ module.exports = (Commands, Cypress, cy) ->
       .timeout(options.timeout)
       .catch Promise.TimeoutError, (err) =>
         v and v.cancel?()
-        $remoteIframe.off("load")
+        $autIframe.off("load")
         timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
   })
 
@@ -475,8 +475,8 @@ module.exports = (Commands, Cypress, cy) ->
     _existing: ->
       $Location.create(window.location.href)
 
-    _src: ($remoteIframe, url) ->
-      $remoteIframe.prop("src", url)
+    _src: ($autIframe, url) ->
+      $autIframe.prop("src", url)
 
     _resolveUrl: (url) ->
       Cypress.triggerPromise("resolve:url", url)

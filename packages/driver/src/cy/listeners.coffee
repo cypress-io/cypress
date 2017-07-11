@@ -11,8 +11,8 @@ module.exports = ($Cy) ->
         previousWin.off()
         previousWin = null
 
-    offIframeListeners: ($remoteIframe) ->
-      $remoteIframe?.off()
+    offIframeListeners: ($autIframe) ->
+      $autIframe?.off()
 
     ## we listen for the unload + submit events on
     ## the window, because when we receive them we

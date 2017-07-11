@@ -103,28 +103,12 @@ class $Cypress
 
     @emit("config", config)
 
-  initialize: (specWindow, $remoteIframe) ->
+  initialize: ($autIframe) ->
     ## push down the options
     ## to the runner
     @mocha.options(@runner)
 
-    ## allow mocha + chai to initialize
-    ## themselves or any other listeners
-    @emit("initialize", {
-      specWindow: specWindow
-      $remoteIframe: $remoteIframe
-    })
-
-    ## let the world know we're ready to
-    ## rock and roll
-    @emit("initialized", {
-      cy: @cy
-      runner: @runner
-      mocha: @mocha
-      chai: @chai
-    })
-
-    return @
+    @cy.initialize($autIframe)
 
   run: (fn) ->
     $utils.throwErrByPath("miscellaneous.no_runner") if not @runner

@@ -172,16 +172,48 @@ const eventManager = {
     // expose Cypress globally
     window.Cypress = Cypress
 
-    this._addListeners(config)
+    this._addListeners()
 
     channel.emit('watch:test:file', specPath)
   },
 
-  run (specWindow, $autIframe) {
-    Cypress.initialize(specWindow, $autIframe)
+  initialize ($autIframe, config) {
+    Cypress.initialize($autIframe)
+
+    // get the current runnable in case we reran mid-test due to a visit
+    // to a new domain
+    channel.emit('get:existing:run:state', (state = {}) => {
+      const runnables = Cypress.normalizeAll(state.tests)
+      const run = () => {
+        this._runDriver(state)
+      }
+
+      reporterBus.emit('runnables:ready', runnables)
+
+      if (state.numLogs) {
+        Cypress.setNumLogs(state.numLogs)
+      }
+
+      if (state.startTime) {
+        Cypress.setStartTime(state.startTime)
+      }
+
+      if (state.currentId) {
+        // if we have a currentId it means
+        // we need to tell the Cypress to skip
+        // ahead to that test
+        Cypress.resumeAtTest(state.currentId, state.emissions)
+      }
+
+      if (config.isHeadless && !state.currentId) {
+        channel.emit('set:runnables', runnables, run)
+      } else {
+        run()
+      }
+    })
   },
 
-  _addListeners (config) {
+  _addListeners () {
     Cypress.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)
     })
@@ -190,50 +222,9 @@ const eventManager = {
       Cypress.on(event, (...args) => channel.emit(event, ...args))
     })
 
-    // TODO: can't this just be a driverToSocketEvents?
-    // Cypress.on('mocha', (event, ...args) => {
-    //   channel.emit('mocha', event, ...args)
-    // })
-
-    // TODO: don't talk to runner here
-    // talk directly to Cypress
-    Cypress.on('initialized', ({ runner }) => {
-      Cypress.on('collect:run:state', () => new Promise((resolve) => {
-        reporterBus.emit('reporter:collect:run:state', resolve)
-      }))
-
-      // get the current runnable in case we reran mid-test due to a visit
-      // to a new domain
-      channel.emit('get:existing:run:state', (state = {}) => {
-        const runnables = runner.normalizeAll(state.tests)
-        const run = () => {
-          this._runDriver(runner, state)
-        }
-
-        reporterBus.emit('runnables:ready', runnables)
-
-        if (state.numLogs) {
-          runner.setNumLogs(state.numLogs)
-        }
-
-        if (state.startTime) {
-          runner.setStartTime(state.startTime)
-        }
-
-        if (state.currentId) {
-          // if we have a currentId it means
-          // we need to tell the runner to skip
-          // ahead to that test
-          runner.resumeAtTest(state.currentId, state.emissions)
-        }
-
-        if (config.isHeadless && !state.currentId) {
-          channel.emit('set:runnables', runnables, run)
-        } else {
-          run()
-        }
-      })
-    })
+    Cypress.on('collect:run:state', () => new Promise((resolve) => {
+      reporterBus.emit('reporter:collect:run:state', resolve)
+    }))
 
     Cypress.on('log', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
@@ -274,7 +265,7 @@ const eventManager = {
     })
   },
 
-  _runDriver (runner, state) {
+  _runDriver (state) {
     Cypress.run(() => {})
 
     reporterBus.emit('reporter:start', {

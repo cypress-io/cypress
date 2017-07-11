@@ -10,7 +10,7 @@ describe "$Cypress.Cy Listeners Extensions", ->
       @cy = $Cypress.Cy.create(@Cypress, {})
 
       @Cypress.trigger "initialize", {
-        $remoteIframe: @iframe
+        $autIframe: @iframe
         config: {}
       }
 

@@ -49,6 +49,15 @@ privateProps = {
 
 # { visit, get, find } = cy
 
+setIframeWindowDocumentProps = ($autIframe, state) ->
+  contentWindow = $autIframe.prop("contentWindow")
+
+  state("window",   contentWindow)
+  state("document", contentWindow.document)
+
+setRemoteIframeProps = ($autIframe, state) ->
+  state("$autIframe", $autIframe)
+
 create = (specWindow, Cypress, config, log) ->
   state = $SetterGetter.create({})
 
@@ -85,17 +94,41 @@ create = (specWindow, Cypress, config, log) ->
     getLastXhrByAlias: xhrs.getLastXhrByAlias
     getRequestsByAlias: xhrs.getRequestsByAlias
 
-    # onCommand: (key, fn, type, enforceDom) ->
-    #   $utils.throwErrByPath("add.type_missing") if not type
-    #
-    #   ## allow object signature
-    #   if _.isObject(key)
-    #     _.each key, (fn, key) =>
-    #       cy.onCommand(key, fn, type, enforceDom)
-    #     return cy
-    #
-    #   ## need to pass the options into inject here
-    #   cy.add(key, fn, type, enforceDom)
+    initialize: ($autIframe) ->
+      setRemoteIframeProps($autIframe, state)
+
+      ## dont need to worry about a try/catch here
+      ## because this is during initialize and its
+      ## impossible something is wrong here
+      setIframeWindowDocumentProps($autIframe, state)
+
+      $autIframe.on "load", =>
+        ## if setting iframe props failed
+        ## dont do anything else because
+        ## we are in trouble
+        try
+          setIframeWindowDocumentProps($autIframe)
+
+          # @urlChanged(null, {log: false})
+          # @pageLoading(false)
+
+          ## we reapply window listeners on load even though we
+          ## applied them already during onBeforeLoad. the reason
+          ## is that after load javascript has finished being evaluated
+          ## and we may need to override things like alert + confirm again
+          # @bindWindowListeners @state("window")
+          # @isReady(true, "load")
+          # @Cypress.trigger("load")
+        catch err
+          ## catch errors associated to cross origin iframes
+          if ready = state("ready")
+            ready.reject(err)
+          else
+            errors.fail(err)
+
+    $$: (selector, context) ->
+      context ?= state("document")
+      new $.fn.init(selector, context)
 
     addCommand: ({key, fn, type, enforceDom}) ->
       commandFns[key] = _.bind(fn, cy)

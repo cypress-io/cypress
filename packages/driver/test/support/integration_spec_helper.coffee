@@ -194,7 +194,7 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
         }
       })
 
-      @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
+      @Cypress.trigger "initialize", {$autIframe: @$iframe}
 
       ## must call defaults manually because
       ## this is naturally called in initialize
