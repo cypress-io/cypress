@@ -31,6 +31,11 @@ $Snapshot = require("./cypress/snapshot")
 
 $utils = require("./cypress/utils")
 
+proxies = {
+  runner: "getStartTime getTestsState getEmissions countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId normalizeAll".split(" ")
+  cy: "checkForEndedEarly onUncaughtException setRunnable".split(" ")
+}
+
 throwDeprecatedCommandInterface = (key, method) ->
   signature = switch method
     when "addParentCommand"
@@ -117,40 +122,6 @@ class $Cypress
       @cy.addCommand(cmd)
 
     @runner.run(fn)
-
-  getStartTime: ->
-    @runner.getStartTime()
-
-  getTestsState: ->
-    @runner.getTestsState()
-
-  getEmissions: ->
-    @runner.getEmissions()
-
-  countByTestState: (tests, state) ->
-    @runner.countByTestState(tests, state)
-
-  getDisplayPropsForLog: (attrs) ->
-    @runner.getDisplayPropsForLog(attrs)
-
-  getConsolePropsForLogById: (logId) ->
-    @runner.getConsolePropsForLogById(logId)
-
-  getSnapshotPropsForLogById: (logId) ->
-    @runner.getSnapshotPropsForLogById(logId)
-
-  getErrorByTestId: (testId) ->
-    @runner.getErrorByTestId(testId)
-
-  checkForEndedEarly: ->
-    @cy and @cy.checkForEndedEarly()
-
-  onUncaughtException: ->
-    @cy.onUncaughtException.apply(@cy, arguments)
-
-  ## TODO: TEST THIS
-  setRunnable: (runnable, hookName) ->
-    @cy.setRunnable(runnable, hookName)
 
   ## onSpecWindow is called as the spec window
   ## is being served but BEFORE any of the actual
@@ -390,6 +361,15 @@ class $Cypress
 
   @extend = (obj) ->
     _.extend @prototype, obj
+
+  ## proxy all of the methods in proxies
+  ## to their corresponding objects
+  _.each proxies, (methods, key) ->
+    _.each methods, (method) ->
+      $Cypress.prototype[method] = ->
+        prop = @[key]
+
+        prop and prop[method].apply(prop, arguments)
 
 ## attach these to the prototype
 ## instead of $Cypress

@@ -706,6 +706,20 @@ create = (mocha, Cypress) ->
     getErrorByTestId: (testId) ->
       if test = testsById[testId]
         wrapErr(test.err)
+
+    getDisplayPropsForLog: $Log.getDisplayProps
+
+    getConsolePropsForLogById: (logId) ->
+      if attrs = logsById[logId]
+        $Log.getConsoleProps(attrs)
+
+    getSnapshotPropsForLogById: (logId) ->
+      if attrs = logsById[logId]
+        $Log.getSnapshotProps(attrs)
+
+    getErrorByTestId: (testId) ->
+      if test = testsById[testId]
+        wrapErr(test.err)
   }
 
 module.exports = {
