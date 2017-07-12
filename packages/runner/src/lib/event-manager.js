@@ -294,7 +294,12 @@ const eventManager = {
       return this._restart()
     })
     .then(() => {
-      Cypress.off()
+      // this probably isn't 100% necessary
+      // since Cypress will fall out of scope
+      // but we want to be aggressive here
+      // and force GC early and often
+      Cypress.removeAllListeners()
+
       localBus.emit('restart')
     })
   },
