@@ -68,7 +68,13 @@ export default class Nav extends Component {
   }
 
   _userStateButton = () => {
-    if (!authStore.isAuthenticated) return null
+    if (!authStore.isAuthenticated) {
+      return (
+        <button onClick={this._login}>
+          <i className='fa fa-sign-in' /> Log In
+        </button>
+      )
+    }
 
     return (
       <Dropdown
@@ -109,6 +115,10 @@ export default class Nav extends Component {
     if (item.id === 'logout') {
       appApi.logOut()
     }
+  }
+
+  _login () {
+    viewStore.showLogin()
   }
 
   _openDocs (e) {

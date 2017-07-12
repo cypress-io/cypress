@@ -1,6 +1,5 @@
 import { action, computed, observable } from 'mobx'
 import User from '../lib/user-model'
-import viewStore from './view-store'
 
 class AuthStore {
   @observable user = null
@@ -12,12 +11,6 @@ class AuthStore {
   @action setUser (user) {
     const isValid = user && user.authToken
     this.user = isValid ? new User(user) : null
-
-    if (isValid) {
-      viewStore.showApp()
-    } else {
-      viewStore.showLogin()
-    }
   }
 }
 

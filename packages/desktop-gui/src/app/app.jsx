@@ -20,12 +20,12 @@ class App extends Component {
   componentDidMount () {
     appApi.listenForMenuClicks()
 
-    ipc.getOptions()
-    .then((options = {}) => {
+    ipc.getOptions().then((options = {}) => {
       appStore.set(_.pick(options, 'env', 'os', 'projectPath', 'version'))
-
-      return ipc.getCurrentUser()
+      viewStore.showApp()
     })
+
+    ipc.getCurrentUser()
     .then((user) => {
       authStore.setUser(user)
       // mobx can trigger a synchronous re-render, which executes
@@ -35,10 +35,7 @@ class App extends Component {
       // same goes for other `return null`s below
       return null
     })
-    .catch(ipc.isUnauthed, () => {
-      viewStore.showLogin()
-      return null
-    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
   }
 
   render () {
