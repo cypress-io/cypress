@@ -28,7 +28,7 @@
     "test": "mocha --compilers coffee:@packages/coffee/register --recursive",
     "test-watch": "npm run test --silent -- --watch",
     "prelint": "npm run root-install",
-    "lint": "linting scripts",
+    "lint": "echo 'linting scripts'",
     "postlint": "$(bin-up eslint) --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
