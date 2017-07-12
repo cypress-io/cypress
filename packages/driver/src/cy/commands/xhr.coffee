@@ -67,7 +67,7 @@ setResponse = (cy, xhr) ->
 startXhrServer = (cy, config) ->
   logs = {}
 
-  cy.state "server", $Server.create({
+  server = $Server.create({
     xhrUrl: config("xhrUrl")
     stripOrigin: stripOrigin
 
@@ -185,6 +185,10 @@ startXhrServer = (cy, config) ->
       if route and _.isFunction(route.onResponse)
         route.onResponse.call(cy, xhr)
   })
+
+  cy.state("server", server)
+
+  return server
 
 defaults = {
   method: undefined
