@@ -217,7 +217,21 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && npm run build && npm run test-e2e
+      - run: cd docs && npm run deps
+      - run: cd docs && npm run build
+      - run: cd docs && npm run test-e2e
+
+  "deploy-docs":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && NODE_ENV=production npm run build
+      # because we already built docs for production
+      # use script that just deploys without rebuilding the production docs
+      # also, for now deploy to staging
+      - run: cd docs && npm run deploy-prebuilt -- --environment staging --scrape
+      - run: cd docs && cat public/build.json
 
   "driver-unit-tests":
     <<: *defaults
@@ -257,15 +271,22 @@ workflows:
       - server-e2e-tests:
           requires:
             - build
-      - docs-tests:
-          requires:
-            - build
       - driver-unit-tests:
           requires:
             - build
       - build-binary:
           requires:
             - build
+      # test and deploy documentation site
+      - docs-tests:
+          requires:
+            - build
+      - deploy-docs:
+          filters:
+            branches:
+              only: master
+          requires:
+            - docs-tests
 
 #
 # things to run in the 4th CI container

@@ -14,60 +14,23 @@ const minimist   = require('minimist')
 const questionsRemain = require('@cypress/questions-remain')
 const scrape     = require('./scrape')
 const shouldDeploy = require('./should-deploy')
+const { configFromEnvOrJsonFile } = require('./env-or-file')
 const R = require('ramda')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const distDir = path.resolve('public')
-
-const fs = Promise.promisifyAll(require('fs-extra'))
+const isValidEnvironment = is.oneOf(['production', 'staging'])
 
 // initialize on existing repo
 const repo = Promise.promisifyAll(gift(path.resolve('..')))
-
-// environment variables set via shell have restrictions
-// so remove invalid characters from the filename
-// that cannot be there
-function filenameToShellVariable (filename) {
-  const rep = '_'
-  return filename.replace(/\//g, rep)
-    .replace(/\./g, rep)
-    .replace(/-/g, rep)
-}
-
-function maybeLoadFromVariable (filename) {
-  const key = filenameToShellVariable(filename)
-  console.log('checking environment variable "%s"', key)
-  if (process.env[key]) {
-    console.log('loading from variable', key)
-    return JSON.parse(process.env[key])
-  }
-}
-
-function loadFromFile (key) {
-  const pathToAwsCreds = path.resolve(key)
-
-  return fs.readJsonAsync(pathToAwsCreds)
-  .then(() => {
-    console.log('loaded from file', key)
-  })
-  .catch({ code: 'ENOENT' }, (err) => {
-    console.log(chalk.red(`Cannot deploy.\n\nYou are missing your AWS credentials.\n\nPlease add your credentials here: ${pathToAwsCreds}\n`))
-    throw err
-  })
-}
 
 // resolves with S3 credentials object
 // first tries to load from ENV string
 // if not found, tries to load from a file
 function getS3Credentials () {
   const key = path.join('support', '.aws-credentials.json')
-  return Promise.resolve()
-    .then(() => maybeLoadFromVariable(key))
-    .then((env) => {
-      if (env) {
-        return env
-      }
-      return loadFromFile(key)
-    })
+  return configFromEnvOrJsonFile(key)
 }
 
 function getCurrentBranch () {
@@ -152,18 +115,19 @@ function publishToS3 (publisher) {
 }
 
 function uploadToS3 (env) {
+  la(isValidEnvironment(env), 'invalid environment', env)
+  const bucketName = `bucket-${env}`
   return getS3Credentials()
   .then((json) => {
-    const bucket = json[`bucket-${env}`] || (function () {
-      throw new Error(`Could not find a bucket for environment: ${env}`)
-    })()
+    la(is.object(json), 'missing S3 credentials object for environment', env)
+    const bucket = json[bucketName]
+    la(is.unemptyString(bucket), 'Could not find a bucket for environment', env)
 
     console.log('\n', 'Deploying to:', chalk.green(bucket), '\n')
-
     const publisher = getPublisher(bucket, json.key, json.secret)
-
-    return publishToS3(publisher)
+    return publisher
   })
+  .then(publishToS3)
 }
 
 function prompt (questions) {
@@ -233,39 +197,41 @@ function scrapeDocs (env, branch) {
 
 }
 
-function doDeploy () {
-  return getS3Credentials()
-  .then(getCurrentBranch)
-  .then((branch) => {
+function deployEnvironmentBranch (env, branch) {
+  la(is.unemptyString(branch), 'missing branch to deploy', branch)
+  la(isValidEnvironment(env), 'invalid deploy environment', env)
+
+  const cleanup = () => {
     console.log('On branch:', chalk.green(branch), '\n')
+    if (env === 'staging') {
+      return env
+    }
 
-    return getDeployEnvironment()
-    .then((env) => {
-      if (env === 'staging') {
-        return env
+    if (env === 'production') {
+      if (branch !== 'master') {
+        throw new Error('Cannot deploy master to production. You are not on the \'master\' branch.')
       }
 
-      if (env === 'production') {
-        if (branch !== 'master') {
-          throw new Error('Cannot deploy master to production. You are not on the \'master\' branch.')
-        }
+      return ensureCleanWorkingDirectory()
+    } else {
+      throw new Error(`Unknown environment: ${env}`)
+    }
+  }
 
-        return ensureCleanWorkingDirectory()
-        .return(env)
-      } else {
-        throw new Error(`Unknown environment: ${env}`)
-      }
+  const uploadEnvToS3 = _.partial(uploadToS3, env)
+  const maybeCommit = () =>
+    commitMessage(env, branch)
+    .catch((err) => {
+      // ignore commit error - do we really need it?
+      console.error('could not make a doc commit')
+      console.error(err.message)
     })
-    .then((env) => {
-      return uploadToS3(env)
-      .then(() => {
-        return commitMessage(env, branch)
-      })
-      .then(() => {
-        return scrapeDocs(env, branch)
-      })
-    })
-  })
+
+  return Promise.resolve()
+  .then(cleanup)
+  .then(uploadEnvToS3)
+  .then(maybeCommit)
+  .then(() => scrapeDocs(env, branch))
   .then(() => {
     console.log(chalk.yellow('\n==============================\n'))
     console.log(chalk.bgGreen(chalk.black(' Done Deploying ')))
@@ -273,20 +239,33 @@ function doDeploy () {
   })
 }
 
+function doDeploy (env) {
+  la(isValidEnvironment(env), 'invalid deploy environment', env)
+  return getCurrentBranch()
+    .then((branch) => deployEnvironmentBranch(env, branch))
+}
+
 function deploy () {
   console.log()
   console.log(chalk.yellow('Cypress Docs Deployinator'))
   console.log(chalk.yellow('==============================\n'))
 
-  return shouldDeploy()
+  return getDeployEnvironment()
+  .then((env) => {
+    return shouldDeploy(env)
     .then((should) => {
       if (!should) {
-        console.log('nothing to deploy')
+        console.log('nothing to deploy for environment %s', env)
         return false
       }
-      return doDeploy()
+      return doDeploy(env)
     })
-
+  })
 }
 
 deploy()
+  .catch((err) => {
+    console.error('🔥  deploy failed')
+    console.error(err)
+    process.exit(-1)
+  })

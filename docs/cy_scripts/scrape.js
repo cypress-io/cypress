@@ -3,41 +3,36 @@
 const path = require('path')
 const chalk = require('chalk')
 const request = require('request-promise')
-const Promise = require('bluebird')
+const { configFromEnvOrJsonFile } = require('./env-or-file')
+const { stripIndent } = require('common-tags')
+const R = require('ramda')
 
-const fs = Promise.promisifyAll(require('fs-extra'))
+function checkToken (token) {
+  if (!token) {
+    const example = JSON.stringify({
+      token: 'foobarbaz',
+    })
+
+    console.log(chalk.red(stripIndent`Cannot scrape docs.
+      You are missing your Circle CI API token.
+      It should look like this:
+
+        ${example}
+    `))
+    throw new Error('missing token')
+  }
+}
 
 function getCircleCredentials () {
-  const pathToCircleCreds = path.resolve('support', '.circle-credentials.json')
-
-  const example = JSON.stringify({
-    token: 'foobarbaz',
-  }, null, 2)
-
-  return fs.readJsonAsync(pathToCircleCreds)
-  .catch({ code: 'ENOENT' }, () => {
-    return {}
-  })
-  .then((json) => {
-    const token = json.token
-
-    if (!token) {
-      console.log(chalk.red(`Cannot scrape docs.\n\nYou are missing your Circle CI token.\n\nPlease add your token here: ${pathToCircleCreds}\n\nIt should look like this:\n\n${example}\n`))
-    }
-
-    return token
-  })
+  const key = path.join('support', '.circle-credentials.json')
+  return configFromEnvOrJsonFile(key)
+    .get('token')
 }
 
 function scrape () {
   return getCircleCredentials()
+  .then(R.tap(checkToken))
   .then((token) => {
-    // bail if we dont have a token
-    if (!token) {
-      console.log('After fixing this problem you can run scraping by itself with this command:', chalk.yellow('npm run scrape'), '\n')
-      return
-    }
-
     // hmm, how do we trigger workflow?
     // seems this is not supported yet as of July 10th 2017
     // https://discuss.circleci.com/t/trigger-workflow-through-rest-api/13931
