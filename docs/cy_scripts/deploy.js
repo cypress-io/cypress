@@ -188,8 +188,8 @@ function scrapeDocs (env, branch) {
 
   // if we arent deploying to production return
   if (env !== 'production') {
-    console.log('Skipping doc scraping because you deployed to:', chalk.cyan('production'))
-
+    console.log('Skipping doc scraping because you deployed to:', chalk.cyan(env))
+    console.log('Only scraping production deploy')
     return
   }
 
@@ -207,6 +207,7 @@ function deployEnvironmentBranch (env, branch) {
   la(isValidEnvironment(env), 'invalid deploy environment', env)
 
   const cleanup = () => {
+    console.log('Target environment:', chalk.green(env))
     console.log('On branch:', chalk.green(branch), '\n')
     if (env === 'staging') {
       return env
