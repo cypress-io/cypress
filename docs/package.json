@@ -32,6 +32,7 @@
     "postlint": "$(bin-up eslint) --fix *.js cy_scripts/*.js scripts/*.js"
   },
   "devDependencies": {
+    "@cypress/env-or-json-file": "^1.0.0",
     "@cypress/questions-remain": "^1.0.1",
     "beeper": "^1.1.1",
     "bin-up": "^1.0.1",

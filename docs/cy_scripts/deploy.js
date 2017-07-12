@@ -14,7 +14,7 @@ const minimist   = require('minimist')
 const questionsRemain = require('@cypress/questions-remain')
 const scrape     = require('./scrape')
 const shouldDeploy = require('./should-deploy')
-const { configFromEnvOrJsonFile } = require('./env-or-file')
+const { configFromEnvOrJsonFile } = require('@cypress/env-or-json-file')
 const R = require('ramda')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -31,6 +31,12 @@ const repo = Promise.promisifyAll(gift(path.resolve('..')))
 function getS3Credentials () {
   const key = path.join('support', '.aws-credentials.json')
   return configFromEnvOrJsonFile(key)
+  .catch((err) => {
+    console.error('⛔️  Cannot find AWS credentials')
+    console.error('Using @cypress/env-or-json-file module')
+    console.error('and key', key)
+    throw err
+  })
 }
 
 function getCurrentBranch () {
@@ -117,7 +123,8 @@ function publishToS3 (publisher) {
 function uploadToS3 (env) {
   la(isValidEnvironment(env), 'invalid environment', env)
   const bucketName = `bucket-${env}`
-  return getS3Credentials()
+  return Promise.resolve()
+  .then(getS3Credentials)
   .then((json) => {
     la(is.object(json), 'missing S3 credentials object for environment', env)
     const bucket = json[bucketName]

@@ -2,8 +2,9 @@
 
 const path = require('path')
 const chalk = require('chalk')
+const Promise = require('bluebird')
 const request = require('request-promise')
-const { configFromEnvOrJsonFile } = require('./env-or-file')
+const { configFromEnvOrJsonFile } = require('@cypress/env-or-json-file')
 const { stripIndent } = require('common-tags')
 const R = require('ramda')
 
@@ -26,11 +27,18 @@ function checkToken (token) {
 function getCircleCredentials () {
   const key = path.join('support', '.circle-credentials.json')
   return configFromEnvOrJsonFile(key)
+    .catch((err) => {
+      console.error('⛔️  Cannot find CircleCI credentials')
+      console.error('Using @cypress/env-or-json-file module')
+      console.error('and key', key)
+      throw err
+    })
     .get('token')
 }
 
 function scrape () {
-  return getCircleCredentials()
+  return Promise.resolve()
+  .then(getCircleCredentials)
   .then(R.tap(checkToken))
   .then((token) => {
     // hmm, how do we trigger workflow?
