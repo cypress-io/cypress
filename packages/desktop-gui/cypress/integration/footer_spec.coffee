@@ -13,29 +13,19 @@ describe "Footer", ->
       cy.stub(@ipc, "getProjectStatuses").resolves([])
       cy.stub(@ipc, "externalOpen")
 
-      @getUser = @util.deferred()
-      cy.stub(@ipc, "getCurrentUser").resolves(@getUser.promise)
-
       start()
 
-  describe "when logged out", ->
-    beforeEach ->
-      @getUser.resolve(null)
+  it "shows footer", ->
+    cy.get("footer").should("be.visible")
 
-    it "hides footer", ->
-      cy.get("footer").should("not.be.visible")
+  it "displays version sent from get:options", ->
+    cy.get("footer").contains(@version)
 
-  describe "when logged in", ->
-    beforeEach ->
-      @getUser.resolve(@user)
+  it "opens link to changelog on click of changelog", ->
+    cy
+      .get("a").contains("Changelog").click().then ->
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")
 
-    it "shows footer", ->
-      cy.get("footer").should("be.visible")
-
-    it "displays version sent from get:options", ->
-      cy.get("footer").contains(@version)
-
-    it "opens link to changelog on click of changelog", ->
-      cy
-        .get("a").contains("Changelog").click().then ->
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")
+  it "does not appear on login page", ->
+    cy.contains("Log In").click()
+    cy.get("footer").should("not.be.visible")
