@@ -229,8 +229,7 @@ jobs:
       - run: cd docs && NODE_ENV=production npm run build
       # because we already built docs for production
       # use script that just deploys without rebuilding the production docs
-      # also, for now deploy to staging
-      - run: cd docs && npm run deploy-prebuilt -- --environment staging --scrape
+      - run: cd docs && npm run deploy-prebuilt -- --environment production --scrape
       - run: cd docs && cat public/build.json
 
   "driver-unit-tests":
