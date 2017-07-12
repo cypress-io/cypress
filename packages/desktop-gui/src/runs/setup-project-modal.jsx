@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
-import authStore from '../lib/auth-store'
+import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'

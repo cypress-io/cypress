@@ -34,14 +34,14 @@ describe "Navigation", ->
         .get("nav").contains("Chat").click().then ->
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
 
-  context.only "without a current user", ->
+  context "without a current user", ->
     beforeEach ->
       @getCurrentUser.resolve({})
 
     it "displays login button", ->
-      cy.contains("nav button", "Log In")
+      cy.contains("nav a", "Log In")
 
-    it "displays login screen when clicking login button", ->
+    it "displays login modal when clicking login button", ->
       cy.contains("Log In").click()
       cy.contains(".btn", "Log In with GitHub")
 
@@ -67,12 +67,7 @@ describe "Navigation", ->
         expect(@ipc.logOut).to.be.called
 
       it "displays login button", ->
-        cy
-          .get("nav a").should ($a) ->
-            expect($a).to.contain("Log In")
-
-      it "displays login screen", ->
-        cy.shouldBeOnLogin()
+        cy.contains("nav a", "Log In")
 
   context "when current user has no name", ->
     beforeEach ->

@@ -1,24 +1,12 @@
-#login {
-  background-color: #232A34;
-  text-align: center;
-  padding-top: 100px;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  color: #eee;
-
+.login {
   h3 {
-    color: #fff;
     margin-bottom: 15px;
     font-weight: 200;
-    font-size: 28px;
+    font-size: 24px;
   }
 
   p {
-    color: #bbb;
-    font-size: $font-size;
+    color: #666;
   }
 
   .alert.alert-danger {
@@ -43,23 +31,12 @@
   }
 }
 
-.login-img-wrapper {
-  width: 200px;
-  margin: 40px auto 20px;
-
-  img {
-    width: 100%;
-    height: 100%;
-  }
-}
-
 .login-content {
-  width: 300px;
   margin: 0 auto;
-  padding: 20px;
   overflow: auto;
-  background-color: #fafafa;
-  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  width: 300px;
 
   a {
     color: #3B94D9;
@@ -69,7 +46,7 @@
 .btn-login {
   line-height: 24px;
   font-size: 16px;
-  border-radius: 0;
+  border-radius: 3px;
   margin-bottom: 10px;
 
   i {

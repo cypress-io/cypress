@@ -15,12 +15,6 @@ class ViewStore {
     }
   }
 
-  @action showLogin () {
-    this.currentView = {
-      name: C.LOGIN,
-    }
-  }
-
   @action showApp () {
     if (appStore.projectPath) {
       this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectPath))

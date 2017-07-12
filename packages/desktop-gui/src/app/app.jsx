@@ -7,12 +7,11 @@ import appApi from '../lib/app-api'
 import C from '../lib/constants'
 import ipc from '../lib/ipc'
 import appStore from '../lib/app-store'
-import authStore from '../lib/auth-store'
+import authStore from '../auth/auth-store'
 import viewStore from '../lib/view-store'
 
 import Intro from './intro'
 import Layout from './layout'
-import Login from '../login/login'
 import Project from '../project/project'
 
 @observer
@@ -42,8 +41,6 @@ class App extends Component {
     switch (viewStore.currentView.name) {
       case C.LOADING:
         return <Loader color='#888' scale={0.5} />
-      case C.LOGIN:
-        return <Login />
       case C.INTRO:
         return (
           <Layout>

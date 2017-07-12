@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import appApi from '../lib/app-api'
 import appStore from '../lib/app-store'
-import authStore from '../lib/auth-store'
+import authApi from '../auth/auth-api'
+import authStore from '../auth/auth-store'
 import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
@@ -70,9 +70,11 @@ export default class Nav extends Component {
   _userStateButton = () => {
     if (!authStore.isAuthenticated) {
       return (
-        <button onClick={this._login}>
-          <i className='fa fa-sign-in' /> Log In
-        </button>
+        <li>
+          <a onClick={this._showLogin}>
+            <i className='fa fa-user' /> Log In
+          </a>
+        </li>
       )
     }
 
@@ -113,12 +115,12 @@ export default class Nav extends Component {
 
   _select = (item) => {
     if (item.id === 'logout') {
-      appApi.logOut()
+      authApi.logOut()
     }
   }
 
-  _login () {
-    viewStore.showLogin()
+  _showLogin () {
+    authStore.setShowingLogin(true)
   }
 
   _openDocs (e) {

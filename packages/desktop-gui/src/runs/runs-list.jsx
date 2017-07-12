@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
-import authStore from '../lib/auth-store'
+import authStore from '../auth/auth-store'
 import RunsStore from './runs-store'
 import errors from '../lib/errors'
 import runsApi from './runs-api'

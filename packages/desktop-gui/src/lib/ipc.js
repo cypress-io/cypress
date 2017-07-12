@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import ipcBus from './ipc-bus'
 import errors from './errors'
-import authStore from './auth-store'
+import authStore from '../auth/auth-store'
 
 const ipc = {
   isUnauthed (error) {
