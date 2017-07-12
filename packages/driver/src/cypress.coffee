@@ -34,6 +34,7 @@ $utils = require("./cypress/utils")
 proxies = {
   runner: "getStartTime getTestsState getEmissions countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId normalizeAll".split(" ")
   cy: "checkForEndedEarly onUncaughtException setRunnable".split(" ")
+  snapshot: "getStyles".split(" ")
 }
 
 throwDeprecatedCommandInterface = (key, method) ->
