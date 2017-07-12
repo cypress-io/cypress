@@ -268,14 +268,23 @@ class $Cypress
         ## also emits this on cy
         ## @cy.emit("fail", args...)
 
+      when "test:after:run"
+        @runner.cleanupQueue(@config("numTestsKeptInMemory"))
+
+        @emit("test:after:run", args...)
+
       when "command:enqueue"
         "asdf"
 
       when "command:log:added"
+        @runner.addLog(args[0], @isHeadless)
+
         @emit("log:added", args...)
 
       when "command:log:changed"
         "asdf"
+        @runner.addLog(args[0], @isHeadless)
+
         @emit("log:changed", args...)
 
   automation: (eventName, args...) ->
