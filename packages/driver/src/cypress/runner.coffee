@@ -653,47 +653,6 @@ create = (mocha, Cypress) ->
   getTests = ->
     tests
 
-  addLog: (attrs, isHeadless) ->
-    ## we dont need to hold a log reference
-    ## to anything in memory when we're headless
-    ## because you cannot inspect any logs
-    return if isHeadless
-
-    test = testsById[attrs.testId]
-
-    ## bail if for whatever reason we
-    ## cannot associate this log to a test
-    return if not test
-
-    ## if this test isnt in the current queue
-    ## then go ahead and add it
-    if not testsQueueById[test.id]
-      testsQueueById[test.id] = true
-      testsQueue.push(test)
-
-    if existing = logsById[attrs.id]
-      ## because log:state:changed may
-      ## fire at a later time, its possible
-      ## we've already cleaned up these attrs
-      ## and in that case we don't want to do
-      ## anything at all
-      return if existing._hasBeenCleanedUp
-
-      ## mutate the existing object
-      _.extend(existing, attrs)
-    else
-      logsById[attrs.id] = attrs
-
-      { testId, instrument } = attrs
-
-      if test = testsById[testId]
-        ## pluralize the instrument
-        ## as a property on the runnable
-        logs = test[instrument + "s"] ?= []
-
-        ## else push it onto the logs
-        logs.push(attrs)
-
   overrideRunnerHook(Cypress, runner, testsById, getTest, setTest, getTests)
 
   return {
@@ -780,6 +739,47 @@ create = (mocha, Cypress) ->
           cleanup(queue)
 
       cleanup(testsQueue)
+
+    addLog: (attrs, isHeadless) ->
+      ## we dont need to hold a log reference
+      ## to anything in memory when we're headless
+      ## because you cannot inspect any logs
+      return if isHeadless
+
+      test = testsById[attrs.testId]
+
+      ## bail if for whatever reason we
+      ## cannot associate this log to a test
+      return if not test
+
+      ## if this test isnt in the current queue
+      ## then go ahead and add it
+      if not testsQueueById[test.id]
+        testsQueueById[test.id] = true
+        testsQueue.push(test)
+
+      if existing = logsById[attrs.id]
+        ## because log:state:changed may
+        ## fire at a later time, its possible
+        ## we've already cleaned up these attrs
+        ## and in that case we don't want to do
+        ## anything at all
+        return if existing._hasBeenCleanedUp
+
+        ## mutate the existing object
+        _.extend(existing, attrs)
+      else
+        logsById[attrs.id] = attrs
+
+        { testId, instrument } = attrs
+
+        if test = testsById[testId]
+          ## pluralize the instrument
+          ## as a property on the runnable
+          logs = test[instrument + "s"] ?= []
+
+          ## else push it onto the logs
+          logs.push(attrs)      
   }
 
 module.exports = {
