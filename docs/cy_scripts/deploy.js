@@ -25,18 +25,16 @@ const isValidEnvironment = is.oneOf(['production', 'staging'])
 // initialize on existing repo
 const repo = Promise.promisifyAll(gift(path.resolve('..')))
 
-// resolves with S3 credentials object
-// first tries to load from ENV string
-// if not found, tries to load from a file
 function getS3Credentials () {
   const key = path.join('support', '.aws-credentials.json')
-  return configFromEnvOrJsonFile(key)
-  .catch((err) => {
+  const config = configFromEnvOrJsonFile(key)
+  if (!config) {
     console.error('⛔️  Cannot find AWS credentials')
     console.error('Using @cypress/env-or-json-file module')
     console.error('and key', key)
-    throw err
-  })
+    throw new Error('AWS config not found')
+  }
+  return config
 }
 
 function getCurrentBranch () {

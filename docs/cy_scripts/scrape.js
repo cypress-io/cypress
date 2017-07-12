@@ -26,14 +26,14 @@ function checkToken (token) {
 
 function getCircleCredentials () {
   const key = path.join('support', '.circle-credentials.json')
-  return configFromEnvOrJsonFile(key)
-    .catch((err) => {
-      console.error('⛔️  Cannot find CircleCI credentials')
-      console.error('Using @cypress/env-or-json-file module')
-      console.error('and key', key)
-      throw err
-    })
-    .get('token')
+  const config = configFromEnvOrJsonFile(key)
+  if (!config) {
+    console.error('⛔️  Cannot find CircleCI credentials')
+    console.error('Using @cypress/env-or-json-file module')
+    console.error('and key', key)
+    throw new Error('Cannot load CircleCI credentials')
+  }
+  return config.token
 }
 
 function scrape () {
