@@ -3,17 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
+  "browser": "src/main",
   "scripts": {
     "postinstall": "echo '@packages/driver needs: npm run build'",
     "build": "gulp build",
+    "watch": "gulp watch",
     "test-unit": "mocha",
     "test-unit-watch": "./test/support/watch",
     "test-unit-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-integration": "gulp test",
     "test-integration-watch": "gulp watch",
+    "test-e2e": "node ./test/scripts/run-integration.js",
     "clean-deps": "rm -rf node_modules"
   },
-  "main": "index.js",
   "files": [
     "dist",
     "lib"

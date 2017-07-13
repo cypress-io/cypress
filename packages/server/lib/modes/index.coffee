@@ -6,3 +6,5 @@ module.exports = (mode, options) ->
       require("./headless").run(options)
     when "headed"
       require("./headed").run(options)
+    when "driver"
+      require("./driver").run(options)

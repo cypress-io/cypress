@@ -1,0 +1,6 @@
+{
+  "port": 3500,
+  "fixturesFolder": "support/server/fixtures",
+  "supportFolder": false,
+  "videoRecording": false
+}
