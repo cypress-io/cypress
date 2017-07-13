@@ -1,4 +1,8 @@
-require('./timers')
+// if we are running in electron
+// we must hack around busted timers
+if (process.versions.electron) {
+  require('./timers/parent')
+}
 
 process.env.UV_THREADPOOL_SIZE = 128
 require('graceful-fs').gracefulify(require('fs'))
