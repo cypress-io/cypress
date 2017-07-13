@@ -12,7 +12,7 @@ describe "Setup Project", ->
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
-      cy.stub(@ipc, "getCurrentUser").returns(@user)
+      cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       @config.projectId = null
@@ -304,9 +304,9 @@ describe "Setup Project", ->
         .get(".modal-body")
           .contains(".btn", "Setup Project").click()
 
-    it "redirects to login when 401", ->
+    it "logs user out when 401", ->
       @setupDashboardProject.reject({ name: "", message: "", statusCode: 401 })
-      cy.shouldBeOnLogin()
+      cy.shouldBeLoggedOut()
 
     it "displays error name and message when unexpected", ->
       @setupDashboardProject.reject({
@@ -327,5 +327,5 @@ describe "Setup Project", ->
         .then =>
           @getOrgs.reject({ name: "", message: "", statusCode: 401 })
 
-    it "redirects to login", ->
-      cy.shouldBeOnLogin()
+    it "logs user out", ->
+      cy.shouldBeLoggedOut()

@@ -170,8 +170,8 @@ describe "Runs List", ->
               beforeEach ->
                 @requestAccess.reject({name: "", message: "", statusCode: 401})
 
-              it "redirects to login", ->
-                cy.shouldBeOnLogin()
+              it "logs user out", ->
+                cy.shouldBeLoggedOut()
 
     describe "timed out error", ->
       beforeEach ->
@@ -197,8 +197,8 @@ describe "Runs List", ->
         @goToRuns().then =>
           @getRuns.reject({name: "", message: "", statusCode: 401})
 
-      it "redirects to login", ->
-        cy.shouldBeOnLogin()
+      it "logs user out", ->
+        cy.shouldBeLoggedOut()
 
     describe "no project id error", ->
       beforeEach ->

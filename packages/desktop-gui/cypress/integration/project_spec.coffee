@@ -1,4 +1,4 @@
-describe "Project Mode", ->
+describe "Project", ->
   beforeEach ->
     cy.fixture("user").as("user")
     cy.fixture("config").as("config")
@@ -37,10 +37,10 @@ describe "Project Mode", ->
       cy.shouldBeOnProjectSpecs().then =>
         expect(@ipc.getProjectStatus).to.be.calledWith({id: @config.projectId, path: "/foo/bar"})
 
-    it "redirects to login when getting project status returns 401", ->
+    it "logs out user when getting project status returns 401", ->
       cy.shouldBeOnProjectSpecs().then =>
         @getProjectStatus.reject({name: "", message: "", statusCode: 401})
-        cy.shouldBeOnLogin()
+      cy.shouldBeLoggedOut()
 
     it "re-opens project if config changes", ->
       cy.shouldBeOnProjectSpecs().then =>

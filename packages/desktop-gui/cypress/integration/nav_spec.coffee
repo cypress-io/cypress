@@ -39,7 +39,7 @@ describe "Navigation", ->
       @getCurrentUser.resolve({})
 
     it "displays login button", ->
-      cy.contains("nav a", "Log In")
+      cy.shouldBeLoggedOut()
 
     it "displays login modal when clicking login button", ->
       cy.contains("Log In").click()
@@ -67,7 +67,7 @@ describe "Navigation", ->
         expect(@ipc.logOut).to.be.called
 
       it "displays login button", ->
-        cy.contains("nav a", "Log In")
+        cy.shouldBeLoggedOut()
 
   context "when current user has no name", ->
     beforeEach ->
