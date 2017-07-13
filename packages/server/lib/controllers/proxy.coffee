@@ -7,13 +7,10 @@ accept        = require("http-accept")
 cwd           = require("../cwd")
 logger        = require("../logger")
 cors          = require("../util/cors")
-inject        = require("../util/inject")
 buffers       = require("../util/buffers")
+rewriter      = require("../util/rewriter")
 networkFailures = require("../util/network_failures")
 
-headRe      = /(<head.*?>)/i
-bodyRe      = /(<body.*?>)/i
-htmlRe      = /(<html.*?>)/i
 redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
@@ -133,7 +130,7 @@ module.exports = {
         str.pipe(thr)
       else
         rewrite = (body) =>
-          @rewrite(body.toString(), remoteState, wantsInjection)
+          rewriter.html(body.toString(), remoteState.domainName, wantsInjection)
 
         injection = concat (body) =>
           encoding = headers["content-encoding"]
@@ -278,28 +275,4 @@ module.exports = {
 
     ## proxy the headers
     res.set(headers)
-
-  rewrite: (html, remoteState, wantsInjection) ->
-    rewrite = (re, str) ->
-      html.replace(re, str)
-
-    htmlToInject = do =>
-      switch wantsInjection
-        when "full"
-          inject.full(remoteState.domainName)
-        when "partial"
-          inject.partial(remoteState.domainName)
-
-    switch
-      when headRe.test(html)
-        rewrite(headRe, "$1 #{htmlToInject}")
-
-      when bodyRe.test(html)
-        rewrite(bodyRe, "<head> #{htmlToInject} </head> $1")
-
-      when htmlRe.test(html)
-        rewrite(htmlRe, "$1 <head> #{htmlToInject} </head>")
-
-      else
-        "<head> #{htmlToInject} </head>" + html
 }
