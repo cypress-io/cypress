@@ -3,3 +3,5 @@
 @import 'lib/fonts';
 @import 'lib/base';
 @import '!(lib)*/**/*';
+
+@import '../../reporter/src/main-runner';

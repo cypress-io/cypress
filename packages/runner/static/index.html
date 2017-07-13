@@ -7,15 +7,14 @@
 
       <link href="/__cypress/static/favicon.ico" rel="icon">
 
-      <link rel="stylesheet" href="/__cypress/reporter/reporter.css">
-      <link rel="stylesheet" href="/__cypress/runner/runner.css">
+      <link rel="stylesheet" href="/__cypress/runner/cypress_runner.css">
   </head>
   <body>
     <div id="app"></div>
 
     <script type="text/javascript" src="/__cypress/socket.io.js"></script>
     <script type="text/javascript" src="/__cypress/driver/driver.js"></script>
-    <script type="text/javascript" src="/__cypress/runner/runner.js"></script>
+    <script type="text/javascript" src="/__cypress/runner/cypress_runner.js"></script>
     <script type="text/javascript">
       setTimeout(function(){
         Runner.start(document.getElementById('app'), {{{config}}})
