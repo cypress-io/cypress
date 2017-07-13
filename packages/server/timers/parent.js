@@ -17,11 +17,14 @@ function clear (id) {
   delete queue[id]
 }
 
-function sendAndQueue (id, cb, ms) {
+function noop () {}
+
+function sendAndQueue (id, cb, ms, args) {
   // const started = Date.now()
 
   queue[id] = {
     // started,
+    args,
     ms,
     cb,
   }
@@ -32,7 +35,11 @@ function sendAndQueue (id, cb, ms) {
   })
 
   // return the timer id
-  return id
+  return {
+    id,
+    ref: noop,
+    unref: noop,
+  }
 }
 
 // fork the child process
@@ -53,17 +60,17 @@ const child = cp.fork(path.join(__dirname, 'child.js'), [], {
     return
   }
 
-  const { cb } = msg
+  const { cb, args } = msg
 
   clear(id)
 
-  cb()
+  cb(...args)
 })
 
-global.setTimeout = function (cb, ms) {
+global.setTimeout = function (cb, ms, ...args) {
   idCounter += 1
 
-  return sendAndQueue(idCounter, cb, ms)
+  return sendAndQueue(idCounter, cb, ms, args)
 }
 
 global.clearTimeout = function (id) {
@@ -76,7 +83,7 @@ global.clearInterval = function (id) {
   clear(id)
 }
 
-global.setInterval = function (fn, ms) {
+global.setInterval = function (fn, ms, ...args) {
   const permId = idCounter += 1
 
   function cb () {
@@ -86,12 +93,8 @@ global.setInterval = function (fn, ms) {
   }
 
   function poll () {
-    // const started = Date.now()
-
-    sendAndQueue(permId, cb, ms)
+    return sendAndQueue(permId, cb, ms, args)
   }
 
-  poll()
-
-  return permId
+  return poll()
 }
