@@ -10,7 +10,10 @@ import logger from './logger'
 import overrides from './overrides'
 
 const $ = $Cypress.$
-const channel = io.connect({ path: '/__socket.io' })
+const channel = io.connect({
+  path: '/__socket.io',
+  transports: ['websocket'],
+})
 
 channel.on('connect', () => {
   channel.emit('runner:connected')
