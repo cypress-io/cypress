@@ -24,11 +24,11 @@ log = (obj = {}) ->
   $.util.log _.compact(args)...
   $.util.beep()
 
-jsOptions = {
-  entries: ["src/main.coffee"]
+integrationSpecHelperOptions = {
+  entries: ["test/support/integration_spec_helper.coffee"]
   extensions: [".coffee", ".js"]
-  destination: "dist"
-  outputName: "driver.js"
+  destination: "dist-test"
+  outputName: "spec_helper.js"
 }
 
 specIndexOptions = {
@@ -54,24 +54,13 @@ matchingSpecFile = (filePath) ->
   ## only files in src/ having matching spec files
   return false if not _.includes(filePath, srcDir)
 
-  specPath = filePath.replace(srcDir, path.join(__dirname, "test/unit"))
+  specPath = filePath.replace(srcDir, path.join(__dirname, "test/integration"))
   specPath = specPath.replace(".coffee", "_spec.coffee")
   try
     fs.statSync(specPath)
     return specPath
   catch e
     return false
-
-compileJs = ->
-  browserify({
-    entries: jsOptions.entries,
-    extensions: jsOptions.extensions
-  })
-    .transform(coffeeify, {})
-    .bundle()
-    .on("error", log)
-    .pipe(source(jsOptions.outputName))
-    .pipe(gulp.dest(jsOptions.destination))
 
 bundleJs = (options, watch = true) ->
   ret = {}
@@ -134,27 +123,25 @@ watchSpecs = ->
     server.runSpec(event.path)
 
 gulp.task "watch", ["ensure:dist:dir"], ->
-  watchJs = bundleJs(jsOptions)
+  watchSpecHelper = bundleJs(integrationSpecHelperOptions)
   watchIndex = bundleJs(specIndexOptions)
   watchRunner = bundleJs(specRunnerOptions)
   watchSpecs()
-  Promise.all([watchJs.promise, watchIndex.promise, watchRunner.promise])
+  Promise.all([watchSpecHelper.promise, watchIndex.promise, watchRunner.promise])
   .then ->
     server = require("#{__dirname}/test/support/server/server.coffee")
     server.runSpecsContinuously()
 
-  return watchJs.process
+  return watchSpecHelper.process
 
 gulp.task "ensure:dist:dir", ->
   fs.ensureDirAsync(path.resolve("./dist-test"))
 
 gulp.task "test", ["ensure:dist:dir"], ->
-  buildJs = bundleJs(jsOptions, false)
+  buildSpecHelper = bundleJs(integrationSpecHelperOptions, false)
   buildIndex = bundleJs(specIndexOptions, false)
   buildRunner = bundleJs(specRunnerOptions, false)
-  Promise.all([buildJs.promise, buildIndex.promise, buildRunner.promise])
+  Promise.all([buildSpecHelper.promise, buildIndex.promise, buildRunner.promise])
   .then ->
     server = require("#{__dirname}/test/support/server/server.coffee")
     server.runAllSpecsOnce()
-
-gulp.task "build", compileJs

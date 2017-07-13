@@ -36,10 +36,13 @@ removeExtension = (str) ->
   str.split(".").slice(0, -1).join(".")
 
 getSpecPath = (pathName) ->
-  if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
+  if /all_specs/.test(pathName)
+    getAllSpecs(false)
+  else
+    [pathName.replace(/^\//, "")]
 
 getAllSpecs = (allSpecs = true) ->
-  specs = glob.sync("../../!(support)/**/*.coffee", { cwd: __dirname })
+  specs = glob.sync("../../integration/**/*.coffee", { cwd: __dirname })
   specs.unshift("specs/all_specs.coffee") if allSpecs
   _.map specs, (spec) ->
     removeExtension(spec.replace("../..", "specs"))
@@ -120,9 +123,6 @@ app.get "/", (req, res) ->
   res.render(path.join(__dirname, "views/index.html"), {
     specs: getAllSpecs()
   })
-
-app.get "/spec_helper.js", (req, res) ->
-  sendJs(res, getSpec("support/integration_spec_helper.coffee"), true)
 
 app.get "*", (req, res) ->
   filePath = req.params[0].replace(/\/+$/, "")

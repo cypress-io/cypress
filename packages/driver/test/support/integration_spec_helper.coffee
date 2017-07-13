@@ -1,25 +1,51 @@
-$Cypress = window.$Cypress
-$ = $Cypress.$
-_ = $Cypress.prototype._
-sinon = $Cypress.prototype.sinon
+_ = require("lodash")
+$ = require("jquery")
 
-window.testUtils = {
-  $Cypress: $Cypress
-  $: $
-  _: _
-  moment: $Cypress.prototype.moment
-  Promise: $Cypress.prototype.Promise
-  Cookies: $Cypress.prototype.Cookies
-  bililiteRange: $Cypress.prototype.bililiteRange
-}
+$Cypress = require("@packages/driver")
 
-uncaught = Mocha.Runner::uncaught
+$Mocha = require("../../src/cypress/mocha")
+$Runner = require("../../src/cypress/runner")
+$Location = require("../../src/cypress/location")
 
-## create the global for hooks and suites and tests
-mocha.setup("bdd")
+## expose globals
+window.$ = $
+window._ = _
+
+# window.$ = $
+
+# window.testUtils = {
+#   $Cypress: $Cypress
+#   $: $
+#   _: _
+#   moment: $Cypress.prototype.moment
+#   Promise: $Cypress.prototype.Promise
+#   Cookies: $Cypress.prototype.Cookies
+#   bililiteRange: $Cypress.prototype.bililiteRange
+# }
+
+mocha = $Mocha.globals(window)
+
+uncaught = mocha.Mocha.Runner::uncaught
+fail = mocha.Mocha.Runner::fail
+#
+mocha.Mocha.Runner::fail = (runnable, err) ->
+  console.log(err)
+  debugger
+
+  fail.call(@, runnable, err)
+
+## allow our own cypress errors to bubble up!
+mocha.Mocha.Runner::uncaught = (err) ->
+  ## debugger if this isnt an AssertionError or CypressError or a message err
+  ## because that means we prob f'd up something
+  if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage and not /SilenceError/.test(err.message)
+    console.error(err.stack)
+    debugger
+
+  uncaught.call(@, err)
 
 before ->
-  $Cypress.Chai.setGlobals(window)
+  # $Cypress.Chai.setGlobals(window)
 
   @allowErrors = (Cypress) ->
     c = Cypress ? @Cypress
@@ -37,35 +63,20 @@ before ->
     else
       ct.skip()
 
-  @sandbox = s = sinon.sandbox.create()
-  @sandbox.useFakeTimers = ->
-    s.clock = $Cypress.prototype.lolex.install()
+  # @sandbox = s = sinon.sandbox.create()
+  # @sandbox.useFakeTimers = ->
+  #   s.clock = $Cypress.prototype.lolex.install()
 
-beforeEach ->
-  ## allow our own cypress errors to bubble up!
-  # stubSocketIo.call(@)
-  # App.config = App.request "new:config:entity", {}
-  # App.config.setEnv("test")
-  # App.execute "socket:start"
-  Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
-    ## debugger if this isnt an AssertionError or CypressError or a message err
-    ## because that means we prob f'd up something
-    if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage and not /SilenceError/.test(err.message)
-      console.error(err.stack)
-      debugger
-
-    orig.call(@, err)
-
-afterEach ->
-  @sandbox.restore()
-
-  @sandbox.clock?.uninstall()
-
-  ## must remove references to the server
-  ## and its requests / responses due to sinon bug
-  @sandbox.server?.requests = []
-  @sandbox.server?.queue = []
-  @sandbox.server?.responses = []
+# afterEach ->
+#   @sandbox.restore()
+#
+#   @sandbox.clock?.uninstall()
+#
+#   ## must remove references to the server
+#   ## and its requests / responses due to sinon bug
+#   @sandbox.server?.requests = []
+#   @sandbox.server?.queue = []
+#   @sandbox.server?.responses = []
 
 resolveUrl = (url, cb) ->
   url = Cypress.Location.resolve(window.location.origin, url)
@@ -75,12 +86,6 @@ resolveUrl = (url, cb) ->
     isHtml: true
     url: url
   })
-
-# stubSocketIo = ->
-#   window.io =
-#     connect: @sandbox.spy =>
-#       on: @sandbox.stub()
-#       emit: @sandbox.stub()
 
 window.loadDom = (fixture, options = {}) ->
   loadFixture(fixture).done (iframe) =>
@@ -129,56 +134,13 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
         @$iframe.contents().find("head").html(@head)
         @$iframe.contents().find("body").html(@body)
 
+      location = $Location.create(window.location.href)
+
       # debugger
       # window.mocha.enableTimeouts(false)
 
       ## load all of the modules
-      @Cypress = $Cypress.create()
-
-      @Cypress.runner = {
-        getStartTime:      @sandbox.stub()
-        getTestsState:     @sandbox.stub()
-        countByTestState:  @sandbox.stub()
-      }
-
-      ## immediately create the chai instance so
-      ## we get our custom properties but then
-      ## restore it to keep things simple
-      @chai = $Cypress.Chai.create(@Cypress, {})
-      @chai.restore()
-      @chai.addCustomProperties()
-
-      @Cypress.start()
-
-      ## instantiate @cy directly here which simulates
-      ## what Cypress.onSpecWindow() does under the hood. we want
-      ## to test cy in isolation here away from the Mocha
-      ## and Runner and Chai overrides
-      @cy = $Cypress.Cy.create(@Cypress, {})
-      $Cypress.Log.create(@Cypress, @cy)
-      @Cypress.Commands = $Cypress.Commands.create(@Cypress, @cy)
-
-      @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
-
-      ## lets prevent getting a ton of noise
-      ## from ending early. we need to do that
-      ## in test mode, and this wont affect our
-      ## tests around this method (since thats
-      ## tested in integration mode)
-      @sandbox.stub(@cy, "endedEarlyErr")
-
-      ## in testing we manually call bindWindowListeners
-      ## with our iframe's contentWindow because
-      ## our iframe has alreadyloaded. because
-      ## its already loaded these listeners would
-      ## never actually get applied
-      @cy.bindWindowListeners @$iframe.prop("contentWindow")
-
-      location = @Cypress.Location.create(window.location.href)
-
-      ct = @currentTest
-
-      @Cypress.setConfig({
+      @Cypress = $Cypress.create({
         namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
         defaultCommandTimeout: 2000
@@ -194,7 +156,73 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
         }
       })
 
-      @Cypress.trigger "initialize", {$autIframe: @$iframe}
+      ## stub Mocha.create
+      $Mocha.create = -> {
+        options: ->
+      }
+
+      ## stub Runner.create
+      $Runner.create = -> {
+        run: ->
+        getStartTime: ->
+        getTestsState: ->
+        countByTestState: ->
+      }
+
+      # @Cypress.runner = {
+      #   getStartTime:      cy.stub()
+      #   getTestsState:     cy.stub()
+      #   countByTestState:  cy.stub()
+      # }
+
+      @Cypress.onSpecWindow(window)
+
+      { @cy } = @Cypress
+
+      debugger
+      # @cy = @Cypress.cy = @Cypress.Cy.create(@Cypress, )
+
+      ## immediately create the chai instance so
+      ## we get our custom properties but then
+      ## restore it to keep things simple
+      # @chai = $Cypress.Chai.create(@Cypress, {})
+      # @chai.restore()
+      # @chai.addCustomProperties()
+
+      # @Cypress.start()
+
+      ## instantiate @cy directly here which simulates
+      ## what Cypress.onSpecWindow() does under the hood. we want
+      ## to test cy in isolation here away from the Mocha
+      ## and Runner and Chai overrides
+      # @cy = $Cypress.Cy.create(@Cypress, {})
+      # $Cypress.Log.create(@Cypress, @cy)
+      # @Cypress.Commands = $Cypress.Commands.create(@Cypress, @cy)
+
+      # @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
+
+      ## lets prevent getting a ton of noise
+      ## from ending early. we need to do that
+      ## in test mode, and this wont affect our
+      ## tests around this method (since thats
+      ## tested in integration mode)
+      # @sandbox.stub(@cy, "endedEarlyErr")
+
+      ## in testing we manually call bindWindowListeners
+      ## with our iframe's contentWindow because
+      ## our iframe has alreadyloaded. because
+      ## its already loaded these listeners would
+      ## never actually get applied
+      # @cy.bindWindowListeners @$iframe.prop("contentWindow")
+
+      ct = @currentTest
+
+      # @Cypress.trigger "initialize", {$autIframe: @$iframe}
+      @Cypress.initialize(@$iframe)
+
+      @Cypress.run(->)
+
+      @Cypress.setRunnable(ct)
 
       ## must call defaults manually because
       ## this is naturally called in initialize
@@ -204,22 +232,22 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
       ## set the jquery engine to be our window so we dont have to juggle
       ## the gazillions of edge cases caused by the remote $ elements being
       ## juggled throughout our expectations
-      @Cypress.option("jQuery", $)
+      # @Cypress.option("jQuery", $)
 
-      if ct
-        @Cypress.trigger "test:before:hooks", {id: 123}, {}
-        @Cypress.set(ct)
-        ct.enableTimeouts(false)
-
-      @Cypress.on("resolve:url", resolveUrl)
-
-      ## handle the fail event ourselves
-      ## since we bypass our Runner instance
-      @Cypress.on "fail", (err) ->
-        console.error(err.stack)
-        ## bubble error up to mocha
-        if ct
-          ct.callback(err)
+      # if ct
+      #   @Cypress.trigger "test:before:hooks", {id: 123}, {}
+      #   @Cypress.set(ct)
+      #   ct.enableTimeouts(false)
+      #
+      # @Cypress.on("resolve:url", resolveUrl)
+      #
+      # ## handle the fail event ourselves
+      # ## since we bypass our Runner instance
+      # @Cypress.on "fail", (err) ->
+      #   console.error(err.stack)
+      #   ## bubble error up to mocha
+      #   if ct
+      #     ct.callback(err)
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need

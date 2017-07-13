@@ -3,10 +3,7 @@ socketReporter = require("./socket_reporter")
 
 isSocketReporter = /reporter=socket/.test(location.search)
 
-mocha.setup({
-  ui: "bdd"
-  reporter: if isSocketReporter then socketReporter else "html"
-})
+mocha.reporter(if isSocketReporter then socketReporter else "html")
 
 api.listenForRun()
 
