@@ -1,7 +1,7 @@
 // if we are running in electron
 // we must hack around busted timers
 if (process.versions.electron) {
-  require('./timers/parent')
+  require('./timers/parent').fix()
 }
 
 process.env.UV_THREADPOOL_SIZE = 128
