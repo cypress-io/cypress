@@ -15,7 +15,7 @@ import Dropdown from '../dropdown/dropdown'
 export default class Nav extends Component {
   render () {
     return (
-      <nav className='navbar navbar-inverse navbar-fixed-top'>
+      <nav className='main-nav navbar navbar-inverse navbar-fixed-top'>
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li className='left-nav'>
@@ -68,6 +68,16 @@ export default class Nav extends Component {
   }
 
   _userStateButton = () => {
+    if (authStore.isLoading) {
+      return (
+        <li>
+          <div>
+            <i className='fa fa-user' /> <i className='fa fa-spinner fa-spin' />
+          </div>
+        </li>
+      )
+    }
+
     if (!authStore.isAuthenticated) {
       return (
         <li>

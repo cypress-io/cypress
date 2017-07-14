@@ -17,22 +17,24 @@ describe "Navigation", ->
 
       start()
 
-  context "any case", ->
-    it "displays link to docs", ->
-      cy.get("nav").contains("Docs")
+  it "displays link to docs", ->
+    cy.get(".main-nav").contains("Docs")
 
-    it "opens link to docs on click", ->
-      cy
-        .get("nav").contains("Docs").click().then ->
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
+  it "opens link to docs on click", ->
+    cy
+      .get(".main-nav").contains("Docs").click().then ->
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
 
-    it "displays link to chat", ->
-      cy.get("nav").contains("Chat")
+  it "displays link to chat", ->
+    cy.get(".main-nav").contains("Chat")
 
-    it "opens link to chat on click", ->
-      cy
-        .get("nav").contains("Chat").click().then ->
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
+  it "opens link to chat on click", ->
+    cy
+      .get(".main-nav").contains("Chat").click().then ->
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
+
+  it "shows loading spinner where user or 'Log in' will be", ->
+    cy.get(".main-nav li:last .fa-spinner")
 
   context "without a current user", ->
     beforeEach ->

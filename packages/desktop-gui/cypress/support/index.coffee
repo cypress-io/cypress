@@ -17,11 +17,11 @@ Cypress.Commands.add "visitIndex", ->
   cy.visit("/dist/index.html")
 
 Cypress.Commands.add "shouldBeOnIntro", ->
-  cy.get(".nav .logo")
+  cy.get(".main-nav .logo")
 
 Cypress.Commands.add "shouldBeOnProjectSpecs", ->
   cy.contains(".folder", "integration")
   cy.contains(".folder", "unit")
 
 Cypress.Commands.add "shouldBeLoggedOut", ->
-  cy.contains("nav a", "Log In")
+  cy.contains(".main-nav a", "Log In")
