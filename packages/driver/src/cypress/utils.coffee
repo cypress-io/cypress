@@ -1,6 +1,7 @@
 $ = require("jquery")
 _ = require("lodash")
 
+$Location = require("./location")
 errorMessages = require("./error_messages")
 
 tagOpen     = /\[([a-z\s='"-]+)\]/g
@@ -326,4 +327,16 @@ module.exports = {
 
   addTwentyYears: ->
     moment().add(20, "years").unix()
+
+  locHref: (win, url) ->
+    win.location.href = url
+
+  locReplace: (win, url) ->
+    win.location.replace(url)
+
+  locExisting: ->
+    $Location.create(window.location.href)
+
+  iframeSrc: ($autIframe, url) ->
+    $autIframe.prop("src", url)
 }

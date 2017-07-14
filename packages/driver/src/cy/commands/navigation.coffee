@@ -310,7 +310,7 @@ module.exports = (Commands, Cypress, cy) ->
             resolve(win)
 
           ## hold onto our existing url
-          existing = @_existing()
+          existing = $utils.locExisting()
 
           ## TODO: $Location.resolve(existing.origin, url)
 
@@ -338,7 +338,7 @@ module.exports = (Commands, Cypress, cy) ->
           ## for this, and so we need to resolve onLoad immediately
           ## and bypass the actual visit resolution stuff
           if bothUrlsMatchAndRemoteHasHash(current, remote)
-            @_src($autIframe, remote.href)
+            $utils.iframeSrc($autIframe, remote.href)
             return onLoad()
 
           if existingHash
@@ -346,7 +346,7 @@ module.exports = (Commands, Cypress, cy) ->
             ## before telling our backend to resolve this url
             url = url.replace(existingHash, "")
 
-          @_resolveUrl(url)
+          requestUrl(url)
           .then (resp = {}) =>
             {url, originalUrl, cookies, redirects, filePath} = resp
 
@@ -385,7 +385,7 @@ module.exports = (Commands, Cypress, cy) ->
               ## callback fn
               $autIframe.one("load", onLoad)
 
-              @_src($autIframe, url)
+              $utils.iframeSrc($autIframe, url)
             else
               ## if we've already visited a new superDomain
               ## then die else we'd be in a terrible endless loop
@@ -429,8 +429,8 @@ module.exports = (Commands, Cypress, cy) ->
 
                 ## replace is broken in electron so switching
                 ## to href for now
-                # @_replace(window, newUri.toString())
-                @_href(window, newUri.toString())
+                # $utils.locReplace(window, newUri.toString())
+                $utils.locHref(window, newUri.toString())
           .catch gotResponse, gotInvalidContentType, (err) ->
             visitFailedByErr err, err.originalUrl, ->
               args = {
@@ -477,7 +477,7 @@ module.exports = (Commands, Cypress, cy) ->
           $autIframe.one "load", =>
             v = visit(win, url, options)
 
-          @_href(win, "about:blank")
+          $utils.locHref(win, "about:blank")
         else
           v = visit(win, url, options)
 
@@ -490,42 +490,6 @@ module.exports = (Commands, Cypress, cy) ->
   })
 
   return {
-    _href: (win, url) ->
-      win.location.href = url
-
-    _replace: (win, url) ->
-      win.location.replace(url)
-
-    _existing: ->
-      $Location.create(window.location.href)
-
-    _src: ($autIframe, url) ->
-      $autIframe.prop("src", url)
-
-    _resolveUrl: (url) ->
-      Cypress.triggerPromise("resolve:url", url)
-      .then (resp = {}) ->
-        switch
-          ## if we didn't even get an OK response
-          ## then immediately die
-          when not resp.isOkStatusCode
-            err = new Error
-            err.gotResponse = true
-            _.extend(err, resp)
-
-            throw err
-
-          when not resp.isHtml
-            ## throw invalid contentType error
-            err = new Error
-            err.invalidContentType = true
-            _.extend(err, resp)
-
-            throw err
-
-          else
-            resp
-
     submitting: (e, options = {}) ->
       ## even though our beforeunload event
       ## should be firing shortly, lets just

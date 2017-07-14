@@ -9,8 +9,6 @@
 _ = require("lodash")
 UrlParse = require("url-parse")
 
-$Cypress = require("../cypress")
-
 reHttp = /^https?:\/\//
 reWww = /^www/
 
