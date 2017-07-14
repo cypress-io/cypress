@@ -288,6 +288,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:command:enqueued"
+        @emit("command:enqueued", args[0])
+
   request: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->
