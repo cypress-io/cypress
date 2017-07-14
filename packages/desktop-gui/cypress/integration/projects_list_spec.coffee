@@ -159,14 +159,20 @@ describe "Projects List", ->
     describe "errors", ->
       beforeEach ->
         @getProjects.resolve(@projects)
-        @getProjectStatuses.reject({
+        @error = {
           name: ""
           message: "Failed to get project statuses"
-        })
+        }
 
       it "displays error above list", ->
+        @getProjectStatuses.reject(@error)
         cy.get(".alert").should("contain", "Failed to get project statuses")
         cy.get(".projects-list li").should("have.length", @projects.length)
+
+      it "does not display api errors", ->
+        @error.isApiError = true
+        @getProjectStatuses.reject(@error)
+        cy.get(".alert").should("not.exist")
 
   describe "if user becomes unauthenticated", ->
     beforeEach ->
