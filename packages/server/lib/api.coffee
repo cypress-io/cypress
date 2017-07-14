@@ -31,6 +31,10 @@ formatResponseBody = (err) ->
 
   throw err
 
+tagError = (err) ->
+  err.isApiError = true
+  throw err
+
 osVersion = (platform) ->
   Promise.try ->
     if platform is "linux"
@@ -45,6 +49,7 @@ osVersion = (platform) ->
 module.exports = {
   ping: ->
     rp.get(Routes.ping())
+    .catch(tagError)
 
   getOrgs: (authToken) ->
     rp.get({
@@ -54,6 +59,7 @@ module.exports = {
         bearer: authToken
       }
     })
+    .catch(tagError)
 
   getProjects: (authToken) ->
     rp.get({
@@ -63,6 +69,7 @@ module.exports = {
         bearer: authToken
       }
     })
+    .catch(tagError)
 
   getProject: (projectId, authToken) ->
     rp.get({
@@ -75,6 +82,7 @@ module.exports = {
         "x-route-version": "2"
       }
     })
+    .catch(tagError)
 
   getProjectRuns: (projectId, authToken, options = {}) ->
     options.page ?= 1
@@ -87,6 +95,7 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   createRun: (options = {}) ->
     rp.post({
@@ -113,6 +122,7 @@ module.exports = {
     .promise()
     .get("buildId")
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   createInstance: (options = {}) ->
     platform = os.platform()
@@ -142,6 +152,7 @@ module.exports = {
       .promise()
       .get("instanceId")
       .catch(errors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
 
   updateInstanceStdout: (options = {}) ->
     rp.put({
@@ -153,6 +164,7 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   updateInstance: (options = {}) ->
     rp.put({
@@ -175,6 +187,7 @@ module.exports = {
       ])
     })
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   createRaygunException: (body, authToken, timeout = 3000) ->
     rp.post({
@@ -187,6 +200,7 @@ module.exports = {
     })
     .promise()
     .timeout(timeout)
+    .catch(tagError)
 
   createSignin: (code) ->
     rp.post({
@@ -203,6 +217,7 @@ module.exports = {
       err.message = err.error
 
       throw err
+    .catch(tagError)
 
   createSignout: (authToken) ->
     rp.post({
@@ -212,8 +227,8 @@ module.exports = {
         bearer: authToken
       }
     })
-    .catch {statusCode: 401}, ->
-      ## do nothing on 401
+    .catch({statusCode: 401}, ->) ## do nothing on 401
+    .catch(tagError)
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({
@@ -233,6 +248,7 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   getProjectRecordKeys: (projectId, authToken) ->
     rp.get({
@@ -242,6 +258,7 @@ module.exports = {
         bearer: authToken
       }
     })
+    .catch(tagError)
 
   requestAccess: (projectId, authToken) ->
     rp.post({
@@ -252,6 +269,7 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   getLoginUrl: ->
     rp.get({
@@ -260,6 +278,7 @@ module.exports = {
     })
     .promise()
     .get("url")
+    .catch(tagError)
 
   _projectToken: (method, projectId, authToken) ->
     rp({
@@ -275,6 +294,7 @@ module.exports = {
     })
     .promise()
     .get("apiToken")
+    .catch(tagError)
 
   getProjectToken: (projectId, authToken) ->
     @_projectToken("get", projectId, authToken)
