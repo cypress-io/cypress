@@ -32,6 +32,30 @@ module.exports = (Commands, Cypress, cy) ->
     ## visited about blank again
     hasVisitedAboutBlank = false
 
+  requestUrl = (url) ->
+    Cypress.request("resolve:url", url)
+    .then (resp = {}) ->
+      switch
+        ## if we didn't even get an OK response
+        ## then immediately die
+        when not resp.isOkStatusCode
+          err = new Error
+          err.gotResponse = true
+          _.extend(err, resp)
+
+          throw err
+
+        when not resp.isHtml
+          ## throw invalid contentType error
+          err = new Error
+          err.invalidContentType = true
+          _.extend(err, resp)
+
+          throw err
+
+        else
+          resp
+
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->
       cy.urlChanged(null, {

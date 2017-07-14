@@ -288,6 +288,21 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+  request: (eventName, args...) ->
+    new Promise (resolve, reject) =>
+      fn = (reply) ->
+        ## TODO: normalize this to reply.error and reply.response
+        if e = reply.error
+          err = $utils.cypressErr(e.message)
+          err.name = e.name
+          err.stack = e.stack
+
+          reject(err)
+        else
+          resolve(reply.response)
+
+      @emit("backend:request", eventName, args..., fn)
+
   automation: (eventName, args...) ->
     ## wrap action in promise
     new Promise (resolve, reject) =>

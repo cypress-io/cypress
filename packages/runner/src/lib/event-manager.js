@@ -21,7 +21,7 @@ channel.on('connect', () => {
 
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'fixture request history:entries exec resolve:url preserve:run:state read:file write:file automation:request mocha'.split(' ')
+const driverToSocketEvents = 'preserve:run:state backend:request automation:request mocha'.split(' ')
 const driverTestEvents = 'test:before:run test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')

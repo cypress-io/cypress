@@ -98,24 +98,6 @@ class Socket
     ## are handled by the spec controller
     .catch ->
 
-  onFixture: (config, file, options, cb) ->
-    fixture.get(config.fixturesFolder, file, options)
-    .then(cb)
-    .catch (err) ->
-      cb({__error: err.message})
-
-  onReadFile: (config, file, options, cb) ->
-    files.readFile(config.projectRoot, file, options)
-    .then(cb)
-    .catch (err) ->
-      cb({__error: { message: err.message, code: err.code, filePath: err.filePath }})
-
-  onWriteFile: (config, file, contents, options, cb) ->
-    files.writeFile(config.projectRoot, file, contents, options)
-    .then(cb)
-    .catch (err) ->
-      cb({__error: { message: err.message, code: err.code, filePath: err.filePath }})
-
   onExec: (projectRoot, options, cb) ->
     exec.run(projectRoot, options)
     .then(cb)
@@ -189,7 +171,7 @@ class Socket
       automation.request(message, data, onAutomationClientRequestCallback)
 
     @io.on "connection", (socket) =>
-      logger.info "socket connected"
+      log("socket connected")
 
       ## cache the headers so we can access
       ## them at any time
@@ -199,6 +181,8 @@ class Socket
         return if automationClient is socket
 
         automationClient = socket
+
+        log("automation:client connected")
 
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
@@ -229,6 +213,8 @@ class Socket
         socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
+        log("automation:request", message, data)
+
         automationRequest(message, data)
         .then (resp) ->
           cb({response: resp})
@@ -251,29 +237,6 @@ class Socket
 
         ## TODO: what to do about runner disconnections?
 
-      socket.on "adapter:connected", =>
-        logger.info "adapter:connected"
-
-        socket.on "adapter:response", respond
-
-      socket.on "adapter:request", (message, data, cb) =>
-        ## if cb isnt a function then we know
-        ## data is really the cb, so reassign it
-        ## and set data to null
-        if not _.isFunction(cb)
-          cb = data
-          data = null
-
-        id = uuid.v4()
-
-        logger.info "adapter:request", id: id, msg: message, data: data
-
-        if _.keys(@io.sockets.adapter.rooms.adapter).length > 0
-          messages[id] = cb
-          @io.to("adapter").emit "adapter:request", id, message, data
-        else
-          cb({__error: "Could not process '#{message}'. No adapter servers connected."})
-
       socket.on "spec:changed", (spec) ->
         options.onSpecChanged(spec)
 
@@ -281,18 +244,6 @@ class Socket
         @watchTestFileByPath(config, filePath, watchers, options)
         ## callback is only for testing purposes
         cb()
-
-      socket.on "fixture", (fixturePath, options, cb) =>
-        @onFixture(config, fixturePath, options, cb)
-
-      socket.on "read:file", (file, options, cb) =>
-        @onReadFile(config, file, options, cb)
-
-      socket.on "write:file", (file, contents, options, cb) =>
-        @onWriteFile(config, file, contents, options, cb)
-
-      socket.on "exec", (options, cb) =>
-        @onExec(config.projectRoot, options, cb)
 
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
@@ -334,17 +285,36 @@ class Socket
         .catch Promise.TimeoutError, (err) ->
           cb(false)
 
-      socket.on "resolve:url", (url, cb) =>
-        options.onResolveUrl(url, headers, automationRequest)
-        .then(cb)
-        .catch (err) ->
-          cb({__error: errors.clone(err)})
+      socket.on "backend:request", (eventName, args...) =>
+        ## cb is always the last argument
+        cb = args.pop()
 
-      socket.on "request", (params, cb) =>
-        options.onRequest(headers, automationRequest, params)
-        .then(cb)
+        log("backend:request", eventName, cb, args)
+
+        backendRequest = ->
+          switch eventName
+            when "resolve:url"
+              options.onResolveUrl(args[0], headers, automationRequest)
+            when "http:request"
+              options.onRequest(headers, automationRequest, args[0])
+            when "get:fixture"
+              fixture.get(config.fixturesFolder, args[0], args[1])
+            when "read:file"
+              files.readFile(config.projectRoot, args[0], args[1])
+            when "write:file"
+              files.writeFile(config.projectRoot, args[0], args[1], args[2])
+            when "exec"
+              exec.run(config.projectRoot, args[0])
+            else
+              Promise.reject(
+                new Error("You requested a backend event we cannot handle: #{eventName}")
+              )
+
+        backendRequest()
+        .then (resp) ->
+          cb({response: resp})
         .catch (err) ->
-          cb({__error: errors.clone(err)})
+          cb({error: errors.clone(err)})
 
       socket.on "preserve:run:state", (state, cb) ->
         existingState = state
@@ -357,11 +327,6 @@ class Socket
           cb(s)
         else
           cb()
-
-      socket.on "go:to:file", (p) ->
-        browsers.launch("chrome", "http://localhost:2020/__#" + p, {
-          host: "http://localhost:2020"
-        })
 
       socket.on "save:app:state", (state, cb) ->
         options.onSavedStateChanged(state)
