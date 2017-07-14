@@ -60,7 +60,7 @@ module.exports = (Commands, Cypress, cy) ->
             memo
           , {}
 
-        options._log = $Log.command
+        options._log = Cypress.log
           message: [chars, deltaOptions]
           $el: options.$el
           consoleProps: ->
@@ -245,7 +245,7 @@ module.exports = (Commands, Cypress, cy) ->
             ## for the total number of keys we're about to
             ## type, ensure we raise the timeout to account
             ## for the delay being added to each keystroke
-            @_timeout (totalKeys * options.delay), true
+            cy.timeout (totalKeys * options.delay), true
 
           onBeforeSpecialCharAction: (id, key) ->
             ## don't apply any special char actions such as
@@ -329,7 +329,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       handleFocused()
       .then =>
-        @_timeout(delay, true)
+        cy.timeout(delay, true)
 
         Promise
           .delay(delay)
@@ -362,7 +362,7 @@ module.exports = (Commands, Cypress, cy) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = $utils.filterOutOptions(options)
 
-          options._log = $Log.command
+          options._log = Cypress.log
             message: deltaOptions
             $el: $el
             consoleProps: ->

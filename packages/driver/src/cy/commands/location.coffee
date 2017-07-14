@@ -11,7 +11,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: ""
 
       getHref = =>
@@ -27,7 +27,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: ""
 
       getHash = =>
@@ -61,7 +61,7 @@ module.exports = (Commands, Cypress, cy) ->
           location
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: key ? ""
 
       do resolveLocation = =>

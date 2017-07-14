@@ -53,7 +53,7 @@ module.exports = (Commands, Cypress, cy) ->
   return {
     _waitNumber: (subject, ms, options) ->
       ## increase the timeout by the delta
-      @_timeout(ms, true)
+      cy.timeout(ms, true)
 
       if options.log isnt false
         options._log = Cypress.Log.command

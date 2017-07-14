@@ -83,7 +83,7 @@ module.exports = (Commands, Cypress, cy) ->
             return obj
         }
 
-        options._log = $Log.command(log)
+        options._log = Cypress.log(log)
 
       if not parentIsWin
         ## scroll the parent into view first
@@ -226,7 +226,7 @@ module.exports = (Commands, Cypress, cy) ->
 
         if !isWin then log.$el = options.$el
 
-        options._log = $Log.command(log)
+        options._log = Cypress.log(log)
 
       ensureScrollability = =>
         try

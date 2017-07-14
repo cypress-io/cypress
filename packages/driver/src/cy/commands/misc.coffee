@@ -13,7 +13,7 @@ module.exports = (Commands, Cypress, cy) ->
     noop: (arg) -> arg
 
     log: (msg, args) ->
-      $Log.command({
+      Cypress.log({
         end: true
         snapshot: true
         message: [msg, args]
@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy) ->
       remoteSubject = @_getRemotejQueryInstance(arg)
 
       if options.log isnt false
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
         if $utils.hasElement(arg)
           options._log.set({$el: arg})

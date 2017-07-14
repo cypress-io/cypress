@@ -28,7 +28,7 @@ module.exports = (Commands, Cypress, cy) ->
     new Promise (resolve, reject) =>
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           name: "message"
           message: utils.stringify([msg, data])
 

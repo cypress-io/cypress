@@ -54,7 +54,7 @@ module.exports = (Commands, Cypress, cy) ->
         logNow = details.now
         logMethods = details.methods.slice()
 
-        $Log.command({
+        Cypress.log({
           name: name
           message: message ? ""
           type: "parent"

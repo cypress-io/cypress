@@ -40,11 +40,11 @@ thenFn = (subject, options, fn) ->
     return @state("next", fn)
 
   _.defaults options,
-    timeout: @_timeout()
+    timeout: cy.timeout()
 
   ## clear the timeout since we are handling
   ## it ourselves
-  @_clearTimeout()
+  cy.clearTimeout()
 
   ## TODO: use subject from @state("subject")
 
@@ -60,7 +60,7 @@ thenFn = (subject, options, fn) ->
     @state("onInjectCommand", null)
 
   cleanupEnqueue = =>
-    @off("enqueue", enqueuedCommand)
+    @off("command:enqueued", enqueuedCommand)
     null
 
   invokedCyCommand = false
@@ -70,7 +70,7 @@ thenFn = (subject, options, fn) ->
 
   @state("onInjectCommand", returnFalseIfThenable)
 
-  @on("enqueue", enqueuedCommand)
+  @on("command:enqueued", enqueuedCommand)
 
   ## this code helps juggle subjects forward
   ## the same way that promises work
@@ -150,7 +150,7 @@ invokeFn = (subject, fn, args...) ->
 
   message = getMessage()
 
-  options._log = $Log.command
+  options._log = Cypress.log
     message: message
     $el: if $utils.hasElement(subject) then subject else null
     consoleProps: ->

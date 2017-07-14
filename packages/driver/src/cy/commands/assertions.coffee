@@ -65,7 +65,7 @@ shouldFn = (subject, chainers, args...) ->
     ## to ensure our .should command gets logged
     current = @state("current")
 
-    log = $Log.command({
+    log = Cypress.log({
       name: "should"
       type: "child"
       message: [].concat(originalChainers, args)

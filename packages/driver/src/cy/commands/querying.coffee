@@ -24,7 +24,7 @@ module.exports = (Commands, Cypress, cy) ->
         log: true
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       log = ($el) ->
         return if options.log is false
@@ -103,7 +103,7 @@ module.exports = (Commands, Cypress, cy) ->
       start = (aliasType) ->
         return if options.log is false
 
-        options._log ?= $Log.command
+        options._log ?= Cypress.log
           message: selector
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
@@ -252,7 +252,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = $Log.command({message: ""})
+        options._log = Cypress.log({message: ""})
 
       log = ($el) ->
         options._log.set({$el: $el}) if options.log
@@ -317,7 +317,7 @@ module.exports = (Commands, Cypress, cy) ->
           "Applied To": $utils.getDomElements(subject or @state("withinSubject"))
         }
 
-        options._log = $Log.command
+        options._log = Cypress.log
           message: _.compact([filter, text])
           type: if subject then "child" else "parent"
           consoleProps: -> consoleProps
@@ -423,7 +423,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log
           $el: subject
           message: ""
 

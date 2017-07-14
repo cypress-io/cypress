@@ -85,7 +85,7 @@ module.exports = (Commands, Cypress, cy) ->
       }
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: name
           displayName: "get cookie"
           consoleProps: ->
@@ -116,7 +116,7 @@ module.exports = (Commands, Cypress, cy) ->
       }
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: ""
           displayName: "get cookies"
           consoleProps: ->
@@ -150,7 +150,7 @@ module.exports = (Commands, Cypress, cy) ->
       cookie = _.pick(options, COOKIE_PROPS)
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: [name, value]
           displayName: "set cookie"
           consoleProps: ->
@@ -178,7 +178,7 @@ module.exports = (Commands, Cypress, cy) ->
       }
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: name
           displayName: "clear cookie"
           consoleProps: ->
@@ -212,7 +212,7 @@ module.exports = (Commands, Cypress, cy) ->
       }
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: ""
           displayName: "clear cookies"
           consoleProps: ->

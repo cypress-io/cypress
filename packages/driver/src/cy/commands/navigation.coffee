@@ -80,7 +80,7 @@ module.exports = (Commands, Cypress, cy) ->
           throwArgsErr()
 
       ## clear the current timeout
-      @_clearTimeout()
+      cy.clearTimeout()
 
       cleanup = null
 
@@ -100,7 +100,7 @@ module.exports = (Commands, Cypress, cy) ->
           throwArgsErr()
 
         if options.log
-          options._log = $Log.command()
+          options._log = Cypress.log()
 
           options._log.snapshot("before", {next: "after"})
 
@@ -128,7 +128,7 @@ module.exports = (Commands, Cypress, cy) ->
       }
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       win = @state("window")
 
@@ -149,7 +149,7 @@ module.exports = (Commands, Cypress, cy) ->
         Cypress.on "load", resolve
 
         ## clear the current timeout
-        @_clearTimeout()
+        cy.clearTimeout()
 
         win.history.go(num)
 
@@ -209,7 +209,7 @@ module.exports = (Commands, Cypress, cy) ->
       consoleProps = {}
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           consoleProps: -> consoleProps
         })
 
@@ -220,10 +220,10 @@ module.exports = (Commands, Cypress, cy) ->
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
-      prevTimeout = @_timeout()
+      prevTimeout = cy.timeout()
 
       ## clear the current timeout
-      @_clearTimeout()
+      cy.clearTimeout()
 
       win           = @state("window")
       $autIframe = @state("$autIframe")
@@ -278,7 +278,7 @@ module.exports = (Commands, Cypress, cy) ->
 
         visit = (win, url, options) =>
           onLoad = =>
-            @_timeout(prevTimeout)
+            cy.timeout(prevTimeout)
             options.onLoad?.call(runnable.ctx, win)
 
             options._log.set({url: url}) if options._log
@@ -510,7 +510,7 @@ module.exports = (Commands, Cypress, cy) ->
       ## fire fast enough
       @state("pageChangeEvent", true)
 
-      $Log.command
+      Cypress.log
         type: "parent"
         name: "form sub"
         message: "--submitting form---"
@@ -545,7 +545,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options,
         timeout: Cypress.config("pageLoadTimeout")
 
-      options._log = $Log.command
+      options._log = Cypress.log
         type: "parent"
         name: "page load"
         message: "--waiting for new page to load---"
@@ -555,7 +555,7 @@ module.exports = (Commands, Cypress, cy) ->
           "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
         }
 
-      @_clearTimeout()
+      cy.clearTimeout()
 
       ready = @state("ready")
 

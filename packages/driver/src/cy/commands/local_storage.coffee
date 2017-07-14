@@ -37,7 +37,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       remote = clearLocalStorage.call(@, keys)
 
-      $Log.command
+      Cypress.log
         name: "clear ls"
         snapshot: true
         end: true

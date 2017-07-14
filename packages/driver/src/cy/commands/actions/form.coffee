@@ -21,7 +21,7 @@ module.exports = (Commands, Cypress, cy) ->
       form = options.$el.get(0)
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log
           $el: options.$el
           consoleProps: ->
             "Applied To": $utils.getDomElements(options.$el)
@@ -54,7 +54,7 @@ module.exports = (Commands, Cypress, cy) ->
       ## dont submit the form if our dispatched event was cancelled (false)
       form.submit() if dispatched
 
-      @_timeout(delay, true)
+      cy.timeout(delay, true)
 
       Promise
         .delay(delay)

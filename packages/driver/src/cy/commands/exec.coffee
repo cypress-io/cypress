@@ -25,7 +25,7 @@ module.exports = (Commands, Cypress, cy) ->
       if options.log
         consoleOutput = {}
 
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: _.truncate(cmd, { length: 25 })
           consoleProps: ->
             consoleOutput
@@ -41,7 +41,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      @_clearTimeout()
+      cy.clearTimeout()
 
       isTimedoutError = (err) -> err.timedout
 

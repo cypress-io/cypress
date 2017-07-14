@@ -19,7 +19,7 @@ module.exports = (Commands, Cypress, cy) ->
       @ensureDom(options.$el, "focus")
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log
           $el: options.$el
           consoleProps: ->
             "Applied To": $utils.getDomElements(options.$el)
@@ -44,7 +44,7 @@ module.exports = (Commands, Cypress, cy) ->
           args: { num }
         })
 
-      timeout = @_timeout() * .90
+      timeout = cy.timeout() * .90
 
       cleanup = null
       hasFocused = false
@@ -68,7 +68,7 @@ module.exports = (Commands, Cypress, cy) ->
 
           cleanup()
 
-          @_timeout(delay, true)
+          cy.timeout(delay, true)
 
           Promise
             .delay(delay)
@@ -153,7 +153,7 @@ module.exports = (Commands, Cypress, cy) ->
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = $Log.command
+        options._log = Cypress.log
           $el: options.$el
           message: deltaOptions
           consoleProps: ->
@@ -184,7 +184,7 @@ module.exports = (Commands, Cypress, cy) ->
             args: { node }
           })
 
-        timeout = @_timeout() * .90
+        timeout = cy.timeout() * .90
 
         cleanup = null
         hasBlurred = false
@@ -208,7 +208,7 @@ module.exports = (Commands, Cypress, cy) ->
 
             cleanup()
 
-            @_timeout(delay, true)
+            cy.timeout(delay, true)
 
             Promise
               .delay(delay)

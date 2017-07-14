@@ -34,7 +34,7 @@ module.exports = (Commands, Cypress, cy) ->
       consoleProps = {}
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: file
           consoleProps: -> consoleProps
         })
@@ -92,7 +92,7 @@ module.exports = (Commands, Cypress, cy) ->
       consoleProps = {}
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: fileName
           consoleProps: -> consoleProps
         })

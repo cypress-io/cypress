@@ -151,7 +151,7 @@ module.exports = (Commands, Cypress, cy) ->
       requestOpts = _.pick(options, REQUEST_PROPS)
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: ""
           consoleProps: ->
             resp = options.response ? {}
@@ -188,7 +188,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      @_clearTimeout()
+      cy.clearTimeout()
 
       request(requestOpts)
       .timeout(options.timeout)

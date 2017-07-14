@@ -31,7 +31,7 @@ module.exports = ($Cy) ->
       ## the previous was. this prevents logging
       ## additionally when the url didnt actually change
       if options.log and (url isnt previousUrl)
-        $Log.command
+        Cypress.log
           name: "new url"
           message: url
           event: true

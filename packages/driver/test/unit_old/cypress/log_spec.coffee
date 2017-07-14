@@ -773,7 +773,7 @@ describe "$Cypress.Log API", ->
             @allowErrors()
 
             @cy.on "command:start", ->
-              @_timeout(100)
+              cy.timeout(100)
 
             ## prevent accidentally adding a .then to @cy
             return null

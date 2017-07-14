@@ -21,7 +21,7 @@ module.exports = (Commands, Cypress, cy) ->
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = $Log.command
+        options._log = Cypress.log
           message: deltaOptions
           $el: options.$el
           consoleProps: ->

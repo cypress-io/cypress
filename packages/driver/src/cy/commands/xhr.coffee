@@ -82,7 +82,7 @@ startXhrServer = (cy, config) ->
         numResponses = rl.get("numResponses")
         rl.set "numResponses", numResponses + 1
 
-      logs[xhr.id] = log = $Log.command({
+      logs[xhr.id] = log = Cypress.log({
         message:   ""
         name:      "xhr"
         displayName: getDisplayName(route)

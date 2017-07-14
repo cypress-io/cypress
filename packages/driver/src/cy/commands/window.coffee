@@ -49,7 +49,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       do resolveTitle = =>
         doc = @state("document")
@@ -64,7 +64,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       getWindow = =>
         window = @state("window")
@@ -91,7 +91,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       getDocument = =>
         win = @state("window")
@@ -122,7 +122,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log
           consoleProps: ->
             obj = {}
             obj.Preset = preset if preset

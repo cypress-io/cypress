@@ -29,7 +29,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           snapshot: true
           autoEnd: false
         })
@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy) ->
               options._log.end()
 
           ## restore timeout
-          @_timeout(timeout)
+          cy.timeout(timeout)
 
           ## invoke callback fn
           fn.call(@)
@@ -61,10 +61,10 @@ module.exports = (Commands, Cypress, cy) ->
         Cypress.trigger("paused", next?.get("name"))
 
         ## backup the current timeout
-        timeout = @_timeout()
+        timeout = cy.timeout()
 
         ## clear out the current timeout
-        @_clearTimeout()
+        cy.clearTimeout()
 
         ## set onResume function
         onResume(fn, timeout)
@@ -75,7 +75,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command({
+        options._log = Cypress.log({
           snapshot: true
           end: true
         })

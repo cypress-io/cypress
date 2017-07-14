@@ -10,8 +10,8 @@ module.exports = ($Cy) ->
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
       if not options._runnableTimeout
-        runnableTimeout = options.timeout ? @_timeout()
-        @_clearTimeout()
+        runnableTimeout = options.timeout ? cy.timeout()
+        cy.clearTimeout()
 
       current = @state("current")
 

@@ -57,7 +57,7 @@ module.exports = (Commands, Cypress, cy) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = $utils.filterOutOptions(options)
 
-          options._log = $Log.command({
+          options._log = Cypress.log({
             message: deltaOptions
             $el: $el
           })
@@ -258,7 +258,7 @@ module.exports = (Commands, Cypress, cy) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        @_timeout(delay, true)
+        cy.timeout(delay, true)
 
         p = findElByCoordinates($el)
           .cancellable()
@@ -336,10 +336,10 @@ module.exports = (Commands, Cypress, cy) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        @_timeout(delay, true)
+        cy.timeout(delay, true)
 
         if options.log
-          log = $Log.command
+          log = Cypress.log
             $el: $el
             consoleProps: ->
               "Applied To":   $utils.getDomElements($el)

@@ -63,7 +63,7 @@ describe "$Cypress.Cy Errors Extensions", ->
     #   @allowErrors()
 
     #   @cy.on "command:start", ->
-    #     @_timeout(100)
+    #     cy.timeout(100)
 
     #   @cy.on "fail", -> done()
 

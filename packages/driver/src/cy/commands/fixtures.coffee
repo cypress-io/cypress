@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      @_clearTimeout()
+      cy.clearTimeout()
 
       fixture(fx, options)
       .timeout(options.timeout)

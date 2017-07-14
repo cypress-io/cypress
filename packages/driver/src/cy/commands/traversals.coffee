@@ -31,7 +31,7 @@ module.exports = (Commands, Cypress, cy) ->
       }
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: getSelector()
           consoleProps: -> consoleProps
 

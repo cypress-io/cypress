@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy) ->
       if options.log
         consoleProps = {}
 
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: name
           consoleProps: ->
             consoleProps
@@ -88,7 +88,7 @@ module.exports = (Commands, Cypress, cy) ->
       else
         ## need to remove the current timeout
         ## because we're handling timeouts ourselves
-        @_clearTimeout()
+        cy.clearTimeout()
 
         automate()
         .timeout(timeout)

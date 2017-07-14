@@ -27,7 +27,7 @@ module.exports = (Commands, Cypress, cy) ->
       eventOptions = _.omit(options, "log", "$el", "position", "x", "y")
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log
           $el: subject
           consoleProps: ->
             {

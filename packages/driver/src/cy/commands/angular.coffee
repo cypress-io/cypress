@@ -20,7 +20,7 @@ module.exports = (Commands, Cypress, cy) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       switch type
         when "model"
