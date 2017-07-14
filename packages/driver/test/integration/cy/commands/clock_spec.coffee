@@ -140,7 +140,7 @@ describe "$Cypress.Cy Clock Commands", ->
           }
         }
         @cy.clock(null, ["setTimeout"]).then (clock) =>
-          @Cypress.trigger("before:window:load", newWindow)
+          @Cypress.trigger("aut:before:window:load", newWindow)
           onSetTimeout = @sandbox.spy()
           newWindow.setTimeout(onSetTimeout)
           clock.tick()

@@ -42,7 +42,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       ## pass up our iframe so the server binds to the XHR
       ## this ends up being faster than doing a cy.visit in every test
-      @Cypress.trigger "before:window:load", @$iframe.prop("contentWindow")
+      @Cypress.trigger "aut:before:window:load", @$iframe.prop("contentWindow")
 
       @server = @cy.state("server")
 
@@ -1885,7 +1885,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.then ->
           expect(@log.attributes.renderProps().indicator).to.equal("bad")
 
-  context.skip "Cypress.on(before:window:load)", ->
+  context.skip "Cypress.on(aut:before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window
       @cy.state("$autIframe").prop("src", "about:blank")

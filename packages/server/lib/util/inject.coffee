@@ -22,7 +22,7 @@ module.exports = {
         }
       </script>
       <script type='text/javascript'>
-        Cypress.onBeforeLoad(window);
+        Cypress.action('aut:before:window:load', window);
       </script>
     "
 

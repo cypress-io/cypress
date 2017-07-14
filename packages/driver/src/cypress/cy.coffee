@@ -7,6 +7,7 @@ $Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
 $Errors = require("../cy/errors")
 $Asserts = require("../cy/asserts")
+$Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
 $CommandQueue = require("./command_queue")
@@ -47,9 +48,10 @@ privateProps = {
 
 # { visit, get, find } = cy
 
-setIframeWindowDocumentProps = ($autIframe, state) ->
-  contentWindow = $autIframe.prop("contentWindow")
+getContentWindow = ($autIframe) ->
+  $autIframe.prop("contentWindow")
 
+setWindowDocumentProps = (contentWindow, state) ->
   state("window",   contentWindow)
   state("document", contentWindow.document)
 
@@ -129,14 +131,26 @@ create = (specWindow, Cypress, config, log) ->
       ## dont need to worry about a try/catch here
       ## because this is during initialize and its
       ## impossible something is wrong here
-      setIframeWindowDocumentProps($autIframe, state)
+      setWindowDocumentProps(getContentWindow($autIframe), state)
 
+      ## the load event comes from the autIframe anytime any window
+      ## inside of it loads.
+      ## when this happens we need to check from cross origin errors
+      ## by trying to talk to the contentWindow document to see if
+      ## its accessible.
+      ## when we find ourselves in a cross origin situation, then our
+      ## proxy has not injected Cypress.action('aut:before:window:load')
+      ## so Cypress.onBeforeAutWindowLoad() was never called
       $autIframe.on "load", =>
-        ## if setting iframe props failed
-        ## dont do anything else because
-        ## we are in trouble
+        ## if setting these props failed
+        ## then we know we're in a cross origin failure
         try
-          setIframeWindowDocumentProps($autIframe, state)
+          setWindowDocumentProps(getContentWindow($autIframe), state)
+
+          ## else we're good to go, and can continue executing
+          ## cypress commands!
+          ## TODO: i dont think we need to reapply window listeners either
+          ## since we already did it during the onBeforeAutWindowLoad
 
           ## TODO: uncomment these lines
           # @urlChanged(null, {log: false})
@@ -146,7 +160,6 @@ create = (specWindow, Cypress, config, log) ->
           ## applied them already during onBeforeLoad. the reason
           ## is that after load javascript has finished being evaluated
           ## and we may need to override things like alert + confirm again
-          # @bindWindowListeners state("window")
           # @isReady(true, "load")
           # @Cypress.trigger("load")
         catch err
@@ -299,6 +312,19 @@ create = (specWindow, Cypress, config, log) ->
       ## since it is long lived (page events continue)
       ## after the tests have finished
       state("runnable", runnable)
+
+    onBeforeAutWindowLoad: (contentWindow) ->
+      ## TODO: probably dont want to silence the console anymore
+      # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
+      setWindowDocumentProps(contentWindow, state)
+
+      $Listeners.bindTo(contentWindow, {
+        onSubmit: (e) ->
+        onBeforeUnload: (e) ->
+        onHashChange: (e) ->
+        onAlert: (str) ->
+        onConfirm: (str) ->
+      })
 
     checkForEndedEarly: ->
       ## if our index is above 0 but is below the commands.length

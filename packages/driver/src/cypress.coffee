@@ -142,17 +142,6 @@ class $Cypress
 
     $Chai.create(specWindow, @cy)
 
-  onBeforeLoad: (contentWindow) ->
-    ## should probably just trigger the "before:window:load"
-    ## event here, so other commands can tap into that
-    return if not @cy
-
-    @cy.silenceConsole(contentWindow) if @isHeadless
-    @cy.bindWindowListeners(contentWindow)
-    @cy._setWindowDocumentProps(contentWindow)
-
-    @emit("before:window:load", contentWindow)
-
   action: (eventName, args...) ->
     ## normalizes all the various ways
     ## other objects communicate intent
@@ -290,6 +279,11 @@ class $Cypress
 
       when "cy:command:enqueued"
         @emit("command:enqueued", args[0])
+
+      when "aut:before:window:load"
+        @cy.onBeforeAutWindowLoad(args[0])
+
+        @emit("aut:before:window:load", args[0])
 
   request: (eventName, args...) ->
     new Promise (resolve, reject) =>
