@@ -12,11 +12,15 @@ module.exports = {
     set = (key, value) ->
       if _.isObject(key)
         obj = key
+        ret = obj
       else
         obj = {}
         obj[key] = value
+        ret = value
 
       _.extend(state, obj)
+
+      return ret
 
     ## return the getter / setter function interface
     return (key, value) ->

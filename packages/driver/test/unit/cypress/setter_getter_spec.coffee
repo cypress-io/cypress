@@ -17,3 +17,10 @@ describe "src/cypress/setter_getter", ->
   it "gets entire sg", ->
     @sg({foo: "bar", bar: "baz"})
     expect(@sg()).to.deep.eq({foo: "bar", bar: "baz"})
+
+  it "returns value", ->
+    expect(@sg("foo", "bar")).to.eq("bar")
+
+  it "returns object", ->
+    @sg("foo", "bar")
+    expect(@sg({baz: "quux"})).to.deep.eq({baz: "quux"})
