@@ -59,6 +59,160 @@ describe "Runs List", ->
         .get(".navbar-default a")
           .contains("Runs").should("have.class", "active")
 
+  context "with a current user", ->
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
+      @config.projectId = @projects[0].id
+      @openProject.resolve(@config)
+
+      timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
+
+      cy
+        .clock(timestamp)
+        .then =>
+          @goToRuns()
+        .then =>
+          @getRuns.resolve(@runs)
+
+    it "lists runs", ->
+      cy
+        .get(".runs-container li")
+        .should("have.length", @runs.length)
+
+    it "displays link to dashboard that goes to admin project runs", ->
+      cy
+        .contains("See All").click()
+        .then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
+
+    it "displays run status icon", ->
+      cy
+        .get(".runs-container li").first().find("> div")
+        .should("have.class", "running")
+
+    it "displays last updated", ->
+      cy.contains("Last updated: 10:00:00am")
+
+    it "clicking run opens admin", ->
+      cy
+        .get(".runs-container li").first()
+        .click()
+        .then =>
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
+
+  context "without a current user", ->
+    beforeEach ->
+      @getCurrentUser.resolve(null)
+      @openProject.resolve(@config)
+      @goToRuns()
+
+    it "shows login message", ->
+      cy.get(".empty h4").should("contain", "Please Log In")
+
+    it "shows login modal after clicking 'Log In'", ->
+      cy.contains(".empty button", "Log In").click()
+      cy.get(".login")
+
+  describe "polling runs", ->
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
+      @getRunsAgain = @util.deferred()
+      @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
+
+      cy
+        .clock()
+        .then =>
+          @goToRuns()
+        .then =>
+          @getRuns.resolve(@runs)
+        .get(".runs-container") ## wait for original runs to show
+        .clock().then (clock) =>
+          @getRunsAgain = @util.deferred()
+          @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
+        .tick(10000)
+
+    it "has original state of runs", ->
+      cy
+        .get(".runs-container li").first().find("> div")
+        .should("have.class", "running")
+
+    it "sends get:runs ipc event", ->
+      expect(@ipc.getRuns).to.be.calledTwice
+
+    it "disables refresh button", ->
+      cy.get(".runs header button").should("be.disabled")
+
+    it "spins the refresh button", ->
+      cy.get(".runs header button i").should("have.class", "fa-spin")
+
+    context "success", ->
+      beforeEach ->
+        @runs[0].status = "passed"
+        @getRunsAgain.resolve(@runs)
+
+      it "updates the runs", ->
+        cy
+          .get(".runs-container li").first().find("> div")
+          .should("have.class", "passed")
+
+      it "enables refresh button", ->
+        cy.get(".runs header button").should("not.be.disabled")
+
+      it "stops spinning the refresh button", ->
+        cy.get(".runs header button i").should("not.have.class", "fa-spin")
+
+    context "errors", ->
+      beforeEach ->
+        @ipcError = (details) =>
+          err = Object.assign(details, {name: "foo", message: "There's an error"})
+          @getRunsAgain.reject(err)
+
+      it "displays permissions error", ->
+        @ipcError({statusCode: 403})
+        cy.contains("Request access")
+
+      it "displays missing project id error", ->
+        @ipcError({type: "NO_PROJECT_ID"})
+        cy.contains("You Have No Recorded Runs")
+
+      it "displays old runs if another error", ->
+        @ipcError({type: "TIMED_OUT"})
+        cy.get(".runs-container li").should("have.length", 4)
+
+  describe "manually refreshing runs", ->
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
+      @getRunsAgain = @util.deferred()
+      @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
+
+      @getRuns.resolve(@runs)
+      @goToRuns().then ->
+        cy.get(".runs header button").click()
+
+    it "sends get:runs ipc event", ->
+      expect(@ipc.getRuns).to.be.calledTwice
+
+    it "still shows list of runs", ->
+      cy.get(".runs-container li").should("have.length", 4)
+
+    it "disables refresh button", ->
+      cy.get(".runs header button").should("be.disabled")
+
+    it "spins the refresh button", ->
+      cy.get(".runs header button i").should("have.class", "fa-spin")
+
+    describe "when runs have loaded", ->
+      beforeEach ->
+        @getRunsAgain.resolve(@runs)
+
+      it "enables refresh button", ->
+        cy.get(".runs header button").should("not.be.disabled")
+
+      it "stops spinning the refresh button", ->
+        cy.get(".runs header button i").should("not.have.class", "fa-spin")
+
   context "error states", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
@@ -173,6 +327,9 @@ describe "Runs List", ->
               it "logs user out", ->
                 cy.shouldBeLoggedOut()
 
+              it "shows login message", ->
+                cy.get(".empty h4").should("contain", "Please Log In")
+
     describe "timed out error", ->
       beforeEach ->
         @openProject.resolve(@config)
@@ -199,6 +356,9 @@ describe "Runs List", ->
 
       it "logs user out", ->
         cy.shouldBeLoggedOut()
+
+      it "shows login message", ->
+        cy.get(".empty h4").should("contain", "Please Log In")
 
     describe "no project id error", ->
       beforeEach ->
@@ -309,144 +469,3 @@ describe "Runs List", ->
           .contains("Cypress Dashboard").click()
           .then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")
-
-  describe "list runs", ->
-    beforeEach ->
-      @getCurrentUser.resolve(@user)
-      @config.projectId = @projects[0].id
-      @openProject.resolve(@config)
-
-      timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
-
-      cy
-        .clock(timestamp)
-        .then =>
-          @goToRuns()
-        .then =>
-          @getRuns.resolve(@runs)
-
-    it "lists runs", ->
-      cy
-        .get(".runs-container li")
-        .should("have.length", @runs.length)
-
-    it "displays link to dashboard that goes to admin project runs", ->
-      cy
-        .contains("See All").click()
-        .then ->
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
-
-    it "displays run status icon", ->
-      cy
-        .get(".runs-container li").first().find("> div")
-        .should("have.class", "running")
-
-    it "displays last updated", ->
-      cy.contains("Last updated: 10:00:00am")
-
-    it "clicking run opens admin", ->
-      cy
-        .get(".runs-container li").first()
-        .click()
-        .then =>
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
-
-  describe "polling runs", ->
-    beforeEach ->
-      @getCurrentUser.resolve(@user)
-      @openProject.resolve(@config)
-      @getRunsAgain = @util.deferred()
-      @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
-
-      cy
-        .clock()
-        .then =>
-          @goToRuns()
-        .then =>
-          @getRuns.resolve(@runs)
-        .get(".runs-container") ## wait for original runs to show
-        .clock().then (clock) =>
-          @getRunsAgain = @util.deferred()
-          @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
-        .tick(10000)
-
-    it "has original state of runs", ->
-      cy
-        .get(".runs-container li").first().find("> div")
-        .should("have.class", "running")
-
-    it "sends get:runs ipc event", ->
-      expect(@ipc.getRuns).to.be.calledTwice
-
-    it "disables refresh button", ->
-      cy.get(".runs header button").should("be.disabled")
-
-    it "spins the refresh button", ->
-      cy.get(".runs header button i").should("have.class", "fa-spin")
-
-    context "success", ->
-      beforeEach ->
-        @runs[0].status = "passed"
-        @getRunsAgain.resolve(@runs)
-
-      it "updates the runs", ->
-        cy
-          .get(".runs-container li").first().find("> div")
-          .should("have.class", "passed")
-
-      it "enables refresh button", ->
-        cy.get(".runs header button").should("not.be.disabled")
-
-      it "stops spinning the refresh button", ->
-        cy.get(".runs header button i").should("not.have.class", "fa-spin")
-
-    context "errors", ->
-      beforeEach ->
-        @ipcError = (details) =>
-          err = Object.assign(details, {name: "foo", message: "There's an error"})
-          @getRunsAgain.reject(err)
-
-      it "displays permissions error", ->
-        @ipcError({statusCode: 403})
-        cy.contains("Request access")
-
-      it "displays missing project id error", ->
-        @ipcError({type: "NO_PROJECT_ID"})
-        cy.contains("You Have No Recorded Runs")
-
-      it "displays old runs if another error", ->
-        @ipcError({type: "TIMED_OUT"})
-        cy.get(".runs-container li").should("have.length", 4)
-
-  describe "manually refreshing runs", ->
-    beforeEach ->
-      @getCurrentUser.resolve(@user)
-      @openProject.resolve(@config)
-      @getRunsAgain = @util.deferred()
-      @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
-
-      @getRuns.resolve(@runs)
-      @goToRuns().then ->
-        cy.get(".runs header button").click()
-
-    it "sends get:runs ipc event", ->
-      expect(@ipc.getRuns).to.be.calledTwice
-
-    it "still shows list of runs", ->
-      cy.get(".runs-container li").should("have.length", 4)
-
-    it "disables refresh button", ->
-      cy.get(".runs header button").should("be.disabled")
-
-    it "spins the refresh button", ->
-      cy.get(".runs header button i").should("have.class", "fa-spin")
-
-    describe "when runs have loaded", ->
-      beforeEach ->
-        @getRunsAgain.resolve(@runs)
-
-      it "enables refresh button", ->
-        cy.get(".runs header button").should("not.be.disabled")
-
-      it "stops spinning the refresh button", ->
-        cy.get(".runs header button i").should("not.have.class", "fa-spin")

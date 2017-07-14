@@ -90,6 +90,11 @@ class RunsList extends Component {
   render () {
     const { project } = this.props
 
+    // not logged in
+    if (!authStore.isAuthenticated) {
+      return this._loginMessage()
+    }
+
     // If the project is invalid
     if (project.state === Project.INVALID) {
       return this._emptyWithoutSetup(false)
@@ -178,6 +183,32 @@ class RunsList extends Component {
       <span className='last-updated'>
         Last updated: {this.runsStore.lastUpdated}
       </span>
+    )
+  }
+
+  _loginMessage () {
+    const showLogin = () => {
+      authStore.setShowingLogin(true)
+    }
+
+    return (
+      <div className='empty empty-log-in'>
+        <h4>Please Log In to View Runs</h4>
+        <p>Cypress can record screenshots, videos and failures when running <code>cypress run</code>, but you must be logged in to view them.</p>
+        <div className='runs-screenshots'>
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
+        </div>
+        <p>After runs are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
+        <button
+          className='btn btn-primary'
+          onClick={showLogin}
+          >
+          <i className='fa fa-user'></i>{' '}
+          Log In
+        </button>
+      </div>
     )
   }
 
