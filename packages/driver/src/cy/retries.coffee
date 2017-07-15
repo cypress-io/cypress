@@ -3,9 +3,9 @@ Promise = require("bluebird")
 
 utils = require("../cypress/utils")
 
-module.exports = ($Cy) ->
-  $Cy.extend
-    _retry: (fn, options, log) ->
+create = (state, finishAssertions) ->
+  return {
+    retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
@@ -13,7 +13,7 @@ module.exports = ($Cy) ->
         runnableTimeout = options.timeout ? cy.timeout()
         cy.clearTimeout()
 
-      current = @state("current")
+      current = state("current")
 
       ## use the log if passed in, else fallback to options._log
       ## else fall back to just grabbing the last log per our current command
@@ -44,7 +44,7 @@ module.exports = ($Cy) ->
         log.snapshot() if log
 
         if assertions = options.assertions
-          @finishAssertions(assertions)
+          finishAssertions(assertions)
 
         getErrMessage = (err) ->
           switch
@@ -61,7 +61,13 @@ module.exports = ($Cy) ->
         }
 
       Promise.delay(interval).cancellable().then =>
-        @trigger("retry", options) unless options.silent is true
+        ## TODO: handle this event
+        # @trigger("retry", options) unless options.silent is true
 
         ## invoke the passed in retry fn
         fn.call(@)
+  }
+
+module.exports = {
+  create
+}

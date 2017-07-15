@@ -27,7 +27,7 @@ parseValueActualAndExpected = (value, actual, expected) ->
 
   obj
 
-create = (state, queue) ->
+create = (state, queue, retryFn) ->
   getUpcomingAssertions = ->
     current = state("current")
     index   = state("index") + 1
@@ -74,6 +74,8 @@ create = (state, queue) ->
         log.end()
 
   return {
+    finishAssertions
+
     assert: (passed, message, value, actual, expected, error, verifying = false) ->
       ## slice off everything after a ', but' or ' but ' for passing assertions, because
       ## otherwise it doesn't make sense:
@@ -215,7 +217,7 @@ create = (state, queue) ->
           finishAssertions(options.assertions)
           throw e3
 
-        @_retry(onRetry, options) if _.isFunction(onRetry)
+        retryFn(onRetry, options) if _.isFunction(onRetry)
 
       ## bail if we have no assertions
       if not cmds.length

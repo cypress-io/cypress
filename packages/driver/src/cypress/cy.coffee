@@ -11,6 +11,7 @@ $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
+$Retries = require("../cy/retries")
 $CommandQueue = require("./command_queue")
 $SetterGetter = require("./setter_getter")
 
@@ -62,16 +63,18 @@ setRemoteIframeProps = ($autIframe, state) ->
 create = (specWindow, Cypress, config, log) ->
   aborted = false
 
+  onFinishAssertions = ->
+    assertions.finishAssertions.apply(null, arguments)
   state = $SetterGetter.create({})
   queue = $CommandQueue.create()
   xhrs = $Xhrs.create(state)
   agents = $Agents.create()
   aliases = $Aliases.create(state)
-  asserts = $Asserts.create(state)
-  errors = $Errors.create(Cypress, state, config)
   timeouts = $Timeouts.create(state)
 
-  assertions = $Assertions.create(state, queue)
+  retries = $Retries.create(state, onFinishAssertions)
+
+  assertions = $Assertions.create(state, queue, retries.retry)
 
   commandFns = {}
   # commandFnsBackup = {}
@@ -131,6 +134,7 @@ create = (specWindow, Cypress, config, log) ->
 
     ## assertions sync methods
     assert: assertions.assert
+    verifyUpcomingAssertions: assertions.verifyUpcomingAssertions
 
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
