@@ -4,7 +4,7 @@ moment = require("moment")
 Promise = require("bluebird")
 
 $Log = require("./log")
-utils = require("./utils")
+$utils = require("./utils")
 
 id = 0
 
@@ -73,7 +73,7 @@ waitForHooksToResolve = (ee, event, test = {}) ->
   #   ## https://github.com/petkaantonov/bluebird/issues/1104
   #   ## TODO: think about applying this to the other areas
   #   ## that use Cypress.invoke(...)
-  #   utils.isInstanceOf(r, Promise)
+  #   $utils.isInstanceOf(r, Promise)
 
   # Promise.all(events)
   ee.emitThen(event, test)
@@ -590,7 +590,7 @@ runnerListeners = (runner, Cypress, emissions, testsById, setTest) ->
 
       ## append a friendly message to the error indicating
       ## we're skipping the remaining tests in this suite
-      err.message += "\n\n" + utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
+      err.message += "\n\n" + $utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
 
     ## always set runnable err so we can tap into
     ## taking a screenshot on error
@@ -779,7 +779,7 @@ create = (mocha, Cypress) ->
           logs = test[instrument + "s"] ?= []
 
           ## else push it onto the logs
-          logs.push(attrs)      
+          logs.push(attrs)
   }
 
 module.exports = {
