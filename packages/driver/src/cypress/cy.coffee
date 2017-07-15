@@ -194,7 +194,8 @@ create = (specWindow, Cypress, config, log) ->
 
         args.unshift(subject)
 
-        @trigger("next:subject:prepared", subject, args)
+        ## TODO: handle this event
+        # @trigger("next:subject:prepared", subject, args)
 
         args
 
@@ -379,6 +380,9 @@ create = (specWindow, Cypress, config, log) ->
 
       ## store the previous timeout
       prevTimeout = timeouts.timeout()
+
+      ## store the current runnable
+      runnable = state("runnable")
 
       ## TODO: handle this event
       # @trigger "command:start", command
