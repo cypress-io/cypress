@@ -67,6 +67,7 @@ create = (specWindow, Cypress, config, log) ->
     assertions.finishAssertions.apply(null, arguments)
   state = $SetterGetter.create({})
   queue = $CommandQueue.create()
+  elements = $Elements.create(state)
   xhrs = $Xhrs.create(state)
   agents = $Agents.create()
   aliases = $Aliases.create(state)

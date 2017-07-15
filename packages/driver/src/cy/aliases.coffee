@@ -95,7 +95,7 @@ create = (state) ->
       memo.unshift(command)
 
       ## break and return the memo
-      if command.get("type") is "parent" or @_contains(command.get("subject"))
+      if command.get("type") is "parent" or cy.isInDom(command.get("subject"))
         return memo
 
       @_getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)

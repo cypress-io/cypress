@@ -68,7 +68,7 @@ module.exports = (Commands, Cypress, cy) ->
           $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         isAttached = ($elToClick) =>
-          @_contains($elToClick)
+          cy.isInDom($elToClick)
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate

@@ -45,7 +45,7 @@ module.exports = (Commands, Cypress, cy) ->
           d = @state("document")
           forceFocusedEl = @state("forceFocusedEl")
           if forceFocusedEl
-            if @_contains(forceFocusedEl)
+            if cy.isInDom(forceFocusedEl)
               el = forceFocusedEl
             else
               @state("forceFocusedEl", null)
@@ -161,9 +161,9 @@ module.exports = (Commands, Cypress, cy) ->
               ## if we're missing any element
               ## within our subject then filter out
               ## anything not currently in the DOM
-              if not @_contains(subject)
+              if not cy.isInDom(subject)
                 subject = subject.filter (index, el) =>
-                  @_contains(el)
+                  cy.isInDom(el)
 
                 ## if we have nothing left
                 ## just go replay the commands
