@@ -602,7 +602,7 @@ create = (specWindow, Cypress, state, config, log) ->
                 ## if we currently have a DOM subject and its not longer
                 ## in the document then we need to null out our subject because
                 ## a page change has happened and we want to discontinue chaining
-                if $utils.hasElement(subject) and not @_contains(subject)
+                if $utils.hasElement(subject) and not elements.isInDom(subject)
                   ## additionally check for errors here
                   ## so we can notify the user if they're trying
                   ## to chain child commands off of this null subject

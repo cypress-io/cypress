@@ -7,7 +7,7 @@ VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bot
 
 returnFalse = -> return false
 
-create = (state, config, expect) ->
+create = (state, config, expect, isInDom) ->
   ensureSubject = ->
     subject = state("subject")
 
@@ -103,7 +103,7 @@ create = (state, config, expect) ->
         args: { cmd }
       })
 
-    if not (isWindow or cy.isInDom(subject))
+    if not (isWindow or isInDom(subject))
       node = $utils.stringifyElement(subject)
       $utils.throwErrByPath("dom.detached", {
         onFail: log

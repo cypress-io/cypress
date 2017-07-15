@@ -95,7 +95,7 @@ chai.use (chai, u) ->
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
     Object.defineProperty(chai.Assertion::, "visible", {get: visibleProto})
 
-  overrideChaiAsserts = (cy) ->
+  overrideChaiAsserts = (assertFn, isInDom) ->
     _this = @
 
     chaiUtils.getMessage = _.wrap getMessage, (orig, assert, args) ->
@@ -157,9 +157,9 @@ chai.use (chai, u) ->
           length = $utils.normalizeNumber(length)
 
           ## filter out anything not currently in our document
-          if not cy.isInDom(obj)
+          if not isInDom(obj)
             obj = @_obj = obj.filter (index, el) ->
-              cy.isInDom(el)
+              isInDom(el)
 
           node = if obj and obj.length then $utils.stringifyElement(obj, "short") else obj.selector
 
@@ -227,7 +227,7 @@ chai.use (chai, u) ->
 
           try
             @assert(
-              isContained = cy.isInDom(obj),
+              isContained = isInDom(obj),
               "expected \#{act} to exist in the DOM",
               "expected \#{act} not to exist in the DOM",
               node,
@@ -266,7 +266,7 @@ chai.use (chai, u) ->
       catch e
         err = e
 
-      cy.assert(passed, message, value, actual, expected, err)
+      assertFn(passed, message, value, actual, expected, err)
 
       throw err if err
 
@@ -335,14 +335,14 @@ chai.use (chai, u) ->
       assert
     }
 
-  create = (specWindow, cy) ->
+  create = (specWindow, assertFn, isInDom) ->
     # restoreOverrides()
     restoreAsserts()
 
     # overrideChai()
-    overrideChaiAsserts(cy)
+    overrideChaiAsserts(assertFn, isInDom)
 
-    return setSpecWindowGlobals(specWindow, cy)
+    return setSpecWindowGlobals(specWindow, assertFn)
 
   module.exports = {
     replaceArgMessages
