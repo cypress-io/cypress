@@ -8,8 +8,8 @@ requestXhrRe = /\.request$/
 
 blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
 
-module.exports = ($Cy) ->
-  $Cy.extend({
+create = (state) ->
+  return {
     getXhrTypeByAlias: (alias) ->
       if requestXhrRe.test(alias) then "request" else "response"
 
@@ -25,26 +25,26 @@ module.exports = ($Cy) ->
 
     _addAlias: (aliasObj) ->
       {alias, subject} = aliasObj
-      aliases = @state("aliases") ? {}
+      aliases = state("aliases") ? {}
       aliases[alias] = aliasObj
-      @state("aliases", aliases)
+      state("aliases", aliases)
 
       remoteSubject = @_getRemotejQueryInstance(subject)
       ## assign the subject to our runnable ctx
       @assign(alias, remoteSubject ? subject)
 
     assign: (str, obj) ->
-      @state("runnable").ctx[str] = obj
+      state("runnable").ctx[str] = obj
 
     ## these are public because its expected other commands
     ## know about them and are expected to call them
     getNextAlias: ->
-      next = @state("current").get("next")
+      next = state("current").get("next")
       if next and next.get("name") is "as"
         next.get("args")[0]
 
     getAlias: (name, cmd, log) ->
-      aliases = @state("aliases") ? {}
+      aliases = state("aliases") ? {}
 
       ## bail if the name doesnt reference an alias
       return if not aliasRe.test(name)
@@ -59,7 +59,7 @@ module.exports = ($Cy) ->
       name.replace(aliasDisplayRe, "")
 
     getAvailableAliases: ->
-      return [] if not aliases = @state("aliases")
+      return [] if not aliases = state("aliases")
 
       _.keys(aliases)
 
@@ -75,7 +75,7 @@ module.exports = ($Cy) ->
           args: { name, displayName }
         }
 
-      cmd ?= log and log.get("name") or @state("current").get("name")
+      cmd ?= log and log.get("name") or state("current").get("name")
       displayName = @_aliasDisplayName(name)
 
       errPath = if availableAliases.length
@@ -104,7 +104,7 @@ module.exports = ($Cy) ->
     _replayFrom: (current) ->
       ## reset each chainerId to the
       ## current value
-      chainerId = @state("chainerId")
+      chainerId = state("chainerId")
 
       insert = (commands) =>
         _.each commands, (cmd) =>
@@ -152,41 +152,8 @@ module.exports = ($Cy) ->
           return memo
 
         , [initialCommand]
+  }
 
-  })
-    # cy
-    #   .server()
-    #   .route("/users", {}).as("u")
-    #   .query("body").as("b")
-    #   .query("div").find("span").find("input").as("i")
-    #   .query("form").wait ($form) ->
-    #     expect($form).to.contain("foo")
-    #   .find("div").find("span:first").find("input").as("i2")
-    #   .within "@b", ->
-    #     cy.query("button").as("btn")
-
-    ## DIFFICULT ALIASING SCENARIOS
-    ## 1. You have a row of 5 todos.  You alias the last row. You insert
-    ## a new row.  Does alias point to the NEW last row or the existing one?
-
-    ## 2. There is several action(s) to make up an element.  You click #add
-    ## which pops up a form, and alias the form.  You fill out the form and
-    ## click submit.  This clears the form.  You then use the form alias.  Does
-    ## it repeat the several steps which created the form in the first place?
-    ## does it simply say the referenced form cannot be found?
-
-    ## IF AN ALIAS CAN BE FOUND
-    ## cy.get("form").find("input[name='age']").as("age")
-    ## cy.get("@age").type(28)
-    ## GET 'form'
-    ##   FIND 'input[name='age']'
-    ##     AS 'age'
-    ##
-    ## GET '@age'
-    ##   TYPE '28'
-    ##
-    ## IF AN ALIAS CANNOT BE FOUND
-    ## ALIAS '@age' NO LONGER IN DOCUMENT, REQUERYING, REPLAYING COMMANDS
-    ## GET 'form'
-    ##   FIND 'input[name='age']'
-    ##     TYPE '28'
+module.exports = {
+  create
+}

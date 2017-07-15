@@ -5,6 +5,7 @@ Promise = require("bluebird")
 $utils = require("./utils")
 $Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
+$Aliases = require("../cy/aliases")
 $Errors = require("../cy/errors")
 $Asserts = require("../cy/asserts")
 $Listeners = require("../cy/listeners")
@@ -65,6 +66,7 @@ create = (specWindow, Cypress, config, log) ->
   queue = $CommandQueue.create()
   xhrs = $Xhrs.create(state)
   agents = $Agents.create()
+  aliases = $Aliases.create(state)
   asserts = $Asserts.create(state)
   errors = $Errors.create(Cypress, state, config)
   timeouts = $Timeouts.create(state)
@@ -125,6 +127,8 @@ create = (specWindow, Cypress, config, log) ->
     getLastXhrByAlias: xhrs.getLastXhrByAlias
     getRequestsByAlias: xhrs.getRequestsByAlias
 
+    ## alias sync methods
+    getAlias: aliases.getAlias
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
 
