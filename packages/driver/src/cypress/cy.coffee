@@ -75,6 +75,7 @@ create = (specWindow, Cypress, state, config, log) ->
   agents = $Agents.create()
   aliases = $Aliases.create(state)
   errors = $Errors.create(state, config, log)
+  ensures = $Ensures.create(state, config, expect, elements.isInDom)
   timeouts = $Timeouts.create(state)
 
   retries = $Retries.create(state, onFinishAssertions)
@@ -145,6 +146,17 @@ create = (specWindow, Cypress, state, config, log) ->
     ## assertions sync methods
     assert: assertions.assert
     verifyUpcomingAssertions: assertions.verifyUpcomingAssertions
+
+    ## ensure sync methods
+    ensureSubject: ensures.ensureSubject
+    ensureParent: ensures.ensureParent
+    ensureDom: ensures.ensureDom
+    ensureExistence: ensures.ensureExistence
+    ensureElExistence: ensures.ensureElExistence
+    ensureVisibility: ensures.ensureVisibility
+    ensureDescendents: ensures.ensureDescendents
+    ensureValidPosition: ensures.ensureValidPosition
+    ensureScrollability: ensures.ensureScrollability
 
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
