@@ -1,161 +1,157 @@
-_ = require("lodash")
 $ = require("jquery")
+_ = require("lodash")
 Promise = require("bluebird")
 
-$Chai = require("../../cypress/chai")
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../cypress/utils")
 
-bRe            = /(\*\*)(.+)(\*\*)/
-bTagOpen       = /\*\*/g
-bTagClosed     = /\*\*/g
-reExistence    = /exist/
-reEventually   = /^eventually/
-reHaveLength   = /length/
+## TODO
+## bTagOpen + bTagClosed
+## are duplicated in assertions.coffee
+butRe = /,? but\b/
+bTagOpen = /\*\*/g
+bTagClosed = /\*\*/g
 
-convertTags = (str) ->
-  ## must first escape these characters
-  ## since we will be inserting them
-  ## as real html
-  str = _.escape(str)
+## Rules:
+## 1. always remove value
+## 2. if value is a jquery object set a subject
+## 3. if actual is undefined or its not expected remove both actual + expected
+parseValueActualAndExpected = (value, actual, expected) ->
+  obj = {actual: actual, expected: expected}
 
-  ## bail if matches werent found
-  return str if not bRe.test(str)
+  if $utils.isInstanceOf(value, $)
+    obj.subject = value
 
-  str
-    .replace(bTagOpen, ": <strong>")
-    .replace(bTagClosed, "</strong>")
-    .split(" :").join(":")
+    if _.isUndefined(actual) or actual isnt expected
+      delete obj.actual
+      delete obj.expected
 
-convertMessage = ($row, message) ->
-  message = convertTags(message)
+  obj
 
-  $row.find("[data-js=message]").html(message)
+create = (state, queue) ->
+  getUpcomingAssertions = ->
+    current = state("current")
+    index   = state("index") + 1
 
-convertRowFontSize = ($row, message) ->
-  len = message.length
+    assertions = []
 
-  ## bail if this isnt a huge message
-  return if len < 100
+    ## grab the rest of the queue'd commands
+    for cmd in queue.slice(index).get()
+      ## don't break on utilities, just skip over them
+      if cmd.is("utility")
+        continue
 
-  ## else reduce the font-size down to 85%
-  ## and reduce the line height
-  $row.css({
-    fontSize: "85%"
-    lineHeight: "14px"
-  })
+      ## grab all of the queued commands which are
+      ## assertions and match our current chainerId
+      if cmd.is("assertion") and cmd.get("chainerId") is current.get("chainerId")
+        assertions.push(cmd)
+      else
+        break
 
-shouldFnWithCallback = (subject, fn) ->
-  Promise
-  .try =>
-    remoteSubject = @_getRemotejQueryInstance(subject)
-    fn.call @state("runnable").ctx, remoteSubject ? subject
-  .return(subject)
+    assertions
 
-shouldFn = (subject, chainers, args...) ->
-  if _.isFunction(chainers)
-    return shouldFnWithCallback.apply(@, arguments)
+  injectAssertionFns = (cmds) ->
+    _.map(cmds, injectAssertion)
 
-  exp = $Chai.expect(subject).to
-  originalChainers = chainers
+  injectAssertion = (cmd) ->
+    return (subject) =>
+      ## set assertions to itself or empty array
+      if not cmd.get("assertions")
+        cmd.set("assertions", [])
 
-  throwAndLogErr = (err) =>
-    ## since we are throwing our own error
-    ## without going through the assertion we need
-    ## to ensure our .should command gets logged
-    current = @state("current")
+      ## reset the assertion index back to 0
+      ## so we can track assertions and merge
+      ## them up with existing ones
+      cmd.set("assertionIndex", 0)
+      cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
 
-    log = Cypress.log({
-      name: "should"
-      type: "child"
-      message: [].concat(originalChainers, args)
-      end: true
-      snapshot: true
-      error: err
-    })
+  finishAssertions = (assertions) ->
+    _.each assertions, (log) ->
+      log.snapshot()
 
-    utils.throwErr(err, { onFail: log })
-
-  chainers = chainers.split(".")
-  lastChainer = _.last(chainers)
-
-  ## backup the original assertion subject
-  originalObj = exp._obj
-
-  options = {}
-
-  if reEventually.test(chainers)
-    err = utils.cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
-    err.retry = false
-    throwAndLogErr(err)
-
-  ## are we doing a length assertion?
-  if reHaveLength.test(chainers) or reExistence.test(chainers)
-    exp.isCheckingExistence = true
-
-  applyChainer = (memo, value) ->
-    if value is lastChainer
-      if _.isFunction(memo[value])
-        try
-          memo[value].apply(memo, args)
-        catch err
-          ## if we made it all the way to the actual
-          ## assertion but its set to retry false then
-          ## we need to log out this .should since there
-          ## was a problem with the actual assertion syntax
-          if err.retry is false
-            throwAndLogErr(err)
-          else
-            throw err
-    else
-      memo[value]
-
-  applyChainers = =>
-    ## if we're not doing existence or length assertions
-    ## then check to ensure the subject exists
-    ## in the DOM if its a DOM subject
-    ## because its possible we're asserting about an
-    ## element which has left the DOM and we always
-    ## want to auto-fail on those
-    if not exp.isCheckingExistence and utils.hasElement(subject)
-      @ensureDom(subject, "should")
-
-    _.reduce chainers, (memo, value) =>
-      if value not of memo
-        err = utils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
-        err.retry = false
-        throwAndLogErr(err)
-
-      applyChainer(memo, value)
-
-    , exp
-
-  Promise.try(applyChainers).then ->
-    ## if the _obj has been mutated then we
-    ## are chaining assertion properties and
-    ## should return this new subject
-    if originalObj isnt exp._obj
-      return exp._obj
-
-    return subject
-
-module.exports = (Commands, Cypress, cy) ->
-  ## backup here
-  assertFn = cy.assert
-
-  Commands.addAssertion({
-    should: ->
-      shouldFn.apply(@, arguments)
-
-    and: ->
-      shouldFn.apply(@, arguments)
-  })
+      if e = log.get("_error")
+        log.error(e)
+      else
+        log.end()
 
   return {
-    verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
-      cmds = @getUpcomingAssertions()
+    assert: (passed, message, value, actual, expected, error, verifying = false) ->
+      ## slice off everything after a ', but' or ' but ' for passing assertions, because
+      ## otherwise it doesn't make sense:
+      ## "expected <div> to have a an attribute 'href', but it was 'href'"
+      if message and passed and butRe.test(message)
+        message = message.substring(0, message.search(butRe))
 
-      @state("upcomingAssertions", cmds)
+      obj = parseValueActualAndExpected(value, actual, expected)
+
+      if $utils.hasElement(value)
+        obj.$el = value
+
+      functionHadArguments = (current) ->
+        fn = current and current.get("args") and current.get("args")[0]
+        fn and _.isFunction(fn) and fn.length > 0
+
+      isAssertionType = (cmd) ->
+        cmd and cmd.is("assertion")
+
+      current = state("current")
+
+      ## if we are simply verifying the upcoming
+      ## assertions then do not immediately end or snapshot
+      ## else do
+      if verifying
+        obj._error = error
+      else
+        obj.end = true
+        obj.snapshot = true
+        obj.error = error
+
+      isChildLike = (subject, current) =>
+        (value is subject) or
+          ## if our current command is an assertion type
+          isAssertionType(current) or
+            ## are we currently verifying assertions?
+            state("upcomingAssertions")?.length > 0 or
+              ## did the function have arguments
+              functionHadArguments(current)
+
+      _.extend obj,
+        name:     "assert"
+        # end:      true
+        # snapshot: true
+        message:  message
+        passed:   passed
+        selector: value?.selector
+        type: (current, subject) ->
+          ## if our current command has arguments assume
+          ## we are an assertion that's involving the current
+          ## subject or our value is the current subject
+          if isChildLike(subject, current)
+            "child"
+          else
+            "parent"
+
+        consoleProps: =>
+          obj = {Command: "assert"}
+
+          _.extend obj, parseValueActualAndExpected(value, actual, expected)
+
+          _.extend obj,
+            Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
+
+      ## think about completely gutting the whole object toString
+      ## which chai does by default, its so ugly and worthless
+
+      if error
+        error.onFail = (err) ->
+
+      Cypress.log(obj)
+
+      return null
+
+    verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
+      cmds = getUpcomingAssertions()
+
+      state("upcomingAssertions", cmds)
 
       options.assertions ?= []
 
@@ -216,7 +212,7 @@ module.exports = (Commands, Cypress, cy) ->
         try
           onFail.call(@, err) if _.isFunction(onFail)
         catch e3
-          @finishAssertions(options.assertions)
+          finishAssertions(options.assertions)
           throw e3
 
         @_retry(onRetry, options) if _.isFunction(onRetry)
@@ -242,7 +238,7 @@ module.exports = (Commands, Cypress, cy) ->
             return if log.get("name") isnt "assert"
 
             ## when we do immediately unbind this function
-            @state("onBeforeLog", null)
+            state("onBeforeLog", null)
 
             insertNewLog = (log) ->
               cmd.log(log)
@@ -302,12 +298,12 @@ module.exports = (Commands, Cypress, cy) ->
             else
               insertNewLog(log)
 
-          @state("onBeforeLog", setCommandLog)
+          state("onBeforeLog", setCommandLog)
 
         ## send verify=true as the last arg
         assertFn.apply(@, args.concat(true))
 
-      fns = @_injectAssertionFns(cmds)
+      fns = @injectAssertionFns(cmds)
 
       subjects = []
 
@@ -326,7 +322,7 @@ module.exports = (Commands, Cypress, cy) ->
           subjects[i] = subject
 
       restore = =>
-        @state("upcomingAssertions", [])
+        state("upcomingAssertions", [])
 
         ## no matter what we need to
         ## restore the assertions
@@ -337,7 +333,7 @@ module.exports = (Commands, Cypress, cy) ->
         .then(restore)
         .then(setSubjectAndSkip)
         .then =>
-          @finishAssertions(options.assertions)
+          finishAssertions(options.assertions)
         .then(onPassFn)
         .cancellable()
         .catch Promise.CancellationError, ->
@@ -348,7 +344,7 @@ module.exports = (Commands, Cypress, cy) ->
           ## when we're told not to retry
           if err.retry is false
             ## finish the assertions
-            @finishAssertions(options.assertions)
+            finishAssertions(options.assertions)
 
             ## and then push our command into this err
             try
@@ -359,48 +355,8 @@ module.exports = (Commands, Cypress, cy) ->
           throw err
         .catch(onFailFn)
 
-    finishAssertions: (assertions) ->
-      _.each assertions, (log) ->
-        log.snapshot()
-
-        if e = log.get("_error")
-          log.error(e)
-        else
-          log.end()
-
-    _injectAssertionFns: (cmds) ->
-      _.map cmds, _.bind(@_injectAssertion, @)
-
-    _injectAssertion: (cmd) ->
-      return (subject) =>
-        ## set assertions to itself or empty array
-        if not cmd.get("assertions")
-          cmd.set("assertions", [])
-
-        ## reset the assertion index back to 0
-        ## so we can track assertions and merge
-        ## them up with existing ones
-        cmd.set("assertionIndex", 0)
-        cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
-
-    getUpcomingAssertions: ->
-      current = @state("current")
-      index   = @state("index") + 1
-
-      assertions = []
-
-      ## grab the rest of the queue'd commands
-      for cmd in @queue.slice(index).get()
-        ## don't break on utilities, just skip over them
-        if cmd.is("utility")
-          continue
-
-        ## grab all of the queued commands which are
-        ## assertions and match our current chainerId
-        if cmd.is("assertion") and cmd.get("chainerId") is current.get("chainerId")
-          assertions.push(cmd)
-        else
-          break
-
-      assertions
   }
+
+module.exports = {
+  create
+}

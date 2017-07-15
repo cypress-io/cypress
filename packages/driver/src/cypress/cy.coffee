@@ -7,7 +7,7 @@ $Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
 $Aliases = require("../cy/aliases")
 $Errors = require("../cy/errors")
-$Asserts = require("../cy/asserts")
+$Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
@@ -71,6 +71,8 @@ create = (specWindow, Cypress, config, log) ->
   errors = $Errors.create(Cypress, state, config)
   timeouts = $Timeouts.create(state)
 
+  assertions = $Assertions.create(state, queue)
+
   commandFns = {}
   # commandFnsBackup = {}
 
@@ -111,9 +113,6 @@ create = (specWindow, Cypress, config, log) ->
     ## command queue instance
     queue
 
-    ## assert sync method
-    assert: asserts.assert
-
     ## agent sync methods
     spy: agents.spy
     stub: agents.stub
@@ -129,6 +128,10 @@ create = (specWindow, Cypress, config, log) ->
 
     ## alias sync methods
     getAlias: aliases.getAlias
+
+    ## assertions sync methods
+    assert: assertions.assert
+
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
 
