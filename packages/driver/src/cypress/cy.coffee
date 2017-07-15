@@ -81,6 +81,7 @@ create = (specWindow, Cypress, state, config, log) ->
   retries = $Retries.create(state, onFinishAssertions)
 
   assertions = $Assertions.create(state, queue, retries.retry)
+  coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
 
   commandFns = {}
   # commandFnsBackup = {}
@@ -142,6 +143,10 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## alias sync methods
     getAlias: aliases.getAlias
+
+    ## coordinates sync methods
+    getCoordinates: coordinates.getCoordinates
+    getElementAtCoordinates: coordinates.getElementAtCoordinates
 
     ## assertions sync methods
     assert: assertions.assert
