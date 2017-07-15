@@ -10,7 +10,6 @@ lolex = require("lolex")
 Cookies = require("js-cookie")
 bililiteRange = require("../vendor/bililiteRange")
 
-$Chai = require("./cypress/chai")
 $Chainer = require("./cypress/chainer")
 $Command = require("./cypress/command")
 $Commands = require("./cypress/commands")
@@ -144,7 +143,7 @@ class $Cypress
     ## wire up command create to cy
     @Commands = $Commands.create(@, @cy, @state, @config, @log)
 
-    $Chai.create(specWindow, @cy)
+    return null
 
   action: (eventName, args...) ->
     ## normalizes all the various ways

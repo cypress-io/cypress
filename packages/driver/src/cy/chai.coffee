@@ -4,8 +4,8 @@ chai = require("chai")
 chaijQuery = require("chai-jquery")
 sinonChai = require("@cypress/sinon-chai")
 
-dom = require("./dom")
-utils = require("./utils")
+dom = require("../cypress/dom")
+$utils = require("../cypress/utils")
 
 ## all words between single quotes which are at
 ## the end of the string
@@ -52,7 +52,7 @@ chai.use (chai, u) ->
       args = _.map args, (arg) ->
         ## if the object in the arguments has a cypress namespace
         ## then swap it out for that object
-        if obj = utils.getCypressNamespace(arg)
+        if obj = $utils.getCypressNamespace(arg)
           return obj
 
         return arg
@@ -102,9 +102,9 @@ chai.use (chai, u) ->
       obj = assert._obj
 
       ## if we are formatting a DOM object
-      if utils.hasElement(obj) or utils.hasWindow(obj) or utils.hasDocument(obj)
+      if $utils.hasElement(obj) or $utils.hasWindow(obj) or $utils.hasDocument(obj)
         ## replace object with our formatted one
-        assert._obj = utils.stringifyElement(obj, "short")
+        assert._obj = $utils.stringifyElement(obj, "short")
 
       msg = orig.call(@, assert, args)
 
@@ -116,10 +116,10 @@ chai.use (chai, u) ->
 
     chai.Assertion.overwriteMethod "match", (_super) ->
       return (regExp) ->
-        if _.isRegExp(regExp) or utils.hasElement(@_obj)
+        if _.isRegExp(regExp) or $utils.hasElement(@_obj)
           _super.apply(@, arguments)
         else
-          err = utils.cypressErr(utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
+          err = $utils.cypressErr($utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
           err.retry = false
           throw err
 
@@ -128,10 +128,10 @@ chai.use (chai, u) ->
         return (text) ->
           obj = @_obj
 
-          if not (utils.isInstanceOf(obj, $) or utils.hasElement(obj))
+          if not ($utils.isInstanceOf(obj, $) or $utils.hasElement(obj))
             return _super.apply(@, arguments)
 
-          escText = utils.escapeQuotes(text)
+          escText = $utils.escapeQuotes(text)
 
           selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
 
@@ -151,17 +151,17 @@ chai.use (chai, u) ->
         return (length) ->
           obj = @_obj
 
-          if not (utils.isInstanceOf(obj, $) or utils.hasElement(obj))
+          if not ($utils.isInstanceOf(obj, $) or $utils.hasElement(obj))
             return _super.apply(@, arguments)
 
-          length = utils.normalizeNumber(length)
+          length = $utils.normalizeNumber(length)
 
           ## filter out anything not currently in our document
-          if not cy._contains(obj)
+          if not cy.isInDom(obj)
             obj = @_obj = obj.filter (index, el) ->
-              cy._contains(el)
+              cy.isInDom(el)
 
-          node = if obj and obj.length then utils.stringifyElement(obj, "short") else obj.selector
+          node = if obj and obj.length then $utils.stringifyElement(obj, "short") else obj.selector
 
           ## if our length assertion fails we need to check to
           ## ensure that the length argument is a finite number
@@ -190,7 +190,7 @@ chai.use (chai, u) ->
               e1.displayMessage = getLongLengthMessage(obj.length, length)
               throw e1
 
-            e2 = utils.cypressErr(utils.errMessageByPath("chai.length_invalid_argument", { length }))
+            e2 = $utils.cypressErr($utils.errMessageByPath("chai.length_invalid_argument", { length }))
             e2.retry = false
             throw e2
 
@@ -213,7 +213,7 @@ chai.use (chai, u) ->
       return ->
         obj = @_obj
 
-        if not (utils.isInstanceOf(obj, $) or utils.hasElement(obj))
+        if not ($utils.isInstanceOf(obj, $) or $utils.hasElement(obj))
           try
             _super.apply(@, arguments)
           catch e
@@ -223,11 +223,11 @@ chai.use (chai, u) ->
           if not obj.length
             @_obj = null
 
-          node = if obj and obj.length then utils.stringifyElement(obj, "short") else obj.selector
+          node = if obj and obj.length then $utils.stringifyElement(obj, "short") else obj.selector
 
           try
             @assert(
-              isContained = cy._contains(obj),
+              isContained = cy.isInDom(obj),
               "expected \#{act} to exist in the DOM",
               "expected \#{act} not to exist in the DOM",
               node,
@@ -322,9 +322,18 @@ chai.use (chai, u) ->
     return fn
 
   setSpecWindowGlobals = (specWindow, cy) ->
+    expect = overrideExpect(cy)
+    assert = overrideAssert(cy)
+
     specWindow.chai   = chai
-    specWindow.expect = overrideExpect(cy)
-    specWindow.assert = overrideAssert(cy)
+    specWindow.expect = expect
+    specWindow.assert = assert
+
+    return {
+      chai
+      expect
+      assert
+    }
 
   create = (specWindow, cy) ->
     # restoreOverrides()
@@ -333,9 +342,7 @@ chai.use (chai, u) ->
     # overrideChai()
     overrideChaiAsserts(cy)
 
-    setSpecWindowGlobals(specWindow, cy)
-
-    return null
+    return setSpecWindowGlobals(specWindow, cy)
 
   module.exports = {
     replaceArgMessages

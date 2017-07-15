@@ -3,6 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $utils = require("./utils")
+$Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
 $Aliases = require("../cy/aliases")
@@ -67,6 +68,9 @@ create = (specWindow, Cypress, state, config, log) ->
     assertions.finishAssertions.apply(null, arguments)
   queue = $CommandQueue.create()
   elements = $Elements.create(state)
+
+  { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
+
   xhrs = $Xhrs.create(state)
   agents = $Agents.create()
   aliases = $Aliases.create(state)
