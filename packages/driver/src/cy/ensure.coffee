@@ -147,25 +147,6 @@ module.exports = ($Cy) ->
 
       @ensureExistence($el)
 
-    ensureNoCommandOptions: (options) ->
-      _.each commandOptions, (opt) =>
-        if _.has(options, opt)
-          assertion = switch opt
-            when "exist", "exists"
-              if options[opt] then "exist" else "not.exist"
-            when "visible"
-              if options[opt] then "be.visible" else "not.be.visible"
-            when "length"
-              "have.length', '#{options[opt]}"
-
-          utils.throwErrByPath("miscellaneous.deprecated", {
-            args: {
-              assertion
-              opt
-              value: options[opt]
-            }
-          })
-
     ensureDescendents: ($el1, $el2, onFail) ->
       cmd = @state("current").get("name")
 
