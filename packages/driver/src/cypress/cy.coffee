@@ -13,6 +13,7 @@ $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
+$Snapshots = require("../cy/snapshots")
 $CommandQueue = require("./command_queue")
 $SetterGetter = require("./setter_getter")
 
@@ -82,6 +83,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
   assertions = $Assertions.create(state, queue, retries.retry)
   coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
+  snapshots = $Snapshots.create($$, state)
 
   commandFns = {}
   # commandFnsBackup = {}
@@ -143,6 +145,9 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## alias sync methods
     getAlias: aliases.getAlias
+
+    ## snapshots sync methods
+    createSnapshot: snapshots.createSnapshot
 
     ## coordinates sync methods
     getCoordinates: coordinates.getCoordinates

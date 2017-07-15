@@ -26,14 +26,12 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
-$Snapshot = require("./cypress/snapshot")
 
 $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId normalizeAll".split(" ")
-  cy: "checkForEndedEarly onUncaughtException setRunnable".split(" ")
-  snapshot: "getStyles".split(" ")
+  cy: "checkForEndedEarly onUncaughtException setRunnable getStyles".split(" ")
 }
 
 throwDeprecatedCommandInterface = (key, method) ->
@@ -134,7 +132,6 @@ class $Cypress
       @log.apply(@, arguments)
 
     ## create cy and expose globally
-    @snapshot = $Snapshot.create(@cy)
     @cy = window.cy = $Cy.create(specWindow, @, @state, @config, logFn)
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)

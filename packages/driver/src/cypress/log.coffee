@@ -1,5 +1,6 @@
 _ = require("lodash")
 
+$Snapshots = require("../cy/snapshots")
 $utils = require("./utils")
 
 ## adds class methods for command, route, and agent logging
@@ -12,6 +13,7 @@ SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWi
 DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
 BLACKLIST_PROPS = "snapshots".split(" ")
 
+HIGHLIGHT_ATTR = { $Snapshots }
 delay = null
 
 reduceMemory = (attrs) ->
@@ -277,7 +279,7 @@ create = (Cypress, cy, state, config) ->
           at: null
           next: null
 
-        {body, htmlAttrs, headStyles, bodyStyles} = snapshot.createSnapshot(@get("$el"))
+        {body, htmlAttrs, headStyles, bodyStyles} = cy.createSnapshot(@get("$el"))
 
         obj = {
           name: name
@@ -346,7 +348,7 @@ create = (Cypress, cy, state, config) ->
 
         ## make sure all $el elements are visible!
         obj = {
-          highlightAttr: snapshot.getHighlightAttr()
+          highlightAttr: HIGHLIGHT_ATTR
           numElements:   $el.length
           visible:       $el.length is $el.filter(":visible").length
         }
