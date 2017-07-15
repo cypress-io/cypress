@@ -167,7 +167,7 @@ create = (state, queue, retryFn) ->
         switch callbacks.ensureExistenceFor
           when "dom"
             $el = determineEl(options.$el, subject)
-            return if not utils.isInstanceOf($el, $)
+            return if not $utils.isInstanceOf($el, $)
 
             @ensureElExistence($el)
 
@@ -350,7 +350,7 @@ create = (state, queue, retryFn) ->
 
             ## and then push our command into this err
             try
-              utils.throwErr(err, { onFail: options._log })
+              $utils.throwErr(err, { onFail: options._log })
             catch e
               err = e
 
