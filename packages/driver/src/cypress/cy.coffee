@@ -311,7 +311,16 @@ create = (specWindow, Cypress, state, config, log) ->
 
       ## add this function to our chainer class
       $Chainer.inject key, (chainerId, firstCall, args) ->
+        ## dont enqueue / inject any new commands if
+        ## onInjectCommand returns false
+        onInjectCommand = state("onInjectCommand")
+
+        if _.isFunction(onInjectCommand)
+          return if onInjectCommand.call(cy, key, args...) is false
+
         cy.enqueue(key, wrap(firstCall), args, type, chainerId)
+
+        return true
 
     enqueue: (key, fn, args, type, chainerId) ->
       clearImmediate(state("timerId"))
