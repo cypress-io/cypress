@@ -392,6 +392,9 @@ create = (specWindow, Cypress, state, config, log) ->
         onConfirm: (str) ->
       })
 
+    getStyles: ->
+      snapshots.getStyles()
+
     checkForEndedEarly: ->
       ## if our index is above 0 but is below the commands.length
       ## then we know we've ended early due to a done() and
