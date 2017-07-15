@@ -251,7 +251,7 @@ class $Cypress
         if @isHeadless
           @emit("mocha", "fail", args...)
 
-      when "errors:fail"
+      when "cy:fail"
         ## comes from cypress errors fail()
         @emit("fail", args...)
 

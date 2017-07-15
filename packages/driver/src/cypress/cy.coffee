@@ -70,6 +70,7 @@ create = (specWindow, Cypress, config, log) ->
   xhrs = $Xhrs.create(state)
   agents = $Agents.create()
   aliases = $Aliases.create(state)
+  errors = $Errors.create(state, config, log)
   timeouts = $Timeouts.create(state)
 
   retries = $Retries.create(state, onFinishAssertions)
@@ -92,7 +93,7 @@ create = (specWindow, Cypress, config, log) ->
 
     state("timerId", setImmediate(fn))
 
-  onCatch = (err) ->
+  fail = (err) ->
     errors.fail(err)
 
     ## reset the nestedIndex back to null
@@ -106,6 +107,8 @@ create = (specWindow, Cypress, config, log) ->
     ## which need to run
     state("index", queue.length)
 
+    Cypress.action("cy:fail", err, state("runnable"))
+
     return err
 
   cy = {
@@ -115,6 +118,9 @@ create = (specWindow, Cypress, config, log) ->
 
     ## command queue instance
     queue
+
+    ## errors sync methods
+    fail
 
     ## agent sync methods
     spy: agents.spy
@@ -435,7 +441,7 @@ create = (specWindow, Cypress, config, log) ->
         ## accidentally chain off of the return value
         return err
 
-      .catch(onCatch)
+      .catch(fail)
 
       ## signify we are at the end of the chain and do not
       ## continue chaining anymore
