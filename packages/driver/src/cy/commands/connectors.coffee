@@ -19,265 +19,265 @@ returnFalseIfThenable = (key, args...) ->
     args[0]()
     return false
 
-## thens can return more "thenables" which are not resolved
-## until they're 'really' resolved, so naturally this API
-## supports nesting promises
-thenFn = (subject, options, fn) ->
-  if _.isFunction(options)
-    fn = options
-    options = {}
+module.exports = (Commands, Cypress, cy, state, config) ->
+  ## thens can return more "thenables" which are not resolved
+  ## until they're 'really' resolved, so naturally this API
+  ## supports nesting promises
+  thenFn = (subject, options, fn) ->
+    if _.isFunction(options)
+      fn = options
+      options = {}
 
-  ## if this is the very last command we know its the 'then'
-  ## called by mocha.  in this case, we need to defer its
-  ## fn callback else we will not properly finish the run
-  ## of our commands, which ends up duplicating multiple commands
-  ## downstream.  this is because this fn callback forces mocha
-  ## to continue synchronously onto tests (if for instance this
-  ## 'then' is called from a hook) - by defering it, we finish
-  ## resolving our deferred.
-  current = @state("current")
-  if utils.isCommandFromMocha(current)
-    return @state("next", fn)
+    ## if this is the very last command we know its the 'then'
+    ## called by mocha.  in this case, we need to defer its
+    ## fn callback else we will not properly finish the run
+    ## of our commands, which ends up duplicating multiple commands
+    ## downstream.  this is because this fn callback forces mocha
+    ## to continue synchronously onto tests (if for instance this
+    ## 'then' is called from a hook) - by defering it, we finish
+    ## resolving our deferred.
+    current = state("current")
+    if $utils.isCommandFromMocha(current)
+      return state("next", fn)
 
-  _.defaults options,
-    timeout: cy.timeout()
+    _.defaults options,
+      timeout: cy.timeout()
 
-  ## clear the timeout since we are handling
-  ## it ourselves
-  cy.clearTimeout()
+    ## clear the timeout since we are handling
+    ## it ourselves
+    cy.clearTimeout()
 
-  ## TODO: use subject from @state("subject")
+    ## TODO: use subject from state("subject")
 
-  remoteSubject = @_getRemotejQueryInstance(subject)
-
-  args = remoteSubject or subject
-  args = if args?._spreadArray then args else [args]
-
-  ## name could be invoke or its!
-  name = @state("current").get("name")
-
-  cleanup = =>
-    @state("onInjectCommand", null)
-
-  cleanupEnqueue = =>
-    @off("command:enqueued", enqueuedCommand)
-    null
-
-  invokedCyCommand = false
-
-  enqueuedCommand = ->
-    invokedCyCommand = true
-
-  @state("onInjectCommand", returnFalseIfThenable)
-
-  @on("command:enqueued", enqueuedCommand)
-
-  ## this code helps juggle subjects forward
-  ## the same way that promises work
-  current = @state("current")
-  next    = current.get("next")
-
-  ## if the next command is chained to us then when it eventually
-  ## runs we need to reset the subject to be the return value of the
-  ## previous command so the subject is continuously juggled forward
-  if next and next.get("chainerId") is current.get("chainerId")
-    checkSubject = (newSubject, args) =>
-      return if @state("current") isnt next
-
-      ## get whatever the previous commands return
-      ## value is. this likely does not match the 'var current'
-      ## command in the case of nested cy commands
-      s = next.get("prev").get("subject")
-
-      ## find the new subject and splice it out
-      ## with our existing subject
-      index = _.indexOf(args, newSubject)
-      if index > -1
-        args.splice(index, 1, s)
-
-      @off("next:subject:prepared", checkSubject)
-
-    @on("next:subject:prepared", checkSubject)
-
-  getRet = =>
-    ret = fn.apply(@state("runnable").ctx, args)
-
-    if @isCy(ret)
-      ret = undefined
-
-    if ret? and invokedCyCommand and not ret.then
-      $utils.throwErrByPath("then.callback_mixes_sync_and_async", {
-        onFail: options._log
-        args: { value: $utils.stringify(ret) }
-      })
-
-    return ret
-
-  Promise
-  .try(getRet)
-  .timeout(options.timeout)
-  .then (ret) =>
-    cleanup()
-
-    ## if ret is null or undefined then
-    ## resolve with the existing subject
-    return if _.isUndefined(ret) then subject else ret
-  .catch Promise.TimeoutError, =>
-    $utils.throwErrByPath "invoke_its.timed_out", {
-      onFail: options._log
-      args: {
-        cmd: name
-        timeout: options.timeout
-        func: fn.toString()
-      }
-    }
-  .finally(cleanupEnqueue)
-
-invokeFn = (subject, fn, args...) ->
-  @ensureParent()
-  @ensureSubject()
-
-  options = {}
-
-  getMessage = ->
-    if name is "invoke"
-      ".#{fn}(" + $utils.stringify(args) + ")"
-    else
-      ".#{fn}"
-
-  ## name could be invoke or its!
-  name = @state("current").get("name")
-
-  message = getMessage()
-
-  options._log = Cypress.log
-    message: message
-    $el: if $utils.hasElement(subject) then subject else null
-    consoleProps: ->
-      Subject: subject
-
-  if not _.isString(fn)
-    $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
-      onFail: options._log
-      args: { cmd: name }
-    })
-
-  if name is "its" and args.length > 0
-    $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
-      onFail: options._log
-      args: { cmd: name }
-    })
-
-  fail = (prop) =>
-    $utils.throwErrByPath("invoke_its.invalid_property", {
-      onFail: options._log
-      args: { prop, cmd: name }
-    })
-
-  failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
-    $utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
-      args: { previousProp, currentProp, value, cmd: name }
-    })
-
-  failOnCurrentNullOrUndefinedValue = (prop, value) =>
-    $utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
-      args: { prop, value, cmd: name }
-    })
-
-  getReducedProp = (str, subject) ->
-    getValue = (memo, prop) ->
-      switch
-        when _.isString(memo)
-          new String(memo)
-        when _.isNumber(memo)
-          new Number(memo)
-        else
-          memo
-
-    _.reduce str.split("."), (memo, prop, index, array) ->
-
-      ## if the property does not EXIST on the subject
-      ## then throw a specific error message
-      try
-        fail(prop) if prop not of getValue(memo, prop)
-      catch e
-        ## if the value is null or undefined then it does
-        ## not have properties which causes us to throw
-        ## an even more particular error
-        if _.isNull(memo) or _.isUndefined(memo)
-          if index > 0
-            failOnPreviousNullOrUndefinedValue(array[index - 1], prop, memo)
-          else
-            failOnCurrentNullOrUndefinedValue(prop, memo)
-        else
-          throw e
-      return memo[prop]
-
-    , subject
-
-  getValue = =>
     remoteSubject = @_getRemotejQueryInstance(subject)
 
-    actualSubject = remoteSubject or subject
+    args = remoteSubject or subject
+    args = if args?._spreadArray then args else [args]
 
-    prop = getReducedProp(fn, actualSubject)
+    ## name could be invoke or its!
+    name = state("current").get("name")
 
-    invoke = =>
-      switch name
-        when "its"
-          prop
-        when "invoke"
-          if _.isFunction(prop)
-            prop.apply(actualSubject, args)
-          else
-            $utils.throwErrByPath("invoke.invalid_type", {
-              onFail: options._log
-              args: { prop: fn }
-            })
+    cleanup = =>
+      state("onInjectCommand", null)
 
-    getFormattedElement = ($el) ->
-      if $utils.hasElement($el)
-        $utils.getDomElements($el)
-      else
-        $el
+    cleanupEnqueue = =>
+      @off("command:enqueued", enqueuedCommand)
+      null
 
-    value = invoke()
+    invokedCyCommand = false
 
-    if options._log
-      options._log.set
-        consoleProps: ->
-          obj = {}
+    enqueuedCommand = ->
+      invokedCyCommand = true
 
-          if name is "invoke"
-            obj["Function"] = message
-            obj["With Arguments"] = args if args.length
-          else
-            obj["Property"] = message
+    state("onInjectCommand", returnFalseIfThenable)
 
-          _.extend obj,
-            On:       getFormattedElement(actualSubject)
-            Yielded: getFormattedElement(value)
+    @on("command:enqueued", enqueuedCommand)
 
-          obj
+    ## this code helps juggle subjects forward
+    ## the same way that promises work
+    current = state("current")
+    next    = current.get("next")
 
-    return value
+    ## if the next command is chained to us then when it eventually
+    ## runs we need to reset the subject to be the return value of the
+    ## previous command so the subject is continuously juggled forward
+    if next and next.get("chainerId") is current.get("chainerId")
+      checkSubject = (newSubject, args) =>
+        return if state("current") isnt next
 
-  ## wrap retrying into its own
-  ## separate function
-  retryValue = =>
+        ## get whatever the previous commands return
+        ## value is. this likely does not match the 'var current'
+        ## command in the case of nested cy commands
+        s = next.get("prev").get("subject")
+
+        ## find the new subject and splice it out
+        ## with our existing subject
+        index = _.indexOf(args, newSubject)
+        if index > -1
+          args.splice(index, 1, s)
+
+        @off("next:subject:prepared", checkSubject)
+
+      @on("next:subject:prepared", checkSubject)
+
+    getRet = =>
+      ret = fn.apply(state("runnable").ctx, args)
+
+      if @isCy(ret)
+        ret = undefined
+
+      if ret? and invokedCyCommand and not ret.then
+        $utils.throwErrByPath("then.callback_mixes_sync_and_async", {
+          onFail: options._log
+          args: { value: $utils.stringify(ret) }
+        })
+
+      return ret
+
     Promise
-    .try(getValue)
-    .catch (err) =>
-      options.error = err
-      @_retry(retryValue, options)
+    .try(getRet)
+    .timeout(options.timeout)
+    .then (ret) =>
+      cleanup()
 
-  do resolveValue = =>
-    Promise.try(retryValue).then (value) =>
-      @verifyUpcomingAssertions(value, options, {
-        onRetry: resolveValue
+      ## if ret is null or undefined then
+      ## resolve with the existing subject
+      return if _.isUndefined(ret) then subject else ret
+    .catch Promise.TimeoutError, =>
+      $utils.throwErrByPath "invoke_its.timed_out", {
+        onFail: options._log
+        args: {
+          cmd: name
+          timeout: options.timeout
+          func: fn.toString()
+        }
+      }
+    .finally(cleanupEnqueue)
+
+  invokeFn = (subject, fn, args...) ->
+    @ensureParent()
+    @ensureSubject()
+
+    options = {}
+
+    getMessage = ->
+      if name is "invoke"
+        ".#{fn}(" + $utils.stringify(args) + ")"
+      else
+        ".#{fn}"
+
+    ## name could be invoke or its!
+    name = state("current").get("name")
+
+    message = getMessage()
+
+    options._log = Cypress.log
+      message: message
+      $el: if $utils.hasElement(subject) then subject else null
+      consoleProps: ->
+        Subject: subject
+
+    if not _.isString(fn)
+      $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+        onFail: options._log
+        args: { cmd: name }
       })
 
-module.exports = (Commands, Cypress, cy) ->
+    if name is "its" and args.length > 0
+      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
+        onFail: options._log
+        args: { cmd: name }
+      })
+
+    fail = (prop) =>
+      $utils.throwErrByPath("invoke_its.invalid_property", {
+        onFail: options._log
+        args: { prop, cmd: name }
+      })
+
+    failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
+      $utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
+        args: { previousProp, currentProp, value, cmd: name }
+      })
+
+    failOnCurrentNullOrUndefinedValue = (prop, value) =>
+      $utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
+        args: { prop, value, cmd: name }
+      })
+
+    getReducedProp = (str, subject) ->
+      getValue = (memo, prop) ->
+        switch
+          when _.isString(memo)
+            new String(memo)
+          when _.isNumber(memo)
+            new Number(memo)
+          else
+            memo
+
+      _.reduce str.split("."), (memo, prop, index, array) ->
+
+        ## if the property does not EXIST on the subject
+        ## then throw a specific error message
+        try
+          fail(prop) if prop not of getValue(memo, prop)
+        catch e
+          ## if the value is null or undefined then it does
+          ## not have properties which causes us to throw
+          ## an even more particular error
+          if _.isNull(memo) or _.isUndefined(memo)
+            if index > 0
+              failOnPreviousNullOrUndefinedValue(array[index - 1], prop, memo)
+            else
+              failOnCurrentNullOrUndefinedValue(prop, memo)
+          else
+            throw e
+        return memo[prop]
+
+      , subject
+
+    getValue = =>
+      remoteSubject = @_getRemotejQueryInstance(subject)
+
+      actualSubject = remoteSubject or subject
+
+      prop = getReducedProp(fn, actualSubject)
+
+      invoke = =>
+        switch name
+          when "its"
+            prop
+          when "invoke"
+            if _.isFunction(prop)
+              prop.apply(actualSubject, args)
+            else
+              $utils.throwErrByPath("invoke.invalid_type", {
+                onFail: options._log
+                args: { prop: fn }
+              })
+
+      getFormattedElement = ($el) ->
+        if $utils.hasElement($el)
+          $utils.getDomElements($el)
+        else
+          $el
+
+      value = invoke()
+
+      if options._log
+        options._log.set
+          consoleProps: ->
+            obj = {}
+
+            if name is "invoke"
+              obj["Function"] = message
+              obj["With Arguments"] = args if args.length
+            else
+              obj["Property"] = message
+
+            _.extend obj,
+              On:       getFormattedElement(actualSubject)
+              Yielded: getFormattedElement(value)
+
+            obj
+
+      return value
+
+    ## wrap retrying into its own
+    ## separate function
+    retryValue = =>
+      Promise
+      .try(getValue)
+      .catch (err) =>
+        options.error = err
+        @_retry(retryValue, options)
+
+    do resolveValue = =>
+      Promise.try(retryValue).then (value) =>
+        @verifyUpcomingAssertions(value, options, {
+          onRetry: resolveValue
+        })
+
   Commands.addAll({ prevSubject: true }, {
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
@@ -286,7 +286,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       subject._spreadArray = true
 
-      thenFn.call(@, subject, options, fn)
+      thenFn(subject, options, fn)
 
     each: (subject, options, fn) ->
       if _.isUndefined(fn)
@@ -317,10 +317,10 @@ module.exports = (Commands, Cypress, cy) ->
       ## if we have a next command then we need to
       ## slice in this existing subject as its subject
       ## due to the way we queue promises
-      next = @state("current").get("next")
+      next = state("current").get("next")
       if next
         checkSubject = (newSubject, args) =>
-          return if @state("current") isnt next
+          return if state("current") isnt next
 
           ## find the new subject and splice it out
           ## with our existing subject
@@ -349,7 +349,7 @@ module.exports = (Commands, Cypress, cy) ->
 
           return ret
 
-        thenFn.call(@, el, options, callback)
+        thenFn(el, options, callback, state)
 
       ## generate a real array since bluebird is finicky and
       ## doesnt want an 'array-like' structure like jquery instances
@@ -362,7 +362,7 @@ module.exports = (Commands, Cypress, cy) ->
 
   Commands.addAll({ prevSubject: "optional" }, {
     then: ->
-      thenFn.apply(@, arguments)
+      thenFn.apply(null, arguments)
 
     ## making this a dual command due to child commands
     ## automatically returning their subject when their
@@ -370,8 +370,8 @@ module.exports = (Commands, Cypress, cy) ->
     ## this and investigate why that is the default behavior
     ## of child commands
     invoke: ->
-      invokeFn.apply(@, arguments)
+      invokeFn.apply(null, arguments)
 
     its: ->
-      invokeFn.apply(@, arguments)
+      invokeFn.apply(null, arguments)
   })
