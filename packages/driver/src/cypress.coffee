@@ -252,6 +252,8 @@ class $Cypress
           @emit("mocha", "fail", args...)
 
       when "cy:fail"
+        @runner.fail(args...)
+
         ## comes from cypress errors fail()
         @emit("fail", args...)
 

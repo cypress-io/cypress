@@ -454,6 +454,12 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
 
   return obj
 
+afterEachFailed = (Cypress, test, err) ->
+  test.state = "failed"
+  test.err = wrapErr(err)
+
+  Cypress.action("runner:test:end", wrap(test))
+
 hookFailed = (hook, err, hookName, testsById) ->
   ## finds the test by returning the first test from
   ## the parent or looping through the suites until
@@ -674,6 +680,15 @@ create = (mocha, Cypress) ->
 
       if re = options.grep
         @grep(re)
+
+    fail: (err, runnable) ->
+      ## if runnable.state is passed then we've
+      ## probably failed in an afterEach and need
+      ## to update the runnable to failed status
+      if runnable.state is "passed"
+        afterEachFailed(Cypress, runnable, err)
+
+      runnable.callback(err)
 
     normalizeAll: (tests) ->
       normalizeAll(
