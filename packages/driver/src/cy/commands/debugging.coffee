@@ -5,7 +5,7 @@ $Cypress = require("../../cypress")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "resume:next", ->
     @resume(false)
 

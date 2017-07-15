@@ -5,7 +5,7 @@ $Log = require("../../../cypress/log")
 { delay, dispatchPrimedChangeEvents, focusable } = require("./utils")
 $utils = require("../../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     focus: (subject, options = {}) ->
       ## we should throw errors by default!

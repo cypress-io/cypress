@@ -5,7 +5,7 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:after:hooks", (test, runnable) ->
     if test.err and Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
       ## give the UI some time to render the error

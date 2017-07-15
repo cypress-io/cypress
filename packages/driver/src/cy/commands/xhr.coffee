@@ -35,23 +35,23 @@ stripOrigin = (url) ->
   location = $Location.create(url)
   url.replace(location.origin, "")
 
-getXhrServer = (cy) ->
-  cy.state("server") ? unavailableErr()
+getXhrServer = (state) ->
+  state("server") ? unavailableErr()
 
-setRequest = (cy, xhr, alias) ->
-  requests = cy.state("requests") ? []
+setRequest = (state, xhr, alias) ->
+  requests = state("requests") ? []
 
   requests.push({
     xhr: xhr
     alias: alias
   })
 
-  cy.state("requests", requests)
+  state("requests", requests)
 
-setResponse = (cy, xhr) ->
-  obj = _.find cy.state("requests"), {xhr: xhr}
+setResponse = (state, xhr) ->
+  obj = _.find state("requests"), {xhr: xhr}
 
-  responses = cy.state("responses") ? []
+  responses = state("responses") ? []
 
   ## we could be setting response from
   ## multiple places so this should first
@@ -62,9 +62,9 @@ setResponse = (cy, xhr) ->
     alias: obj?.alias
   })
 
-  cy.state("responses", responses)
+  state("responses", responses)
 
-startXhrServer = (cy, config) ->
+startXhrServer = (cy, state, config) ->
   logs = {}
 
   server = $Server.create({
@@ -76,7 +76,7 @@ startXhrServer = (cy, config) ->
     onSend: (xhr, stack, route) =>
       alias = route?.alias
 
-      setRequest(cy, xhr, alias)
+      setRequest(state, xhr, alias)
 
       if rl = route and route.log
         numResponses = rl.get("numResponses")
@@ -139,7 +139,7 @@ startXhrServer = (cy, config) ->
       log.snapshot("request")
 
     onLoad: (xhr) =>
-      setResponse(cy, xhr)
+      setResponse(state, xhr)
 
       if log = logs[xhr.id]
         log.snapshot("response").end()
@@ -164,7 +164,7 @@ startXhrServer = (cy, config) ->
       cy.fail(err)
 
     onXhrAbort: (xhr, stack) =>
-      setResponse(cy, xhr)
+      setResponse(state, xhr)
 
       err = new Error $utils.errMessageByPath("xhr.aborted")
       err.name = "AbortError"
@@ -186,7 +186,7 @@ startXhrServer = (cy, config) ->
         route.onResponse.call(cy, xhr)
   })
 
-  cy.state("server", server)
+  state("server", server)
 
   return server
 
@@ -203,10 +203,10 @@ defaults = {
   onResponse: undefined
 }
 
-module.exports = (Commands, Cypress, cy, config) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   abort()
 
-  server = startXhrServer(cy, config)
+  server = startXhrServer(cy, state, config)
 
   Cypress.on "before:unload", ->
     ## if our page is going away due to
@@ -238,9 +238,9 @@ module.exports = (Commands, Cypress, cy, config) ->
 
       ## if we disable the server later make sure
       ## we cannot add cy.routes to it
-      cy.state("serverIsStubbed", options.enable)
+      state("serverIsStubbed", options.enable)
 
-      getXhrServer(cy).set(options)
+      getXhrServer(state).set(options)
 
     route: (args...) ->
       ## TODO:
@@ -256,7 +256,7 @@ module.exports = (Commands, Cypress, cy, config) ->
       ## response from the user
       hasResponse = true
 
-      if not cy.state("serverIsStubbed")
+      if not state("serverIsStubbed")
         $utils.throwErrByPath("route.failed_prerequisites")
 
       ## get the default options currently set
@@ -342,7 +342,7 @@ module.exports = (Commands, Cypress, cy, config) ->
 
         if _.isFunction(o.response)
           getResponse = =>
-            o.response.call(cy.state("runnable").ctx, options)
+            o.response.call(state("runnable").ctx, options)
 
           ## allow route to return a promise
           Promise.try(getResponse)
@@ -376,11 +376,11 @@ module.exports = (Commands, Cypress, cy, config) ->
             Response: options.response
             Alias:    options.alias
 
-        return getXhrServer(cy).route(options)
+        return getXhrServer(state).route(options)
 
       if _.isFunction(args[0])
         getArgs = =>
-          args[0].call(cy.state("runnable").ctx)
+          args[0].call(state("runnable").ctx)
 
         Promise.try(getArgs)
         .then(parseArgs)

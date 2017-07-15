@@ -11,7 +11,7 @@ builtInCommands = [
   require("../cy/commands/actions/text")
   require("../cy/commands/aliasing")
   require("../cy/commands/angular")
-  require("../cy/commands/assertions")
+  require("../cy/commands/asserting")
   require("../cy/commands/clock")
   require("../cy/commands/commands")
   require("../cy/commands/communications")
@@ -44,7 +44,7 @@ getTypeByPrevSubject = (prevSubject) ->
     else
       "parent"
 
-create = (Cypress, cy, config) ->
+create = (Cypress, cy, state, config, log) ->
   ## create a single instance
   ## of commands
   commands = {}
@@ -145,7 +145,7 @@ create = (Cypress, cy, config) ->
 
   ## perf loop
   for cmd in builtInCommands
-    cmd(Commands, Cypress, cy, config)
+    cmd(Commands, Cypress, cy, state, config, log)
 
   return Commands
 

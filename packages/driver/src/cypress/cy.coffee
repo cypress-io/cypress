@@ -60,12 +60,11 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
-create = (specWindow, Cypress, config, log) ->
+create = (specWindow, Cypress, state, config, log) ->
   aborted = false
 
   onFinishAssertions = ->
     assertions.finishAssertions.apply(null, arguments)
-  state = $SetterGetter.create({})
   queue = $CommandQueue.create()
   elements = $Elements.create(state)
   xhrs = $Xhrs.create(state)

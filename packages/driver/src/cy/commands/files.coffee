@@ -20,7 +20,7 @@ writeFile = (file, contents, options) =>
       else
         resolve(resp)
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     readFile: (file, encoding, options = {}) ->
       if _.isObject(encoding)

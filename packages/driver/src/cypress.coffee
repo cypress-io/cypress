@@ -102,6 +102,7 @@ class $Cypress
 
     config = _.omit(config, "environmentVariables", "remote")
 
+    @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
     @env = $SetterGetter.create(environmentVariables)
 
@@ -130,15 +131,18 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
+    logFn = =>
+      @log.apply(@, arguments)
+
     ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow, @, @config)
     @snapshot = $Snapshot.create(@cy)
+    @cy = window.cy = $Cy.create(specWindow, @, @state, @config, logFn)
+    @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(@mocha, @)
-    @log = $Log.create(@, @cy, @config, @snapshot)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @config)
+    @Commands = $Commands.create(@, @cy, @state, @config, @log)
 
     $Chai.create(specWindow, @cy)
 

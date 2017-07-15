@@ -83,7 +83,7 @@ setCounter = (num) ->
 setDelay = (val) ->
   delay = val ? 4
 
-create = (Cypress, cy, config, snapshot) ->
+create = (Cypress, cy, state, config) ->
   counter = 0
   logs = {}
   attributes = {}
@@ -115,7 +115,7 @@ create = (Cypress, cy, config, snapshot) ->
     logs[id] = true
 
   fn = (obj) ->
-    current = cy.state("current")
+    current = state("current")
 
     ## we are logging a command instrument by default
     _.defaults(obj, current?.pick("name", "type"))
@@ -150,15 +150,15 @@ create = (Cypress, cy, config, snapshot) ->
     ## so it can conditionally return either
     ## parent or child (useful in assertions)
     if _.isFunction(obj.type)
-      obj.type = obj.type.call(cy, current, cy.state("subject"))
+      obj.type = obj.type(current, state("subject"))
 
     _.defaults(obj, {
       id:               (counter += 1)
       state:            "pending"
       instrument:       "command"
-      url:              cy.state("url")
-      hookName:         cy.state("hookName")
-      testId:           cy.state("runnable").id
+      url:              state("url")
+      hookName:         state("hookName")
+      testId:           state("runnable").id
       viewportWidth:    config("viewportWidth")
       viewportHeight:   config("viewportHeight")
       referencesAlias:  undefined
@@ -442,7 +442,7 @@ create = (Cypress, cy, config, snapshot) ->
 
     log.wrapConsoleProps()
 
-    onBeforeLog = cy.state("onBeforeLog")
+    onBeforeLog = state("onBeforeLog")
 
     ## dont trigger log if this function
     ## explicitly returns false
@@ -450,7 +450,7 @@ create = (Cypress, cy, config, snapshot) ->
       return if onBeforeLog.call(cy, log) is false
 
     ## set the log on the command
-    cy.state("current")?.log(log)
+    state("current")?.log(log)
 
     addToLogs(log)
 

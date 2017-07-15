@@ -22,7 +22,7 @@ isNaNOrInfinity = (item) ->
 
   return _.isNaN(num) or !_.isFinite(num)
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     scrollIntoView: (subject, options = {}) ->
       if !_.isObject(options)

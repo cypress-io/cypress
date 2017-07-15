@@ -7,7 +7,7 @@ $utils = require("../../cypress/utils")
 
 ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     ng: (type, selector, options = {}) ->
       ## what about requirejs / browserify?

@@ -20,7 +20,7 @@ clearLocalStorage = (keys) ->
   ## return the remote localStorage object
   return remote
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:hooks", ->
     try
       ## this may fail if the current

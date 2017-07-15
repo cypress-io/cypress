@@ -5,7 +5,7 @@ Promise = require("bluebird")
 $Log = require("../../../cypress/log")
 $utils = require("../../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     submit: (subject, options = {}) ->
       _.defaults options,

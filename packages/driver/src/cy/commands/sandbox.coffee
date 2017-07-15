@@ -7,7 +7,7 @@ createSandbox = (sinon) ->
 
   sinon.sandbox.create()
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "restore", ->
     ## restore the sandbox if we've created one
     return if not @state

@@ -15,7 +15,7 @@ $Mouse = require("../../../cypress/mouse")
 
 $utils = require("../../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none

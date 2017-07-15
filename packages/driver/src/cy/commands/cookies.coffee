@@ -34,7 +34,7 @@ mergeDefaults = (obj) ->
   else
     merge(obj)
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   automateCookies = (event, obj = {}, log, timeout) ->
     automate = ->
       Cypress.automation(event, mergeDefaults(obj))

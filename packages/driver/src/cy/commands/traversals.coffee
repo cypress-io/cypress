@@ -5,7 +5,7 @@ $utils = require("../../cypress/utils")
 
 traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   _.each traversals, (traversal) ->
     Commands.add traversal, {prevSubject: "dom"}, (subject, arg1, arg2, options) ->
       if _.isObject(arg2)
@@ -17,8 +17,6 @@ module.exports = (Commands, Cypress, cy) ->
       options ?= {}
 
       _.defaults options, {log: true}
-
-      @ensureNoCommandOptions(options)
 
       getSelector = ->
         args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value()

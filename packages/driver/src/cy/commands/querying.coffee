@@ -14,7 +14,7 @@ $contains = $expr.contains
 restoreContains = ->
   $expr.contains = $contains
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "abort", restoreContains
 
   Commands.addAll({
@@ -96,8 +96,6 @@ module.exports = (Commands, Cypress, cy) ->
         command: null
         verify: true
 
-      @ensureNoCommandOptions(options)
-
       consoleProps = {}
 
       start = (aliasType) ->
@@ -145,7 +143,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       ## we always want to strip everything after the first '.'
       ## since we support alias propertys like '1' or 'all'
-      if aliasObj = @getAlias(selector.split(".")[0])
+      if aliasObj = cy.getAlias(selector.split(".")[0])
         {subject, alias, command} = aliasObj
 
         return do resolveAlias = =>
@@ -172,7 +170,7 @@ module.exports = (Commands, Cypress, cy) ->
 
               log(subject)
 
-              return @verifyUpcomingAssertions(subject, options, {
+              return cy.verifyUpcomingAssertions(subject, options, {
                 onFail: (err) ->
                   ## if we are failing because our aliased elements
                   ## are less than what is expected then we know we

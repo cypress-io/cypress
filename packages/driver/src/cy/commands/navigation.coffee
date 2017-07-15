@@ -19,7 +19,7 @@ timedOutWaitingForPageLoad = (ms, log) ->
     args: { ms }
   })
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run", (test) ->
     ## continuously reset this
     ## before each test run!
@@ -69,11 +69,11 @@ module.exports = (Commands, Cypress, cy) ->
     ## override the remote iframe getters
     overrideRemoteLocationGetters(@, contentWindow)
 
-    current = cy.state("current")
+    current = state("current")
 
     return if not current
 
-    runnable = cy.state("runnable")
+    runnable = state("runnable")
 
     return if not runnable
 
@@ -133,11 +133,11 @@ module.exports = (Commands, Cypress, cy) ->
 
         loaded = =>
           cleanup()
-          resolve cy.state("window")
+          resolve state("window")
 
         Cypress.on "load", loaded
 
-        cy.state("window").location.reload(forceReload)
+        state("window").location.reload(forceReload)
 
       .timeout(options.timeout)
       .catch Promise.TimeoutError, (err) =>
@@ -154,7 +154,7 @@ module.exports = (Commands, Cypress, cy) ->
       if options.log
         options._log = Cypress.log()
 
-      win = cy.state("window")
+      win = state("window")
 
       goNumber = (num) =>
         if num is 0
@@ -185,7 +185,7 @@ module.exports = (Commands, Cypress, cy) ->
 
           ## make sure we resolve our go function
           ## with the remove window (just like cy.visit)
-          cy.state("window")
+          state("window")
 
         Promise.delay(100)
         .then =>
@@ -249,9 +249,9 @@ module.exports = (Commands, Cypress, cy) ->
       ## clear the current timeout
       cy.clearTimeout()
 
-      win           = cy.state("window")
-      $autIframe = cy.state("$autIframe")
-      runnable      = cy.state("runnable")
+      win           = state("window")
+      $autIframe = state("$autIframe")
+      runnable      = state("runnable")
 
       v = null
 
@@ -496,7 +496,7 @@ module.exports = (Commands, Cypress, cy) ->
       ## set the pageChangeEvent to true because
       ## there may be situations where it doesnt
       ## fire fast enough
-      cy.state("pageChangeEvent", true)
+      state("pageChangeEvent", true)
 
       Cypress.log
         type: "parent"
@@ -510,7 +510,7 @@ module.exports = (Commands, Cypress, cy) ->
         }
 
     loading: (options = {}) ->
-      current = cy.state("current")
+      current = state("current")
 
       ## if we are visiting a page which caused
       ## the beforeunload, then dont output this command
@@ -524,11 +524,11 @@ module.exports = (Commands, Cypress, cy) ->
       ## this may change in the future since we want
       ## to add debuggability in the chrome console
       ## which at that point we may keep runnable around
-      return if not cy.state("runnable")
+      return if not state("runnable")
 
       ## this tells the world that we're
       ## handling a page load event
-      cy.state("pageChangeEvent", true)
+      state("pageChangeEvent", true)
 
       _.defaults options,
         timeout: Cypress.config("pageLoadTimeout")
@@ -545,7 +545,7 @@ module.exports = (Commands, Cypress, cy) ->
 
       cy.clearTimeout()
 
-      ready = cy.state("ready")
+      ready = state("ready")
 
       ready.promise
         .cancellable()

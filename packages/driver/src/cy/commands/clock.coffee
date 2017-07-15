@@ -4,7 +4,7 @@ $Clock = require("../../cypress/clock")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   clock = null
 
   Cypress.on "test:before:run", ->
