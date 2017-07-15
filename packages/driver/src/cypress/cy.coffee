@@ -8,14 +8,16 @@ $Xhrs = require("../cy/xhrs")
 $Agents = require("../cy/agents")
 $Aliases = require("../cy/aliases")
 $Errors = require("../cy/errors")
+$Ensures = require("../cy/ensures")
+$Elements = require("../cy/elements")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Snapshots = require("../cy/snapshots")
+$Coordinates = require("../cy/coordinates")
 $CommandQueue = require("./command_queue")
-$SetterGetter = require("./setter_getter")
 
 crossOriginScriptRe = /^script error/i
 
@@ -67,7 +69,16 @@ create = (specWindow, Cypress, state, config, log) ->
 
   onFinishAssertions = ->
     assertions.finishAssertions.apply(null, arguments)
+
+  $$ = (selector, context) ->
+    context ?= state("document")
+    new $.fn.init(selector, context)
+
   queue = $CommandQueue.create()
+
+  retries = $Retries.create(state, onFinishAssertions)
+  assertions = $Assertions.create(state, queue, retries.retry)
+
   elements = $Elements.create(state)
 
   { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
@@ -79,9 +90,6 @@ create = (specWindow, Cypress, state, config, log) ->
   ensures = $Ensures.create(state, config, expect, elements.isInDom)
   timeouts = $Timeouts.create(state)
 
-  retries = $Retries.create(state, onFinishAssertions)
-
-  assertions = $Assertions.create(state, queue, retries.retry)
   coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
   snapshots = $Snapshots.create($$, state)
 
@@ -122,6 +130,9 @@ create = (specWindow, Cypress, state, config, log) ->
   cy = {
     id: _.uniqueId("cy")
 
+    ## synchrounous querying
+    $$
+
     state
 
     ## command queue instance
@@ -130,10 +141,16 @@ create = (specWindow, Cypress, state, config, log) ->
     ## errors sync methods
     fail
 
+    ## chai expect sync methods
+    expect
+
     ## agent sync methods
     spy: agents.spy
     stub: agents.stub
     agents: agents.agents
+
+    ## has element in dom sync
+    isInDom: elements.isInDom
 
     ## timeout sync methods
     timeout: timeouts.timeout
@@ -211,10 +228,6 @@ create = (specWindow, Cypress, state, config, log) ->
             ready.reject(err)
           else
             errors.fail(err)
-
-    $$: (selector, context) ->
-      context ?= state("document")
-      new $.fn.init(selector, context)
 
     addCommand: ({key, fn, type, enforceDom}) ->
       commandFns[key] = _.bind(fn, cy)
