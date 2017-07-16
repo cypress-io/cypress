@@ -287,6 +287,9 @@ class $Cypress
 
         @emit("aut:before:window:load", args[0])
 
+      when "cy:next:subject:prepared"
+        @emit("next:subject:prepared", args...)
+
   request: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->

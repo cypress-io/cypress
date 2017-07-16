@@ -328,9 +328,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           if index > -1
             args.splice(index, 1, subject)
 
-          @off("next:subject:prepared", checkSubject)
+          Cypress.removeListener("next:subject:prepared", checkSubject)
 
-        @on("next:subject:prepared", checkSubject)
+        Cypress.on("next:subject:prepared", checkSubject)
 
       endEarly = false
 

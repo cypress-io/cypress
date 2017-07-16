@@ -256,7 +256,7 @@ create = (specWindow, Cypress, state, config, log) ->
         args.unshift(subject)
 
         ## TODO: handle this event
-        # @trigger("next:subject:prepared", subject, args)
+        Cypress.action("cy:next:subject:prepared", subject, args)
 
         args
 
