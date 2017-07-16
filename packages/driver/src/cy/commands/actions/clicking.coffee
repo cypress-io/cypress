@@ -97,7 +97,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             domEvents.click   = $Mouse.click($elToClick, coords, win)
 
           if options._log
-            consoleObj = options._log.attributes.consoleProps()
+            consoleObj = options._log.invoke("consoleProps")
 
           consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
