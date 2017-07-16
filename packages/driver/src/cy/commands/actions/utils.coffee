@@ -31,7 +31,7 @@ getCoords = (cy, $el, options) -> (scrollIntoView = true, coordsHistory = []) ->
       cy.ensureReceivability($el, options._log)
     catch err
       options.error = err
-      return cy._retry(retry, options)
+      return cy.retry(retry, options)
 
   waitForAnimations(cy, $el, options, coordsHistory)
 
@@ -85,7 +85,7 @@ waitForAnimations = (cy, $el, options, coordsHistory = []) ->
       ## silence the first trigger so we dont
       ## actually fire the 'retry' event
       opts = _.chain(options).clone().extend({silent: true}).value()
-      return cy._retry(retry, opts)
+      return cy.retry(retry, opts)
 
     ## make sure our element is not currently animating
     try
@@ -93,7 +93,7 @@ waitForAnimations = (cy, $el, options, coordsHistory = []) ->
       Promise.resolve(coords)
     catch err
       options.error = err
-      cy._retry(retry, options)
+      cy.retry(retry, options)
 
 module.exports = {
   delay

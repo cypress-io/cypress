@@ -165,6 +165,9 @@ create = (specWindow, Cypress, state, config, log) ->
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
 
+    ## retry sync methods
+    retry: retries.retry
+
     ## coordinates sync methods
     getCoordinates: coordinates.getCoordinates
     getElementAtCoordinates: coordinates.getElementAtCoordinates
