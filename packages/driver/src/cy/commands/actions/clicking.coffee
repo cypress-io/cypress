@@ -296,7 +296,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     dispatchPrimedChangeEvents.call(@)
 
                     ## send in a focus event!
-                    cy.now("focus", {$el: $elToFocus, error: false, verify: false, log: false})
+                    cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
                     .then ->
                       afterMouseDown($elToClick, coords)
                   else
@@ -347,7 +347,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         @ensureVisibility $el, log
 
-        p = cy.now("focus", {$el: $el, error: false, verify: false, log: false}).then =>
+        p = cy.now("focus", $el, {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {
             bubbles: true
             cancelable: true

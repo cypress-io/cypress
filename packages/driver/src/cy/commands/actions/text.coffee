@@ -199,7 +199,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## currently this is sync but if we use a waterfall
             ## promise in the submit command it will break again
             ## consider changing type to a Promise and juggle logging
-            cy.now("submit", {log: false, $el: form})
+            cy.now("submit", form, {log: false, $el: form})
 
         dispatchChangeEvent = (id) =>
           change = document.createEvent("HTMLEvents")
@@ -314,7 +314,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## click the element first to simulate focus
             ## and typical user behavior in case the window
             ## is out of focus
-            cy.now("click", {
+            cy.now("click", options.$el, {
               $el: options.$el
               log: false
               verify: false
@@ -379,7 +379,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             args: { word, node }
           }
 
-        cy.now("type", "{selectall}{del}", {
+        cy.now("type", "{selectall}{del}", $el, {
           $el: $el
           log: false
           verify: false ## handle verification ourselves

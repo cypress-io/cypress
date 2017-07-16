@@ -78,7 +78,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options.$el.get(0).focus()
 
-        @defer =>
+        Promise
+        .delay(1)
+        .then =>
           ## fallback if our focus event never fires
           ## to simulate the focus + focusin
           return if hasFocused
@@ -113,7 +115,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
 
-              cy.now("blur", {$el: $focused, error: false, verify: false, log: false}).then =>
+              cy.now("blur", $focused, {$el: $focused, error: false, verify: false, log: false}).then =>
                 simulate()
             else
               simulate()
@@ -222,7 +224,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           options.$el.get(0).blur()
 
-          @defer =>
+          Promise
+          .delay(1)
+          .then =>
             ## fallback if our blur event never fires
             ## to simulate the blur + focusout
             return if hasBlurred
