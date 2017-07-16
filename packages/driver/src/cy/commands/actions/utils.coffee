@@ -28,7 +28,7 @@ getCoords = (cy, $el, options) -> (scrollIntoView = true, coordsHistory = []) ->
   if options.force isnt true
     try
       cy.ensureVisibility($el, options._log)
-      cy.ensureActionability($el, options._log)
+      cy.ensureReceivability($el, options._log)
     catch err
       options.error = err
       return cy._retry(retry, options)

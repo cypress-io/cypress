@@ -59,7 +59,7 @@ create = (state, config, expect, isInDom) ->
         args: { cmd, node }
       })
 
-  ensureActionability = (subject, onFail) ->
+  ensureReceivability = (subject, onFail) ->
     subject ?= @ensureSubject()
 
     cmd = state("current").get("name")
@@ -191,7 +191,7 @@ create = (state, config, expect, isInDom) ->
 
     ensureElementIsNotAnimating
 
-    ensureActionability
+    ensureReceivability
 
     ensureVisibility
 

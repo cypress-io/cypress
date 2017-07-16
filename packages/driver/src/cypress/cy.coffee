@@ -182,6 +182,7 @@ create = (specWindow, Cypress, state, config, log) ->
     ensureElExistence: ensures.ensureElExistence
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
+    ensureReceivability: ensures.ensureReceivability
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
 
