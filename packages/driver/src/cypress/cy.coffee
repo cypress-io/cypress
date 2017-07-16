@@ -194,6 +194,7 @@ create = (specWindow, Cypress, state, config, log) ->
     ensureReceivability: ensures.ensureReceivability
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
+    ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating
 
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
