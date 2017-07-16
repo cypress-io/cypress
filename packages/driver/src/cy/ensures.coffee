@@ -135,7 +135,7 @@ create = (state, config, expect, isInDom) ->
 
   ensureElExistence = ($el) ->
     ## dont throw if this isnt even a DOM object
-    # return if not $utils.isInstanceOf($el, $)
+    # return if not $utils.isJqueryInstance($el)
 
     ## ensure that we either had some assertions
     ## or that the element existed

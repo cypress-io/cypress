@@ -1,4 +1,3 @@
-$ = require("jquery")
 _ = require("lodash")
 Promise = require("bluebird")
 
@@ -18,7 +17,7 @@ bTagClosed = /\*\*/g
 parseValueActualAndExpected = (value, actual, expected) ->
   obj = {actual: actual, expected: expected}
 
-  if $utils.isInstanceOf(value, $)
+  if $utils.isJqueryInstance(value)
     obj.subject = value
 
     if _.isUndefined(actual) or actual isnt expected
@@ -167,7 +166,7 @@ create = (state, queue, retryFn) ->
         switch callbacks.ensureExistenceFor
           when "dom"
             $el = determineEl(options.$el, subject)
-            return if not $utils.isInstanceOf($el, $)
+            return if not $utils.isJqueryInstance($el)
 
             @ensureElExistence($el)
 

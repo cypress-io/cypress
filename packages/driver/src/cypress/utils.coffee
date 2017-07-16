@@ -226,7 +226,8 @@ module.exports = {
     if @hasDocument(el)
       return "<document>"
 
-    $el = if _.isElement(el) then $(el) else el
+    ## convert this to jquery if its not already one
+    $el = if @isJqueryInstance(el) then el else $(el)
 
     switch form
       when "long"
@@ -324,6 +325,14 @@ module.exports = {
     not cmd.get("next") and
       cmd.get("args").length is 2 and
         (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
+
+  wrapInjQuery: (obj) ->
+    if @isJqueryInstance(obj) then obj else $(obj)
+
+  isJqueryInstance: (obj) ->
+    ## does it have the jquery property and is the
+    ## constructor a function?
+    !!(obj and obj.jquery and _.isFunction(obj.constructor))
 
   addTwentyYears: ->
     moment().add(20, "years").unix()

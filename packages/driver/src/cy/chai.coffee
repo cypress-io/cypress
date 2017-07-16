@@ -128,7 +128,7 @@ chai.use (chai, u) ->
         return (text) ->
           obj = @_obj
 
-          if not ($utils.isInstanceOf(obj, $) or $utils.hasElement(obj))
+          if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
             return _super.apply(@, arguments)
 
           escText = $utils.escapeQuotes(text)
@@ -151,7 +151,7 @@ chai.use (chai, u) ->
         return (length) ->
           obj = @_obj
 
-          if not ($utils.isInstanceOf(obj, $) or $utils.hasElement(obj))
+          if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
             return _super.apply(@, arguments)
 
           length = $utils.normalizeNumber(length)
@@ -213,7 +213,7 @@ chai.use (chai, u) ->
       return ->
         obj = @_obj
 
-        if not ($utils.isInstanceOf(obj, $) or $utils.hasElement(obj))
+        if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
           try
             _super.apply(@, arguments)
           catch e

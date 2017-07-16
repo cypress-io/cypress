@@ -558,10 +558,10 @@ create = (specWindow, Cypress, state, config, log) ->
 
       .then (subject) =>
         ## if ret is a DOM element and its not an instance of our jQuery
-        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+        if subject and $utils.hasElement(subject) and not $utils.isJqueryInstance(subject)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
-          subject = cy.$$(subject)
+          subject = $(subject)
 
         command.set({ subject: subject })
 
