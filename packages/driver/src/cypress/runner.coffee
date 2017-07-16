@@ -183,23 +183,19 @@ onFirstTest = (suite, fn) ->
   for suite in suite.suites
     return test if test = onFirstTest(suite, fn)
 
-testInTestsById = (testsById, test) ->
-  ## do a faster constant time lookup
-  testsById[test.id]
-
-getAllSiblingTests = (suite, testsById) ->
+getAllSiblingTests = (suite, getTestById) ->
   tests = []
   suite.eachTest (test) =>
     ## iterate through each of our suites tests.
     ## this will iterate through all nested tests
     ## as well.  and then we add it only if its
     ## in our grepp'd _this.tests array
-    if testInTestsById(testsById, test)
+    if getTestById(test.id)
       tests.push test
 
   tests
 
-getTestFromHook = (hook, suite, testsById) ->
+getTestFromHook = (hook, suite, getTestById) ->
   ## if theres already a currentTest use that
   return test if test = hook?.ctx.currentTest
 
@@ -216,7 +212,7 @@ getTestFromHook = (hook, suite, testsById) ->
   ## based on walking down the current suite
   ## iterating through each test until it matches
   found = onFirstTest suite, (test) =>
-    testInTestsById(testsById, test)
+    getTestById(test.id)
 
   return found if found
 
@@ -225,7 +221,7 @@ getTestFromHook = (hook, suite, testsById) ->
   ## test (used in testing)
   onFirstTest suite, (test) -> true
 
-overrideRunnerHook = (ee, runner, testsById, getTest, setTest, getTests) ->
+overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
   ## bail if our runner doesnt have a hook.
   ## useful in tests
   return if not runner.hook
@@ -263,7 +259,7 @@ overrideRunnerHook = (ee, runner, testsById, getTest, setTest, getTests) ->
 
     testBeforeHooks = (hook, suite) ->
       if not getTest()
-        t = getTestFromHook(hook, suite, testsById)
+        t = getTestFromHook(hook, suite, getTestById)
         setTest(t)
 
       testEvents.beforeRun(ee, getTest())
@@ -298,7 +294,7 @@ overrideRunnerHook = (ee, runner, testsById, getTest, setTest, getTests) ->
       when "afterEach"
         ## find all of the grep'd _this tests which share
         ## the same parent suite as our current _this test
-        tests = getAllSiblingTests(getTest().parent, testsById)
+        tests = getAllSiblingTests(getTest().parent, getTestById)
 
         ## make sure this test isnt the last test overall but also
         ## isnt the last test in our grep'd parent suite's tests array
@@ -309,7 +305,7 @@ overrideRunnerHook = (ee, runner, testsById, getTest, setTest, getTests) ->
         ## find all of the grep'd _this tests which share
         ## the same parent suite as our current _this test
         if getTest()
-          tests = getAllSiblingTests(getTest().parent, testsById)
+          tests = getAllSiblingTests(getTest().parent, getTestById)
 
           ## if we're the very last test in the entire _this.tests
           ## we wait until the root suite fires
@@ -349,7 +345,7 @@ getTestResults = (tests) ->
       obj.state = "skipped"
     obj
 
-normalizeAll = (suite, initialTests = {}, grep, onTestsById, onTests, onRunnable, onLogsById) ->
+normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById) ->
   hasTests = false
 
   ## only loop until we find the first test
@@ -368,14 +364,14 @@ normalizeAll = (suite, initialTests = {}, grep, onTestsById, onTests, onRunnable
 
   obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById)
 
-  if onTestsById
+  if setTestsById
     ## use callback here to hand back
     ## the optimized tests
-    onTestsById(tests)
+    setTestsById(tests)
 
-  if onTests
+  if setTests
     ## same pattern here
-    onTests(_.values(tests))
+    setTests(_.values(tests))
 
   return obj
 
@@ -460,11 +456,11 @@ afterEachFailed = (Cypress, test, err) ->
 
   Cypress.action("runner:test:end", wrap(test))
 
-hookFailed = (hook, err, hookName, testsById) ->
+hookFailed = (hook, err, hookName, getTestById) ->
   ## finds the test by returning the first test from
   ## the parent or looping through the suites until
   ## it finds the first test
-  test = getTestFromHook(hook, hook.parent, testsById)
+  test = getTestFromHook(hook, hook.parent, getTestById)
   test.err = err
   test.state = "failed"
   test.duration = hook.duration
@@ -478,7 +474,7 @@ hookFailed = (hook, err, hookName, testsById) ->
   else
     Cypress.action("runner:test:end", wrap(test))
 
-runnerListeners = (runner, Cypress, emissions, testsById, setTest) ->
+runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
   runner.on "start", ->
     Cypress.action("runner:start")
 
@@ -517,7 +513,7 @@ runnerListeners = (runner, Cypress, emissions, testsById, setTest) ->
     ## hooks do not have their own id, their
     ## commands need to grouped with the test
     ## and we can only associate them by this id
-    test = getTestFromHook(hook, hook.parent, testsById)
+    test = getTestFromHook(hook, hook.parent, getTestById)
     hook.id = test.id
     hook.ctx.currentTest = test
 
@@ -582,7 +578,7 @@ runnerListeners = (runner, Cypress, emissions, testsById, setTest) ->
     ## if this is not the last test amongst its siblings
     ## then go ahead and fire its test:after:run event
     ## else this will not get called
-    tests = getAllSiblingTests(test.parent, testsById)
+    tests = getAllSiblingTests(test.parent, getTestById)
 
     if _.last(tests) isnt test
       fire(Cypress, "test:after:run", test)
@@ -638,10 +634,10 @@ create = (mocha, Cypress) ->
 
   # @listeners()
 
-  onTestsById = (tbid) ->
+  setTestsById = (tbid) ->
     testsById = tbid
 
-  onTests = (t) ->
+  setTests = (t) ->
     tests = t
 
   onRunnable = (r) ->
@@ -659,7 +655,13 @@ create = (mocha, Cypress) ->
   getTests = ->
     tests
 
-  overrideRunnerHook(Cypress, runner, testsById, getTest, setTest, getTests)
+  getTestById = (id) ->
+    ## perf short circuit
+    return if not id
+
+    testsById[id]
+
+  overrideRunnerHook(Cypress, runner, getTestById, getTest, setTest, getTests)
 
   return {
     id
@@ -695,8 +697,8 @@ create = (mocha, Cypress) ->
         runner.suite,
         tests,
         @grep(),
-        onTestsById,
-        onTests,
+        setTestsById,
+        setTests,
         onRunnable,
         onLogsById
       )
@@ -704,7 +706,7 @@ create = (mocha, Cypress) ->
     run: (fn) ->
       startTime ?= moment().toJSON()
 
-      runnerListeners(runner, Cypress, emissions, testsById, setTest)
+      runnerListeners(runner, Cypress, emissions, getTestById, setTest)
 
       runner.run (failures) =>
         ## TODO this functions is not correctly
@@ -719,7 +721,7 @@ create = (mocha, Cypress) ->
       startTime = iso
 
     getErrorByTestId: (testId) ->
-      if test = testsById[testId]
+      if test = getTestById(testId)
         wrapErr(test.err)
 
     getDisplayPropsForLog: $Log.getDisplayProps
@@ -733,7 +735,7 @@ create = (mocha, Cypress) ->
         $Log.getSnapshotProps(attrs)
 
     getErrorByTestId: (testId) ->
-      if test = testsById[testId]
+      if test = getTestById(testId)
         wrapErr(test.err)
 
     cleanupQueue: (numTestsKeptInMemory) ->
@@ -761,7 +763,7 @@ create = (mocha, Cypress) ->
       ## because you cannot inspect any logs
       return if isHeadless
 
-      test = testsById[attrs.testId]
+      test = getTestById(attrs.testId)
 
       ## bail if for whatever reason we
       ## cannot associate this log to a test
@@ -788,7 +790,7 @@ create = (mocha, Cypress) ->
 
         { testId, instrument } = attrs
 
-        if test = testsById[testId]
+        if test = getTestById(testId)
           ## pluralize the instrument
           ## as a property on the runnable
           logs = test[instrument + "s"] ?= []
