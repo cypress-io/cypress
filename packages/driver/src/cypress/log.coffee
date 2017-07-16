@@ -13,9 +13,10 @@ SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWi
 DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
 BLACKLIST_PROPS = "snapshots".split(" ")
 
-HIGHLIGHT_ATTR = { $Snapshots }
 delay = null
 counter = 0
+
+{ HIGHLIGHT_ATTR } = $Snapshots
 
 reduceMemory = (attrs) ->
   ## mutate attrs by nulling out

@@ -61,7 +61,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       state("onInjectCommand", null)
 
     cleanupEnqueue = =>
-      @off("command:enqueued", enqueuedCommand)
+      Cypress.removeListener("command:enqueued", enqueuedCommand)
       null
 
     invokedCyCommand = false
@@ -71,7 +71,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     state("onInjectCommand", returnFalseIfThenable)
 
-    @on("command:enqueued", enqueuedCommand)
+    Cypress.once("command:enqueued", enqueuedCommand)
 
     ## this code helps juggle subjects forward
     ## the same way that promises work
@@ -96,14 +96,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if index > -1
           args.splice(index, 1, s)
 
-        @off("next:subject:prepared", checkSubject)
+        Cypress.removeListener("next:subject:prepared", checkSubject)
 
-      @on("next:subject:prepared", checkSubject)
+      Cypress.on("next:subject:prepared", checkSubject)
 
     getRet = =>
       ret = fn.apply(state("runnable").ctx, args)
 
-      if @isCy(ret)
+      if cy.isCy(ret)
         ret = undefined
 
       if ret? and invokedCyCommand and not ret.then

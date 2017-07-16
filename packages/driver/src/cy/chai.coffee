@@ -98,7 +98,7 @@ chai.use (chai, u) ->
   overrideChaiAsserts = (assertFn, isInDom) ->
     _this = @
 
-    chaiUtils.getMessage = _.wrap getMessage, (orig, assert, args) ->
+    chaiUtils.getMessage = (assert, args) ->
       obj = assert._obj
 
       ## if we are formatting a DOM object
@@ -106,7 +106,7 @@ chai.use (chai, u) ->
         ## replace object with our formatted one
         assert._obj = $utils.stringifyElement(obj, "short")
 
-      msg = orig.call(@, assert, args)
+      msg = getMessage.call(@, assert, args)
 
       ## restore the real obj if we changed it
       if obj isnt assert._obj
@@ -248,7 +248,7 @@ chai.use (chai, u) ->
             e1.displayMessage = getLongExistsMessage(obj)
             throw e1
 
-  createPatchedAssert = (cy) ->
+  createPatchedAssert = (assertFn) ->
     return (args...) ->
       passed    = chaiUtils.test(@, args)
       value     = chaiUtils.flag(@, "object")
@@ -270,8 +270,8 @@ chai.use (chai, u) ->
 
       throw err if err
 
-  overrideExpect = (cy) ->
-    patchedAssert = createPatchedAssert(cy)
+  overrideExpect = (assertFn) ->
+    patchedAssert = createPatchedAssert(assertFn)
 
     ## only override assertions for this specific
     ## expect function instance so we do not affect
@@ -287,8 +287,8 @@ chai.use (chai, u) ->
       ## return assertion instance
       return ret
 
-  overrideAssert = (cy) ->
-    patchedAssert = createPatchedAssert(cy)
+  overrideAssert = (assertFn) ->
+    patchedAssert = createPatchedAssert(assertFn)
 
     tryCatchFinally = (fn) ->
       try
@@ -321,9 +321,9 @@ chai.use (chai, u) ->
 
     return fn
 
-  setSpecWindowGlobals = (specWindow, cy) ->
-    expect = overrideExpect(cy)
-    assert = overrideAssert(cy)
+  setSpecWindowGlobals = (specWindow, assertFn) ->
+    expect = overrideExpect(assertFn)
+    assert = overrideAssert(assertFn)
 
     specWindow.chai   = chai
     specWindow.expect = expect

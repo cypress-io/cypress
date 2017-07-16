@@ -86,7 +86,7 @@ create = (state, queue, retryFn) ->
       obj = parseValueActualAndExpected(value, actual, expected)
 
       if $utils.hasElement(value)
-        obj.$el = value
+        obj.$el = $utils.wrapInjQuery(value)
 
       functionHadArguments = (current) ->
         fn = current and current.get("args") and current.get("args")[0]
