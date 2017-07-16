@@ -67,6 +67,7 @@ setRemoteIframeProps = ($autIframe, state) ->
 
 create = (specWindow, Cypress, state, config, log) ->
   aborted = false
+  commandFns = {}
 
   onFinishAssertions = ->
     assertions.finishAssertions.apply(null, arguments)
@@ -94,8 +95,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
   coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
   snapshots = $Snapshots.create($$, state)
-
-  commandFns = {}
 
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
@@ -144,6 +143,9 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## chai expect sync methods
     expect
+
+    ## is cy
+    isCy
 
     ## agent sync methods
     spy: agents.spy
