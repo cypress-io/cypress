@@ -78,7 +78,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
   queue = $CommandQueue.create()
 
-  retries = $Retries.create(state, onFinishAssertions)
+  retries = $Retries.create(Cypress, state, onFinishAssertions)
   assertions = $Assertions.create(state, queue, retries.retry)
 
   elements = $Elements.create(state)

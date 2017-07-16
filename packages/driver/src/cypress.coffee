@@ -281,6 +281,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:command:retry"
+        @emit("command:retry", args...)
+
       when "cy:command:enqueued"
         @emit("command:enqueued", args[0])
 

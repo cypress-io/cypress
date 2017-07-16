@@ -3,7 +3,7 @@ Promise = require("bluebird")
 
 $utils = require("../cypress/utils")
 
-create = (state, finishAssertions) ->
+create = (Cypress, state, finishAssertions) ->
   return {
     retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
@@ -60,9 +60,12 @@ create = (state, finishAssertions) ->
           args: { error: getErrMessage(options.error) }
         }
 
-      Promise.delay(interval).cancellable().then =>
-        ## TODO: handle this event
-        # @trigger("retry", options) unless options.silent is true
+      Promise
+      .delay(interval)
+      .cancellable()
+      .then =>
+        if options.silent isnt true
+          Cypress.action("cy:command:retry", options)
 
         ## invoke the passed in retry fn
         fn.call(@)
