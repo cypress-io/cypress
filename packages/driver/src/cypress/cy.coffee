@@ -327,7 +327,9 @@ create = (specWindow, Cypress, state, config, log) ->
         return true
 
     now: (name, args...) ->
-      commandFns[name].apply(cy, args)
+      Promise.resolve(
+        commandFns[name].apply(cy, args)
+      ).cancellable()
 
     enqueue: (key, fn, args, type, chainerId) ->
       clearImmediate(state("timerId"))
