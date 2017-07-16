@@ -270,7 +270,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .try(getValue)
       .catch (err) =>
         options.error = err
-        @_retry(retryValue, options)
+        cy.retry(retryValue, options)
 
     do resolveValue = =>
       Promise.try(retryValue).then (value) =>

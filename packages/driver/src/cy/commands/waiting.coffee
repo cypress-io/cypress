@@ -103,7 +103,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         args = arguments
 
-        @_retry ->
+        cy.retry ->
           args.options = _.omit(options, "timeout")
           checkForXhr.apply(@, args)
         , options

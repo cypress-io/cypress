@@ -131,7 +131,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         .try(getOptions)
         .catch (err) =>
           options.error = err
-          @_retry(retryOptions, options)
+          cy.retry(retryOptions, options)
 
       Promise
       .try(retryOptions)

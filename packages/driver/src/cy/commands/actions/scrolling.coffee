@@ -234,7 +234,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           @ensureScrollability($container, "scrollTo")
         catch err
           options.error = err
-          @_retry(ensureScrollability, options)
+          cy.retry(ensureScrollability, options)
 
       Promise
       .try(ensureScrollability)

@@ -79,7 +79,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         .try(getWindow)
         .catch (err) =>
           options.error = err
-          @_retry(retryWindow, options)
+          cy.retry(retryWindow, options)
 
       do verifyAssertions = =>
         Promise.try(retryWindow).then (win) =>
@@ -107,7 +107,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           .try(getDocument)
           .catch (err) =>
             options.error = err
-            @_retry(retryDocument, options)
+            cy.retry(retryDocument, options)
 
       do verifyAssertions = =>
         Promise.try(retryDocument).then (doc) =>

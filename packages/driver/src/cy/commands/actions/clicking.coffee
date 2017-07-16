@@ -221,10 +221,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   getCoords(@, $el, options)(false)
 
                 ## try again now that we've nudged the window's scroll
-                return @_retry(retry, options)
+                return cy.retry(retry, options)
                          .then(verifyElementAtCoordinates)
 
-              return @_retry(getCoords(@, $el, options), options)
+              return cy.retry(getCoords(@, $el, options), options)
                        .then(verifyElementAtCoordinates)
 
             return coordsObj(coords, $elToClick)
