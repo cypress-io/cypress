@@ -260,7 +260,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if withinSubject = @state("withinSubject")
         return log(withinSubject)
 
-      @execute("get", "html", {log: false}).then(log)
+      cy.now("get", "html", {log: false}).then(log)
   })
 
   Commands.addAll({ prevSubject: "optional" }, {
@@ -382,7 +382,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         throw new Error()
 
       resolveElements = =>
-        @execute("get", selector, getOpts).then ($elements) =>
+        cy.now("get", selector, getOpts).then ($elements) =>
           $el = switch
             when $elements and $elements.length
               getFirstDeepestElement($elements)

@@ -111,7 +111,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     ## if we didnt pass in any values or our
     ## el's value is in the array then check it
     if isElActionable
-      @execute("click", {
+      cy.now("click", $el, {
         $el: $el
         log: false
         verify: false

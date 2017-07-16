@@ -94,7 +94,6 @@ create = (specWindow, Cypress, state, config, log) ->
   snapshots = $Snapshots.create($$, state)
 
   commandFns = {}
-  # commandFnsBackup = {}
 
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
@@ -231,7 +230,8 @@ create = (specWindow, Cypress, state, config, log) ->
             errors.fail(err)
 
     addCommand: ({key, fn, type, enforceDom}) ->
-      commandFns[key] = _.bind(fn, cy)
+      ## TODO: prob don't need this anymore
+      commandFns[key] = fn
 
       prepareSubject = (firstCall, args) =>
         ## if this is the very first call
@@ -302,14 +302,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
         return chain
 
-      ## create a property of this function
-      ## which can be invoked immediately
-      ## without being enqueued
-      cy[key].immediately = (args...) ->
-        ## TODO: instead of wrapping this maybe
-        ## we just invoke the fn directly here?
-        wrap().apply(cy, args)
-
       ## add this function to our chainer class
       $Chainer.inject key, (chainerId, firstCall, args) ->
         ## dont enqueue / inject any new commands if
@@ -322,6 +314,9 @@ create = (specWindow, Cypress, state, config, log) ->
         cy.enqueue(key, wrap(firstCall), args, type, chainerId)
 
         return true
+
+    now: (name, args...) ->
+      commandFns[name].apply(cy, args)
 
     enqueue: (key, fn, args, type, chainerId) ->
       clearImmediate(state("timerId"))

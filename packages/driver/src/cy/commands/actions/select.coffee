@@ -141,7 +141,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## preserve the selected values
         consoleProps.Selected = values
 
-        @execute("click", {
+        cy.now("click", {
           $el: options.$el
           log: false
           verify: false
@@ -164,7 +164,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           Promise
             .resolve(optionEls) ## why cant we just pass these directly to .each?
             .each (optEl) =>
-              @execute("click", {
+              cy.now("click", {
                 $el: optEl
                 log: false
                 verify: false

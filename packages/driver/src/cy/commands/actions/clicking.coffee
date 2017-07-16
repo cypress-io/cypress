@@ -265,7 +265,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           .then (obj) =>
             {$elToClick, coords} = obj
 
-            @execute("focused", {log: false, verify: false}).then ($focused) =>
+            cy.now("focused", {log: false, verify: false}).then ($focused) =>
               ## record the previously focused element before
               ## issuing the mousedown because browsers may
               ## automatically shift the focus to the element
@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 ## retrieve the first focusable $el in our parent chain
                 $elToFocus = getFirstFocusableEl($elToClick)
 
-                @execute("focused", {log: false, verify: false}).then ($focused) =>
+                cy.now("focused", {log: false, verify: false}).then ($focused) =>
                   if shouldFireFocusEvent($focused, $elToFocus)
                     ## if our mousedown went through and
                     ## we are focusing a different element
@@ -296,7 +296,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     dispatchPrimedChangeEvents.call(@)
 
                     ## send in a focus event!
-                    @execute("focus", {$el: $elToFocus, error: false, verify: false, log: false})
+                    cy.now("focus", {$el: $elToFocus, error: false, verify: false, log: false})
                     .then ->
                       afterMouseDown($elToClick, coords)
                   else
@@ -347,7 +347,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         @ensureVisibility $el, log
 
-        p = @execute("focus", {$el: $el, error: false, verify: false, log: false}).then =>
+        p = cy.now("focus", {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {
             bubbles: true
             cancelable: true

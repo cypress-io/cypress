@@ -59,7 +59,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return $(null)
 
       do resolveElements = =>
-        @execute("get", selector, options).then ($elements) =>
+        cy.now("get", selector, options).then ($elements) =>
           @verifyUpcomingAssertions(getEl($elements), options, {
             onRetry: resolveElements
             onFail: (err) ->
@@ -77,7 +77,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         selectors.push(selector)
 
         do resolveElements = =>
-          @execute("get", selector, options).then ($elements) =>
+          cy.now("get", selector, options).then ($elements) =>
             @verifyUpcomingAssertions($elements, options, {
               onRetry: resolveElements
             })

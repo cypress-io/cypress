@@ -108,12 +108,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             # options.$el.cySimulate("focus")
             # options.$el.cySimulate("focusin")
 
-          @execute("focused", {log: false, verify: false}).then ($focused) =>
+          cy.now("focused", {log: false, verify: false}).then ($focused) =>
             ## only blur if we have a focused element AND its not
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
 
-              @execute("blur", {$el: $focused, error: false, verify: false, log: false}).then =>
+              cy.now("blur", {$el: $focused, error: false, verify: false, log: false}).then =>
                 simulate()
             else
               simulate()
@@ -169,7 +169,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num }
         })
 
-      @execute("focused", {log: false, verify: false}).then ($focused) =>
+      cy.now("focused", {log: false, verify: false}).then ($focused) =>
         if options.force isnt true and not $focused
           return if options.error is false
 
