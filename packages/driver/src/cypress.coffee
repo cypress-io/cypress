@@ -140,6 +140,8 @@ class $Cypress
     ## wire up command create to cy
     @Commands = $Commands.create(@, @cy, @state, @config, @log)
 
+    @events.proxyTo(@cy)
+
     return null
 
   action: (eventName, args...) ->

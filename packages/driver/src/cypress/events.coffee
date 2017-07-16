@@ -19,6 +19,22 @@ module.exports = {
   extend: (obj) ->
     events = new EE
 
+    events.proxyTo = (child) ->
+      parent = obj
+
+      emit = parent.emit
+
+      ## whenever our parent parent are emitting
+      ## proxy those to the child obj
+      parent.emit = ->
+        ret = emit.apply(parent, arguments)
+
+        child._events
+
+        child.emit.apply(child, arguments)
+
+        return ret
+
     events.emitThen = (eventName, args...) ->
       listeners = events.listeners(eventName)
 
@@ -35,7 +51,7 @@ module.exports = {
       emit = events.emit
 
       events.emit = (eventName, args...) ->
-        ret = emit.apply(events, [eventName].concat(args))
+        ret = emit.apply(obj, [eventName].concat(args))
 
         if args.length
           log("emitted: '%s' - with args: %o", eventName, withoutFunctions(args)...)
