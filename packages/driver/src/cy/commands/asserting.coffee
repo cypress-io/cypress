@@ -46,7 +46,7 @@ convertRowFontSize = ($row, message) ->
 shouldFnWithCallback = (subject, fn) ->
   Promise
   .try =>
-    remoteSubject = @_getRemotejQueryInstance(subject)
+    remoteSubject = cy.getRemotejQueryInstance(subject)
     fn.call @state("runnable").ctx, remoteSubject ? subject
   .return(subject)
 

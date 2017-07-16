@@ -29,7 +29,7 @@ create = (state) ->
       aliases[alias] = aliasObj
       state("aliases", aliases)
 
-      remoteSubject = @_getRemotejQueryInstance(subject)
+      remoteSubject = cy.getRemotejQueryInstance(subject)
       ## assign the subject to our runnable ctx
       @assign(alias, remoteSubject ? subject)
 

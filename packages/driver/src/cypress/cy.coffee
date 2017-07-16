@@ -5,6 +5,7 @@ Promise = require("bluebird")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
+$jQuery = require("../cy/jquery")
 $Agents = require("../cy/agents")
 $Aliases = require("../cy/aliases")
 $Errors = require("../cy/errors")
@@ -80,6 +81,7 @@ create = (specWindow, Cypress, state, config, log) ->
   assertions = $Assertions.create(state, queue, retries.retry)
 
   elements = $Elements.create(state)
+  jquery = $jQuery.create(state)
 
   { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
 
@@ -161,6 +163,9 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## alias sync methods
     getAlias: aliases.getAlias
+
+    ## jquery sync methods
+    getRemotejQueryInstance: jquery.getRemotejQueryInstance
 
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot

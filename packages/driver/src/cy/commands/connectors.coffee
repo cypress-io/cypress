@@ -49,7 +49,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     ## TODO: use subject from state("subject")
 
-    remoteSubject = @_getRemotejQueryInstance(subject)
+    remoteSubject = cy.getRemotejQueryInstance(subject)
 
     args = remoteSubject or subject
     args = if args?._spreadArray then args else [args]
@@ -217,7 +217,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       , subject
 
     getValue = =>
-      remoteSubject = @_getRemotejQueryInstance(subject)
+      remoteSubject = cy.getRemotejQueryInstance(subject)
 
       actualSubject = remoteSubject or subject
 
