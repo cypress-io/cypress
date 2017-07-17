@@ -41,6 +41,14 @@ describe "lib/user", ->
         expect(api.createSignout).not.to.be.called
         expect(cache.removeUser).to.be.calledOnce
 
+    it "removes the session from cache even if api.createSignout rejects", ->
+      @sandbox.stub(api, "createSignout").withArgs("abc-123").rejects(new Error("ECONNREFUSED"))
+      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
+      @sandbox.spy(cache, "removeUser")
+
+      user.logOut().catch ->
+        expect(cache.removeUser).to.be.calledOnce
+
   context ".getLoginUrl", ->
     it "calls api.getLoginUrl", ->
       @sandbox.stub(api, "getLoginUrl").resolves("https://github.com/login")

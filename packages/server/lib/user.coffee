@@ -19,22 +19,12 @@ module.exports = {
       .return(user)
 
   logOut: ->
-    remove = ->
-      cache.removeUser()
-
-    @get()
-    .then (user) ->
+    @get().then (user) ->
       authToken = user and user.authToken
 
-      ## if we have a authToken
-      ## then send it up
-      if authToken
-        api.createSignout(authToken)
-        .then(remove)
-      else
-        ## else just remove the
-        ## user from cache
-        remove()
+      cache.removeUser().then ->
+        if authToken
+          api.createSignout(authToken)
 
   ensureAuthToken: ->
     @get().then (user) ->
