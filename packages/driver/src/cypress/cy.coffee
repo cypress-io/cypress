@@ -521,8 +521,8 @@ create = (specWindow, Cypress, state, config, log) ->
         ## store the current runnable
         runnable = state("runnable")
 
-        ## TODO: handle this event
-        # @trigger "command:start", command
+        Cypress.action("cy:command:start", command)
+
         cy
         .set(command)
         .then =>
@@ -542,7 +542,7 @@ create = (specWindow, Cypress, state, config, log) ->
           state("index", index += 1)
 
           # TODO: handle this event
-          # @trigger "command:end", command
+          Cypress.action("cy:command:end", command)
 
           if fn = state("onPaused")
             fn.call(cy, next)

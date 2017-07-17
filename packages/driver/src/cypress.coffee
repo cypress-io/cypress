@@ -285,6 +285,11 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:command:start"
+        @emit("command:start", args...)
+
+      when "cy:command:end"
+        @emit("command:end", args...)
       when "cy:command:retry"
         @emit("command:retry", args...)
 
