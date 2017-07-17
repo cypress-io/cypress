@@ -7,7 +7,6 @@ import { action } from 'mobx'
 
 import automation from './automation'
 import logger from './logger'
-import overrides from './overrides'
 
 const $ = $Cypress.$
 const channel = io.connect({
@@ -160,8 +159,6 @@ const eventManager = {
   },
 
   start (config) {
-    if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
-
     if (config.socketId) {
       channel.emit('app:connect', config.socketId)
     }
@@ -284,7 +281,6 @@ const eventManager = {
   stop () {
     localBus.removeAllListeners()
     channel.off()
-    overrides.restore()
   },
 
   _reRun () {
