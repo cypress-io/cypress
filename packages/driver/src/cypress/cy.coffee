@@ -99,16 +99,6 @@ create = (specWindow, Cypress, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
-  defer = (fn) ->
-    clearImmediate(state("timerId"))
-
-    ## do not queue up any new commands if
-    ## we've already been aborted!
-    ## TODO: handle this property
-    return if aborted
-
-    state("timerId", setImmediate(fn))
-
   fail = (err) ->
     errors.fail(err)
 
@@ -351,8 +341,6 @@ create = (specWindow, Cypress, state, config, log) ->
       ).cancellable()
 
     enqueue: (key, fn, args, type, chainerId) ->
-      clearImmediate(state("timerId"))
-
       obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
 
       Cypress.action("cy:command:enqueue", obj)
@@ -389,12 +377,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
       queue.splice(index, 0, obj)
 
-      ## if nestedIndex is either undefined or 0
-      ## then we know we're processing regular commands
-      ## and not splicing in the middle of our commands
-      if not nestedIndex
-        defer(cy.run)
-
     setRunnable: (runnable, hookName) ->
       if _.isFinite(timeout = config("defaultCommandTimeout"))
         runnable.timeout(timeout)
@@ -420,6 +402,16 @@ create = (specWindow, Cypress, state, config, log) ->
 
           if ret and queue.length and (not isCy(ret))
             debugger
+
+          ## if we didn't fire up any cy commands
+          ## then send back mocha what was returned
+          if not queue.length
+            return ret
+
+          ## kick off the run!
+          ## and return this outer
+          ## bluebird promise
+          return cy.run()
 
         catch err
           fail(err)
@@ -449,88 +441,77 @@ create = (specWindow, Cypress, state, config, log) ->
         errors.endedEarlyErr(index, queue)
 
     run: ->
-      ## bail if we've been told to abort in case
-      ## an old command continues to run after
-      if aborted
-        return
+      next = ->
+        ## bail if we've been told to abort in case
+        ## an old command continues to run after
+        if aborted
+          return
 
-      ## start at 0 index if we dont have one
-      index = state("index") ? state("index", 0)
+        ## start at 0 index if we dont have one
+        index = state("index") ? state("index", 0)
 
-      command = queue.at(index)
+        command = queue.at(index)
 
-      ## if the command should be skipped
-      ## just bail and increment index
-      ## and set the subject
-      ## TODO DRY THIS LOGIC UP
-      if command and command.get("skip")
-        ## must set prev + next since other
-        ## operations depend on this state being correct
-        command.set({prev: queue.at(index - 1), next: queue.at(index + 1)})
-        state("index", index + 1)
-        state("subject", command.get("subject"))
+        ## if the command should be skipped
+        ## just bail and increment index
+        ## and set the subject
+        ## TODO DRY THIS LOGIC UP
+        if command and command.get("skip")
+          ## must set prev + next since other
+          ## operations depend on this state being correct
+          command.set({prev: queue.at(index - 1), next: queue.at(index + 1)})
+          state("index", index + 1)
+          state("subject", command.get("subject"))
 
-        return cy.run()
+          return next()
 
-      ## if we're at the very end
-      if not command
+        ## if we're at the very end
+        if not command
 
-        ## trigger end event
-        ## TODO: handle this 'end' event
-        # trigger("end")
+          ## trigger end event
+          ## TODO: handle this 'end' event
+          # trigger("end")
 
-        ## and we should have a next property which
-        ## holds mocha's .then callback fn
-        if next = state("next")
-          next()
-          state("next", null)
+          return null
 
-        return
+        ## store the previous timeout
+        prevTimeout = timeouts.timeout()
 
-      ## store the previous timeout
-      prevTimeout = timeouts.timeout()
+        ## store the current runnable
+        runnable = state("runnable")
 
-      ## store the current runnable
-      runnable = state("runnable")
+        ## TODO: handle this event
+        # @trigger "command:start", command
+        cy
+        .set(command)
+        .then =>
+          ## each successful command invocation should
+          ## always reset the timeout for the current runnable
+          ## unless it already has a state.  if it has a state
+          ## and we reset the timeout again, it will always
+          ## cause a timeout later no matter what.  by this time
+          ## mocha expects the test to be done
+          timeouts.timeout(prevTimeout) if not runnable.state
 
-      ## TODO: handle this event
-      # @trigger "command:start", command
-      promise = cy
-      .set(command)
-      .then =>
-        ## each successful command invocation should
-        ## always reset the timeout for the current runnable
-        ## unless it already has a state.  if it has a state
-        ## and we reset the timeout again, it will always
-        ## cause a timeout later no matter what.  by this time
-        ## mocha expects the test to be done
-        timeouts.timeout(prevTimeout) if not runnable.state
+          ## mutate index by incrementing it
+          ## this allows us to keep the proper index
+          ## in between different hooks like before + beforeEach
+          ## else run will be called again and index would start
+          ## over at 0
+          state("index", index += 1)
 
-        ## mutate index by incrementing it
-        ## this allows us to keep the proper index
-        ## in between different hooks like before + beforeEach
-        ## else run will be called again and index would start
-        ## over at 0
-        state("index", index += 1)
+          # TODO: handle this event
+          # @trigger "command:end", command
 
-        # TODO: handle this event
-        # @trigger "command:end", command
+          if fn = state("onPaused")
+            fn.call(cy, next)
+          else
+            next()
 
-        if fn = state("onPaused")
-          fn.call(cy, cy.run)
-        else
-          ## automatically defer running each command in succession
-          ## so each command is async
-          ## TODO: do we have to do this?
-          # defer(cy.run)
-          cy.run()
-
-        # ## must have this empty return here else we end up creating
-        # ## additional .then callbacks due to bluebird chaining
-        # return null
-
+      promise = Promise
+      .try(next)
       .catch Promise.CancellationError, (err) =>
-        cancel(err)
+        Cypress.action("cy:command:cancelled", state("current"))
 
         ## need to signify we're done our promise here
         ## so we cannot chain off of it, or have bluebird
@@ -544,6 +525,9 @@ create = (specWindow, Cypress, state, config, log) ->
       # promise.done()
 
       state("promise", promise)
+
+      ## return this outer bluebird promise
+      return promise
 
       ## TODO: handle this event
       # @trigger("set", command)
