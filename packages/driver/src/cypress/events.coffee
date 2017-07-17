@@ -15,8 +15,10 @@ Promise = require("bluebird")
 withoutFunctions = (arr) ->
   _.reject(arr, _.isFunction)
 
+logEmit = true
+
 module.exports = {
-  extend: (obj, shouldLog) ->
+  extend: (obj) ->
     events = new EE
 
     events.proxyTo = (child) ->
@@ -29,7 +31,12 @@ module.exports = {
       parent.emit = ->
         ret = emit.apply(parent, arguments)
 
+        ## dont let our child emits also log
+        logEmit = false
+
         child.emit.apply(child, arguments)
+
+        logEmit = true
 
         return ret
 
@@ -38,7 +45,7 @@ module.exports = {
 
       ## is our log enabled and have we not silenced
       ## this specific object?
-      if log.enabled and shouldLog isnt false
+      if log.enabled and logEmit
         log("emitted: '%s' to '%d' listeners - with args: %o", eventName, listeners.length, args...)
 
       listener = (fn) ->
@@ -48,11 +55,16 @@ module.exports = {
 
     ## is our log enabled and have we not silenced
     ## this specific object?
-    if log.enabled and shouldLog isnt false
+    if log.enabled
       emit = events.emit
 
       events.emit = (eventName, args...) ->
         ret = emit.apply(obj, [eventName].concat(args))
+
+        ## bail early if we have turned
+        ## off logging temporarily
+        if logEmit is false
+          return ret
 
         if args.length
           log("emitted: '%s' - with args: %o", eventName, withoutFunctions(args)...)

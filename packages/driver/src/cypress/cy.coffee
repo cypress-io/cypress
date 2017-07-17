@@ -657,8 +657,7 @@ create = (specWindow, Cypress, state, config, log) ->
   ## make cy global in the specWindow
   specWindow.cy = cy
 
-  ## dont log events
-  events = $Events.extend(cy, false)
+  events = $Events.extend(cy)
 
   return cy
 
