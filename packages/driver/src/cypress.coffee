@@ -265,7 +265,12 @@ class $Cypress
         ## also emits this on cy
         ## @cy.emit("fail", args...)
 
-      when "test:after:run"
+      when "runner:test:before:run:async"
+        @cy.reset()
+
+        @emitThen("test:before:run:async", args...)
+        ## TODO: handle timeouts here
+
       when "runner:test:after:run"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 

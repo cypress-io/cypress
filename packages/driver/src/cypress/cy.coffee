@@ -240,6 +240,25 @@ create = (specWindow, Cypress, state, config, log) ->
           else
             errors.fail(err)
 
+    reset: ->
+      s = state()
+
+      backup = {
+        window: s.window
+        document: s.document
+        $autIframe: s.$autIframe
+      }
+
+      ## reset state back to empty object
+      state.reset()
+
+      ## and then restore these backed up props
+      state(backup)
+
+      queue.reset()
+
+      events.removeAllListeners()
+
     addCommand: ({key, fn, type, enforceDom}) ->
       ## TODO: prob don't need this anymore
       commandFns[key] = fn
