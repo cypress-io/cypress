@@ -16,7 +16,7 @@ withoutFunctions = (arr) ->
   _.reject(arr, _.isFunction)
 
 module.exports = {
-  extend: (obj) ->
+  extend: (obj, shouldLog) ->
     events = new EE
 
     events.proxyTo = (child) ->
@@ -29,8 +29,6 @@ module.exports = {
       parent.emit = ->
         ret = emit.apply(parent, arguments)
 
-        child._events
-
         child.emit.apply(child, arguments)
 
         return ret
@@ -38,7 +36,9 @@ module.exports = {
     events.emitThen = (eventName, args...) ->
       listeners = events.listeners(eventName)
 
-      if log.enabled
+      ## is our log enabled and have we not silenced
+      ## this specific object?
+      if log.enabled and shouldLog isnt false
         log("emitted: '%s' to '%d' listeners - with args: %o", eventName, listeners.length, args...)
 
       listener = (fn) ->
@@ -46,8 +46,9 @@ module.exports = {
 
       Promise.map(listeners, listener)
 
-    ## override only if logging is enabled
-    if log.enabled
+    ## is our log enabled and have we not silenced
+    ## this specific object?
+    if log.enabled and shouldLog isnt false
       emit = events.emit
 
       events.emit = (eventName, args...) ->
