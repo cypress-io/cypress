@@ -1,3 +1,4 @@
+import authApi from '../auth/auth-api'
 import ipc from './ipc'
 
 const appApi = {
@@ -5,7 +6,7 @@ const appApi = {
     ipc.onMenuClicked((err, item) => {
       switch (item) {
         case 'log:out':
-          this.logOut()
+          authApi.logOut()
           break
         default:
           return

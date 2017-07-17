@@ -47,7 +47,7 @@ describe "App", ->
 
   context "on:menu:clicked", ->
     beforeEach ->
-      cy.stub(@ipc, "logOut")
+      cy.stub(@ipc, "logOut").resolves()
 
       @start()
 

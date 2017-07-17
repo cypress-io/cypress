@@ -25,7 +25,3 @@ describe "Footer", ->
     cy
       .get("a").contains("Changelog").click().then ->
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")
-
-  it "does not appear on login page", ->
-    cy.contains("Log In").click()
-    cy.get("footer").should("not.be.visible")
