@@ -71,7 +71,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       automateCookies("clear:cookies", cookies, log, timeout)
 
-  Cypress.on "test:before:hooks", ->
+  Cypress.on "test:before:run:async", ->
     ## TODO: handle failure here somehow
     ## maybe by tapping into the Cypress reset
     ## stuff, or handling this in the runner itself?

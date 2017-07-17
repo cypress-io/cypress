@@ -235,7 +235,7 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
       # @Cypress.option("jQuery", $)
 
       # if ct
-      #   @Cypress.trigger "test:before:hooks", {id: 123}, {}
+      #   @Cypress.trigger "test:before:run:async", {id: 123}, {}
       #   @Cypress.set(ct)
       #   ct.enableTimeouts(false)
       #

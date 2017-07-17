@@ -427,7 +427,7 @@ create = (Cypress, cy, state, config) ->
 
     logs[id] = true
 
-  logFn = (obj) ->
+  logFn = (obj = {}) ->
     attributes = {}
 
     log = Log(state, config, obj)

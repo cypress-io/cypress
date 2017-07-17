@@ -7,7 +7,7 @@ $utils = require("../../cypress/utils")
 module.exports = (Commands, Cypress, cy, state, config) ->
   clock = null
 
-  Cypress.on "test:before:run", ->
+  Cypress.on "test:before:run:async", ->
     ## remove clock before each test run, so a new one is created
     ## when user calls cy.clock()
     clock = null

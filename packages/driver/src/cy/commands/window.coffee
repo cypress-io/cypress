@@ -23,7 +23,7 @@ viewports = {
 validOrientations = ["landscape", "portrait"]
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:hooks", ->
+  Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
     ## need to restore prior to running the next test

@@ -20,14 +20,14 @@ timedOutWaitingForPageLoad = (ms, log) ->
   })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:run", (test) ->
+  Cypress.on "test:before:run:async", (test) ->
     ## continuously reset this
     ## before each test run!
     previousDomainVisited = false
 
     id = test.id
 
-  Cypress.on "test:before:hooks", ->
+  Cypress.on "test:before:run:async", ->
     ## make sure we reset that we haven't
     ## visited about blank again
     hasVisitedAboutBlank = false

@@ -7,7 +7,7 @@ describe "$Cypress.Cy Cookie Commands", ->
     beforeEach ->
       @cy._automateCookies.restore()
 
-    context "test:before:hooks", ->
+    context "test:before:run:async", ->
       it "clears cookies before each test run", ->
         get = false
         clear = false
@@ -22,7 +22,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           expect(data).to.deep.eq([{name: "foo", domain: "localhost"}])
           cb({response: []})
 
-        hooks = @Cypress.invoke("test:before:hooks", {})
+        hooks = @Cypress.invoke("test:before:run:async", {})
         Promise.resolve(hooks)
         .then ->
           expect(get).to.be.true
@@ -40,7 +40,7 @@ describe "$Cypress.Cy Cookie Commands", ->
         @Cypress.on "clear:cookies", (data, cb) ->
           clear = true
 
-        hooks = @Cypress.invoke("test:before:hooks", {})
+        hooks = @Cypress.invoke("test:before:run:async", {})
         Promise.resolve(hooks)
         .then ->
           expect(get).to.be.true
@@ -55,7 +55,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         timeout = @sandbox.spy(Promise.prototype, "timeout")
 
-        hooks = @Cypress.invoke("test:before:hooks", {})
+        hooks = @Cypress.invoke("test:before:run:async", {})
         Promise.resolve(hooks)
         .then ->
           expect(timeout).not.to.be.called

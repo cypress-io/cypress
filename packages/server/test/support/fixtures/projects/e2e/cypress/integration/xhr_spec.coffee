@@ -110,6 +110,6 @@ describe "xhrs", ->
         .then ->
           ## simulate an open request which should become
           ## aborted (usually due to moving to next test)
-          Cypress.trigger("test:before:hooks", {id: 123})
+          Cypress.trigger("test:before:run:async", {id: 123})
 
         .wait("@createUser").its("aborted").should("be.true")
