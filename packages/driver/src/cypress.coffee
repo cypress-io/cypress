@@ -266,6 +266,7 @@ class $Cypress
         ## @cy.emit("fail", args...)
 
       when "test:after:run"
+      when "runner:test:after:run"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
         @emit("test:after:run", args...)

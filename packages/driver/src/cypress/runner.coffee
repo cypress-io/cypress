@@ -104,6 +104,21 @@ testBeforeRun = (test, Cypress) ->
     if not fired("runner:test:before:run:async", test)
       fire("runner:test:before:run:async", test, Cypress)
 
+testAfterRun = (test, Cypress) ->
+  if not fired("runner:test:after:run", test)
+    fire("runner:test:after:run", test, Cypress)
+
+    ## perf loop
+    for key, value of test.ctx
+      if _.isObject(value) and not mochaCtxKeysRe.test(key)
+        ## nuke any object properties that come from
+        ## cy.as() aliases aggressively now, even though
+        ## later on 'suite end' it will also clear ctx
+        test.ctx[key] = null
+
+    ## prevent loop comprehension
+    return null
+
 reduceProps = (obj, props) ->
   _.reduce props, (memo, prop) ->
     if _.has(obj, prop) or obj[prop]
@@ -189,6 +204,29 @@ getTestFromHook = (hook, suite, getTestById) ->
   ## test (used in testing)
   onFirstTest suite, (test) -> true
 
+## we have to see if this is the last suite amongst
+## its siblings.  but first we have to filter out
+## suites which dont have a grep'd test in them
+isLastSuite = (suite, tests) ->
+  return false if suite.root
+
+  ## grab all of the suites from our grep'd tests
+  ## including all of their ancestor suites!
+  suites = _.reduce tests, (memo, test) ->
+    while parent = test.parent
+      memo.push(parent)
+      test = parent
+    memo
+  , []
+
+  ## intersect them with our parent suites and see if the last one is us
+  _
+  .chain(suites)
+  .uniq()
+  .intersection(suite.parent.suites)
+  .last()
+  .value() is suite
+
 overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
   ## bail if our runner doesnt have a hook.
   ## useful in tests
@@ -199,49 +237,32 @@ overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
   ## the hooks surrounding a test runnable
   _this = @
 
-  runner.hook = _.wrap runner.hook, (orig, name, fn) ->
+  runnerHook = runner.hook
+
+  runner.hook = (name, fn) ->
     hooks = @suite["_" + name]
 
-    ## we have to see if this is the last suite amongst
-    ## its siblings.  but first we have to filter out
-    ## suites which dont have a grep'd test in them
-    isLastSuite = (suite) ->
-      return false if suite.root
+    ctx = @
 
-      ## grab all of the suites from our grep'd tests
-      ## including all of their ancestor suites!
-      suites = _.reduce _this.tests, (memo, test) ->
-        while parent = test.parent
-          memo.push(parent)
-          test = parent
-        memo
-      , []
+    allTests = _this.tests
 
-      ## intersect them with our parent suites and see if the last one is us
-      _
-      .chain(suites)
-      .uniq()
-      .intersection(suite.parent.suites)
-      .last()
-      .value() is suite
+    changeFnToRunAfterHooks = ->
+      originalFn = fn
 
-
-    testAfterHooks = ->
       test = getTest()
 
       setTest(null)
 
-      fn = _.wrap fn, (orig, args...) ->
-        testEvents.afterHooksAsync(ee, test)
-        .then ->
-          testEvents.afterRun(ee, test)
+      ## reset fn to invoke the hooks
+      ## first but before calling next(err)
+      ## we fire our events
+      fn = ->
+        testAfterRun(test, Cypress)
 
-          Cypress.restore()
+        ## and now invoke next(err)
+        originalFn.apply(null, arguments)
 
-          orig(args...)
-
-
-
+    switch name
       when "afterEach"
         ## find all of the grep'd _this tests which share
         ## the same parent suite as our current _this test
@@ -250,7 +271,7 @@ overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
         ## make sure this test isnt the last test overall but also
         ## isnt the last test in our grep'd parent suite's tests array
         if @suite.root and (getTest() isnt _.last(getTests())) and (getTest() isnt _.last(tests))
-          testAfterHooks()
+          changeFnToRunAfterHooks()
 
       when "afterAll"
         ## find all of the grep'd _this tests which share
@@ -267,10 +288,10 @@ overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
           ## the last test
           if (@suite.root and getTest() is _.last(getTests())) or
             (@suite.parent?.root and getTest() is _.last(tests)) or
-              (not isLastSuite(@suite) and getTest() is _.last(tests))
-            testAfterHooks()
+              (not isLastSuite(@suite, allTests) and getTest() is _.last(tests))
+            changeFnToRunAfterHooks()
 
-    orig.call(@, name, fn)
+    runnerHook.call(@, name, fn)
 
 getId = ->
   ## increment the id counter
@@ -520,7 +541,7 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
     tests = getAllSiblingTests(test.parent, getTestById)
 
     if _.last(tests) isnt test
-      fire(Cypress, "test:after:run", test)
+      fire("test:after:run", test, Cypress)
 
   runner.on "fail", (runnable, err) ->
     isHook = runnable.type is "hook"
