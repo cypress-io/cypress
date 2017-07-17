@@ -43,5 +43,9 @@ module.exports = {
         return at
       else
         ## else throw the not logged in error
-        errors.throw("NOT_LOGGED_IN")
+        error = errors.get("NOT_LOGGED_IN")
+        ## tag it as api error since the user is only relevant
+        ## in regards to the api
+        error.isApiError = true
+        throw error
 }

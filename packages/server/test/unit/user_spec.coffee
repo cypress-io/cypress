@@ -55,7 +55,7 @@ describe "lib/user", ->
       user.ensureAuthToken().then (st) ->
         expect(st).to.eq("abc-123")
 
-    it "throws NOT_LOGGED_IN when no authToken", ->
+    it "throws NOT_LOGGED_IN when no authToken, tagged as api error", ->
       @sandbox.stub(cache, "getUser").resolves(null)
 
       user.ensureAuthToken()
@@ -64,4 +64,5 @@ describe "lib/user", ->
       .catch (err) ->
         expectedErr = errors.get("NOT_LOGGED_IN")
         expect(err.message).to.eq(expectedErr.message)
+        expect(err.isApiError).to.be.true
         expect(err.type).to.eq(expectedErr.type)
