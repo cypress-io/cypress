@@ -388,6 +388,24 @@ create = (specWindow, Cypress, state, config, log) ->
       ## after the tests have finished
       state("runnable", runnable)
 
+    onRunnableRun: (runnable, args) ->
+      fn = runnable.fn
+
+      restore = ->
+        runnable.fn = fn
+
+      runnable.fn = ->
+        restore()
+
+        try
+          ret = fn.apply(@, arguments)
+
+          if ret and queue.length and (not isCy(ret))
+            debugger
+
+        catch err
+          fail(err)
+
     onBeforeAutWindowLoad: (contentWindow) ->
       ## TODO: probably dont want to silence the console anymore
       # @cy.silenceConsole(contentWindow) if Cypress.isHeadless

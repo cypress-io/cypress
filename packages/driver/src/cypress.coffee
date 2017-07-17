@@ -253,6 +253,9 @@ class $Cypress
         if @isHeadless
           @emit("mocha", "fail", args...)
 
+      when "mocha:runnable:run"
+        @cy.onRunnableRun(args...)
+
       when "cy:fail"
         @runner.fail(args...)
 

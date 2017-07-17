@@ -99,11 +99,11 @@ restoreRunnableRun = ->
 patchRunnerFail = ->
   ## matching the current Runner.prototype.fail except
   ## changing the logic for determing whether this is a valid err
-  Runner::fail = _.wrap runnerFail, (orig, runnable, err) ->
+  Runner::fail = (runnable, err) ->
     ## if this isnt a correct error object then just bail
     ## and call the original function
     if Object.prototype.toString.call(err) isnt "[object Error]"
-      return orig.call(@, runnable, err)
+      return runnerFail.call(@, runnable, err)
 
     ## else replicate the normal mocha functionality
     ++@failures
@@ -113,51 +113,15 @@ patchRunnerFail = ->
     @emit("fail", runnable, err)
 
 patchRunnableRun = (Cypress) ->
-  Runnable::run = _.wrap runnableRun, (orig, args...) ->
+  Runnable::run = (args...) ->
     runnable = @
 
-    didInvoke = false
+    Cypress.action("mocha:runnable:run", runnable, args)
 
-    ## if cy was enqueued within the test
-    ## then we know we should forcibly return cy
-    invokedCy = ->
-      didInvoke = true
-
-    runnable.fn = _.wrap runnable.fn, (orig, args...) ->
-      Cypress.once("command:enqueue", invokedCy)
-
-      unbind = ->
-        Cypress.removeListener("command:enqueue", invokedCy)
-        runnable.fn = orig
-
-      try
-        ## call the original function with
-        ## our called ctx (from mocha)
-        ## and apply the new args in case
-        ## we have a done callback
-        result = orig.apply(@, args)
-
-        unbind()
-
-        ## if we invoked cy in this function
-        ## then forcibly return last cy chain
-        if didInvoke
-          ## TODO: if we didn't return the cypress
-          ## chainer or cy instance then explode here
-          ## if result is anything other than undefined
-          # return Cypress.cy.state("chain")
-          throw new Error("please write a good error message")
-
-        ## else return regular result
-        return result
-      catch e
-        unbind()
-        throw e
-
-    orig.apply(@, args)
+    runnableRun.apply(runnable, args)
 
 patchRunnableResetTimeout = ->
-  Runnable::resetTimeout = _.wrap runnableResetTimeout, (orig) ->
+  Runnable::resetTimeout = ->
     runnable = @
 
     ms = @timeout() or 1e9
