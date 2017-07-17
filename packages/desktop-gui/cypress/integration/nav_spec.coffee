@@ -71,6 +71,23 @@ describe "Navigation", ->
       it "displays login button", ->
         cy.shouldBeLoggedOut()
 
+    describe "when log out errors", ->
+      beforeEach ->
+        @ipc.logOut.rejects({ name: "", message: "ECONNREFUSED\n0.0.0.0:1234"})
+        cy.contains("Jane Lane").click()
+        cy.contains("Log Out").click()
+
+      it "shows global error", ->
+        cy.get(".global-error").should("be.visible")
+
+      it "displays error message", ->
+        cy.get(".global-error p").eq(0).invoke("text").should("include", "An unexpected error occurred while logging out")
+        cy.get(".global-error p").eq(1).invoke("html").should("include", "ECONNREFUSED<br>0.0.0.0:1234")
+
+      it "dismisses warning after clicking X", ->
+        cy.get(".global-error .close").click()
+        cy.get(".global-error").should("not.exist")
+
   context "when current user has no name", ->
     beforeEach ->
       @user.name = null

@@ -6,6 +6,7 @@ class AppStore {
   @observable projectPath = null
   @observable newVersion
   @observable version
+  @observable error
 
   @computed get displayVersion () {
     return this.isDev ? `${this.version} (dev)` : this.version
@@ -32,6 +33,10 @@ class AppStore {
 
   @action setNewVersion (newVersion) {
     this.newVersion = newVersion
+  }
+
+  @action setError (err) {
+    this.error = err
   }
 }
 

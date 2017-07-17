@@ -1,3 +1,4 @@
+import appStore from '../lib/app-store'
 import authStore from './auth-store'
 import ipc from '../lib/ipc'
 import viewStore from '../lib/view-store'
@@ -39,7 +40,6 @@ class AuthApi {
     })
     .then((user) => {
       authStore.setUser(user)
-      viewStore.showPreviousView()
       return null
     })
     .catch(alreadyOpen, () => {})
@@ -50,6 +50,10 @@ class AuthApi {
 
     ipc.clearGithubCookies()
     ipc.logOut()
+    .catch((err) => {
+      err.name = 'An unexpected error occurred while logging out'
+      appStore.setError(err)
+    })
   }
 }
 
