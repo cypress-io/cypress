@@ -2,11 +2,9 @@ _ = require("lodash")
 Backbone = require("backbone")
 $utils = require("./utils")
 
+## in the browser mocha is coming back
+## as window
 mocha = require("mocha")
-
-## don't let mocha polute the global namespace
-delete window.mocha
-delete window.Mocha
 
 Mocha = mocha.Mocha ? mocha
 Runner = Mocha.Runner
@@ -16,6 +14,10 @@ runnerRun            = Runner::run
 runnerFail           = Runner::fail
 runnableRun          = Runnable::run
 runnableResetTimeout = Runnable::resetTimeout
+
+## don't let mocha polute the global namespace
+delete window.mocha
+delete window.Mocha
 
 # listeners: ->
 #   @listenTo @Cypress, "abort", =>
@@ -28,9 +30,6 @@ runnableResetTimeout = Runnable::resetTimeout
 #   @listenTo @Cypress, "stop", => @stop()
 #
 #   return @
-
-  grep: (re) ->
-    @_mocha.grep(re)
 
 ui = (specWindow, _mocha) ->
   ## Override mocha.ui so that the pre-require event is emitted
