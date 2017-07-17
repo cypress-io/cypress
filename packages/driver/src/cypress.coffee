@@ -31,7 +31,7 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId normalizeAll".split(" ")
-  cy: "checkForEndedEarly onUncaughtException setRunnable getStyles".split(" ")
+  cy: "checkForEndedEarly onUncaughtException getStyles".split(" ")
 }
 
 throwDeprecatedCommandInterface = (key, method) ->
@@ -204,7 +204,7 @@ class $Cypress
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that
         ## is about to be invoked
-        @setRunnable(args...)
+        @cy.setRunnable(args...)
 
       when "runner:suite:start"
         ## mocha runner started processing a suite
@@ -254,7 +254,7 @@ class $Cypress
           @emit("mocha", "fail", args...)
 
       when "mocha:runnable:run"
-        @cy.onRunnableRun(args...)
+        @runner.onRunnableRun(args...)
 
       when "cy:fail"
         @runner.fail(args...)

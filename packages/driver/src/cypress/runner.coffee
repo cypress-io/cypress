@@ -87,54 +87,22 @@ waitForHooksToResolve = (ee, event, test = {}) ->
     test.fn = ->
       throw err
 
-fire = (ee, event, test, options = {}) ->
+fire = (event, test, Cypress, options = {}) ->
   test._fired ?= {}
   test._fired[event] = true
 
   ## dont fire anything again if we are skipped
   return if test._ALREADY_RAN
 
-  if options.multiple
-    throw new Error("options.multiple is true")
-    # [].concat(@Cypress.invoke(event, wrap(test), test))
-  else
-    ee.emit(event, wrap(test))
-    # @Cypress.trigger(event, wrap(test))
+  Cypress.action(event, wrap(test))
 
 fired = (event, test) ->
   !!(test._fired and test._fired[event])
 
-testEvents = {
-  beforeRun: (ee, test) ->
-    if not fired("test:before:run", test)
-      fire(ee, "test:before:run", test)
-
-  beforeHooksAsync: (ee, test) ->
-    ## there is a bug (but i believe its only in tests
-    ## which happens in Ended Early Integration Tests
-    ## where the test will be undefined due to the runner.suite
-    ## not yet having built its tests/suites array and thus
-    ## our @tests array is empty
-    Promise.try ->
-      if not fired("test:before:hooks", test)
-        waitForHooksToResolve(ee, "test:before:hooks", test)
-
-  afterHooksAsync: (ee, test) ->
-    Promise.try ->
-      if not fired("test:after:hooks", test)
-        waitForHooksToResolve(ee, "test:after:hooks", test)
-
-  afterRun: (ee, test) ->
-    if not fired("test:after:run", test)
-      fire(ee, "test:after:run", test)
-
-      _.each test.ctx, (value, key) ->
-        if _.isObject(value) and not mochaCtxKeysRe.test(key)
-          ## nuke any object properties that come from
-          ## cy.as() aliases aggressively now, even though
-          ## later on 'suite end' it will also clear ctx
-          test.ctx[key] = null
-}
+testBeforeRun = (test, Cypress) ->
+  Promise.try ->
+    if not fired("runner:test:before:run:async", test)
+      fire("runner:test:before:run:async", test, Cypress)
 
 reduceProps = (obj, props) ->
   _.reduce props, (memo, prop) ->
@@ -227,7 +195,7 @@ overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
   return if not runner.hook
 
   ## monkey patch the hook event so we can wrap
-  ## 'test:before:hooks' and 'test:after:hooks' around all of
+  ## 'test:before:run:async' and 'test:after:hooks' around all of
   ## the hooks surrounding a test runnable
   _this = @
 
@@ -257,17 +225,6 @@ overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
       .last()
       .value() is suite
 
-    testBeforeHooks = (hook, suite) ->
-      if not getTest()
-        t = getTestFromHook(hook, suite, getTestById)
-        setTest(t)
-
-      testEvents.beforeRun(ee, getTest())
-
-      fn = _.wrap fn, (orig, args...) ->
-        testEvents.beforeHooksAsync(ee, getTest())
-        .then ->
-          orig(args...)
 
     testAfterHooks = ->
       test = getTest()
@@ -283,13 +240,7 @@ overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
 
           orig(args...)
 
-    switch name
-      when "beforeAll"
-        testBeforeHooks(hooks[0], @suite)
 
-      when "beforeEach"
-        if @suite.root
-          testBeforeHooks(hooks[0], @suite)
 
       when "afterEach"
         ## find all of the grep'd _this tests which share
@@ -517,27 +468,15 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
     hook.id = test.id
     hook.ctx.currentTest = test
 
-    Cypress.action("runner:set:runnable", hook, hookName)
-
     Cypress.action("runner:hook:start", wrap(hook))
 
   runner.on "hook end", (hook) ->
     hookName = getHookName(hook)
 
-    ## because mocha fires a 'test' event first and then
-    ## subsequently fires a beforeEach immediately after
-    ## we have to re-set our test runnable after the
-    ## beforeEach hook ends! every other hook is fine
-    ## we do not need to re-set for any other type!
-    if hookName is "before each" and test = hook.ctx.currentTest
-      Cypress.action("runner:set:runnable", test, "test")
-
     Cypress.action("runner:hook:end", wrap(hook))
 
   runner.on "test", (test) ->
     setTest(test)
-
-    Cypress.action("runner:set:runnable", test, "test")
 
     return if emissions.started[test.id]
 
@@ -562,8 +501,8 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
     ## do nothing if our test is skipped
     return if test._ALREADY_RAN
 
-    if not fired("test:before:run", test)
-      fire(Cypress, "test:before:run", test)
+    if not fired("test:before:run:async", test)
+      fire("test:before:run:async", test, Cypress)
 
     test.state = "pending"
 
@@ -713,6 +652,48 @@ create = (mocha, Cypress) ->
         ## synchronized with the 'end' event that
         ## we manage because of uncaught hook errors
         fn(failures, getTestResults(tests)) if fn
+
+    onRunnableRun: (runnableRun, runnable, args) ->
+      if not runnable.id
+        debugger
+        throw new Error("runnable must have an id", runnable.id)
+
+      ## if this isnt a hook, then the name is 'test'
+      hookName = getHookName(runnable) or "test"
+
+      switch runnable.type
+        when "hook"
+          test = runnable.ctx.currentTest
+        when "test"
+          test = runnable
+
+      ## TODO: handle promise timeouts here!
+      ## whenever any runnable is about to run
+      ## we figure out what test its associated to
+      ## if its a hook, and then we fire the
+      ## test:before:run:async action if its not
+      ## been fired before for this test
+      testBeforeRun(test, Cypress)
+      .then ->
+        ## and regardless we can now tell cy
+        ## that its ready to set the runnable
+        Cypress.action("runner:set:runnable", runnable, hookName)
+      .catch (err) ->
+        ## TODO: if our async tasks fail
+        ## then allow us to cause the test
+        ## to fail here by blowing up its fn
+        ## callback
+        fn = runnable.fn
+
+        restore = ->
+          runnable.fn = fn
+
+        runnable.fn = ->
+          restore()
+
+          throw err
+      .finally ->
+        runnableRun.apply(runnable, args)
 
     getStartTime: ->
       startTime

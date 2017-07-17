@@ -388,7 +388,6 @@ create = (specWindow, Cypress, state, config, log) ->
       ## after the tests have finished
       state("runnable", runnable)
 
-    onRunnableRun: (runnable, args) ->
       fn = runnable.fn
 
       restore = ->

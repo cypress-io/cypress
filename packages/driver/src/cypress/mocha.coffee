@@ -123,9 +123,7 @@ patchRunnableRun = (Cypress) ->
   Runnable::run = (args...) ->
     runnable = @
 
-    Cypress.action("mocha:runnable:run", runnable, args)
-
-    runnableRun.apply(runnable, args)
+    Cypress.action("mocha:runnable:run", runnableRun, runnable, args)
 
 patchRunnableResetTimeout = ->
   Runnable::resetTimeout = ->
