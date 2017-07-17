@@ -606,7 +606,7 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
 
     if isHook
       ## TODO: why do we need to do this???
-      hookFailed(runnable, runnable.err, hookName, testsById)
+      hookFailed(runnable, runnable.err, hookName, getTestById)
 
 create = (mocha, Cypress) ->
   id = 0
