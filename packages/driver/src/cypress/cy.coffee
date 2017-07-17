@@ -377,6 +377,30 @@ create = (specWindow, Cypress, state, config, log) ->
 
       queue.splice(index, 0, obj)
 
+    onBeforeAutWindowLoad: (contentWindow) ->
+      ## TODO: probably dont want to silence the console anymore
+      # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
+      setWindowDocumentProps(contentWindow, state)
+
+      $Listeners.bindTo(contentWindow, {
+        onSubmit: (e) ->
+        onBeforeUnload: (e) ->
+        onHashChange: (e) ->
+        onAlert: (str) ->
+        onConfirm: (str) ->
+      })
+
+    getStyles: ->
+      snapshots.getStyles()
+
+    checkForEndedEarly: ->
+      ## if our index is above 0 but is below the commands.length
+      ## then we know we've ended early due to a done() and
+      ## we should throw a very specific error message
+      index = state("index")
+      if index > 0 and index < queue.length
+        errors.endedEarlyErr(index, queue)
+
     setRunnable: (runnable, hookName) ->
       if _.isFinite(timeout = config("defaultCommandTimeout"))
         runnable.timeout(timeout)
@@ -415,30 +439,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
         catch err
           fail(err)
-
-    onBeforeAutWindowLoad: (contentWindow) ->
-      ## TODO: probably dont want to silence the console anymore
-      # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
-      setWindowDocumentProps(contentWindow, state)
-
-      $Listeners.bindTo(contentWindow, {
-        onSubmit: (e) ->
-        onBeforeUnload: (e) ->
-        onHashChange: (e) ->
-        onAlert: (str) ->
-        onConfirm: (str) ->
-      })
-
-    getStyles: ->
-      snapshots.getStyles()
-
-    checkForEndedEarly: ->
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = state("index")
-      if index > 0 and index < queue.length
-        errors.endedEarlyErr(index, queue)
 
     run: ->
       next = ->
