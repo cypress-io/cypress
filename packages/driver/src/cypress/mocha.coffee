@@ -6,6 +6,7 @@ mocha = require("mocha")
 
 ## don't let mocha polute the global namespace
 delete window.mocha
+delete window.Mocha
 
 Mocha = mocha.Mocha ? mocha
 Runner = Mocha.Runner
@@ -42,35 +43,42 @@ ui = (specWindow, _mocha) ->
 
     @_ui = @_ui(@suite)
 
+    ## this causes the mocha globals in the spec window to be defined
+    ## such as describe, it, before, beforeEach, etc
     @suite.emit("pre-require", specWindow, null, @)
 
     return @
 
   _mocha.ui("bdd")
 
-## TODO: is this necessary anymore?
-## we create new mocha instances all the time
-clone = (_mocha) ->
-  ## remove all of the listeners from the previous root suite
-  _mocha.suite.removeAllListeners()
-
-  ## We clone the outermost root level suite - and replace
-  ## the existing root suite with a new one. this wipes out
-  ## all references to hooks / tests / suites and thus
-  ## prevents holding reference to old suites / tests
-  _mocha.suite = _mocha.suite.clone()
-
 set = (specWindow, _mocha) ->
-  ## create our own mocha objects from our parents if its not already defined
-  ## Mocha is needed for the id generator
-  # specWindow.Mocha ?= Mocha
-  specWindow.mocha ?= _mocha
+  ## Mocha is usually defined in the spec when used normally
+  ## in the browser or node, so we add it as a global
+  ## for our users too
+  M = specWindow.Mocha = Mocha
+  m = specWindow.mocha = _mocha
 
-  clone(_mocha)
+  ## also attach the Mocha class
+  ## to the mocha instance for clarity
+  m.Mocha = M
 
   ## this needs to be part of the configuration of cypress.json
   ## we can't just forcibly use bdd
   ui(specWindow, _mocha)
+
+globals = (specWindow, reporter) ->
+  reporter ?= ->
+
+  _mocha = new Mocha({
+    reporter: reporter
+    enableTimeouts: false
+  })
+
+  ## set mocha props on the specWindow
+  set(specWindow, _mocha)
+
+  ## return the newly created mocha instance
+  return _mocha
 
 getRunner = (_mocha) ->
   Runner::run = ->
@@ -157,17 +165,12 @@ create = (specWindow, Cypress, reporter) ->
 
   override(Cypress)
 
-  reporter ?= ->
-
-  _mocha = new Mocha({
-    reporter: reporter
-    enableTimeouts: false
-  })
+  ## generate the mocha + Mocha globals
+  ## on the specWindow, and get the new
+  ## _mocha instance
+  _mocha = globals(specWindow, reporter)
 
   _runner = getRunner(_mocha)
-
-  ## set mocha props on the specWindow
-  set(specWindow, _mocha)
 
   return {
     _mocha
@@ -185,13 +188,7 @@ create = (specWindow, Cypress, reporter) ->
 module.exports = {
   restore
 
-  override
-
-  set
-
-  clone
-
-  ui
+  globals
 
   create
 }
