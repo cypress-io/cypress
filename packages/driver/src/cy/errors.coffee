@@ -1,5 +1,7 @@
 $utils = require("../cypress/utils")
 
+crossOriginScriptRe = /^script error/i
+
 create = (state, config, log) ->
   commandErr = (err) ->
     current = state("current")
@@ -56,7 +58,37 @@ create = (state, config, log) ->
 
     commandRunningFailed(err)
 
+  createUncaughtException = (msg, source, lineno, colno, err) ->
     current = state("current")
+
+    ## reset the msg on a cross origin script error
+    ## since no details are accessible
+    if crossOriginScriptRe.test(msg)
+      msg = $utils.errMessageByPath("uncaught.cross_origin_script")
+
+    createErrFromMsg = ->
+      new Error $utils.errMessageByPath("uncaught.error", { msg, source, lineno })
+
+    ## if we have the 5th argument it means we're in a super
+    ## modern browser making this super simple to work with.
+    err ?= createErrFromMsg()
+
+    err.name = "Uncaught " + err.name
+
+    err.onFail = ->
+      if log = current and current.getLastLog()
+        log.error(err)
+
+    ## this will cause the last command to be
+    ## highlighted in red since it likely caused
+    ## the uncaughtException to happen!
+    commandRunningFailed(err)
+
+    ## TODO: if this is a hook then we know mocha
+    ## will abort everything on uncaught exceptions
+    ## so we need to explain that to the user
+
+    return err
 
   commandRunningFailed = (err) ->
     ## allow for our own custom onFail function
@@ -78,6 +110,8 @@ create = (state, config, log) ->
     endedEarlyErr
 
     commandRunningFailed
+
+    createUncaughtException
   }
 
 module.exports = {

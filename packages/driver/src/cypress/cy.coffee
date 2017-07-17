@@ -397,6 +397,29 @@ create = (specWindow, Cypress, state, config, log) ->
         onConfirm: (str) ->
       })
 
+    onUncaughtException: ->
+      runnable = state("runnable")
+
+      ## create the special uncaught exception err
+      err = errors.createUncaughtException.apply(null, arguments)
+
+      ## do all the normal fail stuff and promise cancellation
+      ## but dont re-throw the error
+      try
+        fail(err)
+      catch err
+        ## pass this to our runnable so it
+        ## fails nicely
+        ##
+        ## this is the same as passing done(err)
+        ## in the runnable.fn
+        runnable.callback(err)
+
+      ## per the onerror docs we need to return true here
+      ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+      ## When the function returns true, this prevents the firing of the default event handler.
+      return true
+
     getStyles: ->
       snapshots.getStyles()
 
