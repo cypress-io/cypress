@@ -257,13 +257,8 @@ class $Cypress
         @runner.onRunnableRun(args...)
 
       when "cy:fail"
-        @runner.fail(args...)
-
         ## comes from cypress errors fail()
         @emit("fail", args...)
-
-        ## also emits this on cy
-        ## @cy.emit("fail", args...)
 
       when "runner:test:before:run:async"
         @cy.reset()

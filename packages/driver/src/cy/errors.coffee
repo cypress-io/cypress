@@ -31,12 +31,12 @@ create = (state, config, log) ->
     ## bypasses our commands entirely so
     ## we never actually catch it
     ## and 'endedEarlyErr' would fire
-    if err = test.err and not state("err")
-      state("err", err)
+    if err = test.err and not state("error")
+      state("error", err)
 
   endedEarlyErr = (index, queue) ->
     ## return if we already have an error
-    return if state("err")
+    return if state("error")
 
     commands = queue.slice(index).reduce (memo, cmd) =>
       if $utils.isCommandFromThenable(cmd) or $utils.isCommandFromMocha(cmd)
@@ -54,17 +54,11 @@ create = (state, config, log) ->
     )
     err.onFail = ->
 
-    fail(err)
-
-  fail = (err) ->
-    ## make sure we cancel our outstanding
-    ## promise since we could have hit this
-    ## fail handler outside of a command chain
-    ## and we want to ensure we don't continue retrying
-    state("promise")?.cancel()
+    commandRunningFailed(err)
 
     current = state("current")
 
+  commandRunningFailed = (err) ->
     ## allow for our own custom onFail function
     if err.onFail
       err.onFail(err)
@@ -75,13 +69,6 @@ create = (state, config, log) ->
     else
       commandErr(err)
 
-    runnable = state("runnable")
-
-    state("err", err)
-
-    # @Cypress.trigger "fail", err, runnable
-    # @trigger "fail", err, runnable
-
   return {
     ## submit a generic command error
     commandErr
@@ -90,7 +77,7 @@ create = (state, config, log) ->
 
     endedEarlyErr
 
-    fail
+    commandRunningFailed
   }
 
 module.exports = {

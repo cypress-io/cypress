@@ -99,8 +99,12 @@ create = (specWindow, Cypress, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
-  fail = (err) ->
-    errors.fail(err)
+  fail = (err, runnable) ->
+    ## make sure we cancel our outstanding
+    ## promise since we could have hit this
+    ## fail handler outside of a command chain
+    ## and we want to ensure we don't continue retrying
+    state("promise")?.cancel()
 
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
@@ -113,9 +117,12 @@ create = (specWindow, Cypress, state, config, log) ->
     ## which need to run
     state("index", queue.length)
 
+    ## store the error on state now
+    state("error", err)
+
     Cypress.action("cy:fail", err, state("runnable"))
 
-    return err
+    throw err
 
   cy = {
     id: _.uniqueId("cy")
@@ -228,7 +235,7 @@ create = (specWindow, Cypress, state, config, log) ->
           if ready = state("ready")
             ready.reject(err)
           else
-            errors.fail(err)
+            fail(err, state("runnable"))
 
     reset: ->
       s = state()
@@ -421,15 +428,22 @@ create = (specWindow, Cypress, state, config, log) ->
       runnable.fn = ->
         restore()
 
+        ## store the current length of our queue
+        ## before we invoke the runnable.fn
+        currentLength = queue.length
+
         try
           ret = fn.apply(@, arguments)
 
-          if ret and queue.length and (not isCy(ret))
+          ## if we returned a value from fn
+          ## and enqueued some new commands
+          ## and the value isnt currently cy
+          if ret and (queue.length > currentLength) and (not isCy(ret))
             debugger
 
           ## if we didn't fire up any cy commands
           ## then send back mocha what was returned
-          if not queue.length
+          if queue.length is currentLength
             return ret
 
           ## kick off the run!
@@ -438,7 +452,11 @@ create = (specWindow, Cypress, state, config, log) ->
           return cy.run()
 
         catch err
-          fail(err)
+          ## if our runnable.fn throw synchronously
+          ## then it didnt fail from a cypress command
+          ## but we should still teardown and handle
+          ## the error
+          fail(err, runnable)
 
     run: ->
       next = ->
@@ -518,7 +536,13 @@ create = (specWindow, Cypress, state, config, log) ->
         ## accidentally chain off of the return value
         return err
 
-      .catch(fail)
+      .catch (err) ->
+        ## since this failed this means that a
+        ## specific command failed and we should
+        ## highlight it in red or insert a new command
+        errors.commandRunningFailed(err)
+
+        fail(err, runnable)
 
       ## signify we are at the end of the chain and do not
       ## continue chaining anymore
