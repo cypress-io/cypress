@@ -109,6 +109,10 @@ class Login extends Component {
     this.setState({ isLoggingIn: true })
 
     authApi.login()
+    .then(() => {
+      this.setState({ isLoggingIn: false })
+      this._close()
+    })
     .catch((error) => {
       this.setState({
         isLoggingIn: false,

@@ -1,7 +1,6 @@
 import appStore from '../lib/app-store'
 import authStore from './auth-store'
 import ipc from '../lib/ipc'
-import viewStore from '../lib/view-store'
 
 class AuthApi {
   loadUser () {

@@ -16,7 +16,7 @@ describe "Login", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "clearGithubCookies")
-      cy.stub(@ipc, "logOut")
+      cy.stub(@ipc, "logOut").resolves()
 
       @openWindow = @util.deferred()
       cy.stub(@ipc, "windowOpen").returns(@openWindow.promise)
@@ -72,11 +72,8 @@ describe "Login", ->
         cy.then ->
           expect(@ipc.logIn).to.be.calledWith("code-123")
 
-      it "displays spinner with 'Logging in...' on ipc response", ->
-        cy.contains("Logging in...")
-
-      it "disables 'Login' button", ->
-        cy.get("@loginBtn").should("be.disabled")
+      it "displays spinner with 'Logging in...' and disables button", ->
+        cy.contains("Logging in...").should("be.disabled")
 
       describe "on ipc log:in success", ->
         beforeEach ->
@@ -90,43 +87,16 @@ describe "Login", ->
             .get("nav a").should ($a) ->
               expect($a).to.contain(@user.name)
 
-        context.only "log out", ->
+        it "closes modal", ->
+          cy.get(".modal").should("not.be.visible")
+
+        context "log out", ->
           it "displays login button on logout", ->
             cy
               .get("nav a").contains("Jane").click()
             cy
               .contains("Log Out").click()
               .get(".nav").contains("Log In")
-
-          it "has login button enabled after logout and re log in", ->
-            cy.get("nav a").contains("Jane").click()
-            cy
-              .contains("Log Out").click()
-              .get(".nav").contains("Log In").click()
-              .get("@loginBtn").should("not.be.disabled")
-
-          it "goes back to login on logout", ->
-            cy
-              .get("nav a").contains("Jane").click()
-            cy
-              .contains("Log Out").click().then ->
-                expect(@ipc.clearGithubCookies).to.be.called
-
-              .get(".login")
-
-          it "goes back to login on logout", ->
-            cy.get("nav a").contains("Jane").click()
-            cy.contains("Log Out").click().then ->
-              expect(@ipc.clearGithubCookies).to.be.called
-            cy.get(".login")
-
-          it "has login button enabled on logout", ->
-            cy
-              .get("nav a").contains("Jane").click()
-            cy
-              .contains("Log Out").click().then ->
-                expect(@ipc.clearGithubCookies).to.be.called
-              .get("@loginBtn").should("not.be.disabled")
 
           it "calls clear:github:cookies", ->
             cy
@@ -141,6 +111,15 @@ describe "Login", ->
             cy
               .contains("Log Out").click().then ->
                 expect(@ipc.logOut).to.be.called
+
+          it "has login button enabled when returning to login after logout", ->
+            cy.get("nav a").contains("Jane").click()
+            cy.contains("Log Out").click()
+            cy.contains("Log In").click()
+            cy.get(".login button").eq(1)
+              .should("not.be.disabled")
+              .invoke("text")
+              .should("include", "Log In with GitHub")
 
       describe "on ipc 'log:in' error", ->
         beforeEach ->
