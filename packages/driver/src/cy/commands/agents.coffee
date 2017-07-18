@@ -1,14 +1,19 @@
 _ = require("lodash")
+sinon = require("sinon")
 Promise = require("bluebird")
 sinonAsPromised = require("sinon-as-promised")
 
-# $Cy = require("../../cypress/cy")
-$Log = require("../cypress/log")
-$utils = require("../cypress/utils")
+$Log = require("../../cypress/log")
+$utils = require("../../cypress/utils")
+$sinon = require("../../cypress/sinon")
 
 sinonAsPromised(Promise)
+$sinon.override(sinon)
 
 counts = null
+
+createSandbox = ->
+  sinon.sandbox.create()
 
 display = (name) ->
   switch name
@@ -101,12 +106,12 @@ onInvoke = (obj, args) ->
     logProps.alias = aliases
     logProps.aliasType = "agent"
 
-  $Log.command(logProps)
+  Cypress.log(logProps)
 
 onError = (err) ->
   $utils.throwErr(err)
 
-wrap = (_cy, type, agent, obj, method, count) ->
+wrap = (Cypress, cy, type, agent, obj, method, count) ->
   if not count
     count = counts[type] += 1
 
@@ -114,7 +119,8 @@ wrap = (_cy, type, agent, obj, method, count) ->
   if not agent.parent
     counts.children[name] = 0
 
-  log = $Log.agent({
+  log = Cypress.log({
+    instrument: "agent"
     name: name
     type: name
     functionName: method
@@ -122,7 +128,9 @@ wrap = (_cy, type, agent, obj, method, count) ->
     callCount: 0
   })
 
-  agent.invoke = _.wrap agent.invoke, (orig, func, thisValue, args) ->
+  invoke = agent.invoke
+
+  agent.invoke = (func, thisValue, args) ->
     error = null
     returned = null
 
@@ -131,7 +139,7 @@ wrap = (_cy, type, agent, obj, method, count) ->
     ## so we still emit the command that failed
     ## and the user can easily find the error
     try
-      returned = orig.call(@, func, thisValue, args)
+      returned = invoke.call(@, func, thisValue, args)
     catch e
       error = e
 
@@ -157,8 +165,8 @@ wrap = (_cy, type, agent, obj, method, count) ->
     return returned
 
   agent.as = (alias) ->
-    _cy._validateAlias(alias)
-    _cy._addAlias({
+    cy._validateAlias(alias)
+    cy._addAlias({
       subject: agent
       command: log
       alias: alias
@@ -170,42 +178,40 @@ wrap = (_cy, type, agent, obj, method, count) ->
     })
     agent.named(alias)
 
-  agent.withArgs = _.wrap agent.withArgs, (orig, args...) ->
+  withArgs = agent.withArgs
+
+  agent.withArgs = ->
     childCount = counts.children[name] += 1
-    wrap(_cy, type, orig.apply(@, args), obj, method, "#{count}.#{childCount}")
+    wrap(Cypress, cy, type, withArgs.apply(@, arguments), obj, method, "#{count}.#{childCount}")
 
   return agent
 
-## TODO: pass in the dependencies here lik
-## sandbox or aliases
-create = (cy) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   counts = {
     spy: 0
     stub: 0
     children: {}
   }
 
-  return {
+  sandbox = createSandbox()
+
+  Cypress.on "test:before:run:async", ->
+    sandbox.restore()
+
+  Commands.addAllSync({
     spy: (obj, method) ->
-      spy = cy._getSandbox().spy(obj, method)
-      wrap(cy, "spy", spy, obj, method)
+      spy = sandbox.spy(obj, method)
+      wrap(Cypress, cy, "spy", spy, obj, method)
 
     stub: (obj, method, replacerFn) ->
-      stub = cy._getSandbox().stub(obj, method, replacerFn)
-      wrap(cy, "stub", stub, obj, method)
+      stub = sandbox.stub(obj, method, replacerFn)
+      wrap(Cypress, cy, "stub", stub, obj, method)
 
     agents: ->
       $utils.warning "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
 
       {
-        stub: @stub.bind(@)
-        spy: @spy.bind(@)
+        stub: @stub
+        spy: @spy
       }
-  }
-
-module.exports = {
-  # spy
-  # stub
-  # agents
-  create
-}
+  })

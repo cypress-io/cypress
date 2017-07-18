@@ -6,7 +6,6 @@ $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
 $jQuery = require("../cy/jquery")
-$Agents = require("../cy/agents")
 $Aliases = require("../cy/aliases")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
@@ -88,7 +87,6 @@ create = (specWindow, Cypress, state, config, log) ->
   { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
 
   xhrs = $Xhrs.create(state)
-  agents = $Agents.create()
   aliases = $Aliases.create(state)
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, config, expect, elements.isInDom)
@@ -155,11 +153,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## is cy
     isCy
-
-    ## agent sync methods
-    spy: agents.spy
-    stub: agents.stub
-    agents: agents.agents
 
     ## has element in dom sync
     isInDom: elements.isInDom

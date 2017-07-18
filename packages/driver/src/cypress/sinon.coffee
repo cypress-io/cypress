@@ -1,5 +1,5 @@
 _ = require("lodash")
-$Utils = require("./utils")
+$utils = require("./utils")
 
 module.exports = {
   override: (sinon) ->
@@ -14,5 +14,5 @@ module.exports = {
         return ret
       return call
 
-    sinon.format = $Utils.stringifyArg.bind($Utils)
+    sinon.format = $utils.stringifyArg.bind($utils)
   }
