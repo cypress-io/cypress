@@ -1,4 +1,5 @@
 $ = require("jquery")
+_ = require("lodash")
 
 $win = null
 
@@ -6,6 +7,16 @@ reset = ->
   if $win
     $win.off()
     $win = null
+
+eventHasReturnValue = (e) ->
+  val = e.originalEvent.returnValue
+
+  ## return false if val is an empty string
+  ## of if its undinefed
+  return false if val is "" or _.isUndefined(val)
+
+  ## else return true
+  return true
 
 module.exports = {
   bindTo: (contentWindow, callbacks = {}) ->
@@ -32,7 +43,7 @@ module.exports = {
     $win.on "beforeunload", (e) =>
       ## bail if we've cancelled this event (from another source)
       ## or we've set a returnValue on the original event
-      return if e.isDefaultPrevented() or @_eventHasReturnValue(e)
+      return if e.isDefaultPrevented() or eventHasReturnValue(e)
 
       callbacks.onBeforeUnload(e)
 
