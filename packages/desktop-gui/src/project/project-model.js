@@ -96,10 +96,6 @@ export default class Project {
     return this.id && this.isValid
   }
 
-  @computed get canShowRecordKey () {
-    return this.isSetupForRecording && this.isValid
-  }
-
   @computed get otherBrowsers () {
     return _.filter(this.browsers, { isChosen: false })
   }

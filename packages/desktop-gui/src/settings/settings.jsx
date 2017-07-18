@@ -10,7 +10,7 @@ import RecordKey from './record-key'
 const Settings = observer(({ project }) => (
   <div className={cs('settings', {
     'show-project-id': !!project.id,
-    'show-record-key': project.canShowRecordKey,
+    'show-record-key': project.isSetupForRecording,
   })}>
     <div className='settings-wrapper'>
       <Collapse>

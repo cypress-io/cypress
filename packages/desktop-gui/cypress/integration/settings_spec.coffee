@@ -123,7 +123,7 @@ describe "Settings", ->
           .get(".settings-record-key").contains("You can change").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
-      describe "when record key load", ->
+      describe "when record key loads", ->
         beforeEach ->
           @getRecordKeys.resolve(@keys)
 
@@ -136,9 +136,12 @@ describe "Settings", ->
         beforeEach ->
           @getRecordKeys.resolve([])
 
-        it "does not display cypress run command", ->
-          cy
-            .get(".settings-record-key").should("not.contain", "cypress run")
+        it "displays empty message", ->
+          cy.get(".settings-record-key .empty").should("contain", "This project has no record keys")
+
+        it "opens dashboard project settings when clicking 'Dashboard'", ->
+          cy.get(".settings-record-key .empty a").click().then ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
     context "on:focus:tests clicked", ->
       beforeEach ->

@@ -1,7 +1,9 @@
+import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import ipc from '../lib/ipc'
+import authStore from '../auth/auth-store'
 import projectsApi from '../projects/projects-api'
 
 const openDashboardProject = (project) => (e) => {
@@ -9,36 +11,65 @@ const openDashboardProject = (project) => (e) => {
   ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${project.id}`)
 }
 
+const openDashboardProjectSettings = (project) => (e) => {
+  e.preventDefault()
+  ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${project.id}/settings`)
+}
+
 const openRecordKeyGuide = (e) => {
   e.preventDefault()
   ipc.externalOpen('https://on.cypress.io/what-is-a-record-key')
 }
 
-const openAdminKeys = (project) => (e) => {
-  e.preventDefault()
-  ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${project.id}/settings`)
-}
-
 @observer
 class RecordKey extends Component {
-  state = {
-    keys: [],
-    isLoadingKeys: true,
+  @observable key = null
+  @observable isLoading = false
+
+  componentDidMount () {
+    this._loadKeys()
   }
 
-  componentWillMount () {
+  componentDidUpdate () {
+    this._loadKeys()
+  }
+
+  _loadKeys () {
+    // don't load key if already loading, already loaded, or if
+    // we can't show can anyway
+    if (
+      this.isLoading ||
+      this.key ||
+      !this.props.project.isSetupForRecording ||
+      !authStore.isAuthenticated
+    ) return
+
+    this._setLoading(true)
+
+    console.log('get keys')
     projectsApi.getRecordKeys().then((keys = []) => {
-      this.setState({
-        keys,
-        isLoadingKeys: false,
-      })
+      console.log('got keys', keys)
+      this._setKey(keys[0])
+      this._setLoading(false)
     })
+  }
+
+  @action _setLoading (isLoading) {
+    this.isLoading = isLoading
+  }
+
+  @action _setKey (key) {
+    if (key) this.key = key
   }
 
   render () {
     const { project } = this.props
 
-    if (!project.canShowRecordKey) return null
+    if (!project.isSetupForRecording) return null
+
+    if (!authStore.isAuthenticated) {
+      return this._loginMessage()
+    }
 
     return (
       <div>
@@ -52,10 +83,9 @@ class RecordKey extends Component {
             Dashboard.
           </a>
         </p>
-        {this._keys()}
-        {this._loadingKeys()}
+        {this._key()}
         <p className='text-muted manage-btn'>
-          <a href='#' onClick={openAdminKeys(project)}>
+          <a href='#' onClick={openDashboardProjectSettings(project)}>
             <i className='fa fa-key'></i> You can change this key in the Dashboard
           </a>
         </p>
@@ -63,8 +93,21 @@ class RecordKey extends Component {
     )
   }
 
-  _keys () {
-    if (this.state.isLoadingKeys || !this.state.keys.length) return null
+  _key () {
+    if (this.isLoadingKey) {
+      return (
+        <p className='loading-record-keys'>
+          <i className='fa fa-spinner fa-spin'></i>{' '}
+          Loading Keys...
+        </p>
+      )
+    }
+
+    if (!this.key) {
+      return (
+        <p className='empty'>This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.</p>
+      )
+    }
 
     return (
       <div>
@@ -72,20 +115,9 @@ class RecordKey extends Component {
           To record, run this command:
         </p>
         <p>
-          <pre><code>cypress run --record --key {this.state.keys[0].id}</code></pre>
+          <pre><code>cypress run --record --key {this.key.id}</code></pre>
         </p>
       </div>
-    )
-  }
-
-  _loadingKeys () {
-    if (!this.state.isLoadingKeys) return null
-
-    return (
-      <p className='loading-record-keys'>
-        <i className='fa fa-spinner fa-spin'></i>{' '}
-        Loading Keys...
-      </p>
     )
   }
 }
