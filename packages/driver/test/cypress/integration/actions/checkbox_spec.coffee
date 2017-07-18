@@ -1,7 +1,7 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
-describe "$Cypress.Cy Checkbox Commands", ->
+describe "src/cy/commands/actions/checkbox", ->
   before ->
     cy
       .visit("/support/server/fixtures/dom.html")
@@ -159,7 +159,7 @@ describe "$Cypress.Cy Checkbox Commands", ->
           if log.get("name") is "assert"
             @lastLog = log
 
-        null
+        return null
 
       it "eventually passes the assertion", ->
         $(":checkbox:first").click ->
@@ -598,7 +598,7 @@ describe "$Cypress.Cy Checkbox Commands", ->
           if log.get("name") is "assert"
             @lastLog = log
 
-        null
+        return null
 
       it "eventually passes the assertion", ->
         $(":checkbox:first").prop("checked", true).click ->
