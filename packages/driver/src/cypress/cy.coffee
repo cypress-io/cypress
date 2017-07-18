@@ -444,16 +444,17 @@ create = (specWindow, Cypress, state, config, log) ->
         errors.endedEarlyErr(index, queue)
 
     setRunnable: (runnable, hookName) ->
-      if _.isFinite(timeout = config("defaultCommandTimeout"))
-        runnable.timeout(timeout)
-
       state("hookName", hookName)
 
-      ## we store runnable as a property because
-      ## we can't allow it to be reset with props
-      ## since it is long lived (page events continue)
-      ## after the tests have finished
       state("runnable", runnable)
+
+      ## enable us to temporarily override defaultCommandTimeout
+      ## in our state. useful in our own tests to decrease
+      ## the timeouts for errors
+      timeout = state("defaultCommandTimeout") or config("defaultCommandTimeout")
+
+      if _.isFinite(timeout)
+        timeouts.timeout(timeout)
 
       fn = runnable.fn
 
