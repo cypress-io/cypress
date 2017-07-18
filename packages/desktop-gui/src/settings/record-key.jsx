@@ -27,28 +27,27 @@ class RecordKey extends Component {
   @observable isLoading = false
 
   componentDidMount () {
+    this.wasAuthenticated = authStore.isAuthenticated
     this._loadKeys()
   }
 
   componentDidUpdate () {
-    this._loadKeys()
+    // try to load keys again if not already loading, not already loading,
+    // and if user went from not authenticated to authenticated
+    if (
+      !this.isLoading &&
+      !this.key &&
+      (!this.wasAuthenticated && authStore.isAuthenticated)
+    ) {
+      this._loadKeys()
+    }
+    this.wasAuthenticated = authStore.isAuthenticated
   }
 
   _loadKeys () {
-    // don't load key if already loading, already loaded, or if
-    // we can't show can anyway
-    if (
-      this.isLoading ||
-      this.key ||
-      !this.props.project.isSetupForRecording ||
-      !authStore.isAuthenticated
-    ) return
-
     this._setLoading(true)
 
-    console.log('get keys')
     projectsApi.getRecordKeys().then((keys = []) => {
-      console.log('got keys', keys)
       this._setKey(keys[0])
       this._setLoading(false)
     })
@@ -84,17 +83,12 @@ class RecordKey extends Component {
           </a>
         </p>
         {this._key()}
-        <p className='text-muted manage-btn'>
-          <a href='#' onClick={openDashboardProjectSettings(project)}>
-            <i className='fa fa-key'></i> You can change this key in the Dashboard
-          </a>
-        </p>
       </div>
     )
   }
 
   _key () {
-    if (this.isLoadingKey) {
+    if (this.isLoading) {
       return (
         <p className='loading-record-keys'>
           <i className='fa fa-spinner fa-spin'></i>{' '}
@@ -105,7 +99,7 @@ class RecordKey extends Component {
 
     if (!this.key) {
       return (
-        <p className='empty'>This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.</p>
+        <p className='empty-well'>This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.</p>
       )
     }
 
@@ -116,6 +110,11 @@ class RecordKey extends Component {
         </p>
         <p>
           <pre><code>cypress run --record --key {this.key.id}</code></pre>
+        </p>
+        <p className='text-muted manage-btn'>
+          <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>
+            <i className='fa fa-key'></i> You can change this key in the Dashboard
+          </a>
         </p>
       </div>
     )

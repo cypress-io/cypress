@@ -118,11 +118,6 @@ describe "Settings", ->
       it "shows spinner", ->
         cy.get(".settings-record-key .fa-spinner")
 
-      it "opens admin project settings when record key link is clicked", ->
-        cy
-          .get(".settings-record-key").contains("You can change").click().then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
-
       describe "when record key loads", ->
         beforeEach ->
           @getRecordKeys.resolve(@keys)
@@ -132,15 +127,20 @@ describe "Settings", ->
             .get(".settings-record-key")
               .contains("cypress run --record --key #{@keys[0].id}")
 
+        it "opens admin project settings when record key link is clicked", ->
+          cy
+            .get(".settings-record-key").contains("You can change").click().then ->
+              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
+
       describe "when there are no keys", ->
         beforeEach ->
           @getRecordKeys.resolve([])
 
         it "displays empty message", ->
-          cy.get(".settings-record-key .empty").should("contain", "This project has no record keys")
+          cy.get(".settings-record-key .empty-well").should("contain", "This project has no record keys")
 
         it "opens dashboard project settings when clicking 'Dashboard'", ->
-          cy.get(".settings-record-key .empty a").click().then ->
+          cy.get(".settings-record-key .empty-well a").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
     context "on:focus:tests clicked", ->
