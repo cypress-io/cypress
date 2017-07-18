@@ -458,7 +458,7 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
           expect(res.body).to.include("Cannot find module")
 
     describe "failures", ->
@@ -473,7 +473,7 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
           expect(res.body).to.include("ParseError")
 
     describe "no-server", ->

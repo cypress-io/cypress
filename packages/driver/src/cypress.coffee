@@ -301,8 +301,8 @@ class $Cypress
 
         @emit("aut:before:window:load", args[0])
 
-      when "cy:next:subject:prepared"
-        @emit("next:subject:prepared", args...)
+      when "spec:script:error"
+        @emit("script:error", args...)
 
   request: (eventName, args...) ->
     new Promise (resolve, reject) =>

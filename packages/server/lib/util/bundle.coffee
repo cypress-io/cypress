@@ -146,7 +146,7 @@ module.exports = {
 
     """
     (function () {
-      Cypress.trigger("script:error", {
+      Cypress.action("spec:script:error", {
         type: "BUNDLE_ERROR",
         error: #{JSON.stringify(err)}
       })

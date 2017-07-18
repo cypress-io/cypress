@@ -72,7 +72,7 @@ describe "lib/util/bundle", ->
     it "send javascript string with the error", ->
       expect(bundle.clientSideError("an error")).to.equal("""
       (function () {
-        Cypress.trigger("script:error", {
+        Cypress.action("spec:script:error", {
           type: "BUNDLE_ERROR",
           error: "an error"
         })
