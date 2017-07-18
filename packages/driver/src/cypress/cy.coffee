@@ -266,7 +266,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
       queue.reset()
 
-      events.removeAllListeners()
+      cy.removeAllListeners()
 
     addCommand: ({key, fn, type, enforceDom}) ->
       ## TODO: prob don't need this anymore
@@ -736,7 +736,7 @@ create = (specWindow, Cypress, state, config, log) ->
   ## make cy global in the specWindow
   specWindow.cy = cy
 
-  events = $Events.extend(cy)
+  $Events.extend(cy)
 
   return cy
 
