@@ -196,3 +196,11 @@
     margin-left: 8px;
   }
 }
+
+.local-install-notice {
+  padding: 20px 15px 15px;
+
+  &.alert.alert-dismissible .close {
+    top: 15px;
+  }
+}
