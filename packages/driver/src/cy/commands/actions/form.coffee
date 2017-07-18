@@ -12,7 +12,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log: true
         $el: subject
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously
@@ -60,7 +60,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         .delay(delay)
         .then =>
           do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
+            cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
 

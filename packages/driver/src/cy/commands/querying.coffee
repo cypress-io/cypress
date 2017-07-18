@@ -83,7 +83,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           options.$el = $el
 
           ## pass in a null jquery object for assertions
-          @verifyUpcomingAssertions($el ? $(null), options, {
+          cy.verifyUpcomingAssertions($el ? $(null), options, {
             onRetry: resolveFocused
           })
           .return(options.$el)
@@ -242,7 +242,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           if options.verify is false
             return $el
 
-          @verifyUpcomingAssertions($el, options, {
+          cy.verifyUpcomingAssertions($el, options, {
             onRetry: resolveElements
           })
 
@@ -281,7 +281,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults options, {log: true}
 
-      @ensureNoCommandOptions(options)
+      cy.ensureNoCommandOptions(options)
 
       $utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
       $utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
@@ -391,7 +391,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           setEl($el)
 
-          @verifyUpcomingAssertions($el, options, {
+          cy.verifyUpcomingAssertions($el, options, {
             onRetry: resolveElements
             onFail: (err) =>
               switch err.type
@@ -412,7 +412,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "dom"}, {
     within: (subject, options, fn) ->
-      @ensureDom(subject)
+      cy.ensureDom(subject)
 
       if _.isUndefined(fn)
         fn = options

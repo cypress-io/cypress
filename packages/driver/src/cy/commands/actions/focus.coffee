@@ -16,7 +16,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log: true
         verify: true
 
-      @ensureDom(options.$el, "focus")
+      cy.ensureDom(options.$el, "focus")
 
       if options.log
         options._log = Cypress.log
@@ -137,7 +137,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return options.$el if options.verify is false
 
           do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
+            cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
         })
 
@@ -161,7 +161,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps: ->
             "Applied To": $utils.getDomElements(options.$el)
 
-      @ensureDom(options.$el, "blur", options._log)
+      cy.ensureDom(options.$el, "blur", options._log)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
@@ -263,7 +263,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             return options.$el if options.verify is false
 
             do verifyAssertions = =>
-              @verifyUpcomingAssertions(options.$el, options, {
+              cy.verifyUpcomingAssertions(options.$el, options, {
                 onRetry: verifyAssertions
           })
   })

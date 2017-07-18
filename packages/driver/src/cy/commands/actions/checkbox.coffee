@@ -28,7 +28,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     log: true
     force: false
 
-  @ensureDom(options.$el)
+  cy.ensureDom(options.$el)
 
   isNoop = ($el) ->
     switch type
@@ -94,7 +94,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       ## and bail
       if isNoop($el)
         ## still ensure visibility even if the command is noop
-        @ensureVisibility $el, options._log
+        cy.ensureVisibility $el, options._log
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
@@ -135,7 +135,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       options.$el = options.$el.filter(matchingElements)
 
       do verifyAssertions = =>
-        @verifyUpcomingAssertions(options.$el, options, {
+        cy.verifyUpcomingAssertions(options.$el, options, {
           onRetry: verifyAssertions
         })
 

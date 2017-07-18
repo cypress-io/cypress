@@ -56,7 +56,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         title = (doc and doc.title) or ""
 
-        @verifyUpcomingAssertions(title, options, {
+        cy.verifyUpcomingAssertions(title, options, {
           onRetry: resolveTitle
         })
 
@@ -83,7 +83,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       do verifyAssertions = =>
         Promise.try(retryWindow).then (win) =>
-          @verifyUpcomingAssertions(win, options, {
+          cy.verifyUpcomingAssertions(win, options, {
             onRetry: verifyAssertions
           })
 
@@ -111,7 +111,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       do verifyAssertions = =>
         Promise.try(retryDocument).then (doc) =>
-          @verifyUpcomingAssertions(doc, options, {
+          cy.verifyUpcomingAssertions(doc, options, {
             onRetry: verifyAssertions
           })
 

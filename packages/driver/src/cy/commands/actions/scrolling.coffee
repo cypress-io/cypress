@@ -136,7 +136,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           position = xOrPosition
           ## make sure it's one of the valid position strings
-          @ensureValidPosition(position)
+          cy.ensureValidPosition(position)
       else
         x = xOrPosition
 
@@ -171,7 +171,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if subject
         ## if they passed something here, need to ensure it's DOM
-        @ensureDom(subject)
+        cy.ensureDom(subject)
         $container = subject
       else
         isWin = true
@@ -231,7 +231,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ensureScrollability = =>
         try
           ## make sure our container can even be scrolled
-          @ensureScrollability($container, "scrollTo")
+          cy.ensureScrollability($container, "scrollTo")
         catch err
           options.error = err
           cy.retry(ensureScrollability, options)

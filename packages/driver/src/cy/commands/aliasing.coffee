@@ -5,8 +5,8 @@ $utils = require("../../cypress/utils")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addUtility({
     as: (subject, str) ->
-      @ensureParent()
-      @ensureSubject()
+      cy.ensureParent()
+      cy.ensureSubject()
 
       @_validateAlias(str)
 

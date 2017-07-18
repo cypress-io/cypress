@@ -31,7 +31,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         delay: 10
         release: true
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
@@ -340,7 +340,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               return options.$el
 
             do verifyAssertions = =>
-              @verifyUpcomingAssertions(options.$el, options, {
+              cy.verifyUpcomingAssertions(options.$el, options, {
                 onRetry: verifyAssertions
               })
 
@@ -351,7 +351,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log: true
         force: false
 
-      @ensureDom(subject)
+      cy.ensureDom(subject)
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
@@ -398,7 +398,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         .cancellable()
         .then =>
           do verifyAssertions = =>
-            @verifyUpcomingAssertions(subject, options, {
+            cy.verifyUpcomingAssertions(subject, options, {
               onRetry: verifyAssertions
             })
   })

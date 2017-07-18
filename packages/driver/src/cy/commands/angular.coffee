@@ -60,7 +60,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       do resolveElements = =>
         cy.now("get", selector, options).then ($elements) =>
-          @verifyUpcomingAssertions(getEl($elements), options, {
+          cy.verifyUpcomingAssertions(getEl($elements), options, {
             onRetry: resolveElements
             onFail: (err) ->
               err.displayMessage = "Could not find element for binding: '#{binding}'."
@@ -78,7 +78,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         do resolveElements = =>
           cy.now("get", selector, options).then ($elements) =>
-            @verifyUpcomingAssertions($elements, options, {
+            cy.verifyUpcomingAssertions($elements, options, {
               onRetry: resolveElements
             })
 

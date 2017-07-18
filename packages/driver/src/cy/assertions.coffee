@@ -93,10 +93,10 @@ create = (state, queue, retryFn) ->
           $el = determineEl(options.$el, subject)
           return if not $utils.isJqueryInstance($el)
 
-          @ensureElExistence($el)
+          cy.ensureElExistence($el)
 
         when "subject"
-          @ensureExistence(subject)
+          cy.ensureExistence(subject)
 
     determineEl = ($el, subject) ->
       ## prefer $el unless it is strickly undefined
@@ -109,8 +109,6 @@ create = (state, queue, retryFn) ->
         subject
 
     onFailFn = (err) =>
-      debugger
-
       ## when we fail for whatever reason we need to
       ## check to see if we would firstly fail if
       ## we don't have an el in existence. what this

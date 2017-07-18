@@ -34,7 +34,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         y: y
         errorOnSelect: true
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
@@ -195,7 +195,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             $elToClick = @getElementAtCoordinates(coords.x, coords.y)
 
             try
-              @ensureDescendents($el, $elToClick, options._log)
+              cy.ensureDescendents($el, $elToClick, options._log)
             catch err
               if options._log
                 options._log.set consoleProps: ->
@@ -326,7 +326,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults options,
         log: true
 
-      @ensureDom(subject)
+      cy.ensureDom(subject)
 
       dblclicks = []
 
@@ -345,7 +345,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               "Applied To":   $utils.getDomElements($el)
               "Elements":     $el.length
 
-        @ensureVisibility $el, log
+        cy.ensureVisibility $el, log
 
         p = cy.now("focus", $el, {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {

@@ -55,7 +55,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         setEl($el)
 
-        @verifyUpcomingAssertions($el, options, {
+        cy.verifyUpcomingAssertions($el, options, {
           onRetry: getElements
           onFail: (err) ->
             if err.type is "existence"

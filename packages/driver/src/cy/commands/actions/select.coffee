@@ -13,7 +13,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log: true
         force: false
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       consoleProps = {}
 
@@ -205,7 +205,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               options.$el.get(0).dispatchEvent(change)
         ).then =>
           do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
+            cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
         })
   })

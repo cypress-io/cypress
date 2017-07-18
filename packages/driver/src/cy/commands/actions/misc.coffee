@@ -37,7 +37,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.snapshot("before", {next: "after"})
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       if not _.isString(eventName)
         $utils.throwErrByPath("trigger.invalid_argument", {
@@ -80,7 +80,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .then(trigger)
       .then =>
         do verifyAssertions = =>
-          @verifyUpcomingAssertions(subject, options, {
+          cy.verifyUpcomingAssertions(subject, options, {
             onRetry: verifyAssertions
           })
   })

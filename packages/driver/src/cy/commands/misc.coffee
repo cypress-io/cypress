@@ -38,7 +38,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           options._log.set({$el: arg})
 
       do resolveWrap = =>
-        @verifyUpcomingAssertions(arg, options, {
+        cy.verifyUpcomingAssertions(arg, options, {
           onRetry: resolveWrap
         })
   })

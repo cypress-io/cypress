@@ -19,7 +19,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       do resolveHref = =>
         Promise.try(getHref).then (href) =>
-          @verifyUpcomingAssertions(href, options, {
+          cy.verifyUpcomingAssertions(href, options, {
             onRetry: resolveHref
           })
 
@@ -35,7 +35,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       do resolveHash = =>
         Promise.try(getHash).then (hash) =>
-          @verifyUpcomingAssertions(hash, options, {
+          cy.verifyUpcomingAssertions(hash, options, {
             onRetry: resolveHash
           })
 
@@ -66,7 +66,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       do resolveLocation = =>
         Promise.try(getLocation).then (ret) =>
-          @verifyUpcomingAssertions(ret, options, {
+          cy.verifyUpcomingAssertions(ret, options, {
             onRetry: resolveLocation
           })
   })

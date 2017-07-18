@@ -62,7 +62,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps["File Path"] = filePath
           consoleProps["Contents"] = contents
 
-          @verifyUpcomingAssertions(contents, options, {
+          cy.verifyUpcomingAssertions(contents, options, {
             ensureExistenceFor: "subject"
             onFail: (err) ->
               return unless err.type is "existence"

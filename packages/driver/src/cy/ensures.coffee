@@ -60,7 +60,7 @@ create = (state, config, expect, isInDom) ->
       })
 
   ensureReceivability = (subject, onFail) ->
-    subject ?= @ensureSubject()
+    subject ?= cy.ensureSubject()
 
     cmd = state("current").get("name")
 
@@ -73,7 +73,7 @@ create = (state, config, expect, isInDom) ->
       })
 
   ensureVisibility = (subject, onFail) ->
-    subject ?= @ensureSubject()
+    subject ?= cy.ensureSubject()
 
     cmd = state("current").get("name")
 
@@ -86,7 +86,7 @@ create = (state, config, expect, isInDom) ->
       })
 
   ensureDom = (subject, cmd, log) ->
-    subject ?= @ensureSubject()
+    subject ?= cy.ensureSubject()
 
     cmd ?= state("current").get("name")
 
@@ -144,7 +144,7 @@ create = (state, config, expect, isInDom) ->
     ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
     ## OR GO THROUGH I18N
 
-    @ensureExistence($el)
+    cy.ensureExistence($el)
 
   ensureDescendents = ($el1, $el2, onFail) ->
     cmd = state("current").get("name")

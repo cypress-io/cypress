@@ -135,8 +135,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     .finally(cleanupEnqueue)
 
   invokeFn = (subject, fn, args...) ->
-    @ensureParent()
-    @ensureSubject()
+    cy.ensureParent()
+    cy.ensureSubject()
 
     options = {}
 
@@ -274,7 +274,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     do resolveValue = =>
       Promise.try(retryValue).then (value) =>
-        @verifyUpcomingAssertions(value, options, {
+        cy.verifyUpcomingAssertions(value, options, {
           onRetry: resolveValue
         })
 
