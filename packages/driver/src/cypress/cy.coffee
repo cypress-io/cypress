@@ -99,12 +99,14 @@ create = (specWindow, Cypress, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
-  fail = (err, runnable) ->
+  doneEarly = ->
+    p = state("promise")
+
     ## make sure we cancel our outstanding
-    ## promise since we could have hit this
-    ## fail handler outside of a command chain
-    ## and we want to ensure we don't continue retrying
-    state("promise")?.cancel()
+    ## promise since we could have ended early
+    ## with commands still retrying or in the queue
+    if p and p.isPending()
+      p.cancel()
 
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
@@ -116,6 +118,9 @@ create = (specWindow, Cypress, state, config, log) ->
     ## end in case we have after / afterEach hooks
     ## which need to run
     state("index", queue.length)
+
+  fail = (err, runnable) ->
+    doneEarly()
 
     ## store the error on state now
     state("error", err)
@@ -456,6 +461,16 @@ create = (specWindow, Cypress, state, config, log) ->
         currentLength = queue.length
 
         try
+          if fn.length
+            done = arguments[0]
+
+            arguments[0] = (err) ->
+              ## TODO: handle no longer error
+              ## when ended early
+              doneEarly()
+
+              done(err)
+
           ret = fn.apply(@, arguments)
 
           ## if we returned a value from fn
@@ -552,12 +567,12 @@ create = (specWindow, Cypress, state, config, log) ->
       promise = Promise
       .try(next)
       .catch Promise.CancellationError, (err) =>
-        Cypress.action("cy:command:cancelled", state("current"))
+        Cypress.action("cy:command:cancel", state("current"))
 
         ## need to signify we're done our promise here
         ## so we cannot chain off of it, or have bluebird
         ## accidentally chain off of the return value
-        return err
+        return null
 
       .catch (err) ->
         ## since this failed this means that a
@@ -565,7 +580,7 @@ create = (specWindow, Cypress, state, config, log) ->
         ## highlight it in red or insert a new command
         errors.commandRunningFailed(err)
 
-        fail(err, runnable)
+        fail(err, state("runnable"))
 
       ## signify we are at the end of the chain and do not
       ## continue chaining anymore

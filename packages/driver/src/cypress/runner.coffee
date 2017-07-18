@@ -12,6 +12,8 @@ defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
+TEST_AFTER_RUN_EVENT = "runner:test:after:run"
+
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
 RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body".split(" ")
@@ -105,8 +107,8 @@ testBeforeRun = (test, Cypress) ->
       fire("runner:test:before:run:async", test, Cypress)
 
 testAfterRun = (test, Cypress) ->
-  if not fired("runner:test:after:run", test)
-    fire("runner:test:after:run", test, Cypress)
+  if not fired(TEST_AFTER_RUN_EVENT, test)
+    fire(TEST_AFTER_RUN_EVENT, test, Cypress)
 
     ## perf loop
     for key, value of test.ctx
@@ -563,6 +565,13 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
       runnable.alreadyEmittedMocha = true
 
       Cypress.action("runner:fail", wrap(runnable), runnable.err)
+
+    ## if we've already fired the test after run event
+    ## it means that this runnable likely failed due to
+    ## a double done(err) callback, and we need to fire
+    ## this again!
+    if fired(TEST_AFTER_RUN_EVENT, runnable)
+      fire(TEST_AFTER_RUN_EVENT, runnable, Cypress)
 
     if isHook
       ## TODO: why do we need to do this???
