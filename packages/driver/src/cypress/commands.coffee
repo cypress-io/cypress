@@ -86,6 +86,17 @@ create = (Cypress, cy, state, config, log) ->
       ## prevent loop comprehension
       null
 
+    addAllSync: (obj) ->
+      ## perf loop
+      for key, fn of obj
+        Commands.addSync(key, fn)
+
+      ## prevent loop comprehension
+      null
+
+    addSync: (key, fn) ->
+      cy[key] = fn
+
     addAll: (options = {}, obj) ->
       if not obj
         obj = options
