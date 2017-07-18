@@ -20,7 +20,7 @@ a {
   color: $brand-primary;
   cursor: pointer;
 
-  &:hover {
+  &:hover, &:focus, &:active {
     cursor: pointer;
   }
 }
