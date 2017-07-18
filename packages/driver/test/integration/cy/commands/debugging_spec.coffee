@@ -30,7 +30,7 @@ describe "$Cypress.Cy Debugging Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
 
       it "can turn off logging", ->
         @cy

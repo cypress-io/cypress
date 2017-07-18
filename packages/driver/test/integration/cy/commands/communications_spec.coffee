@@ -62,7 +62,7 @@ describe.skip "$Cypress.Cy Communications Commands", ->
         @cy.message("create:user")
 
       it "sets error command state", (done) ->
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
 
         @Cypress.on "message", (msg, data, cb) ->
           cb({__error: "some err message"})
@@ -81,7 +81,7 @@ describe.skip "$Cypress.Cy Communications Commands", ->
         @Cypress.on "message", (msg, data, cb) ->
           cb({__error: "some err message"})
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -94,10 +94,10 @@ describe.skip "$Cypress.Cy Communications Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
 
       it "logs immediately", (done) ->
-          @Cypress.on "log", (attrs, log) ->
+          @Cypress.on "log:added", (attrs, log) ->
             expect(log.pick("name", "message", "state")).to.deep.eq {
               name: "message"
               message: "create:user, {foo: bar}"

@@ -69,7 +69,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -87,7 +87,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>

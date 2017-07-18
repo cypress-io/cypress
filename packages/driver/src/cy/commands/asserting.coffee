@@ -51,15 +51,11 @@ shouldFnWithCallback = (subject, fn) ->
   .return(subject)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  ## backup here
-  assertFn = cy.assert
-  expect = cy.expect
-
   shouldFn = (subject, chainers, args...) ->
     if _.isFunction(chainers)
       return shouldFnWithCallback.apply(@, arguments)
 
-    exp = expect(subject).to
+    exp = cy.expect(subject).to
     originalChainers = chainers
 
     throwAndLogErr = (err) =>
@@ -121,7 +117,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## element which has left the DOM and we always
       ## want to auto-fail on those
       if not exp.isCheckingExistence and $utils.hasElement(subject)
-        @ensureDom(subject, "should")
+        cy.ensureDom(subject, "should")
 
       _.reduce chainers, (memo, value) =>
         if value not of memo

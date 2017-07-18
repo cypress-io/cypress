@@ -36,7 +36,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "can turn off logging", ->
         @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
 
         @cy.readFile('foo.json', { log: false }).then ->
           expect(@log).to.be.undefined
@@ -44,7 +44,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "logs immediately before resolving", ->
         @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           expect(@log.get("state")).to.eq("pending")
           expect(@log.get("message")).to.eq("foo.json")
 
@@ -60,7 +60,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file argument is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -75,7 +75,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file argument is not a string", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -90,7 +90,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file argument is an empty string", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -107,7 +107,7 @@ describe "$Cypress.Cy Files Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -132,7 +132,7 @@ describe "$Cypress.Cy Files Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -154,7 +154,7 @@ describe "$Cypress.Cy Files Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -178,7 +178,7 @@ describe "$Cypress.Cy Files Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -241,7 +241,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "can turn off logging", ->
         @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
 
         @cy.writeFile("foo.txt", "contents", { log: false }).then ->
           expect(@log).to.be.undefined
@@ -249,7 +249,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "logs immediately before resolving", ->
         @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           expect(@log.get("state")).to.eq("pending")
           expect(@log.get("message")).to.eq("foo.txt", "contents")
 
@@ -264,7 +264,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file name argument is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -279,7 +279,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file name argument is not a string", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -294,7 +294,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when contents argument is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -309,7 +309,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when contents argument is not a string, object, or array", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
@@ -326,7 +326,7 @@ describe "$Cypress.Cy Files Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        @Cypress.on "log:added", (attrs, @log) =>
           logs.push(@log)
 
         @cy.on "fail", (err) =>
