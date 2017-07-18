@@ -109,6 +109,12 @@ create = (specWindow, Cypress, state, config, log) ->
       state("canceled", true)
       p.cancel()
 
+    cleanup()
+
+  cleanup = ->
+    ## make sure we don't ever time out this runnable now
+    timeouts.clearTimeout()
+
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
 
@@ -121,7 +127,7 @@ create = (specWindow, Cypress, state, config, log) ->
     state("index", queue.length)
 
   fail = (err, runnable) ->
-    doneEarly()
+    cleanup()
 
     ## store the error on state now
     state("error", err)
@@ -462,17 +468,32 @@ create = (specWindow, Cypress, state, config, log) ->
         currentLength = queue.length
 
         try
+          ## if we have a fn.length that means we
+          ## are accepting a done callback and need
+          ## to change the semantics around how we
+          ## attach the run queue
           if fn.length
-            done = arguments[0]
+            originalDone = arguments[0]
 
-            arguments[0] = (err) ->
+            arguments[0] = done = (err) ->
               ## TODO: handle no longer error
               ## when ended early
               doneEarly()
 
-              done(err)
+              originalDone(err)
 
           ret = fn.apply(@, arguments)
+
+          ## if we attached a done callback
+          ## and returned a promise then we
+          ## need to automatically bind to
+          ## .catch() and return done(err)
+          ## TODO: this has gone away in mocha 3.x.x
+          ## due to overspecifying a resolution.
+          ## in those cases we need to remove
+          ## returning a promise
+          if fn.length and ret.catch
+            ret = ret.catch(done)
 
           ## if we returned a value from fn
           ## and enqueued some new commands
@@ -574,6 +595,8 @@ create = (specWindow, Cypress, state, config, log) ->
         errors.commandRunningFailed(err)
 
         fail(err, state("runnable"))
+
+      .finally(cleanup)
 
       ## signify we are at the end of the chain and do not
       ## continue chaining anymore
