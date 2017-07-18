@@ -57,12 +57,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.timeout(delay, true)
 
       Promise
-        .delay(delay)
-        .then =>
-          do verifyAssertions = =>
-            cy.verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions
-            })
+      .delay(delay)
+      .then =>
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions
+          })
 
     fill: (subject, obj, options = {}) ->
       $utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
