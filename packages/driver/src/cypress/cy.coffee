@@ -276,7 +276,7 @@ create = (specWindow, Cypress, state, config, log) ->
         subject = state("subject")
 
         if enforceDom
-          @ensureDom(subject, key)
+          cy.ensureDom(subject, key)
 
         args.unshift(subject)
 
