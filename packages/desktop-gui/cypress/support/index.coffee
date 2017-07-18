@@ -23,5 +23,9 @@ Cypress.Commands.add "shouldBeOnProjectSpecs", ->
   cy.contains(".folder", "integration")
   cy.contains(".folder", "unit")
 
+Cypress.Commands.add "logOut", ->
+  cy.contains("Jane Lane").click()
+  cy.contains("Log Out").click()
+
 Cypress.Commands.add "shouldBeLoggedOut", ->
   cy.contains(".main-nav a", "Log In")

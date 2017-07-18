@@ -143,6 +143,29 @@ describe "Settings", ->
           cy.get(".settings-record-key .empty-well a").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
+      describe "when the user is logged out", ->
+        beforeEach ->
+          @getRecordKeys.resolve([])
+          cy.logOut()
+
+        it "shows message that user must be logged in to view record keys", ->
+          cy.get(".empty-well").should("contain", "must be logged in")
+
+        it "opens login modal after clicking 'Log In'", ->
+          cy.get(".empty-well button").click()
+          cy.get(".login")
+
+        it "re-loads and shows the record key when user logs in", ->
+          cy.stub(@ipc, "windowOpen").resolves("code-123")
+          cy.stub(@ipc, "logIn").resolves(@user)
+          @ipc.getRecordKeys.onCall(1).resolves(@keys)
+
+          cy.get(".empty-well button").click()
+          cy.contains("Log In with GitHub").click().should =>
+            expect(@ipc.getRecordKeys).to.be.calledTwice
+          cy.get(".settings-record-key")
+            .contains("cypress run --record --key #{@keys[0].id}")
+
     context "on:focus:tests clicked", ->
       beforeEach ->
         @ipc.onFocusTests.yield()

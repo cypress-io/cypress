@@ -21,6 +21,10 @@ const openRecordKeyGuide = (e) => {
   ipc.externalOpen('https://on.cypress.io/what-is-a-record-key')
 }
 
+const showLogin = () => {
+  authStore.setShowingLogin(true)
+}
+
 @observer
 class RecordKey extends Component {
   @observable key = null
@@ -66,10 +70,6 @@ class RecordKey extends Component {
 
     if (!project.isSetupForRecording) return null
 
-    if (!authStore.isAuthenticated) {
-      return this._loginMessage()
-    }
-
     return (
       <div>
         <a href='#' className='learn-more' onClick={openRecordKeyGuide}>
@@ -88,6 +88,21 @@ class RecordKey extends Component {
   }
 
   _key () {
+    if (!authStore.isAuthenticated) {
+      return (
+        <p className='empty-well'>
+          You must be logged in to view the record key.<br />
+          <button
+            className='btn btn-primary'
+            onClick={showLogin}
+          >
+            <i className='fa fa-user'></i>{' '}
+            Log In
+          </button>
+        </p>
+      )
+    }
+
     if (this.isLoading) {
       return (
         <p className='loading-record-keys'>
@@ -99,7 +114,9 @@ class RecordKey extends Component {
 
     if (!this.key) {
       return (
-        <p className='empty-well'>This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.</p>
+        <p className='empty-well'>
+          This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.
+        </p>
       )
     }
 

@@ -62,8 +62,7 @@ describe "Navigation", ->
 
     describe "logging out", ->
       beforeEach ->
-        cy.contains("Jane Lane").click()
-        cy.contains("Log Out").click()
+        cy.logOut()
 
       it "triggers logout on click of logout", ->
         expect(@ipc.logOut).to.be.called
@@ -74,8 +73,7 @@ describe "Navigation", ->
     describe "when log out errors", ->
       beforeEach ->
         @ipc.logOut.rejects({ name: "", message: "ECONNREFUSED\n0.0.0.0:1234"})
-        cy.contains("Jane Lane").click()
-        cy.contains("Log Out").click()
+        cy.logOut()
 
       it "shows global error", ->
         cy.get(".global-error").should("be.visible")
