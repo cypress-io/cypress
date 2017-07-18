@@ -78,7 +78,8 @@ create = (specWindow, Cypress, state, config, log) ->
 
   queue = $CommandQueue.create()
 
-  retries = $Retries.create(Cypress, state, onFinishAssertions)
+  timeouts = $Timeouts.create(state)
+  retries = $Retries.create(Cypress, timeouts.timeout, timeouts.clearTimeout, state, onFinishAssertions)
   assertions = $Assertions.create(state, queue, retries.retry)
 
   elements = $Elements.create(state)
@@ -91,7 +92,6 @@ create = (specWindow, Cypress, state, config, log) ->
   aliases = $Aliases.create(state)
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, config, expect, elements.isInDom)
-  timeouts = $Timeouts.create(state)
 
   coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
   snapshots = $Snapshots.create($$, state)
@@ -106,6 +106,7 @@ create = (specWindow, Cypress, state, config, log) ->
     ## promise since we could have ended early
     ## with commands still retrying or in the queue
     if p and p.isPending()
+      state("canceled", true)
       p.cancel()
 
     ## reset the nestedIndex back to null
@@ -350,7 +351,7 @@ create = (specWindow, Cypress, state, config, log) ->
     now: (name, args...) ->
       Promise.resolve(
         commandFns[name].apply(cy, args)
-      ).cancellable()
+      )
 
     enqueue: (key, fn, args, type, chainerId) ->
       obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
@@ -566,14 +567,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
       promise = Promise
       .try(next)
-      .catch Promise.CancellationError, (err) =>
-        Cypress.action("cy:command:cancel", state("current"))
-
-        ## need to signify we're done our promise here
-        ## so we cannot chain off of it, or have bluebird
-        ## accidentally chain off of the return value
-        return null
-
       .catch (err) ->
         ## since this failed this means that a
         ## specific command failed and we should
@@ -602,7 +595,8 @@ create = (specWindow, Cypress, state, config, log) ->
       else
         Promise.resolve()
 
-      promise.cancellable().then =>
+      promise
+      .then =>
         ## TODO: handle this event
         # @trigger "invoke:start", command
 

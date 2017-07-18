@@ -89,7 +89,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       Promise
         .any(finds)
-        .cancellable()
         .then (subject) ->
           cancelAll()
           return subject

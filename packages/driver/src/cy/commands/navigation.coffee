@@ -548,7 +548,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ready = state("ready")
 
       ready.promise
-        .cancellable()
         .timeout(options.timeout)
         .then =>
           options._log.set("message", "--page loaded--").snapshot().end()

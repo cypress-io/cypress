@@ -319,7 +319,6 @@ $Keyboard = {
     Promise
       .each keys, (key) =>
         @typeChars(el, rng, key, promises, options)
-      .cancellable()
       .then =>
         ## if after typing we ended up changing
         ## our value then fire the onTypeChange callback
@@ -356,14 +355,12 @@ $Keyboard = {
       p = Promise
         .resolve @handleSpecialChars(el, chars, options)
         .delay(options.delay)
-        .cancellable()
       promises.push(p)
       p
     else if @isModifier(chars)
       p = Promise
         .resolve @handleModifier(el, chars, options)
         .delay(options.delay)
-        .cancellable()
       promises.push(p)
       p
     else if charsBetweenCurlyBraces.test(chars)
@@ -373,7 +370,6 @@ $Keyboard = {
       p = Promise
         .resolve options.onNoMatchingSpecialChars(chars, allChars)
         .delay(options.delay)
-        .cancellable()
       promises.push(p)
       p
     else
@@ -382,7 +378,6 @@ $Keyboard = {
           p = Promise
             .resolve @typeKey(el, char, options)
             .delay(options.delay)
-            .cancellable()
           promises.push(p)
           p
 

@@ -128,7 +128,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   Promise
     .resolve(options.$el.toArray())
     .each(checkOrUncheckEl)
-    .cancellable()
     .then =>
       ## filter down our $el to the
       ## matching elements

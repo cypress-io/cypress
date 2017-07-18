@@ -172,7 +172,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 timeout: options.timeout
                 interval: options.interval
               })
-            .cancellable()
             .then =>
               if allSameValue
                 ## if all the values are the same and the user is trying to

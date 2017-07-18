@@ -16,6 +16,9 @@ $Mouse = require("../../../cypress/mouse")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
+  isAttached = ($elToClick) ->
+    cy.isInDom($elToClick)
+
   Commands.addAll({ prevSubject: "dom" }, {
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
@@ -45,8 +48,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       win  = @state("window")
 
-      clicks = []
-
       click = (el, index) =>
         $el = $(el)
 
@@ -66,9 +67,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         if options.errorOnSelect and $el.is("select")
           $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
-
-        isAttached = ($elToClick) =>
-          cy.isInDom($elToClick)
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
@@ -260,65 +258,56 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## timing out from multiple clicks
         cy.timeout(delay, true)
 
-        p = findElByCoordinates($el)
-          .cancellable()
-          .then (obj) =>
-            {$elToClick, coords} = obj
+        findElByCoordinates($el)
+        .then (obj) =>
+          {$elToClick, coords} = obj
 
-            cy.now("focused", {log: false, verify: false}).then ($focused) =>
-              ## record the previously focused element before
-              ## issuing the mousedown because browsers may
-              ## automatically shift the focus to the element
-              ## without firing the focus event
-              $previouslyFocusedEl = $focused
+          cy.now("focused", {log: false, verify: false}).then ($focused) =>
+            ## record the previously focused element before
+            ## issuing the mousedown because browsers may
+            ## automatically shift the focus to the element
+            ## without firing the focus event
+            $previouslyFocusedEl = $focused
 
-              domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords, win)
+            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords, win)
 
-              ## if mousedown was cancelled then or caused
-              ## our element to be removed from the DOM
-              ## just resolve after mouse down and dont
-              ## send a focus event
-              if domEvents.mouseDown.preventedDefault or not isAttached($elToClick)
-                afterMouseDown($elToClick, coords)
-              else
-                ## retrieve the first focusable $el in our parent chain
-                $elToFocus = getFirstFocusableEl($elToClick)
+            ## if mousedown was cancelled then or caused
+            ## our element to be removed from the DOM
+            ## just resolve after mouse down and dont
+            ## send a focus event
+            if domEvents.mouseDown.preventedDefault or not isAttached($elToClick)
+              afterMouseDown($elToClick, coords)
+            else
+              ## retrieve the first focusable $el in our parent chain
+              $elToFocus = getFirstFocusableEl($elToClick)
 
-                cy.now("focused", {log: false, verify: false}).then ($focused) =>
-                  if shouldFireFocusEvent($focused, $elToFocus)
-                    ## if our mousedown went through and
-                    ## we are focusing a different element
-                    ## dispatch any primed change events
-                    ## we have to do this because our blur
-                    ## method might not get triggered if
-                    ## our window is in focus since the
-                    ## browser may fire blur events naturally
-                    dispatchPrimedChangeEvents.call(@)
+              cy.now("focused", {log: false, verify: false}).then ($focused) =>
+                if shouldFireFocusEvent($focused, $elToFocus)
+                  ## if our mousedown went through and
+                  ## we are focusing a different element
+                  ## dispatch any primed change events
+                  ## we have to do this because our blur
+                  ## method might not get triggered if
+                  ## our window is in focus since the
+                  ## browser may fire blur events naturally
+                  dispatchPrimedChangeEvents.call(@)
 
-                    ## send in a focus event!
-                    cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
-                    .then ->
-                      afterMouseDown($elToClick, coords)
-                  else
+                  ## send in a focus event!
+                  cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
+                  .then ->
                     afterMouseDown($elToClick, coords)
-
-        clicks.push(p)
-
-        return p
+                else
+                  afterMouseDown($elToClick, coords)
 
       Promise
-        .each(options.$el.toArray(), click)
-        .cancellable()
-        .then =>
-          return options.$el if options.verify is false
+      .each(options.$el.toArray(), click)
+      .then =>
+        return options.$el if options.verify is false
 
-          do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions
-            })
-        .catch Promise.CancellationError, (err) ->
-          _.invokeMap(clicks, "cancel")
-          throw err
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions
+          })
 
     ## update dblclick to use the click
     ## logic and just swap out the event details?
@@ -364,7 +353,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return null
 
         .delay(delay)
-        .cancellable()
 
         dblclicks.push(p)
 
@@ -378,7 +366,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       Promise
         .resolve(subject.toArray())
         .each(dblclick)
-        .cancellable()
         .return(subject)
         .catch Promise.CancellationError, (err) ->
           _.invokeMap(dblclicks, "cancel")

@@ -395,7 +395,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       Promise
         .resolve(subject.toArray())
         .each(clear)
-        .cancellable()
         .then =>
           do verifyAssertions = =>
             cy.verifyUpcomingAssertions(subject, options, {

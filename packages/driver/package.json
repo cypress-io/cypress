@@ -28,6 +28,7 @@
     "backbone": "^1.1.2",
     "blob-util": "^1.2.1",
     "bluebird": "^2.9.25",
+    "bluebird": "3.5.0",
     "body-parser": "^1.12.4",
     "bootstrap": "^3.3.5",
     "browserify": "^14.3.0",

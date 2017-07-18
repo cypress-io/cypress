@@ -3,15 +3,15 @@ Promise = require("bluebird")
 
 $utils = require("../cypress/utils")
 
-create = (Cypress, state, finishAssertions) ->
+create = (Cypress, timeout, clearTimeout, state, finishAssertions) ->
   return {
     retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
       if not options._runnableTimeout
-        runnableTimeout = options.timeout ? cy.timeout()
-        cy.clearTimeout()
+        runnableTimeout = options.timeout ? timeout()
+        clearTimeout()
 
       current = state("current")
 
@@ -62,10 +62,18 @@ create = (Cypress, state, finishAssertions) ->
 
       Promise
       .delay(interval)
-      .cancellable()
-      .then =>
+      .tap ->
         if options.silent isnt true
           Cypress.action("cy:command:retry", options)
+      ## its very important we use a .then here
+      ## so if our promise is cancelled after the event
+      ## gets emitted above, this callback will not be called
+      .then ->
+        ## bug in bluebird with not propagating cancelations
+        ## fast enough in a series of promises
+        ## https://github.com/petkaantonov/bluebird/issues/1424
+        if state("canceled")
+          return
 
         ## invoke the passed in retry fn
         fn.call(@)
