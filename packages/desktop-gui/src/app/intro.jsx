@@ -119,7 +119,7 @@ class Default extends Component {
   }
 
   _openHelp () {
-    ipc.externalOpen('https://on.cypress.io/adding-new-project')
+    ipc.externalOpen('https://on.cypress.io/installing-via-npm')
   }
 }
 
