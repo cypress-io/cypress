@@ -100,36 +100,36 @@ describe "Settings", ->
       it "displays project id section", ->
         cy.contains(@config.projectId)
 
-    describe "when record keys panels is opened", ->
+    describe "when record key panels is opened", ->
       beforeEach ->
         cy.contains("Record Key").click()
 
-      it "displays record keys section", ->
+      it "displays record key section", ->
         cy.contains("A Record Key sends")
 
       it "opens ci guide when learn more is clicked", ->
         cy
-          .get(".settings-record-keys").contains("Learn More").click().then ->
+          .get(".settings-record-key").contains("Learn More").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-record-key")
 
-      it "loads the project's record keys", ->
+      it "loads the project's record key", ->
         expect(@ipc.getRecordKeys).to.be.called
 
       it "shows spinner", ->
-        cy.get(".settings-record-keys .fa-spinner")
+        cy.get(".settings-record-key .fa-spinner")
 
-      it "opens admin project settings when record keys link is clicked", ->
+      it "opens admin project settings when record key link is clicked", ->
         cy
-          .get(".settings-record-keys").contains("You can change").click().then ->
+          .get(".settings-record-key").contains("You can change").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
-      describe "when record keys load", ->
+      describe "when record key load", ->
         beforeEach ->
           @getRecordKeys.resolve(@keys)
 
         it "displays first Record Key", ->
           cy
-            .get(".settings-record-keys")
+            .get(".settings-record-key")
               .contains("cypress run --record --key #{@keys[0].id}")
 
       describe "when there are no keys", ->
@@ -138,7 +138,7 @@ describe "Settings", ->
 
         it "does not display cypress run command", ->
           cy
-            .get(".settings-record-keys").should("not.contain", "cypress run")
+            .get(".settings-record-key").should("not.contain", "cypress run")
 
     context "on:focus:tests clicked", ->
       beforeEach ->

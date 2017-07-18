@@ -96,12 +96,12 @@ class RunsList extends Component {
     }
 
     // If the project is invalid
-    if (project.state === Project.INVALID) {
+    if (project.isValid) {
       return this._emptyWithoutSetup(false)
     }
 
     // OR if user does not have acces to the project
-    if (project.state === Project.UNAUTHORIZED) {
+    if (project.isUnauthorized) {
       return this._permissionMessage()
     }
 

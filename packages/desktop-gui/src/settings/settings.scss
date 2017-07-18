@@ -1,4 +1,14 @@
-#settings {
+.settings {
+  .settings-project-id,
+  .settings-record-key {
+    display: none;
+  }
+
+  &.show-project-id .settings-project-id,
+  &.show-record-key .settings-record-key {
+    display: block;
+  }
+
   .learn-more {
     position: absolute;
     top: 15px;
