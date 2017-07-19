@@ -280,8 +280,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults options, {log: true}
 
-      cy.ensureNoCommandOptions(options)
-
       $utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
       $utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
 
