@@ -183,7 +183,7 @@ describe "src/cy/commands/actions/select", ->
 
     describe "errors", ->
       beforeEach ->
-        cy.state("defaultCommandTimeout", 100)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 

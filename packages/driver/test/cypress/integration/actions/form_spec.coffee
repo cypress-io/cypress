@@ -153,7 +153,7 @@ describe "src/cy/commands/actions/form", ->
 
     describe "errors", ->
       beforeEach ->
-        cy.state("defaultCommandTimeout", 100)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 

@@ -196,7 +196,7 @@ describe "src/cy/commands/actions/misc", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.state("defaultCommandTimeout", 100)
+        Cypress.config("defaultCommandTimeout", 100)
 
         cy.on "log:added", (attrs, log) =>
           if log.get("name") is "assert"
@@ -329,7 +329,7 @@ describe "src/cy/commands/actions/misc", ->
 
     describe "errors", ->
       beforeEach ->
-        cy.state("defaultCommandTimeout", 100)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 

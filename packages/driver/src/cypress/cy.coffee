@@ -445,10 +445,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
       state("runnable", runnable)
 
-      ## enable us to temporarily override defaultCommandTimeout
-      ## in our state. useful in our own tests to decrease
-      ## the timeouts for errors
-      timeout = state("defaultCommandTimeout") or config("defaultCommandTimeout")
+      timeout = config("defaultCommandTimeout")
 
       if _.isFinite(timeout)
         timeouts.timeout(timeout)

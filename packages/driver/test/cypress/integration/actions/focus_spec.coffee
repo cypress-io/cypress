@@ -178,7 +178,7 @@ describe "src/cy/commands/actions/focus", ->
 
     describe "errors", ->
       beforeEach ->
-        cy.state("defaultCommandTimeout", 100)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -490,7 +490,7 @@ describe "src/cy/commands/actions/focus", ->
 
     describe "errors", ->
       beforeEach ->
-        cy.state("defaultCommandTimeout", 100)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
