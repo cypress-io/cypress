@@ -63,16 +63,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           ## set this back to null unless we are
           ## force focused ourselves during this command
-          forceFocusedEl = @state("forceFocusedEl")
-          @state("forceFocusedEl", null) unless forceFocusedEl is options.$el.get(0)
+          forceFocusedEl = cy.state("forceFocusedEl")
+          if forceFocusedEl isnt options.$el.get(0)
+            cy.state("forceFocusedEl", null)
 
           cleanup()
 
           cy.timeout(delay, true)
 
           Promise
-            .delay(delay)
-            .then(resolve)
+          .delay(delay)
+          .then(resolve)
 
         options.$el.on("focus", focused)
 
@@ -86,17 +87,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return if hasFocused
 
           simulate = =>
-            @state("forceFocusedEl", options.$el.get(0))
+            cy.state("forceFocusedEl", options.$el.get(0))
 
             ## todo handle relatedTarget's per the spec
             focusinEvt = new FocusEvent "focusin", {
               bubbles: true
-              view: @state("window")
+              view: cy.state("window")
               relatedTarget: null
             }
 
             focusEvt = new FocusEvent "focus", {
-              view: @state("window")
+              view: cy.state("window")
               relatedTarget: null
             }
 
@@ -115,7 +116,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
 
-              cy.now("blur", $focused, {$el: $focused, error: false, verify: false, log: false}).then =>
+              cy.now("blur", $focused, {$el: $focused, error: false, verify: false, log: false})
+              .then =>
                 simulate()
             else
               simulate()
@@ -126,20 +128,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             reject(err)
 
       promise
-        .timeout(timeout)
-        .catch Promise.TimeoutError, (err) =>
-          cleanup()
+      .timeout(timeout)
+      .catch Promise.TimeoutError, (err) =>
+        cleanup()
 
-          return if options.error is false
+        return if options.error is false
 
-          $utils.throwErrByPath "focus.timed_out", { onFail: options._log }
-        .then =>
-          return options.$el if options.verify is false
+        $utils.throwErrByPath "focus.timed_out", { onFail: options._log }
+      .then =>
+        return options.$el if options.verify is false
 
-          do verifyAssertions = =>
-            cy.verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions
-        })
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions
+      })
 
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -205,8 +207,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             ## set this back to null unless we are
             ## force blurring ourselves during this command
-            blacklistFocusedEl = @state("blacklistFocusedEl")
-            @state("blacklistFocusedEl", null) unless blacklistFocusedEl is options.$el.get(0)
+            blacklistFocusedEl = cy.state("blacklistFocusedEl")
+            cy.state("blacklistFocusedEl", null) unless blacklistFocusedEl is options.$el.get(0)
 
             cleanup()
 
@@ -231,20 +233,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## to simulate the blur + focusout
             return if hasBlurred
 
-            @state("blacklistFocusedEl", options.$el.get(0))
+            cy.state("blacklistFocusedEl", options.$el.get(0))
 
             ## todo handle relatedTarget's per the spec
             focusoutEvt = new FocusEvent "focusout", {
               bubbles: true
               cancelable: false
-              view: @state("window")
+              view: cy.state("window")
               relatedTarget: null
             }
 
             blurEvt = new FocusEvent "blur", {
               bubble: false
               cancelable: false
-              view: @state("window")
+              view: cy.state("window")
               relatedTarget: null
             }
 
