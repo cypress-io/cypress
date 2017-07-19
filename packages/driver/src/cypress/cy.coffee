@@ -89,7 +89,7 @@ create = (specWindow, Cypress, state, config, log) ->
   xhrs = $Xhrs.create(state)
   aliases = $Aliases.create(state)
   errors = $Errors.create(state, config, log)
-  ensures = $Ensures.create(state, config, expect, elements.isInDom)
+  ensures = $Ensures.create(state, expect, elements.isInDom)
 
   coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
   snapshots = $Snapshots.create($$, state)
