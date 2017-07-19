@@ -58,7 +58,7 @@ $Dom = {
     $el.css("display") is "none"
 
   elHasOverflowHidden: ($el) ->
-    $el.css("overflow") is "hidden"
+    "hidden" in [$el.css("overflow"), $el.css("overflow-y"), $el.css("overflow-x")]
 
   elIsPositioned: ($el) ->
     $el.css("position") in ["relative", "absolute", "fixed", "sticky"]
@@ -67,8 +67,9 @@ $Dom = {
     $el.css("position") is "relative"
 
   elHasClippableOverflow: ($el) ->
-    ## if overflow-x, overflow-y hidden, then overflow is auto
-    $el.css("overflow") in ["hidden", "scroll", "auto"]
+    $el.css("overflow") in ["hidden", "scroll", "auto"] or
+    $el.css("overflow-y") in ["hidden", "scroll", "auto"] or
+    $el.css("overflow-x") in ["hidden", "scroll", "auto"]
 
   elIsScrollable: ($el) ->
     ## if we're the window, we want to get the document's

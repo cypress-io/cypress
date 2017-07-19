@@ -207,6 +207,18 @@ describe "$Cypress.jQuery Extensions", ->
         </div>
       """
 
+      @$elOutOfParentWithOverflowYHiddenBounds = add """
+        <div style='width: 100px; height: 100px; overflow-y: hidden; position: relative;'>
+          <span style='position: absolute; left: 0px; top: 200px;'>position: absolute, out of bounds below</span>
+        </div>
+      """
+
+      @$elOutOfParentWithOverflowXHiddenBounds = add """
+        <div style='width: 100px; height: 100px; overflow-x: hidden; position: relative;'>
+          <span style='position: absolute; left: 200px; top: 0;'>position: absolute, out of bounds below</span>
+        </div>
+      """
+
       @$elInPosAbsParentsBounds = add """
         <div style='width: 200px; height: 200px; overflow: hidden; position: relative;'>
           <div style='position: absolute;'>
@@ -366,6 +378,12 @@ describe "$Cypress.jQuery Extensions", ->
 
     it "is hidden when parent overflow hidden and out of bounds below", ->
       expect(@$elOutOfParentBoundsBelow.find("span")).to.be.hidden
+
+    it "is hidden when parent overflow-y hidden and out of bounds", ->
+      expect(@$elOutOfParentWithOverflowYHiddenBounds.find("span")).to.be.hidden
+
+    it "is hidden when parent overflow-x hidden and out of bounds", ->
+      expect(@$elOutOfParentWithOverflowXHiddenBounds.find("span")).to.be.hidden
 
     it "is hidden when parent overflow scroll and out of bounds", ->
       expect(@$elOutOfScrollingParentBounds.find("span")).to.be.hidden
