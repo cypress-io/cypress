@@ -327,7 +327,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        cy.timeout(delay, true)
+        cy.timeout(delay, true, "dblclick")
 
         if options.log
           log = Cypress.log

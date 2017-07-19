@@ -16,8 +16,8 @@ defaultOptions = {
   timeout: null
   interval: null
   multiple: false
-  waitOnAnimations: null
-  animationDistanceThreshold: null
+  waitForAnimations: true
+  animationDistanceThreshold: 5
 }
 
 module.exports = {
