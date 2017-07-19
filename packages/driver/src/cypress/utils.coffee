@@ -348,4 +348,10 @@ module.exports = {
 
   iframeSrc: ($autIframe, url) ->
     $autIframe.prop("src", url)
+
+  getDistanceBetween: (point1, point2) ->
+    deltaX = point1.x - point2.x
+    deltaY = point1.y - point2.y
+
+    Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 }

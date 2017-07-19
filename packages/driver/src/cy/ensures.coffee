@@ -36,16 +36,10 @@ create = (state, expect, isInDom) ->
 
     [point1, point2] = lastTwo
 
-    distance = ->
-      deltaX = point1.x - point2.x
-      deltaY = point1.y - point2.y
-
-      Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
     ## verify that there is not a distance
     ## greater than a default of '5' between
     ## the points
-    if distance() > threshold
+    if $utils.getDistanceBetween(point1, point2) > threshold
       cmd  = state("current").get("name")
       node = $utils.stringifyElement($el)
       $utils.throwErrByPath("dom.animating", {
