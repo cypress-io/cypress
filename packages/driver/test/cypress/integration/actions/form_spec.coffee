@@ -11,7 +11,7 @@ describe "src/cy/commands/actions/form", ->
   beforeEach ->
     doc = cy.state("document")
 
-    doc.body.innerHTML = @body
+    $(doc.body).empty().html(@body)
 
   context "#submit", ->
     it "does not change the subject when default actions is prevented", ->

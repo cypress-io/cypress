@@ -11,7 +11,7 @@ describe "src/cy/commands/actions/checkbox", ->
   beforeEach ->
     doc = cy.state("document")
 
-    doc.body.innerHTML = @body
+    $(doc.body).empty().html(@body)
 
   context "#check", ->
     it "does not change the subject", ->
