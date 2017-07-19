@@ -42,20 +42,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getFocused = =>
         try
-          d = @state("document")
-          forceFocusedEl = @state("forceFocusedEl")
+          d = cy.state("document")
+          forceFocusedEl = cy.state("forceFocusedEl")
           if forceFocusedEl
             if cy.isInDom(forceFocusedEl)
               el = forceFocusedEl
             else
-              @state("forceFocusedEl", null)
+              cy.state("forceFocusedEl", null)
           else
             el = d.activeElement
 
           ## return null if we have an el but
           ## the el is body or the el is currently the
           ## blacklist focused el
-          if el and el isnt @state("blacklistFocusedEl")
+          if el and el isnt cy.state("blacklistFocusedEl")
             el = $(el)
 
             if el.is("body")
@@ -73,25 +73,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return null
 
       do resolveFocused = (failedByNonAssertion = false) =>
-        Promise.try(getFocused).then ($el) =>
+        Promise.try(getFocused)
+        .then ($el) =>
           if options.verify is false
             return $el
 
-          ## set $el here strictly so
-          ## our assertions are against a jQuery
-          ## or null object
-          options.$el = $el
+          if not $el
+            $el = $(null)
+            $el.selector = "focused"
 
           ## pass in a null jquery object for assertions
-          cy.verifyUpcomingAssertions($el ? $(null), options, {
+          cy.verifyUpcomingAssertions($el, options, {
             onRetry: resolveFocused
           })
-          .return(options.$el)
 
     get: (selector, options = {}) ->
       _.defaults options,
         retry: true
-        withinSubject: @state("withinSubject")
+        withinSubject: cy.state("withinSubject")
         log: true
         command: null
         verify: true
@@ -257,7 +256,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return $el
 
-      if withinSubject = @state("withinSubject")
+      if withinSubject = cy.state("withinSubject")
         return log(withinSubject)
 
       cy.now("get", "html", {log: false}).then(log)
@@ -312,7 +311,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if options.log isnt false
         consoleProps = {
           Content: text
-          "Applied To": $utils.getDomElements(subject or @state("withinSubject"))
+          "Applied To": $utils.getDomElements(subject or cy.state("withinSubject"))
         }
 
         options._log = Cypress.log
@@ -322,7 +321,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getOpts = _.extend _.clone(options),
         # error: getErr(text, phrase)
-        withinSubject: subject or @state("withinSubject") or @$$("body")
+        withinSubject: subject or cy.state("withinSubject") or @$$("body")
         filter: true
         log: false
         # retry: false ## dont retry because we perform our own element validation
@@ -430,17 +429,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## reference the next command after this
       ## within.  when that command runs we'll
       ## know to remove withinSubject
-      next = @state("current").get("next")
+      next = cy.state("current").get("next")
 
       ## backup the current withinSubject
       ## this prevents a bug where we null out
       ## withinSubject when there are nested .withins()
       ## we want the inner within to restore the outer
       ## once its done
-      prevWithinSubject = @state("withinSubject")
-      @state("withinSubject", subject)
+      prevWithinSubject = cy.state("withinSubject")
+      cy.state("withinSubject", subject)
 
-      fn.call @state("runnable").ctx, subject
+      fn.call cy.state("runnable").ctx, subject
 
       stop = =>
         @off "command:start", setWithinSubject
@@ -460,9 +459,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## exact same 'next' command, then this prevents accidentally
         ## resetting withinSubject more than once.  If they point
         ## to differnet 'next's then its okay
-        if next isnt @state("nextWithinSubject")
-          @state "withinSubject", prevWithinSubject or null
-          @state "nextWithinSubject", next
+        if next isnt cy.state("nextWithinSubject")
+          cy.state "withinSubject", prevWithinSubject or null
+          cy.state "nextWithinSubject", next
 
         ## regardless nuke this listeners
         stop()
@@ -474,9 +473,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       else
         ## remove our listener if we happen to reach the end
         ## event which will finalize cleanup if there was no next obj
+        ## TODO: handle this 'end' event
         @once "end", ->
           stop()
-          @state "withinSubject", null
+          cy.state "withinSubject", null
 
       return subject
   })
