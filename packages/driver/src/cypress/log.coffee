@@ -88,42 +88,48 @@ setDelay = (val) ->
   delay = val ? 4
 
 defaults = (state, config, obj) ->
-  current = state("current")
+  instrument = obj.instrument ? "command"
 
-  ## we are logging a command instrument by default
-  _.defaults(obj, current?.pick("name", "type"))
+  ## dont set any defaults if this
+  ## is an agent or route because we
+  ## may not even be inside of a command
+  if instrument is "command"
+    current = state("current")
 
-  ## force duals to become either parents or childs
-  ## normally this would be handled by the command itself
-  ## but in cases where the command purposely does not log
-  ## then it could still be logged during a failure, which
-  ## is why we normalize its type value
-  if not parentOrChildRe.test(obj.type)
-    ## does this command have a previously linked command
-    ## by chainer id
-    obj.type = if current.hasPreviouslyLinkedCommand() then "child" else "parent"
+    ## we are logging a command instrument by default
+    _.defaults(obj, current?.pick("name", "type"))
 
-  _.defaults(obj, {
-    event: false
-    renderProps: -> {}
-    consoleProps: ->
-      ret = if $utils.hasElement(current.get("subject"))
-        $utils.getDomElements(current.get("subject"))
-      else
-        current.get("subject")
+    ## force duals to become either parents or childs
+    ## normally this would be handled by the command itself
+    ## but in cases where the command purposely does not log
+    ## then it could still be logged during a failure, which
+    ## is why we normalize its type value
+    if not parentOrChildRe.test(obj.type)
+      ## does this command have a previously linked command
+      ## by chainer id
+      obj.type = if current.hasPreviouslyLinkedCommand() then "child" else "parent"
 
-      return { Yielded: ret }
-  })
+    _.defaults(obj, {
+      event: false
+      renderProps: -> {}
+      consoleProps: ->
+        ret = if $utils.hasElement(current.get("subject"))
+          $utils.getDomElements(current.get("subject"))
+        else
+          current.get("subject")
 
-  # if obj.isCurrent
-    ## stringify the obj.message (if it exists) or current.get("args")
-  obj.message = $utils.stringify(obj.message ? current.get("args"))
+        return { Yielded: ret }
+    })
 
-  ## allow type to by a dynamic function
-  ## so it can conditionally return either
-  ## parent or child (useful in assertions)
-  if _.isFunction(obj.type)
-    obj.type = obj.type(current, state("subject"))
+    # if obj.isCurrent
+      ## stringify the obj.message (if it exists) or current.get("args")
+    obj.message = $utils.stringify(obj.message ? current.get("args"))
+
+    ## allow type to by a dynamic function
+    ## so it can conditionally return either
+    ## parent or child (useful in assertions)
+    if _.isFunction(obj.type)
+      obj.type = obj.type(current, state("subject"))
 
   _.defaults(obj, {
     id:               (counter += 1)
