@@ -97,14 +97,15 @@ getBottomRightCoordinates = (rect) ->
   y = rect.top + rect.height
   normalizeCoords(x, y, "right", "bottom")
 
-getRelativeCoordinates = ($el, x, y) ->
-  rect = getBoundingClientRect($el)
+getRelativeCoordinates = (state, $el, x, y) ->
+  rect = getBoundingClientRect($el, state)
   x    = rect.left + x
   y    = rect.top + y
   normalizeCoords(x, y)
 
 functions = {
   getTopCoordinates
+  getTopLeftCoordinates
   getTopRightCoordinates
   getLeftCoordinates
   getCenterCoordinates
@@ -116,6 +117,9 @@ functions = {
 
 create = (state, ensureValidPosition) ->
   return {
+    getRelativeCoordinates: ($el, x, y) ->
+      getRelativeCoordinates(state, $el, x, y)
+
     getElementAtCoordinates: (x, y) ->
       ## the coords we receive are absolute coordinates from
       ## the top of the window, they are not relative to the viewport

@@ -179,6 +179,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## coordinates sync methods
     getCoordinates: coordinates.getCoordinates
+    getRelativeCoordinates: coordinates.getRelativeCoordinates
     getElementAtCoordinates: coordinates.getElementAtCoordinates
 
     ## assertions sync methods
