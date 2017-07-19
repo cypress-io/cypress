@@ -13,7 +13,7 @@ describe "src/cy/commands/querying", ->
 
     $(doc.body).empty().html(@body)
 
-  context.only "#focused", ->
+  context "#focused", ->
     it "returns the activeElement", ->
       button = cy.$$("#button")
       button.get(0).focus()
