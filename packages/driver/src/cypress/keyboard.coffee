@@ -65,7 +65,7 @@ $Keyboard = {
       options.charCode = 46
       options.keypress = false
       options.textInput = false
-      cy.ensureKey el, null, options, ->
+      @ensureKey el, null, options, ->
         prev = rng.all()
         rng.text("", "end")
 
@@ -87,7 +87,7 @@ $Keyboard = {
       options.charCode  = 8
       options.keypress  = false
       options.textInput = false
-      cy.ensureKey el, null, options, ->
+      @ensureKey el, null, options, ->
         prev = rng.all()
         rng.text("", "end")
 
@@ -106,7 +106,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
-      cy.ensureKey el, null, options
+      @ensureKey el, null, options
 
     # "{tab}": (el, rng) ->
 
@@ -124,7 +124,7 @@ $Keyboard = {
       options.charCode  = 13
       options.textInput = false
       options.input     = false
-      cy.ensureKey el, "\n", options, ->
+      @ensureKey el, "\n", options, ->
         rng.insertEOL()
         changed = options.prev isnt rng.all()
         options.onEnterPressed(changed, options.id)
@@ -140,7 +140,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
-      cy.ensureKey el, null, options, ->
+      @ensureKey el, null, options, ->
         switch
           when @boundsAreEqual(bounds)
             ## if bounds are equal move the caret
@@ -167,7 +167,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
-      cy.ensureKey(el, null, options)
+      @ensureKey(el, null, options)
 
     ## charCode = 39
     ## no keyPress
@@ -180,7 +180,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
-      cy.ensureKey el, null, options, ->
+      @ensureKey el, null, options, ->
         switch
           when @boundsAreEqual(bounds)
             ## if bounds are equal move the caret
@@ -204,7 +204,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
-      cy.ensureKey(el, null, options)
+      @ensureKey(el, null, options)
   }
 
   modifierChars: {
@@ -488,7 +488,7 @@ $Keyboard = {
       if @expectedValueDoesNotMatchCurrentValue(after, options.rng)
         @moveCaretToEnd(options.rng)
 
-    cy.ensureKey el, key, options, ->
+    @ensureKey el, key, options, ->
       options.updateValue(options.rng, key)
 
   ensureKey: (el, key, options, fn) ->
