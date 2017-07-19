@@ -10,7 +10,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     hover: (args) ->
       $utils.throwErrByPath("hover.not_implemented")
 
-    ttrigger: (subject, eventName, positionOrX, y, options = {}) ->
+    trigger: (subject, eventName, positionOrX, y, options = {}) ->
       {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
 
       _.defaults options,
