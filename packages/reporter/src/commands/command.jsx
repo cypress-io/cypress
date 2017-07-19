@@ -15,6 +15,7 @@ const md = new Markdown()
 
 const displayName = (model) => model.displayName || model.name
 const nameClassName = (name) => name.replace(/(\s+)/g, '-')
+const getMessage = (model) => model.renderProps.message || model.message
 const formattedMessage = (message) => message ? md.renderInline(message) : ''
 const visibleMessage = (model) => {
   if (model.visible) return ''
@@ -51,7 +52,7 @@ const Aliases = observer(({ model }) => {
 const Message = observer(({ model }) => (
   <span>
     <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
-    <span className='command-message-text' dangerouslySetInnerHTML={{ __html: formattedMessage(model.renderProps.message || model.message
+    <span className='command-message-text' dangerouslySetInnerHTML={{ __html: formattedMessage(getMessage(model)
       ) }} />
   </span>
 ))
@@ -66,6 +67,7 @@ class Command extends Component {
 
   render () {
     const { model } = this.props
+    const message = getMessage(model)
 
     return (
       <li
@@ -83,7 +85,7 @@ class Command extends Component {
             'command-other-pinned': this._isOtherCommandPinned(),
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
-            'command-scaled': model.renderProps.message && model.renderProps.message.length > 100,
+            'command-scaled': message && message.length > 100,
           }
         )}
         onMouseOver={() => this._snapshot(true)}
