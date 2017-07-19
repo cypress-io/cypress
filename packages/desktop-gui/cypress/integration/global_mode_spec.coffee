@@ -18,10 +18,11 @@ describe "Global Mode", ->
     @setLocalStorageProjects = (projects) ->
       localStorage.projects = JSON.stringify(projects)
 
-    cy.visitIndex().then (win) ->
+    @setup = (win) =>
       { @start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "logOut").resolves({})
       cy.stub(@ipc, "addProject").resolves(@projects[0])
@@ -41,18 +42,31 @@ describe "Global Mode", ->
 
       @start()
 
+    cy.visitIndex().then(@setup)
+
   it "shows cypress logo in nav", ->
     cy.get(".nav .logo img").should("have.attr", "src", "img/cypress-inverse.png")
 
-  it "shows message about using Cypress locally", ->
-    cy.contains("Run this command")
+  it "shows notice about using Cypress locally", ->
+    cy.contains("versioning Cypress per project")
 
-  it "displays help link", ->
-    cy.contains("a", "Need help?")
+  it "opens link to docs on click 'installing...'", ->
+    cy.contains("a", "installing it via").click().then ->
+      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/installing-via-npm")
 
-  it "opens link to docs on click of help link", ->
-    cy.contains("a", "Need help?").click().then ->
-      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/adding-new-project")
+  it "dismisses notice when close is clicked", ->
+    cy.get(".local-install-notice .close").click()
+    cy.get(".local-install-notice").should("not.exist")
+
+  it "stores the dismissal state in local storage", ->
+    cy.get(".local-install-notice .close").click().then ->
+      expect(localStorage["local-install-notice-dimissed"]).to.equal("true")
+
+  it "does not show notice when dismissed state stored in local storage", ->
+    cy.get(".local-install-notice .close").click()
+    cy.reload().then(@setup)
+    cy.contains("To get started...")
+    cy.get(".local-install-notice").should("not.exist")
 
   it "shows project drop area with button to select project", ->
     cy.get(".project-drop p:first").should("contain", "Drag your project here")

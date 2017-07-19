@@ -14,12 +14,14 @@ const isForced = process.argv.some(equals('--force'))
 /* eslint-disable no-console */
 /* global Promise */
 
+const expectedBranch = 'master'
+
 function isRightBranch () {
   return git.branchName()
     .then(tap((name) => {
       console.log('branch name', name)
     }))
-    .then(equals('master'))
+    .then(equals(expectedBranch))
     .then(tap((rightBranch) => {
       console.log('is right branch?', rightBranch)
     }))
@@ -48,7 +50,7 @@ function lastDeployedCommit (env) {
 }
 
 function changedFilesSince (sha) {
-  return git.changedFilesAfter(sha)
+  return git.changedFilesAfter(sha, expectedBranch)
     .then(tap((list) => {
       debug('%s changed since last docs deploy',
         pluralize('file', list.length, true))
