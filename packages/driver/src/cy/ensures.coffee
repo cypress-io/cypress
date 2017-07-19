@@ -7,7 +7,7 @@ VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bot
 
 returnFalse = -> return false
 
-create = (state, config, expect, isInDom) ->
+create = (state, expect, isInDom) ->
   ensureSubject = ->
     subject = state("subject")
 
@@ -28,13 +28,6 @@ create = (state, config, expect, isInDom) ->
       })
 
   ensureElementIsNotAnimating = ($el, coords = [], threshold) ->
-    waitForAnimations = config("waitForAnimations")
-
-    ## bail if we have disabled waiting on animations
-    return if waitForAnimations is false
-
-    threshold ?= config("animationDistanceThreshold")
-
     lastTwo = coords.slice(-2)
 
     ## bail if we dont yet have two points

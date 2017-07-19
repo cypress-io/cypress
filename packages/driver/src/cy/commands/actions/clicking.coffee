@@ -36,6 +36,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         x: x
         y: y
         errorOnSelect: true
+        waitForAnimations: config("waitForAnimations")
+        animationDistanceThreshold: config("animationDistanceThreshold")
 
       cy.ensureDom(options.$el)
 
@@ -256,7 +258,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        cy.timeout(delay, true)
+        cy.timeout(delay, true, "click")
 
         findElByCoordinates($el)
         .then (obj) =>
