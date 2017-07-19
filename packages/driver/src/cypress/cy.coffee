@@ -109,6 +109,9 @@ create = (specWindow, Cypress, state, config, log) ->
 
     cleanup()
 
+  removeSubject = ->
+    state("subject", undefined)
+
   cleanup = ->
     ## make sure we don't ever time out this runnable now
     timeouts.clearTimeout()
@@ -271,7 +274,7 @@ create = (specWindow, Cypress, state, config, log) ->
         ## on the chainer then make the first
         ## argument undefined (we have no subject)
         if firstCall
-          @_removeSubject()
+          removeSubject()
 
         subject = state("subject")
 
@@ -712,7 +715,7 @@ create = (specWindow, Cypress, state, config, log) ->
                   ## additionally check for errors here
                   ## so we can notify the user if they're trying
                   ## to chain child commands off of this null subject
-                  @_removeSubject()
+                  removeSubject()
 
                 return state("subject")
             .catch (err) ->
