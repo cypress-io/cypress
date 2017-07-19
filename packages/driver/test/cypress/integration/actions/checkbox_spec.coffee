@@ -139,19 +139,12 @@ describe "src/cy/commands/actions/checkbox", ->
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
 
-    it "delays 50ms before resolving", (done) ->
-      waited = false
+    it "delays 50ms before resolving", ->
+      cy.$$(":checkbox:first").on "change", (e) =>
+        cy.spy(Promise, "delay")
 
-      $(":checkbox:first").on "change", (e) =>
-        _.delay ->
-          waited = true
-        , 50
-
-        cy.on "command:end", ->
-          expect(waited).to.be.true
-          done()
-
-      cy.get(":checkbox:first").check()
+      cy.get(":checkbox:first").check().then ->
+        expect(Promise.delay).to.be.calledWith(50, "click")
 
     describe "assertion verification", ->
       beforeEach ->

@@ -237,19 +237,12 @@ describe "src/cy/commands/actions/clicking", ->
       cy.get("#button").click().then ->
         expect(Promise.delay).to.be.calledWith 50
 
-    it "delays 50ms before resolving", (done) ->
-      waited = false
-
+    it "delays 50ms before resolving", ->
       cy.$$("button:first").on "click", (e) =>
-        _.delay ->
-          waited = true
-        , 50
+        cy.spy(Promise, "delay")
 
-        cy.on "command:end", ->
-          expect(waited).to.be.true
-          done()
-
-      cy.get("button:first").click({multiple: true})
+      cy.get("button:first").click({multiple: true}).then ->
+        expect(Promise.delay).to.be.calledWith(50, "click")
 
     it "can operate on a jquery collection", ->
       clicks = 0

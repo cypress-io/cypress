@@ -245,7 +245,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## for the total number of keys we're about to
             ## type, ensure we raise the timeout to account
             ## for the delay being added to each keystroke
-            cy.timeout (totalKeys * options.delay), true
+            cy.timeout (totalKeys * options.delay), true, "type"
 
           onBeforeSpecialCharAction: (id, key) ->
             ## don't apply any special char actions such as
@@ -329,20 +329,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       handleFocused()
       .then =>
-        cy.timeout(delay, true)
+        cy.timeout(delay, true, "type")
 
         Promise
-          .delay(delay)
-          .then =>
-            ## command which consume cy.type may
-            ## want to handle verification themselves
-            if options.verify is false
-              return options.$el
+        .delay(delay, "type")
+        .then =>
+          ## command which consume cy.type may
+          ## want to handle verification themselves
+          if options.verify is false
+            return options.$el
 
-            do verifyAssertions = =>
-              cy.verifyUpcomingAssertions(options.$el, options, {
-                onRetry: verifyAssertions
-              })
+          do verifyAssertions = =>
+            cy.verifyUpcomingAssertions(options.$el, options, {
+              onRetry: verifyAssertions
+            })
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

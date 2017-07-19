@@ -133,24 +133,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             consoleObj
 
-          Promise
-            .delay(delay)
-            .then ->
-              ## display the red dot at these coords
-              if options._log
-                ## because we snapshot and output a command per click
-                ## we need to manually snapshot + end them
-                options._log.set({coords: coords, consoleProps: consoleProps})
+          return Promise
+          .delay(delay, "click")
+          .then ->
+            ## display the red dot at these coords
+            if options._log
+              ## because we snapshot and output a command per click
+              ## we need to manually snapshot + end them
+              options._log.set({coords: coords, consoleProps: consoleProps})
 
-              ## we need to split this up because we want the coordinates
-              ## to mutate our passed in options._log but we dont necessary
-              ## want to snapshot and end our command if we're a different
-              ## action like (cy.type) and we're borrowing the click action
-              if options._log and options.log
-                options._log.snapshot().end()
-            ## need to return null here to prevent
-            ## chaining thenable promises
-            .return(null)
+            ## we need to split this up because we want the coordinates
+            ## to mutate our passed in options._log but we dont necessary
+            ## want to snapshot and end our command if we're a different
+            ## action like (cy.type) and we're borrowing the click action
+            if options._log and options.log
+              options._log.snapshot().end()
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          .return(null)
 
         findElByCoordinates = ($el) =>
           coordsObj = (coords, $el) ->
@@ -354,7 +354,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## chaining thenable promises
           return null
 
-        .delay(delay)
+        .delay(delay, "dblclick")
 
         dblclicks.push(p)
 

@@ -126,17 +126,17 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
 
   ## return our original subject when our promise resolves
   Promise
-    .resolve(options.$el.toArray())
-    .each(checkOrUncheckEl)
-    .then =>
-      ## filter down our $el to the
-      ## matching elements
-      options.$el = options.$el.filter(matchingElements)
+  .resolve(options.$el.toArray())
+  .each(checkOrUncheckEl)
+  .then =>
+    ## filter down our $el to the
+    ## matching elements
+    options.$el = options.$el.filter(matchingElements)
 
-      do verifyAssertions = =>
-        cy.verifyUpcomingAssertions(options.$el, options, {
-          onRetry: verifyAssertions
-        })
+    do verifyAssertions = =>
+      cy.verifyUpcomingAssertions(options.$el, options, {
+        onRetry: verifyAssertions
+      })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {

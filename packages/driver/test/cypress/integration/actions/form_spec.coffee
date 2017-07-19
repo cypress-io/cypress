@@ -108,19 +108,12 @@ describe "src/cy/commands/actions/form", ->
 
       cy.get("form:first").submit()
 
-    it "delays 50ms before resolving", (done) ->
-      waited = false
-
+    it "delays 50ms before resolving", ->
       cy.$$("form:first").on "submit", (e) =>
-        _.delay ->
-          waited = true
-        , 50
+        cy.spy(Promise, "delay")
 
-        cy.on "command:end", ->
-          expect(waited).to.be.true
-          done()
-
-      cy.get("form:first").submit()
+      cy.get("form:first").submit().then ->
+        expect(Promise.delay).to.be.calledWith(50, "submit")
 
     it "increases the timeout delta", ->
       cy.spy(cy, "timeout")

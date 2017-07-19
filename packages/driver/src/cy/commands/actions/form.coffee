@@ -57,7 +57,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.timeout(delay, true)
 
       Promise
-      .delay(delay)
+      .delay(delay, "submit")
       .then =>
         do verifyAssertions = =>
           cy.verifyUpcomingAssertions(options.$el, options, {
