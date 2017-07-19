@@ -80,7 +80,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.$el.get(0).focus()
 
         Promise
-        .delay(1)
+        .resolve(null)
         .then =>
           ## fallback if our focus event never fires
           ## to simulate the focus + focusin
@@ -227,7 +227,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           options.$el.get(0).blur()
 
           Promise
-          .delay(1)
+          .resolve(null)
           .then =>
             ## fallback if our blur event never fires
             ## to simulate the blur + focusout
