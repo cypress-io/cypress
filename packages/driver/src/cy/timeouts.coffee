@@ -6,7 +6,7 @@ create = (state) ->
       runnable = state("runnable")
 
       if not runnable
-        $utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
+        $utils.throwErrByPath("miscellaneous.outside_test_with_cmd", { args: { cmd: "timeout" } })
 
       if ms
         ## if delta is true then we add (or subtract) from the
@@ -21,7 +21,7 @@ create = (state) ->
       runnable = state("runnable")
 
       if not runnable
-        $utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
+        $utils.throwErrByPath("miscellaneous.outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
 
       runnable.clearTimeout()
 
