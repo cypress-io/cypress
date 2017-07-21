@@ -97,7 +97,7 @@ getBottomRightCoordinates = (rect) ->
   y = rect.top + rect.height
   normalizeCoords(x, y, "right", "bottom")
 
-getRelativeCoordinates = (state, $el, x, y) ->
+getAbsoluteCoordinatesRelativeToXY = (state, $el, x, y) ->
   rect = getBoundingClientRect($el, state)
   x    = rect.left + x
   y    = rect.top + y
@@ -117,8 +117,8 @@ functions = {
 
 create = (state, ensureValidPosition) ->
   return {
-    getRelativeCoordinates: ($el, x, y) ->
-      getRelativeCoordinates(state, $el, x, y)
+    getAbsoluteCoordinatesRelativeToXY: ($el, x, y) ->
+      getAbsoluteCoordinatesRelativeToXY(state, $el, x, y)
 
     getElementAtCoordinates: (x, y) ->
       ## the coords we receive are absolute coordinates from
@@ -143,7 +143,7 @@ create = (state, ensureValidPosition) ->
 
       return el
 
-    getCoordinates: ($el, position = "center") ->
+    getAbsoluteCoordinates: ($el, position = "center") ->
       ensureValidPosition(position)
 
       ## rect is an object literal looking like this...

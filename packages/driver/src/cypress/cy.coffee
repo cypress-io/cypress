@@ -181,8 +181,8 @@ create = (specWindow, Cypress, state, config, log) ->
     retry: retries.retry
 
     ## coordinates sync methods
-    getCoordinates: coordinates.getCoordinates
-    getRelativeCoordinates: coordinates.getRelativeCoordinates
+    getAbsoluteCoordinates: coordinates.getAbsoluteCoordinates
+    getAbsoluteCoordinatesRelativeToXY: coordinates.getAbsoluteCoordinatesRelativeToXY
     getElementAtCoordinates: coordinates.getElementAtCoordinates
 
     ## assertions sync methods
