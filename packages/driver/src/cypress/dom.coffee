@@ -1,21 +1,90 @@
 $ = require("jquery")
 _ = require("lodash")
-utils = require("./utils")
+$utils = require("./utils")
 
 fixedOrAbsoluteRe = /(fixed|absolute)/
+
+getWindowFromDoc = (doc) ->
+  ## parentWindow for IE
+  doc.defaultView or doc.parentWindow
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
 
+positionProps = ($el, adjustments = {}) ->
+  el = $el[0]
+
+  return {
+    width: el.offsetWidth
+    height: el.offsetHeight
+    top: el.offsetTop + (adjustments.top or 0)
+    right: el.offsetLeft + el.offsetWidth
+    bottom: el.offsetTop + el.offsetHeight
+    left: el.offsetLeft + (adjustments.left or 0)
+    scrollTop: el.scrollTop
+    scrollLeft: el.scrollLeft
+  }
+
+getFirstFixedPositionParent = ($el) ->
+  ## return null if we're at body/html
+  ## cuz that means nothing has fixed position
+  return null if not $el or $el.is("body,html")
+
+  ## if we have fixed position return ourselves
+  if $el.css("position") is "fixed"
+    return $el
+
+  ## else recursively continue to walk up the parent node chain
+  getFirstFixedPositionParent($el.parent())
+
+getFirstScrollableParent = ($el) ->
+  # doc = $el.prop("ownerDocument")
+
+  # win = getWindowFromDoc(doc)
+
+  ## this may be null or not even defined in IE
+  # scrollingElement = doc.scrollingElement
+
+  search = ($el) ->
+    $parent = $el.parent()
+
+    ## we have no more parents
+    if not ($parent or $parent.length)
+      return null
+
+    ## we match the scrollingElement
+    # if $parent[0] is scrollingElement
+    #   return $parent
+
+    ## instead of fussing with scrollingElement
+    ## we'll simply return null here and let our
+    ## caller deal with situations where they're
+    ## needing to scroll the window or scrollableElement
+    if $parent.is("html,body") or $utils.hasDocument($parent)
+      return null
+
+    if dom.elIsScrollable($parent)
+      return $parent
+
+    return search($parent)
+
+  return search($el)
+
 dom = {
+  positionProps
+
+  getFirstFixedPositionParent
+
+  getFirstScrollableParent
+
   isVisible: (el) ->
     not dom.isHidden(el, "isVisible()")
 
   ## assign this fn to jquery and to our revealing module
   ## at the same time. #pro
   isHidden: (el, filter) ->
-    if not utils.hasElement(el)
-      utils.throwErrByPath("dom.non_dom_is_hidden", {
+    if not $utils.hasElement(el)
+      $utils.throwErrByPath("dom.non_dom_is_hidden", {
         args: { el, filter: filter || "isHidden()" }
       })
 
@@ -70,40 +139,42 @@ dom = {
     $el.css("overflow") in ["hidden", "scroll", "auto"]
 
   elIsScrollable: ($el) ->
-    ## if we're the window, we want to get the document's
-    ## element and check its size against the actual window
-    if utils.hasWindow($el)
-      win = $el
-      $el = $($el.document.documentElement)
-      el  = $el[0]
-
+    checkDocumentElement = (win, documentElement) ->
       ## Check if body height is higher than window height
-      return true if win.innerHeight < el.scrollHeight
+      return true if win.innerHeight < documentElement.scrollHeight
 
       ## Check if body width is higher than window width
-      return true if win.innerWidth < el.scrollWidth
+      return true if win.innerWidth < documentElement.scrollWidth
 
       ## else return false since the window is not scrollable
       return false
-    else
-      ## if we're any other element, we do some css calculations
-      ## to see that the overflow is correct and the scroll
-      ## area is larger than the actual height or width
-      el = $el[0]
 
-      {overflow, overflowY, overflowX} = getComputedStyle(el)
+    ## if we're the window, we want to get the document's
+    ## element and check its size against the actual window
+    switch
+      when $utils.hasWindow($el)
+        win = $el
 
-      ## y axis
-      ## if our content height is less than the total scroll height
-      if el.clientHeight < el.scrollHeight
-        ## and our element has scroll or auto overflow or overflowX
-        return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowY)
+        checkDocumentElement(win, win.document.documentElement)
+      else
+        ## if we're any other element, we do some css calculations
+        ## to see that the overflow is correct and the scroll
+        ## area is larger than the actual height or width
+        el = $el[0]
 
-      ## x axis
-      if el.clientWidth < el.scrollWidth
-        return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowX)
+        {overflow, overflowY, overflowX} = getComputedStyle(el)
 
-      return false
+        ## y axis
+        ## if our content height is less than the total scroll height
+        if el.clientHeight < el.scrollHeight
+          ## and our element has scroll or auto overflow or overflowX
+          return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowY)
+
+        ## x axis
+        if el.clientWidth < el.scrollWidth
+          return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowX)
+
+        return false
 
   canClipContent: ($el) ->
     @elIsPositioned($el) and @elHasClippableOverflow($el)
@@ -132,7 +203,7 @@ dom = {
 
     ## if we've reached the top parent, which is document
     ## then we're in bounds all the way up, return false
-    return false if $ancestor.is("body,html") or utils.hasDocument($ancestor)
+    return false if $ancestor.is("body,html") or $utils.hasDocument($ancestor)
 
     ancestor = $ancestor[0]
 
@@ -143,10 +214,10 @@ dom = {
       adjustments.left += ancestor.offsetLeft
       adjustments.top += ancestor.offsetTop
 
-    elProps = @_positionProps($el, adjustments)
+    elProps = positionProps($el, adjustments)
 
     if @canClipContent($ancestor) or @canBeClippedByAncestor($el, $ancestor)
-      ancestorProps = @_positionProps($ancestor)
+      ancestorProps = positionProps($ancestor)
 
       ## target el is out of bounds
       return true if (
@@ -165,19 +236,6 @@ dom = {
 
     @elIsOutOfBoundsOfAncestorsOverflow($el, $ancestor, $ancestor.parent(), adjustments)
 
-  _positionProps: ($el, adjustments = {}) ->
-    el = $el[0]
-    return {
-      width: el.offsetWidth
-      height: el.offsetHeight
-      top: el.offsetTop + (adjustments.top or 0)
-      right: el.offsetLeft + el.offsetWidth
-      bottom: el.offsetTop + el.offsetHeight
-      left: el.offsetLeft + (adjustments.left or 0)
-      scrollTop: el.scrollTop
-      scrollLeft: el.scrollLeft
-    }
-
   elIsHiddenByAncestors: ($el, $origEl) ->
     ## store the original $el
     $origEl ?= $el
@@ -194,7 +252,7 @@ dom = {
     ## in case there is no body
     ## or if parent is the document which can
     ## happen if we already have an <html> element
-    return false if $parent.is("body,html") or utils.hasDocument($parent)
+    return false if $parent.is("body,html") or $utils.hasDocument($parent)
 
     if @elHasOverflowHidden($parent) and @elHasNoEffectiveWidthOrHeight($parent)
       ## if any of the elements between the parent and origEl
@@ -218,7 +276,7 @@ dom = {
   parentHasDisplayNone: ($el) ->
     ## if we have no $el or we've walked all the way up to document
     ## then return false
-    return false if not $el.length or utils.hasDocument($el)
+    return false if not $el.length or $utils.hasDocument($el)
 
     ## if we have display none then return the $el
     if @elHasDisplayNone($el)
@@ -229,7 +287,7 @@ dom = {
 
   parentHasVisibilityNone: ($el) ->
     ## if we've walked all the way up to document then return false
-    return false if not $el.length or utils.hasDocument($el)
+    return false if not $el.length or $utils.hasDocument($el)
 
     ## if we have display none then return the $el
     if @elHasVisibilityHidden($el)
@@ -239,7 +297,7 @@ dom = {
       return @parentHasVisibilityNone($el.parent())
 
   getReasonElIsHidden: ($el) ->
-    node = utils.stringifyElement($el, "short")
+    node = $utils.stringifyElement($el, "short")
 
     ## returns the reason in human terms why an element is considered not visible
     switch
@@ -247,11 +305,11 @@ dom = {
         "This element (#{node}) is not visible because it has CSS property: 'display: none'"
 
       when $parent = @parentHasDisplayNone($el.parent())
-        parentNode = utils.stringifyElement($parent, "short")
+        parentNode = $utils.stringifyElement($parent, "short")
         "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'display: none'"
 
       when $parent = @parentHasVisibilityNone($el.parent())
-        parentNode = utils.stringifyElement($parent, "short")
+        parentNode = $utils.stringifyElement($parent, "short")
         "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'visibility: hidden'"
 
       when @elHasVisibilityHidden($el)
@@ -263,7 +321,7 @@ dom = {
         "This element (#{node}) is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
 
       when $parent = @parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
-        parentNode  = utils.stringifyElement($parent, "short")
+        parentNode  = $utils.stringifyElement($parent, "short")
         width       = @elOffsetWidth($parent)
         height      = @elOffsetHeight($parent)
         "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
@@ -273,6 +331,7 @@ dom = {
 
       else
         "Cypress could not determine why this element (#{node}) is not visible."
+
 }
 
 module.exports = dom
