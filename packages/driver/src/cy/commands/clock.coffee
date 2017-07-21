@@ -12,7 +12,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## when user calls cy.clock()
     clock = null
 
-  Cypress.on "aut:before:window:load", (contentWindow) ->
+  Cypress.on "app:before:window:load", (contentWindow) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
     if clock

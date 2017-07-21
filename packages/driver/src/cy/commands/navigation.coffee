@@ -65,7 +65,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     $Location.override(Cypress, contentWindow, navigated)
 
-  Cypress.on "aut:before:window:load", (contentWindow) ->
+  Cypress.on "app:before:window:load", (contentWindow) ->
     ## override the remote iframe getters
     overrideRemoteLocationGetters(@, contentWindow)
 

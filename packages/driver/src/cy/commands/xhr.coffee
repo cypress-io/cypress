@@ -218,7 +218,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Cypress.on "abort", abort
 
-  Cypress.on "aut:before:window:load", (contentWindow) ->
+  Cypress.on "app:before:window:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
       $Server.bindTo contentWindow, _.bind(getServer, @)

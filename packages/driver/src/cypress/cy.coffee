@@ -216,7 +216,7 @@ create = (specWindow, Cypress, state, config, log) ->
       ## by trying to talk to the contentWindow document to see if
       ## its accessible.
       ## when we find ourselves in a cross origin situation, then our
-      ## proxy has not injected Cypress.action('aut:before:window:load')
+      ## proxy has not injected Cypress.action('app:before:window:load')
       ## so Cypress.onBeforeAutWindowLoad() was never called
       $autIframe.on "load", =>
         ## if setting these props failed

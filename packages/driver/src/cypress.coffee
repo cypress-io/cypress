@@ -302,7 +302,7 @@ class $Cypress
       when "aut:before:window:load"
         @cy.onBeforeAutWindowLoad(args[0])
 
-        @emit("aut:before:window:load", args[0])
+        @emit("app:before:window:load", args[0])
 
       when "spec:script:error"
         @emit("script:error", args...)
