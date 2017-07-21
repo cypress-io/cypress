@@ -22,6 +22,21 @@ describe "$Cypress.Cy Text Commands", ->
       @cy.get("input:text:first").type("foo").then ($input) ->
         expect($input).to.have.value("foo")
 
+    it "appends subsequent type commands", ->
+      @cy
+        .get("input:first").type("123").type("456")
+        .should("have.value", "123456")
+
+    it "appends subsequent commands when value is changed in between", ->
+      @cy
+        .get("input:first")
+        .type("123")
+        .then ($input) ->
+          $input[0].value += '-'
+          return $input
+        .type("456")
+        .should("have.value", "123-456")
+
     it "can type numbers", ->
       @cy.get(":text:first").type(123).then ($text) ->
         expect($text).to.have.value("123")
