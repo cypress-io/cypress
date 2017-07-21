@@ -285,6 +285,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:viewport:changed"
+        @emit("viewport:changed", args...)
+
       when "cy:app:scrolled"
         @emit("app:scrolled", args...)
 

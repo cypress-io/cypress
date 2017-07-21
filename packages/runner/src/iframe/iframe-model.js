@@ -18,7 +18,7 @@ export default class IframeModel {
     eventManager.on('run:start', action('run:start', this._beforeRun))
     eventManager.on('run:end', action('run:end', this._afterRun))
 
-    eventManager.on('viewport', action('viewport', this._updateViewport))
+    eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
     eventManager.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))

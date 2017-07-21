@@ -4,9 +4,6 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-## hold a global reference to defaults
-viewportDefaults = null
-
 viewports = {
   "macbook-15" : "1440x900"
   "macbook-13" : "1280x800"
@@ -23,6 +20,9 @@ viewports = {
 validOrientations = ["landscape", "portrait"]
 
 module.exports = (Commands, Cypress, cy, state, config) ->
+  ## hold a global reference to defaults
+  viewportDefaults = null
+
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
@@ -30,17 +30,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## after which we simply null and wait for the
     ## next viewport change
     if d = viewportDefaults
-      triggerAndSetViewport.call(@, d.viewportWidth, d.viewportHeight)
+      triggerAndSetViewport(d.viewportWidth, d.viewportHeight)
       viewportDefaults = null
 
   triggerAndSetViewport = (width, height) ->
-    Cypress.config("viewportWidth", width)
-    Cypress.config("viewportHeight", height)
+    config("viewportWidth", width)
+    config("viewportHeight", height)
 
     viewport = {viewportWidth: width, viewportHeight: height}
 
     ## force our UI to change to the viewport
-    Cypress.trigger "viewport", viewport
+    Cypress.action "cy:viewport:changed", viewport
 
     return viewport
 
@@ -191,9 +191,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## backup the previous viewport defaults
       ## if they dont already exist!
       if not viewportDefaults
-        viewportDefaults = _.pick(@Cypress.config(), "viewportWidth", "viewportHeight")
+        viewportDefaults = _.pick(config(), "viewportWidth", "viewportHeight")
 
-      viewport = triggerAndSetViewport.call(@, width, height)
+      viewport = triggerAndSetViewport(width, height)
 
       if options._log
         options._log.set(viewport)
