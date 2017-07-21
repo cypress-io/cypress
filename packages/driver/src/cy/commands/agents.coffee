@@ -186,17 +186,35 @@ wrap = (Cypress, cy, type, agent, obj, method, count) ->
 
   return agent
 
-module.exports = (Commands, Cypress, cy, state, config) ->
+## create a global sandbox
+## to be used through all the tests
+sandbox = createSandbox()
+
+reset = ->
   counts = {
     spy: 0
     stub: 0
     children: {}
   }
 
-  sandbox = createSandbox()
+  sandbox.restore()
 
-  Cypress.on "test:before:run:async", ->
-    sandbox.restore()
+  return null
+
+module.exports = (Commands, Cypress, cy, state, config) ->
+  ## reset initially on a new run because we could be
+  ## re-running from the UI or from a spec file change
+  reset()
+
+  resetAndSetSandbox = ->
+    reset()
+
+    ## attach the sandbox to state
+    state("sandbox", sandbox)
+
+  ## before each of our tests we always want
+  ## to reset the counts + the sandbox
+  Cypress.on("test:before:run:async", resetAndSetSandbox)
 
   Commands.addAllSync({
     spy: (obj, method) ->
