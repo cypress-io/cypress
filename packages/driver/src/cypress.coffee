@@ -285,6 +285,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:app:scrolled"
+        @emit("app:scrolled", args...)
+
       when "cy:command:start"
         @emit("command:start", args...)
 

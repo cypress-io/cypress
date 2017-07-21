@@ -9,7 +9,7 @@ $Mouse = require("../../../cypress/mouse")
   delay,
   dispatchPrimedChangeEvents,
   focusable,
-  getCoords,
+  waitForActionability,
   getPositionFromArguments
 } = require("./utils")
 
@@ -48,7 +48,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num: options.$el.length }
         })
 
-      win  = @state("window")
+      win  = cy.state("window")
 
       click = (el, index) =>
         $el = $(el)
@@ -152,86 +152,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## chaining thenable promises
           .return(null)
 
-        findElByCoordinates = ($el) =>
-          coordsObj = (coords, $el) ->
-            {
-              coords: coords
-              $elToClick: $el
-            }
-
-          scrollWindowPastFixedElement = ($fixed) ->
-            height = $fixed.outerHeight()
-            width  = $fixed.outerWidth()
-            win.scrollBy(-width, -height)
-            if options._log
-              ## store the scrollBy to be used later in the iframe view
-              options._log.set "scrollBy", {x: -width, y: -height}
-
-          getElementWithFixedPosition = ($el) ->
-            ## return null if we're at body/html
-            ## cuz that means nothing has fixed position
-            return null if not $el or $el.is("body,html")
-
-            ## if we have fixed position return ourselves
-            if $el.css("position") is "fixed"
-              return $el
-
-            ## else recursively continue to walk up the parent node chain
-            getElementWithFixedPosition($el.parent())
-
-          verifyElementAtCoordinates = (coords) =>
-            ## return the coordsObj immediately
-            ## if force is true
-            if options.force is true
-              return coordsObj(coords, $el)
-
-            ## accept options which disable actually ensuring the element
-            ## is clickable / in the foreground
-            ## this is helpful during css animations for instance where
-            ## you're trying to click a moving target. in that case we'll
-            ## just 'click' it for you and simulate everything related to
-            ## the click without verifying it is clickable. focus events
-            ## default actions, propagation, etc will still be respected
-            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
-
-            try
-              cy.ensureDescendents($el, $elToClick, options._log)
-            catch err
-              if options._log
-                options._log.set consoleProps: ->
-                  obj = {}
-                  obj["Tried to Click"]     = $utils.getDomElements($el)
-                  obj["But its Covered By"] = $utils.getDomElements($elToClick)
-                  obj
-
-              ## snapshot only on click failure
-              err.onFail = ->
-                if options._log
-                  options._log.snapshot()
-
-              options.error = err
-
-              ## if $elToClick isnt a descendent then attempt to nudge the
-              ## window scrollBy based on the height of the covering element
-              ## (if its fixed position) until our element comes into view
-              if $fixed = getElementWithFixedPosition($elToClick)
-                scrollWindowPastFixedElement($fixed)
-
-                retry = =>
-                  getCoords(@, $el, options)(false)
-
-                ## try again now that we've nudged the window's scroll
-                return cy.retry(retry, options)
-                         .then(verifyElementAtCoordinates)
-
-              return cy.retry(getCoords(@, $el, options), options)
-                       .then(verifyElementAtCoordinates)
-
-            return coordsObj(coords, $elToClick)
-
-          Promise.try(getCoords(@, $el, options))
-          .then(verifyElementAtCoordinates)
-
         shouldFireFocusEvent = ($focused, $elToFocus) ->
           ## if we dont have a focused element
           ## we know we want to fire a focus event
@@ -260,46 +180,67 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## timing out from multiple clicks
         cy.timeout(delay, true, "click")
 
-        findElByCoordinates($el)
-        .then (obj) =>
-          {$elToClick, coords} = obj
+        ## must use callbacks here instead of .then()
+        ## because we're issuing the clicks synchonrously
+        ## once we establish the coordinates and the element
+        ## passes all of the internal checks
+        waitForActionability(cy, $el, win, options, {
+          onScroll: ($el, type) ->
+            console.log($el, type)
+            debugger
+            Cypress.action("cy:app:scrolled", $el, type)
 
-          cy.now("focused", {log: false, verify: false}).then ($focused) =>
-            ## record the previously focused element before
-            ## issuing the mousedown because browsers may
-            ## automatically shift the focus to the element
-            ## without firing the focus event
-            $previouslyFocusedEl = $focused
+          onReady: ($elToClick, coords) ->
+            debugger
+            ## TODO: get focused through a callback here
+            cy.now("focused", {log: false, verify: false})
+            .then ($focused) =>
+              ## record the previously focused element before
+              ## issuing the mousedown because browsers may
+              ## automatically shift the focus to the element
+              ## without firing the focus event
+              $previouslyFocusedEl = $focused
 
-            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords, win)
+              domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords, win)
 
-            ## if mousedown was cancelled then or caused
-            ## our element to be removed from the DOM
-            ## just resolve after mouse down and dont
-            ## send a focus event
-            if domEvents.mouseDown.preventedDefault or not isAttached($elToClick)
-              afterMouseDown($elToClick, coords)
-            else
-              ## retrieve the first focusable $el in our parent chain
-              $elToFocus = getFirstFocusableEl($elToClick)
+              ## if mousedown was cancelled then or caused
+              ## our element to be removed from the DOM
+              ## just resolve after mouse down and dont
+              ## send a focus event
+              if domEvents.mouseDown.preventedDefault or not isAttached($elToClick)
+                afterMouseDown($elToClick, coords)
+              else
+                ## retrieve the first focusable $el in our parent chain
+                $elToFocus = getFirstFocusableEl($elToClick)
 
-              cy.now("focused", {log: false, verify: false}).then ($focused) =>
-                if shouldFireFocusEvent($focused, $elToFocus)
-                  ## if our mousedown went through and
-                  ## we are focusing a different element
-                  ## dispatch any primed change events
-                  ## we have to do this because our blur
-                  ## method might not get triggered if
-                  ## our window is in focus since the
-                  ## browser may fire blur events naturally
-                  dispatchPrimedChangeEvents.call(@)
+                cy.now("focused", {log: false, verify: false})
+                .then ($focused) =>
+                  if shouldFireFocusEvent($focused, $elToFocus)
+                    ## if our mousedown went through and
+                    ## we are focusing a different element
+                    ## dispatch any primed change events
+                    ## we have to do this because our blur
+                    ## method might not get triggered if
+                    ## our window is in focus since the
+                    ## browser may fire blur events naturally
+                    dispatchPrimedChangeEvents(cy.state)
 
-                  ## send in a focus event!
-                  cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
-                  .then ->
+                    ## send in a focus event!
+                    cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
+                    .then ->
+                      afterMouseDown($elToClick, coords)
+                  else
                     afterMouseDown($elToClick, coords)
-                else
-                  afterMouseDown($elToClick, coords)
+        })
+        .catch (err) ->
+          ## snapshot only on click failure
+          err.onFail = ->
+            if options._log
+              options._log.snapshot()
+
+          ## if we give up on waiting for actionability then
+          ## lets throw this error and log the command
+          $utils.throwErr(err, { onFail: options._log })
 
       Promise
       .each(options.$el.toArray(), click)

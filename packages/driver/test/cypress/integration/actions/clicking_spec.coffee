@@ -326,65 +326,194 @@ describe "src/cy/commands/actions/clicking", ->
 
         expect(num.length).to.eq(count)
 
-    it "can click elements which are hidden until scrolled within parent container", ->
-      cy.get("#overflow-auto-container").contains("quux").click()
-
     ## this test needs to increase the height + width of the div
     ## when we implement scrollBy the delta of the left/top
     it "can click elements which are huge and the center is naturally below the fold", ->
       cy.get("#massively-long-div").click()
 
-    it "can forcibly click even when being covered by another element", (done) ->
-      $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
-      span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
-
-      $btn.on "click", -> done()
-
-      cy.get("#button-covered-in-span").click({force: true})
-
-    it "eventually clicks when covered up", ->
-      $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
-      span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
-
-      retried = false
-
-      cy.on "command:retry", _.after 3, ->
-        span.hide()
-        retried = true
-
-      cy.get("#button-covered-in-span").click().then ->
-        expect(retried).to.be.true
-
-    it "waits until element becomes visible", ->
-      $btn = cy.$$("#button").hide()
-
-      retried = false
-
-      cy.on "command:retry", _.after 3, ->
-        $btn.show()
-        retried = true
-
-      cy.get("#button").click().then ->
-        expect(retried).to.be.true
-
-    it "waits until element is no longer disabled", ->
-      $btn = cy.$$("#button").prop("disabled", true)
-
-      retried = false
-      clicks = 0
-
-      $btn.on "click", ->
-        clicks += 1
-
-      cy.on "command:retry", _.after 3, ->
-        $btn.prop("disabled", false)
-        retried = true
-
-      cy.get("#button").click().then ->
-        expect(clicks).to.eq(1)
-        expect(retried).to.be.true
-
     describe "actionability", ->
+      it "can click elements which are hidden until scrolled within parent container", ->
+        cy.get("#overflow-auto-container").contains("quux").click()
+
+      it "does not scroll when being forced", ->
+        scrolled = []
+
+        Cypress.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy
+          .get("button:last").click({ force: true })
+          .then ->
+            expect(scrolled).to.be.empty
+
+      it "can force click on hidden elements", ->
+        cy.get("button:first").invoke("hide").click({ force: true })
+
+      it "can force click on disabled elements", ->
+        cy.get("input:first").invoke("prop", "disabled", true).click({ force: true })
+
+      it "can forcibly click even when being covered by another element", ->
+        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+
+        scrolled = []
+        retried = false
+        clicked = false
+
+        Cypress.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        Cypress.on "command:retry", ($el, type) ->
+          retried = true
+
+        $btn.on "click", ->
+          clicked = true
+
+        cy.get("#button-covered-in-span").click({force: true}).then ->
+          expect(scrolled).to.be.empty
+          expect(retried).to.be.false
+          expect(clicked).to.be.true
+
+      it "eventually clicks when covered up", ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-span")
+        .prependTo(cy.$$("body"))
+
+        $span = $("<span>span on button</span>").css({
+          position: "absolute",
+          left: $btn.offset().left,
+          top: $btn.offset().top,
+          padding: 5,
+          display: "inline-block",
+          backgroundColor: "yellow"
+        }).prependTo(cy.$$("body"))
+
+        scrolled = []
+        retried = false
+
+        Cypress.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.on "command:retry", _.after 3, ->
+          $span.hide()
+          retried = true
+
+        cy.get("#button-covered-in-span").click().then ->
+          expect(retried).to.be.true
+
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - element scrollIntoView (retry covered)
+          ## - element scrollIntoView (retry covered)
+          ## - window
+          expect(scrolled).to.deep.eq(["element", "element", "element", "element"])
+
+      it "scrolls the window past a fixed position element when being covered", ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-nav")
+        .appendTo(cy.$$("#fixed-nav-test"))
+
+        $nav = $("<nav>nav on button</nav>").css({
+          position: "fixed",
+          left: 0
+          top: 0,
+          padding: 20,
+          backgroundColor: "yellow"
+          zIndex: 1
+        }).prependTo(cy.$$("body"))
+
+        scrolled = []
+
+        Cypress.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.get("#button-covered-in-nav").click().then ->
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - window
+          expect(scrolled).to.deep.eq(["element", "element", "window"])
+
+      it "scrolls a container past a fixed position element when being covered", ->
+        $body = cy.$$("body")
+
+        ## we must remove all of our children to
+        ## prevent the window from scrolling
+        $body.children().remove()
+
+        ## this tests that our container properly scrolls!
+        $container = $("<div></div>")
+        .attr("id", "scrollable-container")
+        .css({
+          position: "relative"
+          width: 300
+          height: 200
+          marginBottom: 200
+          backgroundColor: "green"
+          overflow: "auto"
+        })
+        .prependTo($body)
+
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-nav")
+        .css({
+          marginTop: 500
+          # marginLeft: 500
+          marginBottom: 500
+        })
+        .appendTo($container)
+
+        $nav = $("<nav>nav on button</nav>")
+        .css({
+          position: "fixed",
+          left: 0
+          top: 0,
+          padding: 20,
+          backgroundColor: "yellow"
+          zIndex: 1
+        })
+        .prependTo($container)
+
+        scrolled = []
+
+        Cypress.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.get("#button-covered-in-nav").click().then ->
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - window
+          ## - container
+          expect(scrolled).to.deep.eq(["element", "element", "window", "container"])
+
+      it "waits until element becomes visible", ->
+        $btn = cy.$$("#button").hide()
+
+        retried = false
+
+        cy.on "command:retry", _.after 3, ->
+          $btn.show()
+          retried = true
+
+        cy.get("#button").click().then ->
+          expect(retried).to.be.true
+
+      it "waits until element is no longer disabled", ->
+        $btn = cy.$$("#button").prop("disabled", true)
+
+        retried = false
+        clicks = 0
+
+        $btn.on "click", ->
+          clicks += 1
+
+        cy.on "command:retry", _.after 3, ->
+          $btn.prop("disabled", false)
+          retried = true
+
+        cy.get("#button").click().then ->
+          expect(clicks).to.eq(1)
+          expect(retried).to.be.true
+
       it "waits until element stops animating", ->
         retries = 0
 
@@ -396,7 +525,10 @@ describe "src/cy/commands/actions/clicking", ->
         .onThirdCall().returns()
 
         cy.get("button:first").click().then ->
-          expect(retries).to.eq(2)
+          ## - retry animation coords
+          ## - retry animation
+          ## - retry animation
+          expect(retries).to.eq(3)
           expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
 
       it "does not throw when waiting for animations is disabled", ->
