@@ -35,17 +35,20 @@ getPositionFromArguments = (positionOrX, y, options) ->
 
   return {options, position, x, y}
 
+getFixedOrStickyEl = ($el) ->
+  $dom.getFirstFixedOrStickyPositionParent($el)
+
 ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
-  $elForAction = null
+  $elAtCoords = null
 
   ensureDescendents = (coords) ->
     ## figure out the deepest element we are about to interact
     ## with at these coordinates
-    $elForAction = cy.getElementAtCoordinates(coords.x, coords.y)
+    $elAtCoords = cy.getElementAtCoordinates(coords.x, coords.y)
 
-    cy.ensureDescendents($el, $elForAction, log)
+    cy.ensureDescendents($el, $elAtCoords, log)
 
-    return $elForAction
+    return $elAtCoords
 
   ensureDescendentsAndScroll = ->
     try
@@ -56,24 +59,47 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
       ## we're going to attempt to continously scroll the element
       ## from underneath this fixed position element until we can't
       ## anymore
-      $fixed = $dom.getFirstFixedPositionParent($elForAction)
+      $fixed = getFixedOrStickyEl($elAtCoords)
 
       ## if we dont have a fixed position
       ## then just bail, cuz we need to retry async
       if not $fixed
         throw err
 
-      ## get the width + height of the $elForAction
-      ## since this is what we are scrolling past!
-      { width, height } = $dom.positionProps($fixed)
+      scrollContainerPastElement = ($container, $fixed) ->
+        ## get the width + height of the $fixed
+        ## since this is what we are scrolling past!
+        { width, height } = $dom.positionProps($fixed)
 
-      ## nudge algorithm
-      ## starting at the element itself
-      ## walk up until and find all of the scrollable containers
-      ## until we reach null
-      ## then push in the window
+        ## what is this container currently scrolled?
+        ## using jquery here which normalizes window scroll props
+        currentScrollTop = $container.scrollTop()
+        currentScrollLeft = $container.scrollLeft()
+
+        if onScroll
+          type = if $utils.hasWindow($container) then "window" else "container"
+          onScroll($container, type)
+
+        ## TODO: right here we could set all of the scrollable
+        ## containers on the log and include their scroll
+        ## positions.
+        ##
+        ## then the runner could ask the driver to scroll each one
+        ## into its correct position until it passed
+        # if $utils.hasWindow($container)
+        #   log.set("scrollBy", { x: -width, y: -height })
+
+        ## we want to scroll in the opposite direction (up not down)
+        ## so just decrease the scrolled positions
+        $container.scrollTop((currentScrollTop - height))
+        $container.scrollLeft((currentScrollLeft - width))
 
       getAllScrollables = (scrollables, $el) ->
+        ## nudge algorithm
+        ## starting at the element itself
+        ## walk up until and find all of the scrollable containers
+        ## until we reach null
+        ## then push in the window
         $scrollableContainer = $dom.getFirstScrollableParent($el)
 
         if $scrollableContainer
@@ -91,6 +117,10 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
       ## we want to scroll all of our containers until
       ## this element becomes unhidden or retry async
       scrollContainers = (scrollables) ->
+        ## hold onto all the elements we've scrolled
+        ## past in this cycle
+        elementsScrolledPast = []
+
         ## pull off scrollables starting with the most outer
         ## container which is window
         $scrollableContainer = scrollables.pop()
@@ -100,38 +130,36 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
           ## bail and just retry async
           throw err
 
-        ## what is this container currently scrolled?
-        ## using jquery here which normalizes window scroll props
-        currentScrollTop = $scrollableContainer.scrollTop()
-        currentScrollLeft = $scrollableContainer.scrollLeft()
+        possiblyScrollMultipleTimes = ($fixed) ->
+          ## if we got something AND
+          if $fixed and ($fixed.get(0) not in elementsScrolledPast)
+            elementsScrolledPast.push($fixed.get(0))
 
-        if onScroll
-          type = if $utils.hasWindow($scrollableContainer) then "window" else "container"
-          onScroll($scrollableContainer, type)
+            scrollContainerPastElement($scrollableContainer, $fixed)
 
-        ## TODO: right here we could set all of the scrollable
-        ## containers on the log and include their scroll
-        ## positions.
-        ##
-        ## then the runner could ask the driver to scroll each one
-        ## into its correct position until it passed
-        # if $utils.hasWindow($scrollableContainer)
-        #   log.set("scrollBy", { x: -width, y: -height })
+            try
+              ## now that we've changed scroll positions
+              ## we must recalculate whether this element is covered
+              ## since the element's top / left positions change
+              coords = getCoordinatesForEl(cy, $el, options)
 
-        ## we want to scroll in the opposite direction (up not down)
-        ## so just decrease the scrolled positions
-        $scrollableContainer.scrollTop((currentScrollTop - height))
-        $scrollableContainer.scrollLeft((currentScrollLeft - width))
+              ensureDescendents(coords)
+            catch err
+              ## we failed here, but before scrolling the next container
+              ## we need to first verify that the element covering up
+              ## is the same one as before our scroll
+              $elAtCoords = cy.getElementAtCoordinates(coords.x, coords.y)
 
-        try
-          ## now that we've changed scroll positions
-          ## we must recalculate whether this element is covered
-          ## since the element's top / left positions change
-          coords = getCoordinatesForEl(cy, $el, options)
+              ## get the fixed element again
+              $fixed = getFixedOrStickyEl($elAtCoords)
 
-          ensureDescendents(coords)
-        catch err
-          scrollContainers(scrollables)
+              ## and possibly recursively scroll past it
+              ## if we haven't see it before
+              possiblyScrollMultipleTimes($fixed)
+          else
+            scrollContainers(scrollables)
+
+        possiblyScrollMultipleTimes($fixed)
 
       ## start nudging
       scrollContainers(
@@ -144,18 +172,18 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
       log.set consoleProps: ->
         obj = {}
         obj["Tried to Click"]     = $utils.getDomElements($el)
-        obj["But its Covered By"] = $utils.getDomElements($elForAction)
+        obj["But its Covered By"] = $utils.getDomElements($elAtCoords)
         obj
 
     throw err
 
-  ## return the final $elForAction
-  return $elForAction
+  ## return the final $elAtCoords
+  return $elAtCoords
 
 getCoordinatesForEl = (cy, $el, options) ->
   ## determine if this element is animating
   if options.x and options.y
-    cy.getAbsoluteCoordinatesRelativeToXYRelativeToXY($el, options.x, options.y)
+    cy.getAbsoluteCoordinatesRelativeToXY($el, options.x, options.y)
   else
     cy.getAbsoluteCoordinates($el, options.position)
 
@@ -218,10 +246,10 @@ waitForActionability = (cy, $el, win, options, callbacks) ->
 
         ## figures out the element and coordinates and ensures
         ## this is a descendent
-        $elForAction = ensureElIsNotCovered(cy, win, $el, coords, options, _log, onScroll)
+        $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords, options, _log, onScroll)
 
       ## pass our final object into onReady
-      return onReady($elForAction ? $el, coords)
+      return onReady($elAtCoords ? $el, coords)
 
     ## we cannot enforce async promises here because if our
     ## element passes every single check, we MUST fire the event

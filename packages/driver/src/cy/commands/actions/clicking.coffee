@@ -186,12 +186,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## passes all of the internal checks
         waitForActionability(cy, $el, win, options, {
           onScroll: ($el, type) ->
-            console.log($el, type)
-            debugger
             Cypress.action("cy:app:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
-            debugger
             ## TODO: get focused through a callback here
             cy.now("focused", {log: false, verify: false})
             .then ($focused) =>

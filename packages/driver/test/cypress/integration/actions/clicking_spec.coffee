@@ -332,6 +332,9 @@ describe "src/cy/commands/actions/clicking", ->
       cy.get("#massively-long-div").click()
 
     describe "actionability", ->
+      it "can click a tr", ->
+        cy.get("#table tr:first").click()
+
       it "can click elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").click()
 
@@ -432,6 +435,41 @@ describe "src/cy/commands/actions/clicking", ->
           ## - element scrollIntoView (retry animation coords)
           ## - window
           expect(scrolled).to.deep.eq(["element", "element", "window"])
+
+      it "scrolls the window past two fixed positioned elements when being covered", ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-nav")
+        .appendTo(cy.$$("#fixed-nav-test"))
+
+        $nav = $("<nav>nav on button</nav>").css({
+          position: "fixed",
+          left: 0
+          top: 0,
+          padding: 20,
+          backgroundColor: "yellow"
+          zIndex: 1
+        }).prependTo(cy.$$("body"))
+
+        $nav2 = $("<nav>nav2 on button</nav>").css({
+          position: "fixed",
+          left: 0
+          top: 40,
+          padding: 20,
+          backgroundColor: "red"
+          zIndex: 1
+        }).prependTo(cy.$$("body"))
+
+        scrolled = []
+
+        Cypress.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.get("#button-covered-in-nav").click().then ->
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - window (nav1)
+          ## - window (nav2)
+          expect(scrolled).to.deep.eq(["element", "element", "window", "window"])
 
       it "scrolls a container past a fixed position element when being covered", ->
         $body = cy.$$("body")

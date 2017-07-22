@@ -3,6 +3,7 @@ _ = require("lodash")
 $utils = require("./utils")
 
 fixedOrAbsoluteRe = /(fixed|absolute)/
+fixedOrStickyRe = /(fixed|sticky)/
 
 getWindowFromDoc = (doc) ->
   ## parentWindow for IE
@@ -25,17 +26,17 @@ positionProps = ($el, adjustments = {}) ->
     scrollLeft: el.scrollLeft
   }
 
-getFirstFixedPositionParent = ($el) ->
+getFirstFixedOrStickyPositionParent = ($el) ->
   ## return null if we're at body/html
   ## cuz that means nothing has fixed position
   return null if not $el or $el.is("body,html")
 
   ## if we have fixed position return ourselves
-  if $el.css("position") is "fixed"
+  if fixedOrStickyRe.test($el.css("position"))
     return $el
 
   ## else recursively continue to walk up the parent node chain
-  getFirstFixedPositionParent($el.parent())
+  getFirstFixedOrStickyPositionParent($el.parent())
 
 getFirstScrollableParent = ($el) ->
   # doc = $el.prop("ownerDocument")
@@ -73,7 +74,7 @@ getFirstScrollableParent = ($el) ->
 dom = {
   positionProps
 
-  getFirstFixedPositionParent
+  getFirstFixedOrStickyPositionParent
 
   getFirstScrollableParent
 
