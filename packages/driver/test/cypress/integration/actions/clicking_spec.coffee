@@ -21,7 +21,7 @@ describe "src/cy/commands/actions/clicking", ->
     it "receives native click event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       $btn.on "click", (e) =>
         obj = _.pick(e.originalEvent, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -58,7 +58,7 @@ describe "src/cy/commands/actions/clicking", ->
     it "sends native mousedown event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       win = cy.state("window")
 
@@ -88,7 +88,7 @@ describe "src/cy/commands/actions/clicking", ->
     it "sends native mouseup event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       win = cy.state("window")
 
@@ -130,7 +130,7 @@ describe "src/cy/commands/actions/clicking", ->
     it "records correct clientX when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       win = cy.state("window")
 
@@ -144,7 +144,7 @@ describe "src/cy/commands/actions/clicking", ->
     it "records correct clientY when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       win = cy.state("window")
 
@@ -472,6 +472,8 @@ describe "src/cy/commands/actions/clicking", ->
           expect(scrolled).to.deep.eq(["element", "element", "window", "window"])
 
       it "scrolls a container past a fixed position element when being covered", ->
+        cy.viewport(600, 450)
+
         $body = cy.$$("body")
 
         ## we must remove all of our children to
@@ -485,7 +487,7 @@ describe "src/cy/commands/actions/clicking", ->
           position: "relative"
           width: 300
           height: 200
-          marginBottom: 200
+          marginBottom: 100
           backgroundColor: "green"
           overflow: "auto"
         })
@@ -585,7 +587,7 @@ describe "src/cy/commands/actions/clicking", ->
       it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
         $btn = cy.$$("button:first")
 
-        coords = cy.getCoordinates($btn)
+        coords = cy.getAbsoluteCoordinates($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
@@ -600,7 +602,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         $btn = cy.$$("button:first")
 
-        coords = cy.getCoordinates($btn)
+        coords = cy.getAbsoluteCoordinates($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
@@ -1153,7 +1155,7 @@ describe "src/cy/commands/actions/clicking", ->
           lastLog = @lastLog
 
           $btn.blur() ## blur which removes focus styles which would change coords
-          coords = cy.getCoordinates($btn)
+          coords = cy.getAbsoluteCoordinates($btn)
           expect(lastLog.get("coords")).to.deep.eq coords
 
       it "ends", ->
@@ -1180,7 +1182,7 @@ describe "src/cy/commands/actions/clicking", ->
           lastLog = @lastLog
 
           console   = lastLog.invoke("consoleProps")
-          coords    = cy.getCoordinates($button)
+          coords    = cy.getAbsoluteCoordinates($button)
           logCoords = lastLog.get("coords")
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1

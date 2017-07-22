@@ -361,7 +361,7 @@ describe "src/cy/commands/actions/select", ->
 
       it "#consoleProps", ->
         cy.get("select:first").select("de_dust2").then ($select) ->
-          coords = cy.getCoordinates($select)
+          coords = cy.getAbsoluteCoordinates($select)
           console = @lastLog.invoke("consoleProps")
           expect(console.Command).to.eq("select")
           expect(console.Selected).to.deep.eq ["de_dust2"]

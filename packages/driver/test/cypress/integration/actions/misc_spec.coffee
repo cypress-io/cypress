@@ -26,7 +26,7 @@ describe "src/cy/commands/actions/misc", ->
     it "sends event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       $btn.on "mouseover", (e) =>
         obj = _.pick(e.originalEvent, "bubbles", "cancelable", "clientX", "clientY", "target", "type")
@@ -86,7 +86,7 @@ describe "src/cy/commands/actions/misc", ->
     it "records correct clientX when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       win = cy.state("window")
 
@@ -100,7 +100,7 @@ describe "src/cy/commands/actions/misc", ->
     it "records correct clientY when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
-      coords = cy.getCoordinates($btn)
+      coords = cy.getAbsoluteCoordinates($btn)
 
       win = cy.state("window")
 
@@ -526,7 +526,7 @@ describe "src/cy/commands/actions/misc", ->
         cy.get("button:first").trigger("mouseover").then ($btn) ->
           lastLog = @lastLog
 
-          coords = cy.getCoordinates($btn)
+          coords = cy.getAbsoluteCoordinates($btn)
           expect(lastLog.get("coords")).to.deep.eq coords
 
       it "ends", ->
@@ -544,7 +544,7 @@ describe "src/cy/commands/actions/misc", ->
       it "#consoleProps", ->
         cy.get("button:first").trigger("mouseover").then ($button) =>
           consoleProps = @lastLog.invoke("consoleProps")
-          coords       = cy.getCoordinates($button)
+          coords       = cy.getAbsoluteCoordinates($button)
           logCoords    = @lastLog.get("coords")
           eventOptions = consoleProps["Event options"]
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1

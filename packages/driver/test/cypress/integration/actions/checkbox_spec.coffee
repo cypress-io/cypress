@@ -413,7 +413,7 @@ describe "src/cy/commands/actions/checkbox", ->
       it "passes in coords", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
-          coords = cy.getCoordinates($input)
+          coords = cy.getAbsoluteCoordinates($input)
           expect(lastLog.get("coords")).to.deep.eq coords
 
       it "ends command when checkbox is already checked", ->
@@ -426,7 +426,7 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
 
-          coords = cy.getCoordinates($input)
+          coords = cy.getAbsoluteCoordinates($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
@@ -815,7 +815,7 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
           lastLog = @lastLog
 
-          coords = cy.getCoordinates($input)
+          coords = cy.getAbsoluteCoordinates($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
