@@ -19,18 +19,6 @@ runnableResetTimeout = Runnable::resetTimeout
 delete window.mocha
 delete window.Mocha
 
-# listeners: ->
-#   @listenTo @Cypress, "abort", =>
-#     ## during abort we always want to reset
-#     ## the mocha instance grep to all
-#     ## so its picked back up by mocha
-#     ## naturally when the iframe spec reloads
-#     @grep /.*/
-#
-#   @listenTo @Cypress, "stop", => @stop()
-#
-#   return @
-
 ui = (specWindow, _mocha) ->
   ## Override mocha.ui so that the pre-require event is emitted
   ## with the iframe's `window` reference, rather than the parent's.

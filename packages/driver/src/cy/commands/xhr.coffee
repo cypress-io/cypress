@@ -18,6 +18,11 @@ abort = ->
   if server
     server.abort()
 
+reset = ->
+  abort()
+
+  server = null
+
 isUrlLikeArgs = (url, response) ->
   (not _.isObject(url) and not _.isObject(response)) or
     (_.isRegExp(url) or _.isString(url))
@@ -204,19 +209,24 @@ defaults = {
 }
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  abort()
+  reset()
 
-  server = startXhrServer(cy, state, config)
+  ## if our page is going away due to
+  ## a form submit / anchor click then
+  ## we need to cancel all outstanding
+  ## XHR's so the command log displays
+  ## correctly
+  Cypress.on("before:unload", abort)
+  Cypress.on("stop", abort)
 
-  Cypress.on "before:unload", ->
-    ## if our page is going away due to
-    ## a form submit / anchor click then
-    ## we need to cancel all outstanding
-    ## XHR's so the command log displays
-    ## correctly
-    abort()
+  Cypress.on "test:before:run:async", ->
+    ## reset the existing server
+    reset()
 
-  Cypress.on "abort", abort
+    ## create the server before each test run
+    server = startXhrServer(cy, state, config)
+
+    return null
 
   Cypress.on "app:before:window:load", (contentWindow) ->
     if server

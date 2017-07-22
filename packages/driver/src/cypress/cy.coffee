@@ -65,7 +65,7 @@ setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
 create = (specWindow, Cypress, state, config, log) ->
-  aborted = false
+  stopped = false
   commandFns = {}
 
   onFinishAssertions = ->
@@ -113,8 +113,11 @@ create = (specWindow, Cypress, state, config, log) ->
     state("subject", undefined)
 
   cleanup = ->
-    ## make sure we don't ever time out this runnable now
-    timeouts.clearTimeout()
+    ## cleanup could be called during a 'stop' event which
+    ## could happen in between a runnable because they are async
+    if state("runnable")
+      ## make sure we don't ever time out this runnable now
+      timeouts.clearTimeout()
 
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
@@ -245,6 +248,15 @@ create = (specWindow, Cypress, state, config, log) ->
             ready.reject(err)
           else
             fail(err, state("runnable"))
+
+    stop: ->
+      ## don't do anything if we've already stopped
+      if stopped
+        return
+
+      stopped = true
+
+      doneEarly()
 
     reset: ->
       s = state()
@@ -517,7 +529,7 @@ create = (specWindow, Cypress, state, config, log) ->
       next = ->
         ## bail if we've been told to abort in case
         ## an old command continues to run after
-        if aborted
+        if stopped
           return
 
         ## start at 0 index if we dont have one

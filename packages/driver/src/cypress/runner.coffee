@@ -64,31 +64,6 @@ RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook bod
 #   ]
 # }
 
-waitForHooksToResolve = (ee, event, test = {}) ->
-  ## get an array of event listeners
-  # events = fire.call(ctx, event, test, {multiple: true})
-  #
-  # events = _.filter events, (r) ->
-  #   ## get us out only promises
-  #   ## due to a bug in bluebird with
-  #   ## not being able to call {}.hasOwnProperty
-  #   ## https://github.com/petkaantonov/bluebird/issues/1104
-  #   ## TODO: think about applying this to the other areas
-  #   ## that use Cypress.invoke(...)
-  #   $utils.isInstanceOf(r, Promise)
-
-  # Promise.all(events)
-  ee.emitThen(event, test)
-  .catch (err) ->
-    ## this doesn't take into account events running prior to the
-    ## test - but this is the best we can do considering we don't
-    ## yet have test.callback (from mocha). so we just override
-    ## its fn to automatically throw. however this really shouldn't
-    ## ever even happen since the webapp prevents you from running
-    ## tests to begin with. but its here just in case.
-    test.fn = ->
-      throw err
-
 fire = (event, test, Cypress, options = {}) ->
   test._fired ?= {}
   test._fired[event] = true
@@ -229,7 +204,7 @@ isLastSuite = (suite, tests) ->
   .last()
   .value() is suite
 
-overrideRunnerHook = (ee, runner, getTestById, getTest, setTest, getTests) ->
+overrideRunnerHook = (Cypress, runner, getTestById, getTest, setTest, getTests) ->
   ## bail if our runner doesnt have a hook.
   ## useful in tests
   return if not runner.hook
@@ -588,6 +563,7 @@ create = (mocha, Cypress) ->
   # normalizeAll(runner.suite, {}, grep()) if runner.suite
 
   ## hold onto the runnables for faster lookup later
+  stopped = false
   test = null
   tests = []
   testsById = {}
@@ -652,15 +628,6 @@ create = (mocha, Cypress) ->
       if re = options.grep
         @grep(re)
 
-    fail: (err, runnable) ->
-      ## if runnable.state is passed then we've
-      ## probably failed in an afterEach and need
-      ## to update the runnable to failed status
-      if runnable.state is "passed"
-        afterEachFailed(Cypress, runnable, err)
-
-      runnable.callback(err)
-
     normalizeAll: (tests) ->
       normalizeAll(
         runner.suite,
@@ -678,10 +645,15 @@ create = (mocha, Cypress) ->
       runnerListeners(runner, Cypress, emissions, getTestById, setTest)
 
       runner.run (failures) =>
+        ## if we happen to make it all the way through
+        ## the run, then just set stopped to true here
+        stopped = true
+
         ## TODO this functions is not correctly
         ## synchronized with the 'end' event that
         ## we manage because of uncaught hook errors
-        fn(failures, getTestResults(tests)) if fn
+        if fn
+          fn(failures, getTestResults(tests))
 
     onRunnableRun: (runnableRun, runnable, args) ->
       if not runnable.id
@@ -734,6 +706,25 @@ create = (mocha, Cypress) ->
     getErrorByTestId: (testId) ->
       if test = getTestById(testId)
         wrapErr(test.err)
+
+    stop: ->
+      if stopped
+        return
+
+      stopped = true
+
+      ## abort the run
+      runner.abort()
+
+      ## emit the final 'end' event
+      ## since our reporter depends on this event
+      ## and mocha may never fire this becuase our
+      ## runnable may never finish
+      runner.emit("end")
+
+      ## remove all the listeners
+      ## so no more events fire
+      runner.removeAllListeners()
 
     getDisplayPropsForLog: $Log.getDisplayProps
 

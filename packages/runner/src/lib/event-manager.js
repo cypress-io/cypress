@@ -123,10 +123,10 @@ const eventManager = {
       Cypress.trigger('resume:next')
     })
 
-    reporterBus.on('runner:abort', () => {
+    reporterBus.on('runner:stop', () => {
       if (!Cypress) return
 
-      Cypress.abort()
+      Cypress.stop()
     })
 
     reporterBus.on('save:state', (state) => {
@@ -260,7 +260,7 @@ const eventManager = {
     })
 
     Cypress.on('script:error', (err) => {
-      Cypress.abort()
+      Cypress.stop()
       localBus.emit('script:error', err)
     })
   },
@@ -287,11 +287,10 @@ const eventManager = {
     if (!Cypress) return
 
     // when we are re-running we first
-    // need to abort cypress always
-    Cypress.abort()
-    .then(() => {
-      return this._restart()
-    })
+    // need to stop cypress always
+    Cypress.stop()
+
+    return this._restart()
     .then(() => {
       // this probably isn't 100% necessary
       // since Cypress will fall out of scope

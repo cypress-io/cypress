@@ -89,7 +89,7 @@ export default {
 
     localBus.on('stop', action('stop', () => {
       appState.stop()
-      runner.emit('runner:abort')
+      runner.emit('runner:stop')
     }))
 
     localBus.on('restart', action('restart', () => {

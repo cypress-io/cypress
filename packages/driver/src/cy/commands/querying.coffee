@@ -15,7 +15,12 @@ restoreContains = ->
   $expr.contains = $contains
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "abort", restoreContains
+  ## restore initially when a run starts
+  restoreContains()
+
+  ## restore before each test and whenever we stop
+  Cypress.on("test:before:run:async", restoreContains)
+  Cypress.on("stop", restoreContains)
 
   Commands.addAll({
     focused: (options = {}) ->

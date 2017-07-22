@@ -4,24 +4,29 @@ $Clock = require("../../cypress/clock")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-module.exports = (Commands, Cypress, cy, state, config) ->
-  clock = null
+## create a global clock
+clock = null
 
-  Cypress.on "test:before:run:async", ->
-    ## remove clock before each test run, so a new one is created
-    ## when user calls cy.clock()
+module.exports = (Commands, Cypress, cy, state, config) ->
+  reset = ->
+    if clock
+      clock.restore(false)
+
     clock = null
+
+  ## reset before a run
+  reset()
+
+  ## remove clock before each test run, so a new one is created
+  ## when user calls cy.clock()
+  Cypress.on("test:before:run:async", reset)
+  Cypress.on("stop", reset)
 
   Cypress.on "app:before:window:load", (contentWindow) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
     if clock
       clock._bind(contentWindow)
-
-  Cypress.on "restore", ->
-    ## restore the clock if we've created one
-    if clock
-      clock.restore(false)
 
   Commands.addUtility({
     clock: (subject, now, methods, options = {}) ->

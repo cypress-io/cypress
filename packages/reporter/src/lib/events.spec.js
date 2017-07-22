@@ -211,9 +211,9 @@ describe('events', () => {
       expect(appState.stop).to.have.been.called
     })
 
-    it('emits runner:abort on stop', () => {
+    it('emits runner:stop on stop', () => {
       events.emit('stop')
-      expect(runner.emit).to.have.been.calledWith('runner:abort')
+      expect(runner.emit).to.have.been.calledWith('runner:stop')
     })
 
     it('emits runner:restart on restart', () => {

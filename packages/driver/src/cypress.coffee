@@ -149,6 +149,9 @@ class $Cypress
     ## other objects communicate intent
     ## and 'action' to Cypress
     switch eventName
+      when "cypress:stop"
+        @emit("stop")
+
       when "runner:start"
         ## mocha runner has begun running the tests
         @emit("run:start")
@@ -172,8 +175,6 @@ class $Cypress
 
         if @isHeadless
           @emit("mocha", "end")
-
-        @restore()
 
         ## TODO: we may not need to do any of this
         ## it appears only afterHooksAsync is needed
@@ -341,17 +342,12 @@ class $Cypress
 
       @emit("automation:request", eventName, args..., fn)
 
-  abort: ->
-    @emitThen("abort")
-    .then =>
-      @restore()
+  stop: ->
+    @action("cypress:stop")
 
-  ## restores cypress after each test run by
-  ## removing the queue from the proto and
-  ## removing additional own instance properties
-  restore: ->
-    @emitThen("restore")
-    .return(null)
+    @runner.stop()
+
+    @cy.stop()
 
   addChildCommand: (key, fn) ->
     throwDeprecatedCommandInterface(key, "addChildCommand")
