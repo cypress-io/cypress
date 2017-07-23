@@ -21,6 +21,8 @@ module.exports = {
   extend: (obj) ->
     events = new EE
 
+    events.setMaxListeners(Infinity)
+
     events.proxyTo = (child) ->
       parent = obj
 
