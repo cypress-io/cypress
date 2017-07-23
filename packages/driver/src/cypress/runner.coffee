@@ -669,6 +669,18 @@ create = (mocha, Cypress) ->
         when "test"
           test = runnable
 
+      ## if we haven't yet fired this event for this test
+      ## that means that we need to reset the previous state
+      ## of cy - since we now have a new 'test' and all of the
+      ## associated runnables will share this state
+      if not fired("runner:test:before:run:async", test)
+        Cypress.action("runner:reset:before:runnables:for:test:run", test)
+
+      ## our runnable is about to run, so let cy know. this enables
+      ## us to always have a correct runnable set even when we are
+      ## running lifecycle events
+      Cypress.action("runner:set:runnable", runnable, hookName)
+
       ## TODO: handle promise timeouts here!
       ## whenever any runnable is about to run
       ## we figure out what test its associated to
@@ -676,10 +688,6 @@ create = (mocha, Cypress) ->
       ## test:before:run:async action if its not
       ## been fired before for this test
       testBeforeRun(test, Cypress)
-      .then ->
-        ## and regardless we can now tell cy
-        ## that its ready to set the runnable
-        Cypress.action("runner:set:runnable", runnable, hookName)
       .catch (err) ->
         ## TODO: if our async tasks fail
         ## then allow us to cause the test

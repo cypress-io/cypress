@@ -261,11 +261,13 @@ class $Cypress
         ## comes from cypress errors fail()
         @emit("fail", args...)
 
-      when "runner:test:before:run:async"
+      when "runner:reset:before:runnables:for:test:run"
+        ## get back to a clean slate
         @cy.reset()
 
+      when "runner:test:before:run:async"
+        ## TODO: handle timeouts here? or in the runner?
         @emitThen("test:before:run:async", args...)
-        ## TODO: handle timeouts here
 
       when "runner:test:after:run"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))

@@ -457,11 +457,6 @@ create = (specWindow, Cypress, state, config, log) ->
 
       state("runnable", runnable)
 
-      timeout = config("defaultCommandTimeout")
-
-      if _.isFinite(timeout)
-        timeouts.timeout(timeout)
-
       fn = runnable.fn
 
       restore = ->
@@ -469,6 +464,12 @@ create = (specWindow, Cypress, state, config, log) ->
 
       runnable.fn = ->
         restore()
+
+        timeout = config("defaultCommandTimeout")
+
+        ## control timeouts on runnables ourselves
+        if _.isFinite(timeout)
+          timeouts.timeout(timeout)
 
         ## store the current length of our queue
         ## before we invoke the runnable.fn
