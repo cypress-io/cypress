@@ -1,6 +1,7 @@
 _ = require("lodash")
 
 $Snapshots = require("../cy/snapshots")
+$Events = require("./events")
 $utils = require("./utils")
 
 ## adds class methods for command, route, and agent logging
@@ -421,6 +422,8 @@ create = (Cypress, cy, state, config) ->
     if not _.isEqual(log._emittedAttrs, attrs)
       log._emittedAttrs = attrs
 
+      log.emit(event, attrs)
+
       Cypress.action(event, attrs, log)
 
   triggerLog = (log) ->
@@ -437,6 +440,9 @@ create = (Cypress, cy, state, config) ->
     attributes = {}
 
     log = Log(state, config, obj)
+
+    ## add event emitter interface
+    $Events.extend(log)
 
     triggerStateChanged = ->
       trigger(log, "command:log:changed")
