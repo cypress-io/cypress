@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 moment = require("moment")
 
-{ delay, waitForAnimations } = require("./utils")
+{ delay, waitForActionability } = require("./utils")
 $Log = require("../../../cypress/log")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
@@ -30,6 +30,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         force: false
         delay: 10
         release: true
+        waitForAnimations: config("waitForAnimations")
+        animationDistanceThreshold: config("animationDistanceThreshold")
 
       cy.ensureDom(options.$el)
 
@@ -150,6 +152,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       options.chars = "" + chars
 
+      win = state("window")
+
       type = =>
         simulateSubmitHandler = =>
           form = options.$el.parents("form")
@@ -227,7 +231,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           chars:   options.chars
           delay:   options.delay
           release: options.release
-          window:  @state("window")
+          window:  win
 
           updateValue: (rng, key) ->
             if needSingleValueChange()
@@ -245,7 +249,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## for the total number of keys we're about to
             ## type, ensure we raise the timeout to account
             ## for the delay being added to each keystroke
-            cy.timeout (totalKeys * options.delay), true, "type"
+            cy.timeout((totalKeys * options.delay), true, "type")
 
           onBeforeSpecialCharAction: (id, key) ->
             ## don't apply any special char actions such as
@@ -272,9 +276,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## never fire any change events for contenteditable
             return if options.$el.is("[contenteditable]")
 
-            @state "changeEvent", ->
+            state "changeEvent", ->
               dispatchChangeEvent()
-              @state "changeEvent", null
+              state "changeEvent", null
 
           onEnterPressed: (changed, id) =>
             ## dont dispatch change events or handle
@@ -306,26 +310,33 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
-        cy.now("focused", {log: false, verify: false}).then ($focused) =>
-          ## if we dont have a focused element
-          ## or if we do and its not ourselves
-          ## then issue the click
-          if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
-            ## click the element first to simulate focus
-            ## and typical user behavior in case the window
-            ## is out of focus
-            cy.now("click", options.$el, {
-              $el: options.$el
-              log: false
-              verify: false
-              _log: options._log
-              force: options.force
-              timeout: options.timeout
-              interval: options.interval
-            }).then =>
-              type()
-          else
-            waitForAnimations(@, options.$el, options).then(type)
+        cy.now("focused", {log: false, verify: false})
+        .then ($focused) =>
+          waitForActionability(cy, options.$el, win, options, {
+            onScroll: ($el, type) ->
+              Cypress.action("cy:app:scrolled", $el, type)
+
+            onReady: ($elToClick, coords) ->
+              ## if we dont have a focused element
+              ## or if we do and its not ourselves
+              ## then issue the click
+              if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+                ## click the element first to simulate focus
+                ## and typical user behavior in case the window
+                ## is out of focus
+                cy.now("click", $elToClick, {
+                  $el: $elToClick
+                  log: false
+                  verify: false
+                  _log: options._log
+                  force: true ## force the click, avoid waiting
+                  timeout: options.timeout
+                  interval: options.interval
+                }).then(type)
+              else
+                ## don't click, just type
+                type()
+          })
 
       handleFocused()
       .then =>
@@ -379,7 +390,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             args: { word, node }
           }
 
-        cy.now("type", "{selectall}{del}", $el, {
+        cy.now("type", $el, "{selectall}{del}", {
           $el: $el
           log: false
           verify: false ## handle verification ourselves
@@ -393,11 +404,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return null
 
       Promise
-        .resolve(subject.toArray())
-        .each(clear)
-        .then =>
-          do verifyAssertions = =>
-            cy.verifyUpcomingAssertions(subject, options, {
-              onRetry: verifyAssertions
-            })
+      .resolve(subject.toArray())
+      .each(clear)
+      .then =>
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(subject, options, {
+            onRetry: verifyAssertions
+          })
   })
