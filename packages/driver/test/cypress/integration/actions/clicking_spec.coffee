@@ -241,7 +241,7 @@ describe "src/cy/commands/actions/clicking", ->
       cy.$$("button:first").on "click", (e) =>
         cy.spy(Promise, "delay")
 
-      cy.get("button:first").click({multiple: true}).then ->
+      cy.get("button:first").click({ multiple: true}).then  ->
         expect(Promise.delay).to.be.calledWith(50, "click")
 
     it "can operate on a jquery collection", ->
@@ -255,46 +255,40 @@ describe "src/cy/commands/actions/clicking", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its click event
-      cy.get("button").invoke("slice", 0, 3).click({multiple: true}).then ($buttons) ->
+      cy.get("button").invoke("slice", 0, 3).click({ multiple: true}).then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
-    ## TODO: fix this once we implement aborting / restoring / reset
-    it.skip "can cancel multiple clicks", (done) ->
-      clicks = 0
-
-      spy = @sandbox.spy =>
-        @Cypress.abort()
-
+    it "can cancel multiple clicks", (done) ->
       ## abort after the 3rd click
-      clicked = _.after 3, spy
+      stop = _.after 3, ->
+        Cypress.stop()
 
-      anchors = cy.$$("#sequential-clicks a")
-      anchors.click ->
-        clicks += 1
-        clicked()
+      clicked = cy.spy ->
+        stop()
+
+      $anchors = cy.$$("#sequential-clicks a")
+
+      $anchors.on("click", clicked)
 
       ## make sure we have at least 5 anchor links
-      expect(anchors.length).to.be.gte 5
+      expect($anchors.length).to.be.gte 5
 
-      cy.on "cancel", =>
+      cy.on "stop", =>
         ## timeout will get called synchronously
         ## again during a click if the click function
         ## is called
-        timeout = @sandbox.spy cy, "_timeout"
+        timeout = cy.spy(cy.timeout)
 
         _.delay ->
-          ## abort should only have been called once
-          expect(spy.callCount).to.eq 1
-
           ## and we should have stopped clicking after 3
-          expect(clicks).to.eq 3
+          expect(clicked.callCount).to.eq 3
 
           expect(timeout.callCount).to.eq 0
 
           done()
-        , 200
+        , 100
 
-      cy.get("#sequential-clicks a").click({multiple: true})
+      cy.get("#sequential-clicks a").click({ multiple: true })
 
     it "serially clicks a collection", ->
       clicks = 0
@@ -310,7 +304,7 @@ describe "src/cy/commands/actions/clicking", ->
 
       ## make sure we're clicking multiple anchors
       expect(anchors.length).to.be.gt 1
-      cy.get("#sequential-clicks a").click({multiple: true}).then ($anchors) ->
+      cy.get("#sequential-clicks a").click({ multiple: true}).then ($anchors) ->
         expect($anchors.length).to.eq clicks
 
     it "increases the timeout delta after each click", ->
@@ -318,7 +312,7 @@ describe "src/cy/commands/actions/clicking", ->
 
       cy.spy(cy, "timeout")
 
-      cy.get("#three-buttons button").click({multiple: true}).then ->
+      cy.get("#three-buttons button").click({ multiple: true}).then  ->
         calls = cy.timeout.getCalls()
 
         num = _.filter calls, (call) ->
@@ -331,17 +325,17 @@ describe "src/cy/commands/actions/clicking", ->
     it "can click elements which are huge and the center is naturally below the fold", ->
       cy.get("#massively-long-div").click()
 
-    describe "actionability", ->
-      it "can click a tr", ->
-        cy.get("#table tr:first").click()
+    it "can click a tr", ->
+      cy.get("#table tr:first").click()
 
+    describe "actionability", ->
       it "can click elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").click()
 
       it "does not scroll when being forced", ->
         scrolled = []
 
-        Cypress.on "app:scrolled", ($el, type) ->
+        cy.on "app:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy
@@ -363,10 +357,10 @@ describe "src/cy/commands/actions/clicking", ->
         retried = false
         clicked = false
 
-        Cypress.on "app:scrolled", ($el, type) ->
+        cy.on "app:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        Cypress.on "command:retry", ($el, type) ->
+        cy.on "command:retry", ($el, type) ->
           retried = true
 
         $btn.on "click", ->
@@ -394,7 +388,7 @@ describe "src/cy/commands/actions/clicking", ->
         scrolled = []
         retried = false
 
-        Cypress.on "app:scrolled", ($el, type) ->
+        cy.on "app:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", _.after 3, ->
@@ -427,7 +421,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         scrolled = []
 
-        Cypress.on "app:scrolled", ($el, type) ->
+        cy.on "app:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -461,7 +455,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         scrolled = []
 
-        Cypress.on "app:scrolled", ($el, type) ->
+        cy.on "app:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -515,7 +509,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         scrolled = []
 
-        Cypress.on "app:scrolled", ($el, type) ->
+        cy.on "app:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -644,7 +638,7 @@ describe "src/cy/commands/actions/clicking", ->
         cy
           .get("button")
           .invoke("slice", 0, 2)
-          .click({multiple: true})
+          .click({ multiple: true })
           .should("have.class", "clicked")
 
     describe "position argument", ->
@@ -907,7 +901,7 @@ describe "src/cy/commands/actions/clicking", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass {multiple: true} if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass { multiple: true} if you want to serially click each element."
           done()
 
         cy.get("button").click()
@@ -948,7 +942,7 @@ describe "src/cy/commands/actions/clicking", ->
           expect(err.message).to.include "cy.click() failed because this element is not visible"
           done()
 
-        cy.get("#three-buttons button").click({multiple: true})
+        cy.get("#three-buttons button").click({ multiple: true })
 
       it "throws when subject is disabled", (done) ->
         $btn = cy.$$("#button").prop("disabled", true)
@@ -1056,6 +1050,9 @@ describe "src/cy/commands/actions/clicking", ->
 
         clicks = 0
 
+        cy.$$("button:first").on "click", ->
+          clicks += 1
+
         cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
@@ -1135,7 +1132,7 @@ describe "src/cy/commands/actions/clicking", ->
           if log.get("name") is "click"
             clicks.push(log)
 
-        cy.get("button.clicks").click({multiple: true}).then ($buttons) ->
+        cy.get("button.clicks").click({ multiple: true}).then ($buttons) ->
           expect($buttons.length).to.eq(2)
           expect(clicks.length).to.eq(2)
           expect(clicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
@@ -1165,12 +1162,12 @@ describe "src/cy/commands/actions/clicking", ->
           if log.get("name") is "click"
             logs.push(log)
 
-        cy.get("#three-buttons button").click({multiple: true}).then ->
+        cy.get("#three-buttons button").click({ multiple: true}).then ->
           _.each logs, (log) ->
             expect(log.get("state")).to.eq("passed")
             expect(log.get("ended")).to.be.true
 
-      it "logs {multiple: true} options", ->
+      it "logs { multiple: true} options",  ->
         cy.get("span").invoke("slice", 0, 2).click({multiple: true, timeout: 1000}).then ->
           lastLog = @lastLog
 

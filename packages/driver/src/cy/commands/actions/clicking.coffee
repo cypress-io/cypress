@@ -48,7 +48,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num: options.$el.length }
         })
 
-      win  = cy.state("window")
+      win = state("window")
 
       click = (el, index) =>
         $el = $(el)
@@ -220,7 +220,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     ## method might not get triggered if
                     ## our window is in focus since the
                     ## browser may fire blur events naturally
-                    dispatchPrimedChangeEvents(cy.state)
+                    dispatchPrimedChangeEvents(state)
 
                     ## send in a focus event!
                     cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})

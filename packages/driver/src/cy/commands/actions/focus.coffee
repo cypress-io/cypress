@@ -222,7 +222,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           ## for simplicity we allow change events
           ## to be triggered by a manual blur
-          dispatchPrimedChangeEvents.call(@)
+          dispatchPrimedChangeEvents(state)
 
           options.$el.get(0).blur()
 
