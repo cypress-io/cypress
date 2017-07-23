@@ -12,6 +12,7 @@ defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
+HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
@@ -85,13 +86,21 @@ testAfterRun = (test, Cypress) ->
   if not fired(TEST_AFTER_RUN_EVENT, test)
     fire(TEST_AFTER_RUN_EVENT, test, Cypress)
 
-    ## perf loop
-    for key, value of test.ctx
+    ## perf loop only through
+    ## a tests OWN properties and not
+    ## inherited properties from its shared ctx
+    for own key, value of test.ctx
       if _.isObject(value) and not mochaCtxKeysRe.test(key)
         ## nuke any object properties that come from
-        ## cy.as() aliases aggressively now, even though
-        ## later on 'suite end' it will also clear ctx
+        ## cy.as() aliases or anything set from 'this'
+        ## so we aggressively perform GC and prevent obj
+        ## ref's from building up
         test.ctx[key] = null
+
+    ## reset the fn to be empty function
+    ## for GC to be aggressive and prevent
+    ## closures from hold references
+    test.fn = ->
 
     ## prevent loop comprehension
     return null
@@ -126,6 +135,16 @@ getHookName = (hook) ->
   name = hook.title.match(betweenQuotesRe)
   name and name[1]
 
+forceGc = (obj) ->
+  ## aggressively forces GC by purging
+  ## references to ctx, and removes callback
+  ## functions for closures
+  for own key, value of obj.ctx
+    obj.ctx[key] = null
+
+  if obj.fn
+    obj.fn = ->
+
 anyTestInSuite = (suite, fn) ->
   for test in suite.tests
     return true if fn(test) is true
@@ -135,6 +154,14 @@ anyTestInSuite = (suite, fn) ->
 
   ## else return false
   return false
+
+eachHookInSuite = (suite, fn) ->
+  for type in HOOKS
+    for hook in suite["_" + type]
+      fn(hook)
+
+  ## prevent loop comprehension
+  return null
 
 onFirstTest = (suite, fn) ->
   for test in suite.tests
@@ -438,9 +465,9 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
     Cypress.action("runner:suite:start", wrap(suite))
 
   runner.on "suite end", (suite) ->
-    ## perf loop
-    for key, value of suite.ctx
-      delete suite.ctx[key]
+    ## cleanup our suite + its hooks
+    forceGc(suite)
+    eachHookInSuite(suite, forceGc)
 
     return if emissions.ended[suite.id]
 
