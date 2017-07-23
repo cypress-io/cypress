@@ -345,11 +345,10 @@ class $Cypress
       @emit("automation:request", eventName, args..., fn)
 
   stop: ->
-    @action("cypress:stop")
-
     @runner.stop()
-
     @cy.stop()
+
+    @action("cypress:stop")
 
   addChildCommand: (key, fn) ->
     throwDeprecatedCommandInterface(key, "addChildCommand")
@@ -377,6 +376,7 @@ class $Cypress
   ## to enable users to monkeypatch
   $Cypress: $Cypress
 
+  Keyboard: $Keyboard
   Location: $Location
 
   Log: $Log
