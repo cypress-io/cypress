@@ -259,6 +259,8 @@ create = (specWindow, Cypress, state, config, log) ->
       doneEarly()
 
     reset: ->
+      stopped = false
+
       s = state()
 
       backup = {
