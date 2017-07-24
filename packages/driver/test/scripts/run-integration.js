@@ -14,7 +14,7 @@ process.argv.push(
   '--headless=false',
   '--driver',
   '--spec',
-  path.resolve('test', 'cypress', 'integration', 'actions', 'checkbox_spec.coffee')
+  path.resolve('test', 'cypress', 'integration', 'commands', 'actions', 'checkbox_spec.coffee')
 )
 
 require('@packages/server')
