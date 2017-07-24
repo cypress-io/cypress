@@ -271,7 +271,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## get the default options currently set
       ## on our server
-      options = o = getXhrServer(cy).getOptions()
+      options = o = getXhrServer(state).getOptions()
 
       ## enable the entire routing definition to be a function
       parseArgs = (args...) =>
@@ -371,7 +371,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## aliases subject
           options.response = aliasObj.subject
 
-        options.log = $Log.route
+        options.log = Cypress.log({
+          name: "route"
+          instrument: "route"
           method:   options.method
           url:      getUrl(options)
           status:   options.status
@@ -385,6 +387,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Status:   options.status
             Response: options.response
             Alias:    options.alias
+        })
 
         return getXhrServer(state).route(options)
 
