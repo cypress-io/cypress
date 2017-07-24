@@ -23,7 +23,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## hold a global reference to defaults
   viewportDefaults = null
 
-  Cypress.on "test:before:run:async", ->
+  Cypress.on "test:before:run", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
     ## need to restore prior to running the next test

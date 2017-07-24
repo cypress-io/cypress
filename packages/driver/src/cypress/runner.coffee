@@ -65,7 +65,7 @@ RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook bod
 #   ]
 # }
 
-fire = (event, test, Cypress, options = {}) ->
+fire = (event, test, Cypress) ->
   test._fired ?= {}
   test._fired[event] = true
 
@@ -77,7 +77,7 @@ fire = (event, test, Cypress, options = {}) ->
 fired = (event, test) ->
   !!(test._fired and test._fired[event])
 
-testBeforeRun = (test, Cypress) ->
+testBeforeRunAsync = (test, Cypress) ->
   Promise.try ->
     if not fired("runner:test:before:run:async", test)
       fire("runner:test:before:run:async", test, Cypress)
@@ -700,8 +700,8 @@ create = (mocha, Cypress) ->
       ## that means that we need to reset the previous state
       ## of cy - since we now have a new 'test' and all of the
       ## associated runnables will share this state
-      if not fired("runner:test:before:run:async", test)
-        Cypress.action("runner:reset:before:runnables:for:test:run", test)
+      if not fired("runner:test:before:run", test)
+        fire("runner:test:before:run", test, Cypress)
 
       ## our runnable is about to run, so let cy know. this enables
       ## us to always have a correct runnable set even when we are
@@ -714,7 +714,7 @@ create = (mocha, Cypress) ->
       ## if its a hook, and then we fire the
       ## test:before:run:async action if its not
       ## been fired before for this test
-      testBeforeRun(test, Cypress)
+      testBeforeRunAsync(test, Cypress)
       .catch (err) ->
         ## TODO: if our async tasks fail
         ## then allow us to cause the test

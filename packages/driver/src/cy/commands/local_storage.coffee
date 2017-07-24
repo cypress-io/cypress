@@ -21,7 +21,7 @@ clearLocalStorage = (keys) ->
   return remote
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:run:async", ->
+  Cypress.on "test:before:run", ->
     try
       ## this may fail if the current
       ## window is bound to another origin

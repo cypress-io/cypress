@@ -219,7 +219,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on("before:unload", abort)
   Cypress.on("stop", abort)
 
-  Cypress.on "test:before:run:async", ->
+  Cypress.on "test:before:run", ->
     ## reset the existing server
     reset()
 

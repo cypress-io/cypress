@@ -19,7 +19,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   restoreContains()
 
   ## restore before each test and whenever we stop
-  Cypress.on("test:before:run:async", restoreContains)
+  Cypress.on("test:before:run", restoreContains)
   Cypress.on("stop", restoreContains)
 
   Commands.addAll({

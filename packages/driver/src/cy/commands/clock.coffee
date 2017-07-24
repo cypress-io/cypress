@@ -19,7 +19,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   ## remove clock before each test run, so a new one is created
   ## when user calls cy.clock()
-  Cypress.on("test:before:run:async", reset)
+  Cypress.on("test:before:run", reset)
   Cypress.on("stop", reset)
 
   Cypress.on "app:before:window:load", (contentWindow) ->
