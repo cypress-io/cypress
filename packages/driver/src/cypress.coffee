@@ -117,9 +117,6 @@ class $Cypress
   run: (fn) ->
     $utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
-    @Commands.each (cmd) =>
-      @cy.addCommand(cmd)
-
     @runner.run(fn)
 
   ## onSpecWindow is called as the spec window
@@ -234,7 +231,7 @@ class $Cypress
 
       when "runner:test:end"
         ## mocha runner finished processing a hook
-        @checkForEndedEarly()
+        @cy.checkForEndedEarly()
 
         if @isHeadless
           @emit("mocha", "test end", args...)
@@ -307,8 +304,11 @@ class $Cypress
       when "cy:command:enqueued"
         @emit("command:enqueued", args[0])
 
-      when "aut:before:window:load"
-        @cy.onBeforeAutWindowLoad(args[0])
+      when "cy:next:subject:prepared"
+        @emit("next:subject:prepared", args...)
+
+      when "app:before:window:load"
+        @cy.onBeforeAppWindowLoad(args[0])
 
         @emit("app:before:window:load", args[0])
 
@@ -377,6 +377,8 @@ class $Cypress
   ## all of the constructors
   ## to enable users to monkeypatch
   $Cypress: $Cypress
+
+  Cy: $Cy
 
   Keyboard: $Keyboard
   Location: $Location

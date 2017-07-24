@@ -7,6 +7,7 @@ $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
 $jQuery = require("../cy/jquery")
 $Aliases = require("../cy/aliases")
+$Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Elements = require("../cy/elements")
@@ -232,8 +233,8 @@ create = (specWindow, Cypress, state, config, log) ->
 
     ## coordinates sync methods
     getAbsoluteCoordinates: coordinates.getAbsoluteCoordinates
-    getAbsoluteCoordinatesRelativeToXY: coordinates.getAbsoluteCoordinatesRelativeToXY
     getElementAtCoordinates: coordinates.getElementAtCoordinates
+    getAbsoluteCoordinatesRelativeToXY: coordinates.getAbsoluteCoordinatesRelativeToXY
 
     ## assertions sync methods
     assert: assertions.assert
@@ -479,6 +480,8 @@ create = (specWindow, Cypress, state, config, log) ->
 
       ## prevent loop comprehension
       return null
+
+    onBeforeAppWindowLoad: (contentWindow) ->
       # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
       setWindowDocumentProps(contentWindow, state)
 
