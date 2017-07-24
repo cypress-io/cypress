@@ -583,7 +583,7 @@ create = (specWindow, Cypress, state, config, log) ->
           ## due to overspecifying a resolution.
           ## in those cases we need to remove
           ## returning a promise
-          if fn.length and ret.catch
+          if fn.length and ret and ret.catch
             ret = ret.catch(done)
 
           ## if we returned a value from fn
