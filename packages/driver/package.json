@@ -42,6 +42,7 @@
     "cors": "^2.7.1",
     "debug": "^2.6.8",
     "errorhandler": "^1.1.1",
+    "eventemitter2": "^4.1.2",
     "express": "^4.12.3",
     "fs-extra": "^3.0.0",
     "gulp": "3.8.8",
