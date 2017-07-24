@@ -165,8 +165,8 @@ wrap = (Cypress, cy, type, agent, obj, method, count) ->
     return returned
 
   agent.as = (alias) ->
-    cy._validateAlias(alias)
-    cy._addAlias({
+    cy.validateAlias(alias)
+    cy.addAlias({
       subject: agent
       command: log
       alias: alias

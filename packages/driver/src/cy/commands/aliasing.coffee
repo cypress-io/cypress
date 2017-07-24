@@ -8,7 +8,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.ensureParent()
       cy.ensureSubject()
 
-      @_validateAlias(str)
+      cy.validateAlias(str)
 
       ## this is the previous command
       ## which we are setting the alias as
