@@ -1,5 +1,12 @@
 const path = require('path')
 
+// this runs just the project in new desktop gui mode
+// process.argv.push(
+//   '--project',
+//   path.resolve('test')
+// )
+
+// this runs a spec to completion + launches chrome
 process.argv.push(
   '--run-project',
   path.resolve('test'),
