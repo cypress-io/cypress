@@ -10,7 +10,7 @@ clock = null
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset = ->
     if clock
-      clock.restore(false)
+      clock.restore({ log: false })
 
     clock = null
 
@@ -19,17 +19,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   ## remove clock before each test run, so a new one is created
   ## when user calls cy.clock()
-  Cypress.on("test:before:run", reset)
-  Cypress.on("stop", reset)
+  ##
+  ## this MUST be prepended else if we are stubbing or spying on
+  ## global timers they will be reset in agents before this runs
+  ## its reset function
+  Cypress.prependListener("test:before:run", reset)
 
   Cypress.on "app:before:window:load", (contentWindow) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
     if clock
-      clock._bind(contentWindow)
+      clock.bind(contentWindow)
 
   Commands.addUtility({
     clock: (subject, now, methods, options = {}) ->
+      ctx = @
+
       if clock
         return clock
 
@@ -55,7 +60,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if not options.log
           return
 
-        details = clock._details()
+        details = clock.details()
         logNow = details.now
         logMethods = details.methods.slice()
 
@@ -72,34 +77,50 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             }, consoleProps)
         })
 
-      clock = $Clock.create(@state("window"), now, methods)
+      clock = $Clock.create(state("window"), now, methods)
 
-      clock.tick = _.wrap clock.tick, (tick, ms) ->
+      tick = clock.tick
+
+      clock.tick = (ms) ->
         if ms? and not _.isNumber(ms)
           $utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
 
         theLog = log("tick", "#{ms}ms", false, {
-          "Now": clock._details().now + ms
+          "Now": clock.details().now + ms
           "Ticked": "#{ms} milliseconds"
         })
+
         if theLog
           theLog.snapshot("before", {next: "after"})
-        ret = tick.call(clock, ms)
+
+        ret = tick.apply(@, arguments)
+
         if theLog
           theLog.snapshot().end()
+
         return ret
 
-      clock.restore = _.wrap clock.restore, (restore, shouldLog = true) =>
-        ret = restore.call(clock)
-        if shouldLog
+      restore = clock.restore
+
+      clock.restore = (options = {}) ->
+        ret = restore.apply(@, arguments)
+
+        if options.log isnt false
           log("restore")
-        @assign("clock", null)
+
+        ctx.clock = null
+
         clock = null
+
+        state("clock", clock)
+
         return ret
 
       log("clock")
 
-      @assign("clock", clock)
+      state("clock", clock)
+
+      return ctx.clock = clock
 
     tick: (subject, ms) ->
       if not clock
@@ -109,11 +130,3 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       return clock
   })
-
-  ## for testing purposes
-  return {
-    _getClock: ->
-      clock
-    _setClock: (c) ->
-      clock = c
-  }
