@@ -1,66 +1,64 @@
-{ _ } = window.testUtils
+_ = Cypress._
 
-describe "$Cypress.Cy Agents Commands", ->
-  enterCommandTestingMode()
-
-  context "#stub", ->
+describe "src/cy/commands/agents", ->
+  context ".stub", ->
     it "synchronously returns stub", ->
-      stub = @cy.stub()
+      stub = cy.stub()
       expect(stub).to.exist
       expect(stub.returns).to.be.a("function")
 
-    context "#stub()", ->
+    describe ".stub()", ->
       beforeEach ->
-        @stub = @cy.stub()
+        @stub = cy.stub()
 
       it "proxies sinon stub", ->
         @stub()
-        expect(@stub.callCount).to.equal(1)
+        expect(@stub.callCount).to.eq(1)
 
       it "has sinon stub API", ->
         @stub.returns(true)
         result = @stub()
         expect(result).to.be.true
 
-    context "#stub(obj, 'method')", ->
+    describe ".stub(obj, 'method')", ->
       beforeEach ->
         @originalCalled = false
         @obj = {
           foo: => @originalCalled = true
         }
-        @stub = @cy.stub(@obj, "foo")
+        @stub = cy.stub(@obj, "foo")
 
       it "proxies sinon stub", ->
         @obj.foo()
-        expect(@stub.callCount).to.equal(1)
+        expect(@stub.callCount).to.eq(1)
 
       it "replaces method", ->
         @obj.foo()
         expect(@originalCalled).to.be.false
 
-    context "#stub(obj, 'method', replacerFn)", ->
+    describe ".stub(obj, 'method', replacerFn)", ->
       beforeEach ->
         @originalCalled = false
         @obj = {
           foo: => @originalCalled = true
         }
         @replacementCalled = false
-        @stub = @cy.stub @obj, "foo", =>
+        @stub = cy.stub @obj, "foo", =>
           @replacementCalled = true
 
       it "proxies sinon stub", ->
         @obj.foo()
-        expect(@stub.callCount).to.equal(1)
+        expect(@stub.callCount).to.eq(1)
 
       it "replaces method with replacement", ->
         @obj.foo()
         expect(@originalCalled).to.be.false
         expect(@replacementCalled).to.be.true
 
-    context "#resolves", ->
+    describe ".resolves", ->
       beforeEach ->
         @obj = {foo: ->}
-        @stub = @cy.stub(@obj, "foo")
+        @stub = cy.stub(@obj, "foo")
 
       it "has resolves method", ->
         expect(@stub.resolves).to.be.a("function")
@@ -68,23 +66,23 @@ describe "$Cypress.Cy Agents Commands", ->
       it "resolves promise", ->
         @stub.resolves("foo")
         @obj.foo().then (foo) ->
-          expect(foo).to.equal("foo")
+          expect(foo).to.eq("foo")
 
       it "uses Bluebird under the hood", ->
         obj = {
           foo: ->
         }
 
-        @cy.stub(obj, "foo").resolves("bar")
+        cy.stub(obj, "foo").resolves("bar")
 
         obj
         .foo()
         .delay(1)
 
-    context "#rejects", ->
+    describe ".rejects", ->
       beforeEach ->
         @obj = {foo: ->}
-        @stub = @cy.stub(@obj, "foo")
+        @stub = cy.stub(@obj, "foo")
 
       it "has rejects method", ->
         expect(@stub.rejects).to.be.a("function")
@@ -96,38 +94,43 @@ describe "$Cypress.Cy Agents Commands", ->
         .then ->
           throw new Error("Should throw error")
         .catch (err) ->
-          expect(err).to.equal(error)
+          expect(err).to.eq(error)
 
-    context "#withArgs", ->
+    describe ".withArgs", ->
       beforeEach ->
+        @agentLogs = []
         @logs = []
-        @Cypress.on "log", (attrs, log) =>
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.instrument is "agent"
+            @agentLogs.push(log)
+
           @logs.push(log)
 
         @obj = {foo: ->}
-        @stub = @cy.stub(@obj, "foo")
+        @stub = cy.stub(@obj, "foo")
         @stubWithArgs = @stub.withArgs("foo")
 
       it "can be aliased", ->
         @stubWithArgs.as("withFoo")
-        expect(@logs[1].get("alias")).to.equal("withFoo")
+        expect(@logs[1].get("alias")).to.eq("withFoo")
 
-      context "logging", ->
+      describe "logging", ->
         it "creates new log instrument with sub-count", ->
-          expect(@logs.length).to.equal(2)
-          expect(@logs[1].get("name")).to.equal("stub-1.1")
+          expect(@agentLogs.length).to.eq(2)
+          expect(@agentLogs[1].get("name")).to.eq("stub-1.1")
           @stub.withArgs("bar")
-          expect(@logs.length).to.equal(3)
-          expect(@logs[2].get("name")).to.equal("stub-1.2")
+          expect(@agentLogs.length).to.eq(3)
+          expect(@agentLogs[2].get("name")).to.eq("stub-1.2")
 
         describe "on invocation", ->
           it "only logs once", ->
             @obj.foo("foo")
-            expect(@logs.length).to.equal(3)
+            expect(@logs.length).to.eq(3)
 
           it "includes child count in name", ->
             @obj.foo("foo")
-            expect(@logs[2].get("name")).to.equal("stub-1.1")
+            expect(@logs[2].get("name")).to.eq("stub-1.1")
 
           it "has no alias if no aliases set", ->
             @obj.foo("foo")
@@ -151,9 +154,9 @@ describe "$Cypress.Cy Agents Commands", ->
 
           it "logs parent if invoked without necessary args", ->
             @obj.foo()
-            expect(@logs[2].get("name")).to.equal("stub-1")
+            expect(@logs[2].get("name")).to.eq("stub-1")
 
-          describe "#consoleProps", ->
+          describe ".consoleProps", ->
             beforeEach ->
               @stub.as("objFoo")
               @stubWithArgs.as("withFoo")
@@ -161,48 +164,48 @@ describe "$Cypress.Cy Agents Commands", ->
               @consoleProps = @logs[2].get("consoleProps")()
 
             it "includes the event", ->
-              expect(@consoleProps["Event"]).to.equal("stub-1.1 called")
+              expect(@consoleProps["Event"]).to.eq("stub-1.1 called")
 
             it "includes reference to parent stub", ->
               expect(@consoleProps["stub-1"]).to.be.a("function")
 
             it "includes parent call number", ->
-              expect(@consoleProps["stub-1 call #"]).to.equal(1)
+              expect(@consoleProps["stub-1 call #"]).to.eq(1)
 
             it "includes parent alias", ->
-              expect(@consoleProps["stub-1 alias"]).to.equal("objFoo")
+              expect(@consoleProps["stub-1 alias"]).to.eq("objFoo")
 
             it "includes reference to withArgs stub", ->
               expect(@consoleProps["stub-1.1"]).to.be.a("function")
 
             it "includes withArgs call number", ->
-              expect(@consoleProps["stub-1.1 call #"]).to.equal(1)
+              expect(@consoleProps["stub-1.1 call #"]).to.eq(1)
 
             it "includes withArgs alias", ->
-              expect(@consoleProps["stub-1.1 alias"]).to.equal("withFoo")
+              expect(@consoleProps["stub-1.1 alias"]).to.eq("withFoo")
 
             it "includes withArgs matching arguments", ->
               expect(@consoleProps["stub-1.1 matching arguments"]).to.eql(["foo"])
 
-    context "#as", ->
+    describe ".as", ->
       beforeEach ->
         @logs = []
-        @Cypress.on "log", (attrs, log) =>
+        cy.on "log:added", (attrs, log) =>
           @logs.push(log)
 
-        @stub = @cy.stub().as("myStub")
+        @stub = cy.stub().as("myStub")
 
       it "returns stub", ->
         expect(@stub).to.have.property("callCount")
 
       it "updates instrument log with alias", ->
-        expect(@logs[0].get("alias")).to.equal("myStub")
-        expect(@logs[0].get("aliasType")).to.equal("agent")
+        expect(@logs[0].get("alias")).to.eq("myStub")
+        expect(@logs[0].get("aliasType")).to.eq("agent")
 
       it "includes alias in invocation log", ->
         @stub()
         expect(@logs[1].get("alias")).to.eql(["myStub"])
-        expect(@logs[1].get("aliasType")).to.equal("agent")
+        expect(@logs[1].get("aliasType")).to.eq("agent")
 
       it "includes alias in console props", ->
         @stub()
@@ -210,72 +213,83 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(consoleProps["Alias"]).to.eql("myStub")
 
       it "updates the displayName of the agent", ->
-        @cy.then ->
-          expect(@myStub.displayName).to.equal("myStub")
+        cy.then ->
+          expect(@myStub.displayName).to.eq("myStub")
 
       it "stores the lookup as an alias", ->
-        expect(@cy.state("aliases").myStub).to.be.defined
+        expect(cy.state("aliases").myStub).to.be.defined
 
       it "stores the agent as the subject", ->
-        expect(@cy.state("aliases").myStub.subject).to.equal(@stub)
+        expect(cy.state("aliases").myStub.subject).to.eq(@stub)
 
       it "assigns subject to runnable ctx", ->
-        @cy.then ->
+        cy.then ->
           expect(@myStub).to.eq(@stub)
 
       describe "errors", ->
-        beforeEach ->
-          @allowErrors()
-
         _.each [null, undefined, {}, [], 123], (value) =>
           it "throws when passed: #{value}", ->
-            expect(=> @cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+            expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
 
         it "throws on blank string", ->
-          expect(=> @cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+          expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
 
         _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
           it "throws on a blacklisted word: #{blacklist}", ->
-            expect(=> @cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
+            expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
 
-    context "logging", ->
+    describe "logging", ->
       beforeEach ->
         @logs = []
-        @Cypress.on "log", (attrs, log) =>
+        @agentLogs = []
+        @stubLogs = []
+
+        cy.on "log:added", (attrs, log) =>
+          debugger
+          if attrs.instrument is "agent"
+            @agentLogs.push(log)
+
+          if attrs.event
+            @stubLogs.push(log)
+
           @logs.push(log)
 
         @obj = {foo: ->}
-        @stub = @cy.stub(@obj, "foo").returns("return value")
+        @stub = cy.stub(@obj, "foo").returns("return value")
 
       it "logs agent on creation", ->
-        expect(@logs[0].get("name")).to.eq("stub-1")
-        expect(@logs[0].get("type")).to.eq("stub-1")
-        expect(@logs[0].get("instrument")).to.eq("agent")
+        expect(@agentLogs[0].get("name")).to.eq("stub-1")
+        expect(@agentLogs[0].get("type")).to.eq("stub-1")
+        expect(@agentLogs[0].get("instrument")).to.eq("agent")
 
       it "logs event for each invocation", ->
         @obj.foo("foo")
-        expect(@logs.length).to.equal(2)
-        expect(@logs[1].get("name")).to.eq("stub-1")
-        expect(@logs[1].get("message")).to.eq("foo(\"foo\")")
-        expect(@logs[1].get("event")).to.be.true
+        expect(@stubLogs.length).to.eq(1)
+        expect(@stubLogs[0].get("name")).to.eq("stub-1")
+        expect(@stubLogs[0].get("message")).to.eq("foo(\"foo\")")
+        expect(@stubLogs[0].get("event")).to.be.true
+
         @obj.foo("bar")
-        expect(@logs.length).to.equal(3)
-        expect(@logs[2].get("name")).to.eq("stub-1")
-        expect(@logs[2].get("message")).to.eq("foo(\"bar\")")
-        expect(@logs[2].get("event")).to.be.true
+        expect(@stubLogs.length).to.eq(2)
+        expect(@stubLogs[1].get("name")).to.eq("stub-1")
+        expect(@stubLogs[1].get("message")).to.eq("foo(\"bar\")")
+        expect(@stubLogs[1].get("event")).to.be.true
 
       it "increments callCount of agent log on each invocation", ->
-        expect(@logs[0].get("callCount")).to.eq 0
+        expect(@agentLogs[0].get("callCount")).to.eq 0
         @obj.foo("foo", "bar")
-        expect(@logs[0].get("callCount")).to.eq 1
+        expect(@agentLogs[0].get("callCount")).to.eq 1
         @obj.foo("foo", "baz")
-        expect(@logs[0].get("callCount")).to.eq 2
+        expect(@agentLogs[0].get("callCount")).to.eq 2
 
       it "resets unique name counter on restore", ->
-        expect(@logs[0].get("name")).to.equal("stub-1")
-        @Cypress.trigger("restore")
-        @cy.stub()
-        expect(@logs[1].get("name")).to.equal("stub-1")
+        expect(@agentLogs[0].get("name")).to.eq("stub-1")
+
+        Cypress.emit("test:before:run", {})
+
+        cy.stub()
+
+        expect(@agentLogs[1].get("name")).to.eq("stub-1")
 
       context "arg formatting", ->
         beforeEach ->
@@ -297,55 +311,30 @@ describe "$Cypress.Cy Agents Commands", ->
             expect(@logs[4].get("message")).to.eq("foo(1, 2, 3, ...)")
 
         context "in assertion", ->
-          before ->
-            @onAssert = (fn) =>
-              @Cypress.on "log", (attrs, log) =>
-                if log.get("name") is "assert"
-                  ## restore so we dont create an endless loop
-                  ## due to Cypress.assert being called again
-                  @chai.restore()
-                  fn.call(@, log)
-
           beforeEach ->
-            ## create three here because there was a bug where
-            ## we were not correctly restoring assertions
-            ## during construction
-            @chai = $Cypress.Chai.create(@Cypress, {})
-            @chai = $Cypress.Chai.create(@Cypress, {})
-            @chai = $Cypress.Chai.create(@Cypress, {})
+            cy.on "log:added", (attrs, log) =>
+              @lastLog = log
 
-          afterEach ->
-            @chai.restore()
+            return null
 
-          it "formats string, number, boolean args", (done) ->
-            @onAssert (log) ->
-              expect(log.get("message")).to.include("expected foo to have been called with arguments \"str\", 5, true")
-              done()
-
+          it "formats string, number, boolean args", ->
             expect(@obj.foo).be.calledWith("str", 5, true)
 
-          it "formats null, undefined, small array args", (done) ->
-            @onAssert (log) ->
-              expect(log.get("message")).to.include("expected foo to have been called with arguments null, undefined, [1, 2, 3]")
-              done()
+            expect(@lastLog.get("message")).to.include("expected foo to have been called with arguments \"str\", 5, true")
 
+          it "formats null, undefined, small array args", ->
             expect(@obj.foo).be.calledWith(null, undefined, [1, 2, 3])
 
-          it "formats small object, big array, big object args", (done) ->
-            @onAssert (log) ->
-              expect(log.get("message")).to.include("expected foo to have been called with arguments {g: 1}, Array[5], Object{6}")
-              done()
+            expect(@lastLog.get("message")).to.include("expected foo to have been called with arguments null, undefined, [1, 2, 3]")
 
+          it "formats small object, big array, big object args", ->
             expect(@obj.foo).be.calledWith({g: 1}, @bigArray, @bigObject)
 
+            expect(@lastLog.get("message")).to.include("expected foo to have been called with arguments {g: 1}, Array[5], Object{6}")
+
           it "does not include stack with calls when assertion fails", (done) ->
-            @allowErrors()
-            log = null
-            @Cypress.on "log", (attrs, theLog) ->
-              log = theLog
-            @cy.on "fail", =>
-              @chai.restore()
-              expect(log.get("message")).to.include("""
+            cy.on "fail", =>
+              expect(@lastLog.get("message")).to.include("""
                 #{"    "}foo("str", 5, true) => "return value"
                 #{"    "}foo(null, undefined, [1, 2, 3]) => "return value"
                 #{"    "}foo({g: 1}, Array[5], Object{6}) => "return value"
@@ -353,7 +342,7 @@ describe "$Cypress.Cy Agents Commands", ->
               """)
               done()
 
-            @cy.then =>
+            cy.wrap(null).then ->
               expect(@obj.foo).to.be.calledWith(false, false, false)
 
       context "#consoleProps", ->
@@ -369,40 +358,41 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@consoleProps["Error"]).to.be.null
 
         it "includes the event", ->
-          expect(@consoleProps["Event"]).to.equal("stub-1 called")
+          expect(@consoleProps["Event"]).to.eq("stub-1 called")
 
         it "includes reference to stub", ->
           expect(@consoleProps["stub"]).to.be.a("function")
 
         it "includes call number", ->
-          expect(@consoleProps["Call #"]).to.equal(1)
+          expect(@consoleProps["Call #"]).to.eq(1)
 
         it "includes alias", ->
-          expect(@consoleProps["Alias"]).to.equal("objFoo")
+          expect(@consoleProps["Alias"]).to.eq("objFoo")
 
         it "includes references to stubbed object", ->
-          expect(@consoleProps["Stubbed Obj"]).to.be.equal(@obj)
+          expect(@consoleProps["Stubbed Obj"]).to.be.eq(@obj)
 
         it "includes arguments", ->
           expect(@consoleProps["Arguments"]).to.eql(["foo", "baz"])
 
         it "includes context", ->
-          expect(@consoleProps["Context"]).to.equal(@context)
+          expect(@consoleProps["Context"]).to.eq(@context)
 
         it "includes return value", ->
-          expect(@consoleProps["Yielded"]).to.equal("return value")
+          expect(@consoleProps["Yielded"]).to.eq("return value")
 
-  context "#spy(obj, 'method')", ->
+  context.only ".spy(obj, 'method')", ->
     beforeEach ->
       @logs = []
-      @Cypress.on "log", (attrs, log) =>
+      cy.on "log:added", (attrs, log) =>
         @logs.push(log)
 
       @originalCalled = false
       @obj = {
-        foo: => @originalCalled = true
+        foo: =>
+          @originalCalled = true
       }
-      @spy = @cy.spy @obj, "foo"
+      @spy = cy.spy @obj, "foo"
 
     it "synchronously returns spy", ->
       expect(@spy).to.exist
@@ -410,7 +400,7 @@ describe "$Cypress.Cy Agents Commands", ->
 
     it "proxies sinon spy", ->
       @obj.foo()
-      expect(@spy.callCount).to.equal(1)
+      expect(@spy.callCount).to.eq(1)
 
     it "does not replace method", ->
       @obj.foo()
@@ -420,17 +410,17 @@ describe "$Cypress.Cy Agents Commands", ->
       ## same as cy.stub(), so just some smoke tests here
       beforeEach ->
         @logs = []
-        @Cypress.on "log", (attrs, log) =>
+        cy.on "log:added", (attrs, log) =>
           @logs.push(log)
 
-        @spy = @cy.spy().as("mySpy")
+        @spy = cy.spy().as("mySpy")
 
       it "returns spy", ->
         expect(@spy).to.have.property("callCount")
 
       it "updates instrument log with alias", ->
-        expect(@logs[0].get("alias")).to.equal("mySpy")
-        expect(@logs[0].get("aliasType")).to.equal("agent")
+        expect(@logs[0].get("alias")).to.eq("mySpy")
+        expect(@logs[0].get("aliasType")).to.eq("agent")
 
     context "logging", ->
       ## same as cy.stub() except for name and type
@@ -448,12 +438,12 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@consoleProps["spy"]).to.be.a("function")
 
         it "includes references to spied object", ->
-          expect(@consoleProps["Spied Obj"]).to.be.equal(@obj)
+          expect(@consoleProps["Spied Obj"]).to.be.eq(@obj)
 
-  context "#agents", ->
+  context ".agents", ->
     beforeEach ->
       @sandbox.spy console, "warn"
-      @agents = @cy.agents()
+      @agents = cy.agents()
 
     it "logs deprecation warning", ->
       expect(console.warn).to.be.calledWith("Cypress Warning: cy.agents() is deprecated. Use cy.stub() and cy.spy() instead.")
