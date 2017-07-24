@@ -97,6 +97,49 @@ create = (specWindow, Cypress, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
+  enqueue = (obj) ->
+    Cypress.action("cy:command:enqueue", obj)
+
+    ## if we have a nestedIndex it means we're processing
+    ## nested commands and need to splice them into the
+    ## index past the current index as opposed to
+    ## pushing them to the end we also dont want to
+    ## reset the run defer because splicing means we're
+    ## already in a run loop and dont want to create another!
+    ## we also reset the .next property to properly reference
+    ## our new obj
+
+    ## we had a bug that would bomb on custom commands when it was the
+    ## first command. this was due to nestedIndex being undefined at that
+    ## time. so we have to ensure to check that its any kind of number (even 0)
+    ## in order to know to splice into the existing array.
+    nestedIndex = state("nestedIndex")
+
+    ## if this is a number then we know
+    ## we're about to splice this into our commands
+    ## and need to reset next + increment the index
+    if _.isNumber(nestedIndex)
+      state("nestedIndex", nestedIndex += 1)
+
+    ## we look at whether or not nestedIndex is a number, because if it
+    ## is then we need to splice inside of our commands, else just push
+    ## it onto the end of the queu
+    index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
+
+    queue.splice(index, 0, obj)
+
+  getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
+    return null if not command
+
+    ## push these onto the beginning of the commands array
+    memo.unshift(command)
+
+    ## break and return the memo
+    if command.get("type") is "parent" or cy.isInDom(command.get("subject"))
+      return memo
+
+    getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
+
   doneEarly = ->
     p = state("promise")
 
@@ -281,9 +324,9 @@ create = (specWindow, Cypress, state, config, log) ->
 
       cy.removeAllListeners()
 
-    addCommand: ({key, fn, type, enforceDom}) ->
+    addCommand: ({name, fn, type, enforceDom}) ->
       ## TODO: prob don't need this anymore
-      commandFns[key] = fn
+      commandFns[name] = fn
 
       prepareSubject = (firstCall, args) =>
         ## if this is the very first call
@@ -295,7 +338,7 @@ create = (specWindow, Cypress, state, config, log) ->
         subject = state("subject")
 
         if enforceDom
-          cy.ensureDom(subject, key)
+          cy.ensureDom(subject, name)
 
         args.unshift(subject)
 
@@ -305,7 +348,7 @@ create = (specWindow, Cypress, state, config, log) ->
         args
 
       wrap = (firstCall) =>
-        fn = commandFns[key]
+        fn = commandFns[name]
         wrapped = wrapByType(fn, firstCall)
         wrapped.originalFn = fn
         wrapped
@@ -327,7 +370,7 @@ create = (specWindow, Cypress, state, config, log) ->
               if firstCall
                 $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
                   args: {
-                    cmd:  key
+                    cmd:  name
                     args: $utils.stringify(args)
                   }
                 })
@@ -341,13 +384,13 @@ create = (specWindow, Cypress, state, config, log) ->
 
               return ret ? subject
 
-      cy[key] = (args...) ->
+      cy[name] = (args...) ->
         if not state("runnable")
           $utils.throwErrByPath("miscellaneous.outside_test")
 
         ## this is the first call on cypress
         ## so create a new chainer instance
-        chain = $Chainer.create(cy, key, args)
+        chain = $Chainer.create(cy, name, args)
 
         ## store the chain so we can access it later
         state("chain", chain)
@@ -355,15 +398,21 @@ create = (specWindow, Cypress, state, config, log) ->
         return chain
 
       ## add this function to our chainer class
-      $Chainer.inject key, (chainerId, firstCall, args) ->
+      $Chainer.inject name, (chainerId, firstCall, args) ->
         ## dont enqueue / inject any new commands if
         ## onInjectCommand returns false
         onInjectCommand = state("onInjectCommand")
 
         if _.isFunction(onInjectCommand)
-          return if onInjectCommand.call(cy, key, args...) is false
+          return if onInjectCommand.call(cy, name, args...) is false
 
-        cy.enqueue(key, wrap(firstCall), args, type, chainerId)
+        enqueue({
+          name
+          args
+          type
+          chainerId
+          fn: wrap(firstCall)
+        })
 
         return true
 
@@ -372,45 +421,62 @@ create = (specWindow, Cypress, state, config, log) ->
         commandFns[name].apply(cy, args)
       )
 
-    enqueue: (key, fn, args, type, chainerId) ->
-      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
+    replayCommandsFrom: (current) ->
+      ## reset each chainerId to the
+      ## current value
+      chainerId = state("chainerId")
 
-      Cypress.action("cy:command:enqueue", obj)
+      insert = (command) ->
+        command.set("chainerId", chainerId)
 
-      ## TODO: can't we join this method with whats below it
-      cy.insertCommand(obj)
+        ## clone the command to prevent
+        ## mutating its properties
+        enqueue(command.clone())
 
-    insertCommand: (obj) ->
-      ## if we have a nestedIndex it means we're processing
-      ## nested commands and need to splice them into the
-      ## index past the current index as opposed to
-      ## pushing them to the end we also dont want to
-      ## reset the run defer because splicing means we're
-      ## already in a run loop and dont want to create another!
-      ## we also reset the .next property to properly reference
-      ## our new obj
+      ## - starting with the aliased command
+      ## - walk up to each prev command
+      ## - until you reach a parent command
+      ## - or until the subject is in the DOM
+      ## - from that command walk down inserting
+      ##   every command which changed the subject
+      ## - coming upon an assertion should only be
+      ##   inserted if the previous command should
+      ##   be replayed
 
-      ## we had a bug that would bomb on custom commands when it was the
-      ## first command. this was due to nestedIndex being undefined at that
-      ## time. so we have to ensure to check that its any kind of number (even 0)
-      ## in order to know to splice into the existing array.
-      nestedIndex = state("nestedIndex")
+      commands = getCommandsUntilFirstParentOrValidSubject(current)
 
-      ## if this is a number then we know
-      ## we're about to splice this into our commands
-      ## and need to reset next + increment the index
-      if _.isNumber(nestedIndex)
-        state("nestedIndex", nestedIndex += 1)
+      if commands
+        initialCommand = commands.shift()
 
-      ## we look at whether or not nestedIndex is a number, because if it
-      ## is then we need to splice inside of our commands, else just push
-      ## it onto the end of the queu
-      index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
+        commandsToInsert = _.reduce(commands, (memo, command, index) ->
+          push = ->
+            memo.push(command)
 
-      queue.splice(index, 0, obj)
+          switch
+            when command.get("type") is "assertion"
+              ## if we're an assertion and the prev command
+              ## is in the memo, then push this one
+              if command.get("prev") in memo
+                push()
 
-    onBeforeAutWindowLoad: (contentWindow) ->
-      ## TODO: probably dont want to silence the console anymore
+            when command.get("subject") isnt initialCommand.get("subject")
+              ## when our subjects dont match then
+              ## reset the initialCommand to this command
+              ## so the next commands can compare against
+              ## this one to figure out the changing subjects
+              initialCommand = command
+
+              push()
+
+          return memo
+
+        , [initialCommand])
+
+        for c in commandsToInsert
+          insert(c)
+
+      ## prevent loop comprehension
+      return null
       # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
       setWindowDocumentProps(contentWindow, state)
 

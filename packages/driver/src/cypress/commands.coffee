@@ -51,22 +51,24 @@ create = (Cypress, cy, state, config, log) ->
   commandBackups = {}
 
   store = (obj) ->
-    commands[obj.key] = obj
+    commands[obj.name] = obj
 
-  storeOverride = (key, fn) ->
+    cy.addCommand(obj)
+
+  storeOverride = (name, fn) ->
     ## grab the original function if its been backed up
     ## or grab it from the command store
-    original = commandBackups[key] or commands[key]
+    original = commandBackups[name] or commands[name]
 
     if not original
       $utils.throwErrByPath("miscellaneous.invalid_overwrite", {
         args: {
-          name: key
+          name: name
         }
       })
 
     ## store the backup again now
-    commandBackups[key] = original
+    commandBackups[name] = original
 
     originalFn = original.fn
 
@@ -80,7 +82,7 @@ create = (Cypress, cy, state, config, log) ->
 
     each: (fn) ->
       ## perf loop
-      for key, command of commands
+      for name, command of commands
         fn(command)
 
       ## prevent loop comprehension
@@ -88,14 +90,14 @@ create = (Cypress, cy, state, config, log) ->
 
     addAllSync: (obj) ->
       ## perf loop
-      for key, fn of obj
-        Commands.addSync(key, fn)
+      for name, fn of obj
+        Commands.addSync(name, fn)
 
       ## prevent loop comprehension
       null
 
-    addSync: (key, fn) ->
-      cy[key] = fn
+    addSync: (name, fn) ->
+      cy[name] = fn
 
     addAll: (options = {}, obj) ->
       if not obj
@@ -103,13 +105,13 @@ create = (Cypress, cy, state, config, log) ->
         options = {}
 
       ## perf loop
-      for key, fn of obj
-        Commands.add(key, options, fn)
+      for name, fn of obj
+        Commands.add(name, options, fn)
 
       ## prevent loop comprehension
       null
 
-    add: (key, options, fn) ->
+    add: (name, options, fn) ->
       if _.isFunction(options)
         fn = options
         options = {}
@@ -120,7 +122,7 @@ create = (Cypress, cy, state, config, log) ->
       enforceDom = options.prevSubject is "dom"
 
       store({
-        key
+        name
         fn
         type
         enforceDom
@@ -128,9 +130,9 @@ create = (Cypress, cy, state, config, log) ->
 
     addAssertion: (obj) ->
       ## perf loop
-      for key, fn of obj
+      for name, fn of obj
         store({
-          key
+          name
           fn,
           type: "assertion"
         })
@@ -140,9 +142,9 @@ create = (Cypress, cy, state, config, log) ->
 
     addUtility: (obj) ->
       ## perf loop
-      for key, fn of obj
+      for name, fn of obj
         store({
-          key
+          name
           fn,
           type: "utility"
         })
@@ -150,8 +152,8 @@ create = (Cypress, cy, state, config, log) ->
       ## prevent loop comprehension
       null
 
-    overwrite: (key, fn) ->
-      storeOverride(key, fn)
+    overwrite: (name, fn) ->
+      storeOverride(name, fn)
   }
 
   ## perf loop
