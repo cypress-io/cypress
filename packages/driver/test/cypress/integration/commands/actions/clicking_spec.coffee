@@ -259,6 +259,8 @@ describe "src/cy/commands/actions/clicking", ->
         expect($buttons.length).to.eq clicks
 
     it "can cancel multiple clicks", (done) ->
+      cy.stub(Cypress.runner, "stop")
+
       ## abort after the 3rd click
       stop = _.after 3, ->
         Cypress.stop()
@@ -901,7 +903,7 @@ describe "src/cy/commands/actions/clicking", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass { multiple: true} if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass { multiple: true } if you want to serially click each element."
           done()
 
         cy.get("button").click()

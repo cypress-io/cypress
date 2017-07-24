@@ -43,14 +43,15 @@ convertRowFontSize = ($row, message) ->
     lineHeight: "14px"
   })
 
-shouldFnWithCallback = (subject, fn) ->
-  Promise
-  .try =>
-    remoteSubject = cy.getRemotejQueryInstance(subject)
-    fn.call @state("runnable").ctx, remoteSubject ? subject
-  .return(subject)
-
 module.exports = (Commands, Cypress, cy, state, config) ->
+  shouldFnWithCallback = (subject, fn) ->
+    Promise
+    .try =>
+      remoteSubject = cy.getRemotejQueryInstance(subject)
+
+      fn.call(@, remoteSubject ? subject)
+    .return(subject)
+
   shouldFn = (subject, chainers, args...) ->
     if _.isFunction(chainers)
       return shouldFnWithCallback.apply(@, arguments)
@@ -62,7 +63,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## since we are throwing our own error
       ## without going through the assertion we need
       ## to ensure our .should command gets logged
-      current = @state("current")
+      current = state("current")
 
       log = Cypress.log({
         name: "should"

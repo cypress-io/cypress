@@ -15,7 +15,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## and if angular is available through them.  throw a very specific
       ## error message here that's different depending on what module
       ## system you're using
-      $utils.throwErrByPath "ng.no_global" if not @state("window").angular
+      $utils.throwErrByPath "ng.no_global" if not state("window").angular
 
       _.defaults options, {log: true}
 
@@ -38,7 +38,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     _findByNgBinding: (binding, options) ->
       selector = ".ng-binding"
 
-      angular = @state("window").angular
+      angular = state("window").angular
 
       _.extend options, {verify: false, log: false}
 

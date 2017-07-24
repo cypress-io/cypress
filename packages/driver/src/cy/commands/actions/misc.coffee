@@ -51,7 +51,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num: options.$el.length }
         })
 
-      win = @state("window")
+      win = state("window")
       $el = options.$el.first()
       el = $el.get(0)
 
