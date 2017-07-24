@@ -99,6 +99,8 @@ create = (state) ->
 
     validateAlias
 
+    aliasNotFoundFor
+
     getXhrTypeByAlias
 
     getAvailableAliases

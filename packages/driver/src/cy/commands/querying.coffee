@@ -157,7 +157,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               replayFrom = false
 
               replay = =>
-                @_replayFrom command
+                cy.replayCommandsFrom(command)
                 return null
 
               ## if we're missing any element

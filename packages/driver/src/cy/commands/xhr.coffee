@@ -347,7 +347,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## look ahead to see if this
         ## command (route) has an alias?
-        if alias = @getNextAlias()
+        if alias = cy.getNextAlias()
           options.alias = alias
 
         if _.isFunction(o.response)

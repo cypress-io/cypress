@@ -12,7 +12,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## this is the previous command
       ## which we are setting the alias as
-      prev = @state("current").get("prev")
+      prev = state("current").get("prev")
       prev.set("alias", str)
 
       noLogFromPreviousCommandisAlreadyAliased = ->
@@ -21,10 +21,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## we also need to set the alias on the last command log
       ## that matches our chainerId
-      if log = _.last(@queue.logs({
+      if log = _.last(cy.queue.logs({
         instrument: "command"
         event: false
-        chainerId: @state("chainerId")
+        chainerId: state("chainerId")
       }))
 
         ## make sure this alias hasn't already been applied
@@ -38,7 +38,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             aliasType: if $utils.hasElement(subject) then "dom" else "primitive"
           })
 
-      @_addAlias({subject: subject, command: prev, alias: str})
+      cy.addAlias({subject: subject, command: prev, alias: str})
 
       return subject
   })

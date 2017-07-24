@@ -218,6 +218,8 @@ create = (specWindow, Cypress, state, config, log) ->
     getAlias: aliases.getAlias
     addAlias: aliases.addAlias
     validateAlias: aliases.validateAlias
+    getNextAlias: aliases.getNextAlias
+    aliasNotFoundFor: aliases.aliasNotFoundFor
 
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance
