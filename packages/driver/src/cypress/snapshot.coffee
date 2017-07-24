@@ -1,3 +1,5 @@
+path = require("path")
+url = require("url")
 _ = require("lodash")
 $ = require("jquery")
 
@@ -15,6 +17,25 @@ getCssRulesString = (stylesheet) ->
       null
   catch e
     null
+
+makePathsAbsoluteToStylesheet = (styles, stylesheetHref) ->
+  return styles if not _.isString(styles)
+
+  stylesheetPath = stylesheetHref.replace(path.basename(stylesheetHref), '')
+  styles.replace /url\((['"])([^'"]*)\1\)/gm, (_1, _2, filePath) ->
+    absPath = url.resolve(stylesheetPath, filePath)
+    return "url('#{absPath}')"
+
+makePathsAbsoluteToDoc = (styles) ->
+  return styles if not _.isString(styles)
+
+  doc = @cy.privateState("document")
+  styles.replace /url\((['"])([^'"]*)\1\)/gm, (_1, _2, filePath) ->
+    ## the href getter will always resolve an absolute path taking into
+    ## account things like the current URL and the <base> tag
+    a = doc.createElement("a")
+    a.href = filePath
+    return "url('#{a.href}')"
 
 module.exports = ($Cypress) ->
   $Cypress.extend
@@ -84,14 +105,17 @@ module.exports = ($Cypress) ->
 
     _getStylesFor: (location) ->
       _.map @cy.$$(location).find("link[rel='stylesheet'],style"), (stylesheet) =>
+        ## in cases where we can get the CSS as a string, make the paths
+        ## absolute so that when they're restored by appending them to the page
+        ## in <style> tags, background images and fonts still properly load
         if stylesheet.href
           ## if there's an href, it's a link tag
           ## return the CSS rules as a string, or, if cross-domain,
           ## a reference to the stylesheet's href
-          getCssRulesString(@_stylesheets[stylesheet.href]) or {href: stylesheet.href}
+          makePathsAbsoluteToStylesheet(getCssRulesString(@_stylesheets[stylesheet.href]), stylesheet.href) or {href: stylesheet.href}
         else
           ## otherwise, it's a style tag, and we can just grab its content
-          @cy.$$(stylesheet).text()
+          makePathsAbsoluteToDoc(@cy.$$(stylesheet).text())
 
     _indexedStylesheets: ->
       _.reduce @cy.privateState("document").styleSheets, (memo, stylesheet) ->
