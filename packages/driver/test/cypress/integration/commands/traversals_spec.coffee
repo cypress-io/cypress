@@ -2,6 +2,8 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 utils = Cypress.utils
 
+helpers = require("../../support/helpers")
+
 describe "src/cy/commands/traversals", ->
   before ->
     cy
@@ -40,7 +42,7 @@ describe "src/cy/commands/traversals", ->
         beforeEach ->
           Cypress.config("defaultCommandTimeout", 100)
 
-        it.only "throws when options.length isnt a number", (done) ->
+        it "throws when options.length isnt a number", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
             done()
@@ -84,8 +86,6 @@ describe "src/cy/commands/traversals", ->
           cy.get("#list")[name](arg)
 
         it "returns no elements", (done) ->
-          cy._timeout(100)
-
           errIncludes = (el, node) =>
             node = utils.stringifyElement cy.$$(node), "short"
 
@@ -150,7 +150,7 @@ describe "src/cy/commands/traversals", ->
             yielded = Cypress.utils.getDomElements($el)
 
             _.extend obj, {
-              "Applied To": getFirstSubjectByName.call(@, "get").get(0)
+              "Applied To": helpers.getFirstSubjectByName("get").get(0)
               Yielded: yielded
               Elements: $el.length
             }
@@ -158,9 +158,8 @@ describe "src/cy/commands/traversals", ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq obj
 
   it "eventually resolves", ->
-    _.delay ->
+    cy.on "command:retry", _.after 2, ->
       cy.$$("button:first").text("foo").addClass("bar")
-    , 100
 
     cy.root().find("button:first").should("have.text", "foo").and("have.class", "bar")
 
@@ -213,16 +212,23 @@ describe "src/cy/commands/traversals", ->
     logs = []
 
     cy.on "log:added", (attrs, log) ->
-      logs.push log
+      if attrs.name isnt "assert"
+        logs.push(log)
 
     cy.get("button").first({log: false}).then ($button) ->
       expect($button.length).to.eq(1)
-      expect(@logs.length).to.eq(1)
+      expect(logs.length).to.eq(1)
 
   describe "errors", ->
     beforeEach ->
-      @allowErrors()
-      cy._timeout(300)
+      Cypress.config("defaultCommandTimeout", 100)
+
+      @logs = []
+
+      cy.on "log:added", (attrs, log) =>
+        @logs.push(log)
+
+      return null
 
     it "errors after timing out not finding element", (done) ->
       cy.on "fail", (err) ->
@@ -232,14 +238,7 @@ describe "src/cy/commands/traversals", ->
       cy.get("#list li:last").find("span")
 
     it "throws once when incorrect sizzle selector", (done) ->
-      @allowErrors()
-
-      logs = []
-
-      cy.on "log:added", (attrs, log) ->
-        logs.push(log)
-
-      cy.on "fail", (err) ->
+      cy.on "fail", (err) =>
         expect(@logs.length).to.eq 2
         done()
 
@@ -248,13 +247,14 @@ describe "src/cy/commands/traversals", ->
     it "logs out $el when existing $el is found even on failure", (done) ->
       button = cy.$$("#button").hide()
 
-      cy.on "log:added", (attrs, @log) =>
-
       cy.on "fail", (err) =>
-        expect(lastLog.get("state")).to.eq("failed")
-        expect(lastLog.get("error")).to.eq err
-        expect(lastLog.get("$el").get(0)).to.eq button.get(0)
-        consoleProps = @lastLog.invoke("consoleProps")
+        log = @logs[1]
+
+        expect(log.get("state")).to.eq("failed")
+        expect(err.message).to.include(log.get("error").message)
+        expect(log.get("$el").get(0)).to.eq button.get(0)
+
+        consoleProps = log.invoke("consoleProps")
         expect(consoleProps.Yielded).to.eq button.get(0)
         expect(consoleProps.Elements).to.eq button.length
         done()
