@@ -420,33 +420,14 @@ class $Cypress
 
         prop and prop[method].apply(prop, arguments)
 
-## attach these to the prototype
-## instead of $Cypress
+## attaching these so they are accessible
+## via the runner + integration spec helper
 $Cypress.$ = $
-$Cypress.Chai = $Chai
-$Cypress.Chainer = $Chainer
-$Cypress.Command = $Command
-$Cypress.Commands = $Commands
-$Cypress.Cookies = $Cookies
-$Cypress.Cy = $Cy
-$Cypress.Dom = $Cypress.prototype.Dom = $Dom
-$Cypress.Events = $Events
-$Cypress.ErrorMessages = $ErrorMessages
-$Cypress.Keyboard = $Keyboard
-$Cypress.Log = $Log
-$Cypress.Location = $Location
-$Cypress.LocalStorage = $LocalStorage
-$Cypress.Mocha = $Mocha
-$Cypress.Runner = $Runner
-$Cypress.Server = $Cypress.prototype.Server = $Server
-$Cypress.utils = $utils
 
 ## expose globally (temporarily for the runner)
 window.$Cypress = $Cypress
 
 module.exports = $Cypress
-
-
 
 ## QUESTION:
 ## Do we need to expose $Cypress?
