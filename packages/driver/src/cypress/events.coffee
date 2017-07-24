@@ -8,7 +8,7 @@
   # @_events.splice(index, 1)
 
 _ = require("lodash")
-EE = require("events")
+EE = require("eventemitter2")
 log = require("debug")("cypress:driver")
 Promise = require("bluebird")
 
