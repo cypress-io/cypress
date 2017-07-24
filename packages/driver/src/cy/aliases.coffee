@@ -25,10 +25,7 @@ validateAlias = (alias) ->
     $utils.throwErrByPath "as.reserved_word", { args: { alias } }
 
 create = (state) ->
-  assign = (str, obj) ->
-    state("runnable").ctx[str] = obj
-
-  addAlias = (aliasObj) ->
+  addAlias = (ctx, aliasObj) ->
     { alias, subject } = aliasObj
 
     aliases = state("aliases") ? {}
@@ -38,7 +35,7 @@ create = (state) ->
     remoteSubject = cy.getRemotejQueryInstance(subject)
 
     ## assign the subject to our runnable ctx
-    assign(alias, remoteSubject ? subject)
+    ctx[alias] = remoteSubject ? subject
 
   getNextAlias = ->
     next = state("current").get("next")

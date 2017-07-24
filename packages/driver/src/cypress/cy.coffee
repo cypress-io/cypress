@@ -98,6 +98,11 @@ create = (specWindow, Cypress, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
+  runnableCtx = ->
+    ensures.ensureRunnable()
+
+    state("runnable").ctx
+
   enqueue = (obj) ->
     Cypress.action("cy:command:enqueue", obj)
 
@@ -327,6 +332,10 @@ create = (specWindow, Cypress, state, config, log) ->
 
       cy.removeAllListeners()
 
+    addCommandSync: (name, fn) ->
+      cy[name] = ->
+        fn.apply(runnableCtx(), arguments)
+
     addCommand: ({name, fn, type, enforceDom}) ->
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
@@ -388,8 +397,7 @@ create = (specWindow, Cypress, state, config, log) ->
               return ret ? subject
 
       cy[name] = (args...) ->
-        if not state("runnable")
-          $utils.throwErrByPath("miscellaneous.outside_test")
+        ensures.ensureRunnable()
 
         ## this is the first call on cypress
         ## so create a new chainer instance
@@ -724,7 +732,7 @@ create = (specWindow, Cypress, state, config, log) ->
           args[0] = args[0].call(@)
 
         ## run the command's fn with runnable's context
-        ret = command.get("fn").apply(state("runnable").ctx, args)
+        ret = command.get("fn").apply(runnableCtx(), args)
 
         ## allow us to immediately tap into
         ## return value of our command

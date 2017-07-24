@@ -5,6 +5,8 @@ $utils = require("../../cypress/utils")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addUtility({
     as: (subject, str) ->
+      ctx = @
+
       cy.ensureParent()
       cy.ensureSubject()
 
@@ -38,7 +40,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             aliasType: if $utils.hasElement(subject) then "dom" else "primitive"
           })
 
-      cy.addAlias({subject: subject, command: prev, alias: str})
+      cy.addAlias(ctx, {subject: subject, command: prev, alias: str})
 
       return subject
   })

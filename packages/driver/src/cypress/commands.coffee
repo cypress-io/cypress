@@ -97,7 +97,7 @@ create = (Cypress, cy, state, config, log) ->
       null
 
     addSync: (name, fn) ->
-      cy[name] = fn
+      cy.addCommandSync(name, fn)
 
     addAll: (options = {}, obj) ->
       if not obj
