@@ -245,7 +245,6 @@ describe "src/cy/commands/agents", ->
         @stubLogs = []
 
         cy.on "log:added", (attrs, log) =>
-          debugger
           if attrs.instrument is "agent"
             @agentLogs.push(log)
 
@@ -381,7 +380,7 @@ describe "src/cy/commands/agents", ->
         it "includes return value", ->
           expect(@consoleProps["Yielded"]).to.eq("return value")
 
-  context.only ".spy(obj, 'method')", ->
+  context ".spy(obj, 'method')", ->
     beforeEach ->
       @logs = []
       cy.on "log:added", (attrs, log) =>
@@ -442,11 +441,11 @@ describe "src/cy/commands/agents", ->
 
   context ".agents", ->
     beforeEach ->
-      @sandbox.spy console, "warn"
+      cy.spy(top.console, "warn")
       @agents = cy.agents()
 
     it "logs deprecation warning", ->
-      expect(console.warn).to.be.calledWith("Cypress Warning: cy.agents() is deprecated. Use cy.stub() and cy.spy() instead.")
+      expect(top.console.warn).to.be.calledWith("Cypress Warning: cy.agents() is deprecated. Use cy.stub() and cy.spy() instead.")
 
     it "synchronously returns #spy and #stub methods", ->
       expect(@agents.spy).to.be.a("function")
