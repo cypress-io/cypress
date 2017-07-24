@@ -695,6 +695,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
     set: (command) ->
       state("current", command)
+      state("chainerId", command.get("chainerId"))
 
       promise = if state("ready")
         Promise.resolve state("ready").promise
@@ -722,13 +723,8 @@ create = (specWindow, Cypress, state, config, log) ->
         if _.isFunction(args[0]) and args[0]._invokeImmediately
           args[0] = args[0].call(@)
 
-        ## rewrap all functions by checking
-        ## the chainer id before running its fn
-        ## TODO: fix this
-        # @_checkForNewChain command.get("chainerId")
-
-        ## run the command's fn
-        ret = command.get("fn").apply(command.get("ctx"), args)
+        ## run the command's fn with runnable's context
+        ret = command.get("fn").apply(state("runnable").ctx, args)
 
         ## allow us to immediately tap into
         ## return value of our command
