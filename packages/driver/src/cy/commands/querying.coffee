@@ -214,7 +214,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## attempt to query for the elements by withinSubject context
         ## and catch any sizzle errors!
         try
-          $el = @$$(selector, options.withinSubject)
+          $el = cy.$$(selector, options.withinSubject)
         catch e
           e.onFail = -> options._log.error(e)
           throw e
@@ -324,7 +324,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getOpts = _.extend _.clone(options),
         # error: getErr(text, phrase)
-        withinSubject: subject or cy.state("withinSubject") or @$$("body")
+        withinSubject: subject or cy.state("withinSubject") or cy.$$("body")
         filter: true
         log: false
         # retry: false ## dont retry because we perform our own element validation
