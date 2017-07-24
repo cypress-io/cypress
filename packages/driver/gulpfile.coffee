@@ -24,6 +24,13 @@ log = (obj = {}) ->
   $.util.log _.compact(args)...
   $.util.beep()
 
+jsOptions = {
+  entries: ["src/main.coffee"]
+  extensions: [".coffee", ".js"]
+  destination: "dist"
+  outputName: "driver.js"
+}
+
 integrationSpecHelperOptions = {
   entries: ["test/support/integration_spec_helper.coffee"]
   extensions: [".coffee", ".js"]
@@ -49,6 +56,17 @@ server = { runSpec: -> }
 
 srcDir = path.join(__dirname, "src")
 testDir = path.join(__dirname, "test")
+
+compileJs = ->
+  browserify({
+    entries: jsOptions.entries,
+    extensions: jsOptions.extensions
+  })
+    .transform(coffeeify, {})
+    .bundle()
+    .on("error", log)
+    .pipe(source(jsOptions.outputName))
+    .pipe(gulp.dest(jsOptions.destination))
 
 matchingSpecFile = (filePath) ->
   ## only files in src/ having matching spec files
@@ -123,16 +141,16 @@ watchSpecs = ->
     server.runSpec(event.path)
 
 gulp.task "watch", ["ensure:dist:dir"], ->
-  watchSpecHelper = bundleJs(integrationSpecHelperOptions)
-  watchIndex = bundleJs(specIndexOptions)
-  watchRunner = bundleJs(specRunnerOptions)
-  watchSpecs()
-  Promise.all([watchSpecHelper.promise, watchIndex.promise, watchRunner.promise])
-  .then ->
-    server = require("#{__dirname}/test/support/server/server.coffee")
-    server.runSpecsContinuously()
+  watchJs = bundleJs(jsOptions)
+  # watchIndex = bundleJs(specIndexOptions)
+  # watchRunner = bundleJs(specRunnerOptions)
+  # watchSpecs()
+  # Promise.all([watchJs.promise, watchIndex.promise, watchRunner.promise])
+  # .then ->
+    # server = require("#{__dirname}/test/support/server/server.coffee")
+    # server.runSpecsContinuously()
 
-  return watchSpecHelper.process
+  return watchJs.process
 
 gulp.task "ensure:dist:dir", ->
   fs.ensureDirAsync(path.resolve("./dist-test"))
@@ -145,3 +163,5 @@ gulp.task "test", ["ensure:dist:dir"], ->
   .then ->
     server = require("#{__dirname}/test/support/server/server.coffee")
     server.runAllSpecsOnce()
+
+gulp.task "build", compileJs
