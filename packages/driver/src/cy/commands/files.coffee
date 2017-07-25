@@ -4,22 +4,6 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-readFile = (file, options) =>
-  new Promise (resolve, reject) ->
-    Cypress.trigger "read:file", file, options, (resp) ->
-      if err = resp.__error
-        reject(err)
-      else
-        resolve(resp)
-
-writeFile = (file, contents, options) =>
-  new Promise (resolve, reject) ->
-    Cypress.trigger "write:file", file, contents, options, (resp = {}) ->
-      if err = resp.__error
-        reject(err)
-      else
-        resolve(resp)
-
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     readFile: (file, encoding, options = {}) ->
@@ -46,7 +30,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       do verifyAssertions = =>
-        readFile(file, _.pick(options, "encoding"))
+        Cypress.automation("read:file", file, _.pick(options, "encoding"))
         .catch (err) =>
           if err.code is 'ENOENT'
             return {
@@ -112,7 +96,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.isObject(contents)
         contents = JSON.stringify(contents, null, 2)
 
-      writeFile(fileName, contents, _.pick(options, "encoding"))
+      Cypress.automation("write:file", fileName, contents, _.pick(options, "encoding"))
       .then ({ contents, filePath }) ->
         consoleProps["File Path"] = filePath
         consoleProps["Contents"] = contents
