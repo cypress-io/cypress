@@ -55,9 +55,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       @state "onPaused", (fn) ->
         next = @_getNextQueuedCommand()
 
-        if next and $utils.isCommandFromMocha(next)
-          return fn.call(@)
-
         Cypress.trigger("paused", next?.get("name"))
 
         ## backup the current timeout

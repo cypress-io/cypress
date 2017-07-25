@@ -95,7 +95,7 @@ testAfterRun = (test, Cypress) ->
         ## cy.as() aliases or anything set from 'this'
         ## so we aggressively perform GC and prevent obj
         ## ref's from building up
-        test.ctx[key] = null
+        test.ctx[key] = undefined
 
     ## reset the fn to be empty function
     ## for GC to be aggressive and prevent
@@ -140,7 +140,7 @@ forceGc = (obj) ->
   ## references to ctx, and removes callback
   ## functions for closures
   for own key, value of obj.ctx
-    obj.ctx[key] = null
+    obj.ctx[key] = undefined
 
   if obj.fn
     obj.fn = ->

@@ -321,11 +321,6 @@ module.exports = {
       args.length is 3 and
         _.every(args, _.isFunction)
 
-  isCommandFromMocha: (cmd) ->
-    not cmd.get("next") and
-      cmd.get("args").length is 2 and
-        (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
-
   wrapInjQuery: (obj) ->
     if @isJqueryInstance(obj) then obj else $(obj)
 
