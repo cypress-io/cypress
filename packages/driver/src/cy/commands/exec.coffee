@@ -4,15 +4,6 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
-exec = (options) =>
-  new Promise (resolve, reject) ->
-    Cypress.trigger "exec", options, (resp) ->
-      if err = resp.__error
-        err.timedout = resp.timedout
-        reject(err)
-      else
-        resolve(resp)
-
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     exec: (cmd, options = {}) ->
@@ -45,7 +36,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       isTimedoutError = (err) -> err.timedout
 
-      exec(_.pick(options, "cmd", "timeout", "env"))
+      Cypress.automation("exec", _.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
       .then (result) ->
         if options._log
