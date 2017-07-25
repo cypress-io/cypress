@@ -52,7 +52,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log = Cypress.log()
 
       do resolveTitle = =>
-        doc = @state("document")
+        doc = state("document")
 
         title = (doc and doc.title) or ""
 
@@ -67,7 +67,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log = Cypress.log()
 
       getWindow = =>
-        window = @state("window")
+        window = state("window")
         $utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window
@@ -94,7 +94,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log = Cypress.log()
 
       getDocument = =>
-        win = @state("window")
+        win = state("window")
         ## TODO: add failing test around logging twice
         $utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 
