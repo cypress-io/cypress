@@ -30,6 +30,12 @@ Public projects will be free but will likely have a monthly usage cap on them.
 
 We will offer similar pricing models of other Developer Tools you are familiar with using.
 
+## {% fa fa-angle-right %} What is the difference between public and private projects?
+
+**A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs, screenshots, and videos for public projects.
+
+**A private project** means that only {% url 'users' organizations-dashboard#Inviting-Users %} you explicitly invite to your {% url 'organization' organizations-dashboard %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
+
 ## {% fa fa-angle-right %} How is this different than CI?
 
 Cypress is **complimentary** to your {% url "CI provider" continuous-integration %}, and plays a completely different role.
@@ -51,15 +57,6 @@ No, although we are looking to build an on-premise version of the Dashboard for 
 Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
 You can simply always run your tests in CI using {% url "`cypress run`" command-line#cypress-run %} without the `--record` flag which does not communicate with our external servers and will not record any test results.
-
-## {% fa fa-angle-right %} What is the difference between public and private projects?
-
-**A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs, screenshots, and videos for public projects.
-
-**A private project** means that only {% url 'users' organizations-dashboard#Inviting-Users %} you explicitly invite to your {% url 'organization' organizations-dashboard %} can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
-
-The Record Key has nothing to do with *viewing* build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
-
 
 ## {% fa fa-angle-right %} What does Cypress record?
 
