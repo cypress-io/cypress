@@ -40,8 +40,12 @@ describe "src/cy/commands/agents", ->
       beforeEach ->
         @originalCalled = false
         @obj = {
+          bar: "bar"
           foo: => @originalCalled = true
         }
+
+        cy.stub(@obj, "bar", "baz")
+
         @replacementCalled = false
         @stub = cy.stub @obj, "foo", =>
           @replacementCalled = true
@@ -54,6 +58,9 @@ describe "src/cy/commands/agents", ->
         @obj.foo()
         expect(@originalCalled).to.be.false
         expect(@replacementCalled).to.be.true
+
+      it "replaces values", ->
+        expect(@obj.bar).to.eq("baz")
 
     describe ".resolves", ->
       beforeEach ->

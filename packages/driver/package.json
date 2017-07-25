@@ -65,8 +65,7 @@
     "react-dom": "^15.6.1",
     "run-sequence": "^1.0.2",
     "setimmediate": "^1.0.2",
-    "sinon": "cypress-io/sinon#bd2fc5665a7f83acd9931bc9aca212fd21bf3ef2",
-    "sinon-as-promised": "3.0.1",
+    "sinon": "2.3.8",
     "socket.io": "^1.7.3",
     "socket.io-client": "^1.7.3",
     "string-to-stream": "^1.0.1",
@@ -74,6 +73,5 @@
     "url-parse": "^1.1.7",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0"
-  },
-  "dependencies": {}
+  }
 }
