@@ -5,15 +5,55 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
+takeScreenshot = (runnable, name, log, timeout) ->
+  titles = [runnable.title]
+
+  getParentTitle = (runnable) ->
+    if p = runnable.parent
+      if t = p.title
+        titles.unshift(t)
+
+      getParentTitle(p)
+
+  getParentTitle(runnable)
+
+  props = {
+    name:   name
+    titles: titles
+    testId: runnable.id
+  }
+
+  automate = ->
+    Cypress.automation("take:screenshot", props)
+
+  if not timeout
+    automate()
+  else
+    ## need to remove the current timeout
+    ## because we're handling timeouts ourselves
+    cy.clearTimeout("take:screenshot")
+
+    automate()
+    .timeout(timeout)
+    .catch (err) ->
+      $utils.throwErr(err, { onFail: log })
+    .catch Promise.TimeoutError, (err) ->
+      $utils.throwErrByPath "screenshot.timed_out", {
+        onFail: log
+        args: {
+          timeout: timeout
+        }
+      }
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:after:hooks", (test, runnable) ->
-    if test.err and Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
+    if test.err and Cypress.isHeadless and config("screenshotOnHeadlessFailure")
       ## give the UI some time to render the error
       ## because we were noticing that errors were not
       ## yet displayed in the UI when running headlessly
       Promise.delay(75)
       .then =>
-        @_takeScreenshot(runnable)
+        takeScreenshot(runnable)
 
   Commands.addAll({
     screenshot: (name, options = {}) ->
@@ -22,11 +62,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         name = null
 
       ## TODO: handle hook titles
-      runnable = @state("runnable")
+      runnable = state("runnable")
 
       _.defaults options, {
         log: true
-        timeout: Cypress.config("responseTimeout")
+        timeout: config("responseTimeout")
       }
 
       if options.log
@@ -38,7 +78,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      @_takeScreenshot(runnable, name, options._log, options.timeout)
+      takeScreenshot(runnable, name, options._log, options.timeout)
       .then (resp) ->
         _.extend consoleProps, {
           Saved: resp.path
@@ -46,57 +86,3 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         }
       .return(null)
   })
-
-  return {
-    _takeScreenshot: (runnable, name, log, timeout) ->
-      titles = [runnable.title]
-
-      getParentTitle = (runnable) ->
-        if p = runnable.parent
-          if t = p.title
-            titles.unshift(t)
-
-          getParentTitle(p)
-
-      getParentTitle(runnable)
-
-      props = {
-        name:   name
-        titles: titles
-        testId: runnable.id
-      }
-
-      automate = ->
-        new Promise (resolve, reject) ->
-          fn = (resp) =>
-            if e = resp.__error
-              err = $utils.cypressErr(e)
-              err.name = resp.__name
-              err.stack = resp.__stack
-
-              try
-                $utils.throwErr(err, { onFail: log })
-              catch e
-                reject(e)
-            else
-              resolve(resp.response)
-
-          Cypress.trigger("take:screenshot", props, fn)
-
-      if not timeout
-        automate()
-      else
-        ## need to remove the current timeout
-        ## because we're handling timeouts ourselves
-        cy.clearTimeout()
-
-        automate()
-        .timeout(timeout)
-        .catch Promise.TimeoutError, (err) ->
-          $utils.throwErrByPath "screenshot.timed_out", {
-            onFail: log
-            args: {
-              timeout: timeout
-            }
-          }
-  }
