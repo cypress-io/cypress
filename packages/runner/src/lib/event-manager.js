@@ -114,13 +114,13 @@ const eventManager = {
     reporterBus.on('runner:resume', () => {
       if (!Cypress) return
 
-      Cypress.trigger('resume:all')
+      Cypress.emit('resume:all')
     })
 
     reporterBus.on('runner:next', () => {
       if (!Cypress) return
 
-      Cypress.trigger('resume:next')
+      Cypress.emit('resume:next')
     })
 
     reporterBus.on('runner:stop', () => {

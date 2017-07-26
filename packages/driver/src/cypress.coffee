@@ -287,6 +287,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:paused"
+        @emit("paused", args...)
+
       when "cy:viewport:changed"
         @emit("viewport:changed", args...)
 
@@ -315,7 +318,7 @@ class $Cypress
       when "spec:script:error"
         @emit("script:error", args...)
 
-  request: (eventName, args...) ->
+  backend: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->
         ## TODO: normalize this to reply.error and reply.response
