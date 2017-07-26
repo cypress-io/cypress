@@ -19,13 +19,6 @@ display = (name) ->
     when "spy"  then "Spied Obj"
     when "stub" then "Stubbed Obj"
 
-hasMatchingFake = (agent, args) ->
-  _.some agent.fakes, (fake) ->
-    fake.matches(args)
-
-getName = (obj) ->
-  "#{obj.name}-#{obj.count}"
-
 formatArgs = (args) ->
   _.map args, (arg) -> $utils.stringifyArg(arg)
 
@@ -39,25 +32,18 @@ getMessage = (method, args) ->
   "#{method}(#{args.join(', ')})"
 
 onInvoke = (Cypress, obj, args) ->
-  if log = obj.log
-    ## increment the callCount on the agent instrument log
-    log.set "callCount", log.get("callCount") + 1
-    alias = log.get("alias")
-
   agent = obj.agent
+  agentName = agent._cyName
 
-  # if agent.fakes?.length and hasMatchingFake(agent, args)
-    ## this is a parent fake and there is a matching child,
-    ## let them log instead so there isn't a duplicate
-    # return
+  ## fakes are children of the agent created with `withArgs`
+  fakes = agent.matchingFakes(args)
 
-  callCount = agent.callCount
-
-  if parent = agent.parent
-    parentCallCount = parent.callCount
+  agent._cyLog.set("callCount", agent.callCount)
+  for fake in fakes
+    fake._cyLog.set("callCount", fake.callCount)
 
   logProps = {
-    name:     getName(obj)
+    name:     agentName
     message:  obj.message
     error:    obj.error
     type:     "parent"
@@ -68,39 +54,33 @@ onInvoke = (Cypress, obj, args) ->
       consoleObj = {}
       consoleObj.Command = null
       consoleObj.Error = null
-      consoleObj.Event = "#{getName(obj)} called"
+      consoleObj.Event = "#{agentName} called"
 
-      if parent
-        parentCount = ("#{obj.count}").replace(/\.\d+$/, '')
-        parentName = "#{obj.name}-#{parentCount}"
-        name = getName(obj)
-        consoleObj[parentName] = parent
-        consoleObj["#{parentName} call #"] = parentCallCount
-        if parent._cyAlias
-          consoleObj["#{parentName} alias"] = parent._cyAlias
-        consoleObj[name] = agent
-        consoleObj["#{name} call #"] = callCount
-        if alias
-          consoleObj["#{name} alias"] = alias
-        ## typo in sinon! will be fixed in 2.0
-        consoleObj["#{name} matching arguments"] = agent.matchingAguments
-      else
-        consoleObj[obj.name] = agent
-        consoleObj["Call #"] = callCount
-        if alias
-          consoleObj.Alias = alias
+      consoleObj[agent._cyType] = agent
+      consoleObj["Call #"] = agent.callCount
+      consoleObj.Alias = agent._cyAlias
 
       consoleObj[display(obj.name)] = obj.obj
       consoleObj.Arguments = obj.call.args
-      consoleObj.Context =   obj.call.thisValue
-      consoleObj.Yielded =  obj.call.returnValue
+      consoleObj.Context = obj.call.thisValue
+      consoleObj.Yielded = obj.call.returnValue
+
       if obj.error
         consoleObj.Error = obj.error.stack
+
+      for fake in fakes
+        name = fake._cyName
+        count = fake._cyCount
+        consoleObj["Child #{fake._cyType} (#{count})"] = "---"
+        consoleObj["  #{count} #{fake._cyType}"] = fake
+        consoleObj["  #{count} call #"] = fake.callCount
+        consoleObj["  #{count} alias"] = fake._cyAlias
+        consoleObj["  #{count} matching arguments"] = fake.matchingArguments
 
       consoleObj
   }
 
-  aliases = _.compact([agent.parent?._cyAlias, alias])
+  aliases = _.compact([agent._cyAlias].concat(_.map(fakes, "_cyAlias")))
   if aliases.length
     logProps.alias = aliases
     logProps.aliasType = "agent"
@@ -158,19 +138,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       callCount: 0
     })
 
+    agent._cyCount = count
+    agent._cyLog = log
+    agent._cyName = name
+    agent._cyType = type
+
     invoke = agent.invoke
 
     agent.invoke = (func, thisValue, args) ->
       error = null
       returned = null
-
-      agents = agent.matchingFakes(args)
-
-      if agents.length
-        for agent in agents
-          agent.invoke(func, thisValue, args)
-
-        return
 
       ## because our spy could potentially fail here
       ## we need to wrap this in a try / catch
@@ -216,38 +193,39 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         aliasType: "agent"
       })
       agent.named(alias)
+      agent
 
     withArgs = agent.withArgs
-
     agent.withArgs = ->
       childCount = counts.children[name] += 1
       wrap(ctx, type, withArgs.apply(@, arguments), obj, method, "#{count}.#{childCount}")
 
     return agent
 
+  spy = (obj, method) ->
+    theSpy = sandbox.spy(obj, method)
+    wrap(@, "spy", theSpy, obj, method)
+
+  stub = (obj, method, replacerFnOrValue) ->
+    theStub = sandbox.stub.call(sandbox, obj, method)
+
+    ## sinon 2 changed the stub signature
+    ## this maintains the 3-argument signature so it's not breaking
+    if arguments.length is 3
+      if _.isFunction(replacerFnOrValue)
+        theStub = theStub.callsFake(replacerFnOrValue)
+      else
+        theStub = theStub.value(replacerFnOrValue)
+
+    wrap(@, "stub", theStub, obj, method)
+
   Commands.addAllSync({
-    spy: (obj, method) ->
-      spy = sandbox.spy(obj, method)
-      wrap(@, "spy", spy, obj, method)
+    spy: spy
 
-    stub: (obj, method, replacerFnOrValue) ->
-      stub = sandbox.stub.call(sandbox, obj, method)
-
-      ## only if we had 3 arguments normalize this
-      ## API to sinon
-      if arguments.length is 3
-        if _.isFunction(replacerFnOrValue)
-          stub = stub.callsFake(replacerFnOrValue)
-        else
-          stub = stub.value(replacerFnOrValue)
-
-      wrap(@, "stub", stub, obj, method)
+    stub: stub
 
     agents: ->
       $utils.warning "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
 
-      {
-        stub: @stub
-        spy: @spy
-      }
+      return {stub, spy}
   })

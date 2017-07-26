@@ -135,9 +135,9 @@ describe "src/cy/commands/agents", ->
             @obj.foo("foo")
             expect(@logs.length).to.eq(3)
 
-          it "includes child count in name", ->
+          it "includes count in name", ->
             @obj.foo("foo")
-            expect(@logs[2].get("name")).to.eq("stub-1.1")
+            expect(@logs[2].get("name")).to.eq("stub-1")
 
           it "has no alias if no aliases set", ->
             @obj.foo("foo")
@@ -167,32 +167,38 @@ describe "src/cy/commands/agents", ->
             beforeEach ->
               @stub.as("objFoo")
               @stubWithArgs.as("withFoo")
+              @stub.withArgs("foo", "baz").as("withFooBaz")
+              @obj.foo("foo")
               @obj.foo("foo", "baz")
-              @consoleProps = @logs[2].get("consoleProps")()
+              @consoleProps = @logs[4].get("consoleProps")()
 
             it "includes the event", ->
-              expect(@consoleProps["Event"]).to.eq("stub-1.1 called")
+              expect(@consoleProps["Event"]).to.eq("stub-1 called")
 
-            it "includes reference to parent stub", ->
-              expect(@consoleProps["stub-1"]).to.be.a("function")
+            it "includes reference to stub", ->
+              expect(@consoleProps["stub"]).to.be.a("function")
 
-            it "includes parent call number", ->
-              expect(@consoleProps["stub-1 call #"]).to.eq(1)
+            it "includes call number", ->
+              expect(@consoleProps["Call #"]).to.eq(2)
 
-            it "includes parent alias", ->
-              expect(@consoleProps["stub-1 alias"]).to.eq("objFoo")
+            it "includes alias", ->
+              expect(@consoleProps["Alias"]).to.eq("objFoo")
 
-            it "includes reference to withArgs stub", ->
-              expect(@consoleProps["stub-1.1"]).to.be.a("function")
+            it "includes references to withArgs stubs", ->
+              expect(@consoleProps["  1.1 stub"]).to.be.a("function")
+              expect(@consoleProps["  1.2 stub"]).to.be.a("function")
 
-            it "includes withArgs call number", ->
-              expect(@consoleProps["stub-1.1 call #"]).to.eq(1)
+            it "includes withArgs call numbers", ->
+              expect(@consoleProps["  1.1 call #"]).to.eq(2)
+              expect(@consoleProps["  1.2 call #"]).to.eq(1)
 
-            it "includes withArgs alias", ->
-              expect(@consoleProps["stub-1.1 alias"]).to.eq("withFoo")
+            it "includes withArgs aliases", ->
+              expect(@consoleProps["  1.1 alias"]).to.eq("withFoo")
+              expect(@consoleProps["  1.2 alias"]).to.eq("withFooBaz")
 
             it "includes withArgs matching arguments", ->
-              expect(@consoleProps["stub-1.1 matching arguments"]).to.eql(["foo"])
+              expect(@consoleProps["  1.1 matching arguments"]).to.eql(["foo"])
+              expect(@consoleProps["  1.2 matching arguments"]).to.eql(["foo", "baz"])
 
     describe ".as", ->
       beforeEach ->
@@ -316,7 +322,7 @@ describe "src/cy/commands/agents", ->
           it "truncates if more than 3 args", ->
             expect(@logs[4].get("message")).to.eq("foo(1, 2, 3, ...)")
 
-        context "in assertion", ->
+        context.skip "in assertion", ->
           beforeEach ->
             cy.on "log:added", (attrs, log) =>
               @lastLog = log
@@ -370,7 +376,7 @@ describe "src/cy/commands/agents", ->
           expect(@consoleProps["stub"]).to.be.a("function")
 
         it "includes call number", ->
-          expect(@consoleProps["Call #"]).to.eq(1)
+          expect(@consoleProps["Call #"]).to.eq(2)
 
         it "includes alias", ->
           expect(@consoleProps["Alias"]).to.eq("objFoo")
