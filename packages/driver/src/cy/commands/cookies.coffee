@@ -46,7 +46,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     else
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      cy.clearTimeout()
+      cy.clearTimeout(event)
 
       automate()
       .timeout(timeout)
@@ -81,7 +81,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     getCookie: (name, options = {}) ->
       _.defaults options, {
         log: true
-        timeout: Cypress.config("responseTimeout")
+        timeout: config("responseTimeout")
       }
 
       if options.log
@@ -112,7 +112,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     getCookies: (options = {}) ->
       _.defaults options, {
         log: true
-        timeout: Cypress.config("responseTimeout")
+        timeout: config("responseTimeout")
       }
 
       if options.log
@@ -143,8 +143,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         secure: false
         httpOnly: false
         log: true
-        expiry: @_addTwentyYears()
-        timeout: Cypress.config("responseTimeout")
+        expiry: $utils.addTwentyYears()
+        timeout: config("responseTimeout")
       }
 
       cookie = _.pick(options, COOKIE_PROPS)
@@ -174,7 +174,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     clearCookie: (name, options = {}) ->
       _.defaults options, {
         log: true
-        timeout: Cypress.config("responseTimeout")
+        timeout: config("responseTimeout")
       }
 
       if options.log
@@ -208,7 +208,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     clearCookies: (options = {}) ->
       _.defaults options, {
         log: true
-        timeout: Cypress.config("responseTimeout")
+        timeout: config("responseTimeout")
       }
 
       if options.log
@@ -217,6 +217,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           displayName: "clear cookies"
           consoleProps: ->
             obj = {}
+
+            debugger
 
             obj["Yielded"] = "null"
 
@@ -231,6 +233,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getAndClear(options._log, options.timeout)
       .then (resp) ->
+        debugger
         options.cookies = resp
 
         ## null out the current subject
