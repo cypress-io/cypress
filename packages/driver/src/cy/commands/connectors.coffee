@@ -28,18 +28,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       fn = options
       options = {}
 
-    ## if this is the very last command we know its the 'then'
-    ## called by mocha.  in this case, we need to defer its
-    ## fn callback else we will not properly finish the run
-    ## of our commands, which ends up duplicating multiple commands
-    ## downstream.  this is because this fn callback forces mocha
-    ## to continue synchronously onto tests (if for instance this
-    ## 'then' is called from a hook) - by defering it, we finish
-    ## resolving our deferred.
-    current = state("current")
-    if $utils.isCommandFromMocha(current)
-      return state("next", fn)
-
     _.defaults options,
       timeout: cy.timeout()
 
@@ -61,7 +49,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       state("onInjectCommand", null)
 
     cleanupEnqueue = =>
-      Cypress.removeListener("command:enqueued", enqueuedCommand)
+      cy.removeListener("command:enqueued", enqueuedCommand)
       null
 
     invokedCyCommand = false
@@ -71,7 +59,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     state("onInjectCommand", returnFalseIfThenable)
 
-    Cypress.once("command:enqueued", enqueuedCommand)
+    cy.once("command:enqueued", enqueuedCommand)
 
     ## this code helps juggle subjects forward
     ## the same way that promises work
@@ -96,9 +84,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if index > -1
           args.splice(index, 1, s)
 
-        Cypress.removeListener("next:subject:prepared", checkSubject)
+        cy.removeListener("next:subject:prepared", checkSubject)
 
-      Cypress.on("next:subject:prepared", checkSubject)
+      cy.on("next:subject:prepared", checkSubject)
 
     getRet = =>
       ret = fn.apply(state("runnable").ctx, args)
@@ -330,7 +318,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           Cypress.removeListener("next:subject:prepared", checkSubject)
 
-        Cypress.on("next:subject:prepared", checkSubject)
+        cy.on("next:subject:prepared", checkSubject)
 
       endEarly = false
 

@@ -104,8 +104,6 @@ create = (specWindow, Cypress, state, config, log) ->
     state("runnable").ctx
 
   enqueue = (obj) ->
-    Cypress.action("cy:command:enqueue", obj)
-
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
     ## index past the current index as opposed to
@@ -133,6 +131,8 @@ create = (specWindow, Cypress, state, config, log) ->
     index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
 
     queue.splice(index, 0, obj)
+
+    Cypress.action("cy:command:enqueued", obj)
 
   getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
     return null if not command
@@ -745,8 +745,8 @@ create = (specWindow, Cypress, state, config, log) ->
         if isCy(ret) then null else ret
 
       .then (subject) =>
-        ## if ret is a DOM element and its not an instance of our jQuery
-        if subject and $utils.hasElement(subject) and not $utils.isJqueryInstance(subject)
+        ## if ret is a DOM element and its not an instance of our own jQuery
+        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
           subject = $(subject)

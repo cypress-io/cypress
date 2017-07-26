@@ -41,7 +41,7 @@ create = (state, config, log) ->
     return if state("error")
 
     commands = queue.slice(index).reduce (memo, cmd) =>
-      if $utils.isCommandFromThenable(cmd) or $utils.isCommandFromMocha(cmd)
+      if $utils.isCommandFromThenable(cmd)
         memo
       else
         memo.push "- " + cmd.stringify()
