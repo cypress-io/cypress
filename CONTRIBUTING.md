@@ -15,7 +15,7 @@ Thanks for taking the time to contribute! :smile:
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - Write Code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
 
-##### Table of Contents
+## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
