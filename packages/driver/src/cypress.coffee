@@ -315,7 +315,7 @@ class $Cypress
       when "spec:script:error"
         @emit("script:error", args...)
 
-  request: (eventName, args...) ->
+  backend: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->
         ## TODO: normalize this to reply.error and reply.response

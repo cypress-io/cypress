@@ -12,22 +12,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## this is called at the beginning of run, so clear the cache
   cache = {}
 
-  fixture = (fixture, options) =>
-    new Promise (resolve) ->
-      Cypress.trigger("fixture", fixture, options, resolve)
+  reset = ->
+    cache = {}
+
+  Cypress.on("clear:fixtures:cache", reset)
 
   Commands.addAll({
-    fixture: (fx, args...) ->
+    fixture: (fixture, args...) ->
       ## if we already have cached
       ## this fixture then just return it
 
       ## always return a promise here
       ## to make our interface consistent
       ## for use by other code
-      if resp = cache[fx]
+      if resp = cache[fixture]
         ## clone the object first to prevent
         ## accidentally mutating the one in the cache
-        return Promise.resolve clone(resp)
+        return Promise.resolve(clone(resp))
 
       options = {}
 
@@ -38,31 +39,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when _.isObject(args[1])
           options = args[1]
 
-        when _.isString(args[0])
-          options.encoding = args[0]
+      if _.isString(args[0])
+        options.encoding = args[0]
 
-      _.defaults options, {
-        timeout: Cypress.config("responseTimeout")
-      }
+      timeout = options.timeout ? Cypress.config("responseTimeout")
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      cy.clearTimeout()
+      cy.clearTimeout("get:fixture")
 
-      fixture(fx, options)
-      .timeout(options.timeout)
+      Cypress.backend("get:fixture", fixture, _.pick(options, "encoding"))
+      .timeout(timeout)
       .then (response) =>
         if err = response.__error
           $utils.throwErr(err)
         else
           ## add the fixture to the cache
           ## so it can just be returned next time
-          cache[fx] = response
+          cache[fixture] = response
 
           ## return the cloned response
           return clone(response)
       .catch Promise.TimeoutError, (err) ->
         $utils.throwErrByPath "fixture.timed_out", {
-          args: { timeout: options.timeout }
+          args: { timeout }
         }
   })
