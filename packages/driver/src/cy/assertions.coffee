@@ -9,6 +9,7 @@ $utils = require("../cypress/utils")
 butRe = /,? but\b/
 bTagOpen = /\*\*/g
 bTagClosed = /\*\*/g
+stackTracesRe = / at .*\n/gm
 
 ## Rules:
 ## 1. always remove value
@@ -288,7 +289,7 @@ create = (state, queue, retryFn) ->
       message = message.substring(0, message.search(butRe))
 
     if value?.isSinonProxy
-      message = message.replace(/ at .*\n/gm, "\n")
+      message = message.replace(stackTracesRe, "\n")
 
     obj = parseValueActualAndExpected(value, actual, expected)
 
