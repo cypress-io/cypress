@@ -133,21 +133,23 @@ This repository is made up of various packages. They are discrete modules with d
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
-- [coffee]() A centralized version of CoffeeScript used for other packages.
-- [desktop-gui]() The front-end code for the Cypress Desktop GUI.
-- [driver]() The code that is used to drive the behavior of the API commands.
-- [electron]() The Cypress implementation of Electron.
-- [example]() Our example kitchen-sink application.
-- [extension]() The Cypress Chrome browser extension
-- [https-proxy]() This does https proxy for handling http certs and traffic.
-- [launcher]() Finds and launches browsers installed on your system.
-- [reporter]() The reporter shows the running results of the tests (The Command Log UI).
-- [root]() Dummy package pointing at the root of the repository.
-- [runner]() The runner is the minimal "chrome" around the user's application under test.
-- [server]() The <3 of Cypress. This orchestrates everything. The entire backend.
-- [socket]() A wrapper around socket.io to provide common libraries.
-- [static]() Serves static assets used in the Cypress GUI.
-- [ts]() A centralized version of typescript.
+ Folder Name | Purpose
+ ----------- | -------
+[coffee]() | A centralized version of CoffeeScript used for other packages.
+[desktop-gui]() | The front-end code for the Cypress Desktop GUI.
+[driver]() | The code that is used to drive the behavior of the API commands.
+[electron]() | The Cypress implementation of Electron.
+[example]() | Our example kitchen-sink application.
+[extension]() | The Cypress Chrome browser extension
+[https-proxy]() | This does https proxy for handling http certs and traffic.
+[launcher]() | Finds and launches browsers installed on your system.
+[reporter]() | The reporter shows the running results of the tests (The Command Log UI).
+[root]() | Dummy package pointing at the root of the repository.
+[runner]() | The runner is the minimal "chrome" around the user's application under test.
+[server]() | The <3 of Cypress. This orchestrates everything. The entire backend.
+[socket]() | A wrapper around socket.io to provide common libraries.
+[static]() | Serves static assets used in the Cypress GUI.
+[ts]() | A centralized version of typescript.
 
 ### Requirements
 
@@ -177,20 +179,22 @@ option to see more details
 
 Each package is responsible for building itself and testing itself and can do so using whatever tools are appropriate, but each conforms to a standard set of npm scripts so that building, watching, testing, etc. can be orchestrated from the root of this repo. Here are the npm scripts supported and what they mean:
 
-- **build-dev**: Build all assets for development
-- **build-prod**: Build all assets for production
-- **watch-dev**: Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
-- **server**: Run a server for serving files
-- **clean**: Remove any assets created by *build-dev* or *build-prod*
-- **clean-deps**: Remove any dependencies installed (usually by npm or bower)
-- **test-all**: Run all tests in watch mode
-- **test-all-once**: Run all tests
-- **test-all-unit**: Run unit tests in watch mode
-- **test-all-unit-once**: Run unit tests
-- **test-all-integration**: Run integration tests in watch mode
-- **test-all-integration-once**: Run integration tests
-- **test-all-e2e**: Run end-2-end tests in watch mode
-- **test-all-e2e-once**: Run end-2-end tests
+Task | Purpose
+---- | -------
+`build-dev` | Build all assets for development
+`build-prod` | Build all assets for production
+`watch-dev` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
+`server` | Run a server for serving files
+`clean` | Remove any assets created by *build-dev* or *build-prod*
+`clean-deps` | Remove any dependencies installed (usually by npm or bower)
+`test-all` | Run all tests in watch mode
+`test-all-once` | Run all tests
+`test-all-unit` | Run unit tests in watch mode
+`test-all-unit-once` | Run unit tests
+`test-all-integration` | Run integration tests in watch mode
+`test-all-integration-once` | Run integration tests
+`test-all-e2e` | Run end-2-end tests in watch mode
+`test-all-e2e-once` | Run end-2-end tests
 
 Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
 
@@ -301,6 +305,8 @@ See [docs/readme.md](docs/readme.md) for details
 ## Commiting Code
 
 ### Pull Requests
+
+- When opening a PR for a specific issue already open, please use the `address #[issue number]` or `closes #[issue number]` syntax in the pull request description.
 
 ## Deployment
 
