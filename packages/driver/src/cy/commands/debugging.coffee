@@ -33,20 +33,10 @@ getNextQueuedCommand = (state, queue) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "resume:next", ->
-    debugger
     resume(state, false)
 
   Cypress.on "resume:all", ->
-    debugger
     resume(state)
-
-  Cypress.on "pause", ->
-    debugger
-    ## continue chaining off the current chain
-    if chain = state("chain")
-      chain.pause()
-    else
-      cy.pause()
 
   Commands.addUtility({
     ## pause should indefinitely pause until the user
