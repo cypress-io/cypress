@@ -287,6 +287,9 @@ create = (state, queue, retryFn) ->
     if message and passed and butRe.test(message)
       message = message.substring(0, message.search(butRe))
 
+    if value?.isSinonProxy
+      message = message.replace(/ at .*\n/gm, "\n")
+
     obj = parseValueActualAndExpected(value, actual, expected)
 
     if $utils.hasElement(value)

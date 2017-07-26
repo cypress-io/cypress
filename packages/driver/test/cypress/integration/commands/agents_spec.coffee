@@ -322,7 +322,7 @@ describe "src/cy/commands/agents", ->
           it "truncates if more than 3 args", ->
             expect(@logs[4].get("message")).to.eq("foo(1, 2, 3, ...)")
 
-        context.skip "in assertion", ->
+        context "in assertion", ->
           beforeEach ->
             cy.on "log:added", (attrs, log) =>
               @lastLog = log
