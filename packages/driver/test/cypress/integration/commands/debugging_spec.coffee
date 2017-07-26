@@ -1,3 +1,5 @@
+Promise = Cypress.Promise
+
 describe "src/cy/commands/debugging", ->
   context "#debug", ->
     beforeEach ->
@@ -38,6 +40,39 @@ describe "src/cy/commands/debugging", ->
           .debug({log: false}).then ->
             expect(@lastLog).to.be.undefined
 
-  context.skip "#pause", ->
-    it "can pause", ->
-      cy.pause().wrap({}).should("deep.eq", {})
+  context "#pause", ->
+    beforeEach ->
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "pause"
+          @lastLog = log
+
+      return null
+
+    it "can pause between each command and skips assertions", ->
+      expected = false
+
+      cy.once "paused", (name) =>
+        ## should be pending
+        expect(@lastLog.get("state")).to.eq("pending")
+
+        expect(name).to.eq("wrap")
+
+        cy.once "paused", (name) ->
+          expected = true
+
+          expect(name).to.eq("then")
+
+          ## resume the rest of the commands so this
+          ## test ends
+          Cypress.emit("resume:all")
+
+        Cypress.emit("resume:next")
+
+      cy.pause().wrap({}).should("deep.eq", {}).then ->
+        expect(expected).to.be.true
+
+        ## should be pending
+        expect(@lastLog.get("state")).to.eq("passed")
+
+        ## should no longer have onPaused
+        expect(cy.state("onPaused")).to.be.null

@@ -74,8 +74,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       state "onPaused", (fn) ->
         next = getNextQueuedCommand(state, cy.queue)
 
-        Cypress.action("cy:paused", next and next.get("name"))
-
         ## backup the current timeout
         timeout = cy.timeout()
 
@@ -84,6 +82,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## set onResume function
         onResume(fn, timeout)
+
+        Cypress.action("cy:paused", next and next.get("name"))
 
       return subject
 
