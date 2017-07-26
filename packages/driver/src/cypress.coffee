@@ -287,6 +287,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:paused"
+        @emit("paused", args...)
+
       when "cy:viewport:changed"
         @emit("viewport:changed", args...)
 
