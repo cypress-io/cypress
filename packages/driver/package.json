@@ -65,7 +65,7 @@
     "react-dom": "^15.6.1",
     "run-sequence": "^1.0.2",
     "setimmediate": "^1.0.2",
-    "sinon": "cypress-io/sinon#db37ec883c4467ed89da2055bd336dc7d3e50b57",
+    "sinon": "cypress-io/sinon#94fea06270eea1fafa106763135ff8d2344bd0ea",
     "socket.io": "^1.7.3",
     "socket.io-client": "^1.7.3",
     "string-to-stream": "^1.0.1",
