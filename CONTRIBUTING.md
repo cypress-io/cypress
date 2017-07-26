@@ -17,18 +17,18 @@ Thanks for taking the time to contribute! :smile:
 
 ##### Table of Contents
 
-- Code of Conduct
-- Contributing Bug Reports & Feature Requests
-  - Bug Reports
-  - Feature Requests
-- Writing Code
-  - What you need to know before getting started
-  - Requirements
-  - Coding Style
-  - Tests
-- Writing Documentation
-- Committing Code
-  - Pull Requests
+- [Code of Conduct](#code-of-conduct)
+- [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
+  - [Bug Reports](#bug-reports)
+  - [Feature Requests](#feature-requests)
+- [Writing Code](#writing-code)
+  - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
+  - [Requirements](#requirements)
+  - [Coding Style](#coding-style)
+  - [Tests](#tests)
+- [Writing Documentation](#writing-documentation)
+- [Committing Code](#committing-code)
+  - [Pull Requests](#pull-requests)
 
 ## Code of Conduct
 
