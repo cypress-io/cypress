@@ -669,11 +669,12 @@ create = (specWindow, Cypress, state, config, log) ->
           ## over at 0
           state("index", index += 1)
 
-          # TODO: handle this event
           Cypress.action("cy:command:end", command)
 
           if fn = state("onPaused")
-            fn.call(cy, next)
+            new Promise (resolve) ->
+              fn(resolve)
+            .then(next)
           else
             next()
 
