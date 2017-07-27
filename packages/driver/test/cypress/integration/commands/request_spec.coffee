@@ -1,32 +1,19 @@
-{ _, Promise } = window.testUtils
+_ = Cypress._
+Promise = Cypress.Promise
 
-describe "$Cypress.Cy Request Commands", ->
-  enterCommandTestingMode()
-
+describe "src/cy/commands/request", ->
   context "#request", ->
     beforeEach ->
-      @respondWith = (resp, timeout = 10) =>
-        @Cypress.once "request", (data, cb) ->
-          _.delay ->
-            cb(resp)
-          , timeout
-
-    afterEach ->
-      @Cypress.off("request")
+      cy.stub(Cypress, "backend").callThrough()
 
     describe "argument signature", ->
       beforeEach ->
-        @respondWith({isOkStatusCode: true, status: 200})
-
-        trigger = @sandbox.spy(@Cypress, "trigger")
-
-        @cy.on "fail", (err) ->
-          debugger
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({ isOkStatusCode: true, status: 200 })
 
         @expectOptionsToBe = (opts) ->
-          t = _.find trigger.getCalls(), (c) -> c.args[0] is "request"
-
-          options = t.args[1]
+          options = backend.firstCall.args[1]
 
           _.each options, (value, key) ->
             expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
@@ -34,7 +21,7 @@ describe "$Cypress.Cy Request Commands", ->
             expect(opts[key]).to.deep.eq(options[key], "failed on property: (#{key})")
 
       it "accepts object with url", ->
-        @cy.request({url: "http://localhost:8000/foo"}).then ->
+        cy.request({url: "http://localhost:8000/foo"}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8000/foo"
             method: "GET"
@@ -43,7 +30,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "accepts object with url, method, headers, body", ->
-        @cy.request({
+        cy.request({
           url: "http://github.com/users"
           method: "POST"
           body: {name: "brian"}
@@ -64,7 +51,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "accepts string url", ->
-        @cy.request("http://localhost:8080/status").then ->
+        cy.request("http://localhost:8080/status").then ->
           @expectOptionsToBe({
             url: "http://localhost:8080/status"
             method: "GET"
@@ -73,7 +60,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "accepts method + url", ->
-        @cy.request("DELETE", "http://localhost:1234/users/1").then ->
+        cy.request("DELETE", "http://localhost:1234/users/1").then ->
           @expectOptionsToBe({
             url: "http://localhost:1234/users/1"
             method: "DELETE"
@@ -82,7 +69,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "accepts method + url + body", ->
-        @cy.request("POST", "http://localhost:8080/users", {name: "brian"}).then ->
+        cy.request("POST", "http://localhost:8080/users", {name: "brian"}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8080/users"
             method: "POST"
@@ -93,7 +80,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "accepts url + body", ->
-        @cy.request("http://www.github.com/projects/foo", {commits: true}).then ->
+        cy.request("http://www.github.com/projects/foo", {commits: true}).then ->
           @expectOptionsToBe({
             url: "http://www.github.com/projects/foo"
             method: "GET"
@@ -104,7 +91,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "accepts url + string body", ->
-        @cy.request("http://www.github.com/projects/foo", "foo").then ->
+        cy.request("http://www.github.com/projects/foo", "foo").then ->
           @expectOptionsToBe({
             url: "http://www.github.com/projects/foo"
             method: "GET"
@@ -115,7 +102,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "method normalization", ->
         it "uppercases method", ->
-          @cy.request("post", "https://www.foo.com").then ->
+          cy.request("post", "https://www.foo.com").then ->
             @expectOptionsToBe({
               url: "https://www.foo.com/"
               method: "POST"
@@ -125,9 +112,9 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "url normalization", ->
         it "uses absolute urls and adds trailing slash", ->
-          @Cypress.config("baseUrl", "http://localhost:8080/app")
+          Cypress.config("baseUrl", "http://localhost:8080/app")
 
-          @cy.request("https://www.foo.com").then ->
+          cy.request("https://www.foo.com").then ->
             @expectOptionsToBe({
               url: "https://www.foo.com/"
               method: "GET"
@@ -136,7 +123,7 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "uses localhost urls", ->
-          @cy.request("localhost:1234").then ->
+          cy.request("localhost:1234").then ->
             @expectOptionsToBe({
               url: "http://localhost:1234/"
               method: "GET"
@@ -145,7 +132,7 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "uses wwww urls", ->
-          @cy.request("www.foo.com").then ->
+          cy.request("www.foo.com").then ->
             @expectOptionsToBe({
               url: "http://www.foo.com/"
               method: "GET"
@@ -154,10 +141,10 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "prefixes with baseUrl when origin is empty", ->
-          @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
-          @Cypress.config("baseUrl", "http://localhost:8080/app")
+          cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
+          Cypress.config("baseUrl", "http://localhost:8080/app")
 
-          @cy.request("/foo/bar?cat=1").then ->
+          cy.request("/foo/bar?cat=1").then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/app/foo/bar?cat=1"
               method: "GET"
@@ -166,10 +153,10 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "prefixes with baseUrl over current origin", ->
-          @Cypress.config("baseUrl", "http://localhost:8080/app")
-          @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("http://localhost:1234")
+          Cypress.config("baseUrl", "http://localhost:8080/app")
+          cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("http://localhost:1234")
 
-          @cy.request("foobar?cat=1").then ->
+          cy.request("foobar?cat=1").then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/app/foobar?cat=1"
               method: "GET"
@@ -179,7 +166,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "gzip", ->
         it "can turn off gzipping", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8080"
             gzip: false
           }).then ->
@@ -192,7 +179,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "auth", ->
         it "sends auth when it is an object", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8888"
             auth: {
               user: "brian"
@@ -212,7 +199,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "followRedirect", ->
         it "is true by default", ->
-          @cy.request("http://localhost:8888")
+          cy.request("http://localhost:8888")
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
@@ -222,7 +209,7 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "can be set to false", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8888"
             followRedirect: false
           })
@@ -235,7 +222,7 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "normalizes followRedirects -> followRedirect", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8888"
             followRedirects: false
           })
@@ -249,7 +236,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "qs", ->
         it "accepts an object literal", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8888"
             qs: {
               foo: "bar"
@@ -266,7 +253,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "form", ->
         it "accepts an object literal for body", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8888"
             form: true
             body: {
@@ -284,7 +271,7 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "accepts a string for body", ->
-          @cy.request({
+          cy.request({
             url: "http://localhost:8888"
             form: true
             body: "foo=bar&baz=quux"
@@ -301,11 +288,13 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe "failOnStatus", ->
       it "is deprecated but does not fail even on 500 when failOnStatus=false", ->
-        warning = @sandbox.spy(@Cypress.utils, "warning")
+        warning = cy.spy(Cypress.utils, "warning")
 
-        @respondWith({isOkStatusCode: false, status: 500})
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({ isOkStatusCode: false, status: 500 })
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           failOnStatus: false
         })
@@ -317,9 +306,11 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe "failOnStatusCode", ->
       it "does not fail on status 401", ->
-        @respondWith({isOkStatusCode: false, status: 401})
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({ isOkStatusCode: false, status: 401 })
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           failOnStatusCode: false
         })
@@ -329,98 +320,93 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe "subjects", ->
       it "resolves with response obj", ->
-        resp = {status: 200, isOkStatusCode: true, headers: {foo: "bar"}, body: "<html>foo</html>"}
+        resp = {
+          status: 200
+          isOkStatusCode: true
+          body: "<html>foo</html>"
+          headers: {foo: "bar"}
+        }
 
-        @respondWith(resp)
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves(resp)
 
-        @cy.request("http://www.foo.com").then (subject) ->
+        cy.request("http://www.foo.com").then (subject) ->
           expect(subject).to.deep.eq(resp)
 
     describe "timeout", ->
+      beforeEach ->
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({isOkStatusCode: true, status: 200})
+
       it "sets timeout to Cypress.config(responseTimeout)", ->
-        @Cypress.config("responseTimeout", 2500)
+        Cypress.config("responseTimeout", 2500)
 
-        @respondWith({isOkStatusCode: true, status: 200})
+        timeout = cy.spy(Promise.prototype, "timeout")
 
-        timeout = @sandbox.spy(Promise.prototype, "timeout")
-
-        @cy.request("http://www.foo.com").then ->
+        cy.request("http://www.foo.com").then ->
           expect(timeout).to.be.calledWith(2500)
 
       it "can override timeout", ->
-        @respondWith({isOkStatusCode: true, status: 200})
+        timeout = cy.spy(Promise.prototype, "timeout")
 
-        timeout = @sandbox.spy(Promise.prototype, "timeout")
-
-        @cy.request({url: "http://www.foo.com", timeout: 1000}).then ->
+        cy.request({url: "http://www.foo.com", timeout: 1000}).then ->
           expect(timeout).to.be.calledWith(1000)
 
       it "clears the current timeout and restores after success", ->
-        @respondWith({isOkStatusCode: true, status: 200})
+        cy.timeout(100)
 
-        @cy._timeout(100)
+        cy.spy(cy, "clearTimeout")
 
-        calledTimeout = false
-        _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+        cy.request("http://www.foo.com").then ->
+          expect(cy.clearTimeout).to.be.calledWith("http:request")
 
-        @Cypress.on "request", =>
-          calledTimeout = true
-          expect(_clearTimeout).to.be.calledOnce
-
-        @cy.request("http://www.foo.com").then ->
           ## restores the timeout afterwards
-          expect(calledTimeout).to.be.true
-          expect(@cy._timeout()).to.eq(100)
-
-    describe "cancellation", ->
-      it "cancels promise", (done) ->
-        ## respond after 50 ms
-        @respondWith({}, 50)
-
-        @Cypress.on "log:added", (attrs, @log) =>
-          @cmd = @cy.queue.first()
-          @Cypress.abort()
-
-        @cy.on "cancel", (cancelledCmd) =>
-          _.delay =>
-            expect(cancelledCmd).to.eq(@cmd)
-            expect(@cmd.get("subject")).to.be.undefined
-            expect(@log.get("state")).to.eq("pending")
-            done()
-          , 100
-
-        @cy.request("http://www.foo.com")
+          expect(cy.timeout()).to.eq(100)
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log:added", (attrs, @log) =>
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "request"
+            @lastLog = log
+
+        return null
 
       it "can turn off logging", ->
-        @respondWith({isOkStatusCode: true, status: 200})
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({isOkStatusCode: true, status: 200})
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:8080"
           log: false
         }).then ->
-          expect(@log).to.be.undefined
+          expect(@lastLog).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        @respondWith({isOkStatusCode: true, status: 200})
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({isOkStatusCode: true, status: 200})
 
-        @Cypress.on "log:added", (attrs, log) ->
+        cy.on "log:added", (attrs, log) ->
           if log.get("name") is "request"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
             done()
 
-        @cy.request("http://localhost:8080")
+        cy.request("http://localhost:8080")
 
       it "snapshots after clicking", ->
-        @respondWith({isOkStatusCode: true, status: 200})
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({isOkStatusCode: true, status: 200})
 
-        @cy.request("http://localhost:8080").then ->
-          expect(@log.get("snapshots").length).to.eq(1)
-          expect(@log.get("snapshots")[0]).to.be.an("object")
+        cy.request("http://localhost:8080").then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("snapshots").length).to.eq(1)
+          expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
       it ".consoleProps", ->
         allRequestResponse = {
@@ -433,7 +419,9 @@ describe "$Cypress.Cy Request Commands", ->
           "Response Body": {id: 123}
         }
 
-        @respondWith({
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({
           duration: 10
           status: 201
           isOkStatusCode: true
@@ -446,13 +434,13 @@ describe "$Cypress.Cy Request Commands", ->
           allRequestResponses: [allRequestResponse]
         })
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:8080/foo"
           headers: {"x-token": "abc123"}
           method: "POST"
           body: {first: "brian"}
         }).then ->
-          expect(@log.attributes.consoleProps()).to.deep.eq({
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
             Command: "request"
             Request: allRequestResponse
             Yielded: {
@@ -484,7 +472,9 @@ describe "$Cypress.Cy Request Commands", ->
           "Response Body": {id: 123}
         }]
 
-        @respondWith({
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({
           duration: 10
           status: 201
           isOkStatusCode: true
@@ -497,13 +487,13 @@ describe "$Cypress.Cy Request Commands", ->
           allRequestResponses: allRequestResponses
         })
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:8080/foo"
           headers: {"x-token": "abc123"}
           method: "POST"
           body: {first: "brian"}
         }).then ->
-          expect(@log.attributes.consoleProps()).to.deep.eq({
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
             Command: "request"
             Requests: allRequestResponses
             Yielded: {
@@ -517,180 +507,169 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       describe ".renderProps", ->
-
         describe "in any case", ->
           it "sends correct message", ->
-            @respondWith({ isOkStatusCode: true, status: 201 })
+            backend = Cypress.backend
+            .withArgs("http:request")
+            .resolves({ isOkStatusCode: true, status: 201 })
 
-            @cy.request("http://localhost:8080/foo").then ->
-              expect(@log.attributes.renderProps().message).to.equal "GET 201 http://localhost:8080/foo"
+            cy.request("http://localhost:8080/foo").then ->
+              expect(@lastLog.invoke("renderProps").message).to.equal "GET 201 http://localhost:8080/foo"
 
         describe "when response is successful", ->
           it "sends correct indicator", ->
-            @respondWith({ isOkStatusCode: true, status: 201 })
+            backend = Cypress.backend
+            .withArgs("http:request")
+            .resolves({ isOkStatusCode: true, status: 201 })
 
-            @cy.request("http://localhost:8080/foo").then ->
-              expect(@log.attributes.renderProps().indicator).to.equal "successful"
+            cy.request("http://localhost:8080/foo").then ->
+              expect(@lastLog.invoke("renderProps").indicator).to.equal "successful"
 
         describe "when response is outside 200 range", ->
           it "sends correct indicator", (done) ->
-            @allowErrors()
-            @cy.on "fail", (err) =>
-              expect(@log.attributes.renderProps().indicator).to.equal "bad"
+            cy.on "fail", (err) =>
+              expect(@lastLog.invoke("renderProps").indicator).to.equal "bad"
               done()
-            @respondWith({ status: 500 })
 
-            @cy.request("http://localhost:8080/foo")
+            backend = Cypress.backend
+            .withArgs("http:request")
+            .resolves({ status: 500 })
 
-      it ".renderProps", ->
+            cy.request("http://localhost:8080/foo")
 
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
+        Cypress.config("defaultCommandTimeout", 50)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "request"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
 
       it "throws when no url is passed", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() requires a url. You did not provide a url.")
           done()
 
-        @cy.request()
+        cy.request()
 
       it "throws when url is not FQDN", (done) ->
-        @Cypress.config("baseUrl", "")
-        @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
+        Cypress.config("baseUrl", "")
+        cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
 
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
           done()
 
-        @cy.request("/foo/bar")
+        cy.request("/foo/bar")
 
       it "throws when url isnt a string", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() requires the url to be a string.")
           done()
 
-        @cy.request({
+        cy.request({
           url: []
         })
 
       it "throws when auth is truthy but not an object", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() must be passed an object literal for the 'auth' option.")
           done()
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           auth: "foobar"
         })
 
       it "throws when headers is truthy but not an object", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() requires the 'headers' option to be an object literal.")
           done()
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           headers: "foo=bar"
         })
 
       it "throws on invalid method", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS")
           done()
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           method: "FOO"
         })
 
       it "throws when gzip is not boolean", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() requires the 'gzip' option to be a boolean.")
           done()
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           gzip: {}
         })
 
       it "throws when form isnt a boolean", (done) ->
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("cy.request() requires the 'form' option to be a boolean.\n\nIf you're trying to send a x-www-form-urlencoded request then pass either a string or object literal to the 'body' property.")
           done()
 
-        @cy.request({
+        cy.request({
           url: "http://localhost:1234/foo"
           form: {foo: "bar"}
         })
 
-      ## FIXME: hangs for some reason
-      it.skip "throws when status code doesnt start with 2 and failOnStatusCode is true", (done) ->
-        @respondWith({
+      it "throws when status code doesnt start with 2 and failOnStatusCode is true", (done) ->
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({
           isOkStatusCode: false
           status: 500
           statusText: "Server Error"
@@ -707,15 +686,12 @@ describe "$Cypress.Cy Request Commands", ->
           ]
         })
 
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.include("""
             cy.request() failed on:
 
@@ -755,7 +731,7 @@ describe "$Cypress.Cy Request Commands", ->
           """)
           done()
 
-        @cy.request({
+        cy.request({
           method: "POST"
           url: "http://localhost:1234/foo"
           body: {
@@ -763,9 +739,10 @@ describe "$Cypress.Cy Request Commands", ->
           }
         })
 
-      ## FIXME: hangs for some reason
-      it.skip "does not include redirects when there were no redirects", (done) ->
-        @respondWith({
+      it "does not include redirects when there were no redirects", (done) ->
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .resolves({
           isOkStatusCode: false
           status: 500
           statusText: "Server Error"
@@ -779,15 +756,12 @@ describe "$Cypress.Cy Request Commands", ->
           requestBody: "request body"
         })
 
-        logs = []
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.include("""
             cy.request() failed on:
 
@@ -824,7 +798,7 @@ describe "$Cypress.Cy Request Commands", ->
           """)
           done()
 
-        @cy.request({
+        cy.request({
           method: "POST"
           url: "http://localhost:1234/foo"
           body: {
@@ -833,28 +807,33 @@ describe "$Cypress.Cy Request Commands", ->
         })
 
       it "logs once on error", (done) ->
-        @respondWith({__error: "request failed"})
+        error = new Error("request failed")
+        error.backend = true
 
-        logs = []
+        backend = Cypress.backend
+        .withArgs("http:request")
+        .rejects(error)
 
-        @Cypress.on "log:added", (attrs, @log) =>
-          logs.push(@log)
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
           done()
 
-        @cy.request("http://localhost:1234/foo")
+        cy.request("http://localhost:1234/foo")
 
-      ## FIXME: these hang for some reason
-      context.skip "displays error", ->
-        beforeEach ->
-          @respondWith({__error: "request failed"})
-
+      context "displays error", ->
         it "displays method and url in error", (done) ->
-          @cy.on "fail", (err) =>
+          error = new Error("request failed")
+          error.backend = true
+
+          backend = Cypress.backend
+          .withArgs("http:request")
+          .rejects(error)
+
+          cy.on "fail", (err) =>
             expect(err.message).to.include("""
             cy.request() failed trying to load:
 
@@ -886,20 +865,19 @@ describe "$Cypress.Cy Request Commands", ->
 
             done()
 
-          @cy.request("http://localhost:1234/foo")
+          cy.request("http://localhost:1234/foo")
 
         it "throws after timing out", (done) ->
-          @respondWith({isOkStatusCode: true, status: 200}, 250)
+          backend = Cypress.backend
+          .withArgs("http:request")
+          .resolves(Promise.delay(1000))
 
-          logs = []
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
 
-          @Cypress.on "log:added", (attrs, @log) =>
-            logs.push(@log)
-
-          @cy.on "fail", (err) =>
-            expect(logs.length).to.eq(1)
-            expect(@log.get("error")).to.eq(err)
-            expect(@log.get("state")).to.eq("failed")
+            expect(@logs.length).to.eq(1)
+            expect(lastLog.get("error")).to.eq(err)
+            expect(lastLog.get("state")).to.eq("failed")
             expect(err.message).to.eq("""
               cy.request() timed out waiting 50ms for a response from your server.
 
@@ -912,4 +890,4 @@ describe "$Cypress.Cy Request Commands", ->
             """)
             done()
 
-          @cy.request({url: "http://localhost:1234/foo", timeout: 50})
+          cy.request({url: "http://localhost:1234/foo", timeout: 50})

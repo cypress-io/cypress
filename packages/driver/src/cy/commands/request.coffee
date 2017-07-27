@@ -29,9 +29,6 @@ REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
-responseFailed = (err) ->
-  err.triggerPromise is true
-
 argIsHttpMethod = (str) ->
   _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
 
@@ -42,9 +39,6 @@ whichAreOptional = (val, key) ->
   val is null and key in OPTIONAL_OPTS
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  request = (options) =>
-    Cypress.triggerPromise("request", options)
-
   # Cypress.extend
   #   ## set defaults for all requests?
   #   requestDefaults: (options = {}) ->
@@ -81,7 +75,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults(options, REQUEST_DEFAULTS, {
         log: true
-        timeout: Cypress.config("responseTimeout")
+        timeout: config("responseTimeout")
         failOnStatusCode: true
       })
 
@@ -113,7 +107,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## origin may return an empty string if we haven't visited anything yet
       options.url = $Location.normalize(options.url)
 
-      if originOrBase = @Cypress.config("baseUrl") or @_getLocation("origin")
+      if originOrBase = config("baseUrl") or cy.getRemoteLocation("origin")
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
 
       ## if options.url isnt FQDN then we need to throw here
@@ -188,9 +182,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      cy.clearTimeout()
+      cy.clearTimeout("http:request")
 
-      request(requestOpts)
+      Cypress.backend("http:request", requestOpts)
       .timeout(options.timeout)
       .then (response) =>
         options.response = response
@@ -222,7 +216,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             timeout: options.timeout
           }
         }
-      .catch responseFailed, (err) ->
+      .catch { backend: true }, (err) ->
         $utils.throwErrByPath("request.loading_failed", {
           onFail: options._log
           args: {
