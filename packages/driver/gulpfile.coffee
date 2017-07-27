@@ -64,7 +64,7 @@ compileJs = ->
     extensions: jsOptions.extensions
   })
     .transform(coffeeify, {})
-    .plugin(resolutions, ["*"])
+    .plugin(resolutions, ["formatio"])
     .bundle()
     .on("error", log)
     .pipe(source(jsOptions.outputName))
@@ -94,7 +94,7 @@ bundleJs = (options, watch = true) ->
 
   bundler
   .transform(coffeeify, {})
-  .plugin(resolutions, ["*"])
+  .plugin(resolutions, ["formatio"])
 
   if watch
     bundler.plugin(watchify, {
