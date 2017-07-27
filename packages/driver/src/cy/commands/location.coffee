@@ -15,7 +15,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           message: ""
 
       getHref = =>
-        @_getLocation("href")
+        cy.getRemoteLocation("href")
 
       do resolveHref = =>
         Promise.try(getHref).then (href) =>
@@ -31,7 +31,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           message: ""
 
       getHash = =>
-        @_getLocation("hash")
+        cy.getRemoteLocation("hash")
 
       do resolveHash = =>
         Promise.try(getHash).then (hash) =>
@@ -50,7 +50,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults options, {log: true}
 
       getLocation = =>
-        location = @_getLocation()
+        location = cy.getRemoteLocation()
 
         ret = if _.isString(key)
           ## use existential here because we only want to throw

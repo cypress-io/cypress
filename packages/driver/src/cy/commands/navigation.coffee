@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     hasVisitedAboutBlank = false
 
   requestUrl = (url) ->
-    Cypress.request("resolve:url", url)
+    Cypress.backend("resolve:url", url)
     .then (resp = {}) ->
       switch
         ## if we didn't even get an OK response
