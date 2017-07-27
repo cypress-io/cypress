@@ -39,3 +39,7 @@ https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
 ## Development
 
 Please see our [Contributing Guideline](/CONTRIBUTING.md)
+
+## License
+
+This project is licensed under the terms of the [MIT license](/LICENSE.md).
