@@ -157,7 +157,7 @@ You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com
 
 ### Getting Started
 
-Install all dependencies:
+**Install all dependencies:**
 
 ```bash
 npm install
@@ -165,7 +165,7 @@ npm install
 
 This will install this repo's direct dependencies as well as the dependencies for every individual package.
 
-Then, build all the packages and start the app:
+**Then, build all the packages and start the app:**
 
 ```bash
 npm run all build
@@ -185,7 +185,7 @@ Task | Purpose
 `build-prod` | Build all assets for production
 `watch-dev` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 `server` | Run a server for serving files
-`clean` | Remove any assets created by *build-dev* or *build-prod*
+`clean` | Remove any assets created by `build-dev` or `build-prod`
 `clean-deps` | Remove any dependencies installed (usually by npm or bower)
 `test-all` | Run all tests in watch mode
 `test-all-once` | Run all tests

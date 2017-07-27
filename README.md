@@ -38,4 +38,4 @@ https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
 
 ## Development
 
-Please see our [Contributing Guideline](/blob/master/CONTRIBUTING.md)
+Please see our [Contributing Guideline](/CONTRIBUTING.md)
