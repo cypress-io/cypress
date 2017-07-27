@@ -11,6 +11,7 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Elements = require("../cy/elements")
+$Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
@@ -84,6 +85,7 @@ create = (specWindow, Cypress, state, config, log) ->
 
   elements = $Elements.create(state)
   jquery = $jQuery.create(state)
+  location = $Location.create(state)
 
   { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
 
@@ -226,6 +228,9 @@ create = (specWindow, Cypress, state, config, log) ->
     validateAlias: aliases.validateAlias
     getNextAlias: aliases.getNextAlias
     aliasNotFoundFor: aliases.aliasNotFoundFor
+
+    ## location sync methods
+    getRemoteLocation: location.getRemoteLocation
 
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance

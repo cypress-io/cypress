@@ -338,6 +338,9 @@ module.exports = {
   locReplace: (win, url) ->
     win.location.replace(url)
 
+  locToString: (win) ->
+    win.location.toString()
+
   locExisting: ->
     $Location.create(window.location.href)
 

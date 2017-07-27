@@ -70,20 +70,3 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             onRetry: resolveLocation
           })
   })
-
-  return {
-    __location: (win) ->
-      win.location.toString()
-
-    _getLocation: (key, win) ->
-      try
-        remoteUrl = @__location(win ? @state("window"))
-        location  = $Location.create(remoteUrl)
-
-        if key
-          location[key]
-        else
-          location
-      catch e
-        ""
-  }
