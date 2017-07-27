@@ -3,20 +3,20 @@ _ = require("lodash")
 $Cypress = require("../cypress")
 
 class $Chainer
-  constructor: (@cy) ->
+  constructor: ->
     @id        = _.uniqueId("chainer")
     @firstCall = true
 
   @remove = (key) ->
     delete $Chainer.prototype[key]
 
-  @inject = (key, fn) ->
+  @add = (key, fn) ->
     ## when our instance methods are invoked
     ## we know we are chaining on an existing series
     $Chainer.prototype[key] = (args...) ->
       ## call back the original function with our new args
       ## pass args an as array and not a destructured invocation
-      if fn.call(@cy, @id, @firstCall, args)
+      if fn(@, args)
         ## no longer the first call
         @firstCall = false
 
@@ -25,8 +25,8 @@ class $Chainer
       return @
 
   ## creates a new chainer instance
-  @create = (cy, key, args) ->
-    chainer = new $Chainer(cy)
+  @create = (key, args) ->
+    chainer = new $Chainer
 
     ## since this is the first function invocation
     ## we need to pass through onto our instance methods

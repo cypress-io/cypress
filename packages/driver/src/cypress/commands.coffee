@@ -128,6 +128,14 @@ create = (Cypress, cy, state, config, log) ->
         enforceDom
       })
 
+    addChainer: (obj) ->
+      ## perp loop
+      for name, fn of obj
+        cy.addChainer(name, fn)
+
+      ## prevent loop comprehension
+      null
+
     addAssertion: (obj) ->
       ## perf loop
       for name, fn of obj

@@ -384,6 +384,8 @@ class $Cypress
 
   Cy: $Cy
 
+  Chainer: $Chainer
+
   Keyboard: $Keyboard
   Location: $Location
 

@@ -1,7 +1,17 @@
 _ = Cypress._
+$ = Cypress.$
 
-describe "$Cypress.Cy Commands", ->
+describe "src/cy/commands/commands", ->
+  before ->
+    cy
+      .visit("/support/server/fixtures/dom.html")
+      .then (win) ->
+        @body = win.document.body.outerHTML
 
+  beforeEach ->
+    doc = cy.state("document")
+
+    $(doc.body).empty().html(@body)
 
   it "can invoke commands by name", ->
     body = cy.$$("body")
@@ -24,16 +34,16 @@ describe "$Cypress.Cy Commands", ->
   it "does not add cmds to cy.commands queue", ->
     cy.command("get", "body").then ->
       names = cy.queue.names()
-      expect(names).to.deep.eq(["get", "then", "then"])
+      expect(names).to.deep.eq(["get", "then"])
 
   context "custom commands", ->
     beforeEach ->
-      @Cypress.Commands.add "dashboard.selectWindows", =>
+      Cypress.Commands.add "dashboard.selectWindows", =>
         cy
           .get("[contenteditable]")
           .first()
 
-      @Cypress.Commands.add "login", { prevSubject: true }, (subject, email) =>
+      Cypress.Commands.add "login", { prevSubject: true }, (subject, email) =>
         cy
           .wrap(subject.find("input:first"))
           .type(email)
@@ -55,13 +65,10 @@ describe "$Cypress.Cy Commands", ->
           expect($ce.get(0)).to.eq(ce.get(0))
 
   context "errors", ->
-    beforeEach ->
-      @allowErrors()
-
     it "throws when cannot find command by name", ->
       try
         cy.get("body").command("fooDoesNotExist", "bar", "baz")
       catch err
-        cmds = _.keys($Cypress.Chainer.prototype)
+        cmds = _.keys(Cypress.Chainer.prototype)
         expect(cmds.length).to.be.gt(1)
         expect(err.message).to.eq("Could not find a command for: 'fooDoesNotExist'.\n\nAvailable commands are: #{cmds.join(", ")}.\n")
