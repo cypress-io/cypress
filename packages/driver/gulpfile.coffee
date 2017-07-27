@@ -7,6 +7,7 @@ runSequence   = require("run-sequence")
 browserify    = require("browserify")
 coffeeify     = require("coffeeify")
 watchify      = require("watchify")
+resolutions   = require("browserify-resolutions")
 source        = require("vinyl-source-stream")
 fs            = Promise.promisifyAll(require("fs-extra"))
 
@@ -63,6 +64,7 @@ compileJs = ->
     extensions: jsOptions.extensions
   })
     .transform(coffeeify, {})
+    .plugin(resolutions, ["*"])
     .bundle()
     .on("error", log)
     .pipe(source(jsOptions.outputName))
@@ -90,7 +92,10 @@ bundleJs = (options, watch = true) ->
     packageCache: {}
   })
 
-  bundler.transform(coffeeify, {})
+  bundler
+  .transform(coffeeify, {})
+  .plugin(resolutions, ["*"])
+
   if watch
     bundler.plugin(watchify, {
       ignoreWatch: [
