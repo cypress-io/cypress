@@ -25,7 +25,7 @@
         line-height: 35px;
       }
 
-      > a {
+      > a  {
         &:hover, &:focus {
           cursor: pointer;
           background-color: #f3f3f3;
@@ -97,11 +97,13 @@
     }
 
     > li > div,
-    > li > a {
+    > li > a,
+    > li > span > a  {
       color: $navbar-inverse-link-color;
       line-height: 30px;
       font-size: 14px;
       padding: 5px 15px;
+      display: inline-block;
     }
   }
 }

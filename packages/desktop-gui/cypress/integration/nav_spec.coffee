@@ -22,21 +22,13 @@ describe "Navigation", ->
       @getCurrentUser.resolve({})
 
     context "links", ->
-      it "displays link to docs", ->
-        cy.get("nav").contains("Docs")
-
       it "opens link to docs on click", ->
-        cy
-          .get("nav").contains("Docs").click().then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
+        cy.get("nav").find(".fa-graduation-cap").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
 
-      it "displays link to chat", ->
-        cy.get("nav").contains("Chat")
-
-      it "opens link to chat on click", ->
-        cy
-          .get("nav").contains("Chat").click().then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
+      it "opens link to support on click", ->
+        cy.get("nav").find(".fa-question-circle").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/support")
 
       it "displays login button", ->
         cy
@@ -59,21 +51,13 @@ describe "Navigation", ->
       @getCurrentUser.resolve(@user)
 
     context "links", ->
-      it "displays link to docs", ->
-        cy.get("nav").contains("Docs")
-
       it "opens link to docs on click", ->
-        cy
-          .get("nav").contains("Docs").click().then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
+        cy.get("nav").find(".fa-graduation-cap").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
 
-      it "displays link to chat", ->
-        cy.get("nav").contains("Chat")
-
-      it "opens link to chat on click", ->
-        cy
-          .get("nav").contains("Chat").click().then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
+      it "opens link to support on click", ->
+        cy.get("nav").find(".fa-question-circle").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/support")
 
       it "displays user name", ->
         cy
