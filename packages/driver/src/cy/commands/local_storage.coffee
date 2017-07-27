@@ -4,9 +4,9 @@ $LocalStorage = require("../../cypress/local_storage")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-clearLocalStorage = (keys) ->
+clearLocalStorage = (state, keys) ->
   local = window.localStorage
-  remote = @state("window").localStorage
+  remote = state("window").localStorage
 
   ## set our localStorage and the remote localStorage
   $LocalStorage.setStorages(local, remote)
@@ -21,11 +21,12 @@ clearLocalStorage = (keys) ->
   return remote
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:run", ->
+  ## this MUST be prepended before anything else
+  Cypress.prependListener "test:before:run", ->
     try
       ## this may fail if the current
       ## window is bound to another origin
-      clearLocalStorage.call(@, [])
+      clearLocalStorage(state, [])
     catch
       null
 
@@ -35,7 +36,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if keys and not _.isString(keys) and not _.isRegExp(keys)
         $utils.throwErrByPath("clearLocalStorage.invalid_argument")
 
-      remote = clearLocalStorage.call(@, keys)
+      remote = clearLocalStorage(state, keys)
 
       Cypress.log
         name: "clear ls"
