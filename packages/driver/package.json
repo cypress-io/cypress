@@ -13,8 +13,7 @@
     "test-unit-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-integration": "gulp test",
     "test-integration-watch": "gulp watch",
-    "test-e2e": "node ./test/scripts/run-integration.js",
-    "test-e2e-dev": "node ./test/scripts/run-integration.js",
+    "test-e2e": "node ./test/scripts/run-integration-all.js",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
@@ -46,6 +45,7 @@
     "eventemitter2": "^4.1.2",
     "express": "^4.12.3",
     "fs-extra": "^3.0.0",
+    "glob": "^7.1.2",
     "gulp": "3.8.8",
     "gulp-load-plugins": "0.5.3",
     "gulp-plumber": "0.6.3",
