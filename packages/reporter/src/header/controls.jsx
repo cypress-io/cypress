@@ -20,7 +20,9 @@ const Controls = observer(({ events, appState }) => {
   return (
     <div className='controls'>
       {ifThen(appState.isPaused, (
-        <label className='paused-label'>Paused</label>
+        <span className='paused-label'>
+          <label>Paused</label>
+        </span>
       ))}
       {ifThen(appState.isPaused, (
         <Tooltip placement='bottom' title='Resume'>
