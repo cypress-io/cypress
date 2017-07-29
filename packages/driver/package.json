@@ -35,7 +35,6 @@
     "card": "^1.0.2",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
-    "chai-jquery": "^2.0.0",
     "chokidar-cli": "^1.2.0",
     "coffeeify": "^2.1.0",
     "compression": "^1.1.0",

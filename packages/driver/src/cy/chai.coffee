@@ -1,11 +1,11 @@
 _ = require("lodash")
 $ = require("jquery")
 chai = require("chai")
-chaijQuery = require("chai-jquery")
 sinonChai = require("@cypress/sinon-chai")
 
-dom = require("../cypress/dom")
+$dom = require("../cypress/dom")
 $utils = require("../cypress/utils")
+$chaiJquery = require("../cypress/chai_jquery")
 
 ## all words between single quotes which are at
 ## the end of the string
@@ -27,7 +27,6 @@ matchProto = null
 lengthProto = null
 containProto = null
 existProto = null
-visibleProto = null
 getMessage = null
 chaiUtils = null
 
@@ -36,28 +35,34 @@ chai.use(sinonChai)
 chai.use (chai, u) ->
   chaiUtils = u
 
-  chaijQuery(chai, chaiUtils, $)
+  $chaiJquery(chai, chaiUtils, {
+    onError: (err, topic, obj, negated) ->
+      switch topic
+        when "visible"
+          if not negated
+            ## add reason hidden unless we expect the element to be hidden
+            reason = $dom.getReasonElIsHidden(obj)
+            err.message += "\n\n" + reason
+
+      ## always rethrow the error!
+      throw err
+  })
 
   assertProto  = chai.Assertion::assert
   matchProto   = chai.Assertion::match
   lengthProto  = chai.Assertion::__methods.length.method
   containProto = chai.Assertion::__methods.contain.method
   existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
-  visibleProto = Object.getOwnPropertyDescriptor(chai.Assertion::, "visible").get
   getMessage   = chaiUtils.getMessage
 
-  patchChaiMethod = (fn, key) ->
-    chai[key] = _.wrap fn, (orig, args...) ->
+  replaceCypressObjsInNamespace = (args = []) ->
+    _.map args, (arg) ->
+      ## if the object in the arguments has a cypress namespace
+      ## then swap it out for that object
+      if obj = $utils.getCypressNamespace(arg)
+        return obj
 
-      args = _.map args, (arg) ->
-        ## if the object in the arguments has a cypress namespace
-        ## then swap it out for that object
-        if obj = $utils.getCypressNamespace(arg)
-          return obj
-
-        return arg
-
-      orig.apply(@, args)
+      return arg
 
   removeOrKeepSingleQuotesBetweenStars = (message) ->
     ## remove any single quotes between our **, preserving escaped quotes
@@ -93,16 +98,17 @@ chai.use (chai, u) ->
     chai.Assertion::__methods.contain.method = containProto
 
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
-    Object.defineProperty(chai.Assertion::, "visible", {get: visibleProto})
 
   overrideChaiAsserts = (assertFn, isInDom) ->
     _this = @
+
+    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
 
     chaiUtils.getMessage = (assert, args) ->
       obj = assert._obj
 
       ## if we are formatting a DOM object
-      if $utils.hasElement(obj) or $utils.hasWindow(obj) or $utils.hasDocument(obj)
+      if $utils.hasDom(obj)
         ## replace object with our formatted one
         assert._obj = $utils.stringifyElement(obj, "short")
 
@@ -116,35 +122,36 @@ chai.use (chai, u) ->
 
     chai.Assertion.overwriteMethod "match", (_super) ->
       return (regExp) ->
-        if _.isRegExp(regExp) or $utils.hasElement(@_obj)
+        if _.isRegExp(regExp) or $utils.hasDom(@_obj)
           _super.apply(@, arguments)
         else
           err = $utils.cypressErr($utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
           err.retry = false
           throw err
 
-    chai.Assertion.overwriteChainableMethod "contain",
-      fn1 = (_super) ->
-        return (text) ->
-          obj = @_obj
+    containFn1 = (_super) ->
+      return (text) ->
+        obj = @_obj
 
-          if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
-            return _super.apply(@, arguments)
+        if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
+          return _super.apply(@, arguments)
 
-          escText = $utils.escapeQuotes(text)
+        escText = $utils.escapeQuotes(text)
 
-          selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
+        selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
 
-          @assert(
-            obj.is(selector) or !!obj.find(selector).length
-            "expected \#{this} to contain \#{exp}"
-            "expected \#{this} not to contain \#{exp}"
-            text
-          )
+        @assert(
+          obj.is(selector) or !!obj.find(selector).length
+          'expected #{this} to contain #{exp}'
+          'expected #{this} not to contain #{exp}'
+          text
+        )
 
-      fn2 = (_super) ->
-        return ->
-          _super.apply(@, arguments)
+    containFn2 = (_super) ->
+      return ->
+        _super.apply(@, arguments)
+
+    chai.Assertion.overwriteChainableMethod("contain", containFn1, containFn2)
 
     chai.Assertion.overwriteChainableMethod "length",
       fn1 = (_super) ->
@@ -197,17 +204,6 @@ chai.use (chai, u) ->
       fn2 = (_super) ->
         return ->
           _super.apply(@, arguments)
-
-    chai.Assertion.overwriteProperty "visible", (_super) ->
-      return ->
-        try
-          _super.apply(@, arguments)
-        catch e
-          ## add reason hidden unless we expect the element to be hidden
-          if (e.message or "").indexOf("not to be") is -1
-            reason = dom.getReasonElIsHidden(@_obj)
-            e.message += "\n\n" + reason
-          throw e
 
     chai.Assertion.overwriteProperty "exist", (_super) ->
       return ->
@@ -270,60 +266,33 @@ chai.use (chai, u) ->
 
       throw err if err
 
-  overrideExpect = (assertFn) ->
-    patchedAssert = createPatchedAssert(assertFn)
-
+  overrideExpect = ->
     ## only override assertions for this specific
     ## expect function instance so we do not affect
     ## the outside world
     return (val, message) ->
+      val = $utils.getCypressNamespace(val) ? val
+
       ## make the assertion
-      ret = new chai.Assertion(val, message)
+      return new chai.Assertion(val, message)
 
-      ## replace the assert function
-      ## for this assertion instance
-      ret.assert = patchedAssert
-
-      ## return assertion instance
-      return ret
-
-  overrideAssert = (assertFn) ->
-    patchedAssert = createPatchedAssert(assertFn)
-
-    tryCatchFinally = (fn) ->
-      try
-        fn()
-      catch err
-      finally
-        ## always reset the prototype method
-        chai.Assertion.prototype.assert = assertProto
-
-      throw err if err
-
-      return undefined
-
+  overrideAssert = ->
     fn = (express, errmsg) ->
-      chai.Assertion.prototype.assert = patchedAssert
-
-      tryCatchFinally ->
-        chai.assert(express, errmsg)
+      chai.assert(express, errmsg)
 
     fns = _.functions(chai.assert)
 
     _.each fns, (name) ->
-      fn[name] = ->
-        args = arguments
+      fn[name] = (args...) ->
+        args = replaceCypressObjsInNamespace(args)
 
-        chai.Assertion.prototype.assert = patchedAssert
-
-        tryCatchFinally =>
-          chai.assert[name].apply(@, args)
+        chai.assert[name].apply(@, args)
 
     return fn
 
   setSpecWindowGlobals = (specWindow, assertFn) ->
-    expect = overrideExpect(assertFn)
-    assert = overrideAssert(assertFn)
+    expect = overrideExpect()
+    assert = overrideAssert()
 
     specWindow.chai   = chai
     specWindow.expect = expect
@@ -342,14 +311,12 @@ chai.use (chai, u) ->
     # overrideChai()
     overrideChaiAsserts(assertFn, isInDom)
 
-    return setSpecWindowGlobals(specWindow, assertFn)
+    return setSpecWindowGlobals(specWindow)
 
   module.exports = {
     replaceArgMessages
 
     removeOrKeepSingleQuotesBetweenStars
-
-    patchChaiMethod
 
     setSpecWindowGlobals
 

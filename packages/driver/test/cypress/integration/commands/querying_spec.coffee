@@ -1123,7 +1123,7 @@ describe "src/cy/commands/querying", ->
         cy.$$("#button").hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "element (<button#button>) is not visible because"
+          expect(err.message).to.include "element <button#button> is not visible because"
           done()
 
         cy.get("#button").should("be.visible")

@@ -303,35 +303,35 @@ dom = {
     ## returns the reason in human terms why an element is considered not visible
     switch
       when @elHasDisplayNone($el)
-        "This element (#{node}) is not visible because it has CSS property: 'display: none'"
+        "This element '#{node}' is not visible because it has CSS property: 'display: none'"
 
       when $parent = @parentHasDisplayNone($el.parent())
         parentNode = $utils.stringifyElement($parent, "short")
-        "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'display: none'"
+        "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'display: none'"
 
       when $parent = @parentHasVisibilityNone($el.parent())
         parentNode = $utils.stringifyElement($parent, "short")
-        "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'visibility: hidden'"
+        "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'visibility: hidden'"
 
       when @elHasVisibilityHidden($el)
-        "This element (#{node}) is not visible because it has CSS property: 'visibility: hidden'"
+        "This element '#{node}' is not visible because it has CSS property: 'visibility: hidden'"
 
       when @elHasNoOffsetWidthOrHeight($el)
         width  = @elOffsetWidth($el)
         height = @elOffsetHeight($el)
-        "This element (#{node}) is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
+        "This element '#{node}' is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
 
       when $parent = @parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
         parentNode  = $utils.stringifyElement($parent, "short")
         width       = @elOffsetWidth($parent)
         height      = @elOffsetHeight($parent)
-        "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
+        "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
 
       when @elIsOutOfBoundsOfAncestorsOverflow($el)
-        "This element (#{node}) is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
+        "This element '#{node}' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
 
       else
-        "Cypress could not determine why this element (#{node}) is not visible."
+        "Cypress could not determine why this element '#{node}' is not visible."
 
 }
 
