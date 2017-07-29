@@ -15,7 +15,6 @@ builtInCommands = [
   require("../cy/commands/asserting")
   require("../cy/commands/clock")
   require("../cy/commands/commands")
-  require("../cy/commands/communications")
   require("../cy/commands/connectors")
   require("../cy/commands/cookies")
   require("../cy/commands/debugging")
