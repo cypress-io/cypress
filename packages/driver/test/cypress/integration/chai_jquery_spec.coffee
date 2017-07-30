@@ -559,7 +559,7 @@ describe "jquery assertions", ->
       .and.have.text("google") ## 9
 
       try
-        expect(@$a).not.to.have.attr("href", "https://google.com")
+        expect(@$a).not.to.have.attr("href", "https://google.com") ## 10
       catch error
 
       expect(@logs.length).to.eq(10)
@@ -613,4 +613,133 @@ describe "jquery assertions", ->
 
       expect(l10.get("message")).to.eq(
         "expected **<a>** not to have attribute **href** with the value **https://google.com**, but the value was **https://google.com**"
+      )
+
+  context "prop", ->
+    beforeEach ->
+      @$input = $("<input type='checkbox' />")
+      @$input.prop("checked", true)
+      @$input.prop = -> throw new Error("prop called")
+
+      @$a = $("<a href='/foo'>google</a>")
+      @$a.prop = -> throw new Error("prop called")
+
+    it "prop, not prop", ->
+      expect(@$input).to.have.prop("checked") ## 1
+      expect(@$input).to.have.prop("checked", true) ## 2
+      expect(@$input).not.to.have.prop("bar") ## 3
+      expect(@$input).not.to.have.prop("bar", "baz") ## 4
+      expect(@$input).not.to.have.prop("checked", "baz") ## 5
+
+      href = window.location.origin + "/foo"
+
+      expect(@$a).to.have.prop("href").and.match(/foo/) ## 6, 7
+      expect(@$a)
+      .to.have.prop("href", href) ## 8
+      .and.have.text("google") ## 9
+
+      try
+        expect(@$a).not.to.have.prop("href", href) ## 10
+      catch error
+
+      expect(@logs.length).to.eq(10)
+
+      l1 = @logs[0]
+      l2 = @logs[1]
+      l3 = @logs[2]
+      l4 = @logs[3]
+      l5 = @logs[4]
+      l6 = @logs[5]
+      l7 = @logs[6]
+      l8 = @logs[7]
+      l9 = @logs[8]
+      l10 = @logs[9]
+
+      expect(l1.get("message")).to.eq(
+        "expected **<input>** to have property **checked**"
+      )
+
+      expect(l2.get("message")).to.eq(
+        "expected **<input>** to have property **checked** with the value **true**"
+      )
+
+      expect(l3.get("message")).to.eq(
+        "expected **<input>** not to have property **bar**"
+      )
+
+      expect(l4.get("message")).to.eq(
+        "expected **<input>** not to have property **bar**"
+      )
+
+      expect(l5.get("message")).to.eq(
+        "expected **<input>** not to have property **checked** with the value **baz**"
+      )
+
+      expect(l6.get("message")).to.eq(
+        "expected **<a>** to have property **href**"
+      )
+
+      expect(l7.get("message")).to.eq(
+        "expected **#{href}** to match /foo/"
+      )
+
+      expect(l8.get("message")).to.eq(
+        "expected **<a>** to have property **href** with the value **#{href}**"
+      )
+
+      expect(l9.get("message")).to.eq(
+        "expected **<a>** to have text **google**"
+      )
+
+      expect(l10.get("message")).to.eq(
+        "expected **<a>** not to have property **href** with the value **#{href}**, but the value was **#{href}**"
+      )
+
+  context "css", ->
+    beforeEach ->
+      @$div = $("<div style='display: none'>div</div>")
+      @$div.css = -> throw new Error("css called")
+
+    it "prop, not prop", ->
+      expect(@$div).to.have.css("display") ## 1
+      expect(@$div).to.have.css("display", "none") ## 2
+      expect(@$div).not.to.have.css("bar") ## 3
+      expect(@$div).not.to.have.css("bar", "baz") ## 4
+      expect(@$div).not.to.have.css("display", "inline") ## 5
+
+      try
+        expect(@$div).not.to.have.css("display", "none") ## 6
+      catch error
+
+      expect(@logs.length).to.eq(6)
+
+      l1 = @logs[0]
+      l2 = @logs[1]
+      l3 = @logs[2]
+      l4 = @logs[3]
+      l5 = @logs[4]
+      l6 = @logs[5]
+
+      expect(l1.get("message")).to.eq(
+        "expected **<div>** to have CSS property **display**"
+      )
+
+      expect(l2.get("message")).to.eq(
+        "expected **<div>** to have CSS property **display** with the value **none**"
+      )
+
+      expect(l3.get("message")).to.eq(
+        "expected **<div>** not to have CSS property **bar**"
+      )
+
+      expect(l4.get("message")).to.eq(
+        "expected **<div>** not to have CSS property **bar**"
+      )
+
+      expect(l5.get("message")).to.eq(
+        "expected **<div>** not to have CSS property **display** with the value **inline**"
+      )
+
+      expect(l6.get("message")).to.eq(
+        "expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**"
       )
