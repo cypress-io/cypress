@@ -1,4 +1,5 @@
 _ = require("lodash")
+$ = require("jquery")
 
 $Snapshots = require("../cy/snapshots")
 $Events = require("./events")

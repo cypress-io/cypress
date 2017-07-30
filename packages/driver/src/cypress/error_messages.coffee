@@ -71,7 +71,7 @@ module.exports = {
 
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
-    match_invalid_argument: "'chai#match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
+    match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
 
   chain:
     removed: """

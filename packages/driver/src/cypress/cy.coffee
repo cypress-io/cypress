@@ -550,6 +550,8 @@ create = (specWindow, Cypress, state, config, log) ->
 
       state("runnable", runnable)
 
+      state("ctx", runnable.ctx)
+
       fn = runnable.fn
 
       restore = ->
@@ -743,7 +745,7 @@ create = (specWindow, Cypress, state, config, log) ->
           args[0] = args[0].call(@)
 
         ## run the command's fn with runnable's context
-        ret = command.get("fn").apply(runnableCtx(), args)
+        ret = command.get("fn").apply(state("ctx"), args)
 
         ## allow us to immediately tap into
         ## return value of our command

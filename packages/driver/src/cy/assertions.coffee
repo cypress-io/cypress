@@ -11,6 +11,25 @@ bTagOpen = /\*\*/g
 bTagClosed = /\*\*/g
 stackTracesRe = / at .*\n/gm
 
+functionHadArguments = (current) ->
+  fn = current and current.get("args") and current.get("args")[0]
+  fn and _.isFunction(fn) and fn.length > 0
+
+isAssertionType = (cmd) ->
+  cmd and cmd.is("assertion")
+
+isDomSubjectAndMatchesValue = (value, subject) ->
+  allElsAreTheSame = ->
+    els1 = $utils.getDomElements(value)
+    els2 = $utils.getDomElements(subject)
+
+    ## no difference
+    _.difference(els1, els2).length is 0
+
+  $utils.hasDom(value) and
+    $utils.hasDom(subject) and
+      allElsAreTheSame()
+
 ## Rules:
 ## 1. always remove value
 ## 2. if value is a jquery object set a subject
@@ -64,7 +83,11 @@ create = (state, queue, retryFn) ->
       ## so we can track assertions and merge
       ## them up with existing ones
       cmd.set("assertionIndex", 0)
-      cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
+
+      cmd.get("fn").originalFn.apply(
+        state("ctx"),
+        [subject].concat(cmd.get("args"))
+      )
 
   finishAssertions = (assertions) ->
     _.each assertions, (log) ->
@@ -296,13 +319,6 @@ create = (state, queue, retryFn) ->
     if $utils.hasElement(value)
       obj.$el = $utils.wrapInjQuery(value)
 
-    functionHadArguments = (current) ->
-      fn = current and current.get("args") and current.get("args")[0]
-      fn and _.isFunction(fn) and fn.length > 0
-
-    isAssertionType = (cmd) ->
-      cmd and cmd.is("assertion")
-
     current = state("current")
 
     ## if we are simply verifying the upcoming
@@ -317,12 +333,13 @@ create = (state, queue, retryFn) ->
 
     isChildLike = (subject, current) =>
       (value is subject) or
-        ## if our current command is an assertion type
-        isAssertionType(current) or
-          ## are we currently verifying assertions?
-          state("upcomingAssertions")?.length > 0 or
-            ## did the function have arguments
-            functionHadArguments(current)
+        isDomSubjectAndMatchesValue(value, subject) or
+          ## if our current command is an assertion type
+          isAssertionType(current) or
+            ## are we currently verifying assertions?
+            state("upcomingAssertions")?.length > 0 or
+              ## did the function have arguments
+              functionHadArguments(current)
 
     _.extend obj,
       name:     "assert"
