@@ -341,6 +341,10 @@ create = (specWindow, Cypress, state, config, log) ->
       cy[name] = ->
         fn.apply(runnableCtx(), arguments)
 
+    addChainer: (name, fn) ->
+      ## add this function to our chainer class
+      $Chainer.add(name, fn)
+
     addCommand: ({name, fn, type, enforceDom}) ->
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
@@ -406,15 +410,16 @@ create = (specWindow, Cypress, state, config, log) ->
 
         ## this is the first call on cypress
         ## so create a new chainer instance
-        chain = $Chainer.create(cy, name, args)
+        chain = $Chainer.create(name, args)
 
         ## store the chain so we can access it later
         state("chain", chain)
 
         return chain
 
-      ## add this function to our chainer class
-      $Chainer.inject name, (chainerId, firstCall, args) ->
+      cy.addChainer name, (chainer, args) ->
+        { firstCall, chainerId } = chainer
+
         ## dont enqueue / inject any new commands if
         ## onInjectCommand returns false
         onInjectCommand = state("onInjectCommand")
