@@ -6,6 +6,7 @@
   "browser": "src/main",
   "scripts": {
     "postinstall": "echo '@packages/driver needs: npm run build'",
+    "start": "coffee test/support/server/server.coffee",
     "build": "gulp build",
     "watch": "gulp watch",
     "test-unit": "mocha",
