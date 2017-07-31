@@ -21,6 +21,9 @@ abort = ->
 reset = ->
   abort()
 
+  if server
+    server.restore()
+
   server = null
 
 isUrlLikeArgs = (url, response) ->
@@ -191,6 +194,10 @@ startXhrServer = (cy, state, config) ->
         route.onResponse.call(cy, xhr)
   })
 
+  win = state("window")
+
+  server.bindTo(win)
+
   state("server", server)
 
   return server
@@ -230,7 +237,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "app:before:window:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
-      $Server.bindTo contentWindow, _.bind(getServer, @)
+      server.bindTo(contentWindow)
     else
       unavailableErr()
 
@@ -365,7 +372,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       route = =>
         ## if our response is a string and
         ## a reference to an alias
-        if _.isString(o.response) and aliasObj = @getAlias(o.response, "route")
+        if _.isString(o.response) and aliasObj = cy.getAlias(o.response, "route")
           ## reset the route's response to be the
           ## aliases subject
           options.response = aliasObj.subject
