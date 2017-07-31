@@ -6,7 +6,7 @@ describe "src/cy/commands/connectors", ->
   describe "with jquery", ->
     before ->
       cy
-        .visit("/support/server/fixtures/jquery.html")
+        .visit("/fixtures/jquery.html")
         .then (win) ->
           @body = win.document.body.outerHTML
 
@@ -806,7 +806,7 @@ describe "src/cy/commands/connectors", ->
   describe "without jquery", ->
     before ->
       cy
-        .visit("/support/server/fixtures/dom.html")
+        .visit("/fixtures/dom.html")
         .then (win) ->
           @body = win.document.body.outerHTML
 

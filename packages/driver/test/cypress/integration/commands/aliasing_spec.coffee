@@ -4,7 +4,7 @@ _ = Cypress._
 describe "src/cy/commands/aliasing", ->
   before ->
     cy
-      .visit("/support/server/fixtures/dom.html")
+      .visit("/fixtures/dom.html")
       .then (win) ->
         @body = win.document.body.outerHTML
 
@@ -149,7 +149,7 @@ describe "src/cy/commands/aliasing", ->
 
       it "does not match alias when the alias has already been applied", ->
         cy
-          .visit("/support/server/fixtures/commands.html")
+          .visit("/fixtures/commands.html")
           .server()
           .route(/foo/, {}).as("getFoo")
           .then ->

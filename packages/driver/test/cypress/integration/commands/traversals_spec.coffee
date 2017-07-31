@@ -7,7 +7,7 @@ helpers = require("../../support/helpers")
 describe "src/cy/commands/traversals", ->
   before ->
     cy
-      .visit("/support/server/fixtures/dom.html")
+      .visit("/fixtures/dom.html")
       .then (win) ->
         @body = win.document.body.outerHTML
 

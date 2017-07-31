@@ -3,7 +3,7 @@ describe "issue 565", ->
   before ->
     cy
       .viewport(400, 400)
-      .visit("/support/server/fixtures/issue-565.html")
+      .visit("/fixtures/issue-565.html")
 
   it "can click the first tr", ->
     cy.get("td:first").click()

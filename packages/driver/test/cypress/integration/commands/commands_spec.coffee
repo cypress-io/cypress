@@ -4,7 +4,7 @@ $ = Cypress.$
 describe "src/cy/commands/commands", ->
   before ->
     cy
-      .visit("/support/server/fixtures/dom.html")
+      .visit("/fixtures/dom.html")
       .then (win) ->
         @body = win.document.body.outerHTML
 

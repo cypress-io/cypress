@@ -294,7 +294,7 @@ describe "src/cy/commands/window", ->
   context "#title", ->
     before ->
       cy
-        .visit("/support/server/fixtures/generic.html")
+        .visit("/fixtures/generic.html")
         .then (win) ->
           h = $(win.document.head)
           h.find("script").remove()

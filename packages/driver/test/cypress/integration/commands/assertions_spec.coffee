@@ -6,7 +6,7 @@ helpers = require("../../support/helpers")
 describe "src/cy/commands/assertions", ->
   before ->
     cy
-      .visit("/support/server/fixtures/jquery.html")
+      .visit("/fixtures/jquery.html")
       .then (win) ->
         @body = win.document.body.outerHTML
 

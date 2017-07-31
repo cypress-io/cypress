@@ -3,7 +3,7 @@ $ = Cypress.$
 
 describe "src/cy/commands/location", ->
   beforeEach ->
-    cy.visit("/support/server/fixtures/generic.html")
+    cy.visit("/fixtures/generic.html")
 
   context "#url", ->
     it "returns the location href", ->
