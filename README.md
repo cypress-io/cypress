@@ -40,6 +40,10 @@ https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
 
 Please see our [Contributing Guideline](/CONTRIBUTING.md)
 
+## Deployment
+
+Please see out [deployment document](DEPLOY.md)
+
 ## License
 
 This project is licensed under the terms of the [MIT license](/LICENSE.md).
