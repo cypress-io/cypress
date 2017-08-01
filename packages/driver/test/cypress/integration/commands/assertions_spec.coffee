@@ -571,7 +571,7 @@ describe "src/cy/commands/assertions", ->
 
           expect(log.invoke("consoleProps")).to.deep.eq {
             Command: "assert"
-            subject: helpers.getFirstSubjectByName("get")
+            subject: log.get("subject")
             Message: "expected <body> to have a property length"
           }
 
@@ -671,6 +671,13 @@ describe "src/cy/commands/assertions", ->
                 done()
 
             cy.get("button:first").should("have.property", "length")
+
+          it "passes on expected subjects without changing them", ->
+            cy.state("window").$.fn.foo = "bar"
+
+            cy
+              .get("input:first").then ($input) ->
+                expect($input).to.have.property("foo", "bar")
 
   context "chai overrides", ->
     beforeEach ->

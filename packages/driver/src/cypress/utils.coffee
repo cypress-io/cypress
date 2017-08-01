@@ -8,8 +8,6 @@ tagOpen     = /\[([a-z\s='"-]+)\]/g
 tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
 
-CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
-
 defaultOptions = {
   delay: 10
   force: false
@@ -283,14 +281,6 @@ module.exports = {
 
     ## return num if this isNaN else return parsed
     if _.isNaN(parsed) then num else parsed
-
-  getCypressNamespace: (obj) ->
-    obj and obj[CYPRESS_OBJECT_NAMESPACE]
-
-  ## backs up an original object to another
-  ## by going through the cypress object namespace
-  setCypressNamespace: (obj, original) ->
-    obj[CYPRESS_OBJECT_NAMESPACE] = original
 
   ## clientX and clientY by their definition
   ## are calculated from viewport edge

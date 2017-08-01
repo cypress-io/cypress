@@ -55,15 +55,6 @@ chai.use (chai, u) ->
   existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
   getMessage   = chaiUtils.getMessage
 
-  replaceCypressObjsInNamespace = (args = []) ->
-    _.map args, (arg) ->
-      ## if the object in the arguments has a cypress namespace
-      ## then swap it out for that object
-      if obj = $utils.getCypressNamespace(arg)
-        return obj
-
-      return arg
-
   removeOrKeepSingleQuotesBetweenStars = (message) ->
     ## remove any single quotes between our **, preserving escaped quotes
     ## and if an empty string, put the quotes back
@@ -271,8 +262,6 @@ chai.use (chai, u) ->
     ## expect function instance so we do not affect
     ## the outside world
     return (val, message) ->
-      val = $utils.getCypressNamespace(val) ? val
-
       ## make the assertion
       return new chai.Assertion(val, message)
 
@@ -283,10 +272,8 @@ chai.use (chai, u) ->
     fns = _.functions(chai.assert)
 
     _.each fns, (name) ->
-      fn[name] = (args...) ->
-        args = replaceCypressObjsInNamespace(args)
-
-        chai.assert[name].apply(@, args)
+      fn[name] = ->
+        chai.assert[name].apply(@, arguments)
 
     return fn
 

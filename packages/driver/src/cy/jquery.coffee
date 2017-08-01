@@ -16,8 +16,6 @@ create = (state) ->
       if $utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
 
-        $utils.setCypressNamespace(remoteSubject, subject)
-
         return remoteSubject
   }
 
