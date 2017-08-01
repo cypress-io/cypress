@@ -29,8 +29,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     wrap: (arg, options = {}) ->
       _.defaults options, {log: true}
 
-      remoteSubject = cy.getRemotejQueryInstance(arg)
-
       if options.log isnt false
         options._log = Cypress.log()
 
