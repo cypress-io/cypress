@@ -4,7 +4,7 @@ $Cypress = require("../cypress")
 
 class $Chainer
   constructor: ->
-    @id        = _.uniqueId("chainer")
+    @chainerId = _.uniqueId("chainer")
     @firstCall = true
 
   @remove = (key) ->
