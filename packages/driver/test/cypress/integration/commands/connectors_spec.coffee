@@ -538,15 +538,10 @@ describe "src/cy/commands/connectors", ->
           cy.noop({}).invoke({})
 
         it "logs once when not dom subject", (done) ->
-          logs = []
-
-          cy.on "log:added", (attrs, @log) =>
-            logs.push @log
-
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(@logs).to.have.length(1)
+            expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
             done()
 
