@@ -22,7 +22,6 @@ describe "src/cy/commands/actions/scrolling", ->
       @scrollHoriz  = cy.$$("#scroll-to-horizontal")
       @scrollBoth   = cy.$$("#scroll-to-both")
 
-    afterEach ->
       ## reset the scrollable containers back
       ## to furthest left and top
       @win.scrollTop           = 0
@@ -275,6 +274,38 @@ describe "src/cy/commands/actions/scrolling", ->
           expect($container.get(0).scrollLeft).to.eq(500)
 
     describe "assertion verification", ->
+      beforeEach ->
+        cy.on "log:added", (attrs, log) =>
+          if log.get("name") is "assert"
+            @lastLog = log
+
+        return null
+
+      it "eventually passes the assertion", ->
+        cy.on "command:retry", _.after 2, ->
+          cy.$$("#scroll-into-view-horizontal").addClass("scrolled")
+
+        cy
+          .get("#scroll-into-view-horizontal")
+          .scrollTo("right")
+          .should("have.class", "scrolled").then ->
+            lastLog = @lastLog
+
+            expect(lastLog.get("name")).to.eq("assert")
+            expect(lastLog.get("state")).to.eq("passed")
+            expect(lastLog.get("ended")).to.be.true
+
+      it "waits until the subject is scrollable", ->
+        cy.stub(cy, "ensureScrollability")
+        .onFirstCall().throws(new Error)
+
+        cy.on "command:retry", ->
+          cy.ensureScrollability.returns()
+
+        cy
+          .get("#scroll-into-view-horizontal")
+          .scrollTo("right").then ->
+            expect(cy.ensureScrollability).to.be.calledTwice
 
     describe "errors", ->
       beforeEach ->
@@ -287,6 +318,13 @@ describe "src/cy/commands/actions/scrolling", ->
           @logs.push(log)
 
         return null
+
+      it "throws when subject isn't scrollable", (done) ->
+        cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.scrollTo() failed because this element is not scrollable:"
+          done()
+
+        cy.get("button:first").scrollTo("bottom")
 
       context "subject errors", ->
         it "throws when not passed DOM element as subject", (done) ->
@@ -407,7 +445,6 @@ describe "src/cy/commands/actions/scrolling", ->
       @scrollHoriz  = cy.$$("#scroll-into-view-horizontal")
       @scrollBoth   = cy.$$("#scroll-into-view-both")
 
-    afterEach ->
       ## reset the scrollable containers back
       ## to furthest left and top
       @_body.scrollTop(0)
@@ -542,6 +579,28 @@ describe "src/cy/commands/actions/scrolling", ->
         expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
         expect(@scrollBoth.get(0).scrollTop).to.eq(300)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+
+    describe "assertion verification", ->
+      beforeEach ->
+        cy.on "log:added", (attrs, log) =>
+          if log.get("name") is "assert"
+            @lastLog = log
+
+        return null
+
+      it "eventually passes the assertion", ->
+        cy.on "command:retry", _.after 2, ->
+          cy.$$("#scroll-into-view-win-vertical div").addClass("scrolled")
+
+        cy
+          .contains("scroll into view vertical")
+          .scrollIntoView()
+          .should("have.class", "scrolled").then ->
+            lastLog = @lastLog
+
+            expect(lastLog.get("name")).to.eq("assert")
+            expect(lastLog.get("state")).to.eq("passed")
+            expect(lastLog.get("ended")).to.be.true
 
     describe "errors", ->
       beforeEach ->

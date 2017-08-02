@@ -91,25 +91,33 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## before attemp
         options.$parent[0].scrollIntoView()
 
-      return new Promise (resolve, reject) =>
-        ## scroll our axes
-        $(options.$parent).scrollTo(options.$el, {
-          axis:     options.axis
-          easing:   options.easing
-          duration: options.duration
-          offset:   options.offset
-          done: (animation, jumpedToEnd) ->
-            resolve(options.$el)
-          fail: (animation, jumpedToEnd) ->
-            ## its Promise object is rejected
-            try
-              $utils.throwErrByPath("scrollTo.animation_failed")
-            catch err
-              reject(err)
-          always: ->
-            if parentIsWin
-              delete options.$parent.contentWindow
-        })
+      scrollIntoView = ->
+        new Promise (resolve, reject) =>
+          ## scroll our axes
+          $(options.$parent).scrollTo(options.$el, {
+            axis:     options.axis
+            easing:   options.easing
+            duration: options.duration
+            offset:   options.offset
+            done: (animation, jumpedToEnd) ->
+              resolve(options.$el)
+            fail: (animation, jumpedToEnd) ->
+              ## its Promise object is rejected
+              try
+                $utils.throwErrByPath("scrollTo.animation_failed")
+              catch err
+                reject(err)
+            always: ->
+              if parentIsWin
+                delete options.$parent.contentWindow
+          })
+
+      scrollIntoView()
+      .then ($el) ->
+        do verifyAssertions = ->
+          cy.verifyUpcomingAssertions($el, options, {
+            onRetry: verifyAssertions
+          })
   })
 
   Commands.addAll({ prevSubject: "optional" }, {
@@ -237,10 +245,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           options.error = err
           cy.retry(ensureScrollability, options)
 
-      Promise
-      .try(ensureScrollability)
-      .then =>
-        return new Promise (resolve, reject) =>
+      scrollTo = ->
+        new Promise (resolve, reject) =>
           ## scroll our axis'
           $(options.$el).scrollTo({left: x, top: y}, {
             axis:     options.axis
@@ -258,4 +264,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           if isWin
             delete options.$el.contentWindow
+
+      Promise
+      .try(ensureScrollability)
+      .then(scrollTo)
+      .then ($el) ->
+        do verifyAssertions = ->
+          cy.verifyUpcomingAssertions($el, options, {
+            onRetry: verifyAssertions
+          })
   })
