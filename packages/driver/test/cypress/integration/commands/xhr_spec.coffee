@@ -211,7 +211,6 @@ describe "src/cy/commands/xhr", ->
           .route({
             url: /foo/
           }).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             win.$.get("/foo")
@@ -224,7 +223,6 @@ describe "src/cy/commands/xhr", ->
         cy
           .server()
           .route(/foo/).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             win.$.get("foo")
@@ -239,7 +237,6 @@ describe "src/cy/commands/xhr", ->
           .route({
             url: /foo/
           }).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             win.$("<base href='/'>").appendTo(win.$("head"))
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
@@ -255,7 +252,6 @@ describe "src/cy/commands/xhr", ->
           .route({
             url: /foo/
           }).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             win.$("<base href='/nested/route/path'>").appendTo(win.$("head"))
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
@@ -269,7 +265,6 @@ describe "src/cy/commands/xhr", ->
         cy
           .server()
           .route(/foo/).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             win.$.get("http://localhost:3501/foo")
@@ -285,7 +280,6 @@ describe "src/cy/commands/xhr", ->
             url: /foo/
             response: {}
           }).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             win.$.get("http://localhost:9999/foo")
@@ -298,7 +292,6 @@ describe "src/cy/commands/xhr", ->
         cy
           .server()
           .route(/foo/, {}).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             win.$.get("/foo")
@@ -310,7 +303,6 @@ describe "src/cy/commands/xhr", ->
       it "rewrites 404's url's for stubs", ->
         cy
           .server({force404: true})
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             new Promise (resolve) ->
@@ -328,7 +320,6 @@ describe "src/cy/commands/xhr", ->
       it "rewrites urls with nested segments", ->
         cy
           .server()
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .route({
             url: /phones/
             response: {}
@@ -345,7 +336,6 @@ describe "src/cy/commands/xhr", ->
 
       it "does not rewrite CORS", ->
         cy
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             new Promise (resolve) ->
@@ -359,7 +349,6 @@ describe "src/cy/commands/xhr", ->
       it "can stub real CORS requests too", ->
         cy
           .server()
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .route({
             url: /phones/
             response: {}
@@ -377,7 +366,6 @@ describe "src/cy/commands/xhr", ->
       it "can stub CORS string routes", ->
         cy
           .server()
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .route("http://localhost:3501/fixtures/app.json").as("getPhones")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
@@ -392,7 +380,6 @@ describe "src/cy/commands/xhr", ->
       # it "can stub root requests to CORS", ->
       #   cy
       #     .server()
-          # .visit("http://localhost:3500/fixtures/xhr.html")
       #     .route({
       #       url: "http://localhost:3501"
       #       stub: false
@@ -416,7 +403,6 @@ describe "src/cy/commands/xhr", ->
             url: /foo/
             response: {}
           }).as("getFoo")
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             ## trick cypress into thinking the remoteOrigin is location:9999
             cy.stub(cy, "_getLocation").withArgs("origin").returns("")
@@ -430,7 +416,6 @@ describe "src/cy/commands/xhr", ->
       it "decodes proxy urls", ->
         cy
           .server()
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .route({
             url: /users/
             response: {}
@@ -449,7 +434,6 @@ describe "src/cy/commands/xhr", ->
       it "decodes proxy urls #2", ->
         cy
           .server()
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .route(/accounts/, {}).as("getAccounts")
           .window().then (win) ->
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
@@ -785,7 +769,6 @@ describe "src/cy/commands/xhr", ->
           done()
 
         cy
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             new Promise (resolve) ->
               win.$.get("http://www.google.com/foo.json").fail ->
@@ -804,7 +787,6 @@ describe "src/cy/commands/xhr", ->
           done()
 
         cy
-          # .visit("http://localhost:3500/fixtures/xhr.html")
           .window().then (win) ->
             xhr = new win.XMLHttpRequest
             xhr.open("GET", "/foo")

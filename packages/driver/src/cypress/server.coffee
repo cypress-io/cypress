@@ -344,12 +344,8 @@ create = (options = {}) ->
         ## headers for the response
         route = server.getRouteForXhr(@)
 
-        console.log "should apply stub for route?", route, server.shouldApplyStub(route)
-
         if server.shouldApplyStub(route)
           url = server.normalizeStubUrl(options.xhrUrl, fullyQualifiedUrl)
-
-        console.log "url is!!", url
 
         timeStart = new Date
 
