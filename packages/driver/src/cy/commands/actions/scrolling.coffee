@@ -3,6 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
+$dom = require("../../../cypress/dom")
 $utils = require("../../../cypress/utils")
 
 findScrollableParent = ($el, win) ->
@@ -13,7 +14,7 @@ findScrollableParent = ($el, win) ->
   if $parent.is("body,html") or $utils.hasDocument($parent)
     return win
 
-  return $parent if $Cypress.Dom.elIsScrollable($parent)
+  return $parent if $dom.elIsScrollable($parent)
 
   findScrollableParent($parent, win)
 
@@ -30,7 +31,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...
-      if subject is @state("window")
+      if subject is state("window")
         $utils.throwErrByPath("scrollIntoView.subject_is_window")
 
       ## throw if we're trying to scroll to multiple elements
@@ -39,7 +40,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults options,
         $el: subject
-        $parent: @state("window")
+        $parent: state("window")
         log: true
         duration: 0
         easing: "swing"
@@ -51,9 +52,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## here we want to figure out what has to actually
       ## be scrolled to get to this element, cause we need
       ## to scrollTo passing in that element.
-      options.$parent = findScrollableParent(options.$el, @state("window"))
+      options.$parent = findScrollableParent(options.$el, state("window"))
 
-      if options.$parent is @state("window")
+      if options.$parent is state("window")
         parentIsWin = true
         ## jQuery scrollTo looks for the prop contentWindow
         ## otherwise it'll use the wrong window to scroll :(
@@ -177,7 +178,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isWin = true
         ## if we don't have a subject, then we are a parent command
         ## assume they want to scroll the entire window.
-        $container = @state("window")
+        $container = state("window")
 
         ## jQuery scrollTo looks for the prop contentWindow
         ## otherwise it'll use the wrong window to scroll :(
