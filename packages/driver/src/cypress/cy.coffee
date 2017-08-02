@@ -228,6 +228,7 @@ create = (specWindow, Cypress, state, config, log) ->
     validateAlias: aliases.validateAlias
     getNextAlias: aliases.getNextAlias
     aliasNotFoundFor: aliases.aliasNotFoundFor
+    getXhrTypeByAlias: aliases.getXhrTypeByAlias
 
     ## location sync methods
     getRemoteLocation: location.getRemoteLocation

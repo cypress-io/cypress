@@ -22,7 +22,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
-    cy.timeout(ms, true)
+    cy.timeout(ms, true, "wait")
 
     if options.log isnt false
       options._log = Cypress.log({
@@ -33,7 +33,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
     Promise
-    .delay(ms)
+    .delay(ms, "wait")
     .return(subject)
 
   waitString = (subject, str, options) ->
@@ -122,36 +122,26 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       else
         waitForRequest().then(waitForResponse)
 
-    ## we have to juggle a separate array of promises
-    ## in order to cancel them when one bombs
-    ## so they dont just keep retrying and retrying
-    xhrs = []
-
     Promise
     .map [].concat(str), (str) =>
       ## we may get back an xhr value instead
       ## of a promise, so we have to wrap this
       ## in another promise :-(
-      xhr = Promise.resolve waitForXhr.call(@, str, _.omit(options, "error"))
-      xhrs.push(xhr)
-      xhr
+      waitForXhr.call(@, str, _.omit(options, "error"))
     .then (responses) ->
       ## if we only asked to wait for one alias
       ## then return that, else return the array of xhr responses
       ret = if responses.length is 1 then responses[0] else responses
 
-      if options._log
-        options._log.set "consoleProps", -> {
-          "Waited For": (@referencesAlias || []).join(", ")
+      if log
+        log.set "consoleProps", -> {
+          "Waited For": (log.get("referencesAlias") || []).join(", ")
           "Yielded": ret
         }
 
-        options._log.snapshot().end()
+        log.snapshot().end()
 
       return ret
-    .catch (err) ->
-      _(xhrs).invoke("cancel")
-      throw err
 
   Commands.addAll({ prevSubject: "optional" }, {
     wait: (subject, msOrFnOrAlias, options = {}) ->
