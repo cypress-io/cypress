@@ -130,7 +130,7 @@ class $Cypress
       @log.apply(@, arguments)
 
     ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow, @, @state, @config, logFn)
+    @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(@mocha, @)
@@ -288,6 +288,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
+      when "cy:stability:changed"
+        @emit("stability:changed", args...)
+
       when "cy:paused"
         @emit("paused", args...)
 
@@ -314,7 +317,16 @@ class $Cypress
       when "app:before:window:load"
         @cy.onBeforeAppWindowLoad(args[0])
 
-        @emit("app:before:window:load", args[0])
+        @emit("before:window:load", args[0])
+
+      when "app:window:load"
+        @emit("window:load", args[0])
+
+      when "app:before:window:unload"
+        @emit("before:window:unload", args[0])
+
+      when "app:window:unload"
+        @emit("window:unload", args[0])
 
       when "spec:script:error"
         @emit("script:error", args...)

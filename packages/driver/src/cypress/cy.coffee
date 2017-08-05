@@ -17,6 +17,7 @@ $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
+$Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
 $Coordinates = require("../cy/coordinates")
 $CommandQueue = require("./command_queue")
@@ -66,7 +67,7 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
-create = (specWindow, Cypress, state, config, log) ->
+create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
 
@@ -80,7 +81,8 @@ create = (specWindow, Cypress, state, config, log) ->
   queue = $CommandQueue.create()
 
   timeouts = $Timeouts.create(state)
-  retries = $Retries.create(Cypress, timeouts.timeout, timeouts.clearTimeout, state, onFinishAssertions)
+  stability = $Stability.create(Cypress, state)
+  retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
   assertions = $Assertions.create(state, queue, retries.retry)
 
   elements = $Elements.create(state)
@@ -218,6 +220,10 @@ create = (specWindow, Cypress, state, config, log) ->
     timeout: timeouts.timeout
     clearTimeout: timeouts.clearTimeout
 
+    ## stability sync methods
+    isStable: stability.isStable
+    whenStable: stability.whenStable
+
     ## xhr sync methods
     getLastXhrByAlias: xhrs.getLastXhrByAlias
     getRequestsByAlias: xhrs.getRequestsByAlias
@@ -278,7 +284,7 @@ create = (specWindow, Cypress, state, config, log) ->
       ## by trying to talk to the contentWindow document to see if
       ## its accessible.
       ## when we find ourselves in a cross origin situation, then our
-      ## proxy has not injected Cypress.action('app:before:window:load')
+      ## proxy has not injected Cypress.action('before:window:load')
       ## so Cypress.onBeforeAutWindowLoad() was never called
       $autIframe.on "load", =>
         ## if setting these props failed
@@ -291,16 +297,13 @@ create = (specWindow, Cypress, state, config, log) ->
           ## TODO: i dont think we need to reapply window listeners either
           ## since we already did it during the onBeforeAutWindowLoad
 
-          ## TODO: uncomment these lines
-          # @urlChanged(null, {log: false})
-          # @pageLoading(false)
-
           ## we reapply window listeners on load even though we
           ## applied them already during onBeforeLoad. the reason
           ## is that after load javascript has finished being evaluated
           ## and we may need to override things like alert + confirm again
-          # @isReady(true, "load")
-          # @Cypress.trigger("load")
+          stability.isStable(true, "load")
+
+          Cypress.action("app:window:load", state("window"))
         catch err
           ## catch errors associated to cross origin iframes
           if ready = state("ready")
@@ -507,6 +510,17 @@ create = (specWindow, Cypress, state, config, log) ->
       $Listeners.bindTo(contentWindow, {
         onSubmit: (e) ->
         onBeforeUnload: (e) ->
+          stability.isStable(false, "beforeunload")
+
+          Cookies.setInitial()
+
+          Cypress.action("app:before:window:unload", e)
+
+          ## return undefined so our beforeunload handler
+          ## doesnt trigger a confirmation dialog
+          return undefined
+        onUnload: (e) ->
+          Cypress.action("app:window:unload", e)
         onHashChange: (e) ->
         onAlert: (str) ->
         onConfirm: (str) ->
@@ -719,12 +733,6 @@ create = (specWindow, Cypress, state, config, log) ->
       state("current", command)
       state("chainerId", command.get("chainerId"))
 
-      promise = if state("ready")
-        Promise.resolve state("ready").promise
-      else
-        Promise.resolve()
-
-      promise
       .then =>
         ## TODO: handle this event
         # @trigger "invoke:start", command

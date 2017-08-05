@@ -1781,7 +1781,7 @@ describe "src/cy/commands/xhr", ->
         cy.then ->
           expect(@lastLog.invoke("renderProps").indicator).to.equal("bad")
 
-  context.skip "Cypress.on(app:before:window:load)", ->
+  context.skip "Cypress.on(before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window
       cy.state("$autIframe").prop("src", "about:blank")

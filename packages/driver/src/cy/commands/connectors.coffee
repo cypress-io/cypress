@@ -316,7 +316,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           if index > -1
             args.splice(index, 1, subject)
 
-          Cypress.removeListener("next:subject:prepared", checkSubject)
+          cy.removeListener("next:subject:prepared", checkSubject)
 
         cy.on("next:subject:prepared", checkSubject)
 

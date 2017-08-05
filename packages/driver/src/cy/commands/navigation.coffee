@@ -7,17 +7,90 @@ $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
-commandCausingLoading = /^(visit|reload)$/
 
 id                    = null
 previousDomainVisited = false
 hasVisitedAboutBlank  = false
+knownCommandCausingInstability = false
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
     onFail: log
     args: { ms }
   })
+
+pageLoading = (Cypress, state, config, bool, event) ->
+  ## if we purposefully just caused the page to load
+  ## (and thus instability) don't log this out
+  return if knownCommandCausingInstability
+
+  ## bail if we dont have a runnable
+  ## because beforeunload can happen at any time
+  ## we may no longer be testing and thus dont
+  ## want to fire a new loading event
+  ## TODO
+  ## this may change in the future since we want
+  ## to add debuggability in the chrome console
+  ## which at that point we may keep runnable around
+  return if not state("runnable")
+
+  options = {}
+
+  ## this tells the world that we're
+  ## handling a page load event
+  ## TODO: rename this to pageTransitionEvent
+  # state("pageChangeEvent", true)
+
+  _.defaults(options, {
+    timeout: config("pageLoadTimeout")
+  })
+
+  options._log = Cypress.log
+    type: "parent"
+    name: "page load"
+    message: "--waiting for new page to load---"
+    event: true
+    ## add a note here that loading nulled out the current subject?
+    consoleProps: -> {
+      "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
+    }
+
+  cy.clearTimeout()
+
+  loading = ->
+    new Promise (resolve, reject) ->
+      cy.on("window:load", resolve)
+
+  loading()
+  .timeout(options.timeout)
+  .then =>
+    options._log.set("message", "--page loaded--").snapshot().end()
+
+    ## return null to prevent accidental chaining
+    return null
+  .catch Promise.CancellationError, (err) ->
+    ## dont do anything on cancellation errors
+    return
+  .catch Promise.TimeoutError, (err) =>
+    try
+      timedOutWaitingForPageLoad(options.timeout, options._log)
+    catch e
+      ## must directly fail here else we potentially
+      ## get unhandled promise exception
+      @fail(e)
+  .catch (err) =>
+    try
+      {originPolicy} = $Location.create(window.location.href)
+
+      $utils.throwErrByPath("navigation.cross_origin", {
+        onFail: options._log
+        args: {
+          message: err.message
+          originPolicy: originPolicy
+        }
+      })
+    catch e
+      @fail(e)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run", (test) ->
@@ -30,6 +103,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## make sure we reset that we haven't
     ## visited about blank again
     hasVisitedAboutBlank = false
+
+  Cypress.on "stability:changed", (bool, event) ->
+    ## only send up page loading events when we're
+    ## not stable!
+    if bool is false
+      pageLoading(Cypress, state, config, bool, event)
 
   requestUrl = (url) ->
     Cypress.backend("resolve:url", url)
@@ -65,6 +144,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     $Location.override(Cypress, contentWindow, navigated)
 
   Cypress.on "app:before:window:load", (contentWindow) ->
+  Cypress.on "before:window:load", (contentWindow) ->
     ## override the remote iframe getters
     overrideRemoteLocationGetters(@, contentWindow)
 
@@ -103,51 +183,61 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           throwArgsErr()
 
       ## clear the current timeout
-      cy.clearTimeout()
+      cy.clearTimeout("reload")
 
       cleanup = null
 
-      p = new Promise (resolve, reject) =>
-        forceReload ?= false
-        options     ?= {}
+      reload = ->
+        new Promise (resolve, reject) ->
+          forceReload ?= false
+          options     ?= {}
 
-        _.defaults options, {
-          log: true
-          timeout: Cypress.config("pageLoadTimeout")
-        }
+          _.defaults options, {
+            log: true
+            timeout: config("pageLoadTimeout")
+          }
 
-        if not _.isBoolean(forceReload)
-          throwArgsErr()
+          if not _.isBoolean(forceReload)
+            throwArgsErr()
 
-        if not _.isObject(options)
-          throwArgsErr()
+          if not _.isObject(options)
+            throwArgsErr()
 
-        if options.log
-          options._log = Cypress.log()
+          if options.log
+            options._log = Cypress.log()
 
-          options._log.snapshot("before", {next: "after"})
+            options._log.snapshot("before", {next: "after"})
 
-        cleanup = =>
-          Cypress.off "load", loaded
+          cleanup = ->
+            knownCommandCausingInstability = false
 
-        loaded = =>
-          cleanup()
-          resolve state("window")
+            cy.removeListener("window:load", loaded)
 
-        Cypress.on "load", loaded
+            return null
 
-        state("window").location.reload(forceReload)
+          loaded = (win) ->
+            cleanup()
 
-      .timeout(options.timeout)
+            resolve(win)
+
+          knownCommandCausingInstability = true
+
+          cy.on("window:load", loaded)
+
+          state("window").location.reload(forceReload)
+
+      reload()
+      .timeout(options.timeout, "reload")
       .catch Promise.TimeoutError, (err) =>
-        cleanup()
-
-        timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
+        timedOutWaitingForPageLoad(options.timeout, options._log)
+      .finally(cleanup)
 
     go: (numberOrString, options = {}) ->
+      debugger
+
       _.defaults options, {
         log: true
-        timeout: Cypress.config("pageLoadTimeout")
+        timeout: config("pageLoadTimeout")
       }
 
       if options.log
@@ -159,49 +249,63 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if num is 0
           $utils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
-        didUnload = false
-        pending   = Promise.pending()
+        cleanup = null
 
-        beforeUnload = ->
-          didUnload = true
+        if options._log
+          options._log.snapshot("before", {next: "after"})
 
-        resolve = ->
-          pending.resolve()
+        go = ->
+          Promise.try ->
+            didUnload = false
 
-        Cypress.on "before:unload", beforeUnload
-        Cypress.on "load", resolve
+            beforeUnload = ->
+              didUnload = true
 
-        ## clear the current timeout
-        cy.clearTimeout()
+            ## clear the current timeout
+            cy.clearTimeout()
 
-        win.history.go(num)
+            cy.on("before:window:unload", beforeUnload)
 
-        cleanup = =>
-          Cypress.off "load", resolve
+            didLoad = new Promise (resolve) ->
+              cleanup = ->
+                cy.removeListener("window:load", resolve)
+                cy.removeListener("before:window:unload", beforeUnload)
 
-          ## need to set the attributes of 'go'
-          ## consoleProps here with win
+                ## prevent accidentally chaining off of cy
+                return null
 
-          ## make sure we resolve our go function
-          ## with the remove window (just like cy.visit)
-          state("window")
+              cy.on("window:load", resolve)
 
-        Promise.delay(100)
-        .then =>
-          ## cleanup the handler
-          Cypress.off("before:unload", beforeUnload)
+            knownCommandCausingInstability = true
 
-          ## if we've didUnload then we know we're
-          ## doing a full page refresh and we need
-          ## to wait until
-          if didUnload
-            pending.promise.then(cleanup)
-          else
-            cleanup()
-        .timeout(options.timeout)
+            win.history.go(num)
+
+            retWin = ->
+              ## need to set the attributes of 'go'
+              ## consoleProps here with win
+
+              ## make sure we resolve our go function
+              ## with the remove window (just like cy.visit)
+              state("window")
+
+            Promise.delay(100)
+            .then =>
+              knownCommandCausingInstability = false
+
+              ## if we've didUnload then we know we're
+              ## doing a full page refresh and we need
+              ## to wait until
+              if didUnload
+                didLoad.then(retWin)
+              else
+                retWin()
+
+        go()
+        .timeout(options.timeout, "go")
         .catch Promise.TimeoutError, (err) =>
-          cleanup()
-          timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
+          debugger
+          timedOutWaitingForPageLoad(options.timeout, options._log)
+        .finally(cleanup)
 
       goString = (str) =>
         switch str
@@ -225,7 +329,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults options,
         log: true
-        timeout: Cypress.config("pageLoadTimeout")
+        timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
 
@@ -238,7 +342,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       url = $Location.normalize(url)
 
-      if baseUrl = Cypress.config("baseUrl")
+      if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
 
       ## backup the previous runnable timeout
@@ -485,7 +589,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .catch Promise.TimeoutError, (err) =>
         v and v.cancel?()
         $autIframe.off("load")
-        timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
+        timedOutWaitingForPageLoad(options.timeout, options._log)
   })
 
   return {
@@ -507,73 +611,4 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         consoleProps: -> {
           "Originated From": e.target
         }
-
-    loading: (options = {}) ->
-      current = state("current")
-
-      ## if we are visiting a page which caused
-      ## the beforeunload, then dont output this command
-      return if commandCausingLoading.test(current?.get("name"))
-
-      ## bail if we dont have a runnable
-      ## because beforeunload can happen at any time
-      ## we may no longer be testing and thus dont
-      ## want to fire a new loading event
-      ## TODO
-      ## this may change in the future since we want
-      ## to add debuggability in the chrome console
-      ## which at that point we may keep runnable around
-      return if not state("runnable")
-
-      ## this tells the world that we're
-      ## handling a page load event
-      state("pageChangeEvent", true)
-
-      _.defaults options,
-        timeout: Cypress.config("pageLoadTimeout")
-
-      options._log = Cypress.log
-        type: "parent"
-        name: "page load"
-        message: "--waiting for new page to load---"
-        event: true
-        ## add a note here that loading nulled out the current subject?
-        consoleProps: -> {
-          "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
-        }
-
-      cy.clearTimeout()
-
-      ready = state("ready")
-
-      ready.promise
-        .timeout(options.timeout)
-        .then =>
-          options._log.set("message", "--page loaded--").snapshot().end()
-
-          ## return null to prevent accidental chaining
-          return null
-        .catch Promise.CancellationError, (err) ->
-          ## dont do anything on cancellation errors
-          return
-        .catch Promise.TimeoutError, (err) =>
-          try
-            timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
-          catch e
-            ## must directly fail here else we potentially
-            ## get unhandled promise exception
-            @fail(e)
-        .catch (err) =>
-          try
-            {originPolicy} = $Location.create(window.location.href)
-
-            $utils.throwErrByPath("navigation.cross_origin", {
-              onFail: options._log
-              args: {
-                message: err.message
-                originPolicy: originPolicy
-              }
-            })
-          catch e
-            @fail(e)
   }

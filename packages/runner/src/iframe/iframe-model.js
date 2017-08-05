@@ -24,7 +24,7 @@ export default class IframeModel {
     }))
 
     eventManager.on('url:changed', action('url:changed', this._updateUrl))
-    eventManager.on('page:loading', action('page:loading', this._updateLoading))
+    eventManager.on('stability:changed', action('stability:changed', this._updateLoading))
 
     eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
     eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))

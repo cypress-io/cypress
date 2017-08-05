@@ -1,7 +1,23 @@
-{ $, _, Promise, Cookies } = window.testUtils
+$ = Cypress.$.bind(Cypress)
+_ = Cypress._
+Promise = Cypress.Promise
 
-describe "$Cypress.Cy Navigation Commands", ->
-  enterCommandTestingMode()
+describe "src/cy/commands/navigation", ->
+  before ->
+    cy
+      .visit("/fixtures/generic.html")
+      .then (win) ->
+        @body = win.document.body.outerHTML
+
+  beforeEach ->
+    doc = cy.state("document")
+
+    $(doc.body).empty().html(@body)
+
+    @win = cy.state("window")
+
+  afterEach ->
+    cy.state("window", @win)
 
   context "#reload", ->
     it "calls into window.location.reload", (done) ->
@@ -11,9 +27,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.state("window", win)
+      cy.state("window", win)
 
-      @cy.reload()
+      cy.reload()
 
     it "can pass forceReload", (done) ->
       fn = (arg) ->
@@ -22,9 +38,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.state("window", win)
+      cy.state("window", win)
 
-      @cy.reload(true)
+      cy.reload(true)
 
     it "can pass forceReload + options", (done) ->
       fn = (arg) ->
@@ -33,9 +49,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.state("window", win)
+      cy.state("window", win)
 
-      @cy.reload(true, {})
+      cy.reload(true, {})
 
     it "can pass just options", (done) ->
       fn = (arg) ->
@@ -44,12 +60,12 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.state("window", win)
+      cy.state("window", win)
 
-      @cy.reload({})
+      cy.reload({})
 
     it "returns the window object", ->
-      @cy
+      cy
         .window().then (oldWin) ->
           oldWin.foo = "bar"
           expect(oldWin.foo).to.eq("bar")
@@ -58,57 +74,82 @@ describe "$Cypress.Cy Navigation Commands", ->
             expect(win).not.to.be.undefined
             expect(win.foo).to.be.undefined
 
-            expect(win).to.eq(@cy.state("window"))
+            expect(win).to.eq(cy.state("window"))
 
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
-      timeout = @sandbox.spy Promise.prototype, "timeout"
-      @Cypress.config("pageLoadTimeout", 456)
+      timeout = cy.spy(Promise.prototype, "timeout")
 
-      @cy.on "command:end", (cmd) =>
-        if cmd.get("name") is "reload"
-          expect(timeout).to.be.calledWith(456)
+      Cypress.config("pageLoadTimeout", 456)
 
-      @cy.reload()
+      cy.reload().then ->
+        expect(timeout).to.be.calledWith(456, "reload")
+
+    it "fires stability:changed and window events events", ->
+      stub1= cy.stub()
+      stub2 = cy.stub()
+      stub3 = cy.stub()
+
+      cy.on("stability:changed", stub1)
+      cy.on("before:window:unload", stub2)
+      cy.on("window:unload", stub3)
+
+      cy.reload().then ->
+        expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
+        expect(stub1.secondCall).to.be.calledWith(true, "load")
+        expect(stub2).to.be.calledOnce
+        expect(stub3).to.be.calledOnce
+
+    it "removes listeners from window", ->
+      win = cy.state("window")
+
+      rel = cy.stub(win, "removeEventListener")
+
+      cy.reload().then ->
+        expect(rel).to.be.calledWith("beforeunload")
+        expect(rel).to.be.calledWith("unload")
 
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
+        Cypress.config("defaultCommandTimeout", 50)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          @lastLog = log
+          @logs.push(log)
+
+        return null
 
       it "logs once on failure", (done) ->
-        logs = []
-
-        @Cypress.on "log", (attrs, log) ->
-          logs.push log
-
-        @cy.on "fail", (err) ->
-          expect(logs.length).to.eq(1)
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
           done()
 
-        @cy.reload(Infinity)
+        cy.reload(Infinity)
 
       it "throws passing more than 2 args", (done) ->
-        @cy.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
-        @cy.reload(1, 2, 3)
+        cy.reload(1, 2, 3)
 
       it "throws passing 2 invalid arguments", (done) ->
-        @cy.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
-        @cy.reload(true, 1)
+        cy.reload(true, 1)
 
       it "throws passing 1 invalid argument", (done) ->
-        @cy.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
-        @cy.reload(1)
+        cy.reload(1)
 
       it "fully refreshes page", ->
-        @cy
+        cy
           .window().then (win) ->
             win.foo = "foo"
           .reload()
@@ -116,135 +157,263 @@ describe "$Cypress.Cy Navigation Commands", ->
             expect(win.foo).to.be.undefined
 
       it "throws when go times out", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
-          done()
+        cy
+          .visit("/timeout?ms=100").then ->
+            expected = false
 
-        @cy
+            ## wait until the window finishes loading first
+            ## else we can potentially move onto the next test
+            ## while we're still unstable, which will result in
+            ## properties on the window being inaccessible
+            ## since we only visit once at the beginning of these tests
+            cy.on "window:load", ->
+              expect(expected).to.be.true
+              done()
+
+            cy.on "fail", (err) ->
+              expected = true
+
+              expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
+
           .reload({timeout: 1})
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (attrs, @log) =>
+        @logs = []
 
-      afterEach ->
-        delete @log
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "reload"
+            @lastLog = log
+
+          @logs.push(log)
+
+        return null
 
       it "logs reload", ->
-        @cy.reload().then ->
-          expect(@log.get("name")).to.eq("reload")
+        cy.reload().then ->
+          expect(@lastLog.get("name")).to.eq("reload")
 
       it "can turn off logging", ->
-        @cy.reload({log: false}).then ->
-          expect(@log).to.be.undefined
+        cy.reload({log: false}).then ->
+          expect(@lastLog).to.be.undefined
 
-      it "logs before + after", (done) ->
+      it "does not log 'Page Load' events", ->
+        cy.reload().then ->
+          @logs.slice(0).forEach (log) ->
+            expect(log.get("event")).to.be.false
+
+      it "logs before + after", ->
         beforeunload = false
 
-        @cy
+        cy
           .window().then (win) ->
-            $(win).on "beforeunload", =>
+            cy.on "before:window:unload", =>
+              lastLog = @lastLog
+
               beforeunload = true
-              expect(@log.get("snapshots").length).to.eq(1)
-              expect(@log.get("snapshots")[0].name).to.eq("before")
-              expect(@log.get("snapshots")[0].body).to.be.an("object")
+              expect(lastLog.get("snapshots").length).to.eq(1)
+              expect(lastLog.get("snapshots")[0].name).to.eq("before")
+              expect(lastLog.get("snapshots")[0].body).to.be.an("object")
+
               return undefined
 
           .reload().then ->
+            lastLog = @lastLog
+
             expect(beforeunload).to.be.true
-            expect(@log.get("snapshots").length).to.eq(2)
-            expect(@log.get("snapshots")[1].name).to.eq("after")
-            expect(@log.get("snapshots")[1].body).to.be.an("object")
-            done()
+            expect(lastLog.get("snapshots").length).to.eq(2)
+            expect(lastLog.get("snapshots")[1].name).to.eq("after")
+            expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
   context "#go", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
-      @cy
-        .visit("/fixtures/sinon.html")
-        .then =>
-          timeout = @sandbox.spy Promise.prototype, "timeout"
-          @Cypress.config("pageLoadTimeout", 456)
+      timeout = cy.spy Promise.prototype, "timeout"
+      Cypress.config("pageLoadTimeout", 456)
 
-          @cy.on "command:end", (cmd) =>
-            if cmd.get("name") is "go"
-              expect(timeout).to.be.calledWith(456)
+      cy
+        .visit("/fixtures/jquery.html")
+        .go("back").then ->
+          expect(timeout).to.be.calledWith(456, "go")
 
-          @cy.go("back")
+    it "fires stability:changed and window events events", ->
+      stub1= cy.stub()
+      stub2 = cy.stub()
+      stub3 = cy.stub()
+
+      cy
+        .visit("/fixtures/jquery.html")
+        .then ->
+          cy.on("stability:changed", stub1)
+          cy.on("before:window:unload", stub2)
+          cy.on("window:unload", stub3)
+        .go("back").then ->
+          expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
+          expect(stub1.secondCall).to.be.calledWith(true, "load")
+          expect(stub2).to.be.calledOnce
+          expect(stub3).to.be.calledOnce
+
+    it "removes listeners from window", ->
+      cy
+        .visit("/fixtures/jquery.html")
+        .then (win) ->
+          rel = cy.stub(win, "removeEventListener")
+
+          cy.go("back").then ->
+            expect(rel).to.be.calledWith("beforeunload")
+            expect(rel).to.be.calledWith("unload")
 
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
+        Cypress.config("defaultCommandTimeout", 50)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "go"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
 
       _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
         it "throws on: '#{val}'", (done) ->
-          @Cypress.on "fail", (err) ->
+          cy.on "fail", (err) ->
             expect(err.message).to.eq("cy.go() accepts only a string or number argument")
             done()
 
-          @cy.go(val)
+          cy.go(val)
 
       it "throws on invalid string", (done) ->
-        @Cypress.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(err.message).to.eq("cy.go() accepts either 'forward' or 'back'. You passed: 'foo'")
           done()
 
-        @cy.go("foo")
+        cy.go("foo")
 
       it "throws on zero", (done) ->
-        @Cypress.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(err.message).to.eq("cy.go() cannot accept '0'. The number must be greater or less than '0'.")
           done()
 
-        @cy.go(0)
+        cy.go(0)
 
       it "throws when go times out", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
-          done()
+        cy
+          .visit("/timeout?ms=100")
+          .visit("/fixtures/jquery.html")
+          .then ->
+            expected = false
 
-        @cy
-          .visit("/fixtures/sinon.html")
-          .go("back", {timeout: 1})
+            ## wait until the window finishes loading first
+            ## else we can potentially move onto the next test
+            ## while we're still unstable, which will result in
+            ## properties on the window being inaccessible
+            ## since we only visit once at the beginning of these tests
+            cy.on "window:load", ->
+              console.log "WINDOW LOAD"
+              debugger
+              expect(expected).to.be.true
+              done()
+
+            cy.on "fail", (err) ->
+              console.log "PAGE FAILED"
+              debugger
+              expected = true
+
+              expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
+
+            cy.go("back", {timeout: 1})
 
       it "only logs once on error", (done) ->
-        logs = []
-
-        @Cypress.on "log", (attrs, log) =>
-          logs.push log
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(3)
-          expect(logs[1].get("error")).to.eq(err)
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error")).to.eq(err)
           done()
 
-        @cy
-          .visit("/foo")
+        cy
+          .visit("/fixtures/jquery.html")
           .go("back", {timeout: 1})
 
     describe ".log", ->
+      beforeEach ->
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "go"
+            @lastLog = log
+
+          @logs.push(log)
+
+        return null
+
+      it "logs go", ->
+        cy
+          .visit("/fixtures/jquery.html")
+          .go("back").then ->
+            lastLog = @lastLog
+
+            expect(lastLog.get("name")).to.eq("go")
+            expect(lastLog.get("message")).to.eq("back")
+
+      it "can turn off logging", ->
+        cy
+          .visit("/fixtures/jquery.html")
+          .go("back", {log: false}).then ->
+            expect(@lastLog).to.be.undefined
+
+      it "does not log 'Page Load' events", ->
+        cy
+          .visit("/fixtures/jquery.html")
+          .go("back").then ->
+            @logs.slice(0).forEach (log) ->
+              expect(log.get("event")).to.be.false
+
+      it "logs before + after", ->
+        beforeunload = false
+
+        cy
+          .visit("/fixtures/jquery.html")
+          .window().then (win) ->
+            cy.on "before:window:unload", =>
+              lastLog = @lastLog
+
+              beforeunload = true
+              expect(lastLog.get("snapshots").length).to.eq(1)
+              expect(lastLog.get("snapshots")[0].name).to.eq("before")
+              expect(lastLog.get("snapshots")[0].body).to.be.an("object")
+
+              return undefined
+
+            cy.go("back").then ->
+              lastLog = @lastLog
+
+              expect(beforeunload).to.be.true
+              expect(lastLog.get("snapshots").length).to.eq(2)
+              expect(lastLog.get("snapshots")[1].name).to.eq("after")
+              expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
   context "#visit", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
-      timeout = @sandbox.spy Promise.prototype, "timeout"
-      @Cypress.config("pageLoadTimeout", 1500)
-      @cy.visit("/foo").then ->
+      timeout = cy.spy Promise.prototype, "timeout"
+      Cypress.config("pageLoadTimeout", 1500)
+      cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
     it "resolves the subject to the remote iframe window", ->
-      @cy.visit("/foo").then (win) ->
+      cy.visit("/foo").then (win) ->
         expect(win).to.eq $("iframe").prop("contentWindow")
 
     it "changes the src of the iframe to the initial src", ->
-      @cy.visit("/foo").then ->
+      cy.visit("/foo").then ->
         src = $("iframe").attr("src")
         expect(src).to.eq "http://localhost:3500/foo"
 
     it "invokes onLoad callback", (done) ->
-      cy = @cy
+      cy = cy
 
       ctx = @
 
-      @cy.visit("/fixtures/sinon.html", {
+      cy.visit("/fixtures/sinon.html", {
         onLoad: (contentWindow) ->
           expect(@).to.eq(ctx)
           expect(contentWindow.sinon).to.be.defined
@@ -252,11 +421,11 @@ describe "$Cypress.Cy Navigation Commands", ->
       })
 
     it "invokes onBeforeLoad callback with cy context", (done) ->
-      cy = @cy
+      cy = cy
 
       ctx = @
 
-      @cy.visit("/fixtures/sinon.html", {
+      cy.visit("/fixtures/sinon.html", {
         onBeforeLoad: (contentWindow) ->
           expect(@).to.eq(ctx)
           expect(contentWindow.sinon).to.be.defined
@@ -264,65 +433,65 @@ describe "$Cypress.Cy Navigation Commands", ->
       })
 
     it "does not error without an onBeforeLoad callback", ->
-      @cy.visit("/fixtures/sinon.html").then ->
-        prev = @cy.state("current").get("prev")
+      cy.visit("/fixtures/sinon.html").then ->
+        prev = cy.state("current").get("prev")
         expect(prev.get("args")).to.have.length(1)
 
     it "calls resolve:url with http:// when localhost", ->
-      trigger = @sandbox.spy(@Cypress, "trigger")
+      trigger = cy.spy(Cypress, "trigger")
 
-      @cy
+      cy
         .visit("localhost:3500/app")
         .then ->
           expect(trigger).to.be.calledWith("resolve:url", "http://localhost:3500/app")
 
     it "prepends hostname when visiting locally", ->
-      prop = @sandbox.spy(@cy.state("$autIframe"), "prop")
+      prop = cy.spy(cy.state("$autIframe"), "prop")
 
-      @cy
+      cy
         .visit("fixtures/sinon.html")
         .then ->
           expect(prop).to.be.calledWith("src", "http://localhost:3500/fixtures/sinon.html")
 
     it "does not set initial ever", ->
-      setInitial = @sandbox.spy(@Cypress.Cookies, "setInitial")
+      setInitial = cy.spy(Cypress.Cookies, "setInitial")
 
       ## do not fire any beforeunload listeners
       ## else setInitial will trigger twice
-      @cy.offWindowListeners()
+      cy.offWindowListeners()
 
-      @cy
+      cy
         .visit("/foo")
         .then ->
           expect(setInitial).not.to.be.called
 
     it "can visit pages on the same originPolicy", ->
-      @cy
+      cy
         .visit("http://localhost:3500/blank.html")
         .visit("http://localhost:3500/blank.html")
         .visit("http://localhost:3500/blank.html")
 
     it "can visit pages on different subdomain but same originPolicy", ->
-      $autIframe = @cy.state("$autIframe")
+      $autIframe = cy.state("$autIframe")
 
       load = ->
         $autIframe.trigger("load")
 
       ## whenever we're told to change the src
       ## just fire the load event directly on the $autIframe
-      @sandbox.stub(@cy, "_src", load)
+      @sandbox.stub(cy, "_src", load)
 
       ## make it seem like we're already on www.foobar.com:3500
-      one = @Cypress.Location.create("http://www.foobar.com:3500/blank.html")
-      two = @Cypress.Location.create("http://help.foobar.com:3500/blank.html")
+      one = Cypress.Location.create("http://www.foobar.com:3500/blank.html")
+      two = Cypress.Location.create("http://help.foobar.com:3500/blank.html")
 
-      @sandbox.stub(@cy, "_existing")
+      @sandbox.stub(cy, "_existing")
       .onCall(0).returns(one)
       .onCall(1).returns(two)
 
-      trigger = @sandbox.spy(@Cypress, "trigger")
+      trigger = cy.spy(Cypress, "trigger")
 
-      @cy
+      cy
         .visit("http://www.foobar.com:3500/blank.html")
         .visit("http://help.foobar.com:3500/blank.html")
         .then ->
@@ -334,26 +503,26 @@ describe "$Cypress.Cy Navigation Commands", ->
       ## as long as we are already on the localhost:3500
       ## domain this will work
 
-      @cy
+      cy
         .visit("http://localhost:3500/foo")
         .visit("/foo")
 
     it "can visit relative pages with domain like query params", ->
-      @cy
+      cy
         .visit("http://localhost:3500/bar")
-        .visit("http://localhost:3500/foo?email=brian@cypress.io")
+        .visit("http://localhost:3500/foo?email=briancypress.io")
 
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0
         urls = []
 
-        @cy.state("$autIframe").on "load", =>
-          urls.push @cy.state("window").location.href
+        cy.state("$autIframe").on "load", =>
+          urls.push cy.state("window").location.href
 
           count += 1
 
-        @cy
+        cy
           ## about:blank yes (1)
           .visit("/hash.html?foo#bar") ## yes (2)
           .visit("/hash.html?foo#foo") ## no (2)
@@ -378,19 +547,19 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe "when origins don't match", ->
       beforeEach ->
-        @Cypress.trigger "test:before:run", {id: 888}
+        Cypress.trigger "test:before:run:async", {id: 888}
 
-        @sandbox.stub(@Cypress, "getEmissions").returns([])
-        @sandbox.stub(@Cypress, "getTestsState").returns([])
-        @sandbox.stub(@Cypress, "getStartTime").returns("12345")
-        @sandbox.stub(@Cypress.Log, "countLogsByTests").withArgs([]).returns(1)
-        @sandbox.stub(@Cypress, "countByTestState")
+        @sandbox.stub(Cypress, "getEmissions").returns([])
+        @sandbox.stub(Cypress, "getTestsState").returns([])
+        @sandbox.stub(Cypress, "getStartTime").returns("12345")
+        @sandbox.stub(Cypress.Log, "countLogsByTests").withArgs([]).returns(1)
+        @sandbox.stub(Cypress, "countByTestState")
           .withArgs([], "passed").returns(2)
           .withArgs([], "failed").returns(3)
           .withArgs([], "pending").returns(4)
 
       it "triggers preserve:run:state with title + fn", (done) ->
-        @Cypress.on "preserve:run:state", (state, cb) ->
+        cy.on "preserve:run:state", (state, cb) ->
           expect(state).to.deep.eq({
             currentId: 888
             tests: []
@@ -403,21 +572,21 @@ describe "$Cypress.Cy Navigation Commands", ->
           })
           done()
 
-        @cy.visit("http://localhost:4200")
+        cy.visit("http://localhost:4200")
 
       it "replaces window.location when origins don't match", (done) ->
         href = window.location.href
 
-        @Cypress.on "preserve:run:state", (state, cb) ->
+        cy.on "preserve:run:state", (state, cb) ->
           cb()
 
-        @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
+        @sandbox.stub(cy, "_getLocation").withArgs("href").returns("about:blank")
 
-        current = @Cypress.Location.create("about:blank")
-        remote  = @Cypress.Location.create("http://localhost:4200")
-        uri     = @Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
+        current = Cypress.Location.create("about:blank")
+        remote  = Cypress.Location.create("http://localhost:4200")
+        uri     = Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
 
-        @sandbox.stub(@Cypress.Location, "create")
+        @sandbox.stub(Cypress.Location, "create")
         .withArgs("about:blank")
         .returns(current)
         .withArgs(href)
@@ -427,10 +596,10 @@ describe "$Cypress.Cy Navigation Commands", ->
         .withArgs("http://localhost:4200/")
         .returns(remote)
 
-        _href = @cy._href
+        _href = cy._href
         count = 0
 
-        @cy._href = (win, url) ->
+        cy._href = (win, url) ->
           count += 1
 
           if count is 1
@@ -440,14 +609,14 @@ describe "$Cypress.Cy Navigation Commands", ->
             expect(url).to.eq("http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js")
             done()
 
-        @cy.visit("http://localhost:4200")
+        cy.visit("http://localhost:4200")
 
     describe "location getter overrides", ->
       beforeEach ->
         @eq = (attr, str) =>
           expect(@win.location[attr]).to.eq str
 
-        @cy
+        cy
           .visit("/fixtures/sinon.html?foo=bar#dashboard?baz=quux")
           .window().as("win").then (win) ->
             ## ensure href always returns the full path
@@ -478,11 +647,11 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe "history method overrides", ->
       beforeEach ->
-        @cy
+        cy
           .visit("/fixtures/sinon.html")
           .window().as("win")
           .then ->
-            @urlChanged = @sandbox.spy @cy, "urlChanged"
+            @urlChanged = cy.spy cy, "urlChanged"
 
       _.each ["back", "forward", "go"], (attr) =>
         it "fires 'history:event' on attr: '#{attr}'", ->
@@ -501,15 +670,15 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @sandbox.stub(@Cypress, "getEmissions").returns([])
-        @Cypress.on "log", (attrs, @log) =>
+        @sandbox.stub(Cypress, "getEmissions").returns([])
+        cy.on "log:added", (attrs, @log) =>
 
       it "preserves url on subsequent visits", ->
-        @cy.visit("/fixtures/sinon.html").get("button").then ->
-          expect(@log.get("url")).to.eq "http://localhost:3500/fixtures/sinon.html"
+        cy.visit("/fixtures/sinon.html").get("button").then ->
+          expect(lastLog.get("url")).to.eq "http://localhost:3500/fixtures/sinon.html"
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (attrs, log) ->
+        cy.on "log:added", (attrs, log) ->
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
             message: "localhost:3500/app/foo#/hash"
@@ -517,10 +686,10 @@ describe "$Cypress.Cy Navigation Commands", ->
 
           done()
 
-        @cy.visit("localhost:3500/app/foo#/hash")
+        cy.visit("localhost:3500/app/foo#/hash")
 
       it "logs obj once complete", ->
-        @cy.visit("http://localhost:3500/blank.html").then ->
+        cy.visit("http://localhost:3500/blank.html").then ->
           obj = {
             state: "passed"
             name: "visit"
@@ -529,24 +698,24 @@ describe "$Cypress.Cy Navigation Commands", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+            expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
       it "snapshots once", ->
-        @cy.visit("/blank.html").then ->
-          expect(@log.get("snapshots").length).to.eq(1)
-          expect(@log.get("snapshots")[0]).to.be.an("object")
+        cy.visit("/blank.html").then ->
+          expect(lastLog.get("snapshots").length).to.eq(1)
+          expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
       it "can turn off logging", ->
         log = null
 
-        @Cypress.on "log", (attrs, l) ->
+        cy.on "log:added", (attrs, l) ->
           log = l
 
-        @cy.visit("/timeout?ms=0", {log: false}).then ->
+        cy.visit("/timeout?ms=0", {log: false}).then ->
           expect(log).to.be.null
 
       it "displays file attributes as consoleProps", ->
-        @sandbox.stub(@cy, "_resolveUrl").resolves({
+        @sandbox.stub(cy, "_resolveUrl").resolves({
           isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
@@ -556,8 +725,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           cookies: [{}, {}]
         })
 
-        @cy.visit("/foo").then ->
-          expect(@log.attributes.consoleProps()).to.deep.eq({
+        cy.visit("/foo").then ->
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
             "Command": "visit"
             "File Served": "/path/to/foo/bar"
             "Resolved Url": "http://localhost:3500/foo/bar"
@@ -566,7 +735,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           })
 
       it "displays http attributes as consoleProps", ->
-        @sandbox.stub(@cy, "_resolveUrl").resolves({
+        @sandbox.stub(cy, "_resolveUrl").resolves({
           isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
@@ -576,8 +745,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           cookies: [{}, {}]
         })
 
-        @cy.visit("http://localhost:3500/foo").then ->
-          expect(@log.attributes.consoleProps()).to.deep.eq({
+        cy.visit("http://localhost:3500/foo").then ->
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
             "Command": "visit"
             "Resolved Url": "http://localhost:3500/foo"
             "Redirects": [1, 2]
@@ -585,7 +754,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           })
 
       it "displays originalUrl http attributes as consoleProps", ->
-        @sandbox.stub(@cy, "_resolveUrl").resolves({
+        @sandbox.stub(cy, "_resolveUrl").resolves({
           isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
@@ -595,8 +764,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           cookies: [{}, {}]
         })
 
-        @cy.visit("http://localhost:3500/foo").then ->
-          expect(@log.attributes.consoleProps()).to.deep.eq({
+        cy.visit("http://localhost:3500/foo").then ->
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
             "Command": "visit"
             "Original Url": "http://localhost:3500/foo"
             "Resolved Url": "http://localhost:3500/foo/bar"
@@ -605,7 +774,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           })
 
       it "indicates redirects in the message", ->
-        @sandbox.stub(@cy, "_resolveUrl").resolves({
+        @sandbox.stub(cy, "_resolveUrl").resolves({
           isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
@@ -615,8 +784,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           cookies: [{}, {}]
         })
 
-        @cy.visit("http://localhost:3500/foo").then ->
-          expect(@log.get("message")).to.eq(
+        cy.visit("http://localhost:3500/foo").then ->
+          expect(lastLog.get("message")).to.eq(
             "http://localhost:3500/foo -> 1 -> 2"
           )
 
@@ -625,54 +794,54 @@ describe "$Cypress.Cy Navigation Commands", ->
         @allowErrors()
 
       it "sets error command state", (done) ->
-        @sandbox.stub(@cy, "_resolveUrl").rejects(new Error)
+        @sandbox.stub(cy, "_resolveUrl").rejects(new Error)
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
 
-        @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq "failed"
-          expect(@log.get("error")).to.eq err
+        cy.on "fail", (err) =>
+          expect(lastLog.get("state")).to.eq "failed"
+          expect(lastLog.get("error")).to.eq err
           done()
 
-        @cy.visit("/blank.html")
+        cy.visit("/blank.html")
 
       it "logs once on error", (done) ->
-        @sandbox.stub(@cy, "_resolveUrl").rejects(new Error)
+        @sandbox.stub(cy, "_resolveUrl").rejects(new Error)
 
         logs = []
 
-        @Cypress.on "log", (attrs, log) ->
+        cy.on "log:added", (attrs, log) ->
           logs.push log
 
-        @cy.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(logs).to.have.length(1)
           done()
 
-        @cy.visit("/blank.html")
+        cy.visit("/blank.html")
 
       it "logs once on timeout error", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
           expect(err.message).to.include "Your page did not fire its 'load' event within '200ms'."
-          expect(@log.get("error")).to.eq(err)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("/timeout?ms=5000", {timeout: 200})
+        cy.visit("/timeout?ms=5000", {timeout: 200})
 
       it "cancels resolve url promise on timeout", (done) ->
-        Cypress.on "collect:run:state", ->
+        cy.on "collect:run:state", ->
           done(new Error("should not have tried to swap domains"))
 
-        r = @sandbox.spy(@cy, "_resolveUrl")
+        r = cy.spy(cy, "_resolveUrl")
 
         Cypress.off("resolve:url")
 
-        Cypress.on "resolve:url", (args, cb) ->
+        cy.on "resolve:url", (args, cb) ->
           ## resolve after 150ms
           Promise.delay(150)
           .then ->
@@ -686,104 +855,104 @@ describe "$Cypress.Cy Navigation Commands", ->
 
             done()
 
-        @cy.visit("/", {timeout: 100})
+        cy.visit("/", {timeout: 100})
 
       it "throws when url isnt a string", (done) ->
-        @cy.on "fail", (err) ->
+        cy.on "fail", (err) ->
           expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
           done()
 
-        @cy.visit()
+        cy.visit()
 
       it "unbinds remoteIframe load event"
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-          expect(logs.length).to.eq(2)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy
+        cy
           .visit("http://localhost:3500/blank.html")
           .visit("http://localhost:3501/blank.html")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-          expect(logs.length).to.eq(2)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy
+        cy
           .visit("http://localhost:3500/blank.html")
           .visit("https://localhost:3500/blank.html")
 
       it "throws when attempting to visit a 2nd domain on different host", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-          expect(logs.length).to.eq(2)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy
+        cy
           .visit("http://localhost:3500/blank.html")
           .visit("http://google.com:3500/blank.html")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
-        $autIframe = @cy.state("$autIframe")
+        $autIframe = cy.state("$autIframe")
 
         load = ->
           $autIframe.trigger("load")
 
         ## whenever we're told to change the src
         ## just fire the load event directly on the $autIframe
-        @sandbox.stub(@cy, "_src", load)
+        @sandbox.stub(cy, "_src", load)
 
         logs = []
 
         ## make it seem like we're already on http://127.0.0.1:3500
-        one = @Cypress.Location.create("http://127.0.0.1:3500/blank.html")
-        @sandbox.stub(@cy, "_existing")
+        one = Cypress.Location.create("http://127.0.0.1:3500/blank.html")
+        @sandbox.stub(cy, "_existing")
         .returns(one)
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-          expect(logs.length).to.eq(2)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy
+        cy
           .visit("http://127.0.0.1:3500/blank.html")
           .visit("http://126.0.0.1:3500/blank.html")
 
       it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(trigger).to.be.calledWithMatch("resolve:url", "http://localhost:3500/blank.html")
           expect(trigger).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500/blank.html")
           done()
 
-        @cy
+        cy
           .visit("http://localhost:3500/blank.html")
           .visit("http://google.com:3500/blank.html")
 
@@ -791,15 +960,15 @@ describe "$Cypress.Cy Navigation Commands", ->
         err1 = new Error("connect ECONNREFUSED 127.0.0.1:64646")
         err1.stack = "some stack props"
 
-        @sandbox.stub(@cy, "_resolveUrl").rejects(err1)
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        @sandbox.stub(cy, "_resolveUrl").rejects(err1)
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -823,11 +992,11 @@ describe "$Cypress.Cy Navigation Commands", ->
           """)
           expect(err1.url).to.include("/foo.html")
           expect(trigger).to.be.calledWith("visit:failed", err1)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("/foo.html")
+        cy.visit("/foo.html")
 
       it "displays loading_file_failed when _resolveUrl resp is not ok", (done) ->
         obj = {
@@ -844,16 +1013,16 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/foo.html").resolves(obj)
+        @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "/foo.html").resolves(obj)
 
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -868,11 +1037,11 @@ describe "$Cypress.Cy Navigation Commands", ->
               > 404: Not Found
           """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("/foo.html")
+        cy.visit("/foo.html")
 
       ## FIXME: the following 5 tests hang when running all tests in this file
 
@@ -893,16 +1062,16 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/bar").resolves(obj)
+        @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "/bar").resolves(obj)
 
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -921,11 +1090,11 @@ describe "$Cypress.Cy Navigation Commands", ->
               - 301: http://localhost:3500/bar/
           """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("/bar")
+        cy.visit("/bar")
 
       it.skip "displays loading_http_failed when _resolveUrl resp is not ok", (done) ->
         obj = {
@@ -941,16 +1110,16 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
+        @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
 
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -963,11 +1132,11 @@ describe "$Cypress.Cy Navigation Commands", ->
             This was considered a failure because the status code was not '2xx'.
           """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("https://google.com/foo")
+        cy.visit("https://google.com/foo")
 
       it.skip "displays loading_http_failed redirects when _resolveUrl resp is not ok", (done) ->
         obj = {
@@ -986,16 +1155,16 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
+        @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
 
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -1013,11 +1182,11 @@ describe "$Cypress.Cy Navigation Commands", ->
               - 301: https://gmail.com/
           """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("https://google.com/foo")
+        cy.visit("https://google.com/foo")
 
       it.skip "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
         obj = {
@@ -1032,16 +1201,16 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
+        @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
 
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -1058,11 +1227,11 @@ describe "$Cypress.Cy Navigation Commands", ->
             cy.request() will automatically get and set cookies and enable you to parse responses.
           """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("https://google.com/foo")
+        cy.visit("https://google.com/foo")
 
       it.skip "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
         obj = {
@@ -1078,16 +1247,16 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
+        @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
 
-        trigger = @sandbox.spy(@Cypress, "trigger")
+        trigger = cy.spy(Cypress, "trigger")
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        @cy.on "fail", (err) =>
+        cy.on "fail", (err) =>
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -1104,30 +1273,30 @@ describe "$Cypress.Cy Navigation Commands", ->
             cy.request() will automatically get and set cookies and enable you to parse responses.
           """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
           done()
 
-        @cy.visit("https://google.com/foo")
+        cy.visit("https://google.com/foo")
 
   context "#loading", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
-      timeout = @sandbox.spy Promise.prototype, "timeout"
-      @Cypress.config("pageLoadTimeout", 1500)
-      @cy.visit("/foo").then ->
+      timeout = cy.spy Promise.prototype, "timeout"
+      Cypress.config("pageLoadTimeout", 1500)
+      cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
     it "does not reset the timeout", (done) ->
-      @cy._timeout(1000)
+      cy._timeout(1000)
 
       ## previously loading would reset the timeout
       ## which could cause failures on the next test
       ## if there was logic after a test finished running
-      @cy.window().then (win) =>
-        timeout = @sandbox.spy(@cy, "_timeout")
+      cy.window().then (win) =>
+        timeout = cy.spy(cy, "_timeout")
 
-        @cy.state("$autIframe").one "load", =>
-          @cy.state("ready").promise.then ->
+        cy.state("$autIframe").one "load", =>
+          cy.state("ready").promise.then ->
             _.delay ->
               expect(timeout.callCount).to.eq(1)
               expect(timeout.firstCall).to.be.calledWith(1000)
@@ -1143,24 +1312,24 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       ## this navigates us to a new page so
       ## we should be setting the initial cookie
-      @cy.get("a:first").click().then ->
+      cy.get("a:first").click().then ->
         expect(Cookies.get("__cypress.initial")).to.eq("true")
 
     it "clears current cy subject", ->
-      input = @cy.$$("form#click-me input[type=submit]")
+      input = cy.$$("form#click-me input[type=submit]")
 
-      @cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
-        expect(@cy.queue.names()).to.deep.eq [
+      cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
+        expect(cy.queue.names()).to.deep.eq [
           "get", "find", "click", "then", "then"
         ]
         expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
         expect(subject).to.be.undefined
 
     it "clears the current subject on submit event as well", ->
-      form = @cy.$$("form#click-me")
+      form = cy.$$("form#click-me")
 
-      @cy.get("form#click-me").submit().then (subject) ->
-        expect(@cy.queue.names()).to.deep.eq [
+      cy.get("form#click-me").submit().then (subject) ->
+        expect(cy.queue.names()).to.deep.eq [
           "get", "submit", "then", "then"
         ]
         expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)
@@ -1168,29 +1337,29 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (attrs, @log) =>
+        cy.on "log:added", (attrs, @log) =>
 
       it "returns if current command is visit", ->
         logs = []
 
-        @Cypress.on "log", (attrs, log) ->
+        cy.on "log:added", (attrs, log) ->
           logs.push log
 
-        @cy.visit("/fixtures/xhr.html").then ->
+        cy.visit("/fixtures/xhr.html").then ->
           expect(logs).to.have.length(1)
 
       it "is name: page load", ->
-        @cy.get("form#click-me").find("input[type=submit]").click().then ->
-          expect(@log.get("name")).to.eq "page load"
+        cy.get("form#click-me").find("input[type=submit]").click().then ->
+          expect(lastLog.get("name")).to.eq "page load"
 
       it "is type: parent", ->
-        @cy.get("form#click-me").submit().then ->
-          expect(@log.get("type")).to.eq "parent"
+        cy.get("form#click-me").submit().then ->
+          expect(lastLog.get("type")).to.eq "parent"
 
       describe "#consoleProps", ->
         it "only has Event: 'page load'", ->
-          @cy.get("form#click-me").submit().then ->
-            expect(@log.attributes.consoleProps()).to.deep.eq {
+          cy.get("form#click-me").submit().then ->
+            expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Event: "page load"
               Notes: "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
             }
@@ -1202,38 +1371,38 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "can time out", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, log) ->
+        cy.on "log:added", (attrs, log) ->
           logs.push log
 
-        @cy.once "fail", (err) ->
+        cy.once "fail", (err) ->
           ## should only log once
-          expect(logs.length).to.eq 1
+          expect(@logs.length).to.eq 1
           expect(err.message).to.include "Your page did not fire its 'load' event within '100ms'."
           done()
 
-        @cy.on "invoke:end", =>
-          @cy.isReady(false, "testing")
-          @cy.loading({timeout: 100})
+        cy.on "command:end", =>
+          cy.isReady(false, "testing")
+          cy.loading({timeout: 100})
 
-        @cy.noop({})
+        cy.noop({})
 
       it "captures cross origin failures", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, log) ->
+        cy.on "log:added", (attrs, log) ->
           logs.push(log)
 
-        @cy.once "fail", (err) ->
+        cy.once "fail", (err) ->
           log = logs[0]
 
           expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
-          expect(logs.length).to.eq(1)
+          expect(@logs.length).to.eq(1)
           expect(log.get("name")).to.eq("page load")
           expect(log.get("state")).to.eq("failed")
           expect(log.get("error")).to.eq(err)
           done()
 
-        @cy
+        cy
           .window({log: false}).then (win) ->
             win.location.href = "http://localhost:3501/fixtures/dom.html"
 

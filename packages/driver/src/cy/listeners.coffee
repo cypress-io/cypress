@@ -1,15 +1,34 @@
 $ = require("jquery")
 _ = require("lodash")
 
+events = []
+
+removeAllListeners = ->
+  for event in events
+    [win, event, cb] = event
+
+    win.removeEventListener(event, cb)
+
+  ## reset all the events
+  events = []
+
+  return null
+
+addListener = (win, event, cb) ->
+  events.push([win, event, cb])
+
+  win.addEventListener(event, cb)
+
 $win = null
 
 reset = ->
   if $win
+    $win.get(0).onerror = null
     $win.off()
     $win = null
 
 eventHasReturnValue = (e) ->
-  val = e.originalEvent.returnValue
+  val = e.returnValue
 
   ## return false if val is an empty string
   ## of if its undinefed
@@ -25,6 +44,23 @@ module.exports = {
     ## TODO: do we still need to do this?
     return if contentWindow.location.href is "about:blank"
 
+    ## set onerror global handler
+    contentWindow.onerror = callbacks.onError
+
+    addListener contentWindow, "beforeunload", (e) ->
+      ## bail if we've cancelled this event (from another source)
+      ## or we've set a returnValue on the original event
+      return if e.defaultPrevented or eventHasReturnValue(e)
+
+      callbacks.onBeforeUnload(e)
+
+    addListener contentWindow, "unload", (e) ->
+      ## when we unload we need to remove all of the event listeners
+      removeAllListeners()
+
+      ## else we know to proceed onwards!
+      callbacks.onUnload(e)
+
     $win = $(contentWindow)
 
     ## using the native submit method will not trigger a
@@ -39,13 +75,6 @@ module.exports = {
 
       ## else we know to proceed onwards!
       callbacks.onSubmit(e)
-
-    $win.on "beforeunload", (e) =>
-      ## bail if we've cancelled this event (from another source)
-      ## or we've set a returnValue on the original event
-      return if e.isDefaultPrevented() or eventHasReturnValue(e)
-
-      callbacks.onBeforeUnload(e)
 
     $win.on("hashchange", callbacks.onHashChange)
 
