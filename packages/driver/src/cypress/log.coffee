@@ -59,10 +59,10 @@ toSerializedJSON = (attrs) ->
 
   _.mapValues(attrs, stringify)
 
-getDisplayProps = (attrs) =>
+getDisplayProps = (attrs) ->
   _.pick(attrs, DISPLAY_PROPS)
 
-getConsoleProps = (attrs) =>
+getConsoleProps = (attrs) ->
   attrs.consoleProps
 
 getSnapshotProps = (attrs) ->

@@ -16,8 +16,6 @@ browsers      = require("./browsers")
 automation    = require("./automation")
 log           = require('debug')('cypress:server:socket')
 
-existingState = null
-
 runnerEvents = [
   "reporter:restart:test:run"
   "runnables:ready"
@@ -136,6 +134,8 @@ class Socket
     })
 
   startListening: (server, watchers, automation, config, options) ->
+    existingState = null
+
     _.defaults options,
       socketId: null
       onSetRunnables: ->
@@ -293,6 +293,9 @@ class Socket
 
         backendRequest = ->
           switch eventName
+            when "preserve:run:state"
+              existingState = args[0]
+              null
             when "resolve:url"
               options.onResolveUrl(args[0], headers, automationRequest)
             when "http:request"
@@ -306,20 +309,15 @@ class Socket
             when "exec"
               exec.run(config.projectRoot, args[0])
             else
-              Promise.reject(
-                new Error("You requested a backend event we cannot handle: #{eventName}")
+              throw new Error(
+                "You requested a backend event we cannot handle: #{eventName}"
               )
 
-        backendRequest()
+        Promise.try(backendRequest)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
           cb({error: errors.clone(err)})
-
-      socket.on "preserve:run:state", (state, cb) ->
-        existingState = state
-
-        cb()
 
       socket.on "get:existing:run:state", (cb) ->
         if (s = existingState)

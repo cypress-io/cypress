@@ -31,8 +31,8 @@ $Server = require("./cypress/server")
 $utils = require("./cypress/utils")
 
 proxies = {
-  runner: "getStartTime getTestsState getEmissions countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId normalizeAll".split(" ")
-  cy: "checkForEndedEarly onUncaughtException getStyles".split(" ")
+  runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
+  cy: "checkForEndedEarly getStyles".split(" ")
 }
 
 throwDeprecatedCommandInterface = (key, method) ->
@@ -255,10 +255,6 @@ class $Cypress
       when "mocha:runnable:run"
         @runner.onRunnableRun(args...)
 
-      when "cy:fail"
-        ## comes from cypress errors fail()
-        @emit("fail", args...)
-
       when "runner:test:before:run"
         ## get back to a clean slate
         @cy.reset()
@@ -283,16 +279,22 @@ class $Cypress
         @emit("log:added", args...)
 
       when "command:log:changed"
-        "asdf"
         @runner.addLog(args[0], @isHeadless)
 
         @emit("log:changed", args...)
+
+      when "cy:fail"
+        ## comes from cypress errors fail()
+        @emit("fail", args...)
 
       when "cy:stability:changed"
         @emit("stability:changed", args...)
 
       when "cy:paused"
         @emit("paused", args...)
+
+      when "cy:visit:failed"
+        @emit("visit:failed", args[0])
 
       when "cy:viewport:changed"
         @emit("viewport:changed", args...)
@@ -313,6 +315,9 @@ class $Cypress
 
       when "cy:next:subject:prepared"
         @emit("next:subject:prepared", args...)
+
+      when "cy:collect:run:state"
+        @emitThen("collect:run:state")
 
       when "app:before:window:load"
         @cy.onBeforeAppWindowLoad(args[0])

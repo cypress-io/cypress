@@ -2,5 +2,8 @@
   "baseUrl": "http://localhost:3500",
   "fixturesFolder": "support/server/fixtures",
   "supportFolder": false,
-  "videoRecording": false
+  "videoRecording": false,
+  "hosts": {
+    "*.foobar.com": "127.0.0.1"
+  }
 }

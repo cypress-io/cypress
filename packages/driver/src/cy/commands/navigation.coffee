@@ -9,9 +9,22 @@ $utils = require("../../cypress/utils")
 
 
 id                    = null
-previousDomainVisited = false
-hasVisitedAboutBlank  = false
-knownCommandCausingInstability = false
+previousDomainVisited = null
+hasVisitedAboutBlank  = null
+knownCommandCausedInstability = null
+
+reset = (test = {}) ->
+  knownCommandCausedInstability = false
+
+  ## continuously reset this
+  ## before each test run!
+  previousDomainVisited = false
+
+  ## make sure we reset that we haven't
+  ## visited about blank again
+  hasVisitedAboutBlank = false
+
+  id = test.id
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
@@ -19,10 +32,46 @@ timedOutWaitingForPageLoad = (ms, log) ->
     args: { ms }
   })
 
+gotResponse = (err) ->
+  err.gotResponse is true
+
+gotInvalidContentType = (err) ->
+  err.invalidContentType is true
+
+bothUrlsMatchAndRemoteHasHash = (current, remote) ->
+  ## the remote has a hash
+  ## or the last char of href
+  ## is a hash
+  (remote.hash or remote.href.slice(-1) is "#") and
+
+    ## both must have the same origin
+    (current.origin is remote.origin) and
+
+      ## both must have the same pathname
+      (current.pathname is remote.pathname) and
+
+        ## both must have the same query params
+        (current.search is remote.search)
+
+cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
+  $utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
+    onFail: log
+    args: {
+      previousDomain: previousDomainVisited
+      attemptedDomain: origin
+    }
+  })
+
+aboutBlank = (win) ->
+  new Promise (resolve) ->
+    cy.once("window:load", resolve)
+
+    $utils.locHref("about:blank", win)
+
 pageLoading = (Cypress, state, config, bool, event) ->
   ## if we purposefully just caused the page to load
   ## (and thus instability) don't log this out
-  return if knownCommandCausingInstability
+  return if knownCommandCausedInstability
 
   ## bail if we dont have a runnable
   ## because beforeunload can happen at any time
@@ -55,22 +104,19 @@ pageLoading = (Cypress, state, config, bool, event) ->
       "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
     }
 
-  cy.clearTimeout()
+  cy.clearTimeout("page load")
 
   loading = ->
     new Promise (resolve, reject) ->
       cy.on("window:load", resolve)
 
   loading()
-  .timeout(options.timeout)
+  .timeout(options.timeout, "page load")
   .then =>
     options._log.set("message", "--page loaded--").snapshot().end()
 
     ## return null to prevent accidental chaining
     return null
-  .catch Promise.CancellationError, (err) ->
-    ## dont do anything on cancellation errors
-    return
   .catch Promise.TimeoutError, (err) =>
     try
       timedOutWaitingForPageLoad(options.timeout, options._log)
@@ -80,7 +126,7 @@ pageLoading = (Cypress, state, config, bool, event) ->
       @fail(e)
   .catch (err) =>
     try
-      {originPolicy} = $Location.create(window.location.href)
+      { originPolicy } = $Location.create(window.location.href)
 
       $utils.throwErrByPath("navigation.cross_origin", {
         onFail: options._log
@@ -93,22 +139,22 @@ pageLoading = (Cypress, state, config, bool, event) ->
       @fail(e)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:run", (test) ->
-    ## continuously reset this
-    ## before each test run!
-    previousDomainVisited = false
+  reset()
 
-    id = test.id
-
-    ## make sure we reset that we haven't
-    ## visited about blank again
-    hasVisitedAboutBlank = false
+  Cypress.on("test:before:run", reset)
 
   Cypress.on "stability:changed", (bool, event) ->
     ## only send up page loading events when we're
     ## not stable!
     if bool is false
       pageLoading(Cypress, state, config, bool, event)
+
+  visitFailedByErr = (err, url, fn) ->
+    err.url = url
+
+    Cypress.action("cy:visit:failed", err)
+
+    fn()
 
   requestUrl = (url) ->
     Cypress.backend("resolve:url", url)
@@ -135,15 +181,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           resp
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
-    navigated = (attr, args) ->
-      cy.urlChanged(null, {
-        by: attr
-        args: args
-      })
+    # navigated = (attr, args) ->
+    #   debugger
+    #   # cy.urlChanged(null, {
+    #   #   by: attr
+    #   #   args: args
+    #   # })
+    #
+    # $Location.override(Cypress, contentWindow, navigated)
 
-    $Location.override(Cypress, contentWindow, navigated)
-
-  Cypress.on "app:before:window:load", (contentWindow) ->
   Cypress.on "before:window:load", (contentWindow) ->
     ## override the remote iframe getters
     overrideRemoteLocationGetters(@, contentWindow)
@@ -209,7 +255,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             options._log.snapshot("before", {next: "after"})
 
           cleanup = ->
-            knownCommandCausingInstability = false
+            knownCommandCausedInstability = false
 
             cy.removeListener("window:load", loaded)
 
@@ -220,7 +266,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             resolve(win)
 
-          knownCommandCausingInstability = true
+          knownCommandCausedInstability = true
 
           cy.on("window:load", loaded)
 
@@ -233,8 +279,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .finally(cleanup)
 
     go: (numberOrString, options = {}) ->
-      debugger
-
       _.defaults options, {
         log: true
         timeout: config("pageLoadTimeout")
@@ -276,7 +320,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               cy.on("window:load", resolve)
 
-            knownCommandCausingInstability = true
+            knownCommandCausedInstability = true
 
             win.history.go(num)
 
@@ -290,7 +334,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             Promise.delay(100)
             .then =>
-              knownCommandCausingInstability = false
+              knownCommandCausedInstability = false
 
               ## if we've didUnload then we know we're
               ## doing a full page refresh and we need
@@ -349,226 +393,201 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## and the hook's previous timeout
       prevTimeout = cy.timeout()
 
+      cleanup = null
+
       ## clear the current timeout
-      cy.clearTimeout()
+      cy.clearTimeout("visit")
 
-      win           = state("window")
+      win        = state("window")
       $autIframe = state("$autIframe")
-      runnable      = state("runnable")
+      runnable   = state("runnable")
 
-      v = null
+      onLoad = ->
+        ## reset window on load
+        win = state("window")
 
-      p = new Promise (resolve, reject) =>
+        cy.timeout(prevTimeout, "visit")
+        options.onLoad?.call(runnable.ctx, win)
 
-        visitFailedByErr = (err, url, fn) ->
-          err.url = url
+        options._log.set({url: url}) if options._log
 
-          Cypress.trigger("visit:failed", err)
+        return Promise.resolve(win)
 
-          try
-            fn()
-          catch e
-            reject(e)
+      go = ->
+        ## hold onto our existing url
+        existing = $utils.locExisting()
 
-        cannotVisit2ndDomain = (origin) ->
-          try
-            $utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
-              onFail: options._log
-              args: {
-                previousDomain: previousDomainVisited
-                attemptedDomain: origin
-              }
-            })
-          catch e
-            return reject(e)
+        ## TODO: $Location.resolve(existing.origin, url)
 
-        gotResponse = (err) ->
-          err.gotResponse is true
+        ## in the case we are visiting a relative url
+        ## then prepend the existing origin to it
+        ## so we get the right remote url
+        if not $Location.isFullyQualifiedUrl(url)
+          remoteUrl = $Location.fullyQualifyUrl(url)
 
-        gotInvalidContentType = (err) ->
-          err.invalidContentType is true
+        remote = $Location.create(remoteUrl ? url)
 
-        bothUrlsMatchAndRemoteHasHash = (current, remote) ->
-          ## the remote has a hash
-          ## or the last char of href
-          ## is a hash
-          (remote.hash or remote.href.slice(-1) is "#") and
+        ## store the existing hash now since
+        ## we'll need to apply it later
+        existingHash = remote.hash ? ""
 
-            ## both must have the same origin
-            (current.origin is remote.origin) and
+        if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
+          ## if we've already visited a new superDomain
+          ## then die else we'd be in a terrible endless loop
+          return cannotVisit2ndDomain(remote.origin, previousDomainVisited, options._log)
 
-              ## both must have the same pathname
-              (current.pathname is remote.pathname) and
+        current = $Location.create(win.location.href)
 
-                ## both must have the same query params
-                (current.search is remote.search)
+        ## if all that is changing is the hash then we know
+        ## the browser won't actually make a new http request
+        ## for this, and so we need to resolve onLoad immediately
+        ## and bypass the actual visit resolution stuff
+        if bothUrlsMatchAndRemoteHasHash(current, remote)
+          $utils.iframeSrc($autIframe, remote.href)
+          return onLoad()
 
-        visit = (win, url, options) =>
-          onLoad = =>
-            cy.timeout(prevTimeout)
-            options.onLoad?.call(runnable.ctx, win)
+        if existingHash
+          ## strip out the existing hash if we have one
+          ## before telling our backend to resolve this url
+          url = url.replace(existingHash, "")
 
-            options._log.set({url: url}) if options._log
+        requestUrl(url)
+        .then (resp = {}) =>
+          {url, originalUrl, cookies, redirects, filePath} = resp
 
-            resolve(win)
+          ## reapply the existing hash
+          url         += existingHash
+          originalUrl += existingHash
 
-          ## hold onto our existing url
-          existing = $utils.locExisting()
+          if filePath
+            consoleProps["File Served"] = filePath
+          else
+            if url isnt originalUrl
+              consoleProps["Original Url"] = originalUrl
 
-          ## TODO: $Location.resolve(existing.origin, url)
+          if options.log and redirects and redirects.length
+            indicateRedirects = ->
+              [originalUrl].concat(redirects).join(" -> ")
 
-          ## in the case we are visiting a relative url
-          ## then prepend the existing origin to it
-          ## so we get the right remote url
-          if not $Location.isFullyQualifiedUrl(url)
-            remoteUrl = $Location.fullyQualifyUrl(url)
+            options._log.set({message: indicateRedirects()})
 
-          remote = $Location.create(remoteUrl ? url)
+          consoleProps["Resolved Url"]  = url
+          consoleProps["Redirects"]     = redirects
+          consoleProps["Cookies Set"]   = cookies
 
-          ## store the existing hash now since
-          ## we'll need to apply it later
-          existingHash = remote.hash ? ""
+          remote = $Location.create(url)
 
-          if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
-            ## if we've already visited a new superDomain
-            ## then die else we'd be in a terrible endless loop
-            return cannotVisit2ndDomain(remote.origin)
+          ## if the origin currently matches
+          ## then go ahead and change the iframe's src
+          ## and we're good to go
+          # if origin is existing.origin
+          if remote.originPolicy is existing.originPolicy
+            previousDomainVisited = remote.origin
 
-          current = $Location.create(win.location.href)
+            url = $Location.fullyQualifyUrl(url)
 
-          ## if all that is changing is the hash then we know
-          ## the browser won't actually make a new http request
-          ## for this, and so we need to resolve onLoad immediately
-          ## and bypass the actual visit resolution stuff
-          if bothUrlsMatchAndRemoteHasHash(current, remote)
-            $utils.iframeSrc($autIframe, remote.href)
-            return onLoad()
-
-          if existingHash
-            ## strip out the existing hash if we have one
-            ## before telling our backend to resolve this url
-            url = url.replace(existingHash, "")
-
-          requestUrl(url)
-          .then (resp = {}) =>
-            {url, originalUrl, cookies, redirects, filePath} = resp
-
-            ## reapply the existing hash
-            url         += existingHash
-            originalUrl += existingHash
-
-            if filePath
-              consoleProps["File Served"] = filePath
-            else
-              if url isnt originalUrl
-                consoleProps["Original Url"] = originalUrl
-
-            if options.log and redirects and redirects.length
-              indicateRedirects = ->
-                [originalUrl].concat(redirects).join(" -> ")
-
-              options._log.set({message: indicateRedirects()})
-
-            consoleProps["Resolved Url"]  = url
-            consoleProps["Redirects"]     = redirects
-            consoleProps["Cookies Set"]   = cookies
-
-            remote = $Location.create(url)
-
-            ## if the origin currently matches
-            ## then go ahead and change the iframe's src
-            ## and we're good to go
-            # if origin is existing.origin
-            if remote.originPolicy is existing.originPolicy
-              previousDomainVisited = remote.origin
-
-              url = $Location.fullyQualifyUrl(url)
-
+            changeIframeSrc = ->
               ## when the remote iframe's load event fires
               ## callback fn
-              $autIframe.one("load", onLoad)
-
-              $utils.iframeSrc($autIframe, url)
-            else
-              ## if we've already visited a new superDomain
-              ## then die else we'd be in a terrible endless loop
-              if previousDomainVisited
-                return cannotVisit2ndDomain(remote.origin)
-
-              ## tell our backend we're changing domains
               new Promise (resolve) ->
-                ## TODO: add in other things we want to preserve
-                ## state for like scrollTop
-                state = {
-                  currentId: id
-                  tests:     Cypress.getTestsState()
-                  startTime: Cypress.getStartTime()
-                  emissions: Cypress.getEmissions()
-                }
+                cy.once("window:load", resolve)
 
-                state.passed  = Cypress.countByTestState(state.tests, "passed")
-                state.failed  = Cypress.countByTestState(state.tests, "failed")
-                state.pending = Cypress.countByTestState(state.tests, "pending")
-                state.numLogs = $Log.countLogsByTests(state.tests)
+                cleanup = ->
+                  cy.removeListener("window:load", resolve)
 
-                promises = Cypress.invoke("collect:run:state")
+                  return null
 
-                Promise.all(promises)
-                .then (a = []) ->
-                  ## merge all the states together holla'
-                  state = _.reduce a, (memo, obj) ->
-                    _.extend(memo, obj)
-                  , state
+                $utils.iframeSrc($autIframe, url)
 
-                  Cypress.trigger("preserve:run:state", state, resolve)
-              .then =>
-                ## and now we must change the url to be the new
-                ## origin but include the test that we're currently on
-                newUri = new UrlParse(remote.origin)
-                newUri
-                .set("pathname", existing.pathname)
-                .set("query",    existing.search)
-                .set("hash",     existing.hash)
+            changeIframeSrc()
+            .then(onLoad)
+          else
+            ## if we've already visited a new superDomain
+            ## then die else we'd be in a terrible endless loop
+            if previousDomainVisited
+              return cannotVisit2ndDomain(remote.origin, previousDomainVisited, options._log)
 
-                ## replace is broken in electron so switching
-                ## to href for now
-                # $utils.locReplace(window, newUri.toString())
-                $utils.locHref(window, newUri.toString())
-          .catch gotResponse, gotInvalidContentType, (err) ->
-            visitFailedByErr err, err.originalUrl, ->
-              args = {
-                url:         err.originalUrl
-                path:        err.filePath
-                status:      err.status
-                statusText:  err.statusText
-                redirects:   err.redirects
-                contentType: err.contentType
+            ## tell our backend we're changing domains
+            ## TODO: add in other things we want to preserve
+            ## state for like scrollTop
+            debugger
+            s = {
+              currentId: id
+              tests:     Cypress.getTestsState()
+              startTime: Cypress.getStartTime()
+              emissions: Cypress.getEmissions()
+            }
+
+            s.passed  = Cypress.countByTestState(s.tests, "passed")
+            s.failed  = Cypress.countByTestState(s.tests, "failed")
+            s.pending = Cypress.countByTestState(s.tests, "pending")
+            s.numLogs = $Log.countLogsByTests(s.tests)
+
+            Cypress.action("cy:collect:run:state")
+            .then (a = []) ->
+              debugger
+              ## merge all the states together holla'
+              s = _.reduce a, (memo, obj) ->
+                _.extend(memo, obj)
+              , s
+
+              Cypress.backend("preserve:run:state", s)
+            .then =>
+              ## and now we must change the url to be the new
+              ## origin but include the test that we're currently on
+              newUri = new UrlParse(remote.origin)
+              newUri
+              .set("pathname", existing.pathname)
+              .set("query",    existing.search)
+              .set("hash",     existing.hash)
+
+              ## replace is broken in electron so switching
+              ## to href for now
+              # $utils.locReplace(window, newUri.toString())
+              $utils.locHref(newUri.toString(), window)
+
+              ## we are returning a Promise which never resolves
+              ## because we're changing top to be a brand new URL
+              ## and want to block the rest of our commands
+              return Promise.delay(1e9)
+        .catch gotResponse, gotInvalidContentType, (err) ->
+          visitFailedByErr err, err.originalUrl, ->
+            args = {
+              url:         err.originalUrl
+              path:        err.filePath
+              status:      err.status
+              statusText:  err.statusText
+              redirects:   err.redirects
+              contentType: err.contentType
+            }
+
+            msg = switch
+              when err.gotResponse
+                type = if err.filePath then "file" else "http"
+
+                "visit.loading_#{type}_failed"
+
+              when err.invalidContentType
+                "visit.loading_invalid_content_type"
+
+            $utils.throwErrByPath(msg, {
+              onFail: options._log
+              args: args
+            })
+        .catch (err) ->
+          debugger
+          visitFailedByErr err, url, ->
+            $utils.throwErrByPath("visit.loading_network_failed", {
+              onFail: options._log
+              args: {
+                url:   url
+                error: err
+                stack: err.stack
               }
+            })
 
-              msg = switch
-                when err.gotResponse
-                  type = if err.filePath then "file" else "http"
 
-                  "visit.loading_#{type}_failed"
-
-                when err.invalidContentType
-                  "visit.loading_invalid_content_type"
-
-              $utils.throwErrByPath(msg, {
-                onFail: options._log
-                args: args
-              })
-          .catch (err) ->
-            visitFailedByErr err, url, ->
-              $utils.throwErrByPath("visit.loading_network_failed", {
-                onFail: options._log
-                args: {
-                  url:   url
-                  error: err
-                  stack: err.stack
-                }
-              })
-
+      visit = ->
         ## if we've visiting for the first time during
         ## a test then we want to first visit about:blank
         ## so that we nuke the previous state. subsequent
@@ -577,19 +596,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if not hasVisitedAboutBlank
           hasVisitedAboutBlank = true
 
-          $autIframe.one "load", =>
-            v = visit(win, url, options)
-
-          $utils.locHref(win, "about:blank")
+          aboutBlank(win)
+          .then(go)
         else
-          v = visit(win, url, options)
+          go()
 
-      p
-      .timeout(options.timeout)
+      visit()
+      .then ->
+        state("window")
+      .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
-        v and v.cancel?()
-        $autIframe.off("load")
         timedOutWaitingForPageLoad(options.timeout, options._log)
+      .finally(cleanup)
   })
 
   return {

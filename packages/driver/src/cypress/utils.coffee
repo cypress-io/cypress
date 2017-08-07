@@ -322,7 +322,7 @@ module.exports = {
   addTwentyYears: ->
     moment().add(20, "years").unix()
 
-  locHref: (win, url) ->
+  locHref: (url, win) ->
     win.location.href = url
 
   locReplace: (win, url) ->

@@ -6,8 +6,6 @@ Promise = require("bluebird")
 $Log = require("./log")
 $utils = require("./utils")
 
-id = 0
-
 defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
@@ -231,19 +229,19 @@ isLastSuite = (suite, tests) ->
   .last()
   .value() is suite
 
-overrideRunnerHook = (Cypress, runner, getTestById, getTest, setTest, getTests) ->
-  ## bail if our runner doesnt have a hook.
+overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) ->
+  ## bail if our _runner doesnt have a hook.
   ## useful in tests
-  return if not runner.hook
+  return if not _runner.hook
 
   ## monkey patch the hook event so we can wrap
   ## 'test:before:run:async' and 'test:after:hooks' around all of
   ## the hooks surrounding a test runnable
   _this = @
 
-  runnerHook = runner.hook
+  _runnerHook = _runner.hook
 
-  runner.hook = (name, fn) ->
+  _runner.hook = (name, fn) ->
     hooks = @suite["_" + name]
 
     ctx = @
@@ -295,11 +293,7 @@ overrideRunnerHook = (Cypress, runner, getTestById, getTest, setTest, getTests) 
               (not isLastSuite(@suite, allTests) and getTest() is _.last(tests))
             changeFnToRunAfterHooks()
 
-    runnerHook.call(@, name, fn)
-
-getId = ->
-  ## increment the id counter
-  "r" + (id += 1)
+    _runnerHook.call(@, name, fn)
 
 matchesGrep = (runnable, grep) ->
   ## we have optimized this iteration to the maximum.
@@ -321,7 +315,7 @@ getTestResults = (tests) ->
       obj.state = "skipped"
     obj
 
-normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById) ->
+normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getId) ->
   hasTests = false
 
   ## only loop until we find the first test
@@ -338,7 +332,7 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
   tests         = {}
   grepIsDefault = _.isEqual(grep, defaultGrepRe)
 
-  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById)
+  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId)
 
   if setTestsById
     ## use callback here to hand back
@@ -351,7 +345,7 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
 
   return obj
 
-normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById) ->
+normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId) ->
   normalizer = (runnable) =>
     runnable.id = getId()
 
@@ -385,11 +379,11 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
     if runnable.type is "test"
       push(runnable)
 
-    ## and recursively iterate and normalize all other runnables
-    _.each {tests: runnable.tests, suites: runnable.suites}, (runnables, key) =>
+    ## and recursively iterate and normalize all other _runnables
+    _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, key) =>
       if runnable[key]
-        obj[key] = _.map runnables, (runnable) =>
-          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById)
+        obj[key] = _.map _runnables, (runnable) =>
+          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId)
   else
     ## iterate through all tests and only push them in
     ## if they match the current grep
@@ -417,7 +411,9 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
             initialTests,
             grep,
             grepIsDefault,
-            onRunnable
+            onRunnable,
+            onLogsById,
+            getId
           )
         )
 
@@ -450,32 +446,32 @@ hookFailed = (hook, err, hookName, getTestById) ->
   else
     Cypress.action("runner:test:end", wrap(test))
 
-runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
-  runner.on "start", ->
+_runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
+  _runner.on "start", ->
     Cypress.action("runner:start")
 
-  runner.on "end", ->
+  _runner.on "end", ->
     Cypress.action("runner:end")
 
-  runner.on "suite", (suite) ->
-    return if emissions.started[suite.id]
+  _runner.on "suite", (suite) ->
+    return if _emissions.started[suite.id]
 
-    emissions.started[suite.id] = true
+    _emissions.started[suite.id] = true
 
     Cypress.action("runner:suite:start", wrap(suite))
 
-  runner.on "suite end", (suite) ->
+  _runner.on "suite end", (suite) ->
     ## cleanup our suite + its hooks
     forceGc(suite)
     eachHookInSuite(suite, forceGc)
 
-    return if emissions.ended[suite.id]
+    return if _emissions.ended[suite.id]
 
-    emissions.ended[suite.id] = true
+    _emissions.ended[suite.id] = true
 
     Cypress.action("runner:suite:end", wrap(suite))
 
-  runner.on "hook", (hook) ->
+  _runner.on "hook", (hook) ->
     hookName = getHookName(hook)
 
     ## mocha incorrectly sets currentTest on before all's.
@@ -495,34 +491,34 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
 
     Cypress.action("runner:hook:start", wrap(hook))
 
-  runner.on "hook end", (hook) ->
+  _runner.on "hook end", (hook) ->
     hookName = getHookName(hook)
 
     Cypress.action("runner:hook:end", wrap(hook))
 
-  runner.on "test", (test) ->
+  _runner.on "test", (test) ->
     setTest(test)
 
-    return if emissions.started[test.id]
+    return if _emissions.started[test.id]
 
-    emissions.started[test.id] = true
+    _emissions.started[test.id] = true
 
     Cypress.action("runner:test:start", wrap(test))
 
-  runner.on "test end", (test) ->
-    return if emissions.ended[test.id]
+  _runner.on "test end", (test) ->
+    return if _emissions.ended[test.id]
 
-    emissions.ended[test.id] = true
+    _emissions.ended[test.id] = true
 
     Cypress.action("runner:test:end", wrap(test))
 
-  runner.on "pass", (test) ->
+  _runner.on "pass", (test) ->
     Cypress.action("runner:pass", wrap(test))
 
   ## if a test is pending mocha will only
   ## emit the pending event instead of the test
   ## so we normalize the pending / test events
-  runner.on "pending", (test) ->
+  _runner.on "pending", (test) ->
     ## do nothing if our test is skipped
     return if test._ALREADY_RAN
 
@@ -547,7 +543,7 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
     if _.last(tests) isnt test
       fire("test:after:run", test, Cypress)
 
-  runner.on "fail", (runnable, err) ->
+  _runner.on "fail", (runnable, err) ->
     isHook = runnable.type is "hook"
 
     if isHook
@@ -580,72 +576,72 @@ runnerListeners = (runner, Cypress, emissions, getTestById, setTest) ->
       hookFailed(runnable, runnable.err, hookName, getTestById)
 
 create = (mocha, Cypress) ->
-  id = 0
+  _id = 0
 
-  runner = mocha.getRunner()
-  runner.suite = mocha.getRootSuite()
+  _runner = mocha.getRunner()
+  _runner.suite = mocha.getRootSuite()
 
   ## this is used in tests since we provide
   ## the tests immediately
-  # normalizeAll(runner.suite, {}, grep()) if runner.suite
+  # normalizeAll(_runner.suite, {}, grep()) if _runner.suite
 
-  ## hold onto the runnables for faster lookup later
-  stopped = false
-  test = null
-  tests = []
-  testsById = {}
-  testsQueue = []
-  testsQueueById = {}
-  runnables = []
-  logsById = {}
-  emissions = {
+  ## hold onto the _runnables for faster lookup later
+  _stopped = false
+  _test = null
+  _tests = []
+  _testsById = {}
+  _testsQueue = []
+  _testsQueueById = {}
+  _runnables = []
+  _logsById = {}
+  _emissions = {
     started: {}
     ended:   {}
   }
-  startTime = null
+  _startTime = null
 
-  # @listeners()
+  getId = ->
+    ## increment the id counter
+    "r" + (_id += 1)
 
   setTestsById = (tbid) ->
-    testsById = tbid
+    _testsById = tbid
 
   setTests = (t) ->
-    tests = t
-
-  onRunnable = (r) ->
-    runnables.push(r)
-
-  onLogsById = (l) ->
-    logsById[l.id] = l
-
-  getTest = ->
-    test
-
-  setTest = (t) ->
-    test = t
+    _tests = t
 
   getTests = ->
-    tests
+    _tests
+
+  onRunnable = (r) ->
+    _runnables.push(r)
+
+  onLogsById = (l) ->
+    _logsById[l.id] = l
+
+  getTest = ->
+    _test
+
+  setTest = (t) ->
+    _test = t
 
   getTestById = (id) ->
     ## perf short circuit
     return if not id
 
-    testsById[id]
+    _testsById[id]
 
-  overrideRunnerHook(Cypress, runner, getTestById, getTest, setTest, getTests)
+  overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
-    id
-
     grep: (re) ->
       if arguments.length
-        runner._grep = re
+        _runner._grep = re
       else
-        ## grab grep from the mocha runner
+        ## grab grep from the mocha _runner
         ## or just set it to all in case
         ## there is a mocha regression
-        runner._grep ?= defaultGrepRe
+        _runner._grep ?= defaultGrepRe
 
     options: (options = {}) ->
       ## TODO
@@ -657,30 +653,31 @@ create = (mocha, Cypress) ->
 
     normalizeAll: (tests) ->
       normalizeAll(
-        runner.suite,
+        _runner.suite,
         tests,
         @grep(),
         setTestsById,
         setTests,
         onRunnable,
-        onLogsById
+        onLogsById,
+        getId
       )
 
     run: (fn) ->
-      startTime ?= moment().toJSON()
+      _startTime ?= moment().toJSON()
 
-      runnerListeners(runner, Cypress, emissions, getTestById, setTest)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, setTest)
 
-      runner.run (failures) =>
+      _runner.run (failures) =>
         ## if we happen to make it all the way through
-        ## the run, then just set stopped to true here
-        stopped = true
+        ## the run, then just set _stopped to true here
+        _stopped = true
 
         ## TODO this functions is not correctly
         ## synchronized with the 'end' event that
         ## we manage because of uncaught hook errors
         if fn
-          fn(failures, getTestResults(tests))
+          fn(failures, getTestResults(_tests))
 
     onRunnableRun: (runnableRun, runnable, args) ->
       if not runnable.id
@@ -699,7 +696,7 @@ create = (mocha, Cypress) ->
       ## if we haven't yet fired this event for this test
       ## that means that we need to reset the previous state
       ## of cy - since we now have a new 'test' and all of the
-      ## associated runnables will share this state
+      ## associated _runnables will share this state
       if not fired("runner:test:before:run", test)
         fire("runner:test:before:run", test, Cypress)
 
@@ -733,54 +730,101 @@ create = (mocha, Cypress) ->
         runnableRun.apply(runnable, args)
 
     getStartTime: ->
-      startTime
+      _startTime
 
     setStartTime: (iso) ->
-      startTime = iso
+      _startTime = iso
 
-    getErrorByTestId: (testId) ->
-      if test = getTestById(testId)
-        wrapErr(test.err)
+    countByTestState: (tests, state) ->
+      count = _.filter tests, (test, key) ->
+        test.state is state
+
+      count.length
+
+    setNumLogs: (num) ->
+      $Log.setCounter(num)
+
+    getEmissions: ->
+      debugger
+      _emissions
+
+    getTestsState: ->
+      debugger
+      id    = _test?.id
+      tests = {}
+
+      ## bail if we dont have a current test
+      return {} if not id
+
+      ## search through all of the tests
+      ## until we find the current test
+      ## and break then
+      for test in _tests
+        if test.id is id
+          break
+        else
+          test = wrapAll(test)
+
+          _.each RUNNABLE_LOGS, (type) ->
+            if logs = test[type]
+              test[type] = _.map(logs, $Log.toSerializedJSON)
+
+          tests[test.id] = test
+
+      return tests
 
     stop: ->
-      if stopped
+      if _stopped
         return
 
-      stopped = true
+      _stopped = true
 
       ## abort the run
-      runner.abort()
+      _runner.abort()
 
       ## emit the final 'end' event
       ## since our reporter depends on this event
       ## and mocha may never fire this becuase our
       ## runnable may never finish
-      runner.emit("end")
+      _runner.emit("end")
 
       ## remove all the listeners
       ## so no more events fire
-      runner.removeAllListeners()
+      _runner.removeAllListeners()
 
     getDisplayPropsForLog: $Log.getDisplayProps
 
     getConsolePropsForLogById: (logId) ->
-      if attrs = logsById[logId]
+      if attrs = _logsById[logId]
         $Log.getConsoleProps(attrs)
 
     getSnapshotPropsForLogById: (logId) ->
-      if attrs = logsById[logId]
+      if attrs = _logsById[logId]
         $Log.getSnapshotProps(attrs)
 
     getErrorByTestId: (testId) ->
       if test = getTestById(testId)
         wrapErr(test.err)
 
+    resumeAtTest: (id, emissions = {}) ->
+      Cypress._RESUMED_AT_TEST = id
+
+      _emissions = emissions
+
+      for test in _tests
+        if test.id isnt id
+          test._ALREADY_RAN = true
+          test.pending = true
+        else
+          ## bail so we can stop now
+          return
+
     cleanupQueue: (numTestsKeptInMemory) ->
       cleanup = (queue) ->
         if queue.length > numTestsKeptInMemory
           test = queue.shift()
 
-          delete testsQueueById[test.id]
+          delete _testsQueueById[test.id]
 
           _.each RUNNABLE_LOGS, (logs) ->
             _.each test[logs], (attrs) ->
@@ -792,7 +836,7 @@ create = (mocha, Cypress) ->
 
           cleanup(queue)
 
-      cleanup(testsQueue)
+      cleanup(_testsQueue)
 
     addLog: (attrs, isHeadless) ->
       ## we dont need to hold a log reference
@@ -808,11 +852,11 @@ create = (mocha, Cypress) ->
 
       ## if this test isnt in the current queue
       ## then go ahead and add it
-      if not testsQueueById[test.id]
-        testsQueueById[test.id] = true
-        testsQueue.push(test)
+      if not _testsQueueById[test.id]
+        _testsQueueById[test.id] = true
+        _testsQueue.push(test)
 
-      if existing = logsById[attrs.id]
+      if existing = _logsById[attrs.id]
         ## because log:state:changed may
         ## fire at a later time, its possible
         ## we've already cleaned up these attrs
@@ -823,7 +867,7 @@ create = (mocha, Cypress) ->
         ## mutate the existing object
         _.extend(existing, attrs)
       else
-        logsById[attrs.id] = attrs
+        _logsById[attrs.id] = attrs
 
         { testId, instrument } = attrs
 

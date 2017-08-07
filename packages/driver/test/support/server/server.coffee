@@ -44,7 +44,7 @@ app.use(require("method-override")())
 
 app.get "/timeout", (req, res) ->
   Promise
-  .delay(req.query.ms)
+  .delay(req.query.ms ? 0)
   .then ->
     res.send "<html></html>"
 
