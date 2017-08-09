@@ -1,4 +1,4 @@
-# Contributing to Cypress' Documentation
+# Contributing to Cypress Documentation
 
 Thanks for taking the time to contribute! :smile:
 

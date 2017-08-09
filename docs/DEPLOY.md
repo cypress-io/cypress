@@ -1,4 +1,4 @@
-# Deploy
+# Deploy Cypress Documentation
 
 You can only deploy the Cypress documentation manually if
 you are a member of the Cypress organization.
