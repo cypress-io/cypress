@@ -34,7 +34,7 @@ Thanks for taking the time to contribute! :smile:
 
 ## Code of Conduct
 
-All contributors are expecting to abide by our [Code of Conduct]().
+All contributors are expecting to abide by our [Code of Conduct](https://github.com/cypress-io/cypress/wiki/code-of-conduct).
 
 ## Contributing Bug Reports & Feature Requests
 
@@ -290,17 +290,7 @@ npm rebuild node-sass
 
 ## Writing Documentation
 
-If you need to work on documentation, switch to `docs` directory. You should
-be able to install tools, build and start local `hexo` site
-
-```sh
-cd docs
-npm install
-npm run build
-npm start
-```
-
-See [docs/readme.md](docs/readme.md) for details
+See our [Documentation Contributing Guideline](docs/CONTRIBUTING.md)
 
 ## Commiting Code
 
