@@ -57,6 +57,16 @@ Link all pages but their name (property key) in `source/_data/sidebar.yml`
 - https://on.cypress.io/writing-your-first-test
 - https://on.cypress.io/general-questions-faq
 
+### Adding Examples
+
+The documents outlining examples are within the [`source/examples`](/source/examples) directory. Each document is written in markdown with a little bit of [Hexo flair](https://hexo.io/docs/tag-plugins.html). To add an example to a document, just try to follow the formatting of any previous examples in the markdown file.
+
+Add an associating image with the example within the [`source/img/examples`](/source/img/examples) directory. Each image should be resolution **715w x 480h**. Reference the image in the markdown document as follows:
+
+```md
+{% img /img/examples/name-of-file.jpg "alt text describing img" %}
+```
+
 ## Commiting Code
 
 ### Pull Requests
