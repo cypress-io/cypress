@@ -1,5 +1,17 @@
 # Deploy Cypress Documentation
 
+## Table of Contents
+
+- [Automatic Deployment](#automatic-deployment)
+- [Manual Deployment](#manual-deployment)
+- [Check Latest Deployed Version](#check-latest-deployed-version)
+
+## Automatic Deployment
+
+Any commits or PR requests merged that touch any file in the `docs` directory will trigger a deployment.
+
+## Manual Deployment
+
 You can only deploy the Cypress documentation manually if
 you are a member of the Cypress organization.
 
@@ -28,3 +40,7 @@ which are just JSON files as strings.
 ```shell
 cat support/.circle-credentials.json | pbcopy
 ```
+
+## Check Latest Deployed Version
+
+You can see the latest deployed version, including deployment date at [https://docs.cypress.io/build.json](https://docs.cypress.io/build.json)
