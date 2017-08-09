@@ -8,7 +8,10 @@
 
 ## Automatic Deployment
 
-Any commits or PR requests merged that touch any file in the `docs` directory will trigger a deployment.
+Any commits or PR requests merged that touch any file in the `docs` directory
+will trigger a deployment, once the commit lands in the `master` branch.
+But this deployment will only happen if the job `docs-tests` succeeds.
+See [circle.yml](circle.yml) job definition file for up-to-date information.
 
 ## Manual Deployment
 
@@ -43,4 +46,5 @@ cat support/.circle-credentials.json | pbcopy
 
 ## Check Latest Deployed Version
 
-You can see the latest deployed version, including deployment date at [https://docs.cypress.io/build.json](https://docs.cypress.io/build.json)
+You can see the latest deployed version, including deployment date at
+[https://docs.cypress.io/build.json](https://docs.cypress.io/build.json)
