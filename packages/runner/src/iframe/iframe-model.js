@@ -51,8 +51,8 @@ export default class IframeModel {
     this.state.url = url
   }
 
-  _updateLoading = (loading) => {
-    this.state.loading = loading
+  _updateLoading = (isLoading) => {
+    this.state.isLoading = isLoading
   }
 
   _clearMessage = () => {
