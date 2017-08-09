@@ -33,6 +33,9 @@ onInvoke = (Cypress, obj, args) ->
   agent = obj.agent
   agentName = agent._cyName
 
+  ## bail if we've turned off logging this agent
+  return if agent._log is false
+
   ## fakes are children of the agent created with `withArgs`
   fakes = agent.matchingFakes(args)
 
@@ -176,6 +179,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## make sure we return the invoked return value
       ## of the spy
       return returned
+
+    ## enable not logging this agent
+    agent.log = (bool = true) ->
+      agent._log = bool
+
+      return agent
 
     agent.as = (alias) ->
       cy.validateAlias(alias)
