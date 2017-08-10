@@ -35,6 +35,7 @@ export default class IframeModel {
 
   _beforeRun = () => {
     this.state.isRunning = true
+    this.state.reset()
     this._reset()
     this._clearMessage()
   }
@@ -51,8 +52,9 @@ export default class IframeModel {
     this.state.url = url
   }
 
-  _updateLoading = (isLoading) => {
-    this.state.isLoading = isLoading
+  _updateLoading = (isStable) => {
+    // we are loading if we are NOT stable
+    this.state.isLoading = !isStable
   }
 
   _clearMessage = () => {
