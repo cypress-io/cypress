@@ -107,6 +107,40 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     state("runnable").ctx
 
+  urlNavigationEvent = (event) ->
+    Cypress.action("app:navigation:changed", "page navigation event (#{event})")
+
+  contentWindowListeners = (contentWindow) ->
+    $Listeners.bindTo(contentWindow, {
+      onError: ->
+        debugger
+        ## use a function callback here instead of direct
+        ## reference so our users can override this function
+        ## if need be
+        cy.onUncaughtException.apply(cy, arguments)
+      onSubmit: (e) ->
+      onBeforeUnload: (e) ->
+        debugger
+        stability.isStable(false, "beforeunload")
+
+        Cookies.setInitial()
+
+        ## we are now isLoading
+        # pageLoading(true)
+
+        Cypress.action("app:before:window:unload", e)
+
+        ## return undefined so our beforeunload handler
+        ## doesnt trigger a confirmation dialog
+        return undefined
+      onUnload: (e) ->
+        Cypress.action("app:window:unload", e)
+      onNavigation: (args...) ->
+        Cypress.action("app:navigation:changed", args...)
+      onAlert: (str) ->
+      onConfirm: (str) ->
+    })
+
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
@@ -278,29 +312,38 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## impossible something is wrong here
       setWindowDocumentProps(getContentWindow($autIframe), state)
 
+      ## initially set the content window listeners too
+      ## so we can tap into all the normal flow of events
+      ## like before:unload, navigation events, etc
+      contentWindowListeners(getContentWindow($autIframe))
+
       ## the load event comes from the autIframe anytime any window
       ## inside of it loads.
-      ## when this happens we need to check from cross origin errors
+      ## when this happens we need to check for cross origin errors
       ## by trying to talk to the contentWindow document to see if
       ## its accessible.
       ## when we find ourselves in a cross origin situation, then our
       ## proxy has not injected Cypress.action('before:window:load')
-      ## so Cypress.onBeforeAutWindowLoad() was never called
+      ## so Cypress.onBeforeAppWindowLoad() was never called
       $autIframe.on "load", =>
         ## if setting these props failed
         ## then we know we're in a cross origin failure
         try
           setWindowDocumentProps(getContentWindow($autIframe), state)
 
-          ## else we're good to go, and can continue executing
-          ## cypress commands!
-          ## TODO: i dont think we need to reapply window listeners either
-          ## since we already did it during the onBeforeAutWindowLoad
+          ## we may need to update the url now
+          urlNavigationEvent("load")
 
-          ## we reapply window listeners on load even though we
-          ## applied them already during onBeforeLoad. the reason
-          ## is that after load javascript has finished being evaluated
-          ## and we may need to override things like alert + confirm again
+          ## we normally DONT need to reapply contentWindow listeners
+          ## because they would have been automatically applied during
+          ## onBeforeAppWindowLoad, but in the case where we visited
+          ## about:blank in a visit, we do need these
+          contentWindowListeners(getContentWindow($autIframe))
+
+          ## we are done isLoading
+          # pageLoading(false)
+
+          ## we are now stable again
           stability.isStable(true, "load")
 
           Cypress.action("app:window:load", state("window"))
@@ -505,26 +548,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     onBeforeAppWindowLoad: (contentWindow) ->
       # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
+
+      ## we set window / document props before the window load event
+      ## so that we properly handle events coming from the application
+      ## from the time that happens BEFORE the load event occurs
       setWindowDocumentProps(contentWindow, state)
 
-      $Listeners.bindTo(contentWindow, {
-        onSubmit: (e) ->
-        onBeforeUnload: (e) ->
-          stability.isStable(false, "beforeunload")
+      urlNavigationEvent("before:load")
 
-          Cookies.setInitial()
-
-          Cypress.action("app:before:window:unload", e)
-
-          ## return undefined so our beforeunload handler
-          ## doesnt trigger a confirmation dialog
-          return undefined
-        onUnload: (e) ->
-          Cypress.action("app:window:unload", e)
-        onHashChange: (e) ->
-        onAlert: (str) ->
-        onConfirm: (str) ->
-      })
+      contentWindowListeners(contentWindow)
 
     onUncaughtException: ->
       runnable = state("runnable")

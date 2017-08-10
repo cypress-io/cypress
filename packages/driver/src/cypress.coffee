@@ -313,16 +313,25 @@ class $Cypress
       when "cy:command:enqueued"
         @emit("command:enqueued", args[0])
 
+      when "cy:url:changed"
+        @emit("url:changed", args[0])
+
       when "cy:next:subject:prepared"
         @emit("next:subject:prepared", args...)
 
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
 
+      when "app:page:loading"
+        @emit("page:loading", args[0])
+
       when "app:before:window:load"
         @cy.onBeforeAppWindowLoad(args[0])
 
         @emit("before:window:load", args[0])
+
+      when "app:navigation:changed"
+        @emit("navigation:changed", args...)
 
       when "app:window:load"
         @emit("window:load", args[0])

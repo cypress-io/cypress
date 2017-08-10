@@ -398,7 +398,7 @@ describe "src/cy/commands/navigation", ->
               expect(lastLog.get("snapshots")[1].name).to.eq("after")
               expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
-  context.only "#visit", ->
+  context "#visit", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy Promise.prototype, "timeout"
 
@@ -628,758 +628,1125 @@ describe "src/cy/commands/navigation", ->
       it "search", ->
         @eq "search", "?foo=bar"
 
-  #   describe "history method overrides", ->
-  #     beforeEach ->
-  #       cy
-  #         .visit("/fixtures/jquery.html")
-  #         .window().as("win")
-  #         .then ->
-  #           @urlChanged = cy.spy cy, "urlChanged"
-  #
-  #     _.each ["back", "forward", "go"], (attr) =>
-  #       it "fires 'history:event' on attr: '#{attr}'", ->
-  #         if attr is "go"
-  #           arg = -1
-  #
-  #         @win.history[attr](arg)
-  #         expect(@urlChanged).to.be.called
-  #         Promise.delay(300)
-  #
-  #     _.each ["pushState", "replaceState"], (attr) =>
-  #       it "fires 'history:event' on attr: '#{attr}'", ->
-  #         @win.history[attr]({}, "foo")
-  #         expect(@urlChanged).to.be.called
-  #         Promise.delay(300)
-  #
-  #   describe ".log", ->
-  #     beforeEach ->
-  #       @sandbox.stub(Cypress, "getEmissions").returns([])
-  #       cy.on "log:added", (attrs, @log) =>
-  #
-  #     it "preserves url on subsequent visits", ->
-  #       cy.visit("/fixtures/jquery.html").get("button").then ->
-  #         expect(lastLog.get("url")).to.eq "http://localhost:3500/fixtures/jquery.html"
-  #
-  #     it "logs immediately before resolving", (done) ->
-  #       cy.on "log:added", (attrs, log) ->
-  #         expect(log.pick("name", "message")).to.deep.eq {
-  #           name: "visit"
-  #           message: "localhost:3500/app/foo#/hash"
-  #         }
-  #
-  #         done()
-  #
-  #       cy.visit("localhost:3500/app/foo#/hash")
-  #
-  #     it "logs obj once complete", ->
-  #       cy.visit("http://localhost:3500/blank.html").then ->
-  #         obj = {
-  #           state: "passed"
-  #           name: "visit"
-  #           message: "http://localhost:3500/blank.html"
-  #           url: "http://localhost:3500/blank.html"
-  #         }
-  #
-  #         _.each obj, (value, key) =>
-  #           expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
-  #
-  #     it "snapshots once", ->
-  #       cy.visit("/blank.html").then ->
-  #         expect(lastLog.get("snapshots").length).to.eq(1)
-  #         expect(lastLog.get("snapshots")[0]).to.be.an("object")
-  #
-  #     it "can turn off logging", ->
-  #       log = null
-  #
-  #       cy.on "log:added", (attrs, l) ->
-  #         log = l
-  #
-  #       cy.visit("/timeout?ms=0", {log: false}).then ->
-  #         expect(log).to.be.null
-  #
-  #     it "displays file attributes as consoleProps", ->
-  #       @sandbox.stub(cy, "_resolveUrl").resolves({
-  #         isOkStatusCode: true
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         url: "http://localhost:3500/foo/bar"
-  #         filePath: "/path/to/foo/bar"
-  #         redirects: [1, 2]
-  #         cookies: [{}, {}]
-  #       })
-  #
-  #       cy.visit("/fixtures/jquery.html").then ->
-  #         expect(@lastLog.invoke("consoleProps")).to.deep.eq({
-  #           "Command": "visit"
-  #           "File Served": "/path/to/foo/bar"
-  #           "Resolved Url": "http://localhost:3500/foo/bar"
-  #           "Redirects": [1, 2]
-  #           "Cookies Set": [{}, {}]
-  #         })
-  #
-  #     it "displays http attributes as consoleProps", ->
-  #       @sandbox.stub(cy, "_resolveUrl").resolves({
-  #         isOkStatusCode: true
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         url: "http://localhost:3500/foo"
-  #         originalUrl: "http://localhost:3500/foo"
-  #         redirects: [1, 2]
-  #         cookies: [{}, {}]
-  #       })
-  #
-  #       cy.visit("http://localhost:3500/foo").then ->
-  #         expect(@lastLog.invoke("consoleProps")).to.deep.eq({
-  #           "Command": "visit"
-  #           "Resolved Url": "http://localhost:3500/foo"
-  #           "Redirects": [1, 2]
-  #           "Cookies Set": [{}, {}]
-  #         })
-  #
-  #     it "displays originalUrl http attributes as consoleProps", ->
-  #       @sandbox.stub(cy, "_resolveUrl").resolves({
-  #         isOkStatusCode: true
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         url: "http://localhost:3500/foo/bar"
-  #         originalUrl: "http://localhost:3500/foo"
-  #         redirects: [1, 2]
-  #         cookies: [{}, {}]
-  #       })
-  #
-  #       cy.visit("http://localhost:3500/foo").then ->
-  #         expect(@lastLog.invoke("consoleProps")).to.deep.eq({
-  #           "Command": "visit"
-  #           "Original Url": "http://localhost:3500/foo"
-  #           "Resolved Url": "http://localhost:3500/foo/bar"
-  #           "Redirects": [1, 2]
-  #           "Cookies Set": [{}, {}]
-  #         })
-  #
-  #     it "indicates redirects in the message", ->
-  #       @sandbox.stub(cy, "_resolveUrl").resolves({
-  #         isOkStatusCode: true
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         url: "http://localhost:3500/foo/bar"
-  #         originalUrl: "http://localhost:3500/foo"
-  #         redirects: [1, 2]
-  #         cookies: [{}, {}]
-  #       })
-  #
-  #       cy.visit("http://localhost:3500/foo").then ->
-  #         expect(lastLog.get("message")).to.eq(
-  #           "http://localhost:3500/foo -> 1 -> 2"
-  #         )
-  #
-  #   describe "errors", ->
-  #     beforeEach ->
-  #       @allowErrors()
-  #
-  #     it "sets error command state", (done) ->
-  #       @sandbox.stub(cy, "_resolveUrl").rejects(new Error)
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(lastLog.get("state")).to.eq "failed"
-  #         expect(lastLog.get("error")).to.eq err
-  #         done()
-  #
-  #       cy.visit("/blank.html")
-  #
-  #     it "logs once on error", (done) ->
-  #       @sandbox.stub(cy, "_resolveUrl").rejects(new Error)
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, log) ->
-  #         logs.push log
-  #
-  #       cy.on "fail", (err) ->
-  #         expect(logs).to.have.length(1)
-  #         done()
-  #
-  #       cy.visit("/blank.html")
-  #
-  #     it "logs once on timeout error", (done) ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(@logs.length).to.eq(1)
-  #         expect(err.message).to.include "Your page did not fire its 'load' event within '200ms'."
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("/timeout?ms=5000", {timeout: 200})
-  #
-  #     it "cancels resolve url promise on timeout", (done) ->
-  #       cy.on "collect:run:state", ->
-  #         done(new Error("should not have tried to swap domains"))
-  #
-  #       r = cy.spy(cy, "_resolveUrl")
-  #
-  #       Cypress.off("resolve:url")
-  #
-  #       cy.on "resolve:url", (args, cb) ->
-  #         ## resolve after 150ms
-  #         Promise.delay(150)
-  #         .then ->
-  #           cb({isOkStatusCode: true, isHtml: true, url: "http://some.new-domain.com"})
-  #         .then ->
-  #           p = r.getCall(0).returnValue
-  #
-  #           ## make sure our _resolveUrl promise
-  #           ## has been rejected via TimeoutError
-  #           expect(p.isRejected()).to.be.true
-  #
-  #           done()
-  #
-  #       cy.visit("/", {timeout: 100})
-  #
-  #     it "throws when url isnt a string", (done) ->
-  #       cy.on "fail", (err) ->
-  #         expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
-  #         done()
-  #
-  #       cy.visit()
-  #
-  #     it "unbinds remoteIframe load event"
-  #
-  #     it "throws when attempting to visit a 2nd domain on different port", (done) ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-  #         expect(@logs.length).to.eq(2)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy
-  #         .visit("http://localhost:3500/blank.html")
-  #         .visit("http://localhost:3501/blank.html")
-  #
-  #     it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-  #         expect(@logs.length).to.eq(2)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy
-  #         .visit("http://localhost:3500/blank.html")
-  #         .visit("https://localhost:3500/blank.html")
-  #
-  #     it "throws when attempting to visit a 2nd domain on different host", (done) ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-  #         expect(@logs.length).to.eq(2)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy
-  #         .visit("http://localhost:3500/blank.html")
-  #         .visit("http://google.com:3500/blank.html")
-  #
-  #     it "throws attemping to visit 2 unique ip addresses", (done) ->
-  #       $autIframe = cy.state("$autIframe")
-  #
-  #       load = ->
-  #         $autIframe.trigger("load")
-  #
-  #       ## whenever we're told to change the src
-  #       ## just fire the load event directly on the $autIframe
-  #       @sandbox.stub(cy, "_src", load)
-  #
-  #       logs = []
-  #
-  #       ## make it seem like we're already on http://127.0.0.1:3500
-  #       one = Cypress.Location.create("http://127.0.0.1:3500/blank.html")
-  #       @sandbox.stub(cy, "_existing")
-  #       .returns(one)
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
-  #         expect(@logs.length).to.eq(2)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy
-  #         .visit("http://127.0.0.1:3500/blank.html")
-  #         .visit("http://126.0.0.1:3500/blank.html")
-  #
-  #     it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(trigger).to.be.calledWithMatch("resolve:url", "http://localhost:3500/blank.html")
-  #         expect(trigger).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500/blank.html")
-  #         done()
-  #
-  #       cy
-  #         .visit("http://localhost:3500/blank.html")
-  #         .visit("http://google.com:3500/blank.html")
-  #
-  #     it "displays loading_network_failed when _resolveUrl throws", (done) ->
-  #       err1 = new Error("connect ECONNREFUSED 127.0.0.1:64646")
-  #       err1.stack = "some stack props"
-  #
-  #       @sandbox.stub(cy, "_resolveUrl").rejects(err1)
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           /foo.html
-  #
-  #           We attempted to make an http request to this URL but the request failed without a response.
-  #
-  #           We received this error at the network level:
-  #
-  #             > Error: connect ECONNREFUSED 127.0.0.1:64646
-  #
-  #           Common situations why this would fail:
-  #             - you don't have internet access
-  #             - you forgot to run / boot your web server
-  #             - your web server isn't accessible
-  #             - you have weird network configuration settings on your computer
-  #
-  #           The stack trace for this error is:
-  #
-  #           some stack props
-  #         """)
-  #         expect(err1.url).to.include("/foo.html")
-  #         expect(trigger).to.be.calledWith("visit:failed", err1)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("/foo.html")
-  #
-  #     it "displays loading_file_failed when _resolveUrl resp is not ok", (done) ->
-  #       obj = {
-  #         isOkStatusCode: false
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         originalUrl: "/foo.html"
-  #         filePath: "/path/to/foo.html"
-  #         status: 404
-  #         statusText: "Not Found"
-  #         redirects: []
-  #       }
-  #
-  #       visitErrObj = _.clone(obj)
-  #       obj.url = obj.originalUrl
-  #
-  #       @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "/foo.html").resolves(obj)
-  #
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           /foo.html
-  #
-  #           We failed looking for this file at the path:
-  #
-  #           /path/to/foo.html
-  #
-  #           The internal Cypress web server responded with:
-  #
-  #             > 404: Not Found
-  #         """)
-  #         expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("/foo.html")
-  #
-  #     ## FIXME: the following 5 tests hang when running all tests in this file
-  #
-  #     it.skip "displays loading_file_failed redirects when _resolveUrl resp is not ok", (done) ->
-  #       obj = {
-  #         isOkStatusCode: false
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         originalUrl: "/bar"
-  #         filePath: "/path/to/bar/"
-  #         status: 404
-  #         statusText: "Not Found"
-  #         redirects: [
-  #           "301: http://localhost:3500/bar/"
-  #         ]
-  #       }
-  #
-  #       visitErrObj = _.clone(obj)
-  #       obj.url = obj.originalUrl
-  #
-  #       @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "/bar").resolves(obj)
-  #
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           /bar
-  #
-  #           We failed looking for this file at the path:
-  #
-  #           /path/to/bar/
-  #
-  #           The internal Cypress web server responded with:
-  #
-  #             > 404: Not Found
-  #
-  #           We were redirected '1' time to:
-  #
-  #             - 301: http://localhost:3500/bar/
-  #         """)
-  #         expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("/bar")
-  #
-  #     it.skip "displays loading_http_failed when _resolveUrl resp is not ok", (done) ->
-  #       obj = {
-  #         isOkStatusCode: false
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         originalUrl: "https://google.com/foo"
-  #         status: 500
-  #         statusText: "Server Error"
-  #         redirects: []
-  #       }
-  #
-  #       visitErrObj = _.clone(obj)
-  #       obj.url = obj.originalUrl
-  #
-  #       @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
-  #
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           https://google.com/foo
-  #
-  #           The response we received from your web server was:
-  #
-  #             > 500: Server Error
-  #
-  #           This was considered a failure because the status code was not '2xx'.
-  #         """)
-  #         expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("https://google.com/foo")
-  #
-  #     it.skip "displays loading_http_failed redirects when _resolveUrl resp is not ok", (done) ->
-  #       obj = {
-  #         isOkStatusCode: false
-  #         isHtml: true
-  #         contentType: "text/html"
-  #         originalUrl: "https://google.com/foo"
-  #         status: 401
-  #         statusText: "Unauthorized"
-  #         redirects: [
-  #           "302: https://google.com/bar/"
-  #           "301: https://gmail.com/"
-  #         ]
-  #       }
-  #
-  #       visitErrObj = _.clone(obj)
-  #       obj.url = obj.originalUrl
-  #
-  #       @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
-  #
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           https://google.com/foo
-  #
-  #           The response we received from your web server was:
-  #
-  #             > 401: Unauthorized
-  #
-  #           This was considered a failure because the status code was not '2xx'.
-  #
-  #           This http request was redirected '2' times to:
-  #
-  #             - 302: https://google.com/bar/
-  #             - 301: https://gmail.com/
-  #         """)
-  #         expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("https://google.com/foo")
-  #
-  #     it.skip "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
-  #       obj = {
-  #         isOkStatusCode: true
-  #         isHtml: false
-  #         contentType: "application/json"
-  #         originalUrl: "https://google.com/foo"
-  #         status: 200
-  #         statusText: "OK"
-  #       }
-  #
-  #       visitErrObj = _.clone(obj)
-  #       obj.url = obj.originalUrl
-  #
-  #       @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
-  #
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           https://google.com/foo
-  #
-  #           The content-type of the response we received from your web server was:
-  #
-  #             > application/json
-  #
-  #           This was considered a failure because responses must have content-type: 'text/html'
-  #
-  #           However, you can likely use cy.request() instead of cy.visit().
-  #
-  #           cy.request() will automatically get and set cookies and enable you to parse responses.
-  #         """)
-  #         expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("https://google.com/foo")
-  #
-  #     it.skip "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
-  #       obj = {
-  #         isOkStatusCode: true
-  #         isHtml: false
-  #         filePath: "/path/to/bar/"
-  #         contentType: "application/json"
-  #         originalUrl: "https://google.com/foo"
-  #         status: 200
-  #         statusText: "OK"
-  #       }
-  #
-  #       visitErrObj = _.clone(obj)
-  #       obj.url = obj.originalUrl
-  #
-  #       @sandbox.stub(Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
-  #
-  #       trigger = cy.spy(Cypress, "trigger")
-  #
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, @log) =>
-  #         logs.push @log
-  #
-  #       cy.on "fail", (err) =>
-  #         expect(err.message).to.include("""
-  #           cy.visit() failed trying to load:
-  #
-  #           https://google.com/foo
-  #
-  #           The content-type of the response we received from this local file was:
-  #
-  #             > application/json
-  #
-  #           This was considered a failure because responses must have content-type: 'text/html'
-  #
-  #           However, you can likely use cy.request() instead of cy.visit().
-  #
-  #           cy.request() will automatically get and set cookies and enable you to parse responses.
-  #         """)
-  #         expect(trigger).to.be.calledWithMatch("visit:failed", obj)
-  #         expect(@logs.length).to.eq(1)
-  #         expect(lastLog.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy.visit("https://google.com/foo")
-  #
-  # context "#page load", ->
-  #   it "does not reset the timeout", (done) ->
-  #     cy.timeout(1000)
-  #
-  #     ## previously loading would reset the timeout
-  #     ## which could cause failures on the next test
-  #     ## if there was logic after a test finished running
-  #     cy.window().then (win) =>
-  #       timeout = cy.spy(cy, "timeout")
-  #
-  #       ## we are unstable at this point
-  #       cy.on "before:window:unload", ->
-  #         cy.whenStable ->
-  #           expect(timeout).not.to.be.called
-  #           done()
-  #
-  #       win.location.href = "about:blank"
-  #
-  #   it "sets initial=true on beforeunload", ->
-  #     Cookies.remove("__cypress.initial")
-  #
-  #     expect(Cookies.get("__cypress.initial")).to.be.undefined
-  #
-  #     ## this navigates us to a new page so
-  #     ## we should be setting the initial cookie
-  #     cy.get("a:first").click().then ->
-  #       expect(Cookies.get("__cypress.initial")).to.eq("true")
-  #
-  #   it "clears current cy subject", ->
-  #     input = cy.$$("form#click-me input[type=submit]")
-  #
-  #     cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
-  #       expect(cy.queue.names()).to.deep.eq [
-  #         "get", "find", "click", "then", "then"
-  #       ]
-  #       expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
-  #       expect(subject).to.be.undefined
-  #
-  #   it "clears the current subject on submit event as well", ->
-  #     form = cy.$$("form#click-me")
-  #
-  #     cy.get("form#click-me").submit().then (subject) ->
-  #       expect(cy.queue.names()).to.deep.eq [
-  #         "get", "submit", "then", "then"
-  #       ]
-  #       expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)
-  #       expect(subject).to.be.undefined
-  #
-  #   describe ".log", ->
-  #     beforeEach ->
-  #       cy.on "log:added", (attrs, @log) =>
-  #
-  #     it "returns if current command is visit", ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, log) ->
-  #         logs.push log
-  #
-  #       cy.visit("/fixtures/xhr.html").then ->
-  #         expect(logs).to.have.length(1)
-  #
-  #     it "is name: page load", ->
-  #       cy.get("form#click-me").find("input[type=submit]").click().then ->
-  #         expect(lastLog.get("name")).to.eq "page load"
-  #
-  #     it "is type: parent", ->
-  #       cy.get("form#click-me").submit().then ->
-  #         expect(lastLog.get("type")).to.eq "parent"
-  #
-  #     describe "#consoleProps", ->
-  #       it "only has Event: 'page load'", ->
-  #         cy.get("form#click-me").submit().then ->
-  #           expect(@lastLog.invoke("consoleProps")).to.deep.eq {
-  #             Event: "page load"
-  #             Notes: "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
-  #           }
-  #
-  #   describe "errors", ->
-  #     beforeEach ->
-  #       @allowErrors()
-  #
-  #     it "can time out", (done) ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, log) ->
-  #         logs.push log
-  #
-  #       cy.once "fail", (err) ->
-  #         ## should only log once
-  #         expect(@logs.length).to.eq 1
-  #         expect(err.message).to.include "Your page did not fire its 'load' event within '100ms'."
-  #         done()
-  #
-  #       cy.on "command:end", =>
-  #         cy.isReady(false, "testing")
-  #         cy.loading({timeout: 100})
-  #
-  #       cy.noop({})
-  #
-  #     it "captures cross origin failures", (done) ->
-  #       logs = []
-  #
-  #       cy.on "log:added", (attrs, log) ->
-  #         logs.push(log)
-  #
-  #       cy.once "fail", (err) ->
-  #         log = logs[0]
-  #
-  #         expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
-  #         expect(@logs.length).to.eq(1)
-  #         expect(log.get("name")).to.eq("page load")
-  #         expect(log.get("state")).to.eq("failed")
-  #         expect(log.get("error")).to.eq(err)
-  #         done()
-  #
-  #       cy
-  #         .window({log: false}).then (win) ->
-  #           win.location.href = "http://localhost:3501/fixtures/dom.html"
-  #
-  #           null
-  #         .wait(2000)
+    describe "history method overrides", ->
+      beforeEach ->
+        cy
+          .visit("/fixtures/jquery.html")
+          .window().as("win")
+
+      _.each ["back", "forward", "go"], (attr) =>
+        it "fires 'history:event' on attr: '#{attr}'", ->
+          if attr is "go"
+            arg = -1
+
+          @win.history[attr](arg)
+          expect(@urlChanged).to.be.called
+          Promise.delay(300)
+
+      _.each ["pushState", "replaceState"], (attr) =>
+        it "fires 'history:event' on attr: '#{attr}'", ->
+          @win.history[attr]({}, "foo")
+          expect(@urlChanged).to.be.called
+          Promise.delay(300)
+
+    describe ".log", ->
+      beforeEach ->
+        cy.stub(Cypress, "getEmissions").returns([])
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "visit"
+            @lastLog = log
+
+          @logs.push(log)
+
+        return null
+
+      it "preserves url on subsequent visits", ->
+        cy.visit("/fixtures/jquery.html").get("button").then ->
+          expect(lastLog.get("url")).to.eq "http://localhost:3500/fixtures/jquery.html"
+
+      it "does not log 'Page Load' events", ->
+        cy
+          .visit("/fixtures/generic.html")
+          .visit("/fixtures/jquery.html")
+          .then ->
+            @logs.slice(0).forEach (log) ->
+              expect(log.get("event")).to.be.false
+
+      it "logs immediately before resolving", (done) ->
+        cy.on "log:added", (attrs, log) ->
+          cy.removeAllListeners("log:added")
+
+          expect(log.pick("name", "message")).to.deep.eq {
+            name: "visit"
+            message: "localhost:3500/app/foo#/hash"
+          }
+
+          done()
+
+        cy.visit("localhost:3500/app/foo#/hash")
+
+      it "logs obj once complete", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html").then ->
+          obj = {
+            state: "passed"
+            name: "visit"
+            message: "http://localhost:3500/fixtures/generic.html"
+            url: "http://localhost:3500/fixtures/generic.html"
+          }
+
+          lastLog = @lastLog
+
+          _.each obj, (value, key) =>
+            expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+      it "snapshots once", ->
+        cy.visit("/fixtures/generic.html").then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("snapshots").length).to.eq(1)
+          expect(lastLog.get("snapshots")[0]).to.be.an("object")
+
+      it "can turn off logging", ->
+        cy.visit("/timeout?ms=0", {log: false}).then ->
+          expect(@lastLog).not.to.exist
+
+      it "displays file attributes as consoleProps", ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          contentType: "text/html"
+          url: "http://localhost:3500/foo/bar"
+          filePath: "/path/to/foo/bar"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        cy.visit("/fixtures/jquery.html").then ->
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+            "Command": "visit"
+            "File Served": "/path/to/foo/bar"
+            "Resolved Url": "http://localhost:3500/foo/bar"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
+      it "displays http attributes as consoleProps", ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          contentType: "text/html"
+          url: "http://localhost:3500/foo"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        cy.visit("http://localhost:3500/foo").then ->
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+            "Command": "visit"
+            "Resolved Url": "http://localhost:3500/foo"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
+      it "displays originalUrl http attributes as consoleProps", ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          contentType: "text/html"
+          url: "http://localhost:3500/foo/bar"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        cy.visit("http://localhost:3500/foo").then ->
+          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+            "Command": "visit"
+            "Original Url": "http://localhost:3500/foo"
+            "Resolved Url": "http://localhost:3500/foo/bar"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
+      it "indicates redirects in the message", ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          contentType: "text/html"
+          url: "http://localhost:3500/foo/bar"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        cy.visit("http://localhost:3500/foo").then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("message")).to.eq(
+            "http://localhost:3500/foo -> 1 -> 2"
+          )
+
+    describe "errors", ->
+      beforeEach ->
+        Cypress.config("defaultCommandTimeout", 50)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "visit"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
+
+      it "sets error command state", (done) ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .rejects(new Error)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(lastLog.get("state")).to.eq "failed"
+          expect(lastLog.get("error")).to.eq err
+          done()
+
+        cy.visit("/fixtures/generic.html")
+
+      it "logs once on error", (done) ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .rejects(new Error)
+
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          done()
+
+        cy.visit("/fixtures/generic.html")
+
+      it "logs once on timeout error", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(err.message).to.include "Your page did not fire its 'load' event within '20ms'."
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("/timeout?ms=5000", {timeout: 20})
+
+      it "cancels resolve url promise on timeout", (done) ->
+        cy.on "collect:run:state", ->
+          done(new Error("should not have tried to swap domains"))
+
+        fn = ->
+          ## resolve after 100ms
+          Promise.delay(100)
+          .then ->
+            done(new Error("should not have invoked this callback"))
+
+        p = cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .callsFake(fn)
+
+        cy.on "fail", -> done()
+
+        cy.visit("/", {timeout: 20})
+
+      it "throws when url isnt a string", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
+          done()
+
+        cy.visit()
+
+      it "throws when attempting to visit a 2nd domain on different port", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy
+          .visit("http://localhost:3500/fixtures/generic.html")
+          .visit("http://localhost:3501/fixtures/generic.html")
+
+      it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy
+          .visit("http://localhost:3500/fixtures/generic.html")
+          .visit("https://localhost:3500/fixtures/generic.html")
+
+      it "throws when attempting to visit a 2nd domain on different host", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy
+          .visit("http://localhost:3500/fixtures/generic.html")
+          .visit("http://google.com:3500/fixtures/generic.html")
+
+      it "throws attemping to visit 2 unique ip addresses", (done) ->
+        $autIframe = cy.state("$autIframe")
+
+        load = ->
+          $autIframe.trigger("load")
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          url: "http://127.0.0.1:3500"
+        })
+
+        ## whenever we're told to change the src
+        ## just fire the load event directly on the $autIframe
+        cy.stub(Cypress.utils, "iframeSrc").callsFake(load)
+
+        ## make it seem like we're already on http://127.0.0.1:3500
+        one = Cypress.Location.create("http://127.0.0.1:3500/fixtures/generic.html")
+        cy.stub(Cypress.utils, "locExisting")
+        .returns(one)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(@logs.length).to.eq(2)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy
+          .visit("http://127.0.0.1:3500/fixtures/generic.html")
+          .visit("http://126.0.0.1:3500/fixtures/generic.html")
+
+      it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
+        backend = cy.spy(Cypress, "backend")
+
+        cy.on "fail", (err) =>
+          expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/fixtures/generic.html")
+          expect(backend).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500/fixtures/generic.html")
+          done()
+
+        cy
+          .visit("http://localhost:3500/fixtures/generic.html")
+          .visit("http://google.com:3500/fixtures/generic.html")
+
+      it "displays loading_network_failed when _resolveUrl throws", (done) ->
+        err1 = new Error("connect ECONNREFUSED 127.0.0.1:64646")
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        backend = cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .rejects(err1)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          debugger
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            http://localhost:3500/foo.html
+
+            We attempted to make an http request to this URL but the request failed without a response.
+
+            We received this error at the network level:
+
+              > Error: connect ECONNREFUSED 127.0.0.1:64646
+
+            Common situations why this would fail:
+              - you don't have internet access
+              - you forgot to run / boot your web server
+              - your web server isn't accessible
+              - you have weird network configuration settings on your computer
+
+            The stack trace for this error is:
+          """)
+          expect(err1.url).to.include("/foo.html")
+          expect(emit).to.be.calledWith("visit:failed", err1)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("/foo.html")
+
+      it "displays loading_file_failed when _resolveUrl resp is not ok", (done) ->
+        obj = {
+          isOkStatusCode: false
+          isHtml: true
+          contentType: "text/html"
+          originalUrl: "/foo.html"
+          filePath: "/path/to/foo.html"
+          status: 404
+          statusText: "Not Found"
+          redirects: []
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves(obj)
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            /foo.html
+
+            We failed looking for this file at the path:
+
+            /path/to/foo.html
+
+            The internal Cypress web server responded with:
+
+              > 404: Not Found
+          """)
+          expect(emit).to.be.calledWithMatch("visit:failed", obj)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("/foo.html")
+
+      it "displays loading_file_failed redirects when _resolveUrl resp is not ok", (done) ->
+        obj = {
+          isOkStatusCode: false
+          isHtml: true
+          contentType: "text/html"
+          originalUrl: "/bar"
+          filePath: "/path/to/bar/"
+          status: 404
+          statusText: "Not Found"
+          redirects: [
+            "301: http://localhost:3500/bar/"
+          ]
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves(obj)
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            /bar
+
+            We failed looking for this file at the path:
+
+            /path/to/bar/
+
+            The internal Cypress web server responded with:
+
+              > 404: Not Found
+
+            We were redirected '1' time to:
+
+              - 301: http://localhost:3500/bar/
+          """)
+          expect(emit).to.be.calledWithMatch("visit:failed", obj)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("/bar")
+
+      it "displays loading_http_failed when _resolveUrl resp is not ok", (done) ->
+        obj = {
+          isOkStatusCode: false
+          isHtml: true
+          contentType: "text/html"
+          originalUrl: "https://google.com/foo"
+          status: 500
+          statusText: "Server Error"
+          redirects: []
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url", "https://google.com/foo")
+        .resolves(obj)
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The response we received from your web server was:
+
+              > 500: Server Error
+
+            This was considered a failure because the status code was not '2xx'.
+          """)
+          expect(emit).to.be.calledWithMatch("visit:failed", obj)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("https://google.com/foo")
+
+      it "displays loading_http_failed redirects when _resolveUrl resp is not ok", (done) ->
+        obj = {
+          isOkStatusCode: false
+          isHtml: true
+          contentType: "text/html"
+          originalUrl: "https://google.com/foo"
+          status: 401
+          statusText: "Unauthorized"
+          redirects: [
+            "302: https://google.com/bar/"
+            "301: https://gmail.com/"
+          ]
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url", "https://google.com/foo")
+        .resolves(obj)
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The response we received from your web server was:
+
+              > 401: Unauthorized
+
+            This was considered a failure because the status code was not '2xx'.
+
+            This http request was redirected '2' times to:
+
+              - 302: https://google.com/bar/
+              - 301: https://gmail.com/
+          """)
+          expect(emit).to.be.calledWithMatch("visit:failed", obj)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("https://google.com/foo")
+
+      it "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
+        obj = {
+          isOkStatusCode: true
+          isHtml: false
+          contentType: "application/json"
+          originalUrl: "https://google.com/foo"
+          status: 200
+          statusText: "OK"
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url", "https://google.com/foo")
+        .resolves(obj)
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The content-type of the response we received from your web server was:
+
+              > application/json
+
+            This was considered a failure because responses must have content-type: 'text/html'
+
+            However, you can likely use cy.request() instead of cy.visit().
+
+            cy.request() will automatically get and set cookies and enable you to parse responses.
+          """)
+          expect(emit).to.be.calledWithMatch("visit:failed", obj)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("https://google.com/foo")
+
+      it "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
+        obj = {
+          isOkStatusCode: true
+          isHtml: false
+          filePath: "/path/to/bar/"
+          contentType: "application/json"
+          originalUrl: "https://google.com/foo"
+          status: 200
+          statusText: "OK"
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url", "https://google.com/foo")
+        .resolves(obj)
+
+        ## dont log else we create an endless loop!
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The content-type of the response we received from this local file was:
+
+              > application/json
+
+            This was considered a failure because responses must have content-type: 'text/html'
+
+            However, you can likely use cy.request() instead of cy.visit().
+
+            cy.request() will automatically get and set cookies and enable you to parse responses.
+          """)
+          expect(emit).to.be.calledWithMatch("visit:failed", obj)
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.visit("https://google.com/foo")
+
+  context "#page load", ->
+    it "does not reset the timeout", (done) ->
+      cy.timeout(1000)
+
+      ## previously loading would reset the timeout
+      ## which could cause failures on the next test
+      ## if there was logic after a test finished running
+      cy.window().then (win) =>
+        timeout = cy.spy(cy, "timeout")
+
+        ## we are unstable at this point
+        cy.on "before:window:unload", ->
+          cy.whenStable ->
+            expect(timeout).not.to.be.called
+            done()
+
+        win.location.href = "about:blank"
+
+    it "sets initial=true on beforeunload", ->
+      Cookies.remove("__cypress.initial")
+
+      expect(Cookies.get("__cypress.initial")).to.be.undefined
+
+      ## this navigates us to a new page so
+      ## we should be setting the initial cookie
+      cy.get("a:first").click().then ->
+        expect(Cookies.get("__cypress.initial")).to.eq("true")
+
+    it "clears current cy subject", ->
+      input = cy.$$("form#click-me input[type=submit]")
+
+      cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
+        expect(cy.queue.names()).to.deep.eq [
+          "get", "find", "click", "then", "then"
+        ]
+        expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
+        expect(subject).to.be.undefined
+
+    it "clears the current subject on submit event as well", ->
+      form = cy.$$("form#click-me")
+
+      cy.get("form#click-me").submit().then (subject) ->
+        expect(cy.queue.names()).to.deep.eq [
+          "get", "submit", "then", "then"
+        ]
+        expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)
+        expect(subject).to.be.undefined
+
+    describe ".log", ->
+      beforeEach ->
+        cy.on "log:added", (attrs, @log) =>
+
+      it "returns if current command is visit", ->
+        logs = []
+
+        cy.on "log:added", (attrs, log) ->
+          logs.push log
+
+        cy.visit("/fixtures/xhr.html").then ->
+          expect(logs).to.have.length(1)
+
+      it "is name: page load", ->
+        cy.get("form#click-me").find("input[type=submit]").click().then ->
+          expect(lastLog.get("name")).to.eq "page load"
+
+      it "is type: parent", ->
+        cy.get("form#click-me").submit().then ->
+          expect(lastLog.get("type")).to.eq "parent"
+
+      describe "#consoleProps", ->
+        it "only has Event: 'page load'", ->
+          cy.get("form#click-me").submit().then ->
+            expect(@lastLog.invoke("consoleProps")).to.deep.eq {
+              Event: "page load"
+              Notes: "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
+            }
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "can time out", (done) ->
+        logs = []
+
+        cy.on "log:added", (attrs, log) ->
+          logs.push log
+
+        cy.once "fail", (err) ->
+          ## should only log once
+          expect(@logs.length).to.eq 1
+          expect(err.message).to.include "Your page did not fire its 'load' event within '100ms'."
+          done()
+
+        cy.on "command:end", =>
+          cy.isReady(false, "testing")
+          cy.loading({timeout: 100})
+
+        cy.noop({})
+
+      it "captures cross origin failures", (done) ->
+        logs = []
+
+        cy.on "log:added", (attrs, log) ->
+          logs.push(log)
+
+        cy.once "fail", (err) ->
+          log = logs[0]
+
+          expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
+          expect(@logs.length).to.eq(1)
+          expect(log.get("name")).to.eq("page load")
+          expect(log.get("state")).to.eq("failed")
+          expect(log.get("error")).to.eq(err)
+          done()
+
+        cy
+          .window({log: false}).then (win) ->
+            win.location.href = "http://localhost:3501/fixtures/dom.html"
+
+            null
+          .wait(2000)
+
+  ## this tests isLoading spinner
+  ## and page load event
+  context "#page loading", ->
+    beforeEach ->
+      @logs = []
+
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "page load"
+          @lastLog = log
+
+          @logs.push(log)
+
+      return null
+
+    it "emits 'page:loading' before and after initial visit", ->
+      emit = cy.spy(Cypress, "emit").log(false).withArgs("page:loading")
+
+      cy
+        .visit("/timeout?ms=10", {
+          onBeforeLoad: ->
+            expect(emit).to.be.calledOnce
+            expect(emit.firstCall).to.be.calledWith("page:loading", true)
+        })
+        .then ->
+          expect(emit).to.be.calledTwice
+          expect(emit.secondCall).to.be.calledWith("page:loading", false)
+
+    it "emits during page navigation", ->
+      emit = cy.spy(Cypress, "emit").log(false).withArgs("page:loading")
+      expected = false
+
+      cy
+        .visit("/fixtures/generic.html")
+        .then ->
+          cy.once "window:unload", ->
+            expected = true
+            expect(emit.callCount).to.eq(3)
+            expect(emit.thirdCall).to.be.calledWith("page:loading", true)
+
+        .get("#dimensions").click()
+        .then ->
+          expect(expected).to.be.true
+          expect(emit.callCount).to.eq(4)
+          expect(emit.getCall(3)).to.be.calledWith("page:loading", false)
+
+    it "does not log during initial visit", ->
+      cy.visit("/timeout?ms=10").then ->
+        expect(@lastLog).not.to.exist
+
+    it "logs during page navigation", ->
+      expected = false
+
+      cy
+        .visit("/fixtures/generic.html")
+        .then ->
+          cy.once "before:window:unload", =>
+            expected = true
+
+            expect(@lastLog).to.exist
+            expect(@lastLog.get("state")).to.eq("pending")
+            expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
+            expect(@lastLog.get("snapshots")).to.be.empty
+
+        .get("#dimensions").click()
+        .then ->
+          expect(expected).to.be.true
+          expect(@lastLog.get("state")).to.eq("passed")
+          expect(@lastLog.get("message")).to.eq("--page loaded--")
+          expect(@lastLog.get("snapshots")).to.have.length(1)
+
+  context.only "#url:changed", ->
+    beforeEach ->
+      @logs = []
+
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "new url"
+          @lastLog = log
+
+          @logs.push(log)
+
+      return null
+
+    describe "page navigation", ->
+      it "emits url:changed event on initial visit", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+
+        cy
+          .visit("/fixtures/generic.html")
+          .then ->
+            expect(emit).to.be.calledOnce
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html"
+            )
+
+      it "emits url:changed on 2nd visit to different page", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+
+        cy
+          .visit("/fixtures/generic.html")
+          .visit("/fixtures/jquery.html")
+          .then ->
+            expect(emit).to.be.calledTwice
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html"
+            )
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/jquery.html"
+            )
+
+      it "does not emit url:changed twice on visit to the same page", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+
+        cy
+          .visit("/fixtures/generic.html")
+          .visit("/fixtures/generic.html")
+          .then ->
+            expect(emit).to.be.calledOnce
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html"
+            )
+
+      it "does not log url:changed event on visit", ->
+        cy
+          .visit("/fixtures/generic.html")
+          .then ->
+            expect(@lastLog).not.to.exist
+
+      it "emits url:changed event on page navigation", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+
+        cy
+          .visit("/fixtures/generic.html")
+          .get("#dimensions").click()
+          .then ->
+            expect(emit).to.be.calledTwice
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html"
+            )
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/dimensions.html"
+            )
+
+      it "logs url:changed event on page navigation", ->
+        cy
+          .visit("/fixtures/generic.html")
+          .get("#dimensions").click()
+          .then ->
+            expect(@logs.length).to.eq(1)
+
+            expect(@logs[0].get("message")).to.eq(
+              "http://localhost:3500/fixtures/dimensions.html"
+            )
+
+            expect(@logs[0].invoke("consoleProps")).to.deep.eq({
+              "Event": "new url"
+              "New Url": "http://localhost:3500/fixtures/dimensions.html"
+              "Url Updated By": "page navigation event (before:load)"
+            })
+
+    describe "hashchange events", ->
+      it "emits url:changed event", ->
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy
+          .visit("/fixtures/generic.html")
+          .get("#hashchange").click()
+          .then ->
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html#hashchange"
+            )
+
+      it "emits url:changed event as navigation events occur", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+
+        cy
+        .visit("/fixtures/generic.html")
+        .get("#hashchange").click()
+        .window().then (win) ->
+          new Promise (resolve) ->
+            cy.once "navigation:changed", resolve
+
+            win.history.back()
+          .then ->
+            new Promise (resolve) ->
+              cy.once "navigation:changed", resolve
+
+              win.history.forward()
+          .then ->
+            expect(emit.callCount).to.eq(4)
+
+            expect(emit.firstCall).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html"
+            )
+
+            expect(emit.secondCall).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html#hashchange"
+            )
+
+            expect(emit.thirdCall).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html"
+            )
+
+            expect(emit.getCall(3)).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/generic.html#hashchange"
+            )
+      it "logs url changed event", ->
+        cy
+          .visit("/fixtures/generic.html")
+          .window().then (win) ->
+            ohc = null
+
+            win.onhashchange = (event) ->
+              ohc = event
+
+            cy
+            .get("#hashchange").click()
+            .then ->
+              lastLog = @lastLog
+
+              expect(lastLog.get("message")).to.eq("http://localhost:3500/fixtures/generic.html#hashchange")
+              expect(lastLog.get("type")).to.eq("parent")
+              expect(lastLog.get("event")).to.be.true
+
+              expect(lastLog.invoke("consoleProps")).to.deep.eq({
+                "Event": "new url"
+                "New Url": "http://localhost:3500/fixtures/generic.html#hashchange"
+                "Url Updated By": "hashchange"
+                "Args": ohc
+              })
+
+      it "logs url:changed event as navigation events occur", ->
+        cy
+        .visit("/fixtures/generic.html")
+        .get("#hashchange").click()
+        .window().then (win) ->
+          new Promise (resolve) ->
+            cy.once "navigation:changed", resolve
+
+            win.history.back()
+          .then ->
+            new Promise (resolve) ->
+              cy.once "navigation:changed", resolve
+
+              win.history.forward()
+        .then ->
+          expect(@logs.length).to.eq(3)
+
+          expect(@logs[0].get("message")).to.eq(
+            "http://localhost:3500/fixtures/generic.html#hashchange"
+          )
+
+          expect(@logs[1].get("message")).to.eq(
+            "http://localhost:3500/fixtures/generic.html"
+          )
+
+          expect(@logs[2].get("message")).to.eq(
+            "http://localhost:3500/fixtures/generic.html#hashchange"
+          )
+
+    describe "history.pushState", ->
+      it "emits url:changed event", ->
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy
+          .visit("/fixtures/generic.html")
+          .window().then (win) ->
+            win.history.pushState({foo: "bar"}, null, "pushState.html")
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/pushState.html"
+            )
+
+      it "logs url changed event", ->
+        cy
+          .visit("/fixtures/generic.html")
+          .window().then (win) ->
+            win.history.pushState({foo: "bar"}, null, "pushState.html")
+
+            lastLog = @lastLog
+
+            expect(lastLog.get("message")).to.eq("http://localhost:3500/fixtures/pushState.html")
+            expect(lastLog.get("type")).to.eq("parent")
+            expect(lastLog.get("event")).to.be.true
+
+            expect(lastLog.invoke("consoleProps")).to.deep.eq({
+              "Event": "new url"
+              "New Url": "http://localhost:3500/fixtures/pushState.html"
+              "Url Updated By": "pushState"
+              "Args": [
+                { foo: "bar" },
+                null,
+                "pushState.html",
+              ]
+            })
+
+    describe "history.replaceState", ->
+      it "emits url:changed event", ->
+        emit = cy.spy(Cypress, "emit").log(false)
+
+        cy
+          .visit("/fixtures/generic.html")
+          .window().then (win) ->
+            win.history.replaceState({foo: "bar"}, null, "replaceState.html")
+
+            expect(emit).to.be.calledWith(
+              "url:changed"
+              "http://localhost:3500/fixtures/replaceState.html"
+            )
+
+      it "logs url changed event", ->
+        cy
+          .visit("/fixtures/generic.html")
+          .window().then (win) ->
+            win.history.replaceState({foo: "bar"}, null, "replaceState.html")
+
+            lastLog = @lastLog
+
+            expect(lastLog.get("message")).to.eq("http://localhost:3500/fixtures/replaceState.html")
+            expect(lastLog.get("type")).to.eq("parent")
+            expect(lastLog.get("event")).to.be.true
+
+            expect(lastLog.invoke("consoleProps")).to.deep.eq({
+              "Event": "new url"
+              "New Url": "http://localhost:3500/fixtures/replaceState.html"
+              "Url Updated By": "replaceState"
+              "Args": [
+                { foo: "bar" },
+                null,
+                "replaceState.html",
+              ]
+            })

@@ -1,9 +1,15 @@
 $ = require("jquery")
 _ = require("lodash")
 
+HISTORY_ATTRS = "pushState replaceState".split(" ")
+
 events = []
+$win = null
+listenersAdded = null
 
 removeAllListeners = ->
+  listenersAdded = false
+
   for event in events
     [win, event, cb] = event
 
@@ -18,8 +24,6 @@ addListener = (win, event, cb) ->
   events.push([win, event, cb])
 
   win.addEventListener(event, cb)
-
-$win = null
 
 reset = ->
   if $win
@@ -39,10 +43,11 @@ eventHasReturnValue = (e) ->
 
 module.exports = {
   bindTo: (contentWindow, callbacks = {}) ->
+    return if listenersAdded
+
     reset()
 
-    ## TODO: do we still need to do this?
-    return if contentWindow.location.href is "about:blank"
+    listenersAdded = true
 
     ## set onerror global handler
     contentWindow.onerror = callbacks.onError
@@ -61,6 +66,18 @@ module.exports = {
       ## else we know to proceed onwards!
       callbacks.onUnload(e)
 
+    addListener contentWindow, "hashchange", (e) ->
+      callbacks.onNavigation("hashchange", e)
+
+    for attr in HISTORY_ATTRS
+      do (attr) ->
+        return if not (orig = contentWindow.history?[attr])
+
+        contentWindow.history[attr] = (args...) ->
+          orig.apply(@, args)
+
+          callbacks.onNavigation(attr, args)
+
     $win = $(contentWindow)
 
     ## using the native submit method will not trigger a
@@ -75,8 +92,6 @@ module.exports = {
 
       ## else we know to proceed onwards!
       callbacks.onSubmit(e)
-
-    $win.on("hashchange", callbacks.onHashChange)
 
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm

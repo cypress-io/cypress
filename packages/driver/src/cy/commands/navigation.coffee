@@ -11,6 +11,7 @@ $utils = require("../../cypress/utils")
 id                    = null
 previousDomainVisited = null
 hasVisitedAboutBlank  = null
+currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
 reset = (test = {}) ->
@@ -23,6 +24,8 @@ reset = (test = {}) ->
   ## make sure we reset that we haven't
   ## visited about blank again
   hasVisitedAboutBlank = false
+
+  currentlyVisitingAboutBlank = false
 
   id = test.id
 
@@ -68,7 +71,87 @@ aboutBlank = (win) ->
 
     $utils.locHref("about:blank", win)
 
-pageLoading = (Cypress, state, config, bool, event) ->
+navigationChanged = (Cypress, cy, state, source, arg) ->
+  ## get the current url of our remote application
+  url = cy.getRemoteLocation("href")
+
+  ## dont trigger for empty url's or about:blank
+  return if _.isEmpty(url) or url is "about:blank"
+
+  ## start storing the history entries
+  urls = state("urls") ? []
+
+  previousUrl = _.last(urls)
+
+  ## ensure our new url doesnt match whatever
+  ## the previous was. this prevents logging
+  ## additionally when the url didnt actually change
+  return if url is previousUrl
+
+  ## else notify the world and log this event
+  Cypress.action("cy:url:changed", url)
+
+  urls.push(url)
+
+  state("urls", urls)
+
+  state("url", url)
+
+  ## don't output a command log for 'load' or 'before:load' events
+  # return if source in command
+  return if knownCommandCausedInstability
+
+  ## ensure our new url doesnt match whatever
+  ## the previous was. this prevents logging
+  ## additionally when the url didnt actually change
+  Cypress.log({
+    name: "new url"
+    message: url
+    event: true
+    type: "parent"
+    end: true
+    snapshot: true
+    consoleProps: ->
+      obj = {
+        "New Url": url
+      }
+
+      if source
+        obj["Url Updated By"] = source
+
+      if arg
+        obj.Args = arg
+
+      return obj
+  })
+
+pageLoading = (bool, state) ->
+  return if state("pageLoading") is bool
+
+  state("pageLoading", bool)
+
+  Cypress.action("app:page:loading", bool)
+
+stabilityChanged = (Cypress, state, config, stable, event) ->
+  if currentlyVisitingAboutBlank
+    if stable is false
+      ## if we're currently visiting about blank
+      ## and becoming unstable for the first time
+      ## notifiy that we're page loading
+      pageLoading(true, state)
+      return
+    else
+      ## else wait until after we finish visiting
+      ## about blank
+      return
+
+  ## let the world know that the app is page:loading
+  pageLoading(!stable, state)
+
+  ## if we aren't becoming unstable
+  ## then just return now
+  return if stable isnt false
+
   ## if we purposefully just caused the page to load
   ## (and thus instability) don't log this out
   return if knownCommandCausedInstability
@@ -97,7 +180,7 @@ pageLoading = (Cypress, state, config, bool, event) ->
   options._log = Cypress.log
     type: "parent"
     name: "page load"
-    message: "--waiting for new page to load---"
+    message: "--waiting for new page to load--"
     event: true
     ## add a note here that loading nulled out the current subject?
     consoleProps: -> {
@@ -146,8 +229,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "stability:changed", (bool, event) ->
     ## only send up page loading events when we're
     ## not stable!
-    if bool is false
-      pageLoading(Cypress, state, config, bool, event)
+    stabilityChanged(Cypress, state, config, bool, event)
+
+  Cypress.on "navigation:changed", (source, arg) ->
+    navigationChanged(Cypress, cy, state, source, arg)
 
   visitFailedByErr = (err, url, fn) ->
     err.url = url
@@ -180,20 +265,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  overrideRemoteLocationGetters = (cy, contentWindow) ->
-    # navigated = (attr, args) ->
-    #   debugger
-    #   # cy.urlChanged(null, {
-    #   #   by: attr
-    #   #   args: args
-    #   # })
-    #
-    # $Location.override(Cypress, contentWindow, navigated)
-
   Cypress.on "before:window:load", (contentWindow) ->
-    ## override the remote iframe getters
-    overrideRemoteLocationGetters(@, contentWindow)
-
     current = state("current")
 
     return if not current
@@ -259,16 +331,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             cy.removeListener("window:load", loaded)
 
-            return null
-
-          loaded = (win) ->
-            cleanup()
-
-            resolve(win)
-
           knownCommandCausedInstability = true
 
-          cy.on("window:load", loaded)
+          cy.on("window:load", resolve)
 
           state("window").location.reload(forceReload)
 
@@ -276,7 +341,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .timeout(options.timeout, "reload")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)
-      .finally(cleanup)
+      .finally ->
+        cleanup?()
+
+        return null
 
     go: (numberOrString, options = {}) ->
       _.defaults options, {
@@ -315,9 +383,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 cy.removeListener("window:load", resolve)
                 cy.removeListener("before:window:unload", beforeUnload)
 
-                ## prevent accidentally chaining off of cy
-                return null
-
               cy.on("window:load", resolve)
 
             knownCommandCausedInstability = true
@@ -347,9 +412,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         go()
         .timeout(options.timeout, "go")
         .catch Promise.TimeoutError, (err) =>
-          debugger
           timedOutWaitingForPageLoad(options.timeout, options._log)
-        .finally(cleanup)
+        .finally ->
+          cleanup?()
+
+          return null
 
       goString = (str) =>
         switch str
@@ -495,7 +562,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 cleanup = ->
                   cy.removeListener("window:load", resolve)
 
-                  return null
+                  knownCommandCausedInstability = false
+
+                knownCommandCausedInstability = true
 
                 $utils.iframeSrc($autIframe, url)
 
@@ -510,7 +579,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## tell our backend we're changing domains
             ## TODO: add in other things we want to preserve
             ## state for like scrollTop
-            debugger
             s = {
               currentId: id
               tests:     Cypress.getTestsState()
@@ -525,7 +593,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             Cypress.action("cy:collect:run:state")
             .then (a = []) ->
-              debugger
               ## merge all the states together holla'
               s = _.reduce a, (memo, obj) ->
                 _.extend(memo, obj)
@@ -575,7 +642,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               args: args
             })
         .catch (err) ->
-          debugger
           visitFailedByErr err, url, ->
             $utils.throwErrByPath("visit.loading_network_failed", {
               onFail: options._log
@@ -595,9 +661,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## our history entries are intact
         if not hasVisitedAboutBlank
           hasVisitedAboutBlank = true
+          currentlyVisitingAboutBlank = true
 
           aboutBlank(win)
-          .then(go)
+          .then ->
+            currentlyVisitingAboutBlank = false
+
+            go()
         else
           go()
 
@@ -607,7 +677,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)
-      .finally(cleanup)
+      .finally ->
+        cleanup?()
+
+        return null
   })
 
   return {
