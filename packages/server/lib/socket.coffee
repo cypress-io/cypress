@@ -14,6 +14,7 @@ errors        = require("./errors")
 logger        = require("./logger")
 browsers      = require("./browsers")
 automation    = require("./automation")
+preprocessor  = require("./preprocessor")
 log           = require('debug')('cypress:server:socket')
 
 existingState = null
@@ -53,18 +54,21 @@ class Socket
       return new Socket
 
   onTestFileChange: (filePath) ->
-    logger.info "onTestFileChange", filePath: filePath
+    log("test file changed: #{filePath}")
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
     return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
 
+    console.log("foo")
     fs.statAsync(filePath)
     .then =>
+      console.log("bar")
       @io.emit("watched:file:changed")
     .catch ->
+      log("could not find test file that changed: #{filePath}")
 
-  watchTestFileByPath: (config, originalFilePath, watchers, options) ->
+  watchTestFileByPath: (config, originalFilePath, options) ->
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
@@ -79,21 +83,22 @@ class Socket
     ## bail if we're already watching this
     ## exact file or we've turned off watching
     ## for file changes
-    return if (filePath is @testFilePath) or (config.watchForFileChanges is false)
-
-    logger.info "watching test file", {path: filePath}
+    return if filePath is @testFilePath
 
     ## remove the existing file by its path
     if @testFilePath
-      watchers.removeBundle(@testFilePath)
+      preprocessor.removeFile(@testFilePath)
 
     ## store this location
     @testFilePath = filePath
     log("will watch test file path #{filePath}")
 
-    watchers.watchBundle(filePath, config, {
-      onChange: @onTestFileChange.bind(@)
-    })
+    if config.watchForFileChanges
+      options = {
+        onChange: @onTestFileChange.bind(@)
+      }
+
+    preprocessor.getFile(filePath, config, options)
     ## ignore errors b/c we're just setting up the watching. errors
     ## are handled by the spec controller
     .catch ->
@@ -153,7 +158,7 @@ class Socket
       cookie: cookie
     })
 
-  startListening: (server, watchers, automation, config, options) ->
+  startListening: (server, automation, config, options) ->
     _.defaults options,
       socketId: null
       onSetRunnables: ->
@@ -278,7 +283,7 @@ class Socket
         options.onSpecChanged(spec)
 
       socket.on "watch:test:file", (filePath, cb = ->) =>
-        @watchTestFileByPath(config, filePath, watchers, options)
+        @watchTestFileByPath(config, filePath, options)
         ## callback is only for testing purposes
         cb()
 

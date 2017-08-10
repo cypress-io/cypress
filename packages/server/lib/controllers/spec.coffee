@@ -1,10 +1,11 @@
-fs      = require("fs")
-errors  = require("../errors")
-bundle  = require("../util/bundle")
-appData = require("../util/app_data")
+log = require('debug')('cypress:server:controllers:spec')
+errors = require("../errors")
+preprocessor = require("../preprocessor")
 
 module.exports = {
-  handle: (spec, req, res, config, next, watchers, project) ->
+  handle: (spec, req, res, config, next, project) ->
+    log("request for", spec)
+
     res.set({
       "Cache-Control": "no-cache, no-store, must-revalidate"
       "Pragma": "no-cache"
@@ -13,38 +14,29 @@ module.exports = {
 
     res.type("js")
 
-    streamBundle = ->
-      bundledPath = bundle.outputPath(config.projectRoot, spec)
-      fs.createReadStream(bundledPath)
-      .pipe(res)
-
-    if config.isHeadless
-      bundle
-      .build(spec, config)
-      .getLatestBundle()
-      .then(streamBundle)
-      .catch (err) ->
+    preprocessor
+    .getFile(spec, config)
+    .then (filePath) ->
+      log("send #{filePath}")
+      res.sendFile(filePath)
+    .catch (err) ->
+      if config.isHeadless
         ## bluebird made a change in 3.4.7 where they handle
         ## SyntaxErrors differently here
         ## https://github.com/petkaantonov/bluebird/pull/1295
         ##
-        ## their new behavior messes us how we show these errors
+        ## their new behavior messes up how we show these errors
         ## so we must backup the original stack and replace it here
         if os = err.originalStack
           err.stack = os
 
         filePath = err.filePath ? spec
 
-        err = errors.get("BUNDLE_ERROR", filePath, bundle.errorMessage(err))
+        err = errors.get("BUNDLE_ERROR", filePath, preprocessor.errorMessage(err))
 
         errors.log(err)
 
         project.emit("exitEarlyWithErr", err.message)
-    else
-      watchers
-      .watchBundle(spec, config)
-      .then(streamBundle)
-      .catch (err) ->
-        res.send(bundle.clientSideError(err))
-
+      else
+        res.send(preprocessor.clientSideError(err))
 }

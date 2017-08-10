@@ -44,11 +44,10 @@ setProxiedUrl = (req) ->
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
-  constructor: (watchers) ->
+  constructor:  ->
     if not (@ instanceof Server)
-      return new Server(watchers)
+      return new Server()
 
-    @watchers = watchers
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -120,7 +119,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, @watchers, project)
+      @createRoutes(app, config, @_request, getRemoteState, project)
 
       @createServer(app, config, @_request)
 
@@ -535,12 +534,12 @@ class Server
 
       @_middleware = null
 
-  startWebsockets: (watchers, automation, config, options = {}) ->
+  startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
     @_socket = Socket()
-    @_socket.startListening(@_server, watchers, automation, config, options)
+    @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
 

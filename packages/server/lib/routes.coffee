@@ -13,14 +13,14 @@ proxy       = require("./controllers/proxy")
 driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, request, getRemoteState, watchers, project) ->
+module.exports = (app, config, request, getRemoteState, project) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
     ## slice out the cache buster
     test = CacheBuster.strip(req.query.p)
 
-    spec.handle(test, req, res, config, next, watchers, project)
+    spec.handle(test, req, res, config, next, project)
 
   app.get "/__cypress/errors/:error", (req, res) ->
     errors.handle(req, res, config)

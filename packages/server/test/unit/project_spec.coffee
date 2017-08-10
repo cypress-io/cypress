@@ -15,6 +15,7 @@ Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
+preprocessor = require("#{root}lib/preprocessor")
 git          = require("#{root}lib/util/git")
 
 describe "lib/project", ->
@@ -282,7 +283,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
-      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
+      @sandbox.stub(preprocessor, "getFile").resolves()
       @config = {
         projectRoot: "/path/to/root/"
         supportFile: "/path/to/root/foo/bar.js"
@@ -291,16 +292,16 @@ describe "lib/project", ->
     it "does nothing when {supportFile: false}", ->
       @project.watchSupportFile({supportFile: false})
 
-      expect(@watchBundle).not.to.be.called
+      expect(preprocessor.getFile).not.to.be.called
 
-    it "calls watchers.watchBundle with relative path to file", ->
+    it "calls preprocessor.getFile with relative path to file", ->
       @project.watchSupportFile(@config)
 
-      expect(@watchBundle).to.be.calledWith("foo/bar.js", @config)
+      expect(preprocessor.getFile).to.be.calledWith("foo/bar.js", @config)
 
     it "calls server.onTestFileChange when file changes", ->
       @project.watchSupportFile(@config)
-      @watchBundle.firstCall.args[2].onChange()
+      preprocessor.getFile.firstCall.args[2].onChange()
 
       expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
 
@@ -308,7 +309,7 @@ describe "lib/project", ->
       @config.watchForFileChanges = false
       @project.watchSupportFile(@config)
 
-      expect(@watchBundle.firstCall.args[2]).to.be.undefined
+      expect(preprocessor.getFile.firstCall.args[2]).to.be.undefined
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
@@ -318,12 +319,12 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSettings")
       @sandbox.stub(Automation, "create").returns("automation")
 
-    it "calls server.startWebsockets with watchers, automation + config", ->
+    it "calls server.startWebsockets with automation + config", ->
       c = {}
 
       @project.watchSettingsAndStartWebsockets({}, c)
 
-      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, "automation", c)
+      expect(@project.server.startWebsockets).to.be.calledWith("automation", c)
 
     it "passes onReloadBrowser callback", ->
       fn = @sandbox.stub()

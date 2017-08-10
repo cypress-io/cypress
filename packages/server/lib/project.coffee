@@ -19,6 +19,7 @@ Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
+preprocessor = require("./preprocessor")
 git         = require("./util/git")
 settings    = require("./util/settings")
 scaffoldLog = require("debug")("cypress:server:scaffold")
@@ -48,7 +49,7 @@ class Project extends EE
 
   open: (options = {}) ->
     debug("opening project instance %s", @projectRoot)
-    @server = Server(@watchers)
+    @server = Server()
 
     _.defaults options, {
       report:       false
@@ -65,6 +66,7 @@ class Project extends EE
     @getConfig(options)
     .then (cfg) =>
       process.chdir(@projectRoot)
+      preprocessor.prep(cfg)
 
       @server.open(cfg, @)
       .spread (port, warning) =>
@@ -114,7 +116,8 @@ class Project extends EE
 
     Promise.join(
       @server?.close(),
-      @watchers?.close()
+      @watchers?.close(),
+      preprocessor.close()
     )
     .then ->
       process.chdir(localCwd)
@@ -126,7 +129,7 @@ class Project extends EE
         options = {
           onChange: _.bind(@server.onTestFileChange, @server, relativePath)
         }
-      @watchers.watchBundle(relativePath, config, options)
+      preprocessor.getFile(relativePath, config, options)
       ## ignore errors b/c we're just setting up the watching. errors
       ## are handled by the spec controller
       .catch ->
@@ -160,7 +163,7 @@ class Project extends EE
 
     @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
 
-    @server.startWebsockets(@watchers, @automation, config, {
+    @server.startWebsockets(@automation, config, {
       onReloadBrowser: options.onReloadBrowser
 
       onFocusTests: options.onFocusTests

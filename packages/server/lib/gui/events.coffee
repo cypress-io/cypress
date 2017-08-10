@@ -1,6 +1,7 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
+log         = require('debug')('cypress:server:events')
 dialog      = require("./dialog")
 pgk         = require("./package")
 logs        = require("./logs")
@@ -21,6 +22,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       event.sender.send("response", data)
 
   sendErr = (err) ->
+    log("send error:", err)
     sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->
