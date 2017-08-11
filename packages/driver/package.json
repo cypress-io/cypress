@@ -12,9 +12,7 @@
     "test-unit": "mocha",
     "test-unit-watch": "./test/support/watch",
     "test-unit-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
-    "test-integration": "gulp test",
-    "test-integration-watch": "gulp watch",
-    "test-e2e": "node ./test/scripts/run-integration-all.js",
+    "test-integration": "node ./test/scripts/run-integration-all.js",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
