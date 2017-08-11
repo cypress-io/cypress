@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
+  "browser": "./lib/client.js",
   "scripts": {
     "test": "NODE_ENV=test mocha",
     "test-watch": "NODE_ENV=test mocha --watch",
@@ -12,8 +13,8 @@
     "lib"
   ],
   "dependencies": {
-    "socket.io": "1.4.5",
-    "socket.io-client": "1.4.5"
+    "socket.io": "1.7.4",
+    "socket.io-client": "1.7.4"
   },
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
