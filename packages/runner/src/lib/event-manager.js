@@ -1,14 +1,14 @@
-/* global $Cypress, io */
-
 import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
+import io from '@packages/socket'
 
 import automation from './automation'
 import logger from './logger'
 
-const $ = $Cypress.$
+import $Cypress, { $ } from '@packages/driver'
+
 const channel = io.connect({
   path: '/__socket.io',
   transports: ['websocket'],

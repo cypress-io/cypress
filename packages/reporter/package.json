@@ -47,7 +47,7 @@
     "enzyme": "^2.9.1",
     "font-awesome": "^4.6.3",
     "jsdom": "^9.4.1",
-    "lodash": "^4.0.0",
+    "lodash": "4.17.4",
     "markdown-it": "^6.1.1",
     "mobx": "^3.1.15",
     "mobx-react": "^4.2.1",

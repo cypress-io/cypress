@@ -1,5 +1,3 @@
-/* global $Cypress */
-
 import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
@@ -7,6 +5,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
+import { $ } from '@packages/driver'
 
 import errorMessages from '../errors/error-messages'
 import windowUtil from '../lib/window-util'
@@ -17,8 +16,6 @@ import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
 import RunnerWrap from './runner-wrap'
-
-const $ = $Cypress.$
 
 @observer
 class App extends Component {
