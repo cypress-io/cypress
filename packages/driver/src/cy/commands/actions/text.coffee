@@ -4,12 +4,12 @@ Promise = require("bluebird")
 moment = require("moment")
 
 { delay, waitForActionability } = require("./utils")
+$dom = require("../../../cypress/dom")
 $Log = require("../../../cypress/log")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
-textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
 dateRegex = /^\d{4}-\d{2}-\d{2}$/
 monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
@@ -79,12 +79,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log.snapshot("before", {next: "after"})
 
       isBody      = options.$el.is("body")
-      isTextLike  = options.$el.is(textLike)
-      isDate      = options.$el.is("[type=date]")
-      isTime      = options.$el.is("[type=time]")
-      isMonth     = options.$el.is("[type=month]")
-      isWeek      = options.$el.is("[type=week]")
-      hasTabIndex = options.$el.is("[tabindex]")
+      isTextLike  = $dom.elIsTextLike(options.$el)
+      isDate      = $dom.elIsType(options.$el, "date")
+      isTime      = $dom.elIsType(options.$el, "time")
+      isMonth     = $dom.elIsType(options.$el, "month")
+      isWeek      = $dom.elIsType(options.$el, "week")
+      hasTabIndex = $dom.elMatchesSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
       ## TODO: can't be readonly
@@ -154,6 +154,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       win = state("window")
 
+      getDefaultButtons = (form) ->
+        form.find("input, button").filter (__, el) ->
+          $el = $(el)
+          ($dom.elMatchesSelector($el, "input") and $dom.elIsType($el, "submit")) or
+          ($dom.elMatchesSelector($el, "button") and not $dom.elIsType($el, "button"))
+
       type = =>
         simulateSubmitHandler = =>
           form = options.$el.parents("form")
@@ -162,7 +168,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           multipleInputsAndNoSubmitElements = (form) ->
             inputs  = form.find("input")
-            submits = form.find("input[type=submit], button[type!=button]")
+            submits = getDefaultButtons(form)
 
             inputs.length > 1 and submits.length is 0
 
@@ -181,7 +187,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               false
 
           getDefaultButton = (form) ->
-            form.find("input[type=submit], button[type!=button]").first()
+            getDefaultButtons(form).first()
 
           defaultButtonisDisabled = (button) ->
             button.prop("disabled")
@@ -221,7 +227,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           isMonth or
           isWeek or
           isTime or
-          (options.$el.is("[type=number]") and _.includes(options.chars, "."))
+          ($dom.elIsType(options.$el, "number") and _.includes(options.chars, "."))
 
         ## see comment in updateValue below
         typed = ""
@@ -383,7 +389,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         node = $utils.stringifyElement($el)
 
-        if not $el.is(textLike)
+        if not $dom.elIsTextLike($el)
           word = $utils.plural(subject, "contains", "is")
           $utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log

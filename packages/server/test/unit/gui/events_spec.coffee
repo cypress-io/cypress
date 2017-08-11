@@ -413,8 +413,6 @@ describe "lib/gui/events", ->
         .then =>
           @expectSendErrCalledWith(err)
 
-      it "reboots onSettingsChanged"
-
       it "emits bus 'focus:tests' onFocustTests"
 
     describe "close:project", ->

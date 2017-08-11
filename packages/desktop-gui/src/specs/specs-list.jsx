@@ -1,3 +1,4 @@
+import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
@@ -24,14 +25,14 @@ class Specs extends Component {
         </a>
         <ul className='outer-files-container list-as-table'>
           { _.map(specsStore.specs, (spec) => (
-            this.specItem(spec)
+            this._specItem(spec)
           ))}
         </ul>
       </div>
     )
   }
 
-  specItem (spec) {
+  _specItem (spec) {
     if (spec.children.specs && spec.children.specs.length) {
       return (
         <li key={spec.path} className='folder'>
@@ -43,7 +44,7 @@ class Specs extends Component {
             <div>
               <ul className='list-as-table'>
                 { _.map(spec.children.specs, (spec) => (
-                  this.specItem(spec)
+                  this._specItem(spec)
                 ))}
               </ul>
             </div>
@@ -51,14 +52,13 @@ class Specs extends Component {
         </li>
       )
     } else {
-      let activeClass = spec.isChosen ? 'active' : ''
-
+      const isChosen = specsStore.isChosenSpec(spec)
       return (
         <li key={spec.path} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={activeClass}>
+          <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
             <div>
               <div>
-                <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
+                <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
                 { spec.displayName }
               </div>
             </div>
@@ -71,16 +71,16 @@ class Specs extends Component {
     }
   }
 
-  _allSpecsIcon (bool) {
-    if (bool) {
+  _allSpecsIcon (allSpecsChosen) {
+    if (allSpecsChosen) {
       return 'fa-dot-circle-o green'
     } else {
       return 'fa-play'
     }
   }
 
-  _specIcon (bool) {
-    if (bool) {
+  _specIcon (isChosen) {
+    if (isChosen) {
       return 'fa-dot-circle-o green'
     } else {
       return 'fa-file-code-o'

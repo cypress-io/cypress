@@ -1,7 +1,7 @@
 const util = require('hexo-util')
 
 function issue (hexo, args) {
-  // {% issue 74 'not currently supported' %}
+  // {% issue 74 "not currently supported" %}
 
   const num = args[0]
 
@@ -10,9 +10,18 @@ function issue (hexo, args) {
     target: '_blank',
   }
 
-  const text = args[1] || `issue #${num}`
+  const text = args[1] || `#${num}`
 
-  return util.htmlTag('a', attrs, text)
+  return hexo.render.render({ text: text, engine: 'markdown' })
+  .then((markdown) => {
+    // remove <p> and </p> and \n
+    markdown = markdown
+    .split('<p>').join('')
+    .split('</p>').join('')
+    .split('\n').join('')
+
+    return util.htmlTag('a', attrs, markdown)
+  })
 }
 
 function openAnIssue (hexo, args) {

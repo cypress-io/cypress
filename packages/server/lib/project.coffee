@@ -82,7 +82,6 @@ class Project extends EE
         @cfg = cfg
 
         if warning
-          warning.isWarning = true
           options.onWarning(warning)
 
         options.onSavedStateChanged = (state) =>

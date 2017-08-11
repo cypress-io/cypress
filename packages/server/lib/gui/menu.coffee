@@ -112,19 +112,19 @@ module.exports = {
         role: "help"
         submenu: [
           {
-            label: "Report an Issue.."
+            label: "Support"
             click: ->
-              shell.openExternal("https://on.cypress.io/new-issue")
+              shell.openExternal("https://on.cypress.io/support")
           }
           {
-            label: "Cypress Documentation"
+            label: "Documentation"
             click: ->
               shell.openExternal("https://on.cypress.io")
           }
           {
-            label: "Cypress Chat"
+            label: "Report an Issue.."
             click: ->
-              shell.openExternal("https://on.cypress.io/chat")
+              shell.openExternal("https://on.cypress.io/new-issue")
           }
         ]
       }

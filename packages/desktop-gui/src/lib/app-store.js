@@ -1,4 +1,5 @@
 import { action, computed, observable } from 'mobx'
+import localData from '../lib/local-data'
 
 class AppStore {
   @observable env
@@ -6,6 +7,7 @@ class AppStore {
   @observable projectPath = null
   @observable newVersion
   @observable version
+  @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
 
   @computed get displayVersion () {
     return this.isDev ? `${this.version} (dev)` : this.version
@@ -32,6 +34,11 @@ class AppStore {
 
   @action setNewVersion (newVersion) {
     this.newVersion = newVersion
+  }
+
+  @action setLocalInstallNoticeDismissed (isDismissed) {
+    this.localInstallNoticeDismissed = isDismissed
+    localData.set('local-install-notice-dimissed', isDismissed)
   }
 }
 

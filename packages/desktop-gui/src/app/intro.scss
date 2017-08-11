@@ -2,21 +2,41 @@
   bottom: 18px;
   left: 0;
   margin-bottom: 0;
-  padding: 20px 40px;
   position: fixed;
   overflow: auto;
   right: 0;
   top: 40px;
 
-  h1 {
-    color: #636668;
-    font-family: $font-title;
-    font-weight: 100;
-    margin-top: 15px;
-    text-align: center;
+  .alert {
+    margin-bottom: 20px;
+    p {
+      line-height: 1.5em;
+    }
+
+    a {
+      border-bottom: 1px dotted lighten($brand-primary, 30%);
+    }
   }
 
-  p {
+  .mono {
+    font-family: $font-mono;
+    font-size: 1.1em;
+  }
+
+  h3 {
+    font-size: 16px;
+    margin: 10px 0 6px;
+  }
+
+  h1 {
+    color: #555;
+    font-family: $font-title;
+    font-weight: 400;
+    margin-top: 20px;
+    font-size: 20px;
+  }
+
+  &>p {
     margin: 10px 0;
     color: #636668;
     font-size: 14px;
@@ -31,6 +51,14 @@
     color: #eee;
     margin-bottom: 15px;
   }
+
+  .intro-content {
+    padding: 0 40px 10px;
+  }
+
+  .loader {
+    min-height: 100px;
+  }
 }
 
 .project-drop {
@@ -44,14 +72,39 @@
   margin-bottom: 40px;
   height: 150px;
 
-  .fa-cloud-upload {
-    font-size: 50px;
-    color: #d3d6d8;
+  .fa-stack {
+  width: 3em;
+  height: 3em;
+  line-height: 3em;
   }
 
-  a {
+  .fa {
+    // font-size: 50px;
+    color: #d3d6d8;
+
+    &.fa-stack-2x {
+      font-size: 3em;
+    }
+
+    &.fa-stack-1x {
+      font-size: 1.2em;
+    }
+
+    &[class*="fa-plus"] {
+      position: relative;
+      color: #fff;
+      top: 3px;
+    }
+  }
+
+  p>a {
     border-bottom: 1px dotted lighten($brand-primary, 30%);
     color: lighten($brand-primary, 12%);
+
+    &:hover, &:focus, &:active {
+      text-decoration: none;
+      cursor: pointer !important;
+    }
   }
 
   p {
@@ -70,15 +123,10 @@
   min-height: 50px; // for loader
   position: relative;
 
-  h3 {
-    font-size: $font-size;
-    margin: 10px 0 6px;
-
-    a {
-      font-size: 12px;
-      position: relative;
-      top: -4px;
-    }
+  h1 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0;
   }
 
   .alert {
@@ -146,5 +194,13 @@
     font-size: 12px;
     font-style: italic;
     margin-left: 8px;
+  }
+}
+
+.local-install-notice {
+  padding: 20px 15px 15px;
+
+  &.alert.alert-dismissible .close {
+    top: 15px;
   }
 }

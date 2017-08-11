@@ -8,7 +8,10 @@
 
 .close {
   position: relative;
-  top: 5px
+  top: 5px;
+  &:hover, &:focus, &:active {
+    cursor: pointer;
+  }
 }
 
 .modal-body.os-dialog {

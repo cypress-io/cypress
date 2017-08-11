@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 config   = require("#{root}lib/config")
+configUtil = require("#{root}lib/util/config")
 scaffold = require("#{root}lib/scaffold")
 settings = require("#{root}lib/util/settings")
 
@@ -909,3 +910,20 @@ describe "lib/config", ->
         expected[folder] = "/_test-output/path/to/project/foo/bar"
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
+
+describe "lib/util/config", ->
+
+  context ".isDefault", ->
+    it "returns true if value is default value", ->
+      settings = {baseUrl: null}
+      defaults = {baseUrl: null}
+      resolved = {}
+      merged = config.setResolvedConfigValues(settings, defaults, resolved)
+      expect(configUtil.isDefault(merged, "baseUrl")).to.be.true
+
+    it "returns false if value is not default value", ->
+      settings = {baseUrl: null}
+      defaults = {baseUrl: "http://localhost:8080"}
+      resolved = {}
+      merged = config.setResolvedConfigValues(settings, defaults, resolved)
+      expect(configUtil.isDefault(merged, "baseUrl")).to.be.false

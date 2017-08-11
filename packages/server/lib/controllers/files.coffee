@@ -111,11 +111,12 @@ module.exports = {
     ## coded. the rest is simply whatever is in
     ## the javascripts array
 
-    fixturesFolderPath = path.join(
-      config.fixturesFolder,
-      "**",
-      "*"
-    )
+    if config.fixturesFolder
+      fixturesFolderPath = path.join(
+        config.fixturesFolder,
+        "**",
+        "*"
+      )
 
     supportFilePath = config.supportFile or []
 
@@ -123,7 +124,7 @@ module.exports = {
     ## TODO: think about moving this into config
     ## and mapping each of the javascripts into an
     ## absolute path
-    javascriptsPath = _.map config.javascripts, (js) ->
+    javascriptsPaths = _.map config.javascripts, (js) ->
       path.join(config.projectRoot, js)
 
     ## ignore fixtures + javascripts
@@ -131,11 +132,11 @@ module.exports = {
       sort:     true
       absolute: true
       cwd:      integrationFolderPath
-      ignore:   [].concat(
-        javascriptsPath,
-        supportFilePath,
+      ignore:   _.compact(_.flatten([
+        javascriptsPaths
+        supportFilePath
         fixturesFolderPath
-      )
+      ]))
     }
 
     ## filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee

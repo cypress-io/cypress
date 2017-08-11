@@ -11,7 +11,7 @@ describe "Project Mode", ->
       cy.stub(@ipc, "onFocusTests")
       cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
-      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
 
       @getCurrentUser = @util.deferred()

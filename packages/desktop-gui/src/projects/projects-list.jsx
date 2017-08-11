@@ -33,7 +33,7 @@ class ProjectsList extends Component {
 
     return (
       <div className='projects-list'>
-        <h3>Recent Projects</h3>
+        <h1>Recent Projects:</h1>
         {this._error()}
         {this._content()}
       </div>

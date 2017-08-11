@@ -1,5 +1,10 @@
 $ = Cypress.$.bind(Cypress)
 
+normalizeStyles = (styles) ->
+  styles
+  .replace(/\s+/gm, "")
+  .replace(/['"]/gm, "'")
+
 describe "src/cy/snapshot", ->
   context "invalid snapshot html", ->
     beforeEach ->
@@ -128,6 +133,44 @@ describe "src/cy/snapshot", ->
     it "removes data-cypress-el attr", ->
       cy.createSnapshot(@$el)
       expect(@$el.attr("data-cypress-el")).to.be.undefined
+
+    it "replaces CSS paths of style tags with absolute paths", ->
+      styles = """
+        <style>
+          @font-face {
+            font-family: 'Some Font';
+            src: url('../fonts/some-font.eot');
+            src: url('../fonts/some-font.eot?#iefix') format('embedded-opentype'), url('../fonts/some-font.woff2') format('woff2'), url('../fonts/some-font.woff') format('woff'), url('../fonts/some-font.ttf') format('truetype'), url('../fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+          }
+        </style>
+      """
+      $(styles).appendTo(cy.$$("head"))
+
+      ## need to wait a tick for appended stylesheet to take affect
+      { headStyles } = cy.createSnapshot(@$el)
+      expect(headStyles[0].replace(/\s+/gm, "")).to.include """
+        @font-face {
+          font-family: 'Some Font';
+          src: url('http://localhost:3500/fonts/some-font.eot');
+          src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format('embedded-opentype'), url('http://localhost:3500/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fonts/some-font.ttf') format('truetype'), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+        }
+      """.replace(/\s+/gm, "")
+
+    it "replaces CSS paths of local stylesheets with absolute paths", (done) ->
+      loadFn = ->
+        ## need to wait a tick for appended stylesheet to take affect
+        { headStyles } = cy.createSnapshot(@$el)
+        expect(normalizeStyles(headStyles[0])).to.include(normalizeStyles("""
+          @font-face {
+            font-family: 'Some Font';
+            src: url('http://localhost:3500/fixtures/fonts/some-font.eot?#iefix') format('embedded-opentype'), url('http://localhost:3500/fixtures/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fixtures/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fixtures/fonts/some-font.ttf') format('truetype'), url('http://localhost:3500/fixtures/fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+          }
+        """))
+        done()
+
+      $("<link rel='stylesheet' href='nested/with_paths.css' />")
+      .load(loadFn)
+      .appendTo(cy.$$("head"))
 
     context "iframes", ->
       it "replaces with placeholders that have src in content", ->

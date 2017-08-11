@@ -10,6 +10,7 @@ minimist = require("minimist")
 la       = require("lazy-ass")
 check    = require("check-more-types")
 debug    = require("debug")("cypress:binary")
+questionsRemain = require("@cypress/questions-remain")
 
 zip      = require("./zip")
 ask      = require("./ask")
@@ -36,26 +37,13 @@ zippedFilename = (platform) ->
 # resolves with all relevant options set
 # if the property already exists, skips the question
 askMissingOptions = (properties = []) ->
-  return (options = {}) ->
-    questions = {
-      platform: ask.whichPlatform,
-      version: ask.deployNewVersion,
-      # note: zip file might not be absolute
-      zip: ask.whichZipFile
-    }
-
-    reducer = (memo, property) ->
-      if (check.has(memo, property)) then return memo
-      question = questions[property]
-      if (!check.fn(question)) then return memo
-      la(check.fn(question), "cannot find question for property", property)
-
-      question(memo[property])
-      .then (answer) ->
-        memo[property] = answer
-        memo
-
-    Promise.reduce(properties, reducer, options)
+  questions = {
+    platform: ask.whichPlatform,
+    version: ask.deployNewVersion,
+    # note: zip file might not be absolute
+    zip: ask.whichZipFile
+  }
+  return questionsRemain(_.pick(questions, properties))
 
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)

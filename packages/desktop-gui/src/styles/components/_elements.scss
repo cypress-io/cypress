@@ -19,6 +19,10 @@ html, body {
 a {
   color: $brand-primary;
   cursor: pointer;
+
+  &:hover, &:focus, &:active {
+    cursor: pointer;
+  }
 }
 
 a, button {

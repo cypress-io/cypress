@@ -4,8 +4,8 @@ getos      = require("getos")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
+pkg        = require("@packages/root")
 Routes     = require("./util/routes")
-pkg        = require("../package.json")
 
 getos = Promise.promisify(getos)
 

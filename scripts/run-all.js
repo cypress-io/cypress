@@ -10,6 +10,7 @@ const Promise = require('bluebird')
 const runAll = require('@cypress/npm-run-all')
 const through = require('through')
 const fs = require('fs')
+const prefixedList = require('prefixed-list')
 
 const globAsync = Promise.promisify(glob)
 
@@ -76,7 +77,7 @@ const checkDirsLength = (dirs, errMessage) => {
 }
 
 const mapTasks = (cmd, packages) => {
-  const colors = 'green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite'.split(' ')
+  const colors = 'green yellow blue magenta cyan white gray bgGreen bgBlue bgMagenta bgCyan bgYellow bgWhite'.split(' ')
 
   let runCommand
 
@@ -91,7 +92,8 @@ const mapTasks = (cmd, packages) => {
       runCommand = `run ${cmd}`
   }
 
-  console.log('filtered packages:', packages.join(', '))
+  console.log('filtered packages:', prefixedList(packages))
+
   return packages.map((dir, index) => {
     const packageName = packageNameFromPath(dir)
     return {

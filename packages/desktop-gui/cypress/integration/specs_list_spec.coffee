@@ -12,17 +12,20 @@ describe "Specs List", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       cy.stub(@ipc, "launchBrowser")
-      cy.stub(@ipc, "openProject")
       cy.stub(@ipc, "openFinder")
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "onboardingClosed")
+      cy.stub(@ipc, "onSpecChanged")
+
+      @openProject = @util.deferred()
+      cy.stub(@ipc, "openProject").returns(@openProject.promise)
 
       start()
 
   describe "no specs", ->
     beforeEach ->
       @ipc.getSpecs.yields(null, [])
-      @ipc.openProject.yield(null, @config)
+      @openProject.resolve(@config)
 
     it "displays empty message", ->
       cy.contains("No files found")
@@ -45,7 +48,7 @@ describe "Specs List", ->
   describe "first time onboarding specs", ->
     beforeEach ->
       @config.isNewProject = true
-      @ipc.openProject.yield(null, @config)
+      @openProject.resolve(@config)
 
     it "displays modal", ->
       cy
@@ -89,7 +92,7 @@ describe "Specs List", ->
   describe "lists specs", ->
     beforeEach ->
       @ipc.getSpecs.yields(null, @specs)
-      @ipc.openProject.yield(null, @config)
+      @openProject.resolve(@config)
 
     context "run all specs", ->
       it "displays run all specs button", ->
@@ -153,6 +156,11 @@ describe "Specs List", ->
           .click()
           .should("have.class", "active")
 
+      it "maintains active selection if specs change", ->
+        cy.get("@firstSpec").click().then =>
+          @ipc.getSpecs.yield(null, @specs)
+        cy.get("@firstSpec").should("have.class", "active")
+
     context "spec running in browser", ->
       context "choose shallow spec", ->
         beforeEach ->
@@ -194,19 +202,17 @@ describe "Specs List", ->
   describe "spec list updates", ->
     beforeEach ->
       @ipc.getSpecs.yields(null, @specs)
-      @ipc.openProject.yield(null, @config)
+      @openProject.resolve(@config)
 
     it "updates spec list selected on specChanged", ->
       cy
         .get(".file a")
         .contains("a", "app_spec.coffee").as("firstSpec")
         .then ->
-          @config.specChanged = "integration/app_spec.coffee"
-          @ipc.openProject.yield(null, @config)
+          @ipc.onSpecChanged.yield(null, "integration/app_spec.coffee")
         .get("@firstSpec").should("have.class", "active")
         .then ->
-          @config.specChanged = "integration/accounts/account_new_spec.coffee"
-          @ipc.openProject.yield(null, @config)
+          @ipc.onSpecChanged.yield(null, "integration/accounts/account_new_spec.coffee")
         .get("@firstSpec").should("not.have.class", "active")
       cy
         .contains("a", "account_new_spec.coffee")

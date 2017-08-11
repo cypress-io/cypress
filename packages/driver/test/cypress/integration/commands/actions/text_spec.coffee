@@ -35,6 +35,21 @@ describe "src/cy/commands/actions/text", ->
       cy.get("input:text:first").type("foo").then ($input) ->
         expect($input).to.have.value("foo")
 
+    it "appends subsequent type commands", ->
+      @cy
+        .get("input:first").type("123").type("456")
+        .should("have.value", "123456")
+
+    it "appends subsequent commands when value is changed in between", ->
+      @cy
+        .get("input:first")
+        .type("123")
+        .then ($input) ->
+          $input[0].value += '-'
+          return $input
+        .type("456")
+        .should("have.value", "123-456")
+
     it "can type numbers", ->
       cy.get(":text:first").type(123).then ($text) ->
         expect($text).to.have.value("123")
@@ -223,8 +238,6 @@ describe "src/cy/commands/actions/text", ->
           expect(args[1]).to.deep.eq([coords, coords])
           expect(args[2]).to.eq(animationDistanceThreshold)
 
-    ## we will need extra tests and logic for input types date, time, month, & week
-    ## see issue https://github.com/cypress-io/cypress/issues/27
     describe "input types where no extra formatting required", ->
       _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
         it "accepts input [type=#{type}]", ->
@@ -235,6 +248,13 @@ describe "src/cy/commands/actions/text", ->
           cy.get("#input-type-#{type}").type("1234").then ($input) ->
             expect($input).to.have.value "1234"
             expect($input.get(0)).to.eq $input.get(0)
+
+        it "accepts type [type=#{type}], regardless of capitalization", ->
+          input = @cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
+
+          @cy.$$("body").append(input)
+
+          @cy.get("#input-type-#{type}").type("1234")
 
     describe "tabindex", ->
       beforeEach ->

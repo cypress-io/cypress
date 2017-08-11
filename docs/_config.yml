@@ -17,7 +17,7 @@ permalink: :year/:month/:day/:title/
 permalink_defaults:
 
 logo: img/logo.png
-github: cypress-io/cypress-documentation
+github: cypress-io/cypress
 
 # Directory
 source_dir: source
@@ -28,6 +28,9 @@ skip_render:
 # Generate alias pages for redirecting to posts, pages or URL
 # You must run `npm run build` for changes to take effect
 # https://github.com/hexojs/hexo-generator-alias
+# to redirect a directory, make sure it has a trailing slash (/docs/bob > /docs/bob/)
+# can also do outside page links here
+# plugins/index.html: https://github.com/cypress/cypress/wiki/Plugins
 alias:
   index.html: guides/getting-started/why-cypress.html
   guides/index.html: guides/getting-started/why-cypress.html
@@ -35,8 +38,40 @@ alias:
   examples/index.html: examples/recipes/unit-testing-recipe.html
   dashboard/index.html: dashboard/overview/features-dashboard.html
   faq/index.html: faq/questions/general-questions-faq.html
-  # can also do outside page links here
-  # plugins/index.html: https://github.com/cypress/cypress/wiki/Plugins
+  docs/known-issues/: guides/references/known-issues.html
+  docs/finding-elements/: guides/core-concepts/introduction-to-cypress.html#Querying-Elements
+
+#from Google Search Console/Webmaster Tools since 7/3/2017 - https://docs.google.com/spreadsheets/d/1SHhjytMEzIxtdzFNXJHn_Q6p3xFFv_lFw0x_JtNtxt0/edit#gid=1581503717
+  v1.0/docs/promise/: api/utilities/promise.html
+  v1.0/docs/getcookie/: api/commands/getcookie.html
+  v1.0/docs/getcookies/: api/commands/getcookies.html
+  v1.0/docs/nextall/: api/commands/nextall.html
+  v1.0/docs/prevuntil/: api/commands/prevuntil.html
+  v1.0/docs/siblings/: api/commands/siblings.html
+  guides/issuing-commands/: guides/core-concepts/introduction-to-cypress.html#Subject-Management
+  v1.0/docs/clearcookie/: api/commands/clearcookie.html
+  api/commands/api-server.html: api/cypress-api/cypress-server.html
+  guides/installing-and-running/: guides/getting-started/installing-cypress.html
+  docs/screenshots-and-videos/: guides/core-concepts/screenshots-and-videos.html
+  docs/projects/: dashboard/overview/projects-dashboard.html
+  docs/network-requests-xhr/: guides/guides/network-requests.html
+  docs/environment-variables/: guides/guides/environment-variables.html
+  api/commands/cypress-blob.html: api/utilities/blob.html
+  docs/installing-and-running/: guides/getting-started/installing-cypress.html
+  docs/configuration/: guides/references/configuration.html
+  v1.0/docs/exec/: api/commands/exec.html
+  v1.0/docs/setcookie/: api/commands/setcookie.html
+  v1.0/docs/clear/: api/commands/clear.html
+  v1.0/docs/cypress-minimatch/: api/utilities/minimatch.html
+  v1.0/docs/first/: /api/commands/first.html
+  docs/cli/: guides/guides/command-line.html
+  docs/wait/: api/commands/wait.html
+  why-cypress/: guides/getting-started/why-cypress.html
+  guides.html/: guides/getting-started/why-cypress.html
+  guides/references/type/: api/commands/type.html
+  docs/launching-browsers/: guides/core-concepts/launching-browsers.html
+  guides/integrating-cypress/features.html/: guides/guides/continuous-integration.html
+  guides/network-requests-xhr/: guides/guides/network-requests.html
 
 # Include/Exclude Files/Folders
 include:

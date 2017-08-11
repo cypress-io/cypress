@@ -199,10 +199,9 @@ const runSmokeTest = () => {
 const differentFrom = (a) => (b) => a !== b
 
 const logStart = () =>
-  log(chalk.green('⧖ Verifying Cypress executable...'))
+  log(chalk.yellow('⧖ Verifying Cypress executable...'))
 
 const logSuccess = () => {
-  log()
   log(chalk.green('✓ Successfully verified Cypress executable'))
 }
 
@@ -272,12 +271,16 @@ const verify = (options = {}) => {
   })
   .then(() => {
     const executable = getPathToExecutable()
-    return fs.statAsync(executable).catch(() =>
-      explainAndFail(errors.missingApp)(new Error(stripIndent`
-        Cypress executable not found at
-        ${executable}
-      `))
-    )
+    return fs.statAsync(executable)
+      .then(() => {
+        log(chalk.green('✓ Cypress executable found at:'), chalk.cyan(executable))
+      })
+      .catch(() =>
+        explainAndFail(errors.missingApp)(new Error(stripIndent`
+          Cypress executable not found at
+          ${executable}
+        `))
+      )
   })
   .then(() => {
     return maybeVerify(options)

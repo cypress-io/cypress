@@ -10,6 +10,7 @@ cache         = require("#{root}lib/cache")
 exception     = require("#{root}lib/exception")
 Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
+pkg           = require("@packages/root")
 
 describe "lib/exceptions", ->
   context ".getAuthToken", ->
@@ -58,9 +59,7 @@ describe "lib/exceptions", ->
 
   context ".getVersion", ->
     it "returns version from package.json", ->
-      @sandbox.stub(fs, "readJsonAsync")
-      .withArgs("./package.json")
-      .resolves({version: "0.1.2"})
+      @sandbox.stub(pkg, "version", "0.1.2")
 
       exception.getVersion().then (v) ->
         expect(v).to.eq("0.1.2")
@@ -70,10 +69,7 @@ describe "lib/exceptions", ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
       @sandbox.stub(logger, "getLogs").resolves([])
       @err = new Error()
-
-      @sandbox.stub(fs, "readJsonAsync")
-      .withArgs("./package.json")
-      .resolves({version: "0.1.2"})
+      @sandbox.stub(pkg, "version", "0.1.2")
 
     it "sets err", ->
       exception.getBody(@err).then (body) ->

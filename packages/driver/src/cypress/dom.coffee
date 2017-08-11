@@ -86,7 +86,7 @@ dom = {
   isHidden: (el, filter) ->
     if not $utils.hasElement(el)
       $utils.throwErrByPath("dom.non_dom_is_hidden", {
-        args: { el, filter: filter || "isHidden()" }
+        args: { el, filter: filter or "isHidden()" }
       })
 
     $el = $(el)
@@ -127,7 +127,7 @@ dom = {
     $el.css("display") is "none"
 
   elHasOverflowHidden: ($el) ->
-    $el.css("overflow") is "hidden"
+    "hidden" in [$el.css("overflow"), $el.css("overflow-y"), $el.css("overflow-x")]
 
   elIsPositioned: ($el) ->
     $el.css("position") in ["relative", "absolute", "fixed", "sticky"]
@@ -136,8 +136,9 @@ dom = {
     $el.css("position") is "relative"
 
   elHasClippableOverflow: ($el) ->
-    ## if overflow-x, overflow-y hidden, then overflow is auto
-    $el.css("overflow") in ["hidden", "scroll", "auto"]
+    $el.css("overflow") in ["hidden", "scroll", "auto"] or
+    $el.css("overflow-y") in ["hidden", "scroll", "auto"] or
+    $el.css("overflow-x") in ["hidden", "scroll", "auto"]
 
   elIsScrollable: ($el) ->
     checkDocumentElement = (win, documentElement) ->
@@ -332,6 +333,34 @@ dom = {
 
       else
         "Cypress could not determine why this element '#{node}' is not visible."
+
+  elIsTextLike: ($el) ->
+    isSel = (selector) => @elMatchesSelector($el, selector)
+    isType = (type) => @elIsType($el, type)
+
+    _.some([
+      isSel("textarea")
+      isSel(":text")
+      isSel("[contenteditable]")
+      isType("password")
+      isType("email")
+      isType("number")
+      isType("date")
+      isType("week")
+      isType("month")
+      isType("time")
+      isType("datetime")
+      isType("datetime-local")
+      isType("search")
+      isType("url")
+      isType("tel")
+    ])
+
+  elIsType: ($el, type) ->
+    ($el.attr("type") or "").toLowerCase() is type
+
+  elMatchesSelector: ($el, selector) ->
+    $el.is(selector)
 
 }
 

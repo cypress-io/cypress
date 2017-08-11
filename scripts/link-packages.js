@@ -32,7 +32,7 @@ function proxyModule (name, pathToMain, pathToBrowser) {
   const pkg = {
     name,
     version: '0.0.0',
-    description: `fake proxy module to packages/${name}`,
+    description: `fake proxy module ${name}`,
     main: pathToMain,
   }
   if (pathToBrowser) {

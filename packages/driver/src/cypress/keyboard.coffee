@@ -237,9 +237,15 @@ $Keyboard = {
 
     el = options.$el.get(0)
 
-    ## if el does not have this property
     bililiteRangeSelection = el.bililiteRangeSelection
     rng = bililiteRange(el).bounds("selection")
+
+    ## if the value has changed since previously typing, we need to
+    ## update the caret position if the value has changed
+    if el.prevValue and @expectedValueDoesNotMatchCurrentValue(el.prevValue, rng)
+      @moveCaretToEnd(rng)
+      el.prevValue = rng.all()
+      bililiteRangeSelection = el.bililiteRangeSelection = rng.bounds()
 
     ## store the previous text value
     ## so we know to fire change events
@@ -247,7 +253,6 @@ $Keyboard = {
     options.prev = rng.all()
 
     resetBounds = (start, end) ->
-
       if start? and end?
         bounds = [start, end]
       else
@@ -490,6 +495,10 @@ $Keyboard = {
 
     @ensureKey el, key, options, ->
       options.updateValue(options.rng, key)
+      ## update the selection that's cached on the element
+      ## and store the value for comparison in any future typing
+      el.bililiteRangeSelection = options.rng.bounds()
+      el.prevValue = el.value
 
   ensureKey: (el, key, options, fn) ->
     options.id        = _.uniqueId("char")

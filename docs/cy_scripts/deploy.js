@@ -10,28 +10,31 @@ const Promise    = require('bluebird')
 const inquirer   = require('inquirer')
 const awspublish = require('gulp-awspublish')
 const parallelize = require('concurrent-transform')
+const minimist   = require('minimist')
+const questionsRemain = require('@cypress/questions-remain')
 const scrape     = require('./scrape')
+const shouldDeploy = require('./should-deploy')
+const { configFromEnvOrJsonFile } = require('@cypress/env-or-json-file')
+const R = require('ramda')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const distDir = path.resolve('public')
-
-const fs = Promise.promisifyAll(require('fs-extra'))
+const isValidEnvironment = is.oneOf(['production', 'staging'])
 
 // initialize on existing repo
 const repo = Promise.promisifyAll(gift(path.resolve('..')))
 
-console.log()
-console.log(chalk.yellow('Cypress Docs Deployinator'))
-console.log(chalk.yellow('==============================\n'))
-
 function getS3Credentials () {
-  const pathToAwsCreds = path.resolve('support', '.aws-credentials.json')
-
-  return fs.readJsonAsync(pathToAwsCreds)
-  .catch({ code: 'ENOENT' }, (err) => {
-    console.log(chalk.red(`Cannot deploy.\n\nYou are missing your AWS credentials.\n\nPlease add your credentials here: ${pathToAwsCreds}\n`))
-
-    throw err
-  })
+  const key = path.join('support', '.aws-credentials.json')
+  const config = configFromEnvOrJsonFile(key)
+  if (!config) {
+    console.error('⛔️  Cannot find AWS credentials')
+    console.error('Using @cypress/env-or-json-file module')
+    console.error('and key', key)
+    throw new Error('AWS config not found')
+  }
+  return config
 }
 
 function getCurrentBranch () {
@@ -51,6 +54,18 @@ function promptForDeployEnvironment () {
   })
   .get('strategy')
 }
+
+function cliOrAsk (property, ask, minimistOptions) {
+  // for now isolate the CLI/question logic
+  const askRemaining = questionsRemain({
+    [property]: ask,
+  })
+  const options = minimist(process.argv.slice(2), minimistOptions)
+  return askRemaining(options).then(R.prop(property))
+}
+
+const getDeployEnvironment = R.partial(cliOrAsk,
+  ['environment', promptForDeployEnvironment])
 
 function ensureCleanWorkingDirectory () {
   return repo.statusAsync()
@@ -104,18 +119,20 @@ function publishToS3 (publisher) {
 }
 
 function uploadToS3 (env) {
-  return getS3Credentials()
+  la(isValidEnvironment(env), 'invalid environment', env)
+  const bucketName = `bucket-${env}`
+  return Promise.resolve()
+  .then(getS3Credentials)
   .then((json) => {
-    const bucket = json[`bucket-${env}`] || (function () {
-      throw new Error(`Could not find a bucket for environment: ${env}`)
-    })()
+    la(is.object(json), 'missing S3 credentials object for environment', env)
+    const bucket = json[bucketName]
+    la(is.unemptyString(bucket), 'Could not find a bucket for environment', env)
 
     console.log('\n', 'Deploying to:', chalk.green(bucket), '\n')
-
     const publisher = getPublisher(bucket, json.key, json.secret)
-
-    return publishToS3(publisher)
+    return publisher
   })
+  .then(publishToS3)
 }
 
 function prompt (questions) {
@@ -143,6 +160,22 @@ function commitMessage (env, branch) {
   })
 }
 
+function prompToScrape () {
+  return prompt({
+    type: 'list',
+    name: 'scrape',
+    message: 'Would you like to scrape the docs? (You only need to do this if they have changed on this deployment)',
+    choices: [
+      { name: 'Yes', value: true },
+      { name: 'No',  value: false },
+    ],
+  })
+  .get('scrape')
+}
+
+const getScrapeDocs = R.partial(cliOrAsk,
+  ['scrape', prompToScrape, { boolean: 'scrape' }])
+
 function scrapeDocs (env, branch) {
   console.log('')
 
@@ -155,21 +188,12 @@ function scrapeDocs (env, branch) {
 
   // if we arent deploying to production return
   if (env !== 'production') {
-    console.log('Skipping doc scraping because you deployed to:', chalk.cyan('production'))
-
+    console.log('Skipping doc scraping because you deployed to:', chalk.cyan(env))
+    console.log('Only scraping production deploy')
     return
   }
 
-  return prompt({
-    type: 'list',
-    name: 'scrape',
-    message: 'Would you like to scrape the docs? (You only need to do this if they have changed on this deployment)',
-    choices: [
-      { name: 'Yes', value: true },
-      { name: 'No',  value: false },
-    ],
-  })
-  .get('scrape')
+  return getScrapeDocs()
   .then((bool) => {
     if (bool) {
       return scrape()
@@ -178,13 +202,13 @@ function scrapeDocs (env, branch) {
 
 }
 
-getS3Credentials()
-.then(getCurrentBranch)
-.then((branch) => {
-  console.log('On branch:', chalk.green(branch), '\n')
+function deployEnvironmentBranch (env, branch) {
+  la(is.unemptyString(branch), 'missing branch to deploy', branch)
+  la(isValidEnvironment(env), 'invalid deploy environment', env)
 
-  return promptForDeployEnvironment()
-  .then((env) => {
+  const cleanup = () => {
+    console.log('Target environment:', chalk.green(env))
+    console.log('On branch:', chalk.green(branch), '\n')
     if (env === 'staging') {
       return env
     }
@@ -195,23 +219,59 @@ getS3Credentials()
       }
 
       return ensureCleanWorkingDirectory()
-      .return(env)
     } else {
       throw new Error(`Unknown environment: ${env}`)
     }
+  }
+
+  const uploadEnvToS3 = _.partial(uploadToS3, env)
+  const maybeCommit = () =>
+    commitMessage(env, branch)
+    .catch((err) => {
+      // ignore commit error - do we really need it?
+      console.error('could not make a doc commit')
+      console.error(err.message)
+    })
+
+  return Promise.resolve()
+  .then(cleanup)
+  .then(uploadEnvToS3)
+  .then(maybeCommit)
+  .then(() => scrapeDocs(env, branch))
+  .then(() => {
+    console.log(chalk.yellow('\n==============================\n'))
+    console.log(chalk.bgGreen(chalk.black(' Done Deploying ')))
+    console.log('')
   })
+}
+
+function doDeploy (env) {
+  la(isValidEnvironment(env), 'invalid deploy environment', env)
+  return getCurrentBranch()
+    .then((branch) => deployEnvironmentBranch(env, branch))
+}
+
+function deploy () {
+  console.log()
+  console.log(chalk.yellow('Cypress Docs Deployinator'))
+  console.log(chalk.yellow('==============================\n'))
+
+  return getDeployEnvironment()
   .then((env) => {
-    return uploadToS3(env)
-    .then(() => {
-      return commitMessage(env, branch)
-    })
-    .then(() => {
-      return scrapeDocs(env, branch)
+    return shouldDeploy(env)
+    .then((should) => {
+      if (!should) {
+        console.log('nothing to deploy for environment %s', env)
+        return false
+      }
+      return doDeploy(env)
     })
   })
-})
-.then(() => {
-  console.log(chalk.yellow('\n==============================\n'))
-  console.log(chalk.bgGreen(chalk.black(' Done Deploying ')))
-  console.log('')
-})
+}
+
+deploy()
+  .catch((err) => {
+    console.error('🔥  deploy failed')
+    console.error(err)
+    process.exit(-1)
+  })

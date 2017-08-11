@@ -16,18 +16,20 @@ describe "Project Nav", ->
       cy.stub(@ipc, "getRecordKeys").resolves([])
       cy.stub(@ipc, "launchBrowser")
       cy.stub(@ipc, "closeBrowser").resolves(null)
-      cy.stub(@ipc, "openProject")
       cy.stub(@ipc, "closeProject")
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "offOpenProject")
       cy.stub(@ipc, "offGetSpecs")
       cy.stub(@ipc, "offOnFocusTests")
 
+      @openProject = @util.deferred()
+      cy.stub(@ipc, "openProject").returns(@openProject.promise)
+
       start()
 
   context "project nav", ->
     beforeEach ->
-      @ipc.openProject.yield(null, @config)
+      @openProject.resolve(@config)
 
     it "displays projects nav", ->
       cy
@@ -80,7 +82,7 @@ describe "Project Nav", ->
   context "browsers dropdown", ->
     describe "browsers available", ->
       beforeEach ->
-        @ipc.openProject.yield(null, @config)
+        @openProject.resolve(@config)
 
       context "normal browser list behavior", ->
         it "lists browsers", ->
@@ -202,7 +204,7 @@ describe "Project Nav", ->
     describe "local storage saved browser", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "chromium")
-        @ipc.openProject.yield(null, @config)
+        @openProject.resolve(@config)
 
       afterEach ->
         cy.clearLocalStorage()
@@ -220,7 +222,7 @@ describe "Project Nav", ->
     describe "when browser saved in local storage no longer exists", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "netscape-navigator")
-        @ipc.openProject.yield(null, @config)
+        @openProject.resolve(@config)
 
       it "defaults to first browser", ->
         cy
@@ -237,7 +239,7 @@ describe "Project Nav", ->
         }]
 
         @config.browsers = @oneBrowser
-        @ipc.openProject.yield(null, @config)
+        @openProject.resolve(@config)
 
       it "displays no dropdown btn", ->
         cy
@@ -255,7 +257,7 @@ describe "Project Nav", ->
           "info": @info
         }]
 
-        @ipc.openProject.yield(null, @config)
+        @openProject.resolve(@config)
 
       it "shows info icon with tooltip", ->
         cy

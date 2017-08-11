@@ -227,6 +227,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
 
   fixture:
+    set_to_false: "#{cmd('fixture')} is not valid because you have configured 'fixturesFolder' to false."
     timed_out: "#{cmd('fixture')} timed out waiting '{{timeout}}ms' to receive a fixture. No fixture was ever sent by the server."
 
   focus:

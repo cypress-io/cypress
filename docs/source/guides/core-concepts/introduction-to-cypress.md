@@ -335,7 +335,7 @@ cy
 
 ***Using Aliases to Refer to Previous Subjects***
 
-Cypress has some added functionality for quickly referring back to past subjects called [Aliases](/guides.html). It looks something like this:
+Cypress has some added functionality for quickly referring back to past subjects called {% url 'Aliases' aliases-and-references %}. It looks something like this:
 
 ```js
 cy

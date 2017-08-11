@@ -3,7 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 rp       = require("request-promise")
 os       = require("os")
-pkg      = require("#{root}package.json")
+pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
 

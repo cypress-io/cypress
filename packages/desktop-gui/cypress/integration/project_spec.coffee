@@ -8,13 +8,13 @@ describe "Project Mode", ->
     cy.visitIndex().then (win) =>
       { @start, @ipc } = win.App
 
-      cy.stub(@ipc, "onMenuClicked")
-      cy.stub(@ipc, "onFocusTests")
       cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
-      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeProject").resolves()
+      cy.stub(@ipc, "onConfigChanged")
+      cy.stub(@ipc, "onProjectWarning")
 
       @getProjectStatus = @util.deferred()
       cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
@@ -42,10 +42,17 @@ describe "Project Mode", ->
         @getProjectStatus.reject({name: "", message: "", statusCode: 401})
         cy.shouldBeOnLogin()
 
+    it "re-opens project if config changes", ->
+      cy.shouldBeOnProjectSpecs().then =>
+        @ipc.onConfigChanged.yield()
+        expect(@ipc.closeProject).to.be.called
+        expect(@ipc.openProject).to.be.called
+        cy.shouldBeOnProjectSpecs()
+
     describe "warnings", ->
       beforeEach ->
         cy.shouldBeOnProjectSpecs().then =>
-          @ipc.openProject.yield({isWarning: true, message: "Some warning\nmessage"})
+          @ipc.onProjectWarning.yield(null, {type: "NOT_GOOD_BUT_NOT_TOO_BAD", name: "Fairly serious warning", message: "Some warning\nmessage"})
 
       it "shows warning", ->
         cy.get(".alert-warning")
@@ -55,6 +62,18 @@ describe "Project Mode", ->
       it "can dismiss the warning", ->
         cy.get(".alert-warning button").click()
         cy.get(".alert-warning").should("not.exist")
+
+      it "stays dismissed after receiving same warning again", ->
+        cy.get(".alert-warning button").click()
+        cy.get(".alert-warning").should("not.exist").then =>
+          @ipc.onProjectWarning.yield(null, {type: "NOT_GOOD_BUT_NOT_TOO_BAD", name: "Fairly serious warning", message: "Some warning\nmessage"})
+        cy.get(".alert-warning").should("not.exist")
+
+      it "shows new, different warning after dismissing old warning", ->
+        cy.get(".alert-warning button").click()
+        cy.get(".alert-warning").should("not.exist").then =>
+          @ipc.onProjectWarning.yield(null, {type: "PRETTY_BAD_WARNING", name: "Totally serious warning", message: "Some warning\nmessage"})
+        cy.get(".alert-warning").should("be.visible")
 
     describe "errors", ->
       beforeEach ->
@@ -67,24 +86,23 @@ describe "Project Mode", ->
           type: "PORT_IN_USE_SHORT"
         }
 
-        cy.shouldBeOnProjectSpecs()
 
       it "displays normal error message", ->
-        @ipc.openProject.yield(@err)
+        @ipc.openProject.rejects(@err)
         cy
           .get(".error")
             .should("contain", @err.message)
 
       it "displays error message with html escaped", ->
         @err.message = "Error reading from: <span class='ansi-blur-gf'>/Users/cypress.json</span><br /><br /> <span class=ansi-yellow-fg'>SyntaxError</span>"
-        @ipc.openProject.yield(@err)
+        @ipc.openProject.rejects(@err)
         cy
           .get(".error")
             .should("contain", "Error reading from: /Users/cypress.json")
             .should("not.contain", "<span")
 
       it "displays Port in Use instructions on err", ->
-        @ipc.openProject.yield(@err)
+        @ipc.openProject.rejects(@err)
         cy
           .get(".error")
             .should("contain", @err.message)
@@ -93,7 +111,7 @@ describe "Project Mode", ->
       it "word wraps long error message plus update bar", ->
         @updaterCheck.resolve("1.3.4")
         @longErrMessage = "Morbileorisus,portaacconsecteturac,vestibulumateros.Nullamquisrisusegeturnamollis ornare vel eu leo. Donec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo. Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. Vestibulum id ligula porta felis euismod semper.Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam id dolor id nibh ultricies vehicula ut id elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec id elit non mi porta gravida at eget metus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio, dapibus ac facilisis in, egestas eget quam.Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod."
-        @ipc.openProject.yield({name: "Error", message: @longErrMessage, stack: "[object Object]↵"})
+        @ipc.openProject.rejects({name: "Error", message: @longErrMessage, stack: "[object Object]↵"})
 
         cy
           .get("#updates-available").should("be.visible")
@@ -104,26 +122,11 @@ describe "Project Mode", ->
           .and("contain", @longErrMessage)
 
       it "re-opens project on click of 'Try again' button", ->
-        @ipc.openProject.yield(@err)
+        @ipc.openProject.rejects(@err)
         cy
           .get(".error").contains("Try Again").click().should =>
             expect(@ipc.closeProject).to.be.called
             expect(@ipc.openProject).to.be.called
-
-      it "re-opens project if error is cleared by subsequent open:project yield", ->
-        @ipc.openProject.yield(@err)
-        cy.get(".error").then =>
-          @ipc.openProject.yield(null, {})
-          expect(@ipc.closeProject).to.be.called
-          expect(@ipc.openProject).to.be.called
-        cy.get(".error").should("not.exist")
-        cy.contains("integration")
-
-      it "updates error if another error is yielded", ->
-        @ipc.openProject.yield(@err)
-        cy.get(".error").then =>
-          @ipc.openProject.yield({message: "New error"})
-        cy.get(".error").should("contain", "New error")
 
   describe "polling", ->
     beforeEach ->

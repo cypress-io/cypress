@@ -40,7 +40,7 @@ describe "lib/saved_state", ->
 
   it "sets file path to app data path and file name to 'state'", ->
     statePath = savedState().path
-    expected = path.join(appData.path(), "state.json")
+    expected = path.join(appData.path(), "projects", "__global__", "state.json")
     expect(statePath).to.equal(expected)
 
   it "caches state file instance per path", ->

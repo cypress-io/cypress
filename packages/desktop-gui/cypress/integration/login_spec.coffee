@@ -11,7 +11,7 @@ describe "Login", ->
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "getProjects").resolves([])
       cy.stub(@ipc, "getProjectStatuses").resolves([])
-      cy.stub(@ipc, "openProject").yields(null, @config)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "clearGithubCookies")

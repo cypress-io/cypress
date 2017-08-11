@@ -1,9 +1,5 @@
-fs      = require("fs-extra")
-path    = require("path")
 Promise = require("bluebird")
-cwd     = require("../cwd")
-
-fs = Promise.promisifyAll(fs)
+pkg     = require("@packages/root")
 
 module.exports = ->
-  fs.readJsonAsync cwd("package.json")
+  Promise.resolve(pkg)

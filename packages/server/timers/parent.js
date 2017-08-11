@@ -69,7 +69,10 @@ function fix () {
 
   // fork the child process
   let child = cp.fork(path.join(__dirname, 'child.js'), [], {
+<<<<<<< HEAD
     stdio: 'inherit',
+=======
+>>>>>>> master
     env: {
       ELECTRON_RUN_AS_NODE: true,
     },

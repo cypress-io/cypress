@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable, action } from 'mobx'
+import { action, computed, observable } from 'mobx'
 
 import Spec from './spec-model'
 
@@ -7,62 +7,48 @@ export class SpecsStore {
   @observable specs = []
   @observable error = null
   @observable isLoading = false
-  @observable allSpecsChosen = false
+  @observable chosenSpecPath
+
+  @computed get allSpecsChosen () {
+    return this.chosenSpecPath === '__all'
+  }
 
   @action loading (bool) {
     this.isLoading = bool
   }
 
-  @action setSpecs (specs) {
-    this.specs = this.resetToTreeView(specs)
+  @action setSpecs (specsByType) {
+    this.specs = this._tree(specsByType)
 
     this.isLoading = false
   }
 
   @action setChosenSpec (specPath) {
-    this.allSpecsChosen = specPath === '__all'
-
-    function setChosen (specs) {
-      _.forEach(specs, (spec) => {
-        // we're a file if we have no child specs
-        if (!spec.children.specs.length && (spec.name === specPath || spec.path === specPath)) {
-          spec.setChosen(true)
-        } else {
-          spec.setChosen(false)
-          setChosen(spec.children.specs)
-        }
-      })
-    }
-
-    setChosen(this.specs)
+    this.chosenSpecPath = specPath
   }
 
-
-  findByDisplayName (specs, path) {
-    return _.find(specs, (spec) => (spec.displayName === path))
+  isChosenSpec (spec) {
+    return spec.name === this.chosenSpecPath || spec.path === this.chosenSpecPath
   }
 
-  getFilesSplitByDirectory (specs) {
-    return _.map(specs, (spec) => (spec.name.split('/')))
-  }
-
-  resetToTreeView (specs) {
+  _tree (specsByType) {
     let specsTree = new SpecsStore()
 
-    _.forEach(specs, (arr, key) => {
-      _.forEach(this.getFilesSplitByDirectory(arr), (segments, index) => {
-        // add the 'key' to the beginning of the segment
+    _.forEach(specsByType, (specs, type) => {
+      const filesByDirectory = _.map(specs, (spec) => spec.name.split('/'))
+      _.forEach(filesByDirectory, (segments, index) => {
+        // add the 'type' to the beginning of the segment
         // so it prepend 'unit' or 'integration'
-        segments.unshift(key)
+        segments.unshift(type)
 
         _.reduce(segments, (memo, segment) => {
           // grab the original object
           // at index so we can find its path
-          let obj = arr[index]
+          let specPaths = specs[index]
 
           // attempt to find an existing spec
           // on the specs memo by its segment
-          let spec = memo.findByDisplayName(memo.specs, segment)
+          let spec = _.find(memo.specs, { displayName: segment })
 
           // if its not found then we know we need to
           // push a new spec into the specs memo
@@ -75,7 +61,7 @@ export class SpecsStore {
             memo.specs.push(spec)
           }
 
-          spec.path = obj.path
+          spec.path = specPaths.path
 
           // and always return the spec's children
           return spec.children
@@ -83,7 +69,6 @@ export class SpecsStore {
         }, specsTree)
       })
     })
-
 
     return specsTree.specs
   }

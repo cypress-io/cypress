@@ -13,7 +13,7 @@ Error.stackTraceLimit = Infinity
 ## cannot use relative require statement
 ## here because when obfuscated package
 ## would not be available
-pkg = cwd("package.json")
+pkg = require("@packages/root")
 
 try
   ## i wish we didn't have to do this but we have to append
@@ -32,6 +32,6 @@ getEnv = ->
 
   ## use env from package first
   ## or development as default
-  process.env["CYPRESS_ENV"] or= fs.readJsonSync(pkg).env ? "development"
+  process.env["CYPRESS_ENV"] or= pkg.env ? "development"
 
 module.exports = getEnv()

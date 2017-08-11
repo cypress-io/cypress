@@ -3,6 +3,8 @@ nmi            = require("node-machine-id")
 semver         = require("semver")
 request        = require("request")
 NwUpdater      = require("node-webkit-updater")
+_              = require("lodash")
+pkg            = require("@packages/root")
 cwd            = require("./cwd")
 konfig         = require("./konfig")
 logger         = require("./logger")
@@ -65,9 +67,7 @@ class Updater
     @getClient().getAppPath = -> cwd()
 
   getPackage: ->
-    pkg = fs.readJsonSync cwd("package.json")
-    pkg.manifestUrl = konfig("desktop_manifest_url")
-    pkg
+    _.extend({}, pkg, {manifestUrl: konfig("desktop_manifest_url")})
 
   getClient: ->
     ## requiring inline due to easier testability

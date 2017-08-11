@@ -51,6 +51,7 @@ describe "lib/gui/windows", ->
       @state = savedState()
       @sandbox.stub(@state, "set")
 
+      @projectPath = undefined
       @keys = {
         width: "theWidth"
         height: "someHeight"
@@ -64,7 +65,7 @@ describe "lib/gui/windows", ->
       ## reason, so this is the next best thing
       @sandbox.stub(_, "debounce").returnsArg(0)
 
-      Windows.trackState(@win, @keys)
+      Windows.trackState(@projectPath, @win, @keys)
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
@@ -78,7 +79,7 @@ describe "lib/gui/windows", ->
     it "returns if window isDestroyed on resize", ->
       @win.isDestroyed.returns(true)
 
-      Windows.trackState(@win, @keys)
+      Windows.trackState(@projectPath, @win, @keys)
       @win.emit("resize")
 
       expect(@state.set).not.to.be.called
@@ -87,7 +88,7 @@ describe "lib/gui/windows", ->
       ## tried using useFakeTimers here, but it didn't work for some
       ## reason, so this is the next best thing
       @sandbox.stub(_, "debounce").returnsArg(0)
-      Windows.trackState(@win, @keys)
+      Windows.trackState(@projectPath, @win, @keys)
       @win.emit("moved")
 
       expect(@state.set).to.be.calledWith({
@@ -98,19 +99,19 @@ describe "lib/gui/windows", ->
     it "returns if window isDestroyed on moved", ->
       @win.isDestroyed.returns(true)
 
-      Windows.trackState(@win, @keys)
+      Windows.trackState(@projectPath, @win, @keys)
       @win.emit("moved")
 
       expect(@state.set).not.to.be.called
 
     it "saves dev tools state when opened", ->
-      Windows.trackState(@win, @keys)
+      Windows.trackState(@projectPath, @win, @keys)
       @win.webContents.emit("devtools-opened")
 
       expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
 
     it "saves dev tools state when closed", ->
-      Windows.trackState(@win, @keys)
+      Windows.trackState(@projectPath, @win, @keys)
       @win.webContents.emit("devtools-closed")
 
       expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})

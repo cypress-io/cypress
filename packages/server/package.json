@@ -76,7 +76,7 @@
     "browserify": "^13.1.1",
     "bytes": "^2.4.0",
     "chai": "^1.9.2",
-    "chalk": "1.1.1",
+    "chalk": "^2.0.1",
     "chokidar": "1.6.0",
     "cjsxify": "^0.3.0",
     "compression": "1.1.0",

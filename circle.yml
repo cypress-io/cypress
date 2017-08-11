@@ -217,16 +217,29 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && npm run deps
+      - run: cd docs && npm run build
       - run: cd docs && npm run test-e2e
 
-  # "driver-unit-tests":
-  #   <<: *defaults
-  #   parallelism: 2
-  #   steps:
-  #     - restore_cache:
-  #         key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-  #     - run: chrome --version
-  #     - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
+  "deploy-docs":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && NODE_ENV=production npm run build
+      # because we already built docs for production
+      # use script that just deploys without rebuilding the production docs
+      - run: cd docs && npm run deploy-prebuilt -- --environment production --scrape
+      - run: cd docs && cat public/build.json
+
+  "driver-unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: chrome --version
+      - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
 
   "build-binary":
     <<: *defaults
@@ -257,15 +270,22 @@ workflows:
       - server-e2e-tests:
           requires:
             - build
-      - docs-tests:
+      - driver-unit-tests:
           requires:
             - build
-      # - driver-unit-tests:
-      #     requires:
-      #       - build
       - build-binary:
           requires:
             - build
+      # test and deploy documentation site
+      - docs-tests:
+          requires:
+            - build
+      - deploy-docs:
+          filters:
+            branches:
+              only: master
+          requires:
+            - docs-tests
 
 #
 # things to run in the 4th CI container

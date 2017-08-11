@@ -4,10 +4,10 @@ Promise   = require("bluebird")
 path      = require("path")
 cypressEx = require("@packages/example")
 glob      = require("glob")
-hbs       = require("hbs")
 cwd       = require("./cwd")
 log       = require("debug")("cypress:server:scaffold")
 { propEq, complement, equals, compose, head, isEmpty, always } = require("ramda")
+{ isDefault } = require("./util/config")
 
 glob = Promise.promisify(glob)
 fs = Promise.promisifyAll(fs)
@@ -70,63 +70,40 @@ isNewProject = (integrationFolder) ->
 module.exports = {
   isNewProject
 
-  # when is this called?
   integration: (folder, config) ->
-    log "integration in folder #{folder}"
+    log "integration folder #{folder}"
+
+    ## skip if user has explicitly set integrationFolder
+    return Promise.resolve() if not isDefault(config, "integrationFolder")
+
     @verifyScaffolding folder, =>
       log "copying examples into #{folder}"
       @_copy(INTEGRATION_EXAMPLE_SPEC, folder, config)
 
-  # when is this called?
   fixture: (folder, config) ->
+    log "fixture folder #{folder}"
+
+    ## skip if user has explicitly set fixturesFolder
+    return Promise.resolve() if not isDefault(config, "fixturesFolder")
+
     @verifyScaffolding folder, =>
       log "fixture needs to copy example.json"
       @_copy("example.json", folder, config)
 
   support: (folder, config) ->
-    log "support folder #{folder} support file #{config.resolved.supportFile.from}"
+    log "support folder #{folder}, support file #{config.supportFile}"
 
     ## skip if user has explicitly set supportFile
-    ## TODO: change this to use something like config.isDefault(supportFile)
-    ## instead of drilling into all of these resolved properties
-    return Promise.resolve() if config.resolved.supportFile.from isnt "default"
+    return Promise.resolve() if not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
       log "copying defaults and commands to #{folder}"
       Promise.join(
         @_copy("defaults.js", folder, config)
         @_copy("commands.js", folder, config)
+        @_copy("index.js", folder, config)
       )
     )
-    .then =>
-      log "checking if support file #{config.supportFile} exists"
-      fs.statAsync(config.supportFile)
-      .catch {code: "ENOENT"}, =>
-        ## only if support/index.js doesn't exist already
-        ## rethrow error if it's something unexpected
-        log "support file does not exist #{config.supportFile}"
-        Promise.join(
-          fs.readFileAsync(cwd("lib", "scaffold", "index.js.hbs"), "utf8"),
-
-          glob(path.join(folder, "**", "*"), {nodir: true})
-          .map (filePath) ->
-            ## strip off the extension from our filePath
-            ext      = path.extname(filePath)
-            filePath = filePath.replace(ext, "")
-
-            ## get the relative path from the supportFolder
-            ## to this specific file's path
-            path.relative(config.supportFolder, filePath)
-        )
-        .spread (indexTemplate, supportFiles) =>
-          indexTemplate = hbs.handlebars.compile(indexTemplate)
-          contents      = indexTemplate({ files: supportFiles })
-          filePath      = path.join(folder, "index.js")
-
-          @_assertInFileTree(filePath, config)
-
-          log "writing file #{filePath}"
-          fs.outputFileAsync(filePath, contents)
 
   _copy: (file, folder, config) ->
     ## allow file to be relative or absolute

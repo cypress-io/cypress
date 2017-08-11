@@ -55,6 +55,20 @@ describe "src/cy/commands/fixtures", ->
 
         return null
 
+      it "throws if fixturesFolder is set to false", (done) ->
+        cy.stub(Cypress, "config").withArgs("fixturesFolder").returns(false)
+
+        cy.on "fail", =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error").message).to.eq("cy.fixture() is not valid because you have configured 'fixturesFolder' to false.")
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(lastLog.get("name")).to.eq "fixture"
+          done()
+
+        cy.fixture("foo")
+
       it "throws if response contains __error key", (done) ->
         err = new Error("some error")
 

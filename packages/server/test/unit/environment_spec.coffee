@@ -1,5 +1,7 @@
 require("../spec_helper")
 
+pkg = require("@packages/root")
+
 describe "lib/environment", ->
   before ->
     @env = process.env["CYPRESS_ENV"]
@@ -34,8 +36,11 @@ describe "lib/environment", ->
   context "uses package.json env", ->
     beforeEach ->
       @setEnv = (env) =>
-        @sandbox.stub(fs, "readJsonSync").returns({env: env})
+        pkg.env = env
         @expectedEnv(env)
+
+    afterEach ->
+      delete pkg.env
 
     it "is production", ->
       @setEnv("production")

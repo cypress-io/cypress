@@ -3,7 +3,7 @@ require("../spec_helper")
 _   = require("lodash")
 cp  = require("child_process")
 pr  = require("../support/helpers/process")
-pkg = require("#{root}package.json")
+pkg = require("@packages/root")
 
 anyLineWithCaret = (str) ->
   str[0] is ">"

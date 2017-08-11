@@ -36,6 +36,10 @@ describe "lib/controllers/files", ->
       .then (R.prop("integration"))
       .then (R.forEach(checkFoundSpec))
 
+    it "handles fixturesFolder being false", ->
+      @config.fixturesFolder = false
+      expect(=> filesController.getTestFiles(@config)).not.to.throw()
+
 describe "lib/files", ->
   beforeEach ->
     FixturesHelper.scaffold()

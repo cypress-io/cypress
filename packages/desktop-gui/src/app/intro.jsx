@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 
+import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import viewStore from '../lib/view-store'
@@ -22,27 +23,40 @@ class Default extends Component {
   render () {
     return (
       <div className='intro'>
-        <h1>To Get Started...</h1>
-        <p>
-          Run this command in your Console (or Terminal) in the project you want to test:
-          <a onClick={this._openHelp} className='helper-docs-link pull-right'>
-            <i className='fa fa-question-circle' /> Need help?
-          </a>
+        {this._localNotice()}
+        <div className='intro-content'>
+          <h1>To get started...</h1>
+          <div
+            className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
+            onDragOver={this._dragover}
+            onDragLeave={this._dragleave}
+            onDrop={this._drop}
+          >
+            <span className="fa-stack fa-lg">
+            <i className="fa fa-folder fa-stack-2x"></i>
+            <i className="fa fa-plus fa-stack-1x"></i>
+            </span>
+            <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
+          </div>
+          <ProjectsList onSelect={this._projectSelected} />
+        </div>
+      </div>
+    )
+  }
+
+  _localNotice () {
+    if (appStore.localInstallNoticeDismissed) return null
+
+    return (
+      <div className='local-install-notice alert alert-info alert-dismissible'>
+        <p className='text-center'>
+          <i className='fa fa-info-circle'></i>{' '}
+          We recommend versioning Cypress per project and{' '}
+          <a onClick={this._openHelp} className='helper-docs-link'>
+            installing it via <span className='mono'>npm</span>
+          </a>.
         </p>
-        <div>
-          <pre><code>npm install this thang</code></pre>
-        </div>
-        <p>Or you can just drag your project here to run it:</p>
-        <div
-          className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
-          onDragOver={this._dragover}
-          onDragLeave={this._dragleave}
-          onDrop={this._drop}
-        >
-          <i className='fa fa-cloud-upload'></i>
-          <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
-        </div>
-        <ProjectsList onSelect={this._projectSelected} />
+        <button className="close" onClick={this._removeGlobalIntro}><span>&times;</span></button>
       </div>
     )
   }
@@ -50,6 +64,10 @@ class Default extends Component {
   componentWillUnmount () {
     document.removeEventListener('dragover', this._nope)
     document.removeEventListener('drop', this._nope)
+  }
+
+  _removeGlobalIntro = () => {
+    appStore.setLocalInstallNoticeDismissed(true)
   }
 
   _selectProject = (e) => {
@@ -101,7 +119,7 @@ class Default extends Component {
   }
 
   _openHelp () {
-    ipc.externalOpen('https://on.cypress.io/adding-new-project')
+    ipc.externalOpen('https://on.cypress.io/installing-via-npm')
   }
 }
 

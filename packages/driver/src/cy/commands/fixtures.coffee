@@ -19,6 +19,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({
     fixture: (fixture, args...) ->
+      if config("fixturesFolder") is false
+        $utils.throwErrByPath("fixture.set_to_false")
+
       ## if we already have cached
       ## this fixture then just return it
 
