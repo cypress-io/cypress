@@ -541,7 +541,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     tests = getAllSiblingTests(test.parent, getTestById)
 
     if _.last(tests) isnt test
-      fire("test:after:run", test, Cypress)
+      fire(TEST_AFTER_RUN_EVENT, test, Cypress)
 
   _runner.on "fail", (runnable, err) ->
     isHook = runnable.type is "hook"
