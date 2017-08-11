@@ -1,5 +1,4 @@
 _ = require("lodash")
-Backbone = require("backbone")
 $utils = require("./utils")
 
 ## in the browser mocha is coming back

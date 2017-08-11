@@ -1,6 +1,5 @@
 _ = require('lodash')
 $ = require("jquery")
-Backbone = require("backbone")
 blobUtil = require("blob-util")
 minimatch = require("minimatch")
 moment = require("moment")

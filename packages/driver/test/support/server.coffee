@@ -50,18 +50,18 @@ app.get "/timeout", (req, res) ->
 
 app.get "/node_modules/*", (req, res) ->
   res.sendFile(path.join("node_modules", req.params[0]), {
-    root: path.join(__dirname, "../../..")
+    root: path.join(__dirname, "../..")
   })
 
 app.get "/xml", (req, res) ->
   res.type("xml").send("<foo>bar</foo>")
 
 app.get "/buffer", (req, res) ->
-  fs.readFile path.join(__dirname, "fixtures/sample.pdf"), (err, bytes) ->
+  fs.readFile path.join(__dirname, "../cypress/fixtures/sample.pdf"), (err, bytes) ->
     res.type("pdf")
     res.send(bytes)
 
-app.use(express.static(__dirname))
+app.use(express.static(path.join(__dirname, "..", "cypress")))
 
 app.use(require("errorhandler")())
 

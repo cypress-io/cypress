@@ -1,6 +1,5 @@
 {
   "baseUrl": "http://localhost:3500",
-  "fixturesFolder": "support/server/fixtures",
   "supportFolder": false,
   "videoRecording": false,
   "hosts": {

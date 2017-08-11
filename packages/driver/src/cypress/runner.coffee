@@ -1,5 +1,4 @@
 _ = require("lodash")
-Backbone = require("backbone")
 moment = require("moment")
 Promise = require("bluebird")
 
