@@ -2,7 +2,6 @@ process.on('message', (obj = {}) => {
   const { id, ms } = obj
 
   setTimeout(() => {
-<<<<<<< HEAD
     try {
       // process.send could throw if
       // parent process has already exited
@@ -13,11 +12,5 @@ process.on('message', (obj = {}) => {
     } catch (err) {
       // eslint-disable no-empty
     }
-=======
-    process.send({
-      id,
-      ms,
-    })
->>>>>>> master
   }, ms)
 })
