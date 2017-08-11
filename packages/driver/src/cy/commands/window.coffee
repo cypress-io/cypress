@@ -104,10 +104,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## separate function
       retryDocument = =>
         Promise
-          .try(getDocument)
-          .catch (err) =>
-            options.error = err
-            cy.retry(retryDocument, options)
+        .try(getDocument)
+        .catch (err) =>
+          options.error = err
+          cy.retry(retryDocument, options)
 
       do verifyAssertions = =>
         Promise.try(retryDocument).then (doc) =>
