@@ -825,45 +825,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         state("subject", subject)
 
-        ## TODO: handle this event
-        # @trigger "invoke:end", command
-
-        ## we must look back at the ready property
-        ## at the end of resolving our command because
-        ## its possible it has become "unready" such
-        ## as beforeunload firing. in that case before
-        ## resolving we need to ensure it finishes first
-        if ready = state("ready")
-          if ready.promise.isPending()
-            return ready.promise
-            .then =>
-              ## if we became unready when a command
-              ## was being resolved then we need to
-              ## null out the subject here and additionally
-              ## check for child commands and error if found
-              ## only if this is a DOM subject
-              ##
-              ## since we delay the resolving
-              ## of our command subjects, they may have
-              ## caused a page load / form submit so
-              ## if our subject has been nulled we need
-              ## to keep it nulled
-              if state("pageChangeEvent")
-                state("pageChangeEvent", false)
-
-                ## if we currently have a DOM subject and its not longer
-                ## in the document then we need to null out our subject because
-                ## a page change has happened and we want to discontinue chaining
-                if $utils.hasElement(subject) and not elements.isInDom(subject)
-                  ## additionally check for errors here
-                  ## so we can notify the user if they're trying
-                  ## to chain child commands off of this null subject
-                  removeSubject()
-
-                return state("subject")
-            .catch (err) ->
-
-        return state("subject")
+        return subject
   }
 
   _.each privateProps, (obj, key) =>

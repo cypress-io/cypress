@@ -168,11 +168,6 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   options = {}
 
-  ## this tells the world that we're
-  ## handling a page load event
-  ## TODO: rename this to pageTransitionEvent
-  # state("pageChangeEvent", true)
-
   _.defaults(options, {
     timeout: config("pageLoadTimeout")
   })
@@ -191,15 +186,13 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   loading = ->
     new Promise (resolve, reject) ->
-      cy.on("window:load", resolve)
+      cy.on "window:load", ->
+        options._log.set("message", "--page loaded--").snapshot().end()
+
+        resolve()
 
   loading()
   .timeout(options.timeout, "page load")
-  .then =>
-    options._log.set("message", "--page loaded--").snapshot().end()
-
-    ## return null to prevent accidental chaining
-    return null
   .catch Promise.TimeoutError, (err) =>
     try
       timedOutWaitingForPageLoad(options.timeout, options._log)
@@ -329,11 +322,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cleanup = ->
             knownCommandCausedInstability = false
 
-            cy.removeListener("window:load", loaded)
+            cy.removeListener("window:load", resolve)
 
           knownCommandCausedInstability = true
 
-          cy.on("window:load", resolve)
+          cy.once("window:load", resolve)
 
           state("window").location.reload(forceReload)
 
@@ -376,14 +369,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## clear the current timeout
             cy.clearTimeout()
 
-            cy.on("before:window:unload", beforeUnload)
+            cy.once("before:window:unload", beforeUnload)
 
             didLoad = new Promise (resolve) ->
               cleanup = ->
                 cy.removeListener("window:load", resolve)
                 cy.removeListener("before:window:unload", beforeUnload)
 
-              cy.on("window:load", resolve)
+              cy.once("window:load", resolve)
 
             knownCommandCausedInstability = true
 

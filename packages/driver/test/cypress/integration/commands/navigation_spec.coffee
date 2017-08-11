@@ -2,6 +2,8 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
+Cookie = require("js-cookie")
+
 describe "src/cy/commands/navigation", ->
   context "#reload", ->
     before ->
@@ -12,12 +14,17 @@ describe "src/cy/commands/navigation", ->
 
     beforeEach ->
       doc = cy.state("document")
+      @win = cy.state("window")
 
       $(doc.body).empty().html(@body)
+
+    afterEach ->
+      cy.state("window", @win)
 
     it "calls into window.location.reload", (done) ->
       fn = (arg) ->
         expect(arg).to.be.false
+
         done()
 
       win = {location: {reload: fn}}
@@ -71,6 +78,16 @@ describe "src/cy/commands/navigation", ->
 
             expect(win).to.eq(cy.state("window"))
 
+    it "removes window:load listeners", ->
+      listeners = cy.listeners("window:load")
+
+      winLoad = cy.spy(cy, "once").withArgs("window:load")
+
+      cy.reload().then ->
+        expect(winLoad).to.be.calledOnce
+
+        expect(cy.listeners("window:load")).to.deep.eq(listeners)
+
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy(Promise.prototype, "timeout")
 
@@ -94,7 +111,7 @@ describe "src/cy/commands/navigation", ->
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
 
-    it "removes listeners from window", ->
+    it "removes listeners", ->
       win = cy.state("window")
 
       rel = cy.stub(win, "removeEventListener")
@@ -151,7 +168,7 @@ describe "src/cy/commands/navigation", ->
           .window().then (win) ->
             expect(win.foo).to.be.undefined
 
-      it "throws when go times out", (done) ->
+      it "throws when reload times out", (done) ->
         cy
           .visit("/timeout?ms=100").then ->
             expected = false
@@ -241,6 +258,25 @@ describe "src/cy/commands/navigation", ->
         .go("back").then ->
           expect(timeout).to.be.calledWith(456, "go")
 
+    it "removes listeners", ->
+      cy
+        .visit("/fixtures/jquery.html")
+        .then ->
+          winLoadListeners = cy.listeners("window:load")
+          beforeWinUnloadListeners = cy.listeners("before:window:unload")
+
+          cyOn = cy.spy(cy, "once")
+
+          winLoad = cyOn.withArgs("window:load")
+          beforeWinUnload = cyOn.withArgs("before:window:unload")
+
+          cy.go("back").then ->
+            expect(winLoad).to.be.calledOnce
+            expect(beforeWinUnload).to.be.calledOnce
+
+            expect(cy.listeners("window:load")).to.deep.eq(winLoadListeners)
+            expect(cy.listeners("before:window:unload")).to.deep.eq(beforeWinUnloadListeners)
+
     it "fires stability:changed and window events events", ->
       stub1= cy.stub()
       stub2 = cy.stub()
@@ -316,14 +352,10 @@ describe "src/cy/commands/navigation", ->
             ## properties on the window being inaccessible
             ## since we only visit once at the beginning of these tests
             cy.on "window:load", ->
-              console.log "WINDOW LOAD"
-              debugger
               expect(expected).to.be.true
               done()
 
             cy.on "fail", (err) ->
-              console.log "PAGE FAILED"
-              debugger
               expected = true
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
@@ -407,16 +439,22 @@ describe "src/cy/commands/navigation", ->
       cy.visit("/fixtures/jquery.html").then ->
         expect(timeout).to.be.calledWith(1500)
 
+    it "removes window:load listeners", ->
+      listeners = cy.listeners("window:load")
+
+      winLoad = cy.spy(cy, "once").withArgs("window:load")
+
+      cy.visit("/fixtures/generic.html").then ->
+        ## once for about:blank, once for $iframe src
+        expect(winLoad).to.be.calledTwice
+
+        expect(cy.listeners("window:load")).to.deep.eq(listeners)
+
     it "can visit pages on the same originPolicy", ->
       cy
         .visit("http://localhost:3500/fixtures/jquery.html")
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html")
-
-    it "can visit pages on different subdomain but same originPolicy", ->
-      cy
-        .visit("http://www.foobar.com:3500/fixtures/generic.html")
-        .visit("http://help.foobar.com:3500/fixtures/generic.html")
 
     it "resolves the subject to the remote iframe window", ->
       cy.visit("/fixtures/jquery.html").then (win) ->
@@ -628,27 +666,6 @@ describe "src/cy/commands/navigation", ->
       it "search", ->
         @eq "search", "?foo=bar"
 
-    describe "history method overrides", ->
-      beforeEach ->
-        cy
-          .visit("/fixtures/jquery.html")
-          .window().as("win")
-
-      _.each ["back", "forward", "go"], (attr) =>
-        it "fires 'history:event' on attr: '#{attr}'", ->
-          if attr is "go"
-            arg = -1
-
-          @win.history[attr](arg)
-          expect(@urlChanged).to.be.called
-          Promise.delay(300)
-
-      _.each ["pushState", "replaceState"], (attr) =>
-        it "fires 'history:event' on attr: '#{attr}'", ->
-          @win.history[attr]({}, "foo")
-          expect(@urlChanged).to.be.called
-          Promise.delay(300)
-
     describe ".log", ->
       beforeEach ->
         cy.stub(Cypress, "getEmissions").returns([])
@@ -665,7 +682,7 @@ describe "src/cy/commands/navigation", ->
 
       it "preserves url on subsequent visits", ->
         cy.visit("/fixtures/jquery.html").get("button").then ->
-          expect(lastLog.get("url")).to.eq "http://localhost:3500/fixtures/jquery.html"
+          expect(@lastLog.get("url")).to.eq "http://localhost:3500/fixtures/jquery.html"
 
       it "does not log 'Page Load' events", ->
         cy
@@ -1280,6 +1297,26 @@ describe "src/cy/commands/navigation", ->
         cy.visit("https://google.com/foo")
 
   context "#page load", ->
+    it "sets initial=true and then removes", ->
+      Cookie.remove("__cypress.initial")
+
+      expect(Cookie.get("__cypress.initial")).to.be.undefined
+
+      expected = false
+
+      cy.on "before:window:unload", ->
+        expected = true
+        expect(Cookie.get("__cypress.initial")).to.eq("true")
+
+      ## this navigates us to a new page so
+      ## we should be setting the initial cookie
+      cy
+        .visit("/fixtures/form.html")
+        .get("a:first").click().then ->
+          expect(expected).to.be.true
+
+          expect(Cookie.get("__cypress.initial")).to.be.undefined
+
     it "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
@@ -1297,106 +1334,48 @@ describe "src/cy/commands/navigation", ->
 
         win.location.href = "about:blank"
 
-    it "sets initial=true on beforeunload", ->
-      Cookies.remove("__cypress.initial")
-
-      expect(Cookies.get("__cypress.initial")).to.be.undefined
-
-      ## this navigates us to a new page so
-      ## we should be setting the initial cookie
-      cy.get("a:first").click().then ->
-        expect(Cookies.get("__cypress.initial")).to.eq("true")
-
-    it "clears current cy subject", ->
-      input = cy.$$("form#click-me input[type=submit]")
-
-      cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
-        expect(cy.queue.names()).to.deep.eq [
-          "get", "find", "click", "then", "then"
-        ]
-        expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
-        expect(subject).to.be.undefined
-
-    it "clears the current subject on submit event as well", ->
-      form = cy.$$("form#click-me")
-
-      cy.get("form#click-me").submit().then (subject) ->
-        expect(cy.queue.names()).to.deep.eq [
-          "get", "submit", "then", "then"
-        ]
-        expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)
-        expect(subject).to.be.undefined
-
-    describe ".log", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, @log) =>
-
-      it "returns if current command is visit", ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push log
-
-        cy.visit("/fixtures/xhr.html").then ->
-          expect(logs).to.have.length(1)
-
-      it "is name: page load", ->
-        cy.get("form#click-me").find("input[type=submit]").click().then ->
-          expect(lastLog.get("name")).to.eq "page load"
-
-      it "is type: parent", ->
-        cy.get("form#click-me").submit().then ->
-          expect(lastLog.get("type")).to.eq "parent"
-
-      describe "#consoleProps", ->
-        it "only has Event: 'page load'", ->
-          cy.get("form#click-me").submit().then ->
-            expect(@lastLog.invoke("consoleProps")).to.deep.eq {
-              Event: "page load"
-              Notes: "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
-            }
-
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
+        @logs = []
 
-      it "can time out", (done) ->
-        logs = []
+        cy.on "log:added", (attrs, log) =>
+          @lastLog = log
+          @logs.push(log)
 
-        cy.on "log:added", (attrs, log) ->
-          logs.push log
+        return null
 
-        cy.once "fail", (err) ->
+      ## TODO: fix this
+      it.skip "can time out", (done) ->
+        cy.once "fail", (err) =>
           ## should only log once
           expect(@logs.length).to.eq 1
           expect(err.message).to.include "Your page did not fire its 'load' event within '100ms'."
           done()
 
-        cy.on "command:end", =>
-          cy.isReady(false, "testing")
-          cy.loading({timeout: 100})
+        cy
+          .window().then (win) ->
+            Cypress.config("pageLoadTimeout", 50)
 
-        cy.noop({})
+            win.location.href = "/timeout?ms=1000"
 
-      it "captures cross origin failures", (done) ->
-        logs = []
+            null
+          .wait(2000)
 
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log)
-
+      ## TODO: fix this
+      it.skip "captures cross origin failures", (done) ->
         cy.once "fail", (err) ->
-          log = logs[0]
+          firstLog = @logs[0]
 
-          expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
           expect(@logs.length).to.eq(1)
-          expect(log.get("name")).to.eq("page load")
-          expect(log.get("state")).to.eq("failed")
-          expect(log.get("error")).to.eq(err)
+          expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
+          expect(firstLog.get("name")).to.eq("page load")
+          expect(firstLog.get("state")).to.eq("failed")
+          expect(firstLog.get("error")).to.eq(err)
           done()
 
         cy
           .window({log: false}).then (win) ->
-            win.location.href = "http://localhost:3501/fixtures/dom.html"
+            win.location.href = "http://localhost:3501/fixtures/generic.html"
 
             null
           .wait(2000)
@@ -1471,7 +1450,44 @@ describe "src/cy/commands/navigation", ->
           expect(@lastLog.get("message")).to.eq("--page loaded--")
           expect(@lastLog.get("snapshots")).to.have.length(1)
 
-  context.only "#url:changed", ->
+    it "logs during form submission and yields stale element", ->
+      expected = false
+
+      names = cy.queue.names()
+
+      cy
+        .visit("/fixtures/form.html")
+        .then ->
+          $input = cy.$$("form#click-me input[type=submit]")
+
+          cy.once "before:window:unload", =>
+            expected = true
+
+            expect(@lastLog).to.exist
+            expect(@lastLog.get("state")).to.eq("pending")
+            expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
+            expect(@lastLog.get("snapshots")).to.be.empty
+
+          cy
+            .get("form#click-me")
+            .find("input[type=submit]")
+            .click()
+            .then (subject) ->
+              expect(expected).to.be.true
+
+              expect(@lastLog.get("state")).to.eq("passed")
+              expect(@lastLog.get("message")).to.eq("--page loaded--")
+              expect(@lastLog.get("snapshots")).to.have.length(1)
+
+              expect(cy.queue.names()).to.deep.eq names.concat([
+                "visit", "then", "get", "find", "click", "then"
+              ])
+
+              expect(cy.isInDom(subject)).to.be.false
+
+              expect(subject.get(0)).to.eq($input.get(0))
+
+  context "#url:changed", ->
     beforeEach ->
       @logs = []
 
