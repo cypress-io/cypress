@@ -1,5 +1,4 @@
 _ = require("lodash")
-require("../../cypress/sinon-override") ## needs to be above require("sinon")
 sinon = require("sinon")
 
 Promise = require("bluebird")
@@ -8,6 +7,8 @@ $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 counts = null
+
+sinon.setFormatter($utils.stringifyArg.bind($utils))
 
 createSandbox = ->
   sinon.sandbox.create().usingPromise(Promise)
