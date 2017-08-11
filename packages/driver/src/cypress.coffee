@@ -106,7 +106,7 @@ class $Cypress
 
     @Cookies = $Cookies.create(config.namespace, d)
 
-    @emit("config", config)
+    @action("cypress:config", config)
 
   initialize: ($autIframe) ->
     ## push down the options
@@ -149,6 +149,9 @@ class $Cypress
     switch eventName
       when "cypress:stop"
         @emit("stop")
+
+      when "cypress:config"
+        @emit("config", args[0])
 
       when "runner:start"
         ## mocha runner has begun running the tests
