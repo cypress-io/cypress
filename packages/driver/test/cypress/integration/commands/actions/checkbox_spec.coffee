@@ -1,5 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
+Promise = Cypress.Promise
 
 describe "src/cy/commands/actions/checkbox", ->
   before ->
@@ -90,13 +91,17 @@ describe "src/cy/commands/actions/checkbox", ->
         expect($inputs.filter(":checked").length).to.eq 2
         expect($inputs.filter("[value=blue],[value=green]")).to.be.checked
 
-    it "can forcibly click even when being covered by another element", (done) ->
+    it "can forcibly click even when being covered by another element", ->
       checkbox = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo($("body"))
       span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo($("body"))
 
-      checkbox.on "click", -> done()
+      clicked = false
 
-      cy.get("#checkbox-covered-in-span").check({force: true})
+      checkbox.on "click", ->
+        clicked = true
+
+      cy.get("#checkbox-covered-in-span").check({force: true}).then ->
+        expect(clicked).to.be.true
 
     it "passes timeout and interval down to click", (done) ->
       checkbox  = $("<input type='checkbox' />")
@@ -114,8 +119,7 @@ describe "src/cy/commands/actions/checkbox", ->
       })
       .prependTo($("body"))
 
-      cy.on "command:retry", (options) ->
-        debugger
+      cy.on "command:retry", _.once (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()
@@ -243,7 +247,7 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(chk.length + 1)
+          expect(@logs.length).to.eq(chk.length + 1)
           expect(lastLog.get("error")).to.eq(err)
           expect(err.message).to.include "cy.check() failed because this element is not visible"
           done()
@@ -268,7 +272,7 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(chk.length + 1)
+          expect(@logs.length).to.eq(chk.length + 1)
           expect(lastLog.get("error")).to.eq(err)
           expect(err.message).to.include "cy.check() failed because this element is not visible"
           done()
@@ -279,7 +283,7 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -365,7 +369,7 @@ describe "src/cy/commands/actions/checkbox", ->
           checks.push(log) if log.get("name") is "check"
 
         cy.get("[name=colors][value=blue]").check().then ->
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(checks).to.have.length(1)
 
       it "logs only 1 check event on click of 1 radio", ->
@@ -377,7 +381,7 @@ describe "src/cy/commands/actions/checkbox", ->
           radios.push(log) if log.get("name") is "check"
 
         cy.get("[name=gender][value=female]").check().then ->
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(radios).to.have.length(1)
 
       it "logs only 1 check event on checkbox with 1 matching value arg", ->
@@ -389,7 +393,7 @@ describe "src/cy/commands/actions/checkbox", ->
           checks.push(log) if log.get("name") is "check"
 
         cy.get("[name=colors]").check("blue").then ->
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(checks).to.have.length(1)
 
       it "logs only 1 check event on radio with 1 matching value arg", ->
@@ -401,7 +405,7 @@ describe "src/cy/commands/actions/checkbox", ->
           radios.push(log) if log.get("name") is "check"
 
         cy.get("[name=gender]").check("female").then ->
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(radios).to.have.length(1)
 
       it "passes in $el", ->
@@ -647,7 +651,7 @@ describe "src/cy/commands/actions/checkbox", ->
           lastLog = @lastLog
 
           len  = (chk.length * 2) + 6
-          expect(@logs).to.have.length(len)
+          expect(@logs.length).to.eq(len)
           expect(lastLog.get("error")).to.eq(err)
           expect(err.message).to.include "cy.uncheck() failed because this element is not visible"
           done()
@@ -660,7 +664,7 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -784,7 +788,7 @@ describe "src/cy/commands/actions/checkbox", ->
           unchecks.push(log) if log.get("name") is "uncheck"
 
         cy.get("[name=colors][value=blue]").uncheck().then ->
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(unchecks).to.have.length(1)
 
       it "logs only 1 uncheck event on uncheck with 1 matching value arg", ->
@@ -796,7 +800,7 @@ describe "src/cy/commands/actions/checkbox", ->
           unchecks.push(log) if log.get("name") is "uncheck"
 
         cy.get("[name=colors]").uncheck("blue").then ->
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(unchecks).to.have.length(1)
 
       it "passes in $el", ->

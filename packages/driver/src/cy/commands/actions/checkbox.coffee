@@ -104,7 +104,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       else
         ## set the coords only if we are actually
         ## going to go out and click this bad boy
-        coords = @getCoordinates($el)
+        coords = cy.getAbsoluteCoordinates($el)
         consoleProps.Coords = coords
         options._log.set "coords", coords
 
