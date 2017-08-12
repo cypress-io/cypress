@@ -155,13 +155,17 @@ create = (state, expect, isInDom) ->
           args: { cmd, node }
         })
 
-  ensureValidPosition = (position) ->
+  ensureValidPosition = (position, log) ->
     ## make sure its valid first!
     if position in VALID_POSITIONS
       return true
 
     $utils.throwErrByPath("dom.invalid_position_argument", {
-      args: { position, validPositions: VALID_POSITIONS.join(', ') }
+      onFail: log
+      args: {
+        position,
+        validPositions: VALID_POSITIONS.join(', ')
+      }
     })
 
   ensureScrollability = ($el, cmd) ->

@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
-{ getCoords, getPositionFromArguments } = require("./utils")
+{ waitForActionability, getPositionFromArguments } = require("./utils")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -10,7 +10,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     trigger: (subject, eventName, positionOrX, y, options = {}) ->
       {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
 
-      _.defaults options,
+      _.defaults(options, {
         log: true
         $el: subject
         bubbles: true
@@ -18,23 +18,27 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         position: position
         x: x
         y: y
+        waitForAnimations: config("waitForAnimations")
+        animationDistanceThreshold: config("animationDistanceThreshold")
+      })
 
       ## omit entries we know aren't part of an event, but pass anything
       ## else through so user can specify what the event object needs
       eventOptions = _.omit(options, "log", "$el", "position", "x", "y")
 
+      debugger
+
       if options.log
-        options._log = Cypress.log
+        options._log = Cypress.log({
           $el: subject
           consoleProps: ->
             {
               "Yielded": subject
               "Event options": eventOptions
             }
+        })
 
         options._log.snapshot("before", {next: "after"})
-
-      cy.ensureDom(options.$el)
 
       if not _.isString(eventName)
         $utils.throwErrByPath("trigger.invalid_argument", {
@@ -52,32 +56,37 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       $el = options.$el.first()
       el = $el.get(0)
 
-      trigger = (coords) =>
-        if options._log
-          ## display the red dot at these coords
-          options._log.set({coords: coords})
+      trigger = ->
+        waitForActionability(cy, $el, win, options, {
+          onScroll: ($el, type) ->
+            Cypress.action("cy:app:scrolled", $el, type)
 
-        eventOptions = _.extend({
-          clientX: $utils.getClientX(coords, win)
-          clientY: $utils.getClientY(coords, win)
-          pageX: coords.x
-          pageY: coords.y
-        }, eventOptions)
+          onReady: ($elToClick, coords) ->
+            if options._log
+              ## display the red dot at these coords
+              options._log.set({coords: coords})
 
-        event = new Event(eventName, eventOptions)
+            eventOptions = _.extend({
+              clientX: $utils.getClientX(coords, win)
+              clientY: $utils.getClientY(coords, win)
+              pageX: coords.x
+              pageY: coords.y
+            }, eventOptions)
 
-        ## some options, like clientX & clientY, must be set on the
-        ## instance instead of passing them into the constructor
-        _.extend(event, eventOptions)
+            event = new Event(eventName, eventOptions)
 
-        el.dispatchEvent(event)
+            ## some options, like clientX & clientY, must be set on the
+            ## instance instead of passing them into the constructor
+            _.extend(event, eventOptions)
+
+            el.dispatchEvent(event)
+      })
 
       Promise
-      .try(getCoords(@, $el, options))
-      .then(trigger)
+      .try(trigger)
       .then =>
         do verifyAssertions = =>
-          cy.verifyUpcomingAssertions(subject, options, {
+          cy.verifyUpcomingAssertions($el, options, {
             onRetry: verifyAssertions
           })
   })

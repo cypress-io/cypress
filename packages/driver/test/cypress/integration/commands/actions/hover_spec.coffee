@@ -1,7 +1,7 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
-describe "src/cy/commands/actions/misc", ->
+describe "src/cy/commands/actions/hover", ->
   before ->
     cy
       .visit("/fixtures/dom.html")

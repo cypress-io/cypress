@@ -210,7 +210,7 @@ waitForActionability = (cy, $el, win, options, callbacks) ->
   ## this ahead of time else bail early
   if position
     try
-      cy.ensureValidPosition(position)
+      cy.ensureValidPosition(position, _log)
     catch err
       ## cannot proceed, give up
       return Promise.reject(err)

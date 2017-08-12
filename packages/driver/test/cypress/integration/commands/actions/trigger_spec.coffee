@@ -1,7 +1,7 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
-describe "src/cy/commands/actions/misc", ->
+describe "src/cy/commands/actions/trigger", ->
   before ->
     cy
       .visit("/fixtures/dom.html")
@@ -102,88 +102,283 @@ describe "src/cy/commands/actions/misc", ->
 
       cy.get("#scrolledBtn").trigger("mouseover")
 
-    it "waits until element becomes visible", ->
-      $btn = cy.$$("#button").hide()
+    describe "actionability", ->
+      it "can trigger on elements which are hidden until scrolled within parent container", ->
+        cy.get("#overflow-auto-container").contains("quux").trigger("mousedown")
 
-      retried = false
+      it "does not scroll when being forced", ->
+        scrolled = []
 
-      cy.on "command:retry", _.after 3, ->
-        $btn.show()
-        retried = true
+        cy.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
 
-      cy.get("#button").trigger("mouseover").then ->
-        expect(retried).to.be.true
+        cy
+          .get("button:last").trigger("mouseover", { force: true })
+          .then ->
+            expect(scrolled).to.be.empty
 
-    it "waits until element is no longer disabled", ->
-      $btn = cy.$$("#button").prop("disabled", true)
+      it "can force trigger on hidden elements", ->
+        cy.get("button:first").invoke("hide").trigger("tap", { force: true })
 
-      retried = false
-      mouseovers = 0
+      it "can force trigger on disabled elements", ->
+        cy.get("input:first").invoke("prop", "disabled", true).trigger("tap", { force: true })
 
-      $btn.on "mouseover", ->
-        mouseovers += 1
+      it "can forcibly trigger even when being covered by another element", ->
+        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-      cy.on "command:retry", _.after 3, ->
-        $btn.prop("disabled", false)
-        retried = true
+        scrolled = []
+        retried = false
+        tapped = false
 
-      cy.get("#button").trigger("mouseover").then ->
-        expect(mouseovers).to.eq(1)
-        expect(retried).to.be.true
+        cy.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
 
-    it.skip "waits until element stops animating", (done) ->
-      retries = []
-      mouseovers  = 0
+        cy.on "command:retry", ($el, type) ->
+          retried = true
 
-      p = $("<p class='slidein'>sliding in</p>")
-      p.on "mouseover", -> mouseovers += 1
-      p.css("animation-duration", ".5s")
+        $btn.on "tap", ->
+          tapped = true
 
-      cy.on "command:retry", (obj) ->
-        expect(mouseovers).to.eq(0)
-        retries.push(obj)
+        cy.get("#button-covered-in-span").trigger("tap", {force: true}).then ->
+          expect(scrolled).to.be.empty
+          expect(retried).to.be.false
+          expect(tapped).to.be.true
 
-      p.on "animationstart", =>
-        t = Date.now()
-        _.delay =>
-          cy.get(".slidein").trigger("mouseover").then ->
-            expect(retries.length).to.be.gt(5)
-            done()
-        , 100
+      it "eventually clicks when covered up", ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-span")
+        .prependTo(cy.$$("body"))
 
-      cy.$$("#animation-container").append(p)
+        $span = $("<span>span on button</span>").css({
+          position: "absolute",
+          left: $btn.offset().left,
+          top: $btn.offset().top,
+          padding: 5,
+          display: "inline-block",
+          backgroundColor: "yellow"
+        }).prependTo(cy.$$("body"))
 
-    it "does not throw when waiting for animations is disabled", ->
-      cy.stub(Cypress, "config").withArgs("waitForAnimations").returns(false)
+        scrolled = []
+        retried = false
 
-      cy.timeout(100)
+        cy.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
 
-      p = $("<p class='slidein'>sliding in</p>")
-      p.css("animation-duration", ".5s")
+        cy.on "command:retry", _.after 3, ->
+          $span.hide()
+          retried = true
 
-      cy.$$("#animation-container").append(p)
+        cy.get("#button-covered-in-span").trigger("mousedown").then ->
+          expect(retried).to.be.true
 
-      cy.get(".slidein").trigger("mouseover")
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - element scrollIntoView (retry covered)
+          ## - element scrollIntoView (retry covered)
+          ## - window
+          expect(scrolled).to.deep.eq(["element", "element", "element", "element"])
 
-    it "does not throw when turning off waitForAnimations in options", ->
-      cy.timeout(100)
+      it "scrolls the window past a fixed position element when being covered", ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-nav")
+        .appendTo(cy.$$("#fixed-nav-test"))
 
-      p = $("<p class='slidein'>sliding in</p>")
-      p.css("animation-duration", ".5s")
+        $nav = $("<nav>nav on button</nav>").css({
+          position: "fixed",
+          left: 0
+          top: 0,
+          padding: 20,
+          backgroundColor: "yellow"
+          zIndex: 1
+        }).prependTo(cy.$$("body"))
 
-      cy.$$("#animation-container").append(p)
+        scrolled = []
 
-      cy.get(".slidein").trigger("mouseover", {waitForAnimations: false})
+        cy.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
 
-    it "does not throw when setting animationDistanceThreshold extremely high in options", ->
-      cy.timeout(100)
+        cy.get("#button-covered-in-nav").trigger("mouseover").then ->
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - window
+          expect(scrolled).to.deep.eq(["element", "element", "window"])
 
-      p = $("<p class='slidein'>sliding in</p>")
-      p.css("animation-duration", ".5s")
+      it "scrolls the window past two fixed positioned elements when being covered", ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-nav")
+        .appendTo(cy.$$("#fixed-nav-test"))
 
-      cy.$$("#animation-container").append(p)
+        $nav = $("<nav>nav on button</nav>").css({
+          position: "fixed",
+          left: 0
+          top: 0,
+          padding: 20,
+          backgroundColor: "yellow"
+          zIndex: 1
+        }).prependTo(cy.$$("body"))
 
-      cy.get(".slidein").trigger("mouseover", {animationDistanceThreshold: 1000})
+        $nav2 = $("<nav>nav2 on button</nav>").css({
+          position: "fixed",
+          left: 0
+          top: 40,
+          padding: 20,
+          backgroundColor: "red"
+          zIndex: 1
+        }).prependTo(cy.$$("body"))
+
+        scrolled = []
+
+        cy.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.get("#button-covered-in-nav").trigger("mouseover").then ->
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - window (nav1)
+          ## - window (nav2)
+          expect(scrolled).to.deep.eq(["element", "element", "window", "window"])
+
+      it "scrolls a container past a fixed position element when being covered", ->
+        cy.viewport(600, 450)
+
+        $body = cy.$$("body")
+
+        ## we must remove all of our children to
+        ## prevent the window from scrolling
+        $body.children().remove()
+
+        ## this tests that our container properly scrolls!
+        $container = $("<div></div>")
+        .attr("id", "scrollable-container")
+        .css({
+          position: "relative"
+          width: 300
+          height: 200
+          marginBottom: 100
+          backgroundColor: "green"
+          overflow: "auto"
+        })
+        .prependTo($body)
+
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-nav")
+        .css({
+          marginTop: 500
+          # marginLeft: 500
+          marginBottom: 500
+        })
+        .appendTo($container)
+
+        $nav = $("<nav>nav on button</nav>")
+        .css({
+          position: "fixed",
+          left: 0
+          top: 0,
+          padding: 20,
+          backgroundColor: "yellow"
+          zIndex: 1
+        })
+        .prependTo($container)
+
+        scrolled = []
+
+        cy.on "app:scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.get("#button-covered-in-nav").trigger("mouseover").then ->
+          ## - element scrollIntoView
+          ## - element scrollIntoView (retry animation coords)
+          ## - window
+          ## - container
+          expect(scrolled).to.deep.eq(["element", "element", "window", "container"])
+
+      it "waits until element becomes visible", ->
+        $btn = cy.$$("#button").hide()
+
+        retried = false
+
+        cy.on "command:retry", _.after 3, ->
+          $btn.show()
+          retried = true
+
+        cy.get("#button").trigger("mouseover").then ->
+          expect(retried).to.be.true
+
+      it "waits until element is no longer disabled", ->
+        $btn = cy.$$("#button").prop("disabled", true)
+
+        retried = false
+        mouseovers = 0
+
+        $btn.on "mouseover", ->
+          mouseovers += 1
+
+        cy.on "command:retry", _.after 3, ->
+          $btn.prop("disabled", false)
+          retried = true
+
+        cy.get("#button").trigger("mouseover").then ->
+          expect(mouseovers).to.eq(1)
+          expect(retried).to.be.true
+
+      it "waits until element stops animating", ->
+        retries = 0
+
+        cy.on "command:retry", (obj) ->
+          retries += 1
+
+        cy.stub(cy, "ensureElementIsNotAnimating")
+        .throws(new Error("animating!"))
+        .onThirdCall().returns()
+
+        cy.get("button:first").trigger("mouseover").then ->
+          ## - retry animation coords
+          ## - retry animation
+          ## - retry animation
+          expect(retries).to.eq(3)
+          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+
+      it "does not throw when waiting for animations is disabled", ->
+        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
+        Cypress.config("waitForAnimations", false)
+
+        cy.get("button:first").trigger("mouseover").then ->
+          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+
+      it "does not throw when turning off waitForAnimations in options", ->
+        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
+
+        cy.get("button:first").trigger("tap", {waitForAnimations: false}).then ->
+          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+
+      it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
+        $btn = cy.$$("button:first")
+
+        coords = cy.getAbsoluteCoordinates($btn)
+
+        cy.spy(cy, "ensureElementIsNotAnimating")
+
+        cy.get("button:first").trigger("tap", {animationDistanceThreshold: 1000}).then ->
+          args = cy.ensureElementIsNotAnimating.firstCall.args
+
+          expect(args[1]).to.deep.eq([coords, coords])
+          expect(args[2]).to.eq(1000)
+
+      it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
+        animationDistanceThreshold = Cypress.config("animationDistanceThreshold")
+
+        $btn = cy.$$("button:first")
+
+        coords = cy.getAbsoluteCoordinates($btn)
+
+        cy.spy(cy, "ensureElementIsNotAnimating")
+
+        cy.get("button:first").trigger("mouseover").then ->
+          args = cy.ensureElementIsNotAnimating.firstCall.args
+
+          expect(args[1]).to.deep.eq([coords, coords])
+          expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "assertion verification", ->
       beforeEach ->
@@ -352,15 +547,15 @@ describe "src/cy/commands/actions/misc", ->
         cy.get("button").trigger("mouseover")
 
       it "throws when subject is not in the document", (done) ->
-        clicked = 0
+        mouseover = 0
 
         checkbox = cy.$$(":checkbox:first").on "mouseover", (e) ->
-          clicked += 1
+          mouseover += 1
           checkbox.remove()
           return false
 
         cy.on "fail", (err) ->
-          expect(clicked).to.eq 1
+          expect(mouseover).to.eq 1
           expect(err.message).to.include "cy.trigger() failed because this element"
           done()
 
@@ -370,11 +565,11 @@ describe "src/cy/commands/actions/misc", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy.trigger("mouseover")
+        cy.wrap({}).trigger("mouseover")
 
       it "throws when the subject isnt visible", (done) ->
         $btn = cy.$$("#button:first").hide()
@@ -402,32 +597,28 @@ describe "src/cy/commands/actions/misc", ->
 
       it "throws when provided invalid position", (done) ->
         cy.on "fail", (err) =>
+          debugger
           expect(@logs.length).to.eq(2)
           expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
 
         cy.get("button:first").trigger("mouseover", "foo")
 
-      ## FIXME: change to unit test that doesn't rely on real animation
-      ## write one test that integration tests animations
-      it.skip "throws when element animation exceeds timeout", (done) ->
-        cy.timeout(100)
+      it "throws when element animation exceeds timeout", (done) ->
+        ## force the animation calculation to think we moving at a huge distance ;-)
+        cy.stub(Cypress.utils, "getDistanceBetween").returns(100000)
 
-        mouseovers = 0
+        clicks = 0
 
-        p = $("<p class='slidein'>sliding in</p>")
-        p.css("animation-duration", ".5s")
-        p.on "mouseover", -> mouseovers += 1
+        cy.$$("button:first").on "tap", ->
+          clicks += 1
 
         cy.on "fail", (err) ->
-          expect(mouseovers).to.eq(0)
+          expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.trigger() could not be issued because this element is currently animating:\n")
           done()
 
-        p.on "animationstart", =>
-          cy.get(".slidein").trigger("mouseover", {interval: 50, animationDistanceThreshold: 0})
-
-        cy.$$("#animation-container").append(p)
+        cy.get("button:first").trigger("tap")
 
       it "eventually fails the assertion", (done) ->
         cy.on "fail", (err) =>
@@ -487,22 +678,6 @@ describe "src/cy/commands/actions/misc", ->
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
           expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
-      it "returns only the $el for the element of the subject that was triggered", ->
-        clicks = []
-
-        ## append two buttons
-        button = -> $("<button class='clicks'>click</button>")
-        cy.$$("body").append(button()).append(button())
-
-        cy.on "log:added", (attrs, log) ->
-          if log.get("name") is "click"
-            clicks.push(log)
-
-        cy.get("button.clicks").click({multiple: true}).then ($buttons) ->
-          expect($buttons.length).to.eq(2)
-          expect(clicks.length).to.eq(2)
-          expect(clicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
-
       it "logs only 1 event", ->
         logs = []
 
@@ -519,18 +694,6 @@ describe "src/cy/commands/actions/misc", ->
 
           coords = cy.getAbsoluteCoordinates($btn)
           expect(lastLog.get("coords")).to.deep.eq coords
-
-      it "ends", ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          if log.get("name") is "click"
-            logs.push(log)
-
-        cy.get("button").invoke("slice", 0, 2).click({multiple: true}).then ->
-          _.each logs, (log) ->
-            expect(log.get("state")).to.eq("passed")
-            expect(log.get("ended")).to.be.true
 
       it "#consoleProps", ->
         cy.get("button:first").trigger("mouseover").then ($button) =>
