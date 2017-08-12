@@ -145,7 +145,7 @@ describe "src/cy/commands/actions/trigger", ->
           expect(retried).to.be.false
           expect(tapped).to.be.true
 
-      it "eventually clicks when covered up", ->
+      it "eventually triggers when covered up", ->
         $btn = $("<button>button covered</button>")
         .attr("id", "button-covered-in-span")
         .prependTo(cy.$$("body"))
@@ -391,11 +391,10 @@ describe "src/cy/commands/actions/trigger", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.$$("button:first").on "mouseover", ->
-          _.delay =>
-            $(@).addClass("moused-over")
-          , 50
-          return false
+        $btn = cy.$$("button:first")
+
+        cy.on "command:retry", _.once ->
+          $btn.addClass("moused-over")
 
         cy.get("button:first").trigger("mouseover").should("have.class", "moused-over").then ->
           lastLog = @lastLog
@@ -597,7 +596,6 @@ describe "src/cy/commands/actions/trigger", ->
 
       it "throws when provided invalid position", (done) ->
         cy.on "fail", (err) =>
-          debugger
           expect(@logs.length).to.eq(2)
           expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()

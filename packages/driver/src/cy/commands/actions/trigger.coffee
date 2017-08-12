@@ -24,9 +24,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## omit entries we know aren't part of an event, but pass anything
       ## else through so user can specify what the event object needs
-      eventOptions = _.omit(options, "log", "$el", "position", "x", "y")
-
-      debugger
+      eventOptions = _.omit(options, "log", "$el", "position", "x", "y", "waitForAnimations", "animationDistanceThreshold")
 
       if options.log
         options._log = Cypress.log({
