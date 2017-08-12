@@ -18,7 +18,7 @@ module.exports = {
       fs.createReadStream(bundledPath)
       .pipe(res)
 
-    if config.isHeadless
+    if config.isTextTerminal
       bundle
       .build(spec, config)
       .getLatestBundle()

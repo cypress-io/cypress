@@ -166,7 +166,7 @@ const eventManager = {
 
   setup (config, specPath) {
     Cypress = $Cypress.create(
-      _.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'version', 'fixturesFolder')
+      _.pick(config, 'isTextTerminal', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'version', 'fixturesFolder')
     )
 
     // expose Cypress globally
@@ -205,7 +205,7 @@ const eventManager = {
         Cypress.resumeAtTest(state.currentId, state.emissions)
       }
 
-      if (config.isHeadless && !state.currentId) {
+      if (config.isTextTerminal && !state.currentId) {
         channel.emit('set:runnables', runnables, run)
       } else {
         run()

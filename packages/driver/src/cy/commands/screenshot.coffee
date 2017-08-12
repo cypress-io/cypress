@@ -47,7 +47,7 @@ takeScreenshot = (runnable, name, log, timeout) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:after:hooks", (test, runnable) ->
-    if test.err and Cypress.isHeadless and config("screenshotOnHeadlessFailure")
+    if test.err and config("screenshotOnHeadlessFailure") and not config("isInteractive")
       ## give the UI some time to render the error
       ## because we were noticing that errors were not
       ## yet displayed in the UI when running headlessly

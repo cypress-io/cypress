@@ -53,7 +53,7 @@ describe "lib/util/bundle", ->
 
     describe "headless mode", ->
       beforeEach ->
-        @config.isHeadless = true
+        @config.isTextTerminal = true
         bundle.build("file.js", @config)
 
       it "does not watch", ->

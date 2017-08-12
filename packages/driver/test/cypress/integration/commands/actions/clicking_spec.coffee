@@ -927,16 +927,19 @@ describe "src/cy/commands/actions/clicking", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
         cy.click()
 
       it "throws when any member of the subject isnt visible", (done) ->
+        cy.timeout(250)
+
         $btn = cy.$$("#three-buttons button").show().last().hide()
 
         cy.on "fail", (err) =>
+          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(4)
@@ -1147,7 +1150,7 @@ describe "src/cy/commands/actions/clicking", ->
             logs.push(log)
 
         cy.get("button:first").click().then ->
-          expect(logs).to.have.length(1)
+          expect(logs.length).to.eq(1)
 
       it "passes in coords", ->
         cy.get("button").first().click().then ($btn) ->
@@ -1545,7 +1548,7 @@ describe "src/cy/commands/actions/clicking", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -1557,7 +1560,7 @@ describe "src/cy/commands/actions/clicking", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(4)
+          expect(@logs.length).to.eq(4)
           expect(lastLog.get("error")).to.eq(err)
           expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
           done()
@@ -1616,7 +1619,7 @@ describe "src/cy/commands/actions/clicking", ->
             logs.push(log)
 
         cy.get("button:first").dblclick().then ->
-          expect(logs).to.have.length(1)
+          expect(logs.length).to.eq(1)
 
       it "#consoleProps", ->
         cy.on "log:added", (attrs, @log) =>

@@ -28,7 +28,7 @@ defaults = {
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
-  isHeadless:                    false
+  isTextTerminal:                    false
   reporter:                      "spec"
   reporterOptions:               null
   clientRoute:                   "/__/"
@@ -150,7 +150,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report", "browsers")
+    _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
     _.each @whitelist(options), (val, key) ->
       resolved[key] = "cli"
@@ -170,7 +170,7 @@ module.exports = {
     delete config.envFile
 
     ## when headless
-    if config.isHeadless
+    if config.isTextTerminal
       ## dont ever watch for file changes
       config.watchForFileChanges = false
 

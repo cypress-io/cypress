@@ -837,11 +837,11 @@ create = (mocha, Cypress) ->
 
       cleanup(_testsQueue)
 
-    addLog: (attrs, isHeadless) ->
+    addLog: (attrs, isInteractive) ->
       ## we dont need to hold a log reference
       ## to anything in memory when we're headless
       ## because you cannot inspect any logs
-      return if isHeadless
+      return if not isInteractive
 
       test = getTestById(attrs.testId)
 

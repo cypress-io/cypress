@@ -92,7 +92,15 @@ class $Cypress
       document.domain = d
 
     @version = config.version
-    @isHeadless = !!config.isHeadless
+
+    ## normalize this into boolean
+    config.isTextTerminal = !!config.isTextTerminal
+
+    ## we asumme we're interactive based on whether or
+    ## not we're in a text terminal, but we keep this
+    ## as a separate property so we can potentially
+    ## slice up the behavior
+    config.isInteractive = !config.isTextTerminal
 
     {environmentVariables, remote} = config
 
@@ -157,7 +165,7 @@ class $Cypress
 
         return if @_RESUMED_AT_TEST
 
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "start")
 
       when "runner:end"
@@ -172,7 +180,7 @@ class $Cypress
         ## test:after:run events ourselves
         @emit("run:end")
 
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "end")
 
         ## TODO: we may not need to do any of this
@@ -208,49 +216,49 @@ class $Cypress
 
       when "runner:suite:start"
         ## mocha runner started processing a suite
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "suite", args...)
 
       when "runner:suite:end"
         ## mocha runner finished processing a suite
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "suite end", args...)
 
       when "runner:hook:start"
         ## mocha runner started processing a hook
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "hook", args...)
 
       when "runner:hook:end"
         ## mocha runner finished processing a hook
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "hook end", args...)
 
       when "runner:test:start"
         ## mocha runner started processing a hook
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "test", args...)
 
       when "runner:test:end"
         ## mocha runner finished processing a hook
         @cy.checkForEndedEarly()
 
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "test end", args...)
 
       when "runner:pass"
         ## mocha runner calculated a pass
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "pass", args...)
 
       when "runner:pending"
         ## mocha runner calculated a pending test
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "pending", args...)
 
       when "runner:fail"
         ## mocha runner calculated a failure
-        if @isHeadless
+        if @config("isTextTerminal")
           @emit("mocha", "fail", args...)
 
       when "mocha:runnable:run"
@@ -275,12 +283,12 @@ class $Cypress
         "asdf"
 
       when "command:log:added"
-        @runner.addLog(args[0], @isHeadless)
+        @runner.addLog(args[0], @config("isInteractive"))
 
         @emit("log:added", args...)
 
       when "command:log:changed"
-        @runner.addLog(args[0], @isHeadless)
+        @runner.addLog(args[0], @config("isInteractive"))
 
         @emit("log:changed", args...)
 

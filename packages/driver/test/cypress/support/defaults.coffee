@@ -8,6 +8,11 @@ beforeEach ->
   ## restore it before each test
   Cypress.config(ORIG_CONFIG)
 
+  ## always set that we're interactive so we
+  ## get consistent passes and failures when running
+  ## from CI and when running in GUI mode
+  Cypress.config("isInteractive", true)
+
   ## remove all event listeners
   ## from the window
   $(cy.state("window")).off()

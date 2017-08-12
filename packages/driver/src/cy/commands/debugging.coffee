@@ -43,7 +43,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## presses a key or clicks in the UI to continue
     pause: (subject, options = {}) ->
       ## bail if we're headless
-      return subject if Cypress.isHeadless
+      return subject if not config("isInteractive")
 
       _.defaults options, {log: true}
 

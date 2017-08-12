@@ -255,7 +255,7 @@ Log = (state, config, obj) ->
       ## bail early and dont snapshot
       ## if we're in headless mode
       ## TODO: fix this
-      if Cypress.isHeadless
+      if not config("isInteractive")
         return @
 
       _.defaults options,

@@ -105,7 +105,7 @@ describe "lib/controllers/spec", ->
       @build = @sandbox.stub(bundle, "build").returns({
         getLatestBundle: -> Promise.resolve()
       })
-      @config.isHeadless = true
+      @config.isTextTerminal = true
 
     it "sends the file from the bundles path", ->
       @handle(specName)
