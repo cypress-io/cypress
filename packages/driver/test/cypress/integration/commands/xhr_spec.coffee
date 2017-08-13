@@ -405,7 +405,7 @@ describe "src/cy/commands/xhr", ->
           }).as("getFoo")
           .window().then (win) ->
             ## trick cypress into thinking the remoteOrigin is location:9999
-            cy.stub(cy, "_getLocation").withArgs("origin").returns("")
+            cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
             @open = cy.spy(cy.state("server").getOptions(), "onOpen")
             win.$.get("/foo")
             null
