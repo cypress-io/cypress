@@ -4,37 +4,38 @@ $utils = require("../cypress/utils")
 
 validAliasApiRe = /^(\d+|all)$/
 
-lastXhrNotWaitedOn = (state, alias, prop) ->
+xhrNotWaitedOnByIndex = (state, alias, index, prop) ->
   ## find the last request or response
   ## which hasnt already been used.
   xhrs = state(prop) ? []
+
+  xhrs = _.filter xhrs, { alias }
 
   ## allow us to handle waiting on both
   ## the request or the response part of the xhr
   privateProp = "_has#{prop}BeenWaitedOn"
 
-  for obj in xhrs
-    ## we want to return the first xhr which has
-    ## not already been waited on, and if its alias matches ours
-    if !obj[privateProp] and obj.alias is alias
-      obj[privateProp] = true
-      return obj.xhr
+  obj = xhrs[index]
+
+  if obj and !obj[privateProp]
+    obj[privateProp] = true
+    return obj.xhr
 
 create = (state) ->
   return {
-    getLastXhrByAlias: (alias) ->
+    getIndexedXhrByAlias: (alias, index) ->
       [str, prop] = alias.split(".")
 
       if prop
         if prop is "request"
-          return lastXhrNotWaitedOn(state, str, "requests")
+          return xhrNotWaitedOnByIndex(state, str, index, "requests")
         else
           if prop isnt "response"
             $utils.throwErrByPath "wait.alias_invalid", {
               args: { prop, str }
             }
 
-      lastXhrNotWaitedOn(state, str, "responses")
+      xhrNotWaitedOnByIndex(state, str, index, "responses")
 
     getRequestsByAlias: (alias) ->
       [alias, prop] = alias.split(".")

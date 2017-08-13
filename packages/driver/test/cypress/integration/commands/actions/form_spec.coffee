@@ -256,7 +256,7 @@ describe "src/cy/commands/actions/form", ->
 
         cy.get("form:first").submit().should("have.class", "submitted")
 
-    describe.only ".log", ->
+    describe ".log", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
           if log.get("name") is "submit"

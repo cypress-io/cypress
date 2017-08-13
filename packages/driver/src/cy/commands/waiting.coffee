@@ -6,12 +6,13 @@ $utils = require("../../cypress/utils")
 
 getNumRequests = (state, alias) =>
   requests = state("aliasRequests") ? {}
-  requests[alias] ?= 0
+  index = requests[alias] ?= 0
+
   requests[alias] += 1
 
   state("aliasRequests", requests)
 
-  _.ordinalize(requests[alias])
+  [index, _.ordinalize(requests[alias])]
 
 throwErr = (arg) ->
   $utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
@@ -43,11 +44,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         aliasType: "route"
       })
 
-    checkForXhr = (alias, type, num, options) ->
+    checkForXhr = (alias, type, index, num, options) ->
       options.type = type
 
       ## append .type to the alias
-      xhr = cy.getLastXhrByAlias(alias + "." + type)
+      xhr = cy.getIndexedXhrByAlias(alias + "." + type, index)
 
       ## return our xhr object
       return Promise.resolve(xhr) if xhr
@@ -62,8 +63,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       args = arguments
 
       cy.retry ->
-        args.options = _.omit(options, "timeout")
-        checkForXhr.apply(@, args)
+        checkForXhr.apply(null, args)
       , options
 
     waitForXhr = (str, options) ->
@@ -103,17 +103,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## the error related to a previous xhr
       timeout = options.timeout
 
-      num = getNumRequests(state, alias)
+      [ index, num ] = getNumRequests(state, alias)
 
       waitForRequest = =>
         options = _.omit(options, "_runnableTimeout")
         options.timeout = timeout ? Cypress.config("requestTimeout")
-        checkForXhr.call(@, alias, "request", num, options)
+        checkForXhr(alias, "request", index, num, options)
 
       waitForResponse = =>
         options = _.omit(options, "_runnableTimeout")
         options.timeout = timeout ? Cypress.config("responseTimeout")
-        checkForXhr.call(@, alias, "response", num, options)
+        checkForXhr(alias, "response", index, num, options)
 
       ## if we were only waiting for the request
       ## then resolve immediately do not wait for response
@@ -123,11 +123,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         waitForRequest().then(waitForResponse)
 
     Promise
-    .map [].concat(str), (str) =>
+    .map [].concat(str), (str) ->
       ## we may get back an xhr value instead
       ## of a promise, so we have to wrap this
       ## in another promise :-(
-      waitForXhr.call(@, str, _.omit(options, "error"))
+      waitForXhr(str, _.omit(options, "error"))
     .then (responses) ->
       ## if we only asked to wait for one alias
       ## then return that, else return the array of xhr responses

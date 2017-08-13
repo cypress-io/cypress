@@ -6,7 +6,7 @@ xhrGet = (win, url) ->
   xhr.open("GET", url)
   xhr.send()
 
-describe.only "src/cy/commands/waiting", ->
+describe "src/cy/commands/waiting", ->
   context "#wait", ->
     describe "number argument", ->
       it "passes delay onto Promise", ->
@@ -213,6 +213,11 @@ describe.only "src/cy/commands/waiting", ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'foo'. No request ever occured."
             done()
+
+          cy.on "command:retry", (options) ->
+            ## force foo to time out before bar
+            if /foo/.test options.error
+              options._runnableTimeout = 0
 
           cy
             .server()
@@ -490,6 +495,9 @@ describe.only "src/cy/commands/waiting", ->
           cy.wait("@foo", "@bar")
 
     describe "multiple alias arguments", ->
+      before ->
+        cy.visit("/fixtures/jquery.html")
+
       it "can wait for all requests to have a response", ->
         resp1 = {foo: "foo"}
         resp2 = {bar: "bar"}
@@ -506,14 +514,19 @@ describe.only "src/cy/commands/waiting", ->
             expect(xhr2.responseBody).to.deep.eq resp2
 
     describe "multiple separate alias waits", ->
+      before ->
+        cy.visit("/fixtures/jquery.html")
+
       it "waits for a 3rd request before resolving", ->
         resp = {foo: "foo"}
         response = 0
 
-        cy.on "command:retry", =>
-          response += 1
-          win = cy.state("window")
-          win.$.get("/users", {num: response})
+        win = cy.state("window")
+
+        cy.on "command:retry", (options) ->
+          if options._retries is 1
+            response += 1
+            win.$.get("/users", {num: response})
 
         cy
           .server()
@@ -532,10 +545,14 @@ describe.only "src/cy/commands/waiting", ->
         resp = {foo: "foo"}
         response = 0
 
-        cy.on "command:retry", =>
-          response += 1
-          win = cy.state("window")
-          win.$.get("/users", {num: response})
+        win = cy.state("window")
+
+        cy.on "command:retry", (options) ->
+          ## only add a request for the first unique retry
+          ## for each request
+          if options._retries is 1
+            response += 1
+            win.$.get("/users", {num: response})
 
         cy
           .server()
@@ -547,14 +564,6 @@ describe.only "src/cy/commands/waiting", ->
           .wait("@getUsers").then (xhr) ->
             expect(xhr.url).to.include "/users?num=4"
             expect(xhr.responseBody).to.deep.eq resp
-
-      describe "errors", ->
-        beforeEach ->
-          @currentTest.enableTimeouts(false)
-          @allowErrors()
-
-        it "throws and includes the incremented alias number"
-          ## use underscore.string here for formatting the number
 
     describe "errors", ->
       describe "invalid 1st argument", ->
