@@ -112,7 +112,7 @@ module.exports = {
     obj = @normalizeObjWithLength(obj)
 
     str = _.reduce obj, (memo, value, key) =>
-      memo.push key.toLowerCase() + ": " + @_stringify(value)
+      memo.push "#{key}".toLowerCase() + ": " + @_stringify(value)
       memo
     , []
 

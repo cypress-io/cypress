@@ -8,7 +8,7 @@ describe "src/cy/commands/location", ->
   context "#url", ->
     it "returns the location href", ->
       cy.url().then (url) ->
-        expect(url).to.eq "http://localhost:3500/support/server/fixtures/generic.html"
+        expect(url).to.eq "http://localhost:3500/fixtures/generic.html"
 
     it "eventually resolves", ->
       _.delay =>
@@ -124,7 +124,7 @@ describe "src/cy/commands/location", ->
 
           expect(consoleProps).to.deep.eq {
             Command: "url"
-            Yielded: "http://localhost:3500/support/server/fixtures/generic.html"
+            Yielded: "http://localhost:3500/fixtures/generic.html"
           }
 
   context "#hash", ->
@@ -250,7 +250,7 @@ describe "src/cy/commands/location", ->
 
     it "returns a specific key from location object", ->
       cy.location("href").then (href) ->
-        expect(href).to.eq "http://localhost:3500/support/server/fixtures/generic.html"
+        expect(href).to.eq "http://localhost:3500/fixtures/generic.html"
 
     it "eventually resolves", ->
       _.delay ->
