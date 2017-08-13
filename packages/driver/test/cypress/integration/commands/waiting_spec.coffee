@@ -208,10 +208,10 @@ describe "src/cy/commands/waiting", ->
             .wait(["@foo", "@bar"])
 
         it "throws whenever an alias times out", (done) ->
-          Cypress.config("requestTimeout", 100)
+          Cypress.config("requestTimeout", 1000)
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'foo'. No request ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting 1000ms for the 1st request to the route: 'foo'. No request ever occured."
             done()
 
           cy.on "command:retry", (options) ->
@@ -294,7 +294,7 @@ describe "src/cy/commands/waiting", ->
         it "does not retry after 1 alias times out", (done) ->
           Promise.onPossiblyUnhandledRejection(done)
 
-          Cypress.config("requestTimeout", 100)
+          Cypress.config("requestTimeout", 1000)
 
           cy.on "command:retry", (options) ->
             ## force bar to time out before foo
@@ -467,16 +467,17 @@ describe "src/cy/commands/waiting", ->
 
         it "throws when waiting on the 3rd response on array of aliases", (done) ->
           Cypress.config("requestTimeout", 200)
-          Cypress.config("responseTimeout", 300)
+          Cypress.config("responseTimeout", 1000)
 
-          cy.on "command:retry", _.once =>
-            win = cy.state("window")
-            _.defer => win.$.get("/timeout?ms=1")
-            _.defer => win.$.get("/timeout?ms=2")
-            _.defer => win.$.get("/timeout?ms=3000")
+          win = cy.state("window")
+
+          cy.on "command:retry", (options) ->
+            if /getThree/.test(options.error)
+              ## force 3 to immediately time out
+              options._runnableTimeout = 0
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 300ms for the 1st response to the route: 'getThree'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting 1000ms for the 1st response to the route: 'getThree'. No response ever occured."
             done()
 
           cy
@@ -484,7 +485,12 @@ describe "src/cy/commands/waiting", ->
             .route("/timeout?ms=1").as("getOne")
             .route("/timeout?ms=2").as("getTwo")
             .route("/timeout?ms=3000").as("getThree")
-            .route(/three/, {}).as("getThree")
+            .then ->
+              win.$.get("/timeout?ms=1")
+              win.$.get("/timeout?ms=2")
+              win.$.get("/timeout?ms=3000")
+
+              return null
             .wait(["@getOne", "@getTwo", "@getThree"])
 
         it "throws when passed multiple string arguments", (done) ->
