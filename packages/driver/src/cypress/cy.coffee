@@ -259,8 +259,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     whenStable: stability.whenStable
 
     ## xhr sync methods
-    getLastXhrByAlias: xhrs.getLastXhrByAlias
     getRequestsByAlias: xhrs.getRequestsByAlias
+    getIndexedXhrByAlias: xhrs.getIndexedXhrByAlias
 
     ## alias sync methods
     getAlias: aliases.getAlias

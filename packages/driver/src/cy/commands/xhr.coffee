@@ -7,7 +7,6 @@ $Server = require("../../cypress/server")
 $utils = require("../../cypress/utils")
 
 validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i
-validAliasApiRe    = /^(\d+|all)$/
 
 server = null
 
@@ -57,18 +56,24 @@ setRequest = (state, xhr, alias) ->
   state("requests", requests)
 
 setResponse = (state, xhr) ->
-  obj = _.find state("requests"), {xhr: xhr}
+  obj = _.find(state("requests"), { xhr })
+
+  ## if we've been reset between tests and an xhr
+  ## leaked through, then we may not be able to associate
+  ## this response correctly
+  return if not obj
+
+  index = state("requests").indexOf(obj)
 
   responses = state("responses") ? []
 
-  ## we could be setting response from
-  ## multiple places so this should first
-  ## see if we find the xhr in responses
-  ## and bail if we do.
-  responses.push({
+  ## set the response in the same index as the request
+  ## so we can later wait on this specific index'd response
+  ## else its not deterministic
+  responses[index] = {
     xhr: xhr
     alias: obj?.alias
-  })
+  }
 
   state("responses", responses)
 
