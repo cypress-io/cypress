@@ -684,7 +684,7 @@ describe "src/cy/commands/actions/trigger", ->
             logs.push(log)
 
         cy.get("button:first").trigger("mouseover").then ->
-          expect(logs).to.have.length(1)
+          expect(logs.length).to.eq(1)
 
       it "passes in coords", ->
         cy.get("button:first").trigger("mouseover").then ($btn) ->

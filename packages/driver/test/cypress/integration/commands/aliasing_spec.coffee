@@ -170,7 +170,7 @@ describe "src/cy/commands/aliasing", ->
       #     .noop({}).as("foo").then ->
       #       debugger
 
-  context "#_replayFrom", ->
+  context "#replayCommandsFrom", ->
     describe "subject in document", ->
       it "returns if subject is still in the document", ->
         cy

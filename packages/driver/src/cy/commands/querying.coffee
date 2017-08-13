@@ -192,7 +192,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## if this is a route command
             when command.get("name") is "route"
               alias = _.compact([alias, selector.split(".")[1]]).join(".")
-              requests = @getRequestsByAlias(alias) ? null
+              requests = cy.getRequestsByAlias(alias) ? null
               log(requests, "route")
               return requests
             else
@@ -423,9 +423,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.log
+        options._log = Cypress.log({
           $el: subject
           message: ""
+        })
 
       $utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
 
@@ -476,7 +477,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       else
         ## remove our listener if we happen to reach the end
         ## event which will finalize cleanup if there was no next obj
-        cy.once "command:queue:end", ->
+        cy.once "command:queue:before:end", ->
           cleanup()
 
           cy.state("withinSubject", null)

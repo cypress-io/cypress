@@ -72,7 +72,7 @@ describe "src/cy/commands/querying", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "command:retry", _.after 2, ->
           cy.$$(":text:first").addClass("focused").focus()
 
         cy.focused().should("have.class", "focused").then ->
@@ -86,7 +86,7 @@ describe "src/cy/commands/querying", ->
       it "retries on an elements value", ->
         $input = cy.$$("input:first")
 
-        cy.on "command:retry", _.after 2, =>
+        cy.on "command:retry", _.after 2, ->
           cy.state("forceFocusedEl", $input.get(0))
 
           $input.val("1234")
@@ -291,14 +291,14 @@ describe "src/cy/commands/querying", ->
     it "clears withinSubject even if next is null", (done) ->
       span = cy.$$("#button-text button span")
 
-      cy.on "end", ->
+      cy.once "command:queue:before:end", ->
         ## should be defined here because next would have been
         ## null and withinSubject would not have been cleared
         expect(cy.state("withinSubject")).not.to.be.undefined
 
-        _.defer =>
-          expect(cy.state("withinSubject")).to.be.null
-          done()
+      cy.once "command:queue:end", ->
+        expect(cy.state("withinSubject")).to.be.null
+        done()
 
       cy.get("#button-text").within ->
         cy.get("button span").then ($span) ->
@@ -306,14 +306,16 @@ describe "src/cy/commands/querying", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, @log) =>
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "within"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
 
       it "can silence logging", ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log) if log.name is "within"
-
         cy.get("div:first").within({log: false}, ->).then ->
           expect(@logs.length).to.eq(0)
 
@@ -330,23 +332,30 @@ describe "src/cy/commands/querying", ->
         cy.get("div:first").within ->
 
       it "snapshots after clicking", ->
-        cy.get("div:first").within ->
-          cy.then ->
-            expect(lastLog.get("snapshots").length).to.eq(1)
-            expect(lastLog.get("snapshots")[0]).to.be.an("object")
+        cy.get("div:first").within(->)
+        .then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("snapshots").length).to.eq(1)
+          expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
+        Cypress.config("defaultCommandTimeout", 50)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          @lastLog = log
+          @logs.push(log)
+
+        return null
 
       it "logs once when not dom subject", (done) ->
-        logs = []
-
-        cy.on "log:added", (attrs, @log) =>
-          logs.push @log
-
         cy.on "fail", (err) =>
-          expect(logs).to.have.length(1)
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -400,7 +409,15 @@ describe "src/cy/commands/querying", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, @log) =>
+        beforeEach ->
+          @logs = []
+
+          cy.on "log:added", (attrs, log) =>
+            if attrs.name is "root"
+              @lastLog = log
+              @logs.push(log)
+
+          return null
 
       it "can turn off logging", ->
         cy.root({log: false}).then ->
@@ -416,9 +433,9 @@ describe "src/cy/commands/querying", ->
         cy.root()
 
       it "snapshots after clicking", ->
-        cy.on "log:added", (attrs, @log) =>
-
         cy.root().then ->
+          lastLog = @lastLog
+
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
@@ -426,7 +443,7 @@ describe "src/cy/commands/querying", ->
         html = cy.$$("html")
 
         cy.root().then ->
-          expect(lastLog.get("$el").get(0)).to.eq(html.get(0))
+          expect(@lastLog.get("$el").get(0)).to.eq(html.get(0))
 
       it "sets $el to withinSubject", ->
         form = cy.$$("form")
@@ -435,7 +452,7 @@ describe "src/cy/commands/querying", ->
           cy
             .get("input")
             .root().then ($root) ->
-              expect(lastLog.get("$el").get(0)).to.eq(form.get(0))
+              expect(@lastLog.get("$el").get(0)).to.eq(form.get(0))
 
       it "consoleProps", ->
         cy.root().then ($root) ->
@@ -447,9 +464,7 @@ describe "src/cy/commands/querying", ->
 
   context "#get", ->
     beforeEach ->
-      ## make this test timeout quickly so
-      ## we dont have to wait so damn long
-      @currentTest.timeout(300)
+      Cypress.config("defaultCommandTimeout", 100)
 
     it "finds by selector", ->
       list = cy.$$("#list")
@@ -472,27 +487,19 @@ describe "src/cy/commands/querying", ->
     it "can increase the timeout", ->
       missingEl = $("<div />", id: "missing-el")
 
-      ## make our runnable timeout after 100ms
-      cy._timeout(100)
-
-      cy.on "command:retry", (options) =>
+      cy.on "command:retry", _.after 2, (options) ->
         ## make sure runnableTimeout is 10secs
         expect(options._runnableTimeout).to.eq 10000
 
         ## we shouldnt have a timer either
-        expect(cy.state("runnable")).not.to.have.property("timer")
-
-      ## but wait 300ms
-      _.delay =>
         cy.$$("body").append(missingEl)
-      , 300
 
       cy.get("#missing-el", {timeout: 10000})
 
     it "does not factor in the total time the test has been running", ->
       missingEl = $("<div />", id: "missing-el")
 
-      cy.on "command:retry", _.after 2, =>
+      cy.on "command:retry", _.after 2, ->
         cy.$$("body").append(missingEl)
 
       ## in this example our test has been running 200ms
@@ -504,29 +511,26 @@ describe "src/cy/commands/querying", ->
         .get("#missing-el", {timeout: 125})
         .then ->
           ## it should reset the timeout back
-          ## to 300 after successfully finished get method
-          expect(cy._timeout()).to.eq 300
+          ## to 100 after successfully finished get method
+          expect(cy.timeout()).to.eq(100)
 
     it "cancels existing promises", (done) ->
-      logs = []
-
-      cy.on "log:added", (attrs, log) ->
-        logs.push(log)
+      cy.stub(Cypress.runner, "stop")
 
       retrys = 0
 
-      abort = _.after 2, =>
-        @Cypress.abort()
+      stop = _.after 2, ->
+        Cypress.stop()
 
-      cy.on "cancel", ->
+      cy.on "stop", ->
         _.delay ->
           expect(retrys).to.eq(2)
           done()
-        , 500
+        , 100
 
       cy.on "command:retry", ->
         retrys += 1
-        abort()
+        stop()
 
       cy.get("doesNotExist")
 
@@ -554,46 +558,6 @@ describe "src/cy/commands/querying", ->
 
           .get("@foo").should("contain", "asdf")
 
-    describe "deprecated command options", ->
-      beforeEach ->
-        @allowErrors()
-
-      it "throws on {exist: false}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: cy.should('not.exist')."
-          done()
-
-        cy.get("ul li", {exist: false})
-
-      it "throws on {exists: true}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: cy.should('exist')."
-          done()
-
-        cy.get("ul li", {exists: true, length: 10})
-
-      it "throws on {visible: true}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: cy.should('be.visible')."
-          done()
-
-        cy.get("ul li", {visible: true})
-
-
-      it "throws on {visible: false}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: cy.should('not.be.visible')."
-          done()
-
-        cy.get("ul li", {visible: false})
-
-      it "throws on {length: 3}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: cy.should('have.length', '3')."
-          done()
-
-        cy.get("ul li", {length: 3})
-
     describe "should('exist')", ->
       it "waits until button exists", ->
         cy.on "command:retry", _.after 3, =>
@@ -603,7 +567,9 @@ describe "src/cy/commands/querying", ->
 
     describe "should('not.exist')", ->
       it "waits until button does not exist", ->
-        cy.on "command:retry", _.after 3, =>
+        cy.timeout(500, true)
+
+        cy.on "command:retry", _.after 2, ->
           cy.$$("#button").remove()
 
         cy.get("#button").should("not.exist")
@@ -614,7 +580,7 @@ describe "src/cy/commands/querying", ->
 
       it "retries until cannot find element", ->
         ## add 500ms to the delta
-        cy._timeout(500, true)
+        cy.timeout(500, true)
 
         retry = _.after 3, =>
           cy.$$("#list li:last").remove()
@@ -643,7 +609,7 @@ describe "src/cy/commands/querying", ->
 
       it "retries until element is invisible", ->
         ## add 500ms to the delta
-        cy._timeout(500, true)
+        cy.timeout(500, true)
 
         button = null
 
@@ -664,7 +630,7 @@ describe "src/cy/commands/querying", ->
 
       it "retries until element is visible", ->
         ## add 500ms to the delta
-        cy._timeout(500, true)
+        cy.timeout(500, true)
 
         button = cy.$$("#button").hide()
 
@@ -684,11 +650,14 @@ describe "src/cy/commands/querying", ->
           expect($forms.length).to.eq forms.length
 
       it "retries until length equals n", ->
+        ## add 500ms to the delta
+        cy.timeout(500, true)
+
         buttons = cy.$$("button")
 
         length = buttons.length - 2
 
-        cy.on "command:retry", _.after 2, =>
+        cy.on "command:retry", _.after 2, ->
           buttons.last().remove()
           buttons = cy.$$("button")
 
@@ -697,6 +666,9 @@ describe "src/cy/commands/querying", ->
           expect($buttons.length).to.eq length
 
       it "retries an alias when not enough elements found", ->
+        ## add 500ms to the delta
+        cy.timeout(500, true)
+
         buttons = cy.$$("button")
 
         length = buttons.length + 1
@@ -712,35 +684,40 @@ describe "src/cy/commands/querying", ->
             expect($buttons.length).to.eq length
 
       it "retries an alias when too many elements found without replaying commands", ->
+        ## add 500ms to the delta
+        cy.timeout(500, true)
+
         buttons = cy.$$("button")
 
         length = buttons.length - 2
 
-        _replayFrom = @sandbox.spy(cy, "_replayFrom")
+        replayCommandsFrom = cy.spy(cy, "replayCommandsFrom")
 
-        ## add another button after 2 retries, once
-        cy.on "command:retry", _.after 2, =>
+        cy.on "command:retry", ->
           buttons.last().remove()
           buttons = cy.$$("button")
+
+        existingLen = cy.queue.length
 
         ## should eventually resolve after adding 1 button
         cy
           .get("button").as("btns")
           .get("@btns").should("have.length", length).then ($buttons) ->
-            expect(_replayFrom).not.to.be.called
-            expect(cy.queue.length).to.eq(6) ## we should not have replayed any commands
+            expect(replayCommandsFrom).not.to.be.called
+
+            ## get, as, get, should, then == 5
+            expect(cy.queue.length - existingLen).to.eq(5) ## we should not have replayed any commands
             expect($buttons.length).to.eq length
 
     describe "assertion verification", ->
       it "automatically retries", ->
-        _.delay =>
+        cy.on "command:retry", _.after 2, ->
           cy.$$("button:first").attr("data-foo", "bar")
-        , 100
 
         cy.get("button:first").should("have.attr", "data-foo").and("match", /bar/)
 
       it "eventually resolves an alias", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "command:retry", _.after 2, ->
           cy.$$("button:first").addClass("foo-bar-baz")
 
         cy
@@ -749,36 +726,45 @@ describe "src/cy/commands/querying", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, @log) =>
+        @logs = []
 
-      ## FIXME: fails when all test files are run together
-      it.skip "logs elements length", ->
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "get"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
+
+      it "logs elements length", ->
         buttons = cy.$$("button")
 
         length = buttons.length - 2
 
-        cy.on "command:retry", _.after 2, =>
+        ## add 500ms to the delta
+        cy.timeout(500, true)
+
+        cy.on "command:retry", ->
           buttons.last().remove()
           buttons = cy.$$("button")
 
         ## should resolving after removing 2 buttons
         cy.get("button").should("have.length", length).then ($buttons) ->
-          expect(lastLog.get("numElements")).to.eq length
+          expect(@lastLog.get("numElements")).to.eq length
 
       it "logs exist: false", ->
         cy.get("#does-not-exist").should("not.exist").then ->
-          expect(lastLog.get("message")).to.eq "#does-not-exist"
-          expect(lastLog.get("$el").get(0)).not.to.be.ok
+          expect(@lastLog.get("message")).to.eq "#does-not-exist"
+          expect(@lastLog.get("$el").get(0)).not.to.be.ok
 
       it "logs route aliases", ->
         cy
-          .visit("http://localhost:3500/fixtures/xhr.html")
+          .visit("http://localhost:3500/fixtures/jquery.html")
           .server()
           .route(/users/, {}).as("getUsers")
           .window().then (win) ->
             win.$.get("/users")
           .get("@getUsers").then ->
-            expect(@log.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
+            expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
               message: "@getUsers"
               referencesAlias: "getUsers"
               aliasType: "route"
@@ -786,11 +772,12 @@ describe "src/cy/commands/querying", ->
 
       it "logs primitive aliases", (done) ->
         cy.on "log:added", (attrs, log) ->
-          expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
-            referencesAlias: "f"
-            aliasType: "primitive"
-          }
-          done()
+          if attrs.name is "get"
+            expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
+              referencesAlias: "f"
+              aliasType: "primitive"
+            }
+            done()
 
         cy
           .noop("foo").as("f")
@@ -798,12 +785,13 @@ describe "src/cy/commands/querying", ->
 
       it "logs immediately before resolving", (done) ->
         cy.on "log:added", (attrs, log) ->
-          expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
-            state: "pending"
-            referencesAlias: undefined
-            aliasType: "dom"
-          }
-          done()
+          if attrs.name is "get"
+            expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
+              state: "pending"
+              referencesAlias: undefined
+              aliasType: "dom"
+            }
+            done()
 
         cy.get("body")
 
@@ -811,10 +799,10 @@ describe "src/cy/commands/querying", ->
         cy
           .get("body").as("b")
           .get("@b").then ->
-            expect(lastLog.get("ended")).to.be.true
-            expect(lastLog.get("state")).to.eq("passed")
-            expect(lastLog.get("snapshots").length).to.eq(1)
-            expect(lastLog.get("snapshots")[0]).to.be.an("object")
+            expect(@lastLog.get("ended")).to.be.true
+            expect(@lastLog.get("state")).to.eq("passed")
+            expect(@lastLog.get("snapshots").length).to.eq(1)
+            expect(@lastLog.get("snapshots")[0]).to.be.an("object")
 
       it "logs obj once complete", ->
         cy.get("body").as("b").then ($body) ->
@@ -825,11 +813,12 @@ describe "src/cy/commands/querying", ->
             alias: "b"
             aliasType: "dom"
             referencesAlias: undefined
-            $el: $body
           }
 
+          expect(@lastLog.get("$el").get(0)).to.eq($body.get(0))
+
           _.each obj, (value, key) =>
-            expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+            expect(@lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
       it "#consoleProps", ->
         cy.get("body").then ($body) ->
@@ -861,7 +850,7 @@ describe "src/cy/commands/querying", ->
         cy
           .server()
           .route(/users/, {}).as("getUsers")
-          .visit("http://localhost:3500/fixtures/xhr.html")
+          .visit("http://localhost:3500/fixtures/jquery.html")
           .window().then (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
@@ -912,7 +901,7 @@ describe "src/cy/commands/querying", ->
           cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("http://localhost:3500/fixtures/xhr.html")
+            .visit("http://localhost:3500/fixtures/jquery.html")
             .window().then (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
@@ -922,13 +911,13 @@ describe "src/cy/commands/querying", ->
           cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("http://localhost:3500/fixtures/xhr.html")
+            .visit("http://localhost:3500/fixtures/jquery.html")
             .get("@getUsers").then (xhr) ->
               expect(xhr).to.be.null
 
         it "returns an array of xhrs", ->
           cy
-            .visit("http://localhost:3500/fixtures/xhr.html")
+            .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -941,7 +930,7 @@ describe "src/cy/commands/querying", ->
 
         it "returns the 1st xhr", ->
           cy
-            .visit("http://localhost:3500/fixtures/xhr.html")
+            .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -952,7 +941,7 @@ describe "src/cy/commands/querying", ->
 
         it "returns the 2nd xhr", ->
           cy
-            .visit("http://localhost:3500/fixtures/xhr.html")
+            .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -965,7 +954,7 @@ describe "src/cy/commands/querying", ->
           cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("http://localhost:3500/fixtures/xhr.html")
+            .visit("http://localhost:3500/fixtures/jquery.html")
             .window().then (win) ->
               win.$.get("/users", {num: 1})
               win.$.get("/users", {num: 2})
@@ -1014,15 +1003,19 @@ describe "src/cy/commands/querying", ->
 
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
+        Cypress.config("defaultCommandTimeout", 50)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "get"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
 
       it "throws once when incorrect sizzle selector", (done) ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log)
-
-        cy.on "fail", (err) ->
+        cy.on "fail", (err) =>
           expect(@logs.length).to.eq 1
           done()
 
@@ -1079,7 +1072,7 @@ describe "src/cy/commands/querying", ->
           .route(/json/, {foo: "foo"}).as("getJSON")
           .visit("http://localhost:3500/fixtures/xhr.html").then ->
             cy.$$("#get-json").click =>
-              cy._timeout(1000)
+              cy.timeout(1000)
 
               retry = _.after 3, _.once =>
                 cy.state("window").$.getJSON("/json")
@@ -1098,7 +1091,7 @@ describe "src/cy/commands/querying", ->
 
       it "throws after timing out while trying to find an invisible element", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "expected '<div#dom>' not to be visible"
+          expect(err.message).to.include "expected '<div#dom>' not to be 'visible'"
           done()
 
         cy.get("div:first").should("not.be.visible")
@@ -1114,7 +1107,7 @@ describe "src/cy/commands/querying", ->
         cy.$$("#button").hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "expected '<button#button>' to be visible"
+          expect(err.message).to.include "expected '<button#button>' to be 'visible'"
           done()
 
         cy.get("#button").should("be.visible")
@@ -1123,15 +1116,15 @@ describe "src/cy/commands/querying", ->
         cy.$$("#button").hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "element <button#button> is not visible because"
+          expect(err.message).to.include "element '<button#button>' is not visible because"
           done()
 
         cy.get("#button").should("be.visible")
 
       it "sets error command state", (done) ->
-        cy.on "log:added", (attrs, @log) =>
-
         cy.on "fail", (err) =>
+          lastLog = @lastLog
+
           expect(lastLog.get("state")).to.eq "failed"
           expect(lastLog.get("error")).to.eq err
           done()
@@ -1171,13 +1164,13 @@ describe "src/cy/commands/querying", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()
 
-        cy.on "log:added", (attrs, @log) =>
-
         cy.on "fail", (err) =>
+          lastLog = @lastLog
+
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("error")).to.eq err
           expect(lastLog.get("$el").get(0)).to.eq button.get(0)
-          consoleProps = @lastLog.invoke("consoleProps")
+          consoleProps = lastLog.invoke("consoleProps")
           expect(consoleProps.Yielded).to.eq button.get(0)
           expect(consoleProps.Elements).to.eq button.length
           done()
@@ -1278,11 +1271,11 @@ describe "src/cy/commands/querying", ->
         expect($item.get(0)).to.eq item.get(0)
 
     it "finds text by regexp and restores contains", ->
-      contains = $.expr[":"].contains
+      contains = Cypress.$Cypress.$.expr[":"].contains
 
       cy.contains(/^asdf \d+/).then ($li) ->
         expect($li).to.have.text("asdf 1")
-        expect($.expr[":"].contains).to.eq(contains)
+        expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
 
     it "returns elements found first when multiple siblings found", ->
       cy.contains("li", "asdf").then ($li) ->
@@ -1293,16 +1286,18 @@ describe "src/cy/commands/querying", ->
         expect($ul.find("li:first")).to.have.text("jkl 1")
 
     it "cancels existing promises", (done) ->
-      getSync = @sandbox.spy(cy.get, "immediately")
-
       retrys = 0
 
-      abort = _.after 2, =>
-        @Cypress.abort()
+      cy.stub(Cypress.runner, "stop")
 
-      cy.on "cancel", ->
+      abort = _.after 2, ->
+        cy.spy(cy, "now")
+
+        Cypress.stop()
+
+      cy.on "stop", ->
         _.delay ->
-          expect(getSync.callCount).to.be.within(2, 3)
+          expect(cy.now).not.to.be.called
           expect(retrys).to.eq(2)
           done()
         , 50
@@ -1312,46 +1307,6 @@ describe "src/cy/commands/querying", ->
         abort()
 
       cy.contains("DOES NOT CONTAIN THIS!")
-
-    describe "deprecated command options", ->
-      beforeEach ->
-        @allowErrors()
-
-      it "throws on {exist: false}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: cy.should('not.exist')."
-          done()
-
-        cy.contains("asdfasdf", {exist: false})
-
-      it "throws on {exists: true}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: cy.should('exist')."
-          done()
-
-        cy.contains("button", {exists: true, length: 10})
-
-      it "throws on {visible: true}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: cy.should('be.visible')."
-          done()
-
-        cy.contains("button", {visible: true})
-
-
-      it "throws on {visible: false}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: cy.should('not.be.visible')."
-          done()
-
-        cy.get("ul li").contains("foo", {visible: false})
-
-      it "throws on {length: 3}", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: cy.should('have.length', '3')."
-          done()
-
-        cy.contains("foo", {length: 3})
 
     describe "should('not.exist')", ->
       it "returns null when no content exists", ->
@@ -1449,11 +1404,19 @@ describe "src/cy/commands/querying", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, @log) =>
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "contains"
+            @lastLog = log
+
+          @logs.push(log)
+
+        return null
 
       it "logs immediately before resolving", (done) ->
         cy.on "log:added", (attrs, log) ->
-          if log.get("name") is "contains"
+          if attrs.name is "contains"
             expect(log.pick("state", "type")).to.deep.eq {
               state: "pending"
               type: "child"
@@ -1463,68 +1426,71 @@ describe "src/cy/commands/querying", ->
         cy.get("body").contains("foo")
 
       it "snapshots and ends after finding element", ->
-        cy.on "log:added", (attrs, @log) =>
-
         cy.contains("foo").then ->
-          expect(lastLog.get("ended")).to.be.true
-          expect(lastLog.get("state")).to.eq("passed")
-          expect(lastLog.get("snapshots").length).to.eq(1)
-          expect(lastLog.get("snapshots")[0]).to.be.an("object")
+          expect(@lastLog.get("ended")).to.be.true
+          expect(@lastLog.get("state")).to.eq("passed")
+          expect(@lastLog.get("snapshots").length).to.eq(1)
+          expect(@lastLog.get("snapshots")[0]).to.be.an("object")
 
       it "silences internal cy.get() log", ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push log
-
         ## GOOD: [ {name: get} , {name: contains} ]
         ## BAD:  [ {name: get} , {name: get} , {name: contains} ]
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          names = _.map logs, (log) -> log.get("name")
-          expect(logs).to.have.length(2)
+          names = _.map @logs, (log) -> log.get("name")
+          expect(@logs.length).to.eq(2)
           expect(names).to.deep.eq ["get", "contains"]
 
       it "passes in $el", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(lastLog.get("$el")).to.eq $label
+          expect(@lastLog.get("$el").get(0)).to.eq($label.get(0))
 
       it "sets type to parent when used as a parent command", ->
         cy.contains("foo").then ->
-          expect(lastLog.get("type")).to.eq "parent"
+          expect(@lastLog.get("type")).to.eq "parent"
 
       it "sets type to parent when subject doesnt have an element", ->
         cy.noop({}).contains("foo").then ->
-          expect(lastLog.get("type")).to.eq "parent"
+          expect(@lastLog.get("type")).to.eq "parent"
 
       it "sets type to child when used as a child command", ->
         cy.get("body").contains("foo").then ->
-          expect(lastLog.get("type")).to.eq "child"
+          expect(@lastLog.get("type")).to.eq "child"
 
       it "logs when not exists", ->
         cy.contains("does-not-exist").should("not.exist").then ->
-          expect(lastLog.get("message")).to.eq "does-not-exist"
-          expect(lastLog.get("$el").length).to.eq(0)
+          expect(@lastLog.get("message")).to.eq "does-not-exist"
+          expect(@lastLog.get("$el").length).to.eq(0)
 
       it "logs when should be visible with filter", ->
         cy.contains("div", "Nested Find").should("be.visible").then ($div) ->
-          expect(lastLog.get("message")).to.eq "div, Nested Find"
-          expect(lastLog.get("$el")).to.eq $div
+          expect(@lastLog.get("message")).to.eq "div, Nested Find"
+          expect(@lastLog.get("$el").get(0)).to.eq($div.get(0))
 
       it "#consoleProps", ->
+        $complex = cy.$$("#complex-contains")
+
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
           consoleProps = @lastLog.invoke("consoleProps")
           expect(consoleProps).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
-            "Applied To": getFirstSubjectByName.call(@, "get").get(0)
+            "Applied To": $complex.get(0)
             Yielded: $label.get(0)
             Elements: 1
           }
 
     describe "errors", ->
       beforeEach ->
-        @allowErrors()
-        @currentTest.timeout(200)
+        Cypress.config("defaultCommandTimeout", 100)
+
+        @logs = []
+
+        cy.on "log:added", (attrs, log) =>
+          if attrs.name is "contains"
+            @lastLog = log
+            @logs.push(log)
+
+        return null
 
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
@@ -1542,13 +1508,8 @@ describe "src/cy/commands/querying", ->
         cy.contains("")
 
       it "logs once on error", (done) ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push log
-
-        cy.on "fail", (err) ->
-          expect(logs).to.have.length(1)
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
           done()
 
         cy.contains(undefined)
@@ -1591,12 +1552,10 @@ describe "src/cy/commands/querying", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button")
 
-        cy.on "log:added", (attrs, @log) =>
-
         cy.on "fail", (err) =>
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("error")).to.eq err
-          expect(lastLog.get("$el").get(0)).to.eq button.get(0)
+          expect(@lastLog.get("state")).to.eq("failed")
+          expect(@lastLog.get("error")).to.eq err
+          expect(@lastLog.get("$el").get(0)).to.eq button.get(0)
           consoleProps = @lastLog.invoke("consoleProps")
           expect(consoleProps.Yielded).to.eq button.get(0)
           expect(consoleProps.Elements).to.eq button.length
@@ -1605,12 +1564,7 @@ describe "src/cy/commands/querying", ->
         cy.contains("button").should("not.exist")
 
       it "throws when assertion is have.length > 1", (done) ->
-        logs = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log)
-
-        cy.on "fail", (err) ->
+        cy.on "fail", (err) =>
           expect(@logs.length).to.eq 1
           expect(err.message).to.eq "cy.contains() cannot be passed a length option because it will only ever return 1 element."
           done()
@@ -1618,34 +1572,34 @@ describe "src/cy/commands/querying", ->
         cy.contains("Nested Find").should("have.length", 2)
 
       it "restores contains even when cy.get fails", (done) ->
-        contains = $.expr[":"].contains
+        contains = Cypress.$Cypress.$.expr[":"].contains
 
-        cyExecute = cy.execute
+        cyNow = cy.now
 
         cy.on "fail", (err) ->
           expect(err.message).to.include("Syntax error, unrecognized expression")
-          expect($.expr[":"].contains).to.eq(contains)
+          expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
           done()
 
-        execute = ->
-          cyExecute.call(@, "get", "aBad:jQuery^Selector", {})
-
-        @sandbox.stub(cy, "execute", execute)
+        cy.stub(cy, "now").callsFake ->
+          cyNow("get", "aBad:jQuery^Selector", {})
 
         cy.contains(/^asdf \d+/)
 
       it "restores contains on abort", (done) ->
-        @timeout(1000)
+        cy.timeout(1000)
 
-        contains = $.expr[":"].contains
+        contains = Cypress.$Cypress.$.expr[":"].contains
 
-        cy.on "cancel", ->
+        cy.stub(Cypress.runner, "stop")
+
+        cy.on "stop", ->
           _.delay ->
-            expect($.expr[":"].contains).to.eq(contains)
+            expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
             done()
           , 50
 
         cy.on "command:retry", _.after 2, ->
-          @Cypress.abort()
+          Cypress.stop()
 
         cy.contains(/^does not contain asdfasdf at all$/)

@@ -2,6 +2,8 @@ _ = require("lodash")
 
 $utils = require("../cypress/utils")
 
+validAliasApiRe = /^(\d+|all)$/
+
 lastXhrNotWaitedOn = (state, alias, prop) ->
   ## find the last request or response
   ## which hasnt already been used.
