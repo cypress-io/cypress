@@ -384,7 +384,7 @@ describe "src/cy/commands/window", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(2)
+          expect(@logs.length).to.eq(2)
           expect(err.message).to.include(lastLog.get("error").message)
           done()
 

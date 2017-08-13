@@ -386,8 +386,8 @@ describe "src/cy/commands/actions/select", ->
             types.push(log)
 
         cy.get("select:first").select("de_dust2").then ->
-          expect(@logs).to.have.length(2)
-          expect(types).to.have.length(1)
+          expect(@logs.length).to.eq(2)
+          expect(types.length).to.eq(1)
 
       it "logs deltaOptions", ->
         cy.get("select:first").select("de_dust2", {force: true, timeout: 1000}).then ->

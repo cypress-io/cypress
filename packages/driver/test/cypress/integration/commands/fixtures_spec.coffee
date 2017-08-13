@@ -56,7 +56,7 @@ describe "src/cy/commands/fixtures", ->
         return null
 
       it "throws if fixturesFolder is set to false", (done) ->
-        cy.stub(Cypress, "config").withArgs("fixturesFolder").returns(false)
+        Cypress.config("fixturesFolder", false)
 
         cy.on "fail", =>
           lastLog = @lastLog
