@@ -123,8 +123,9 @@ describe "src/cy/commands/actions/focus", ->
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-          @logs.push(log)
+          if attrs.name is "focus"
+            @lastLog = log
+            @logs.push(log)
 
         return null
 
@@ -164,10 +165,7 @@ describe "src/cy/commands/actions/focus", ->
         cy
           .get("input:first").focus()
           .get("button:first").focus().then ->
-            names = _.map @logs, (log) ->
-              log.get("name")
-            expect(@logs).to.have.length(4)
-            expect(names).to.deep.eq ["get", "focus", "get", "focus"]
+            expect(@logs.length).to.eq(2)
 
       it "#consoleProps", ->
         cy.get("input:first").focus().then ($input) ->
@@ -230,7 +228,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -434,8 +432,9 @@ describe "src/cy/commands/actions/focus", ->
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-          @logs.push(log)
+          if attrs.name is "blur"
+            @lastLog = log
+            @logs.push(log)
 
         return null
 
@@ -469,10 +468,7 @@ describe "src/cy/commands/actions/focus", ->
       it "logs 1 blur event", ->
         cy
           .get("input:first").focus().blur().then ->
-            names = _.map @logs, (log) ->
-              log.get("name")
-            expect(@logs).to.have.length(3)
-            expect(names).to.deep.eq ["get", "focus", "blur"]
+            expect(@logs.length).to.eq(1)
 
       it "logs delta options for {force: true}", ->
         cy
@@ -564,7 +560,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 

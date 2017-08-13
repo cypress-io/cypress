@@ -444,8 +444,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       fn.call cy.state("runnable").ctx, subject
 
-      stop = =>
-        @off "command:start", setWithinSubject
+      cleanup = ->
+        cy.removeListener("command:start", setWithinSubject)
 
       ## we need a mechanism to know when we should remove
       ## our withinSubject so we dont accidentally keep it
@@ -463,23 +463,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## resetting withinSubject more than once.  If they point
         ## to differnet 'next's then its okay
         if next isnt cy.state("nextWithinSubject")
-          cy.state "withinSubject", prevWithinSubject or null
-          cy.state "nextWithinSubject", next
+          cy.state("withinSubject", prevWithinSubject or null)
+          cy.state("nextWithinSubject", next)
 
         ## regardless nuke this listeners
-        stop()
+        cleanup()
 
       ## if next is defined then we know we'll eventually
       ## unbind these listeners
       if next
-        @on("command:start", setWithinSubject)
+        cy.on("command:start", setWithinSubject)
       else
         ## remove our listener if we happen to reach the end
         ## event which will finalize cleanup if there was no next obj
-        ## TODO: handle this 'end' event
-        @once "end", ->
-          stop()
-          cy.state "withinSubject", null
+        cy.once "command:queue:end", ->
+          cleanup()
+
+          cy.state("withinSubject", null)
 
       return subject
   })

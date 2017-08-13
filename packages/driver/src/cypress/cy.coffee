@@ -696,9 +696,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## if we're at the very end
         if not command
 
-          ## trigger end event
-          ## TODO: handle this 'end' event
-          # trigger("end")
+          ## trigger queue is finished
+          Cypress.action("cy:command:queue:end")
 
           return null
 
