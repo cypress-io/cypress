@@ -4,7 +4,6 @@ _ = require("lodash")
 HISTORY_ATTRS = "pushState replaceState".split(" ")
 
 events = []
-$win = null
 listenersAdded = null
 
 removeAllListeners = ->
@@ -25,12 +24,6 @@ addListener = (win, event, cb) ->
 
   win.addEventListener(event, cb)
 
-reset = ->
-  if $win
-    $win.get(0).onerror = null
-    $win.off()
-    $win = null
-
 eventHasReturnValue = (e) ->
   val = e.returnValue
 
@@ -45,7 +38,7 @@ module.exports = {
   bindTo: (contentWindow, callbacks = {}) ->
     return if listenersAdded
 
-    reset()
+    removeAllListeners()
 
     listenersAdded = true
 
@@ -78,17 +71,12 @@ module.exports = {
 
           callbacks.onNavigation(attr, args)
 
-    $win = $(contentWindow)
-
-    ## using the native submit method will not trigger a
-    ## beforeunload event synchronously so we must bind
-    ## to the submit event to know we're about to navigate away
-    $win.on "submit", (e) ->
+    addListener contentWindow, "submit", (e) ->
       ## if we've prevented the default submit action
       ## without stopping propagation, we will still
       ## receive this event even though the form
       ## did not submit
-      return if e.isDefaultPrevented()
+      return if e.defaultPrevented
 
       ## else we know to proceed onwards!
       callbacks.onSubmit(e)

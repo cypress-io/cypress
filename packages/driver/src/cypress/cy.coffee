@@ -119,8 +119,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## if need be
         cy.onUncaughtException.apply(cy, arguments)
       onSubmit: (e) ->
+        Cypress.action("app:form:submitted", e)
       onBeforeUnload: (e) ->
-        debugger
         stability.isStable(false, "beforeunload")
 
         Cookies.setInitial()
@@ -343,10 +343,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## we are done isLoading
           # pageLoading(false)
 
-          ## we are now stable again
-          stability.isStable(true, "load")
-
           Cypress.action("app:window:load", state("window"))
+
+          ## we are now stable again which is purposefully
+          ## the last event we call here, to give our event
+          ## listeners time to be invoked prior to moving on
+          stability.isStable(true, "load")
         catch err
           ## catch errors associated to cross origin iframes
           if ready = state("ready")
@@ -696,10 +698,17 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## if we're at the very end
         if not command
 
-          ## trigger queue is finished
-          Cypress.action("cy:command:queue:end")
+          ## trigger queue is almost finished
+          Cypress.action("cy:command:queue:before:end")
 
-          return null
+          ## we need to wait after all commands have
+          ## finished running if the application under
+          ## test is no longer stable because we cannot
+          ## move onto the next test until its finished
+          return stability.whenStable ->
+            Cypress.action("cy:command:queue:end")
+
+            return null
 
         ## store the previous timeout
         prevTimeout = timeouts.timeout()
@@ -764,7 +773,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state("current", command)
       state("chainerId", command.get("chainerId"))
 
-      .then =>
+      stability.whenStable ->
         ## TODO: handle this event
         # @trigger "invoke:start", command
 

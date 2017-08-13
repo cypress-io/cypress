@@ -125,6 +125,20 @@ navigationChanged = (Cypress, cy, state, source, arg) ->
       return obj
   })
 
+formSubmitted = (Cypress, e) ->
+  Cypress.log({
+    type: "parent"
+    name: "form sub"
+    message: "--submitting form--"
+    event: true
+    end: true
+    snapshot: true
+    consoleProps: -> {
+      "Originated From": e.target
+      "Args": e
+    }
+  })
+
 pageLoading = (bool, state) ->
   return if state("pageLoading") is bool
 
@@ -172,15 +186,12 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     timeout: config("pageLoadTimeout")
   })
 
-  options._log = Cypress.log
+  options._log = Cypress.log({
     type: "parent"
     name: "page load"
     message: "--waiting for new page to load--"
     event: true
-    ## add a note here that loading nulled out the current subject?
-    consoleProps: -> {
-      "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
-    }
+  })
 
   cy.clearTimeout("page load")
 
@@ -226,6 +237,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Cypress.on "navigation:changed", (source, arg) ->
     navigationChanged(Cypress, cy, state, source, arg)
+
+  Cypress.on "form:submitted", (e) ->
+    formSubmitted(Cypress, e)
 
   visitFailedByErr = (err, url, fn) ->
     err.url = url
@@ -675,24 +689,3 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return null
   })
-
-  return {
-    submitting: (e, options = {}) ->
-      ## even though our beforeunload event
-      ## should be firing shortly, lets just
-      ## set the pageChangeEvent to true because
-      ## there may be situations where it doesnt
-      ## fire fast enough
-      state("pageChangeEvent", true)
-
-      Cypress.log
-        type: "parent"
-        name: "form sub"
-        message: "--submitting form---"
-        event: true
-        end: true
-        snapshot: true
-        consoleProps: -> {
-          "Originated From": e.target
-        }
-  }

@@ -1,5 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
+Promise = Cypress.Promise
 
 describe "src/cy/commands/actions/form", ->
   before ->
@@ -96,17 +97,33 @@ describe "src/cy/commands/actions/form", ->
           expect(beforeunload).to.be.true
 
     ## if we removed our submit handler this would fail.
-    it "does not resolve the submit command because submit event is captured setting isReady to false", ->
+    it "fires 'form:submitted event'", ->
+      $form = cy.$$("form:first")
       ## we must rely on isReady already being pending here
       ## because the submit method does not trigger beforeunload
       ## synchronously.
 
-      cy.on "command:returned:value", (cmd, ret) =>
-        if cmd.get("name") is "submit"
-          ## expect our isReady to be pending
-          expect(@state("ready").promise.isPending()).to.be.true
+      submitted = false
 
-      cy.get("form:first").submit()
+      cy.on "form:submitted", (e) ->
+        submitted = true
+        expect(e.target).to.eq($form.get(0))
+
+      cy.get("form:first").submit().then ->
+        expect(submitted).to.be.true
+
+    it "does not fire 'form:submitted' if default action is prevented", ->
+      submitted = false
+
+      cy.on "form:submitted", (e) ->
+        submitted = true
+
+      cy.$$("form:first").on "submit", (e) ->
+        e.preventDefault()
+
+      cy
+        .get("form:first").submit().then ->
+          expect(submitted).to.be.false
 
     it "delays 50ms before resolving", ->
       cy.$$("form:first").on "submit", (e) =>
@@ -208,7 +225,7 @@ describe "src/cy/commands/actions/form", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(@logs).to.have.length(1)
+          expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -239,7 +256,7 @@ describe "src/cy/commands/actions/form", ->
 
         cy.get("form:first").submit().should("have.class", "submitted")
 
-    describe ".log", ->
+    describe.only ".log", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
           if log.get("name") is "submit"
@@ -248,12 +265,12 @@ describe "src/cy/commands/actions/form", ->
         return null
 
       it "logs immediately before resolving", ->
-        form = cy.$$("form:first")
+        $form = cy.$$("form:first")
 
         cy.on "log:added", (attrs, log) =>
           if log.get("name") is "submit"
             expect(log.get("state")).to.eq("pending")
-            expect(log.get("$el").get(0)).to.eq form.get(0)
+            expect(log.get("$el").get(0)).to.eq $form.get(0)
 
         cy.get("form:first").submit()
 
@@ -266,18 +283,22 @@ describe "src/cy/commands/actions/form", ->
           expect(lastLog.get("name")).to.eq "submit"
           expect(lastLog.get("$el")).to.match $form
 
-      it "snapshots before submitted", (done) ->
+      it "snapshots before submitted", ->
+        expected = false
+
         cy.$$("form:first").submit -> return false
 
         cy.$$("form").first().submit =>
           lastLog = @lastLog
 
+          expected = true
+
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0].name).to.eq("before")
           expect(lastLog.get("snapshots")[0].body).to.be.an("object")
-          done()
 
-        cy.get("form").first().submit()
+        cy.get("form").first().submit().then ->
+          expect(expected).to.be.true
 
       it "snapshots after submitting", ->
         cy.$$("form:first").submit -> return false

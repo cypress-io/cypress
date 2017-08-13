@@ -1487,6 +1487,25 @@ describe "src/cy/commands/navigation", ->
 
               expect(subject.get(0)).to.eq($input.get(0))
 
+    it "waits for stability at the end of the command queue when not stable", (done) ->
+      cy
+      .visit("/fixtures/generic.html")
+      .then (win) ->
+        cy.on "window:load", ->
+          cy.on "command:queue:end", ->
+            done()
+
+        cy.on "command:queue:before:end", ->
+          ## force us to become unstable immediately
+          ## else the beforeunload event fires at the end
+          ## of the tick which is too late
+          cy.isStable(false, "testing")
+
+          ## this should cause instability
+          win.location.href = "/timeout?ms=100"
+
+        null
+
   context "#url:changed", ->
     beforeEach ->
       @logs = []
@@ -1639,6 +1658,7 @@ describe "src/cy/commands/navigation", ->
               "url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
+
       it "logs url changed event", ->
         cy
           .visit("/fixtures/generic.html")
@@ -1765,4 +1785,40 @@ describe "src/cy/commands/navigation", ->
                 null,
                 "replaceState.html",
               ]
+            })
+
+  context "#form sub", ->
+    beforeEach ->
+      @logs = []
+
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "form sub"
+          @lastLog = log
+
+          @logs.push(log)
+
+      return null
+
+    it "logs 'form sub'", ->
+      event = null
+
+      cy
+        .visit("/fixtures/form.html")
+        .then ->
+          $form = cy.$$("#click-me").on "submit", (e) ->
+            event = e.originalEvent
+
+          cy
+          .get("#click-me").find("input[type=submit]").click()
+          .then ->
+            expect(@logs.length).to.eq(1)
+
+            expect(@logs[0].get("message")).to.eq(
+              "--submitting form--"
+            )
+
+            expect(@logs[0].invoke("consoleProps")).to.deep.eq({
+              "Event": "form sub"
+              "Originated From": $form.get(0)
+              "Args": event
             })

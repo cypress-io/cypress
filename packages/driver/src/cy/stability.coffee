@@ -6,32 +6,13 @@ tryFn = (fn) ->
 
 create = (Cypress, state) ->
   isStable = (bool = true, event) ->
-      # if whenReady = state("whenReady")
-        # whenReady()
-
-    #   ## we set recentlyReady to true
-    #   ## so we dont accidently set isReady
-    #   ## back to false in between commands
-    #   ## which are async
-    #   state("recentlyReady", true)
-    #
-    #   if ready = state("ready")
-    #     if ready.promise.isPending()
-    #       ready.promise.then =>
-    #         @trigger "ready", true
-    #
-    #         ## prevent accidential chaining
-    #         ## .this after isReady resolves
-    #         return null
-    #
-    #   return ready?.resolve()
-
-    ## if we already have a ready object and
-    ## its state is pending just leave it be
-    ## and dont touch it
-    # return if state("ready") and state("ready").promise.isPending()
-
     return if state("isStable") is bool
+
+    ## if we are going back to stable and we have
+    ## a whenStable callback
+    if bool and whenStable = state("whenStable")
+      ## invoke it
+      whenStable()
 
     state("isStable", bool)
 
@@ -42,16 +23,9 @@ create = (Cypress, state) ->
   whenStable = (fn) ->
     ## if we are not stable
     if state("isStable") is false
-      debugger
       return new Promise (resolve) ->
         ## then when we become stable
         state "whenStable", ->
-
-          debugger
-
-          ## reset us back to stable
-          state("isStable", true)
-
           ## reset this callback function
           state("whenStable", null)
 

@@ -21,11 +21,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       form = options.$el.get(0)
 
       if options.log
-        options._log = Cypress.log
+        options._log = Cypress.log({
           $el: options.$el
           consoleProps: ->
             "Applied To": $utils.getDomElements(options.$el)
             Elements: options.$el.length
+        })
 
         options._log.snapshot("before", {next: "after"})
 

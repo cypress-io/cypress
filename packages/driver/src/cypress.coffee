@@ -322,6 +322,9 @@ class $Cypress
       when "cy:command:enqueued"
         @emit("command:enqueued", args[0])
 
+      when "cy:command:queue:before:end"
+        @emit("command:queue:before:end")
+
       when "cy:command:queue:end"
         @emit("command:queue:end")
 
@@ -344,6 +347,9 @@ class $Cypress
 
       when "app:navigation:changed"
         @emit("navigation:changed", args...)
+
+      when "app:form:submitted"
+        @emit("form:submitted", args[0])
 
       when "app:window:load"
         @emit("window:load", args[0])
