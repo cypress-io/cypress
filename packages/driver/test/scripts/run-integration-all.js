@@ -1,13 +1,19 @@
 /* eslint-disable no-console */
 
+require('@packages/coffee/register')
+
 const cp = require('child_process')
 const path = require('path')
+const minimist = require('minimist')
 const Promise = require('bluebird')
+
+const humanTime = require('../../../server/lib/util/human_time.coffee')
 
 const glob = Promise.promisify(require('glob'))
 
-const actions = process.argv.includes('--actions')
-const noActions = process.argv.includes('--no-actions')
+const options = minimist(process.argv.slice(2))
+
+const started = new Date()
 
 let numFailed = 0
 
@@ -21,12 +27,16 @@ function spawn (cmd, args, opts) {
 
 glob('test/cypress/integration/**/*.coffee')
 .filter((spec) => {
-  if (actions) {
+  if (options.actions) {
     return spec.includes('actions')
   }
 
-  if (noActions) {
+  if (options.actions === false) {
     return !spec.includes('actions')
+  }
+
+  if (options.spec) {
+    return spec.includes(options.spec)
   }
 
   return spec
@@ -57,5 +67,10 @@ glob('test/cypress/integration/**/*.coffee')
   })
 })
 .then(() => {
+  const duration = new Date() - started
+
+  console.log('Total duration:', humanTime(duration))
+  console.log('Exiting with final code:', numFailed)
+
   process.exit(numFailed)
 })

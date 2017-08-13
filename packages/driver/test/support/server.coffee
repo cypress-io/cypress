@@ -1,4 +1,5 @@
 _         = require("lodash")
+fs        = require("fs")
 bodyParser = require("body-parser")
 express   = require("express")
 http      = require("http")
