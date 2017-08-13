@@ -287,6 +287,12 @@ workflows:
       - driver-unit-tests:
           requires:
             - build
+      - driver-integration-tests-1:
+          requires:
+            - build
+      - driver-integration-tests-2:
+          requires:
+            - build
       - build-binary:
           requires:
             - build
