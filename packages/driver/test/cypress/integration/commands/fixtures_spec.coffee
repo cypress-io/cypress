@@ -45,6 +45,21 @@ describe "src/cy/commands/fixtures", ->
     it "really works", ->
       cy.fixture("example").should("deep.eq", { example: true })
 
+    it "looks for csv without extension", ->
+      cy.fixture("comma-separated").should "equal", """
+        One,Two,Three
+        1,2,3
+
+      """
+
+    it "handles files with unknown extensions, reading them as utf-8", ->
+      cy.fixture("yaml.yaml").should "equal", """
+        - foo
+        - bar
+        - 
+
+      """
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)
@@ -72,12 +87,9 @@ describe "src/cy/commands/fixtures", ->
 
         cy.fixture("foo")
 
-      it "throws if response contains __error key", (done) ->
-        err = new Error("some error")
-
-        Cypress.backend.withArgs("get:fixture").rejects(err)
-
+      it "throws when fixture cannot be found without extension", (done) ->
         cy.on "fail", (err) =>
+          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -85,9 +97,29 @@ describe "src/cy/commands/fixtures", ->
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq "fixture"
           expect(lastLog.get("message")).to.eq "err"
+
+          expect(err.message).to.include "No fixture file found with an acceptable extension. Searched in:"
+          expect(err.message).to.include "cypress/fixtures/err"
           done()
 
         cy.fixture("err")
+
+      it "throws when fixture cannot be found with extension", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          debugger
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(lastLog.get("name")).to.eq "fixture"
+          expect(lastLog.get("message")).to.eq "err.txt"
+
+          expect(err.message).to.include "No fixture exists at:"
+          expect(err.message).to.include "cypress/fixtures/err.txt"
+          done()
+
+        cy.fixture("err.txt")
 
       it "throws after timing out", (done) ->
         Cypress.backend.withArgs("get:fixture").resolves(Promise.delay(1000))
