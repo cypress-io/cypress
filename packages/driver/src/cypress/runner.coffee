@@ -744,11 +744,9 @@ create = (mocha, Cypress) ->
       $Log.setCounter(num)
 
     getEmissions: ->
-      debugger
       _emissions
 
     getTestsState: ->
-      debugger
       id    = _test?.id
       tests = {}
 
