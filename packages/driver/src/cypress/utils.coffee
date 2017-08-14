@@ -30,7 +30,8 @@ module.exports = {
     console.info(msgs...)
 
   cloneErr: (err) ->
-    err2 = @cypressErr(err.message)
+    err2 = new Error(err.message)
+    err2.name = err.name
 
     for own prop, val of err
       if not err2[prop]
