@@ -69,6 +69,13 @@ Any and all. Ruby, Node, C#, PHP - none of that matters. Cypress tests anything 
 
 You'll write your tests in JavaScript, but beyond that Cypress works everywhere.
 
+## {% fa fa-angle-right %} Can I run cypress on another browser other than Chrome?
+
+You can read about our currently available browsers {% url "here" launching-browsers %}.
+
+## {% fa fa-angle-right %} Is it possible to use cypress on `.jspa`?
+Yes. Cypress works on anything rendered to a browser.
+
 ## {% fa fa-angle-right %} Will Cypress work in my CI provider?
 
 Cypress works in any {% url "CI provider" continuous-integration %}.
@@ -117,6 +124,14 @@ No. In fact Cypress' architecture is very different from Selenium in a few criti
 ## {% fa fa-angle-right %} Are there driver bindings in my language?
 
 Cypress does *not* utilize WebDriver for testing, so does not use or have any notion of driver bindings.
+
+## {% fa fa-angle-right %} So what benefits would one get for converting one's unit tests from Karma or Jest to Cypress?
+
+Unit tests are not something we are really trying to solve right now. Most of the `cy` API commands are useless in unit tests. The biggest benefit of writing unit tests in Cypress is that they run in a browser, which has debugger support built in.
+
+We have internally experimented at doing DOM based component unit testing in Cypress - and that has the possibility of being an excellent "sweet spot" for unit tests. You'd get full DOM support, screenshot support, snapshot testing, and you could then use other `cy` commands (if need be). But as I mentioned this isn't something we're actively pushing, it just remains a thing that's possible if we wanted to go down that route.
+
+With that said - we actually believe the best form of testing in Cypress is a combination of a "unit test" mixed with an "e2e test". We don't believe in a "hands off" approach. We want you to modify the state of your application, take shortcuts as much as possible (because you have native access to all objects including your app). In other words, we want you to think in unit tests while you write integration tests.
 
 ## {% fa fa-angle-right %} Is Cypress open source?
 

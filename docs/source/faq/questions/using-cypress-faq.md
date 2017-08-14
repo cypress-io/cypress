@@ -195,40 +195,36 @@ If it's just an anchor that initiates the download, you could just test that it 
 
 In the end, it's up to you to know your implementation and to test just enough to cover everything.
 
+## {% fa fa-angle-right %} Is is possible to catch the promise chain in Cypress?
 
-<!-- ## How do I make Cypress wait for an XHR request? -->
+No. You cannot add a `.catch` error handler to a failed command. {% url "Read more about how the Cypress commands are not Promises" introduction-to-cypress#Commands-Are-Not-Promises %}
 
-<!-- ## is there CLI option to run in chrome? Or is electron the only way to run headlessly? -->
+## {% fa fa-angle-right %} Is there a way to modify the screenshots/video resolution?
 
-<!-- ## How do I make conditional based assertions / control flow? -->
+Not at the moment. {% issue 587 "There is an open issue for this." %}
 
+## {% fa fa-angle-right %} Does Cypress support ES7?
 
-<!-- ## How do I run my tests in another browser? -->
+Not currently. It uses {% url "browserify" http://browserify.org/ %} and {% url "babelify" https://github.com/babel/babelify %} with the presets/plugins are hard-coded. {% issue 343 "There is an open issue for making this configurable." %}
 
+## {% fa fa-angle-right %} How does one determine what the latest version of Cypress is?
 
-<!-- ## Where do I get the key to run my tests in CI? -->
+There are a few ways.
 
+- The easiest way is probably to check our {% url "changelog" changelog %}.
+- You can also check the latest version {% url "here" https://download.cypress.io/desktop.json %}.
+- Once we're open source (soon!), we'll have it tagged in the {% url "repo" https://github.com/cypress-io/cypress %}.
 
-<!-- ## Can I create more than one key for CI? -->
+## {% fa fa-angle-right %} Is there an ESLint plugin for Cypress or a list of globals?
 
+`describe/it/beforeEach`, etc globals come from {% url "Mocha" https://mochajs.org/ %}. So you can use ESLint plugins for Mocha like {% url "this one" https://www.npmjs.com/package/eslint-plugin-mocha %}.
 
-<!-- ## I have an app that needs to be tested across multiple user sessions, like a chat app across 2 browsers. How do I test that? -->
+## When I visit my site directly, the certificate is verified, however the browser launched through Cypress is showing it as "Not Secure". Why?
 
+This is normal. Cypress modifies the traffic between your server and the browser. The browser notices this and displays a certificate warning. However, this is purely cosmetic and does not alter the way your application under test runs in any way, so you can safely ignore this warning.
 
-<!-- ## I want to test clicking a link that navigates, how do I wait and check the resulting location url? -->
+## Is there an option to run Cypress with DevTools open? We want to track network and console issues.
 
+No. This is definitely the motivation behind {% issue 448 "this open issue" %}, but there is not a way to run Cypress headlessly with DevTools open. 
 
-<!-- ## Is there a way to watch for an xhr request and assert that the response code came back a certain way? -->
-
-
-<!-- ## I’m running a lot of tests that appear to slow down as they run, is there a way to fix this? -->
-
-
-<!-- ## How do I pass data to my webserver from Cypress? -->
-
-<!-- ## How do I test drag-n-drop? -->
-
-
-<!-- ## How do I wait for an element not to exist? -->
-
-<!-- ## How do I do different things depending on what’s currently in the dom/url/cookies/localstore? -->
+You may try running the tests locally and {% url "select the Electron browser" launching-browsers#Electron-Browser %}, that's as close as you'll get with DevTools open and replicating the environment that was run headlessly.
