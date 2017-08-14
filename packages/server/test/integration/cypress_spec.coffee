@@ -211,8 +211,9 @@ describe "lib/cypress", ->
       statePath = null
       beforeEach ->
         # TODO switch to async file system calls
-        statePath = appData.path(formStatePath(@todosPath))
+        statePath = appData.projectsPath(formStatePath(@todosPath))
         rm(statePath) if exists(statePath)
+
       afterEach ->
         rm(statePath)
 
