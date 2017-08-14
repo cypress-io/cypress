@@ -1,5 +1,6 @@
 $ = require("jquery")
 _ = require("lodash")
+moment = require("moment")
 
 $Location = require("./location")
 errorMessages = require("./error_messages")

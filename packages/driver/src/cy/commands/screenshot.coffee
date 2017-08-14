@@ -1,5 +1,4 @@
 _ = require("lodash")
-moment = require("moment")
 Promise = require("bluebird")
 
 $Log = require("../../cypress/log")

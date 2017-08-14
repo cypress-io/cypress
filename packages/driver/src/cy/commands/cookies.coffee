@@ -1,6 +1,5 @@
 _ = require("lodash")
 Promise = require("bluebird")
-moment = require("moment")
 
 $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
@@ -218,8 +217,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps: ->
             obj = {}
 
-            debugger
-
             obj["Yielded"] = "null"
 
             if (c = options.cookies) and c.length
@@ -233,7 +230,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getAndClear(options._log, options.timeout)
       .then (resp) ->
-        debugger
         options.cookies = resp
 
         ## null out the current subject
