@@ -1,7 +1,7 @@
 count        = 0
-onBeforeLoad = Cypress.onBeforeLoad
+onBeforeLoad = Cypress.action(
 
-Cypress.onBeforeLoad = ->
+Cypress.action( = ->
   count += 1
 
   onBeforeLoad.apply(@, arguments)

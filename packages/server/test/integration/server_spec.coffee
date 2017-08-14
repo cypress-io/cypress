@@ -129,7 +129,7 @@ describe "Server", ->
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("index.html content")
             expect(res.body).to.include("document.domain = 'localhost'")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script>\n  </head>")
 
       it "sends back the content type", ->
         @server._onResolveUrl("/assets/foo.json", {}, @automationRequest)
@@ -313,7 +313,7 @@ describe "Server", ->
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'getbootstrap.com'")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script> </head>content</html>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script> </head>content</html>")
 
       it "sends back the content type", ->
         nock("http://getbootstrap.com")
@@ -373,7 +373,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'go.com'")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script> </head>content</html>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script> </head>content</html>")
 
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "http://espn.go.com"
@@ -450,7 +450,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("go.com")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>espn</body></html>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script></head><body>espn</body></html>")
             expect(buffers.keys()).to.deep.eq([])
 
       it "does not buffer 'bad' responses", ->
@@ -698,7 +698,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("google.com")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>google</body></html>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script></head><body>google</body></html>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://www.google.com"
@@ -733,7 +733,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://localhost:2000"
@@ -763,7 +763,7 @@ describe "Server", ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("google.com")
-              expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>google</body></html>")
+              expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script></head><body>google</body></html>")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "http://www.google.com"
@@ -800,7 +800,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("foobar.com")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>https server</body></html>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script></head><body>https server</body></html>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "https://www.foobar.com:8443"
@@ -835,7 +835,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://localhost:2000"
@@ -865,7 +865,7 @@ describe "Server", ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("foobar.com")
-              expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>https server</body></html>")
+              expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script></head><body>https server</body></html>")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "https://www.foobar.com:8443"
@@ -946,7 +946,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
-            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:before:window:load', window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://localhost:2000"
