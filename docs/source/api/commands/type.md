@@ -336,7 +336,7 @@ Any modifiers activated for the event are also listed in a `modifiers` column.
 
 Tabbing will be implemented as a separate command as `.tab()` and support things like multiple tabs, tabbing in reverse, or tabbing to a specific element. {% open_an_issue %} if you need this to be fixed.
 
-## Modifies
+## Modifiers
 
 ***Modifier effects***
 
