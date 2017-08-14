@@ -366,12 +366,9 @@ class $Cypress
   backend: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->
-        ## TODO: normalize this to reply.error and reply.response
         if e = reply.error
-          err = $utils.cypressErr(e.message)
-          err.name = e.name
-          err.stack = e.stack
-
+          err = $utils.cloneErr(e)
+          err.backend = true
           reject(err)
         else
           resolve(reply.response)
@@ -382,12 +379,9 @@ class $Cypress
     ## wrap action in promise
     new Promise (resolve, reject) =>
       fn = (reply) ->
-        ## TODO: normalize this to reply.error and reply.response
-        if e = reply.__error
-          err = $utils.cypressErr(e)
-          err.name = reply.__name
-          err.stack = reply.__stack
-
+        if e = reply.error
+          err = $utils.cloneErr(e)
+          err.automation = true
           reject(err)
         else
           resolve(reply.response)

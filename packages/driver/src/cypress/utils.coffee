@@ -28,6 +28,15 @@ module.exports = {
   logInfo: (msgs...) ->
     console.info(msgs...)
 
+  cloneErr: (err) ->
+    err2 = @cypressErr(err.message)
+
+    for own prop, val of err
+      if not err2[prop]
+        err2[prop] = val
+
+    return err2
+
   throwErr: (err, options = {}) ->
     if _.isString(err)
       err = @cypressErr(err)

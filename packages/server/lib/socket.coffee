@@ -96,12 +96,6 @@ class Socket
     ## are handled by the spec controller
     .catch ->
 
-  onExec: (projectRoot, options, cb) ->
-    exec.run(projectRoot, options)
-    .then(cb)
-    .catch (err) ->
-      cb({__error: err.message, timedout: err.timedout})
-
   toReporter: (event, data) ->
     @io and @io.to("reporter").emit(event, data)
 
@@ -219,7 +213,7 @@ class Socket
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
-          cb({__error: err.message, __name: err.name, __stack: err.stack})
+          cb({error: errors.clone(err)})
 
       socket.on "reporter:connected", =>
         return if socket.inReporterRoom

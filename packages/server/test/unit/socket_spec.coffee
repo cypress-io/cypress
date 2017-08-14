@@ -168,7 +168,7 @@ describe "lib/socket", ->
           @extClient.disconnect()
 
           @client.emit "automation:request", "get:cookies", {domain: "foo"}, (resp) ->
-            expect(resp.__error).to.eq("Could not process 'get:cookies'. No automation clients connected.")
+            expect(resp.error.message).to.eq("Could not process 'get:cookies'. No automation clients connected.")
             done()
 
         it "returns true when tab matches magic string", (done) ->
@@ -325,41 +325,29 @@ describe "lib/socket", ->
 
         @client.emit "app:connect", "sid-123"
 
-    context "on(fixture)", ->
-      it "calls socket#onFixture", (done) ->
-        onFixture = @sandbox.stub(@socket, "onFixture").yieldsAsync("bar")
-
-        @client.emit "fixture", "foo", {}, (resp) =>
-          expect(resp).to.eq("bar")
-
-          ## ensure onFixture was called with those same arguments
-          ## therefore we have verified the socket binding and
-          ## the call into onFixture with the proper arguments
-          expect(onFixture).to.be.calledWith(@cfg, "foo")
+    context "on(get:fixture)", ->
+      it "returns the fixture object", (done) ->
+        cb = (resp) ->
+          expect(resp.response).to.deep.eq([
+            { "json": true }
+          ])
           done()
 
-      it "returns the fixture object", ->
-        cb = @sandbox.spy()
+        @client.emit("backend:request", "get:fixture", "foo", cb)
 
-        @socket.onFixture(@cfg, "foo", {}, cb).then ->
-          expect(cb).to.be.calledWith [
-            {"json": true}
-          ]
+      it "errors when fixtures fails", (done) ->
+        cb = (resp) ->
+          expect(resp.error.message).to.include "No fixture exists at:"
+          done()
 
-      it "errors when fixtures fails", ->
-        cb = @sandbox.spy()
+        @client.emit("backend:request", "get:fixture", "does-not-exist.txt", {}, cb)
 
-        @socket.onFixture(@cfg, "does-not-exist.txt", {}, cb).then ->
-          obj = cb.getCall(0).args[0]
-          expect(obj).to.have.property("__error")
-          expect(obj.__error).to.include "No fixture exists at:"
-
-    context "on(request)", ->
+    context "on(http:request)", ->
       it "calls socket#onRequest", (done) ->
         @sandbox.stub(@options, "onRequest").resolves({foo: "bar"})
 
-        @client.emit "request", "foo", (resp) ->
-          expect(resp).to.deep.eq({foo: "bar"})
+        @client.emit "backend:request", "http:request", "foo", (resp) ->
+          expect(resp.response).to.deep.eq({foo: "bar"})
 
           done()
 
@@ -368,8 +356,8 @@ describe "lib/socket", ->
 
         @sandbox.stub(@options, "onRequest").rejects(err)
 
-        @client.emit "request", "foo", (resp) ->
-          expect(resp).to.deep.eq({__error: errors.clone(err)})
+        @client.emit "backend:request", "http:request", "foo", (resp) ->
+          expect(resp.error).to.deep.eq(errors.clone(err))
 
           done()
 
@@ -377,9 +365,9 @@ describe "lib/socket", ->
       it "calls exec#run with project root and options", (done) ->
         run = @sandbox.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
 
-        @client.emit "exec", { cmd: "ls" }, (resp) =>
+        @client.emit "backend:request", "exec", { cmd: "ls" }, (resp) =>
           expect(run).to.be.calledWith(@cfg.projectRoot, { cmd: "ls" })
-          expect(resp).to.eq("Desktop Music Pictures")
+          expect(resp.response).to.eq("Desktop Music Pictures")
           done()
 
       it "errors when execution fails, passing through timedout", (done) ->
@@ -387,9 +375,9 @@ describe "lib/socket", ->
         error.timedout = true
         @sandbox.stub(exec, "run").rejects(error)
 
-        @client.emit "exec", { cmd: "lsd" }, (resp) =>
-          expect(resp.__error).to.equal("command not found: lsd")
-          expect(resp.timedout).to.be.true
+        @client.emit "backend:request", "exec", { cmd: "lsd" }, (resp) =>
+          expect(resp.error.message).to.equal("command not found: lsd")
+          expect(resp.error.timedout).to.be.true
           done()
 
     context "on(save:app:state)", ->
