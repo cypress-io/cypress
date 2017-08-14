@@ -1,6 +1,5 @@
 {
   "baseUrl": "http://localhost:3500",
-  "supportFolder": false,
   "videoRecording": false,
   "hosts": {
     "*.foobar.com": "127.0.0.1"

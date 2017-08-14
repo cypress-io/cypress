@@ -42,6 +42,9 @@ describe "src/cy/commands/fixtures", ->
           encoding: "ascii"
         })
 
+    it "really works", ->
+      cy.fixture("example").should("deep.eq", { example: true })
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)

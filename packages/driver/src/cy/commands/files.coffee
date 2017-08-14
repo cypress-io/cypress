@@ -30,9 +30,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       do verifyAssertions = =>
-        Cypress.automation("read:file", file, _.pick(options, "encoding"))
+        Cypress.backend("read:file", file, _.pick(options, "encoding"))
         .catch (err) =>
-          if err.code is 'ENOENT'
+          if err.code is "ENOENT"
             return {
               contents: null
               filePath: err.filePath
@@ -96,7 +96,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.isObject(contents)
         contents = JSON.stringify(contents, null, 2)
 
-      Cypress.automation("write:file", fileName, contents, _.pick(options, "encoding"))
+      Cypress.backend("write:file", fileName, contents, _.pick(options, "encoding"))
       .then ({ contents, filePath }) ->
         consoleProps["File Path"] = filePath
         consoleProps["Contents"] = contents

@@ -8,31 +8,31 @@ okResponse = {
 describe "src/cy/commands/files", ->
   beforeEach ->
     ## call through normally on everything
-    cy.stub(Cypress, "automation").callThrough()
+    cy.stub(Cypress, "backend").callThrough()
 
   describe "#readFile", ->
     it "triggers 'read:file' with the right options", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.readFile("foo.json").then ->
-        expect(Cypress.automation).to.be.calledWith(
+        expect(Cypress.backend).to.be.calledWith(
           "read:file",
           "foo.json",
           { encoding: "utf8" }
         )
 
     it "can take encoding as second argument", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.readFile("foo.json", "ascii").then ->
-        expect(Cypress.automation).to.be.calledWith(
+        expect(Cypress.backend).to.be.calledWith(
           "read:file",
           "foo.json",
           { encoding: "ascii" }
         )
 
     it "sets the contents as the subject", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.readFile('foo.json').then (subject) ->
         expect(subject).to.equal("contents")
@@ -46,7 +46,7 @@ describe "src/cy/commands/files", ->
       cy.on "command:retry", ->
         retries += 1
 
-      Cypress.automation
+      Cypress.backend
       .onFirstCall()
       .rejects(err)
       .onSecondCall()
@@ -61,7 +61,7 @@ describe "src/cy/commands/files", ->
       cy.on "command:retry", ->
         retries += 1
 
-      Cypress.automation
+      Cypress.backend
       .onFirstCall()
       .resolves({
         contents: "foobarbaz"
@@ -71,8 +71,14 @@ describe "src/cy/commands/files", ->
         contents: "quux"
       })
 
-      cy.readFile('foo.json').should("eq", "quux").then ->
+      cy.readFile("foo.json").should("eq", "quux").then ->
         expect(retries).to.eq(1)
+
+    it "really works", ->
+      cy.readFile("cypress.json").its("baseUrl").should("eq", "http://localhost:3500")
+
+    it "works when contents are supposed to be null", ->
+      cy.readFile("does-not-exist").should("be.null")
 
     describe ".log", ->
       beforeEach ->
@@ -85,7 +91,7 @@ describe "src/cy/commands/files", ->
         return null
 
       it "can turn off logging", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.readFile('foo.json', { log: false }).then ->
           logs = _.filter @logs, (log) ->
@@ -94,7 +100,7 @@ describe "src/cy/commands/files", ->
           expect(logs.length).to.eq(0)
 
       it "logs immediately before resolving", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.on "log:added", (attrs, log) =>
           if attrs.name is "readFile"
@@ -159,7 +165,7 @@ describe "src/cy/commands/files", ->
         err.code = "EISDIR"
         err.filePath = "/path/to/foo"
 
-        Cypress.automation.rejects(err)
+        Cypress.backend.rejects(err)
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -186,7 +192,7 @@ describe "src/cy/commands/files", ->
         err.code = "ENOENT"
         err.filePath = "/path/to/foo.json"
 
-        Cypress.automation.rejects(err)
+        Cypress.backend.rejects(err)
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -204,7 +210,7 @@ describe "src/cy/commands/files", ->
         cy.readFile("foo.json")
 
       it "throws a specific error when file exists when it shouldn't", (done) ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -222,7 +228,7 @@ describe "src/cy/commands/files", ->
         cy.readFile("foo.json").should("not.exist")
 
       it "passes through assertion error when not about existence", (done) ->
-        Cypress.automation.resolves({
+        Cypress.backend.resolves({
           contents: "foo"
         })
 
@@ -239,10 +245,10 @@ describe "src/cy/commands/files", ->
 
   describe "#writeFile", ->
     it "triggers 'write:file' with the right options", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.txt", "contents").then ->
-        expect(Cypress.automation).to.be.calledWith(
+        expect(Cypress.backend).to.be.calledWith(
           "write:file",
           "foo.txt",
           "contents",
@@ -250,10 +256,10 @@ describe "src/cy/commands/files", ->
         )
 
     it "can take encoding as third argument", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.txt", "contents", "ascii").then ->
-        expect(Cypress.automation).to.be.calledWith(
+        expect(Cypress.backend).to.be.calledWith(
           "write:file",
           "foo.txt",
           "contents",
@@ -261,23 +267,23 @@ describe "src/cy/commands/files", ->
         )
 
     it "sets the contents as the subject", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.txt", "contents").then (subject) ->
         expect(subject).to.equal("contents")
 
     it "can write a string", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.txt", "contents")
 
     it "can write an array as json", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.json", [])
 
     it "can write an object as json", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.json", {})
 
@@ -292,7 +298,7 @@ describe "src/cy/commands/files", ->
         return null
 
       it "can turn off logging", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.writeFile("foo.txt", "contents", { log: false }).then ->
           logs = _.filter @logs, (log) ->
@@ -301,7 +307,7 @@ describe "src/cy/commands/files", ->
           expect(logs.length).to.eq(0)
 
       it "logs immediately before resolving", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.on "log:added", (attrs, log) =>
           if attrs.name is "writeFile"
@@ -378,7 +384,7 @@ describe "src/cy/commands/files", ->
         err.code = "WHOKNOWS"
         err.filePath = "/path/to/foo.txt"
 
-        Cypress.automation.rejects(err)
+        Cypress.backend.rejects(err)
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
