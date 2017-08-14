@@ -102,6 +102,16 @@ class $Cypress
     ## slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
+    if not config.isInteractive
+      ## disable long stack traces when
+      ## we are running headlessly for
+      ## performance since users cannot
+      ## interact with the stack traces
+      ## anyway
+      Promise.config({
+        longStackTraces: false
+      })
+
     {environmentVariables, remote} = config
 
     config = _.omit(config, "environmentVariables", "remote")
