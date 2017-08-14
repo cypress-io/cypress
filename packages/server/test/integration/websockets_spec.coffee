@@ -29,8 +29,8 @@ describe "Web Sockets", ->
       @ws = new ws.Server({port: wsPort})
 
       @server = Server()
-      @server.open(@cfg)
 
+      @server.open(@cfg)
       .then =>
         httpsServer.start(wssPort)
       .then (httpsSrv) =>
@@ -165,8 +165,8 @@ describe "Web Sockets", ->
         @wsClient.disconnect()
 
       it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "fixture", "example.json", {}, (data) ->
-          expect(data).to.deep.eq({foo: "bar"})
+        @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
+          expect(data.response).to.deep.eq({foo: "bar"})
           done()
 
     context "when http superDomain has been set", ->
@@ -187,8 +187,8 @@ describe "Web Sockets", ->
         @wsClient.disconnect()
 
       it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "fixture", "example.json", {}, (data) ->
-          expect(data).to.deep.eq({foo: "bar"})
+        @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
+          expect(data.response).to.deep.eq({foo: "bar"})
           done()
 
     context "when https superDomain has been set", ->
@@ -210,6 +210,6 @@ describe "Web Sockets", ->
         @wsClient.disconnect()
 
       it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "fixture", "example.json", {}, (data) ->
-          expect(data).to.deep.eq({foo: "bar"})
+        @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
+          expect(data.response).to.deep.eq({foo: "bar"})
           done()

@@ -61,7 +61,7 @@ describe "Server", ->
             @server = Server()
 
             @server.open(cfg)
-            .then (port) =>
+            .spread (port) =>
               if initialUrl
                 @server._onDomainSet(initialUrl)
 
