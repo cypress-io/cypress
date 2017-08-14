@@ -246,6 +246,9 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
       - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --actions
 
   "driver-integration-tests-2":
@@ -253,6 +256,9 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
       - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --no-actions
 
   "build-binary":
