@@ -3,7 +3,7 @@ Promise = require("bluebird")
 
 $utils = require("../cypress/utils")
 
-create = (Cypress, timeout, clearTimeout, state, finishAssertions) ->
+create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
     retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
@@ -76,7 +76,8 @@ create = (Cypress, timeout, clearTimeout, state, finishAssertions) ->
           return
 
         ## invoke the passed in retry fn
-        fn.call(@)
+        ## once we reach stability
+        whenStable(fn)
   }
 
 module.exports = {
