@@ -265,13 +265,32 @@ describe "src/cy/commands/exec", ->
 
           cy.exec("ls")
 
+        it "can really fail", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            { Yielded } = lastLog.invoke("consoleProps")
+
+            expect(Yielded).to.deep.eq({
+              stdout: "foo\n"
+              stderr: ""
+              code: 1
+            })
+
+            done()
+
+          cy.exec("echo foo && exit 1")
+
         describe "and failOnNonZeroExit is false", ->
           it "does not error", ->
             response = { code: 1, stderr: "error output", stdout: "regular output" }
             Cypress.backend.resolves(response)
 
-            cy.on "fail", (err) ->
-              throw new Error("should not fail, but did with error: #{err}")
+            cy
+            .exec("ls", { failOnNonZeroExit: false })
+            .should("deep.eq", response)
 
-            cy.exec("ls", { failOnNonZeroExit: false }).then (result)->
-              expect(result).to.equal response
+          it "does not really fail", ->
+            cy.exec("echo foo && exit 1", {
+              failOnNonZeroExit: false
+            })
