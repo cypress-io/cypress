@@ -1,6 +1,6 @@
 describe "keyboard", ->
   beforeEach ->
-    cy.visit("/jquery.html")
+    cy.visit("/fixtures/jquery.html")
 
   context "modifiers", ->
     it "fires keyboard and click events with modifier", ->
