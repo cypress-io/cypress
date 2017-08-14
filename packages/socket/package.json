@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test $(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "NODE_ENV=test mocha --watch",
     "clean-deps": "rm -rf node_modules"
   },
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5"
+    "bin-up": "^1.0.1",
+    "chai": "^3.5.0"
   }
 }
