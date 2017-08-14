@@ -34,9 +34,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## because we're handling timeouts ourselves
       cy.clearTimeout()
 
-      isTimedoutError = (err) -> err.timedout
-
-      Cypress.automation("exec", _.pick(options, "cmd", "timeout", "env"))
+      Cypress.backend("exec", _.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
       .then (result) ->
         if options._log
@@ -55,7 +53,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { cmd, output, code: result.code }
         }
 
-      .catch Promise.TimeoutError, isTimedoutError, (err) ->
+      .catch Promise.TimeoutError, { timedout: true }, (err) ->
         utils.throwErrByPath "exec.timed_out", {
           onFail: options._log
           args: { cmd, timeout: options.timeout }

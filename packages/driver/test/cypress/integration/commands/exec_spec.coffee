@@ -8,30 +8,33 @@ describe "src/cy/commands/exec", ->
     beforeEach ->
       Cypress.config("execTimeout", 2500)
 
-      ## call through normally on everything other than exec
-      cy.stub(Cypress, "automation").callThrough()
+      ## call through normally on everything
+      cy.stub(Cypress, "backend").callThrough()
 
     it "triggers 'exec' with the right options", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.exec("ls").then ->
-        expect(Cypress.automation).to.be.calledWith("exec", {
+        expect(Cypress.backend).to.be.calledWith("exec", {
           cmd: "ls"
           timeout: 2500
           env: {}
         })
 
     it "passes through environment variables", ->
-      Cypress.automation.resolves(okResponse)
+      Cypress.backend.resolves(okResponse)
 
       cy.exec("ls", { env: { FOO: "foo" } }).then ->
-        expect(Cypress.automation).to.be.calledWith("exec", {
+        expect(Cypress.backend).to.be.calledWith("exec", {
           cmd: "ls"
           timeout: 2500
           env: {
             FOO: "foo"
           }
         })
+
+    it "really works", ->
+      cy.exec("echo foo").its("stdout").should("eq", "foo\n")
 
     describe ".log", ->
       beforeEach ->
@@ -44,7 +47,7 @@ describe "src/cy/commands/exec", ->
         return null
 
       it "can turn off logging", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.exec('ls', { log: false }).then ->
           logs = _.filter @logs, (log) ->
@@ -53,7 +56,7 @@ describe "src/cy/commands/exec", ->
           expect(logs.length).to.eq(0)
 
       it "logs immediately before resolving", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.on "log:added", (attrs, log) =>
           if attrs.name is "exec"
@@ -65,7 +68,7 @@ describe "src/cy/commands/exec", ->
 
     describe "timeout", ->
       it "defaults timeout to Cypress.config(execTimeout)", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         timeout = cy.spy(Promise.prototype, "timeout")
 
@@ -73,7 +76,7 @@ describe "src/cy/commands/exec", ->
           expect(timeout).to.be.calledWith(2500)
 
       it "can override timeout", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         timeout = cy.spy(Promise.prototype, "timeout")
 
@@ -81,7 +84,7 @@ describe "src/cy/commands/exec", ->
           expect(timeout).to.be.calledWith(1000)
 
       it "clears the current timeout and restores after success", ->
-        Cypress.automation.resolves(okResponse)
+        Cypress.backend.resolves(okResponse)
 
         cy.timeout(100)
 
@@ -143,7 +146,7 @@ describe "src/cy/commands/exec", ->
         cy.exec('')
 
       it "throws when the execution errors", (done) ->
-        Cypress.automation.rejects(new Error("exec failed"))
+        Cypress.backend.rejects(new Error("exec failed"))
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -158,7 +161,7 @@ describe "src/cy/commands/exec", ->
         cy.exec("ls")
 
       it "throws after timing out", (done) ->
-        Cypress.automation.resolves(Promise.delay(250))
+        Cypress.backend.resolves(Promise.delay(250))
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -172,7 +175,7 @@ describe "src/cy/commands/exec", ->
         cy.exec("ls", { timeout: 50 })
 
       it "logs once on error", (done) ->
-        Cypress.automation.rejects(new Error("exec failed"))
+        Cypress.backend.rejects(new Error("exec failed"))
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -184,9 +187,32 @@ describe "src/cy/commands/exec", ->
 
         cy.exec("ls")
 
+      it "can timeout from the backend's response", (done) ->
+        err = new Error("timeout")
+        err.timedout = true
+
+        Cypress.backend.rejects(err)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.exec('sleep 2') timed out after waiting 100ms.")
+          done()
+
+        cy.exec("sleep 2", {
+          timeout: 100
+        })
+
+      it "can really time out", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.exec('sleep 2') timed out after waiting 100ms.")
+          done()
+
+        cy.exec("sleep 2", {
+          timeout: 100
+        })
+
       describe "when error code is non-zero", ->
         it "throws error that includes useful information and exit code", (done) ->
-          Cypress.automation.resolves({ code: 1 })
+          Cypress.backend.resolves({ code: 1 })
 
           cy.on "fail", (err) ->
             expect(err.message).to.contain("cy.exec('ls') failed because the command exited with a non-zero code.\n\nPass {failOnNonZeroExit: false} to ignore exit code failures.")
@@ -196,7 +222,7 @@ describe "src/cy/commands/exec", ->
           cy.exec("ls")
 
         it "throws error that includes stderr if it exists and is non-empty", (done) ->
-          Cypress.automation.resolves({ code: 1, stderr: "error output", stdout: "" })
+          Cypress.backend.resolves({ code: 1, stderr: "error output", stdout: "" })
 
           cy.on "fail", (err) ->
             expect(err.message).to.contain("Stderr:\nerror output")
@@ -206,7 +232,7 @@ describe "src/cy/commands/exec", ->
           cy.exec("ls")
 
         it "throws error that includes stdout if it exists and is non-empty", (done) ->
-          Cypress.automation.resolves({ code: 1, stderr: "", stdout: "regular output" })
+          Cypress.backend.resolves({ code: 1, stderr: "", stdout: "regular output" })
 
           cy.on "fail", (err) ->
             expect(err.message).to.contain("\nStdout:\nregular output")
@@ -216,7 +242,7 @@ describe "src/cy/commands/exec", ->
           cy.exec("ls")
 
         it "throws error that includes stdout and stderr if they exists and are non-empty", (done) ->
-          Cypress.automation.resolves({ code: 1, stderr: "error output", stdout: "regular output" })
+          Cypress.backend.resolves({ code: 1, stderr: "error output", stdout: "regular output" })
 
           cy.on "fail", (err) ->
             expect(err.message).to.contain("\nStdout:\nregular output\nStderr:\nerror output")
@@ -225,7 +251,7 @@ describe "src/cy/commands/exec", ->
           cy.exec("ls")
 
         it "truncates the stdout and stderr in the error message", (done) ->
-          Cypress.automation.resolves({
+          Cypress.backend.resolves({
             code: 1
             stderr: "#{_.range(200).join()}stderr should be truncated"
             stdout: "#{_.range(200).join()}stdout should be truncated"
@@ -240,10 +266,9 @@ describe "src/cy/commands/exec", ->
           cy.exec("ls")
 
         describe "and failOnNonZeroExit is false", ->
-
           it "does not error", ->
             response = { code: 1, stderr: "error output", stdout: "regular output" }
-            Cypress.automation.resolves(response)
+            Cypress.backend.resolves(response)
 
             cy.on "fail", (err) ->
               throw new Error("should not fail, but did with error: #{err}")
