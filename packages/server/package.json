@@ -15,7 +15,7 @@
     "test-unit-watch": "./test/support/watch test-unit",
     "test-integration": "./test/support/run test/integration",
     "test-integration-watch": "./test/support/watch test-integration",
-    "test-e2e": "./test/support/run test/e2e",
+    "test-e2e": "node ./test/scripts/e2e.js",
     "test-e2e-chrome": "./test/support/run test/e2e chrome",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",

@@ -4,11 +4,10 @@ require('@packages/coffee/register')
 
 const _ = require('lodash')
 const cp = require('child_process')
-const path = require('path')
 const minimist = require('minimist')
 const Promise = require('bluebird')
 
-const humanTime = require('../../../server/lib/util/human_time.coffee')
+const humanTime = require('../../lib/util/human_time.coffee')
 
 const glob = Promise.promisify(require('glob'))
 
@@ -30,7 +29,7 @@ function spawn (cmd, args, opts) {
   })
 }
 
-glob('test/cypress/integration/**/*.coffee')
+glob('test/e2e/**/*')
 .then((specs = []) => {
   if (options.spec) {
     return _.filter(specs, (spec) => {
@@ -54,17 +53,9 @@ glob('test/cypress/integration/**/*.coffee')
 .each((spec = []) => {
   console.log('Running spec', spec)
 
-  const args = [
-    'test/scripts/run-integration',
-    '--project',
-    path.resolve('test'),
-    '--browser=chrome',
-    '--driver',
-    '--spec',
-    spec.replace('test/', ''),
-  ]
+  const args = [spec]
 
-  return spawn('node', args, { stdio: 'inherit' })
+  return spawn('./test/support/run', args, { stdio: 'inherit' })
   .then((code) => {
     console.log(`${spec} exited with code`, code)
 
