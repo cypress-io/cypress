@@ -287,6 +287,13 @@ describe "src/cy/commands/files", ->
 
       cy.writeFile("foo.json", {})
 
+    it "writes the file to the filesystem, overriding existing file", ->
+      cy
+        .writeFile("cypress/fixtures/foo.txt", "")
+        .writeFile("cypress/fixtures/foo.txt", "bar")
+        .readFile("cypress/fixtures/foo.txt").should("equal", "bar")
+        .exec("rm cypress/fixtures/foo.txt")
+
     describe ".log", ->
       beforeEach ->
         @logs = []
