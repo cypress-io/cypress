@@ -816,7 +816,8 @@ describe "lib/config", ->
         supportFolder: "#{projectRoot}/test/unit"
       })
 
-    it "sets the supportFile to default index.js if it does not exist and supportFile is the default", ->
+    it "sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default", ->
+      @sandbox.stub(fs, "existsSync").returns(false)
       projectRoot = process.cwd()
 
       obj = config.setAbsolutePaths({
@@ -829,6 +830,19 @@ describe "lib/config", ->
         supportFile: "#{projectRoot}/cypress/support/index.js"
         supportFolder: "#{projectRoot}/cypress/support"
       })
+
+    it "sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/blank-support")
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support"
+      })
+
+      expect(config.setSupportFileAndFolder(obj)).to.eql({
+        projectRoot: projectRoot
+        supportFile: false
+        })
 
     it "throws error if supportFile is not default and does not exist", ->
       projectRoot = process.cwd()
