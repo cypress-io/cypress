@@ -57,6 +57,12 @@ privateProps = {
 
 # { visit, get, find } = cy
 
+silenceConsole = (contentWindow) ->
+  if c = contentWindow.console
+    c.log = ->
+    c.warn = ->
+    c.info = ->
+
 getContentWindow = ($autIframe) ->
   $autIframe.prop("contentWindow")
 
@@ -549,7 +555,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       return null
 
     onBeforeAppWindowLoad: (contentWindow) ->
-      # @cy.silenceConsole(contentWindow) if Cypress.isHeadless
+      ## we silence the console when running headlessly
+      ## because console logs are kept around in memory for
+      ## inspection via the developer
+      if not config("isInteractive")
+        silenceConsole(contentWindow)
 
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
