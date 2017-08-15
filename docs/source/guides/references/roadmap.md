@@ -46,8 +46,8 @@ the element is outside of the boundaries of that parent element and validate vis
 - [x] Fix issue where Cypress hanged due to `xvfb` permissions. More intuitive output is given during install failures. Fixes {% issue 330 %}
 - [x] Fix issue with internal timers being inaccurate from within Electron. Fixes {% issue 572 %}
 - [x] Cypress will now scroll past multiple elements that cover up an element to be interacted with. It also now factors in elements with `position: sticky`. Fixes {% issue 571 %}
-- [x] {% "The checks used to determine an element's actionability" interacting-with-elements#Actionability %} are now run synchronously. This solves some circumstances where the element could have moved or otherwise change between the checks. Fixes {% issue 570 %}
-- [x] Cypress now scrolls all parent containers (not just `window`) when attempting to {% "check an element's actionability" interacting-with-elements#Actionability %}. Fixes {% issue 569 %}
+- [x] {% url "The checks used to determine an element's actionability" interacting-with-elements#Actionability %} are now run synchronously. This solves some circumstances where the element could have moved or otherwise change between the checks. Fixes {% issue 570 %}
+- [x] Cypress now scrolls all parent containers (not just `window`) when attempting to {% url "check an element's actionability" interacting-with-elements#Actionability %}. Fixes {% issue 569 %}
 - [x] Fix issue where clipped elements with `overflow-y: hidden` were falsely passing as "visible". Fixes {% issue 563 %}
 - [x] When using {% url `.select()` select %} on a select with multiple options with the same value, we now properly set `selectedIndex` and `selectedOptions` on the `select`. Fixes {% issue 554 %}
 - [x] Fix issue where changing any spec file (renaming, adding, deleting) would remove the highlighted styling of the currently active spec file in the Desktop GUI. Fixes {% issue 547 %}
