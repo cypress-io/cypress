@@ -56,6 +56,10 @@ export default {
       statsStore.incrementCount(runnable.state)
     }))
 
+    runner.on('test:set:state', action('test:set:state', (runnable, cb) => {
+      runnablesStore.updateTest(runnable, cb)
+    }))
+
     runner.on('paused', action('paused', (nextCommandName) => {
       appState.pause(nextCommandName)
       statsStore.pause()

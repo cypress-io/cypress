@@ -149,7 +149,7 @@ class $Cypress
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
-    @runner = $Runner.create(@mocha, @)
+    @runner = $Runner.create(@mocha, @, @cy)
 
     ## wire up command create to cy
     @Commands = $Commands.create(@, @cy, @state, @config, @log)
@@ -250,9 +250,6 @@ class $Cypress
           @emit("mocha", "test", args...)
 
       when "runner:test:end"
-        ## mocha runner finished processing a hook
-        @cy.checkForEndedEarly()
-
         if @config("isTextTerminal")
           @emit("mocha", "test end", args...)
 
@@ -284,13 +281,18 @@ class $Cypress
         ## TODO: handle timeouts here? or in the runner?
         @emitThen("test:before:run:async", args...)
 
+      when "runner:runnable:after:run:async"
+        @emitThen("runnable:after:run:async", args...)
+
       when "runner:test:after:run"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
+        ## this event is how the reporter knows how to display
+        ## stats and runnable properties such as errors
         @emit("test:after:run", args...)
 
-      when "command:enqueue"
-        "asdf"
+      when "cy:test:set:state"
+        @emit("test:set:state", args...)
 
       when "command:log:added"
         @runner.addLog(args[0], @config("isInteractive"))

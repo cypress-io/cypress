@@ -115,6 +115,14 @@ export default class State {
     this.messageType = _defaults.messageType
   }
 
+  setCallbackAfterUpdate (cb) {
+    this.callbackAfterUpdate = () => {
+      this.callbackAfterUpdate = null
+
+      cb()
+    }
+  }
+
   reset () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl

@@ -10,6 +10,7 @@ mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
+TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
 TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
@@ -62,22 +63,27 @@ RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook bod
 #   ]
 # }
 
-fire = (event, test, Cypress) ->
-  test._fired ?= {}
-  test._fired[event] = true
+fire = (event, runnable, Cypress) ->
+  runnable._fired ?= {}
+  runnable._fired[event] = true
 
   ## dont fire anything again if we are skipped
-  return if test._ALREADY_RAN
+  return if runnable._ALREADY_RAN
 
-  Cypress.action(event, wrap(test))
+  Cypress.action(event, wrap(runnable), runnable)
 
-fired = (event, test) ->
-  !!(test._fired and test._fired[event])
+fired = (event, runnable) ->
+  !!(runnable._fired and runnable._fired[event])
 
 testBeforeRunAsync = (test, Cypress) ->
   Promise.try ->
     if not fired("runner:test:before:run:async", test)
       fire("runner:test:before:run:async", test, Cypress)
+
+runnableAfterRunAsync = (runnable, Cypress) ->
+  Promise.try ->
+    if not fired("runner:runnable:after:run:async", runnable)
+      fire("runner:runnable:after:run:async", runnable, Cypress)
 
 testAfterRun = (test, Cypress) ->
   if not fired(TEST_AFTER_RUN_EVENT, test)
@@ -234,7 +240,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
   return if not _runner.hook
 
   ## monkey patch the hook event so we can wrap
-  ## 'test:before:run:async' and 'test:after:hooks' around all of
+  ## 'test:after:run' around all of
   ## the hooks surrounding a test runnable
   _this = @
 
@@ -521,8 +527,8 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     ## do nothing if our test is skipped
     return if test._ALREADY_RAN
 
-    if not fired("test:before:run:async", test)
-      fire("test:before:run:async", test, Cypress)
+    if not fired(TEST_BEFORE_RUN_EVENT, test)
+      fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
 
     test.state = "pending"
 
@@ -551,7 +557,11 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
 
       ## append a friendly message to the error indicating
       ## we're skipping the remaining tests in this suite
-      err.message += "\n\n" + $utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
+      err.message += "\n\n" +
+      $utils.errMessageByPath("uncaught.error_in_hook", {
+        parentTitle,
+        hookName
+      })
 
     ## always set runnable err so we can tap into
     ## taking a screenshot on error
@@ -574,7 +584,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
       ## TODO: why do we need to do this???
       hookFailed(runnable, runnable.err, hookName, getTestById)
 
-create = (mocha, Cypress) ->
+create = (mocha, Cypress, cy) ->
   _id = 0
 
   _runner = mocha.getRunner()
@@ -696,13 +706,55 @@ create = (mocha, Cypress) ->
       ## that means that we need to reset the previous state
       ## of cy - since we now have a new 'test' and all of the
       ## associated _runnables will share this state
-      if not fired("runner:test:before:run", test)
-        fire("runner:test:before:run", test, Cypress)
+      if not fired(TEST_BEFORE_RUN_EVENT, test)
+        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+
+      ## extract out the next(fn) which mocha uses to
+      ## move to the next runnable - this will be our async seam
+      next = args[0]
 
       ## our runnable is about to run, so let cy know. this enables
       ## us to always have a correct runnable set even when we are
       ## running lifecycle events
-      Cypress.action("runner:set:runnable", runnable, hookName)
+      ## and also get back a function result handler that we use as
+      ## an async seam
+      cy.setRunnable(runnable, hookName)
+
+      onNext = (err) ->
+        ## attach error right now
+        ## if we have one
+        if err
+          runnable.err = wrapErr(err)
+
+        ## check for ended early and switch the err
+        ## to that if one exists
+        ## TODO: implement this
+        # try
+          # cy.checkForEndedEarly()
+        # catch err
+
+        runnableAfterRunAsync(runnable, Cypress)
+        .then ->
+          ## once we complete callback with the
+          ## original err
+          next(err)
+
+          ## return null here to signal to bluebird
+          ## that we did not forget to return a promise
+          ## because mocha internally does not return
+          ## the test.run(fn)
+          return null
+
+        ## if these promises fail then reset the
+        ## error to that
+        .catch (err) ->
+          next(err)
+
+          ## return null here to signal to bluebird
+          ## that we did not forget to return a promise
+          ## because mocha internally does not return
+          ## the test.run(fn)
+          return null
 
       ## TODO: handle promise timeouts here!
       ## whenever any runnable is about to run
@@ -726,7 +778,9 @@ create = (mocha, Cypress) ->
 
           throw err
       .finally ->
-        runnableRun.apply(runnable, args)
+        ## call the original method with our
+        ## custom onNext function
+        runnableRun.call(runnable, onNext)
 
     getStartTime: ->
       _startTime

@@ -45,14 +45,16 @@ takeScreenshot = (runnable, name, log, timeout) ->
       }
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:after:hooks", (test, runnable) ->
+  Cypress.on "runnable:after:run:async", (test, runnable) ->
     if test.err and config("screenshotOnHeadlessFailure") and not config("isInteractive")
-      ## give the UI some time to render the error
-      ## because we were noticing that errors were not
-      ## yet displayed in the UI when running headlessly
-      Promise.delay(75)
-      .then =>
-        takeScreenshot(runnable)
+
+      new Promise (resolve) ->
+        ## open up our test so we can see it during the screenshot
+        test.isOpen = true
+
+        Cypress.action "cy:test:set:state", test, ->
+          takeScreenshot(runnable)
+          .then(resolve)
 
   Commands.addAll({
     screenshot: (name, options = {}) ->
@@ -77,7 +79,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      takeScreenshot(runnable, name, options._log, options.timeout)
+      testState = (bool) ->
+        return {
+          id: runnable.id
+          isOpen: bool
+        }
+
+      setTestState = (bool) ->
+        new Promise (resolve) ->
+          ## tell this test to open
+          Cypress.action("cy:test:set:state", testState(bool), resolve)
+
+      ## open the test for screenshot
+      setTestState(true)
+      .then ->
+        takeScreenshot(runnable, name, options._log, options.timeout)
+        .finally ->
+          ## now close the test again no mattter what
+          setTestState(false)
       .then (resp) ->
         _.extend consoleProps, {
           Saved: resp.path

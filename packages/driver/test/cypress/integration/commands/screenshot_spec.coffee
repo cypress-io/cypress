@@ -5,61 +5,85 @@ describe "src/cy/commands/screenshot", ->
   beforeEach ->
     cy.stub(Cypress, "automation").callThrough()
 
-  context.skip "test:after:hooks", ->
-    it "no screenshot when no test.err", ->
-      hooks = Cypress.invoke("test:after:hooks", {err: null})
+  context "runnable:after:run:async", ->
+    it "is noop when isInteractive", ->
+      Cypress.config("isInteractive", true)
 
-      Promise.all(hooks)
-      .then =>
-        expect(cy._takeScreenshot).not.to.be.called
+      cy.spy(Cypress, "action").log(false)
 
-    it "no screenshot when not headless", ->
-      Cypress.isHeadless = false
+      test = {
+        err: new Error
+      }
 
-      hooks = Cypress.invoke("test:after:hooks", {err: {}})
+      runnable = cy.state("runnable")
 
-      Promise.all(hooks)
-      .then =>
-        expect(cy._takeScreenshot).not.to.be.called
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
+        expect(Cypress.automation).not.to.be.called
 
-    it "no screenshot when screenshotOnHeadlessFailure is false", ->
-      @sandbox.stub(Cypress, "config").withArgs("screenshotOnHeadlessFailure").returns(false)
+    it "is noop when no test.err", ->
+      Cypress.config("isInteractive", false)
 
-      Cypress.isHeadless = true
+      cy.spy(Cypress, "action").log(false)
 
-      hooks = Cypress.invoke("test:after:hooks", {err: {}})
+      test = {}
 
-      Promise.all(hooks)
-      .then =>
-        expect(cy._takeScreenshot).not.to.be.called
+      runnable = cy.state("runnable")
 
-    it "takes screenshot if test.err and isHeadless and screenshotOnHeadlessFailure is true", ->
-      @sandbox.stub(Cypress, "config").withArgs("screenshotOnHeadlessFailure").returns(true)
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
+        expect(Cypress.automation).not.to.be.called
 
-      Cypress.isHeadless = true
+    it "is noop when screenshotOnHeadlessFailure is false", ->
+      Cypress.config("isInteractive", false)
+      Cypress.config("screenshotOnHeadlessFailure", false)
 
-      Cypress.on "take:screenshot", (data, cb) ->
-        expect(data).to.deep.eq({
+      cy.spy(Cypress, "action").log(false)
+
+      test = {
+        err: new Error
+      }
+
+      runnable = cy.state("runnable")
+
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
+        expect(Cypress.automation).not.to.be.called
+
+    it "sets test state and takes screenshot when not isInteractive", ->
+      Cypress.config("isInteractive", false)
+
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+
+      cy.stub(Cypress, "action").log(false)
+      .callThrough()
+      .withArgs("cy:test:set:state")
+      .yieldsAsync()
+
+      test = {
+        err: new Error
+      }
+
+      runnable = cy.state("runnable")
+
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        ## this should mutate this property
+        expect(test.isOpen).to.be.true
+
+        expect(Cypress.action).to.be.calledWith("cy:test:set:state", test)
+        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
           name: undefined
-          titles: ["foo", "bar"]
-          testId: 1
+          testId: runnable.id
+          titles: [
+            "src/cy/commands/screenshot",
+            "runnable:after:run:async",
+            runnable.title
+          ]
         })
-
-        cb({response: {}})
-
-      hooks = Cypress.invoke("test:after:hooks", {
-        err: {}
-      }, {
-        id: 1
-        title: "bar"
-        parent: {
-          title: "foo"
-        }
-      })
-
-      Promise.all(hooks)
-      .then =>
-        expect(cy._takeScreenshot).to.be.called
 
   context "#screenshot", ->
     it "nulls out current subject", ->
@@ -99,6 +123,26 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+        })
+
+    it "opens and closes the test", ->
+      runnable = cy.state("runnable")
+
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+
+      testSetState = cy.spy(Cypress, "action").log(false).withArgs("cy:test:set:state")
+
+      cy
+      .screenshot("foo")
+      .then ->
+        expect(testSetState.firstCall).to.be.calledWith("cy:test:set:state", {
+          id: runnable.id
+          isOpen: true
+        })
+
+        expect(testSetState.secondCall).to.be.calledWith("cy:test:set:state", {
+          id: runnable.id
+          isOpen: false
         })
 
     describe "timeout", ->
