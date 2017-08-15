@@ -11,7 +11,7 @@ user        = require("./user")
 cache       = require("./cache")
 config      = require("./config")
 logger      = require("./logger")
-debug       = require('./log')
+debug       = require("./log")
 errors      = require("./errors")
 Server      = require("./server")
 scaffold    = require("./scaffold")
@@ -156,6 +156,8 @@ class Project extends EE
     ## if we've passed down reporter
     ## then record these via mocha reporter
     if config.report
+      if not Reporter.isValidReporterName(config.reporter, config.projectRoot)
+        errors.throw("INVALID_REPORTER_NAME", config.reporter, config.projectRoot)
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
     @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
@@ -173,9 +175,12 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
+        debug("onSetRunnables")
+        debug("runnables", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
+        debug("onMocha", event)
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
@@ -183,7 +188,7 @@ class Project extends EE
         reporter.emit(event, runnable)
 
         if event is "end"
-          stats = reporter.stats()
+          stats = reporter?.stats()
 
           ## TODO: convert this to a promise
           ## since we need an ack to this end

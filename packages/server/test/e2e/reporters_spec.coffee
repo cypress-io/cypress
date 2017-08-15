@@ -11,6 +11,18 @@ e2ePath  = Fixtures.projectPath("e2e")
 describe "e2e reporters", ->
   e2e.setup({npmInstall: true})
 
+  it "reports error if cannot load reporter", ->
+    e2e.exec(@, {
+      spec: "simple_passing_spec.coffee"
+      expectedExitCode: 1
+      reporter: "module-does-not-exist"
+    })
+    .get("stdout")
+    .then (stdout) ->
+      expect(stdout).to.include """
+        Could not load reporter by name module-does-not-exist
+      """
+
   it "supports junit reporter and reporter options", ->
     e2e.start(@, {
       spec: "simple_passing_spec.coffee"
