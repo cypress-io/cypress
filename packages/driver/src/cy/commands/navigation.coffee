@@ -191,6 +191,9 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     name: "page load"
     message: "--waiting for new page to load--"
     event: true
+    consoleProps: -> {
+      Note: "This event initially fires when your application fires its 'beforeunload' event and completes when your application fires its 'load' event after the next page loads."
+    }
   })
 
   cy.clearTimeout("page load")
