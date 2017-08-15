@@ -143,6 +143,14 @@ export default class Iframes extends Component {
     }
   }
 
+  componentDidUpdate () {
+    const cb = this.props.state.callbackAfterUpdate
+
+    if (cb) {
+      cb()
+    }
+  }
+
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)
     eventManager.stop()

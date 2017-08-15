@@ -23,26 +23,28 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## hold a global reference to defaults
   viewportDefaults = null
 
-  Cypress.on "test:before:run", ->
+  Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
     ## need to restore prior to running the next test
     ## after which we simply null and wait for the
     ## next viewport change
     if d = viewportDefaults
-      triggerAndSetViewport(d.viewportWidth, d.viewportHeight)
       viewportDefaults = null
 
-  triggerAndSetViewport = (width, height) ->
+      setViewportAndSynchronize(d.viewportWidth, d.viewportHeight)
+
+  setViewportAndSynchronize = (width, height) ->
     config("viewportWidth", width)
     config("viewportHeight", height)
 
     viewport = {viewportWidth: width, viewportHeight: height}
 
-    ## force our UI to change to the viewport
-    Cypress.action "cy:viewport:changed", viewport
-
-    return viewport
+    new Promise (resolve) ->
+      ## force our UI to change to the viewport and wait for it
+      ## to be updated
+      Cypress.action "cy:viewport:changed", viewport, ->
+        resolve(viewport)
 
   Commands.addAll({
     title: (options = {}) ->
@@ -193,10 +195,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not viewportDefaults
         viewportDefaults = _.pick(config(), "viewportWidth", "viewportHeight")
 
-      viewport = triggerAndSetViewport(width, height)
+      setViewportAndSynchronize(width, height)
+      .then (viewport) ->
+        if options._log
+          options._log.set(viewport)
 
-      if options._log
-        options._log.set(viewport)
-
-      return null
+        return null
   })

@@ -441,8 +441,9 @@ describe "src/cy/commands/window", ->
 
   context "#viewport", ->
     it "triggers 'viewport' event with dimensions object", (done) ->
-      cy.on "viewport:changed", (viewport) ->
+      cy.on "viewport:changed", (viewport, fn) ->
         expect(viewport).to.deep.eq {viewportWidth: 800, viewportHeight: 600}
+        expect(fn).to.be.a("function")
         done()
 
       cy.viewport(800, 600)
@@ -458,6 +459,16 @@ describe "src/cy/commands/window", ->
         done()
 
       cy.viewport(800, 600)
+
+    context.only "changing viewport", ->
+      it "changes viewport and then resets back to the original", ->
+        { viewportHeight, viewportWidth } = Cypress.config()
+
+        cy.viewport(500, 400).then ->
+          Cypress.action("runner:test:before:run:async", {})
+          .then ->
+            expect(Cypress.config("viewportWidth")).to.eq(viewportWidth)
+            expect(Cypress.config("viewportHeight")).to.eq(viewportHeight)
 
     context "presets", ->
       it "ipad-2", (done) ->

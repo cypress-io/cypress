@@ -44,8 +44,12 @@ export default class IframeModel {
     this.state.isRunning = false
   }
 
-  _updateViewport = ({ viewportWidth, viewportHeight }) => {
+  _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
     this.state.updateDimensions(viewportWidth, viewportHeight)
+
+    if (cb) {
+      this.state.setCallbackAfterUpdate(cb)
+    }
   }
 
   _updateUrl = (url) => {
