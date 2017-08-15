@@ -64,7 +64,7 @@ the element is outside of the boundaries of that parent element and validate vis
 - [ ] Convert `zip` -> `tar.gz`
 - [ ] NPM Module versioning
 - [ ] Remove `npm install -g cypress-cli`
-- [x] The Cypress CLI now checks the installed version on run. Addresses {% issue 396 %}
+- [x] The Cypress CLI now checks the installed version on run and does not re-install Cypress if it is already installed. Addresses {% issue 396 %}
 - [x] Support per-project `state.json`. Addresses {% issue 512 %}.
 - [x] Desktop GUI update window now has messaging about `package.json` versioning. Addresses {% issue 513 %}.
 - [x] Desktop GUI now accounts for cypress being installed per project as npm module. Addresses {% issue 500 %} and {% issue 514 %}.
