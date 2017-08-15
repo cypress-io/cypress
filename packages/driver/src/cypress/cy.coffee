@@ -29,6 +29,9 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
+returnedFalse = (result) ->
+  result is false
+
 # window.Cypress ($Cypress)
 #
 # Cypress.config(...)
@@ -573,20 +576,22 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     onUncaughtException: ->
       runnable = state("runnable")
 
+      ## don't do anything if we don't have a current runnable
+      return if not runnable
+
       ## create the special uncaught exception err
       err = errors.createUncaughtException.apply(null, arguments)
 
+      results = Cypress.action("cy:uncaught:exception", err, runnable)
+
+      ## dont do anything if any of our uncaught:exception
+      ## listeners returned false
+      return if _.some(results, returnedFalse)
+
       ## do all the normal fail stuff and promise cancellation
       ## but dont re-throw the error
-      try
-        fail(err)
-      catch err
-        ## pass this to our runnable so it
-        ## fails nicely
-        ##
-        ## this is the same as passing done(err)
-        ## in the runnable.fn
-        runnable.callback(err)
+      if r = state("reject")
+        r(err)
 
       ## per the onerror docs we need to return true here
       ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
@@ -755,21 +760,24 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           else
             next()
 
-      promise = Promise
-      .try(next)
-      .catch (err) ->
+      promise = new Promise((resolve, reject) ->
+        state("resolve", resolve)
+        state("reject", reject)
+
+        Promise
+        .try(next)
+        .then(resolve)
+        .catch(reject)
+      )
+      .catch((err) ->
         ## since this failed this means that a
         ## specific command failed and we should
         ## highlight it in red or insert a new command
         errors.commandRunningFailed(err)
 
         fail(err, state("runnable"))
-
+      )
       .finally(cleanup)
-
-      ## signify we are at the end of the chain and do not
-      ## continue chaining anymore
-      # promise.done()
 
       state("promise", promise)
 

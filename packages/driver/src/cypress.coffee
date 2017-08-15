@@ -349,6 +349,9 @@ class $Cypress
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
 
+      when "cy:uncaught:exception"
+        @emitMap("uncaught:exception", args...)
+
       when "app:page:loading"
         @emit("page:loading", args[0])
 
