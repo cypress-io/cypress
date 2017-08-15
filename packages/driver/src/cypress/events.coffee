@@ -12,6 +12,8 @@ EE = require("eventemitter2")
 log = require("debug")("cypress:driver")
 Promise = require("bluebird")
 
+proxyFunctions = "emit emitThen emitMap".split(" ")
+
 withoutFunctions = (arr) ->
   _.reject(arr, _.isFunction)
 
@@ -26,24 +28,55 @@ module.exports = {
     events.proxyTo = (child) ->
       parent = obj
 
-      emit = parent.emit
+      for fn in proxyFunctions
+        ## create a closure
+        do (fn) ->
+          original = parent[fn]
 
-      ## whenever our parent parent are emitting
-      ## proxy those to the child obj
-      parent.emit = ->
-        ret = emit.apply(parent, arguments)
+          ## whenever our parent parent are emitting
+          ## proxy those to the child obj
+          parent[fn] = ->
+            ret1 = original.apply(parent, arguments)
 
-        ## dont let our child emits also log
-        logEmit = false
+            ## dont let our child emits also log
+            logEmit = false
 
-        child.emit.apply(child, arguments)
+            ret2 = child[fn].apply(child, arguments)
 
-        logEmit = true
+            logEmit = true
 
-        return ret
+            ## aggregate the results of the parent
+            ## and child
+            switch fn
+              when "emit"
+                ## boolean
+                ret1 or ret2
+              when "emitMap"
+                ## array of results
+                ret1.concat(ret2)
+              when "emitThen"
+                Promise.join ret1, ret2, (a, a2) ->
+                  ## array of results
+                  a.concat(a2)
+
+      return null
+
+    events.emitMap = (eventName, args...) ->
+      listeners = obj.listeners(eventName)
+
+      ## is our log enabled and have we not silenced
+      ## this specific object?
+      if log.enabled and logEmit
+        log("emitted: '%s' to '%d' listeners - with args: %o", eventName, listeners.length, args...)
+
+      listener = (fn) ->
+        fn.apply(obj, args)
+
+      ## collect the results from the listeners
+      _.map(listeners, listener)
 
     events.emitThen = (eventName, args...) ->
-      listeners = events.listeners(eventName)
+      listeners = obj.listeners(eventName)
 
       ## is our log enabled and have we not silenced
       ## this specific object?
