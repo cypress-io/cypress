@@ -25,17 +25,6 @@ create = (state, config, log) ->
           obj
     })
 
-  checkTestErr = (test) ->
-    ## if our test has an error but we dont
-    ## have one referenced then set this err
-    ## this can happen if there is an window
-    ## uncaught error from our test which
-    ## bypasses our commands entirely so
-    ## we never actually catch it
-    ## and 'endedEarlyErr' would fire
-    if err = test.err and not state("error")
-      state("error", err)
-
   endedEarlyErr = (index, queue) ->
     ## return if we already have an error
     return if state("error")
@@ -76,17 +65,8 @@ create = (state, config, log) ->
     err.name = "Uncaught " + err.name
 
     err.onFail = ->
-      if log = current and current.getLastLog()
-        log.error(err)
-
-    ## this will cause the last command to be
-    ## highlighted in red since it likely caused
-    ## the uncaughtException to happen!
-    commandRunningFailed(err)
-
-    ## TODO: if this is a hook then we know mocha
-    ## will abort everything on uncaught exceptions
-    ## so we need to explain that to the user
+      if l = current and current.getLastLog()
+        l.error(err)
 
     return err
 
@@ -104,8 +84,6 @@ create = (state, config, log) ->
   return {
     ## submit a generic command error
     commandErr
-
-    checkTestErr
 
     endedEarlyErr
 
