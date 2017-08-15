@@ -439,6 +439,10 @@ class $Cypress
 
   Log: $Log
 
+  LocalStorage: $LocalStorage
+
+  Server: $Server
+
   utils: $utils
 
   _: _
