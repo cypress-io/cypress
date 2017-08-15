@@ -115,6 +115,9 @@ defaults = (state, config, obj) ->
       event: false
       renderProps: -> {}
       consoleProps: ->
+        ## if we don't have a current command just bail
+        return {} if not current
+
         ret = if $utils.hasElement(current.get("subject"))
           $utils.getDomElements(current.get("subject"))
         else
@@ -373,24 +376,26 @@ Log = (state, config, obj) ->
     wrapConsoleProps: ->
       _this = @
 
-      ## re-wrap consoleProps to set Command + Error defaults
-      attributes.consoleProps = _.wrap attributes.consoleProps, (orig, args...) ->
+      consoleProps = attributes.consoleProps
 
+      ## re-wrap consoleProps to set Command + Error defaults
+      attributes.consoleProps = ->
         key = if _this.get("event") then "Event" else "Command"
 
         consoleObj = {}
         consoleObj[key] = _this.get("name")
 
         ## merge in the other properties from consoleProps
-        _.extend consoleObj, orig.apply(@, args)
+        _.extend consoleObj, consoleProps.apply(@, arguments)
 
         ## TODO: right here we need to automatically
         ## merge in "Yielded + Element" if there is an $el
 
         ## and finally add error if one exists
         if err = _this.get("error")
-          _.defaults consoleObj,
+          _.defaults(consoleObj, {
             Error: _this.getError(err)
+          })
 
         ## add note if no snapshot exists on command instruments
         if _this.get("instrument") is "command" and not _this.get("snapshots")
