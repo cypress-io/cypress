@@ -3,26 +3,11 @@ e2e      = require("../support/helpers/e2e")
 
 e2ePath = Fixtures.projectPath("e2e")
 
-afterHookCount = 0
-afterRunCount  = 0
-
-onServer = (app) ->
-  app.get "/hook", (req, res) ->
-    afterHookCount += 1
-
-    res.send("<html>#{afterHookCount}</html>")
-
-  app.get "/run", (req, res) ->
-    afterRunCount += 1
-
-    res.send("<html>#{afterRunCount}</html>")
-
 describe "e2e caught and uncaught hooks errors", ->
   e2e.setup({
     servers: {
       port: 7878
       static: true
-      onServer: onServer
     }
   })
 
@@ -89,9 +74,10 @@ describe "e2e caught and uncaught hooks errors", ->
 
   it "failing4", ->
     e2e.start(@, {
+    e2e.exec(@, {
       spec: "hook_uncaught_error_events_failing_spec.coffee"
       expectedExitCode: 1
     })
-    .then ->
-      expect(afterHookCount).to.eq(1)
-      expect(afterRunCount).to.eq(1)
+    .get("stdout")
+    .then (stdout) ->
+      expect(stdout).to.include("Uncaught ReferenceError: foo is not defined")
