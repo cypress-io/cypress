@@ -201,7 +201,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## with commands still retrying or in the queue
     if p and p.isPending()
       state("canceled", true)
-      p.cancel()
+      state("cancel")()
 
     cleanup()
 
@@ -760,11 +760,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           else
             next()
 
+      inner = null
+
+      ## this ends up being the parent promise wrapper
       promise = new Promise((resolve, reject) ->
+        ## can't use onCancel argument here because
+        ## its called asynchronously
+
         state("resolve", resolve)
         state("reject", reject)
 
-        Promise
+        ## bubble out the inner promise
+        inner = Promise
         .try(next)
         .then(resolve)
         .catch(reject)
@@ -779,6 +786,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       )
       .finally(cleanup)
 
+      ## cancel both promises
+      cancel = ->
+        promise.cancel()
+        inner.cancel()
+
+        ## notify the world
+        Cypress.action("cy:canceled")
+
+      state("cancel", cancel)
       state("promise", promise)
 
       ## return this outer bluebird promise

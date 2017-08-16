@@ -314,6 +314,9 @@ class $Cypress
       when "cy:paused"
         @emit("paused", args...)
 
+      when "cy:canceled"
+        @emit("canceled")
+
       when "cy:visit:failed"
         @emit("visit:failed", args[0])
 
