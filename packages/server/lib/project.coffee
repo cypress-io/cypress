@@ -121,6 +121,9 @@ class Project extends EE
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
+      if not fs.existsSync(supportFile)
+        errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
+
       relativePath = path.relative(config.projectRoot, config.supportFile)
       if config.watchForFileChanges isnt false
         options = {
