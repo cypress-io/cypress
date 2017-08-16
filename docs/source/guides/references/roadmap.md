@@ -29,11 +29,13 @@ comments: false
 - [x] If any of an element's parent's overflow is 'hidden', we now calculate if the element is outside of the boundaries of that parent element and validate visibility assertions accordingly. This may cause some tests that were previously passing to now accurately fail. Fixes {% issue 410 %}.
 - [x] {% url `.select()` select %} Should Look For Trimmed Value Inside of `<option></option>`. This may change the content argument required to select the option you intended in your {% url `.select()` select %} command. Addresses {% issue 175 %}.
 - [x] When passing the option `{ force: true }` to {% url `.click()` click %} and {% url `.type()` type %}, we no longer attempt to scroll the element into view. We've also disabled the check that the element is in view before clicking or typing. Addresses {% issue 553 %}.
+- [x] `Cypress.Dom` has been renamed to `Cypress.dom`.
 
 **Deprecations**
 
 - [x] The {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} has been deprecated. Addresses {% issue 316 %}.
 - [ ] The interface for writing custom commands has been deprecated. Please read our docs on the new custom commands interface. Addresses {% issue 436 %} and {% issue 465 %}.
+- [x] `Cypress.Log.command` has been renamed to `Cypress.log`.
 
 **Bugfixes:**
 
