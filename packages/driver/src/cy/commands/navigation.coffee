@@ -466,10 +466,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
 
-      ## backup the previous runnable timeout
-      ## and the hook's previous timeout
-      prevTimeout = cy.timeout()
-
       cleanup = null
 
       ## clear the current timeout
@@ -483,7 +479,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## reset window on load
         win = state("window")
 
-        cy.timeout(prevTimeout, "visit")
         options.onLoad?.call(runnable.ctx, win)
 
         options._log.set({url: url}) if options._log
@@ -609,7 +604,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               , s
 
               Cypress.backend("preserve:run:state", s)
-            .then =>
+            .then ->
               ## and now we must change the url to be the new
               ## origin but include the test that we're currently on
               newUri = new UrlParse(remote.origin)
