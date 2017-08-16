@@ -9,12 +9,20 @@ describe "uncaught errors", ->
     return null
 
   it "logs visit failure once", (done) ->
+    r = cy.state("runnable")
+
     cy.on "fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(1)
 
+      ## this runnable should not have a timer
+      expect(r.timer).not.to.be.ok
+
       done()
+
+      ## and still not have a timer
+      expect(r.timer).not.to.be.ok
 
     ## when this beforeEach hook fails
     ## it will skip invoking the test

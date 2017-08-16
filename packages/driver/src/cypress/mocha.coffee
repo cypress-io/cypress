@@ -12,6 +12,7 @@ Runnable = Mocha.Runnable
 runnerRun            = Runner::run
 runnerFail           = Runner::fail
 runnableRun          = Runnable::run
+runnableClearTimeout = Runnable::clearTimeout
 runnableResetTimeout = Runnable::resetTimeout
 
 ## don't let mocha polute the global namespace
@@ -78,6 +79,9 @@ getRunner = (_mocha) ->
 
   _mocha.run()
 
+restoreRunnableClearTimeout = ->
+  Runnable::clearTimeout = runnableClearTimeout
+
 restoreRunnableResetTimeout = ->
   Runnable::resetTimeout = runnableResetTimeout
 
@@ -112,6 +116,15 @@ patchRunnableRun = (Cypress) ->
 
     Cypress.action("mocha:runnable:run", runnableRun, runnable, args)
 
+patchRunnableClearTimeout = ->
+  Runnable::clearTimeout = ->
+    ## call the original
+    runnableClearTimeout.apply(@, arguments)
+
+    ## nuke the timer property
+    ## for testing purposes
+    @timer = null
+
 patchRunnableResetTimeout = ->
   Runnable::resetTimeout = ->
     runnable = @
@@ -137,11 +150,13 @@ restore = ->
   restoreRunnerRun()
   restoreRunnerFail()
   restoreRunnableRun()
+  restoreRunnableClearTimeout()
   restoreRunnableResetTimeout()
 
 override = (Cypress) ->
   patchRunnerFail()
   patchRunnableRun(Cypress)
+  patchRunnableClearTimeout()
   patchRunnableResetTimeout()
 
 create = (specWindow, Cypress, reporter) ->
