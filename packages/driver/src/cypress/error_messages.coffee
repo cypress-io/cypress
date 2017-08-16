@@ -165,7 +165,7 @@ module.exports = {
     """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
     non_dom: "Cannot call #{cmd('{{cmd}}')} on a non-DOM subject."
-    non_dom_is_hidden: "$Cypress.Dom.{{filter}} must be passed a basic DOM element. You passed: '{{el}}'"
+    non_dom_is_hidden: "Cypress.dom.{{filter}} must be passed a basic DOM element. You passed: '{{el}}'"
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
       {{node}}\n

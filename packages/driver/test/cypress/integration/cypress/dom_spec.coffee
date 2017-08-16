@@ -1,52 +1,52 @@
-{ $ } = window.testUtils
+$dom = Cypress.dom
+$ = Cypress.$.bind(Cypress)
 
-describe "$Cypress.jQuery Extensions", ->
-  enterCommandTestingMode()
+describe "src/cypress/dom", ->
+  beforeEach ->
+    cy.visit("/fixtures/generic.html")
 
   it "attaches to Cypress namespace", ->
-    expect($Cypress.Dom).to.be.an("object")
+    expect($dom).to.be.an("object")
 
   context "isHidden", ->
     it "exposes isHidden", ->
-      expect($Cypress.Dom.isHidden).to.be.a("function")
+      expect($dom.isHidden).to.be.a("function")
 
     it "throws when not passed a DOM element", ->
       fn = ->
-        $Cypress.Dom.isHidden(null)
+        $dom.isHidden(null)
 
-      expect(fn).to.throw("$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: 'null'")
+      expect(fn).to.throw("Cypress.dom.isHidden() must be passed a basic DOM element. You passed: 'null'")
 
   context "isVisible", ->
     it "exposes isVisible", ->
-      expect($Cypress.Dom.isVisible).to.be.a("function")
+      expect($dom.isVisible).to.be.a("function")
 
     it "throws when not passed a DOM element", ->
       fn = ->
-        $Cypress.Dom.isVisible(null)
+        $dom.isVisible(null)
 
-      expect(fn).to.throw("$Cypress.Dom.isVisible() must be passed a basic DOM element. You passed: 'null'")
+      expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element. You passed: 'null'")
 
   context "#elIsScrollable", ->
     beforeEach ->
-      @allowErrors()
-
       @add = (el) =>
-        $(el).appendTo(@cy.$$("body"))
+        $(el).appendTo(cy.$$("body"))
 
     it "returns true if window and body > window height", ->
-      win = @cy.state("window")
+      win = cy.state("window")
 
-      fn = => $Cypress.Dom.elIsScrollable(win)
+      fn = => $dom.elIsScrollable(win)
 
       expect(fn()).to.be.true
 
     it "returns false window and body > window height", ->
 
-      @cy.$$("body").html("<div>foo</div>")
+      cy.$$("body").html("<div>foo</div>")
 
-      win = @cy.state("window")
+      win = cy.state("window")
 
-      fn = => $Cypress.Dom.elIsScrollable(win)
+      fn = -> $dom.elIsScrollable(win)
 
       expect(fn()).to.be.false
 
@@ -57,7 +57,7 @@ describe "$Cypress.jQuery Extensions", ->
         </div>
         """
 
-      fn = => $Cypress.Dom.elIsScrollable(noScroll)
+      fn = => $dom.elIsScrollable(noScroll)
 
       expect(fn()).to.be.false
 
@@ -70,7 +70,7 @@ describe "$Cypress.jQuery Extensions", ->
         </div>
         """
 
-      fn = => $Cypress.Dom.elIsScrollable(noOverflow)
+      fn = => $dom.elIsScrollable(noOverflow)
 
       expect(fn()).to.be.false
 
@@ -81,7 +81,7 @@ describe "$Cypress.jQuery Extensions", ->
         </div>
       """
 
-      fn = => $Cypress.Dom.elIsScrollable(vertScrollable)
+      fn = => $dom.elIsScrollable(vertScrollable)
 
       expect(fn()).to.be.true
 
@@ -92,7 +92,7 @@ describe "$Cypress.jQuery Extensions", ->
         </div>
       """
 
-      fn = => $Cypress.Dom.elIsScrollable(horizScrollable)
+      fn = => $dom.elIsScrollable(horizScrollable)
 
       expect(fn()).to.be.true
 
@@ -103,14 +103,14 @@ describe "$Cypress.jQuery Extensions", ->
         </div>
       """
 
-      fn = => $Cypress.Dom.elIsScrollable(forcedScroll)
+      fn = => $dom.elIsScrollable(forcedScroll)
 
       expect(fn()).to.be.true
 
   context "hidden/visible overrides", ->
     beforeEach ->
       add = (el) =>
-        $(el).appendTo(@cy.$$("body"))
+        $(el).appendTo(cy.$$("body"))
 
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
       @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>parent visibility: hidden</button></div>"
@@ -412,31 +412,31 @@ describe "$Cypress.jQuery Extensions", ->
     describe "#getReasonElIsHidden", ->
       beforeEach ->
         @reasonIs = ($el, str) ->
-          expect($Cypress.Dom.getReasonElIsHidden($el)).to.eq(str)
+          expect($dom.getReasonElIsHidden($el)).to.eq(str)
 
       it "has 'display: none'", ->
-        @reasonIs @$displayNone, "This element (<button>) is not visible because it has CSS property: 'display: none'"
+        @reasonIs @$displayNone, "This element '<button>' is not visible because it has CSS property: 'display: none'"
 
       it "has a parent with 'display: none'", ->
-        @reasonIs @$parentDisplayNone.find("span"), "This element (<span>) is not visible because its parent (<div#none>) has CSS property: 'display: none'"
+        @reasonIs @$parentDisplayNone.find("span"), "This element '<span>' is not visible because its parent '<div#none>' has CSS property: 'display: none'"
 
       it "has 'visibility: hidden'", ->
-        @reasonIs @$visHidden, "This element (<ul>) is not visible because it has CSS property: 'visibility: hidden'"
+        @reasonIs @$visHidden, "This element '<ul>' is not visible because it has CSS property: 'visibility: hidden'"
 
       it "has parent with 'visibility: hidden'", ->
-        @reasonIs @$parentVisHidden.find("button"), "This element (<button>) is not visible because its parent (<div.invis>) has CSS property: 'visibility: hidden'"
+        @reasonIs @$parentVisHidden.find("button"), "This element '<button>' is not visible because its parent '<div.invis>' has CSS property: 'visibility: hidden'"
 
       it "has effective zero width", ->
-        @reasonIs @$divNoWidth, "This element (<div>) is not visible because it has an effective width and height of: '0 x 100' pixels."
+        @reasonIs @$divNoWidth, "This element '<div>' is not visible because it has an effective width and height of: '0 x 100' pixels."
 
       it "has effective zero height", ->
-        @reasonIs @$divNoHeight, "This element (<div>) is not visible because it has an effective width and height of: '50 x 0' pixels."
+        @reasonIs @$divNoHeight, "This element '<div>' is not visible because it has an effective width and height of: '50 x 0' pixels."
 
       it "has a parent with an effective zero width and overflow: hidden", ->
-        @reasonIs @$parentNoHeight.find("span"), "This element (<span>) is not visible because its parent (<div>) has CSS property: 'overflow: hidden' and an effective width and height of: '100 x 0' pixels."
+        @reasonIs @$parentNoHeight.find("span"), "This element '<span>' is not visible because its parent '<div>' has CSS property: 'overflow: hidden' and an effective width and height of: '100 x 0' pixels."
 
       it "element sits outside boundaries of parent with overflow clipping", ->
-        @reasonIs @$elOutOfParentBoundsToRight.find("span"), "This element (<span>) is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'"
+        @reasonIs @$elOutOfParentBoundsToRight.find("span"), "This element '<span>' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'"
 
       it "cannot determine why element is not visible", ->
-        @reasonIs @$btnOpacity, "Cypress could not determine why this element (<button>) is not visible."
+        @reasonIs @$btnOpacity, "Cypress could not determine why this element '<button>' is not visible."
