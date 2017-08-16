@@ -9,8 +9,8 @@
   "scripts": {
     "pretest": "npm run lint",
     "test": "npm run test-unit",
-    "test-unit": "mocha",
-    "test-watch": "mocha --watch",
+    "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=config.json",
+    "test-watch": "$(bin-up mocha) --watch",
     "test-dependencies": "$(bin-up deps-ok) && dependency-check . --no-dev",
     "lint": "$(bin-up eslint) --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prebuild": "npm run test-dependencies && ./scripts/build.sh",
@@ -50,7 +50,6 @@
     "chai": "^3.5.0",
     "clear-module": "^2.1.0",
     "dependency-check": "^2.8.0",
-    "mocha": "^3.2.0",
     "nock": "^9.0.9",
     "sinon": "^2.1.0",
     "snap-shot": "^2.17.0"

@@ -2,6 +2,8 @@ fs      = require("fs-extra")
 path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
+la      = require("lazy-ass")
+check   = require("check-more-types")
 log     = require("debug")("cypress:server:appdata")
 pkg     = require("@packages/root")
 cwd     = require("../cwd")
@@ -40,6 +42,8 @@ module.exports = {
     fs.removeAsync(cwd(".cy")).catch(->)
 
   path: (paths...) ->
+    la(check.unemptyString(process.env.CYPRESS_ENV),
+      "expected CYPRESS_ENV, found", process.env.CYPRESS_ENV)
     p = path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
     log("path: %s", p)
     p

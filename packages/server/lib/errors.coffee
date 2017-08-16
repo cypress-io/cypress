@@ -285,6 +285,13 @@ API = {
 
         Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
         """
+      when "INVALID_REPORTER_NAME"
+        """
+        Could not load reporter by name #{chalk.yellow(arg1)}
+        Relative to the project path #{chalk.yellow(arg2)}
+
+        Learn more at https://on.cypress.io/reporters
+        """
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)
