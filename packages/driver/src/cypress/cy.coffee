@@ -80,6 +80,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
 
+  isStopped = -> stopped
+
   onFinishAssertions = ->
     assertions.finishAssertions.apply(null, arguments)
 
@@ -193,22 +195,28 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
+  removeSubject = ->
+    state("subject", undefined)
+
   doneEarly = ->
+    ## we only need to worry about doneEarly when
+    ## it comes from a manual event such as stopping
+    ## Cypress or when we yield a (done) callback
+    ## and could arbitrarily call it whenever we want
     p = state("promise")
 
-    ## make sure we cancel our outstanding
-    ## promise since we could have ended early
-    ## with commands still retrying or in the queue
-    if p and p.isPending()
+    ## if our outer promise is pending
+    ## then cancel outer and inner
+    ## and set canceled to be true
+    if (p and p.isPending())
       state("canceled", true)
       state("cancel")()
 
     cleanup()
 
-  removeSubject = ->
-    state("subject", undefined)
-
   cleanup = ->
+    stopped = true
+
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
@@ -227,13 +235,20 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     state("index", queue.length)
 
   fail = (err, runnable) ->
-    cleanup()
-
     ## store the error on state now
     state("error", err)
 
     Cypress.action("cy:fail", err, state("runnable"))
 
+    ## if we are an async runnable that means
+    ## we have an explicit (done) callback and
+    ## we aren't attached to the cypress command queue
+    ## promise chain and throwing the error would only
+    ## result in an unhandled rejection
+    return if runnable.async
+
+    ## else we're connected to the promise chain
+    ## and need to throw so this bubbles up
     throw err
 
   cy = {
@@ -255,6 +270,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## is cy
     isCy
+
+    isStopped
 
     ## has element in dom sync
     isInDom: elements.isInDom
@@ -369,8 +386,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## don't do anything if we've already stopped
       if stopped
         return
-
-      stopped = true
 
       doneEarly()
 
@@ -735,7 +750,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         cy
         .set(command)
-        .then =>
+        .then ->
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
           ## unless it already has a state.  if it has a state
@@ -764,17 +779,36 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       ## this ends up being the parent promise wrapper
       promise = new Promise((resolve, reject) ->
+        ## bubble out the inner promise
+        ## we must use a resolve(null) here
+        ## so the outer promise is first defined
+        ## else this will kick off the 'next' call
+        ## too soon and end up running commands prior
+        ## to promise being defined
+        inner = Promise
+        .resolve(null)
+        .then(next)
+        .then(resolve)
+        .catch(reject)
+
         ## can't use onCancel argument here because
         ## its called asynchronously
 
-        state("resolve", resolve)
-        state("reject", reject)
+        ## when we manually reject our outer promise we
+        ## have to immediately cancel the inner one else
+        ## it won't be notified and its callbacks will
+        ## continue to be invoked
+        ## normally we don't have to do this because rejections
+        ## come from the inner promise and bubble out to our outer
+        ##
+        ## but when we manually reject the outer promise we
+        ## have to go in the opposite direction from outer -> inner
+        rejectOuterAndCancelInner = (err) ->
+          inner.cancel()
+          reject(err)
 
-        ## bubble out the inner promise
-        inner = Promise
-        .try(next)
-        .then(resolve)
-        .catch(reject)
+        state("resolve", resolve)
+        state("reject", rejectOuterAndCancelInner)
       )
       .catch((err) ->
         ## since this failed this means that a
@@ -804,6 +838,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       # @trigger("set", command)
 
     set: (command) ->
+      ## bail here prior to creating a new promise
+      ## because we could have stopped / canceled
+      ## prior to ever making it through our first
+      ## command
+      return if stopped
+
       state("current", command)
       state("chainerId", command.get("chainerId"))
 
