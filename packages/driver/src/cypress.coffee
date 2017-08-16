@@ -442,6 +442,7 @@ class $Cypress
 
   Chainer: $Chainer
 
+  dom: $dom
   Keyboard: $Keyboard
   Location: $Location
 
