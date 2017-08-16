@@ -140,6 +140,10 @@ describe "src/cy/commands/clock", ->
           clock.tick()
           expect(onSetTimeout).to.be.called
 
+      it "binds to window if called before visit", ->
+        cy.clock()
+        cy.visit('/fixtures/dom.html') ## should not throw
+
     context "logging", ->
       beforeEach ->
         @logs = []

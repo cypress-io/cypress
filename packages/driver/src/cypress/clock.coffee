@@ -14,7 +14,6 @@ create = (win, now, methods) ->
     clock.uninstall()
 
   bind = (win) ->
-    restore()
     clock = install(win, now, methods)
 
   details = ->
