@@ -1,3 +1,5 @@
+snapshot = require("snap-shot-it")
+
 Fixtures = require("../support/helpers/fixtures")
 e2e      = require("../support/helpers/e2e")
 
@@ -32,42 +34,17 @@ describe "e2e caught and uncaught hooks errors", ->
       expectedExitCode: 1
     })
     .get("stdout")
-    .then (stdout) ->
-      expect(stdout).to.include("4 passing")
-      expect(stdout).to.include("1 failing")
+    .then(e2e.normalizeStdout)
+    .then(snapshot)
 
-      expect(stdout).to.include("✓ t1a")
-      expect(stdout).to.include("s1a")
-      expect(stdout).to.include("1) \"before each\" hook for \"t2a\"")
-      expect(stdout).not.to.include("t3a")
-      expect(stdout).not.to.include("t4a")
-      expect(stdout).to.include("✓ t5a")
-      expect(stdout).to.include("✓ t6a")
-      expect(stdout).to.include("✓ t7a")
-      expect(stdout).to.include("1) s1a \"before each\" hook for \"t2a\":")
-
-  it "failing2", ->
+  it.only "failing2", ->
     e2e.exec(@, {
       spec: "hook_uncaught_error_failing_spec.coffee"
       expectedExitCode: 1
     })
     .get("stdout")
-    .then (stdout) ->
-      expect(stdout).to.include("Uncaught ReferenceError: foo is not defined")
-      expect(stdout).to.include("Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 's1b'")
-
-      expect(stdout).to.include("4 passing")
-      expect(stdout).to.include("1 failing")
-
-      expect(stdout).to.include("t1b")
-      expect(stdout).to.include("s1b")
-      expect(stdout).to.include("1) \"before each\" hook for \"t2b\"")
-      expect(stdout).not.to.include("t3b")
-      expect(stdout).not.to.include("t4b")
-      expect(stdout).to.include("t5b")
-      expect(stdout).to.include("t6b")
-      expect(stdout).to.include("t7b")
-      expect(stdout).to.include("1) s1b \"before each\" hook for \"t2b\":")
+    .then(e2e.normalizeStdout)
+    .then(snapshot)
 
   it "failing3", ->
     e2e.exec(@, {
