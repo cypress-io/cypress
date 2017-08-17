@@ -1,3 +1,5 @@
+_ = Cypress._
+
 describe "uncaught errors", ->
   beforeEach ->
     @logs = []
@@ -50,3 +52,58 @@ describe "uncaught errors", ->
       return false
 
     cy.visit("/fixtures/visit_error.html")
+
+  it "logs click error once", (done) ->
+    uncaught = false
+
+    cy.on "uncaught:exception", ->
+      uncaught = true
+
+      return true
+
+    cy.on "fail", (err) =>
+      lastLog = @lastLog
+
+      expect(@logs.length).to.eq(4)
+      expect(uncaught).to.be.true
+      expect(err.message).to.include("uncaught click error")
+      expect(lastLog.get("name")).to.eq("click")
+      expect(lastLog.get("error")).to.eq(err)
+
+      done()
+
+    cy
+      .visit("/fixtures/jquery.html")
+      .window().then (win) ->
+        win.$("button:first").on "click", ->
+          throw new Error("uncaught click error")
+      .get("button:first").click()
+
+  it "logs error on page load when new page has uncaught exception", (done) ->
+    uncaught = false
+
+    cy.on "uncaught:exception", ->
+      uncaught = true
+
+      return true
+
+    cy.on "fail", (err) =>
+      click = _.find @logs, (log) ->
+        log.get("name") is "click"
+
+      ## visit, window, contains, click, page loading, new url
+      expect(@logs.length).to.eq(6)
+      expect(uncaught).to.be.true
+      expect(err.message).to.include("foo is not defined")
+      expect(click.get("name")).to.eq("click")
+      expect(click.get("error")).to.eq(err)
+
+      done()
+
+    cy
+      .visit("/fixtures/jquery.html")
+      .window().then (win) ->
+        win.$("<a href='/fixtures/visit_error.html'>visit</a>")
+        .appendTo(win.document.body)
+
+      .contains("visit").click()

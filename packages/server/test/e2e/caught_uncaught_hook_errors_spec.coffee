@@ -73,7 +73,6 @@ describe "e2e caught and uncaught hooks errors", ->
       expect(stdout).not.to.include("t4c")
 
   it "failing4", ->
-    e2e.start(@, {
     e2e.exec(@, {
       spec: "hook_uncaught_error_events_failing_spec.coffee"
       expectedExitCode: 1
