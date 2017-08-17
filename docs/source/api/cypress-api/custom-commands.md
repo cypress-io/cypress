@@ -13,33 +13,23 @@ For example, the first custom command you'll probably create is the canonical `l
 A great place to define these commands is in your `cypress/support/commands.js` file, since it is loaded before any test files are evaluated.
 {% endnote %}
 
-# [Cypress.addChildCommand()]()
+# [Cypress.Commands.add()]()
 
 Child commands are always chained off of a **parent** command, or another **child** command.
 
-***
-
-# [Cypress.addDualCommand]()
-
 While parent commands always start a new chain of commands and child commands require being chained off a parent command, dual commands can behave as parent or child command. That is, they can **start** a new chain, or be chained off of an **existing** chain.
 
-***
-
-# [Cypress.addParentCommand](#add-parent-command-usage)
-
 Parent commands always **begin** a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains.
-
-***
 
 # Add Parent Command Usage
 
 ## Custom command for 'login'
 ```javascript
-Cypress.addParentCommand("login", function(email, password){
+Cypress.Commands.add("login", function(email, password){
   var email    = email || "joe@example.com"
   var password = password || "foobar"
 
-  var log = Cypress.Log.command({
+  var log = Cypress.log({
     name: "login",
     message: [email, password],
     onConsole: function(){
@@ -50,14 +40,13 @@ Cypress.addParentCommand("login", function(email, password){
     }
   })
 
-  cy
-    .visit("/login", {log: false})
-    .contains("Log In", {log: false})
-    .get("#email", {log: false}).type(email, {log: false})
-    .get("#password", {log: false}).type(password, {log: false})
-    .get("button", {log: false}).click({log: false}) //this should submit the form
-    .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
-    .url({log: false}).should("match", /dashboard/, {log: false})
+  cy.visit("/login", {log: false})
+  cy.contains("Log In", {log: false})
+  cy.get("#email", {log: false}).type(email, {log: false})
+  cy.get("#password", {log: false}).type(password, {log: false})
+  cy.get("button", {log: false}).click({log: false}) //this should submit the form
+  cy.get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
+  cy.url({log: false}).should("match", /dashboard/, {log: false})
     .then(function(){
       log.snapshot().end()
     })
@@ -67,9 +56,8 @@ Cypress.addParentCommand("login", function(email, password){
 ## Another custom command for sign in
 
 ```javascript
-Cypress.addParentCommand("signIn", function(email, password) {
-  return cy.chain()
-  .request({
+Cypress.Commands.add("signIn", function(email, password) {
+  cy.request({
     method: "POST",
     url: "/auth",
     body: {email, password}
@@ -88,26 +76,19 @@ describe("custom command", function() {
 });
 ```
 
-## Using cy.chain to manage a command's subject
-
 ```javascript
-Cypress.addParentCommand("a", function(){
-  cy
-    .chain()
-    .wrap({foo: "bar"})
+Cypress.Commands.add("a", function(){
+  cy.wrap({foo: "bar"})
     .its("foo")
 })
 
-Cypress.addChildCommand("b", function(subj){
-  cy
-    .chain()
-    .wrap(subj)
+Cypress.Commands.add("b", function(subj){
+  cy.wrap(subj)
     .should("eq", "bar")
 })
 
 it("can chain subjects", function(){
-  cy
-    .a()
+  cy.a()
     .b()
     .should("eq", "bar")
 })

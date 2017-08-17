@@ -48,13 +48,34 @@ Option | Default | Description
 
 # Examples
 
+## Scrolling
+
+```javascript
+cy.get('button#checkout').scrollIntoView()
+  .should('be.visible')
+```
+
+## Options
+
+***Use linear easing animation to scroll***
+
+```javascript
+cy.get('.next-page').scrollIntoView({ easing: 'linear' } )
+```
+
+***Scroll to element over 2000ms***
+
+```javascript
+cy.get('footer').scrollIntoView({ duration: 2000 })
+```
+
 # Notes
 
 ## Snapshots
 
 ***Snapshots do not reflect scroll behavior***
 
-*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos.html#Videos %}.
+*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos#Videos %}.
 
 # Rules
 
@@ -71,6 +92,21 @@ Option | Default | Description
 {% timeouts assertions .scrollToIntoView %}
 
 # Command Log
+
+***Assert element is visible after scrolling it into view***
+
+```javascript
+cy.get('#scroll-horizontal button').scrollIntoView()
+  .should('be.visible')
+```
+
+The commands above will display in the command log as:
+
+{% img /img/api/scrollintoview/command-log-for-scrollintoview.png "command log scrollintoview" %}
+
+When clicking on the `scrollintoview` command within the command log, the console outputs the following:
+
+{% img /img/api/scrollintoview/console-log-for-scrollintoview.png "console.log scrollintoview" %}
 
 # See also
 

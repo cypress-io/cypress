@@ -41,7 +41,7 @@ The name of the `event` to be triggered on the DOM element.
 
 The position where the event should be triggered. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
-![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
+{% img /img/api/coordinates-diagram.jpg "cypress-command-positions-diagram" %}
 
 **{% fa fa-angle-right %} x** ***(Number)***
 
@@ -84,7 +84,7 @@ cy.get('button').trigger('mouseover') // yields 'button'
 ***Drag and Drop***
 
 {% note info %}
-{% url 'Check out our example recipe triggering mouse and drag events to test dragging and dropping' drag-and-drop %}
+{% url 'Check out our example recipe triggering mouse and drag events to test dragging and dropping' testing-the-dom-recipe %}
 {% endnote %}
 
 ## Change Event
@@ -192,19 +192,21 @@ That means that your event listener callbacks will be invoked, but don't expect 
 
 # Command Log
 
-***Trigger a `mouseover` event on the first button***
+***Trigger a `change` event on input type='range'***
 
 ```javascript
-cy.get('button').first().trigger('mouseover')
+cy.get('.trigger-input-range')
+  .invoke('val', 25)
+  .trigger('change')
 ```
 
 The commands above will display in the command log as:
 
-![command log for trigger](https://cloud.githubusercontent.com/assets/1157043/23477277/749d347e-fe8b-11e6-9c31-6667f7ff65d8.png)
+{% img /img/api/trigger/command-log-trigger.png "command log trigger" %}
 
 When clicking on `trigger` within the command log, the console outputs the following:
 
-![console.log for trigger](https://cloud.githubusercontent.com/assets/1157043/23477276/749aac54-fe8b-11e6-81b3-e7600cca0ba0.png)
+{% img /img/api/trigger/console-log-trigger.png "console log trigger" %}
 
 # See also
 
