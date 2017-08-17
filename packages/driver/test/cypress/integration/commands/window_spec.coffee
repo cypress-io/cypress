@@ -460,7 +460,7 @@ describe "src/cy/commands/window", ->
 
       cy.viewport(800, 600)
 
-    context.only "changing viewport", ->
+    context "changing viewport", ->
       it "changes viewport and then resets back to the original", ->
         { viewportHeight, viewportWidth } = Cypress.config()
 
