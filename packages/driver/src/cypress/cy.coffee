@@ -199,6 +199,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     state("subject", undefined)
 
   doneEarly = ->
+    stopped = true
+
     ## we only need to worry about doneEarly when
     ## it comes from a manual event such as stopping
     ## Cypress or when we yield a (done) callback
@@ -215,8 +217,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     cleanup()
 
   cleanup = ->
-    stopped = true
-
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
@@ -235,6 +235,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     state("index", queue.length)
 
   fail = (err, runnable) ->
+    stopped = true
+
     ## store the error on state now
     state("error", err)
 

@@ -174,7 +174,8 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("error").error(err)
 
-      cy.fail(err)
+      if r = state("reject")
+        r(err)
 
     onXhrAbort: (xhr, stack) =>
       setResponse(state, xhr)

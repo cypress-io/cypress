@@ -744,8 +744,7 @@ describe "src/cy/commands/xhr", ->
           expect(lastLog.get("snapshots")[1].name).to.eq("response")
           expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
-    ## TODO: fix these, they should not be skipped
-    describe.skip "errors", ->
+    describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 200)
 
@@ -759,19 +758,21 @@ describe "src/cy/commands/xhr", ->
         return null
 
       it "sets err on log when caused by code errors", (done) ->
+        finalThenCalled = false
+
         cy.on "fail", (err) =>
-          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.be.ok
+          expect(lastLog.get("name")).to.eq("xhr")
           expect(lastLog.get("error")).to.eq err
           done()
 
         cy
           .window().then (win) ->
             new Promise (resolve) ->
-              win.$.get("http://www.google.com/foo.json").fail ->
+              win.$.get("http://www.google.com/foo.json")
+              .fail ->
                 foo.bar()
 
       it "causes errors caused by onreadystatechange callback function", (done) ->
@@ -781,19 +782,19 @@ describe "src/cy/commands/xhr", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.be.ok
+          expect(lastLog.get("name")).to.eq("xhr")
           expect(lastLog.get("error")).to.eq err
           expect(err).to.eq(e)
           done()
 
         cy
           .window().then (win) ->
-            xhr = new win.XMLHttpRequest
-            xhr.open("GET", "/foo")
-            xhr.onreadystatechange = ->
-              throw e
-            xhr.send()
-            null
+            new Promise (resolve) ->
+              xhr = new win.XMLHttpRequest
+              xhr.open("GET", "/foo")
+              xhr.onreadystatechange = ->
+                throw e
+              xhr.send()
 
   context "#server", ->
     it "sets serverIsStubbed", ->
@@ -863,8 +864,7 @@ describe "src/cy/commands/xhr", ->
           .server({enable: false})
           .route(/app/, {})
 
-      ## TODO: same problem this should not be skipped
-      describe.skip ".log", ->
+      describe ".log", ->
         beforeEach ->
           @logs = []
 
@@ -1432,14 +1432,15 @@ describe "src/cy/commands/xhr", ->
 
         cy.route()
 
-      ## TODO: fix this due to uncaught error
-      it.skip "sets err on log when caused by the XHR response", (done) ->
+      it "sets err on log when caused by the XHR response", (done) ->
+        @route.restore()
+
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           ## route + window + xhr log === 3
           expect(@logs.length).to.eq(3)
-          expect(lastLog.get("error")).to.be.ok
+          expect(lastLog.get("name")).to.eq("xhr")
           expect(lastLog.get("error")).to.eq err
           done()
 
@@ -1781,11 +1782,7 @@ describe "src/cy/commands/xhr", ->
         cy.then ->
           expect(@lastLog.invoke("renderProps").indicator).to.equal("bad")
 
-  context.skip "Cypress.on(before:window:load)", ->
-    beforeEach ->
-      ## force us to start from blank window
-      cy.state("$autIframe").prop("src", "about:blank")
-
+  context "Cypress.on(before:window:load)", ->
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
@@ -1793,15 +1790,22 @@ describe "src/cy/commands/xhr", ->
       cy
         .server()
         .route(/foo/, {foo: "bar"}).as("getFoo")
-        .then ->
-          expect(cy.state("bindServer")).to.be.a("function")
-          expect(cy.state("bindRoutes")).to.be.a("array")
-        .visit("http://localhost:3500/fixtures/sinon.html")
-        .then ->
-          expect(cy.state("bindServer")).to.be.a("function")
-          expect(cy.state("bindRoutes")).to.be.a("array")
-        .visit("http://localhost:3500/fixtures/sinon.html")
-        .wait("@getFoo").its("url").should("include", "?some=data")
+        .visit("http://localhost:3500/fixtures/jquery.html")
+        .window().then (win) ->
+          new Promise (resolve) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            xhr.send()
+            xhr.onload = resolve
+        .wait("@getFoo").its("url").should("include", "/foo")
+        .visit("http://localhost:3500/fixtures/generic.html")
+        .window().then (win) ->
+          new Promise (resolve) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            xhr.send()
+            xhr.onload = resolve
+        .wait("@getFoo").its("url").should("include", "/foo")
 
   context.skip "#cancel", ->
     it "calls server#cancel", (done) ->
