@@ -170,11 +170,11 @@ cy.get('#scrollable-horizontal').scrollTo('right')
 
 The commands above will display in the command log as:
 
-![command log for scrollTo](https://cloud.githubusercontent.com/assets/1271364/25049157/50d68f18-210e-11e7-81f1-ed837075160d.png)
+{% img /img/api/command-log-scrollto.png "command log for scrollTo" %}
 
 When clicking on `scrollTo` within the command log, the console outputs the following:
 
-![console.log for scrollTo](https://cloud.githubusercontent.com/assets/1271364/25049182/6e07211a-210e-11e7-9419-b57f3e08a608.png)
+{% img /img/api/console-log-scrollto.png "console.log for scrollTo" %}
 
 # See also
 

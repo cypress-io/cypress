@@ -192,19 +192,21 @@ That means that your event listener callbacks will be invoked, but don't expect 
 
 # Command Log
 
-***Trigger a `mouseover` event on the first button***
+***Trigger a `change` event on input type='range'***
 
 ```javascript
-cy.get('button').first().trigger('mouseover')
+cy.get('.trigger-input-range')
+  .invoke('val', 25)
+  .trigger('change')
 ```
 
 The commands above will display in the command log as:
 
-![command log for trigger](https://cloud.githubusercontent.com/assets/1157043/23477277/749d347e-fe8b-11e6-9c31-6667f7ff65d8.png)
+{% img /img/api/trigger/command-log-trigger.png "command log trigger" %}
 
 When clicking on `trigger` within the command log, the console outputs the following:
 
-![console.log for trigger](https://cloud.githubusercontent.com/assets/1157043/23477276/749aac54-fe8b-11e6-81b3-e7600cca0ba0.png)
+{% img /img/api/trigger/console-log-trigger.png "console log trigger" %}
 
 # See also
 
