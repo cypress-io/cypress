@@ -42,7 +42,7 @@ cy.title().scrollTo('My App')  // Errors, 'title' does not yield DOM element
 
 A specified position to scroll the window or element to. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
-![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
+{% img /img/api/coordinates-diagram.jpg "cypress-command-positions-diagram" %}
 
 **{% fa fa-angle-right %} x** ***(Number, String)***
 
