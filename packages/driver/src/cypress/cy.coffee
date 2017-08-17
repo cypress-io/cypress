@@ -589,6 +589,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindowListeners(contentWindow)
 
+    onSpecWindowUncaughtException: ->
+      ## create the special uncaught exception err
+      errors.createUncaughtException.apply(null, arguments)
+
     onUncaughtException: ->
       runnable = state("runnable")
 

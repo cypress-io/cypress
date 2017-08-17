@@ -6,6 +6,7 @@ $utils = require("./utils")
 mocha = require("mocha")
 
 Mocha = mocha.Mocha ? mocha
+Test = Mocha.Test
 Runner = Mocha.Runner
 Runnable = Mocha.Runnable
 
@@ -173,6 +174,11 @@ create = (specWindow, Cypress, reporter) ->
 
   return {
     _mocha
+
+    createRootTest: (title, fn) ->
+      r = new Test(title, fn)
+      _runner.suite.addTest(r)
+      r
 
     getRunner: ->
       _runner

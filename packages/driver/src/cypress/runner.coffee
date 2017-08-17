@@ -584,15 +584,39 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
       ## TODO: why do we need to do this???
       hookFailed(runnable, runnable.err, hookName, getTestById)
 
-create = (mocha, Cypress, cy) ->
+create = (specWindow, mocha, Cypress, cy) ->
   _id = 0
 
   _runner = mocha.getRunner()
   _runner.suite = mocha.getRootSuite()
 
-  ## this is used in tests since we provide
-  ## the tests immediately
-  # normalizeAll(_runner.suite, {}, grep()) if _runner.suite
+  specWindow.onerror = ->
+    err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
+
+    ## do the same thing as mocha here
+    if not runnable = _runner.currentRunnable
+      err.message += "We could not associate this error to a runnable..."
+
+      throwErr = ->
+        throw err
+
+      runnable = mocha.createRootTest("foo bar baz", throwErr)
+
+    ## ignore if our runnable currently has a state
+    return if runnable.state
+
+    ## if we're currently running
+    if _runner.started
+      ## fail the runnable so we get
+      ## all the events
+      _runner.fail(runnable, err)
+
+    ## else this test will get picked up later
+    ## when we go to run all the tests
+
+    ## return true to prevent default uncaught exception
+    ## handling
+    return true
 
   ## hold onto the _runnables for faster lookup later
   _stopped = false
