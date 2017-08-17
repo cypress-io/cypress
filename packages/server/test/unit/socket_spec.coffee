@@ -69,6 +69,7 @@ describe "lib/socket", ->
           path: socketIoRoute
           transports: ["websocket"]
         })
+      return
 
     afterEach ->
       @client.disconnect()
@@ -119,8 +120,6 @@ describe "lib/socket", ->
           ])
 
           @client.emit "automation:request", "get:cookies", {domain: "localhost"}, (resp) ->
-            console.log(resp)
-
             expect(resp).to.deep.eq({
               response: [
                 {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}

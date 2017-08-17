@@ -243,15 +243,16 @@ describe "lib/modes/headless", ->
         .then (ret) ->
           expect(ret).to.be.undefined
 
-      it "does not resolve if socketId does not match id", (done) ->
+      it "does not resolve if socketId does not match id", ->
         process.nextTick =>
           @projectInstance.emit("socket:connected", 12345)
 
         headless
           .waitForSocketConnection(@projectInstance, 1234)
           .timeout(50)
+          .then ->
+            throw new Error("should time out and not resolve")
           .catch Promise.TimeoutError, (err) ->
-            done()
 
       it "actually removes the listener", ->
         process.nextTick =>
