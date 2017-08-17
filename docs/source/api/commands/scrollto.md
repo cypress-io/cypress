@@ -3,8 +3,6 @@ title: scrollTo
 comments: false
 ---
 
-THIS DOCUMENT NEEDS ITS USAGE, REQUIREMENTS, ASSERTIONS, AND TIMEOUTS FIXED
-
 Scroll to a specific position.
 
 # Syntax
@@ -14,11 +12,18 @@ cy.scrollTo(position)
 cy.scrollTo(x, y)
 cy.scrollTo(position, options)
 cy.scrollTo(x, y, options)
+
+// ---or---
+
+.scrollTo(position)
+.scrollTo(x, y)
+.scrollTo(position, options)
+.scrollTo(x, y, options)
 ```
 
 ## Usage
 
-`cy.scrollTo()` can be chained off of `cy` to scroll to a position in the window or chained off another cy command that *yields* a DOM element - limiting scrolling to it's yielded element.
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
 cy.scrollTo(0, 500)                     // Scroll the window 500px down
@@ -61,18 +66,6 @@ Option | Default | Description
 ## Yields {% helper_icon yields %}
 
 {% yields same_subject cy.scrollTo %}
-
-## Timeouts {% helper_icon timeout %}
-
-`cy.scrollTo()` will wait until the window or element is in a 'scrollable' state for the duration of the {% url `defaultCommandTimeout` configuration#Timeouts %} or the duration of the `timeout` specified in the command's options.
-
-## Requirements {% helper_icon requirements %}
-
-{% requirements scrollability .scrollTo %}
-
-## Timeouts {% helper_icon timeout %}
-
-{% timeouts assertions .scrollTo %}
 
 # Examples
 
@@ -126,11 +119,45 @@ cy.get('#slider').scrollTo('right', { duration: 2000} )
 
 # Notes
 
+## Actionability
+
+`cy.scrollTo()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+## Scopes
+
+`cy.scrollTo()` acts differently whether its starting a series of commands or being chained off of an existing.
+
+***When starting a series of commands:***
+
+This scrolls the `window`.
+
+```javascript
+cy.scrollTo('bottom')
+```
+
+***When chained to an existing series of commands:***
+
+This will scroll the `<#checkout-items>` element.
+
+```javascript
+cy.get('#checkout-items').scrollTo('right')
+```
+
 ## Snapshots
 
 ***Snapshots do not reflect scroll behavior***
 
-*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos.html#Videos %}.
+*Cypress does not reflect the accurate scroll positions of any elements within snapshots.* If you want to see the actual scrolling behavior in action, we recommend using {% url `.pause()` pause %} to walk through each command or {% url 'watching the video of the test run' screenshots-and-videos#Videos %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements scrollability .scrollTo %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .scrollTo %}
 
 # Command Log
 
