@@ -48,6 +48,27 @@ Option | Default | Description
 
 # Examples
 
+## Scrolling
+
+```javascript
+cy.get('button#checkout').scrollIntoView()
+  .should('be.visible')
+```
+
+## Options
+
+***Use linear easing animation to scroll***
+
+```javascript
+cy.get('.next-page').scrollIntoView({ easing: 'linear' } )
+```
+
+***Scroll to element over 2000ms***
+
+```javascript
+cy.get('footer').scrollIntoView({ duration: 2000 })
+```
+
 # Notes
 
 ## Snapshots
