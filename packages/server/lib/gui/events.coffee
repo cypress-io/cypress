@@ -26,6 +26,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
   send = (data) ->
     sendResponse({id: id, data: data})
 
+  sendNull = ->
+    send(null)
+
   onBus = (event) ->
     bus.removeAllListeners(event)
     bus.on(event, send)
@@ -40,9 +43,18 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:focus:tests"
       onBus("focus:tests")
 
+    when "on:spec:changed"
+      onBus("spec:changed")
+
+    when "on:config:changed"
+      onBus("config:changed")
+
+    when "on:project:warning"
+      onBus("project:warning")
+
     when "gui:error"
       logs.error(arg)
-      .then -> send(null)
+      .then(sendNull)
       .catch(sendErr)
 
     when "show:directory:dialog"
@@ -83,6 +95,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "launch:browser"
       # headless.createWindows(arg, true)
       openProject.launch(arg.browser, arg.spec, {
+        projectPath: options.projectPath
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->
@@ -110,29 +123,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "updater:check"
       Updater.check({
-        onNewVersion: ->   send(true)
+        onNewVersion: ({ version }) -> send(version)
         onNoNewVersion: -> send(false)
       })
-
-    when "updater:run"
-      echo = (event, version) ->
-        send({event: event, version: version})
-
-      upd = Updater.run({
-        onStart: -> echo("start")
-        onApply: -> echo("apply")
-        onError: -> echo("error")
-        onDone: ->  echo("done")
-        onNone: ->  echo("none")
-        onDownload: (version) ->
-          echo("download", version)
-      })
-
-      ## TODO: there is no note here, what if the window
-      ## is closed once the updater finishes?
-      win = Windows.getByWebContents(event.sender)
-      win.once "closed", ->
-        upd.cancel()
 
     when "get:logs"
       logs.get()
@@ -141,7 +134,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "clear:logs"
       logs.clear()
-      .then -> send(null)
+      .then(sendNull)
       .catch(sendErr)
 
     when "on:log"
@@ -183,24 +176,24 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "open:project"
       onSettingsChanged = ->
-        openProject.reboot()
-        .call("getConfig")
-        .then(send)
-        .catch(sendErr)
+        bus.emit("config:changed")
 
       onSpecChanged = (spec) ->
-        send({specChanged: spec})
+        bus.emit("spec:changed", spec)
 
       onFocusTests = ->
         if _.isFunction(options.onFocusTests)
           options.onFocusTests()
-
         bus.emit("focus:tests")
+
+      onWarning = (warning) ->
+        bus.emit("project:warning", errors.clone(warning, {html: true}))
 
       openProject.create(arg, options, {
         onFocusTests: onFocusTests
         onSpecChanged: onSpecChanged
         onSettingsChanged: onSettingsChanged
+        onWarning: onWarning
       })
       .call("getConfig")
       .then(send)
@@ -227,8 +220,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onError: sendErr
       })
 
-    when "get:builds"
-      openProject.getBuilds()
+    when "get:runs"
+      openProject.getRuns()
       .then(send)
       .catch (err) ->
         err.type = if _.get(err, "statusCode") is 401
@@ -254,6 +247,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
           err.type or "UNKNOWN"
 
         sendErr(err)
+
+    when "onboarding:closed"
+      openProject.getProject()
+      .saveState({ showedOnBoardingModal: true })
+      .then(sendNull)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

@@ -18,7 +18,7 @@
 
   p {
     color: #bbb;
-    font-size: 16px;
+    font-size: $font-size;
   }
 
   .alert.alert-danger {
@@ -84,7 +84,3 @@
   margin: 10px 0;
   color: #777;
 }
-
-
-
-

@@ -1,4 +1,4 @@
-global.root      = "../../../"
+global.root      = "../../"
 global.supertest = require("supertest-as-promised")
 global.nock      = require("nock")
 global.fs        = require("fs-extra")
@@ -17,7 +17,7 @@ global.fs = fs = Promise.promisifyAll(global.fs)
 agent = require("superagent")
 
 require("chai")
-.use(require("sinon-chai"))
+.use(require("@cypress/sinon-chai"))
 
 mockery.enable({
   warnOnUnregistered: false

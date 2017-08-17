@@ -237,9 +237,15 @@ $Keyboard = {
 
     el = options.$el.get(0)
 
-    ## if el does not have this property
     bililiteRangeSelection = el.bililiteRangeSelection
     rng = bililiteRange(el).bounds("selection")
+
+    ## if the value has changed since previously typing, we need to
+    ## update the caret position if the value has changed
+    if el.prevValue and @expectedValueDoesNotMatchCurrentValue(el.prevValue, rng)
+      @moveCaretToEnd(rng)
+      el.prevValue = rng.all()
+      bililiteRangeSelection = el.bililiteRangeSelection = rng.bounds()
 
     ## store the previous text value
     ## so we know to fire change events
@@ -247,7 +253,6 @@ $Keyboard = {
     options.prev = rng.all()
 
     resetBounds = (start, end) ->
-
       if start? and end?
         bounds = [start, end]
       else
@@ -440,6 +445,7 @@ $Keyboard = {
       when "input"
         keys      = false
         otherKeys = false
+        simulated = true
 
     if otherKeys
       _.extend event, {
@@ -447,6 +453,12 @@ $Keyboard = {
         repeat: false
       }
       @mixinModifiers(event)
+
+    ## fixes https://github.com/cypress-io/cypress/issues/536#issuecomment-308734118
+    if simulated
+      _.extend event, {
+        simulated: true
+      }
 
     if keys
       _.extend event, {
@@ -460,6 +472,7 @@ $Keyboard = {
         view: options.window
         which: which
       }
+
 
     args = [options.id, key, eventType, charCodeAt]
 
@@ -475,9 +488,6 @@ $Keyboard = {
 
     return dispatched
 
-  updateValue: (rng, key) ->
-    rng.text(key, "end")
-
   typeKey: (el, key, options) ->
     ## if we have an afterKey value it means
     ## we've typed in prior to this
@@ -489,7 +499,11 @@ $Keyboard = {
         @moveCaretToEnd(options.rng)
 
     @ensureKey el, key, options, ->
-      @updateValue(options.rng, key)
+      options.updateValue(options.rng, key)
+      ## update the selection that's cached on the element
+      ## and store the value for comparison in any future typing
+      el.bililiteRangeSelection = options.rng.bounds()
+      el.prevValue = el.value
 
   ensureKey: (el, key, options, fn) ->
     options.id        = _.uniqueId("char")

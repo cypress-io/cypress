@@ -4,12 +4,11 @@ EE         = require("events")
 app        = require("electron").app
 image      = require("electron").nativeImage
 Promise    = require("bluebird")
-cyIcons    = require("@cypress/icons")
 Position   = require("electron-positioner")
+cyIcons    = require("@cypress/icons")
 user       = require("../user")
 errors     = require("../errors")
 savedState = require("../saved_state")
-Updater    = require("../updater")
 logs       = require("../gui/logs")
 menu       = require("../gui/menu")
 Events     = require("../gui/events")
@@ -22,7 +21,7 @@ module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  getWindowArgs: (state) ->
+  getWindowArgs: (state, options = {}) ->
     common = {
       backgroundColor: "#dfe2e4"
       width: state.appWidth or 800
@@ -40,6 +39,7 @@ module.exports = {
         y: "appY"
         devTools: "isAppDevToolsOpen"
       }
+      projectPath: options.projectPath
       onBlur: ->
         return if @webContents.isDevToolsOpened()
 
@@ -78,27 +78,19 @@ module.exports = {
     ## instance here instead of callback functions
     menu.set({
       withDevTools: isDev()
-      onUpdatesClicked: ->
-        bus.emit("menu:item:clicked", "check:for:updates")
-
       onLogOutClicked: ->
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState.get()
+    savedState(options.projectPath).get()
     .then (state) =>
-      Windows.open(@getWindowArgs(state))
+      Windows.open(@getWindowArgs(state, options))
       .then (win) =>
-        ## cause the browser window instance
-        ## to receive focus when we"ve been
-        ## told to focus on the tests!
-        options.onFocusTests = ->
-          win.focus()
-
-        Events.start(options, bus)
-
-        if options.updating
-          Updater.install(options)
+        Events.start(_.extend({}, options, {
+          env: process.env["CYPRESS_ENV"]
+          onFocusTests: -> win.focus()
+          os: os.platform()
+        }), bus)
 
         return win
 

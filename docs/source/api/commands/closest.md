@@ -1,65 +1,101 @@
+---
 title: closest
-comments: true
+comments: false
 ---
 
-Get the first DOM element that matches the selector whether it be itself or one of it's ancestors.
+Get the first DOM element that matches the selector (whether it be itself or one of it's ancestors).
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.closest()` http://api.jquery.com/closest %} works in jQuery.
+{% endnote %}
 
-***
-
-# [cy.closest( *selector* )](#section-selector-usage)
-
-For each DOM element in the set, get the first DOM element that matches the selector by testing the DOM element itself and traversing up through its ancestors in the DOM tree.
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.closest`.
-
-**cy.closest( *selector*, *options* )**
-
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
-
-# Selector Usage
-
-## Find the closest element of the current subject with the class `nav`
+# Syntax
 
 ```javascript
-cy.get("li.active").closest(".nav")
+.closest(selector)
+.closest(selector, options)
 ```
 
-***
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.get('td').closest('.filled') // Yield closest el with class '.filled'
+```
+
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
+
+```javascript
+cy.closest('.active')  // Errors, cannot be chained off 'cy'
+cy.url().closest()     // Errors, 'url' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.closest()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .closest %}
+
+## Yields {% helper_icon yields %}
+
+{% yields changes_dom_subject .closest %}
+
+# Examples
+
+## No Args
+
+***Find the closest element of the 'error' with the class 'banner'***
+
+```javascript
+cy.get('p.error').closest('.banner')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .closest %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .closest %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .closest %}
 
 # Command Log
 
-## Find the closest element of the current subject with the class `nav`
+***Find the closest element of 'active li' with the class 'nav'***
 
 ```javascript
-cy.get("li.active").closest(".nav")
+cy.get('li.active').closest('.nav')
 ```
 
 The commands above will display in the command log as:
 
-<img width="530" alt="screen shot 2015-11-27 at 2 07 28 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447200/500fe9ca-9510-11e5-8c77-8afb8325d937.png">
+![Command Log closest](/img/api/closest/find-closest-nav-element-in-test.png)
 
 When clicking on the `closest` command within the command log, the console outputs the following:
 
-<img width="478" alt="screen shot 2015-11-27 at 2 07 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png">
+![console.log closest](/img/api/closest/closest-console-logs-elements-found.png)
 
-***
+# See also
 
-# Related
-
-- [parents](https://on.cypress.io/api/parents)
-- [next](https://on.cypress.io/api/next)
-- [first](https://on.cypress.io/api/first)
+- {% url `.first()` first %}
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.parentsUntil()` parentsuntil %}
+- {% url `.prev()` prev %}
+- {% url `.prevAll()` prevall %}
+- {% url `.prevUntil()` prevuntil %}

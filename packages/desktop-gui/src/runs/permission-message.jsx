@@ -24,7 +24,6 @@ class PermissionMessage extends Component {
   render () {
     return (
       <div
-        id='runs-list-page'
         className={cs('request-access', {
           'is-submitting': this.state.isSubmitting,
         })}

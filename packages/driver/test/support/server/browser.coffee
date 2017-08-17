@@ -1,7 +1,7 @@
 Promise = require("bluebird")
 fs = Promise.promisifyAll(require("fs-extra"))
 path = require("path")
-launcher = require("../../../../launcher")
+launcher = require("@packages/launcher")
 
 profileDir = path.join(__dirname, "../../../dist-test/browsers/chrome")
 themeDir = path.join(__dirname, "theme")
@@ -43,6 +43,10 @@ args = [
   "--disable-client-side-phishing-detection"
   "--disable-component-update"
   "--disable-default-apps"
+
+  # Run Chrome with options to work inside Docker container
+  "--no-sandbox"
+  "--disable-gpu"
 
   "--load-extension=#{themeDir}"
   "--user-data-dir=#{profileDir}"

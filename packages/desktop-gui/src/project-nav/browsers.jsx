@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
 
-import { closeBrowser } from '../projects/projects-api'
+import projectsApi from '../projects/projects-api'
 
 @observer
 export default class Browsers extends Component {
@@ -33,7 +33,7 @@ export default class Browsers extends Component {
     if (this.props.project.browserState === 'opened') {
       return (
         <li className='close-browser'>
-          <button className="btn btn-xs btn-danger" onClick={this._closeBrowser.bind(this)}>
+          <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
             <i className='fa fa-fw fa-times'></i>
             Stop
           </button>
@@ -44,7 +44,7 @@ export default class Browsers extends Component {
 
   _closeBrowser = (e) => {
     e.preventDefault()
-    closeBrowser(this.props.project.clientId)
+    projectsApi.closeBrowser(this.props.project)
   }
 
   _onSelect = (browser) => {
@@ -52,22 +52,24 @@ export default class Browsers extends Component {
   }
 
   _browser = (browser) => {
+    const project = this.props.project
+    let icon
     let prefixText
 
-    switch (this.props.project.browserState) {
-      case 'opening':
-        prefixText = 'Opening'
-        break
-      case 'opened':
-        prefixText = 'Running'
-        break
-      default:
-        prefixText = ''
+    if (project.browserState === 'opening') {
+      icon = 'refresh fa-spin'
+      prefixText = 'Opening'
+    } else if (project.browserState === 'opened') {
+      icon = 'check-circle-o green'
+      prefixText = 'Running'
+    } else {
+      icon = browser.icon
+      prefixText = ''
     }
 
     return (
       <span className={browser.name}>
-        <i className={`fa fa-${browser.icon}`}></i>{' '}
+        <i className={`fa fa-${icon}`}></i>{' '}
         { prefixText }{' '}
         { browser.displayName }{' '}
         { browser.majorVersion }

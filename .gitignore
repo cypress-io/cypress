@@ -6,3 +6,44 @@ node_modules
 *.orig
 dist
 dist-*
+build
+.vscode
+.publish
+_test-output
+
+# from extension
+Cached Theme.pak
+Cached Theme Material Design.pak
+
+# from https-proxy project
+packages/https-proxy/ca/
+
+# from example
+packages/example/app
+packages/example/build
+packages/example/cypress/screenshots
+packages/example/cypress/videos
+packages/example/cypress/fixtures/profile.json
+packages/example/cypress/fixtures/users.json
+
+# from server
+packages/server/.cy
+packages/server/.projects
+packages/server/support
+
+# from docs
+docs/public
+docs/db.json
+docs/.deploy*/
+docs/cypress/screenshots
+docs/cypress/videos
+docs/themes/cypress/source/css/vendor
+docs/themes/cypress/source/js/vendor
+docs/themes/cypress/source/fonts/vendor
+docs/support
+
+# CLI tool
+cli/build
+
+# Building app binary
+scripts/binary/support

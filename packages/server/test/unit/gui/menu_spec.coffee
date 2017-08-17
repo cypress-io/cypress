@@ -71,13 +71,12 @@ describe "gui/menu", ->
         expect(getMenuItem("Cypress")).to.be.undefined
 
   context "File", ->
-    it "contains changelog, check for updates, logout, close window", ->
+    it "contains changelog, logout, close window", ->
       menu.set()
       labels = getLabels(getMenuItem("File").submenu)
 
       expect(labels).to.eql([
         "Changelog"
-        "Check for Updates"
         "Manage Account"
         "Log Out"
         "View App Data"
@@ -88,23 +87,6 @@ describe "gui/menu", ->
       menu.set()
       getSubMenuItem(getMenuItem("File"), "Changelog").click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/changelog")
-
-    it "calls updates callback when Check for Updates is clicked", ->
-      onUpdatesClicked = @sandbox.stub()
-      menu.set({onUpdatesClicked})
-      getSubMenuItem(getMenuItem("File"), "Check for Updates").click()
-      expect(onUpdatesClicked).to.be.called
-
-    it "calls original updates callback when menu is reset without new callback", ->
-      onUpdatesClicked = @sandbox.stub()
-      menu.set({onUpdatesClicked})
-      menu.set()
-      getSubMenuItem(getMenuItem("File"), "Check for Updates").click()
-      expect(onUpdatesClicked).to.be.called
-
-    it "is noop when Check for Updates is clicked with no callback", ->
-      menu.set()
-      expect(-> getSubMenuItem(getMenuItem("File"), "Check for Updates").click()).not.to.throw()
 
     it "opens dashboard when Manage Account is clicked", ->
       menu.set()
@@ -204,25 +186,25 @@ describe "gui/menu", ->
       labels = getLabels(getMenuItem("Help").submenu)
 
       expect(labels).to.eql([
+        "Support"
+        "Documentation"
         "Report an Issue.."
-        "Cypress Documentation"
-        "Cypress Chat"
       ])
 
-    it "opens new issue when Report an Issue is clicked", ->
+    it "opens chat when Support is clicked", ->
       menu.set()
       getMenuItem("Help").submenu[0].click()
-      expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/new-issue")
+      expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/support")
 
-    it "opens docs when Cypress Documentation is clicked", ->
+    it "opens docs when Documentation is clicked", ->
       menu.set()
       getMenuItem("Help").submenu[1].click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io")
 
-    it "opens chat when Cypress Chat is clicked", ->
+    it "opens new issue when Report an Issue is clicked", ->
       menu.set()
       getMenuItem("Help").submenu[2].click()
-      expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/chat")
+      expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/new-issue")
 
   context "Developer Tools", ->
     it "does not exist by default", ->

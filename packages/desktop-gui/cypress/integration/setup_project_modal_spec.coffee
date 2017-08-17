@@ -1,51 +1,41 @@
-_ = require("lodash")
-moment = require("moment")
-{deferred, stubIpc} = require("../support/util")
-
 describe "Setup Project", ->
   beforeEach ->
-    cy
-      .fixture("user").as("user")
-      .fixture("projects").as("projects")
-      .fixture("projects_statuses").as("projectStatuses")
-      .fixture("config").as("config")
-      .fixture("specs").as("specs")
-      .fixture("organizations").as("orgs")
-      .fixture("keys").as("keys")
-      .visit("/")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
+    cy.fixture("projects").as("projects")
+    cy.fixture("projects_statuses").as("projectStatuses")
+    cy.fixture("config").as("config")
+    cy.fixture("specs").as("specs")
+    cy.fixture("organizations").as("orgs")
+    cy.fixture("keys").as("keys")
 
-        @config.projectId = null
-        @setupDashboardProject = deferred()
-        @getOrgs = deferred()
+    cy.visitIndex().then (win) ->
+      { start, @ipc } = win.App
 
-        stubIpc(@App.ipc, {
-          "on:menu:clicked": ->
-          "close:browser": ->
-          "close:project": ->
-          "on:focus:tests": ->
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.resolves(@user)
-          "updater:check": (stub) => stub.resolves(false)
-          "get:projects": (stub) => stub.resolves(@projects)
-          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
-          "open:project": (stub) => stub.yields(null, @config)
-          "get:specs": (stub) => stub.resolves(@specs)
-          "get:builds": (stub) => stub.resolves([])
-          "get:orgs": (stub) => stub.returns(@getOrgs.promise)
-          "setup:dashboard:project": (stub) => stub.returns(@setupDashboardProject.promise)
-          "get:record:keys": (stub) => stub.resolves(@keys)
-        })
+      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getCurrentUser").returns(@user)
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "closeBrowser").resolves(null)
+      @config.projectId = null
+      cy.stub(@ipc, "openProject").resolves(@config)
+      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      cy.stub(@ipc, "getRuns").resolves([])
+      cy.stub(@ipc, "getRecordKeys").resolves(@keys)
+      cy.stub(@ipc, "externalOpen")
 
-        @App.start()
+      @getOrgs = @util.deferred()
+      cy.stub(@ipc, "getOrgs").returns(@getOrgs.promise)
 
-        cy
-          .get(".projects-list a")
-            .contains("My-Fake-Project").click()
-          .get(".navbar-default a")
-            .contains("Runs").click()
+      @getProjectStatus = @util.deferred()
+      cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
+
+      @setupDashboardProject = @util.deferred()
+      cy.stub(@ipc, "setupDashboardProject").returns(@setupDashboardProject.promise)
+
+      start()
+
+      cy
+        .get(".navbar-default a")
+          .contains("Runs").click()
 
   it "displays empty message", ->
     cy.contains("You Have No Recorded Runs")
@@ -53,12 +43,10 @@ describe "Setup Project", ->
   context "modal display", ->
     beforeEach ->
       @getOrgs.resolve(@orgs)
-      cy
-        .get(".btn").contains("Setup Project").click()
+      cy.get(".btn").contains("Setup Project").click()
 
     it "clicking link opens setup project window", ->
-      cy
-        .get(".modal").should("be.visible")
+      cy.get(".modal").should("be.visible")
 
     it "submit button is disabled", ->
       cy
@@ -68,26 +56,21 @@ describe "Setup Project", ->
   context "project name", ->
     beforeEach ->
       @getOrgs.resolve(@orgs)
-      cy
-        .get(".btn").contains("Setup Project").click()
+      cy.get(".btn").contains("Setup Project").click()
 
     it "prefills Project Name", ->
-      cy
-        .get("#projectName").should("have.value", "My-Fake-Project")
+      cy.get("#projectName").should("have.value", "bar")
 
     it "allows me to change Project Name value", ->
-      newProjectName = "New Project Here"
-
       cy
-        .get("#projectName").clear().type(newProjectName)
-        .get("#projectName").should("have.value", newProjectName)
+        .get("#projectName").clear().type("New Project Here")
+          .should("have.value", "New Project Here")
 
   context "selecting owner", ->
     describe "default", ->
       beforeEach ->
         @getOrgs.resolve(@orgs)
-        cy
-          .get(".btn").contains("Setup Project").click()
+        cy.get(".btn").contains("Setup Project").click()
 
       it "has no owner selected by default", ->
         cy.get("#me").should("not.be.selected")
@@ -97,8 +80,7 @@ describe "Setup Project", ->
         cy
           .contains("label", "Who should own this")
             .find("a").click().then ->
-              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-are-organizations")
-
+              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-are-organizations")
 
     describe "select me", ->
       beforeEach ->
@@ -113,7 +95,7 @@ describe "Setup Project", ->
         cy
           .contains("label", "Who should see the runs")
             .find("a").click().then ->
-              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-is-project-access")
+              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-project-access")
 
       it "displays public & private radios with no preselects", ->
         cy
@@ -141,7 +123,7 @@ describe "Setup Project", ->
         it "opens external link on click of manage", ->
           cy
             .get(".manage-orgs-btn").click().then ->
-               expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
+               expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
 
         it "displays public & private radios on select", ->
           cy
@@ -174,7 +156,7 @@ describe "Setup Project", ->
 
         it "opens dashboard organizations when 'create organizatoin' is clicked", ->
           cy.contains("Create Organization").click().then ->
-             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
+             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
 
       context "polls for newly added organizations", ->
         beforeEach ->
@@ -187,11 +169,12 @@ describe "Setup Project", ->
 
         it "polls for orgs twice on click of org", ->
           cy.tick(11000).then =>
-            expect(@App.ipc.withArgs("get:orgs")).to.be.calledTwice
+            expect(@ipc.getOrgs).to.be.calledTwice
 
         it "updates orgs list on successful poll", ->
           @orgs[0].name = "Foo Bar Devs"
-          @getOrgsAgain = @App.ipc.withArgs("get:orgs").onCall(2).resolves(@orgs)
+          @getOrgsAgain = @ipc.getOrgs.onCall(2).resolves(@orgs)
+
           cy
             .tick(11000)
             .get("#organizations-select").find("option")
@@ -232,6 +215,22 @@ describe "Setup Project", ->
 
       cy.contains(".btn", "Setup Project").click()
 
+    it "sends project name, org id, and public flag to ipc event", ->
+      cy
+        .get(".modal-body")
+          .contains(".btn", "An Organization").click()
+        .get("#projectName").clear().type("New Project")
+        .get("select").select("Acme Developers")
+        .get(".privacy-radio").find("input").first().check()
+        .get(".modal-body")
+          .contains(".btn", "Setup Project").click()
+        .then =>
+          expect(@ipc.setupDashboardProject).to.be.calledWith({
+            projectName: "New Project"
+            orgId: "777"
+            public: true
+          })
+
     context "org/public", ->
       beforeEach ->
         cy
@@ -243,8 +242,8 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
-          projectName: "My-Fake-Project"
+        expect(@ipc.setupDashboardProject).to.be.calledWith({
+          projectName: "bar"
           orgId: "777"
           public: true
         })
@@ -259,8 +258,8 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
-          projectName: "My-Fake-Project"
+        expect(@ipc.setupDashboardProject).to.be.calledWith({
+          projectName: "bar"
           orgId: "000"
           public: false
         })
@@ -275,8 +274,8 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
-          projectName: "My-Fake-Project"
+        expect(@ipc.setupDashboardProject).to.be.calledWith({
+          projectName: "bar"
           orgId: "000"
           public: true
         })

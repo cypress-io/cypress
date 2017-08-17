@@ -25,6 +25,13 @@ const NoCommands = observer(() => (
 
 @observer
 class Test extends Component {
+  static defaultProps = {
+    appState,
+    events,
+    runnablesStore,
+    scroller,
+  }
+
   @observable isOpen = null
 
   componentDidMount () {
@@ -119,13 +126,6 @@ class Test extends Component {
     e.stopPropagation()
     this.props.events.emit('show:error', this.props.model.id)
   }
-}
-
-Test.defaultProps = {
-  appState,
-  events,
-  runnablesStore,
-  scroller,
 }
 
 export { NoCommands }

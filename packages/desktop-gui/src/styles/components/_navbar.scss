@@ -1,0 +1,148 @@
+.navbar-default {
+  background-color:#ececec;
+  box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.20);
+  border-color: #c8c8c8;
+  min-height: 35px;
+
+  &.navbar-fixed-top {
+    top: 40px;
+  }
+
+  .navbar-nav {
+    > .open {
+      > a, > a:hover {
+        background-color: #dedede;
+        color: #262626;
+      }
+    }
+
+    > li {
+      > div,
+      > a {
+        font-size: 13px;
+        color: #444;
+        padding: 1px 20px 0 20px;
+        line-height: 35px;
+      }
+
+      > a  {
+        &:hover, &:focus {
+          cursor: pointer;
+          background-color: #f3f3f3;
+        }
+
+        &.active {
+          background-color: #dedede;
+          color: #262626;
+        }
+
+        &.btn-link {
+          padding: 0 5px;
+
+          &:hover {
+            background-color:#ececec;
+          }
+        }
+      }
+
+      &.dropdown > a {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+    }
+  }
+}
+
+
+.navbar-right {
+  margin-right: 0;
+
+  .user-avatar {
+    position: relative;
+    top: -1px;
+  }
+}
+
+.navbar .container-fluid {
+  padding: 0;
+
+  a:hover {
+    cursor: pointer;
+  }
+}
+.navbar-collapse {
+  padding-left: 0;
+}
+
+.navbar-inverse {
+  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.20);
+  background-color: #252831;
+  min-height: 40px;
+  z-index: 1040;
+
+  .logo {
+    padding: 5px 0;
+
+    img {
+      height: 30px;
+    }
+  }
+
+  .nav.navbar-nav {
+    > .open {
+      > a, > a:hover, > a:focus {
+        background-color: #111;
+        color: #fff;
+      }
+    }
+
+    > li > div,
+    > li > a,
+    > li > span > a  {
+      color: $navbar-inverse-link-color;
+      line-height: 30px;
+      font-size: 14px;
+      padding: 5px 15px;
+      display: inline-block;
+    }
+  }
+}
+
+.browsers-list {
+  > span {
+    padding: 9px 15px;
+    display: inline-block;
+  }
+
+  .chrome > i { color: #1aa15f; }
+  .canary > i { color: #e4b721; }
+  .chromium > i { color: #829ac3; }
+  .electron > i { color: #777; }
+}
+
+.nav .browser-info {
+  color: #999;
+  margin-left: 6px;
+  margin-right: 4px;
+}
+
+.browser-info-tooltip {
+  background: #ececec;
+  border-color: #c7c7c7;
+  color: #333;
+  max-width: 300px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  text-align: left;
+
+  svg {
+    fill: #ececec;
+    stroke: #c7c7c7;
+  }
+}
+
+.close-browser {
+  .btn {
+    margin-top: 7px;
+  }
+}

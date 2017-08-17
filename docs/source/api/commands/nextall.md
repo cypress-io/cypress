@@ -1,45 +1,62 @@
-title: nextall
-comments: true
+---
+title: nextAll
+comments: false
 ---
 
-Get all following siblings of each DOM element in the set of matched DOM elements.
+Get all following siblings of each DOM element in a set of matched DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.nextAll` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.nextAll()` http://api.jquery.com/nextAll %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.nextAll()](#usage)
+```javascript
+.nextAll()
+.nextAll(selector)
+.nextAll(options)
+.nextAll(selector, options)
+```
 
-Get all of the next siblings of the elements.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.nextAll( *selector* )](#selector-usage)
+```javascript
+cy.get('.active').nextAll() // Yield all links next to `.active`
+```
 
-When a selector is provided, it retrieves all of the following siblings only if it matches that selector.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.nextAll()                // Errors, cannot be chained off 'cy'
+cy.getCookies().nextAll()   // Errors, 'getCookies' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.nextAll`.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-**cy.nextAll( *options* )**
-**cy.nextAll( *selector*, *options* )**
+A selector used to filter matching DOM elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.nextAll()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .nextAll %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .nextAll %}
 
-## Find all of the element's siblings following `.second`
+# Examples
+
+## No Args
+
+***Find all of the element's siblings following `.second`***
 
 ```html
 <ul>
@@ -52,15 +69,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns [<li>bananas</li>, <li>pineapples</li>, <li>grapes</li>]
-cy.get(".second").nextAll()
+// yields [<li>bananas</li>, <li>pineapples</li>, <li>grapes</li>]
+cy.get('.second').nextAll()
 ```
 
-***
+## Selector
 
-# Selector Usage
-
-## Find all of the following siblings of each li. Keep only the ones with a class `selected`.
+***Find all of the following siblings of each li. Keep only the ones with a class `selected`.***
 
 ```html
 <ul>
@@ -73,32 +88,42 @@ cy.get(".second").nextAll()
 ```
 
 ```javascript
-//returns <li>pineapples</li>
-cy.get("li").nextAll(".selected")
+// yields <li>pineapples</li>
+cy.get('li').nextAll('.selected')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .nextAll %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .nextAll %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .nextAll %}
 
 # Command Log
 
-## Find all elements following the active li
+***Find all elements following the `.active` li***
 
 ```javascript
-cy.get(".left-nav").find("li.active").nextAll()
+cy.get('.left-nav').find('li.active').nextAll()
 ```
 
 The commands above will display in the command log as:
 
-<img width="560" alt="screen shot 2017-03-23 at 2 05 32 pm" src="https://cloud.githubusercontent.com/assets/1271364/24262886/e1513334-0fd1-11e7-93b1-b413a9390828.png">
+![Command Log nextAll](/img/api/nextall/next-all-traversal-command-for-the-dom.png)
 
 When clicking on `nextAll` within the command log, the console outputs the following:
 
-<img width="567" alt="screen shot 2017-03-23 at 2 05 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/24262907/f2b7fe78-0fd1-11e7-921c-6eabf6e32abb.png">
+![Console log nextAll](/img/api/nextall/all-next-elements-are-logged-in-console.png)
 
-***
+# See also
 
-# Related
-
-- [next](https://on.cypress.io/api/next)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
-- [prevAll](https://on.cypress.io/api/prevall)
+- {% url `.next()` next %}
+- {% url `.nextUntil()` nextuntil %}
+- {% url `.prevAll()` prevall %}

@@ -4,7 +4,7 @@ _             = require("lodash")
 rp            = require("request-promise")
 Promise       = require("bluebird")
 evilDns       = require("evil-dns")
-httpsServer   = require("#{root}../../packages/https-proxy/test/helpers/https_server")
+httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
 buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
@@ -42,14 +42,14 @@ describe "Server", ->
             url = options
             options = {}
 
-          _.defaults options,
-            url: url
+          _.defaults options, {
+            url
             proxy: @proxy
-            jar: jar
+            jar
             simple: false
             followRedirect: false
             resolveWithFullResponse: true
-
+          }
           rp(options)
 
         open = =>

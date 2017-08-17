@@ -1,23 +1,13 @@
-_              = require("lodash")
-os             = require("os")
 fs             = require("fs-extra")
-tar            = require("tar-fs")
 nmi            = require("node-machine-id")
-path           = require("path")
-glob           = require("glob")
-home           = require("home-or-tmp")
-trash          = require("trash")
-chmodr         = require("chmodr")
 semver         = require("semver")
 request        = require("request")
-Promise        = require("bluebird")
 NwUpdater      = require("node-webkit-updater")
+_              = require("lodash")
+pkg            = require("@packages/root")
 cwd            = require("./cwd")
 konfig         = require("./konfig")
 logger         = require("./logger")
-argsUtil       = require("./util/args")
-
-chmodr = Promise.promisify(chmodr)
 
 ## backup the original cwd
 localCwd = cwd()
@@ -68,186 +58,20 @@ class Updater
 
     @client     = new NwUpdater @getPackage()
     @request    = null
-    @cancelled  = false
     @callbacks  = callbacks
 
     if process.env["CYPRESS_ENV"] isnt "production"
       @patchAppPath()
 
-  getArgs: ->
-    c = @getClient()
-
-    ## get a reference to current cwd
-    currentCwd = process.cwd()
-
-    ## change to the original local cwd
-    ## in case we have a project open
-    process.chdir(localCwd)
-
-    args = _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating"]
-
-    ## now restore back to what it was
-    process.chdir(currentCwd)
-
-    return args
-
   patchAppPath: ->
     @getClient().getAppPath = -> cwd()
 
   getPackage: ->
-    pkg = fs.readJsonSync cwd("package.json")
-    pkg.manifestUrl = konfig("desktop_manifest_url")
-    pkg
+    _.extend({}, pkg, {manifestUrl: konfig("desktop_manifest_url")})
 
   getClient: ->
     ## requiring inline due to easier testability
     @client ? throw new Error("missing Updater#client")
-
-  trash: (appPath) ->
-    ## moves the current appPath to the trash
-    ## this is the path to the existing app
-    logger.info "trashing current app", appPath: appPath
-
-    Promise.resolve(trash([appPath]))
-
-  install: (argsObj = {}) ->
-    c = @getClient()
-
-    argsObj = @normalizeArgs(argsObj)
-
-    {appPath, execPath} = argsObj
-
-    ## slice out updating, execPath, and appPath args
-    argsObj = _.omit(argsObj, "updating", "execPath", "appPath")
-
-    args = argsUtil.toArray(argsObj)
-
-    ## trash the 'old' app currently installed at the default
-    ## installation: /Applications/Cypress.app
-    @trash(appPath).then =>
-      logger.info "installing updated app", appPath: appPath, execPath: execPath
-
-      @copyTmpToAppPath(c.getAppPath(), appPath).then ->
-        c.run(execPath, args)
-
-        ## and now quit this process
-        process.exit(0)
-
-  normalizeArgs: (args = {}) ->
-    ## argsObj should look like this
-    ##
-    ## OSX:
-    ## {
-    ##   updating: true
-    ##   appPath:  "/Applications/Cypress.app"
-    ##   execPath: "/Applications/Cypress.app"
-    ## }
-    ##
-    ## Linux:
-    ## {
-    ##   updating: true
-    ##   appPath:  "/home/vagrant/.cypress/Cypress"
-    ##   execPath: "/home/vagrant/.cypress/Cypress/Cypress"
-    ## }
-    ##
-    ## there was a bug in Cypress in the 0.17.x range
-    ## which due to changing process.cwd() we messed
-    ## up the app-path + exec-path and were accidentally
-    ## trying to trash 3 levels above the users project!
-    ## so let's detect that and fix it right here with
-    ## the defaults.
-    ##
-    {appPath, execPath} = args
-
-    switch os.platform()
-      when "darwin"
-        if not osxAppRe.test(appPath)
-          args.appPath = args.execPath = "/Applications/Cypress.app"
-
-      when "linux"
-        if not linuxAppRe.test(appPath)
-          p = path.join(@getHome(), ".cypress", "Cypress")
-
-          args.appPath = p
-          args.execPath = path.join(p, "Cypress")
-
-    return args
-
-  getHome: -> home
-
-  copyTmpToAppPath: (tmp, appPath) ->
-    new Promise (resolve, reject) ->
-
-      obj = {
-        fs: require("original-fs")
-      }
-
-      ## now move the /tmp application over
-      ## to the 'existing / old' app path.
-      ## meaning from from /tmp/Cypress.app to /Applications/Cypress.app
-
-      ## https://github.com/atom/electron/pull/3641
-      ## tar-fs
-      tar
-      .pack(tmp, obj)
-      .pipe(tar.extract(appPath, obj))
-
-      .on "error", reject
-
-      .on "finish", resolve
-
-  runInstaller: (newAppPath) ->
-    ## get the --updating args
-    args = @getArgs()
-
-    logger.info "running installer from tmp", destination: newAppPath, args: args
-
-    ## runs the 'new' app in the /tmp directory with
-    ## appPath + execPath to the 'existing / old' app
-    ## (which is where its normally installed in /Applications)
-    ## it additionally passes the --updating flag
-    @getClient().runInstaller(newAppPath, args, {})
-
-    process.exit()
-
-  unpack: (destinationPath, manifest) ->
-    logger.info "unpacking new version", destination: destinationPath
-
-    @trigger("apply")
-
-    fn = (err, newAppPath) =>
-      return @trigger("error", err) if err
-
-      return if @cancelled
-
-      @runInstaller(newAppPath)
-
-    @getClient().unpack(destinationPath, fn, manifest)
-
-  download: (manifest) ->
-    logger.info "downloading new version", version: manifest.version
-
-    @trigger("download", manifest.version)
-
-    fn = (err, destinationPath) =>
-      return @trigger("error", err) if err
-
-      ## fixes issue with updater failing during unpack
-      setTimeout =>
-        return if @cancelled
-
-        @unpack(destinationPath, manifest)
-      , 1000
-
-    @request = @getClient().download(fn, manifest)
-
-  cancel: ->
-    @cancelled = true
-
-    try
-      ## attempt to abort the request
-      ## and slurp up any errors
-      @request.abort()
 
   trigger: (event, args...) ->
     ## normalize event name
@@ -268,25 +92,7 @@ class Updater
         logger.info "new version does not exist"
         options.onNoNewVersion?()
 
-  run: ->
-    @trigger("start")
-
-    @check
-      onNewVersion: (manifest) =>
-        @download(manifest)
-
-      onNoNewVersion: =>
-        @trigger("none")
-
-    return @
-
-  @install = (options) ->
-    Updater().install(options)
-
   @check = (options = {}) ->
     Updater().check(options)
-
-  @run = (callbacks = {}) ->
-    Updater(callbacks).run()
 
 module.exports = Updater

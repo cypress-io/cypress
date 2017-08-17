@@ -1,70 +1,107 @@
+---
 title: as
-comments: true
+comments: false
 ---
 
-{% note info New to Cypress? %}
-[Read about Using Aliases first.](https://on.cypress.io/guides/using-aliases)
+Assign an alias for later use. Reference the alias later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command with a `@` prefix.
+
+{% note info %}
+**Note:** `.as()` assumes you are already familiar with core concepts such as {% url 'aliases' aliases-and-references %}
 {% endnote %}
 
-Assign an alias to a route or DOM element for use later. Reference the alias later within the [`cy.get`](https://on.cypress.io/api/get) or [`cy.wait`](https://on.cypress.io/api/wait) command with the prefix `@`.
-
-| | |
-|--- | --- |
-| **Returns** | the DOM element or route being aliased  |
-| **Timeout** | the alias will retry the chain of commands before the alias assignment for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
-
-***
-
-# [cy.as( *text* )](#section-usage)
-
-Create an alias to be used later, passing the name of the alias as a parameter.
-
-***
-
-# Usage
-
-## Alias a route, then wait for that route using `@alias`
+# Syntax
 
 ```javascript
-cy
-  .route("PUT", /^\/users\/\d+/, "fixture:user").as("userPut")
-  .get("form").submit()
-  .wait("@userPut")
-    .its("url").should("contain", "users")
-
+.as(aliasName)
 ```
 
-***
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.get('.main-nav').find('li').first().as('firstNav') // Alias first 'li' as @firstNav
+cy.route('PUT', 'users', 'fx:user').as('putUser')     // Alias 'route' as @putUser   
+cy.stub(api, 'onUnauth').as('unauth')                 // Alias 'stub' as @unauth   
+cy.spy(win, 'fetch').as('winFetch')                   // Alias 'spy' as @winFetch  
+```
+
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
+
+```javascript
+cy.as('foo')   // Errors, cannot be chained off 'cy'
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} aliasName** ***(String)***
+
+The name of the alias to be referenced later within a {% url `cy.get()` get %} or {% url `cy.wait()` wait %} command using a `@` prefix.
+
+## Yields {% helper_icon yields %}
+
+{% yields same_subject .as %}
+
+# Examples
+
+## DOM Element
+
+```javascript
+cy.route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
+cy.get('form').submit()
+cy.wait('@userPut')
+  .its('url').should('contain', 'users')
+```
+
+## Route
+
+```javascript
+cy.route('PUT', 'users', 'fx:user').as('userPut')
+cy.get('form').submit()
+cy.wait('@userPut')
+  .its('url').should('contain', 'users')
+```
+
+# Notes
+
+## Reserved Words
+
+***Alias names cannot match some reserved words.***
+
+Some strings are not allowed as alias names since they are reserved words in Cypress. These words include: `test`, `runnable`, `timeout`, `slow`, `skip`, and `inspect`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .as %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility .as %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .as %}
 
 # Command Log
 
-## Alias several routes
+***Alias several routes***
 
 ```javascript
-cy
-  .route(/company/, "fixture:company").as("companyGet")
-  .route(/roles/, "fixture:roles").as("rolesGet")
-  .route(/teams/, "fixture:teams").as("teamsGet")
-  .route(/users\/\d+/, "fixture:user").as("userGet")
-  .route("PUT", /^\/users\/\d+/, "fixture:user").as("userPut")
+cy.route(/company/, 'fixture:company').as('companyGet')
+cy.route(/roles/, 'fixture:roles').as('rolesGet')
+cy.route(/teams/, 'fixture:teams').as('teamsGet')
+cy.route(/users\/\d+/, 'fixture:user').as('userGet')
+cy.route('PUT', /^\/users\/\d+/, 'fixture:user').as('userPut')
 ```
 
 Aliases of routes display in the routes instrument panel:
 
-<img width="567" alt="screen shot 2015-11-29 at 2 25 47 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459470/22e31e54-96a5-11e5-8895-a6ff5f8bb973.png">
+![Command log for route](/img/api/as/routes-table-in-command-log.png)
 
-***
+# See also
 
-# Errors
-
-## cy.as() cannot be aliased as: 'str'. This word is reserved.
-
-Some strings are not allowed as aliases since they are reserved words in Cypress. These words include: test, runnable, timeout, slow, skip, and inspect.
-
-***
-
-# Related
-
-- [get](https://on.cypress.io/api/get)
-- [wait](https://on.cypress.io/api/wait)
-- [Using Aliases](https://on.cypress.io/guides/using-aliases)
+- {% url `cy.get()` get %}
+- {% url `cy.wait()` wait %}
+- {% url 'Guides: Aliases' aliases-and-references %}

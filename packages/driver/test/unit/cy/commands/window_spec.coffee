@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Window Commands", ->
   enterCommandTestingMode()
 
@@ -146,7 +148,7 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.window().then (win) ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "window"
-            Returned: win
+            Yielded: win
           }
 
   context "#document", ->
@@ -294,7 +296,7 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.document().then (win) ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "document"
-            Returned: win
+            Yielded: win
           }
 
   context "#title", ->
@@ -416,7 +418,7 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.title().then ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "title"
-            Returned: "DOM Fixture"
+            Yielded: "DOM Fixture"
           }
 
   context "#viewport", ->

@@ -5,8 +5,8 @@ path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 Promise    = require("bluebird")
-inquirer   = require("inquirer")
 random     = require("randomstring")
+pkg        = require("@packages/root")
 ss         = require("../screenshots")
 user       = require("../user")
 stats      = require("../stats")
@@ -21,7 +21,7 @@ trash      = require("../util/trash")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 Windows    = require("../gui/windows")
-pkg        = require("../../package.json")
+log        = require("../log")
 
 fs = Promise.promisifyAll(fs)
 
@@ -33,7 +33,21 @@ haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## and (record or ci) hasn't been set to true or false
   (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
+collectTestResults = (obj) ->
+  {
+    tests:       obj.tests
+    passes:      obj.passes
+    pending:     obj.pending
+    failures:    obj.failures
+    duration:    humanTime(obj.duration)
+    screenshots: obj.screenshots and obj.screenshots.length
+    video:       !!obj.video
+    version:     pkg.version
+  }
+
 module.exports = {
+  collectTestResults
+
   getId: ->
     ## return a random id
     random.generate({
@@ -144,16 +158,7 @@ module.exports = {
 
     console.log("")
 
-    stats.display(color, {
-      tests:       obj.tests
-      passes:      obj.passes
-      pending:     obj.pending
-      failures:    obj.failures
-      duration:    humanTime(obj.duration)
-      screenshots: obj.screenshots and obj.screenshots.length
-      video:       !!obj.video
-      version:     pkg.version
-    })
+    stats.display(color, obj)
 
   displayScreenshots: (screenshots = []) ->
     console.log("")
@@ -244,6 +249,35 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
+  listenForProjectEnd: (project, gui) ->
+    new Promise (resolve) ->
+      ## dont ever end if we're in 'gui' debugging mode
+      return if gui
+
+      onEarlyExit = (errMsg) ->
+        ## probably should say we ended
+        ## early too: (Ended Early: true)
+        ## in the stats
+        obj = {
+          error:        errors.stripAnsi(errMsg)
+          failures:     1
+          tests:        0
+          passes:       0
+          pending:      0
+          duration:     0
+          failingTests: []
+        }
+
+        resolve(obj)
+
+      onEnd = (obj) =>
+        resolve(obj)
+
+      ## when our project fires its end event
+      ## resolve the promise
+      project.once("end", onEnd)
+      project.once("exitEarlyWithErr", onEarlyExit)
+
   waitForBrowserToConnect: (options = {}) ->
     { project, id, timeout } = options
 
@@ -293,67 +327,51 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, gui, screenshots, started, end, name, cname, videoCompression } = options
+    { project, gui, screenshots, started, end, name, cname, videoCompression, outputPath } = options
 
-    new Promise (resolve, reject) =>
-      ## dont ever end if we're in 'gui' debugging mode
-      return if gui
+    @listenForProjectEnd(project, gui)
+    .then (obj) =>
+      if end
+        obj.video = name
 
-      onFinish = (obj) =>
-        finish = ->
+      if screenshots
+        obj.screenshots = screenshots
+
+      testResults = collectTestResults(obj)
+
+      writeOutput = ->
+        if not outputPath
+          return Promise.resolve()
+
+        log("saving results as %s", outputPath)
+
+        fs.outputJsonAsync(outputPath, testResults)
+
+      finish = ->
+        writeOutput()
+        .then ->
           project
           .getConfig()
           .then (cfg) ->
             obj.config = cfg
-          .finally ->
-            resolve(obj)
+          .return(obj)
 
-        if end
-          obj.video = name
+      @displayStats(testResults)
 
-        if screenshots
-          obj.screenshots = screenshots
+      if screenshots and screenshots.length
+        @displayScreenshots(screenshots)
 
-        @displayStats(obj)
+      ft = obj.failingTests
 
-        if screenshots and screenshots.length
-          @displayScreenshots(screenshots)
+      if ft and ft.length
+        obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
-        ft = obj.failingTests
-
-        if ft and ft.length
-          obj.failingTests = Reporter.setVideoTimestamp(started, ft)
-
-        if end
-          @postProcessRecording(end, name, cname, videoCompression)
-          .then(finish)
-          ## TODO: add a catch here
-        else
-          finish()
-
-      onEarlyExit = (errMsg) ->
-        ## probably should say we ended
-        ## early too: (Ended Early: true)
-        ## in the stats
-        obj = {
-          error:        errors.stripAnsi(errMsg)
-          failures:     1
-          tests:        0
-          passes:       0
-          pending:      0
-          duration:     0
-          failingTests: []
-        }
-
-        onFinish(obj)
-
-      onEnd = (obj) =>
-        onFinish(obj)
-
-      ## when our project fires its end event
-      ## resolve the promise
-      project.once("end", onEnd)
-      project.once("exitEarlyWithErr", onEarlyExit)
+      if end
+        @postProcessRecording(end, name, cname, videoCompression)
+        .then(finish)
+        ## TODO: add a catch here
+      else
+        finish()
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true
@@ -400,6 +418,10 @@ module.exports = {
 
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
+    log("runTests with options %j", Object.keys(options))
+
+    browser ?= "electron"
+    log "runTests for browser #{browser}"
 
     screenshots = []
 
@@ -410,12 +432,19 @@ module.exports = {
     ## to gracefully handle this in promise land
 
     ## if we've been told to record and we're not spawning a headed browser
-    if videoRecording and not browser
-      id2       = @getId()
-      name      = path.join(videosFolder, id2 + ".mp4")
-      cname     = path.join(videosFolder, id2 + "-compressed.mp4")
+    browserCanBeRecorded = (name) ->
+      name == "electron"
 
-      recording = @createRecording(name)
+    if videoRecording
+      if browserCanBeRecorded(browser)
+        if !videosFolder
+          throw new Error("Missing videoFolder for recording")
+        id2       = @getId()
+        name      = path.join(videosFolder, id2 + ".mp4")
+        cname     = path.join(videosFolder, id2 + "-compressed.mp4")
+        recording = @createRecording(name)
+      else
+        errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -433,6 +462,7 @@ module.exports = {
             gui:              options.gui
             project:          options.project
             videoCompression: options.videoCompression
+            outputPath:       options.outputPath
             end
             name
             cname
@@ -453,6 +483,7 @@ module.exports = {
         })
 
   ready: (options = {}) ->
+    log("headless mode ready with options %j", Object.keys(options))
     id = @getId()
 
     ## verify this is an added project
@@ -491,6 +522,7 @@ module.exports = {
             spec:             options.spec
             gui:              options.showHeadlessGui
             browser:          options.browser
+            outputPath:       options.outputPath
           })
         .get("stats")
         .finally =>

@@ -1,103 +1,133 @@
+---
 title: uncheck
-comments: true
+comments: false
 ---
 
-Unchecks the checkboxes within the current subject.
+Uncheck checkbox(es).
 
-**The following events are fired during uncheck:** `mousedown`, `focus`, `mouseup`, `click`
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.uncheck` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the commands [options](#section-options). |
+```javascript
+.uncheck()
+.uncheck(value)
+.uncheck(values)
+.uncheck(options)
+.uncheck(value, options)
+.uncheck(values, options)
+```
 
-***
+## Usage
 
-# [cy.uncheck()](#section-usage)
+**{% fa fa-check-circle green %} Correct Usage**
 
-Unchecks checkboxes. Triggers events associated with check.
+```javascript
+cy.get('[type="checkbox"]').uncheck()   // Unchecks checkbox element
+```
 
-***
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-# [cy.uncheck( *values* )](#section-values-usage)
+```javascript
+cy.uncheck('[type="checkbox"]') // Errors, cannot be chained off 'cy'
+cy.get('p:first').uncheck()     // Errors, '.get()' does not yield checkbox
+```
 
-Unchecks the checkboxes matching the values. Triggers events associated with uncheck.
+## Arguments
 
-***
+**{% fa fa-angle-right %} value**  ***(String)***
 
-# Options
+Value of checkbox that should be unchecked.
 
-Pass in an options object to change the default behavior of `cy.uncheck`.
+**{% fa fa-angle-right %} values**  ***(Array)***
 
-**cy.uncheck( *options* )**
+Values of checkboxes that should be unchecked.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.uncheck()`.
+
+Option | Default | Description
 --- | --- | ---
-`interval` | `16` | Interval which to retry a uncheck
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the uncheck
-`force` | `false` | Forces uncheck, disables error checking prior to uncheck
-`log` | `true` | whether to display command in command log
-`multiple` | `false` | Enables serially unchecking multiple elements
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force uncheck %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .uncheck %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields same_subject .uncheck %}
 
-## Uncheck all checkboxes
+# Examples
 
-```javascript
-cy.get(":checkbox").uncheck()
-```
+## No Args
 
-***
-
-## Uncheck all radios
+***Uncheck all checkboxes***
 
 ```javascript
-cy.get("[type='checkbox']").uncheck()
+cy.get(':checkbox').uncheck()
 ```
 
-***
-
-## Uncheck element with the id `saveUserName`
+***Uncheck element with the id 'saveUserName'***
 
 ```javascript
-cy.get("#saveUserName").uncheck()
+cy.get('#saveUserName').uncheck()
 ```
 
-***
+## Value
 
-# Values Usage
-
-## Uncheck the checkbox with the value of "ga"
+***Uncheck the checkbox with the value of 'ga'***
 
 ```javascript
-cy.get("input[type='checkbox']").uncheck(["ga"])
+cy.get('input[type="checkbox"]').uncheck(['ga'])
 ```
 
-***
+## Values
+
+***Uncheck the checkboxes with the values 'ga' and 'ca'***
+
+```javascript
+cy.get('[type="checkbox"]').uncheck(['ga', 'ca'])
+```
+
+# Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.uncheck()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements checkability .uncheck %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .uncheck %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .uncheck %}
 
 # Command Log
 
-## Uncheck the first checkbox
+***Uncheck the first checkbox***
 
 ```javascript
 cy
-  .get("[data-js='choose-all']").click()
-  .find("input[type='checkbox']").first().uncheck()
+  .get('[data-js="choose-all"]').click()
+  .find('input[type="checkbox"]').first().uncheck()
 ```
 
 The commands above will display in the command log as:
 
-<img width="584" alt="screen shot 2015-11-29 at 1 30 49 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459133/7bf25814-969d-11e5-9f03-9d2d4538fcd5.png">
+![Command Log](/img/api/uncheck/test-unchecking-a-checkbox.png)
 
 When clicking on `uncheck` within the command log, the console outputs the following:
 
-<img width="601" alt="screen shot 2015-11-29 at 1 31 04 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459134/7f29dea8-969d-11e5-9843-dfd07dfe888f.png">
+![Console Log](/img/api/uncheck/console-shows-events-from-clicking-the-checkbox.png)
 
-***
+# See also
 
-# Related
-
-- [check](https://on.cypress.io/api/check)
-- [click](https://on.cypress.io/api/click)
+- {% url `.check()` check %}
+- {% url `.click()` click %}

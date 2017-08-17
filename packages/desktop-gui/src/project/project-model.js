@@ -1,9 +1,8 @@
 import _ from 'lodash'
-import md5 from 'md5'
-import { computed, observable, action, asReference } from 'mobx'
+import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
-const persistentProps = [
+const cacheProps = [
   'id',
   'name',
   'public',
@@ -14,9 +13,8 @@ const persistentProps = [
   'lastBuildCreatedAt',
 ]
 
-const validProps = persistentProps.concat([
+const validProps = cacheProps.concat([
   'state',
-  'clientId',
   'isChosen',
   'isLoading',
   'isNew',
@@ -24,7 +22,6 @@ const validProps = persistentProps.concat([
   'onBoardingModalOpen',
   'browserState',
   'resolvedConfig',
-  'error',
   'parentTestsFolderDisplay',
   'integrationExampleName',
   'scaffoldedFiles',
@@ -48,29 +45,31 @@ export default class Project {
   // comes from ipc, but not persisted
   @observable state = Project.VALID
   // local state
-  @observable clientId
   @observable isChosen = false
   @observable isLoading = false
   @observable isNew = false
   @observable browsers = []
   @observable onBoardingModalOpen = false
-  @observable browserState = "closed"
-  @observable resolvedConfig = asReference(null)
+  @observable browserState = 'closed'
+  @observable resolvedConfig
   @observable error
+  @observable warning
+  @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable scaffoldedFiles = []
   // should never change after first set
   @observable path
+  // not observable
+  dismissedWarnings = {}
 
   constructor (props) {
     this.path = props.path
-    this.clientId = md5(props.path)
 
     this.update(props)
   }
 
-  update (props) {
+  @action update (props) {
     if (!props) return
 
     _.each(validProps, (prop) => {
@@ -82,8 +81,27 @@ export default class Project {
     if (props[prop] != null) this[prop] = props[prop]
   }
 
+  clientDetails () {
+    return _.pick(this, 'id', 'path')
+  }
+
   serialize () {
-    return _.pick(this, persistentProps)
+    return _.pick(this, cacheProps)
+  }
+
+  @computed get displayName () {
+    if (this.name) return this.name
+
+    let splitName = _.last(this.path.split('/'))
+    return _.truncate(splitName, { length: 60 })
+  }
+
+  @computed get displayPath () {
+    const maxPathLength = 45
+    if (this.path.length <= maxPathLength) return this.path
+
+    const truncatedPath = this.path.slice((this.path.length - 1) - maxPathLength, this.path.length)
+    return '...'.concat(truncatedPath)
   }
 
   @computed get isValid () {
@@ -102,8 +120,8 @@ export default class Project {
     return this.browsers[0]
   }
 
-  @action loading (bool) {
-    this.isLoading = bool
+  @action setLoading (isLoading) {
+    this.isLoading = isLoading
   }
 
   @action openModal () {
@@ -115,15 +133,15 @@ export default class Project {
   }
 
   @action browserOpening () {
-    this.browserState = "opening"
+    this.browserState = 'opening'
   }
 
   @action browserOpened () {
-    this.browserState = "opened"
+    this.browserState = 'opened'
   }
 
   @action browserClosed () {
-    this.browserState = "closed"
+    this.browserState = 'closed'
   }
 
   @action setBrowsers (browsers = []) {
@@ -164,8 +182,27 @@ export default class Project {
     this.resolvedConfig = resolved
   }
 
-  @action setError (err) {
+  @action setError (err = {}) {
     this.error = err
+  }
+
+  @action clearError () {
+    this.error = null
+  }
+
+  @action setWarning (warning) {
+    if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
+      this.warning = warning
+    }
+  }
+
+  @action clearWarning () {
+    this.dismissedWarnings[this._serializeWarning(this.warning)] = true
+    this.warning = null
+  }
+
+  @action setApiError = (err = {}) => {
+    this.apiError = err
   }
 
   setChosenBrowserByName (name) {
@@ -173,7 +210,7 @@ export default class Project {
     this.setChosenBrowser(browser)
   }
 
-  @action clearError () {
-    this.error = undefined
+  _serializeWarning (warning) {
+    return `${warning.type}:${warning.name}:${warning.message}`
   }
 }

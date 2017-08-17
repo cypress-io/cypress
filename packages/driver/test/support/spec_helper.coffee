@@ -1,22 +1,17 @@
-## do we need to require these or just use cypress?
-lolex = require("lolex")
-sinon = require("sinon")
-sinonChai = require("sinon-chai")
+$Cypress = window.$Cypress
+$ = $Cypress.$
+_ = $Cypress.prototype._
+sinon = $Cypress.prototype.sinon
 
-window.$Cypress = $Cypress = require("../../src/main")
-
-$ = window.$ = $Cypress.$
-_ = window._ = $Cypress.prototype._
-window.moment = $Cypress.prototype.moment
-window.Promise = $Cypress.prototype.Promise
-window.Cookies = require("js-cookie")
-
-## TODO: move this as something we can grab
-## off of the driver
-require("sinon-as-promised")(Promise)
-
-window.bililiteRange = require("../../vendor/bililiteRange")
-$Cypress.Chai.use(sinonChai)
+window.testUtils = {
+  $Cypress: $Cypress
+  $: $
+  _: _
+  moment: $Cypress.prototype.moment
+  Promise: $Cypress.prototype.Promise
+  Cookies: $Cypress.prototype.Cookies
+  bililiteRange: $Cypress.prototype.bililiteRange
+}
 
 uncaught = Mocha.Runner::uncaught
 
@@ -42,10 +37,9 @@ before ->
     else
       ct.skip()
 
-  # sinon.format = -> ""
   @sandbox = s = sinon.sandbox.create()
   @sandbox.useFakeTimers = ->
-    s.clock = lolex.install()
+    s.clock = $Cypress.prototype.lolex.install()
 
 beforeEach ->
   ## allow our own cypress errors to bubble up!

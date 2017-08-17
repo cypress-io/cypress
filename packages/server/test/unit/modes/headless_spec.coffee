@@ -13,7 +13,7 @@ openProject = require("#{root}../lib/open_project")
 
 describe "lib/modes/headless", ->
   beforeEach ->
-    @projectInstance = Project("path/to/project")
+    @projectInstance = Project("/_test-output/path/to/project")
 
   context ".getId", ->
     it "returns random.generate string", ->
@@ -35,21 +35,21 @@ describe "lib/modes/headless", ->
       @sandbox.stub(Project, "exists").resolves(true)
       @sandbox.spy(Project, "add")
 
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
+      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
       .then ->
         expect(Project.add).not.to.be.called
-        expect(openProject.create).to.be.calledWith("path/to/project")
+        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
 
     it "prompts to add the project if it doesnt exist at projectPath", ->
       @sandbox.stub(Project, "exists").resolves(false)
       @sandbox.spy(Project, "add")
       @sandbox.spy(console, "log")
 
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
+      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
       .then ->
-        expect(console.log).to.be.calledWithMatch("Added this project:", "path/to/project")
-        expect(Project.add).to.be.calledWith("path/to/project")
-        expect(openProject.create).to.be.calledWith("path/to/project")
+        expect(console.log).to.be.calledWithMatch("Added this project:", "/_test-output/path/to/project")
+        expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
+        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
 
   context ".openProject", ->
     it "calls openProject.create with projectPath + options", ->
@@ -58,14 +58,14 @@ describe "lib/modes/headless", ->
       options = {
         port: 8080
         environmentVariables: {foo: "bar"}
-        projectPath: "path/to/project/foo"
+        projectPath: "/_test-output/path/to/project/foo"
       }
 
       headless.openProject(1234, options)
       .then ->
-        expect(openProject.create).to.be.calledWithMatch("path/to/project/foo", {
+        expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
           port: 8080
-          projectPath: "path/to/project/foo"
+          projectPath: "/_test-output/path/to/project/foo"
           environmentVariables: {foo: "bar"}
         }, {
           morgan: false
@@ -243,15 +243,16 @@ describe "lib/modes/headless", ->
         .then (ret) ->
           expect(ret).to.be.undefined
 
-      it "does not resolve if socketId does not match id", (done) ->
+      it "does not resolve if socketId does not match id", ->
         process.nextTick =>
           @projectInstance.emit("socket:connected", 12345)
 
         headless
           .waitForSocketConnection(@projectInstance, 1234)
           .timeout(50)
+          .then ->
+            throw new Error("should time out and not resolve")
           .catch Promise.TimeoutError, (err) ->
-            done()
 
       it "actually removes the listener", ->
         process.nextTick =>
@@ -267,25 +268,6 @@ describe "lib/modes/headless", ->
   context ".waitForTestsToFinishRunning", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({})
-
-    it "resolves with end event + argument", ->
-      process.nextTick =>
-        @projectInstance.emit("end", {foo: "bar"})
-
-      headless.waitForTestsToFinishRunning({project: @projectInstance})
-      .then (obj) ->
-        expect(obj).to.deep.eq({
-          foo: "bar"
-          config: {}
-        })
-
-    it "stops listening to end event", ->
-      process.nextTick =>
-        expect(@projectInstance.listeners("end")).to.have.length(1)
-        @projectInstance.emit("end", {foo: "bar"})
-        expect(@projectInstance.listeners("end")).to.have.length(0)
-
-      headless.waitForTestsToFinishRunning({project: @projectInstance})
 
     it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
       started = new Date
@@ -321,7 +303,8 @@ describe "lib/modes/headless", ->
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
 
-        expect(headless.displayStats).to.be.calledWith(obj)
+        results = headless.collectTestResults(obj)
+        expect(headless.displayStats).to.be.calledWith(results)
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
@@ -364,7 +347,8 @@ describe "lib/modes/headless", ->
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
 
-        expect(headless.displayStats).to.be.calledWith(obj)
+        results = headless.collectTestResults(obj)
+        expect(headless.displayStats).to.be.calledWith(results)
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
@@ -379,6 +363,58 @@ describe "lib/modes/headless", ->
           screenshots:  screenshots
           video:        "foo.mp4"
         })
+
+  context ".listenForProjectEnd", ->
+    it "resolves with end event + argument", ->
+      process.nextTick =>
+        @projectInstance.emit("end", {foo: "bar"})
+
+      headless.listenForProjectEnd(@projectInstance)
+      .then (obj) ->
+        expect(obj).to.deep.eq({
+          foo: "bar"
+        })
+
+    it "stops listening to end event", ->
+      process.nextTick =>
+        expect(@projectInstance.listeners("end")).to.have.length(1)
+        @projectInstance.emit("end", {foo: "bar"})
+        expect(@projectInstance.listeners("end")).to.have.length(0)
+
+      headless.listenForProjectEnd(@projectInstance)
+
+  context ".run browser vs video recording", ->
+    beforeEach ->
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(user, "ensureAuthToken")
+      @sandbox.stub(headless, "getId").returns(1234)
+      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(openProject)
+      @sandbox.stub(headless, "waitForSocketConnection").resolves()
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.spy(headless,  "waitForBrowserToConnect")
+      @sandbox.stub(openProject, "launch").resolves()
+      @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
+      @sandbox.spy(errors, "get")
+      @sandbox.stub(@projectInstance, "getConfig").resolves({
+        proxyUrl: "http://localhost:12345",
+        videoRecording: true,
+        videosFolder: "videos"
+      })
+
+    it "shows no errors for default browser", ->
+      headless.run()
+      .then ->
+        expect(errors.get).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+
+    it "shows no errors for electron browser", ->
+      headless.run({browser: "electron"})
+      .then ->
+        expect(errors.get).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+
+    it "disabled video recording for non-electron browser", ->
+      headless.run({browser: "chrome"})
+      .then ->
+        expect(errors.get).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
   context ".run", ->
     beforeEach ->

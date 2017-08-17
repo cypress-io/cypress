@@ -18,31 +18,47 @@
   }
 }
 
-#updates {
-  text-align: center;
-  padding: 40px 0;
-}
-
-html.updates {
-  background-color: #ECECEC;
-}
-
 html.has-updates {
   .helper-line {
     bottom: 90px;
   }
 
-  .alert {
-    margin-bottom: 90px;
+  .project-content {
+    bottom: 90px;
   }
 }
 
+.update-modal {
+  a:hover {
+    cursor: pointer !important;
+  }
 
-#updates-applied {
-  padding-top: 175px;
-  text-align: center;
+  ol {
+    padding-left: 20px;
 
-  h3 {
-    margin-bottom: 20px;
+    li {
+      line-height: 2em;
+      color: #999;
+
+      &>span {
+        color: #555;
+        padding-left: 3px;
+      }
+    }
+  }
+
+  pre {
+    border-radius: 3px;
+    background-color: #252831;
+    color: #eee;
+    padding: 10px;
+    font-family: $font-mono;
+    border: 0;
+  }
+
+  code {
+    border-radius: 3px;
+    padding: 3px 8px;
+    color: #333;
   }
 }

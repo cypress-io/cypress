@@ -1,6 +1,7 @@
-fs       = require("fs-extra")
+fs        = require("fs-extra")
 Promise   = require("bluebird")
-extension = require("../../../extension")
+extension = require("@packages/extension")
+log       = require("debug")("cypress:server:browsers")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 
@@ -68,7 +69,7 @@ module.exports = {
 
     Promise.all([
       ## ensure that we have a chrome profile dir
-      utils.ensureProfile(browserName),
+      utils.ensureProfile(browserName)
 
       @_writeExtension(options.proxyUrl, options.socketIoRoute)
     ])
@@ -87,5 +88,6 @@ module.exports = {
         args.push("--disable-web-security")
         args.push("--allow-running-insecure-content")
 
+      log("launch in chrome: %s, %s", url, args)
       utils.launch(browserName, url, args)
 }

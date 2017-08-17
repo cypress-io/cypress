@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress.LocalStorage API", ->
   before ->
     @clear = (remote) =>

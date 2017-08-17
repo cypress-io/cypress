@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Querying Commands", ->
   enterCommandTestingMode()
 
@@ -128,7 +130,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("input:first").focused().then ($input) ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "focused"
-            Returned: $input.get(0)
+            Yielded: $input.get(0)
             Elements: 1
           }
 
@@ -136,7 +138,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.focused().blur().focused().then ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "focused"
-            Returned: "--nothing--"
+            Yielded: "--nothing--"
             Elements: 0
           }
 
@@ -365,7 +367,7 @@ describe "$Cypress.Cy Querying Commands", ->
           consoleProps = @log.attributes.consoleProps()
           expect(consoleProps).to.deep.eq {
             Command: "root"
-            Returned: $root.get(0)
+            Yielded: $root.get(0)
           }
 
   context "#get", ->
@@ -759,7 +761,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Selector: "body"
-            Returned: $body.get(0)
+            Yielded: $body.get(0)
             Elements: 1
           }
 
@@ -768,7 +770,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Alias: "@b"
-            Returned: $body.get(0)
+            Yielded: $body.get(0)
             Elements: 1
           }
 
@@ -777,7 +779,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Alias: "@obj"
-            Returned: obj
+            Yielded: obj
           }
 
       it "#consoleProps with a route alias", ->
@@ -791,7 +793,7 @@ describe "$Cypress.Cy Querying Commands", ->
             expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "get"
               Alias: "@getUsers"
-              Returned: obj
+              Yielded: obj
             }
 
     describe "alias references", ->
@@ -1101,7 +1103,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
           consoleProps = @log.attributes.consoleProps()
-          expect(consoleProps.Returned).to.eq button.get(0)
+          expect(consoleProps.Yielded).to.eq button.get(0)
           expect(consoleProps.Elements).to.eq button.length
           done()
 
@@ -1440,7 +1442,7 @@ describe "$Cypress.Cy Querying Commands", ->
             Command: "contains"
             Content: "nested contains"
             "Applied To": getFirstSubjectByName.call(@, "get").get(0)
-            Returned: $label.get(0)
+            Yielded: $label.get(0)
             Elements: 1
           }
 
@@ -1521,7 +1523,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
           consoleProps = @log.attributes.consoleProps()
-          expect(consoleProps.Returned).to.eq button.get(0)
+          expect(consoleProps.Yielded).to.eq button.get(0)
           expect(consoleProps.Elements).to.eq button.length
           done()
 

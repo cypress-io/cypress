@@ -1,5 +1,6 @@
-title: userland-extensions
-comments: true
+---
+title: Userland Extensions
+comments: false
 ---
 
 # Docker
@@ -8,9 +9,7 @@ comments: true
 
 Docker image with dependencies and specific version of Cypress.
 
-https://hub.docker.com/r/bahmutov/cypress-image/
-
-***
+{% url "https://github.com/cypress-io/docker" https://github.com/cypress-io/docker %}
 
 # Gitlab
 
@@ -18,9 +17,7 @@ https://hub.docker.com/r/bahmutov/cypress-image/
 
 Run multiple spec files concurrently.
 
-https://github.com/kensho/multi-cypress
-
-***
+{% url "https://github.com/kensho/multi-cypress" https://github.com/kensho/multi-cypress %}
 
 # Typescript
 
@@ -28,4 +25,4 @@ https://github.com/kensho/multi-cypress
 
 Typescript typings for most Cypress API commands.
 
-https://github.com/StackVista/typed-cypress
+{% url "https://github.com/StackVista/typed-cypress" https://github.com/StackVista/typed-cypress %}

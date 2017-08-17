@@ -1,57 +1,64 @@
 {
-  "name": "@cypress/core-reporter",
-  "version": "0.3.4",
-  "main": "lib/reporter",
+  "name": "@packages/reporter",
+  "version": "0.0.0",
+  "private": true,
+  "main": "lib/reporter.js",
   "browser": "src/main",
   "scripts": {
-    "build-dev": "node ./scripts/build-dev.js",
+    "postinstall": "echo '@packages/reporter needs: npm run build'",
+    "prebuild": "rebuild-node-sass",
+    "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
+    "watch": "node ./scripts/watch.js",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps",
-    "test": "npm run test-unit-once",
-    "test-once": "npm run test-unit-once",
-    "test-unit-once": "node ./scripts/test.js",
-    "watch-dev": "node ./scripts/watch.js"
+    "test": "node ./scripts/test.js",
+    "lint": "$(bin-up eslint) --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-reporter.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-reporter/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
   "files": [
     "dist"
   ],
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015",
+            "react",
+            "stage-1"
+          ],
+          "plugins": [
+            "add-module-exports",
+            "transform-decorators-legacy"
+          ]
+        }
+      ]
+    ]
+  },
   "devDependencies": {
-    "@cypress/react-tooltip": "^0.1.1",
+    "@cypress/react-tooltip": "^0.2.5",
     "@cypress/releaser": "0.1.12",
-    "babel-eslint": "^6.0.4",
+    "bin-up": "^1.0.0",
     "chai": "^3.5.0",
-    "chai-enzyme": "^0.6.1",
+    "chai-enzyme": "^0.8.0",
     "classnames": "^2.2.5",
     "css-element-queries": "^0.3.2",
-    "enzyme": "^2.8.1",
-    "eslint": "^3.11.1",
-    "eslint-plugin-mocha": "^4.0.0",
-    "eslint-plugin-react": "^5.1.1",
+    "enzyme": "^2.9.1",
     "font-awesome": "^4.6.3",
     "jsdom": "^9.4.1",
     "lodash": "^4.0.0",
     "markdown-it": "^6.1.1",
-    "mobx": "^2.3.6",
-    "mobx-react": "^3.5.3",
+    "mobx": "^3.1.15",
+    "mobx-react": "^4.2.1",
     "prop-types": "^15.5.9",
-    "react": "^15.3.0",
-    "react-addons-test-utils": "^15.5.1",
-    "react-dom": "^15.3.0",
-    "react-test-renderer": "^15.5.4",
+    "react": "^15.6.1",
+    "react-addons-test-utils": "^15.6.0",
+    "react-dom": "^15.6.1",
+    "react-test-renderer": "^15.6.1",
+    "rebuild-node-sass": "^1.0.1",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "zunder": "4.0.4"
+    "zunder": "^4.1.1"
   }
 }

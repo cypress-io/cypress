@@ -30,7 +30,7 @@ npm run lint
 #### For development
 
 ```bash
-npm run build-dev
+npm run build
 ```
 
 #### For production
@@ -42,7 +42,7 @@ npm run build-prod
 ### Watching
 
 ```bash
-npm run watch-dev
+npm run watch
 ```
 
 ### Testing

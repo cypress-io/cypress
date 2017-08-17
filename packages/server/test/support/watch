@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+CMD="$1"
+ARGS="$2"
+
+npm run $CMD $ARGS --silent & \
+chokidar 'test/**/*' 'lib/**/*' \
+-c "npm run $CMD $ARGS --silent" \
+--polling \
+--poll-interval=250

@@ -1,65 +1,67 @@
+---
 title: eq
-comments: true
+comments: false
 ---
 
-Get a DOM element in an array of elements at the specific index.
+Get A DOM element at a specific index in an array of elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.eq` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.eq()` http://api.jquery.com/eq %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.eq( *index* )](#section-index-usage)
+```javascript
+.eq(index)
+.eq(indexFromEnd)
+.eq(index, options)
+.eq(indexFromEnd, options)
+```
 
-Reduce the set of matched DOM elements to the one at the specified index.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.eq( *indexFromEnd* )](#section-index-from-end-usage)
+```javascript
+cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
+cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
+```
 
-Providing a negative number indicates a position starting from the end of the set, rather than the beginning.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.eq(0)                  // Errors, cannot be chained off 'cy'
+cy.getCookies().eq('4')   // Errors, 'getCookies' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.eq`.
+**{% fa fa-angle-right %} index**  ***(Number)***
 
-**cy.eq( *index*, *options* )**
-**cy.eq( *indexFromEnd*, *options* )**
+A number indicating the index to find the element at within an array of elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} indexFromEnd**  ***(Number)***
+
+A negative number indicating the index position from the end to find the element at within an array of elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.eq()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .eq %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Index Usage
+{% yields changes_dom_subject .eq %}
 
-## Find the 2nd element within the elements
+# Examples
 
-```html
-<ul>
-  <li>tabby</li>
-  <li>siamese</li>
-  <li>persian</li>
-  <li>sphynx</li>
-  <li>burmese</li>
-</ul>
-```
+## Index
 
-```javascript
-cy.get("li").eq(1).should("contain", "siamese") // true
-```
-
-***
-
-# Index Form End Usage
-
-## Find the 2nd from the last element within the elements
+***Find the 2nd element within the elements***
 
 ```html
 <ul>
@@ -72,30 +74,60 @@ cy.get("li").eq(1).should("contain", "siamese") // true
 ```
 
 ```javascript
-cy.get("li").eq(-2).should("contain", "sphynx") // true
+cy.get('li').eq(1).should('contain', 'siamese') // true
 ```
 
-***
+## Index Form End
+
+***Find the 2nd from the last element within the elements***
+
+```html
+<ul>
+  <li>tabby</li>
+  <li>siamese</li>
+  <li>persian</li>
+  <li>sphynx</li>
+  <li>burmese</li>
+</ul>
+```
+
+```javascript
+cy.get('li').eq(-2).should('contain', 'sphynx') // true
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .eq %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .eq %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .eq %}
 
 # Command Log
 
-## Find the 4th `li` in the navigation
+***Find the 4th `<li>` in the navigation***
 
 ```javascript
-cy.get(".left-nav.nav").find(">li").eq(3)
+cy.get('.left-nav.nav').find('>li').eq(3)
 ```
 
 The commands above will display in the command log as:
 
-<img width="532" alt="screen shot 2015-11-27 at 2 11 47 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447231/e225e1f2-9510-11e5-8615-4a5b42ef71c1.png">
+![Command log eq](/img/api/eq/find-element-at-index.png)
 
 When clicking on the `eq` command within the command log, the console outputs the following:
 
-<img width="569" alt="screen shot 2015-11-27 at 2 12 03 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447234/e594ce52-9510-11e5-8794-712a7dbeae55.png">
+![console.log eq](/img/api/eq/see-element-and-list-when-using-eq.png)
 
-***
+# See also
 
-# Related
-
-- [first](https://on.cypress.io/api/first)
-- [last](https://on.cypress.io/api/last)
+- {% url `.first()` first %}
+- {% url `.last()` last %}
+- {% url `.next()` next %}
+- {% url `.prev()` prev %}

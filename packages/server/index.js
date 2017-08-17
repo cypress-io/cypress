@@ -1,7 +1,17 @@
+// if we are running in electron
+// we must hack around busted timers
+if (process.versions.electron) {
+  require('./timers/parent').fix()
+}
+
 process.env.UV_THREADPOOL_SIZE = 128
 require('graceful-fs').gracefulify(require('fs'))
-require("../ts/register")
-require("../coffee/register")
+// if running in production mode (CYPRESS_ENV)
+// all transpile should have been done already
+// and these calls should do nothing
+require("@packages/ts/register")
+require("@packages/coffee/register")
+
 require && require.extensions && delete require.extensions[".litcoffee"]
 require && require.extensions && delete require.extensions[".coffee.md"]
 require("./lib/cypress").start(process.argv)

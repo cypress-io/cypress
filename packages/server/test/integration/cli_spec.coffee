@@ -3,7 +3,7 @@ require("../spec_helper")
 _   = require("lodash")
 cp  = require("child_process")
 pr  = require("../support/helpers/process")
-pkg = require("#{root}package.json")
+pkg = require("@packages/root")
 
 anyLineWithCaret = (str) ->
   str[0] is ">"
@@ -40,8 +40,8 @@ describe "CLI Interface", ->
       done(err) if err
 
       pkg = JSON.parse(parse(stdout))
-      expect(pkg.name).to.eq("cypress")
-      expect(pkg.productName).to.eq("Cypress")
+      expect(pkg.name).to.eq("@packages/server")
+      expect(pkg.productName).to.eq("Cypress", stdout)
       done()
 
   ## this tests that our exit codes are correct.

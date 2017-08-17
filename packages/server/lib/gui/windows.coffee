@@ -1,8 +1,8 @@
 _             = require("lodash")
 uri           = require("url")
 Promise       = require("bluebird")
-cyDesktop     = require("../../../desktop-gui")
-extension     = require("../../../extension")
+cyDesktop     = require("@packages/desktop-gui")
+extension     = require("@packages/extension")
 contextMenu   = require("electron-context-menu")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../cwd")
@@ -16,12 +16,6 @@ getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
       user.getLoginUrl()
-    when "ABOUT"
-      cyDesktop.getPathToAbout()
-    when "DEBUG"
-      cyDesktop.getPathToDebug()
-    when "UPDATES"
-      cyDesktop.getPathToUpdates()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
@@ -66,6 +60,9 @@ module.exports = {
     win = @getByWebContents(webContents)
 
     @automation(win)
+
+  _newBrowserWindow: (options) ->
+    new BrowserWindow(options)
 
   automation: (win) ->
     cookies = Promise.promisifyAll(win.webContents.session.cookies)
@@ -155,7 +152,7 @@ module.exports = {
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
 
-    win = new BrowserWindow(options)
+    win = @_newBrowserWindow(options)
 
     win.on "blur", ->
       options.onBlur.apply(win, arguments)
@@ -174,7 +171,7 @@ module.exports = {
       options.onNewWindow.apply(win, arguments)
 
     if ts = options.trackState
-      @trackState(win, ts)
+      @trackState(options.projectPath, win, ts)
 
     ## open dev tools if they're true
     if options.devTools
@@ -184,7 +181,9 @@ module.exports = {
     if options.contextMenu
       ## adds context menu with copy, paste, inspect element, etc
       contextMenu({
-        showInspectElement: true
+        ## don't show inspect element until this fix is released
+        ## and we upgrade electron: https://github.com/electron/electron/pull/8688
+        showInspectElement: false
         window: win
       })
 
@@ -282,7 +281,7 @@ module.exports = {
       else
         Promise.resolve(win)
 
-  trackState: (win, keys) ->
+  trackState: (projectPath, win, keys) ->
     isDestroyed = ->
       win.isDestroyed()
 
@@ -296,7 +295,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState.set(newState)
+      savedState(projectPath).set(newState)
     , 500
 
     win.on "moved", _.debounce ->
@@ -306,17 +305,17 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState.set(newState)
+      savedState(projectPath).set(newState)
     , 500
 
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState.set(newState)
+      savedState(projectPath).set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState.set(newState)
+      savedState(projectPath).set(newState)
 
 }

@@ -1,60 +1,84 @@
-{deferred, stubIpc} = require("../support/util")
+OLD_VERSION = "1.3.3"
+NEW_VERSION = "1.3.4"
 
 describe "Update Banner", ->
   beforeEach ->
-    cy
-      .fixture("user").as("user")
-      .fixture("projects").as("projects")
-      .fixture("projects_statuses").as("projectStatuses")
-      .fixture("config").as("config")
-      .fixture("specs").as("specs")
-      .visit("/#/projects")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
+    cy.fixture("projects").as("projects")
+    cy.fixture("projects_statuses").as("projectStatuses")
+    cy.fixture("config").as("config")
+    cy.fixture("specs").as("specs")
 
-        @updateCheck = deferred(win.Promise)
+    cy.visitIndex().then (win) ->
+      { @start, @ipc } = win.App
 
-        stubIpc(@App.ipc, {
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.resolves(@user)
-          "updater:check": (stub) => stub.returns(@updateCheck.promise)
-          "get:projects": (stub) => stub.resolves(@projects)
-          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
-        })
+      cy.stub(@ipc, "getCurrentUser").resolves(@user)
+      cy.stub(@ipc, "windowOpen")
+      cy.stub(@ipc, "externalOpen")
 
-        @App.start()
+      @updaterCheck = @util.deferred()
+      cy.stub(@ipc, "updaterCheck").returns(@updaterCheck.promise)
 
-  it "does not display update banner when no update available", ->
-    @updateCheck.resolve(false)
+  describe "general behavior", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION})
+      @start()
 
-    cy
-      .get("#updates-available").should("not.exist")
-      .get("html").should("not.have.class", "has-updates")
+    it "does not display update banner when no update available", ->
+      @updaterCheck.resolve(false)
 
-  it "checks for update on show", ->
-    cy.then ->
-      expect(@App.ipc).to.be.calledWith("updater:check")
+      cy.get("#updates-available").should("not.exist")
+      cy.get("html").should("not.have.class", "has-updates")
 
-  it "displays banner if updater:check is new version", ->
-    @updateCheck.resolve("1.3.4")
-    cy.get("#updates-available").should("be.visible")
-    cy.contains("New updates are available")
-    cy
-      .get("html").should("have.class", "has-updates")
+    it "checks for update on show", ->
+      cy.then ->
+        expect(@ipc.updaterCheck).to.be.called
 
-  it "triggers open:window on click of Update link", ->
-    @updateCheck.resolve("1.3.4")
-    cy.contains("Update").click().then ->
-      expect(@App.ipc).to.be.calledWith("window:open", {
-        position: "center"
-        width: 300
-        height: 240
-        toolbar: false
-        title: "Updates"
-        type: "UPDATES"
-      })
+    it "displays banner if new version is available", ->
+      @updaterCheck.resolve(NEW_VERSION)
+      cy.get("#updates-available").should("be.visible")
+      cy.contains("New updates are available")
+      cy.get("html").should("have.class", "has-updates")
 
-  it "gracefully handles error", ->
-    @updateCheck.reject({name: "foo", message: "Something bad happened"})
-    cy.get(".footer").should("be.visible")
+    it "gracefully handles error", ->
+      @updaterCheck.reject({name: "foo", message: "Something bad happened"})
+      cy.get(".footer").should("be.visible")
+
+    it "opens modal on click of Update link", ->
+      @updaterCheck.resolve(NEW_VERSION)
+      cy.contains("Update").click()
+      cy.get(".modal").should("be.visible")
+
+    it "closes modal when X is clicked", ->
+      @updaterCheck.resolve(NEW_VERSION)
+      cy.contains("Update").click()
+      cy.get(".close").click()
+      cy.get(".modal").should("not.be.visible")
+
+  describe "in global mode", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, os: "linux"})
+      @start()
+      @updaterCheck.resolve(NEW_VERSION)
+      cy.contains("Update").click()
+
+    it "modal has info about downloading new version", ->
+      cy.get(".modal").contains("Download the new version")
+
+    it "opens download link when Download is clicked", ->
+      cy.contains("Download the new version").click().then =>
+        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop?os=linux64")
+
+  describe "in project mode", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectPath: "/foo/bar"})
+      @start()
+      @updaterCheck.resolve(NEW_VERSION)
+      cy.contains("Update").click()
+
+    it "modal has info about updating package.json", ->
+      cy.get(".modal").contains("npm install --save-dev cypress@#{NEW_VERSION}")
+
+    it "opens changelog when new version is clicked", ->
+      cy.get(".modal").contains(NEW_VERSION).click().then =>
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")

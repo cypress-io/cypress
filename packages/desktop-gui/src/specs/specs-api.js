@@ -1,5 +1,5 @@
 import ipc from '../lib/ipc'
-import specsCollection from './specs-collection'
+import specsStore from './specs-store'
 
 const getSpecs = (setProjectError) => {
   ipc.getSpecs((err, specs = []) => {
@@ -7,7 +7,7 @@ const getSpecs = (setProjectError) => {
       return setProjectError(err)
     }
 
-    specsCollection.setSpecs(specs)
+    specsStore.setSpecs(specs)
   })
 }
 

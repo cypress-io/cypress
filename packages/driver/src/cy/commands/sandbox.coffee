@@ -20,9 +20,8 @@ $Cy.extend({
 
 module.exports = (Cypress, Commands) ->
   Cypress.on "restore", ->
-    ## restore the sandbox if we've
-    ## created one
-    return if not @prop
+    ## restore the sandbox if we've created one
+    return if not @state
 
     if sandbox = @state("sandbox")
       sandbox.restore()

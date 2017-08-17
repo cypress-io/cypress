@@ -1,79 +1,41 @@
 import _ from 'lodash'
-import ipc from '../lib/ipc'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { ContextMenu, MenuItem } from "react-contextmenu"
+import Loader from 'react-loader'
 
-import Project from './projects-list-item/'
-import { closeProject, getProjects, pollProjects, stopPollingProjects } from './projects-api'
+import projectsApi from './projects-api'
 import projectsStore from './projects-store'
+import { Link, routes } from '../lib/routing'
 
-class MyContextMenu extends Component {
-  render () {
-    return (
-      <ContextMenu identifier="context-menu">
-        <MenuItem onClick={this.handleClick}>
-          <i className='fa fa-minus-circle red'></i>{' '}
-          Remove project
-        </MenuItem>
-      </ContextMenu>
-    )
-  }
-
-  handleClick (e, project) {
-    projectsStore.removeProject(project.clientId)
-
-    ipc.removeProject(project.path)
-  }
-}
+const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
+  <li>
+    <Link className='project' to={routes.specs(project)} onClick={onSelect}>
+      <span className='project-name'>{project.displayName}</span>
+      <span className='project-path'>{project.displayPath}</span>
+    </Link>
+    <button onClick={(e) => {
+      e.stopPropagation()
+      onRemove()
+    }}>
+      <i className='fa fa-remove' />
+    </button>
+  </li>
+))
 
 @observer
-export default class Projects extends Component {
-  constructor (props) {
-    super(props)
-    closeProject()
-  }
-
+class ProjectsList extends Component {
   componentDidMount () {
-    getProjects()
-    this.pollId = pollProjects()
-  }
-
-  componentWillUnmount () {
-    stopPollingProjects(this.pollId)
+    projectsApi.loadProjects()
   }
 
   render () {
-    if (!projectsStore.projects.length) return this._empty()
+    if (!projectsStore.isLoading && !projectsStore.projects.length) return null
 
     return (
-      <div className="content-wrapper">
-        { this._error() }
-        <ul className='projects-list list-as-table'>
-          { _.map(projectsStore.projects, (project) => (
-            <li key={project.clientId} className='li'>
-              <Project project={project} />
-            </li>
-          ))}
-        </ul>
-        <MyContextMenu />
-      </div>
-    )
-  }
-
-  _empty () {
-    return (
-      <div className='empty empty-projects'>
-        <h4>Add your first project</h4>
-        <p>To begin testing, click <strong><i className='fa fa-plus'></i> Add Project</strong> above.</p>
-        <p>Choose the folder with the resources of your project.</p>
-        { this._error() }
-        <p className='helper-docs-append'>
-          <a onClick={this._openHelp} className='helper-docs-link'>
-            <i className='fa fa-question-circle'></i>{' '}
-            Need help?
-          </a>
-        </p>
+      <div className='projects-list'>
+        <h1>Recent Projects:</h1>
+        {this._error()}
+        {this._content()}
       </div>
     )
   }
@@ -82,32 +44,34 @@ export default class Projects extends Component {
     if (!projectsStore.error) return null
 
     return (
-      <div className='alert alert-danger error alert-in-projects alert-dismissable'>
-        <button type="button" className="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <p className='text-center'>
-          <i className='fa fa-exclamation-triangle'></i>{' '}
-          { this._errorMessage(projectsStore.error) }
+      <div className='alert alert-danger'>
+        <p>
+          <i className='fa fa-warning'></i>{' '}
+          <strong>Error</strong>
         </p>
+        <p dangerouslySetInnerHTML={{
+          __html: projectsStore.error.message.split('\n').join('<br />'),
+        }} />
       </div>
     )
   }
 
-  _errorMessage (message) {
-    function createMarkup () {
-      return {
-        __html: message.replace('\n', '<br /><br />'),
-      }
-    }
+  _content () {
+    if (projectsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
     return (
-      <span dangerouslySetInnerHTML={createMarkup()} />
+      <ul>
+        {_.map(projectsStore.projects, (project) => (
+          <ProjectListItem
+            key={project.path}
+            project={project}
+            onSelect={() => this.props.onSelect(project)}
+            onRemove={() => projectsApi.removeProject(project)}
+          />
+        ))}
+      </ul>
     )
   }
-
-  _openHelp () {
-    ipc.externalOpen('https://on.cypress.io/adding-new-project')
-  }
-
 }
+
+export default ProjectsList

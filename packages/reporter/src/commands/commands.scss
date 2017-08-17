@@ -113,26 +113,9 @@
   }
 
   .command-wrapper {
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
     color: #777;
-
-    i.fa-ellipsis-h {
-      color: #fff;
-      background-color: #abaaaa;
-      border-radius: 3px;
-      padding: 0 4px;
-    }
-
-    .label {
-      font-weight: normal;
-      padding: 1px 4px;
-      border-radius: 5px;
-    }
-
-    .label-default {
-      background-color: #777;
-    }
 
     .command-alias {
       border-radius: 10px;
@@ -156,12 +139,12 @@
   }
 
   .command-number {
-    float: left;
-    width: 25px;
+    flex-shrink: 0;
     color: #bcbccc;
-    min-height: 1px; //used because some numbers are empty
-    text-align: right;
+    min-height: 1px; // because some numbers are empty
     padding-right: 10px;
+    text-align: right;
+    width: 25px;
 
     i {
       display: none;
@@ -174,16 +157,13 @@
   }
 
   .command-method {
-    padding: 0 2px;
+    padding: 1px 2px 0;
     display: inline-block;
     text-transform: uppercase;
     font-size: 11px;
-    float: left;
     min-width: 80px;
     font-weight: 600;
     color: #565554;
-    position: relative;
-    top: 1px;
   }
 
   .command-state-pending {
@@ -208,6 +188,24 @@
     .command-message {
       color: $fail;
     }
+  }
+
+  .command-message {
+    flex-grow: 2;
+    margin-left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+
+    > span {
+      align-items: center;
+      display: flex;
+    }
+  }
+
+  .command-message-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .command-wrapper .fa-circle {
@@ -268,6 +266,10 @@
       }
     }
 
+    .command-message-text {
+      white-space: normal;
+    }
+
     &.command-state-pending {
       .command-method {
         span {
@@ -321,17 +323,7 @@
     }
   }
 
-  .command-message {
-    display: inline-block;
-    margin-left: 0;
-    width: 63%;
-  }
-
   .command-controls {
-    position: absolute;
-    top: 0;
-    right: 0;
-
     i {
       padding: 2px;
       color: #3f7bA1;
@@ -396,7 +388,7 @@
   .command-pin {
     color: #999;
     display: none;
-    float: left;
+    flex-shrink: 0;
     font-size: 14px;
     line-height: 1;
     margin-right: 10px;
@@ -458,5 +450,13 @@
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
     min-height: 20px;
     padding: 9px;
+  }
+
+  // utilizing element size queries: https://github.com/marcj/css-element-queries
+  // styles take effect when width is greater than or equal to the specified amount
+  &[min-width~="300px"] {
+    .command-wrapper {
+      flex-wrap: nowrap;
+    }
   }
 }

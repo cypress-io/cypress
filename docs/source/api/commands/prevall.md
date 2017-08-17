@@ -1,45 +1,62 @@
-title: prevall
-comments: true
+---
+title: prevAll
+comments: false
 ---
 
-Get all previous siblings of each DOM element in the set of matched DOM elements.
+Get all previous siblings of each DOM element in a set of matched DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prevAll` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prevAll()` http://api.jquery.com/prevAll %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.prevAll()](#usage)
+```javascript
+.prevAll()
+.prevAll(selector)
+.prevAll(options)
+.prevAll(selector, options)
+```
 
-Get all of the next siblings of the elements.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.prevAll( *selector* )](#selector-usage)
+```javascript
+cy.get('.active').prevAll() // Yield all links previous to `.active`
+```
 
-When a selector is provided, it retrieves all of the previous siblings only if it matches that selector.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.prevAll()                // Errors, cannot be chained off 'cy'
+cy.getCookies().prevAll()   // Errors, 'getCookies' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.prevAll`.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-**cy.prevAll( *options* )**
-**cy.prevAll( *selector*, *options* )**
+A selector used to filter matching DOM elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.prevAll()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .prevAll %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .prevAll %}
 
-## Find all of the element's siblings before `.third`
+# Examples
+
+## No Args
+
+***Find all of the element's siblings before `.third`***
 
 ```html
 <ul>
@@ -52,15 +69,13 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns [<li>apples</li>, <li>oranges</li>]
-cy.get(".third").prevAll()
+// yields [<li>apples</li>, <li>oranges</li>]
+cy.get('.third').prevAll()
 ```
 
-***
+## Selector
 
-# Selector Usage
-
-## Find all of the previous siblings of each li. Keep only the ones with a class `selected`.
+***Find all of the previous siblings of each li. Keep only the ones with a class `selected`.***
 
 ```html
 <ul>
@@ -73,32 +88,43 @@ cy.get(".third").prevAll()
 ```
 
 ```javascript
-//returns <li>pineapples</li>
-cy.get("li").prevAll(".selected")
+// yields <li>pineapples</li>
+cy.get('li').prevAll('.selected')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .prevAll %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prevAll %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prevAll %}
 
 # Command Log
 
-## Find all elements before the active li
+***Find all elements before the `.active` li***
 
 ```javascript
-cy.get(".left-nav").find("li.active").prevAll()
+cy.get('.left-nav').find('li.active').prevAll()
 ```
 
 The commands above will display in the command log as:
 
-<img width="562" alt="screen shot 2017-03-23 at 2 50 20 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264885/1a1d87ac-0fd8-11e7-97cb-1d0d2110de81.png">
+![Command Log](/img/api/prevall/find-all-previous-elements-with-optional-selector.png)
 
 When clicking on `prevAll` within the command log, the console outputs the following:
 
-<img width="539" alt="screen shot 2017-03-23 at 2 50 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264898/2219d1a4-0fd8-11e7-9e8b-6b2d97166d6a.png">
+![Console Log](/img/api/prevall/console-log-all-previous-elements-traversed.png)
 
-***
+# See also
 
-# Related
-
-- [prev](https://on.cypress.io/api/prev)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
-- [nextAll](https://on.cypress.io/api/nextall)
+- {% url `.nextAll()` nextall %}
+- {% url `.parents()` parents %}
+- {% url `.prev()` prev %}
+- {% url `.prevUntil()` prevuntil %}

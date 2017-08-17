@@ -1,59 +1,72 @@
-title: prevuntil
-comments: true
+---
+title: prevUntil
+comments: false
 ---
 
-Get all previous siblings of each DOM element in the set of matched DOM elements up to, but not including, the element matched by the selector
+Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prevUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prevUntil()` http://api.jquery.com/prevUntil %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.prevUntil( *selector* )](#usage)
+```javascript
+.prevUntil(selector)
+.prevUntil(selector, filter)
+.prevUntil(selector, filter, options)
+.prevUntil(element)
+.prevUntil(element, filter)
+.prevUntil(element, filter, options)
+```
 
-Get all of the previous siblings of the elements until the selector.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.prevUntil( *selector*, *filter )](#filter-usage)
+```javascript
+cy.get('p').prevUntil('.intro') // Yield siblings before 'p' until '.intro'
+```
 
-When a filter is provided, it retrieves all of the previous siblings up until the selector only if it matches that filter.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.prevUntil()                  // Errors, cannot be chained off 'cy'
+cy.location().prevUntil('path') // Errors, 'location' does not yield DOM element
+```
 
-# [cy.prevUntil( *element* )](#element-usage)
+## Arguments
 
-Get all of the previous siblings of the elements until the DOM node or jQuery object.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-***
+The selector where you want finding previous siblings to stop.
 
-# [cy.prevUntil( *element*, *filter )](#element-filter-usage)
+**{% fa fa-angle-right %} element**  ***(DOM node, jQuery Object)***
 
-When a filter is provided, it retrieves all of the previous siblings up until the DOM node or jQuery object only if it matches that filter.
+The element where you want finding previous siblings to stop.
 
-***
+**{% fa fa-angle-right %} filter**  ***(String selector)***
 
-# Options
+A selector used to filter matching DOM elements.
 
-Pass in an options object to change the default behavior of `cy.prevUntil`.
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-**cy.prevUntil( *selector*, *options* )**
-**cy.prevUntil( *selector*, *filter*, *options* )**
-**cy.prevUntil( *element*, *options* )**
-**cy.prevUntil( *element*, *filter*, *options* )**
+Pass in an options object to change the default behavior of `.prevUntil()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .prevUntil %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .prevUntil %}
 
-## Find all of the element's siblings before `#nuts` until `#veggies`
+# Examples
+
+## Selector
+
+***Find all of the element's siblings before `#nuts` until `#veggies`***
 
 ```html
 <ul>
@@ -73,33 +86,43 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
-cy.get("#nuts").nextUntil("#veggies")
+// yields [<li>cucumbers</li>, <li>carrots</li>, <li>corn</li>]
+cy.get('#nuts').prevUntil('#veggies')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .prevUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prevUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prevUntil %}
 
 # Command Log
 
-## Find all of the element's siblings before `#nuts` until `#veggies`
+***Find all of the element's siblings before `#nuts` until `#veggies`***
 
 ```javascript
-cy.get("#nuts").nextUntil("#veggies")
+cy.get('#nuts').prevUntil('#veggies')
 ```
 
 The commands above will display in the command log as:
 
-<img width="560" alt="screen shot 2017-03-23 at 2 45 30 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264621/69ed829c-0fd7-11e7-934d-c11157c36aca.png">
+![Command Log](/img/api/prevuntil/prev-until-finding-elements-in-command-log.png)
 
 When clicking on `prevUntil` within the command log, the console outputs the following:
 
-<img width="560" alt="screen shot 2017-03-23 at 2 45 36 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264632/7743f57a-0fd7-11e7-99f8-c148acd17459.png">
+![Console Log](/img/api/prevuntil/console-log-previous-elements-until-defined-el.png)
 
-***
+# See also
 
-# Related
-
-- [prev](https://on.cypress.io/api/prev)
-- [prevAll](https://on.cypress.io/api/prevall)
-- [parentsUntil](https://on.cypress.io/api/parentsuntil)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
+- {% url `.prev()` prev %}
+- {% url `.prevAll()` prevall %}
+- {% url `.parentsUntil()` parentsuntil %}
+- {% url `.nextUntil()` nextuntil %}

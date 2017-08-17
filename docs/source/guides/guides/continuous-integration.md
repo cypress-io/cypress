@@ -1,117 +1,115 @@
-title: continuous-integration
-comments: true
 ---
+title: Continuous Integration
+comments: false
+---
+
+Running Cypress tests in Continous Integration is as easy as running tests locally. You generally only need to do two things:
+
+  1. **Install the CLI tools**
+
+  ```shell
+  npm install -g cypress-cli
+  ```
+
+  2. **Run Cypress**
+
+  ```shell
+  cypress run
+  ```
+
+That's it! This will go out and {% url 'install Cypress' installing-cypress %}, and then run all your tests.
+
+For a comprehensive list of all the options you can pass to {% url '`cypress run`' command-line#cypress-run %}, {% url 'refer to the CLI documentation' command-line %}.
+
+![travis-logs](/img/guides/travis-ci-logs-running-cypress.gif)
 
 # What's Supported?
 
-Cypress should run on **all** CI providers. We currently have seen Cypress working on the following services / providers:
+Cypress should run on **all** CI providers. We currently have seen Cypress working on the following services:
 
-- Jenkins (Linux)
-- TravisCI
-- CircleCI
-- CodeShip
-- GitLab
-- Docker
+- {% url "Jenkins" https://jenkins.io/ %} (Linux)
+- {% url "TravisCI" https://travis-ci.org/ %}
+- {% url "CircleCI" https://circleci.com %}
+- {% url "CodeShip" https://codeship.com/ %}
+- {% url "GitLab" https://gitlab.com %}
+- {% url "Docker" https://www.docker.com/ %}
 
-***
+# Setting Up CI
 
-# Running in CI
+Depending on which CI provider you use, you may need a config file. You'll want to refer to your CI provider's documentation to know where to add the commands to install and run Cypress. For more example config files check out any of our {% url "example apps" unit-testing-recipe %}.
 
-Running Cypress in CI is just as easy as running it locally. You generally only need to do two things:
+## Travis
 
-```shell
-## 1. install the CLI tools
-npm install -g cypress-cli
-
-## 2. run cypress
-cypress run
-```
-
-That's it!
-
-This will automatically go out and install Cypress, and then run all your tests.
-
-For a comprehensive list of all the options you can pass to `cypress run`, [refer to the CLI documentation](https://on.cypress.io/cli).
-
-![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
-
-***
-
-## Your CI Config File
-
-Depending on which CI provider you'll need to add these two lines (above) to a config file.
-
-For instance with TravisCI and CircleCI we have:
-
-- `.travis.yml`
-- `circle.yml`
-
-You'll want to refer to your CI providers documentation for knowing when to run those commands.
-
-Here's a couple example config files:
+***Example `.travis.yml` config file***
 
 ```yaml
-## .travis.yml
-
 before_install:
   - npm install -g cypress-cli
-
 script:
-  - cypress run
+  - cypress run --record
 ```
 
-```yaml
-## circle.yml
+## CircleCI
 
+***Example `circle.yml` config file***
+
+```yaml
 dependencies:
   post:
     - npm install -g cypress-cli
-
 test:
   override:
-    - cypress run
+    - cypress run --record
 ```
 
-For more example config files check out any of our [example apps](https://on.cypress.io/guides/all-example-apps).
+## Docker
 
-***
+We have {% url 'created' https://github.com/cypress-io/docker %} an official {% url 'cypress/base' 'https://hub.docker.com/r/cypress/base/' %} container with all of the required dependencies installed. Just add Cypress and go! As an experiment we have also created a complete {% url 'cypress/internal:cy' 'https://hub.docker.com/r/cypress/internal/tags/' %} image with pre-installed Cypress; just call {% url '`cypress run`' command-line#cypress-run %}.
 
-## Recording your runs
+If you don't use this image you must install all of the {% url 'linux dependencies' continuous-integration#Dependencies %}. See {% issue 165 'this issue' %} for more information.
 
-You can automatically have Cypress record your runs and make them available in our Dashboard.
+***Docker CI examples***
 
-Recorded runs will contain:
+* {% url "GitLab" https://gitlab.com/cypress-io/cypress-example-docker-gitlab %}
+* {% url "Codeship" https://github.com/cypress-io/cypress-example-docker-codeship %}
+* {% url "CircleCI" https://github.com/cypress-io/cypress-example-docker-circle %}
+* {% url "CircleCI with Workflows" https://github.com/cypress-io/cypress-example-docker-circle-workflows %}
 
-- Standard output
-- Failing Tests
-- Screenshots
-- Videos
+# Dependencies
 
-To record your runs:
+If you are not using one of the above CI providers then make sure your system has these dependencies installed.
 
-1. [Setup your project to record](https://on.cypress.io/guides/projects)
-2. [Pass the --record flag to `cypress run`](https://on.cypress.io/how-do-i-record-runs)
+```shell
+apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound
+```
 
-You can [read more about the Dashboard here](https://on.cypress.io/guides/dashboard-features).
+If you run {% url '`cypress run`' command-line#cypress-run %} and see no output {% url 'see this section for troubleshooting this known issue' continuous-integration#Troubleshooting %}.
 
-***
+# Recording Tests in CI
 
-# Using Environment Variables
+Cypress can record your tests running and make them available in our {% url 'Dashboard' https://on.cypress.io/dashboard %}.
+
+***Recorded tests allow you to:***
+
+- See the number of failed, pending and passing tests.
+- Get the entire stack trace of failed tests.
+- View screenshots taken when tests fail and when using {% url `cy.screenshot()` screenshot %}.
+- Watch a video of your entire test run or a clip at the point of test failure.
+
+***To record tests running:***
+
+1. {% url 'Setup your project to record' projects-dashboard#Set-up-a-Project-to-Record %}
+2. {% url 'Pass the `--record` flag to `cypress run`' command-line#cypress-run-record %}
+
+You can {% url 'read more about the Dashboard here' features-dashboard %}.
+
+# Environment Variables
 
 You can set various environment variables to modify how Cypress runs.
 
-Typically you'd want to do this to:
+## Record Key
 
-- [Hide your **Record Key**](#section-hide-your-record-key)
-- [Install a specific version](#section-install-a-specific-version)
-- [Modify configuration settings](#section-modify-configuration-settings)
-- [Change environment variables in your tests](#section-change-environment-variables-in-your-tests)
-
-***
-
-## Hide your Record Key
-
-If you are [recording your runs](#section-recording-your-runs) on a public project, you'll want to protect your Record Key. [Learn why.](https://docs.cypress.io/docs/projects#section-how-do-a-projectid-and-record-key-work-together-)
+If you are {% url 'recording your runs' continuous-integration#Recording-Tests-in-CI %} on a public project, you'll want to protect your Record Key. {% url 'Learn why.' projects-dashboard#Authentication %}
 
 Instead of hard coding it into your run command like this:
 
@@ -119,53 +117,47 @@ Instead of hard coding it into your run command like this:
 cypress run --record --key <record_key>
 ```
 
-You can set it as an environment variable and we'll automatically use that value.
-
-Typically you'd set this inside of your CI provider like this:
-
-**CircleCI**
-![screen shot 2017-02-12 at 8 56 17 pm](https://cloud.githubusercontent.com/assets/1268976/22868594/cabd8152-f165-11e6-8897-0e3e57d0eafd.png)
-
-**TravisCI**
-![screen shot 2017-02-12 at 8 58 01 pm](https://cloud.githubusercontent.com/assets/1268976/22868637/05c46e00-f166-11e6-9106-682d5729acca.png)
-
-You can now omit the `--key` flag when recording.
+You can set the record key as the environment variable, `CYPRESS_RECORD_KEY`, and we'll automatically use that value. You can now omit the `--key` flag when recording.
 
 ```shell
-## weeee we don't have to pass in the key here!
 cypress run --record
 ```
 
-***
+Typically you'd set this inside of your CI provider.
 
-## Install a specific version
+***CircleCI Environment Variable***
 
-You can install a specific version of Cypress by setting the environment variable: `CYPRESS_VERSION`.
+![Record key environment variable](/img/guides/cypress-record-key-as-environment-variable.png)
 
-**Set the version to an older Cypress**
-![screen shot 2016-03-28 at 11 28 26 am](https://cloud.githubusercontent.com/assets/1271364/14081365/601e2da4-f4d8-11e5-8ea8-0491ffcb0999.png)
+***TravisCI Environment Variable***
 
-***
+![Travis key environment variable](/img/guides/cypress-record-key-as-env-var-travis.png)
 
-## Modify configuration settings
+## Version
 
-Don't forget you can also override settings in `cypress.json` to modify Cypress's behavior.
+You can install a specific version of Cypress by setting the environment variable, `CYPRESS_VERSION`.
 
-Typical use cases would be modifying things like:
+***Set the version to an older version of Cypress in CI***
+
+![setting Cypress version in CI env var](/img/guides/cypress-version-as-environment-variable.png)
+
+## Other Configuration Values
+
+You can set any configuration value as an environment variable. This overrides values in your `cypress.json`.
+
+***Typical use cases would be modifying things like:***
 
 - `CYPRESS_BASE_URL`
 - `CYPRESS_VIDEO_COMPRESSION`
 - `CYPRESS_REPORTER`
 
-Refer to the [configuration docs](https://on.cypress.io/guides/configuration#section-environment-variables) for more examples.
+{% note info %}
+Refer to the {% url 'configuration' configuration#Environment-Variables %} for more examples.
+{% endnote %}
 
-***
+## Custom Environment Variables
 
-## Change environment variables in your tests
-
-Of course you can also set environment varibables for use strictly in your tests.
-
-These enable your code to reference dynamic values.
+You can also set custom environment variables for use in your tests. These enable your code to reference dynamic values.
 
 ```shell
 export "EXTERNAL_API_SERVER=https://corp.acme.co"
@@ -174,42 +166,39 @@ export "EXTERNAL_API_SERVER=https://corp.acme.co"
 And then in your tests:
 
 ```javascript
-cy
-  .request({
-    method: "POST",
-    url: Cypress.env("EXTERNAL_API_SERVER") + "/users/1",
-    body: {
-      foo: "bar",
-      baz: "quux"
-    }
-  })
+cy.request({
+  method: 'POST',
+  url: Cypress.env('EXTERNAL_API_SERVER') + '/users/1',
+  body: {
+    foo: 'bar',
+    baz: 'quux'
+  }
+})
 ```
 
-Refer to the dedicated [Environment Variables Guide](https://on.cypress.io/guides/environment-variables) for more examples.
+{% note info %}
+Refer to the dedicated {% url 'Environment Variables Guide' environment-variables %} for more examples.
+{% endnote %}
 
-***
+# Optimizing CI with Caching
 
-# Optimizing CI
+Most CI providers allow caching of directories or dependencies between builds. This allows you to cache the state of Cypress and make the builds run faster.
 
-Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, therefore making the builds run faster.
+## Travis CI
 
-## Caching Cypress in Travis CI
+***.travis.yml***
 
 ```yaml
-## .travis.yml
-
 cache:
   directories:
     - /home/travis/.cypress/Cypress
 ```
 
-***
+## CircleCI
 
-## Caching Cypress in CircleCI
+***circle.yml***
 
 ```yaml
-## circle.yml
-
 ## make sure you set the correct node version based on what you've installed!
 dependencies:
   cache_directories:
@@ -218,72 +207,42 @@ dependencies:
     - /home/ubuntu/.cypress/Cypress
 ```
 
-***
-
-# Dependencies
-
-If you're using a hosted CI service such as `Travis` or `CircleCI` then you don't have to install anything.
-
-For **everything else** you must install these dependencies:
-
-```shell
-apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
-```
-
-If you run `cypress run` and see no output [see this section for troubleshooting this known issue](#section-no-output).
-
-***
-
 # Known Issues
 
 ## CircleCI
 
-You need to select their [`Ubuntu 12.04` image](https://circleci.com/docs/build-image-precise/).
+You need to select their {% url "`Ubuntu 12.04` image" https://circleci.com/docs/build-image-precise/ %}. The `Ubuntu 14.04` image does not have all of the required dependencies installed by default. You can likely install them yourself. {% issue 315 'There is an open issue for this here.' %}
 
-![](https://cloud.githubusercontent.com/assets/1268976/20771195/6e93e9f4-b716-11e6-809b-f4fd8f6fa439.png)
-
-The `Ubuntu 14.04` image does not have all of the required dependencies installed by default. You can likely install them yourself. [There is an open issue for this here.](https://github.com/cypress-io/cypress/issues/315)
-
-***
+![Ubuntu build environment in circle](/img/guides/ubuntu-build-environment-in-circle-ci.png)
 
 ## Jenkins
 
-You need to install all of the [linux dependencies](#section-dependencies).
-
-***
+You need to install all of the {% url 'linux dependencies' continuous-integration#Dependencies %}.
 
 ## Docker
 
-We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#section-docker).
-
-If you don't use this image you must install all of the [linux dependencies](#section-dependencies).
-
-See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
-
-If you are running **long** runs on Docker, you need to set the `ipc` to `host` mode.
-
-[This issue](https://github.com/cypress-io/cypress/issues/350) describes exactly what to do.
-
-***
+If you are running long runs on Docker, you need to set the `ipc` to `host` mode. {% issue 350 'This issue' %} describes exactly what to do.
 
 # Troubleshooting
 
 ## No Output
 
-**Sympton**
-After executing `cypress run` you don't see any output. In other words: nothing happens.
+***Symptom***
 
-**Problem**
-You are in 100% of the cases missing [a dependency](#section-dependencies) above. Please install all of the dependencies.
+After executing {% url '`cypress run`' command-line#cypress-run %} you don't see any output. In other words: nothing happens.
 
-The reason you're not seeing any output is a longstanding issue with Cypress which [there is an open issue for](https://github.com/cypress-io/cypress/issues/317).
+***Problem***
 
-We are working on improving this experience!
+You are missing  {% url 'a dependency' continuous-integration#Dependencies %} above. *Please install all of the dependencies.*
 
-**Seeing Errors**
-Although running `cypress run` will yield no output - you can see the actual dependency failure by invoking the Cypress binary directly.
+The reason you're not seeing any output is a longstanding issue with Cypress which {% issue 317 'there is an open issue for' %}. We are working on improving this experience!
+
+***Seeing Errors***
+
+Although running {% url '`cypress run`' command-line#cypress-run %} will yield no output - you can see the actual dependency failure by invoking the Cypress binary directly.
+
+***Invoke the Cypress binary directly***
 
 ```shell
-## invoke the Cypress binary directly
-/home/<user>/.cypress/Cypress/Cypress
+/home/YOUR_USER/.cypress/Cypress/Cypress
 ```

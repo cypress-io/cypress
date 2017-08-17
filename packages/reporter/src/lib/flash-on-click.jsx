@@ -6,6 +6,16 @@ import Tooltip from '@cypress/react-tooltip'
 
 @observer
 class FlashOnClick extends Component {
+  static propTypes = {
+    message: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
+    shouldShowMessage: PropTypes.func,
+  }
+
+  static defaultProps = {
+    shouldShowMessage: () => true,
+  }
+
   @observable _show = false
 
   render () {
@@ -27,16 +37,6 @@ class FlashOnClick extends Component {
       this._show = false
     }), 800)
   }
-}
-
-FlashOnClick.propTypes = {
-  message: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  shouldShowMessage: PropTypes.func,
-}
-
-FlashOnClick.defaultProps = {
-  shouldShowMessage: () => true,
 }
 
 export default FlashOnClick

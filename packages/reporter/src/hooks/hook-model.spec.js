@@ -53,7 +53,7 @@ describe('Hook model', () => {
       const matches = { err: { displayMessage: 'matching error message' } }
       hook.addCommand(matches)
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.equal(matches)
+      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.eql(matches)
     })
 
     it('returns undefined when no match', () => {

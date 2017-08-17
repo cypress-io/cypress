@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress.Cy Agents Commands", ->
   enterCommandTestingMode()
 
@@ -388,7 +390,7 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@consoleProps["Context"]).to.equal(@context)
 
         it "includes return value", ->
-          expect(@consoleProps["Returned"]).to.equal("return value")
+          expect(@consoleProps["Yielded"]).to.equal("return value")
 
   context "#spy(obj, 'method')", ->
     beforeEach ->

@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Select Commands", ->
   enterCommandTestingMode()
 
@@ -33,9 +35,18 @@ describe "$Cypress.Cy Select Commands", ->
         expect($select).to.have.value("jarjar")
 
     it "can handle options with same value selected by text", ->
-      @cy.get("select[name=startrek]").select("Uhura").then ($select) ->
+      @cy.get("select[name=startrek-same]").select("Uhura").then ($select) ->
         expect($select.val()).to.equal("same")
         expect($select.find("option:selected")).to.have.text("Uhura")
+        expect($select[0].selectedIndex).to.equal(2)
+        expect($select[0].selectedOptions[0]).to.eql($select.find("option:selected")[0])
+
+    it "can handle options with some same values selected by text", ->
+      @cy.get("select[name=startrek-some-same]").select("Uhura").then ($select) ->
+        expect($select.val()).to.equal("same")
+        expect($select.find("option:selected")).to.have.text("Uhura")
+        expect($select[0].selectedIndex).to.equal(2)
+        expect($select[0].selectedOptions[0]).to.eql($select.find("option:selected")[0])
 
     it "can select an array of values", ->
       @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->

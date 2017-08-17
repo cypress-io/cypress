@@ -1,40 +1,36 @@
 {
-  "name": "@cypress/core-example",
-  "version": "0.8.0",
-  "description": "Interal Cypress repo for managing https://example.cypress.io",
+  "name": "@packages/example",
+  "version": "0.0.0",
+  "private": true,
   "main": "index.js",
   "scripts": {
+    "postinstall": "echo '@packages/example needs: npm run build'",
     "clean-deps": "rm -rf node_modules",
-    "test-lib": "NODE_ENV=test mocha",
-    "test": "cypress run",
+    "test": "NODE_ENV=test mocha",
+    "test-e2e": "cypress run",
     "build": "./bin/build.sh && gulp build",
     "predeploy": "npm run build",
     "deploy": "gulp deploy",
     "prerelease": "npm run build",
-    "release": "releaser"
+    "release": "releaser",
+    "lint": "$(bin-up eslint) --fix *.js bin/*.js lib/*.js test/*.js",
+    "pretest": "npm run lint"
   },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "dependencies": {
-    "cypress-example-kitchensink": "0.7.0",
-    "glob": "^7.0.3"
-  },
+  "files": [
+    "cypress",
+    "lib"
+  ],
   "devDependencies": {
-    "chai": "^3.5.0",
     "@cypress/releaser": "0.1.12",
+    "bin-up": "^1.0.1",
+    "chai": "^3.5.0",
+    "cypress-example-kitchensink": "0.7.0",
+    "glob": "^7.0.3",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.1",
     "gulp-gh-pages": "^0.5.4",
     "gulp-rev-all": "^0.8.22",
     "mocha": "^2.4.5",
     "run-sequence": "^1.1.5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-example.git"
-  },
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-example/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-example#readme"
+  }
 }

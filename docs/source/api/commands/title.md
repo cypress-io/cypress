@@ -1,62 +1,80 @@
+---
 title: title
-comments: true
+comments: false
 ---
 
-Get the title of the document.
+Get the `document.title` property of the page that is currently active.
 
-| | |
-|--- | --- |
-| **Returns** | the `document` title as a string |
-| **Timeout** | `cy.title` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
-
-***
-
-# [cy.title()](#section-usage)
-
-Get the title of the document.
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.click`.
-
-**cy.title( *options* )**
-
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
-
-***
-
-# Usage
-
-## Assert that the document's title contains "New User"
+# Syntax
 
 ```javascript
-cy.title().should("contain", "New User")
+cy.title()
+cy.title(options)
 ```
 
-***
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.title()    // Yields the documents title as a string
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.title()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.title %}
+
+## Yields {% helper_icon yields %}
+
+{% yields sets_subject cy.title 'yields the `document.title` property of the current page' %}
+
+# Examples
+
+## No Args
+
+***Assert that the document's title is "My Awesome Application"***
+
+```javascript
+cy.title().should('eq', 'My Awesome Application')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.title %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.title %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.title %}
 
 # Command Log
 
-## Assert that the document's title contains "New User"
+***Assert that the document's title includes 'New User'***
 
 ```javascript
-cy.title().should("contain", "New User")
+cy.title().should('include', 'New User')
 ```
 
 The commands above will display in the command log as:
 
-<img width="577" alt="screen shot 2015-11-29 at 2 12 54 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459376/587ae9b8-96a3-11e5-86b4-ce7ba00ccda5.png">
+![Command Log](/img/api/title/test-title-of-website-or-webapp.png)
 
 When clicking on `title` within the command log, the console outputs the following:
 
-<img width="437" alt="screen shot 2015-11-29 at 2 13 06 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459377/5b8110e2-96a3-11e5-97e6-fbeb80f83277.png">
+![Console Log](/img/api/title/see-the-string-yielded-in-the-console.png)
 
-***
+# See also
 
-# Related
-
-- [document](https://on.cypress.io/api/document)
+- {% url `cy.document()` document %}

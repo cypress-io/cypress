@@ -1,3 +1,5 @@
+{ $ } = window.testUtils
+
 describe "$Cypress.jQuery Extensions", ->
   enterCommandTestingMode()
 
@@ -111,105 +113,117 @@ describe "$Cypress.jQuery Extensions", ->
         $(el).appendTo(@cy.$$("body"))
 
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
-      @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>foo</button></div>"
-      @$displayNone = add "<button style='display: none'>none</button>"
-      @$btnOpacity = add "<button style='opacity: 0'>opacity</button>"
-      @$divNoWidth = add "<div style='width: 0; height: 100px;'>foo</div>"
-      @$divNoHeight = add "<div style='width: 50px; height: 0px;'>bar</div>"
+      @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>parent visibility: hidden</button></div>"
+      @$displayNone = add "<button style='display: none'>display: none</button>"
+      @$btnOpacity = add "<button style='opacity: 0'>opacity: 0</button>"
+      @$divNoWidth = add "<div style='width: 0; height: 100px;'>width: 0</div>"
+      @$divNoHeight = add "<div style='width: 50px; height: 0px;'>height: 0</div>"
       @$parentNoWidth = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px;'>
-            <span>child</span>
+            <span>parent width: 0</span>
           </div>
         </div>"""
 
       @$parentNoHeight = add """
         <div style='width: 100px; height: 0px; overflow: hidden;'>
-          <span>child</span>
+          <span>parent height: 0</span>
         </div>"""
 
       @$parentNoWidthHeightOverflowAuto = add """
         <div style='width: 0; height: 0px; overflow: auto;'>
-          <span>child</span>
+          <span>parent no size, overflow: auto</span>
         </div>"""
 
       @$parentWithWidthHeightNoOverflow = add """
         <div style='width: 100px; height: 100px; overflow: hidden;'>
           <div style='height: 100px; width: 100px;'>
-            <span>child</span>
+            <span>parent with size, overflow: hidden</span>
           </div>
         </div>"""
 
       @$childPosAbs = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px;'>
-            <span style='position: absolute;'>child</span>
+            <span style='position: absolute;'>position: absolute</span>
           </div>
         </div>"""
 
       @$childPosFixed = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px;'>
-            <span style='position: fixed;'>child</span>
+            <span style='position: fixed;'>position: fixed</span>
           </div>
         </div>"""
 
       @$descendentPosAbs = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px; position: absolute;'>
-            <span>child</span>
+            <span>no width, descendant position: absolute</span>
           </div>
         </div>"""
 
       @$descendentPosFixed = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px; position: fixed;'>
-            <span>child</span>
+            <span>no width, descendant position: fixed</span>
           </div>
         </div>"""
 
       @$parentPosAbs = add """
         <div style='width: 0; height: 100px; overflow: hidden; position: absolute;'>
           <div style='height: 500px; width: 500px;'>
-            <span>child</span>
+            <span>parent position: absolute</span>
           </div>
         </div>"""
 
       @$parentDisplayNone = add """
         <div id="none" style='display: none;'>
-          <span>child</span>
+          <span>parent display: none</span>
         </div>
         """
 
       @$elOutOfParentBoundsToLeft = add """
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-          <span style='position: absolute; left: -100px; top: 0px;'>child</span>
+          <span style='position: absolute; left: -400px; top: 0px;'>position: absolute, out of bounds left</span>
         </div>
       """
 
       @$elOutOfParentBoundsToRight = add """
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-          <span style='position: absolute; left: 200px; top: 0px;'>child</span>
+          <span style='position: absolute; left: 200px; top: 0px;'>position: absolute, out of bounds right</span>
         </div>
       """
 
       @$elOutOfParentBoundsAbove = add """
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-          <span style='position: absolute; left: 0px; top: -100px;'>child</span>
+          <span style='position: absolute; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
         </div>
       """
 
       @$elOutOfParentBoundsBelow = add """
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-          <span style='position: absolute; left: 0px; top: 200px;'>child</span>
+          <span style='position: absolute; left: 0px; top: 200px;'>position: absolute, out of bounds below</span>
+        </div>
+      """
+
+      @$elOutOfParentWithOverflowYHiddenBounds = add """
+        <div style='width: 100px; height: 100px; overflow-y: hidden; position: relative;'>
+          <span style='position: absolute; left: 0px; top: 200px;'>position: absolute, out of bounds below</span>
+        </div>
+      """
+
+      @$elOutOfParentWithOverflowXHiddenBounds = add """
+        <div style='width: 100px; height: 100px; overflow-x: hidden; position: relative;'>
+          <span style='position: absolute; left: 200px; top: 0;'>position: absolute, out of bounds below</span>
         </div>
       """
 
       @$elInPosAbsParentsBounds = add """
-        <div style='width: 100px; height: 100px; overflow: hidden; position: relative; top: 700px; left: 700px;'>
+        <div style='width: 200px; height: 200px; overflow: hidden; position: relative;'>
           <div style='position: absolute;'>
             <div style='position: absolute;'>
-              <span style='position: absolute; left: 50px; top: 50px;'>child</span>
+              <span style='position: absolute; left: 50px; top: 50px;'>in bounds, parent position: absolute</span>
             </div>
           </div>
         </div>
@@ -219,7 +233,7 @@ describe "$Cypress.jQuery Extensions", ->
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative; top: 700px; left: 700px;'>
           <div style='position: absolute;'>
             <div style='position: absolute;'>
-              <span style='position: absolute; left: -300px; top: 0px;'>child</span>
+              <span style='position: absolute; left: -300px; top: 0px;'>out of bounds, parent position: absolute</span>
             </div>
           </div>
         </div>
@@ -227,7 +241,7 @@ describe "$Cypress.jQuery Extensions", ->
 
       @$elInParentBounds = add """
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-          <span style='position: absolute; left: 0px; top: 0px;'>child</span>
+          <span style='position: absolute; left: 0px; top: 0px;'>in bounds, position: absolute</span>
         </div>
       """
 
@@ -235,7 +249,43 @@ describe "$Cypress.jQuery Extensions", ->
         <div style='width: 100px; height: 100px; overflow: scroll; position: relative; top: 700px; left: 700px;'>
           <div style='position: absolute;'>
             <div style='position: absolute;'>
-              <span style='position: absolute; left: 300px; top: 0px;'>child</span>
+              <span style='position: absolute; left: 300px; top: 0px;'>out of scrolling bounds, position: absolute</span>
+            </div>
+          </div>
+        </div>
+      """
+
+      @$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor = add """
+        <div style='padding: 100px; position: relative;'>
+          <div style='overflow: hidden;'>
+            <div>
+              <span style='position: absolute; left: 0; top: 0;'>in bounds of ancestor, position: absolute, parent overflow: hidden</span>
+            </div>
+          </div>
+        </div>
+      """
+
+      @$elIsRelativeAndOutOfBoundsOfAncestorOverflow = add """
+        <div style='overflow: hidden;'>
+          <div>
+            <span style='position: relative; left: 0; top: -200px;'>out of bounds, position: relative</span>
+          </div>
+        </div>
+      """
+
+      @$elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow = add """
+        <div>
+          <div>
+            <span style='position: relative; left: 0; top: -200px;'>out of bounds but visible, position: relative</span>
+          </div>
+        </div>
+      """
+
+      @$parentOutOfBoundsButElInBounds = add """
+        <div style='position: relative; padding: 20px;'>
+          <div style='overflow: hidden;'>
+            <div style='position: relative; left: 0; top: -100px;'>
+              <span style='position: relative; left: 0; top: 100px;'>in bounds of ancestor, parent out of bounds</span>
             </div>
           </div>
         </div>
@@ -329,17 +379,35 @@ describe "$Cypress.jQuery Extensions", ->
     it "is hidden when parent overflow hidden and out of bounds below", ->
       expect(@$elOutOfParentBoundsBelow.find("span")).to.be.hidden
 
-    it "is hidden when parent pos abs & overflow hidden and out of bounds", ->
-      expect(@$elOutOfPosAbsParentsBounds.find("span")).to.be.hidden
+    it "is hidden when parent overflow-y hidden and out of bounds", ->
+      expect(@$elOutOfParentWithOverflowYHiddenBounds.find("span")).to.be.hidden
+
+    it "is hidden when parent overflow-x hidden and out of bounds", ->
+      expect(@$elOutOfParentWithOverflowXHiddenBounds.find("span")).to.be.hidden
 
     it "is hidden when parent overflow scroll and out of bounds", ->
       expect(@$elOutOfScrollingParentBounds.find("span")).to.be.hidden
 
-    it "is visible when parent abs positioned and overflow hidden and not out of bounds", ->
+    it "is hidden when parent absolutely positioned and overflow hidden and out of bounds", ->
+      expect(@$elOutOfPosAbsParentsBounds.find("span")).to.be.hidden
+
+    it "is visible when parent absolutely positioned and overflow hidden and not out of bounds", ->
       expect(@$elInPosAbsParentsBounds.find("span")).to.be.visible
 
     it "is visible when parent overflow hidden and not out of bounds", ->
       expect(@$elInParentBounds.find("span")).to.be.visible
+
+    it "is visible when ancestor is overflow hidden but more distant ancestor is position relative", ->
+      expect(@$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor.find("span")).to.be.visible
+
+    it "is hidden when relatively positioned outside ancestor with overflow hidden", ->
+      expect(@$elIsRelativeAndOutOfBoundsOfAncestorOverflow.find("span")).to.be.hidden
+
+    it "is visible when el is relatively positioned outside ancestor that does not hide overflow", ->
+      expect(@$elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow.find("span")).to.be.visible
+
+    it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
+      expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
 
     describe "#getReasonElIsHidden", ->
       beforeEach ->

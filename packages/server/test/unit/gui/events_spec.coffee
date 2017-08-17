@@ -1,7 +1,7 @@
 require("../../spec_helper")
 
 _        = require("lodash")
-extension = require("#{root}../../../packages/extension")
+extension = require("@packages/extension")
 electron = require("electron")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")
@@ -183,44 +183,15 @@ describe "lib/gui/events", ->
 
   context "updating", ->
     describe "updater:check", ->
-      it "returns true when new version", ->
-        @sandbox.stub(Updater, "check").yieldsTo("onNewVersion")
+      it "returns version when new version", ->
+        @sandbox.stub(Updater, "check").yieldsTo("onNewVersion", {version: "1.2.3"})
         @handleEvent("updater:check")
-        @expectSendCalledWith(true)
+        @expectSendCalledWith("1.2.3")
 
       it "returns false when no new version", ->
         @sandbox.stub(Updater, "check").yieldsTo("onNoNewVersion")
         @handleEvent("updater:check")
         @expectSendCalledWith(false)
-
-    describe "updater:run", ->
-      beforeEach ->
-        @once = @sandbox.stub()
-        @sandbox.stub(Windows, "getByWebContents").withArgs(@event.sender).returns({once: @once})
-
-      it "calls cancel when win is closed", ->
-        cancel = @sandbox.spy()
-        run    = @sandbox.stub(Updater, "run").returns({cancel: cancel})
-        @once.withArgs("closed").yields()
-        @handleEvent("updater:run")
-        expect(cancel).to.be.calledOnce
-
-      _.each {
-        onStart: "start"
-        onApply: "apply"
-        onError: "error"
-        onDone:  "done"
-        onNone:  "none"
-      }, (val, key) ->
-        it "returns #{val} on #{key}", ->
-          @sandbox.stub(Updater, "run").yieldsTo(key)
-          @handleEvent("updater:run")
-          @expectSendCalledWith({event: val, version: undefined})
-
-      it "returns down + version on onDownload", ->
-        @sandbox.stub(Updater, "run").yieldsTo("onDownload", "0.14.0")
-        @handleEvent("updater:run")
-        @expectSendCalledWith({event: "download", version: "0.14.0"})
 
   context "log events", ->
     describe "get:logs", ->
@@ -337,7 +308,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "open")
         @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("open:finder", "path")
         .then =>
@@ -389,30 +360,30 @@ describe "lib/gui/events", ->
 
     describe "add:project", ->
       it "adds project + returns result", ->
-        @sandbox.stub(Project, "add").withArgs("path/to/project").resolves("result")
+        @sandbox.stub(Project, "add").withArgs("/_test-output/path/to/project").resolves("result")
 
-        @handleEvent("add:project", "path/to/project").then =>
+        @handleEvent("add:project", "/_test-output/path/to/project").then =>
           @expectSendCalledWith("result")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Project, "add").withArgs("path/to/project").rejects(err)
+        @sandbox.stub(Project, "add").withArgs("/_test-output/path/to/project").rejects(err)
 
-        @handleEvent("add:project", "path/to/project").then =>
+        @handleEvent("add:project", "/_test-output/path/to/project").then =>
           @expectSendErrCalledWith(err)
 
     describe "remove:project", ->
       it "remove project + returns arg", ->
-        @sandbox.stub(cache, "removeProject").withArgs("path/to/project").resolves()
+        @sandbox.stub(cache, "removeProject").withArgs("/_test-output/path/to/project").resolves()
 
-        @handleEvent("remove:project", "path/to/project").then =>
-          @expectSendCalledWith("path/to/project")
+        @handleEvent("remove:project", "/_test-output/path/to/project").then =>
+          @expectSendCalledWith("/_test-output/path/to/project")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(cache, "removeProject").withArgs("path/to/project").rejects(err)
+        @sandbox.stub(cache, "removeProject").withArgs("/_test-output/path/to/project").rejects(err)
 
-        @handleEvent("remove:project", "path/to/project").then =>
+        @handleEvent("remove:project", "/_test-output/path/to/project").then =>
           @expectSendErrCalledWith(err)
 
     describe "open:project", ->
@@ -430,7 +401,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "open")
         @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @expectSendCalledWith({some: "config"})
 
@@ -438,11 +409,9 @@ describe "lib/gui/events", ->
         err = new Error("foo")
         @sandbox.stub(Project.prototype, "open").rejects(err)
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @expectSendErrCalledWith(err)
-
-      it "reboots onSettingsChanged"
 
       it "emits bus 'focus:tests' onFocustTests"
 
@@ -460,7 +429,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "getConfig").resolves({})
         @sandbox.stub(Project.prototype, "open").withArgs({sync: true}).resolves()
 
-        @handleEvent("open:project", "path/to/project")
+        @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           ## it should store the opened project
           expect(openProject.getProject()).not.to.be.null
@@ -472,52 +441,52 @@ describe "lib/gui/events", ->
 
             @expectSendCalledWith(null)
 
-    describe "get:builds", ->
-      it "calls openProject.getBuilds", ->
-        @sandbox.stub(openProject, "getBuilds").resolves([])
+    describe "get:runs", ->
+      it "calls openProject.getRuns", ->
+        @sandbox.stub(openProject, "getRuns").resolves([])
 
-        @handleEvent("get:builds").then =>
-          expect(openProject.getBuilds).to.be.called
+        @handleEvent("get:runs").then =>
+          expect(openProject.getRuns).to.be.called
 
-      it "returns array of builds", ->
-        @sandbox.stub(openProject, "getBuilds").resolves([])
+      it "returns array of runs", ->
+        @sandbox.stub(openProject, "getRuns").resolves([])
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           @expectSendCalledWith([])
 
       it "sends UNAUTHENTICATED when statusCode is 401", ->
         err = new Error("foo")
         err.statusCode = 401
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNAUTHENTICATED")
 
       it "sends TIMED_OUT when cause.code is ESOCKETTIMEDOUT", ->
         err = new Error("foo")
         err.cause = { code: "ESOCKETTIMEDOUT" }
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("TIMED_OUT")
 
       it "sends NO_CONNECTION when code is ENOTFOUND", ->
         err = new Error("foo")
         err.code = "ENOTFOUND"
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("NO_CONNECTION")
 
       it "sends type when if existing for other errors", ->
         err = new Error("foo")
         err.type = "NO_PROJECT_ID"
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("NO_PROJECT_ID")
 
@@ -526,9 +495,9 @@ describe "lib/gui/events", ->
         err.name = "name"
         err.message = "message"
         err.stack = "stack"
-        @sandbox.stub(openProject, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getRuns").rejects(err)
 
-        @handleEvent("get:builds").then =>
+        @handleEvent("get:runs").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")
 

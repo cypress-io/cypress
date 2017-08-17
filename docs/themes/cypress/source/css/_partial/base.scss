@@ -17,18 +17,21 @@ body {
   line-height: $line-height;
   background: $color-background;
   font-size: $font-size;
-  font-weight: 300;
+  font-weight: normal;
   font-family: $font-sans;
   color: $color-default;
-  text-rendering: optimizeLegibility;
+  text-size-adjust: 100%;
   overflow-x: hidden;
 }
 
 a {
   cursor: pointer;
+  transition: 0.2s;
+
   img {
     border: none;
   }
+
   &.article-title:hover {
     color: $color-link-hover;
   }
@@ -42,6 +45,7 @@ table, caption, td, th {
 
 * {
   box-sizing: inherit;
+  -webkit-font-smoothing: antialiased;
   &:before {
     box-sizing: inherit;
   }
@@ -57,16 +61,20 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
 }
 
 .wrapper {
+  margin: 0 auto;
+
   &:before {
     content: "";
     display: table;
   }
+
   &:after {
     content: "";
     display: table;
     clear: both;
   }
 }
+
 .inner {
   &:before {
     content: "";
@@ -80,9 +88,10 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
 }
 
 #content-wrap {
-  background: $white;
+  background-color: white;
   border-top: 1px solid $color-background;
   border-bottom: 1px solid $color-background;
+  padding-top: 40px;
   margin: -1px 0;
 }
 
@@ -125,11 +134,17 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
 }
 
 #content {
+  background-color: #fff;
+  // border-right: 1px solid #eee;
+  // border-left: 1px solid #eee;
+  // margin-top: -50px;
   position: relative;
+
   &:before {
     content: "";
     display: table;
   }
+
   &:after {
     content: "";
     display: table;
@@ -158,4 +173,14 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
   font-size: 50px;
   line-height: 100px;
   margin: 100px 0;
+}
+
+i.fa {
+  &.red {
+    color: $color-red;
+  }
+
+  &.green {
+    color: $color-green;
+  }
 }

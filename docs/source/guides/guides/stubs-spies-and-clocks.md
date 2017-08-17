@@ -1,14 +1,23 @@
-title: stubs-spies-clocks
-comments: true
 ---
+title: Stubs, Spies, and Clocks
+comments: false
+---
+
+{% note info %}
+# {% fa fa-graduation-cap %} What You'll Learn
+
+- Which libraries Cypress includes to provide typical testing functionality
+- How to use stubs for asserting that code was called but preventing it from executing
+- How to use spies for asserting that code was called without interfering with its execution
+- How to control time for deterministically testing code that is time-dependent
+- How Cypress improves and extends the included libraries
+{% endnote %}
 
 # Capabilities
 
-Cypress comes built in with the ability to [`stub`](https://on.cypress.io/api/stub), [`spy`](https://on.cypress.io/api/spy) or modify your applications [`clock`](https://on.cypress.io/api/clock) - such as controlling `Date`, `setTimeout`, and `setInterval`.
+Cypress comes built in with the ability to {% url `cy.stub()` stub %}, {% url `cy.spy()` spy %} or modify your applications {% url `cy.clock()` clock %} - such as controlling `Date`, `setTimeout`, and `setInterval`.
 
 These commands are useful when writing both **unit tests** and **integration tests**.
-
-***
 
 # Libraries and Tools
 
@@ -16,19 +25,17 @@ Cypress automatically bundles and wraps these libraries:
 
 | Name | What it does |
 | --- | ---- |
-| [`sinon`](http://sinonjs.org) | provides the [`stub`](https://on.cypress.io/api/stub) and [`spy`](https://on.cypress.io/api/spy) API's |
-| [`lolex`](https://github.com/sinonjs/lolex) | provides the [`clock`](https://on.cypress.io/api/clock) and [`tick`](https://on.cypress.io/api/tick) API's |
+| [`sinon`](http://sinonjs.org) | provides the {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} API's |
+| [`lolex`](https://github.com/sinonjs/lolex) | provides the {% url `cy.clock()` clock %} and {% url `cy.tick()` tick %} API's |
 | [`sinon-as-promised`](https://github.com/bendrucker/sinon-as-promised) | makes it easy to stub `Promise` returning functions |
 | [`sinon-chai`](https://github.com/domenic/sinon-chai) | adds `chai` assertions for stubs and spies |
 
 You can refer to each of these libraries documentation for more examples and explanations.
 
-***
-
 # Common Scenarios
 
 {% note info Example test! %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% url 'Check out our example recipe testing spying, stubbing and time' stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
 ## Stubs
@@ -59,7 +66,7 @@ cy.stub(obj, "method").rejects(new Error("foo"))
 
 You generally stub a function when it has side effects you are trying to control.
 
-**Common Scenarios:**
+***Common Scenarios:***
 
 - You have a function that accepts a callback, and want to invoke the callback.
 - Your function returns a `Promise`, and you want to automatically resolve or reject it.
@@ -70,10 +77,8 @@ You generally stub a function when it has side effects you are trying to control
 - You're using `oauth` and want to stub login methods.
 
 {% note info cy.stub() %}
-[Read more about how to use cy.stub](https://on.cypress.io/api/stub)
+{% url 'Read more about how to use `cy.stub()`' stub %}
 {% endnote %}
-
-***
 
 ## Spies
 
@@ -86,39 +91,34 @@ cy.spy(obj, "method")
 ```
 
 {% note info cy.spy() %}
-[Read more about how to use cy.spy](https://on.cypress.io/api/spy)
+{% url 'Read more about how to use `cy.spy()`' spy %}
 {% endnote %}
-
-***
 
 ## Clock
 
 There are situations when it is useful to control your applications `date` and `time` in order to force its behavior or avoid slow tests.
 
-[`cy.clock`](https://on.cypress.io/api/clock) gives you the ability to control:
+{% url `cy.clock()` clock %} gives you the ability to control:
 
 - `Date`
 - `setTimeout`
 - `setInterval`
 
-**Common Scenarios:**
+***Common Scenarios:***
 
 - You're polling something in your application with `setInterval` and want to control that.
 - You have **throttled** or **debounced** functions which you want to control.
 
-Once you've enabled [`cy.clock`](https://on.cypress.io/api/clock) you can then control time by **ticking** it ahead by milliseconds.
+Once you've enabled {% url `cy.clock()` clock %} you can then control time by **ticking** it ahead by milliseconds.
 
 ```javascript
-cy
-  .clock()
-  .visit("http://localhost:3333")
-  .get("#search").type("foobarbaz")
-  .tick(1000)
+cy.clock()
+cy.visit("http://localhost:3333")
+cy.get("#search").type("foobarbaz")
+cy.tick(1000)
 ```
 
-[`cy.clock`](https://on.cypress.io/api/clock) is special in that it can be called **prior** to visiting your application, and we will automatically bind it to the application on the next [`cy.visit`](https://on.cypress.io/api/visit). We bind **before** any timers from your application can be invoked. This works identically to [`cy.server`](https://on.cypress.io/api/server) + [`cy.route`](https://on.cypress.io/api/route).
-
-***
+{% url `cy.clock()` clock %} is special in that it can be called **prior** to visiting your application, and we will automatically bind it to the application on the next {% url `cy.visit()` visit %}. We bind **before** any timers from your application can be invoked. This works identically to {% url `cy.server()` server %} + {% url `cy.route()` route %}.
 
 ## Assertions
 
@@ -175,13 +175,11 @@ expect(user.updateEmail).to.have.returned("jane@devs.com") // true
 expect(user.fail).to.have.thrown("Error")                  // true
 ```
 
-***
-
 # Integration and Extensions
 
 Beyond just integrating these tools together we have also extended and improved the collaboration of these tools.
 
-Some examples:
+***Some examples:***
 
 - We replaced Sinon's argument stringifier for a much less noisy, more performant, custom version.
 - We improved the `sinon-chai` assertion output by changing what displays during a passing vs failing test.
@@ -190,19 +188,19 @@ Some examples:
 
 We also integrated all of these API's directly into the Command Log so you can visually see what's happening in your application.
 
-We visually indicate when:
+***We visually indicate when:***
 
 - A `stub` is called
 - A `spy` is called
 - A `clock` is ticked
 
-When you use aliasing with the [`.as(alias)`](https://on.cypress.io/api/as) command, we also coorelate those aliases with the calls. This works identically to aliasing a [`cy.route`](https://on.cypress.io/api/route).
+When you use aliasing with the {% url `.as()` as %} command, we also correlate those aliases with the calls. This works identically to aliasing a {% url `cy.route()` route %}.
 
 When stubs are created by calling the method `.withArgs(...)` we also visually link these together.
 
 When you click on a stub or spy we also output **incredibly** helpful debugging information.
 
-For instance we automatically display:
+***For instance we automatically display:***
 
 - The call count (and total number of calls)
 - The arguments without transforming them (they are the real arguments)

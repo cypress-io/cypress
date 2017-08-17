@@ -1,12 +1,19 @@
 {
-  "name": "static",
+  "name": "@packages/static",
+  "version": "0.0.0",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "build-dev": "gulp build",
+    "postinstall": "echo '@packages/static needs: npm run build'",
+    "build": "gulp build",
     "test": "echo 'Nothing to test yet'"
   },
+  "files": [
+    "dist",
+    "lib"
+  ],
   "devDependencies": {
-    "@cypress/icons": "0.5.2",
+    "@cypress/icons": "0.5.4",
     "gulp": "^3.9.1"
   }
 }

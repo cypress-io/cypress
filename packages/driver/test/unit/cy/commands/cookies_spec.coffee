@@ -1,3 +1,5 @@
+{ _, Promise } = window.testUtils
+
 describe "$Cypress.Cy Cookie Commands", ->
   enterCommandTestingMode()
 
@@ -203,7 +205,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.getCookies().then (cookies) ->
             expect(cookies).to.deep.eq([{name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false}])
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.deep.eq cookies
+            expect(c["Yielded"]).to.deep.eq cookies
             expect(c["Num Cookies"]).to.eq 1
 
     context "#getCookie", ->
@@ -367,13 +369,13 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.getCookie("foo").then (cookie) ->
             expect(cookie).to.deep.eq({name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false})
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.deep.eq cookie
+            expect(c["Yielded"]).to.deep.eq cookie
 
         it "#consoleProps when no cookie found", ->
           @cy.getCookie("bar").then (cookie) ->
             expect(cookie).to.be.null
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.eq "null"
+            expect(c["Yielded"]).to.eq "null"
             expect(c["Note"]).to.eq("No cookie with the name: 'bar' was found.")
 
     context "#setCookie", ->
@@ -549,7 +551,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.setCookie("foo", "bar").then (cookie) ->
             expect(cookie).to.deep.eq({name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false})
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.deep.eq cookie
+            expect(c["Yielded"]).to.deep.eq cookie
 
     context "#clearCookie", ->
       beforeEach ->
@@ -699,14 +701,14 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.clearCookie("foo").then (cookie) ->
             expect(cookie).to.be.null
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.eq("null")
+            expect(c["Yielded"]).to.eq("null")
             expect(c["Cleared Cookie"]).to.deep.eq {name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false}
 
         it "#consoleProps when no matching cookie was found", ->
           @cy.clearCookie("bar").then (cookie) ->
             expect(cookie).to.be.null
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.eq("null")
+            expect(c["Yielded"]).to.eq("null")
             expect(c["Cleared Cookie"]).to.be.undefined
             expect(c["Note"]).to.eq "No cookie with the name: 'bar' was found or removed."
 
@@ -941,7 +943,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.clearCookies().then (cookies) ->
             expect(cookies).to.be.null
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.eq("null")
+            expect(c["Yielded"]).to.eq("null")
             expect(c["Cleared Cookies"]).to.deep.eq [{name: "foo"}]
             expect(c["Num Cookies"]).to.eq 1
 
@@ -957,7 +959,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.clearCookies().then (cookies) ->
             expect(cookies).to.be.null
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.eq("null")
+            expect(c["Yielded"]).to.eq("null")
             expect(c["Cleared Cookies"]).to.be.undefined
             expect(c["Note"]).to.eq "No cookies were found or removed."
 
@@ -977,6 +979,6 @@ describe "$Cypress.Cy Cookie Commands", ->
           @cy.clearCookies().then (cookies) ->
             expect(cookies).to.be.null
             c = @log.attributes.consoleProps()
-            expect(c["Returned"]).to.eq("null")
+            expect(c["Yielded"]).to.eq("null")
             expect(c["Cleared Cookies"]).to.be.undefined
             expect(c["Note"]).to.eq "No cookies were found or removed."

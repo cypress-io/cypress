@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 Reporter = require("#{root}lib/reporter")
+snapshot = require("snap-shot-it")
 
 describe "lib/reporter", ->
   beforeEach ->
@@ -58,7 +59,7 @@ describe "lib/reporter", ->
   context ".create", ->
     it "can create mocha-teamcity-reporter", ->
       teamCityFn = @sandbox.stub()
-      mockery.registerMock("mocha-teamcity-reporter", teamCityFn)
+      mockery.registerMock("@cypress/mocha-teamcity-reporter", teamCityFn)
 
       reporter = Reporter.create("teamcity")
       reporter.setRunnables(@root)
@@ -89,6 +90,7 @@ describe "lib/reporter", ->
 
     it "recursively creates suites for fullTitle", ->
       args = @reporter.parseArgs("fail", [@testObj])
+      console.log(args)
       expect(args[0]).to.eq("fail")
 
       title = "TodoMVC - React When page is initially opened should focus on the todo input field"
@@ -104,24 +106,7 @@ describe "lib/reporter", ->
 
       @reporter.reporterName = "foo"
 
-      expect(@reporter.stats()).to.deep.eq({
-        reporter: "foo"
-        suites: 0
-        tests: 1
-        passes: 0
-        pending: 0
-        failures: 1
-        failingTests: [
-          {
-            clientId: "r4"
-            title: "TodoMVC - React /// When page is initially opened /// should focus on the todo input field"
-            duration: 4
-            stack: [1,2,3]
-            error: "foo"
-            started: 1234
-          }
-        ]
-      })
+      snapshot(@reporter.stats())
 
   context "#emit", ->
     beforeEach ->

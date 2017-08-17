@@ -2,10 +2,9 @@ _         = require("lodash")
 Promise   = require("bluebird")
 files     = require("./controllers/files")
 config    = require("./config")
-errors    = require("./errors")
-cache     = require("./cache")
 Project   = require("./project")
 browsers  = require("./browsers")
+log       = require('./log')
 
 create = ->
   openProject     = null
@@ -30,13 +29,14 @@ create = ->
 
     getRecordKeys: tryToCall("getRecordKeys")
 
-    getBuilds: tryToCall("getBuilds")
+    getRuns: tryToCall("getRuns")
 
     requestAccess: tryToCall("requestAccess")
 
     getProject: -> openProject
 
     launch: (browserName, spec, options = {}) ->
+      log("launching browser %s spec %s", browserName, spec)
       @reboot()
       .then ->
         openProject.ensureSpecUrl(spec)
@@ -60,6 +60,7 @@ create = ->
           options = _.extend({}, cfg, options)
 
           do relaunchBrowser = ->
+            log "launching project in browser #{browserName}"
             browsers.open(browserName, options, automation)
 
     getSpecChanges: (options = {}) ->
@@ -114,6 +115,7 @@ create = ->
         return null
 
     close:  ->
+      log "closing opened project"
       @clearSpecInterval()
       @closeOpenProjectAndBrowsers()
 
@@ -132,6 +134,7 @@ create = ->
       open = ->
         ## open the project and return
         ## the config for the project instance
+        log("opening project %s", path)
         openProject.open(options)
 
       @reboot = ->

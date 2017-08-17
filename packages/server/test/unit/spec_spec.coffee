@@ -30,10 +30,10 @@ collectResponse = (resStream) ->
 
 browserifyFile = (filePath) ->
   streamToPromise(
-    browserify(
-      entries: [filePath]
+    browserify({
+      entries: [filePath],
       extensions: [".js", ".jsx", ".coffee", ".cjsx"]
-    )
+    })
     .transform(cjsxify)
     .transform(babelify, {
       plugins: ["add-module-exports"],
@@ -43,10 +43,13 @@ browserifyFile = (filePath) ->
   )
 
 describe "lib/controllers/spec", ->
+  specName = "sample.js"
+  specSource = ";"
+
   beforeEach ->
     @config = {
       projectName: "foo?bar"
-      projectRoot: ""
+      projectRoot: "/foobar"
       integrationFolder: fixturesRoot
       browserify: {
         basedir: fixturesRoot
@@ -67,14 +70,15 @@ describe "lib/controllers/spec", ->
       watchBundle: -> Promise.resolve()
     }
 
-    fs.ensureDirSync(appData.path("bundles", "foobar"))
-    fs.writeFileSync(appData.path("bundles", "foobar", "sample.js"), ';')
+    samplePath = bundle.outputPath(@config.projectRoot, specName)
+    fs.ensureDirSync(path.dirname(samplePath))
+    fs.writeFileSync(samplePath, ';')
 
     @handle = (filePath) =>
       spec.handle filePath, {}, @res, @config, (=>), @watchers, @project
 
   it "sets the correct content type", ->
-    @handle("sample.js")
+    @handle(specName)
 
     expect(@res.type)
       .to.have.been.calledOnce
@@ -83,15 +87,15 @@ describe "lib/controllers/spec", ->
   describe "headed mode", ->
 
     it "sends the file from the bundles path", ->
-      @handle("sample.js")
+      @handle(specName)
 
       collectResponse(@res).then (result) ->
-        expect(result).to.equal(";")
+        expect(result).to.equal(specSource)
 
     it "sends the client-side error if there is one", ->
       @watchers.watchBundle = -> Promise.reject(new Error("Reason request failed"))
 
-      @handle("sample.js").then =>
+      @handle(specName).then =>
         expect(@res.send).to.have.been.called
         expect(@res.send.firstCall.args[0]).to.include("(function")
         expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
@@ -104,10 +108,10 @@ describe "lib/controllers/spec", ->
       @config.isHeadless = true
 
     it "sends the file from the bundles path", ->
-      @handle("sample.js")
+      @handle(specName)
 
       collectResponse(@res).then (result) ->
-        expect(result).to.equal(";")
+        expect(result).to.equal(specSource)
 
     it "logs the error and exits if there is one", ->
       err = new Error("Reason request failed")
@@ -117,7 +121,7 @@ describe "lib/controllers/spec", ->
       })
       @log = @sandbox.stub(errors, "log")
 
-      @handle("sample.js").then =>
+      @handle(specName).then =>
         expect(@log).to.have.been.called
         expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
         expect(@project.emit).to.have.been.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")

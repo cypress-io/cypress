@@ -1,39 +1,56 @@
-title: submit
-comments: true
 ---
-
-Submits the DOM element from the previous command if it is a form. Submit can only be called on a single form.
-
-**The following events are fired during submit:** `submit`
-
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.submit` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts). |
-
-***
-
-# [cy.submit()](#section-usage)
+title: submit
+comments: false
+---
 
 Submit a form.
 
-***
+{% note warning %}
+This element must be an `<form>`.
+{% endnote %}
 
-# Options
+# Syntax
 
-Pass in an options object to change the default behavior of `cy.submit`.
+```javascript
+.submit()
+.submit(options)
+```
 
-**cy.submit( *options* )**
+## Usage
 
-Option | Default | Notes
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.get('form').submit()   // Submit a form
+```
+
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
+
+```javascript
+cy.submit()               // Errors, cannot be chained off 'cy'
+cy.get('input').submit()  // Errors, 'input' does not yield a form
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.submit()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .submit %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields same_subject .submit %}
 
-## Submit a form
+# Example
+
+## No Args
+
+***Submit can only be called on a single form.***
 
 ```html
 <form id="contact">
@@ -43,32 +60,55 @@ Option | Default | Notes
 ```
 
 ```javascript
-// submits the form and performs all default actions
-// returns <form> for further chaining
-cy.get("#contact").submit()
+cy.get('#contact').submit()
 ```
 
-***
+# Notes
+
+## Actionability
+
+***Submit is not an action command***
+
+`.submit()` is not implemented like other action commands, and does not follow the same rules of {% url 'waiting for actionability' interacting-with-elements %}.
+
+`.submit()` is just a helpful command which is a simple shortcut. Normally a user has to perform a different "action" to submit a form. It could be clicking a submit `<button>`, or pressing `enter` on a keyboard.
+
+Oftentimes its must simpler and conveys what you're trying to test by just using `.submit()` directly.
+
+If you want the other guarantees of waiting for an element to become actionable, you should use a different command like {% url `.click()` click %} or {% url `.type()` type %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements submitability .submit %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions wait .submit %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .submit %}
 
 # Command Log
 
-## Submit a form
+***Submit a form***
 
 ```javascript
-cy.route("POST", /users/, "fixture:user").as("userSuccess")
-cy.get("form").submit()
+cy.route('POST', '/users', 'fixture:user').as('userSuccess')
+cy.get('form').submit()
 ```
 
 The commands above will display in the command log as:
 
-<img width="594" alt="screen shot 2015-11-29 at 1 21 43 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459081/3149d9e6-969c-11e5-85b2-ba57638f02df.png">
+![Command Log](/img/api/submit/form-submit-shows-in-command-log-of-cypress.png)
 
 When clicking on `submit` within the command log, the console outputs the following:
 
-![cy.submit console log](https://cloud.githubusercontent.com/assets/1271364/12888878/222f5522-ce4a-11e5-9edd-f67be2ebce40.png)
+![cy.submit console log](/img/api/submit/console-shows-what-form-was-submitted.png)
 
-***
+# See also
 
-# Related
-
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}
+- {% url `.type()` type %}

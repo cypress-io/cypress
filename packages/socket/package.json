@@ -1,33 +1,23 @@
 {
-  "name": "@cypress/core-socket",
-  "version": "0.2.1",
-  "description": "Cypress Shared Socket Libs",
+  "name": "@packages/socket",
+  "version": "0.0.0",
+  "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test $(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "NODE_ENV=test mocha --watch",
-    "test-once": "npm run test-unit-once",
-    "test-unit-once": "NODE_ENV=test mocha",
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps"
+    "clean-deps": "rm -rf node_modules"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-socket.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-socket/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-socket#readme",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "socket.io": "1.4.5",
     "socket.io-client": "1.4.5"
   },
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5"
+    "bin-up": "^1.0.1",
+    "chai": "^3.5.0"
   }
 }

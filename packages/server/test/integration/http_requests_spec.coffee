@@ -16,8 +16,8 @@ cjsxify       = require("cjsxify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
-httpsServer   = require("#{root}../../packages/https-proxy/test/helpers/https_server")
-pkg           = require("#{root}package.json")
+httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
+pkg           = require("@packages/root")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Watchers      = require("#{root}lib/watchers")
@@ -80,14 +80,14 @@ describe "Routes", ->
           url = options
           options = {}
 
-        _.defaults options,
-          url: url
-          proxy: @proxy
-          jar: jar
-          simple: false
-          followRedirect: false
+        _.defaults options, {
+          url,
+          proxy: @proxy,
+          jar,
+          simple: false,
+          followRedirect: false,
           resolveWithFullResponse: true
-
+        }
         rp(options)
 
       open = =>
@@ -925,7 +925,7 @@ describe "Routes", ->
       it "unzips, injects, and then rezips initial content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
+        .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
           "Content-Type": "text/html"
           "Content-Encoding": "gzip"
@@ -949,7 +949,7 @@ describe "Routes", ->
       it "unzips, injects, and then rezips regular http content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
+        .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
           "Content-Type": "text/html"
           "Content-Encoding": "gzip"
@@ -973,7 +973,7 @@ describe "Routes", ->
       it "does not inject on regular gzip'd content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
+        .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
           "Content-Type": "application/javascript"
           "Content-Encoding": "gzip"
@@ -989,6 +989,45 @@ describe "Routes", ->
           expect(res.body).to.include("gzip")
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
+
+    context "accept-encoding", ->
+      beforeEach ->
+        @setup("http://www.github.com")
+
+      it "strips unsupported deflate and br encoding", ->
+        nock(@server._remoteOrigin)
+        .get("/accept")
+        .matchHeader("accept-encoding", "gzip")
+        .reply(200, "<html>accept</html>")
+
+        @rp({
+          url: "http://www.github.com/accept"
+          gzip: true
+          headers: {
+            "accept-encoding": "gzip,deflate,br"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html>accept</html>")
+
+      it "removes accept-encoding when nothing is supported", ->
+        nock(@server._remoteOrigin, {
+          badheaders: ["accept-encoding"]
+        })
+        .get("/accept")
+        .reply(200, "<html>accept</html>")
+
+        @rp({
+          url: "http://www.github.com/accept"
+          gzip: true
+          headers: {
+            "accept-encoding": "foo,bar,baz"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html>accept</html>")
 
     context "304 Not Modified", ->
       beforeEach ->
@@ -1723,8 +1762,9 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, contents,
+        .reply 200, contents, {
           "Content-Type": "text/html; charset=utf-8"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1744,8 +1784,9 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html> <head prefix=\"og: foo\"> <meta name=\"foo\" content=\"bar\"> </head> <body>hello from bar!</body> </html>",
+        .reply 200, "<html> <head prefix=\"og: foo\"> <meta name=\"foo\" content=\"bar\"> </head> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1764,8 +1805,9 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html> <body>hello from bar!</body> </html>",
+        .reply 200, "<html> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1782,8 +1824,9 @@ describe "Routes", ->
       it "injects when head is capitalized", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<HTML> <HEAD>hello from bar!</HEAD> </HTML>",
+        .reply 200, "<HTML> <HEAD>hello from bar!</HEAD> </HTML>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1799,8 +1842,9 @@ describe "Routes", ->
       it "injects when body is capitalized", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<HTML> <BODY>hello from bar!</BODY> </HTML>",
+        .reply 200, "<HTML> <BODY>hello from bar!</BODY> </HTML>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1816,8 +1860,9 @@ describe "Routes", ->
       it "injects when both head + body are missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<HTML>hello from bar!</HTML>",
+        .reply 200, "<HTML>hello from bar!</HTML>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1834,8 +1879,9 @@ describe "Routes", ->
       it "injects even when html + head + body are missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<div>hello from bar!</div>",
+        .reply 200, "<div>hello from bar!</div>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -1852,8 +1898,9 @@ describe "Routes", ->
       it "injects superdomain even when head tag is missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html> <body>hello from bar!</body> </html>",
+        .reply 200, "<html> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -2226,8 +2273,9 @@ describe "Routes", ->
       it "does not rewrite html when initial", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -2245,8 +2293,9 @@ describe "Routes", ->
       it "does not rewrite html when not initial", ->
         nock(@server._remoteOrigin)
         .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
           url: "http://www.google.com/bar"
@@ -2474,7 +2523,9 @@ describe "Routes", ->
             res.end()
 
           ## start the server listening on ipv6 only
-          server.listen 6565, "::1", =>
+          ## for demo how to bind to localhost via ipv6 see project
+          ## https://github.com/bahmutov/docker-ip6
+          server.listen 6565, "::", =>
 
             @rp("http://localhost:6565/#/foo")
             .then (res) ->

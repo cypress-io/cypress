@@ -1,31 +1,32 @@
-{deferred, stubIpc} = require("../support/util")
-
 describe "Login", ->
   beforeEach ->
-    cy
-      .fixture("user").as("user")
-      .visit("/#login")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
 
-        @getCurrentUser = deferred()
-        @openWindow = deferred()
-        @login = deferred()
+    cy.visitIndex().then (win) ->
+      { start, @ipc } = win.App
 
-        stubIpc(@App.ipc, {
-          "on:menu:clicked": ->
-          "close:browser": ->
-          "close:project": ->
-          "on:focus:tests": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
-          "window:open": (stub) => stub.returns(@openWindow.promise)
-          "log:in": (stub) => stub.returns(@login.promise)
-        })
+      cy.stub(@ipc, "onMenuClicked")
+      cy.stub(@ipc, "onFocusTests")
+      cy.stub(@ipc, "getOptions").resolves({})
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "getProjects").resolves([])
+      cy.stub(@ipc, "getProjectStatuses").resolves([])
+      cy.stub(@ipc, "openProject").resolves(@config)
+      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      cy.stub(@ipc, "externalOpen")
+      cy.stub(@ipc, "clearGithubCookies")
+      cy.stub(@ipc, "logOut")
 
-        @App.start()
+      @getCurrentUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
+
+      @openWindow = @util.deferred()
+      cy.stub(@ipc, "windowOpen").returns(@openWindow.promise)
+
+      @login = @util.deferred()
+      cy.stub(@ipc, "logIn").returns(@login.promise)
+
+      start()
 
   context "without a current user", ->
     beforeEach ->
@@ -51,7 +52,7 @@ describe "Login", ->
 
       it "opens link to login docs on click of help link", ->
         cy.contains("a", "Need help?").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/logging-in")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/logging-in")
 
     describe "click 'Log In with GitHub'", ->
       beforeEach ->
@@ -62,7 +63,7 @@ describe "Login", ->
       it "triggers ipc 'window:open' on click", ->
         cy
           .get("@loginBtn").click().then ->
-            expect(@App.ipc).to.be.calledWithExactly("window:open", {
+            expect(@ipc.windowOpen).to.be.calledWithExactly({
               position: "center"
               focus: true
               width: 1000
@@ -86,7 +87,7 @@ describe "Login", ->
 
         it "triggers ipc 'log:in'", ->
           cy.then ->
-            expect(@App.ipc).to.be.calledWith("log:in", "code-123")
+            expect(@ipc.logIn).to.be.calledWith("code-123")
 
         it "displays spinner with 'Logging in...' on ipc response", ->
           cy.contains("Logging in...")
@@ -97,16 +98,11 @@ describe "Login", ->
 
         describe "on ipc log:in success", ->
           beforeEach ->
-            stubIpc(@App.ipc, {
-              "get:projects": (stub) -> stub.resolves([])
-              "get:project:statuses": (stub) -> stub.resolves([])
-            })
-
             @login.resolve(@user)
 
-          it "triggers get:projects", ->
+          it "triggers getting projects", ->
             cy.get("nav a").then =>
-              expect(@App.ipc).to.be.calledWith("get:projects")
+              expect(@ipc.getProjects).to.be.called
 
           it "displays username in UI", ->
             cy
@@ -134,7 +130,7 @@ describe "Login", ->
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
-                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
+                  expect(@ipc.clearGithubCookies).to.be.called
 
                 .get("#login")
 
@@ -143,7 +139,7 @@ describe "Login", ->
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
-                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
+                  expect(@ipc.clearGithubCookies).to.be.called
                 .get("@loginBtn").should("not.be.disabled")
 
             it "calls clear:github:cookies", ->
@@ -151,14 +147,14 @@ describe "Login", ->
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
-                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
+                  expect(@ipc.clearGithubCookies).to.be.called
 
             it "calls log:out", ->
               cy
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
-                  expect(@App.ipc).to.be.calledWith("log:out")
+                  expect(@ipc.logOut).to.be.called
 
         describe "on ipc 'log:in' error", ->
           beforeEach ->
@@ -196,7 +192,7 @@ describe "Login", ->
           it "opens link to docs on click of help link", ->
             cy
               .contains("a", "Why am I not authorized?").click().then ->
-                expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/email-not-authorized")
+                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/email-not-authorized")
 
           it "login button should be enabled", ->
             cy

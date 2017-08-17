@@ -125,10 +125,10 @@
         el with tabindex
       </div>
 
-      <input id="input" />
       <button id="button">button</button>
 
       <form id="by-id">
+        <input id="input" />
         <input id="name" />
         <input id="age" />
       </form>
@@ -254,11 +254,30 @@
       </div>
 
       <div id="input-types">
-        <input type="number" />
-        <input type="email" />
-        <input type="password" />
-        <input type="date" />
-        <input type="time" />
+        <input id="input-with-value" value="foo" />
+        <input id="input-without-value" />
+
+        <input id="number-with-value" type="number" value="12" />
+        <input id="number-without-value" type="number" />
+
+        <input id="email-with-value" type="email" value="brian@foo.c" />
+        <input id="email-without-value" type="email" />
+
+        <input id="password-with-value" type="password" value="pass" />
+        <input id="password-without-value" type="password" />
+
+        <input id="date-with-value" type="date" value="2016-01-01" />
+        <input id="date-without-value" type="date" />
+
+        <input id="month-with-value" type="month" value="2017-05" />
+        <input id="month-without-value" type="month" />
+
+        <input id="week-with-value" type="week" value="2017-W05" />
+        <input id="week-without-value" type="week" />
+
+        <input id="time-with-value" type="time" value="01:23:45" />
+        <input id="time-without-value" type="time" />
+
         <div contenteditable="true"></div>
         <textarea></textarea>
       </div>
@@ -323,8 +342,15 @@
         </optgroup>
       </select>
 
-      <select name="startrek">
+      <select name="startrek-same">
         <option value="same">Kirk</option>
+        <option value="same">Spock</option>
+        <option value="same">Uhura</option>
+        <option value="same">Sulu</option>
+      </select>
+
+      <select name="startrek-some-same">
+        <option value="different">Kirk</option>
         <option value="same">Spock</option>
         <option value="same">Uhura</option>
         <option value="same">Sulu</option>

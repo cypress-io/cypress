@@ -1,18 +1,17 @@
 {
-  "name": "@cypress/core-extension",
-  "version": "0.4.2",
-  "description": "Cypress Chrome Extension",
+  "name": "@packages/extension",
+  "version": "0.0.0",
+  "private": true,
   "main": "index.js",
   "scripts": {
-    "watch-dev": "gulp watch",
-    "build-dev": "gulp build",
+    "postinstall": "echo '@packages/extension needs: npm run build'",
+    "watch": "gulp watch",
+    "build": "gulp build",
     "build-prod": "gulp build",
-    "test": "npm run test-unit-once",
-    "test-once": "npm run test-unit-once",
-    "test-unit-once": "NODE_ENV=test mocha --require test-setup.js",
+    "test": "NODE_ENV=test $(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "npm run test -- --watch",
     "clean": "gulp clean",
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps"
+    "clean-deps": "rm -rf node_modules"
   },
   "files": [
     "app",
@@ -20,20 +19,11 @@
     "lib",
     "theme"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-extension.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-extension/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
   "devDependencies": {
     "@cypress/core-socket": "0.1.0",
-    "@cypress/icons": "0.5.2",
+    "@cypress/icons": "0.5.4",
     "@cypress/releaser": "0.1.12",
+    "bin-up": "^1.0.1",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "coffeeify": "^2.0.1",
@@ -41,7 +31,6 @@
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-rename": "^1.2.2",
-    "mocha": "^2.4.5",
     "run-sequence": "^1.1.5",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",

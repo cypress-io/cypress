@@ -1,13 +1,14 @@
-_ = require("lodash")
-moment = require("moment")
-{deferred, stubIpc} = require("../support/util")
-
 describe "Runs List", ->
   beforeEach ->
-    @goToRuns = (projectName = "My-Fake-Project") =>
+    cy.fixture("user").as("user")
+    cy.fixture("config").as("config")
+    cy.fixture("projects").as("projects")
+    cy.fixture("specs").as("specs")
+    cy.fixture("runs").as("runs")
+    cy.fixture("organizations").as("orgs")
+
+    @goToRuns = ->
       cy
-        .get(".projects-list a")
-          .contains(projectName).click()
         .get(".navbar-default a")
           .contains("Runs").click()
 
@@ -17,50 +18,41 @@ describe "Runs List", ->
       orgId: "000"
     }
 
-    cy
-      .fixture("user").as("user")
-      .fixture("projects").as("projects")
-      .fixture("projects_statuses").as("projectStatuses")
-      .fixture("config").as("config")
-      .fixture("specs").as("specs")
-      .fixture("runs").as("runs")
-      .fixture("organizations").as("orgs")
-      .fixture("keys").as("keys")
-      .visit("/")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.visitIndex().then (win) ->
+      { start, @ipc } = win.App
 
-        @getCurrentUser = deferred()
-        @getRuns = deferred()
+      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "closeBrowser").resolves(null)
+      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      cy.stub(@ipc, "getOrgs").resolves(@orgs)
+      cy.stub(@ipc, "requestAccess")
+      cy.stub(@ipc, "setupDashboardProject")
+      cy.stub(@ipc, "externalOpen")
 
-        stubIpc(@App.ipc, {
-          "get:options": (stub) => stub.resolves({})
-          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
-          "on:menu:clicked": ->
-          "close:browser": ->
-          "close:project": ->
-          "on:focus:tests": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:projects": (stub) => stub.resolves(@projects)
-          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
-          "open:project": (stub) => stub.yields(null, @config)
-          "get:specs": (stub) => stub.resolves(@specs)
-          "get:builds": (stub) => stub.returns(@getRuns.promise)
-          "get:orgs": (stub) => stub.resolves(@orgs)
-        })
+      @openProject = @util.deferred()
+      cy.stub(@ipc, "openProject").returns(@openProject.promise)
 
-        @App.start()
+      @getCurrentUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
+
+      @getProjectStatus = @util.deferred()
+      cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
+
+      @getRuns = @util.deferred()
+      cy.stub(@ipc, "getRuns").returns(@getRuns.promise)
+
+      start()
 
   context "displays page", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
       @getRuns.resolve(@runs)
       @goToRuns()
 
     it "navigates to runs page", ->
-      cy
-        .location().its("hash").should("include", "runs")
+      cy.contains("h5", "Runs")
 
     it "highlight run nav", ->
       cy
@@ -73,6 +65,7 @@ describe "Runs List", ->
 
     describe "permissions error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns()
 
       context "statusCode: 403", ->
@@ -84,18 +77,16 @@ describe "Runs List", ->
 
       context "any case", ->
         beforeEach ->
-          @requestAccess = deferred()
-          stubIpc(@App.ipc, {
-            "request:access": (stub) => stub.returns(@requestAccess.promise)
-          })
+          @requestAccess = @util.deferred()
+          @ipc.requestAccess.returns(@requestAccess.promise)
           @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
 
         context "request access", ->
           beforeEach ->
             cy.contains("Request Access").click()
 
-          it "sends request:access ipc event with org id", ->
-            expect(@App.ipc).to.be.calledWith("request:access", "d8104707-a348-4653-baea-7da9c7d52448")
+          it "sends requests access with org id", ->
+            expect(@ipc.requestAccess).to.be.calledWith("d8104707-a348-4653-baea-7da9c7d52448")
 
           it "disables button", ->
             cy.contains("Request Access").should("be.disabled")
@@ -114,25 +105,21 @@ describe "Runs List", ->
               cy.contains("Request Sent")
 
             it "'persists' request state (until app is reloaded at least)", ->
-              @App.ipc.withArgs("get:builds").onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
+              @ipc.getRuns.onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
 
-              cy
-                .contains("Back to Projects").click()
-                .get(".projects-list a")
-                  .contains("My-Fake-Project").click()
-                .get(".navbar-default")
-                  .find("a").contains("Runs").click()
-                .end().contains("Request Sent")
+              cy.get(".navbar-default a").contains("Tests").click()
+              cy.get(".navbar-default a").contains("Runs").click()
+              cy.contains("Request Sent")
 
           describe "when request succeeds and user is already a member", ->
             beforeEach ->
               @requestAccess.reject({name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
-              @getRuns = deferred()
-              @App.ipc.withArgs("get:builds").onCall(1).returns(@getRuns.promise)
+              @getRuns = @util.deferred()
+              @ipc.getRuns.onCall(1).returns(@getRuns.promise)
               cy.wait(1)
 
             it "retries getting runs", ->
-              expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
+              expect(@ipc.getRuns.callCount).to.equal(2)
 
             it "shows loading spinner", ->
               cy.get(".loader")
@@ -188,6 +175,7 @@ describe "Runs List", ->
 
     describe "timed out error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "TIMED_OUT"})
 
@@ -196,6 +184,7 @@ describe "Runs List", ->
 
     describe "not found error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
 
@@ -204,6 +193,7 @@ describe "Runs List", ->
 
     describe "unauthenticated error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "", message: "", statusCode: 401})
 
@@ -212,9 +202,8 @@ describe "Runs List", ->
 
     describe "no project id error", ->
       beforeEach ->
-        stubIpc(@App.ipc, {
-          "setup:dashboard:project": (stub) => stub.resolves(@validCiProject)
-        })
+        @openProject.resolve(@config)
+        @ipc.setupDashboardProject.resolves(@validCiProject)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
 
@@ -234,6 +223,7 @@ describe "Runs List", ->
 
     describe "unexpected error", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: """
           {
@@ -247,23 +237,26 @@ describe "Runs List", ->
 
     describe "unauthorized project", ->
       beforeEach ->
-        cy
-          .get(".projects-list a")
-            .contains("project4").click()
+        @openProject.resolve(@config)
+        @getProjectStatus.resolve({
+          state: "UNAUTHORIZED"
+        })
+
+        @goToRuns()
 
       it "displays permissions message", ->
         cy.contains("Request access")
 
     describe "invalid project", ->
       beforeEach ->
-        @config.projectId = null
-        @App.ipc.withArgs("open:project").resolves(@config)
-        stubIpc(@App.ipc, {
-          "setup:dashboard:project": (stub) => stub.resolves(@validCiProject)
+        @openProject.resolve(@config)
+        @ipc.setupDashboardProject.resolves(@validCiProject)
+
+        @getProjectStatus.resolve({
+          state: "INVALID"
         })
 
-        @goToRuns("project5").then =>
-          @getRuns.resolve([])
+        @goToRuns()
 
       it "displays empty message", ->
         cy.contains("Runs Cannot Be Displayed")
@@ -288,7 +281,7 @@ describe "Runs List", ->
       context "having never setup CI", ->
         beforeEach ->
           @config.projectId = null
-          @App.ipc.withArgs("open:project").resolves(@config)
+          @openProject.resolve(@config)
 
           @goToRuns().then =>
             @getRuns.resolve([])
@@ -298,6 +291,7 @@ describe "Runs List", ->
 
     context "having previously setup CI", ->
       beforeEach ->
+        @openProject.resolve(@config)
         @goToRuns().then =>
           @getRuns.resolve([])
 
@@ -308,29 +302,26 @@ describe "Runs List", ->
         cy
           .contains("Why?").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-is-a-project-id")
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-project-id")
 
       it "opens dashboard on clicking 'Cypress Dashboard'", ->
         cy
           .contains("Cypress Dashboard").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")
 
   describe "list runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @config.projectId = @projects[0].id
-      @App.ipc.withArgs("open:project").resolves(@config)
+      @openProject.resolve(@config)
 
-      timestamp = moment("2016-12-19 10:00:00").valueOf()
+      timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
       cy
         .clock(timestamp)
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .tick(1000) ## allow promises from get:specs, etc to resolve
-        .get(".navbar-default a")
-          .contains("Runs").click()
+        .then =>
+          @goToRuns()
         .then =>
           @getRuns.resolve(@runs)
 
@@ -343,7 +334,7 @@ describe "Runs List", ->
       cy
         .contains("See All").click()
         .then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
 
     it "displays run status icon", ->
       cy
@@ -351,34 +342,32 @@ describe "Runs List", ->
         .should("have.class", "running")
 
     it "displays last updated", ->
-      cy.contains("Last updated: 10:00:01am")
+      cy.contains("Last updated: 10:00:00am")
 
     it "clicking run opens admin", ->
       cy
         .get(".runs-container li").first()
         .click()
         .then =>
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
 
   describe "polling runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
-      @getRunsAgain = deferred()
-      @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
+      @openProject.resolve(@config)
+      @getRunsAgain = @util.deferred()
+      @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
       cy
         .clock()
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .tick(1000) ## allow promises from get:specs, etc to resolve
-        .get(".navbar-default a")
-          .contains("Runs").click()
+        .then =>
+          @goToRuns()
         .then =>
           @getRuns.resolve(@runs)
         .get(".runs-container") ## wait for original runs to show
         .clock().then (clock) =>
-          @getRunsAgain = deferred()
-          @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
+          @getRunsAgain = @util.deferred()
+          @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
         .tick(10000)
 
     it "has original state of runs", ->
@@ -387,7 +376,7 @@ describe "Runs List", ->
         .should("have.class", "running")
 
     it "sends get:runs ipc event", ->
-      expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+      expect(@ipc.getRuns).to.be.calledTwice
 
     it "disables refresh button", ->
       cy.get(".runs header button").should("be.disabled")
@@ -414,7 +403,7 @@ describe "Runs List", ->
     context "errors", ->
       beforeEach ->
         @ipcError = (details) =>
-          err = _.extend(details, {name: "foo", message: "There's an error"})
+          err = Object.assign(details, {name: "foo", message: "There's an error"})
           @getRunsAgain.reject(err)
 
       it "displays permissions error", ->
@@ -432,15 +421,16 @@ describe "Runs List", ->
   describe "manually refreshing runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
-      @getRunsAgain = deferred()
-      @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
+      @openProject.resolve(@config)
+      @getRunsAgain = @util.deferred()
+      @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
       @getRuns.resolve(@runs)
       @goToRuns().then ->
         cy.get(".runs header button").click()
 
     it "sends get:runs ipc event", ->
-      expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+      expect(@ipc.getRuns).to.be.calledTwice
 
     it "still shows list of runs", ->
       cy.get(".runs-container li").should("have.length", 4)

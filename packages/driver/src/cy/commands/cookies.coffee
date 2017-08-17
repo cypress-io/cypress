@@ -109,9 +109,9 @@ module.exports = (Cypress, Commands) ->
             obj = {}
 
             if c = options.cookie
-              obj["Returned"] = c
+              obj["Yielded"] = c
             else
-              obj["Returned"] = "null"
+              obj["Yielded"] = "null"
               obj["Note"] = "No cookie with the name: '#{name}' was found."
 
             obj
@@ -140,7 +140,7 @@ module.exports = (Cypress, Commands) ->
             obj = {}
 
             if c = options.cookies
-              obj["Returned"] = c
+              obj["Yielded"] = c
               obj["Num Cookies"] = c.length
 
             obj
@@ -174,7 +174,7 @@ module.exports = (Cypress, Commands) ->
             obj = {}
 
             if c = options.cookie
-              obj["Returned"] = c
+              obj["Yielded"] = c
 
             obj
         })
@@ -201,7 +201,7 @@ module.exports = (Cypress, Commands) ->
           consoleProps: ->
             obj = {}
 
-            obj["Returned"] = "null"
+            obj["Yielded"] = "null"
 
             if c = options.cookie
               obj["Cleared Cookie"] = c
@@ -235,7 +235,7 @@ module.exports = (Cypress, Commands) ->
           consoleProps: ->
             obj = {}
 
-            obj["Returned"] = "null"
+            obj["Yielded"] = "null"
 
             if (c = options.cookies) and c.length
               obj["Cleared Cookies"] = c

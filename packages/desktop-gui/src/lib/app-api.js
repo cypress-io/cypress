@@ -1,10 +1,9 @@
 import ipc from './ipc'
-import state from './state'
-import updater from '../update/update-model'
+import authStore from './auth-store'
 
 const appApi = {
   logOut () {
-    state.setUser(null)
+    authStore.setUser(null)
 
     ipc.clearGithubCookies()
     ipc.logOut()
@@ -15,9 +14,6 @@ const appApi = {
       switch (item) {
         case 'log:out':
           this.logOut()
-          break
-        case 'check:for:updates':
-          updater.openUpdateWindow()
           break
         default:
           return

@@ -1,81 +1,107 @@
+---
 title: parent
-comments: true
+comments: false
 ---
 
-Get the parent DOM element of the DOM elements.
+Get the parent DOM element of a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parent` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parent()` http://api.jquery.com/parent %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.parent()](#section-usage)
+```javascript
+.parent()
+.parent(selector)
+.parent(options)
+.parent(selector, options)
+```
 
-Get the parent of each element in the current set of matched elements.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.parent( *selector* )](#section-selector-usage)
+```javascript
+cy.get('header').parent() // Yield parent el of `header`
+```
 
-Get the parent of each element in the current set of matched elements filtered by selector.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.parent()            // Errors, cannot be chained off 'cy'
+cy.reload().parent()   // Errors, 'reload' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.parent`.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-**cy.parent( *options* )**
-**cy.parent( *selector*, *options* )**
+A selector used to filter matching DOM elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.parent()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parent %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .parent %}
 
-## Get the parent of the active `li`
+# Examples
 
-```javascript
-cy.get("li.active").parent()
-```
+## No Args
 
-***
-
-# Selector Usage
-
-## Get the parent with class `nav` of the active `li`
+***Get the parent of the active li***
 
 ```javascript
-cy.get("li.active").parent(".nav")
+cy.get('li.active').parent()
 ```
 
-***
+## Selector
+
+***Get the parent with class `nav` of the active li***
+
+```javascript
+cy.get('li.active').parent('.nav')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .parent %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parent %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parent %}
 
 # Command Log
 
-## Assert on the parent of the active li
+***Assert on the parent of the active li***
 
 ```javascript
-cy.get("li.active").parent().should("have.class", "nav")
+cy.get('li.active').parent().should('have.class', 'nav')
 ```
 
 The commands above will display in the command log as:
 
-<img width="531" alt="screen shot 2015-11-27 at 1 58 32 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447127/0d9ab5a8-950f-11e5-90ae-c317dd83aa65.png">
+![Command Log parent](/img/api/parent/get-parent-element-just-like-jquery.png)
 
 When clicking on the `parent` command within the command log, the console outputs the following:
 
-<img width="440" alt="screen shot 2015-11-27 at 1 58 44 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447130/11b22c02-950f-11e5-9b82-cc3b2ff8548e.png">
+![Console Log parent](/img/api/parent/parent-command-found-elements-for-console-log.png)
 
-***
+# See also
 
-# Related
-
-- [parents](https://on.cypress.io/api/parents)
-- [children](https://on.cypress.io/api/children)
+- {% url `.children()` children %}
+- {% url `.parents()` parents %}
+- {% url `.parentsUntil()` parentsuntil %}

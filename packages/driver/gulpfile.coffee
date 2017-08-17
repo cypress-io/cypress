@@ -4,8 +4,6 @@ gulp          = require("gulp")
 path          = require("path")
 Promise       = require("bluebird")
 runSequence   = require("run-sequence")
-importOnce    = require("node-sass-import-once")
-cyIcons       = require("@cypress/icons")
 browserify    = require("browserify")
 coffeeify     = require("coffeeify")
 watchify      = require("watchify")
@@ -33,13 +31,6 @@ jsOptions = {
   outputName: "driver.js"
 }
 
-specHelperOptions = {
-  entries: ["test/support/spec_helper.coffee"]
-  extensions: [".coffee", ".js"]
-  destination: "dist-test"
-  outputName: "spec_helper.js"
-}
-
 specIndexOptions = {
   entries: ["test/support/client/spec_index.coffee"]
   extensions: [".coffee", ".js"]
@@ -56,8 +47,14 @@ specRunnerOptions = {
 
 server = { runSpec: -> }
 
+srcDir = path.join(__dirname, "src")
+testDir = path.join(__dirname, "test")
+
 matchingSpecFile = (filePath) ->
-  specPath = filePath.replace(path.join(__dirname, "src"), path.join(__dirname, "test/unit"))
+  ## only files in src/ having matching spec files
+  return false if not _.includes(filePath, srcDir)
+
+  specPath = filePath.replace(srcDir, path.join(__dirname, "test/unit"))
   specPath = specPath.replace(".coffee", "_spec.coffee")
   try
     fs.statSync(specPath)
@@ -143,12 +140,19 @@ gulp.task "app:html", ->
   gulp.src(["app/html/*"])
     .pipe gulp.dest("lib/public")
 
-gulp.task "watch", ["watch:app:js", "watch:app:html"]
-
-gulp.task "watch:app:js", -> bundleJs(jsOptions)
-
-gulp.task "watch:app:html", ->
+gulp.task "watch", ->
   gulp.watch "app/html/index.html", ["app:html"]
+
+  watchJs = bundleJs(jsOptions)
+  watchIndex = bundleJs(specIndexOptions)
+  watchRunner = bundleJs(specRunnerOptions)
+  watchSpecs()
+  Promise.all([watchJs.promise, watchIndex.promise, watchRunner.promise])
+  .then ->
+    server = require("#{__dirname}/test/support/server/server.coffee")
+    server.runSpecsContinuously()
+
+  return watchJs.process
 
 gulp.task "server", -> require("./server/server.coffee")
 
@@ -156,27 +160,13 @@ gulp.task "ensure:dist:dir", ->
   fs.ensureDirAsync(path.resolve("./dist-test"))
 
 gulp.task "test", ["ensure:dist:dir"], ->
-  watchSpecHelper = bundleJs(specHelperOptions)
-  watchIndex = bundleJs(specIndexOptions)
-  watchRunner = bundleJs(specRunnerOptions)
-  watchSpecs()
-  Promise.all([watchSpecHelper.promise, watchIndex.promise, watchRunner.promise])
-  .then ->
-    server = require("#{__dirname}/test/support/server/server.coffee")
-    server.runSpecsContinuously()
-
-  return watchSpecHelper.process
-
-gulp.task "test:once", ["ensure:dist:dir"], ->
-  buildSpecHelper = bundleJs(specHelperOptions, false)
+  buildJs = bundleJs(jsOptions, false)
   buildIndex = bundleJs(specIndexOptions, false)
   buildRunner = bundleJs(specRunnerOptions, false)
-  Promise.all([buildSpecHelper.promise, buildIndex.promise, buildRunner.promise])
+  Promise.all([buildJs.promise, buildIndex.promise, buildRunner.promise])
   .then ->
     server = require("#{__dirname}/test/support/server/server.coffee")
     server.runAllSpecsOnce()
-
-gulp.task "app", ["app:html", "app:watch"]
 
 gulp.task "build", (cb) ->
   runSequence ["app:js", "app:html"], cb

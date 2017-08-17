@@ -1,13 +1,13 @@
 import React from 'react'
 
-import Nav from '../nav/nav'
+import Nav from './nav'
 import Footer from '../footer/footer'
 import UpdateBanner from '../update/update-banner'
 
-export default ({ params, children }) => {
+export default ({ children }) => {
   return (
     <div>
-      <Nav params={params}/>
+      <Nav />
       {children}
       <UpdateBanner />
       <Footer />

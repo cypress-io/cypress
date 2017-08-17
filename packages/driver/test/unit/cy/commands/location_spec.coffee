@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress.Cy Location Commands", ->
   enterCommandTestingMode()
 
@@ -110,7 +112,7 @@ describe "$Cypress.Cy Location Commands", ->
           consoleProps = @log.attributes.consoleProps()
           expect(consoleProps).to.deep.eq {
             Command: "url"
-            Returned: "http://localhost:3500/fixtures/dom.html"
+            Yielded: "http://localhost:3500/fixtures/dom.html"
           }
 
   context "#hash", ->
@@ -215,7 +217,7 @@ describe "$Cypress.Cy Location Commands", ->
           consoleProps = @log.attributes.consoleProps()
           expect(consoleProps).to.deep.eq {
             Command: "hash"
-            Returned: ""
+            Yielded: ""
           }
 
   context "#location", ->
@@ -336,6 +338,6 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.location().then ->
           consoleProps = @log.attributes.consoleProps()
 
-          expect(_.keys(consoleProps)).to.deep.eq ["Command", "Returned"]
+          expect(_.keys(consoleProps)).to.deep.eq ["Command", "Yielded"]
           expect(consoleProps.Command).to.eq "location"
-          expect(_.keys(consoleProps.Returned)).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]
+          expect(_.keys(consoleProps.Yielded)).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]

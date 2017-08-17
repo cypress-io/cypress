@@ -1,16 +1,19 @@
 {
-  "name": "ts",
-  "version": "1.0.0",
-  "description": "TypeScript runtime Node hook",
+  "name": "@packages/ts",
+  "version": "0.0.0",
+  "private": true,
   "main": "index.js",
+  "files": [
+    "register.js"
+  ],
   "scripts": {
     "test": "node test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "ts-node": "^3.0.4",
     "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "debug": "^2.6.8"
   }
 }

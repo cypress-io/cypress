@@ -1,78 +1,107 @@
-title: setcookie
-comments: true
+---
+title: setCookie
+comments: false
 ---
 
 Set a browser cookie.
 
-| | |
-|--- | --- |
-| **Returns** | a cookie object |
-| **Timeout** | `cy.setCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
-
-***
-
-# [cy.setCookie( *name*, *value* )](#section-usage)
-
-Sets a browser cookie.
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.setCookie`.
-
-**[cy.setCookie( *name*, *value*, *options* )](#options-usage)**
-
-Option | Default | Notes
---- | --- | ---
-`path` | `/` | the cookie path
-`domain` | `window.location.hostname` | the domain the cookie is visible to
-`secure` | `false` | whether the cookie is a secure cookie
-`httpOnly` | `false` | whether the cookie is an HTTP only cookie
-`expiry` | 20 years into the future | when the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.setCookie` command to be processed
-`log` | `true` | whether to display command in command log
-
-***
-
-# Usage
-
-## Set a cookie
+# Syntax
 
 ```javascript
-cy
-  .getCookies().should('be.empty')
-  .setCookie('session_id', '189jd09sufh33aaiidhf99d09')
-  .getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
+cy.setCookie(name, value)
+cy.setCookie(name, value, options)
 ```
 
-***
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.setCookie('auth_key', '123key') // Set the 'auth_key' cookie to '123key'
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} name** ***(String)***
+
+The name of the cookie to set.
+
+**{% fa fa-angle-right %} value** ***(String)***
+
+The value of the cookie to set.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.setCookie()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`domain` | `window.location.hostname` | The domain the cookie is visible to
+`expiry` | 20 years into the future | When the cookie expires, specified in seconds since {% url 'Unix Epoch' https://en.wikipedia.org/wiki/Unix_time %}.
+`httpOnly` | `false` | Whether the cookie is an HTTP only cookie
+`path` | `/` | The cookie path
+`secure` | `false` | Whether the cookie is a secure cookie
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.setCookie %}
+
+## Yields {% helper_icon yields %}
+
+`cy.setCookie()` yields a cookie object literal with the following properties:
+
+- `name`
+- `value`
+- `path`
+- `domain`
+- `httpOnly`
+- `secure`
+- `expiry`
+
+# Examples
+
+## Name Value
+
+***Set a cookie***
+
+```javascript
+cy.getCookies().should('be.empty')
+cy.setCookie('session_id', '189jd09sufh33aaiidhf99d09')
+cy.getCookie('session_id').should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.setCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.setCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.setCookie %}
 
 # Command Log
 
-## Get cookie
-
 ```javascript
-cy
-  .getCookies().should('be.empty')
-  .setCookie('fakeCookie1', '123ABC')
-  .getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
+cy.getCookies().should('be.empty')
+cy.setCookie('fakeCookie1', '123ABC')
+cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 ```
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-10 at 12 15 53 pm](https://cloud.githubusercontent.com/assets/1271364/15153887/00b4c98e-16a9-11e6-8df5-bb2018582439.png)
+![Command Log](/img/api/setcookie/set-cookie-on-browser-for-testing.png)
 
 When clicking on `setCookie` within the command log, the console outputs the following:
 
-![screen shot 2016-05-10 at 12 16 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153886/00b41782-16a9-11e6-99db-bc085c3513b3.png)
+![Console Log](/img/api/setcookie/see-cookie-properties-expiry-domain-and-others-in-test.png)
 
-***
+# See also
 
-# Related
-
-- [clearCookie](https://on.cypress.io/api/clearcookie)
-- [clearCookies](https://on.cypress.io/api/clearcookies)
-- [getCookie](https://on.cypress.io/api/getcookie)
-- [getCookies](https://on.cypress.io/api/getcookies)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)
+- {% url `cy.clearCookie()` clearcookie %}
+- {% url `cy.clearCookies()` clearcookies %}
+- {% url 'Cypress Cookies API' cookies %}
+- {% url `cy.getCookie()` getcookie %}
+- {% url `cy.getCookies()` getcookies %}

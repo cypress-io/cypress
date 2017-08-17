@@ -1,3 +1,5 @@
 <aside id="sidebar" role="navigation">
-  <div class="inner">{{ doc_sidebar('sidebar') }}</div>
+  <ul>
+    {{ doc_sidebar('sidebar') }}
+  </ul>
 </aside>

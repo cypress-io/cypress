@@ -26,7 +26,7 @@ module.exports = (Cypress, Commands) ->
         consoleOutput = {}
 
         options._log = $Log.command({
-          message: _.truncate(cmd, 25)
+          message: _.truncate(cmd, { length: 25 })
           consoleProps: ->
             consoleOutput
         })
@@ -49,15 +49,15 @@ module.exports = (Cypress, Commands) ->
       .timeout(options.timeout)
       .then (result) ->
         if options._log
-          _.extend(consoleOutput, { Returned: _.omit(result, "shell") })
+          _.extend(consoleOutput, { Yielded: _.omit(result, "shell") })
 
           consoleOutput["Shell Used"] = result.shell
 
         return result if result.code is 0 or not options.failOnNonZeroExit
 
         output = ""
-        output += "\nStdout:\n#{_.truncate(result.stdout, 200)}" if result.stdout
-        output += "\nStderr:\n#{_.truncate(result.stderr, 200)}" if result.stderr
+        output += "\nStdout:\n#{_.truncate(result.stdout, { length: 200 })}" if result.stdout
+        output += "\nStderr:\n#{_.truncate(result.stderr, { length: 200 })}" if result.stderr
 
         utils.throwErrByPath "exec.non_zero_exit", {
           onFail: options._log

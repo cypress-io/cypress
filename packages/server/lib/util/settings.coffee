@@ -51,7 +51,7 @@ module.exports =
     @_err("ERROR_WRITING_FILE", file, err)
 
   _write: (file, obj = {}) ->
-    fs.writeJsonAsync(file, obj, {spaces: 2})
+    fs.outputJsonAsync(file, obj, {spaces: 2})
     .return(obj)
     .catch (err) =>
       @_logWriteErr(file, err)

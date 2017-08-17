@@ -1,56 +1,97 @@
+---
 title: its
-comments: true
+comments: false
 ---
 
-`cy.its` gets regular properties on the current subject.
+Get a property's value on the previously yielded subject.
 
-If you want to call a function on the current subject, use [`cy.invoke`](https://on.cypress.io/api/invoke).
+{% note info %}
+If you want to call a function on the previously yielded subject, use {% url `.invoke()` invoke %}.
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | the value of the property |
-| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
-
-***
-
-# [cy.its( *propertyName* )](#section-usage)
-
-Gets the property with the specified name.
-
-You can also access multiple nested properties with **dot notation**.
-
-***
-
-# Usage
-
-## Access properties
+# Syntax
 
 ```javascript
-cy.wrap({foo: "bar"}).its("foo").should("eq", "bar") // true
+.its(propertyName)
 ```
 
-Call the `length` property on the current subject
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.wrap({width: '50'}).its('width') // Get the 'width' property
+cy.window().its('angular')          // Get the 'angular' property
+```
+
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
+
+```javascript
+cy.its('window')                // Errors, cannot be chained off 'cy'
+cy.clearCookies().its('length') // Errors, 'clearCookies' does not yield Object
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} propertyName**  ***(String)***
+
+Name of property or nested properties (with dot notation) to get.
+
+## Yields {% helper_icon yields %}
+
+{% yields changes_subject .its 'yields the value of the property' %}
+
+# Examples
+
+## Plain Objects
+
+***Get property***
+
+```javascript
+cy.wrap({age: 52}).its('age').should('eq', 52) // true
+```
+
+## DOM Elements
+
+***Get the `length` property of a DOM element***
 
 ```javascript
 cy
-  .get("ul li") // this returns us the jquery object
-  .its("length") // calls the 'length' property returning that value
-  .should("be.gt", 2) // ensure this length is greater than 2
+  .get('ul li')       // this yields us a jquery object
+  .its('length')      // calls 'length' property returning that value
+  .should('be.gt', 2) // ensure the length is greater than 2
 })
 ```
 
-***
+## Strings
 
-## Access functions
+***Get `length` of title***
+
+```javascript
+cy.title().its('length').should('eq', 24)
+```
+
+## Functions
+
+***Get function as property***
+
+```javascript
+var fn = function(){
+  return 42
+}
+
+cy.wrap({getNum: fn}).its('getNum').should('be.a', 'function')
+```
+
+***Access function properties***
 
 You can access functions to then drill into their own properties instead of invoking them.
 
 ```javascript
 // Your app code
-
 // a basic Factory constructor
 var Factory = function(arg){
-  ...
+  // ...
 }
 
 Factory.create = function(arg){
@@ -63,65 +104,71 @@ window.Factory = Factory
 
 ```javascript
 cy
-  .window() // get the window object
-  .its("Factory") // now we are on the Factory function
-  .invoke("create", "arg") // and now we can invoke properties on it
-
+  .window()                 // yields window object
+  .its('Factory')           // yields Factory function
+  .invoke('create', 'arg')  // now invoke properties on it
 ```
 
-{% note info Testing cy.window().its('fetch') %}
-[Check out our example recipe on testing window.fetch using cy.its()](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+***Use `.its()` to test `window.fetch`***
+
+{% note info %}
+{% url "Check out our example recipe on testing `window.fetch` using `.its()`" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
-***
+## Nested Properties
 
-## Drill into nested properties
-
-You can additionally automatically drill into nested properties by using **dot notation**.
+You can drill into nested properties by using *dot notation*.
 
 ```javascript
-var obj = {
-  foo: {
-    bar: {
-      baz: "quux"
+var user = {
+  contacts: {
+    work: {
+      name: 'Kamil'
     }
   }
 }
 
-cy.wrap(obj).its("foo.bar.baz").should("eq", "quux") // true
+cy.wrap(user).its('contacts.work.name').should('eq', 'Kamil') // true
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .its %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions its .its %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts its .its %}
 
 # Command Log
 
-## Fetch 'comments' fixture
+***Get `responseBody` of aliased route***
 
 ```javascript
-cy
-  .server()
-  .route(/comments/, 'fixture:comments.json').as('getComments')
-  .get('#fetch-comments').click()
-  .wait('@getComments')
-    .its('responseBody')
-    .should('deep.eq', [
-      {id: 1, comment: 'hi'},
-      {id: 2, comment: 'there'}
-    ])
+cy.server()
+cy.route(/comments/, 'fixture:comments.json').as('getComments')
+cy.get('#fetch-comments').click()
+cy.wait('@getComments').its('responseBody').should('deep.eq', [
+  {id: 1, comment: 'hi'},
+  {id: 2, comment: 'there'}
+])
 ```
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-24 at 12 39 40 pm](https://cloud.githubusercontent.com/assets/1268976/15512229/d512cbb4-21ac-11e6-9a9a-5d358ae4fe4b.png)
+![Command Log](/img/api/its/xhr-response-its-response-body-for-testing.png)
 
 When clicking on `its` within the command log, the console outputs the following:
 
-![screen shot 2016-05-24 at 12 40 17 pm](https://cloud.githubusercontent.com/assets/1268976/15512225/d14723cc-21ac-11e6-88d5-39ffe6c0a195.png)
+![Console Log](/img/api/its/response-body-yielded-with-its-command-log.png)
 
-***
+# See also
 
-# Related
-
-- [invoke](https://on.cypress.io/api/invoke)
-- [wrap](https://on.cypress.io/api/wrap)
-- [then](https://on.cypress.io/api/then)
+- {% url `.invoke()` invoke %}
+- {% url `.then()` then %}
+- {% url `cy.wrap()` wrap %}

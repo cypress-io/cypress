@@ -1,148 +1,155 @@
+---
 title: get
-comments: true
+comments: false
 ---
 
-Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
+Get one or more DOM elements by selector or {% url 'alias' aliases-and-references %}.
 
-`cy.get` supports all CSS based selectors. It is analogous to jQuery's `$(...)` in that any selector you pass to jQuery you can also pass to `cy.get`.
-
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.get` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
-
-***
-
-# [cy.get( *selector* )](#section-selector-usage)
-
-Finds one or more DOM elements based on the selector.
-
-***
-
-# [cy.get( *alias* )](#section-alias-usage)
-
-{% note info New to Cypress? %}
-[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)
+{% note info %}
+The querying behavior of this command matches exactly how {% url `$(...)` http://api.jquery.com/jQuery/ %} works in jQuery.
 {% endnote %}
 
-You can pass in the `@` character and the name of an alias as a parameter to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
+# Syntax
 
-Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
+```javascript
+cy.get(selector)
+cy.get(alias)
+cy.get(selector, options)
+cy.get(alias, options)
+```
 
-***
+## Usage
 
-# Options
+**{% fa fa-check-circle green %} Correct Usage**
 
-Pass in an options object to change the default behavior of `cy.get`.
+```javascript
+cy.get('.list>li')    // Yield the <li>'s in <.list>
+```
 
-**cy.get( *selector*, *options* )**
-**cy.get( *alias*, *options* )**
+## Arguments
 
-Option | Default | Notes
+**{% fa fa-angle-right %} selector** ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} alias** ***(String)***
+
+An alias as defined using the {% url `.as()` as %} command and referenced with the `@` character and the name of the alias.
+
+Internally, Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path defined before {% url `.as()` as %} to find it again.
+
+{% note info %}
+{% url 'Read more about aliases here' aliases-and-references %}
+{% endnote %}
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.get()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.get %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Selector Usage
+{% yields sets_dom_subject cy.get %}
 
-## Find the element with an id of main
+# Examples
+
+## Selector
+
+***Get the input element***
 
 ```javascript
-cy.get("#main")
+cy.get('input').should('be.disabled')
 ```
 
-***
-
-## Find the first `li` descendent within a `ul`
+***Find the first `li` descendent within a `ul`***
 
 ```javascript
-cy.get("ul li:first")
+cy.get('ul li:first').should('have.class', 'active')
 ```
 
-***
-
-## Find the element with class dropdown-menu and click it.
+***Find the the dropdown-menu and click it.***
 
 ```javascript
-cy
-  .get(".dropdown-menu").click()
-
-  // Break out of the previous command chain and
-  // query for #search from the root document.
-  .get("#search").type("mogwai")
+cy.get('.dropdown-menu').click()
 ```
 
-***
+## Get in Within
 
-## Reset the current scope in a [`cy.within`](https://on.cypress.io/api/within)
+***`cy.get()` in the {% url `.within()` within %} command***
+
+Since `cy.get()` is chained off of `cy`, it always looks for the selector within the entire `document`. The only exception is when used inside a [`.within()`]() command.
 
 ```javascript
-// Find form and scope all new queries to within form.
-cy.get("form").within(function(){
-  cy
-    // Find the input within form and type Pamela
-    .get("input").type("Pamela")
-    // Find the element textarea within form and type in it
-    .get("textarea").type("is a developer")
+cy.get('form').within(function(){
+  cy.get('input').type('Pamela')            // Only yield inputs within form
+  cy.get('textarea').type('is a developer') // Only yield textareas within form
 })
 ```
 
-***
+## Alias
 
-# Alias Usage
+For a detailed explanation of aliasing, {% url 'read more about aliasing here' aliases-and-references %}.
 
-For a detailed explanation of aliasing, [read more about aliasing here](https://on.cypress.io/guides/using-aliases).
-
-## Retrieve aliased `todos` elements
+***Get the aliased 'todos' elements***
 
 ```javascript
-cy.get("ul#todos").as("todos")
+cy.get('ul#todos').as('todos')
 
 //...hack hack hack...
 
 //later retrieve the todos
-cy.get("@todos")
+cy.get('@todos')
 ```
 
-***
-
-## Alias the `submitBtn` in a `beforeEach`
+***Get the aliased 'submitBtn' element***
 
 ```javascript
 beforeEach(function(){
-  cy.get("button[type=submit]").as("submitBtn")
+  cy.get('button[type=submit]').as('submitBtn')
 })
 
-it("disables on click", function(){
-  cy.get("@submitBtn").should("be.disabled")
+it('disables on click', function(){
+  cy.get('@submitBtn').should('be.disabled')
 })
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom cy.get %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.get %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence cy.get %}
 
 # Command Log
 
-## Get an input and assert on the value
+***Get an input and assert on the value***
 
 ```javascript
-cy
-  .get("input[name='firstName']")
-  .should("have.value", "Homer")
+cy.get('input[name="firstName"]').should('have.value', 'Homer')
 ```
 
 The commands above will display in the command log as:
 
-<img width="524" alt="screen shot 2015-11-27 at 1 24 20 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446808/5d2f2180-950a-11e5-8645-4f0f14321f86.png">
+![Command Log get](/img/api/get/get-element-and-make-an-assertion.png)
 
 When clicking on the `get` command within the command log, the console outputs the following:
 
-<img width="543" alt="screen shot 2015-11-27 at 1 24 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png">
+![Console Log get](/img/api/get/console-log-get-command-and-elements-found.png)
 
-# Related
+# See also
 
-- [contains](https://on.cypress.io/api/contains)
-- [within](https://on.cypress.io/api/within)
-- [find](https://on.cypress.io/api/find)
-- [root](https://on.cypress.io/api/root)
+- {% url `.as()` as %}
+- {% url `cy.contains()` contains %}
+- {% url `.find()` find %}
+- {% url `.within()` within %}

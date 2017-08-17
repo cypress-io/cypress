@@ -1,3 +1,5 @@
+{ _, Promise } = window.testUtils
+
 describe "$Cypress.Cy Screenshot Commands", ->
   enterCommandTestingMode()
 
@@ -9,9 +11,6 @@ describe "$Cypress.Cy Screenshot Commands", ->
       beforeEach ->
         @sandbox.spy(@cy, "_takeScreenshot")
 
-      afterEach ->
-        delete $Cypress.isHeadless
-
       it "no screenshot when no test.err", ->
         hooks = @Cypress.invoke("test:after:hooks", {err: null})
 
@@ -20,7 +19,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
           expect(@cy._takeScreenshot).not.to.be.called
 
       it "no screenshot when not headless", ->
-        $Cypress.isHeadless = false
+        @Cypress.isHeadless = false
 
         hooks = @Cypress.invoke("test:after:hooks", {err: {}})
 
@@ -31,7 +30,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
       it "no screenshot when screenshotOnHeadlessFailure is false", ->
         @sandbox.stub(Cypress, "config").withArgs("screenshotOnHeadlessFailure").returns(false)
 
-        $Cypress.isHeadless = true
+        @Cypress.isHeadless = true
 
         hooks = @Cypress.invoke("test:after:hooks", {err: {}})
 
@@ -42,7 +41,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
       it "takes screenshot if test.err and isHeadless and screenshotOnHeadlessFailure is true", ->
         @sandbox.stub(Cypress, "config").withArgs("screenshotOnHeadlessFailure").returns(true)
 
-        $Cypress.isHeadless = true
+        @Cypress.isHeadless = true
 
         @Cypress.on "take:screenshot", (data, cb) ->
           expect(data).to.deep.eq({

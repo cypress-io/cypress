@@ -10,6 +10,7 @@ cache         = require("#{root}lib/cache")
 exception     = require("#{root}lib/exception")
 Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
+pkg           = require("@packages/root")
 
 describe "lib/exceptions", ->
   context ".getAuthToken", ->
@@ -27,8 +28,8 @@ describe "lib/exceptions", ->
 
   context ".getErr", ->
     it "returns an object literal", ->
-      err = new Error
-      expect(exception.getErr(err)).to.have.keys("name", "message", "stack", "info")
+      err = new Error()
+      expect(exception.getErr(err)).to.have.keys("name", "message", "stack")
 
     describe "fields", ->
       beforeEach ->
@@ -36,7 +37,6 @@ describe "lib/exceptions", ->
           foo.bar()
         catch err
           @err = err
-
 
       it "has name", ->
         obj = exception.getErr(@err)
@@ -48,19 +48,37 @@ describe "lib/exceptions", ->
 
       it "has stack", ->
         obj = exception.getErr(@err)
-        expect(obj.stack).to.eq @err.stack
+        expect(obj.stack).to.be.a("string")
+        expect(obj.stack).to.include("foo is not defined")
 
-      it "has info", ->
-        getAllInfo = @sandbox.stub(winston.exception, "getAllInfo").returns({})
-        obj = exception.getErr(@err)
-        expect(obj.info).to.be.an("object")
-        expect(getAllInfo).to.be.calledWith(@err)
+    describe "path stripping", ->
+      beforeEach ->
+        @err = {
+          name: "Path not found: /Users/ruby/dev/foo.js"
+          message: "Could not find /Users/ruby/dev/foo.js"
+          stack: """
+            Error at /Users/ruby/dev/index.js
+            at foo /Users/ruby/dev/foo.js
+            at bar /Users/ruby/dev/bar.js
+          """
+        }
+
+      it "strips paths from name", ->
+        expect(exception.getErr(@err).name).to.equal("Path not found: <path>")
+
+      it "strips paths from message", ->
+        expect(exception.getErr(@err).message).to.equal("Could not find <path>")
+
+      it "strips paths from stack", ->
+        expect(exception.getErr(@err).stack).to.equal("""
+          Error at <path>
+          at foo <path>
+          at bar <path>
+        """)
 
   context ".getVersion", ->
     it "returns version from package.json", ->
-      @sandbox.stub(fs, "readJsonAsync")
-      .withArgs("./package.json")
-      .resolves({version: "0.1.2"})
+      @sandbox.stub(pkg, "version", "0.1.2")
 
       exception.getVersion().then (v) ->
         expect(v).to.eq("0.1.2")
@@ -69,11 +87,8 @@ describe "lib/exceptions", ->
     beforeEach ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
       @sandbox.stub(logger, "getLogs").resolves([])
-      @err = new Error
-
-      @sandbox.stub(fs, "readJsonAsync")
-      .withArgs("./package.json")
-      .resolves({version: "0.1.2"})
+      @err = new Error()
+      @sandbox.stub(pkg, "version", "0.1.2")
 
     it "sets err", ->
       exception.getBody(@err).then (body) ->

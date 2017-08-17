@@ -1,10 +1,5 @@
 #tests-list-page {
-  bottom: 18px;
-  top: 77px;
-  position: fixed;
-  overflow: auto;
-  margin-bottom: 0;
-  width: 100%;
+  position: relative;
 
   .empty-well code {
     display: block;
@@ -72,7 +67,7 @@
     font-weight: 500;
     font-size: 15px;
     color: #636363;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: $font-sans;
 
     i {
       font-size: 13px;
@@ -87,7 +82,7 @@
     font-weight: 300;
     border-bottom: 1px dotted #eeeeee;
     padding: 4px 0;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: $font-sans;
     color: #637eb9;
     font-size: 15px;
 
@@ -164,7 +159,7 @@
       border-top: 1px solid #eee;
       color: #777;
       line-height: 18px;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: $font-sans;
 
       i {
         display: none;

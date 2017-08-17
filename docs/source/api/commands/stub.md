@@ -1,111 +1,119 @@
+---
 title: stub
-comments: true
+comments: false
 ---
 
-A stub is used to replace a function, record its usage and control its behavior. You can track calls to the functions and what arguments the function was called with. You can also control what the function returns and even cause it to throw an exception.
+Replace a function, record its usage and control its behavior.
 
-`cy.stub` returns a [sinon.js stub](http://sinonjs.org/docs/#stubs). All methods found on sinon.js spies and stubs are supported. `cy.stub` creates stubs in a [sandbox](http://sinonjs.org/docs/#sandbox), so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
+{% note info %}
+**Note:** `.stub()` assumes you are already familiar with our guide: {% url 'Stubs, Spies, and Clocks' stubs-spies-and-clocks %}
+{% endnote %}
 
-Cypress has built-in [sinon-as-promised](https://github.com/bendrucker/sinon-as-promised) support, so the stubs returned by `cy.stub` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
+# Syntax
 
-Cypress also has built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any [assertions](https://github.com/domenic/sinon-chai#assertions) supported by `sinon-chai` can be used without any configuration.
+```javascript
+cy.stub()
+cy.stub(object, method)
+cy.stub(object, method, replacerFn)
+```
 
-Unlike most Cypress commands, `cy.stub` is *synchronous* and returns a value (the stub) instead of a Promise-like chain-able object.
+## Usage
 
-| | |
-|--- | --- |
-| **Returns** | the stub |
+**{% fa fa-check-circle green %} Correct Usage**
 
-***
+```javascript
+cy.stub(user, 'addFriend')    
+```
 
-# [cy.stub()](#section-usage)
+## Arguments
 
-Creates and returns a stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
+**{% fa fa-angle-right %} object** ***(Object)***
 
-***
+The `object` that has the `method` to be replaced.
 
-# [cy.stub( *object*, *"method"* )](#section-replace-a-method-with-a-stub)
+**{% fa fa-angle-right %} method** ***(String)***
 
-Replaces the `method` on the `object` with a stub and returns the stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
+The name of the `method` on the `object` to be wrapped.
 
-***
+**{% fa fa-angle-right %} replacerFn** ***(Function)***
 
-# [cy.stub( *object*, *"method"*, replacerFn )](#section-replace-a-method-with-a-function)
+The function used to replace the `method` on the `object`.
 
-Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for methods on the spy.
+## Yields {% helper_icon yields %}
 
-***
+Unlike most Cypress commands, `cy.stub()` is *synchronous* and returns a value (the stub) instead of a Promise-like chain-able object.
 
-# Usage
+`cy.stub()` returns a {% url "Sinon.js stub" http://sinonjs.org/%}. All methods found on {% url "Sinon.js" http://sinonjs.org %} spies and stubs are supported.
 
-## Create a stub and manually replace a function
+# Examples
+
+## Method
+
+***Create a stub and manually replace a function***
 
 ```javascript
 // assume App.start calls util.addListeners
 util.addListeners = cy.stub()
+
 App.start()
 expect(util.addListeners).to.be.called
 ```
 
-***
-
-## Replace a method with a stub
+***Replace a method with a stub***
 
 ```javascript
 // assume App.start calls util.addListeners
-cy.stub(util, "addListeners")
+cy.stub(util, 'addListeners')
+
 App.start()
 expect(util.addListeners).to.be.called
 ```
 
-***
-
-## Replace a method with a function
+***Replace a method with a function***
 
 ```javascript
 // assume App.start calls util.addListeners
 let listenersAdded = false
-cy.stub(util, "addListeners", function () {
+
+cy.stub(util, 'addListeners', function () {
   listenersAdded = true
 })
+
 App.start()
 expect(listenersAdded).to.be.true
 ```
 
-***
-
-## Specify the return value of a stubbed method
+***Specify the return value of a stubbed method***
 
 ```javascript
 // assume App.start calls util.addListeners, which returns a function
 // that removes the listeners
 const removeStub = cy.stub()
-cy.stub(util, "addListeners").returns(removeStub)
+
+cy.stub(util, 'addListeners').returns(removeStub)
+
 App.start()
 App.stop()
 expect(removeStub).to.be.called
 ```
 
-***
+***Using cy.stub***
 
-## Example Recipe
-
-{% note info Using cy.stub %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% note info %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
-***
+## Aliases
 
-## Alias a stub
-
-Adding an alias using [`cy.as`](https://on.cypress.io/api/as) to stubs makes them easier to identify in error messages and Cypress's command log.
+Adding an alias using {% url `.as()` as %} to stubs makes them easier to identify in error messages and Cypress' command log.
 
 ```javascript
 const obj = {
   foo () {}
 }
-const stub = cy.stub(obj, "foo").as("anyArgs")
-const withFoo = stub.withArgs("foo").as("withFoo")
+const stub = cy.stub(obj, 'foo').as('anyArgs')
+const withFoo = stub.withArgs('foo').as('withFoo')
+
 obj.foo()
 expect(stub).to.be.called
 expect(withFoo).to.be.called // purposefully failing assertion
@@ -113,37 +121,68 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22437243/4cc778a4-e6f5-11e6-8f07-e601d3438c4f.png)
+![stubs with aliases](/img/api/stub/stubs-with-aliases-and-error-in-command-log.png)
 
-***
+# Notes
+
+## Restores
+
+***Automatic reset/restore between tests***
+
+`cy.stub()` creates stubs in a {% url "sandbox" http://sinonjs.org/releases/v2.0.0/sandbox/ %}, so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
+
+## Differences
+
+***Difference between cy.spy() and cy.stub()***
+
+The main difference between `cy.spy()` and {% url `cy.stub()` stub %} is that `cy.spy()` does not replace the method, it only wraps it. So, while invocations are recorded, the original method is still called. This can be very useful when testing methods on native browser objects. You can verify a method is being called by your test and still have the original method action invoked.
+
+## Assertions
+
+***Assertion Support***
+
+Cypress has built-in {% url "sinon-as-promised" https://github.com/bendrucker/sinon-as-promised %} support, so the stubs returned by `cy.stub()` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.stub %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.stub %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.stub %}
 
 # Command Log
 
-## Create a stub, alias it, and call it
+***Create a stub, alias it, and call it***
 
 ```javascript
 const obj = {
   foo () {}
 }
-const stub = cy.stub(obj, "foo").as("foo")
-obj.foo("foo", "bar")
+const stub = cy.stub(obj, 'foo').as('foo')
+obj.foo('foo', 'bar')
 expect(stub).to.be.called
 ```
 
 The command above will display in the command log as:
 
-<img width="454" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437473/335f7104-e6f6-11e6-8ee8-74dc21e7d4fa.png">
+![Command Log](/img/api/stub/stub-in-command-log.png)
 
 When clicking on the `(stub-1)` event within the command log, the console outputs the following:
 
-<img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437546/6b01e574-e6f6-11e6-878f-e10c2316d213.png">
+![Command Log](/img/api/stub/inspect-the-stubbed-object-and-any-calls-or-arguments-made.png)
 
-***
+# See also
 
-# Related
-
-- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
-- [spy](https://on.cypress.io/api/spy)
-- [clock](https://on.cypress.io/api/clock)
+- {% url `.as()` as %}
+- {% url `cy.clock()` clock %}
+- {% url `cy.spy()` spy %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}
+- {% url "Recipe: Unit Test - Stubbing Dependencies" unit-testing-recipe %}

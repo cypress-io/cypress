@@ -56,27 +56,44 @@ describe "lib/cache", ->
   context "projects", ->
     describe "#insertProject", ->
       it "inserts project by path", ->
-        cache.insertProject("foo/bar").then =>
-          cache.__get("PROJECTS").then (projects) ->
-            expect(projects).to.deep.eq ["foo/bar"]
-
-      it "is a noop if project already exists by id", ->
         cache.insertProject("foo/bar")
-        .then =>
-          cache.insertProject("foo/bar")
-        .then =>
-          cache.__get("PROJECTS").then (projects) ->
-            expect(projects).to.deep.eq(["foo/bar"])
+        .then ->
+          cache.__get("PROJECTS")
+        .then (projects) ->
+          expect(projects).to.deep.eq ["foo/bar"]
 
-      it "can insert multiple projects", ->
+      it "inserts project at the start", ->
+        cache.insertProject("foo")
+        .then ->
+          cache.insertProject("bar")
+        .then ->
+          cache.__get("PROJECTS")
+        .then (projects) ->
+          expect(projects).to.deep.eq ["bar", "foo"]
+
+      it "can insert multiple projects in a row", ->
+        Promise.all([
+          cache.insertProject("baz")
+          cache.insertProject("bar")
+          cache.insertProject("foo")
+        ])
+        .then ->
+          cache.__get("PROJECTS")
+        .then (projects) ->
+          expect(projects).to.deep.eq(["foo", "bar", "baz"])
+
+      it "moves project to start if it already exists", ->
         Promise.all([
           cache.insertProject("foo")
           cache.insertProject("bar")
           cache.insertProject("baz")
         ])
-        .then =>
-          cache.__get("PROJECTS").then (projects) ->
-            expect(projects).to.deep.eq(["foo", "bar", "baz"])
+        .then ->
+          cache.insertProject("bar")
+        .then ->
+          cache.__get("PROJECTS")
+        .then (projects) ->
+          expect(projects).to.deep.eq ["bar", "baz", "foo"]
 
     describe "#removeProject", ->
       it "removes project by path", ->
@@ -100,11 +117,11 @@ describe "lib/cache", ->
           cache.insertProject("/Users/sam/app2")
         .then =>
           cache.getProjectPaths().then (paths) ->
-            expect(paths).to.deep.eq ["/Users/brian/app", "/Users/sam/app2"]
+            expect(paths).to.deep.eq ["/Users/sam/app2", "/Users/brian/app"]
 
       it "removes any paths which no longer exist on the filesystem", ->
         @statAsync.withArgs("/Users/brian/app").resolves()
-        @statAsync.withArgs("/Users/sam/app2").rejects(new Error)
+        @statAsync.withArgs("/Users/sam/app2").rejects(new Error())
 
         cache.insertProject("/Users/brian/app")
         .then =>

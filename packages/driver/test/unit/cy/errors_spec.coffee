@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Errors Extensions", ->
   before ->
     @iframe = $("<iframe />").appendTo $("body")

@@ -1,68 +1,77 @@
-'use strict'
+/* global hexo */
+/* eslint-disable object-shorthand */
 
-hexo.extend.tag.register('note', function(args, content){
+const _ = require('lodash')
+const Promise = require('bluebird')
+const beepAndLog = require('../lib/beep')
+const partial = require('../lib/tags/partial')
+const note = require('../lib/tags/note')
+const yields = require('../lib/tags/yields')
+const requirements = require('../lib/tags/requirements')
+const assertions = require('../lib/tags/assertions')
+const timeouts = require('../lib/tags/timeouts')
+const usageOptions = require('../lib/tags/usage')
+const { issue, openAnIssue } = require('../lib/tags/issues')
+const { url, urlHash } = require('../lib/tags/url')
+const { fa, helperIcon } = require('../lib/tags/icons')
 
-  // WHAT IT IS YO
-  // [block:callout]
-  // {
-  //   "type": "info",
-  //   "body": "Explore talks, blogs, and podcasts about testing in Cypress.",
-  //   "title": "Want to see Cypress in action?"
-  // }
-  // [/block]
+const tags = {
+  // partials
+  partial: partial,
 
-  // {% note info Want to see Cypress in action? %}
-  // Explore talks, blogs, and podcasts about testing in Cypress.
-  // {% endnote %}
-  //
-  // <<< Transforms into >>>
-  //
-  // <blockquote class="note info">
-  //   <strong class="note-title">Want to see Cypress in action?</strong>
-  //   <p>
-  //     Explore talks, blogs, and podcasts about testing in Cypress.
-  //   </p>
-  // </blockquote>
+  // issues
+  open_an_issue: openAnIssue,
+  issue: issue,
 
-  const iconLookup = {
-    info: "info",
-    warning: "exclamation",
-    success: "check",
-    danger: "times",
+  // icons
+  fa: fa,
+  helper_icon: helperIcon,
+
+  // usage_options
+  usage_options: usageOptions,
+
+  // url
+  url: url,
+  urlHash: urlHash,
+
+  // yields
+  yields: yields,
+
+  // requirements
+  requirements: requirements,
+
+  // assertions
+  assertions: assertions,
+
+  // timeouts
+  timeouts: timeouts,
+}
+
+// tags which require ending
+const endingTags = {
+  // note
+  note: note,
+}
+
+function promisify (fn) {
+  // partial in hexo as 1st argument
+  fn = _.partial(fn, hexo)
+
+  // return higher order function
+  return function () {
+    // call with up hexo context
+    /* eslint-disable prefer-rest-params */
+    return Promise.resolve(fn.apply(this, arguments))
+    .catch(beepAndLog)
   }
+}
 
-  var className = args.shift()
-  var header = ''
-  var result = ''
-  var icon = iconLookup[className]
+_.each(tags, (fn, key) => {
+  // make all regular tags async and provide 'hexo' as the first argument
+  hexo.extend.tag.register(key, promisify(fn), { async: true })
+})
 
-
-  if (args.length){
-    header += `<strong class="note-title foo">
-      ${icon ? `<i class="fa fa-${icon}"></i>` : ""}
-      ${args.join(' ')}
-    </strong>`
-  }
-
-  result += '<blockquote class="note ' + className + '">' + header
-  result += hexo.render.renderSync({text: content, engine: 'markdown'})
-  result += '</blockquote>'
-
-  return result
-}, true)
-
-
-hexo.extend.tag.register('fa', function(args, content){
-  // WHAT IT IS YO
-  // :fa-angle-right:
-
-  // {% fa fa-angle-right green fa-fw %}
-  //
-  // <<< Transforms into >>>
-  //
-  // <i class="fa fa-angle-right"></i>
-
-  var classNames = args.join(' ')
-
-  return '<i class="fa ' + classNames + '"></i>'
+_.each(endingTags, (fn, key) => {
+  // make all ending tags async and provide 'hexo' as the first argument
+  hexo.extend.tag.register(key, promisify(fn), { async: true, ends: true })
 })

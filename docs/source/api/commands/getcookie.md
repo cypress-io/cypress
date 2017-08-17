@@ -1,90 +1,110 @@
-title: getcookie
-comments: true
+---
+title: getCookie
+comments: false
 ---
 
-Get a browser cookie.
+Get a browser cookie by it's name.
 
-| | |
-|--- | --- |
-| **Returns** | a cookie object literal |
-| **Timeout** | `cy.getCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
-
-***
-
-# [cy.getCookie( *name* )](#section-usage)
-
-Gets a browser cookie by its name.
-
-This object will have the following properties:
-
-| Properties |
-| --- |
-| `name` |
-| `value` |
-| `path` |
-| `domain` |
-| `httpOnly` |
-| `secure` |
-| `expiry` |
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.getCookie`.
-
-**cy.getCookie( *name*, *options* )**
-
-Option | Default | Notes
---- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.getCookie` command to be processed
-`log` | `true` | whether to display command in command log
-
-***
-
-# Usage
-
-## Get `session_id` cookie after logging in
-
-In this example, on first login our server sends us back a session cookie.
+# Syntax
 
 ```javascript
-cy
-  .login('bob@example.com', 'p@ssw0rd') // example of a custom command
-  .getCookie('session_id')
-    .should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
+cy.getCookie(name)
+cy.getCookie(name, options)
 ```
 
-{% note info Using cy.getCookie to test login %}
-Check out our example recipes using cy.getCookie to test [logging in using HTML web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js), [logging in using XHR web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js) and [logging in with single sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.getCookie('auth_key')     // Get cookie with name 'auth_key'
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} name** ***(String)***
+
+The name of the cookie to get.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.getCookie()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.getCookie %}
+
+## Yields {% helper_icon yields %}
+
+`cy.getCookie()` yields a cookie object with the following properties:
+
+- `name`
+- `value`
+- `path`
+- `domain`
+- `httpOnly`
+- `secure`
+- `expiry`
+
+***When a cookie matching the name could not be found:***
+
+`cy.getCookie()` yields `null`.
+
+# Examples
+
+## No Args
+
+***Get `session_id` cookie after logging in***
+
+In this example, on first login, our server sends us back a session cookie.
+
+```javascript
+// assume we just logged in
+cy.contains('Login').click()
+cy.url().should('include', 'profile')
+cy.getCookie('session_id')
+  .should('have.property', 'value', '189jd09su')
+```
+
+***Using `cy.getCookie()` to test logging in***
+
+{% note info %}
+Check out our example recipes using `cy.getCookie()` to test {% url 'logging in using HTML web forms' logging-in-recipe %}, {% url 'logging in using XHR web forms' logging-in-recipe %} and {% url 'logging in with single sign on' logging-in-recipe %}
 {% endnote %}
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.getCookie %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.getCookie %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts automation cy.getCookie %}
 
 # Command Log
 
-## Get cookie
-
 ```javascript
-cy
-  .getCookie('fakeCookie1')
-    .should('have.property', 'value', '123ABC')
+cy.getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
 ```
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-10 at 12 12 13 pm](https://cloud.githubusercontent.com/assets/1271364/15153750/7a1caa40-16a8-11e6-9f70-3858dacb6792.png)
+![Command Log](/img/api/getcookie/get-browser-cookie-and-make-assertions-about-object.png)
 
 When clicking on `getCookie` within the command log, the console outputs the following:
 
-![screen shot 2016-05-10 at 12 12 05 pm](https://cloud.githubusercontent.com/assets/1271364/15153749/7a18b00c-16a8-11e6-86ad-ea969f46bb6c.png)
+![Console Log](/img/api/getcookie/inspect-cookie-object-properties-in-console.png)
 
-***
+# See also
 
-# Related
-
-- [clearCookie](https://on.cypress.io/api/clearcookie)
-- [clearCookies](https://on.cypress.io/api/clearcookies)
-- [getCookies](https://on.cypress.io/api/getcookies)
-- [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress Cookies API](https://on.cypress.io/api/cookies)
+- {% url `cy.clearCookie()` clearcookie %}
+- {% url `cy.clearCookies()` clearcookies %}
+- {% url 'Cypress Cookies API' cookies %}
+- {% url `cy.getCookies()` getcookies %}
+- {% url `cy.setCookie()` setcookie %}

@@ -1,47 +1,64 @@
+---
 title: hash
-comments: true
+comments: false
 ---
 
-Get the current URL hash. This is the same as [`cy.location().hash`](https://on.cypress.io/api/location)
+Get the current URL hash of the page that is currently active.
 
-| | |
-|--- | --- |
-| **Returns** | the current URL hash as a string, including the `#` character. If no `#` character is present, an empty string will be returned. |
-| **Timeout** | *cannot timeout* |
+{% note info %}
+This is an alias of {% url "`cy.location('hash')`" location %}
+{% endnote %}
 
-***
-
-# [cy.hash()](#section-usage)
-
-Get the current URL hash.
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.hash`.
-
-**cy.hash( *options* )**
-**cy.hash( *options* )**
-
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
-
-***
-
-# Usage
-
-## Assert that the hash is `#/users/1` given the remote URL: `http://localhost:8000/app/#/users/1`
+# Syntax
 
 ```javascript
-// Hash returns #/users/1
-cy.hash().should("eq", "#/users/1") // => true
+cy.hash()
+cy.hash(options)
 ```
 
-***
+## Usage
 
-## Assert that the hash matches via RegExp
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.hash()     // Get the url hash
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.hash()`.
+
+**cy.hash( *options* )**
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.hash %}
+
+## Yields {% helper_icon yields %}
+
+***When the current URL contains a hash:***
+
+{% yields sets_subject cy.hash "yields the current URL's hash (including the `#` character)" %}
+
+***When the current URL does not contain a hash:***
+
+{% yields sets_subject cy.hash "yields an empty string" %}
+
+# Examples
+
+## No Args
+
+***Assert that hash is `#/users/1` given remote URL: `http://localhost:8000/app/#/users/1`***
+
+```javascript
+// yields #/users/1
+cy.hash().should('eq', '#/users/1') // => true
+```
+
+***Assert that the hash matches via RegExp***
 
 ```html
 <ul id="users">
@@ -52,53 +69,41 @@ cy.hash().should("eq", "#/users/1") // => true
 ```
 
 ```javascript
-cy
-  .get("#users li").find("a")
-  .hash().should("match", /users\/.+$/) // => true
+cy.get('#users li').find('a').click()
+cy.hash().should('match', /users\/.+$/) // => true
 ```
 
-***
+# Rules
 
-# Notes
+## Requirements {% helper_icon requirements %}
 
-## Hash is a shortcut for `cy.location().hash`
+{% requirements parent cy.hash %}
 
-These 3 assertions are all the same.
+## Assertions {% helper_icon assertions %}
 
-```javascript
-// 1. verbose
-cy.location().then(function(location){
-  expect(location.hash).to.eq("#/users/1")
-})
+{% assertions retry cy.hash %}
 
-// 2. better
-cy.location().its("hash").should("eq", "#/users/1")
+## Timeouts {% helper_icon timeout %}
 
-// 3. best
-cy.hash().should("eq", "#/users/1")
-```
-
-***
+{% timeouts assertions cy.hash %}
 
 # Command Log
 
-## Assert that the hash matches `#users/new`
+***Assert that the hash matches `#users/new`***
 
 ```javascript
-cy.hash().should("eq", "#users/new")
+cy.hash().should('eq', '#users/new')
 ```
 
 The commands above will display in the command log as:
 
-<img width="581" alt="screen shot 2015-11-29 at 1 34 12 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459152/ed737be4-969d-11e5-823e-1d12cd7d03b1.png">
+![Command Log for hash](/img/api/hash/test-url-hash-for-users-page.png)
 
 When clicking on `hash` within the command log, the console outputs the following:
 
-<img width="472" alt="screen shot 2015-11-29 at 1 34 17 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459153/f0aa6476-969d-11e5-9851-302957f9eb0f.png">
+![Console Log for hash](/img/api/hash/hash-command-yields-url-after-hash.png)
 
-***
+# See also
 
-# Related
-
-- [location](https://on.cypress.io/api/location)
-- [url](https://on.cypress.io/api/url)
+- {% url `cy.location()` location %}
+- {% url `cy.url()` url %}

@@ -1,71 +1,95 @@
+---
 title: focused
-comments: true
+comments: false
 ---
 
 Get the DOM element that is currently focused.
 
-| | |
-|--- | --- |
-| **Returns** | the current DOM element that is focused or `null` |
-| **Timeout** | `cy.focused` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
-
-***
-
-# [cy.focused()](#section-usage)
-
-Get the focused DOM element.
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.focused`.
-
-**cy.focused( *options* )**
-
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
-
-***
-
-# Usage
-
-## Get the element that is focused.
+# Syntax
 
 ```javascript
 cy.focused()
+cy.focused(options)
 ```
 
-***
+## Usage
 
-## Make an assertion on the focused element.
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-cy.focused().should("have.attr", "name", "username")
+cy.focused()    // Yields the element currently in focus
 ```
 
-***
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.focused()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.focused %}
+
+## Yields {% helper_icon yields %}
+
+{% yields sets_dom_subject cy.focused %}
+
+# Examples
+
+## No Args
+
+***Get the element that is focused***
+
+```javascript
+cy.focused().then(function($el) {
+  // do something with $el
+})
+```
+
+***Blur the element with focus***
+
+```javascript
+cy.focused().blur()
+```
+
+***Make an assertion on the focused element***
+
+```javascript
+cy.focused().should('have.attr', 'name', 'username')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom cy.focused %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence cy.focused %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence cy.focused %}
 
 # Command Log
 
-## Make an assertion on the focused element.
+***Make an assertion on the focused element***
 
 ```javascript
-cy.focused().should("have.attr", "name").and("eq", "num")
+cy.focused().should('have.attr', 'name').and('eq', 'num')
 ```
 
 The commands above will display in the command log as:
 
-<img width="523" alt="screen shot 2015-11-27 at 1 01 51 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446780/f71fb350-9509-11e5-963a-a6940fbc63b6.png">
+![Command Log focused](/img/api/focused/make-assertion-about-focused-element.png)
 
 When clicking on the `focused` command within the command log, the console outputs the following:
 
-<img width="407" alt="screen shot 2015-11-27 at 1 02 02 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446771/d104a6d0-9509-11e5-9464-2e397cb1eb24.png">
+![console focused](/img/api/focused/currently-focused-element-in-an-input.png)
 
-***
+# See also
 
-# Related
-
-- [focus](https://on.cypress.io/api/focus)
-- [blur](https://on.cypress.io/api/blur)
+- {% url `.blur()` blur %}
+- {% url `.focus()` focus %}

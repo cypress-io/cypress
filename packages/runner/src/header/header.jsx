@@ -43,7 +43,7 @@ export default class Header extends Component {
 }`}
               </pre>
               <p>
-                <a href='https://on.cypress.io/api/viewport' target='_blank' rel="noopener noreferrer">
+                <a href='https://on.cypress.io/viewport' target='_blank' rel="noopener noreferrer">
                   <i className='fa fa-info-circle'></i>
                   Read more about viewport here.
                 </a>

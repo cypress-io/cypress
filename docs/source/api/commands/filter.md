@@ -1,38 +1,64 @@
+---
 title: filter
-comments: true
+comments: false
 ---
 
-Get DOM elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)
+Get the DOM elements that match a specific selector.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+Opposite of {% url `.not()` not %}
+{% endnote %}
 
-***
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.filter()` http://api.jquery.com/filter %} works in jQuery.
+{% endnote %}
 
-# [cy.filter( *selector* )](#section-selector-usage)
+# Syntax
 
-Reduce the set of matched DOM elements to those that match the selector.
+```javascript
+.filter(selector)
+.filter(selector, options)
+```
 
-***
+## Usage
 
-# Options
+**{% fa fa-check-circle green %} Correct Usage**
 
-Pass in an options object to change the default behavior of `cy.filter`.
+```javascript
+cy.get('td').filter('.users') // Yield all el's with class '.users'
+```
 
-**cy.filter( *selector*, *options* )**
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-Option | Default | Notes
+```javascript
+cy.filter('.animated')  // Errors, cannot be chained off 'cy'
+cy.location().filter()  // Errors, 'location' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.filter()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .filter %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Selector Usage
+{% yields changes_dom_subject .filter %}
 
-## Filter the current subject to the element with the class `active`.
+# Examples
+
+## Selector
+
+***Filter the current subject to the elements with the class 'active'.***
 
 ```html
 <ul>
@@ -45,28 +71,40 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <li>About</li>
-cy.get("ul").find(">li").filter(".active")
+// yields <li>About</li>
+cy.get('ul').find('>li').filter('.active')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .filter %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .filter %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .filter %}
 
 # Command Log
 
-## Filter the `li`'s to the `li` with the class `active`.
+***Filter the li's to the li with the class 'active'.***
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li").filter(".active")
+cy.get('.left-nav>.nav').find('>li').filter('.active')
 ```
 
 The commands above will display in the command log as:
 
-<img width="522" alt="screen shot 2015-11-27 at 2 15 53 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447263/7176e824-9511-11e5-93cc-fa10b3b94482.png">
+![Command Log filter](/img/api/filter/filter-el-by-selector.png)
 
 When clicking on the `filter` command within the command log, the console outputs the following:
 
-<img width="503" alt="screen shot 2015-11-27 at 2 16 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447266/74b643a4-9511-11e5-8b42-6f6dfbdfb2a8.png">
+![console.log filter](/img/api/filter/console-shows-list-and-filtered-element.png)
 
-# Related
+# See also
 
-- [not](https://on.cypress.io/api/not)
+- {% url `.not()` not %}

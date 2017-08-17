@@ -135,11 +135,6 @@ describe('<Command />', () => {
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The message')
     })
 
-    it('truncates the message when over 100 chars', () => {
-      const component = shallow(<Command model={model({ message: longText })} />)
-      expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(_.truncate(longText, 100))
-    })
-
     it('renders the renderProps message when specified', () => {
       const component = shallow(<Command model={model({ renderProps: { message: 'The display message' } })} />)
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The display message')
@@ -193,8 +188,8 @@ describe('<Command />', () => {
 
       it('renders the right tooltip title for each alias it references', () => {
         const tooltips = aliases.find('Tooltip')
-        expect(tooltips.first()).to.have.prop('title', "Found an alias for: 'barAlias'")
-        expect(tooltips.last()).to.have.prop('title', "Found an alias for: 'bazAlias'")
+        expect(tooltips.first()).to.have.prop('title', 'Found an alias for: \'barAlias\'')
+        expect(tooltips.last()).to.have.prop('title', 'Found an alias for: \'bazAlias\'')
       })
     })
 
@@ -219,7 +214,7 @@ describe('<Command />', () => {
         })
 
         it('renders the alias tooltip with the right title', () => {
-          expect(aliases.find('Tooltip').first()).to.have.prop('title', "The message aliased as: 'fooAlias'")
+          expect(aliases.find('Tooltip').first()).to.have.prop('title', 'The message aliased as: \'fooAlias\'')
         })
       })
 

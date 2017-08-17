@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress.Cy Fixtures Commands", ->
   enterCommandTestingMode()
 
@@ -40,8 +42,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
       @cy.fixture("foo", "ascii", {timeout: 1000}).then (obj) ->
         expect(obj).to.deep.eq {foo: "bar"}
 
-    ## FIXME
-    describe.skip "cancellation", ->
+    describe "cancellation", ->
       it "cancels promise", (done) ->
         ## respond after 50 ms
         @respondWith({}, 50)
@@ -63,6 +64,23 @@ describe "$Cypress.Cy Fixtures Commands", ->
       beforeEach ->
         @allowErrors()
 
+      it "throws if fixturesFolder is set to false", (done) ->
+        @sandbox.stub(@Cypress, "config").withArgs("fixturesFolder").returns(false)
+
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push(@log)
+
+        @cy.on "fail", =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error").message).to.eq("cy.fixture() is not valid because you have configured 'fixturesFolder' to false.")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("name")).to.eq "fixture"
+          done()
+
+        @cy.fixture("foo")
+
       it "throws if response contains __error key", (done) ->
         @respondWith({__error: "some error"})
 
@@ -81,8 +99,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         @cy.fixture("err")
 
-      ## FIXME
-      it.skip "throws after timing out", (done) ->
+      it "throws after timing out", (done) ->
         @respondWith({foo: "bar"}, 1000)
 
         logs = []
@@ -101,8 +118,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         @cy.fixture("foo", {timeout: 50})
 
-    ## FIXME: these are failing because the fixture cache needs to be cleared somehow
-    describe.skip "timeout", ->
+    describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
         @Cypress.config("responseTimeout", 2500)
 
@@ -138,8 +154,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
           ## restores the timeout afterwards
           expect(@cy._timeout()).to.eq(100)
 
-    ## FIXME: these are failing because the fixture cache needs to be cleared somehow
-    describe.skip "caching", ->
+    describe "caching", ->
       it "caches fixtures by name", ->
         @respondWith({foo: "bar"})
         cy.fixture("foo").then (obj) =>

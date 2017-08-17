@@ -1,3 +1,5 @@
+{ _ } = window.testUtils
+
 describe "$Cypress.Cy Files Commands", ->
   enterCommandTestingMode()
 
@@ -25,10 +27,10 @@ describe "$Cypress.Cy Files Commands", ->
       @cy.readFile("foo.json", "ascii")
 
     it "sets the contents as the subject", ->
-        @respondWith({ contents: "contents" })
+      @respondWith({ contents: "contents" })
 
-        @cy.readFile('foo.json').then (subject) ->
-          expect(subject).to.equal("contents")
+      @cy.readFile('foo.json').then (subject) ->
+        expect(subject).to.equal("contents")
 
     describe ".log", ->
       it "can turn off logging", ->
@@ -50,8 +52,9 @@ describe "$Cypress.Cy Files Commands", ->
           throw new Error("failed to log before resolving") unless @log
 
     describe "errors", ->
-
       beforeEach ->
+        @cy._timeout(100)
+
         @allowErrors()
 
       it "throws when file argument is absent", (done) ->
@@ -167,9 +170,11 @@ describe "$Cypress.Cy Files Commands", ->
 
         @cy.readFile("foo.json").should("not.exist")
 
-      it "passes through assertion error when not about existence", ->
+      it "passes through assertion error when not about existence", (done) ->
+        @cy._timeout(100)
+
         @Cypress.on "read:file", (file, options, cb) ->
-          cb({ contents: "contents", filePath: "/path/to/foo.json" })
+          cb({ contents: "foo", filePath: "/path/to/foo.json" })
 
         logs = []
 
@@ -177,10 +182,11 @@ describe "$Cypress.Cy Files Commands", ->
           logs.push(@log)
 
         @cy.on "fail", (err) =>
+          debugger
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("Timed out retrying: expected foo to equal contents")
+          expect(err.message).to.eq("Timed out retrying: expected 'foo' to equal 'contents'")
           @Cypress.off "read:file"
           done()
 

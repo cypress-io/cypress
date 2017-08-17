@@ -1,24 +1,23 @@
-title: known-issues
-comments: true
+---
+title: Known Issues
+comments: false
 ---
 
 # Missing Commands
 
 Some commands have not been implemented in Cypress. Some commands will be implemented in the future and some do not make sense to implement in Cypress.
 
-***
-
 ## Right click
 
-[Issue #53](https://github.com/cypress-io/cypress/issues/53)
+{% fa fa-github %} {% issue 53 'Issue #53' %}
 
 **Workaround**
 
-Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to trigger the event or execute the action in the DOM.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to trigger the event or execute the action in the DOM.
 
 **Example of right clicking on an element using jQuery**
 ```javascript
-cy.get("#nav").first().invoke("trigger", "contextmenu")
+cy.get('#nav').first().invoke('trigger', 'contextmenu')
 ```
 
 **Example of right clicking on an element without jQuery**
@@ -30,41 +29,37 @@ e.clientX = 451
 e.clientY = 68
 
 cy
-  .get("#nav").first().then(function($el) {
+  .get('#nav').first().then(function($el) {
     $el[0].dispatchEvent(e)
   })
 ```
 
-***
-
 ## Hover
 
-[Issue #10](https://github.com/cypress-io/cypress/issues/10)
+{% fa fa-github %} {% issue 10 'Issue #10' %}
 
 Sometimes an element has specific logic on hover. Maybe the element doesn't even display to be clickable until you hover over a specific element.
 
 **Workaround**
 
-Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to show the element before you perform the action.
+Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to show the element before you perform the action.
 
 **Example of showing an element in order to perform action**
 ```javascript
-cy.get(".content").invoke("show").click()
+cy.get('.content').invoke('show').click()
 ```
 
 You can also force the action to be performed on the element regardless of whether the element is visible or not.
 
 **Example of clicking on a hidden element**
 ```javascript
-cy.get(".content").click({force: true})
+cy.get('.content').click({force: true})
 ```
 
 **Example of checking a hidden element**
 ```javascript
-cy.get(".checkbox").check({force: true})
+cy.get('.checkbox').check({force: true})
 ```
-
-***
 
 # Difficult use cases
 
@@ -72,7 +67,7 @@ Cypress does not support the following use cases.
 
 ## Iframes
 
-[Issue #136](https://github.com/cypress-io/cypress/issues/136)
+{% fa fa-github %} {% issue 136 'Issue #136' %}
 
 You cannot target elements or interact with anything in an iframe - regardless of it being a same domain or cross domain iframe.
 
@@ -81,8 +76,6 @@ This is actively being worked on in Cypress and you'll first see support for sam
 **Workaround**
 
 Sit tight, comment on the issue so we know you care about this support, and be patient.
-
-***
 
 ## OAuth
 
@@ -94,11 +87,9 @@ Likely we will be able to support server side oauth redirects, but for client si
 
 [Come into Gitter](https://gitter.im/cypress-io/cypress) and talk to us about what you're trying to do. We'll tell you if you're able to mock this and how to do it.
 
-***
-
 ## window.fetch routing and stubbing
 
-[Issue #95](https://github.com/cypress-io/cypress/issues/95)
+{% fa fa-github %} {% issue 95 'Issue #95' %}
 
 Support for `fetch` has not been added but it's possible to handle in the same way as we handle `XHRs`. This biggest challenge here is that you can use `fetch` in `Service Workers` outside of the global context. We'll likely have to move routing to the server and handle it in the proxy layer but it should be possible.
 

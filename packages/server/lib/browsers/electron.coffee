@@ -6,10 +6,10 @@ Windows       = require("../gui/windows")
 savedState    = require("../saved_state")
 
 module.exports = {
-  _render: (url, state, options = {}) ->
+  _defaultOptions: (state, options) ->
     _this = @
 
-    _.defaults(options, {
+    _.defaults({}, options, {
       x: state.browserX
       y: state.browserY
       width: state.browserWidth or 1280
@@ -30,7 +30,7 @@ module.exports = {
       onNewWindow: (e, url) ->
         _win = @
 
-        _this._launchChild(e, url, _win, options)
+        _this._launchChild(e, url, _win, state, options)
         .then (child) ->
           ## close child on parent close
           _win.on "close", ->
@@ -38,16 +38,19 @@ module.exports = {
               child.close()
     })
 
+  _render: (url, state, options = {}) ->
+    options = @_defaultOptions(state, options)
+
     win = Windows.create(options)
 
     @_launch(win, url, options)
 
-  _launchChild: (e, url, parent, options) ->
+  _launchChild: (e, url, parent, state, options) ->
     e.preventDefault()
 
     [parentX, parentY] = parent.getPosition()
 
-    options = _.clone(options)
+    options = @_defaultOptions(state, options)
 
     _.extend(options, {
       x: parentX + 100
@@ -82,7 +85,7 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    savedState.get()
+    savedState(options.projectPath).get()
     .then (state) =>
       @_render(url, state, options)
       .then (win) =>

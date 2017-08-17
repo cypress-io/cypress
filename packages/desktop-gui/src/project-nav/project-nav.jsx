@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
+
 import Browsers from './browsers'
-import { Link } from 'react-router'
+import { Link, routes } from '../lib/routing'
 
 export default class ProjectNav extends Component {
   render () {
@@ -11,28 +12,19 @@ export default class ProjectNav extends Component {
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li>
-              <Link
-                to={`/projects/${project.clientId}/specs`}
-                activeClassName='active'
-                >
+              <Link to={routes.specs(project)}>
                 <i className='fa fa-code'></i>{' '}
                 Tests
               </Link>
             </li>
             <li>
-              <Link
-                to={`/projects/${project.clientId}/runs`}
-                activeClassName='active'
-                >
+              <Link to={routes.runs(project)}>
                 <i className='fa fa-database'></i>{' '}
                 Runs
               </Link>
             </li>
             <li>
-              <Link
-                to={`/projects/${project.clientId}/config`}
-                activeClassName='active'
-                >
+              <Link to={routes.settings(project)}>
                 <i className='fa fa-cog'></i>{' '}
                 Settings
               </Link>

@@ -234,6 +234,17 @@ module.exports = {
       # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
       opts = {followRedirect: false, strictSSL: false}
 
+      ## strip unsupported accept-encoding headers
+      encodings = accept.parser(req.headers["accept-encoding"]) ? []
+
+      if "gzip" in encodings
+        ## we only want to support gzip right now
+        req.headers["accept-encoding"] = "gzip"
+      else
+        ## else just delete them since we cannot
+        ## properly decode them
+        delete req.headers["accept-encoding"]
+
       if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
         opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
       else

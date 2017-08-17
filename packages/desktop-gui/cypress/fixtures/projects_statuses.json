@@ -10,9 +10,7 @@
     "repoUrl": "https://github.com/janelane/jekyl_blog",
     "createdAt": "2016-04-05T18:43:56+00:00",
     "updatedAt": "2016-04-12T18:43:56+00:00",
-    "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75,
     "state": "VALID"
   },
   {
@@ -30,9 +28,7 @@
     "repoUrl": "https://github.com/janelane/jekyl_blog",
     "createdAt": "2016-04-05T18:43:56+00:00",
     "updatedAt": "2016-04-12T18:43:56+00:00",
-    "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75,
     "state": "VALID"
   },
   {
@@ -47,9 +43,7 @@
     "repoUrl": "https://github.com/janelane/jekyl_blog",
     "createdAt": "2016-04-05T18:43:56+00:00",
     "updatedAt": "2016-04-12T18:43:56+00:00",
-    "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75,
     "state": "VALID"
   },
   {
@@ -64,46 +58,10 @@
     "repoUrl": "https://github.com/janelane/jekyl_blog",
     "createdAt": "2016-04-05T18:43:56+00:00",
     "updatedAt": "2016-04-12T18:43:56+00:00",
-    "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75,
     "state": "VALID"
   },
   {
     "path": "/Users/Jane/Projects/project3"
-  },
-  {
-    "id": "712jdha0wef082h98ha0f89-8f9789",
-    "path": "/Users/Jane/Projects/project4",
-    "name": "project4",
-    "lastBuildStatus": null,
-    "lastBuildCreatedAt": null,
-    "public": false,
-    "defaultOrg": false,
-    "orgName": "Osato Developers",
-    "repoUrl": "https://github.com/janelane/jekyl_blog",
-    "createdAt": "2016-04-05T18:43:56+00:00",
-    "updatedAt": "2016-04-12T18:43:56+00:00",
-    "ownerId": 123,
-    "orgId": 829,
-    "hoursUsed": 14.75,
-    "state": "UNAUTHORIZED"
-  },
-  {
-    "id": "0f89712jdha0wef082h98ha-8f98h3",
-    "path": "/Users/Jane/Projects/project5",
-    "name": "project5",
-    "lastBuildStatus": null,
-    "lastBuildCreatedAt": null,
-    "public": false,
-    "defaultOrg": false,
-    "orgName": "Osato Developers",
-    "repoUrl": "https://github.com/janelane/jekyl_blog",
-    "createdAt": "2016-04-05T18:43:56+00:00",
-    "updatedAt": "2016-04-12T18:43:56+00:00",
-    "ownerId": 123,
-    "orgId": 829,
-    "hoursUsed": 14.75,
-    "state": "INVALID"
   }
 ]

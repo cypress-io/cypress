@@ -54,7 +54,7 @@ npm start
 
 ```bash
 ## boot a specific project
-npm run server -- --project <path-to-the-project-you-want-to-test>
+npm run server -- --run-project <path-to-the-project-you-want-to-test>
 ```
 
 You should see `nodemon` watching all of your files.
@@ -68,10 +68,18 @@ Code changes are applied instantly:
 
 ```bash
 ## boot a specific project
-npm start -- --project <path-to-the-project-you-want-to-test>
+npm start -- --run-project <path-to-the-project-you-want-to-test>
 ```
 
 You will see Cypress run all the tests headlessly and you'll see output in your console.
+
+### 4. Run a single spec headlessly
+
+```bash
+npm start -- --run-project <path to project> --spec <path to spec file>
+```
+
+Path to spec file can be relative to the project you want to test.
 
 ## Testing the Driver
 
@@ -85,6 +93,22 @@ gulp test
 ```
 
 Navigate to [http://localhost:3500](http://localhost:3500)
+
+## Debugging
+
+Using [debug](https://github.com/visionmedia/debug#readme) module under
+namespace `cypress:server`. There are a few places where low-level events are
+also written, for example `cypress:server:file`. To see debug messages
+
+```sh
+DEBUG=cypress:server npm start ...
+```
+
+You can see more debug messaging by using a wild card
+
+```sh
+DEBUG=cypress* npm start ...
+```
 
 ## Deploying
 

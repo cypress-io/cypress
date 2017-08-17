@@ -38,7 +38,7 @@ module.exports = (Cypress, Commands) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Returned = utils.getDomElements($el)
+        consoleProps.Yielded = utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})

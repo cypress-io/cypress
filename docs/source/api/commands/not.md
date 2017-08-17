@@ -1,62 +1,99 @@
+---
 title: not
-comments: true
+comments: false
 ---
 
-Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
+Filter DOM element(s) from a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.not` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+Opposite of {% url `.filter()` filter %}
+{% endnote %}
 
-***
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.not()` http://api.jquery.com/not %} works in jQuery.
+{% endnote %}
 
-# [cy.not( *selector* )](#section-selector-usage)
-
-Remove the element(s) by it's selector from the elements
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.not`.
-
-**cy.not( *selector*, *options* )**
-
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
-
-# Selector Usage
-
-## Filter the current subject to the elements that do not have class `active`.
+# Syntax
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li").not(".active")
+.not(selector)
+.not(selector, options)
 ```
 
-***
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.get('input').not('.required') // Yield all inputs without class '.required'
+```
+
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
+
+```javascript
+cy.not('.icon')      // Errors, cannot be chained off 'cy'
+cy.location().not()  // Errors, 'location' does not yield DOM element
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to remove matching DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.not()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .not %}
+
+## Yields {% helper_icon yields %}
+
+{% yields changes_dom_subject .not %}
+
+# Examples
+
+## Selector
+
+***Yield the elements that do not have class `active`.***
+
+```javascript
+cy.get('.left-nav>li').not('.active').should('not.have.class', 'active') // true
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .not %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .not %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .not %}
 
 # Command Log
 
-## Find all buttons that are not of type submit
+***Find all buttons that are not of type submit***
 
 ```javascript
-cy.get("form").find("button").not("[type='submit']")
+cy.get('form').find('button').not('[type="submit"]')
 ```
 
 The commands above will display in the command log as:
 
-<img width="572" alt="screen shot 2015-11-29 at 12 36 49 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458817/0a846c3c-9696-11e5-9901-5f4376629e75.png">
+![Command Log not](/img/api/not/filter-elements-with-not-and-optional-selector.png)
 
 When clicking on `not` within the command log, the console outputs the following:
 
-<img width="689" alt="screen shot 2015-11-29 at 12 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458819/0d6870f6-9696-11e5-9364-2685b8ffc71b.png">
+![Console log not](/img/api/not/log-elements-found-when-using-cy-not.png)
 
-***
-# Related
+# See also
 
-- [filter](https://on.cypress.io/api/filter)
+- {% url `.filter()` filter %}

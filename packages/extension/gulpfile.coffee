@@ -1,5 +1,3 @@
-require("app-module-path").addPath("../../")
-
 fs         = require("fs-extra")
 pkg        = require("./package.json")
 gulp       = require("gulp")
@@ -7,10 +5,10 @@ clean      = require("gulp-clean")
 rename     = require("gulp-rename")
 runSeq     = require("run-sequence")
 source     = require("vinyl-source-stream")
-icons      = require("@cypress/icons")
 Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
 browserify = require("browserify")
+icons      = require("@cypress/icons")
 ext        = require("./")
 
 gulp.task "copy:socket:client", ->

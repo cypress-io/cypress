@@ -1,0 +1,44 @@
+.modal {
+  display: block;
+}
+
+.modal-dialog {
+  width: 550px;
+}
+
+.close {
+  position: relative;
+  top: 5px;
+  &:hover, &:focus, &:active {
+    cursor: pointer;
+  }
+}
+
+.modal-body.os-dialog {
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  padding: 15px 30px;
+
+  .no-left-padding {
+    padding-left: 0;
+  }
+
+  hr {
+    border-top: 1px solid #c0c0bf;
+  }
+
+  form .control-label {
+    padding-right: 0;
+  }
+}
+
+.manage-orgs-btn {
+  padding: 6px 0;
+}
+
+.checkbox small {
+  font-size: 11px;
+  color: #888;
+  clear: both;
+  display: block;
+}

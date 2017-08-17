@@ -1,12 +1,10 @@
 <nav id="mobile-nav">
   <div id="mobile-nav-inner">
     <ul id="mobile-nav-list">
-      {{ header_menu('mobile-nav') }}
-      <li class="mobile-nav-item">
-        <a href="https://github.com/{{ config.github }}" class="mobile-nav-link" rel="external" target="_blank">GitHub</a>
-      </li>
+      {{ menu('main') }}
+      <a href="https://github.com/{{ config.github }}" class="main-nav-link" rel="external" target="_blank">GitHub</a>
     </ul>
-    {% if page.layout == 'page' %}
+    {% if page.layout == 'page' || page.layout == 'faq' %}
       {{ doc_sidebar('mobile-nav') }}
     {% endif %}
   </div>

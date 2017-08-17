@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Server API", ->
   beforeEach ->
     @iframe = $("<iframe />").appendTo $("body")

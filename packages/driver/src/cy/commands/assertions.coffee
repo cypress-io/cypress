@@ -221,13 +221,6 @@ assertFn = (passed, message, value, actual, expected, error, verifying = false) 
       _.extend obj,
         Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
 
-    renderProps: ->
-      ## by default, the reporter will truncate a message to 100 chars
-      ## this bypasses the truncation
-      {
-        message: message
-      }
-
   ## think about completely gutting the whole object toString
   ## which chai does by default, its so ugly and worthless
 

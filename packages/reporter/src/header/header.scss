@@ -2,18 +2,24 @@
   header {
     background-color: #f8f8f8;
     box-shadow: 0 1px 3px #ccc;
-    height: $header-height;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    min-height: $header-height;
     outline: 0;
-    overflow: visible;
-    position: absolute;
+    overflow: hidden;
     width: 100%;
     z-index: 1;
+
+    .spacer {
+      flex-grow: 2;
+    }
 
     button {
       background-color: #f8f8f8;
       border-color: transparent;
       border-radius: 0;
-      display: none;
+      display: block;
       line-height: 26px;
       outline: 0;
       padding: 10px 0;
@@ -31,31 +37,35 @@
   }
 
   .focus-tests {
-    border-right: 1px solid #ddd;
-    float: left;
-    font-weight: normal;
-    padding: 10px 12px;
-    width: auto !important;
+    display: flex;
 
-    span {
-      display: none;
-    }
+    button {
+      border-right: 1px solid #ddd;
+      font-weight: normal;
+      padding: 10px 12px;
+      width: auto !important;
 
-    i {
-      margin-right: 5px;
+      span {
+        display: none;
+      }
+
+      i {
+        margin-right: 5px;
+      }
     }
   }
 
   .stats {
-    float: left;
+    display: flex;
+    flex-wrap: wrap;
     margin-bottom: 0;
     padding: 0;
 
     li {
-      display: none;
-      float: left;
+      display: block;
       font-size: 16px;
       font-weight: 500;
+      height: 46px;
       line-height: 26px;
       list-style-type: none;
       padding: 10px 5px;
@@ -86,7 +96,12 @@
   }
 
   .controls {
-    float: right;
+    display: flex;
+    flex-wrap: wrap;
+
+    > span {
+      display: flex;
+    }
 
     .paused-label {
       background-color: #CC4239;
@@ -128,34 +143,13 @@
   }
 
   // utilizing element size queries: https://github.com/marcj/css-element-queries
-  &[min-width~="200px"] {
-    .stats {
-      .passed,
-      .failed,
-      .pending {
-        display: inline-block;
-      }
-    }
-  }
-
-  &[min-width~="300px"] {
-    .stats .duration {
-      display: inline-block;
-    }
-  }
-
+  // styles take effect when width is greater than or equal to the specified amount
   &[min-width~="400px"] {
-    header button {
-      display: inline-block;
-    }
-  }
-
-  &[min-width~="500px"] {
     header button {
       width: 50px;
     }
 
-    .focus-tests span {
+    .focus-tests button span {
       display: inline;
     }
 

@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+path = require("path")
 settings = require("#{root}lib/util/settings")
 
 projectRoot = process.cwd()
@@ -53,7 +54,7 @@ describe "lib/settings", ->
 
   context ".id", ->
     beforeEach ->
-      @projectPath = "path/to/project/"
+      @projectPath = path.join(projectRoot, "_test-output/path/to/project/")
       fs.ensureDirAsync(@projectPath)
 
     afterEach ->
@@ -114,6 +115,6 @@ describe "lib/settings", ->
     it "only writes over conflicting keys", ->
       @setup({projectId: "12345", autoOpen: true})
       .then ->
-        settings.write(projectRoot, projectId: "abc123")
+        settings.write(projectRoot, {projectId: "abc123"})
       .then (obj) ->
         expect(obj).to.deep.eq {projectId: "abc123", autoOpen: true}

@@ -1,13 +1,10 @@
 import React, { Component } from 'react'
-import { withRouter } from 'react-router'
-import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
 
 import ipc from '../lib/ipc'
-import state from '../lib/state'
+import authStore from '../lib/auth-store'
 
-@withRouter
 @observer
 class Login extends Component {
   constructor (props) {
@@ -17,12 +14,6 @@ class Login extends Component {
       isLoggingIn: false,
       error: null,
     }
-
-    autorun(() => {
-      if (state.hasUser) {
-        return this.props.router.push('/')
-      }
-    })
   }
 
   render () {
@@ -82,9 +73,10 @@ class Login extends Component {
 
       return ipc.logIn(code)
     })
-    .then(action('logged:in', (user) => {
-      state.setUser(user)
-    }))
+    .then((user) => {
+      authStore.setUser(user)
+      return null
+    })
     .catch(alreadyOpen, () => {
       return // do nothing if we're already open!
     })

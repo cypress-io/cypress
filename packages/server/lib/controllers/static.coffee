@@ -1,5 +1,5 @@
 send      = require("send")
-staticPkg = require("../../../static")
+staticPkg = require("@packages/static")
 
 module.exports = {
   handle: (req, res) ->

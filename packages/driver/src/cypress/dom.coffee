@@ -58,7 +58,18 @@ $Dom = {
     $el.css("display") is "none"
 
   elHasOverflowHidden: ($el) ->
-    $el.css("overflow") is "hidden"
+    "hidden" in [$el.css("overflow"), $el.css("overflow-y"), $el.css("overflow-x")]
+
+  elIsPositioned: ($el) ->
+    $el.css("position") in ["relative", "absolute", "fixed", "sticky"]
+
+  elHasPositionRelative: ($el) ->
+    $el.css("position") is "relative"
+
+  elHasClippableOverflow: ($el) ->
+    $el.css("overflow") in ["hidden", "scroll", "auto"] or
+    $el.css("overflow-y") in ["hidden", "scroll", "auto"] or
+    $el.css("overflow-x") in ["hidden", "scroll", "auto"]
 
   elIsScrollable: ($el) ->
     ## if we're the window, we want to get the document's
@@ -97,13 +108,10 @@ $Dom = {
       return false
 
   canClipContent: ($el) ->
-    elStyle    = getComputedStyle($el[0])
-    elOverflow = elStyle.overflow
+    @elIsPositioned($el) and @elHasClippableOverflow($el)
 
-    ##: if overflow-x, overflow-y hidden, then overflow is auto
-    (elOverflow is 'hidden') or
-    (elOverflow is 'scroll') or
-    (elOverflow is 'auto')
+  canBeClippedByAncestor: ($el, $ancestor) ->
+    @elHasPositionRelative($el) and @elHasClippableOverflow($ancestor)
 
   elDescendentsHavePositionFixedOrAbsolute: ($parent, $child) ->
     ## create an array of all elements between $parent and $child
@@ -114,60 +122,63 @@ $Dom = {
     _.some $els.get(), (el) ->
       fixedOrAbsoluteRe.test $(el).css("position")
 
-  elIsOutOfBoundsOfAncestorsOverflow: ($el) ->
-    el = $el[0]
-    ## get some offset positions for el
-    elTop = el.offsetTop ## Top corner position number
-    elLeft = el.offsetLeft ## Left corner position number
-    elWidth = el.offsetWidth ## el width
-    elHeight = el.offsetHeight ## el height
-    elBottom = elTop + elHeight ## Bottom corner position number
-    elRight = elLeft + elWidth ## Right corner position number
+  ## walks up the tree and compares the target's size and position
+  ## with that of its ancestors to determine if it's hidden due to being
+  ## out of bounds of any ancestors that hide overflow
+  elIsOutOfBoundsOfAncestorsOverflow: ($el, $prevAncestor, $ancestor, adjustments) ->
+    $prevAncestor ?= $el
+    $ancestor ?= $el.parent()
+    adjustments ?= {left: 0, top: 0}
 
-    @isInBounds($el, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
-
-  isInBounds: ($el, elTop, elRight, elBottom, elLeft, elWidth, elHeight) ->
-    if not $parent = $el.parent()
-      return false
+    return false if not $ancestor
 
     ## if we've reached the top parent, which is document
     ## then we're in bounds all the way up, return false
-    return false if $parent.is("body,html") or utils.hasDocument($parent)
+    return false if $ancestor.is("body,html") or utils.hasDocument($ancestor)
 
-    parent = $parent[0]
+    ancestor = $ancestor[0]
 
-    ## if the current element's offset parent IS the
-    ## parent, we want to add that offset to the element
+    ## as we walk up the tree, we add any offset parent's
+    ## offsets to the left and top positions of the $el
     ## so we can make correct comparisons of the boundaries.
-    if parent is $el[0].offsetParent
-      elLeft += parent.offsetLeft
-      elTop += parent.offsetTop
+    if ancestor is $prevAncestor[0].offsetParent
+      adjustments.left += ancestor.offsetLeft
+      adjustments.top += ancestor.offsetTop
 
-    ## hidden, scroll, or auto can all chip children elements
-    if @canClipContent($parent)
-      parentTop         = parent.offsetTop
-      parentLeft        = parent.offsetLeft
-      parentScrollTop   = parent.scrollTop
-      parentScrollLeft  = parent.scrollLeft
-      parentWidth       = parent.offsetWidth
-      parentHeight      = parent.offsetHeight
+    elProps = @_positionProps($el, adjustments)
 
-      ## Our target el is out of bounds
+    if @canClipContent($ancestor) or @canBeClippedByAncestor($el, $ancestor)
+      ancestorProps = @_positionProps($ancestor)
+
+      ## target el is out of bounds
       return true if (
-        ## target el is to the right of the parent el's visible area
-        elLeft > parentWidth + parentLeft + parentScrollLeft or
+        ## target el is to the right of the ancestor's visible area
+        elProps.left > ancestorProps.width + ancestorProps.left + ancestorProps.scrollLeft or
 
-        ## target el is to the left of the parent el visible area
-        elLeft + elWidth < parentLeft or
+        ## target el is to the left of the ancestor's visible area
+        elProps.left + elProps.width < ancestorProps.left or
 
-        ## target el is under the parent el visible area
-        elTop > parentHeight + parentTop + parentScrollTop or
+        ## target el is under the ancestor's visible area
+        elProps.top > ancestorProps.height + ancestorProps.top + ancestorProps.scrollTop or
 
-        ## target el is above the parent el visible area
-        elTop + elHeight < parentTop
+        ## target el is above the ancestor's visible area
+        elProps.top + elProps.height < ancestorProps.top
       )
 
-    @isInBounds($parent, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
+    @elIsOutOfBoundsOfAncestorsOverflow($el, $ancestor, $ancestor.parent(), adjustments)
+
+  _positionProps: ($el, adjustments = {}) ->
+    el = $el[0]
+    return {
+      width: el.offsetWidth
+      height: el.offsetHeight
+      top: el.offsetTop + (adjustments.top or 0)
+      right: el.offsetLeft + el.offsetWidth
+      bottom: el.offsetTop + el.offsetHeight
+      left: el.offsetLeft + (adjustments.left or 0)
+      scrollTop: el.scrollTop
+      scrollLeft: el.scrollLeft
+    }
 
   elIsHiddenByAncestors: ($el, $origEl) ->
     ## store the original $el
@@ -264,6 +275,34 @@ $Dom = {
 
       else
         "Cypress could not determine why this element (#{node}) is not visible."
+
+  elIsTextLike: ($el) ->
+    isSel = (selector) => @elMatchesSelector($el, selector)
+    isType = (type) => @elIsType($el, type)
+
+    _.some([
+      isSel("textarea")
+      isSel(":text")
+      isSel("[contenteditable]")
+      isType("password")
+      isType("email")
+      isType("number")
+      isType("date")
+      isType("week")
+      isType("month")
+      isType("time")
+      isType("datetime")
+      isType("datetime-local")
+      isType("search")
+      isType("url")
+      isType("tel")
+    ])
+
+  elIsType: ($el, type) ->
+    ($el.attr("type") or "").toLowerCase() is type
+
+  elMatchesSelector: ($el, selector) ->
+    $el.is(selector)
 }
 
 module.exports = $Dom

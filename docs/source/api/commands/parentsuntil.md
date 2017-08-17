@@ -1,59 +1,72 @@
-title: parentsuntil
-comments: true
+---
+title: parentsUntil
+comments: false
 ---
 
-Get all ancestors of each DOM element in the set of matched DOM elements up to, but not including, the element matched by the selector
+Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parentsUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parentsUntil()` http://api.jquery.com/parentsUntil %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.parentsUntil( *selector* )](#usage)
+```javascript
+.parentsUntil(selector)
+.parentsUntil(selector, filter)
+.parentsUntil(selector, filter, options)
+.parentsUntil(element)
+.parentsUntil(element, filter)
+.parentsUntil(element, filter, options)
+```
 
-Get all of the ancestors of the elements until the selector.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.parentsUntil( *selector*, *filter )](#filter-usage)
+```javascript
+cy.get('p').parentsUntil('.article') // Yield parents of 'p' until '.article'
+```
 
-When a filter is provided, it retrieves all of the ancestors up until the selector only if it matches that filter.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.parentsUntil()                  // Errors, cannot be chained off 'cy'
+cy.location().parentsUntil('href') // Errors, 'location' does not yield DOM element
+```
 
-# [cy.parentsUntil( *element* )](#element-usage)
+## Arguments
 
-Get all of the ancestors of the elements until the DOM node or jQuery object.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-***
+The selector where you want finding parent ancestors to stop.
 
-# [cy.parentsUntil( *element*, *filter )](#element-filter-usage)
+**{% fa fa-angle-right %} element**  ***(DOM node, jQuery Object)***
 
-When a filter is provided, it retrieves all of the ancestors up until the DOM node or jQuery object only if it matches that filter.
+The element where you want finding parent ancestors to stop.
 
-***
+**{% fa fa-angle-right %} filter**  ***(String selector)***
 
-# Options
+A selector used to filter matching DOM elements.
 
-Pass in an options object to change the default behavior of `cy.parentsUntil`.
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-**cy.parentsUntil( *selector*, *options* )**
-**cy.parentsUntil( *selector*, *filter*, *options* )**
-**cy.parentsUntil( *element*, *options* )**
-**cy.parentsUntil( *element*, *filter*, *options* )**
+Pass in an options object to change the default behavior of `.parentsUntil()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parentsUntil %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .parentsUntil %}
 
-## Find all of the `.active` element's ancestors until `.nav`
+# Examples
+
+## Selector
+
+***Find all of the `.active` element's ancestors until `.nav`***
 
 ```html
 <ul class="nav">
@@ -72,33 +85,43 @@ Option | Default | Notes
 ```
 
 ```javascript
-//returns [ul.menu, li]
-cy.get(".active").parentsUntil(".nav")
+// yields [ul.menu, li]
+cy.get('.active').parentsUntil('.nav')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .parentsUntil %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parentsUntil %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parentsUntil %}
 
 # Command Log
 
-## Find all of the `.active` element's ancestors until `.nav`
+***Find all of the `active` element's ancestors until `.nav`***
 
 ```javascript
-cy.get(".active").parentsUntil(".nav")
+cy.get('.active').parentsUntil('.nav')
 ```
 
 The commands above will display in the command log as:
 
-<img width="561" alt="screen shot 2017-03-23 at 2 37 31 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264301/516d5fd6-0fd6-11e7-9ab7-b55b211acde3.png">
+![Command Log parentsUntil](/img/api/parentsuntil/get-all-parents-until-nav-selector.png)
 
 When clicking on `parentsUntil` within the command log, the console outputs the following:
 
-<img width="523" alt="screen shot 2017-03-23 at 2 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264309/60cc75de-0fd6-11e7-97b4-d0aa184b0ba6.png">
+![Console Log parentsUntil](/img/api/parentsuntil/show-parents-until-nav-in-console.png)
 
-***
+# See also
 
-# Related
-
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [prevUntil](https://on.cypress.io/api/prevuntil)
-- [nextUntil](https://on.cypress.io/api/nextuntil)
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.prevUntil()` prevuntil %}
+- {% url `.nextUntil()` nextuntil %}

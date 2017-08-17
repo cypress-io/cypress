@@ -1,125 +1,178 @@
-title: exec
-comments: true
 ---
-
-Allows you to execute a system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rake db:seed`, etc.
-
-`cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test, but outside the scope of Cypress. This is great for running build scripts, seeding your test database, starting or killing processes, etc.
-
-`cy.exec` does not support commands that don't exit, such as `rails server`, a task that runs a watch, or any process that needs to be manually interrupted to stop. A command must exit within the timeout or Cypress will kill the command's process and fail the current test.
-
-We don't recommend executing commands that take a long time to exit. Cypress will not continue running any other commands until `cy.exec` has finished, so a long-running command will drastically slow down your test cycle.
-
-The current working directory is set to the project root (the directory that contains cypress.json).
-
-| | |
-|--- | --- |
-| **Returns** | an object with the exit `code`, the `stdout`, and the `stderr` |
-| **Timeout** | `cy.exec` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
-
-***
-
-# [cy.exec( *command* )](#section-command-usage)
+title: exec
+comments: false
+---
 
 Execute a system command.
 
-***
+{% note warning 'Anti-Pattern' %}
+Don't try to start a web server from `cy.exec()`.
 
-# Options
+Read about {% url 'best practices' best-practices#Web-Servers %} here.
+{% endnote %}
 
-Pass in an options object to change the default behavior of `cy.exec`.
+# Syntax
 
-**cy.exec( *command*, *options* )**
+```javascript
+cy.exec(command)
+cy.exec(command, options)
+```
 
-Option | Default | Notes
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+cy.exec('npm run build')    
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} command** ***(String)***
+
+The system command to be executed from the project root (the directory that contains `cypress.json`).
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `cy.exec()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to allow the command to execute
-`failOnNonZeroExit` | `true` | Fail if the command exits with a non-zero code
-`env` | `{}` | Object of environment variables to set before the command executes (e.g. { USERNAME: 'johndoe' }). Will be merged with existing system environment variables
+`log` | `true` | {% usage_options log %}
+`env` | `{}` | Object of environment variables to set before the command executes (e.g. `{USERNAME: 'johndoe'}`). Will be merged with existing system environment variables
+`failOnNonZeroExit` | `true` | whether to fail if the command exits with a non-zero code
+`timeout` | {% url `execTimeout` configuration#Timeouts %} | {% usage_options timeout cy.exec %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+`cy.exec()` yields an object with the following properties:
+- `code`
+- `stdout`
+- `stderr`
 
-## Run a build command
+# Examples
 
-```javascript
-cy
-  .exec("npm run build")
-  .then(function (result) {
-    // subject is now the result object
-    // {
-    //   code: 0,
-    //   stdout: "Files successfully built",
-    //   stderr: ""
-    // }
-  })
-```
+## Command
 
-## Seed the database and assert it was successful
+`cy.exec()` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test outside the scope of Cypress. This is great for:
 
-```javascript
-cy.exec("rake db:seed").its("code").should("eq", 0)
-```
+- Running build scripts
+- Seeding your test database
+- Starting processes
+- Killing processes
 
-## Run an arbitrary script and assert its output
+***Run a build command***
 
 ```javascript
-cy.exec("npm run my-script").its("stdout").should("contain", "Done running the script")
+cy.exec('npm run build').then(function (result) {
+  // yields the 'result' object
+  // {
+  //   code: 0,
+  //   stdout: "Files successfully built",
+  //   stderr: ""
+  // }
+})
 ```
 
-## Change the timeout
+***Seed the database and assert it was successful***
+
+```javascript
+cy.exec('rake db:seed').its('code').should('eq', 0)
+```
+
+***Run an arbitrary script and assert its output***
+
+```javascript
+cy.exec('npm run my-script').its('stdout').should('contain', 'Done running the script')
+```
+
+***Write to a file to create a fixture from response body***
+```javascript
+cy.server()
+cy.route('POST', '/comments').as('postComment')
+cy.get('.add-comment').click()
+cy.wait('@postComment').then(function(xhr){
+  cy.exec(`echo ${JSON.stringify(xhr.responseBody)} >cypress/fixtures/comment.json`)
+  cy.fixture('comment.json').should('deep.eq', xhr.responseBody)
+})
+```
+
+## Options
+
+***Change the timeout***
+
+You can increase the time allowed to execute the command, although *we don't recommend executing commands that take a long time to exit*.
+
+Cypress will *not* continue running any other commands until `cy.exec()` has finished, so a long-running command will drastically slow down your test cycle.
 
 ```javascript
 // will fail if script takes longer than 20 seconds to finish
-cy.exec("npm run build", { timeout: 20000 });
+cy.exec('npm run build', { timeout: 20000 });
 ```
 
-## Choose not to fail on non-zero exit and assert on code and stderr
+***Choose to not fail on non-zero exit and assert on code and stderr***
 
 ```javascript
 cy
-  .exec("man bear pig", { failOnNonZeroExit: false })
-  .its("code").should("eq", 1)
-  .its("stderr").should("contain", "No manual entry for bear")
+  .exec('man bear pig', { failOnNonZeroExit: false })
+  .its('code').should('eq', 1)
+  .its('stderr').should('contain', 'No manual entry for bear')
 ```
 
-## Specify environment variables
+***Specify environment variables***
 
 ```javascript
 cy
-  .exec("echo $USERNAME", { env: { USERNAME: "johndoe" } })
-  .its("stdout").should("contain", "johndoe")
+  .exec('echo $USERNAME', { env: { USERNAME: 'johndoe' } })
+  .its('stdout').should('contain', 'johndoe')
 ```
 
-## Write to a file to create a fixture from response body
-```javascript
-cy
-  .server()
-  .route("POST", "/comments").as("postComment")
-  .get(".add-comment").click()
-  .wait("@postComment").then(function(xhr){
-    cy
-      .exec("echo '" + JSON.stringify(xhr.responseBody) + "'>cypress/fixtures/comment.json")
-      .fixture("comment.json").should("deep.eq", xhr.responseBody)
-  })
-```
+# Notes
 
-***
+## Commands Must Exit
+
+***Commands that do not exit are not supported***
+
+`cy.exec()` does not support commands that don't exit, such as:
+
+- Starting a `rails server`
+- A task that runs a watch
+- Any process that needs to be manually interrupted to stop
+
+A command must exit within the `execTimeout` or Cypress will kill the command's process and fail the current test.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements exec cy.exec %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.exec %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts exec cy.exec %}
 
 # Command Log
 
-## List the contents of cypress.json
+***List the contents of cypress.json***
 
 ```javascript
-cy.exec("cat cypress.json")
+cy.exec('cat cypress.json')
 ```
 
 The command above will display in the command log as:
 
-<img width="445" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/15369507/e03a7eca-1d00-11e6-8558-396d8c9b6d98.png">
+![Command Log exec](/img/api/exec/exec-cat-in-shell.png)
 
 When clicking on the `exec` command within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15969867/e3ab646e-2eff-11e6-9199-987ca2f74025.png">
+![console.log exec](/img/api/exec/console-shows-code-shell-stderr-and-stdout-for-exec.png)
+
+# See also
+
+- {% url `cy.readFile()` readfile %}
+- {% url `cy.request()` request %}
+- {% url `cy.writeFile()` writefile %}

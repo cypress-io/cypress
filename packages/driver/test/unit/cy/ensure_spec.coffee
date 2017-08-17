@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Ensure Extensions", ->
   enterCommandTestingMode()
 

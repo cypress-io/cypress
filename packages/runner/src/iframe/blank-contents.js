@@ -88,7 +88,7 @@ export default () => {
         <li>Start your app's server</li>
         <li>
           <kbd>
-            <a href='https://on.cypress.io/api/visit' target='_blank'>cy.visit()</a>
+            <a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a>
           </kbd>
           your app
         </li>

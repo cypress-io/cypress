@@ -9,9 +9,16 @@
 
   if (!toc) return;
 
-  // https://github.com/lcdsantos/menuspy
-  // This highlights the proper toc link while scrolling
   var ms = new MenuSpy(tocInner)
+
+  // we need this to be called after all images have loaded
+  // otherwise the height for the menuspy is not properly calculated
+  window.addEventListener('load', function(){
+    // https://github.com/lcdsantos/menuspy
+    // This highlights the proper toc link while scrolling
+    ms.cacheItems()
+    ms.tick()
+  });
 
   // This keeps the toc within the view
   function updateSidebarPosition(){

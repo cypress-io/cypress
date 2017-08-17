@@ -3,7 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 rp       = require("request-promise")
 os       = require("os")
-pkg      = require("#{root}package.json")
+pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
 
@@ -51,7 +51,7 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(project)
 
-  context ".getProjectBuilds", ->
+  context ".getProjectRuns", ->
     it "GET /projects/:id/builds + returns builds", ->
       builds = []
 
@@ -60,7 +60,7 @@ describe "lib/api", ->
       .get("/projects/id-123/builds")
       .reply(200, builds)
 
-      api.getProjectBuilds("id-123", "auth-token-123")
+      api.getProjectRuns("id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(builds)
 
@@ -71,7 +71,7 @@ describe "lib/api", ->
       .socketDelay(5000)
       .reply(200, [])
 
-      api.getProjectBuilds("id-123", "auth-token-123", {timeout: 100})
+      api.getProjectRuns("id-123", "auth-token-123", {timeout: 100})
       .then (ret) ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -83,7 +83,7 @@ describe "lib/api", ->
         then: (fn) -> fn()
       })
 
-      api.getProjectBuilds("id-123", "auth-token-123")
+      api.getProjectRuns("id-123", "auth-token-123")
       .then (ret) ->
         expect(rp.get).to.be.calledWithMatch({timeout: 10000})
 
@@ -97,7 +97,7 @@ describe "lib/api", ->
         }
       })
 
-      api.getProjectBuilds("id-123", "auth-token-123")
+      api.getProjectRuns("id-123", "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -125,7 +125,7 @@ describe "lib/api", ->
       .then (resp) ->
         expect(resp).to.eq("OK")
 
-  context ".createBuild", ->
+  context ".createRun", ->
     it "POST /builds + returns buildId", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
@@ -148,7 +148,7 @@ describe "lib/api", ->
         buildId: "new-build-id-123"
       })
 
-      api.createBuild({
+      api.createRun({
         projectId:         "id-123"
         recordKey:         "token-123"
         commitSha:         "sha"
@@ -188,7 +188,7 @@ describe "lib/api", ->
         }
       })
 
-      api.createBuild({
+      api.createRun({
         projectId:         null
         recordKey:         "token-123"
         commitSha:         "sha"
@@ -225,7 +225,7 @@ describe "lib/api", ->
       .socketDelay(5000)
       .reply(200, {})
 
-      api.createBuild({
+      api.createRun({
         timeout: 100
       })
       .then ->
@@ -235,13 +235,16 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: ->
-          get: ->
-            catch: ->
+        promise: -> {
+          get: -> {
+            catch: -> {
               then: (fn) -> fn()
+            }
+          }
+        }
       })
 
-      api.createBuild({})
+      api.createRun({})
       .then ->
         expect(rp.post).to.be.calledWithMatch({timeout: 10000})
 
@@ -334,10 +337,13 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: ->
-          get: ->
-            catch: ->
+        promise: -> {
+          get: -> {
+            catch: -> {
               then: (fn) -> fn()
+            }
+          }
+        }
       })
 
       api.createInstance({})
@@ -742,13 +748,12 @@ describe "lib/api", ->
       api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
         expect(p.timeout).to.be.calledWith(3000)
 
-    it "times out after exceeding timeout", (done) ->
+    it "times out after exceeding timeout", ->
       ## force our connection to be delayed 5 seconds
       @setup({foo: "bar"}, "auth-token-123", 5000)
 
       ## and set the timeout to only be 50ms
       api.createRaygunException({foo: "bar"}, "auth-token-123", 50)
       .then ->
-        done("errored: it did not catch the timeout error!")
+        throw new Error("errored: it did not catch the timeout error!")
       .catch Promise.TimeoutError, ->
-        done()

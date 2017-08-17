@@ -3,7 +3,6 @@ Backbone = require("backbone")
 moment = require("moment")
 Promise = require("bluebird")
 
-$Cypress = require("../cypress")
 $Log = require("./log")
 utils = require("./utils")
 
@@ -17,7 +16,7 @@ RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook bod
 
 triggerMocha = (Cypress, event, args...) ->
   ## dont trigger mocha events if we are not headless
-  return if not $Cypress.isHeadless
+  return if not Cypress.isHeadless
 
   Cypress.trigger("mocha", event, args...)
 
@@ -403,7 +402,7 @@ class $Runner
     ## we dont need to hold a log reference
     ## to anything in memory when we're headless
     ## because you cannot inspect any logs
-    return if $Cypress.isHeadless
+    return if Cypress.isHeadless
 
     test = @testsById[attrs.testId]
 

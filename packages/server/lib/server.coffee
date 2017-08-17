@@ -8,7 +8,8 @@ express      = require("express")
 Promise      = require("bluebird")
 evilDns      = require("evil-dns")
 httpProxy    = require("http-proxy")
-httpsProxy   = require("../../https-proxy")
+httpsProxy   = require("@packages/https-proxy")
+log          = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
@@ -37,7 +38,6 @@ setProxiedUrl = (req) ->
   ## how browsers would normally send
   ## use their url
   req.proxiedUrl = req.url
-  logger.info "Setting proxied url", proxiedUrl: req.proxiedUrl
 
   req.url = url.parse(req.url).path
 
@@ -145,6 +145,8 @@ class Server
           reject @portInUseErr(port)
 
       onUpgrade = (req, socket, head) =>
+        log("Got UPGRADE request from %s", req.url)
+
         @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
 
       callListeners = (req, res) =>
@@ -158,21 +160,14 @@ class Server
           upgrade.call(@_server, req, socket, head)
 
       @_server.on "connect", (req, socket, head) =>
+        log("Got CONNECT request from %s", req.url)
+
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
             ## make a direct connection only if
             ## our req url does not match the origin policy
             ## which is the superDomain + port
-            dc = not cors.urlMatchesOriginPolicyProps("https://" + req.url, @_remoteProps)
-
-            if dc
-              str = "Making"
-            else
-              str = "Not making"
-
-            logger.info(str + " direction connection to: '#{req.url}'")
-
-            return dc
+            not cors.urlMatchesOriginPolicyProps("https://" + req.url, @_remoteProps)
         })
 
       @_server.on "upgrade", onUpgrade
@@ -197,16 +192,21 @@ class Server
           ## and make sure the server is connectable!
           if baseUrl
             connect.ensureUrl(baseUrl)
+            .return(null)
             .catch (err) =>
-              reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)
-        .then =>
+              if config.isHeadless
+                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+              else
+                errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+
+        .then (warning) =>
           ## once we open set the domain
           ## to root by default
           ## which prevents a situation where navigating
           ## to http sites redirects to /__/ cypress
           @_onDomainSet(baseUrl ? "<root>")
 
-          resolve(port)
+          resolve([port, warning])
 
   _port: ->
     @_server?.address()?.port
@@ -218,7 +218,7 @@ class Server
 
         @isListening = true
 
-        logger.info("Server listening", {port: port})
+        log("Server listening on port %s", port)
 
         @_server.removeListener "error", onError
 
@@ -407,8 +407,8 @@ class Server
         .catch(error)
 
   _onDomainSet: (fullyQualifiedUrl) ->
-    log = (type, url) ->
-      logger.info("Setting #{type}", value: url)
+    l = (type, url) ->
+      log("Setting %s %s", type, url)
 
     ## if this isn't a fully qualified url
     ## or if this came to us as <root> in our tests
@@ -421,11 +421,11 @@ class Server
       @_remoteDomainName = DEFAULT_DOMAIN_NAME
       @_remoteProps = null
 
-      log("remoteOrigin", @_remoteOrigin)
-      log("remoteStrategy", @_remoteStrategy)
-      log("remoteHostAndPort", @_remoteProps)
-      log("remoteDocDomain", @_remoteDomainName)
-      log("remoteFileServer", @_remoteFileServer)
+      l("remoteOrigin", @_remoteOrigin)
+      l("remoteStrategy", @_remoteStrategy)
+      l("remoteHostAndPort", @_remoteProps)
+      l("remoteDocDomain", @_remoteDomainName)
+      l("remoteFileServer", @_remoteFileServer)
 
     else
       @_remoteOrigin = origin(fullyQualifiedUrl)
@@ -440,9 +440,9 @@ class Server
 
       @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
 
-      log("remoteOrigin", @_remoteOrigin)
-      log("remoteHostAndPort", @_remoteProps)
-      log("remoteDocDomain", @_remoteDomainName)
+      l("remoteOrigin", @_remoteOrigin)
+      l("remoteHostAndPort", @_remoteProps)
+      l("remoteDocDomain", @_remoteDomainName)
 
     return @_getRemoteState()
 

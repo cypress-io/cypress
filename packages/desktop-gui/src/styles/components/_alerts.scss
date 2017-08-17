@@ -1,0 +1,41 @@
+.alert {
+  border-radius: 0;
+  margin-bottom: 40px;
+  position: relative;
+
+  &>ul {
+    padding-left: 20px;
+  }
+
+  .btn-sm {
+    margin-top: 10px;
+
+    + .btn-sm {
+      margin-left: 5px;
+    }
+  }
+
+  &.alert-dismissable .close, &.alert-dismissible .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+  }
+
+  &.error p {
+    overflow: hidden;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    -ms-word-break: break-all;
+    word-break: break-word;
+  }
+}
+
+.full-alert {
+  overflow: auto;
+  text-align: center;
+  padding: 20px;
+  margin: 80px 60px 60px;
+}

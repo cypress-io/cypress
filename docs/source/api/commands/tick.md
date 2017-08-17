@@ -1,81 +1,112 @@
+---
 title: tick
-comments: true
+comments: false
 ---
 
-`cy.tick` is used to move time after overriding native time functions with [`cy.clock`](https://on.cypress.io/api/clock).
+Move time after overriding a native time function with {% url `cy.clock()` clock %}.
 
-It moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
+{% note warning %}
+{% url `cy.clock()` clock %} must be called before `cy.tick()` in order to override native time functions first.
+{% endnote %}
 
-[`cy.clock`](https://on.cypress.io/api/clock) must be called before `cy.tick` in order to override native time functions first.
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#section-clock-api) |
+```javascript
+cy.tick(milliseconds)
+```
 
-***
+## Usage
 
-# [cy.tick( *milliseconds* )](#section-usage)
+**{% fa fa-check-circle green %} Correct Usage**
 
-Moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
+```javascript
+cy.tick(500)
+```
 
-***
+## Arguments
 
-# Usage
+**{% fa fa-angle-right %} milliseconds** ***(Number)***
 
-## Create a clock and move time to trigger a setTimeout
+The number of `milliseconds` to move the clock. Any timers within the affected range of time will be called.
+
+## Yields {% helper_icon yields %}
+
+`cy.tick()` yields a `clock` object with the following methods:
+
+- **`clock.tick(milliseconds)`**
+
+  Move the clock a number of milliseconds. Any timers within the affected range of time will be called.
+
+- **`clock.restore()`**
+
+  Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+
+You can also access the `clock` object via `this.clock` in a {% url `.then()` then %} callback.
+
+# Examples
+
+## Milliseconds
+
+***Create a clock and move time to trigger a `setTimeout`***
 
 ```javascript
 // app code loaded by index.html
-window.foo = () => {
+window.addIntro = () => {
   setTimeout(() => {
-    document.getElementById('#foo').textContent = 'Foo'
+    document.getElementById('#header').textContent = 'Hello, World'
   }, 500)
 }
-
-// test
-cy
-  .clock()
-  .visit("/index.html")
-  .window().invoke("foo")
-  .tick(500)
-  .get("#foo")
-    .should("have.text", "Foo")
 ```
 
-***
+```javascript
+cy.clock()
+cy.visit('/index.html')
+cy.window().invoke('addIntro')
+cy.tick(500)
+cy.get('#header').should('have.text', 'Hello, World')
+```
 
-## Example Recipe
+***Using `cy.clock()` and `cy.tick()`***
 
-{% note info Using cy.clock and cy.tick %}
-[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% note info %}
+{% url "Check out our example recipe testing spying, stubbing and time" stubs-spies-and-clocks-recipe %}
 {% endnote %}
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements tick cy.tick %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility cy.tick %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.tick %}
 
 # Command Log
 
-## Create a clock and tick it 1 second
+***Create a clock and tick it 1 second***
 
 ```javascript
-cy
-  .clock()
-  .tick(1000)
+cy.clock()
+cy.tick(1000)
 ```
 
 The command above will display in the command log as:
 
-<img width="448" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png">
+![Command Log](/img/api/tick/tick-machine-clock-1-second-in-time.png)
 
 When clicking on the `tick` command within the command log, the console outputs the following:
 
-<img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22438009/504fecd8-e6f8-11e6-8ef1-4d7cb0b5594c.png">
+![Console Log](/img/api/tick/console-shows-same-clock-object-as-clock-command.png)
 
-***
+# See also
 
-# Related
-
-- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
-- [clock](https://on.cypress.io/api/clock)
-- [stub](https://on.cypress.io/api/stub)
-- [spy](https://on.cypress.io/api/spy)
+- {% url `cy.clock()` clock %}
+- {% url `cy.spy()` spy %}
+- {% url `cy.stub()` stub %}
+- {% url 'Guide: Stubs, Spies and Clocks' stubs-spies-and-clocks %}
+- {% url "Recipe: Controlling Behavior with Spies, Stubs, and Clocks" stubs-spies-and-clocks-recipe %}

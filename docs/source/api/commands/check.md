@@ -1,117 +1,153 @@
+---
 title: check
-comments: true
+comments: false
 ---
 
-Check the checkboxes or radios within the current subject.
+Check checkbox(es) or radio(s).
 
-**The following events are fired during check:** `mousedown`, `focus`, `mouseup`, `click`
+{% note warning %}
+This element must be an `<input>` with type `checkbox` or `radio`.
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.check` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+# Syntax
 
-***
+```javascript
+.check()
+.check(value)
+.check(values)
+.check(options)
+.check(value, options)
+.check(values, options)
+```
 
-# [cy.check()](#section-usage)
+## Usage
 
-Checks checkboxes or radios.
+**{% fa fa-check-circle green %} Correct Usage**
 
-***
+```javascript
+cy.get('[type="checkbox"]').check()       // Check checkbox element
+cy.get('[type="radio"]').first().check()  // Check first radio element
+```
 
-# [cy.check( *value* )](#section-value-usage)
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-Checks the checkbox or radio with the matching value.
+```javascript
+cy.check('[type="checkbox"]') // Errors, cannot be chained off 'cy'
+cy.get('p:first').check()     // Errors, '.get()' does not yield checkbox or radio
+```
 
-***
+## Arguments
 
-# [cy.check( *values* )](#section-values-usage)
+**{% fa fa-angle-right %} value**  ***(String)***
 
-Checks the checkboxes or radios with the matching values.
+Value of checkbox or radio that should be checked.
 
-***
+**{% fa fa-angle-right %} values**  ***(Array)***
 
-# Options
+Values of checkboxes or radios that should be checked.
 
-Pass in an options object to change the default behavior of `cy.check`.
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-**cy.check( *options* )**
+Pass in an options object to change the default behavior of `.check()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`interval` | `16` | Interval which to retry a check
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the check
-`force` | `false` | Forces check, disables error checking prior to check
-`log` | `true` | whether to display command in command log
-`multiple` | `false` | Enables serially checking multiple elements
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force check %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .check %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields same_subject .check %}
 
-## Check all checkboxes
+# Examples
 
-```javascript
-cy.get("[type='checkbox']").check()
-```
+## No Args
 
-***
-
-## Check all radios
+***Check all checkboxes***
 
 ```javascript
-cy.get("[type='radio']").check()
+cy.get('[type="checkbox"]').check()
 ```
 
-***
-
-## Check the element with id of `saveUserName` and check it
+***Check all radios***
 
 ```javascript
-cy.get("#saveUserName").check()
+cy.get('[type="radio"]').check()
 ```
 
-***
-
-# Value Usage
-
-## Check the checkbox with the value of "US"
+***Check the element with id of 'saveUserName'***
 
 ```javascript
-cy.get("input[type='checkbox']").check("US")
+cy.get('#saveUserName').check()
 ```
 
-***
+## Value
 
-# Values Usage
-
-## Check the checkbox with the value of "ga" and "ca"
+***Select the radio with the value of 'US'***
 
 ```javascript
-cy.get("input[type='checkbox']").check(["ga", "ca"])
+cy.get('[type="radio"]').check('US')
 ```
 
-***
+## Values
+
+***Check the checkboxes with the values 'ga' and 'ca'***
+
+```javascript
+cy.get('[type="checkbox"]').check(['ga', 'ca'])
+```
+
+## Options
+
+***Check an invisible checkbox***
+
+You can ignore Cypress' default behavior of checking that the element is visible, clickable and not disabled by setting `force` to `true` in the options.
+
+```javascript
+cy.get('.action-checkboxes').should('not.be.visible') // Passes
+  .check({ force: true }).should('be.checked')        // Passes
+```
+
+# Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.check()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements checkability .check %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .check %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .check %}
 
 # Command Log
 
-## check the element with name of emailUser
+**check the element with name of 'emailUser'**
 
 ```javascript
-cy.get("form").find("[name='emailUser']").check()
+cy.get('form').find('[name="emailUser"]').check()
 ```
 
 The commands above will display in the command log as:
 
-<img width="582" alt="screen shot 2015-11-29 at 12 53 25 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458925/6226b39e-9698-11e5-9a2a-debf91f5989a.png">
+![Command log for check](/img/api/check/check-checkbox-in-cypress.png)
 
 When clicking on `check` within the command log, the console outputs the following:
 
-<img width="547" alt="screen shot 2015-11-29 at 12 53 48 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458927/65a2526c-9698-11e5-8b33-f59e666170e2.png">
+![console.log for check](/img/api/check/console-showing-events-on-check.png)
 
-***
+# See also
 
-# Related
-
-- [uncheck](https://on.cypress.io/api/uncheck)
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}
+- {% url `.uncheck()` uncheck %}

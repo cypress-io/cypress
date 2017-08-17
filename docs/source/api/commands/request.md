@@ -1,180 +1,170 @@
+---
 title: request
-comments: true
+comments: false
 ---
 
-Use `cy.request` to make HTTP requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.
+Make an HTTP request.
 
-| | |
-|--- | --- |
-| **Returns** | the `response` as an object literal. |
-| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the [`timeout`](#section-options) passed in the options object of the command. |
+# Syntax
 
-***
+```javascript
+cy.request(url)
+cy.request(url, body)
+cy.request(method, url)
+cy.request(method, url, body)
+cy.request(options)
+```
 
-# [cy.request( *url* )](#section-url-usage)
+## Usage
 
-Makes a `GET` request using the specified url.
+**{% fa fa-check-circle green %} Correct Usage**
 
-***
+```javascript
+cy.request('http://dev.local/seed')    
+```
 
-# [cy.request( *url*, *body* )](#section-url-and-body-usage)
+## Arguments
 
-Make a `GET` request to the provided url with the provided body.
+**{% fa fa-angle-right %} url** ***(String)***
 
-***
+The `url` to make the request to.
 
-# [cy.request( *method*, *url* )](#section-method-and-url-usage)
+If you provide a non fully qualified domain name (FQDN), Cypress will make its best guess as to which host you want `cy.request()` to use in the url.
 
-Make a request using the provided method to the specified url.
+1. If you make a `cy.request()` after  visiting a page, Cypress assumes the url used for the `cy.visit()` is the host.
 
-***
+  ```javascript
+  cy.visit('http://localhost:8080/app')
+  cy.request('users/1.json') //  url is  http://localhost:8080/users/1.json
+  ```
 
-# [cy.request( *method*, *url*, *body* )](#section-method-and-url-and-body-usage)
+2. If you make a `cy.request()` prior to visiting a page, Cypress uses the host configured as the `baseUrl` property inside of `cypress.json`.
 
-Additionally pass in the request `body` as a `String` or `Object Literal`. Cypress will set the `Accepts` request header and serialize the response body by its `Content-Type`.
+  ```json
+  // cypress.json
 
-***
+  {
+    "baseUrl": "http://localhost:1234"
+  }
+  ```
 
-# Options
+  ```javascript
+  cy.request('seed/admin') // url is http://localhost:1234/seed/admin
+  ```
+
+3. If Cypress cannot determine the host it will throw an error.
+
+**{% fa fa-angle-right %} body** ***(String, Object)***
+
+A request `body` to be sent in the request. Cypress sets the `Accepts` request header and serializes the response body by its `Content-Type`.
+
+**{% fa fa-angle-right %} method** ***(String)***
+
+Make a request using a specific method (`GET`, `POST`, `PUT`, etc). If no method is defined, Cypress uses the `GET` method by default.
+
+**{% fa fa-angle-right %} options** ***(Object)***
 
 Pass in an options object to change the default behavior of `cy.request`.
 
-**[cy.request( *options* )](#options-usage)**
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`auth` | `null` | Any auth to send. Accepts an object literal.
-`body` | `null` | The Request Body to send along with the request.
-`failOnStatusCode` | `true` | Whether to fail on response codes other than `2xx` and `3xx`.
-`followRedirect` | `true` | Whether to automatically follow redirects.
-`form` | `false` | Whether to convert the `body` values to urlencoded content and automatically set the `x-www-form-urlencoded` header.
-`gzip` | `true` | Whether to accept the `gzip` encoding.
-`headers` | `null` | Any additional headers to send. Accepts an object literal.
-`log` | `true` | Whether to log the request in the Command Log
-`method` | `GET` | The HTTP method to use when making the request.
-`qs` | `null` | The query parameters to be appended to the `url` option when making the request.
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
-`url` | `null` | The URL to make the request.
+`log` | `true` | {% usage_options log %}
+`url` | `null` | The URL to make the request to
+`method` | `GET` | The HTTP method to use in the request
+`auth` | `null` | Any auth to send; Accepts object literal
+`body` | `null` | Body to send along with the request
+`failOnStatusCode` | `true` | Whether to fail on response codes other than `2xx` and `3xx`
+`followRedirect` | `true` | Whether to automatically follow redirects
+`form` | `false` | Whether to convert the `body` values to url encoded content and set the `x-www-form-urlencoded` header
+`gzip` | `true` | Whether to accept the `gzip` encoding
+`headers` | `null` | Additional headers to send; Accepts object literal
+`qs` | `null` | Query parameters to append to the `url` of the request
+`timeout` | {% url `responseTimeout` configuration#Timeouts %} | {% usage_options timeout cy.request %}
 
-You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for `cy.request`'s `baseUrl` and `responseTimeout` globally in {% url 'configuration' configuration %}.
 
-***
+## Yields {% helper_icon yields %}
 
-# URL Usage
+`cy.request()` yields the `response` as an object literal containing properties such as:
 
-## Make a `GET` request
+- `status`
+- `body`
+- `headers`
+- `duration`
+
+# Examples
+
+## URL
+
+***Make a `GET` request***
+
+`cy.request()` is great for talking to an external endpoint before your tests to seed a database.
 
 ```javascript
-// make a request to seed the database prior to running each test
 beforeEach(function(){
-  cy.request("http://localhost:8080/db/seed")
+  cy.request('http://localhost:8080/db/seed')
 })
 ```
 
-## Issue a simple HTTP request
+***Issue a simple HTTP request***
+
+Sometimes it is quicker to simply test the contents of a page rather than {% url `cy.visit()` visit %} and wait for the entire page and all of it's resource to load.
 
 ```javascript
-cy
-  // dont visit this page and load the resources
-  // instead let's just issue a simple HTTP request
-  // so we can make an assertion about its body
-  .request("/admin")
-  .its("body")
-  .should("include", "<h2>admin.html</h2>")
+cy.request('/admin').its('body').should('include', '<h1>Admin</h1>')
 ```
 
-***
+## Method and URL
 
-## Send the new subject to an HTTP's response on request
+***Send a `DELETE` request***
 
 ```javascript
-// the response object is an object literal
-// containing status, body, headers, and duration
-cy.request("http://dev.local/users").then(function(response){
-  // subject is now the response object
-  // {
-  //   status: 200,
-  //   headers: {...},
-  //   body: [{id: 1, name: "Jane"}, {id: 2, name: "LeeAnn"}],
-  //   duration: 28
-  // }
-})
+cy.request('DELETE', 'http://localhost:8888/users/827')
 ```
 
-***
+## Method, URL, and Body
 
-# Method and URL Usage
-
-## Send a `DELETE` request
+***Send a `POST` request with a JSON body***
 
 ```javascript
-// Delete a user
-cy.request("DELETE", "http://localhost:8888/users/827")
-```
-
-***
-
-# Method and URL and Body Usage
-
-## Send a `POST` request with a JSON body
-
-```javascript
-// the Accepts Request Header is automatically set based
-// on the type of body you supply
-cy
-  .request("POST", "http://localhost:8888/users/admin", {name: "Jane"})
+cy.request('POST', 'http://localhost:8888/users/admin', {name: 'Jane'})
   .then(function(response){
-    // response.body would automatically be serialized into JSON
-    expect(response.body).to.have.property("name", "Jane") // true
+    // response.body is automatically serialized into JSON
+    expect(response.body).to.have.property('name', 'Jane') // true
 })
 ```
 
-***
+## Options
 
-# Options Usage
+***Request a page while disabling auto redirect***
 
-## Request the dashboard while disabling auto redirect
+To test the redirection behavior of a login without a session, `cy.request` can be used to check the `status` and `redirectedToUrl` property.
+
+The `redirectedToUrl` property is a special Cypress property that normalizes the `url` the browser would normally follow during a redirect.
 
 ```javascript
-// to test the redirection behavior on login without a session
-// cy.request can be used to check the status code and redirectedToUrl property.
-//
-// the 'redirectedToUrl' property is a special Cypress property under the hood
-// that normalizes the url the browser would normally follow during a redirect
-
 cy.request({
-  url: '/dashboard',
-  followRedirect: false // turn off following redirects automatically
-})
-.then((resp) => {
-  // should have status code 302
-  expect(resp.status).to.eq(302)
-
-  // when we turn off following redirects, Cypress will also send us
-  // a 'redirectedToUrl' property with the fully qualified URL that we were redirected to.
-  expect(resp.redirectedToUrl).to.eq("http://localhost:8082/unauthorized")
-})
+    url: '/dashboard',
+    followRedirect: false // turn off following redirects
+  })
+  .then((resp) => {
+    // redirect status code is 302
+    expect(resp.status).to.eq(302)
+    expect(resp.redirectedToUrl).to.eq('http://localhost:8082/unauthorized')
+  })
 ```
 
-***
+***HTML form submissions using form option***
 
-## HTML form submissions using form option
+Oftentimes, once you have a proper e2e test around logging in, there's no reason to continue to `cy.visit()` the login and wait for the entire page to load all associated resources before running any other commands. Doing so can slow down our entire test suite.
+
+Using `cy.request()`, we can bypass all of this because it automatically gets and sets cookies just as if the requests had come from the browser.
 
 ```javascript
-// oftentimes once we have a proper e2e test around logging in
-// there is NO more reason to actually use our UI to log in users
-// doing so wastes a huge amount of time, as our entire page has to load
-// all associated resources, we have to wait to fill the
-// form and for the form submission and redirection process
-//
-// with cy.request we can bypass all of this because it automatically gets
-// and sets cookies under the hood which acts exactly as if these requests
-// came from the browser
-
-cy
-  .request({
+cy.request({
     method: 'POST',
-    url: '/login_with_form', // baseUrl will be prepended to this url
+    url: '/login_with_form', // baseUrl is prepended to url
     form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
     body: {
       username: 'jane.lane',
@@ -182,81 +172,84 @@ cy
     }
   })
 
-  // just to prove we have a session
-  cy.getCookie("cypress-session-cookie").should('exist')
+// just to prove we have a session
+cy.getCookie('cypress-session-cookie').should('exist')
 ```
 
-{% note info Using cy.request for HTML Forms %}
-[Check out our example recipe using cy.request for HTML form submissions](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
-{% endnote %}
+***Using cy.request for HTML Forms***
 
-***
+{% note info %}
+{% url "Check out our example recipe using `cy.request()` for HTML form submissions" logging-in-recipe %}
+{% endnote %}
 
 # Notes
 
-## Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?
+## Debugging
 
-Cypress does not actually make an XHR request out of the browser. Under the hood we are making the HTTP request from the desktop application (in node). Therefore you will not see the request inside of the Chrome Dev Tools.
+***Request is not displayed in the Network Tab of Developer Tools***
 
-Note that we automatically set both Cookies + User Agent headers correctly as if the request was really coming from the browser.
+Cypress does not *actually* make an XHR request from the browser. We are actually making the HTTP request from the Cypress desktop application (in Node.js). So, you won't see the request inside of your Developer Tools.
 
-***
+## Cors
 
-## CORS is bypassed
+***CORS is bypassed***
 
-Normally when the browser detects a cross-origin HTTP request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests. `cy.request` bypasses CORS entirely.
+Normally when the browser detects a cross-origin HTTP request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests, but `cy.request()` bypasses CORS entirely.
 
 ```javascript
 // we can make requests to any external server, no problem.
-cy
-  .request("https://www.google.com/webhp?#q=cypress.io+cors")
-    .its("body")
-    .should("include", "Testing, the way it should be") // true
+cy.request('https://www.google.com/webhp?#q=cypress.io+cors')
+  .its('body').should('include', 'Testing, the way it should be') // true
 ```
 
-***
+## Cookies
 
-## Cookies are automatically sent and received
+***Cookies are automatically sent and received***
 
-Before sending the HTTP request, we will automatically attach cookies that would have otherwise been attached had the request come from the browser. Additionally, if a response has a `Set-Cookie` header, these are automatically set back on the browser cookies.
+Before sending the HTTP request, we automatically attach cookies that would have otherwise been attached had the request come from the browser. Additionally, if a response has a `Set-Cookie` header, these are automatically set back on the browser cookies.
 
-In other words, `cy.request` transparently performs all of the underlying functions as if it came from the browser.
+In other words, `cy.request()` transparently performs all of the underlying functions as if it came from the browser.
 
-***
+# Rules
 
-## Rules for resolving a relative request url
+## Requirements {% helper_icon requirements %}
 
-If you provide a non fully qualified domain name (FQDN), Cypress will make its best guess as to which host you want the request to go to.
+{% requirements request cy.request %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once cy.request %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts request cy.request %}
+
+# Command Log
+
+***Request comments endpoint and test response***
 
 ```javascript
-cy
-  // after you visit somewhere, Cypress will assume this is the host
-  .visit("http://localhost:8080/app")
-  .request("users/1.json") // <-- url is http://localhost:8080/users/1.json
+cy.request('https://jsonplaceholder.typicode.com/comments').then(function(response){
+  expect(response.status).to.eq(200)
+  expect(response.body).to.have.length(500)
+  expect(response).to.have.property('headers')
+  expect(response).to.have.property('duration')
+})
 ```
 
-If you make the `cy.request` prior to visiting a page, Cypress will use the host configured as the `baseUrl` property inside of `cypress.json`.
+The commands above will display in the command log as:
 
-```javascript
-// cypress.json
-{
-  baseUrl: "http://localhost:1234"
-}
-```
+![Command Log request](/img/api/request/testing-request-url-and-its-response-body-headers.png)
 
-```javascript
-// inside of your tests
-cy.request("seed/admin") //<-- url is http://localhost:1234/seed/admin
-```
+When clicking on `request` within the command log, the console outputs the following:
 
-If Cypress cannot determine the host it will throw an explicit error.
+![Console log request](/img/api/request/console-log-request-response-body-headers-status-url.png)
 
-***
+# See also
 
-# Related
-
-- [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
-- [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
-- [Recipe: Logging In - CSRF Tokens](https://github.com/cypress-io/cypress-example-recipes#logging-in---csrf-tokens)
-- [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
-- [visit](https://on.cypress.io/api/visit)
+- {% url `cy.exec()` exec %}
+- {% url `cy.visit()` visit %}
+- {% url "Recipe: Logging In - CSRF Tokens" logging-in-recipe %}
+- {% url "Recipe: Logging In - HTML Web Form" logging-in-recipe %}
+- {% url "Recipe: Logging In - Single Sign on" logging-in-recipe %}
+- {% url "Recipe: Logging In - XHR Web Form" logging-in-recipe %}

@@ -1,0 +1,20 @@
+.project-content {
+  bottom: 18px;
+  top: 77px;
+  position: fixed;
+  overflow: auto;
+  margin-bottom: 0;
+  width: 100%;
+
+  .alert-warning {
+    margin-bottom: 0;
+    position: relative;
+
+    button {
+      font-size: 1em;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  }
+}

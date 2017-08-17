@@ -1,32 +1,22 @@
-{deferred, stubIpc} = require("../support/util")
-
 describe "Footer", ->
   beforeEach ->
-    cy
-      .visit("/")
-      .fixture("user").as("user")
-      .window().then (win) ->
-        {@App} = win
-        cy.stub(@App, "ipc").as("ipc")
+    cy.fixture("user").as("user")
 
-        @getUser = deferred()
-        @getProjects = deferred()
+    cy.visitIndex().then (win) ->
+      { start, @ipc } = win.App
 
-        @version = "1.0.0"
+      @version = "1.0.0"
 
-        stubIpc(@App.ipc, {
-          "get:options": (stub) => stub.resolves({version: @version})
-          "get:current:user": (stub) => stub.resolves(@getUser.promise)
-          "on:menu:clicked": ->
-          "close:browser": ->
-          "close:project": ->
-          "on:focus:tests": ->
-          "updater:check": (stub) => stub.resolves(false)
-          "get:projects": (stub) -> stub.resolves([])
-          "get:project:statuses": (stub) -> stub.resolves([])
-        })
+      cy.stub(@ipc, "getOptions").resolves({version: @version})
+      cy.stub(@ipc, "updaterCheck").resolves(false)
+      cy.stub(@ipc, "getProjects").resolves([])
+      cy.stub(@ipc, "getProjectStatuses").resolves([])
+      cy.stub(@ipc, "externalOpen")
 
-        @App.start()
+      @getUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").resolves(@getUser.promise)
+
+      start()
 
   describe "when logged out", ->
     beforeEach ->
@@ -48,4 +38,4 @@ describe "Footer", ->
     it "opens link to changelog on click of changelog", ->
       cy
         .get("a").contains("Changelog").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/changelog")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")

@@ -1,44 +1,53 @@
 guides:
-  welcome:
-    intro: guides.html
-    our-goals: our-goals.html
   getting-started:
-    installing-and-running: installing-and-running.html
+    why-cypress: why-cypress.html
+    installing-cypress: installing-cypress.html
     writing-your-first-test: writing-your-first-test.html
-    using-the-cypress-runner: using-the-cypress-runner.html
-  examples:
-    list-of-example-apps: list-of-example-apps.html
-    list-of-example-recipes: list-of-example-recipes.html
-  dashboard:
-    features: features.html
-    projects: projects.html
-    recorded-runs: recorded-runs.html
-    organizations: organizations.html
+    testing-your-app: testing-your-app.html
+    # next-steps: next-steps.html
+  core-concepts:
+    introduction-to-cypress: introduction-to-cypress.html
+    writing-and-organizing-tests: writing-and-organizing-tests.html
+    overview-of-the-gui: overview-of-the-gui.html
+    interacting-with-elements: interacting-with-elements.html
+    aliases-and-references: aliases-and-references.html
+    screenshots-and-videos: screenshots-and-videos.html
+    launching-browsers: launching-browsers.html
   guides:
-    configuration: configuration.html
-    issuing-commands: issuing-commands.html
-    finding-elements: finding-elements.html
-    making-assertions: making-assertions.html
+    command-line: command-line.html
+    debugging: debugging.html
     network-requests: network-requests.html
     continuous-integration: continuous-integration.html
     environment-variables: environment-variables.html
     stubs-spies-and-clocks: stubs-spies-and-clocks.html
-    using-aliases: using-aliases.html
-    creating-fixtures: creating-fixtures.html
-    screenshots-and-videos: screenshots-and-videos.html
-    bundled-tools: bundled-tools.html
-    reporters: reporters.html
-  references:
-    cli-tool: cli-tool.html
-    error-messages: error-messages.html
-    anti-patterns: anti-patterns.html
-    known-issues: known-issues.html
     web-security: web-security.html
-    browser-management: browser-management.html
+    reporters: reporters.html
+  # advanced-cypress:
+    # the-cypress-workflow: the-cypress-workflow.html
+    # coming-from-selenium: coming-from-selenium.html
+    # custom-commands: custom-commands.html
+    # how-cypress-really-works: how-cypress-really-works.html
+    # talking-to-your-backend: talking-to-your-backend.html
+    # spawning-processes: spawning-processes.html
+  references:
+    assertions: assertions.html
+    configuration: configuration.html
+    error-messages: error-messages.html
+    best-practices: best-practices.html
+    bundled-tools: bundled-tools.html
+    # creating-fixtures: creating-fixtures.html
+    # best-practices: best-practices.html
+    # anti-patterns: anti-patterns.html
+    # cypress-api-design: cypress-api-design.html
     userland-extensions: userland-extensions.html
+    known-issues: known-issues.html
+    # contributing: contributing.html
+    changelog: changelog.html
+    roadmap: roadmap.html
+    # all-videos: all-videos.html
 
 api:
-  welcome:
+  introduction:
     api: api.html
   commands:
     and: and.html
@@ -85,14 +94,18 @@ api:
     parent: parent.html
     parents: parents.html
     parentsuntil: parentsuntil.html
+    pause: pause.html
+    prev: prev.html
+    prevall: prevall.html
+    prevuntil: prevuntil.html
     readfile: readfile.html
     reload: reload.html
     request: request.html
     root: root.html
     route: route.html
     screenshot: screenshot.html
-    scrollintoview: scrollintoview.html
-    scrollto: scrollto.html
+    # scrollintoview: scrollintoview.html
+    # scrollto: scrollto.html
     select: select.html
     server: server.html
     setcookie: setcookie.html
@@ -105,7 +118,7 @@ api:
     then: then.html
     tick: tick.html
     title: title.html
-    trigger: trigger.html
+    # trigger: trigger.html
     type: type.html
     uncheck: uncheck.html
     url: url.html
@@ -119,13 +132,50 @@ api:
   utilities:
     _: _.html
     $: $.html
-    minimatch: minimatch.html
     blob: blob.html
+    minimatch: minimatch.html
+    moment: moment.html
     promise: promise.html
   cypress-api:
+    custom-commands: custom-commands.html
     config: config.html
-    env: env.html
-    cypress-commands: commands.html
     cookies: cookies.html
     dom: dom.html
-    cypress-server: server.html
+    env: env.html
+    cypress-server: cypress-server.html
+
+examples:
+  recipes:
+    unit-testing-recipe: unit-testing-recipe.html
+    logging-in-recipe: logging-in-recipe.html
+    testing-the-dom-recipe: testing-the-dom-recipe.html
+    working-with-the-backend-recipe: working-with-the-backend-recipe.html
+    stubs-spies-and-clocks-recipe: stubs-spies-and-clocks-recipe.html
+    extending-cypress-recipe: extending-cypress-recipe.html
+  applications:
+    kitchen-sink: kitchen-sink.html
+    todo-mvc: todo-mvc.html
+    pie-chopper: pie-chopper.html
+    phonecat: phonecat.html
+  docker:
+    docker-images: docker-images.html
+    circle-ci: circle-ci.html
+    codeship: codeship.html
+  media:
+    blogs-media: blogs-media.html
+    talks-media: talks-media.html
+    podcasts-media: podcasts-media.html
+
+dashboard:
+  overview:
+    features-dashboard: features-dashboard.html
+    projects-dashboard: projects-dashboard.html
+    runs-dashboard: runs-dashboard.html
+    organizations-dashboard: organizations-dashboard.html
+
+faq:
+  questions:
+    general-questions-faq: general-questions-faq.html
+    using-cypress-faq: using-cypress-faq.html
+    dashboard-faq: dashboard-faq.html
+    company-faq: company-faq.html

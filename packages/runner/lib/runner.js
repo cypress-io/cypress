@@ -1,17 +1,16 @@
-var path = require('path')
+const path = require('path')
 
-function dist () {
-  var args = [].slice.call(arguments)
-  var paths = [__dirname, '..', 'dist'].concat(args)
-  return path.join.apply(path, paths)
+function dist (...args) {
+  const paths = [__dirname, '..', 'dist'].concat(args)
+  return path.join(...paths)
 }
 
 module.exports = {
-  getPathToDist: function(){
-    return dist.apply(null, arguments)
+  getPathToDist (...args) {
+    return dist(...args)
   },
 
-  getPathToIndex: function(){
+  getPathToIndex () {
     return dist('index.html')
   },
 }

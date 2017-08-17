@@ -5,6 +5,10 @@ blobUtil = require("blob-util")
 minimatch = require("minimatch")
 moment = require("moment")
 Promise = require("bluebird")
+sinon = require("sinon")
+lolex = require("lolex")
+Cookies = require("js-cookie")
+bililiteRange = require("../vendor/bililiteRange")
 
 $Chai = require("./cypress/chai")
 $Chainer = require("./cypress/chainer")
@@ -82,8 +86,7 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
-    if config.isHeadless
-      $Cypress.isHeadless = true
+    @isHeadless = !!config.isHeadless
 
     {environmentVariables, remote} = config
 
@@ -179,7 +182,7 @@ class $Cypress
     ## event here, so other commands can tap into that
     return if not @cy
 
-    @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
+    @cy.silenceConsole(contentWindow) if @isHeadless
     @cy.bindWindowListeners(contentWindow)
     @cy._setWindowDocumentProps(contentWindow)
 
@@ -270,6 +273,14 @@ class $Cypress
 
   minimatch: minimatch
 
+  sinon: sinon
+
+  lolex: lolex
+
+  Cookies: Cookies
+
+  bililiteRange: bililiteRange
+
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   _.extend $Cypress.prototype, Backbone.Events
@@ -295,7 +306,7 @@ $Cypress.Commands = $Commands
 $Cypress.Config = $Config
 $Cypress.Cookies = $Cookies
 $Cypress.Cy = $Cy
-$Cypress.Dom = $Dom
+$Cypress.Dom = $Cypress.prototype.Dom = $Dom
 $Cypress.EnvironmentVariables = $EnvironmentVariables
 $Cypress.ErrorMessages = $ErrorMessages
 $Cypress.Keyboard = $Keyboard
@@ -304,7 +315,7 @@ $Cypress.Location = $Location
 $Cypress.LocalStorage = $LocalStorage
 $Cypress.Mocha = $Mocha
 $Cypress.Runner = $Runner
-$Cypress.Server = $Server
+$Cypress.Server = $Cypress.prototype.Server = $Server
 $Cypress.utils = utils
 
 ## expose globally (temporarily for the runner)

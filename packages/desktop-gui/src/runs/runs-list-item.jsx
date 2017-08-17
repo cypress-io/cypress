@@ -80,7 +80,7 @@ export default class RunsListItem extends Component {
               // do we have multiple OS's ?
               this._moreThanOneInstance() && this._osLength() > 1 ?
                 <span>
-                  <i className={`fa fa-fw fa-desktop`}></i>{' '}
+                  <i className='fa fa-fw fa-desktop'></i>{' '}
                   {this._osLength()}
                 </span> :
                 // or did we only actual run it on one OS
@@ -100,7 +100,7 @@ export default class RunsListItem extends Component {
                 // do we have multiple browsers ?
                 this._moreThanOneInstance() && this._browsersLength() > 1 ?
                   <span>
-                    <i className={`fa fa-fw fa-globe`}></i>{' '}
+                    <i className='fa fa-fw fa-globe'></i>{' '}
                     {this._browsersLength()}
                   </span> :
                   // or did we only actual run it on one browser
@@ -116,7 +116,7 @@ export default class RunsListItem extends Component {
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className="fa fa-circle-o-notch"></i>{' '}
+                <i className='fa fa-circle-o-notch'></i>{' '}
                 <span>
                   {
                     run.totalPending ?
@@ -132,12 +132,12 @@ export default class RunsListItem extends Component {
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className="fa fa-check green"></i>{' '}
+                <i className='fa fa-check green'></i>{' '}
                 <span>
                   {
                     run.totalPasses ?
                       run.totalPasses :
-                      "-"
+                      '-'
                   }
                 </span>
               </div> :
@@ -148,12 +148,12 @@ export default class RunsListItem extends Component {
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className="fa fa-times red"></i>{' '}
+                <i className='fa fa-times red'></i>{' '}
                 <span>
                   {
                     run.totalFailures ?
                       run.totalFailures :
-                      "-"
+                      '-'
                   }
                 </span>
               </div> :

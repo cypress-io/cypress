@@ -1,6 +1,9 @@
 menu:
   guides: Guides
   api: API
+  faq: FAQ
+  examples: Examples
+  dashboard: Dashboard
   search: Search
 
 index:
@@ -16,46 +19,54 @@ page:
 
 sidebar:
   guides:
-    welcome: Welcome
-    intro: Intro
-    our-goals: Our Goals
     getting-started: Getting Started
-    installing-and-running: Installing and Running
+    why-cypress: Why Cypress?
+    installing-cypress: Installing Cypress
     writing-your-first-test: Writing Your First Test
-    using-the-cypress-runner: Using the Cypress Runner
-    examples: Examples
-    list-of-example-apps: List of Example Apps
-    list-of-example-recipes: List of Example Recipes
-    dashboard: Dashboard
-    features: Features
-    projects: Projects
-    recorded-runs: Recorded Runs
-    organizations: Organizations
-    guides: Guides
-    configuration: Configuration
-    issuing-commands: Issuing Commands
-    finding-elements: Finding Elements
-    making-assertions: Making Assertions
+    testing-your-app: Testing Your App
+    interacting-with-elements: Interacting with Elements
+    next-steps: Next Steps
+    core-concepts: Core Concepts
+    introduction-to-cypress: Introduction to Cypress
+    writing-and-organizing-tests: Writing and Organizing Tests
+    overview-of-the-gui: Overview of the GUI
+    debugging: Debugging
+    aliases-and-references: Aliases and References
+    stubs-spies-and-clocks: Stubs, Spies, and Clocks
     network-requests: Network Requests
+    screenshots-and-videos: Screenshots and Videos
+    guides: Guides
+    command-line: Command Line
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
-    stubs-spies-and-clocks: Stubs, Spies, and Clocks
-    using-aliases: Using Aliases
-    creating-fixtures: Creating Fixtures
-    screenshots-and-videos: Screenshots and Videos
-    bundled-tools: Bundled Tools
     reporters: Reporters
-    references: References
-    cli-tool: CLI Tool
-    error-messages: Error Messages
-    anti-patterns: Anti-patterns
-    known-issues: Known Issues
+    launching-browsers: Launching Browsers
+    advanced-cypress: Advanced
+    the-cypress-workflow: The Cypress Workflow
+    coming-from-selenium: Coming from Selenium?
+    custom-commands: Custom Commands
     web-security: Web Security
-    browser-management: Browser Management
+    how-cypress-really-works: How Cypress Really Works
+    talking-to-your-backend: Talking to Your Backend
+    spawning-processes: Spawning Processes
+    references: References
+    configuration: Configuration
+    error-messages: Error Messages
+    bundled-tools: Bundled Tools
+    assertions: Assertions
+    creating-fixtures: Creating Fixtures
+    best-practices: Best Practices
+    anti-patterns: Anti-patterns
     userland-extensions: Userland Extensions
+    known-issues: Known Issues
+    contributing: Contributing
+    changelog: Changelog
+    roadmap: Roadmap
+    cypress-api-design: API Design
+    all-videos: Videos
   api:
-    welcome: Welcome
-    api: api
+    introduction: Introduction
+    api: API
     commands: Commands
     and: and
     as: as
@@ -101,6 +112,10 @@ sidebar:
     parent: parent
     parents: parents
     parentsuntil: parentsUntil
+    pause: pause
+    prev: prev
+    prevall: prevAll
+    prevuntil: prevUntil
     readfile: readFile
     reload: reload
     request: request
@@ -136,12 +151,46 @@ sidebar:
     _: _
     $: $
     minimatch: minimatch
-    blob: blob
-    promise: promise
+    moment: moment
+    blob: Blob
+    promise: Promise
     cypress-api: Cypress API
     config: config
     env: env
-    cypress-commands: commands
-    cookies: cookies
-    dom: dom
-    cypress-server: server
+    custom-commands: Commands
+    cookies: Cookies
+    dom: Dom
+    cypress-server: Server
+  examples:
+    recipes: Recipes
+    unit-testing-recipe: Unit Testing
+    logging-in-recipe: Logging In
+    testing-the-dom-recipe: Testing the DOM
+    working-with-the-backend-recipe: Working with the Backend
+    stubs-spies-and-clocks-recipe: Spies, Stubs, and Clocks
+    extending-cypress-recipe: Extending Cypress
+    applications: Applications
+    kitchen-sink: Kitchen Sink
+    todo-mvc: TodoMVC
+    pie-chopper: PieChopper
+    phonecat: Phonecat
+    docker: Docker
+    docker-images: Images
+    circle-ci: CicleCI
+    codeship: Codeship
+    media: Media
+    talks-media: Talks
+    podcasts-media: Podcasts
+    blogs-media: Blogs
+  dashboard:
+    overview: Dashboard
+    features-dashboard: Features
+    projects-dashboard: Projects
+    runs-dashboard: Recorded Runs
+    organizations-dashboard: Organizations
+  faq:
+    questions: FAQ
+    general-questions-faq: General Questions
+    using-cypress-faq: Using Cypress
+    dashboard-faq: Dashboard
+    company-faq: Company

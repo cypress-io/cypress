@@ -1,4 +1,5 @@
 _ = require("lodash")
+Promise = require("bluebird")
 
 $Location = require("../../cypress/location")
 $Log = require("../../cypress/log")
@@ -119,7 +120,6 @@ module.exports = (Cypress, Commands) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        debugger
         utils.throwErrByPath("request.url_invalid")
 
       ## only set json to true if form isnt true
@@ -166,7 +166,7 @@ module.exports = (Cypress, Commands) ->
             rr = if rr.length is 1 then rr[0] else rr
 
             obj[word] = rr
-            obj["Returned"] = _.pick(resp, "status", "duration", "body", "headers")
+            obj["Yielded"] = _.pick(resp, "status", "duration", "body", "headers")
 
             return obj
 
@@ -181,7 +181,7 @@ module.exports = (Cypress, Commands) ->
             indicator ?= if options.response?.isOkStatusCode then "successful" else "bad"
 
             {
-              message: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
+              message: "#{options.method} #{status} #{options.url}"
               indicator: indicator
             }
         })

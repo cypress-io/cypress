@@ -1,3 +1,5 @@
+{ $ } = window.testUtils
+
 describe "$Cypress.Cy Listeners Extensions", ->
   context "iframe load", ->
     before ->
@@ -60,14 +62,12 @@ describe "$Cypress.Cy Listeners Extensions", ->
         @cy.get("a#change-page").click().then ->
           expect(@isReady).not.to.be.calledWith false
 
-      ## FIXME: the following 2 fail when running all test files
-
-      it.skip "sets initial cookies", ->
+      it "sets initial cookies", ->
         setInitial = @sandbox.stub @Cypress.Cookies, "setInitial"
         @cy.get("a#change-page").click().then ->
           expect(setInitial).to.be.called
 
-      it.skip "calls cy#loading", ->
+      it "calls cy#loading", ->
         loading = @sandbox.stub @cy, "loading"
         @cy.get("a#change-page").click().then ->
           expect(loading).to.be.called

@@ -64,13 +64,13 @@ describe "lib/modes/record", ->
       @sandbox.stub(git, "_getMessage").resolves("such hax")
       @sandbox.stub(git, "_getSha").resolves("sha-123")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
-      @sandbox.stub(api, "createBuild")
+      @sandbox.stub(api, "createRun")
 
-    it "calls api.createBuild with args", ->
-      api.createBuild.resolves()
+    it "calls api.createRun with args", ->
+      api.createRun.resolves()
 
-      record.generateProjectBuildId("id-123", "path/to/project", "project", "key-123").then ->
-        expect(api.createBuild).to.be.calledWith({
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+        expect(api.createRun).to.be.calledWith({
           projectId: "id-123"
           recordKey: "key-123"
           commitSha: "sha-123"
@@ -88,7 +88,7 @@ describe "lib/modes/record", ->
       err = new Error
       err.statusCode = 401
 
-      api.createBuild.rejects(err)
+      api.createRun.rejects(err)
 
       key = "3206e6d9-51b6-4766-b2a5-9d173f5158aa"
 
@@ -105,7 +105,7 @@ describe "lib/modes/record", ->
       err = new Error
       err.statusCode = 404
 
-      api.createBuild.rejects(err)
+      api.createRun.rejects(err)
 
       record.generateProjectBuildId("id-123", "path", "project", "key-123")
       .then ->
@@ -116,7 +116,7 @@ describe "lib/modes/record", ->
     it "handles all other errors", ->
       err = new Error("foo")
 
-      api.createBuild.rejects(err)
+      api.createRun.rejects(err)
 
       @sandbox.spy(errors, "warning")
       @sandbox.spy(logger, "createException")
@@ -334,19 +334,19 @@ describe "lib/modes/record", ->
       @sandbox.spy(Project, "add")
 
     it "ensures id", ->
-      record.run({projectPath: "path/to/project"})
+      record.run({projectPath: "/_test-output/path/to/project"})
       .then ->
-        expect(Project.id).to.be.calledWith("path/to/project")
+        expect(Project.id).to.be.calledWith("/_test-output/path/to/project")
 
     it "adds project with projectPath", ->
-      record.run({projectPath: "path/to/project"})
+      record.run({projectPath: "/_test-output/path/to/project"})
       .then ->
-        expect(Project.add).to.be.calledWith("path/to/project")
+        expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
 
     it "passes id + projectPath + options.key to generateProjectBuildId", ->
-      record.run({projectPath: "path/to/project", key: "key-foo"})
+      record.run({projectPath: "/_test-output/path/to/project", key: "key-foo"})
       .then ->
-        expect(record.generateProjectBuildId).to.be.calledWith("id-123", "path/to/project", "projectName", "key-foo")
+        expect(record.generateProjectBuildId).to.be.calledWith("id-123", "/_test-output/path/to/project", "projectName", "key-foo")
 
     it "passes buildId + options.spec to createInstance", ->
       record.run({spec: "foo/bar/spec"})

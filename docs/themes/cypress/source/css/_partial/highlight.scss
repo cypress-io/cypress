@@ -1,95 +1,18 @@
-pre {
-  font-family: $font-mono;
-  color: $highlight-foreground;
-  background: $highlight-background;
-  font-size: 0.9em;
-  padding: 1em;
-  line-height: $line-height;
-
-  code {
-    color: $highlight-foreground;
-    border: none;
-    display: block;
-    padding: 0;
-  }
-
-  .comment { color: $highlight-comment; }
-
-  .variable,
-  .attribute,
-  .tag,
-  .regexp,
-  .ruby .constant,
-  .xml .tag .title,
-  .xml .pi,
-  .xml .doctype,
-  .html .doctype,
-  .css .id,
-  .css .class,
-  .css .pseudo {
-    color: $highlight-red;
-  }
-
-  .number,
-  .preprocessor,
-  .built_in,
-  .literal,
-  .params,
-  .constant,
-  .command {
-    color: $highlight-orange;
-  }
-
-  .ruby .class .title,
-  .css .rules .attribute,
-  .string,
-  .value,
-  .inheritance,
-  .header,
-  .ruby .symbol,
-  .xml .cdata,
-  .special,
-  .number,
-  .formula {
-    color: $highlight-green;
-  }
-
-  .title,
-  .css .hexcolor {
-    color: $highlight-aqua;
-  }
-
-  .function,
-  .python .decorator,
-  .python .title,
-  .ruby .function .title,
-  .ruby .title .keyword,
-  .perl .sub,
-  .javascript .title,
-  .coffeescript .title {
-    color: $highlight-blue;
-  }
-
-  .keyword,
-  .javascript .function {
-    color: $highlight-purple;
-  }
-}
-
 code {
   margin: 0;
-  padding: 0;
-  border: 1px solid #E9E9EF;
-  border-radius: 4px;
+  padding: 0px 4px;
+  display: inline-block;
+  line-height: 1.5;
+  border: 1px solid #eee;
   outline: 0;
-  font-weight: normal;
+  font-weight: 600;
   font-family: inherit;
   font-size: 0.9em;
   vertical-align: baseline;
+  color: $highlight-foreground;
   font-family: $font-mono;
-  color: #46af91;
-  background: #F7F7F9;
-  padding: 0 5px;
+  background-color: $highlight-background;
+  border-radius: 3px;
 }
 
 a code {
@@ -97,75 +20,87 @@ a code {
 
   &:hover {
     color: $color-link-hover;
+    background-color: darken($highlight-background, 2%);
   }
 }
 
-.highlight {
-  padding: 10px 15px;
-  color: $highlight-foreground;
-  background: $highlight-background;
-  line-height: $line-height;
-  overflow: auto;
-  margin: 0;
-
-  &.shell {
-    background: #252831;
-    pre {
-      color: #c4c5ca;
-    }
-  }
-
-  pre {
-    border: none;
-    margin: 0;
-    padding: 1px;
-  }
-
-  table {
-    margin: 0 !important;
+.article pre, .article code,
+.faq pre, .faq code {
+  &[class*="language-"] {
+    font-size: 0.9em;
+    line-height: $line-height;
+    background-image: none;
+    background-color: $highlight-background;
+    color: $highlight-foreground;
+    box-shadow: none !important;
     border: 0;
+    border-radius: 0;
+    font-weight: normal;
 
-    th {
-      padding: 0;
-      border: 0;
-    }
+    .token {
+      &.keyword, &.function {
+        color: $highlight-purple;
+      }
 
-    td {
-      padding: 0;
-      border: 0;
-    }
-  }
+      &.comment {
+        color: $highlight-comment;
+      }
 
-  figcaption {
-    margin: -5px 0 5px;
-    font-size: 0.9em;
-    color: $color-gray;
+      &.string {
+        color: $highlight-blue;
+      }
 
-    &:before {
-      content: "";
-      display: table;
-    }
+      &.regex {
+        color: $highlight-red;
+      }
 
-    &:after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-
-    a {
-      float: right;
-      color: $highlight-foreground;
-
-      &:hover { border-bottom-color: $highlight-foreground; }
+      &.keyword, .attr-value {
+        color: $highlight-aqua;
+      }
     }
   }
+}
 
-  .line {
-    height: 22px;
-    font-size: 0.9em;
+.article pre, .faq pre {
+  &[class*="language-"] {
+    border-left: 5px solid $color-border;
+    padding: 15px 0;
+    margin: 15px 0;
+  }
+}
+
+.article pre.language-shell code,
+.faq pre.language-shell code {
+  padding-left: 3.8em;
+}
+
+.article pre.language-shell,
+.faq pre.language-shell {
+  border-left: 5px solid #000;
+  background-color: #252831;
+  color: #f5f6f8;
+
+  code {
+    padding-left: 2em;
+    background-color: #252831;
+    color: #f5f6f8;
   }
 
-  .gutter {
-    display: none;
+  &:before{
+    content: '$';
+    z-index: 1;
+    display: block;
+    // position: absolute;
+    bottom: auto;
+    left: 10px;
+    width: auto;
+    height: auto;
+    max-height: 13em;
+    box-shadow: none;
+    -webkit-transform: rotate(0);
+    -moz-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
   }
 }

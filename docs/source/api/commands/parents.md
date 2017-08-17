@@ -1,79 +1,105 @@
+---
 title: parents
-comments: true
+comments: false
 ---
 
-Get the parents DOM elements of the DOM elements.
+Get the parent DOM elements of a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parents` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.parents()` http://api.jquery.com/parents %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.parents()](#section-usage)
+```javascript
+.parents()
+.parents(selector)
+.parents(options)
+.parents(selector, options)
+```
 
-Get the ancestors of each element in the current set of matched elements.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.parents( *selector* )](#section-selector-usage)
+```javascript
+cy.get('aside').parents()  // Yield parents of aside
+```
 
-Get the ancestors of each element in the current set of matched elements filtered by selector
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.parents()              // Errors, cannot be chained off 'cy'
+cy.go('back').parents()   // Errors, 'go' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.parents`.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-**cy.parents( *options* )**
-**cy.parents( *selector*, *options* )**
+A selector used to filter matching DOM elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.parents()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .parents %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .parents %}
 
-## Get the parents of the active `li`
+# Examples
 
-```javascript
-cy.get("li.active").parents()
-```
+## No Args
 
-***
-
-# Selector Usage
-
-## Get the parents with class `nav` of the active `li`
+***Get the parents of the active li***
 
 ```javascript
-cy.get("li.active").parents(".nav")
+cy.get('li.active').parents()
 ```
 
-***
+## Selector
+
+***Get the parents with class `nav` of the active li***
+
+```javascript
+cy.get('li.active').parents('.nav')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .parents %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .parents %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .parents %}
 
 # Command Log
 
-## Get the parents of the active `li`
+***Get the parents of the active `li`***
 
 ```javascript
-cy.get("li.active").parents()
+cy.get('li.active').parents()
 ```
 
-<img width="531" alt="screen shot 2015-11-27 at 2 02 59 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447168/be286244-950f-11e5-82e8-9a2a6d1d08e8.png">
+![Command Log parents](/img/api/parents/get-all-parents-of-a-dom-element.png)
 
 When clicking on the `parents` command within the command log, the console outputs the following:
 
-<img width="537" alt="screen shot 2015-11-27 at 2 03 32 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447171/c1ba5ef8-950f-11e5-9f2d-7fbd0b142649.png">
+![Console Log parents](/img/api/parents/parents-elements-displayed-in-devtools-console.png)
 
-***
+# See also
 
-# Related
-
-- [parent](https://on.cypress.io/api/parent)
-- [children](https://on.cypress.io/api/children)
+- {% url `.children()` children %}
+- {% url `.parent()` parent %}
+- {% url `.parentsUntil()` parentsuntil %}

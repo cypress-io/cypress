@@ -1,37 +1,54 @@
-title: within
-comments: true
 ---
+title: within
+comments: false
+---
+Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
 
-Reset the root scope to the current subject and pass that as an argument to the callback function.
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | *cannot timeout* |
+```javascript
+.within(callbackFn)
+.within(options, callbackFn)
+```
 
-***
+## Usage
 
-# [cy.within( *function* )](#section-usage)
+**{% fa fa-check-circle green %} Correct Usage**
 
-Set the root scope to the current subject
+```javascript
+cy.get('.list').within(function(list) {}) // Yield the `.list` and scope all commands within it
+```
 
-***
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-# Options
+```javascript
+cy.within(function() {})              // Errors, cannot be chained off 'cy'
+cy.getCookies().within(function() {}) // Errors, 'getCookies' does not yield DOM element
+```
 
-Pass in an options object to change the default behavior of `cy.within`.
+## Arguments
 
-**cy.within( *options*, *function* )**
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
 
-Option | Default | Notes
+Pass a function that takes the current yielded subject as it's first argument.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the default behavior of `.within()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `false` | Display command in command log
+`log` | `true` | {% usage_options log %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields same_subject .within %}
 
-## Get inputs within a form and submit the form
+# Examples
+
+## Forms
+
+***Get inputs within a form and submit the form***
 
 ```html
 <form>
@@ -42,16 +59,47 @@ Option | Default | Notes
 ```
 
 ```javascript
-cy.get("form").within(function(){
-  cy
-    .get("input[name='email']").type("john.doe@email.com")
-    .get("input[name='password']").type("password")
-    .root().submit()
+cy.get('form').within(($form) => {
+  // cy.get() will only search for elements within form,
+  // not within the entire document
+  cy.get('input[name="email"]').type('john.doe@email.com')
+  cy.get('input[name="password"]').type('password')
+  cy.root().submit()
 })
 ```
 
-***
+# Rules
 
-# Related
+## Requirements {% helper_icon requirements %}
 
-- [root](https://on.cypress.io/api/root)
+{% requirements child .within %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions once .within %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .within %}
+
+# Command Log
+
+***Get the input within the form***
+
+```javascript
+cy.get('.query-form').within((el) => {
+  cy.get('input:first')
+})
+```
+
+The commands above will display in the command log as:
+
+![Command Log](/img/api/within/go-within-other-dom-elements.png)
+
+When clicking on the `within` command within the command log, the console outputs the following:
+
+![Console Log](/img/api/within/within-shows-its-yield-in-console-log.png)
+
+# See also
+
+- {% url `.root()` root %}

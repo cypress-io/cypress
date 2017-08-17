@@ -1,3 +1,5 @@
+{ _, Cookies } = window.testUtils
+
 describe "$Cypress.Cookies API", ->
   beforeEach ->
     @Cypress = $Cypress.create()

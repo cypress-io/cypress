@@ -76,7 +76,7 @@ class $Command
     {name, args} = @attributes
 
     args = _.reduce args, (memo, arg) ->
-      arg = if _.isString(arg) then _.truncate(arg, 20) else "..."
+      arg = if _.isString(arg) then _.truncate(arg, { length: 20 }) else "..."
       memo.push(arg)
       memo
     , []

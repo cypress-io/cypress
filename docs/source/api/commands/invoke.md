@@ -1,94 +1,88 @@
+---
 title: invoke
-comments: true
+comments: false
 ---
 
-`cy.invoke` invokes functions on the current subject.
+Invoke a function on the previously yielded subject.
 
-If you want to call a regular property that is not a function on the current subject, use [`cy.its`](https://on.cypress.io/api/its).
+{% note info %}
+If you want to get a property that is not a function on the previously yielded subject, use {% url `.its()` its %}.
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | the return value of the invoked property |
-| **Timeout** | `cy.invoke` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts)  |
+# Syntax
 
-***
+```javascript
+.invoke(functionName)
+.invoke(functionName, args...)
+```
 
-# [cy.invoke( *functionName* )](#section-function-usage)
+## Usage
 
-Invokes the function with the specified name
+**{% fa fa-check-circle green %} Correct Usage**
 
-***
+```javascript
+cy.wrap({animate: fn}).invoke('animate') // Invoke the 'animate' function
+cy.get('.modal').invoke('show')          // Invoke the jQuery 'show' function
+```
 
-# [cy.invoke( *functionName*, **arguments* )](#section-function-with-arguments-usage)
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-Invokes the function with the specified name and forwards any additional arguments to the function call. There are no limits to the number of arguments.
+```javascript
+cy.invoke('convert')                   // Errors, cannot be chained off 'cy'
+cy.wrap({name: 'Jane'}).invoke('name') // Errors, 'name' is not a function
+```
 
-***
+## Arguments
 
-# Function Usage
+**{% fa fa-angle-right %} functionName**  ***(String)***
 
-## Assert on a function after invoke
+Name of function to be invoked.
+
+**{% fa fa-angle-right %} args...**
+
+Additional arguments to be given to the function call. There is no limit to the number of arguments.
+
+# Examples
+
+## Function
+
+***Assert on a function's return value***
 
 ```javascript
 var fn = function(){
-  return "bar"
+  return 'bar'
 }
 
-cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
+cy.wrap({foo: fn}).invoke('foo').should('eq', 'bar') // true
 ```
 
-{% note info Using cy.invoke('text') %}
-[Check out our example recipe where we use cy.invoke('text') to test against HTML content](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+***Use `.invoke()` to test HTML content***
+
+{% note info %}
+{% url "Check out our example recipe where we use `cy.invoke('text')` to test against HTML content" working-with-the-backend-recipe %}
 {% endnote %}
 
-## Properties that are functions are invoked
+***Properties that are functions are invoked***
+
+In the example below, we use `.invoke()` to force a hidden div to be `'display: block'` so we can interact with its children elements.
 
 ```javascript
-// force a hidden div to be 'display: block'
-// so we can interact with its children elements
-cy
-  .get("div.container").should("be.hidden") // true
+cy.get('div.container').should('be.hidden') // true
 
-  .invoke("show") // call the jquery method 'show' on the 'div.container'
-    .should("be.visible") // true
-    .find("input").type("Cypress is great")
+  .invoke('show') // call jquery method 'show' on the '.container'
+    .should('be.visible') // true
+    .find('input').type('Cypress is great')
 ```
 
-{% note info Using cy.invoke('show') and cy.invoke('trigger') %}
-[Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
+***Use `.invoke('show')` and `.invoke('trigger')`***
+
+{% note info %}
+{% url "Check out our example recipe where we use `cy.invoke('show')` and `cy.invoke('trigger')` to click an element that is only visible on hover" testing-the-dom-recipe %}
 {% endnote %}
 
-***
+## Function with Arguments
 
-## Useful for 3rd party plugins
-
-```javascript
-// as a slightly verbose approach
-cy.get("input").invoke("getKendoDropDownList").then(function(dropDownList){
-  // the return of $input.getKendoDropDownList() has now become the new subject
-
-  // whatever the select method returns becomes the next subject after this
-  return dropDownList.select("apples")
-})
-```
-
-***
-
-## We can rewrite the previous example in a more terse way and add an assertion.
-
-```javascript
-cy
-  .get("input")
-    .invoke("getKendoDropDownList")
-    .invoke("select", "apples")
-  .its("val").should("match", /apples/)
-```
-
-***
-
-# Function with Arguments Usage
-
-## Send specific arguments to the function
+***Send specific arguments to the function***
 
 ```javascript
 var fn = function(a, b, c){
@@ -97,29 +91,83 @@ var fn = function(a, b, c){
 
 cy
   .wrap({sum: fn})
-  .invoke("sum", 2, 4, 6)
-    .should("be.gt", 10) // true
-    .and("be.lt", 20) // true
+  .invoke('sum', 2, 4, 6)
+    .should('be.gt', 10) // true
+    .and('be.lt', 20)    // true
 ```
 
-{% note info Using cy.invoke('removeAttr', 'target') %}
-[Check out our example recipe where we use cy.invoke('removeAttr', 'target') to test clicking on a link without opening in a new tab](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)
+***Use `cy.invoke('removeAttr', 'target')` to get around new tab***
+
+{% note info %}
+{% url "Check out our example recipe where we use `cy.invoke('removeAttr', 'target')` to test clicking on a link without opening in a new tab" testing-the-dom-recipe %}%}
 {% endnote %}
 
-## Arguments are automatically forwarded to the function
+***Arguments are automatically forwarded to the function***
 
 ```javascript
 cy
-  .get("img").invoke("attr", "src")
-    .should("include", "myLogo")
+  .get('img').invoke('attr', 'src')
+    .should('include', 'myLogo')
 ```
 
-***
+# Notes
 
-# Related
+## Third Party Plugins
 
-- [its](https://on.cypress.io/api/its)
-- [wrap](https://on.cypress.io/api/wrap)
-- [then](https://on.cypress.io/api/then)
-- [stub](https://on.cypress.io/api/stub)
-- [spy](https://on.cypress.io/api/spy)
+***Using a Kendo DropDown***
+
+If you are using `jQuery` then the `jQuery` wrapped elements will automatically have your 3rd party plugins available to be called.
+
+```javascript
+cy.get('input').invoke('getKendoDropDownList').then(function(dropDownList){
+  // yields the return of $input.getKendoDropDownList()
+  return dropDownList.select('apples')
+})
+```
+
+We can rewrite the previous example in a more terse way and add an assertion.
+
+```javascript
+cy
+  .get('input')
+  .invoke('getKendoDropDownList')
+  .invoke('select', 'apples')
+  .invoke('val').should('match', /apples/)
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements child .invoke %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry .invoke %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions .invoke %}
+
+# Command Log
+
+***Invoke jQuery show method on element***
+
+```javascript
+cy.get('.connectors-div').should('be.hidden')
+  .invoke('show').should('be.visible')
+```
+
+The commands above will display in the command log as:
+
+![Command Log invoke](/img/api/invoke/invoke-jquery-show-on-element-for-testing.png)
+
+When clicking on `invoke` within the command log, the console outputs the following:
+
+![Console log invoke](/img/api/invoke/log-function-invoked-and-return.png)
+
+# See also
+
+- {% url `.its()` its %}
+- {% url `.then()` then %}
+- {% url `cy.wrap()` wrap %}

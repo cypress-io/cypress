@@ -23,6 +23,8 @@ module.exports = {
     ended      = Promise.pending()
     done       = false
     errored    = false
+    written    = false
+    logErrors  = true
     wantsWrite = true
     skipped    = 0
 
@@ -31,15 +33,20 @@ module.exports = {
     })
 
     end = ->
-      pt.end()
-
       done = true
 
-      if errored
-        errored.recordingVideoFailed = true
-        Promise.reject(errored)
-      else
-        Promise.resolve(ended.promise)
+      if not written
+        ## when no data has been written this will
+        ## result in an 'pipe:0: End of file' error
+        ## for ffmpeg so we need to account for that
+        ## and not log errors to the console
+        logErrors = false
+
+      pt.end()
+
+      ## return the ended promise which will eventually
+      ## get resolve or rejected
+      return ended.promise
 
     write = (data) ->
       ## make sure we haven't ended
@@ -47,6 +54,9 @@ module.exports = {
       ## events can linger beyond
       ## finishing the actual video
       return if done
+
+      ## we have written at least 1 byte
+      written = true
 
       if wantsWrite
         if not wantsWrite = pt.write(data)
@@ -64,28 +74,25 @@ module.exports = {
     .inputOptions("-use_wallclock_as_timestamps 1")
     .videoCodec("libx264")
     .outputOptions("-preset ultrafast")
-    .save(name)
     .on "start", (line) ->
-      # console.log "spawned ffmpeg", line
       started.resolve(new Date)
-    # .on "codecData", (data) ->
+      # .on "codecData", (data) ->
       # console.log "codec data", data
-    # .on("error", options.onError)
+      # .on("error", options.onError)
     .on "error", (err, stdout, stderr) ->
-      options.onError(err, stdout, stderr)
+      ## if we're supposed log errors then
+      ## bubble them up
+      if logErrors
+        options.onError(err, stdout, stderr)
 
-      errored = err
-      # ended.reject(err)
-      # console.log "error occured here", arguments
-      ## TODO: call into lib/errors here
-      # console.log "ffmpeg failed", err
-      # ended.reject(err)
+      err.recordingVideoFailed = true
+
+      ## reject the ended promise
+      ended.reject(err)
+
     .on "end", ->
       ended.resolve()
-
-    # setTimeout ->
-    #   cmd.kill()
-    # , 1000
+    .save(name)
 
     return {
       cmd:     cmd

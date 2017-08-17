@@ -52,7 +52,7 @@ module.exports = (Cypress, Commands) ->
     ## presses a key or clicks in the UI to continue
     pause: (subject, options = {}) ->
       ## bail if we're headless
-      return subject if $Cypress.isHeadless
+      return subject if Cypress.isHeadless
 
       _.defaults options, {log: true}
 

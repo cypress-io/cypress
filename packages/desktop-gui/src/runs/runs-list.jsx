@@ -1,16 +1,14 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
-import state from '../lib/state'
-import RunsCollection from './runs-collection'
+import authStore from '../lib/auth-store'
+import RunsStore from './runs-store'
 import errors from '../lib/errors'
-import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
-import { getRecordKeys } from '../projects/projects-api'
-import projectsStore from '../projects/projects-store'
+import runsApi from './runs-api'
+import projectsApi from '../projects/projects-api'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
 import Run from './runs-list-item'
@@ -19,18 +17,14 @@ import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 
 @observer
-class Runs extends Component {
-  constructor (props) {
-    super(props)
-
-    this.runsCollection = new RunsCollection()
-
-    this.state = {
-      recordKey: null,
-    }
+class RunsList extends Component {
+  state = {
+    recordKey: null,
   }
 
   componentWillMount () {
+    this.runsStore = new RunsStore()
+
     this._getRuns()
     this._handlePolling()
     this._getKey()
@@ -46,7 +40,7 @@ class Runs extends Component {
   }
 
   _getRuns = () => {
-    getRuns(this.runsCollection)
+    runsApi.loadRuns(this.runsStore)
   }
 
   _handlePolling () {
@@ -59,22 +53,22 @@ class Runs extends Component {
 
   _shouldPollRuns () {
     return (
-      state.hasUser &&
+      authStore.isAuthenticated &&
       !!this.props.project.id
     )
   }
 
   _poll () {
-    pollRuns(this.runsCollection)
+    runsApi.pollRuns(this.runsStore)
   }
 
   _stopPolling () {
-    stopPollingRuns()
+    runsApi.stopPollingRuns()
   }
 
   _getKey () {
     if (this._needsKey()) {
-      getRecordKeys().then((keys = []) => {
+      projectsApi.getRecordKeys().then((keys = []) => {
         if (keys.length) {
           this.setState({ recordKey: keys[0].id })
         }
@@ -85,10 +79,10 @@ class Runs extends Component {
   _needsKey () {
     return (
       !this.state.recordKey &&
-      state.hasUser &&
-      !this.runsCollection.isLoading &&
-      !this.runsCollection.error &&
-      !this.runsCollection.runs.length &&
+      authStore.isAuthenticated &&
+      !this.runsStore.isLoading &&
+      !this.runsStore.error &&
+      !this.runsStore.runs.length &&
       this.props.project.id
     )
   }
@@ -107,30 +101,30 @@ class Runs extends Component {
     }
 
     // OR if there is an error getting the runs
-    if (this.runsCollection.error) {
+    if (this.runsStore.error) {
       // project id missing, probably removed manually from cypress.json
-      if (errors.isMissingProjectId(this.runsCollection.error)) {
+      if (errors.isMissingProjectId(this.runsStore.error)) {
         return this._emptyWithoutSetup()
 
       // the project is invalid
-      } else if (errors.isNotFound(this.runsCollection.error)) {
+      } else if (errors.isNotFound(this.runsStore.error)) {
         return this._emptyWithoutSetup(false)
 
       // they are not authorized to see runs
-      } else if (errors.isUnauthenticated(this.runsCollection.error) || errors.isUnauthorized(this.runsCollection.error)) {
+      } else if (errors.isUnauthenticated(this.runsStore.error) || errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
       // other error, but only show if we don't already have runs
-      } else if (!this.runsCollection.isLoaded) {
-        return <ErrorMessage error={this.runsCollection.error} />
+      } else if (!this.runsStore.isLoaded) {
+        return <ErrorMessage error={this.runsStore.error} />
       }
     }
 
     // OR the runs are loading for the first time
-    if (this.runsCollection.isLoading && !this.runsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
+    if (this.runsStore.isLoading && !this.runsStore.isLoaded) return <Loader color='#888' scale={0.5}/>
 
     // OR there are no runs to show
-    if (!this.runsCollection.runs.length) {
+    if (!this.runsStore.runs.length) {
 
       // AND they've never setup CI
       if (!project.id) {
@@ -145,7 +139,7 @@ class Runs extends Component {
 
     // everything's good, there are runs to show!
     return (
-      <div id='runs-list-page' className='runs'>
+      <div className='runs'>
         <header>
           <h5>Runs
           <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
@@ -157,15 +151,15 @@ class Runs extends Component {
             {this._lastUpdated()}
             <button
               className='btn btn-link btn-sm'
-              disabled={this.runsCollection.isLoading}
+              disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i className={`fa fa-refresh ${this.runsCollection.isLoading ? 'fa-spin' : ''}`}></i>
+              <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </div>
         </header>
         <ul className='runs-container list-as-table'>
-          {_.map(this.runsCollection.runs, (run) => (
+          {_.map(this.runsStore.runs, (run) => (
             <Run
               key={run.id}
               goToRun={this._openRun}
@@ -178,11 +172,11 @@ class Runs extends Component {
   }
 
   _lastUpdated () {
-    if (!this.runsCollection.lastUpdated) return null
+    if (!this.runsStore.lastUpdated) return null
 
     return (
       <span className='last-updated'>
-        Last updated: {this.runsCollection.lastUpdated}
+        Last updated: {this.runsStore.lastUpdated}
       </span>
     )
   }
@@ -206,9 +200,9 @@ class Runs extends Component {
     )
   }
 
-  @action _setProjectDetails = (projectDetails) => {
-    this.runsCollection.setError(null)
-    projectsStore.updateProject(this.props.project, {
+  _setProjectDetails = (projectDetails) => {
+    this.runsStore.setError(null)
+    projectsApi.updateProject(this.props.project, {
       id: projectDetails.id,
       name: projectDetails.projectName,
       public: projectDetails.public,
@@ -220,7 +214,7 @@ class Runs extends Component {
 
   _empty () {
     return (
-      <div id='runs-list-page'>
+      <div>
         <div className='first-run-instructions'>
           <h4>
             To record your first run...
@@ -236,9 +230,9 @@ class Runs extends Component {
             </a>
           </h5>
           <pre className='line-nums'>
-            <span>{`{`}</span>
+            <span>{'{'}</span>
             <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
-            <span>{`}`}</span>
+            <span>{'}'}</span>
           </pre>
           <h5>
             <span className='pull-left'>
@@ -290,4 +284,4 @@ class Runs extends Component {
   }
 }
 
-export default Runs
+export default RunsList

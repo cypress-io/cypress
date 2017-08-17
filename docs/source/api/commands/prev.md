@@ -1,66 +1,62 @@
+---
 title: prev
-comments: true
+comments: false
 ---
 
-Get the immediately preceding sibling of each element in the set of the elements.
+Get the immediately preceding sibling of each element in a set of the elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prev` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.prev()` http://api.jquery.com/prev %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.prev()](#section-usage)
+```javascript
+.prev()
+.prev(selector)
+.prev(options)
+.prev(selector, options)
+```
 
-Get the immediately preceding sibling of each element in the set of matched elements.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.prev( *selector* )](#section-selector-usage)
+```javascript
+cy.get('tr.highlight').prev() // Yield previous 'tr'
+```
 
-Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.prev()                // Errors, cannot be chained off 'cy'
+cy.getCookies().prev()   // Errors, 'getCookies' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.prev`.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-**cy.prev( *options* )**
-**cy.prev( *selector*, *options* )**
+A selector used to filter matching DOM elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.prev()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .prev %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .prev %}
 
-## Find the previous element of the element with class of `active`
+# Examples
 
-```html
-<ul>
-  <li>Cockatiels</li>
-  <li>Lorikeets</li>
-  <li class="active">Cockatoos</li>
-  <li>Conures</li>
-  <li>Eclectus</li>
-</ul>
-```
+## No Args
 
-```javascript
-// returns <li>Lorikeets</li>
-cy.get(".active").prev()
-```
-
-***
-
-# Selector Usage
-
-## Find the previous element with a class of `active`
+***Find the previous element of the element with class of `active`***
 
 ```html
 <ul>
@@ -73,30 +69,61 @@ cy.get(".active").prev()
 ```
 
 ```javascript
-// returns <li>Cockatoos</li>
-cy.get("li").prev(".active")
+// yields <li>Lorikeets</li>
+cy.get('.active').prev()
 ```
 
-***
+## Selector
+
+***Find the previous element with a class of `active`***
+
+```html
+<ul>
+  <li>Cockatiels</li>
+  <li>Lorikeets</li>
+  <li class="active">Cockatoos</li>
+  <li>Conures</li>
+  <li>Eclectus</li>
+</ul>
+```
+
+```javascript
+// yields <li>Cockatoos</li>
+cy.get('li').prev('.active')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .prev %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .prev %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .prev %}
 
 # Command Log
 
-## Find the previous element of the active `li`
+***Find the previous element of the active `li`***
 
 ```javascript
-cy.get(".left-nav").find("li.active").prev()
+cy.get('.left-nav').find('li.active').prev()
 ```
 
 The commands above will display in the command log as:
 
-<img width="564" alt="screen shot 2015-11-29 at 12 46 57 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458884/5bb4da1e-9697-11e5-9172-762df10c9a6e.png">
+![Command Log prev](/img/api/prev/find-prev-element-in-list-of-els.png)
 
 When clicking on `prev` within the command log, the console outputs the following:
 
-<img width="446" alt="screen shot 2015-11-29 at 12 47 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458886/5e20c63c-9697-11e5-9167-1b81f96e1906.png">
+![Console Log](/img/api/prev/previous-element-in-console-log.png)
 
-***
+# See also
 
-# Related
-
-1. [next](https://on.cypress.io/api/next)
+- {% url `.next()` next %}
+- {% url `.prevAll()` prevall %}
+- {% url `.prevUntil()` prevuntil %}

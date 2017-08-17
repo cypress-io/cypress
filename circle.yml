@@ -1,95 +1,319 @@
-machine:
-  node:
-    version: 6.5.0
+version: 2
 
-dependencies:
-  # CircleCI caching
-  # https://circleci.com/docs/1.0/how-cache-works/
-  cache_directories:
-    # downloaded Electron binary
-    - "~/.electron"
-    # could not use wildcard format, so list every subfolder
-    - packages/coffee/node_modules
-    - packages/desktop-gui/node_modules
-    - packages/driver/node_modules
-    - packages/electron/node_modules
-    - packages/example/node_modules
-    - packages/extension/node_modules
-    - packages/https-proxy/node_modules
-    - packages/launcher/node_modules
-    - packages/reporter/node_modules
-    - packages/runner/node_modules
-    - packages/server/node_modules
-    - packages/socket/node_modules
-    - packages/static/node_modules
+defaults: &defaults
+  parallelism: 1
+  working_directory: ~/cypress-monorepo
+  docker:
+    # the Docker image with Cypress dependencies and Chrome browser
+    - image: cypress/internal:chrome58
+      environment:
+        ## this enables colors + fixes failing unit tests
+        TERM: xterm
 
-test:
-  ## e2e (1)
-  ## desktop-gui (2)
-  ## driver (3)
-  ## example (4)
-  ## cli (5)
-  ## extension (5)
-  ## https-proxy (5)
-  ## launcher (5)
-  ## reporter (5)
-  ## runner (5)
-  ## server (5, 6)
-  override:
-    #
-    # things to run in the 1st CI container
-    #
-    # run unit tests (fast)
-    # separate commands for better GUI view
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package coffee; fi:
-        parallel: true
+        npm_config_loglevel: warn
+        # even when running as non-root user
+        # need to set unsafe perm to be able to do `npm postinstall`
+        npm_config_unsafe-perm: true
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package desktop-gui; fi:
-        parallel: true
+jobs:
+  ## code checkout and NPM installs
+  build:
+    <<: *defaults
+    steps:
+      - checkout
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package electron; fi:
-        parallel: true
+      ## make sure the TERM is set to 'xterm' in node
+      ## else colors (and tests) will fail
+      ## See the following information
+      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      - run:
+          name: Checking TERM is set
+          command: |
+            echo 'term env var is:' $TERM
+            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
+            node -e 'console.log("TERM %s stdout.isTTY?", process.env.TERM, process.stdout.isTTY)'
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package extension; fi:
-        parallel: true
+      # need to restore a separate cache for each package.json
+      - restore_cache:
+          key: v5-{{ .Branch }}-cli-deps
+      - restore_cache:
+          key: v5-{{ .Branch }}-root-deps
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-coffee
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-desktop-gui
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-driver
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-example
+      - restore_cache:
+          key: v7-{{ .Branch }}-deps-electron
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-extension
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-https-proxy
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-launcher
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-reporter
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-runner
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-server
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-socket
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-static
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-ts
+      - restore_cache:
+          key: v5-{{ .Branch }}-deps-docs
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package https-proxy; fi:
-        parallel: true
+      # only installs the root dependencies, without going into packages
+      # via postinstall script
+      - run: npm install --ignore-scripts
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package launcher; fi:
-        parallel: true
+      ## symlink all of our sub packages in node_modules
+      - run: npm run link
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package reporter; fi:
-        parallel: true
+      ## now install all of the sub packages node_modules
+      - run: npm run all install -- --serial
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package runner; fi:
-        parallel: true
+      # save each node_modules folder per package
+      - save_cache:
+          key: v5-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          paths:
+            - cli/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
+          paths:
+            - packages/coffee/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
+          paths:
+            - packages/desktop-gui/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
+          paths:
+            - packages/driver/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
+          paths:
+            - packages/example/node_modules
+      - save_cache:
+          key: v7-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          paths:
+            - packages/electron/node_modules
+            - ~/.cache/electron
+            - ~/.electron
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
+          paths:
+            - packages/extension/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
+          paths:
+            - packages/https-proxy/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
+          paths:
+            - packages/launcher/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          paths:
+            - packages/reporter/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
+          paths:
+            - packages/runner/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          paths:
+            - packages/server/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
+          paths:
+            - packages/socket/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
+          paths:
+            - packages/static/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
+          paths:
+            - packages/ts/node_modules
+      - save_cache:
+          key: v5-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
+          paths:
+            - docs/node_modules
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package server; fi:
-        parallel: true
+      - run: npm run stop-only
+      ## now go build all of subpackages
+      - run: npm run build
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package socket; fi:
-        parallel: true
+      ## save entire folder as artifact for other jobs to continue
+      ## hmm, do not see a good way to cache it, since all code
+      ## might change
+      - save_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /home/person/cypress-monorepo
 
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package static; fi:
-        parallel: true
+  lint:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run lint
+      - run: npm run all lint
 
-    - if [ $CIRCLE_NODE_INDEX == 1 ]; then npm run all test-integration-once -- --package server; fi:
-        parallel: true
+  "unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test -- --package cli
+      # can store multiple test results from different test commands
+      # they are all appended together
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - run: npm run all test -- --package coffee
+      - run: npm run all test -- --package desktop-gui
+      - run: npm run all test -- --package electron
+      - run: npm run all test -- --package extension
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - run: npm run all test -- --package https-proxy
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - run: npm run all test -- --package launcher
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      # how to pass Mocha reporter through zunder?
+      - run: npm run all test -- --package reporter
+      - run: npm run all test -- --package runner
+      - run: npm run all test -- --package socket
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - run: npm run all test -- --package static
 
-    #
-    # things to run in the 2nd CI container
-    #
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package driver; fi:
-        parallel: true
+  "server-unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-unit -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
-    #
-    # things to run in the 3rd CI container
-    #
-    - if [ $CIRCLE_NODE_INDEX == 2 ]; then npm run all test-e2e-once -- --package server; fi:
-        parallel: true
+  "server-integration-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-integration -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
-    # Example project E2E tests
-    # Hanging now, so commented out
-    # - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm start -- --project ../example/; fi:
-    #     parallel: true
+  "server-e2e-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run all test-e2e -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+
+  "docs-tests":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && npm run deps
+      - run: cd docs && npm run build
+      - run: cd docs && npm run test-e2e
+
+  "deploy-docs":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && NODE_ENV=production npm run build
+      # because we already built docs for production
+      # use script that just deploys without rebuilding the production docs
+      - run: cd docs && npm run deploy-prebuilt -- --environment production --scrape
+      - run: cd docs && cat public/build.json
+
+  "driver-unit-tests":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: chrome --version
+      - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
+
+  "build-binary":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      - run: ls -la build/linux/Cypress
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - lint:
+          requires:
+            - build
+      - unit-tests:
+          requires:
+            - build
+      - server-unit-tests:
+          requires:
+            - build
+      - server-integration-tests:
+          requires:
+            - build
+      - server-e2e-tests:
+          requires:
+            - build
+      - driver-unit-tests:
+          requires:
+            - build
+      - build-binary:
+          requires:
+            - build
+      # test and deploy documentation site
+      - docs-tests:
+          requires:
+            - build
+      - deploy-docs:
+          filters:
+            branches:
+              only: master
+          requires:
+            - docs-tests
+
+#
+# things to run in the 4th CI container
+#
+# - run:
+#     name: Example e2e tests
+#     command: |
+#       if [ $CIRCLE_NODE_INDEX == 3 ]; then
+#         # ./bin/cypress --project=./packages/example --path-to-cypress
+#         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+#       fi

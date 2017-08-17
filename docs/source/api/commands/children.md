@@ -1,80 +1,96 @@
+---
 title: children
-comments: true
+comments: false
 ---
 
-Get the children of each DOM element in the set of matched DOM elements.
+Get the children of each DOM element within a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.children` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.children()` http://api.jquery.com/children %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.children()](#section-usage)
+```javascript
+.children()
+.children(selector)
+.children(options)
+.children(selector, options)
+```
 
-Get the children of each DOM element in the set of matched DOM elements.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# [cy.children( *selector* )](#section-selector-usage)
+```javascript
+cy.get('nav').children()     // Yield children of nav
+```
 
-The `.children()` method optionally accepts a selector expression. If the selector is supplied, the DOM elements will be filtered by testing whether they match it.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.children()                // Errors, cannot be chained off 'cy'
+cy.location().children()     // Errors, 'location' does not yield DOM element
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.children`.
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-**cy.children( *options* )**
-**cy.children( *selector*, *options* )**
+A selector used to filter matching DOM elements.
 
-Option | Default | Notes
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.children()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .children %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .children %}
 
-## Get the children of the "secondary-nav"
+# Examples
+
+## No Args
+
+***Get the children of the "secondary-nav"***
 
 ```html
-<ul class="primary-nav">
-  <li class="about">About</li>
-  <li class="services">Services
+<ul>
+  <li>About</li>
+  <li>Services
     <ul class="secondary-nav">
       <li class="services-1">Web Design</li>
-      <li class="services-2">Print Design
+      <li class="services-2">Logo Design</li>
+      <li class="services-3">
+        Print Design
         <ul class="tertiary-nav">
-          <li class="item-1">Signage</li>
-          <li class="item-2">T-Shirt</li>
-          <li class="item-3">Business Cards</li>
+          <li>Signage</li>
+          <li>T-Shirt</li>
+          <li>Business Cards</li>
         </ul>
       </li>
-      <li class="services-3">Logo Design</li>
     </ul>
   </li>
-  <li class="Contact">Contact</li>
+  <li>Contact</li>
 </ul>
 ```
 
 ```javascript
-// returns [
-//  <li class="services-1"></li>,
-//  <li class="services-2"></li>,
-//  <li class="services-3"></li>
+// yields [
+//  <li class="services-1">Web Design</li>,
+//  <li class="services-2">Logo Design</li>,
+//  <li class="services-3">Print Design</li>
 // ]
-cy.get("ul.secondary-nav").children()
+cy.get('ul.secondary-nav').children()
 ```
 
-***
+## Selector
 
-# Selector Usage
-
-## Get the children with class "active"
+***Get the children with class 'active'***
 
 ```html
 <div>
@@ -86,33 +102,45 @@ cy.get("ul.secondary-nav").children()
 ```
 
 ```javascript
-// returns [<li class="active">Unit Testing</li>]
-cy.get("ul").children(".active")
+// yields [
+//  <li class="active">Unit Testing</li>
+// ]
+cy.get('ul').children('.active')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .children %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .children %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .children %}
 
 # Command Log
 
-## Assert that there should be 8 children elements in a nav
+**Assert that there should be 8 children elements in a nav**
 
 ```javascript
-cy.get(".left-nav>.nav").children().should("have.length", 8)
+cy.get('.left-nav>.nav').children().should('have.length', 8)
 ```
 
 The commands above will display in the command log as:
 
-<img width="521" alt="screen shot 2015-11-27 at 1 52 26 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447069/2b0f8a7e-950e-11e5-96b5-9d82d9fdddec.png">
+![Command log for children](/img/api/children/children-elements-shown-in-command-log.png)
 
 When clicking on the `children` command within the command log, the console outputs the following:
 
-<img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
+![console.log for children](/img/api/children/children-yielded-in-console.png)
 
-***
+# See also
 
-# Related
-
-- [parent](https://on.cypress.io/api/parent)
-- [parents](https://on.cypress.io/api/parents)
-- [next](https://on.cypress.io/api/next)
-- [siblings](https://on.cypress.io/api/siblings)
+- {% url `.next()` next %}
+- {% url `.parent()` parent %}
+- {% url `.parents()` parents %}
+- {% url `.siblings()` siblings %}

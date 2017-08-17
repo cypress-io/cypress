@@ -1,7 +1,7 @@
 _      = require("lodash")
 send   = require("send")
-runner = require("../../../runner")
-pkg    = require("../../package.json")
+runner = require("@packages/runner")
+pkg    = require("@packages/root")
 
 module.exports = {
   serve: (req, res, config, getRemoteState) ->

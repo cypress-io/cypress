@@ -1,48 +1,90 @@
+---
 title: debug
-comments: true
+comments: false
 ---
 
-`cy.debug` sets a `debugger` and logs the subject from the previous command.
+Set a `debugger` and log what the previous command yields.
 
-Make sure you have your Developer Tools open for `cy.debug` to hit the breakpoint.
+{% note warning %}
+You need to have your Developer Tools open for `.debug()` to hit the breakpoint.
+{% endnote %}
 
-| | |
-|--- | --- |
-| **Returns** | the subject from the previous command for further chaining. |
-| **Timeout** | *cannot timeout* |
-
-***
-
-# [cy.debug()](#section-usage)
-
-Debug the previous command.
-
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.debug`.
-
-**cy.debug(*options* )**
-
-Option | Default | Notes
---- | --- | ---
-`log` | `true` | whether to display command in command log
-
-***
-
-# Usage
-
-## Log out the current subject for debugging
+# Syntax
 
 ```javascript
-// Cypress will log out the current subject and other
-// useful debugging information to your console
-cy.get("a").debug().should("have.attr", "href")
+.debug()
+.debug(options)
+
+cy.debug()
+cy.debug(options)
 ```
 
-***
+## Usage
 
-# Related
+**{% fa fa-check-circle green %} Correct Usage**
 
-- [pause](https://on.cypress.io/api/pause)
+```javascript
+cy.debug().getCookie('app') // Pause to debug at beginning of commands
+cy.get('nav').debug()       // Debug the `get` command's yield
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.debug()`.
+
+Option | Default | Description
+--- | --- | ---
+`log` | `true` | {% usage_options log %}
+
+## Yields {% helper_icon yields %}
+
+{% yields same_subject .debug %}
+
+# Examples
+
+## Debug
+
+***Pause with debugger after `.get()`***
+
+```javascript
+cy.get('a').debug().should('have.attr', 'href')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dual .debug %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions utility .debug %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none .debug %}
+
+# Command Log
+
+***Log out the current subject for debugging***
+
+```javascript
+cy.get(".ls-btn").click({ force: true }).debug()
+```
+
+The commands above will display in the command log as:
+
+![Command Log debug](/img/api/debug/how-debug-displays-in-command-log.png)
+
+When clicking on the `debug` command within the command log, the console outputs the following:
+
+![console.log debug](/img/api/debug/console-gives-all-debug-info-for-command.png)
+
+# See also
+
+- {% url 'Dashboard' https://on.cypress.io/dashboard %}
+- {% url `.pause()` pause %}
+- {% url `cy.log()` log %}
+- {% url `cy.screenshot()` screenshot %}

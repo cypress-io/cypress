@@ -1,14 +1,19 @@
 _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
+moment = require("moment")
 
 { delay, waitForAnimations } = require("./utils")
+$Dom = require("../../../cypress/dom")
 $Log = require("../../../cypress/log")
 $Keyboard = require("../../../cypress/keyboard")
 utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
-textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
+dateRegex = /^\d{4}-\d{2}-\d{2}$/
+monthRegex = /^\d{4}-(0\d|1[0-2])$/
+weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
+timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
@@ -72,8 +77,12 @@ module.exports = (Cypress, Commands) ->
         options._log.snapshot("before", {next: "after"})
 
       isBody      = options.$el.is("body")
-      isTextLike  = options.$el.is(textLike)
-      hasTabIndex = options.$el.is("[tabindex]")
+      isTextLike  = $Dom.elIsTextLike(options.$el)
+      isDate      = $Dom.elIsType(options.$el, "date")
+      isTime      = $Dom.elIsType(options.$el, "time")
+      isMonth     = $Dom.elIsType(options.$el, "month")
+      isWeek      = $Dom.elIsType(options.$el, "week")
+      hasTabIndex = $Dom.elMatchesSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
       ## TODO: can't be readonly
@@ -102,7 +111,50 @@ module.exports = (Cypress, Commands) ->
       if _.isBlank(chars)
         utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
+      if isDate and (
+        not _.isString(chars) or
+        not dateRegex.test(chars) or
+        not moment(chars).isValid()
+      )
+        utils.throwErrByPath("type.invalid_date", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isMonth and (
+        not _.isString(chars) or
+        not monthRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_month", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isWeek and (
+        not _.isString(chars) or
+        not weekRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_week", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isTime and (
+        not _.isString(chars) or
+        not timeRegex.test(chars)
+      )
+        utils.throwErrByPath("type.invalid_time", {
+          onFail: options._log
+          args: { chars }
+        })
+
       options.chars = "" + chars
+
+      getDefaultButtons = (form) ->
+        form.find("input, button").filter (__, el) ->
+          $el = $(el)
+          ($Dom.elMatchesSelector($el, "input") and $Dom.elIsType($el, "submit")) or
+          ($Dom.elMatchesSelector($el, "button") and not $Dom.elIsType($el, "button"))
 
       type = =>
         simulateSubmitHandler = =>
@@ -112,7 +164,7 @@ module.exports = (Cypress, Commands) ->
 
           multipleInputsAndNoSubmitElements = (form) ->
             inputs  = form.find("input")
-            submits = form.find("input[type=submit], button[type!=button]")
+            submits = getDefaultButtons(form)
 
             inputs.length > 1 and submits.length is 0
 
@@ -131,7 +183,7 @@ module.exports = (Cypress, Commands) ->
               false
 
           getDefaultButton = (form) ->
-            form.find("input[type=submit], button[type!=button]").first()
+            getDefaultButtons(form).first()
 
           defaultButtonisDisabled = (button) ->
             button.prop("disabled")
@@ -166,12 +218,34 @@ module.exports = (Cypress, Commands) ->
 
           return dispatched
 
+        needSingleValueChange = ->
+          isDate or
+          isMonth or
+          isWeek or
+          isTime or
+          ($Dom.elIsType(options.$el, "number") and _.includes(options.chars, "."))
+
+        ## see comment in updateValue below
+        typed = ""
+
         $Keyboard.type({
           $el:     options.$el
           chars:   options.chars
           delay:   options.delay
           release: options.release
           window:  @privateState("window")
+
+          updateValue: (rng, key) ->
+            if needSingleValueChange()
+              ## in these cases, the value must only be set after all
+              ## the characters are input because attemping to set
+              ## a partial/invalid value results in the value being
+              ## set to an empty string
+              typed += key
+              if typed is options.chars
+                options.$el.val(options.chars)
+            else
+              rng.text(key, "end")
 
           onBeforeType: (totalKeys) =>
             ## for the total number of keys we're about to
@@ -304,7 +378,7 @@ module.exports = (Cypress, Commands) ->
 
         node = utils.stringifyElement($el)
 
-        if not $el.is(textLike)
+        if not $Dom.elIsTextLike($el)
           word = utils.plural(subject, "contains", "is")
           utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log

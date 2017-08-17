@@ -1,3 +1,5 @@
+{ $, _, Promise } = window.testUtils
+
 describe "$Cypress.Cy Connectors Commands", ->
   enterCommandTestingMode()
 
@@ -260,7 +262,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             return $input
           .then ($input) ->
             expectOriginal(@cy.state("subject")).not.to.be.instanceof @remoteWindow.$
-            expectOriginal(@cy.state("subject")).to.be.instanceof window.$
+            expectOriginal(@cy.state("subject")).to.be.instanceof $
 
       it "does not nuke selector properties", ->
         @cy
@@ -495,7 +497,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             Function: ".attr(numbers, [1, 2, 3])"
             "With Arguments": ["numbers", [1,2,3]]
             On:       @obj
-            Returned: {numbers: [1,2,3]}
+            Yielded: {numbers: [1,2,3]}
           }
 
       it "#consoleProps as a function property without args", ->
@@ -504,7 +506,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             Command:  "invoke"
             Function: ".bar()"
             On:       @obj
-            Returned: "bar"
+            Yielded: "bar"
           }
 
       it "#consoleProps as a function property with args", ->
@@ -514,7 +516,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             Function: ".sum(1, 2, 3)"
             "With Arguments": [1,2,3]
             On:       @obj
-            Returned: 6
+            Yielded: 6
           }
 
       it "#consoleProps as a function reduced property with args", ->
@@ -524,7 +526,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             Function: ".math.sum(1, 2, 3)"
             "With Arguments": [1,2,3]
             On:       @obj
-            Returned: 6
+            Yielded: 6
           }
 
       it "#consoleProps as a function on DOM element", ->
@@ -534,7 +536,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             Command: "invoke"
             Function: ".hide()"
             On: $btn.get(0)
-            Returned: $btn.get(0)
+            Yielded: $btn.get(0)
           }
 
     describe "errors", ->
@@ -731,7 +733,7 @@ describe "$Cypress.Cy Connectors Commands", ->
             Command:  "its"
             Property: ".num"
             On:       @obj
-            Returned: 123
+            Yielded: 123
           }
 
     describe "errors", ->

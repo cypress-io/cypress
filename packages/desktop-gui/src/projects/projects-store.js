@@ -2,11 +2,10 @@ import _ from 'lodash'
 import { computed, observable, action } from 'mobx'
 import Project from '../project/project-model'
 
-class Projects {
+class ProjectsStore {
   @observable projects = []
   @observable error = null
   @observable isLoading = false
-  @observable isLoaded = false
   @observable _membershipRequestedIds = {}
 
   @computed get chosen () {
@@ -21,55 +20,48 @@ class Projects {
     return _.map(this.projects, (project) => _.pick(project, ['path', 'id']))
   }
 
-  getProjectByClientId (clientId) {
-    return _.find(this.projects, { clientId })
-  }
-
-  addProject (path) {
-    let projectToAdd = {
-      path,
+  @action getProjectByPath (path) {
+    if (!this.projects.length) {
+      return this.addProject(path)
     }
 
-    const project = new Project(projectToAdd)
-    this.projects.push(project)
-    this._saveToLocalStorage()
+    return _.find(this.projects, { path })
+  }
+
+  @action addProject (path) {
+    // projects are sorted by most recently used, so add a project to the start
+    // or move it to the start if it already exists
+    const existingIndex = _.findIndex(this.projects, { path })
+    let project
+    if (existingIndex > -1) {
+      project = this.projects[existingIndex]
+      this.projects.splice(existingIndex, 1)
+    } else {
+      project = new Project({ path })
+    }
+
+    this.projects.unshift(project)
+
     return project
   }
 
-  @action loading (bool) {
-    this.isLoading = bool
+  @action setLoading (isLoading) {
+    this.isLoading = isLoading
   }
 
   @action setProjects (projects) {
-    // get the projects off of localStorage (with statuses)
-    // and set them up so we don't have to wait for data from server
-    const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
-    // index for quick lookup
-    const localProjectsIndex = _.keyBy(localProjects, 'id')
-
-    this.projects = _.map(projects, (project) => {
-      const props = _.extend(project, localProjectsIndex[project.id])
-      return new Project(props)
-    })
-
-    this.isLoading = false
-    this.isLoaded = true
+    this.projects = _.map(projects, (project) =>  new Project(project))
   }
 
-  @action setProjectStatuses (projects) {
-    // index for quick lookup
-    const projectsIndex = _.keyBy(projects, 'id')
+  @action updateProjectsWithStatuses (projectsWithStatuses = []) {
+    const projectsIndex = _.keyBy(projectsWithStatuses, 'id') // index for quick lookup
 
-    // merge projects received from api with what we
-    // already have in memory
     _.each(this.projects, (project) => {
       project.update(projectsIndex[project.id])
     })
-
-    this._saveToLocalStorage()
   }
 
-  @action setError (err) {
+  @action setError = (err = {}) => {
     this.error = err
   }
 
@@ -81,26 +73,16 @@ class Projects {
     project.isChosen = true
   }
 
-  updateProject (project, props) {
-    project.update(props)
-    this._saveToLocalStorage()
-  }
-
-  @action removeProject (clientId) {
-    const projectIndex = _.findIndex(this.projects, { clientId })
+  @action removeProject ({ path }) {
+    const projectIndex = _.findIndex(this.projects, { path })
 
     if (projectIndex != null) {
       this.projects.splice(projectIndex, 1)
-      this._saveToLocalStorage()
     }
   }
 
   serializeProjects () {
     return _.map(this.projects, (project) => project.serialize())
-  }
-
-  _saveToLocalStorage () {
-    localStorage.setItem('projects', JSON.stringify(this.serializeProjects()))
   }
 
   membershipRequested (id) {
@@ -112,4 +94,4 @@ class Projects {
   }
 }
 
-export default new Projects()
+export default new ProjectsStore()

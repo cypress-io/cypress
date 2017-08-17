@@ -1,45 +1,59 @@
+---
 title: siblings
-comments: true
+comments: false
 ---
 
-Get the siblings DOM elements of each element in the set of matched DOM elements.
+Get sibling DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.siblings` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+# Syntax
 
-***
+```javascript
+.siblings()
+.siblings(selector)
+.siblings(options)
+.siblings(selector, options)
+```
 
-# [cy.siblings()](#section-usage)
+## Usage
 
-Get the siblings of each DOM element in the set of matched DOM elements.
+**{% fa fa-check-circle green %} Correct Usage**
 
-***
+```javascript
+cy.get('td').siblings()           // Yield all td's siblings
+cy.get('li').siblings('.active')  // Yield all li's siblings with class '.active'
+```
 
-# [cy.siblings( *selector* )](#section-selector-usage)
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-Get the siblings of each DOM element in the set of matched DOM elements filtered by a selector.
+```javascript
+cy.siblings('.error')     // Errors, cannot be chained off 'cy'
+cy.location().siblings()  // Errors, 'location' does not yield DOM element
+```
 
-***
+## Arguments
 
-# Options
+**{% fa fa-angle-right %} selector**  ***(String selector)***
 
-Pass in an options object to change the default behavior of `cy.siblings`.
+A selector used to filter matching DOM elements.
 
-**cy.siblings( *options* )**
-**cy.siblings( *selector*, *options* )**
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-Option | Default | Notes
+Pass in an options object to change the default behavior of `.siblings()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .siblings %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .siblings %}
 
-## Get the siblings of each li.
+# Examples
+
+## No Args
+
+***Get the siblings of each li***
 
 ```html
 <ul>
@@ -51,42 +65,50 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns all other li's in list
-cy.get(".active").siblings()
+// yields all other li's in list
+cy.get('.active').siblings()
 ```
 
-***
+## Selector
 
-# Selector Usage
-
-## Get siblings of element with class `active`.
+***Get siblings of element with class `active`***
 
 ```javascript
-// returns <li class="active">Services</li>
-cy.get("li").siblings(".active")
+// yields <li class="active">Services</li>
+cy.get('li').siblings('.active')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .siblings %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .siblings %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .siblings %}
 
 # Command Log
 
-## Get the siblings of element with class `active`
+***Get the siblings of element with class `active`***
 
 ```javascript
-cy.get(".left-nav").find("li.active").siblings()
+cy.get('.left-nav').find('li.active').siblings()
 ```
 
 The commands above will display in the command log as:
 
-<img width="561" alt="screen shot 2015-11-29 at 12 48 55 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458897/a93f2a1e-9697-11e5-8a5b-b131156e1aa4.png">
+![Command Log](/img/api/siblings/find-siblings-of-dom-elements-to-test.png)
 
 When clicking on `siblings` within the command log, the console outputs the following:
 
-<img width="429" alt="screen shot 2015-11-29 at 12 49 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458898/ab940fd2-9697-11e5-96ab-a4c34efa3431.png">
+![Console Log](/img/api/siblings/console-log-of-sibling-elements.png)
 
-***
+# See also
 
-# Related
-
-- [prev](https://on.cypress.io/api/prev)
-- [next](https://on.cypress.io/api/next)
+- {% url `.prev()` prev %}
+- {% url `.next()` next %}

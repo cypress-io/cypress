@@ -1,4 +1,5 @@
 _ = require("lodash")
+Promise = require("bluebird")
 
 $Cy = require("../../cypress/cy")
 $Location = require("../../cypress/location")
@@ -149,7 +150,7 @@ $Cy.extend({
             indicator ?= if /^2/.test(status) then "successful" else "bad"
 
             {
-              message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), 20)}"
+              message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
               indicator: indicator
             }
         })

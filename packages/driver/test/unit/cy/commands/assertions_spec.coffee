@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Assertion Commands", ->
   enterCommandTestingMode()
 
@@ -506,13 +508,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("#does-not-exist")
 
-      ## FIXME: Can no longer call cy.should() because it's a child command
-      ## but not sure if we can remove this test or if it should be updated
-      it.skip "logs once with type: parent immediately without retrying", (done) ->
-        ## when cy.should is used by itself it really just acts like
-        ## a cy.then (it does not retry) because nothing has been told
-        ## to retry it!
-
+      it "throws if used as a parent command", (done) ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
@@ -521,18 +517,12 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy.on "fail", (err) =>
           @chai.restore()
 
-          expect(logs.length).to.eq(2)
-          expect(err.message).to.eq("foo is not defined")
-          expect(logs[1].get("name")).to.eq("should")
-          expect(logs[1].get("state")).to.eq("failed")
-          expect(logs[1].get("snapshots").length).to.eq(1)
-          expect(logs[1].get("snapshots")[0]).to.be.an("object")
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.include("looks like you are trying to call a child command before running a parent command")
 
           done()
 
-        @cy.get("button")
         @cy.should ->
-          foo.bar()
 
     describe ".log", ->
       beforeEach ->
@@ -551,17 +541,6 @@ describe "$Cypress.Cy Assertion Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("type")).to.eq("child")
-
-      ## FIXME: Can no longer call cy.should() because it's a child command
-      ## but not sure if we can remove this test or if it should be updated
-      it.skip "resets upcomingAssertions after resolving assertions", ->
-        @cy.get("button").as("btn").should("match", "button").and ->
-          ## length should be 2 for 'cy.should' and 'cy.and'
-          expect(@cy.state("upcomingAssertions").length).to.eq(2)
-        @cy.should ->
-          expect(@cy.state("upcomingAssertions")).to.deep.eq([])
-        .then ->
-          expect(@cy.state("upcomingAssertions")).to.deep.eq([])
 
   context "#and", ->
     it "proxies to #should", ->

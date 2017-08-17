@@ -1,3 +1,5 @@
+{ $, _, Promise, moment } = window.testUtils
+
 describe "$Cypress.Cy API", ->
   context "unit", ->
     before ->

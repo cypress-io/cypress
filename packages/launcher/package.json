@@ -1,47 +1,52 @@
 {
-  "name": "@cypress/core-launcher",
-  "version": "0.1.1",
-  "description": "Internal lib for spawning browser processes",
+  "name": "@packages/launcher",
+  "version": "0.0.0",
+  "private": true,
   "main": "index.js",
-  "types": "./index.d.ts",
+  "types": "../ts/index.d.ts",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps",
-    "lint": "tslint --type-check --project ../ts --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts",
-    "build-dev": "npm run lint",
     "pretest": "npm run lint",
-    "test": "mocha"
+    "test": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "clean-deps": "rm -rf node_modules",
+    "clean": "rm lib/*.js lib/**/*.js || true",
+    "clean-js": "npm run clean",
+    "lint": "npm run format-ts && npm run lint-ts && npm run lint-coffee && npm run lint-js",
+    "lint-js": "$(bin-up eslint) --fix *.js",
+    "lint-ts": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts",
+    "lint-coffee": "$(bin-up coffeelint) test/*.coffee test/**/*.coffee",
+    "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts",
+    "build-js": "tsc",
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-launcher.git"
-  },
-  "author": "Brian Mann",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-launcher/issues"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
     "@types/bluebird": "^3.5.3",
+    "@types/chai": "^3.5.2",
     "@types/debug": "0.0.29",
     "@types/fs-extra": "3.0.0",
     "@types/lodash": "^4.14.64",
+    "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.18",
+    "bin-up": "^1.0.1",
     "chai": "^3.5.0",
-    "mocha": "^2.4.5",
+    "prettier": "^1.4.2",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "tslint": "^5.2.0",
-    "tslint-config-standard": "^5.0.2"
+    "tslint": "5.4.3",
+    "tslint-config-standard": "5.0.2",
+    "typescript": "2.3.2"
   },
   "dependencies": {
+    "@types/ramda": "0.0.10",
     "bluebird": "^3.3.5",
     "debug": "^2.6.6",
     "execa": "^0.6.3",
     "fs-extra": "^3.0.0",
     "lodash": "^4.11.1",
-    "plist": "^1.2.0"
+    "plist": "^2.1.0",
+    "ramda": "^0.23.0"
   }
 }

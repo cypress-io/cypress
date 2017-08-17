@@ -1,38 +1,60 @@
+---
 title: find
-comments: true
+comments: false
 ---
 
-Get the descendents DOM elements of a specific selector.
+Get the descendent DOM elements of a specific selector.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.find` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.find()` http://api.jquery.com/find %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.find( *selector* )](#section-selector-usage)
+```javascript
+.find(selector)
+.find(selector, options)
+```
 
-Get the descendants of each DOM element in the current set of matched DOM elements within the selector.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# Options
+```javascript
+cy.get('.article').find('footer') // Yield 'footer' within '.article'
+```
 
-Pass in an options object to change the default behavior of `cy.find`.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-**cy.find( *selector*, *options* )**
+```javascript
+cy.find('.progress')          // Errors, cannot be chained off 'cy'
+cy.exec('node start').find()  // Errors, 'exec' does not yield DOM element
+```
 
-Option | Default | Notes
+## Arguments
+
+**{% fa fa-angle-right %} selector**  ***(String selector)***
+
+A selector used to filter matching descendent DOM elements.
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.find()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .find %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Selector Usage
+{% yields changes_dom_subject .find %}
 
-## Get li's within parent
+# Examples
+
+## Selector
+
+***Get li's within parent***
 
 ```html
 <ul id="parent">
@@ -42,30 +64,40 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns [<li class="first"></li>, <li class="second"></li>]
-cy.get("#parent").find("li")
+// yields [<li class="first"></li>, <li class="second"></li>]
+cy.get('#parent').find('li')
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .find %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .find %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .find %}
 
 # Command Log
 
-## Find the `li`'s within the nav
+***Find the li's within the nav***
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li")
+cy.get('.left-nav>.nav').find('>li')
 ```
 
 The commands above will display in the command log as:
 
-<img width="522" alt="screen shot 2015-11-27 at 2 19 38 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447309/f6a9be4a-9511-11e5-84a5-a111215bf1e6.png">
+![Command Log find](/img/api/find/find-li-of-uls-in-test.png)
 
 When clicking on the `find` command within the command log, the console outputs the following:
 
-<img width="516" alt="screen shot 2015-11-27 at 2 19 54 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447312/fa3679cc-9511-11e5-9bea-904f8c70063d.png">
+![console.log find](/img/api/find/find-in-console-shows-list-and-yields.png)
 
-***
+# See also
 
-# Related
-
-- [get](https://on.cypress.io/api/get)
+- {% url `cy.get()` get %}

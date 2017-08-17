@@ -1,63 +1,90 @@
+---
 title: log
-comments: true
+comments: false
 ---
 
-Print a message to the Command Log within Cypress.
+Print a message to the Cypress Command Log.
 
-| | |
-|--- | --- |
-| **Returns** | null |
-| **Timeout** | *cannot timeout* |
-
-***
-
-# [cy.log( *message* )](#section-usage)
-
-Print the message to the Command Log.
-
-***
-
-# [cy.log( *message*, *arguments* )](#section-arguments-usage)
-
-Print the message to the Command Log, along with any arguments.
-
-***
-
-# Usage
-
-## Log a message to the Command Log.
+# Syntax
 
 ```javascript
-cy.log("Login successful")
+cy.log(message)
+cy.log(message, args...)
 ```
 
-***
+## Usage
 
-# Arguments Usage
-
-## Log a message with arguments to the Command Log.
+**{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-// print previously saved variable 'events' to the Command Log.
-cy.log("events triggered", events)
+cy.log('created new user')    
 ```
 
-***
+## Arguments
+
+**{% fa fa-angle-right %} message** ***(String)***
+
+Message to be printed to Cypress Command Log.
+
+**{% fa fa-angle-right %} args...**
+
+Additional arguments to be printed to the Cypress Command Log. There is no limit to the number of arguments.
+
+## Yields {% helper_icon yields %}
+
+{% yields null cy.log %}
+
+# Examples
+
+## Message
+
+***Print a message to the Command Log.***
+
+```javascript
+cy.click('Login')
+cy.url().should('not.include', 'login')
+cy.log('Login successful')
+```
+
+## Args
+
+***Print a message with arguments to the Command Log.***
+
+```javascript
+cy.log('events triggered', events)
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.log %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions none cy.log %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts none cy.log %}
 
 # Command Log
 
-## Print messages with arguments to the Command Log.
+***Print messages with arguments to the Command Log.***
 
 ```javascript
-cy
-  .log("log out any message we want here")
-  .log("another message", ["one", "two", "three"])
+cy.log('log out any message we want here')
+cy.log('another message', ['one', 'two', 'three'])
 ```
 
 The commands above will display in the command log as:
 
-<img width="560" alt="command log with cy.log" src="https://cloud.githubusercontent.com/assets/1271364/21321329/55389b3c-c5e2-11e6-8607-592683d520da.png">
+![Command Log log](/img/api/log/custom-command-log-with-any-message.png)
 
 When clicking on `log` within the command log, the console outputs the following:
 
-<img width="746" alt="console display of cy.log" src="https://cloud.githubusercontent.com/assets/1271364/21321324/4f616dec-c5e2-11e6-8c2f-924e7bfd6f87.png">
+![Console log log](/img/api/log/console-shows-logs-message-and-any-arguments.png)
+
+# See also
+
+- {% url `cy.exec()` exec %}

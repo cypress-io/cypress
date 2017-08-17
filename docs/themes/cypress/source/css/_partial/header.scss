@@ -1,6 +1,5 @@
 #header {
   position: relative;
-  padding: 6px 0;
 }
 
 #header-inner {
@@ -36,16 +35,23 @@
 
 .main-nav-link {
   font-size: 14px;
-  color: $white-90;
+  color: $white-60;
   text-decoration: none;
   line-height: 50px;
   transition: 0.2s;
   font-family: $font-title;
   display: inline-block;
-  padding: 0 15px;
+  padding: 5px 15px;
+  font-weight: 400;
+
   &:hover {
     opacity: 1;
     color: $white;
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
   }
 
   .fa-github {
@@ -58,21 +64,36 @@
 #lang-select-wrap {
   display: none;
   position: relative;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0 10px;
+  margin-top: 14px;
+  margin-right: 10px;
+  float: right;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+  }
 }
+
 #lang-select-label {
+
   color: $white;
   opacity: 0.7;
   font-family: $font-title;
   font-size: 14px;
-  line-height: 50px;
+  line-height: 30px;
   span {
-    padding-left: 8px;
+    padding-left: 6px;
+    padding-right: 6px;
   }
   i {
     opacity: 0.7;
   }
 }
 #lang-select {
+  cursor: pointer;
   opacity: 0;
   position: absolute;
   top: 0;

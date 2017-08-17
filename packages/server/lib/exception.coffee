@@ -6,6 +6,12 @@ user     = require("./user")
 cache    = require("./cache")
 logger   = require("./logger")
 Settings = require("./util/settings")
+pkg      = require("@packages/root")
+
+## borrowed from https://github.com/atom/metrics/blob/master/lib/metrics.coffee#L168
+pathRE = /'?((\/|\\|[a-z]:\\)[^\s']+)+'?/ig
+stripPath = (text) ->
+  text.replace(pathRE, "<path>")
 
 ## POST https://api.cypress.io/exceptions
 ## sets request body
@@ -24,14 +30,13 @@ module.exports = {
 
   getErr: (err) ->
     {
-      name: err.name
-      message: err.message
-      stack: err.stack
-      info: winston.exception.getAllInfo(err)
+      name: stripPath(err.name)
+      message: stripPath(err.message)
+      stack: stripPath(err.stack)
     }
 
   getVersion: ->
-    fs.readJsonAsync("./package.json").get("version")
+    Promise.resolve(pkg.version)
 
   getBody: (err, settings) ->
     body = {err: @getErr(err)}

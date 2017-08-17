@@ -1,70 +1,83 @@
+---
 title: url
-comments: true
+comments: false
 ---
 
-Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/api/location) under the hood.
+Get the current URL of the page that is currently active.
 
-| | |
-|--- | --- |
-| **Returns** | the current URL as a string |
-| **Timeout** | *cannot timeout* |
+{% note info %}
+This is an alias of {% url "`cy.location('href')`" location %}
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.url()](#section-usage)
+```javascript
+cy.url()
+cy.url(options)
+```
 
-Get the current URL.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# Options
+```javascript
+cy.url()    // Yields the current url as a string
+```
 
-Pass in an options object to change the default behavior of `cy.url`.
+## Arguments
 
-**cy.url( *options* )**
+**{% fa fa-angle-right %} options** ***(Object)***
 
-Option | Default | Notes
+Pass in an options object to change the default behavior of `cy.url()`.
+
+**cy.hash( *options* )**
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.url %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields sets_subject cy.url 'yields the current URL as a string' %}
 
-## Assert the URL is `http://localhost:8000/users/1/edit`
+# Examples
+
+## No Args
+
+***Assert the URL is `http://localhost:8000/users/1/edit`***
 
 ```javascript
 // clicking the anchor causes the browser to follow the link
-cy
-  .get("#user-edit a").click()
-  .url().should("eq", "http://localhost:8000/users/1/edit") // => true
+cy.get('#user-edit a').click()
+cy.url().should('eq', 'http://localhost:8000/users/1/edit') // => true
 ```
 
-***
+# Notes
 
-## URL is a shortcut for `cy.location().href`
+## Href Shorthand
+
+***Url is an alias for `cy.location('href')`***
 
 `cy.url()` uses `href` under the hood.
 
 ```javascript
-cy.url()                  // these return the same string
-cy.location().its("href") // these return the same string
+cy.url()                  // these yield the same string
+cy.location('href')       // these yield the same string
 ```
 
-***
+## Differences
 
-# Notes
-
-## Why is this command called `url` instead of `href`?
+***Url versus href***
 
 Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
 ```javascript
-cy.location().its("href").should("eq", "http://localhost:8000/index.html")
+cy.location('href').should('eq', 'http://localhost:8000/index.html')
 
-cy.location().invoke("toString").should("eq", "http://localhost:8000/index.html")
+cy.location().its('href').should('eq', 'http://localhost:8000/index.html')
 
-cy.url().should("eq", "http://localhost:8000/index.html")
+cy.url().should('eq', 'http://localhost:8000/index.html')
 ```
 
 `href` and `toString` come from the `window.location` spec.
@@ -73,27 +86,37 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 `cy.url()` exists because it's what most developers naturally assume would return them the full current URL.  We almost never refer to the URL as an `href`.
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.url %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.url %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.url %}
 
 # Command Log
 
-## Assert that the url contains "#users/new"
+***Assert that the url contains "#users/new"***
 
 ```javascript
-cy.url().should("contain", "#users/new")
+cy.url().should('contain', '#users/new')
 ```
 
 The commands above will display in the command log as:
 
-<img width="583" alt="screen shot 2015-11-29 at 1 42 40 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459196/20645888-969f-11e5-973a-6a4a98339b15.png">
+![Command Log](/img/api/url/test-url-of-website-or-web-application.png)
 
 When clicking on `url` within the command log, the console outputs the following:
 
-<img width="440" alt="screen shot 2015-11-29 at 1 42 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459197/229e2552-969f-11e5-80a9-eeaf3221a178.png">
+![Console Log](/img/api/url/console-log-of-browser-url-string.png)
 
-***
+# See also
 
-# Related
-
-- [hash](https://on.cypress.io/api/hash)
-- [location](https://on.cypress.io/api/location)
+- {% url `cy.hash()` hash %}
+- {% url `cy.location()` location %}

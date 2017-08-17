@@ -1,80 +1,111 @@
+---
 title: clear
-comments: true
+comments: false
 ---
 
-Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
+Clear the value of an `input` or `textarea`.
+
+{% note info %}
+An alias for {% url `.type('{selectall}{backspace}')` type %}
+{% endnote %}
+
+# Syntax
 
 ```javascript
-cy.type("{selectall}{backspace}")
+.clear()
+.clear(options)
 ```
 
-Prior to clearing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
+## Usage
 
-**The following events are fired during clear:** `keydown`, `keypress`, `textInput`, `input`, `keyup`.
+**{% fa fa-check-circle green %} Correct Usage**
 
-`beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
+```javascript
+cy.get('[type="text"]').clear()        // Clear text input
+cy.get('textarea').type('Hi!').clear() // Clear textarea
+cy.focused().clear()                   // Clear focused input/textarea
+```
 
-| | |
-|--- | --- |
-| **Returns** | the element that was typed into |
-| **Timeout** | `cy.clear` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options).|
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-***
+```javascript
+cy.clear()                // Errors, cannot be chained off 'cy'
+cy.get('nav').clear()     // Errors, 'get' doesn't yield input or textarea
+cy.url().clear()          // Errors, 'url' doesn't yield DOM element
+```
 
-# [cy.clear()](#section-usage)
+## Arguments
 
-Clears the value of an `<input>` or `<textarea>`.
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-***
+Pass in an options object to change the default behavior of `.clear()`.
 
-# Options
-
-Pass in an options object to change the default behavior of `cy.clear`.
-
-**cy.clear( *options* )**
-
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Forces clear, disables error checking prior to clear
-`interval` | `16` | Interval which to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
-`log` | `true` | whether to display command in command log
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force clear %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .clear %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields same_subject .clear %}
 
-## Clear the input and type a new value.
+# Examples
 
-```html
-<input name="name" value="John Doe" />
-```
+## No Args
+
+**Clear the input and type a new value.**
 
 ```javascript
-// clears the existing value first before typing
-cy.get("input[name='name']").clear().type("Jane Lane")
+cy.get('textarea').clear().type('Hello, World')
 ```
 
-***
+# Notes
+
+## Actionability
+
+***The element must first reach actionability***
+
+`.clear()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+## Documentation
+
+`.clear()` is just an alias for {% url `.type({selectall}{backspace})` type %}.
+
+Please read the {% url `.type()` type %} documentation for more details.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements clearability .clear %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .clear %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .clear %}
 
 # Command Log
 
-## Clear the input and type a new value
+**Clear the input and type a new value**
 
 ```javascript
-cy.get("input[name='name']").clear().type("Jane Lane")
+cy.get('input[name="name"]').clear().type('Jane Lane')
 ```
 
 The commands above will display in the command log as:
 
-<img width="570" alt="screen shot 2015-11-29 at 12 56 58 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458939/bac1f4dc-9698-11e5-8e20-1ed9405f3d30.png">
+![Command log for clear](/img/api/clear/clear-input-in-cypress.png)
 
 When clicking on `clear` within the command log, the console outputs the following:
 
-<img width="511" alt="screen shot 2015-11-29 at 12 57 07 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458940/bdc93a50-9698-11e5-8be7-ef6a0470c3ae.png">
+![console.log for clear](/img/api/clear/one-input-cleared-in-tests.png)
 
-***
+# See also
 
-# Related
-
-- [type](https://on.cypress.io/api/type)
+- {% url `.blur()` blur %}
+- {% url `.focus()` focus %}
+- {% url `.type()` type %}

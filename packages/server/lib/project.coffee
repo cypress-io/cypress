@@ -11,6 +11,7 @@ user        = require("./user")
 cache       = require("./cache")
 config      = require("./config")
 logger      = require("./logger")
+debug       = require("./log")
 errors      = require("./errors")
 Server      = require("./server")
 scaffold    = require("./scaffold")
@@ -20,6 +21,7 @@ savedState  = require("./saved_state")
 Automation  = require("./automation")
 git         = require("./util/git")
 settings    = require("./util/settings")
+scaffoldLog = require("debug")("cypress:server:scaffold")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -42,8 +44,10 @@ class Project extends EE
     @cfg         = null
     @memoryCheck = null
     @automation  = null
+    debug("Project created %s", @projectRoot)
 
   open: (options = {}) ->
+    debug("opening project instance %s", @projectRoot)
     @server = Server(@watchers)
 
     _.defaults options, {
@@ -63,7 +67,7 @@ class Project extends EE
       process.chdir(@projectRoot)
 
       @server.open(cfg, @)
-      .then (port) =>
+      .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
         ## open the server
@@ -77,8 +81,11 @@ class Project extends EE
         ## opening the server
         @cfg = cfg
 
-        options.onSavedStateChanged = =>
-          @_setSavedState(@cfg)
+        if warning
+          options.onWarning(warning)
+
+        options.onSavedStateChanged = (state) =>
+          @saveState(state)
 
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)
@@ -90,15 +97,16 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  getBuilds: ->
+  getRuns: ->
     Promise.all([
       @getProjectId(),
       user.ensureAuthToken()
     ])
     .spread (projectId, authToken) ->
-      api.getProjectBuilds(projectId, authToken)
+      api.getProjectRuns(projectId, authToken)
 
   close: ->
+    debug("closing project instance %s", @projectRoot)
     if @memoryCheck
       clearInterval(@memoryCheck)
 
@@ -113,6 +121,9 @@ class Project extends EE
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
+      if not fs.existsSync(supportFile)
+        errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
+
       relativePath = path.relative(config.projectRoot, config.supportFile)
       if config.watchForFileChanges isnt false
         options = {
@@ -148,6 +159,8 @@ class Project extends EE
     ## if we've passed down reporter
     ## then record these via mocha reporter
     if config.report
+      if not Reporter.isValidReporterName(config.reporter, config.projectRoot)
+        errors.throw("INVALID_REPORTER_NAME", config.reporter, config.projectRoot)
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
     @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
@@ -165,9 +178,12 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
+        debug("onSetRunnables")
+        debug("runnables", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
+        debug("onMocha", event)
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
@@ -175,7 +191,7 @@ class Project extends EE
         reporter.emit(event, runnable)
 
         if event is "end"
-          stats = reporter.stats()
+          stats = reporter?.stats()
 
           ## TODO: convert this to a promise
           ## since we need an ack to this end
@@ -184,40 +200,6 @@ class Project extends EE
 
           @emit("end", stats)
     })
-
-  determineIsNewProject: (integrationFolder) ->
-    ## logic to determine if new project
-    ## 1. there are no files in 'integrationFolder'
-    ## 2. there is only 1 file in 'integrationFolder'
-    ## 3. the file is called 'example_spec.js'
-    ## 4. the bytes of the file match lib/scaffold/example_spec.js
-    nameIsDefault = (file) ->
-      path.basename(file) is scaffold.integrationExampleName()
-
-    getCurrentSize = (file) ->
-      fs
-      .statAsync(file)
-      .get("size")
-
-    checkIfBothMatch = (current, scaffold) ->
-      current is scaffold
-
-    glob("**/*", {cwd: integrationFolder, realpath: true})
-    .then (files) ->
-      ## TODO: add tests for this
-      return true if files.length is 0
-
-      return false if files.length isnt 1
-
-      exampleSpec = files[0]
-
-      return false if not def = nameIsDefault(exampleSpec)
-
-      Promise.join(
-        getCurrentSize(exampleSpec),
-        scaffold.integrationExampleSize(),
-        checkIfBothMatch
-      )
 
   changeToUrl: (url) ->
     @server.changeToUrl(url)
@@ -230,24 +212,45 @@ class Project extends EE
   getAutomation: ->
     @automation
 
-  getConfig: (options = {}) ->
-    getConfig = =>
-      if c = @cfg
-        Promise.resolve(c)
-      else
-        config.get(@projectRoot, options)
-        .then (cfg) =>
-          ## return a boolean whether this is a new project or not
-          @determineIsNewProject(cfg.integrationFolder)
-          .then (bool) ->
-            cfg.isNewProject = bool
-          .return(cfg)
+  ## do not check files again and again - keep previous promise
+  ## to refresh it - just close and open the project again.
+  determineIsNewProject: (folder) ->
+    scaffold.isNewProject(folder)
 
-    getConfig().then (cfg) =>
-      @_setSavedState(cfg)
+  ## returns project config (user settings + defaults + cypress.json)
+  ## with additional object "state" which are transient things like
+  ## window width and height, DevTools open or not, etc.
+  getConfig: (options = {}) =>
+    setNewProject = (cfg) =>
+      ## decide if new project by asking scaffold
+      ## and looking at previously saved user state
+      throw new Error("Missing integration folder") if not cfg.integrationFolder
+      @determineIsNewProject(cfg.integrationFolder)
+      .then (untouchedScaffold) ->
+        userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
+        scaffoldLog "untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}"
+        cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
+      .return(cfg)
+
+    if c = @cfg
+      Promise.resolve(c)
+    else
+      config.get(@projectRoot, options)
+      .then (cfg) => @_setSavedState(cfg)
+      .then(setNewProject)
+
+  # forces saving of project's state by first merging with argument
+  saveState: (stateChanges = {}) ->
+    throw new Error("Missing project config") if not @cfg
+    throw new Error("Missing project root") if not @projectRoot
+    newState = _.merge({}, @cfg.state, stateChanges)
+    savedState(@projectRoot).set(newState)
+    .then =>
+      @cfg.state = newState
+      newState
 
   _setSavedState: (cfg) ->
-    savedState.get()
+    savedState(@projectRoot).get()
     .then (state) ->
       cfg.state = state
       cfg
@@ -302,6 +305,8 @@ class Project extends EE
     [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
+    debug("scaffolding project %s", @projectRoot)
+
     scaffolds = []
 
     push = scaffolds.push.bind(scaffolds)
@@ -360,13 +365,10 @@ class Project extends EE
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
   createCiProject: (projectDetails) ->
-    Promise.all([
-      user.ensureAuthToken()
-      @getConfig()
-    ])
-    .spread (authToken, cfg) ->
+    user.ensureAuthToken()
+    .then (authToken) =>
       git
-      .init(cfg.projectRoot)
+      .init(@projectRoot)
       .getRemoteOrigin()
       .then (remoteOrigin) ->
         api.createProject(projectDetails, remoteOrigin, authToken)

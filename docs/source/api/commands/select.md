@@ -1,81 +1,63 @@
+---
 title: select
-comments: true
+comments: false
 ---
 
-Select an option within a `<select>` DOM element.
+Select an `<option>` within a `<select>`.
 
-**The following events are fired during select:** `mousedown`, `focus`, `mouseup`, `click`
+# Syntax
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.select` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+```javascript
+.select(value)
+.select(values)
+.select(value, options)
+.select(values, options)
+```
 
-***
+## Usage
 
-# [cy.select( *text* )](#section-text-usage)
+**{% fa fa-check-circle green %} Correct Usage**
 
-Select an option within a `<select>` element based on the text content of the option.
+```javascript
+cy.get('select').select('user-1') // Select the 'user-1' option
+```
 
-***
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-# [cy.select( *value* )](#section-value-usage)
+```javascript
+cy.select('John Adams')  // Errors, cannot be chained off 'cy'
+cy.location().select()   // Errors, 'location' does not yield <select> element
+```
 
-Select an option within a `<select>` element based on the value of the option.
+## Arguments
 
-***
+**{% fa fa-angle-right %} value**  ***(String)***
 
-# [cy.select( *texts* )](#section-texts-usage)
+The `value` or text content of the `<option>` to be selected.
 
-Select multiple options within a `<select>` element based on the text of the option.
+**{% fa fa-angle-right %} values**  ***(Array)***
 
-***
+An array of `values` or text contents of the `<option>`s to be selected.
 
-# [cy.select( *values* )](#section-values-usage)
+**{% fa fa-angle-right %} options**  ***(Object)***
 
-Select multiple options within a `<select>` element based on the value of the option.
+Pass in an options object to change the default behavior of `.select()`.
 
-***
-
-# Options
-
-Pass in an options object to change the default behavior of `cy.select`.
-
-**cy.select( *text*, *options* )**
-**cy.select( *value*, *options* )**
-**cy.select( *array*, *options* )**
-
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`force` | `false` | Forces select, disables error checking prior to select
-`interval` | `50` | Interval which to retry a select
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the select
-`log` | `true` | whether to display command in command log
+`log` | `true` | {% usage_options log %}
+`force` | `false` | {% usage_options force select %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .select %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Text Usage
+{% yields same_subject .select %}
 
-## Select the option with the text `apples`
+# Examples
 
-```html
-<select>
-  <option value="456">apples</option>
-  <option value="457">oranges</option>
-  <option value="458">bananas</option>
-</select>
-```
+## Text Content
 
-```javascript
-// returns <option value="456">apples</option>
-cy.get("select").select("apples")
-```
-
-***
-
-# Value Usage
-
-## Select the option with the value "456"
+***Select the option with the text `apples`***
 
 ```html
 <select>
@@ -86,15 +68,30 @@ cy.get("select").select("apples")
 ```
 
 ```javascript
-// returns <option value="456">apples</option>
-cy.get("select").select("456")
+// yields <option value="456">apples</option>
+cy.get('select').select('apples')
 ```
 
-***
+## Value
 
-# Texts Usage
+***Select the option with the value "456"***
 
-## Select the options with the texts "apples" and "bananas"
+```html
+<select>
+  <option value="456">apples</option>
+  <option value="457">oranges</option>
+  <option value="458">bananas</option>
+</select>
+```
+
+```javascript
+// yields <option value="456">apples</option>
+cy.get('select').select('456')
+```
+
+## Select multiple options
+
+***Select the options with the texts "apples" and "bananas"***
 
 ```html
 <select multiple>
@@ -105,14 +102,10 @@ cy.get("select").select("456")
 ```
 
 ```javascript
-cy.get("select").select(["apples", "bananas"])
+cy.get('select').select(['apples', 'bananas'])
 ```
 
-***
-
-# Values Usage
-
-## Select the options with the values "456" and "457"
+***Select the options with the values "456" and "457"***
 
 ```html
 <select multiple>
@@ -123,29 +116,45 @@ cy.get("select").select(["apples", "bananas"])
 ```
 
 ```javascript
-cy.get("select").select(["456", "457"])
+cy.get('select').select(['456', '457'])
 ```
 
-***
+# Notes
+
+## Actionability
+
+`.select()` is an "action command" that follows all the rules {% url 'defined here' interacting-with-elements %}.
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements selectability .select %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions actions .select %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts actions .select %}
 
 # Command Log
 
-## Select the option with the text "Homer Simpson"
+***Select the option with the text "Homer Simpson"***
 
 ```javascript
-cy.get("select").select("Homer Simpson")
+cy.get('select').select('Homer Simpson')
 ```
 
 The commands above will display in the command log as:
 
-<img width="575" alt="screen shot 2015-11-29 at 1 17 27 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459044/a2fd8fca-969b-11e5-8d23-3a118b82b5de.png">
+![Command Log select](/img/api/select/select-homer-option-from-browser-dropdown.png)
 
 When clicking on `select` within the command log, the console outputs the following:
 
-<img width="560" alt="screen shot 2015-11-29 at 1 17 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459045/a6b3bde2-969b-11e5-9357-272ea9684987.png">
+![Console Log select](/img/api/select/console-log-for-select-shows-option-and-any-events-caused-from-clicking.png)
 
-***
+# See also
 
-# Related
-
-- [click](https://on.cypress.io/api/click)
+- {% url `.click()` click %}

@@ -1,62 +1,79 @@
+---
 title: window
-comments: true
+comments: false
 ---
 
-Get the global `window` object of the remote application [visited](https://on.cypress.io/api/visit).
+Get the `window` object of the page that is currently active.
 
-| | |
-|--- | --- |
-| **Returns** | the `window` object |
-| **Timeout** | `cy.window` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+# Syntax
 
-***
+```javascript
+cy.window()
+cy.window(options)
+```
 
-# [cy.window()](#section-usage)
+## Usage
 
-Get the global window object of the remote application you've visited.
+**{% fa fa-check-circle green %} Correct Usage**
 
-***
+```javascript
+cy.window()    
+```
 
-# Options
+## Arguments
 
-Pass in an options object to change the default behavior of `cy.window`.
+**{% fa fa-angle-right %} options** ***(Object)***
 
-**[cy.window( *options* )](#section-options-usage)**
+Pass in an options object to change the default behavior of `cy.window()`.
 
-Option | Default | Notes
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout cy.window %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields sets_subject cy.window 'yields the `window` object' %}
 
-## Returns the remote window object
+# Examples
 
-```javascript
-cy
-  .visit("http://localhost:8080/app")
-  .window().then(function(win){
-    // win is the remote window
-    // of the page at: http://localhost:8080/app
-  })
-```
+## No Args
 
-***
-
-# Options Usage
-
-## Passes timeout through to `cy.should` assertion
+***Yields the remote window object***
 
 ```javascript
-cy.window({timeout: 10000}).should("have.property", "foo")
+cy.visit('http://localhost:8080/app')
+cy.window().then(function(win){
+  // win is the remote window
+  // of the page at: http://localhost:8080/app
+})
 ```
 
-***
+## Options
+
+***Passes timeout through to {% url `.should()` should %} assertion***
+
+```javascript
+cy.window({ timeout: 10000 }).should('have.property', 'foo')
+```
+
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements parent cy.window %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions retry cy.window %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts assertions cy.window %}
 
 # Command Log
 
-## Get the window
+***Get the window***
 
 ```javascript
 cy.window()
@@ -64,15 +81,13 @@ cy.window()
 
 The commands above will display in the command log as:
 
-<img width="587" alt="screen shot 2015-11-29 at 2 15 49 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459397/ced0a6de-96a3-11e5-93b4-9abd9ffabd98.png">
+![Command Log](/img/api/window/window-command-log-for-cypress-tests.png)
 
 When clicking on `window` within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot 2015-11-29 at 2 16 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459398/d0e6f4be-96a3-11e5-8583-69dcffef9cd3.png">
+![Console Log](/img/api/window/console-shows-the-applications-window-object-being-tested.png)
 
-***
+# See also
 
-# Related
-
-- [visit](https://on.cypress.io/api/visit)
-- [document](https://on.cypress.io/api/document)
+- {% url `cy.visit()` visit %}
+- {% url `cy.document()` document %}

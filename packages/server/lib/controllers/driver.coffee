@@ -1,5 +1,5 @@
 send   = require("send")
-driver = require("../../../driver")
+driver = require("@packages/driver")
 
 module.exports = {
   handle: (req, res) ->

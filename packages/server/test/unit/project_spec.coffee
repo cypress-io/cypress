@@ -2,6 +2,7 @@ require("../spec_helper")
 
 path         = require("path")
 Promise      = require("bluebird")
+fs           = require("fs-extra")
 Fixtures     = require("../support/helpers/fixtures")
 ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
@@ -44,17 +45,55 @@ describe "lib/project", ->
     expect(p.projectRoot).not.to.eq("../foo/bar")
     expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
 
-  context "#getConfig", ->
+  context "#saveState", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
-      @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
+      integrationFolder = "the/save/state/test"
+      @sandbox.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
+      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
+      @project.cfg = { integrationFolder }
+      savedState(@project.projectRoot).remove()
+
+    afterEach ->
+      savedState(@project.projectRoot).remove()
+
+    it "saves state without modification", ->
+      @project.saveState()
+      .then (state) ->
+        expect(state).to.deep.eq({})
+
+    it "adds property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 42 })
+
+    it "adds second property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then () => @project.saveState({ bar: true })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 42, bar: true })
+
+    it "modifes property", ->
+      @project.saveState()
+      .then () => @project.saveState({ foo: 42 })
+      .then () => @project.saveState({ foo: 'modified' })
+      .then (state) ->
+        expect(state).to.deep.eq({ foo: 'modified' })
+
+  context "#getConfig", ->
+    integrationFolder = "foo/bar/baz"
+    beforeEach ->
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder })
+      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
-      @sandbox.stub(savedState, "get").returns(Promise.resolve({ reporterWidth: 225 }))
+      state = savedState(@todosPath)
+      @sandbox.stub(state, "get").resolves({ reporterWidth: 225 })
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
         expect(cfg).to.deep.eq({
-          integrationFolder: "foo/bar/baz"
+          integrationFolder
           isNewProject: false
           baz: "quux"
           state: {
@@ -63,11 +102,32 @@ describe "lib/project", ->
         })
 
     it "resolves if cfg is already set", ->
-      @project.cfg = {foo: "bar"}
+      @project.cfg = {
+        integrationFolder: integrationFolder,
+        foo: "bar"
+      }
 
       @project.getConfig()
       .then (cfg) ->
-        expect(cfg).to.deep.eq({foo: "bar", state: {}})
+        expect(cfg).to.deep.eq({
+          integrationFolder: integrationFolder,
+          foo: "bar"
+        })
+
+    it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
+      state = savedState(@todosPath)
+      @sandbox.stub(state, "get").resolves({ showedOnBoardingModal: true })
+
+      @project.getConfig({foo: "bar"})
+      .then (cfg) ->
+        expect(cfg).to.deep.eq({
+          integrationFolder
+          isNewProject: false
+          baz: "quux"
+          state: {
+            showedOnBoardingModal: true
+          }
+        })
 
   context "#open", ->
     beforeEach ->
@@ -75,7 +135,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSupportFile").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(Server.prototype, "open").resolves()
+      @sandbox.stub(Server.prototype, "open").resolves([])
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -97,15 +157,17 @@ describe "lib/project", ->
         expect(@project.getConfig).to.be.calledWith(opts)
 
     it "updates config.state when saved state changes", ->
-      getSavedState = @sandbox.stub(savedState, "get").returns(Promise.resolve({}))
+      @sandbox.spy(@project, "saveState")
+
       options = {}
+
       @project.open(options)
-      .then ->
-        getSavedState.returns(Promise.resolve({ autoScrollingEnabled: false }))
-        options.onSavedStateChanged()
+      .then =>
+        options.onSavedStateChanged({ autoScrollingEnabled: false })
       .then =>
         @project.getConfig()
-      .then (config) ->
+      .then (config) =>
+        expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
 
     it.skip "watches cypress.json", ->
@@ -122,7 +184,7 @@ describe "lib/project", ->
 
   context "#close", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
 
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
@@ -142,75 +204,21 @@ describe "lib/project", ->
     it "can close when server + watchers arent open", ->
       @project.close()
 
-  context "#determineIsNewProject", ->
-    it "is false when files.length isnt 1", ->
-      id = =>
-        @ids = Project(@idsPath)
-        @ids.getConfig()
-        .then (cfg) =>
-          @ids.scaffold(cfg).return(cfg)
-        .then (cfg) =>
-          @ids.determineIsNewProject(cfg.integrationFolder)
-        .then (ret) ->
-          expect(ret).to.be.false
-
-      todo = =>
-        @todos = Project(@todosPath)
-        @todos.getConfig()
-        .then (cfg) =>
-          @todos.scaffold(cfg).return(cfg)
-        .then (cfg) =>
-          @todos.determineIsNewProject(cfg.integrationFolder)
-        .then (ret) ->
-          expect(ret).to.be.false
-
-      Promise.join(id, todo)
-
-    it "is true when files, name + bytes match to scaffold", ->
-      pristine = Project(@pristinePath)
-      pristine.getConfig()
-      .then (cfg) ->
-        pristine.scaffold(cfg).return(cfg)
-      .then (cfg) ->
-        pristine.determineIsNewProject(cfg.integrationFolder)
-      .then (ret) ->
-        expect(ret).to.be.true
-
-    it "is false when bytes dont match scaffold", ->
-      pristine = Project(@pristinePath)
-      pristine.getConfig()
-      .then (cfg) ->
-        pristine.scaffold(cfg).return(cfg)
-      .then (cfg) ->
-        example = scaffold.integrationExampleName()
-        file    = path.join(cfg.integrationFolder, example)
-
-        ## write some data to the file so it is now
-        ## different in file size
-        fs.readFileAsync(file, "utf8")
-        .then (str) ->
-          str += "foo bar baz"
-          fs.writeFileAsync(file, str).return(cfg)
-      .then (cfg) ->
-        pristine.determineIsNewProject(cfg.integrationFolder)
-      .then (ret) ->
-        expect(ret).to.be.false
-
-  context "#getBuilds", ->
+  context "#getRuns", ->
     beforeEach ->
       @project = Project(@todosPath)
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
-      @sandbox.stub(api, "getProjectBuilds").resolves('builds')
+      @sandbox.stub(api, "getProjectRuns").resolves('runs')
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
-    it "calls api.getProjectBuilds with project id + session", ->
-      @project.getBuilds().then (builds) ->
-        expect(api.getProjectBuilds).to.be.calledWith("id-123", "auth-token-123")
-        expect(builds).to.equal("builds")
+    it "calls api.getProjectRuns with project id + session", ->
+      @project.getRuns().then (runs) ->
+        expect(api.getProjectRuns).to.be.calledWith("id-123", "auth-token-123")
+        expect(runs).to.equal("runs")
 
   context "#scaffold", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @sandbox.stub(scaffold, "integration").resolves()
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
@@ -231,7 +239,7 @@ describe "lib/project", ->
 
   context "#watchSettings", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
       @watch = @sandbox.stub(@project.watchers, "watch")
 
@@ -250,7 +258,7 @@ describe "lib/project", ->
       expect(@watch).not.to.be.called
 
     it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
-      @project.generatedProjectIdTimestamp = timestamp = new Date
+      @project.generatedProjectIdTimestamp = timestamp = new Date()
 
       emit = @sandbox.spy(@project, "emit")
 
@@ -273,9 +281,10 @@ describe "lib/project", ->
 
   context "#watchSupportFile", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @sandbox.stub(fs, "existsSync").returns(true)
+      @project = Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
-      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").returns(Promise.resolve())
+      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
       @config = {
         projectRoot: "/path/to/root/"
         supportFile: "/path/to/root/foo/bar.js"
@@ -303,9 +312,13 @@ describe "lib/project", ->
 
       expect(@watchBundle.firstCall.args[2]).to.be.undefined
 
+    it "throws when support file does not exist", ->
+      fs.existsSync.returns(false)
+      expect(=> @project.watchSupportFile(@config)).to.throw("Support file missing or invalid.")
+
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @project.watchers = {}
       @project.server = @sandbox.stub({startWebsockets: ->})
       @sandbox.stub(@project, "watchSettings")
@@ -332,7 +345,7 @@ describe "lib/project", ->
       delete process.env.CYPRESS_PROJECT_ID
 
     beforeEach ->
-      @project         = Project("path/to/project")
+      @project         = Project("/_test-output/path/to/project")
       @verifyExistence = @sandbox.stub(Project.prototype, "verifyExistence").resolves()
 
     it "resolves with process.env.CYPRESS_PROJECT_ID if set", ->
@@ -363,10 +376,10 @@ describe "lib/project", ->
         throw new Error("expected to fail, but did not")
       .catch (err) ->
         expect(err.type).to.eq("NO_PROJECT_ID")
-        expect(err.message).to.include("path/to/project")
+        expect(err.message).to.include("/_test-output/path/to/project")
 
     it "bubbles up Settings.read errors", ->
-      err = new Error
+      err = new Error()
       err.code = "EACCES"
 
       @sandbox.stub(settings, "read").rejects(err)
@@ -379,7 +392,7 @@ describe "lib/project", ->
 
   context "#writeProjectId", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
 
       @sandbox.stub(settings, "write")
         .withArgs(@project.projectRoot, {projectId: "id-123"})
@@ -483,7 +496,7 @@ describe "lib/project", ->
 
   context "#createCiProject", ->
     beforeEach ->
-      @project = Project("path/to/project")
+      @project = Project("/_test-output/path/to/project")
       @newProject = { id: "project-id-123" }
 
       @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
@@ -540,8 +553,8 @@ describe "lib/project", ->
       @sandbox.stub(cache, "removeProject").resolves()
 
     it "calls cache.removeProject with path", ->
-      Project.remove("path/to/project").then ->
-        expect(cache.removeProject).to.be.calledWith("path/to/project")
+      Project.remove("/_test-output/path/to/project").then ->
+        expect(cache.removeProject).to.be.calledWith("/_test-output/path/to/project")
 
   context ".exists", ->
     beforeEach ->
@@ -638,11 +651,11 @@ describe "lib/project", ->
         { id: "id-123", lastBuildStatus: "passing" }
       ])
 
-      Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+      Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses[0]).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           lastBuildStatus: "passing"
           state: "VALID"
         })
@@ -650,10 +663,10 @@ describe "lib/project", ->
     it "returns client project when it has no id", ->
       @sandbox.stub(api, "getProjects").resolves([])
 
-      Project.getProjectStatuses([{ path: "/path/to/project" }])
+      Project.getProjectStatuses([{ path: "/_test-output/path/to/project" }])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses[0]).to.eql({
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           state: "VALID"
         })
 
@@ -664,33 +677,33 @@ describe "lib/project", ->
       it "marks project as invalid if api 404s", ->
         @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
           expect(projectsWithStatuses[0]).to.eql({
             id: "id-123"
-            path: "/path/to/project"
+            path: "/_test-output/path/to/project"
             state: "INVALID"
           })
 
       it "marks project as unauthorized if api 403s", ->
         @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
           expect(projectsWithStatuses[0]).to.eql({
             id: "id-123"
-            path: "/path/to/project"
+            path: "/_test-output/path/to/project"
             state: "UNAUTHORIZED"
           })
 
       it "merges in project details and marks valid if somehow project exists and is authorized", ->
         @sandbox.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
           expect(projectsWithStatuses[0]).to.eql({
             id: "id-123"
-            path: "/path/to/project"
+            path: "/_test-output/path/to/project"
             lastBuildStatus: "passing"
             state: "VALID"
           })
@@ -699,7 +712,7 @@ describe "lib/project", ->
         error = {name: "", message: ""}
         @sandbox.stub(api, "getProject").rejects(error)
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then =>
           throw new Error("Should throw error")
         .catch (err) ->
@@ -709,7 +722,7 @@ describe "lib/project", ->
     beforeEach ->
       @clientProject = {
         id: "id-123",
-        path: "/path/to/project"
+        path: "/_test-output/path/to/project"
       }
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
@@ -729,7 +742,7 @@ describe "lib/project", ->
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           lastBuildStatus: "passing"
           state: "VALID"
         })
@@ -741,7 +754,7 @@ describe "lib/project", ->
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           state: "INVALID"
         })
 
@@ -752,7 +765,7 @@ describe "lib/project", ->
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
-          path: "/path/to/project"
+          path: "/_test-output/path/to/project"
           state: "UNAUTHORIZED"
         })
 
@@ -791,7 +804,7 @@ describe "lib/project", ->
     it "throws CANNOT_FETCH_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "getProjectToken")
         .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error)
+        .rejects(new Error())
 
       Project.getSecretKeyByPath(@todosPath)
       .then ->
@@ -814,7 +827,7 @@ describe "lib/project", ->
     it "throws CANNOT_CREATE_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "updateProjectToken")
         .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error)
+        .rejects(new Error())
 
       Project.generateSecretKeyByPath(@todosPath)
       .then ->

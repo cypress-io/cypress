@@ -5,7 +5,12 @@
   "parserOptions": {
     "ecmaVersion": 6
   },
+  "plugins": [
+    "no-only-tests"
+  ],
   "rules": {
+    "quotes": ["error", "single"],
+    "no-only-tests/no-only-tests": 1,
     "array-bracket-spacing": ["error", "never"],
     "arrow-parens": ["error", "always"],
     "arrow-spacing": "error",

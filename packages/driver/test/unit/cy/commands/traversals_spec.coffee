@@ -1,3 +1,5 @@
+{ $, _ } = window.testUtils
+
 describe "$Cypress.Cy Traversal Commands", ->
   enterCommandTestingMode()
 
@@ -126,11 +128,11 @@ describe "$Cypress.Cy Traversal Commands", ->
             obj = {Command: name}
             obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
 
-            returned = @Cypress.utils.getDomElements($el)
+            yielded = @Cypress.utils.getDomElements($el)
 
             _.extend obj, {
               "Applied To": getFirstSubjectByName.call(@, "get").get(0)
-              Returned: returned
+              Yielded: yielded
               Elements: $el.length
             }
 
@@ -273,7 +275,7 @@ describe "$Cypress.Cy Traversal Commands", ->
         expect(@log.get("error")).to.eq err
         expect(@log.get("$el").get(0)).to.eq button.get(0)
         consoleProps = @log.attributes.consoleProps()
-        expect(consoleProps.Returned).to.eq button.get(0)
+        expect(consoleProps.Yielded).to.eq button.get(0)
         expect(consoleProps.Elements).to.eq button.length
         done()
 

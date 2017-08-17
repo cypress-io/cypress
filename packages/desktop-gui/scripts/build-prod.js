@@ -1,18 +1,13 @@
-var z = require('zunder')
-var u = z.undertaker
-var copyScripts = require('./copy-scripts')
-var setZunderConfig = require('./set-zunder-config')
+const z = require('zunder')
+const u = z.undertaker
 
-setZunderConfig(z)
+require('./set-zunder-config')()
 
 u.series(
   z.applyProdEnv,
   z.cleanProd,
-  u.parallel(
-    z.buildDevHtml,
-    z.buildDevScripts,
-    z.buildProdStylesheets,
-    z.buildProdStaticAssets,
-    copyScripts(z.config.prodDir)
-  )
+  z.buildDevHtml,
+  z.buildDevScripts,
+  z.buildProdStylesheets,
+  z.buildProdStaticAssets
 )()

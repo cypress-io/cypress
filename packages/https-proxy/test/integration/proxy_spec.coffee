@@ -32,6 +32,10 @@ describe "Proxy", ->
     )
 
   it "can request the googles", ->
+    ## give some padding to external
+    ## network request
+    @timeout(10000)
+
     Promise.all([
       request({
         strictSSL: false
@@ -135,4 +139,3 @@ describe "Proxy", ->
           url: "https://localhost:8443/"
           proxy: "http://localhost:3333"
         })
-

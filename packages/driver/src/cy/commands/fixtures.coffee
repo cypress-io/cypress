@@ -4,25 +4,24 @@ Promise = require("bluebird")
 $Cy = require("../../cypress/cy")
 utils = require("../../cypress/utils")
 
-cache = {}
-
 fixturesRe = /^(fx:|fixture:)/
 
 clone = (obj) ->
   JSON.parse(JSON.stringify(obj))
 
 module.exports = (Cypress, Commands) ->
+  ## this is called at the beginning of run, so clear the cache
+  cache = {}
+
   fixture = (fixture, options) =>
     new Promise (resolve) ->
       Cypress.trigger("fixture", fixture, options, resolve)
 
-  ## reset the cache whenever we
-  ## completely stop
-  Cypress.on "stop", ->
-    cache = {}
-
   Commands.addAll({
     fixture: (fx, args...) ->
+      if Cypress.config("fixturesFolder") is false
+        utils.throwErrByPath("fixture.set_to_false")
+
       ## if we already have cached
       ## this fixture then just return it
 

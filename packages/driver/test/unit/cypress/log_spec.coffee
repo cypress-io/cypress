@@ -1,3 +1,5 @@
+{ $, _, Promise } = window.testUtils
+
 describe "$Cypress.Log API", ->
 
   describe "instances", ->
@@ -277,13 +279,13 @@ describe "$Cypress.Log API", ->
       it "serializes window", ->
         @log.set({
           consoleProps: ->
-            Returned: window
+            Yielded: window
         })
 
         expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
           consoleProps: {
             Command: undefined
-            Returned: "<window>"
+            Yielded: "<window>"
           }
           err: null
           id: @log.get("id")
@@ -294,13 +296,13 @@ describe "$Cypress.Log API", ->
       it "serializes document", ->
         @log.set({
           consoleProps: ->
-            Returned: document
+            Yielded: document
         })
 
         expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
           consoleProps: {
             Command: undefined
-            Returned: "<document>"
+            Yielded: "<document>"
           }
           err: null
           id: @log.get("id")
@@ -316,13 +318,13 @@ describe "$Cypress.Log API", ->
         @log.set({
           $el: imgs
           consoleProps: ->
-            Returned: [img1, img2]
+            Yielded: [img1, img2]
         })
 
         expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
           consoleProps: {
             Command: undefined
-            Returned: ["<img>", "<img>"]
+            Yielded: ["<img>", "<img>"]
           }
           $el: "[ <img>, 1 more... ]"
           err: null
@@ -795,7 +797,7 @@ describe "$Cypress.Log API", ->
                 Command: "get"
                 Selector: "foo"
                 Elements: 0
-                Returned: undefined
+                Yielded: undefined
                 Error: err.toString()
               }
               done()
@@ -841,7 +843,7 @@ describe "$Cypress.Log API", ->
                   Command: "contains"
                   Content: "asdfasdfasdfasdf"
                   Elements: 0
-                  Returned: undefined
+                  Yielded: undefined
                   "Applied To": $Cypress.utils.getDomElements(btns)
                   Error: err.toString()
                 }
@@ -849,6 +851,7 @@ describe "$Cypress.Log API", ->
 
             @cy.get("button").contains("asdfasdfasdfasdf")
 
+          ## FIXME: timed out once on full run
           it "#consoleProps for nested children commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
@@ -858,7 +861,7 @@ describe "$Cypress.Log API", ->
                   Command: "contains"
                   Content: "asdfasdfasdfasdf"
                   Elements: 0
-                  Returned: undefined
+                  Yielded: undefined
                   "Applied To": getFirstSubjectByName.call(@, "eq").get(0)
                   Error: err.toString()
                 }

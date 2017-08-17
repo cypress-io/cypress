@@ -257,7 +257,7 @@ invokeFn = (subject, fn, args...) ->
 
           _.extend obj,
             On:       getFormattedElement(actualSubject)
-            Returned: getFormattedElement(value)
+            Yielded: getFormattedElement(value)
 
           obj
 

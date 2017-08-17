@@ -2,8 +2,9 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
-savedState    = require("../saved_state")
+log           = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
+errors        = require("../errors")
 
 fs              = Promise.promisifyAll(fs)
 instance        = null
@@ -52,13 +53,15 @@ module.exports = {
 
       if not browser = browsers[name]
         keys = _.keys(browsers).join(", ")
-        throw new Error("Browser: #{name} has not been added. Available browsers are: #{keys}")
+        errors.throw("BROWSER_NOT_FOUND", name, keys)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
+      log("open browser %s", name)
       browser.open(name, url, options, automation)
       .then (i) ->
+        log("browser opened")
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
 

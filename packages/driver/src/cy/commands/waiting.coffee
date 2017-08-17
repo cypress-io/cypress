@@ -14,7 +14,7 @@ $Cy.extend({
       options._log = Cypress.Log.command
         consoleProps: -> {
           "Waited For": "#{ms}ms before continuing"
-          "Returned": subject
+          "Yielded": subject
         }
 
     Promise
@@ -140,7 +140,7 @@ $Cy.extend({
         if options._log
           options._log.set "consoleProps", -> {
             "Waited For": (@referencesAlias || []).join(", ")
-            "Returned": ret
+            "Yielded": ret
           }
 
           options._log.snapshot().end()

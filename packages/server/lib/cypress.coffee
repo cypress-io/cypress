@@ -13,6 +13,7 @@ _       = require("lodash")
 cp      = require("child_process")
 path    = require("path")
 Promise = require("bluebird")
+log     = require('./log')
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
@@ -57,7 +58,7 @@ module.exports = {
 
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
-          cypressElectron = require("../../electron")
+          cypressElectron = require("@packages/electron")
           fn = (code) ->
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
@@ -75,7 +76,7 @@ module.exports = {
     _.defaults options, { autoOpen: true }
 
     if not options.project
-      throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project path/to/project'\n\n")
+      throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project /path/to/project'\n\n")
 
     if options.debug
       args.debug = "--debug"
@@ -153,9 +154,8 @@ module.exports = {
         when options.record or options.ci
           options.mode = "record"
 
-        when options.project
-          ## go into headless mode
-          ## when we have 'project'
+        when options.runProject
+          ## go into headless mode when told to run
           options.mode = "headless"
 
         else
@@ -169,6 +169,7 @@ module.exports = {
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->
+    log("start in mode %s with options %j", mode, options)
     switch mode
       when "removeIds"
         require("./project").removeIds(options.projectPath)

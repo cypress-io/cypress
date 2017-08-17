@@ -1,10 +1,12 @@
+_ = require("lodash")
+
 divider = (num, char) ->
   Array(num).join(char)
 
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, 100)
+      _.truncate(data, { length: 100 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
@@ -225,6 +227,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
 
   fixture:
+    set_to_false: "#{cmd('fixture')} is not valid because you have configured 'fixturesFolder' to false."
     timed_out: "#{cmd('fixture')} timed out waiting '{{timeout}}ms' to receive a fixture. No fixture was ever sent by the server."
 
   focus:
@@ -249,7 +252,7 @@ module.exports = {
       #{cmd('hover')} is not currently implemented.\n
       However it is usually easy to workaround.\n
       Read the following document for a detailed explanation.\n
-      https://on.cypress.io/api/hover
+      https://on.cypress.io/hover
     """
 
   invoke:
@@ -356,7 +359,7 @@ module.exports = {
 
       Please go through the getter function: #{cmd(obj.name, "...")}
 
-      #{if obj.url then "https://on.cypress.io/api/#{obj.name}" else ""}
+      #{if obj.url then "https://on.cypress.io/#{obj.name}" else ""}
       """
     retry_timed_out: "Timed out retrying: {{error}}"
 
@@ -588,6 +591,10 @@ module.exports = {
   type:
     empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
     invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
+    invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
+    invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
+    invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
+    invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single textarea or :text. Your subject contained {{num}} elements."
     not_on_text_field: "#{cmd('type')} can only be called on textarea or :text. Your subject is a: {{node}}"
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."

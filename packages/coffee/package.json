@@ -1,10 +1,16 @@
 {
-  "name": "coffee",
+  "name": "@packages/coffee",
   "main": "index.js",
+  "private": true,
   "dependencies": {
     "coffee-script": "1.12.5"
   },
+  "files": [
+    "register.js"
+  ],
   "scripts": {
-    "test": "echo 'Nothing to test for the coffee project'"
+    "test": "echo 'Nothing to test for the coffee package'"
+  },
+  "devDependencies": {
   }
 }

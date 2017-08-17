@@ -1,3 +1,4 @@
 test/unit
---compilers coffee:../coffee/register,ts:../ts/register
+--compilers ts:@packages/ts/register,coffee:@packages/coffee/register
+--timeout 10000
 --recursive

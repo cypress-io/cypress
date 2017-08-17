@@ -17,7 +17,7 @@ permalink: :year/:month/:day/:title/
 permalink_defaults:
 
 logo: img/logo.png
-github: cypress-io/cypress-documentation
+github: cypress-io/cypress
 
 # Directory
 source_dir: source
@@ -25,9 +25,57 @@ public_dir: public
 i18n_dir: :lang
 skip_render:
 
+# Generate alias pages for redirecting to posts, pages or URL
+# You must run `npm run build` for changes to take effect
+# https://github.com/hexojs/hexo-generator-alias
+# to redirect a directory, make sure it has a trailing slash (/docs/bob > /docs/bob/)
+# can also do outside page links here
+# plugins/index.html: https://github.com/cypress/cypress/wiki/Plugins
+alias:
+  index.html: guides/getting-started/why-cypress.html
+  guides/index.html: guides/getting-started/why-cypress.html
+  api/index.html: api/introduction/api.html
+  examples/index.html: examples/recipes/unit-testing-recipe.html
+  dashboard/index.html: dashboard/overview/features-dashboard.html
+  faq/index.html: faq/questions/general-questions-faq.html
+  docs/known-issues/: guides/references/known-issues.html
+  docs/finding-elements/: guides/core-concepts/introduction-to-cypress.html#Querying-Elements
+
+#from Google Search Console/Webmaster Tools since 7/3/2017 - https://docs.google.com/spreadsheets/d/1SHhjytMEzIxtdzFNXJHn_Q6p3xFFv_lFw0x_JtNtxt0/edit#gid=1581503717
+  v1.0/docs/promise/: api/utilities/promise.html
+  v1.0/docs/getcookie/: api/commands/getcookie.html
+  v1.0/docs/getcookies/: api/commands/getcookies.html
+  v1.0/docs/nextall/: api/commands/nextall.html
+  v1.0/docs/prevuntil/: api/commands/prevuntil.html
+  v1.0/docs/siblings/: api/commands/siblings.html
+  guides/issuing-commands/: guides/core-concepts/introduction-to-cypress.html#Subject-Management
+  v1.0/docs/clearcookie/: api/commands/clearcookie.html
+  api/commands/api-server.html: api/cypress-api/cypress-server.html
+  guides/installing-and-running/: guides/getting-started/installing-cypress.html
+  docs/screenshots-and-videos/: guides/core-concepts/screenshots-and-videos.html
+  docs/projects/: dashboard/overview/projects-dashboard.html
+  docs/network-requests-xhr/: guides/guides/network-requests.html
+  docs/environment-variables/: guides/guides/environment-variables.html
+  api/commands/cypress-blob.html: api/utilities/blob.html
+  docs/installing-and-running/: guides/getting-started/installing-cypress.html
+  docs/configuration/: guides/references/configuration.html
+  v1.0/docs/exec/: api/commands/exec.html
+  v1.0/docs/setcookie/: api/commands/setcookie.html
+  v1.0/docs/clear/: api/commands/clear.html
+  v1.0/docs/cypress-minimatch/: api/utilities/minimatch.html
+  v1.0/docs/first/: /api/commands/first.html
+  docs/cli/: guides/guides/command-line.html
+  docs/wait/: api/commands/wait.html
+  why-cypress/: guides/getting-started/why-cypress.html
+  guides.html/: guides/getting-started/why-cypress.html
+  guides/references/type/: api/commands/type.html
+  docs/launching-browsers/: guides/core-concepts/launching-browsers.html
+  guides/integrating-cypress/features.html/: guides/guides/continuous-integration.html
+  guides/network-requests-xhr/: guides/guides/network-requests.html
+
 # Include/Exclude Files/Folders
 include:
-  - api/utilities/**
+  - api/utilities/** ## This ensures that our '_.md' file is included
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -40,9 +88,13 @@ post_asset_folder: false
 relative_link: false
 future: true
 highlight:
-  enable: true
-  line_number: false
-  auto_detect: true
+  enable: false
+
+# https://github.com/ele828/hexo-prism-plugin
+prism_plugin:
+  mode: 'preprocess'    # realtime/preprocess
+  theme: 'coy'
+  line_number: false    # default false
 
 # Category & Tag
 default_category: uncategorized
@@ -55,11 +107,6 @@ tag_map:
 ## http://momentjs.com/docs/#/displaying/format/
 date_format: MM-DD-YYYY
 time_format: HH:mm:ss
-
-# Pagination
-## Set per_page to 0 to disable pagination
-per_page: 10
-pagination_dir: page
 
 twitter_username: Cypress_io
 facebook_username: cypressio
@@ -80,11 +127,18 @@ google:
   optimize_id: GTM-MVNP9PH
   tag_manager_id: GTM-KNKBWLD
 
+# Crash reporting
+raygun:
+  apiKey: SG5ZJfQICgeechPbpRE1DQ==
+
 ## Algolia Search
 ## https://github.com/LouisBarranqueiro/hexo-algoliasearch
 algolia:
   en:
-    api_key: "8baa384b1e9cbf317e714aa0df1a2576"
+    # Algolia application ID
+    app_id: "R9KDA5FMJB"
+    # Algolia SEARCH ID (not Write or Admin)
+    api_key: "8e6c3119ee78db1ad10cd7bfb439d726"
     index_name: "cypress"
 
 # Extensions
@@ -98,10 +152,13 @@ node_sass:
   precision: 5
   sourceComments: false
 
-## https://github.com/hexojs/hexo-generator-sitemap
+## https://github.com/ludoviclefevre/hexo-generator-seo-friendly-sitemap
 sitemap:
   path: sitemap.xml
-  template: ./sitemap_template.xml
+
+## https://github.com/hexojs/hexo-renderer-marked
+marked:
+  autolink: false
 
 ## https://github.com/mamboer/hexo-filter-cleanup
 hfc_useref:
@@ -109,7 +166,7 @@ hfc_useref:
   concat: true
   exclude:
 hfc_html:
-  enable: true
+  enable: false
   exclude:
 hfc_css:
   enable: true
@@ -136,13 +193,6 @@ hfc_img:
   jpegrecompress: false
   jpegrecompressQuality: 'medium'
   optipng: true
-  svgo: true
+  svgo: false
 hfc_favicons:
   enable: false
-
-# Deployment
-## Docs: https://hexo.io/docs/deployment.html
-deploy:
-  type: git
-  repo: https://github.com/cypress-io/cypress-documentation
-  branch: gh-pages

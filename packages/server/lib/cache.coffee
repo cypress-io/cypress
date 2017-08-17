@@ -84,10 +84,13 @@ module.exports = {
   insertProject: (path) ->
     fileUtil.transaction (tx) =>
       @_getProjects(tx).then (projects) =>
-        ## bail if we already have this path
-        return projects if path in projects
+        ## projects are sorted by most recently used, so add a project to
+        ## the start or move it to the start if it already exists
+        existingIndex = _.findIndex projects, (project) -> project is path
+        if existingIndex > -1
+          projects.splice(existingIndex, 1)
 
-        projects.push(path)
+        projects.unshift(path)
         tx.set("PROJECTS", projects)
 
   getUser: ->

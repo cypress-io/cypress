@@ -1,38 +1,56 @@
+---
 title: last
-comments: true
+comments: false
 ---
 
 Get the last DOM element within a set of DOM elements.
 
-| | |
-|--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.last` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+{% note info %}
+The querying behavior of this command matches exactly how {% url `.last()` http://api.jquery.com/last %} works in jQuery.
+{% endnote %}
 
-***
+# Syntax
 
-# [cy.last()](#section-usage)
+```javascript
+.last()
+.last(options)
+```
 
-Reduce the set of matched DOM elements to the final one in the set.
+## Usage
 
-***
+**{% fa fa-check-circle green %} Correct Usage**
 
-# Options
+```javascript
+cy.get('nav a').last()     // Yield last link in nav
+```
 
-Pass in an options object to change the default behavior of `cy.last`.
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
-**cy.last( *options* )**
+```javascript
+cy.last()                  // Errors, cannot be chained off 'cy'
+cy.getCookies().last()     // Errors, 'getCookies' does not yield DOM element
+```
 
-Option | Default | Notes
+## Arguments
+
+**{% fa fa-angle-right %} options**  ***(Object)***
+
+Pass in an options object to change the default behavior of `.last()`.
+
+Option | Default | Description
 --- | --- | ---
-`log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`log` | `true` | {% usage_options log %}
+`timeout` | {% url `defaultCommandTimeout` configuration#Timeouts %} | {% usage_options timeout .last %}
 
-***
+## Yields {% helper_icon yields %}
 
-# Usage
+{% yields changes_dom_subject .last %}
 
-## Get the last list item in a list.
+# Examples
+
+## No Args
+
+***Get the last list item in a list.***
 
 ```html
 <ul>
@@ -44,30 +62,40 @@ Option | Default | Notes
 ```
 
 ```javascript
-// returns <li class="four">Knick knack on my door</li>
-cy.get("ul").last()
+// yields <li class="four">Knick knack on my door</li>
+cy.get('li').last()
 ```
 
-***
+# Rules
+
+## Requirements {% helper_icon requirements %}
+
+{% requirements dom .last %}
+
+## Assertions {% helper_icon assertions %}
+
+{% assertions existence .last %}
+
+## Timeouts {% helper_icon timeout %}
+
+{% timeouts existence .last %}
 
 # Command Log
 
-## Find the last button in the form
+***Find the last button in the form***
 
 ```javascript
-cy.get("form").find("button").last()
+cy.get('form').find('button').last()
 ```
 
 The commands above will display in the command log as:
 
-<img width="560" alt="screen shot 2015-11-29 at 12 33 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458797/8e9abdf6-9695-11e5-8594-7044751d5199.png">
+![Command Log last](/img/api/last/find-the-last-button-in-a-form.png)
 
 When clicking on `last` within the command log, the console outputs the following:
 
-<img width="746" alt="screen shot 2015-11-29 at 12 34 07 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458799/91a115cc-9695-11e5-8569-93fbaa2704d4.png">
+![Console log last](/img/api/last/inspect-last-element-in-console.png)
 
-***
+# See also
 
-# Related
-
-- [first](https://on.cypress.io/api/first)
+- {% url `.first()` first %}

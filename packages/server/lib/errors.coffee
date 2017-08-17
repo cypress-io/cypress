@@ -5,6 +5,8 @@ ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
 API = {
+  # forms well-formatted user-friendly error for most common
+  # errors Cypress can encounter
   getMsgByType: (type, arg1, arg2) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
@@ -30,6 +32,18 @@ API = {
         This error will not alter the exit code.
 
         #{arg1}
+        """
+      when "BROWSER_NOT_FOUND"
+        """
+        Browser: #{arg1} was not found on your system.
+
+        Available browsers found are: #{arg2}
+        """
+      when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
+        """
+        Warning: Cannot record test run video when using non built-in electron browser
+
+        You are using #{arg1}, disabling video recording
         """
       when "NOT_LOGGED_IN"
         """
@@ -226,7 +240,7 @@ API = {
 
         Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
 
-        Correct your cypress.json or create the appropriate file.
+        Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid
         """
@@ -257,15 +271,26 @@ API = {
         """
       when "CANNOT_CONNECT_BASE_URL"
         """
-        Cypress cannot start because we could not verify this server is running:
+        Cypress could not verify that the server set as your 'baseUrl' is running:
 
           > #{chalk.blue(arg1)}
 
-        We run this check because this server has been set as your 'baseUrl'.
-
-        You likely forgot to boot this web server prior to running Cypress.
+        Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
 
         Please start this server and then run Cypress again.
+        """
+      when "CANNOT_CONNECT_BASE_URL_WARNING"
+        """
+        Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
+
+        Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+        """
+      when "INVALID_REPORTER_NAME"
+        """
+        Could not load reporter by name #{chalk.yellow(arg1)}
+        Relative to the project path #{chalk.yellow(arg2)}
+
+        Learn more at https://on.cypress.io/reporters
         """
 
   get: (type, arg1, arg2) ->

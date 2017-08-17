@@ -9,6 +9,7 @@ user        = require("../user")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 errors      = require("../errors")
+log         = require("debug")("cypress:server:files")
 
 glob = Promise.promisify(glob)
 
@@ -102,17 +103,20 @@ module.exports = {
 
   getTestFiles: (config) ->
     integrationFolderPath = config.integrationFolder
+    log("looking for test files in the integration folder %s",
+      integrationFolderPath)
 
     ## support files are not automatically
     ## ignored because only _fixtures are hard
     ## coded. the rest is simply whatever is in
     ## the javascripts array
 
-    fixturesFolderPath = path.join(
-      config.fixturesFolder,
-      "**",
-      "*"
-    )
+    if config.fixturesFolder
+      fixturesFolderPath = path.join(
+        config.fixturesFolder,
+        "**",
+        "*"
+      )
 
     supportFilePath = config.supportFile or []
 
@@ -120,19 +124,19 @@ module.exports = {
     ## TODO: think about moving this into config
     ## and mapping each of the javascripts into an
     ## absolute path
-    javascriptsPath = _.map config.javascripts, (js) ->
+    javascriptsPaths = _.map config.javascripts, (js) ->
       path.join(config.projectRoot, js)
 
     ## ignore fixtures + javascripts
     options = {
       sort:     true
-      realpath: true
+      absolute: true
       cwd:      integrationFolderPath
-      ignore:   [].concat(
-        javascriptsPath,
-        supportFilePath,
+      ignore:   _.compact(_.flatten([
+        javascriptsPaths
+        supportFilePath
         fixturesFolderPath
-      )
+      ]))
     }
 
     ## filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
@@ -145,7 +149,17 @@ module.exports = {
 
     relativePathFromProjectRoot = (file) ->
       path.relative(config.projectRoot, file)
-    
+
+    setNameParts = (file) ->
+      log("found test file %s", file)
+      throw new Error("Cannot set parts of file from non-absolute path #{file}") if not path.isAbsolute(file)
+
+      {
+        name: relativePathFromIntegrationFolder(file)
+        path: relativePathFromProjectRoot(file)
+        absolute: file
+      }
+
     ignorePatterns = [].concat(config.ignoreTestFiles)
 
     ## a function which returns true if the file does NOT match
@@ -164,14 +178,11 @@ module.exports = {
     ## filter out anything that matches our
     ## ignored test files glob
     .filter(doesNotMatchAllIgnoredPatterns)
-    .map (file) ->
+    .map(setNameParts)
+    .then (files) ->
+      log("found %d spec files", files.length)
+      log(files)
       {
-        name: relativePathFromIntegrationFolder(file)
-        path: relativePathFromProjectRoot(file)
-        absolute: file
-      }
-    .then (arr) ->
-      {
-        integration: arr
+        integration: files
       }
 }

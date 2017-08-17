@@ -1,6 +1,7 @@
 _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
+fs       = require("fs")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
@@ -8,6 +9,8 @@ origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
+log      = require("./log")
+pathHelpers = require("./util/path_helpers")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
@@ -233,26 +236,53 @@ module.exports = {
     return obj
 
   setSupportFileAndFolder: (obj) ->
+    return obj if not obj.supportFile
     obj = _.clone(obj)
 
-    ## if supportFile isn't false
-    if sf = obj.supportFile
-      try
-        ## resolve full path with extension to
-        obj.supportFile = require.resolve(sf)
-      catch err
-        ## supportFile doesn't exist on disk
-        if sf isnt path.resolve(obj.projectRoot, defaults.supportFile)
-          ## throw because they have it explicitly set,
-          ## so it should be there
-          errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
-        else
-          ## set it to support/index.js, and it will be scaffolded
-          ## later in process
-          obj.supportFile = path.join(sf, "index.js")
+    ## TODO move this logic to find support file into util/path_helpers
 
-      ## set config.supportFolder to its directory
-      obj.supportFolder = path.dirname(obj.supportFile)
+    sf = obj.supportFile
+    log "setting support file #{sf}"
+    log "for project root #{obj.projectRoot}"
+    try
+      ## resolve full path with extension
+      obj.supportFile = require.resolve(sf)
+      if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
+        log("require.resolve switched support folder from %s to %s",
+          sf, obj.supportFile)
+        # this means the path was probably symlinked, like
+        # /tmp/foo -> /private/tmp/foo
+        # which can confuse the rest of the code
+        # switch it back to "normal" file
+        obj.supportFile = path.join(sf, path.basename(obj.supportFile))
+        if not fs.existsSync(obj.supportFile)
+          errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
+        log("switching to found file %s", obj.supportFile)
+    catch err
+      if err.code isnt "MODULE_NOT_FOUND"
+        throw err
+
+      log("support file does not exist")
+      ## supportFile doesn't exist on disk
+      if sf is path.resolve(obj.projectRoot, defaults.supportFile)
+        log("support file is default")
+        if fs.existsSync(path.dirname(sf))
+          log("support folder exists")
+          ## if the directory exists, set it to false so it's ignored
+          obj.supportFile = false
+          return obj
+        else
+          log("support folder does not exist")
+          ## otherwise, set it up to be scaffolded later
+          obj.supportFile = path.join(sf, "index.js")
+      else
+        log("support file is not default")
+        ## they have it explicitly set, so it should be there
+        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+
+    ## set config.supportFolder to its directory
+    obj.supportFolder = path.dirname(obj.supportFile)
+    log "set support folder #{obj.supportFolder}"
 
     return obj
 
