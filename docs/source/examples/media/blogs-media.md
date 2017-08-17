@@ -4,7 +4,7 @@ comments: false
 containerClass: examples
 ---
 
-## {% url "Cypress.io & Docker: the Ultimate E2E Stack (part1)" https://dashbouquet.com/blog/frontend-development/cypressio-and-docker-the-ultimate-e2e-stack %}
+## {% url "Cypress.io & Docker: the Ultimate E2E Stack (part1)" https://dashbouquet.com/blog/frontend-development/cypressio-and-docker-the-ultimate-e2e-stack-part-1 %}
 
 Published on [**dashbouquet blog**](https://dashbouquet.com/blog) by Dziamid Zayankouski *(Aug 7, 2017)*
 {% img /img/examples/cypdock-post.jpg "cypress and docker together" %}

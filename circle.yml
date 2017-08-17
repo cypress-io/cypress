@@ -152,6 +152,7 @@ jobs:
           paths:
             - docs/node_modules
 
+      - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run build
 
@@ -178,15 +179,28 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test -- --package cli
+      # can store multiple test results from different test commands
+      # they are all appended together
+      - store_test_results:
+          path: /tmp/cypress-monorepo
       - run: npm run all test -- --package coffee
       - run: npm run all test -- --package desktop-gui
       - run: npm run all test -- --package electron
       - run: npm run all test -- --package extension
+      - store_test_results:
+          path: /tmp/cypress-monorepo
       - run: npm run all test -- --package https-proxy
+      - store_test_results:
+          path: /tmp/cypress-monorepo
       - run: npm run all test -- --package launcher
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      # how to pass Mocha reporter through zunder?
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
       - run: npm run all test -- --package socket
+      - store_test_results:
+          path: /tmp/cypress-monorepo
       - run: npm run all test -- --package static
 
   "server-unit-tests":
@@ -196,6 +210,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-unit -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "server-integration-tests":
     <<: *defaults
@@ -204,6 +220,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-integration -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "server-e2e-tests-1":
     <<: *defaults
@@ -211,6 +229,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd packages/server && npm run test-e2e -- --parallel 3 --index 0
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "server-e2e-tests-2":
     <<: *defaults
@@ -218,6 +238,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd packages/server && npm run test-e2e -- --parallel 3 --index 1
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "server-e2e-tests-3":
     <<: *defaults
@@ -225,6 +247,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd packages/server && npm run test-e2e -- --parallel 3 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "docs-tests":
     <<: *defaults

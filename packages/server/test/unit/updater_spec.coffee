@@ -56,8 +56,8 @@ describe "lib/updater", ->
               "x-machine-id": id
             }
           })
-
           done()
+      return
 
     it "sends x-machine-id as null on error", (done) ->
       @sandbox.stub(nmi, "machineId").rejects(new Error())
@@ -70,6 +70,7 @@ describe "lib/updater", ->
         })
 
         done()
+      return
 
   context "#check", ->
     beforeEach ->

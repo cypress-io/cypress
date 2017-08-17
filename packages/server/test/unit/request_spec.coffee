@@ -92,7 +92,7 @@ describe "lib/request", ->
       .then ->
         expect(init).to.be.calledWithMatch({strictSSL: false})
 
-    it "sets simple=false", (done) ->
+    it "sets simple=false", ->
       nock("http://www.github.com")
       .get("/foo")
       .reply(500, "")
@@ -103,7 +103,6 @@ describe "lib/request", ->
         url: "http://www.github.com/foo"
         cookies: false
       })
-      .then -> done()
 
     it "sets resolveWithFullResponse=true", ->
       nock("http://www.github.com")

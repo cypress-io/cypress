@@ -149,7 +149,7 @@ describe "lib/scaffold", ->
         fs.ensureDirAsync(@supportFolder)
       .then =>
         ## now scaffold
-        scaffold.integration(@supportFolder, @cfg)
+        scaffold.support(@supportFolder, @cfg)
       .then =>
         glob("**/*", {cwd: @supportFolder})
       .then (files) ->

@@ -2,6 +2,7 @@ require("../spec_helper")
 
 path         = require("path")
 Promise      = require("bluebird")
+fs           = require("fs-extra")
 Fixtures     = require("../support/helpers/fixtures")
 ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
@@ -280,6 +281,7 @@ describe "lib/project", ->
 
   context "#watchSupportFile", ->
     beforeEach ->
+      @sandbox.stub(fs, "existsSync").returns(true)
       @project = Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
       @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
@@ -309,6 +311,10 @@ describe "lib/project", ->
       @project.watchSupportFile(@config)
 
       expect(@watchBundle.firstCall.args[2]).to.be.undefined
+
+    it "throws when support file does not exist", ->
+      fs.existsSync.returns(false)
+      expect(=> @project.watchSupportFile(@config)).to.throw("Support file missing or invalid.")
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->

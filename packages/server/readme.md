@@ -73,6 +73,14 @@ npm start -- --run-project <path-to-the-project-you-want-to-test>
 
 You will see Cypress run all the tests headlessly and you'll see output in your console.
 
+### 4. Run a single spec headlessly
+
+```bash
+npm start -- --run-project <path to project> --spec <path to spec file>
+```
+
+Path to spec file can be relative to the project you want to test.
+
 ## Testing the Driver
 
 To run driver tests:
@@ -94,6 +102,12 @@ also written, for example `cypress:server:file`. To see debug messages
 
 ```sh
 DEBUG=cypress:server npm start ...
+```
+
+You can see more debug messaging by using a wild card
+
+```sh
+DEBUG=cypress* npm start ...
 ```
 
 ## Deploying

@@ -240,7 +240,7 @@ API = {
 
         Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
 
-        Correct your cypress.json or create the appropriate file.
+        Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid
         """
@@ -284,6 +284,13 @@ API = {
         Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
 
         Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+        """
+      when "INVALID_REPORTER_NAME"
+        """
+        Could not load reporter by name #{chalk.yellow(arg1)}
+        Relative to the project path #{chalk.yellow(arg2)}
+
+        Learn more at https://on.cypress.io/reporters
         """
 
   get: (type, arg1, arg2) ->

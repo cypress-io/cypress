@@ -5,7 +5,7 @@
 # cp =   require("child_process")
 # pkg  = require("#{root}package")
 
-# describe.only "lib/package", ->
+# describe "lib/package", ->
 #   it "includes mocha as dependency", ->
 #     expect(pkg.dependencies).to.include.keys("mocha")
 

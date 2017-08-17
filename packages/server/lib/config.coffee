@@ -259,15 +259,26 @@ module.exports = {
           errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
         log("switching to found file %s", obj.supportFile)
     catch err
+      if err.code isnt "MODULE_NOT_FOUND"
+        throw err
+
+      log("support file does not exist")
       ## supportFile doesn't exist on disk
-      if sf isnt path.resolve(obj.projectRoot, defaults.supportFile)
-        ## throw because they have it explicitly set,
-        ## so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+      if sf is path.resolve(obj.projectRoot, defaults.supportFile)
+        log("support file is default")
+        if fs.existsSync(path.dirname(sf))
+          log("support folder exists")
+          ## if the directory exists, set it to false so it's ignored
+          obj.supportFile = false
+          return obj
+        else
+          log("support folder does not exist")
+          ## otherwise, set it up to be scaffolded later
+          obj.supportFile = path.join(sf, "index.js")
       else
-        ## set it to support/index.js, and it will be scaffolded
-        ## later in process
-        obj.supportFile = path.join(sf, "index.js")
+        log("support file is not default")
+        ## they have it explicitly set, so it should be there
+        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
 
     ## set config.supportFolder to its directory
     obj.supportFolder = path.dirname(obj.supportFile)
