@@ -323,7 +323,7 @@ class Project extends EE
 
     ## if we're in headed mode add these other scaffolding
     ## tasks
-    if not config.isHeadless
+    if not config.isTextTerminal
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
       push(scaffold.integration(config.integrationFolder, config))

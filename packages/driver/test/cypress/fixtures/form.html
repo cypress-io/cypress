@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Generic HTML Fixture</title>
+  </head>
+  <body>
+    Some form content
+    <a href="/fixtures/generic.html">generic</a>
+
+    <form id="button-inside-a">
+      <button>
+        <span>click button</span>
+      </button>
+    </form>
+
+    <form action="/timeout" id="click-me">
+      <input type="hidden" name="ms" value="50" />
+      <a href="#">
+        <span>click me 1</span>
+      </a>
+      <button>
+        <span>click me 2</span>
+      </button>
+      <input type="submit" value="click me" />
+    </form>
+
+    <form id="complex-contains">
+      <button>
+        <a href="#">
+          <label>nested contains</label>
+        </a>
+      </button>
+    </form>
+
+    <form id="button-text">
+      <a href="#">
+        <span>click button 1</span>
+      </a>
+      <button>
+        <span>click button 2</span>
+      </button>
+    </form>
+
+    <form id="anchor-text">
+      <a href="#">
+        <span>Home Page</span>
+      </a>
+    </form>
+
+    <form id="focus">
+      <div>
+        <span>
+          <input type="text" />
+          <button>focusable button</button>
+        </span>
+      </div>
+    </form>
+
+    <div id="form-submits">
+      <form id="single-input">
+        <div>
+          <input name="fname" />
+        </div>
+      </form>
+
+      <form id="no-buttons">
+        <input name="fname" />
+        <input name="lname" />
+      </form>
+
+      <form id="one-button-type-button">
+        <input name="fname" />
+        <input name="lname" />
+        <button type="button">submit me</button>
+      </form>
+
+      <form id="multiple-inputs-and-input-submit">
+        <input name="fname" />
+        <input name="lname" />
+        <input type="submit" value="submit me" />
+      </form>
+
+      <form id="multiple-inputs-and-button-submit">
+        <input name="fname" />
+        <input name="lname" />
+        <button type="submit">submit me</button>
+      </form>
+
+      <form id="multiple-inputs-and-button-with-no-type">
+        <input name="fname" />
+        <input name="lname" />
+        <button>submit me</button>
+      </form>
+
+      <form id="multiple-inputs-and-multiple-submits">
+        <input name="fname" />
+        <input name="lname" />
+        <button>submit me</button>
+        <input type="submit" value ="submit me2" />
+      </form>
+    </div>
+  </body>
+</html>

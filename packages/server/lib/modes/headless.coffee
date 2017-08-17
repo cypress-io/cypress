@@ -99,7 +99,7 @@ module.exports = {
       morgan:       false
       socketId:     id
       report:       true
-      isHeadless:   options.isHeadless ? true
+      isTextTerminal:   options.isTextTerminal ? true
     })
     .catch {portInUse: true}, (err) ->
       ## TODO: this needs to move to emit exitEarly

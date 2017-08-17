@@ -482,8 +482,8 @@ describe "lib/config", ->
     it "morgan=true", ->
       @defaults "morgan", true
 
-    it "isHeadless=false", ->
-      @defaults "isHeadless", false
+    it "isTextTerminal=false", ->
+      @defaults "isTextTerminal", false
 
     it "socketId=null", ->
       @defaults "socketId", null
@@ -504,12 +504,12 @@ describe "lib/config", ->
       @defaults "supportFile", false, {supportFile: false}
 
     it "resets numTestsKeptInMemory to 0 when headless", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
 
       expect(cfg.numTestsKeptInMemory).to.eq(0)
 
     it "resets watchForFileChanges to false when headless", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
 
       expect(cfg.watchForFileChanges).to.be.false
 
@@ -518,10 +518,10 @@ describe "lib/config", ->
 
       expect(cfg.morgan).to.be.false
 
-    it "can override isHeadless in options", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+    it "can override isTextTerminal in options", ->
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
 
-      expect(cfg.isHeadless).to.be.true
+      expect(cfg.isTextTerminal).to.be.true
 
     it "can override socketId in options", ->
       cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {socketId: 1234})

@@ -1,3 +1,5 @@
+require("../lib/environment")
+
 global.root      = "../../"
 global.supertest = require("supertest-as-promised")
 global.nock      = require("nock")

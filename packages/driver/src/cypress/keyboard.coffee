@@ -317,29 +317,23 @@ $Keyboard = {
 
     options.onBeforeType @countNumIndividualKeyStrokes(keys)
 
-    promises = []
-
     ## should make each keystroke async to mimic
     ## how keystrokes come into javascript naturally
     Promise
-      .each keys, (key) =>
-        @typeChars(el, rng, key, promises, options)
-      .cancellable()
-      .then =>
-        ## if after typing we ended up changing
-        ## our value then fire the onTypeChange callback
-        if @expectedValueDoesNotMatchCurrentValue(options.prev, rng)
-          options.onTypeChange()
+    .each keys, (key) =>
+      @typeChars(el, rng, key, options)
+    .then =>
+      ## if after typing we ended up changing
+      ## our value then fire the onTypeChange callback
+      if @expectedValueDoesNotMatchCurrentValue(options.prev, rng)
+        options.onTypeChange()
 
-        ## after typing be sure to clear all ranges
-        if sel = options.window.getSelection()
-          sel.removeAllRanges()
+      ## after typing be sure to clear all ranges
+      if sel = options.window.getSelection()
+        sel.removeAllRanges()
 
-        unless options.release is false
-          @resetModifiers(el, options.window)
-      .catch Promise.CancellationError, (err) ->
-        _.invokeMap(promises, "cancel")
-        throw err
+      unless options.release is false
+        @resetModifiers(el, options.window)
 
   countNumIndividualKeyStrokes: (keys) ->
     _.reduce keys, (memo, chars) =>
@@ -353,43 +347,36 @@ $Keyboard = {
         memo + chars.length
     , 0
 
-  typeChars: (el, rng, chars, promises, options) ->
+  typeChars: (el, rng, chars, options) ->
     options = _.clone(options)
     options.rng = rng
 
-    if @isSpecialChar(chars)
-      p = Promise
+    switch
+      when @isSpecialChar(chars)
+        Promise
         .resolve @handleSpecialChars(el, chars, options)
         .delay(options.delay)
-        .cancellable()
-      promises.push(p)
-      p
-    else if @isModifier(chars)
-      p = Promise
+
+      when @isModifier(chars)
+        Promise
         .resolve @handleModifier(el, chars, options)
         .delay(options.delay)
-        .cancellable()
-      promises.push(p)
-      p
-    else if charsBetweenCurlyBraces.test(chars)
-      ## between curly braces, but not a valid special
-      ## char or modifier
-      allChars = _.keys(@specialChars).concat(_.keys(@modifierChars)).join(", ")
-      p = Promise
+
+      when charsBetweenCurlyBraces.test(chars)
+        ## between curly braces, but not a valid special
+        ## char or modifier
+        allChars = _.keys(@specialChars).concat(_.keys(@modifierChars)).join(", ")
+
+        Promise
         .resolve options.onNoMatchingSpecialChars(chars, allChars)
         .delay(options.delay)
-        .cancellable()
-      promises.push(p)
-      p
-    else
-      Promise
+        
+      else
+        Promise
         .each chars.split(""), (char) =>
-          p = Promise
-            .resolve @typeKey(el, char, options)
-            .delay(options.delay)
-            .cancellable()
-          promises.push(p)
-          p
+          Promise
+          .resolve @typeKey(el, char, options)
+          .delay(options.delay)
 
   getCharCode: (key) ->
     code = key.charCodeAt(0)

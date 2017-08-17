@@ -1,0 +1,3 @@
+npm run test-unit --silent & \
+chokidar 'test/**/*' 'src/**/*' \
+-c "npm run test-unit --silent"

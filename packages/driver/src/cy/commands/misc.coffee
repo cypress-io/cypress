@@ -1,9 +1,9 @@
 _ = require("lodash")
 
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "optional" }, {
     end: ->
       null
@@ -13,7 +13,7 @@ module.exports = (Cypress, Commands) ->
     noop: (arg) -> arg
 
     log: (msg, args) ->
-      $Log.command({
+      Cypress.log({
         end: true
         snapshot: true
         message: [msg, args]
@@ -29,16 +29,14 @@ module.exports = (Cypress, Commands) ->
     wrap: (arg, options = {}) ->
       _.defaults options, {log: true}
 
-      remoteSubject = @_getRemotejQueryInstance(arg)
-
       if options.log isnt false
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
-        if utils.hasElement(arg)
+        if $utils.hasElement(arg)
           options._log.set({$el: arg})
 
       do resolveWrap = =>
-        @verifyUpcomingAssertions(arg, options, {
+        cy.verifyUpcomingAssertions(arg, options, {
           onRetry: resolveWrap
         })
   })

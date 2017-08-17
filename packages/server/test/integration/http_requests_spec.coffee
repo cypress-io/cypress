@@ -99,7 +99,7 @@ describe "Routes", ->
           @server = Server(Watchers())
 
           @server.open(cfg)
-          .then (port) =>
+          .spread (port) =>
             if initialUrl
               @server._onDomainSet(initialUrl)
 
@@ -256,23 +256,17 @@ describe "Routes", ->
     beforeEach ->
       @setup("http://localhost:8443")
 
-    it "can get runner.js", ->
-      @rp("http://localhost:8443/__cypress/runner/runner.js")
+    it "can get cypress_runner.js", ->
+      @rp("http://localhost:8443/__cypress/runner/cypress_runner.js")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/React/)
 
-    it "can get runner.css", ->
-      @rp("http://localhost:8443/__cypress/runner/runner.css")
+    it "can get cypress_runner.css", ->
+      @rp("http://localhost:8443/__cypress/runner/cypress_runner.css")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/spec-iframe/)
-
-    it "can get reporter.css", ->
-      @rp("http://localhost:8443/__cypress/reporter/reporter.css")
-      .then (res) ->
-        expect(res.statusCode).to.eq(200)
-        expect(res.body).to.match(/command-name-assert/)
 
   context "GET /__cypress/files", ->
     beforeEach ->
@@ -458,7 +452,7 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
           expect(res.body).to.include("Cannot find module")
 
     describe "failures", ->
@@ -473,7 +467,7 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
           expect(res.body).to.include("ParseError")
 
     describe "no-server", ->
@@ -1944,7 +1938,7 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
-            expect(res.body).to.include("Cypress.onBeforeLoad")
+            expect(res.body).to.include("Cypress.action(")
 
       it "injects performantly on a huge amount of elements over http", ->
         Fixtures.scaffold()
@@ -2039,7 +2033,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include("Cypress.onBeforeLoad")
+            expect(res.body).to.include("Cypress.action(")
 
       it "injects even on 5xx responses", ->
         @setup("https://www.google.com")
@@ -2332,7 +2326,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.match(/index.html content/)
-            expect(res.body).to.match(/Cypress\.onBeforeLoad/)
+            expect(res.body).to.match(/Cypress\.action/)
 
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")

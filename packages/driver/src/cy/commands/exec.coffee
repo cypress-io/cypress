@@ -4,16 +4,7 @@ Promise = require("bluebird")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
-exec = (options) =>
-  new Promise (resolve, reject) ->
-    Cypress.trigger "exec", options, (resp) ->
-      if err = resp.__error
-        err.timedout = resp.timedout
-        reject(err)
-      else
-        resolve(resp)
-
-module.exports = (Cypress, Commands) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     exec: (cmd, options = {}) ->
       _.defaults options,
@@ -25,7 +16,7 @@ module.exports = (Cypress, Commands) ->
       if options.log
         consoleOutput = {}
 
-        options._log = $Log.command({
+        options._log = Cypress.log({
           message: _.truncate(cmd, { length: 25 })
           consoleProps: ->
             consoleOutput
@@ -41,11 +32,9 @@ module.exports = (Cypress, Commands) ->
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
-      @_clearTimeout()
+      cy.clearTimeout()
 
-      isTimedoutError = (err) -> err.timedout
-
-      exec(_.pick(options, "cmd", "timeout", "env"))
+      Cypress.backend("exec", _.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
       .then (result) ->
         if options._log
@@ -64,7 +53,7 @@ module.exports = (Cypress, Commands) ->
           args: { cmd, output, code: result.code }
         }
 
-      .catch Promise.TimeoutError, isTimedoutError, (err) ->
+      .catch Promise.TimeoutError, { timedout: true }, (err) ->
         utils.throwErrByPath "exec.timed_out", {
           onFail: options._log
           args: { cmd, timeout: options.timeout }

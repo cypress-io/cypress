@@ -11,6 +11,10 @@ const _defaults = {
   height: 660,
 
   reporterWidth: null,
+
+  url: '',
+  highlightUrl: false,
+  isLoading: false,
 }
 
 export default class State {
@@ -28,9 +32,9 @@ export default class State {
     stateIndex: 0,
   }
 
-  @observable url = ''
-  @observable highlightUrl = false
-  @observable isLoading = false
+  @observable url = _defaults.url
+  @observable highlightUrl = _defaults.highlightUrl
+  @observable isLoading = _defaults.isLoading
 
   @observable width = _defaults.width
   @observable height = _defaults.height
@@ -109,5 +113,19 @@ export default class State {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
+  }
+
+  setCallbackAfterUpdate (cb) {
+    this.callbackAfterUpdate = () => {
+      this.callbackAfterUpdate = null
+
+      cb()
+    }
+  }
+
+  reset () {
+    this.url = _defaults.url
+    this.highlightUrl = _defaults.highlightUrl
+    this.isLoading = _defaults.isLoading
   }
 }

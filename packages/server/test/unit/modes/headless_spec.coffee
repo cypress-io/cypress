@@ -71,7 +71,7 @@ describe "lib/modes/headless", ->
           morgan: false
           socketId: 1234
           report: true
-          isHeadless: true
+          isTextTerminal: true
         })
 
   context ".getElectronProps", ->

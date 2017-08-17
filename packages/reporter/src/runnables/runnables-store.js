@@ -113,6 +113,10 @@ class RunnablesStore {
     this._initialScrollTop = initialScrollTop
   }
 
+  updateTest (props, cb) {
+    this._withTest(props.id, (test) => test.update(props, cb))
+  }
+
   runnableStarted ({ id }) {
     this._withTest(id, (test) => test.start())
   }

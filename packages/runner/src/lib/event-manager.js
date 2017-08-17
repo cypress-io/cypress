@@ -1,16 +1,18 @@
-/* global $Cypress, io */
-
 import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
+import io from '@packages/socket'
 
 import automation from './automation'
 import logger from './logger'
-import overrides from './overrides'
 
-const $ = $Cypress.$
-const channel = io.connect({ path: '/__socket.io' })
+import $Cypress, { $ } from '@packages/driver'
+
+const channel = io.connect({
+  path: '/__socket.io',
+  transports: ['websocket'],
+})
 
 channel.on('connect', () => {
   channel.emit('runner:connected')
@@ -18,10 +20,9 @@ channel.on('connect', () => {
 
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'fixture request history:entries exec resolve:url preserve:run:state read:file write:file'.split(' ')
-const driverTestEvents = 'test:before:run test:after:run'.split(' ')
-const driverAutomationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie take:screenshot'.split(' ')
-const driverToLocalEvents = 'viewport config stop url:changed page:loading visit:failed'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha'.split(' ')
+const driverTestEvents = 'test:before:run:async test:after:run test:set:state'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
 const localBus = new EventEmitter()
@@ -113,19 +114,19 @@ const eventManager = {
     reporterBus.on('runner:resume', () => {
       if (!Cypress) return
 
-      Cypress.trigger('resume:all')
+      Cypress.emit('resume:all')
     })
 
     reporterBus.on('runner:next', () => {
       if (!Cypress) return
 
-      Cypress.trigger('resume:next')
+      Cypress.emit('resume:next')
     })
 
-    reporterBus.on('runner:abort', () => {
+    reporterBus.on('runner:stop', () => {
       if (!Cypress) return
 
-      Cypress.abort()
+      Cypress.stop()
     })
 
     reporterBus.on('save:state', (state) => {
@@ -158,28 +159,61 @@ const eventManager = {
   },
 
   start (config) {
-    if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
-
     if (config.socketId) {
       channel.emit('app:connect', config.socketId)
     }
   },
 
   setup (config, specPath) {
-    Cypress = $Cypress.create({ loadModules: true })
+    Cypress = $Cypress.create(
+      _.pick(config, 'isTextTerminal', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'version', 'fixturesFolder')
+    )
 
-    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'fixturesFolder'))
-    Cypress.setVersion(config.version)
-    Cypress.start()
-    this._addListeners(config)
+    // expose Cypress globally
+    window.Cypress = Cypress
+
+    this._addListeners()
+
     channel.emit('watch:test:file', specPath)
   },
 
-  run (specWindow, $autIframe) {
-    Cypress.initialize(specWindow, $autIframe)
+  initialize ($autIframe, config) {
+    Cypress.initialize($autIframe)
+
+    // get the current runnable in case we reran mid-test due to a visit
+    // to a new domain
+    channel.emit('get:existing:run:state', (state = {}) => {
+      const runnables = Cypress.normalizeAll(state.tests)
+      const run = () => {
+        this._runDriver(state)
+      }
+
+      reporterBus.emit('runnables:ready', runnables)
+
+      if (state.numLogs) {
+        Cypress.setNumLogs(state.numLogs)
+      }
+
+      if (state.startTime) {
+        Cypress.setStartTime(state.startTime)
+      }
+
+      if (state.currentId) {
+        // if we have a currentId it means
+        // we need to tell the Cypress to skip
+        // ahead to that test
+        Cypress.resumeAtTest(state.currentId, state.emissions)
+      }
+
+      if (config.isTextTerminal && !state.currentId) {
+        channel.emit('set:runnables', runnables, run)
+      } else {
+        run()
+      }
+    })
   },
 
-  _addListeners (config) {
+  _addListeners () {
     Cypress.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)
     })
@@ -188,58 +222,16 @@ const eventManager = {
       Cypress.on(event, (...args) => channel.emit(event, ...args))
     })
 
-    Cypress.on('mocha', (event, ...args) => {
-      channel.emit('mocha', event, ...args)
-    })
+    Cypress.on('collect:run:state', () => new Promise((resolve) => {
+      reporterBus.emit('reporter:collect:run:state', resolve)
+    }))
 
-    _.each(driverAutomationEvents, (event) => {
-      Cypress.on(event, (...args) => channel.emit('automation:request', event, ...args))
-    })
-
-    Cypress.on('initialized', ({ runner }) => {
-      Cypress.on('collect:run:state', () => new Promise((resolve) => {
-        reporterBus.emit('reporter:collect:run:state', resolve)
-      }))
-
-      // get the current runnable in case we reran mid-test due to a visit
-      // to a new domain
-      channel.emit('get:existing:run:state', (state = {}) => {
-        const runnables = runner.normalizeAll(state.tests)
-        const run = () => {
-          this._runDriver(runner, state)
-        }
-
-        reporterBus.emit('runnables:ready', runnables)
-
-        if (state.numLogs) {
-          runner.setNumLogs(state.numLogs)
-        }
-
-        if (state.startTime) {
-          runner.setStartTime(state.startTime)
-        }
-
-        if (state.currentId) {
-          // if we have a currentId it means
-          // we need to tell the runner to skip
-          // ahead to that test
-          runner.resumeAtTest(state.currentId, state.emissions)
-        }
-
-        if (config.isHeadless && !state.currentId) {
-          channel.emit('set:runnables', runnables, run)
-        } else {
-          run()
-        }
-      })
-    })
-
-    Cypress.on('log', (log) => {
+    Cypress.on('log:added', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
-    Cypress.on('log:state:changed', (log) => {
+    Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -251,8 +243,8 @@ const eventManager = {
     })
 
     _.each(driverTestEvents, (event) => {
-      Cypress.on(event, (test) => {
-        reporterBus.emit(event, test)
+      Cypress.on(event, (test, cb) => {
+        reporterBus.emit(event, test, cb)
       })
     })
 
@@ -268,12 +260,12 @@ const eventManager = {
     })
 
     Cypress.on('script:error', (err) => {
-      Cypress.abort()
+      Cypress.stop()
       localBus.emit('script:error', err)
     })
   },
 
-  _runDriver (runner, state) {
+  _runDriver (state) {
     Cypress.run(() => {})
 
     reporterBus.emit('reporter:start', {
@@ -289,20 +281,23 @@ const eventManager = {
   stop () {
     localBus.removeAllListeners()
     channel.off()
-    overrides.restore()
   },
 
   _reRun () {
     if (!Cypress) return
 
     // when we are re-running we first
-    // need to abort cypress always
-    Cypress.abort()
+    // need to stop cypress always
+    Cypress.stop()
+
+    return this._restart()
     .then(() => {
-      return this._restart()
-    })
-    .then(() => {
-      Cypress.off()
+      // this probably isn't 100% necessary
+      // since Cypress will fall out of scope
+      // but we want to be aggressive here
+      // and force GC early and often
+      Cypress.removeAllListeners()
+
       localBus.emit('restart')
     })
   },

@@ -47,13 +47,17 @@ export default {
       }
     }))
 
-    runner.on('test:before:run', action('test:before:run', (runnable) => {
+    runner.on('test:before:run:async', action('test:before:run:async', (runnable) => {
       runnablesStore.runnableStarted(runnable)
     }))
 
     runner.on('test:after:run', action('test:after:run', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.incrementCount(runnable.state)
+    }))
+
+    runner.on('test:set:state', action('test:set:state', (runnable, cb) => {
+      runnablesStore.updateTest(runnable, cb)
     }))
 
     runner.on('paused', action('paused', (nextCommandName) => {
@@ -89,7 +93,7 @@ export default {
 
     localBus.on('stop', action('stop', () => {
       appState.stop()
-      runner.emit('runner:abort')
+      runner.emit('runner:stop')
     }))
 
     localBus.on('restart', action('restart', () => {

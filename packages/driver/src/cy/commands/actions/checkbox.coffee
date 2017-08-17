@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## we're not handling conversion of values to strings
@@ -28,7 +28,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     log: true
     force: false
 
-  @ensureDom(options.$el)
+  cy.ensureDom(options.$el)
 
   isNoop = ($el) ->
     switch type
@@ -61,16 +61,16 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       matchingElements.push(el)
 
     consoleProps = {
-      "Applied To":   utils.getDomElements($el)
+      "Applied To":   $utils.getDomElements($el)
       "Elements":     $el.length
     }
 
     if options.log and isElActionable
 
       ## figure out the options which actually change the behavior of clicks
-      deltaOptions = utils.filterOutOptions(options)
+      deltaOptions = $utils.filterOutOptions(options)
 
-      options._log = $Log.command
+      options._log = Cypress.log
         message: deltaOptions
         $el: $el
         consoleProps: ->
@@ -81,10 +81,10 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       options._log.snapshot("before", {next: "after"})
 
       if not isAcceptableElement($el)
-        node   = utils.stringifyElement($el)
-        word   = utils.plural(options.$el, "contains", "is")
+        node   = $utils.stringifyElement($el)
+        word   = $utils.plural(options.$el, "contains", "is")
         phrase = if type is "check" then " and :radio" else ""
-        utils.throwErrByPath "check_uncheck.invalid_element", {
+        $utils.throwErrByPath "check_uncheck.invalid_element", {
           onFail: options._log
           args: { node, word, phrase, cmd: type }
         }
@@ -94,7 +94,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       ## and bail
       if isNoop($el)
         ## still ensure visibility even if the command is noop
-        @ensureVisibility $el, options._log
+        cy.ensureVisibility $el, options._log
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
@@ -104,14 +104,14 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       else
         ## set the coords only if we are actually
         ## going to go out and click this bad boy
-        coords = @getCoordinates($el)
+        coords = cy.getAbsoluteCoordinates($el)
         consoleProps.Coords = coords
         options._log.set "coords", coords
 
     ## if we didnt pass in any values or our
     ## el's value is in the array then check it
     if isElActionable
-      @execute("click", {
+      cy.now("click", $el, {
         $el: $el
         log: false
         verify: false
@@ -126,21 +126,19 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
 
   ## return our original subject when our promise resolves
   Promise
-    .resolve(options.$el.toArray())
-    .each(checkOrUncheckEl)
-    .cancellable()
-    .then =>
-      ## filter down our $el to the
-      ## matching elements
-      options.$el = options.$el.filter(matchingElements)
+  .resolve(options.$el.toArray())
+  .each(checkOrUncheckEl)
+  .then =>
+    ## filter down our $el to the
+    ## matching elements
+    options.$el = options.$el.filter(matchingElements)
 
-      do verifyAssertions = =>
-        @verifyUpcomingAssertions(options.$el, options, {
-          onRetry: verifyAssertions
-        })
+    do verifyAssertions = =>
+      cy.verifyUpcomingAssertions(options.$el, options, {
+        onRetry: verifyAssertions
+      })
 
-module.exports = (Cypress, Commands) ->
-
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     check: (subject, values, options) ->
       checkOrUncheck.call(@, "check", subject, values, options)
