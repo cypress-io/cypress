@@ -1,85 +1,87 @@
 $ = require("jquery")
-utils = require("../cypress/utils")
+_ = require("lodash")
 
-module.exports = ($Cy) ->
-  previousWin = null
+HISTORY_ATTRS = "pushState replaceState".split(" ")
 
-  $Cy.extend
+events = []
+listenersAdded = null
 
-    offWindowListeners: ->
-      if previousWin
-        previousWin.off()
-        previousWin = null
+removeAllListeners = ->
+  listenersAdded = false
 
-    offIframeListeners: ($remoteIframe) ->
-      $remoteIframe?.off()
+  for event in events
+    [win, event, cb] = event
 
-    ## we listen for the unload + submit events on
-    ## the window, because when we receive them we
-    ## tell cy its not ready and this prevents any
-    ## additional invocations of any commands until
-    ## its ready again (which happens after the load
-    ## event)
-    bindWindowListeners: (contentWindow) ->
-      @offWindowListeners()
+    win.removeEventListener(event, cb)
 
-      return if contentWindow.location.href is "about:blank"
+  ## reset all the events
+  events = []
 
-      win = $(contentWindow)
+  return null
 
-      previousWin = win
+addListener = (win, event, cb) ->
+  events.push([win, event, cb])
 
-      ## using the native submit method will not trigger a
-      ## beforeunload event synchronously so we must bind
-      ## to the submit event to know we're about to navigate away
-      win.on "submit", (e) =>
-        ## if we've prevented the default submit action
-        ## without stopping propagation, we will still
-        ## receive this event even though the form
-        ## did not submit
-        return if e.isDefaultPrevented()
+  win.addEventListener(event, cb)
 
-        @submitting(e)
+eventHasReturnValue = (e) ->
+  val = e.returnValue
 
-        @isReady(false, "submit")
+  ## return false if val is an empty string
+  ## of if its undinefed
+  return false if val is "" or _.isUndefined(val)
 
-      win.on "beforeunload", (e) =>
-        ## bail if we've cancelled this event (from another source)
-        ## or we've set a returnValue on the original event
-        return if e.isDefaultPrevented() or @_eventHasReturnValue(e)
+  ## else return true
+  return true
 
-        @isReady(false, "beforeunload")
+module.exports = {
+  bindTo: (contentWindow, callbacks = {}) ->
+    return if listenersAdded
 
-        @loading()
+    removeAllListeners()
 
-        @Cypress.Cookies.setInitial()
+    listenersAdded = true
 
-        @pageLoading()
+    ## set onerror global handler
+    contentWindow.onerror = callbacks.onError
 
-        ## whenever our window is about to be nuked
-        ## we want to turn off all of the window listeners
-        ## else jquery will never release them
-        @offWindowListeners()
+    addListener contentWindow, "beforeunload", (e) ->
+      ## bail if we've cancelled this event (from another source)
+      ## or we've set a returnValue on the original event
+      return if e.defaultPrevented or eventHasReturnValue(e)
 
-        @Cypress.trigger("before:unload")
+      callbacks.onBeforeUnload(e)
 
-        ## return undefined so our beforeunload handler
-        ## doesnt trigger a confirmation dialog
-        return undefined
+    addListener contentWindow, "unload", (e) ->
+      ## when we unload we need to remove all of the event listeners
+      removeAllListeners()
 
-      # win.off("unload").on "unload", =>
-        ## put cy in a waiting state now that
-        ## we've unloaded
-        # @isReady(false, "unload")
+      ## else we know to proceed onwards!
+      callbacks.onUnload(e)
 
-      win.on "hashchange", =>
-        @urlChanged(null, {
-          by: "hashchange"
-        })
+    addListener contentWindow, "hashchange", (e) ->
+      callbacks.onNavigation("hashchange", e)
 
-      win.get(0).alert = (str) ->
-        utils.logInfo("Automatically resolving alert: ", str)
+    for attr in HISTORY_ATTRS
+      do (attr) ->
+        return if not (orig = contentWindow.history?[attr])
 
-      win.get(0).confirm = (message) ->
-        utils.logInfo("Confirming 'true' to: ", message)
-        return true
+        contentWindow.history[attr] = (args...) ->
+          orig.apply(@, args)
+
+          callbacks.onNavigation(attr, args)
+
+    addListener contentWindow, "submit", (e) ->
+      ## if we've prevented the default submit action
+      ## without stopping propagation, we will still
+      ## receive this event even though the form
+      ## did not submit
+      return if e.defaultPrevented
+
+      ## else we know to proceed onwards!
+      callbacks.onSubmit(e)
+
+    contentWindow.alert = callbacks.onAlert
+    contentWindow.confirm = callbacks.onConfirm
+
+}

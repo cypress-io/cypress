@@ -2,20 +2,16 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-$Cy.extend({
-  ## these are private because only 'ng' should know
-  ## about them.  we're attaching them regardless
-  ## so they're reachable and can be monkey patched
-  _findByNgBinding: (binding, options) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
+  findByNgBinding = (binding, options) ->
     selector = ".ng-binding"
 
-    angular = @privateState("window").angular
+    angular = state("window").angular
 
     _.extend options, {verify: false, log: false}
 
@@ -36,14 +32,14 @@ $Cy.extend({
       return $(null)
 
     do resolveElements = =>
-      @execute("get", selector, options).then ($elements) =>
-        @verifyUpcomingAssertions(getEl($elements), options, {
+      cy.now("get", selector, options).then ($elements) =>
+        cy.verifyUpcomingAssertions(getEl($elements), options, {
           onRetry: resolveElements
           onFail: (err) ->
             err.displayMessage = "Could not find element for binding: '#{binding}'."
         })
 
-  _findByNgAttr: (name, attr, el, options) ->
+  findByNgAttr = (name, attr, el, options) ->
     selectors = []
     error = "Could not find element for #{name}: '#{el}'.  Searched "
 
@@ -54,8 +50,8 @@ $Cy.extend({
       selectors.push(selector)
 
       do resolveElements = =>
-        @execute("get", selector, options).then ($elements) =>
-          @verifyUpcomingAssertions($elements, options, {
+        cy.now("get", selector, options).then ($elements) =>
+          cy.verifyUpcomingAssertions($elements, options, {
             onRetry: resolveElements
           })
 
@@ -66,7 +62,6 @@ $Cy.extend({
 
     Promise
       .any(finds)
-      .cancellable()
       .then (subject) ->
         cancelAll()
         return subject
@@ -74,10 +69,8 @@ $Cy.extend({
         cancelAll()
         throw err
       .catch Promise.AggregateError, (err) =>
-        utils.throwErr error
-})
+        $utils.throwErr error
 
-module.exports = (Cypress, Commands) ->
   Commands.addAll({
     ng: (type, selector, options = {}) ->
       ## what about requirejs / browserify?
@@ -85,18 +78,18 @@ module.exports = (Cypress, Commands) ->
       ## and if angular is available through them.  throw a very specific
       ## error message here that's different depending on what module
       ## system you're using
-      utils.throwErrByPath "ng.no_global" if not @privateState("window").angular
+      $utils.throwErrByPath "ng.no_global" if not state("window").angular
 
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       switch type
         when "model"
-          @_findByNgAttr("model", "model=", selector, options)
+          findByNgAttr("model", "model=", selector, options)
         when "repeater"
-          @_findByNgAttr("repeater", "repeat*=", selector, options)
+          findByNgAttr("repeater", "repeat*=", selector, options)
         when "binding"
-          @_findByNgBinding(selector, options)
+          findByNgBinding(selector, options)
   })

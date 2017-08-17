@@ -40,6 +40,11 @@ class Test extends Component {
 
   componentDidUpdate () {
     this._scrollIntoView()
+
+    const cb = this.props.model.callbackAfterUpdate
+    if (cb) {
+      cb()
+    }
   }
 
   _scrollIntoView () {
@@ -110,6 +115,7 @@ class Test extends Component {
 
     // otherwise, look at reasons to auto-open the test
     return this.props.model.state === 'failed'
+           || this.props.model.isOpen
            || this.props.model.isLongRunning
            || this.props.runnablesStore.hasSingleTest
   }

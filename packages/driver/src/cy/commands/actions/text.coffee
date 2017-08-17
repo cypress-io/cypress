@@ -3,11 +3,11 @@ $ = require("jquery")
 Promise = require("bluebird")
 moment = require("moment")
 
-{ delay, waitForAnimations } = require("./utils")
-$Dom = require("../../../cypress/dom")
+{ delay, waitForActionability } = require("./utils")
+$dom = require("../../../cypress/dom")
 $Log = require("../../../cypress/log")
 $Keyboard = require("../../../cypress/keyboard")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
 dateRegex = /^\d{4}-\d{2}-\d{2}$/
@@ -15,9 +15,9 @@ monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
-module.exports = (Cypress, Commands) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run", ->
-    $Keyboard.resetModifiers(@privateState("document"), @privateState("window"))
+    $Keyboard.resetModifiers(state("document"), state("window"))
 
   Commands.addAll({ prevSubject: "dom" }, {
     type: (subject, chars, options = {}) ->
@@ -30,12 +30,14 @@ module.exports = (Cypress, Commands) ->
         force: false
         delay: 10
         release: true
+        waitForAnimations: config("waitForAnimations")
+        animationDistanceThreshold: config("animationDistanceThreshold")
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options)
 
         table = {}
 
@@ -60,12 +62,12 @@ module.exports = (Cypress, Commands) ->
             memo
           , {}
 
-        options._log = $Log.command
+        options._log = Cypress.log
           message: [chars, deltaOptions]
           $el: options.$el
           consoleProps: ->
             "Typed":      chars
-            "Applied To": utils.getDomElements(options.$el)
+            "Applied To": $utils.getDomElements(options.$el)
             "Options":    deltaOptions
             "table": ->
               {
@@ -77,12 +79,12 @@ module.exports = (Cypress, Commands) ->
         options._log.snapshot("before", {next: "after"})
 
       isBody      = options.$el.is("body")
-      isTextLike  = $Dom.elIsTextLike(options.$el)
-      isDate      = $Dom.elIsType(options.$el, "date")
-      isTime      = $Dom.elIsType(options.$el, "time")
-      isMonth     = $Dom.elIsType(options.$el, "month")
-      isWeek      = $Dom.elIsType(options.$el, "week")
-      hasTabIndex = $Dom.elMatchesSelector(options.$el, "[tabindex]")
+      isTextLike  = $dom.elIsTextLike(options.$el)
+      isDate      = $dom.elIsType(options.$el, "date")
+      isTime      = $dom.elIsType(options.$el, "time")
+      isMonth     = $dom.elIsType(options.$el, "month")
+      isWeek      = $dom.elIsType(options.$el, "week")
+      hasTabIndex = $dom.elMatchesSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
       ## TODO: can't be readonly
@@ -90,33 +92,33 @@ module.exports = (Cypress, Commands) ->
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
       if not isBody and not isTextLike and not hasTabIndex
-        node = utils.stringifyElement(options.$el)
-        utils.throwErrByPath("type.not_on_text_field", {
+        node = $utils.stringifyElement(options.$el)
+        $utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
           args: { node }
         })
 
       if (num = options.$el.length) and num > 1
-        utils.throwErrByPath("type.multiple_elements", {
+        $utils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
-        utils.throwErrByPath("type.wrong_type", {
+        $utils.throwErrByPath("type.wrong_type", {
           onFail: options._log
           args: { chars }
         })
 
       if _.isBlank(chars)
-        utils.throwErrByPath("type.empty_string", { onFail: options._log })
+        $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       if isDate and (
         not _.isString(chars) or
         not dateRegex.test(chars) or
         not moment(chars).isValid()
       )
-        utils.throwErrByPath("type.invalid_date", {
+        $utils.throwErrByPath("type.invalid_date", {
           onFail: options._log
           args: { chars }
         })
@@ -125,7 +127,7 @@ module.exports = (Cypress, Commands) ->
         not _.isString(chars) or
         not monthRegex.test(chars)
       )
-        utils.throwErrByPath("type.invalid_month", {
+        $utils.throwErrByPath("type.invalid_month", {
           onFail: options._log
           args: { chars }
         })
@@ -134,7 +136,7 @@ module.exports = (Cypress, Commands) ->
         not _.isString(chars) or
         not weekRegex.test(chars)
       )
-        utils.throwErrByPath("type.invalid_week", {
+        $utils.throwErrByPath("type.invalid_week", {
           onFail: options._log
           args: { chars }
         })
@@ -143,18 +145,20 @@ module.exports = (Cypress, Commands) ->
         not _.isString(chars) or
         not timeRegex.test(chars)
       )
-        utils.throwErrByPath("type.invalid_time", {
+        $utils.throwErrByPath("type.invalid_time", {
           onFail: options._log
           args: { chars }
         })
 
       options.chars = "" + chars
 
+      win = state("window")
+
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
           $el = $(el)
-          ($Dom.elMatchesSelector($el, "input") and $Dom.elIsType($el, "submit")) or
-          ($Dom.elMatchesSelector($el, "button") and not $Dom.elIsType($el, "button"))
+          ($dom.elMatchesSelector($el, "input") and $dom.elIsType($el, "submit")) or
+          ($dom.elMatchesSelector($el, "button") and not $dom.elIsType($el, "button"))
 
       type = =>
         simulateSubmitHandler = =>
@@ -205,7 +209,7 @@ module.exports = (Cypress, Commands) ->
             ## currently this is sync but if we use a waterfall
             ## promise in the submit command it will break again
             ## consider changing type to a Promise and juggle logging
-            @execute("submit", {log: false, $el: form})
+            cy.now("submit", form, {log: false, $el: form})
 
         dispatchChangeEvent = (id) =>
           change = document.createEvent("HTMLEvents")
@@ -223,7 +227,7 @@ module.exports = (Cypress, Commands) ->
           isMonth or
           isWeek or
           isTime or
-          ($Dom.elIsType(options.$el, "number") and _.includes(options.chars, "."))
+          ($dom.elIsType(options.$el, "number") and _.includes(options.chars, "."))
 
         ## see comment in updateValue below
         typed = ""
@@ -233,7 +237,7 @@ module.exports = (Cypress, Commands) ->
           chars:   options.chars
           delay:   options.delay
           release: options.release
-          window:  @privateState("window")
+          window:  win
 
           updateValue: (rng, key) ->
             if needSingleValueChange()
@@ -251,7 +255,7 @@ module.exports = (Cypress, Commands) ->
             ## for the total number of keys we're about to
             ## type, ensure we raise the timeout to account
             ## for the delay being added to each keystroke
-            @_timeout (totalKeys * options.delay), true
+            cy.timeout((totalKeys * options.delay), true, "type")
 
           onBeforeSpecialCharAction: (id, key) ->
             ## don't apply any special char actions such as
@@ -278,9 +282,9 @@ module.exports = (Cypress, Commands) ->
             ## never fire any change events for contenteditable
             return if options.$el.is("[contenteditable]")
 
-            @state "changeEvent", ->
+            state "changeEvent", ->
               dispatchChangeEvent()
-              @state "changeEvent", null
+              state "changeEvent", null
 
           onEnterPressed: (changed, id) =>
             ## dont dispatch change events or handle
@@ -299,9 +303,9 @@ module.exports = (Cypress, Commands) ->
 
           onNoMatchingSpecialChars: (chars, allChars) =>
             if chars is "{tab}"
-              utils.throwErrByPath("type.tab", { onFail: options._log })
+              $utils.throwErrByPath("type.tab", { onFail: options._log })
             else
-              utils.throwErrByPath("type.invalid", {
+              $utils.throwErrByPath("type.invalid", {
                 onFail: options._log
                 args: { chars, allChars }
               })
@@ -312,43 +316,50 @@ module.exports = (Cypress, Commands) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
-        @execute("focused", {log: false, verify: false}).then ($focused) =>
-          ## if we dont have a focused element
-          ## or if we do and its not ourselves
-          ## then issue the click
-          if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
-            ## click the element first to simulate focus
-            ## and typical user behavior in case the window
-            ## is out of focus
-            @execute("click", {
-              $el: options.$el
-              log: false
-              verify: false
-              _log: options._log
-              force: options.force
-              timeout: options.timeout
-              interval: options.interval
-            }).then =>
-              type()
-          else
-            waitForAnimations(@, options.$el, options).then(type)
+        cy.now("focused", {log: false, verify: false})
+        .then ($focused) =>
+          waitForActionability(cy, options.$el, win, options, {
+            onScroll: ($el, type) ->
+              Cypress.action("cy:app:scrolled", $el, type)
+
+            onReady: ($elToClick, coords) ->
+              ## if we dont have a focused element
+              ## or if we do and its not ourselves
+              ## then issue the click
+              if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+                ## click the element first to simulate focus
+                ## and typical user behavior in case the window
+                ## is out of focus
+                cy.now("click", $elToClick, {
+                  $el: $elToClick
+                  log: false
+                  verify: false
+                  _log: options._log
+                  force: true ## force the click, avoid waiting
+                  timeout: options.timeout
+                  interval: options.interval
+                }).then(type)
+              else
+                ## don't click, just type
+                type()
+          })
 
       handleFocused()
       .then =>
-        @_timeout(delay, true)
+        cy.timeout(delay, true, "type")
 
         Promise
-          .delay(delay)
-          .then =>
-            ## command which consume cy.type may
-            ## want to handle verification themselves
-            if options.verify is false
-              return options.$el
+        .delay(delay, "type")
+        .then =>
+          ## command which consume cy.type may
+          ## want to handle verification themselves
+          if options.verify is false
+            return options.$el
 
-            do verifyAssertions = =>
-              @verifyUpcomingAssertions(options.$el, options, {
-                onRetry: verifyAssertions
-              })
+          do verifyAssertions = =>
+            cy.verifyUpcomingAssertions(options.$el, options, {
+              onRetry: verifyAssertions
+            })
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
@@ -357,7 +368,7 @@ module.exports = (Cypress, Commands) ->
         log: true
         force: false
 
-      @ensureDom(subject)
+      cy.ensureDom(subject)
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
@@ -366,26 +377,26 @@ module.exports = (Cypress, Commands) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = utils.filterOutOptions(options)
+          deltaOptions = $utils.filterOutOptions(options)
 
-          options._log = $Log.command
+          options._log = Cypress.log
             message: deltaOptions
             $el: $el
             consoleProps: ->
-              "Applied To": utils.getDomElements($el)
+              "Applied To": $utils.getDomElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
 
-        node = utils.stringifyElement($el)
+        node = $utils.stringifyElement($el)
 
-        if not $Dom.elIsTextLike($el)
-          word = utils.plural(subject, "contains", "is")
-          utils.throwErrByPath "clear.invalid_element", {
+        if not $dom.elIsTextLike($el)
+          word = $utils.plural(subject, "contains", "is")
+          $utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log
             args: { word, node }
           }
 
-        @execute("type", "{selectall}{del}", {
+        cy.now("type", $el, "{selectall}{del}", {
           $el: $el
           log: false
           verify: false ## handle verification ourselves
@@ -399,12 +410,11 @@ module.exports = (Cypress, Commands) ->
           return null
 
       Promise
-        .resolve(subject.toArray())
-        .each(clear)
-        .cancellable()
-        .then =>
-          do verifyAssertions = =>
-            @verifyUpcomingAssertions(subject, options, {
-              onRetry: verifyAssertions
-            })
+      .resolve(subject.toArray())
+      .each(clear)
+      .then =>
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(subject, options, {
+            onRetry: verifyAssertions
+          })
   })

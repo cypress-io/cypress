@@ -13,6 +13,7 @@ export default class Test extends Runnable {
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive = null
   @observable isLongRunning = false
+  @observable isOpen = false
   @observable routes = []
   @observable _state = null
   type = 'test'
@@ -60,16 +61,31 @@ export default class Test extends Runnable {
     this.isActive = true
   }
 
-  finish ({ state, err, hookName }) {
+  update ({ state, err, hookName, isOpen }, cb) {
+    if (cb) {
+      this.callbackAfterUpdate = () => {
+        this.callbackAfterUpdate = null
+        cb()
+      }
+    }
+
     this._state = state
     this.err.update(err)
-    this.isActive = false
+    if (isOpen != null) {
+      this.isOpen = isOpen
+    }
+
     if (hookName) {
       const hook = _.find(this.hooks, { name: hookName })
       if (hook) {
         hook.failed = true
       }
     }
+  }
+
+  finish (props) {
+    this.update(props)
+    this.isActive = false
   }
 
   commandMatchingErr () {

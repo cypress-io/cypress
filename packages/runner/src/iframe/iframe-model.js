@@ -16,9 +16,9 @@ export default class IframeModel {
 
   listen () {
     eventManager.on('run:start', action('run:start', this._beforeRun))
-    eventManager.on('run:end', action('run:start', this._afterRun))
+    eventManager.on('run:end', action('run:end', this._afterRun))
 
-    eventManager.on('viewport', action('viewport', this._updateViewport))
+    eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
     eventManager.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))
@@ -35,6 +35,7 @@ export default class IframeModel {
 
   _beforeRun = () => {
     this.state.isRunning = true
+    this.state.reset()
     this._reset()
     this._clearMessage()
   }
@@ -43,16 +44,20 @@ export default class IframeModel {
     this.state.isRunning = false
   }
 
-  _updateViewport = ({ viewportWidth, viewportHeight }) => {
+  _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
     this.state.updateDimensions(viewportWidth, viewportHeight)
+
+    if (cb) {
+      this.state.setCallbackAfterUpdate(cb)
+    }
   }
 
   _updateUrl = (url) => {
     this.state.url = url
   }
 
-  _updateLoading = (loading) => {
-    this.state.loading = loading
+  _updateLoading = (isLoading) => {
+    this.state.isLoading = isLoading
   }
 
   _clearMessage = () => {

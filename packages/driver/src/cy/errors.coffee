@@ -1,83 +1,97 @@
-utils = require("../cypress/utils")
+$utils = require("../cypress/utils")
 
-module.exports = ($Cy) ->
-  $Cy.extend
-    ## submit a generic command error
-    commandErr: (err) ->
-      current = @state("current")
+crossOriginScriptRe = /^script error/i
 
-      @Cypress.Log.command
-        end: true
-        snapshot: true
-        error: err
-        consoleProps: ->
-          obj = {}
-          ## if type isnt parent then we know its dual or child
-          ## and we can add Applied To if there is a prev command
-          ## and it is a parent
-          if current.get("type") isnt "parent" and prev = current.get("prev")
-            ret = if utils.hasElement(prev.get("subject"))
-              utils.getDomElements(prev.get("subject"))
-            else
-              prev.get("subject")
+create = (state, config, log) ->
+  commandErr = (err) ->
+    current = state("current")
 
-            obj["Applied To"] = ret
-            obj
+    log({
+      end: true
+      snapshot: true
+      error: err
+      consoleProps: ->
+        obj = {}
+        ## if type isnt parent then we know its dual or child
+        ## and we can add Applied To if there is a prev command
+        ## and it is a parent
+        if current.get("type") isnt "parent" and prev = current.get("prev")
+          ret = if $utils.hasElement(prev.get("subject"))
+            $utils.getDomElements(prev.get("subject"))
+          else
+            prev.get("subject")
 
-    checkTestErr: (test) ->
-      ## if our test has an error but we dont
-      ## have one referenced then set this err
-      ## this can happen if there is an window
-      ## uncaught error from our test which
-      ## bypasses our commands entirely so
-      ## we never actually catch it
-      ## and 'endedEarlyErr' would fire
-      if err = test.err and not @state("err")
-        @state("err", err)
+          obj["Applied To"] = ret
+          obj
+    })
 
-      return @
+  endedEarlyErr = (index, queue) ->
+    ## return if we already have an error
+    return if state("error")
 
-    endedEarlyErr: (index) ->
-      ## return if we already have an error
-      return if @state("err")
+    commands = queue.slice(index).reduce (memo, cmd) =>
+      if $utils.isCommandFromThenable(cmd)
+        memo
+      else
+        memo.push "- " + cmd.stringify()
+        memo
+    , []
 
-      commands = @queue.slice(index).reduce (memo, cmd) =>
-        if @_isCommandFromThenable(cmd) or @_isCommandFromMocha(cmd)
-          memo
-        else
-          memo.push "- " + cmd.stringify()
-          memo
-      , []
-
-      err = utils.cypressErr(utils.errMessageByPath("miscellaneous.dangling_commands", {
+    err = $utils.cypressErr(
+      $utils.errMessageByPath("miscellaneous.dangling_commands", {
         numCommands: commands.length
         commands:    commands.join('\n')
-      }))
-      err.onFail = ->
-      @fail(err)
+      })
+    )
+    err.onFail = ->
 
-    fail: (err) ->
-      ## make sure we cancel our outstanding
-      ## promise since we could have hit this
-      ## fail handler outside of a command chain
-      ## and we want to ensure we don't continue retrying
-      @state("promise")?.cancel()
+    commandRunningFailed(err)
 
-      current = @state("current")
+  createUncaughtException = (msg, source, lineno, colno, err) ->
+    current = state("current")
 
-      ## allow for our own custom onFail function
-      if err.onFail
-        err.onFail.call(@, err)
+    ## reset the msg on a cross origin script error
+    ## since no details are accessible
+    if crossOriginScriptRe.test(msg)
+      msg = $utils.errMessageByPath("uncaught.cross_origin_script")
 
-        ## clean up this onFail callback
-        ## after its been called
-        delete err.onFail
-      else
-        @commandErr(err)
+    createErrFromMsg = ->
+      new Error $utils.errMessageByPath("uncaught.error", { msg, source, lineno })
 
-      runnable = @privateState("runnable")
+    ## if we have the 5th argument it means we're in a super
+    ## modern browser making this super simple to work with.
+    err ?= createErrFromMsg()
 
-      @state("err", err)
+    err.name = "Uncaught " + err.name
 
-      @Cypress.trigger "fail", err, runnable
-      @trigger "fail", err, runnable
+    err.onFail = ->
+      if l = current and current.getLastLog()
+        l.error(err)
+
+    return err
+
+  commandRunningFailed = (err) ->
+    ## allow for our own custom onFail function
+    if err.onFail
+      err.onFail(err)
+
+      ## clean up this onFail callback
+      ## after its been called
+      delete err.onFail
+    else
+      commandErr(err)
+
+  return {
+    ## submit a generic command error
+    commandErr
+
+    endedEarlyErr
+
+    commandRunningFailed
+
+    createUncaughtException
+  }
+
+module.exports = {
+  create
+}

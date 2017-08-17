@@ -46,7 +46,7 @@ module.exports = {
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
         "env":         "environmentVariables"
-        "headless":    "isHeadless"
+        "headless":    "isTextTerminal"
         "show-headless-gui":"showHeadlessGui"
         "exit-with-code": "exitWithCode"
         "reporter-options": "reporterOptions"

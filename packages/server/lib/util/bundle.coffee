@@ -32,7 +32,7 @@ module.exports = {
     appData.projectsPath(toHashName(projectRoot), "bundles", filePath)
 
   build: (filePath, config) ->
-    if config.isHeadless and built = builtFiles[filePath]
+    if config.isTextTerminal and built = builtFiles[filePath]
       return built
 
     log "bundler for project #{config.projectRoot} for file #{filePath}"
@@ -49,7 +49,7 @@ module.exports = {
       packageCache: {}
     })
 
-    if not config.isHeadless
+    if not config.isTextTerminal
       @_watching = true ## for testing purposes
 
       bundler.plugin(watchify, {
@@ -73,7 +73,7 @@ module.exports = {
           bundler
           .bundle()
           .on "error", (err) =>
-            if config.isHeadless
+            if config.isTextTerminal
               err.filePath = absolutePath
               ## backup the original stack before its
               ## potentially modified from bluebird
@@ -146,7 +146,7 @@ module.exports = {
 
     """
     (function () {
-      Cypress.trigger("script:error", {
+      Cypress.action("spec:script:error", {
         type: "BUNDLE_ERROR",
         error: #{JSON.stringify(err)}
       })

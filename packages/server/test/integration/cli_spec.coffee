@@ -3,12 +3,13 @@ require("../spec_helper")
 _   = require("lodash")
 cp  = require("child_process")
 pr  = require("../support/helpers/process")
-pkg = require("@packages/root")
+pkg = require("../../package.json")
+root = require("@packages/root")
 
 anyLineWithCaret = (str) ->
   str[0] is ">"
 
-parse = (str) ->
+clean = (str) ->
   ## remove blank lines and slice off any line
   ## starting with a caret because thats junk
   ## from npm logs
@@ -32,16 +33,16 @@ describe "CLI Interface", ->
     cp.exec "npm start -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
-      expect(parse(stdout)).to.eq("12345")
+      expect(clean(stdout)).to.eq("12345")
       done()
 
   it "writes out package.json and exits", (done) ->
     cp.exec "npm start -- --return-pkg", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
-      pkg = JSON.parse(parse(stdout))
-      expect(pkg.name).to.eq("@packages/server")
-      expect(pkg.productName).to.eq("Cypress", stdout)
+      json = JSON.parse(clean(stdout))
+      expect(json.name).to.eq("cypress")
+      expect(json.productName).to.eq("Cypress", stdout)
       done()
 
   ## this tests that our exit codes are correct.

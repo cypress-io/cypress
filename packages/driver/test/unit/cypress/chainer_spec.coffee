@@ -1,17 +1,15 @@
-describe "$Cypress.Chainer API", ->
-  beforeEach ->
-    @Cypress = $Cypress.create()
-    # @cy      = $Cypress.Cy.create(@Cypress)
+require("../../support/unit_spec_helper")
 
-    # @chainer = $Cypress.Chainer.create(@Cypress)
+$Chainer = require("#{src}/cypress/chainer")
 
+describe "src/cypress/chainer", ->
   context ".inject", ->
     afterEach ->
-      delete $Cypress.Chainer::foo
+      delete $Chainer::foo
 
     it "sets key/fn on the $Chainer prototype", ->
-      $Cypress.Chainer.inject "foo", ->
-      expect($Cypress.Chainer.prototype.foo).to.be.a("function")
+      $Chainer.inject "foo", ->
+      expect($Chainer.prototype.foo).to.be.a("function")
 
     it "calls the callback with cy context, id, and args", (done) ->
       cy = {state: ->}
@@ -23,18 +21,18 @@ describe "$Cypress.Chainer API", ->
         expect(args).to.deep.eq []
         done()
 
-      $Cypress.Chainer.inject "foo", fn
-      chainer = new $Cypress.Chainer cy
+      $Chainer.inject "foo", fn
+      chainer = new $Chainer(cy)
       chainer.foo()
 
   context ".create", ->
 
   context "#constructor", ->
     it "sets unique id", ->
-      chainer = new $Cypress.Chainer
+      chainer = new $Chainer
       expect(chainer.id).to.be.ok
 
     it "sets cy", ->
       cy = {}
-      chainer = new $Cypress.Chainer cy
+      chainer = new $Chainer(cy)
       expect(chainer.cy).to.eq cy
