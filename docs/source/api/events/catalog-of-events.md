@@ -5,35 +5,37 @@ comments: false
 
 Here's the complete list of Cypress events, with arguments.
 
-- "test:before:run" (runnable)
-- "test:before:run:async"
-- "runnable:after:run:async"
-- "test:after:run"
-- "test:set:state"
-- "log:added"
-- "log:changed"
-- "fail"
-- "stability:changed"
-- "paused"
-- "canceled"
-- "visit:failed"
-- "viewport:changed"
-- "app:scrolled"
-- "command:start"
-- "command:end"
-- "command:retry"
-- "command:enqueued"
-- "command:queue:before:end"
-- "command:queue:end"
-- "url:changed"
-- "next:subject:prepared"
-- "collect:run:state"
-- "uncaught:exception" (err, runnable)
-- "page:loading"
-- "before:window:load"
-- "navigation:changed"
-- "form:submitted"
-- "window:load"
-- "before:window:unload"
-- "window:unload"
-- "script:error"
+Event | Args | Description
+----- | ---- | ----------
+`"test:before:run"` | log, runnable |
+`"test:before:run:async"` | log, runnable |
+`"runnable:after:run:async"` | log, runnable |
+`"test:after:run"` | log, runnable |
+`"test:set:state"` | log, function |
+`"log:added"` | command, event |
+`"log:changed"` | command, event |
+`"fail"` | error, runnable |
+`"stability:changed"` | bool, eventName |
+`"paused"` | |
+`"canceled"` | |
+`"visit:failed"` | |
+`"viewport:changed"` | viewport sizes, function |
+`"app:scrolled"` | subject, subject type|
+`"command:enqueued"` | command |
+`"command:start"` | command |
+`"command:end"` | command |
+`"command:retry"` | command |
+`"command:queue:before:end"` | - |
+`"command:queue:end"` | - |
+`"url:changed"` | url |
+`"next:subject:prepared"` | subject, jQuery wrapped subject |
+`"collect:run:state"` | |
+`"uncaught:exception"` | error, runnable |
+`"page:loading"` | bool |
+`"before:window:load"` | window |
+`"navigation:changed"` | eventName |
+`"form:submitted"` | |
+`"window:load"` | window |
+`"before:window:unload"` | beforeUnload event |
+`"window:unload"` | unload event |
+`"script:error"` | |
