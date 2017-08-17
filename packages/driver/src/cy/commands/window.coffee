@@ -20,8 +20,9 @@ viewports = {
 validOrientations = ["landscape", "portrait"]
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  ## hold a global reference to defaults
-  viewportDefaults = null
+  ## keep track of the current viewport so we know if the viewport
+  ## command is actually changing it or not
+  defaultViewport = currentViewport = _.pick(config(), "viewportWidth", "viewportHeight")
 
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
@@ -29,18 +30,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## need to restore prior to running the next test
     ## after which we simply null and wait for the
     ## next viewport change
-    if d = viewportDefaults
-      viewportDefaults = null
-
-      setViewportAndSynchronize(d.viewportWidth, d.viewportHeight)
+    setViewportAndSynchronize(defaultViewport.viewportWidth, defaultViewport.viewportHeight)
 
   setViewportAndSynchronize = (width, height) ->
-    config("viewportWidth", width)
-    config("viewportHeight", height)
-
     viewport = {viewportWidth: width, viewportHeight: height}
 
     new Promise (resolve) ->
+      if currentViewport.viewportWidth is width and currentViewport.viewportHeight
+        ## noop if viewport won't change
+        return resolve(currentViewport)
+
+      currentViewport = {
+        viewportWidth: width
+        viewportHeight: height
+      }
+
       ## force our UI to change to the viewport and wait for it
       ## to be updated
       Cypress.action "cy:viewport:changed", viewport, ->
@@ -190,15 +194,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           throwErrBadArgs()
 
-      ## backup the previous viewport defaults
-      ## if they dont already exist!
-      if not viewportDefaults
-        viewportDefaults = _.pick(config(), "viewportWidth", "viewportHeight")
-
       setViewportAndSynchronize(width, height)
       .then (viewport) ->
         if options._log
           options._log.set(viewport)
 
         return null
+
   })

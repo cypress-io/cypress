@@ -13,7 +13,7 @@ describe "src/cy/commands/window", ->
 
         delete @remoteWindow.foo
 
-        Cypress.config("defaultCommandTimeout", 50)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -155,7 +155,7 @@ describe "src/cy/commands/window", ->
 
         delete @remoteDocument.foo
 
-        Cypress.config("defaultCommandTimeout", 50)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -440,27 +440,54 @@ describe "src/cy/commands/window", ->
           }
 
   context "#viewport", ->
-    it "triggers 'viewport' event with dimensions object", (done) ->
+    it "triggers 'viewport:changed' event with dimensions object", ->
+      expected = false
+
       cy.on "viewport:changed", (viewport, fn) ->
+        expected = true
         expect(viewport).to.deep.eq {viewportWidth: 800, viewportHeight: 600}
         expect(fn).to.be.a("function")
-        done()
+
+      cy.viewport(800, 600).then ->
+        expect(expected).to.be.true
+
+    it "does not trigger 'viewport:changed' when changing to the default", ->
+      fn = ->
+        throw new Error("Should not trigger 'viewport:changed'")
+
+      Cypress.prependListener("viewport:changed", fn)
+
+      cy.viewport(1000, 600).then ->
+        Cypress.removeListener("viewport:changed", fn)
+
+    it "does not trigger 'viewport:changed' when changing to the same viewport", ->
+      triggeredOnce = false
+      fn = ->
+        if triggeredOnce
+          throw new Error("Should not trigger 'viewport:changed'")
+        triggeredOnce = true
+
+      Cypress.prependListener("viewport:changed", fn)
 
       cy.viewport(800, 600)
+      cy.viewport(800, 600).then ->
+        Cypress.removeListener("viewport:changed", fn)
 
     it "sets subject to null", ->
       cy.viewport("ipad-2").then (subject) ->
         expect(subject).to.be.null
 
-    it "sets viewportWidth and viewportHeight to private", (done) ->
+    it "does not modify viewportWidth and viewportHeight in config", ->
+      expected = false
       cy.on "viewport:changed", ->
-        expect(Cypress.config("viewportWidth")).to.eq(800)
-        expect(Cypress.config("viewportHeight")).to.eq(600)
-        done()
+        expected = true
+        expect(Cypress.config("viewportWidth")).not.to.eq(800)
+        expect(Cypress.config("viewportHeight")).not.to.eq(600)
 
-      cy.viewport(800, 600)
+      cy.viewport(800, 600).then ->
+        expect(expected).to.be.true
 
-    context.only "changing viewport", ->
+    context "changing viewport", ->
       it "changes viewport and then resets back to the original", ->
         { viewportHeight, viewportWidth } = Cypress.config()
 
