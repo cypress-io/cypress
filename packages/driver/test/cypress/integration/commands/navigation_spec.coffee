@@ -1334,6 +1334,41 @@ describe "src/cy/commands/navigation", ->
 
         win.location.href = "about:blank"
 
+    it "does not time out current commands until stability is reached", ->
+      ## on the first retry cause a page load event synchronously
+      cy.on "command:retry", (options) ->
+        switch options._retries
+          when 1
+            win = cy.state("window")
+
+            ## load a page which times out after 500ms
+            ## to guarantee that url does not time out
+            $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
+            .appendTo(win.document.body)
+
+            ## this causes a synchronous beforeunload event
+            ## unlike win.location.href setter
+            $a.get(0).click()
+
+          when 2
+            ## on 2nd retry add the DOM element
+            win = cy.state("window")
+            $("<div id='does-not-exist'>does not exist<div>")
+            .appendTo(win.document.body)
+
+          when 3
+            ## and on the 3rd retry add the class
+            win = cy.state("window")
+            $("#does-not-exist").addClass("foo")
+
+      cy
+        .visit("/fixtures/jquery.html")
+
+        ## make get timeout after 300ms
+        ## but even though our page does not load for 500ms
+        ## this does not time out
+        .get("#does-not-exist", { timeout: 300 }).should("have.class", "foo")
+
     describe "errors", ->
       beforeEach ->
         @logs = []
@@ -1344,22 +1379,100 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      ## TODO: fix this
-      it.skip "can time out", (done) ->
-        cy.once "fail", (err) =>
-          ## should only log once
-          expect(@logs.length).to.eq 1
-          expect(err.message).to.include "Your page did not fire its 'load' event within '100ms'."
-          done()
+      it "can time out", (done) ->
+        thenCalled = false
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          ## visit, window, page loading
+          expect(@logs.length).to.eq(3)
+          expect(err.message).to.include "Your page did not fire its 'load' event within '50ms'."
+          expect(lastLog.get("name")).to.eq("page load")
+          expect(lastLog.get("error")).to.eq(err)
+
+          Promise
+          .delay(100)
+          .then ->
+            expect(cy.isStopped()).to.be.true ## make sure we ran our cleanup routine
+            expect(thenCalled).to.be.false
+
+            done()
 
         cy
+          .visit("/fixtures/jquery.html")
           .window().then (win) ->
             Cypress.config("pageLoadTimeout", 50)
 
-            win.location.href = "/timeout?ms=1000"
+            $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
+            .appendTo(win.document.body)
+
+            ## this causes a synchronous beforeunload event
+            ## unlike win.location.href setter
+            $a.get(0).click()
 
             null
-          .wait(2000)
+          .wrap(null).then ->
+            thenCalled = true
+
+      it "does time out once stability is reached", (done) ->
+        logByName = (name) =>
+          _.find @logs, (log) ->
+            log.get("name") is name
+
+        cy.on "fail", (err) ->
+          cy.on "command:retry", ->
+            throw new Error("should not have retried twice")
+
+          expect(err.message).to.include("Expected to find element")
+
+          get = logByName("get")
+
+          expect(get.get("error")).to.eq(err)
+
+          Promise.delay(200)
+          .then ->
+            expect(cy.isStopped()).to.be.true
+
+            done()
+
+        start = null
+
+        ## on the first retry cause a page load event synchronously
+        cy.on "command:retry", (options) ->
+          switch options._retries
+            when 1
+              ## hold a ref to this
+              start = options._start
+
+              win = cy.state("window")
+
+              ## load a page which times out after 400ms
+              ## to guarantee that url does not time out
+              $a = win.$("<a href='/timeout?ms=400'>jquery</a>")
+              .appendTo(win.document.body)
+
+              ## this causes a synchronous beforeunload event
+              ## unlike win.location.href setter
+              $a.get(0).click()
+
+              ## immediately logs pending state
+              expect(logByName("page load").get("state")).to.eq("pending")
+
+            when 2
+              ## it should have reset this because we became
+              ## unstable
+              expect(start).not.to.eq(options._start)
+
+              ## and by the time we retry for the 2nd time
+              ## the page should be loaded
+              expect(logByName("page load").get("state")).to.eq("passed")
+
+        cy
+          .visit("/fixtures/jquery.html")
+
+          ## make url timeout after only 100ms
+          .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
       ## TODO: fix this
       it.skip "captures cross origin failures", (done) ->
@@ -1374,8 +1487,12 @@ describe "src/cy/commands/navigation", ->
           done()
 
         cy
+          .visit("/fixtures/jquery.html")
           .window({log: false}).then (win) ->
-            win.location.href = "http://localhost:3501/fixtures/generic.html"
+            url = "http://localhost:3501/fixtures/generic.html"
+
+            $a = win.$("<a href='#{url}'>jquery</a>")
+            .appendTo(win.document.body)
 
             null
           .wait(2000)

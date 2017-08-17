@@ -55,25 +55,35 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
             else
               err
 
-        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
-          onFail: (options.onFail or log)
-          args: { error: getErrMessage(options.error) }
-        }
+        try
+          $utils.throwErrByPath "miscellaneous.retry_timed_out", {
+            onFail: (options.onFail or log)
+            args: { error: getErrMessage(options.error) }
+          }
+        catch err
+          if r = state("reject")
+            r(err)
 
-      Promise
-      .delay(interval)
-      .tap ->
-        if options.silent isnt true
-          Cypress.action("cy:command:retry", options)
-      ## its very important we use a .then here
-      ## so if our promise is cancelled after the event
-      ## gets emitted above, this callback will not be called
-      .then ->
+      ended = ->
         ## bug in bluebird with not propagating cancelations
         ## fast enough in a series of promises
         ## https://github.com/petkaantonov/bluebird/issues/1424
-        if state("canceled")
-          return
+        state("canceled") or state("error")
+
+      Promise
+      .delay(interval)
+      .then ->
+        return if ended()
+
+        Cypress.action("cy:command:retry", options)
+
+        return if ended()
+
+        ## if we are unstable then remove
+        ## the start since we need to retry
+        ## fresh once we become stable again!
+        if state("isStable") is false
+          options._start = undefined
 
         ## invoke the passed in retry fn
         ## once we reach stability

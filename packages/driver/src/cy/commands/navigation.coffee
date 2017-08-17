@@ -205,16 +205,17 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
         resolve()
 
+  reject = (err) ->
+    if r = state("reject")
+      r(err)
+
   loading()
   .timeout(options.timeout, "page load")
-  .catch Promise.TimeoutError, (err) =>
+  .catch Promise.TimeoutError, ->
     try
       timedOutWaitingForPageLoad(options.timeout, options._log)
-    catch e
-      ## must directly fail here else we potentially
-      ## get unhandled promise exception
-      @fail(e)
-  .catch (err) =>
+    catch err
+      reject(err)
     try
       { originPolicy } = $Location.create(window.location.href)
 

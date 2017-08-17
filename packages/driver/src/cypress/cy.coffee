@@ -136,9 +136,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
-        ## we are now isLoading
-        # pageLoading(true)
-
         Cypress.action("app:before:window:unload", e)
 
         ## return undefined so our beforeunload handler
@@ -247,7 +244,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## we aren't attached to the cypress command queue
     ## promise chain and throwing the error would only
     ## result in an unhandled rejection
-    return if runnable.async
+    return null if runnable.async
 
     ## else we're connected to the promise chain
     ## and need to throw so this bubbles up
