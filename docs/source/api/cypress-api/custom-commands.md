@@ -74,58 +74,130 @@ Parent commands always **begin** a new chain of commands. Even if you've chained
 ***Custom command for 'login'***
 
 ```javascript
-Cypress.Commands.add('login', function(email, password){
-  var email    = email || 'joe@example.com'
-  var password = password || 'foobar'
+Cypress.Commands.add('loginByForm', (username, password) => {
 
-  var log = Cypress.log({
-    name: 'login',
-    message: [email, password],
-    onConsole: function(){
-      return {
-        email: email,
-        password: password
-      }
+  Cypress.log({
+    name: 'loginByForm',
+    message: username + ' | ' + password
+  })
+
+  return cy.request({
+    method: 'POST',
+    url: '/login',
+    form: true,
+    body: {
+      username: username,
+      password: password
     }
   })
+})
 
-  cy.visit('/login', {log: false})
-  cy.contains('Log In', {log: false})
-  cy.get('#email', {log: false}).type(email, {log: false})
-  cy.get('#password', {log: false}).type(password, {log: false})
-  //this should submit the form
-  cy.get('button', {log: false}).click({log: false})
-  // we should be on the dashboard now
-  cy.get('h1', {log: false}).contains('Dashboard', {log: false}) /
-  cy.url({log: false}).should('match', /dashboard/, {log: false})
-    .then(function(){
-      log.snapshot().end()
-    })
+beforeEach(function(){
+  // login before each test
+  cy.loginByForm('jane.lane', 'password123')
 })
 ```
 
-## Another custom command for sign in
+***Another custom command for sign in***
 
 ```javascript
-Cypress.Commands.add('signIn', function(email, password) {
+Cypress.Commands.add('loginByCSRF', (csrfToken) => {
   cy.request({
     method: 'POST',
-    url: '/auth',
-    body: {email, password}
-  }).its('body')
+    url: '/login',
+    failOnStatusCode: false, // dont fail so we can make assertions
+    form: true, // we are submitting a regular form body
+    body: {
+      username: 'cypress',
+      password: 'password123',
+      _csrf: csrfToken // insert this as part of form body
+    }
+  })
 })
 
-describe('custom command', function() {
-  it('resolves with the body', function() {
-    // the subject (body) is carried on and
-    // we can then add assertions about it
-    cy.signIn({'jane.lane', 'password123'}).should('deep.eq', {
-      email: 'jane.lane',
-      password: 'password123'
-    })
+it('403 status without a valid CSRF token', function(){
+  cy.loginByCSRF('invalid-token')
+    .its('status')
+    .should('eq', 403)
+})
+```
+
+***Login with single signon command***
+
+```javascript
+Cypress.Commands.add('loginBySingleSignOn', (overrides = {}) => {
+
+  Cypress.log({
+    name: 'loginBySingleSignOn'
+  })
+
+  const options = {
+    method: 'POST',
+    url: 'http://auth.corp.com:8086/login',
+    qs: {
+      // use qs to set query string to the url that creates
+      // http://auth.corp.com:8080?redirectTo=http://localhost:8085/set_token
+      redirectTo: 'http://localhost:8085/set_token'
+    },
+    form: true, // we are submitting a regular form body
+    body: {
+      username: 'jane.lane',
+      password: 'password123',
+    }
+  }
+
+  // allow us to override defaults with passed in overrides
+  _.extend(options, overrides)
+
+  cy.request(options)
+})
+
+it('can authenticate with cy.request', function(){
+  cy.loginBySingleSignOn().then((resp) => {
+    // yup this should all be good
+    expect(resp.status).to.eq(200)
   })
 })
 ```
+
+***Login with JSON***
+
+```javascript
+Cypress.Commands.add('loginByJSON', (username, password) => {
+
+  Cypress.log({
+    name: 'loginByJSON',
+    message: username + ' | ' + password
+  })
+
+  return cy.request({
+    method: 'POST',
+    url: '/login',
+    body: {
+      username: username,
+      password: password
+    }
+  })
+})
+
+beforeEach(function(){
+  // login before each test
+  cy.loginByJSON('jane.lane', 'password123')
+})
+```
+
+***Set local storage on each visit***
+
+```javascript
+Cypress.Commands.add('visitAuthed', function(path) {
+  cy.server().visit("/#" + path, {
+    onBeforeLoad: function(win) {
+      win.localStorage.setItem('apiKey', Cypress.env('apiKey'))
+    }
+  })
+})
+```
+
 
 ## Dual Command
 
@@ -138,3 +210,7 @@ Cypress.Commands.add('swipe', {prevSubject: 'optional'}, function(subject, arg1,
   // there is an existing subject or not
 })
 ```
+
+# See also
+
+- {% url 'Recipe: Logging In' logging-in-recipe %}
