@@ -236,7 +236,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     reset()
 
     ## create the server before each test run
-    server = startXhrServer(cy, state, config)
+    ## its possible for this to fail if the
+    ## last test we ran ended with an invalid
+    ## window such as if the last test ended
+    ## with a cross origin window
+    try
+      server = startXhrServer(cy, state, config)
+    catch err
+      ## in this case, just don't bind to the server
+      server = null
 
     return null
 
@@ -245,7 +253,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## dynamically bind the server to whatever is currently running
       server.bindTo(contentWindow)
     else
-      unavailableErr()
+      ## if we don't have a server such as the case when
+      ## the last window was cross origin, try to bind
+      ## to it now 
+      server = startXhrServer(cy, state, config)
 
   Commands.addAll({
     server: (options) ->

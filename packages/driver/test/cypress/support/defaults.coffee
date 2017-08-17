@@ -15,4 +15,7 @@ beforeEach ->
 
   ## remove all event listeners
   ## from the window
-  $(cy.state("window")).off()
+  ## this could fail if this window
+  ## is a cross origin window
+  try
+    $(cy.state("window")).off()

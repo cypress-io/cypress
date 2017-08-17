@@ -198,6 +198,24 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   cy.clearTimeout("page load")
 
+  onPageLoadErr = (err) ->
+    state("onPageLoadErr", null)
+    
+    { originPolicy } = $Location.create(window.location.href)
+
+    try
+      $utils.throwErrByPath("navigation.cross_origin", {
+        onFail: options._log
+        args: {
+          message: err.message
+          originPolicy: originPolicy
+        }
+      })
+    catch err
+      return err
+
+  state("onPageLoadErr", onPageLoadErr)
+
   loading = ->
     new Promise (resolve, reject) ->
       cy.on "window:load", ->
@@ -216,18 +234,11 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       timedOutWaitingForPageLoad(options.timeout, options._log)
     catch err
       reject(err)
-    try
-      { originPolicy } = $Location.create(window.location.href)
+  .finally ->
+    ## clean this up
+    cy.state("onPageLoadErr", null)
 
-      $utils.throwErrByPath("navigation.cross_origin", {
-        onFail: options._log
-        args: {
-          message: err.message
-          originPolicy: originPolicy
-        }
-      })
-    catch e
-      @fail(e)
+    return null
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()

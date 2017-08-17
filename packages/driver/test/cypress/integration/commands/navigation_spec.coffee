@@ -529,7 +529,7 @@ describe "src/cy/commands/navigation", ->
         count = 0
         urls = []
 
-        cy.state("$autIframe").on "load", =>
+        cy.on "window:load", ->
           urls.push cy.state("window").location.href
 
           count += 1
@@ -1312,8 +1312,15 @@ describe "src/cy/commands/navigation", ->
       ## we should be setting the initial cookie
       cy
         .visit("/fixtures/form.html")
+        .then ->
+          cy.on "window:unload", ->
+            expect(cy.state("onPageLoadErr")).to.be.a("function")
+
+          null
         .get("a:first").click().then ->
           expect(expected).to.be.true
+
+          expect(cy.state("onPageLoadErr")).to.be.null
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
@@ -1394,6 +1401,7 @@ describe "src/cy/commands/navigation", ->
           Promise
           .delay(100)
           .then ->
+            expect(cy.state("onPageLoadErr")).to.be.null
             expect(cy.isStopped()).to.be.true ## make sure we ran our cleanup routine
             expect(thenCalled).to.be.false
 
@@ -1474,16 +1482,17 @@ describe "src/cy/commands/navigation", ->
           ## make url timeout after only 100ms
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
-      ## TODO: fix this
-      it.skip "captures cross origin failures", (done) ->
-        cy.once "fail", (err) ->
-          firstLog = @logs[0]
+      it "captures cross origin failures", (done) ->
+        cy.once "fail", (err) =>
+          lastLog = @lastLog
 
-          expect(@logs.length).to.eq(1)
+          expect(@logs.length).to.eq(2)
           expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
-          expect(firstLog.get("name")).to.eq("page load")
-          expect(firstLog.get("state")).to.eq("failed")
-          expect(firstLog.get("error")).to.eq(err)
+          expect(lastLog.get("name")).to.eq("page load")
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(lastLog.get("error")).to.eq(err)
+          expect(cy.state("onPageLoadErr")).to.be.null
+
           done()
 
         cy
@@ -1494,8 +1503,9 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='#{url}'>jquery</a>")
             .appendTo(win.document.body)
 
+            $a.get(0).click()
+
             null
-          .wait(2000)
 
   ## this tests isLoading spinner
   ## and page load event

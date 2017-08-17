@@ -350,7 +350,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## when we find ourselves in a cross origin situation, then our
       ## proxy has not injected Cypress.action('before:window:load')
       ## so Cypress.onBeforeAppWindowLoad() was never called
-      $autIframe.on "load", =>
+      $autIframe.on "load", ->
         ## if setting these props failed
         ## then we know we're in a cross origin failure
         try
@@ -365,9 +365,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## about:blank in a visit, we do need these
           contentWindowListeners(getContentWindow($autIframe))
 
-          ## we are done isLoading
-          # pageLoading(false)
-
           Cypress.action("app:window:load", state("window"))
 
           ## we are now stable again which is purposefully
@@ -375,11 +372,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## listeners time to be invoked prior to moving on
           stability.isStable(true, "load")
         catch err
-          ## catch errors associated to cross origin iframes
-          if ready = state("ready")
-            ready.reject(err)
-          else
-            fail(err, state("runnable"))
+          ## we failed setting the remote window props
+          ## which means we're in a cross domain failure
+          ## check first to see if you have a callback function
+          ## defined and let the page load change the error
+          if onpl = state("onPageLoadErr")
+            err = onpl(err)
+
+          ## and now reject with it
+          if r = state("reject")
+            r(err)
 
     stop: ->
       ## don't do anything if we've already stopped
