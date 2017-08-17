@@ -1807,6 +1807,31 @@ describe "src/cy/commands/xhr", ->
             xhr.onload = resolve
         .wait("@getFoo").its("url").should("include", "/foo")
 
+    it "reapplies server + route automatically during page transitions", ->
+      ## this tests that the server + routes are automatically reapplied
+      ## after the 2nd visit - which is an example of the remote iframe
+      ## causing an onBeforeLoad event
+      cy
+        .server()
+        .route(/foo/, {foo: "bar"}).as("getFoo")
+        .visit("http://localhost:3500/fixtures/jquery.html")
+        .window().then (win) ->
+          url = "http://localhost:3500/fixtures/generic.html"
+
+          $a = win.$("<a href='#{url}'>jquery</a>")
+          .appendTo(win.document.body)
+
+          ## synchronous beforeunload
+          $a.get(0).click()
+        .url().should("include", "/generic.html")
+        .window().then (win) ->
+          new Promise (resolve) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            xhr.send()
+            xhr.onload = resolve
+        .wait("@getFoo").its("url").should("include", "/foo")
+
   context.skip "#cancel", ->
     it "calls server#cancel", (done) ->
       cancel = null
