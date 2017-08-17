@@ -129,6 +129,12 @@ api:
     within: within.html
     wrap: wrap.html
     writefile: writefile.html
+  events:
+    catalog-of-events: catalog-of-events.html
+    on: on.html
+    once: once.html
+    removelistener: removelistener.html
+    removealllisteners: removealllisteners.html
   utilities:
     _: _.html
     $: $.html
