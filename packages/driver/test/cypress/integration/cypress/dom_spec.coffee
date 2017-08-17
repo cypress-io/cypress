@@ -34,6 +34,7 @@ describe "src/cypress/dom", ->
         $(el).appendTo(cy.$$("body"))
 
     it "returns true if window and body > window height", ->
+      @add("<div style='height: 1000px;' />")
       win = cy.state("window")
 
       fn = => $dom.elIsScrollable(win)
