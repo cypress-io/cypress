@@ -22,6 +22,8 @@ comments: false
 - [x] We have all new {% url "docker examples" docker-images %} you can check out.
 - [x] The `cypress` npm package now checks the currently installed version on `install` and `run` and does not re-install Cypress if it is already installed. Addresses {% issue 396 %}.
 - [x] We've added a new `Cypress.Commands` interface to handle adding your own custom commands. Addresses {% issue 436 %}.
+- [x] We removed an artificial delay that was being set in between commands. This means test commands now run faster.
+- [x] You can now disable Cypress global exception handler. Addresses {% issue 254 %}
 
 **Breaking Changes:**
 
@@ -60,6 +62,8 @@ comments: false
 - [x] Fix issue where changing any spec file (renaming, adding, deleting) would remove the highlighted styling of the currently active spec file in the Desktop GUI. Fixes {% issue 547 %}.
 - [x] We now get the absolute paths of styles to use when displaying snapshots. This will fix situations where some stylesheets were improperly referenced during the snapshot, so did not display styles correctly. Fixes {% issue 525 %}.
 - [x] Fixed regression where multiple uses of {% url `cy.server()` server %} in a `before` hook was throwing an error. Fixes {% issue 80 %} and {% issue 510 %}.
+- [x] Fixed issue where commands would retry and potentially exceed their timeout values during page transitions. Fixes {% issue 594 %}
+- Fixed issue where server routes were lost after page load if not initiated by a {% url `cy.visit()` visit %} command. Fixes {% issue 177 %}
 
 **Misc:**
 
