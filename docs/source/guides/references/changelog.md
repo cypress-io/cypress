@@ -108,7 +108,7 @@ Fixed {% url "`.type()`" type %} not firing `input` event for {% url "React" htt
 - We renamed `CYPRESS_CI_KEY` TO `CYPRESS_RECORD_KEY`. This makes it clearer what this key actually does - and the fact that it can be run anywhere irrespective of CI. We still look for the old named key but will print a warning if we detect it.
 - We print a warning when using an older CLI tool version. Fixes {% issue 424 '#424' %}.
 - We've improved many of the error messages related to recording runs. Fixes {% issue 423 '#423' %}.
-- `cypress ci` has been deprecated. You now use {% url '`cypress run --record --key <record_key>`' command-line#cypress-run-record %}. The key you used to pass to `cypress ci` is the same key. We've simply consolidated these commands into just {% url '`cypress run`' command-line#cypress-run %} which makes it simpler and clearer. Their only difference is that passing `--record` to {% url '`cypress run`' command-line#cypress-run %} will **record** the build to our Dashboard. Fixes {% issue 417 '#417' %}.
+- `cypress ci` has been deprecated. You now use {% url '`cypress run --record --key <record_key>`' command-line#cypress-run %}. The key you used to pass to `cypress ci` is the same key. We've simply consolidated these commands into just {% url '`cypress run`' command-line#cypress-run %} which makes it simpler and clearer. Their only difference is that passing `--record` to {% url '`cypress run`' command-line#cypress-run %} will **record** the build to our Dashboard. Fixes {% issue 417 '#417' %}.
 
 # 0.18.8
 

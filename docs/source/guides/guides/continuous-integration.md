@@ -3,12 +3,12 @@ title: Continuous Integration
 comments: false
 ---
 
-Running Cypress tests in Continous Integration is as easy as running tests locally. You generally only need to do two things:
+Running Cypress tests in Continuous Integration is as easy as running tests locally. You generally only need to do two things:
 
-  1. **Install the CLI tools**
+  1. **Include Cypress package**
 
   ```shell
-  npm install -g cypress-cli
+  npm install cypress --save-dev
   ```
 
   2. **Run Cypress**
@@ -19,9 +19,9 @@ Running Cypress tests in Continous Integration is as easy as running tests local
 
 That's it! This will go out and {% url 'install Cypress' installing-cypress %}, and then run all your tests.
 
-For a comprehensive list of all the options you can pass to {% url '`cypress run`' command-line#cypress-run %}, {% url 'refer to the CLI documentation' command-line %}.
+For a comprehensive list of all the options you can pass to {% url '`cypress run`' command-line#cypress-run %}, {% url 'refer to the command line documentation' command-line %}.
 
-![travis-logs](/img/guides/travis-ci-logs-running-cypress.gif)
+{% img /img/guides/travis-ci-logs-running-cypress.gif "travis-logs" %}
 
 # What's Supported?
 
@@ -43,8 +43,6 @@ Depending on which CI provider you use, you may need a config file. You'll want 
 ***Example `.travis.yml` config file***
 
 ```yaml
-before_install:
-  - npm install -g cypress-cli
 script:
   - cypress run --record
 ```
@@ -54,9 +52,6 @@ script:
 ***Example `circle.yml` config file***
 
 ```yaml
-dependencies:
-  post:
-    - npm install -g cypress-cli
 test:
   override:
     - cypress run --record
@@ -99,7 +94,7 @@ Cypress can record your tests running and make them available in our {% url 'Das
 ***To record tests running:***
 
 1. {% url 'Setup your project to record' projects-dashboard#Set-up-a-Project-to-Record %}
-2. {% url 'Pass the `--record` flag to `cypress run`' command-line#cypress-run-record %}
+2. {% url 'Pass the `--record` flag to `cypress run`' command-line#cypress-run %}
 
 You can {% url 'read more about the Dashboard here' features-dashboard %}.
 
@@ -132,14 +127,6 @@ Typically you'd set this inside of your CI provider.
 ***TravisCI Environment Variable***
 
 ![Travis key environment variable](/img/guides/cypress-record-key-as-env-var-travis.png)
-
-## Version
-
-You can install a specific version of Cypress by setting the environment variable, `CYPRESS_VERSION`.
-
-***Set the version to an older version of Cypress in CI***
-
-![setting Cypress version in CI env var](/img/guides/cypress-version-as-environment-variable.png)
 
 ## Other Configuration Values
 

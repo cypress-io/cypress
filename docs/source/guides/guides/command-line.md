@@ -3,75 +3,35 @@ title: Command Line
 comments: false
 ---
 
-The CLI Tool is an [`npm package`](https://github.com/cypress-io/cypress-cli) that wraps the Desktop Application.
+{% note info %}
+# {% fa fa-graduation-cap %} What You'll Learn
 
-It provides a set of commands that can be used to:
-
-- Install Cypress
-- Run Cypress headlessly
-- Record your tests running
-- Output the current installed version
-
-{% note info  %}
-Installing the CLI tool allows you to programmatically install and run Cypress. This is commonly used when {% url 'running Cypress in CI' continuous-integration %}.
+- How to run Cypress headlessly from the command line
+- How to record your tests running from the command line
+- How to output the current installed version from the command line
 {% endnote %}
 
 # Installation
 
-This makes the `cypress` commands globally available from your command line.
+This makes the `cypress` commands available and {% url "installs the Cypress Desktop Application" installing-cypress %} matching your package's version.
 
 ```shell
-npm install -g cypress-cli
+npm install cypress
 ```
 
 # Available Commands
 
-## `cypress install`
-
-Install the **Cypress Desktop Application** to the default location for your Operating System.
-
-OS | Path
-:--- | :---
-Mac  | `/Applications/Cypress.app`
-Linux  | `/home/<user>/.cypress/Cypress`
-Windows  | {% issue 74 'not currently supported' %}
-
-***Install the latest version***
-
-```shell
-cypress install
-```
-
-***Install a specific version***
-```shell
-cypress install --cypress-version 0.13.0
-```
-
-Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. This is most useful when {% url 'running Cypress in CI' continuous-integration %}.
-
-![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
-
-## `cypress update`
-
-Update Cypress to the latest version. This is the as `cypress install`.
-
-```shell
-cypress update
-```
-
 ## `cypress run`
 
-Run Cypress headlessly without spawning a browser.
+Run Cypress headlessly without spawning a browser. You can use this command when working locally or when {% url 'running Cypress in CI' continuous-integration %}.
 
-You can use this command when working locally or when {% url 'running Cypress in CI' continuous-integration %}.
-
-Cypress checks to see that the Desktop Application is installed and automatically installs it prior to running (if necessary).
-
-***Run tests from current path***
+***Run tests***
 
 ```shell
-cypress run
+cypress run [project] [options]
 ```
+
+**Project**
 
 ***Run tests specifying path to the project***
 
@@ -79,7 +39,42 @@ cypress run
 cypress run /users/john/projects/TodoMVC
 ```
 
-***Run tests specifying a port (overrides values in `cypress.json`)***
+**Options**
+
+Option | Description
+------ |  ---------
+`-b`, `--browser`  | Specify name of browser to run tests in
+`-c`, `--config`  | Specify configuration
+`-e`, `--env`  | Specify environment variables
+`-h`, `--help`  | Output usage information
+`-k`, `--key`  | Specify your secret record key
+`-p`, `--port`  | Override default port
+`--record`  | Whether to record the test run
+`-r`, `--reporter`  | Specify a mocha reporter
+`-o`, `--reporter-options`  | Specify mocha reporter options
+`-s`, `--spec`  | A single test file to run instead of all tests
+
+***Run tests specifying browser***
+
+```shell
+cypress run --browser chrome
+```
+
+***Run tests specifying configuration***
+
+Read more about {% url 'environment variables' environment-variables %} and {% url 'configuration' configuration %}.
+
+```shell
+cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
+```
+
+***Run tests specifying environment variables***
+
+```shell
+cypress run --env host=api.dev.local
+```
+
+***Run tests specifying a port***
 
 ```shell
 cypress run --port 8080
@@ -103,32 +98,9 @@ cypress run --reporter-options mochaFile=result.xml,toConsole=true
 cypress run --spec cypress/integration/app_spec.js
 ```
 
-***Run tests specifying environment variables***
+***Run and record video of tests***
 
-```shell
-cypress run --env host=api.dev.local
-```
-
-***Run tests specifying configuration (overrides values in `cypress.json`)***
-
-```shell
-cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
-```
-{% note info  %}
-Read more about {% url 'environment variables' environment-variables %} and {% url 'configuration' configuration %}.
-{% endnote %}
-
-## `cypress run --record`
-
-Record video of tests running after {% url 'setting up your project to record' projects-dashboard#Set-up-a-Project-to-Record %}.
-
-{% note info  %}
-You'd typically record your runs in {% url 'Continuous Integration' continuous-integration %}, but you can also record when running locally.
-{% endnote %}
-
-After setting up your project you will be given a **Record Key**.
-
-***Run and record tests specifying record key***
+Record video of tests running after {% url 'setting up your project to record' projects-dashboard#Set-up-a-Project-to-Record %}. After setting up your project you will be given a **Record Key**.
 
 ```shell
 cypress run --record --key <record_key>
@@ -136,13 +108,13 @@ cypress run --record --key <record_key>
 
 If you set the **Record Key** as the environment variable `CYPRESS_RECORD_KEY`, you can omit the `--key` flag.
 
-***Set environment variable (typically in {% url 'Continuous Integration' continuous-integration %}).***
+**Set environment variable (typically in {% url 'Continuous Integration' continuous-integration %}).**
 
 ```shell
 export CYPRESS_RECORD_KEY=abc-key-123
 ```
 
-***Omit `--key` flag when env var set.***
+**Omit `--key` flag when env var set.**
 
 ```shell
 cypress run --record
@@ -154,21 +126,38 @@ You can {% url 'read more about recording runs here' projects-dashboard#Set-up-a
 
 Open the Cypress GUI application. This is the same thing as double-clicking the application.
 
-Arguments you pass to `cypress open` will automatically be applied to the project you open. These persist on all projects until you quit the Cypress Desktop Application.
+***Open Cypress***
 
-***Open Cypress projects specifying port (overrides values in `cypress.json`)***
+```shell
+cypress open [options]
+```
+
+**Options**
+
+Options passed to `cypress open` will automatically be applied to the project you open. These persist on all projects until you quit the Cypress Desktop Application. These options will also override values in `cypress.json`
+
+Option | Description
+------ | ---------
+`-c`, `--config`  | Specify configuration
+`-d`, `--detached` | Open Cypress in detached mode
+`-e`, `--env`  | Specify environment variables
+`-h`, `--help`  | Output usage information
+`-p`, `--port`  | Override default port
+
+
+***Open Cypress projects specifying port***
 
 ```shell
 cypress open --port 8080
 ```
 
-***Open Cypress projects specifying configuration (overrides values in `cypress.json`)***
+***Open Cypress projects specifying configuration***
 
 ```shell
 cypress open --config pageLoadTimeout=100000,watchForFileChanges=false
 ```
 
-***Open Cypress projects specifying environment variables (overrides values in `cypress.json`)***
+***Open Cypress projects specifying environment variables***
 
 ```shell
 cypress open --env host=api.dev.local
@@ -191,7 +180,7 @@ Cypress was found at this path.
 
 ## `cypress verify`
 
-Verify that the Cypress application is found.
+Verify that Cypress is installed correctly and executable.
 
 ```shell
 cypress verify
@@ -205,7 +194,7 @@ Cypress application is valid and should be okay to run: /Applications/Cypress.ap
 
 ## `cypress version`
 
-Output both the version of the CLI Tool and the installed Cypress application.
+Output both the version of the the installed Cypress application.
 
 ```shell
 cypress version
@@ -214,6 +203,5 @@ cypress version
 ***Example Output***
 
 ```shell
-Cypress CLI: 0.13.1
-Cypress App: 0.19.2
+Cypress App: 0.20.0
 ```

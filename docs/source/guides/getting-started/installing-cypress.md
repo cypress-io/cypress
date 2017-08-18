@@ -7,7 +7,6 @@ comments: false
 # {% fa fa-graduation-cap %} What You'll Learn
 
 - How to install the Cypress Desktop Application
-- How to install the CLI tool
 
 {% endnote %}
 
@@ -27,33 +26,25 @@ Mac  | `/Applications/Cypress.app`
 Linux  | `/home/<user>/.cypress/Cypress`
 Windows  | {% issue 74 'not currently supported' %}
 
-There are no dependencies to install the Desktop Application, although if you want to {% url "use Cypress from the Command Line" https://github.com/cypress-io/cypress-cli %} you will need to have `node` installed.
+There are no dependencies to install the Desktop Application, although if you want to {% url "use Cypress from the command line" https://www.npmjs.com/package/cypress %} you will need to have {% url "`node`" https://nodejs.org %} installed.
 
 # Installing
 
 You can install Cypress in 2 different ways:
 
-* {% url "Cypress CLI Tool" command-line %}
+* {% url "Install Cypress via npm" command-line %}
 * {% urlHash "Direct Download" Direct-Download %}
 
-## {% fa fa-terminal %} Command Line Tool
+## {% fa fa-terminal %} Install Cypress via npm
 
-**Install the Cypress CLI tool**
-
-```shell
-npm install -g cypress-cli
-```
-
-**Install the Desktop Cypress app**
+Installing Cypress using npm allows you to install Cypress per project. This also allows you to maintain specific versions of Cypress per project.
 
 ```shell
-cypress install
+npm install cypress
 ```
-
-![cypress-cli](/img/guides/install-cypress-in-command-line.gif)
 
 {% note info %}
-The Cypress CLI Tool contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
+The cypress npm package contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
 {% endnote %}
 
 ## {% fa fa-download %} Direct Download
