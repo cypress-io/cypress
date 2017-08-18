@@ -13,25 +13,16 @@ Some commands have not been implemented in Cypress. Some commands will be implem
 
 **Workaround**
 
-Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to trigger the event or execute the action in the DOM.
+Oftentimes you can use {% url `.trigger()` trigger %}, {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to trigger the event or execute the action in the DOM.
+
+**Example of triggering `contextmenu` event**
+```javascript
+cy.get('#nav').first().trigger('contextmenu')
+```
 
 **Example of right clicking on an element using jQuery**
 ```javascript
 cy.get('#nav').first().invoke('trigger', 'contextmenu')
-```
-
-**Example of right clicking on an element without jQuery**
-```javascript
-// need to create the event to later dispatch
-var e = new Event('contextmenu', {bubbles: true, cancelable: true})
-// set coordinates of click
-e.clientX = 451
-e.clientY = 68
-
-cy
-  .get('#nav').first().then(function($el) {
-    $el[0].dispatchEvent(e)
-  })
 ```
 
 ## Hover
@@ -40,26 +31,7 @@ cy
 
 Sometimes an element has specific logic on hover. Maybe the element doesn't even display to be clickable until you hover over a specific element.
 
-**Workaround**
-
-Oftentimes you can use {% url `.invoke()` invoke %} or {% url `cy.wrap()` wrap %} to show the element before you perform the action.
-
-**Example of showing an element in order to perform action**
-```javascript
-cy.get('.content').invoke('show').click()
-```
-
-You can also force the action to be performed on the element regardless of whether the element is visible or not.
-
-**Example of clicking on a hidden element**
-```javascript
-cy.get('.content').click({force: true})
-```
-
-**Example of checking a hidden element**
-```javascript
-cy.get('.checkbox').check({force: true})
-```
+{% "Check out document on `cy.hover()` for workarounds." hover %}
 
 # Difficult use cases
 
@@ -75,7 +47,7 @@ This is actively being worked on in Cypress and you'll first see support for sam
 
 **Workaround**
 
-Sit tight, comment on the issue so we know you care about this support, and be patient.
+Sit tight, {% issue 136 'comment on the issue' %} so we know you care about this support, and be patient.
 
 ## OAuth
 
@@ -87,7 +59,7 @@ Likely we will be able to support server side oauth redirects, but for client si
 
 [Come into Gitter](https://gitter.im/cypress-io/cypress) and talk to us about what you're trying to do. We'll tell you if you're able to mock this and how to do it.
 
-## window.fetch routing and stubbing
+## `window.fetch` routing and stubbing
 
 {% fa fa-github %} {% issue 95 'Issue #95' %}
 
@@ -97,4 +69,4 @@ While we currently provide things like the stack trace and initiator line for XH
 
 **Workaround**
 
-Sit tight, comment on the issue so we know you care about this support, and be patient.
+Sit tight, {% issue 95 'comment on the issue' %} so we know you care about this support, and be patient.
