@@ -6,9 +6,6 @@ describe "e2e only spec", ->
   it "failing", ->
     e2e.exec(@, {
       spec: "only_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })
-    .get("stdout")
-    .then (stdout) ->
-      expect(stdout).to.include("1 passing")
-      expect(stdout).not.to.include("failing")

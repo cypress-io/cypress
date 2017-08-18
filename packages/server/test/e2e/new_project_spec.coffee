@@ -18,10 +18,10 @@ describe "e2e new project", ->
     .then ->
       throw new Error("support folder should not exist")
     .catch =>
-      e2e.start(@, {
+      e2e.exec(@, {
         project: noScaffoldingPath
+        snapshot: true
         expectedExitCode: 0
       })
       .then ->
         fs.statAsync(supportPath)
-

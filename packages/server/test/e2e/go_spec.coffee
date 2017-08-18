@@ -20,7 +20,8 @@ describe "e2e go", ->
     ## there have been regressions in electron which would
     ## otherwise cause these tests to fail
 
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "go_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

@@ -12,7 +12,8 @@ describe "e2e images", ->
     ## this tests that images are correctly proxied and that we are not
     ## accidentally modifying their bytes in the stream
 
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "images_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })
