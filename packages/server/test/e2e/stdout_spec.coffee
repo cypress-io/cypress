@@ -25,43 +25,22 @@ describe "e2e stdout", ->
   it "displays errors from failures", ->
     e2e.exec(@, {
       port: 2020
+      snapshot: true
       spec: "stdout_failing_spec.coffee"
       expectedExitCode: 3
     })
-    .get("stdout")
-    .then (stdout) ->
-      stdout = normalize(stdout)
-
-      contents1 = Fixtures.get("server/expected_stdout_failures.txt")
-      contents2 = Fixtures.get("server/expected_stdout_failures_outro.txt")
-
-      expect(stdout).to.include(contents1)
-      expect(stdout).to.include(contents2)
-      expect(stdout).to.include("3) stdout_failing_spec passing hook is failing:")
 
   it "displays errors from exiting early due to bundle errors", ->
     e2e.exec(@, {
       spec: "stdout_exit_early_failing_spec.coffee"
+      snapshot: true
       expectedExitCode: 1
     })
-    .get("stdout")
-    .then (stdout) ->
-      stdout = normalize(stdout)
-
-      contents = Fixtures.get("server/expected_stdout_bundle_failures.txt")
-
-      expect(stdout).to.include(contents)
 
   it "does not duplicate suites or tests between visits", ->
     e2e.exec(@, {
       spec: "stdout_passing_spec.coffee"
       timeout: 120000
+      snapshot: true
       expectedExitCode: 0
     })
-    .get("stdout")
-    .then (stdout) ->
-      stdout = normalize(stdout)
-
-      contents = Fixtures.get("server/expected_stdout_passing.txt")
-
-      expect(stdout).to.include(contents)

@@ -9,9 +9,11 @@ human        = require("human-interval")
 morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
+snapshot     = require("snap-shot-it")
 Fixtures     = require("./fixtures")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
+stdout       = require("#{root}../lib/stdout")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 settings     = require("#{root}../lib/util/settings")
@@ -155,6 +157,12 @@ module.exports = {
 
     new Promise (resolve, reject) ->
       sp = cp.spawn "node", args, {env: _.omit(env, "CYPRESS_DEBUG")}
+
+      ## pipe these to our current process
+      ## so we can see them in the terminal
+      sp.stdout.pipe(process.stdout)
+      sp.stderr.pipe(process.stderr)
+
       sp.stdout.on "data", (buf) ->
         stdout += buf.toString()
       sp.stderr.on "data", (buf) ->
@@ -166,6 +174,14 @@ module.exports = {
             expect(expected).to.eq(code)
           catch err
             return reject(err)
+
+        ## snapshot the stdout!
+        if options.snapshot
+          try
+            str = normalizeStdout(stdout)
+            snapshot(str)
+          catch err
+            reject(err)
 
         resolve({
           code:   code

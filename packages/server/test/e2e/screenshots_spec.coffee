@@ -39,9 +39,10 @@ describe "e2e screenshots", ->
     ## and are also generated automatically on failure with
     ## the test title as the file name
 
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "screenshots_spec.coffee"
       expectedExitCode: 4
+      snapshot: true
     })
     .then ->
       screenshot1 = path.join(e2ePath, "cypress", "screenshots", "black.png")
