@@ -23,6 +23,8 @@ Some commands in Cypress are for interacting with the DOM such as:
 - {% url `.check()` check %}
 - {% url `.uncheck()` uncheck %}
 - {% url `.select()` select %}
+- {% url `.scrollTo()` scrollto %}
+- {% url `.scrollIntoView()` scrollintoview %}
 
 These commands simulate a user interacting with your application. Under the hood Cypress fires the events a browser would fire thus causing your application's event bindings to fire.
 
