@@ -6,7 +6,8 @@ comments: false
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- How to install the Cypress Desktop Application
+- How to install Cypress via `npm`.
+- How to install Cypress via direct download.
 
 {% endnote %}
 
@@ -30,10 +31,7 @@ There are no dependencies to install the Desktop Application, although if you wa
 
 # Installing
 
-You can install Cypress in 2 different ways:
-
-* {% url "Install Cypress via npm" command-line %}
-* {% urlHash "Direct Download" Direct-Download %}
+You can install Cypress in a few different ways:
 
 ## {% fa fa-terminal %} Install Cypress via npm
 
@@ -43,19 +41,15 @@ Installing Cypress using npm allows you to install Cypress per project. This als
 npm install cypress
 ```
 
-{% note info %}
-The cypress npm package contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
-{% endnote %}
+The {% url "cypress npm package" https://www.npmjs.com/package/cypress %} contains many commands such as `cypress run` and `cypress verify`. See the {% url "Command Line Docs" command-line %}.
 
 ## {% fa fa-download %} Direct Download
 
 You can {% url "download Cypress directly here" http://download.cypress.io/desktop %}.
 
-## Continuous Integration
+## {% fa fa-refresh %} Continuous Integration
 
-{% note warning "I'm trying to install Cypress in CI" %}
 Please read our {% url 'Continuous Integration' continuous-integration %} docs for help installing Cypress in CI. When running in linux you'll need to install some {% url 'system dependencies' continuous-integration#Dependencies %}.
-{% endnote %}
 
 # Logging In
 
@@ -63,7 +57,7 @@ After installing, you will need to log in to Cypress. Logging in currently requi
 
 ***To Login:***
 
-- Open the Cypress App -- just double click the app from your OS application's folder.
+- Open the Cypress App -- just double click the app from your OS application's folder or use the {% url "`cypress open`" command-line#cypress-open %} command.
 - Click **Log In with GitHub**.
 - Authorize GitHub access to your account.
 
