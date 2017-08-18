@@ -676,7 +676,7 @@ Fixed {% url "`.type()`" type %} not firing `input` event for {% url "React" htt
 
 **Notes:**
 
-- Updating through the Desktop App in **Linux** does not work. To update please run {% url '`cypress install`' command-line#cypress-install %} from the command line.
+- Updating through the Desktop App in **Linux** does not work. To update please run {% url '`cypress install`' command-line %} from the command line.
 - We are still updating the docs to reflect all of these changes.
 - All users must *LOG IN AGAIN* and re-add their projects. Sorry, we've changed the way we store local data.
 
@@ -925,7 +925,7 @@ More Info:
 **Summary:**
 
 - This update represents mostly a lot of internal structure changes. We swapped out the underlying Desktop architecture and refactored all of the backend code to prepare for an open-source release.
-- If you choose to install Cypress from the {% url 'CLI Tool' command-line %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' command-line#cypress-install %}. You don't need to do anything if you update from within the Desktop GUI itself.
+- If you choose to install Cypress from the {% url 'CLI Tool' command-line %} you must update to the latest version `0.9.1`. Just run `npm install -g cypress` and then you can run {% url '`cypress install`' command-line %}. You don't need to do anything if you update from within the Desktop GUI itself.
 
 **Features:**
 

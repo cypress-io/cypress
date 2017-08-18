@@ -31,7 +31,7 @@ cy.get('#nav').first().invoke('trigger', 'contextmenu')
 
 Sometimes an element has specific logic on hover. Maybe the element doesn't even display to be clickable until you hover over a specific element.
 
-{% "Check out document on `cy.hover()` for workarounds." hover %}
+{% url "Check out document on `cy.hover()` for workarounds." hover %}
 
 # Difficult use cases
 
