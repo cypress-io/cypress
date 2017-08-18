@@ -1,14 +1,14 @@
 ---
-title: Cypress.Dom
+title: Cypress.dom
 comments: false
 ---
 
-`Cypress.Dom.isHidden()` allows you to work with logic that determines whether an element is hidden.
+`Cypress.dom.isHidden()` allows you to work with logic that determines whether an element is hidden.
 
 # Syntax
 
 ```javascript
-Cypress.Dom.isHidden(element)
+Cypress.dom.isHidden(element)
 ```
 
 ## Usage
@@ -16,13 +16,13 @@ Cypress.Dom.isHidden(element)
 **{% fa fa-check-circle green %} Correct Usage**
 
 ```javascript
-Cypress.Dom.isHidden('form')
+Cypress.dom.isHidden('form')
 ```
 
 **{% fa fa-exclamation-triangle red %} Incorrect Usage**
 
 ```javascript
-cy.Dom.isHidden('form')  // Errors, cannot be chained off 'cy'
+cy.dom.isHidden('form')  // Errors, cannot be chained off 'cy'
 ```
 
 # Examples
@@ -31,10 +31,10 @@ cy.Dom.isHidden('form')  // Errors, cannot be chained off 'cy'
 
 **Returns a boolean indicating whether an element is hidden.**
 
-Cypress internally uses this method *everywhere* to figure out whether an element is hidden.
+Cypress internally uses this method *everywhere* to figure out whether an element is hidden, {% url "mostly for actionability" interacting-with-elements %}.
 
 ```javascript
 var $el = $("#modal")
 
-Cypress.Dom.isHidden($el) // => false
+Cypress.dom.isHidden($el) // => false
 ```
