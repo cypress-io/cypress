@@ -591,7 +591,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
-      errors.createUncaughtException.apply(null, arguments)
+      err = errors.createUncaughtException.apply(null, arguments)
+
+      if runnable = state("runnable")
+        ## we're using an explicit done callback here
+        if d = state("done")
+          d(err)
+
+        if r = state("reject")
+          return r(err)
+
+      ## else pass the error along
+      return err
 
     onUncaughtException: ->
       runnable = state("runnable")
