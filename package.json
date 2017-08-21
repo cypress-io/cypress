@@ -27,7 +27,7 @@
     "precommit": "lint-staged",
     "precommit-lint": "eslint --fix --rule 'no-only-tests/no-only-tests: 2'",
     "prepush": "npm run stop-only",
-    "stop-only": "stop-only packages --exclude-dir .cy --exclude-dir .projects --exclude-dir node_modules --exclude-dir dist --exclude-dir dist-test --exclude-dir fixtures --exclude-dir lib",
+    "stop-only": "stop-only packages --exclude-dir .cy --exclude-dir .projects --exclude-dir node_modules --exclude-dir dist --exclude-dir dist-test --exclude-dir fixtures --exclude-dir lib --exclude-dir bower_components",
     "bump": "gulp bump",
     "binary-build": "node ./scripts/binary.js build",
     "binary-zip": "node ./scripts/binary.js zip",
