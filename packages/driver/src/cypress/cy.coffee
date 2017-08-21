@@ -237,18 +237,43 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## store the error on state now
     state("error", err)
 
-    Cypress.action("cy:fail", err, state("runnable"))
+    finish = (err) ->
+      ## if we have an async done callback
+      ## we have an explicit (done) callback and
+      ## we aren't attached to the cypress command queue
+      ## promise chain and throwing the error would only
+      ## result in an unhandled rejection
+      if d = state("done")
+        ## invoke it with err
+        return d(err)
 
-    ## if we are an async runnable that means
-    ## we have an explicit (done) callback and
-    ## we aren't attached to the cypress command queue
-    ## promise chain and throwing the error would only
-    ## result in an unhandled rejection
-    return null if runnable.async
+      ## else we're connected to the promise chain
+      ## and need to throw so this bubbles up
+      throw err
 
-    ## else we're connected to the promise chain
-    ## and need to throw so this bubbles up
-    throw err
+    ## if we have a "fail" handler
+    ## 1. catch any errors it throws and fail the test
+    ## 2. otherwise swallow any errors
+    ## 3. but if the test is not ended with a done()
+    ##    then it should fail
+    ## 4. and tests without a done will pass
+
+    ## if we dont have a "fail" handler
+    ## 1. callback with state("done") when async
+    ## 2. throw the error for the promise chain
+
+    try
+      ## collect all of the callbacks for 'fail'
+      rets = Cypress.action("cy:fail", err, state("runnable"))
+    catch err2
+      ## and if any of these throw synchronously immediately error
+      finish(err2)
+
+    ## bail if we had callbacks attached
+    return if rets.length
+
+    ## else figure out how to finisht this failure
+    return finish(err)
 
   cy = {
     id: _.uniqueId("cy")
@@ -589,6 +614,21 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindowListeners(contentWindow)
 
+    onSpecWindowUncaughtException: ->
+      ## create the special uncaught exception err
+      err = errors.createUncaughtException.apply(null, arguments)
+
+      if runnable = state("runnable")
+        ## we're using an explicit done callback here
+        if d = state("done")
+          d(err)
+
+        if r = state("reject")
+          return r(err)
+
+      ## else pass the error along
+      return err
+
     onUncaughtException: ->
       runnable = state("runnable")
 
@@ -664,6 +704,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               doneEarly()
 
               originalDone(err)
+
+            ## store this done property
+            ## for async tests
+            state("done", done)
 
           ret = fn.apply(@, arguments)
 

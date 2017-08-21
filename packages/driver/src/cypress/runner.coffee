@@ -433,7 +433,7 @@ afterEachFailed = (Cypress, test, err) ->
 
   Cypress.action("runner:test:end", wrap(test))
 
-hookFailed = (hook, err, hookName, getTestById) ->
+hookFailed = (hook, err, hookName, getTestById, setTest) ->
   ## finds the test by returning the first test from
   ## the parent or looping through the suites until
   ## it finds the first test
@@ -443,6 +443,11 @@ hookFailed = (hook, err, hookName, getTestById) ->
   test.duration = hook.duration
   test.hookName = hookName
   test.failedFromHook = true
+
+  ## make sure we set this test as the current
+  ## else its possible that our TEST_AFTER_RUN_EVENT
+  ## will never fire if this failed in a before hook
+  setTest(test)
 
   if hook.alreadyEmittedMocha
     ## TODO: won't this always hit right here???
@@ -577,22 +582,55 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     ## it means that this runnable likely failed due to
     ## a double done(err) callback, and we need to fire
     ## this again!
+    debugger
     if fired(TEST_AFTER_RUN_EVENT, runnable)
       fire(TEST_AFTER_RUN_EVENT, runnable, Cypress)
 
     if isHook
-      ## TODO: why do we need to do this???
-      hookFailed(runnable, runnable.err, hookName, getTestById)
+      ## if a hook fails (such as a before) then the test will never
+      ## get run and we'll need to make sure we set the test so that
+      ## the TEST_AFTER_RUN_EVENT fires correctly
+      hookFailed(runnable, runnable.err, hookName, getTestById, setTest)
 
-create = (mocha, Cypress, cy) ->
+create = (specWindow, mocha, Cypress, cy) ->
   _id = 0
 
   _runner = mocha.getRunner()
   _runner.suite = mocha.getRootSuite()
 
-  ## this is used in tests since we provide
-  ## the tests immediately
-  # normalizeAll(_runner.suite, {}, grep()) if _runner.suite
+  specWindow.onerror = ->
+    debugger
+    err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
+
+    ## err will not be returned if cy can associate this
+    ## uncaught exception to an existing runnable
+    return true if not err
+
+    todoMsg = ->
+      if not Cypress.config("isTextTerminal")
+        "Check your console for the stack trace or click this message to see where it originated from."
+
+    append = ->
+      _.chain([
+        "Cypress could not associate this error to any specific test.",
+        "We dynamically generated a new test to display this failure.",
+        todoMsg()
+      ])
+      .compact()
+      .join("\n\n")
+
+    ## else  do the same thing as mocha here
+    err.message += "\n\n" + append()
+
+    throwErr = ->
+      throw err
+
+    ## create a runnable to associate for the failure
+    runnable = mocha.createRootTest("An uncaught error was detected outside of a test", throwErr)
+
+    ## return undefined so the browser does its default
+    ## uncaught exception behavior (logging to console)
+    return undefined
 
   ## hold onto the _runnables for faster lookup later
   _stopped = false

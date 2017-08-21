@@ -9,7 +9,8 @@ describe "e2e viewport", ->
   })
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "viewport_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

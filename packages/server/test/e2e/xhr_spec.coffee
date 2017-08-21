@@ -27,7 +27,8 @@ describe "e2e xhr", ->
   })
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "xhr_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

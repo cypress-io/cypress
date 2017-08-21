@@ -149,7 +149,7 @@ class $Cypress
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
-    @runner = $Runner.create(@mocha, @, @cy)
+    @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
     @Commands = $Commands.create(@, @cy, @state, @config, @log)
@@ -306,7 +306,7 @@ class $Cypress
 
       when "cy:fail"
         ## comes from cypress errors fail()
-        @emit("fail", args...)
+        @emitMap("fail", args...)
 
       when "cy:stability:changed"
         @emit("stability:changed", args...)

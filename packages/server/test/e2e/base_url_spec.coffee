@@ -13,8 +13,9 @@ describe "e2e baseUrl", ->
     })
 
     it "passes", ->
-      e2e.start(@, {
+      e2e.exec(@, {
         spec: "base_url_spec.coffee"
+        snapshot: true
         expectedExitCode: 0
       })
 
@@ -30,7 +31,8 @@ describe "e2e baseUrl", ->
     })
 
     it "passes", ->
-      e2e.start(@, {
+      e2e.exec(@, {
         spec: "base_url_spec.coffee"
+        snapshot: true
         expectedExitCode: 0
       })
