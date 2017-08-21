@@ -256,9 +256,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     4) quux2 fails
     ✓ quux3 passes
     ✓ quux4 passes
+    ✓ quux5 passes
+    ✓ quux6 passes
 
 
-  2 passing (123ms)
+  4 passing (123ms)
   4 failing
 
   1) foo baz fails:
@@ -282,8 +284,8 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Finished)
 
-  - Tests:           6
-  - Passes:          2
+  - Tests:           8
+  - Passes:          4
   - Failures:        4
   - Pending:         0
   - Duration:        10 seconds

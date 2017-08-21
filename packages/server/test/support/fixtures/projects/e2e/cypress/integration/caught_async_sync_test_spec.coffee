@@ -39,3 +39,16 @@ describe "foo", ->
     ## nothing throws in the fail callback
     cy.wrap(null).then ->
       foo.bar()
+
+  it "quux5 passes", ->
+    cy.on "fail", ->
+
+    ## no commands fail handler should pass
+    foo.bar()
+
+  it "quux6 passes", (done) ->
+    cy.on "fail", ->
+      done()
+
+    ## no commands fail async handler should pass
+    foo.bar()
