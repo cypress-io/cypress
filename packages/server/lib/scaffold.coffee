@@ -95,7 +95,6 @@ module.exports = {
 
     ## skip if user has explicitly set supportFile
     return Promise.resolve() if not config.supportFile or not isDefault(config, "supportFile")
-    # return Promise.resolve() if not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
       log "copying defaults and commands to #{folder}"
