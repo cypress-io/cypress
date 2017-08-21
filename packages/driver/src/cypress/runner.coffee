@@ -482,7 +482,6 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     Cypress.action("runner:suite:end", wrap(suite))
 
   _runner.on "hook", (hook) ->
-    debugger
     hookName = getHookName(hook)
 
     ## mocha incorrectly sets currentTest on before all's.

@@ -306,7 +306,7 @@ class $Cypress
 
       when "cy:fail"
         ## comes from cypress errors fail()
-        @emit("fail", args...)
+        @emitMap("fail", args...)
 
       when "cy:stability:changed"
         @emit("stability:changed", args...)

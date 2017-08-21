@@ -24,9 +24,16 @@ describe "e2e uncaught errors", ->
       expectedExitCode: 1
     })
 
-  it.only "failing4", ->
+  it "failing4", ->
     e2e.exec(@, {
       spec: "uncaught_during_hook_spec.coffee"
       snapshot: true
       expectedExitCode: 1
+    })
+
+  it "failing5", ->
+    e2e.exec(@, {
+      spec: "caught_async_sync_test_spec.coffee"
+      snapshot: true
+      expectedExitCode: 4
     })
