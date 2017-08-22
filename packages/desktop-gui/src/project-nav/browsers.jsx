@@ -25,7 +25,7 @@ export default class Browsers extends Component {
           keyProperty='name'
           browserState={project.browserState}
         />
-    </ul>
+      </ul>
     )
   }
 
@@ -70,9 +70,9 @@ export default class Browsers extends Component {
     return (
       <span className={browser.name}>
         <i className={`fa fa-${icon}`}></i>{' '}
-        { prefixText }{' '}
-        { browser.displayName }{' '}
-        { browser.majorVersion }
+        {prefixText}{' '}
+        {browser.displayName}{' '}
+        {browser.majorVersion}
         {this._info(browser)}
       </span>
     )

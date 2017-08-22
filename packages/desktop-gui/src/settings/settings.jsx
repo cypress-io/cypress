@@ -73,9 +73,9 @@ class Settings extends Component {
           </tbody>
         </table>
         <pre className='config-vars'>
-          { '{' }
-          { this._display(config) }
-          { '}' }
+          {'{'}
+          {this._display(config)}
+          {'}'}
         </pre>
       </Panel>
     )
@@ -128,8 +128,8 @@ class Settings extends Component {
         <span className='nested'>
           <span className='key'>{key}</span>
           <span className='colon'>:</span>{' '}
-          { '{' }
-          { this._display(value) }
+          {'{'}
+          {this._display(value)}
         </span>
         <span className='line'>{'}'}{this._getComma(hasComma)}</span>
         <br />
@@ -193,7 +193,7 @@ class Settings extends Component {
               <pre><code>cypress run --record --key {this.state.keys[0].id}</code></pre>
             </p>
           </div>
-        : null}
+          : null}
         {this._recordKeys()}
         <p className='text-muted manage-btn'>
           <a href='#' onClick={this._openAdminKeys}>
