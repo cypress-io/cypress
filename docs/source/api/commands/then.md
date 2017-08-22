@@ -50,8 +50,10 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 ***The element `input` is yielded***
 
 ```javascript
-cy.get('form').find('input').then(($input) => {
-  // work with $input here
+cy.get('button').then(($btn) => {
+  var cls = $btn.class()
+
+  cy.wrap($btn).click().should('not.have.class', cls)
 })
 ```
 
@@ -62,18 +64,17 @@ cy.get('form').find('input').then(($input) => {
 ```javascript
 cy.then(() => {
   return {id: 123}
-})
-.then((obj) =>{
-  // subject is now the obj {id: 123}
-  expect(obj.id).to.eq(123) // true
-})
+  })
+  .then((obj) =>{
+    // subject is now the obj {id: 123}
+    expect(obj.id).to.eq(123) // true
+  })
 ```
 
 ***Returning `null` or `undefined` will not modify the yielded subject***
 
 ```javascript
-cy
-  .get('form').then(($form) => {
+cy.get('form').then(($form) => {
     console.log('form is:', $form)
     // undefined is returned here, but $form will be
     // yielded to allow for continued chaining
