@@ -606,7 +606,7 @@ module.exports = {
 
       Cypress detected that an uncaught error was thrown from a cross origin script.
 
-      We cannot provide you the stack trace, line number, or file where this error occured.
+      We cannot provide you the stack trace, line number, or file where this error occurred.
 
       Check your Developer Tools Console for the actual error - it should be printed there.
 
@@ -615,7 +615,7 @@ module.exports = {
       https://on.cypress.io/cross-origin-script-error
     """
     error_in_hook: (obj) ->
-      msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+      msg = "Because this error occurred during a '#{obj.hookName}' hook we are skipping "
 
       if t = obj.parentTitle
         msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
@@ -729,7 +729,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {{arg}}"
     invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: '{{alias}}' did not match a route."
     invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
-    timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occured."
+    timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occurred."
 
   window:
     iframe_doc_undefined: "The remote iframe's document is undefined"

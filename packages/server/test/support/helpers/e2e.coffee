@@ -47,6 +47,8 @@ normalizeStdout = (str) ->
   .split("\n")
   .map(replaceStackTraceLines)
   .join("\n")
+  .split("2560x1440") ## normalize resolutions
+  .join("1280x720")
   .split(e2ePath)
   .join("/foo/bar/.projects/e2e")
 
@@ -157,7 +159,7 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    if browser = env.BROWSER
+    if browser = (env.BROWSER or options.browser)
       args.push("--browser=#{browser}")
 
     return args
