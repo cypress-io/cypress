@@ -178,11 +178,21 @@ dom = {
 
         return false
 
-  canClipContent: ($el) ->
-    @elIsPositioned($el) and @elHasClippableOverflow($el)
+  canClipContent: ($el, $ancestor) ->
+    ## can't clip without clippable overflow
+    if not @elHasClippableOverflow($ancestor)
+      return false
 
-  canBeClippedByAncestor: ($el, $ancestor) ->
-    @elHasPositionRelative($el) and @elHasClippableOverflow($ancestor)
+    ## even if overflow is clippable, if an ancestor of the ancestor is the
+    ## element's offset parent, the ancestor will not clip the element
+    ## unless the element is position is position relative
+    if not @elHasPositionRelative($el) and @isAncestor($ancestor, $($el[0].offsetParent))
+      return false
+
+    return true
+
+  isAncestor: ($el, $maybeAncestor) ->
+    $el.parents().index($maybeAncestor) >= 0
 
   elDescendentsHavePositionFixedOrAbsolute: ($parent, $child) ->
     ## create an array of all elements between $parent and $child
@@ -218,7 +228,7 @@ dom = {
 
     elProps = positionProps($el, adjustments)
 
-    if @canClipContent($ancestor) or @canBeClippedByAncestor($el, $ancestor)
+    if @canClipContent($el, $ancestor)
       ancestorProps = positionProps($ancestor)
 
       ## target el is out of bounds
