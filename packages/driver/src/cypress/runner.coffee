@@ -601,7 +601,6 @@ create = (specWindow, mocha, Cypress, cy) ->
   _runner.suite = mocha.getRootSuite()
 
   specWindow.onerror = ->
-    debugger
     err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
 
     ## err will not be returned if cy can associate this

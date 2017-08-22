@@ -196,7 +196,7 @@ module.exports = {
         stderr += buf.toString()
       sp.on "error", reject
       sp.on "exit", (code) ->
-        if expected = options.expectedExitCode
+        if (expected = options.expectedExitCode)?
           try
             expect(expected).to.eq(code)
           catch err
