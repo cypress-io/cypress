@@ -39,7 +39,7 @@ class Login extends Component {
               <i className='fa fa-spinner fa-spin'></i>{' '}
               Logging in...
             </div>
-          : null }
+            : null}
           <a className='helper-docs-link' onClick={this._openHelp}>
             <i className='fa fa-question-circle'></i>{' '}
             Need help?
@@ -106,7 +106,7 @@ class Login extends Component {
               Why am I not authorized?
             </a>
           </p>
-        : null}
+          : null}
       </div>
     )
   }

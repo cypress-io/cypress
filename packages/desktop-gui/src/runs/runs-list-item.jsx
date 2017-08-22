@@ -57,7 +57,7 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             <i className='fa fa-clock-o'></i>{' '}
-            { moment(run.createdAt).fromNow() }
+            {moment(run.createdAt).fromNow()}
           </div>
         </div>
         <div className='row-column-wrapper'>
@@ -78,17 +78,17 @@ export default class RunsListItem extends Component {
               // only display something if we have all of the instances back
               this._allInstancesArePresent() ?
               // do we have multiple OS's ?
-              this._moreThanOneInstance() && this._osLength() > 1 ?
-                <span>
-                  <i className='fa fa-fw fa-desktop'></i>{' '}
-                  {this._osLength()}
-                </span> :
-                // or did we only actual run it on one OS
-                <span>
-                  <i className={`fa fa-fw fa-${(this._osIcon())}`}></i>{' '}
-                  {this._osDisplay()}
-                </span> :
-              null
+      this._moreThanOneInstance() && this._osLength() > 1 ?
+        <span>
+          <i className='fa fa-fw fa-desktop'></i>{' '}
+          {this._osLength()}
+        </span> :
+        // or did we only actual run it on one OS
+        <span>
+          <i className={`fa fa-fw fa-${(this._osIcon())}`}></i>{' '}
+          {this._osDisplay()}
+        </span> :
+                null
             }
           </div>
         </div>
@@ -98,16 +98,16 @@ export default class RunsListItem extends Component {
               // only display something if we have all of the instances back
               this._allInstancesArePresent() ?
                 // do we have multiple browsers ?
-                this._moreThanOneInstance() && this._browsersLength() > 1 ?
-                  <span>
-                    <i className='fa fa-fw fa-globe'></i>{' '}
-                    {this._browsersLength()}
-                  </span> :
-                  // or did we only actual run it on one browser
-                  <span>
-                    <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
-                    {this._browserDisplay()}
-                  </span> :
+      this._moreThanOneInstance() && this._browsersLength() > 1 ?
+        <span>
+          <i className='fa fa-fw fa-globe'></i>{' '}
+          {this._browsersLength()}
+        </span> :
+        // or did we only actual run it on one browser
+        <span>
+          <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
+          {this._browserDisplay()}
+        </span> :
                 null
             }
           </div>
@@ -118,11 +118,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-circle-o-notch'></i>{' '}
                 <span>
-                  {
-                    run.totalPending ?
-                      run.totalPending :
-                      '-'
-                  }
+                  {run.totalPending ? run.totalPending : '-'}
                 </span>
               </div> :
               null
@@ -134,11 +130,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-check green'></i>{' '}
                 <span>
-                  {
-                    run.totalPasses ?
-                      run.totalPasses :
-                      '-'
-                  }
+                  {run.totalPasses ? run.totalPasses : '-'}
                 </span>
               </div> :
               null
@@ -150,11 +142,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-times red'></i>{' '}
                 <span>
-                  {
-                    run.totalFailures ?
-                      run.totalFailures :
-                      '-'
-                  }
+                  {run.totalFailures ? run.totalFailures : '-'}
                 </span>
               </div> :
               null

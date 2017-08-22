@@ -51,7 +51,7 @@ class PermissionMessage extends Component {
         className='btn btn-primary'
         disabled={this.state.isSubmitting}
         onClick={this._requestAccess}
-        >
+      >
         <span>
           <i className='fa fa-paper-plane'></i>{' '}
           Request Access

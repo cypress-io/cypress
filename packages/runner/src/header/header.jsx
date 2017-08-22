@@ -36,12 +36,12 @@ export default class Header extends Component {
             <div className='viewport-menu'>
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{defaults.width}px</strong> by <strong>{defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
               <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
-              <pre>
+              <pre>{/* eslint-disable indent */}
 {`{
   viewportWidth: ${defaults.width},
   viewportHeight: ${defaults.height}
 }`}
-              </pre>
+              </pre>{/* eslint-enable indent */}
               <p>
                 <a href='https://on.cypress.io/viewport' target='_blank' rel="noopener noreferrer">
                   <i className='fa fa-info-circle'></i>
