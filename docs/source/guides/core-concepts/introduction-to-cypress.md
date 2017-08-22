@@ -183,8 +183,8 @@ cy.get('.main').contains('New Post')
 
 This is helpful when writing tests from the perspective of a user interacting with your app. They just know they want to click the button labeled "Submit", they have no idea that it has a `type` attribute of `submit`, or a CSS class of `my-submit-button`.
 
-{% note warning Localization %}
-If your app is translated into multiple languages, make sure you consider the implications of using user-facing text to find DOM elements!
+{% note warning Internationalization %}
+If your app is translated into multiple languages for i18n, make sure you consider the implications of using user-facing text to find DOM elements!
 {% endnote %}
 
 ## When Elements Are Missing
