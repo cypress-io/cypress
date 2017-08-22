@@ -52,7 +52,7 @@ module.exports = {
     emitter = new EE()
 
     preprocessorConfig = {
-      shouldWatch: !config.isHeadless
+      shouldWatch: !config.isTextTerminal
     }
 
     log("prep preprocessor:", preprocessorConfig)
@@ -70,7 +70,7 @@ module.exports = {
 
     log("getFile #{filePath}")
 
-    if config.isHeadless and fileProcessor = fileProcessors[filePath]
+    if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
       log("- headless and already processed")
       return fileProcessor
 

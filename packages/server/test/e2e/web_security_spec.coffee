@@ -50,22 +50,9 @@ describe "e2e web security", ->
     it "fails", ->
       e2e.exec(@, {
         spec: "web_security_spec.coffee"
+        snapshot: true
         expectedExitCode: 3
       })
-      .get("stdout")
-      .then (stdout) ->
-        messages = [
-          "Cypress detected a cross origin error happened on page load"
-          "you were bound to the origin policy"
-          "> http://localhost:5566"
-          "https://on.cypress.io/cross-origin-violation"
-        ]
-
-        messages.forEach (msg) ->
-          ## make sure this message is included
-          ## three times in stdout, one for each
-          ## failing test
-          expect(str.count(stdout, msg)).to.eq(3)
 
   context "when disabled", ->
     e2e.setup({
@@ -82,7 +69,8 @@ describe "e2e web security", ->
     })
 
     it "fails", ->
-      e2e.start(@, {
+      e2e.exec(@, {
         spec: "web_security_spec.coffee"
+        snapshot: true
         expectedExitCode: 0
       })

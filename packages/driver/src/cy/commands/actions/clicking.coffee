@@ -4,16 +4,20 @@ Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
 $Mouse = require("../../../cypress/mouse")
+
 {
   delay,
   dispatchPrimedChangeEvents,
   focusable,
-  getCoords,
+  waitForActionability,
   getPositionFromArguments
 } = require("./utils")
-utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+$utils = require("../../../cypress/utils")
+
+module.exports = (Commands, Cypress, cy, state, config) ->
+  isAttached = ($elToClick) ->
+    cy.isInDom($elToClick)
 
   Commands.addAll({ prevSubject: "dom" }, {
     click: (subject, positionOrX, y, options = {}) ->
@@ -32,19 +36,19 @@ module.exports = (Cypress, Commands) ->
         x: x
         y: y
         errorOnSelect: true
+        waitForAnimations: config("waitForAnimations")
+        animationDistanceThreshold: config("animationDistanceThreshold")
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
       if options.multiple is false and options.$el.length > 1
-        utils.throwErrByPath("click.multiple_elements", {
+        $utils.throwErrByPath("click.multiple_elements", {
           args: { num: options.$el.length }
         })
 
-      win  = @privateState("window")
-
-      clicks = []
+      win = state("window")
 
       click = (el, index) =>
         $el = $(el)
@@ -54,9 +58,9 @@ module.exports = (Cypress, Commands) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = utils.filterOutOptions(options)
+          deltaOptions = $utils.filterOutOptions(options)
 
-          options._log = $Log.command({
+          options._log = Cypress.log({
             message: deltaOptions
             $el: $el
           })
@@ -64,10 +68,7 @@ module.exports = (Cypress, Commands) ->
           options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
-          utils.throwErrByPath "click.on_select_element", { onFail: options._log }
-
-        isAttached = ($elToClick) =>
-          @_contains($elToClick)
+          $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
@@ -96,11 +97,11 @@ module.exports = (Cypress, Commands) ->
             domEvents.click   = $Mouse.click($elToClick, coords, win)
 
           if options._log
-            consoleObj = options._log.attributes.consoleProps()
+            consoleObj = options._log.invoke("consoleProps")
 
           consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
-              "Applied To":   utils.getDomElements($el)
+              "Applied To":   $utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
               "Options":      deltaOptions
@@ -108,7 +109,7 @@ module.exports = (Cypress, Commands) ->
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              consoleObj["Actual Element Clicked"] = utils.getDomElements($elToClick)
+              consoleObj["Actual Element Clicked"] = $utils.getDomElements($elToClick)
 
             consoleObj.groups = ->
               groups = [{
@@ -132,104 +133,24 @@ module.exports = (Cypress, Commands) ->
 
             consoleObj
 
-          Promise
-            .delay(delay)
-            .then ->
-              ## display the red dot at these coords
-              if options._log
-                ## because we snapshot and output a command per click
-                ## we need to manually snapshot + end them
-                options._log.set({coords: coords, consoleProps: consoleProps})
-
-              ## we need to split this up because we want the coordinates
-              ## to mutate our passed in options._log but we dont necessary
-              ## want to snapshot and end our command if we're a different
-              ## action like (cy.type) and we're borrowing the click action
-              if options._log and options.log
-                options._log.snapshot().end()
-            ## need to return null here to prevent
-            ## chaining thenable promises
-            .return(null)
-
-        findElByCoordinates = ($el) =>
-          coordsObj = (coords, $el) ->
-            {
-              coords: coords
-              $elToClick: $el
-            }
-
-          scrollWindowPastFixedElement = ($fixed) ->
-            height = $fixed.outerHeight()
-            width  = $fixed.outerWidth()
-            win.scrollBy(-width, -height)
+          return Promise
+          .delay(delay, "click")
+          .then ->
+            ## display the red dot at these coords
             if options._log
-              ## store the scrollBy to be used later in the iframe view
-              options._log.set "scrollBy", {x: -width, y: -height}
+              ## because we snapshot and output a command per click
+              ## we need to manually snapshot + end them
+              options._log.set({coords: coords, consoleProps: consoleProps})
 
-          getElementWithFixedPosition = ($el) ->
-            ## return null if we're at body/html
-            ## cuz that means nothing has fixed position
-            return null if not $el or $el.is("body,html")
-
-            ## if we have fixed position return ourselves
-            if $el.css("position") is "fixed"
-              return $el
-
-            ## else recursively continue to walk up the parent node chain
-            getElementWithFixedPosition($el.parent())
-
-          verifyElementAtCoordinates = (coords) =>
-            ## return the coordsObj immediately
-            ## if force is true
-            if options.force is true
-              return coordsObj(coords, $el)
-
-            ## accept options which disable actually ensuring the element
-            ## is clickable / in the foreground
-            ## this is helpful during css animations for instance where
-            ## you're trying to click a moving target. in that case we'll
-            ## just 'click' it for you and simulate everything related to
-            ## the click without verifying it is clickable. focus events
-            ## default actions, propagation, etc will still be respected
-            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
-
-            try
-              @ensureDescendents($el, $elToClick, options._log)
-            catch err
-              if options._log
-                options._log.set consoleProps: ->
-                  obj = {}
-                  obj["Tried to Click"]     = utils.getDomElements($el)
-                  obj["But its Covered By"] = utils.getDomElements($elToClick)
-                  obj
-
-              ## snapshot only on click failure
-              err.onFail = ->
-                if options._log
-                  options._log.snapshot()
-
-              options.error = err
-
-              ## if $elToClick isnt a descendent then attempt to nudge the
-              ## window scrollBy based on the height of the covering element
-              ## (if its fixed position) until our element comes into view
-              if $fixed = getElementWithFixedPosition($elToClick)
-                scrollWindowPastFixedElement($fixed)
-
-                retry = =>
-                  getCoords(@, $el, options)(false)
-
-                ## try again now that we've nudged the window's scroll
-                return @_retry(retry, options)
-                         .then(verifyElementAtCoordinates)
-
-              return @_retry(getCoords(@, $el, options), options)
-                       .then(verifyElementAtCoordinates)
-
-            return coordsObj(coords, $elToClick)
-
-          Promise.try(getCoords(@, $el, options))
-          .then(verifyElementAtCoordinates)
+            ## we need to split this up because we want the coordinates
+            ## to mutate our passed in options._log but we dont necessary
+            ## want to snapshot and end our command if we're a different
+            ## action like (cy.type) and we're borrowing the click action
+            if options._log and options.log
+              options._log.snapshot().end()
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          .return(null)
 
         shouldFireFocusEvent = ($focused, $elToFocus) ->
           ## if we dont have a focused element
@@ -257,14 +178,20 @@ module.exports = (Cypress, Commands) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        @_timeout(delay, true)
+        cy.timeout(delay, true, "click")
 
-        p = findElByCoordinates($el)
-          .cancellable()
-          .then (obj) =>
-            {$elToClick, coords} = obj
+        ## must use callbacks here instead of .then()
+        ## because we're issuing the clicks synchonrously
+        ## once we establish the coordinates and the element
+        ## passes all of the internal checks
+        waitForActionability(cy, $el, win, options, {
+          onScroll: ($el, type) ->
+            Cypress.action("cy:app:scrolled", $el, type)
 
-            @execute("focused", {log: false, verify: false}).then ($focused) =>
+          onReady: ($elToClick, coords) ->
+            ## TODO: get focused through a callback here
+            cy.now("focused", {log: false, verify: false})
+            .then ($focused) =>
               ## record the previously focused element before
               ## issuing the mousedown because browsers may
               ## automatically shift the focus to the element
@@ -283,7 +210,8 @@ module.exports = (Cypress, Commands) ->
                 ## retrieve the first focusable $el in our parent chain
                 $elToFocus = getFirstFocusableEl($elToClick)
 
-                @execute("focused", {log: false, verify: false}).then ($focused) =>
+                cy.now("focused", {log: false, verify: false})
+                .then ($focused) =>
                   if shouldFireFocusEvent($focused, $elToFocus)
                     ## if our mousedown went through and
                     ## we are focusing a different element
@@ -292,32 +220,34 @@ module.exports = (Cypress, Commands) ->
                     ## method might not get triggered if
                     ## our window is in focus since the
                     ## browser may fire blur events naturally
-                    dispatchPrimedChangeEvents.call(@)
+                    dispatchPrimedChangeEvents(state)
 
                     ## send in a focus event!
-                    @execute("focus", {$el: $elToFocus, error: false, verify: false, log: false})
+                    cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
                     .then ->
                       afterMouseDown($elToClick, coords)
                   else
                     afterMouseDown($elToClick, coords)
+        })
+        .catch (err) ->
+          ## snapshot only on click failure
+          err.onFail = ->
+            if options._log
+              options._log.snapshot()
 
-        clicks.push(p)
-
-        return p
+          ## if we give up on waiting for actionability then
+          ## lets throw this error and log the command
+          $utils.throwErr(err, { onFail: options._log })
 
       Promise
-        .each(options.$el.toArray(), click)
-        .cancellable()
-        .then =>
-          return options.$el if options.verify is false
+      .each(options.$el.toArray(), click)
+      .then =>
+        return options.$el if options.verify is false
 
-          do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions
-            })
-        .catch Promise.CancellationError, (err) ->
-          _.invokeMap(clicks, "cancel")
-          throw err
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions
+          })
 
     ## update dblclick to use the click
     ## logic and just swap out the event details?
@@ -325,7 +255,7 @@ module.exports = (Cypress, Commands) ->
       _.defaults options,
         log: true
 
-      @ensureDom(subject)
+      cy.ensureDom(subject)
 
       dblclicks = []
 
@@ -335,18 +265,18 @@ module.exports = (Cypress, Commands) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        @_timeout(delay, true)
+        cy.timeout(delay, true, "dblclick")
 
         if options.log
-          log = $Log.command
+          log = Cypress.log
             $el: $el
             consoleProps: ->
-              "Applied To":   utils.getDomElements($el)
+              "Applied To":   $utils.getDomElements($el)
               "Elements":     $el.length
 
-        @ensureVisibility $el, log
+        cy.ensureVisibility $el, log
 
-        p = @execute("focus", {$el: $el, error: false, verify: false, log: false}).then =>
+        p = cy.now("focus", $el, {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {
             bubbles: true
             cancelable: true
@@ -362,8 +292,7 @@ module.exports = (Cypress, Commands) ->
           ## chaining thenable promises
           return null
 
-        .delay(delay)
-        .cancellable()
+        .delay(delay, "dblclick")
 
         dblclicks.push(p)
 
@@ -377,7 +306,6 @@ module.exports = (Cypress, Commands) ->
       Promise
         .resolve(subject.toArray())
         .each(dblclick)
-        .cancellable()
         .return(subject)
         .catch Promise.CancellationError, (err) ->
           _.invokeMap(dblclicks, "cancel")

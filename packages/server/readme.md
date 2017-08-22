@@ -73,6 +73,14 @@ npm start -- --run-project <path-to-the-project-you-want-to-test>
 
 You will see Cypress run all the tests headlessly and you'll see output in your console.
 
+### 4. Run a single spec headlessly
+
+```bash
+npm start -- --run-project <path to project> --spec <path to spec file>
+```
+
+Path to spec file can be relative to the project you want to test.
+
 ## Testing the Driver
 
 To run driver tests:
@@ -94,6 +102,12 @@ also written, for example `cypress:server:file`. To see debug messages
 
 ```sh
 DEBUG=cypress:server npm start ...
+```
+
+You can see more debug messaging by using a wild card
+
+```sh
+DEBUG=cypress* npm start ...
 ```
 
 ## Deploying
@@ -193,71 +207,3 @@ socket.emit("remote:response", "123-a-guid-as-an-id", {a: "new response data obj
 - `npm i`
 - Open new tab: `npm run watch`
 - `node_modules/.bin/nw .`
-
-## Catalog of Events
-
-### Order of Runnable Events
-
-Event | From | To | Description
---- | --- | --- | ---
-restart:test:run | Runner | Anyone | when cypress has been told to 're-run' and before iframes have been loaded. typically seen after a test change or the 'restart tests' button has been clicked
-before:run | Runner | Anyone | before run has started but after iframes have loaded
-before:add | Runner | Anyone | before any tests have been added to the UI
-suite:add | Runner | Anyone | when a suite should be added to the UI
-test:add | Runner | Anyone | when a test should be added to the UI
-after:add | Runner | Anyone | when all runnables have been added to the UI
-runnables:ready | Runner | Anyone | when all runnables have been reduced to basic objects
-mocha:start | Mocha | Cypress | when mocha runner triggers its 'start' event
-suite:start | Mocha | Cypress | when mocha runner fires its 'suite' event
-test:before:run | Cypress | Anyone | before any code has run for a particular test
-test:before:hooks | Cypress | Cypress | before any hooks for a test have started
-hook:start | Mocha | Cypress | when mocha runner fires its 'hook' event
-test:start | Mocha | Cypress | when mocha runner fires its 'test' event
-suite:end | Mocha | Cypress | when mocha runner fires its 'suite end' event
-hook:end | Mocha | Cypress | when mocha runner fires its 'hook end' event
-mocha:pass | Mocha | Cypress | when mocha runner fires its 'pass' event
-mocha:pending | Mocha | Cypress | when mocha runner fires its 'pending' event
-mocha:fail | Mocha | Cypress | when mocha runner fires its 'fail' event
-test:end | Mocha | Cypress | when mocha runner fires its 'test end' event
-test:results:ready | Runner | Anyone | when we receive the 'test:end' event
-test:after:hooks | Cypress | Cypress | after all hooks have run for a test
-test:after:run | Cypress | Anyone | after any code has run for a test
-mocha:end | Mocha | Cypress | when mocha runner fires its 'end' event
-after:run | Runner | Anyone | after run has finished
-
-### Command Events
-
-Event | From | To | Description
---- | --- | --- | ---
-log:add | Cypress | Runner | when log entries have been added (commands / routes / spies)
-log:state:changed | Cypress | Runner | when an existing logs state or attributes have changed
-
-### Request Events
-
-Event | From | To | Description
---- | --- | --- | ---
-get:cookies | Cypress | Runner | when cookies are being requested
-get:cookie | Cypress | Runner | when a cookie is being requested
-set:cookie | Cypress | Runner | when setting cookie is being requested
-clear:cookie | Cypress | Runner | when clearing a cookie is being requested
-clear:cookies | Cypress | Runner | when clearing cookies is being requested
-message | Cypress | Runner | when a msg is being requested
-fixture | Cypress | Runner | when a fixture is being requested
-request | Cypress | Runner | when a request is being requested
-exec | Cypress | Runner | when exec is being requested
-paused | Cypress | Runner | when pausing is being requested
-
-### AUT Events
-
-Event | From | To | Description
---- | --- | --- | ---
-url:changed | Cypress | Anyone | when aut app url is changed
-page:loading | Cypress | Anyone | when aut app is currently loading a page
-viewport | Cypress | Anyone | when viewport has changed
-
-### Server Sent Events
-
-Event | From | To | Description
---- | --- | --- | ---
-watched:file:changed | Server | Runner | when user has changed local spec file
-automation:push:message | Server | Runner | when automation server has sent a message

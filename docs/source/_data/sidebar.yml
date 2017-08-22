@@ -104,8 +104,8 @@ api:
     root: root.html
     route: route.html
     screenshot: screenshot.html
-    # scrollintoview: scrollintoview.html
-    # scrollto: scrollto.html
+    scrollintoview: scrollintoview.html
+    scrollto: scrollto.html
     select: select.html
     server: server.html
     setcookie: setcookie.html
@@ -118,7 +118,7 @@ api:
     then: then.html
     tick: tick.html
     title: title.html
-    # trigger: trigger.html
+    trigger: trigger.html
     type: type.html
     uncheck: uncheck.html
     url: url.html
@@ -129,6 +129,12 @@ api:
     within: within.html
     wrap: wrap.html
     writefile: writefile.html
+  events:
+    catalog-of-events: catalog-of-events.html
+    on: on.html
+    once: once.html
+    removelistener: removelistener.html
+    removealllisteners: removealllisteners.html
   utilities:
     _: _.html
     $: $.html

@@ -193,7 +193,7 @@ class Server
             connect.ensureUrl(baseUrl)
             .return(null)
             .catch (err) =>
-              if config.isHeadless
+              if config.isTextTerminal
                 reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
               else
                 errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)

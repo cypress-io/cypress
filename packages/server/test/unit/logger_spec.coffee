@@ -149,7 +149,7 @@ describe "lib/logger", ->
 
       handlers[0](err)
 
-    it "catches unhandled rejections", (done) ->
+    it "catches unhandled rejections", ->
       defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
 
       Promise
@@ -159,7 +159,6 @@ describe "lib/logger", ->
       Promise.delay(50).then ->
         expect(defaultErrorHandler).to.be.calledOnce
         expect(defaultErrorHandler.getCall(0).args[0].message).to.eq("foo")
-        done()
 
       # expect(defaultErrorHandler).to.be.calledWith(err)
   # it "logs to error", (done) ->

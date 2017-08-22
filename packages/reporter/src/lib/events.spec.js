@@ -132,8 +132,8 @@ describe('events', () => {
       expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
 
-    it('sends runnable started on test:before:run', () => {
-      runner.on.withArgs('test:before:run').callArgWith(1, 'the runnable')
+    it('sends runnable started on test:before:run:async', () => {
+      runner.on.withArgs('test:before:run:async').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
     })
 
@@ -211,9 +211,9 @@ describe('events', () => {
       expect(appState.stop).to.have.been.called
     })
 
-    it('emits runner:abort on stop', () => {
+    it('emits runner:stop on stop', () => {
       events.emit('stop')
-      expect(runner.emit).to.have.been.calledWith('runner:abort')
+      expect(runner.emit).to.have.been.calledWith('runner:stop')
     })
 
     it('emits runner:restart on restart', () => {

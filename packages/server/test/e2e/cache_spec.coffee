@@ -32,7 +32,8 @@ describe "e2e cache", ->
   })
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "cache_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

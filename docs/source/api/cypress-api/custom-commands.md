@@ -3,112 +3,214 @@ title: Custom Commands
 comments: false
 ---
 
-Cypress comes with its own API for creating custom commands. In fact, the same public methods *you* have access to are the same ones we use to create all of the built in commands. In other words, there's nothing special or different about ours versus yours. You can customize every aspect of commands, not only their behavior, but also their display in the Command Log.
-
-This allows you to build up specific commands for your application which take their own custom arguments, and perform their own custom behavior.
-
-For example, the first custom command you'll probably create is the canonical `login` command. This typically would navigate the user to your `/login` url, fill out a username / password combination, submit the form, and then assert that the dashboard page comes up (or whatever happens upon successful login).
+Cypress comes with its own API for creating custom commands. In fact, the same public methods *you* have access to from our API is used to build every command in our API.
 
 {% note info  %}
 A great place to define these commands is in your `cypress/support/commands.js` file, since it is loaded before any test files are evaluated.
 {% endnote %}
 
-# [Cypress.addChildCommand()]()
+# Syntax
+
+```javascript
+Cypress.Commands.add(name, callbackFn)
+Cypress.Commands.add(name, options, callbackFn)
+```
+
+## Usage
+
+**{% fa fa-check-circle green %} Correct Usage**
+
+```javascript
+Cypress.Commands.add('login', (email, pw) => {})
+```
+
+**{% fa fa-exclamation-triangle red %} Incorrect Usage**
+
+```javascript
+Cypress.add('login', (email, pw) => {})  // Errors, cannot be chained off 'Cypress'
+cy.add('login', (email, pw) => {})  // Errors, cannot be chained off 'cy'
+```
+
+## Arguments
+
+**{% fa fa-angle-right %} callbackFn** ***(Function)***
+
+Pass a function that takes the arguments passed to the command.
+
+**{% fa fa-angle-right %} options** ***(Object)***
+
+Pass in an options object to change the behavior of the custom command.
+
+Option | Default | Description
+--- | --- | ---
+`prevSubject` | `false` | how to handle the previously yielded subject.
+
+The `prevSubject` accepts the following values:
+
+- `true`: use the subject yielded from the previously chained command. (parent command)
+- `false`: ignore any existing subject from previously chained command. (child command)
+- `dom`: use the subject yielded from the previously chained command. Expects subject to be a DOM element. (child command)
+- `optional`: may or may not have an existing subject (dual command)
+
+# Examples
+
+## Child Command
 
 Child commands are always chained off of a **parent** command, or another **child** command.
 
-***
+***Custom command to right click on DOM element***
 
-# [Cypress.addDualCommand]()
+```javascript
+Cypress.Commands.add('rightclick', {prevSubject: 'dom'}, function(subject, arg1, arg2){
+  // enforces that the previous subject is DOM and the subject is yielded here
+  // blows up and provides a great error when improperly chained
+})
+```
+
+## Parent Command
+
+Parent commands always **begin** a new chain of commands. Even if you've chained it off of a previous command, parent commands will always start a new chain, and ignore previously yielded subjects.
+
+***Custom command for 'login'***
+
+```javascript
+Cypress.Commands.add('loginByForm', (username, password) => {
+
+  Cypress.log({
+    name: 'loginByForm',
+    message: username + ' | ' + password
+  })
+
+  return cy.request({
+    method: 'POST',
+    url: '/login',
+    form: true,
+    body: {
+      username: username,
+      password: password
+    }
+  })
+})
+
+beforeEach(function(){
+  // login before each test
+  cy.loginByForm('jane.lane', 'password123')
+})
+```
+
+***Another custom command for sign in***
+
+```javascript
+Cypress.Commands.add('loginByCSRF', (csrfToken) => {
+  cy.request({
+    method: 'POST',
+    url: '/login',
+    failOnStatusCode: false, // dont fail so we can make assertions
+    form: true, // we are submitting a regular form body
+    body: {
+      username: 'cypress',
+      password: 'password123',
+      _csrf: csrfToken // insert this as part of form body
+    }
+  })
+})
+
+it('403 status without a valid CSRF token', function(){
+  cy.loginByCSRF('invalid-token')
+    .its('status')
+    .should('eq', 403)
+})
+```
+
+***Login with single signon command***
+
+```javascript
+Cypress.Commands.add('loginBySingleSignOn', (overrides = {}) => {
+
+  Cypress.log({
+    name: 'loginBySingleSignOn'
+  })
+
+  const options = {
+    method: 'POST',
+    url: 'http://auth.corp.com:8086/login',
+    qs: {
+      // use qs to set query string to the url that creates
+      // http://auth.corp.com:8080?redirectTo=http://localhost:8085/set_token
+      redirectTo: 'http://localhost:8085/set_token'
+    },
+    form: true, // we are submitting a regular form body
+    body: {
+      username: 'jane.lane',
+      password: 'password123',
+    }
+  }
+
+  // allow us to override defaults with passed in overrides
+  _.extend(options, overrides)
+
+  cy.request(options)
+})
+
+it('can authenticate with cy.request', function(){
+  cy.loginBySingleSignOn().then((resp) => {
+    // yup this should all be good
+    expect(resp.status).to.eq(200)
+  })
+})
+```
+
+***Login with JSON***
+
+```javascript
+Cypress.Commands.add('loginByJSON', (username, password) => {
+
+  Cypress.log({
+    name: 'loginByJSON',
+    message: username + ' | ' + password
+  })
+
+  return cy.request({
+    method: 'POST',
+    url: '/login',
+    body: {
+      username: username,
+      password: password
+    }
+  })
+})
+
+beforeEach(function(){
+  // login before each test
+  cy.loginByJSON('jane.lane', 'password123')
+})
+```
+
+***Set local storage on each visit***
+
+```javascript
+Cypress.Commands.add('visitAuthed', function(path) {
+  cy.server().visit("/#" + path, {
+    onBeforeLoad: function(win) {
+      win.localStorage.setItem('apiKey', Cypress.env('apiKey'))
+    }
+  })
+})
+```
+
+
+## Dual Command
 
 While parent commands always start a new chain of commands and child commands require being chained off a parent command, dual commands can behave as parent or child command. That is, they can **start** a new chain, or be chained off of an **existing** chain.
 
-***
-
-# [Cypress.addParentCommand](#add-parent-command-usage)
-
-Parent commands always **begin** a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains.
-
-***
-
-# Add Parent Command Usage
-
-## Custom command for 'login'
 ```javascript
-Cypress.addParentCommand("login", function(email, password){
-  var email    = email || "joe@example.com"
-  var password = password || "foobar"
-
-  var log = Cypress.Log.command({
-    name: "login",
-    message: [email, password],
-    onConsole: function(){
-      return {
-        email: email,
-        password: password
-      }
-    }
-  })
-
-  cy
-    .visit("/login", {log: false})
-    .contains("Log In", {log: false})
-    .get("#email", {log: false}).type(email, {log: false})
-    .get("#password", {log: false}).type(password, {log: false})
-    .get("button", {log: false}).click({log: false}) //this should submit the form
-    .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
-    .url({log: false}).should("match", /dashboard/, {log: false})
-    .then(function(){
-      log.snapshot().end()
-    })
+Cypress.Commands.add('swipe', {prevSubject: 'optional'}, function(subject, arg1, arg2){
+  // subject may or may not be undefined giving you the option to change the behavior
+  // the most common dual command is cy.contains() which operates differently whether
+  // there is an existing subject or not
 })
 ```
 
-## Another custom command for sign in
+# See also
 
-```javascript
-Cypress.addParentCommand("signIn", function(email, password) {
-  return cy.chain()
-  .request({
-    method: "POST",
-    url: "/auth",
-    body: {email, password}
-  }).its("body");
-});
-
-describe("custom command", function() {
-  it("resolves with the body", function() {
-    // the subject (body) is carried on and
-    // we can then add assertions about it
-    cy.signIn({"jane.lane", "password123"}).should("deep.eq", {
-      email: "jane.lane",
-      password: "password123"
-    });
-  });
-});
-```
-
-## Using cy.chain to manage a command's subject
-
-```javascript
-Cypress.addParentCommand("a", function(){
-  cy
-    .chain()
-    .wrap({foo: "bar"})
-    .its("foo")
-})
-
-Cypress.addChildCommand("b", function(subj){
-  cy
-    .chain()
-    .wrap(subj)
-    .should("eq", "bar")
-})
-
-it("can chain subjects", function(){
-  cy
-    .a()
-    .b()
-    .should("eq", "bar")
-})
-```
+- {% url 'Recipe: Logging In' logging-in-recipe %}

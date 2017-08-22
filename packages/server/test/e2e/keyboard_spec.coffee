@@ -4,7 +4,8 @@ describe "e2e keyboard", ->
   e2e.setup()
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "keyboard_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

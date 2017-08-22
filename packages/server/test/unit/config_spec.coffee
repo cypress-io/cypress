@@ -482,8 +482,8 @@ describe "lib/config", ->
     it "morgan=true", ->
       @defaults "morgan", true
 
-    it "isHeadless=false", ->
-      @defaults "isHeadless", false
+    it "isTextTerminal=false", ->
+      @defaults "isTextTerminal", false
 
     it "socketId=null", ->
       @defaults "socketId", null
@@ -504,12 +504,12 @@ describe "lib/config", ->
       @defaults "supportFile", false, {supportFile: false}
 
     it "resets numTestsKeptInMemory to 0 when headless", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
 
       expect(cfg.numTestsKeptInMemory).to.eq(0)
 
     it "resets watchForFileChanges to false when headless", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
 
       expect(cfg.watchForFileChanges).to.be.false
 
@@ -518,10 +518,10 @@ describe "lib/config", ->
 
       expect(cfg.morgan).to.be.false
 
-    it "can override isHeadless in options", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+    it "can override isTextTerminal in options", ->
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
 
-      expect(cfg.isHeadless).to.be.true
+      expect(cfg.isTextTerminal).to.be.true
 
     it "can override socketId in options", ->
       cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {socketId: 1234})
@@ -816,7 +816,8 @@ describe "lib/config", ->
         supportFolder: "#{projectRoot}/test/unit"
       })
 
-    it "sets the supportFile to default index.js if it does not exist and supportFile is the default", ->
+    it "sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default", ->
+      @sandbox.stub(fs, "existsSync").returns(false)
       projectRoot = process.cwd()
 
       obj = config.setAbsolutePaths({
@@ -829,6 +830,19 @@ describe "lib/config", ->
         supportFile: "#{projectRoot}/cypress/support/index.js"
         supportFolder: "#{projectRoot}/cypress/support"
       })
+
+    it "sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/blank-support")
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support"
+      })
+
+      expect(config.setSupportFileAndFolder(obj)).to.eql({
+        projectRoot: projectRoot
+        supportFile: false
+        })
 
     it "throws error if supportFile is not default and does not exist", ->
       projectRoot = process.cwd()

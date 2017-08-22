@@ -68,7 +68,8 @@ describe "e2e page_loading", ->
     ## set we send an XHR which should not inject because its requested for JSON
     ## but that another XHR which is requested for html should inject
 
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "page_loading_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

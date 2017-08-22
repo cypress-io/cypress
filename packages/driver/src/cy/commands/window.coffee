@@ -2,10 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
-
-## hold a global reference to defaults
-viewportDefaults = null
+$utils = require("../../cypress/utils")
 
 viewports = {
   "macbook-15" : "1440x900"
@@ -22,41 +19,50 @@ viewports = {
 
 validOrientations = ["landscape", "portrait"]
 
-module.exports = (Cypress, Commands) ->
-  Cypress.on "test:before:hooks", ->
+module.exports = (Commands, Cypress, cy, state, config) ->
+  ## keep track of the current viewport so we know if the viewport
+  ## command is actually changing it or not
+  defaultViewport = currentViewport = _.pick(config(), "viewportWidth", "viewportHeight")
+
+  Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
     ## need to restore prior to running the next test
     ## after which we simply null and wait for the
     ## next viewport change
-    if d = viewportDefaults
-      triggerAndSetViewport.call(@, d.viewportWidth, d.viewportHeight)
-      viewportDefaults = null
+    setViewportAndSynchronize(defaultViewport.viewportWidth, defaultViewport.viewportHeight)
 
-  triggerAndSetViewport = (width, height) ->
-    Cypress.config("viewportWidth", width)
-    Cypress.config("viewportHeight", height)
-
+  setViewportAndSynchronize = (width, height) ->
     viewport = {viewportWidth: width, viewportHeight: height}
 
-    ## force our UI to change to the viewport
-    Cypress.trigger "viewport", viewport
+    new Promise (resolve) ->
+      if currentViewport.viewportWidth is width and currentViewport.viewportHeight
+        ## noop if viewport won't change
+        return resolve(currentViewport)
 
-    return viewport
+      currentViewport = {
+        viewportWidth: width
+        viewportHeight: height
+      }
+
+      ## force our UI to change to the viewport and wait for it
+      ## to be updated
+      Cypress.action "cy:viewport:changed", viewport, ->
+        resolve(viewport)
 
   Commands.addAll({
     title: (options = {}) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       do resolveTitle = =>
-        doc = @privateState("document")
+        doc = state("document")
 
         title = (doc and doc.title) or ""
 
-        @verifyUpcomingAssertions(title, options, {
+        cy.verifyUpcomingAssertions(title, options, {
           onRetry: resolveTitle
         })
 
@@ -64,11 +70,11 @@ module.exports = (Cypress, Commands) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       getWindow = =>
-        window = @privateState("window")
-        utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
+        window = state("window")
+        $utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window
 
@@ -79,11 +85,11 @@ module.exports = (Cypress, Commands) ->
         .try(getWindow)
         .catch (err) =>
           options.error = err
-          @_retry(retryWindow, options)
+          cy.retry(retryWindow, options)
 
       do verifyAssertions = =>
         Promise.try(retryWindow).then (win) =>
-          @verifyUpcomingAssertions(win, options, {
+          cy.verifyUpcomingAssertions(win, options, {
             onRetry: verifyAssertions
           })
 
@@ -91,12 +97,12 @@ module.exports = (Cypress, Commands) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command()
+        options._log = Cypress.log()
 
       getDocument = =>
-        win = @privateState("window")
+        win = state("window")
         ## TODO: add failing test around logging twice
-        utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
+        $utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 
         return win.document
 
@@ -104,14 +110,14 @@ module.exports = (Cypress, Commands) ->
       ## separate function
       retryDocument = =>
         Promise
-          .try(getDocument)
-          .catch (err) =>
-            options.error = err
-            @_retry(retryDocument, options)
+        .try(getDocument)
+        .catch (err) =>
+          options.error = err
+          cy.retry(retryDocument, options)
 
       do verifyAssertions = =>
         Promise.try(retryDocument).then (doc) =>
-          @verifyUpcomingAssertions(doc, options, {
+          cy.verifyUpcomingAssertions(doc, options, {
             onRetry: verifyAssertions
           })
 
@@ -122,7 +128,7 @@ module.exports = (Cypress, Commands) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log
           consoleProps: ->
             obj = {}
             obj.Preset = preset if preset
@@ -131,7 +137,7 @@ module.exports = (Cypress, Commands) ->
             obj
 
       throwErrBadArgs = =>
-        utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
+        $utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
 
       widthAndHeightAreValidNumbers = (width, height) ->
         _.every [width, height], (val) ->
@@ -143,7 +149,7 @@ module.exports = (Cypress, Commands) ->
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
-          utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
+          $utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
 
         when _.isString(presetOrWidth)
           getPresetDimensions = (preset) =>
@@ -151,7 +157,7 @@ module.exports = (Cypress, Commands) ->
               _.map(viewports[presetOrWidth].split("x"), Number)
             catch e
               presets = _.keys(viewports).join(", ")
-              utils.throwErrByPath "viewport.missing_preset", {
+              $utils.throwErrByPath "viewport.missing_preset", {
                 onFail: options._log
                 args: { preset, presets }
               }
@@ -159,7 +165,7 @@ module.exports = (Cypress, Commands) ->
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
               all = validOrientations.join("' or '")
-              utils.throwErrByPath "viewport.invalid_orientation", {
+              $utils.throwErrByPath "viewport.invalid_orientation", {
                 onFail: options._log
                 args: { all, orientation }
               }
@@ -183,20 +189,16 @@ module.exports = (Cypress, Commands) ->
           height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
-            utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
+            $utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
 
         else
           throwErrBadArgs()
 
-      ## backup the previous viewport defaults
-      ## if they dont already exist!
-      if not viewportDefaults
-        viewportDefaults = _.pick(@Cypress.config(), "viewportWidth", "viewportHeight")
+      setViewportAndSynchronize(width, height)
+      .then (viewport) ->
+        if options._log
+          options._log.set(viewport)
 
-      viewport = triggerAndSetViewport.call(@, width, height)
+        return null
 
-      if options._log
-        options._log.set(viewport)
-
-      return null
   })

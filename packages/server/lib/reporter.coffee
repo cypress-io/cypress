@@ -2,6 +2,7 @@ _     = require("lodash")
 Mocha = require("mocha")
 chalk = require("chalk")
 path  = require("path")
+log   = require("./log")
 
 mochaReporters = require("mocha/lib/reporters")
 
@@ -84,22 +85,7 @@ class Reporter
   setRunnables: (rootRunnable = {}) ->
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
-
-    if r = reporters[@reporterName]
-      reporter = require(r)
-    else if r = mochaReporters[@reporterName]
-      reporter = @reporterName
-    else
-      ## it's likely a custom reporter
-      ## that is local (./custom-reporter.js)
-      ## or one installed by the user through npm
-      try
-        ## try local
-        reporter = require(path.join(@projectRoot, @reporterName))
-      catch err
-        ## try npm. if this fails, we're out of options, so let it throw
-        reporter = require(path.join(@projectRoot, "node_modules", @reporterName))
-
+    reporter = Reporter.loadReporter(@reporterName, @projectRoot)
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
@@ -126,7 +112,7 @@ class Reporter
 
   emit: (event, args...) ->
     if args = @parseArgs(event, args)
-      @runner.emit.apply(@runner, args)
+      @runner?.emit.apply(@runner, args)
 
   parseArgs: (event, args) ->
     ## make sure this event is in our events hash
@@ -171,7 +157,9 @@ class Reporter
     .map(@normalize)
     .value()
 
-    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(@reporter.stats, STATS)
+    stats = if @reporter then @reporter.stats else {}
+
+    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(stats, STATS)
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
@@ -180,5 +168,39 @@ class Reporter
 
   @create = (reporterName, reporterOptions, projectRoot) ->
     new Reporter(reporterName, reporterOptions, projectRoot)
+
+  @loadReporter = (reporterName, projectRoot) ->
+    log("loading reporter #{reporterName}")
+    if r = reporters[reporterName]
+      log("#{reporterName} is built-in reporter")
+      return require(r)
+
+    if mochaReporters[reporterName]
+      log("#{reporterName} is Mocha reporter")
+      return reporterName
+
+    ## it's likely a custom reporter
+    ## that is local (./custom-reporter.js)
+    ## or one installed by the user through npm
+    try
+      ## try local
+      log("loading local reporter by name #{reporterName}")
+      return require(path.join(projectRoot, reporterName))
+    catch err
+      ## try npm. if this fails, we're out of options, so let it throw
+      log("loading NPM reporter module #{reporterName} from #{projectRoot}")
+      try
+        return require(path.join(projectRoot, "node_modules", reporterName))
+      catch err
+        msg = "Could not find reporter module #{reporterName} relative to #{projectRoot}"
+        throw new Error(msg)
+
+  @isValidReporterName = (reporterName, projectRoot) ->
+    try
+      Reporter.loadReporter(reporterName, projectRoot)
+      log("reporter #{reporterName} is valid name")
+      true
+    catch
+      false
 
 module.exports = Reporter

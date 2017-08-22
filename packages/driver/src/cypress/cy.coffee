@@ -1,624 +1,155 @@
-require("setimmediate")
-
 _ = require("lodash")
 $ = require("jquery")
-Backbone = require("backbone")
 Promise = require("bluebird")
 
-utils = require("./utils")
-$Cypress = require("../cypress")
+$utils = require("./utils")
+$Chai = require("../cy/chai")
+$Xhrs = require("../cy/xhrs")
+$jQuery = require("../cy/jquery")
+$Aliases = require("../cy/aliases")
+$Events = require("./events")
+$Errors = require("../cy/errors")
+$Ensures = require("../cy/ensures")
+$Elements = require("../cy/elements")
+$Location = require("../cy/location")
+$Assertions = require("../cy/assertions")
+$Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
+$Timeouts = require("../cy/timeouts")
+$Retries = require("../cy/retries")
+$Stability = require("../cy/stability")
+$Snapshots = require("../cy/snapshots")
+$Coordinates = require("../cy/coordinates")
 $CommandQueue = require("./command_queue")
 
 crossOriginScriptRe = /^script error/i
 
 privateProps = {
-  props:    { name: "state",        url: true }
-  privates: { name: "privateState", url: false }
+  props:    { name: "state", url: true }
+  privates: { name: "state", url: false }
 }
 
-class $Cy
-  constructor: (@Cypress, specWindow) ->
-    @id = _.uniqueId("cy")
-
-    @defaults()
-    @listeners()
-
-    @privates = {}
-    @_privateState = {}
-
-    @_commandFns       = {}
-    @_commandFnsBackup = {}
-
-    @queue = $CommandQueue.create()
-
-    _.each privateProps, (obj, key) =>
-      Object.defineProperty(@, key, {
-        get: ->
-          utils.throwErrByPath("miscellaneous.private_property", {
-            args: obj
-          })
-      })
-
-    specWindow.cy = @
-
-  onCommand: (key, fn, type, enforceDom) ->
-    utils.throwErrByPath("add.type_missing") if not type
-
-    ## allow object signature
-    if _.isObject(key)
-      _.each key, (fn, key) =>
-        @onCommand(key, fn, type, enforceDom)
-      return @
-
-    ## need to pass the options into inject here
-    @add(key, fn, type, enforceDom)
-
-  onOverwrite: (key, fn) ->
-    ## grab the original function if its been backed up
-    ## or grab it from the commandState
-    original = @_commandFnsBackup[key] or @_commandFns[key]
-
-    if not original
-      utils.throwErrByPath("miscellaneous.invalid_overwrite", {
-        args: {
-          name: key
-        }
-      })
-
-    ## store the backup again now
-    @_commandFnsBackup[key] = original
-
-    @_commandFns[key] = _.wrap original, ->
-      fn.apply(@, arguments)
-
-  add: (key, fn, type, enforceDom) ->
-    @_commandFns[key] = _.bind(fn, @)
-
-    prepareSubject = (firstCall, args) =>
-      ## if this is the very first call
-      ## on the chainer then make the first
-      ## argument undefined (we have no subject)
-      if firstCall
-        @_removeSubject()
-
-      subject = @state("subject")
-
-      if enforceDom
-        @ensureDom(subject, key)
-
-      args.unshift(subject)
-
-      @trigger("next:subject:prepared", subject, args)
-
-      args
-
-    wrap = (firstCall) =>
-      fn = @_commandFns[key]
-      wrapped = wrapByType(fn, firstCall)
-      wrapped.originalFn = fn
-      wrapped
-
-    wrapByType = (fn, firstCall) ->
-      switch type
-        when "parent"
-          return fn
-
-        when "dual", "utility"
-          _.wrap fn, (orig, args...) ->
-            ## push the subject into the args
-            args = prepareSubject(firstCall, args)
-
-            return orig.apply(@, args)
-
-        when "child", "assertion"
-          _.wrap fn, (orig, args...) ->
-            if firstCall
-              utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
-                args: {
-                  cmd:  key
-                  args: utils.stringify(args)
-                }
-              })
-
-            ## push the subject into the args
-            args = prepareSubject(firstCall, args)
-
-            subject = args[0]
-
-            ret = orig.apply(@, args)
-
-            return ret ? subject
-
-    @[key] = (args...) ->
-      if not @privateState("runnable")
-        utils.throwErrByPath("miscellaneous.outside_test")
-
-      ## this is the first call on cypress
-      ## so create a new chainer instance
-      chain = $Chainer.create(@, key, args)
-
-      ## store the chain so we can access it later
-      @state("chain", chain)
-
-      return chain
-
-    ## create a property of this function
-    ## which can be invoked immediately
-    ## without being enqueued
-    @[key].immediately = (args...) ->
-      ## TODO: instead of wrapping this maybe
-      ## we just invoke the fn directly here?
-      wrap().apply(@, args)
-
-    ## add this function to our chainer class
-    $Chainer.inject key, (chainerId, firstCall, args) ->
-      @enqueue(key, wrap(firstCall), args, type, chainerId)
-
-  initialize: (obj) ->
-    @defaults()
-
-    {$remoteIframe} = obj
-
-    @privateState("$remoteIframe", $remoteIframe)
-
-    @_setRemoteIframeProps($remoteIframe)
-
-    $remoteIframe.on "load", =>
-      ## if setting iframe props failed
-      ## dont do anything else because
-      ## we are in trouble
-      if @_setWindowDocumentProps($remoteIframe.prop("contentWindow"))
-
-        @urlChanged(null, {log: false})
-        @pageLoading(false)
-
-        ## we reapply window listeners on load even though we
-        ## applied them already during onBeforeLoad. the reason
-        ## is that after load javascript has finished being evaluated
-        ## and we may need to override things like alert + confirm again
-        @bindWindowListeners @privateState("window")
-        @isReady(true, "load")
-        @Cypress.trigger("load")
-
-    ## anytime initialize is called we immediately
-    ## set cy to be ready to invoke commands
-    ## this prevents a bug where we go into not
-    ## ready mode due to the unload event when
-    ## our tests are re-run
-    @isReady(true, "initialize")
-
-  defaults: ->
-    @_state = {}
-
-    return @
-
-  silenceConsole: (contentWindow) ->
-    if c = contentWindow.console
-      c.log = ->
-      c.warn = ->
-      c.info = ->
-
-  listeners: ->
-    @listenTo @Cypress, "initialize", (obj) =>
-      @initialize(obj)
-
-    ## why arent we listening to "defaults" here?
-    ## instead we are manually hard coding them
-    @listenTo @Cypress, "stop",       => @stop()
-    @listenTo @Cypress, "restore",    => @restore()
-    @listenTo @Cypress, "abort",      => @abort()
-    @listenTo @Cypress, "test:after:hooks", (test) => @checkTestErr(test)
-
-  abort: ->
-    @offWindowListeners()
-    @offIframeListeners(@privateState("$remoteIframe"))
-    @isReady(false, "abort")
-    @privateState("runnable")?.clearTimeout()
-
-    promise = @state("promise")
-    promise?.cancel()
-
-    @_aborted = true
-
-    ## ready can potentially be cancellable
-    ## so we need cancel it (if it is)
-    ready = @state("ready")
-    if ready and readyPromise = ready.promise
-      if readyPromise.isCancellable()
-        readyPromise.cancel()
-
-    Promise.resolve(promise)
-
-  stop: ->
-    delete window.cy
-
-    @stopListening()
-
-    @offWindowListeners()
-    @offIframeListeners(@privateState("$remoteIframe"))
-
-    @_privateState = {}
-
-    @Cypress.cy = null
-
-  restore: ->
-    @clearTimeout @state("timerId")
-
-    ## reset the commands to an empty array
-    ## by mutating it. we do this because
-    ## commands is the context in promises
-    ## which ends up holding a reference
-    ## to the old array and keeps objects
-    ## in memory longer than we want them
-    @queue.reset()
-
-    ## remove any event listeners
-    @off()
-
-    ## removes any registered props from the
-    ## instance
-    @defaults()
-
-    return @
-
-  ## global options applicable to all cy instances
-  ## and restores
-  options: (options = {}) ->
-
-  checkForEndedEarly: ->
-    ## if our index is above 0 but is below the commands.length
-    ## then we know we've ended early due to a done() and
-    ## we should throw a very specific error message
-    index = @state("index")
-    if index > 0 and index < @queue.length
-      @endedEarlyErr(index)
-
-  _removeSubject: ->
-    @state("subject", undefined)
-
-    return @
-
-  _eventHasReturnValue: (e) ->
-    val = e.originalEvent.returnValue
-
-    ## return false if val is an empty string
-    ## of if its undinefed
-    return false if val is "" or _.isUndefined(val)
-
-    ## else return true
-    return true
-
-  isReady: (bool = true, event) ->
-    if bool
-      ## we set recentlyReady to true
-      ## so we dont accidently set isReady
-      ## back to false in between commands
-      ## which are async
-      @state("recentlyReady", true)
-
-      if ready = @state("ready")
-        if ready.promise.isPending()
-          ready.promise.then =>
-            @trigger "ready", true
-
-            ## prevent accidential chaining
-            ## .this after isReady resolves
-            return null
-
-      return ready?.resolve()
-
-    ## if we already have a ready object and
-    ## its state is pending just leave it be
-    ## and dont touch it
-    return if @state("ready") and @state("ready").promise.isPending()
-
-    ## else set it to a deferred object
-    @trigger "ready", false
-
-    @state "ready", Promise.pending()
-
-  run: ->
-    ## start at 0 index if we dont have one
-    index = @state("index") ? @state("index", 0)
-
-    command = @queue.at(index)
-
-    ## if the command should be skipped
-    ## just bail and increment index
-    ## and set the subject
-    ## TODO DRY THIS LOGIC UP
-    if command and command.get("skip")
-      ## must set prev + next since other
-      ## operations depend on this state being correct
-      command.set({prev: @queue.at(index - 1), next: @queue.at(index + 1)})
-      @state("index", index + 1)
-      @state("subject", command.get("subject"))
-      return @run()
-
-    runnable = @privateState("runnable")
-
-    ## if we're at the very end
-    if not command
-
-      ## trigger end event
-      @trigger("end")
-
-      ## and we should have a next property which
-      ## holds mocha's .then callback fn
-      if next = @state("next")
-        next()
-        @state("next", null)
-
-      return @
-
-    ## store the previous timeout
-    prevTimeout = @_timeout()
-
-    ## prior to running set the runnables
-    ## timeout to 30s. this is useful
-    ## because we may have to wait to begin
-    ## running such as the case in angular
-    @_timeout(30000)
-
-    run = =>
-      ## bail if we've been told to abort in case
-      ## an old command continues to run after
-      if @_aborted
-        return
-
-      ## bail if we've changed runnables by the
-      ## time this resolves
-      return if @privateState("runnable") isnt runnable
-
-      ## reset the timeout to what it used to be
-      @_timeout(prevTimeout)
-
-      @trigger "command:start", command
-
-      promise = @set(command)
-      .then =>
-        ## each successful command invocation should
-        ## always reset the timeout for the current runnable
-        ## unless it already has a state.  if it has a state
-        ## and we reset the timeout again, it will always
-        ## cause a timeout later no matter what.  by this time
-        ## mocha expects the test to be done
-        @_timeout(prevTimeout) if not runnable.state
-
-        ## mutate index by incrementing it
-        ## this allows us to keep the proper index
-        ## in between different hooks like before + beforeEach
-        ## else run will be called again and index would start
-        ## over at 0
-        @state("index", index += 1)
-
-        @trigger "command:end", command
-
-        if fn = @state("onPaused")
-          fn.call(@, @run)
-        else
-          @defer @run
-
-        ## must have this empty return here else we end up creating
-        ## additional .then callbacks due to bluebird chaining
-        return null
-
-      .catch Promise.CancellationError, (err) =>
-        @cancel(err)
-
-        ## need to signify we're done our promise here
-        ## so we cannot chain off of it, or have bluebird
-        ## accidentally chain off of the return value
-        return err
-
-      .catch (err) =>
-        @onFail(err)
-
-      ## signify we are at the end of the chain and do not
-      ## continue chaining anymore
-      # promise.done()
-
-      @state "promise", promise
-
-      @trigger "set", command
-
-    ## automatically defer running each command in succession
-    ## so each command is async
-    @defer(run)
-
-  onUncaughtException: (msg, source, lineno, colno, err) ->
-    current = @state("current")
-
-    ## reset the msg on a cross origin script error
-    ## since no details are accessible
-    if crossOriginScriptRe.test(msg)
-      msg = utils.errMessageByPath("uncaught.cross_origin_script")
-
-    createErrFromMsg = ->
-      new Error utils.errMessageByPath("uncaught.error", { msg, source, lineno })
-
-    ## if we have the 5th argument it means we're in a super
-    ## modern browser making this super simple to work with.
-    err ?= createErrFromMsg()
-
-    err.name = "Uncaught " + err.name
-
-    err.onFail = ->
-      if log = current and current.getLastLog()
-        log.error(err)
-
-    @onFail(err)
-    ## TODO: if this is a hook then we know mocha
-    ## will abort everything on uncaught exceptions
-    ## so we need to explain that to the user
-
-    ## per the onerror docs
-    ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
-    ## When the function returns true, this prevents the firing of the default event handler.
-    return true
-
-  onFail: (err) ->
-    @fail(err)
-
-    ## reset the nestedIndex back to null
-    @state("nestedIndex", null)
-
-    ## also reset recentlyReady back to null
-    @state("recentlyReady", null)
-
-    ## and forcibly move the index needle to the
-    ## end in case we have after / afterEach hooks
-    ## which need to run
-    @state("index", @queue.length)
-
-    return err
-
-  clearTimeout: (id) ->
-    clearImmediate(id) if id
-    return @
-
-  # get: (name) ->
-  #   alias = @aliases[name]
-  #   return alias unless _.isUndefined(alias)
-
-  #   ## instead of returning a function here and setting this
-  #   ## invoke property, we should just convert this to a deferred
-  #   ## and then during the actual save we should find out anystanding
-  #   ## 'get' promises that match the name and then resolve them.
-  #   ## the problem with this is we still need to run this anonymous
-  #   ## function to check to see if we have an alias by that name
-  #   ## else our alias will never resolve (if save is never called
-  #   ## by this name argument)
-  #   fn = =>
-  #     @aliases[name] or
-  #       ## TODO: update this to utils.throwErrByPath if this code gets uncommented
-  #       utils.throwErr("No alias was found by the name: #{name}")
-  #   fn._invokeImmediately = true
-  #   fn
-
-  set: (command) ->
-    @state("current", command)
-
-    promise = if @state("ready")
-      Promise.resolve @state("ready").promise
-    else
-      Promise.resolve()
-
-    promise.cancellable().then =>
-      @trigger "invoke:start", command
-
-      @state "nestedIndex", @state("index")
-
-      command.get("args")
-
-    ## allow promises to be used in the arguments
-    ## and wait until they're all resolved
-    .all()
-
-    .then (args) =>
-      ## if the first argument is a function and it has an _invokeImmediately
-      ## property that means we are supposed to immediately invoke
-      ## it and use its return value as the argument to our
-      ## current command object
-      if _.isFunction(args[0]) and args[0]._invokeImmediately
-        args[0] = args[0].call(@)
-
-      ## rewrap all functions by checking
-      ## the chainer id before running its fn
-      @_checkForNewChain command.get("chainerId")
-
-      ## run the command's fn
-      ret = command.get("fn").apply(command.get("ctx"), args)
-
-      ## allow us to immediately tap into
-      ## return value of our command
-      @trigger "command:returned:value", command, ret
-
-      ## we cannot pass our cypress instance or our chainer
-      ## back into bluebird else it will create a thenable
-      ## which is never resolved
-      if @isCy(ret) then null else ret
-
-    .then (subject) =>
-      ## if ret is a DOM element and its not an instance of our jQuery
-      if subject and utils.hasElement(subject) and not utils.isInstanceOf(subject, $)
-        ## set it back to our own jquery object
-        ## to prevent it from being passed downstream
-        subject = @$$(subject)
-
-      command.set({subject: subject})
-
-      ## end / snapshot our logs
-      ## if they need it
-      command.finishLogs()
-
-      ## trigger an event here so we know our
-      ## command has been successfully applied
-      ## and we've potentially altered the subject
-      @trigger "invoke:subject", subject, command
-
-      ## reset the nestedIndex back to null
-      @state("nestedIndex", null)
-
-      ## also reset recentlyReady back to null
-      @state("recentlyReady", null)
-
-      @state("subject", subject)
-
-      @trigger "invoke:end", command
-
-      ## we must look back at the ready property
-      ## at the end of resolving our command because
-      ## its possible it has become "unready" such
-      ## as beforeunload firing. in that case before
-      ## resolving we need to ensure it finishes first
-      if ready = @state("ready")
-        if ready.promise.isPending()
-          return ready.promise
-          .then =>
-            ## if we became unready when a command
-            ## was being resolved then we need to
-            ## null out the subject here and additionally
-            ## check for child commands and error if found
-            ## only if this is a DOM subject
-            ##
-            ## since we delay the resolving
-            ## of our command subjects, they may have
-            ## caused a page load / form submit so
-            ## if our subject has been nulled we need
-            ## to keep it nulled
-            if @state("pageChangeEvent")
-              @state("pageChangeEvent", false)
-
-              ## if we currently have a DOM subject and its not longer
-              ## in the document then we need to null out our subject because
-              ## a page change has happened and we want to discontinue chaining
-              if utils.hasElement(subject) and not @_contains(subject)
-                ## additionally check for errors here
-                ## so we can notify the user if they're trying
-                ## to chain child commands off of this null subject
-                @_removeSubject()
-
-              return @state("subject")
-          .catch (err) ->
-
-      return @state("subject")
-
-  cancel: (err) ->
-    @trigger "cancel", @state("current")
-
-  enqueue: (key, fn, args, type, chainerId) ->
-    @clearTimeout @state("timerId")
-
-    obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
-
-    @trigger "enqueue", obj
-    @Cypress.trigger "enqueue", obj
-
-    @insertCommand(obj)
-
-  insertCommand: (obj) ->
+returnedFalse = (result) ->
+  result is false
+
+# window.Cypress ($Cypress)
+#
+# Cypress.config(...)
+#
+# Cypress.Server.defaults()
+# Cypress.Keyboard.defaults()
+# Cypress.Mouse.defaults()
+# Cypress.Commands.add("login")
+#
+# Cypress.on "error"
+# Cypress.on "retry"
+# Cypress.on "uncaughtException"
+#
+# cy.on "error"
+#
+# # Cypress.Log.command()
+#
+# log = Cypress.log()
+#
+# log.snapshot().end()
+# log.set().get()
+#
+# cy.log()
+#
+# cy.foo (Cy)
+
+# { visit, get, find } = cy
+
+silenceConsole = (contentWindow) ->
+  if c = contentWindow.console
+    c.log = ->
+    c.warn = ->
+    c.info = ->
+
+getContentWindow = ($autIframe) ->
+  $autIframe.prop("contentWindow")
+
+setWindowDocumentProps = (contentWindow, state) ->
+  state("window",   contentWindow)
+  state("document", contentWindow.document)
+
+setRemoteIframeProps = ($autIframe, state) ->
+  state("$autIframe", $autIframe)
+
+create = (specWindow, Cypress, Cookies, state, config, log) ->
+  stopped = false
+  commandFns = {}
+
+  isStopped = -> stopped
+
+  onFinishAssertions = ->
+    assertions.finishAssertions.apply(null, arguments)
+
+  $$ = (selector, context) ->
+    context ?= state("document")
+    new $.fn.init(selector, context)
+
+  queue = $CommandQueue.create()
+
+  timeouts = $Timeouts.create(state)
+  stability = $Stability.create(Cypress, state)
+  retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
+  assertions = $Assertions.create(state, queue, retries.retry)
+
+  elements = $Elements.create(state)
+  jquery = $jQuery.create(state)
+  location = $Location.create(state)
+
+  { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
+
+  xhrs = $Xhrs.create(state)
+  aliases = $Aliases.create(state)
+  errors = $Errors.create(state, config, log)
+  ensures = $Ensures.create(state, expect, elements.isInDom)
+
+  coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
+  snapshots = $Snapshots.create($$, state)
+
+  isCy = (val) ->
+    (val is cy) or $utils.isInstanceOf(val, $Chainer)
+
+  runnableCtx = ->
+    ensures.ensureRunnable()
+
+    state("runnable").ctx
+
+  urlNavigationEvent = (event) ->
+    Cypress.action("app:navigation:changed", "page navigation event (#{event})")
+
+  contentWindowListeners = (contentWindow) ->
+    $Listeners.bindTo(contentWindow, {
+      onError: ->
+        debugger
+        ## use a function callback here instead of direct
+        ## reference so our users can override this function
+        ## if need be
+        cy.onUncaughtException.apply(cy, arguments)
+      onSubmit: (e) ->
+        Cypress.action("app:form:submitted", e)
+      onBeforeUnload: (e) ->
+        stability.isStable(false, "beforeunload")
+
+        Cookies.setInitial()
+
+        Cypress.action("app:before:window:unload", e)
+
+        ## return undefined so our beforeunload handler
+        ## doesnt trigger a confirmation dialog
+        return undefined
+      onUnload: (e) ->
+        Cypress.action("app:window:unload", e)
+      onNavigation: (args...) ->
+        Cypress.action("app:navigation:changed", args...)
+      onAlert: (str) ->
+      onConfirm: (str) ->
+    })
+
+  enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
     ## index past the current index as opposed to
@@ -632,190 +163,813 @@ class $Cy
     ## first command. this was due to nestedIndex being undefined at that
     ## time. so we have to ensure to check that its any kind of number (even 0)
     ## in order to know to splice into the existing array.
-    nestedIndex = @state("nestedIndex")
+    nestedIndex = state("nestedIndex")
 
     ## if this is a number then we know
     ## we're about to splice this into our commands
     ## and need to reset next + increment the index
     if _.isNumber(nestedIndex)
-      @state("nestedIndex", nestedIndex += 1)
+      state("nestedIndex", nestedIndex += 1)
 
     ## we look at whether or not nestedIndex is a number, because if it
     ## is then we need to splice inside of our commands, else just push
     ## it onto the end of the queu
-    index = if _.isNumber(nestedIndex) then nestedIndex else @queue.length
+    index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
 
-    @queue.splice(index, 0, obj)
+    queue.splice(index, 0, obj)
 
-    ## if nestedIndex is either undefined or 0
-    ## then we know we're processing regular commands
-    ## and not splicing in the middle of our commands
-    if not nestedIndex
-      @defer(@run)
+    Cypress.action("cy:command:enqueued", obj)
 
-    return @
+  getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
+    return null if not command
 
-  _contains: ($el) ->
-    doc = @privateState("document")
+    ## push these onto the beginning of the commands array
+    memo.unshift(command)
 
-    contains = (el) ->
-      $.contains(doc, el)
+    ## break and return the memo
+    if command.get("type") is "parent" or cy.isInDom(command.get("subject"))
+      return memo
 
-    if utils.hasDocument($el)
-      ## change $el to be the root
-      ## document element
-      $el = $el.documentElement
+    getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
-    ## either see if the raw element itself
-    ## is contained in the document
-    if _.isElement($el)
-      contains($el)
-    else
-      return false if $el.length is 0
+  removeSubject = ->
+    state("subject", undefined)
 
-      ## or all the elements in the collection
-      _.every $el.toArray(), contains
+  doneEarly = ->
+    stopped = true
 
-  _checkForNewChain: (chainerId) ->
-    ## dont do anything if this isnt even defined
-    return if _.isUndefined(chainerId)
+    ## we only need to worry about doneEarly when
+    ## it comes from a manual event such as stopping
+    ## Cypress or when we yield a (done) callback
+    ## and could arbitrarily call it whenever we want
+    p = state("promise")
 
-    @state("chainerId", chainerId)
+    ## if our outer promise is pending
+    ## then cancel outer and inner
+    ## and set canceled to be true
+    if (p and p.isPending())
+      state("canceled", true)
+      state("cancel")()
 
-    # ## if we dont have a current chainerId
-    # ## then set one
-    # if not id = @state("chainerId")
-    #   @state("chainerId", chainerId)
-    # else
-    #   ## else if we have one currently and
-    #   ## it doesnt match then nuke our subject
-    #   ## since we've started a new chain
-    #   ## and reset our chainerId
-    #   if id isnt chainerId
-    #     @state("chainerId", chainerId)
-    #     @_removeSubject()
+    cleanup()
 
-  ## the command method is useful for immediately
-  ## executing another command without enqueing it
-  execute: (name, args...) ->
-    fn = @[name]
+  cleanup = ->
+    ## cleanup could be called during a 'stop' event which
+    ## could happen in between a runnable because they are async
+    if state("runnable")
+      ## make sure we don't ever time out this runnable now
+      timeouts.clearTimeout()
 
-    Promise.resolve(
-      fn.immediately.apply(@, args)
-    )
-    .cancellable()
+    ## reset the nestedIndex back to null
+    state("nestedIndex", null)
 
-  defer: (fn) ->
-    @clearTimeout(@state("timerId"))
+    ## also reset recentlyReady back to null
+    state("recentlyReady", null)
 
-    ## do not queue up any new commands if
-    ## we've already been aborted!
-    return if @_aborted
+    ## and forcibly move the index needle to the
+    ## end in case we have after / afterEach hooks
+    ## which need to run
+    state("index", queue.length)
 
-    @state "timerId", setImmediate _.bind(fn, @)
+  fail = (err, runnable) ->
+    stopped = true
 
-  hook: (name) ->
-    @privateState("hookName", name)
+    ## store the error on state now
+    state("error", err)
 
-  ## returns the current chain so you can continue
-  ## chaining off of cy without breaking the current
-  ## subject
-  chain: ->
-    utils.throwErrByPath("chain.removed")
+    finish = (err) ->
+      ## if we have an async done callback
+      ## we have an explicit (done) callback and
+      ## we aren't attached to the cypress command queue
+      ## promise chain and throwing the error would only
+      ## result in an unhandled rejection
+      if d = state("done")
+        ## invoke it with err
+        return d(err)
 
-  ## figures out if the object is cy like
-  isCy: (obj) ->
-    utils.isInstanceOf(obj, $Cy) or utils.isInstanceOf(obj, $Chainer)
+      ## else we're connected to the promise chain
+      ## and need to throw so this bubbles up
+      throw err
 
-  _setWindowDocumentProps: (contentWindow) ->
+    ## if we have a "fail" handler
+    ## 1. catch any errors it throws and fail the test
+    ## 2. otherwise swallow any errors
+    ## 3. but if the test is not ended with a done()
+    ##    then it should fail
+    ## 4. and tests without a done will pass
+
+    ## if we dont have a "fail" handler
+    ## 1. callback with state("done") when async
+    ## 2. throw the error for the promise chain
+
     try
-      @privateState("window",   contentWindow)
-      @privateState("document", contentWindow.document)
-    catch e
-      ## catch errors associated to cross origin iframes
-      if ready = @state("ready")
-        ready.reject(e)
-      else
-        @fail(e)
+      ## collect all of the callbacks for 'fail'
+      rets = Cypress.action("cy:fail", err, state("runnable"))
+    catch err2
+      ## and if any of these throw synchronously immediately error
+      finish(err2)
 
-      ## indicate setting window/doc props failed
-      return false
+    ## bail if we had callbacks attached
+    return if rets.length
 
-    return true
+    ## else figure out how to finisht this failure
+    return finish(err)
 
-  _setRemoteIframeProps: ($iframe) ->
-    @privateState("$remoteIframe", $iframe)
+  cy = {
+    id: _.uniqueId("cy")
 
-    return @_setWindowDocumentProps($iframe.prop("contentWindow"))
+    ## synchrounous querying
+    $$
 
-  _setRunnable: (runnable, hookName) ->
-    runnable.startedAt = new Date
+    state
 
-    if _.isFinite(timeout = @Cypress.config("defaultCommandTimeout"))
-      runnable.timeout timeout
+    ## command queue instance
+    queue
 
-    @hook(hookName)
+    ## errors sync methods
+    fail
 
-    ## we store runnable as a property because
-    ## we can't allow it to be reset with props
-    ## since it is long lived (page events continue)
-    ## after the tests have finished
-    @privateState("runnable", runnable)
+    ## chai expect sync methods
+    expect
 
-    return @
+    ## is cy
+    isCy
 
-  $$: (selector, context) ->
-    context ?= @privateState("document")
-    new $.fn.init selector, context
+    isStopped
 
-  _.extend $Cy.prototype, Backbone.Events
+    ## has element in dom sync
+    isInDom: elements.isInDom
 
-  ["_", "$", "Promise", "Blob", "moment"].forEach (lib) ->
-    Object.defineProperty $Cy.prototype, lib, {
+    ## timeout sync methods
+    timeout: timeouts.timeout
+    clearTimeout: timeouts.clearTimeout
+
+    ## stability sync methods
+    isStable: stability.isStable
+    whenStable: stability.whenStable
+
+    ## xhr sync methods
+    getRequestsByAlias: xhrs.getRequestsByAlias
+    getIndexedXhrByAlias: xhrs.getIndexedXhrByAlias
+
+    ## alias sync methods
+    getAlias: aliases.getAlias
+    addAlias: aliases.addAlias
+    validateAlias: aliases.validateAlias
+    getNextAlias: aliases.getNextAlias
+    aliasNotFoundFor: aliases.aliasNotFoundFor
+    getXhrTypeByAlias: aliases.getXhrTypeByAlias
+
+    ## location sync methods
+    getRemoteLocation: location.getRemoteLocation
+
+    ## jquery sync methods
+    getRemotejQueryInstance: jquery.getRemotejQueryInstance
+
+    ## snapshots sync methods
+    createSnapshot: snapshots.createSnapshot
+
+    ## retry sync methods
+    retry: retries.retry
+
+    ## coordinates sync methods
+    getAbsoluteCoordinates: coordinates.getAbsoluteCoordinates
+    getElementAtCoordinates: coordinates.getElementAtCoordinates
+    getAbsoluteCoordinatesRelativeToXY: coordinates.getAbsoluteCoordinatesRelativeToXY
+
+    ## assertions sync methods
+    assert: assertions.assert
+    verifyUpcomingAssertions: assertions.verifyUpcomingAssertions
+
+    ## ensure sync methods
+    ensureSubject: ensures.ensureSubject
+    ensureParent: ensures.ensureParent
+    ensureDom: ensures.ensureDom
+    ensureExistence: ensures.ensureExistence
+    ensureElExistence: ensures.ensureElExistence
+    ensureVisibility: ensures.ensureVisibility
+    ensureDescendents: ensures.ensureDescendents
+    ensureReceivability: ensures.ensureReceivability
+    ensureValidPosition: ensures.ensureValidPosition
+    ensureScrollability: ensures.ensureScrollability
+    ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating
+
+    initialize: ($autIframe) ->
+      setRemoteIframeProps($autIframe, state)
+
+      ## dont need to worry about a try/catch here
+      ## because this is during initialize and its
+      ## impossible something is wrong here
+      setWindowDocumentProps(getContentWindow($autIframe), state)
+
+      ## initially set the content window listeners too
+      ## so we can tap into all the normal flow of events
+      ## like before:unload, navigation events, etc
+      contentWindowListeners(getContentWindow($autIframe))
+
+      ## the load event comes from the autIframe anytime any window
+      ## inside of it loads.
+      ## when this happens we need to check for cross origin errors
+      ## by trying to talk to the contentWindow document to see if
+      ## its accessible.
+      ## when we find ourselves in a cross origin situation, then our
+      ## proxy has not injected Cypress.action('before:window:load')
+      ## so Cypress.onBeforeAppWindowLoad() was never called
+      $autIframe.on "load", ->
+        ## if setting these props failed
+        ## then we know we're in a cross origin failure
+        try
+          setWindowDocumentProps(getContentWindow($autIframe), state)
+
+          ## we may need to update the url now
+          urlNavigationEvent("load")
+
+          ## we normally DONT need to reapply contentWindow listeners
+          ## because they would have been automatically applied during
+          ## onBeforeAppWindowLoad, but in the case where we visited
+          ## about:blank in a visit, we do need these
+          contentWindowListeners(getContentWindow($autIframe))
+
+          Cypress.action("app:window:load", state("window"))
+
+          ## we are now stable again which is purposefully
+          ## the last event we call here, to give our event
+          ## listeners time to be invoked prior to moving on
+          stability.isStable(true, "load")
+        catch err
+          ## we failed setting the remote window props
+          ## which means we're in a cross domain failure
+          ## check first to see if you have a callback function
+          ## defined and let the page load change the error
+          if onpl = state("onPageLoadErr")
+            err = onpl(err)
+
+          ## and now reject with it
+          if r = state("reject")
+            r(err)
+
+    stop: ->
+      ## don't do anything if we've already stopped
+      if stopped
+        return
+
+      doneEarly()
+
+    reset: ->
+      stopped = false
+
+      s = state()
+
+      backup = {
+        window: s.window
+        document: s.document
+        $autIframe: s.$autIframe
+      }
+
+      ## reset state back to empty object
+      state.reset()
+
+      ## and then restore these backed up props
+      state(backup)
+
+      queue.reset()
+
+      cy.removeAllListeners()
+
+    addCommandSync: (name, fn) ->
+      cy[name] = ->
+        fn.apply(runnableCtx(), arguments)
+
+    addChainer: (name, fn) ->
+      ## add this function to our chainer class
+      $Chainer.add(name, fn)
+
+    addCommand: ({name, fn, type, enforceDom}) ->
+      ## TODO: prob don't need this anymore
+      commandFns[name] = fn
+
+      prepareSubject = (firstCall, args) =>
+        ## if this is the very first call
+        ## on the chainer then make the first
+        ## argument undefined (we have no subject)
+        if firstCall
+          removeSubject()
+
+        subject = state("subject")
+
+        if enforceDom
+          cy.ensureDom(subject, name)
+
+        args.unshift(subject)
+
+        ## TODO: handle this event
+        Cypress.action("cy:next:subject:prepared", subject, args)
+
+        args
+
+      wrap = (firstCall) =>
+        fn = commandFns[name]
+        wrapped = wrapByType(fn, firstCall)
+        wrapped.originalFn = fn
+        wrapped
+
+      wrapByType = (fn, firstCall) ->
+        switch type
+          when "parent"
+            return fn
+
+          when "dual", "utility"
+            _.wrap fn, (orig, args...) ->
+              ## push the subject into the args
+              args = prepareSubject(firstCall, args)
+
+              return orig.apply(@, args)
+
+          when "child", "assertion"
+            _.wrap fn, (orig, args...) ->
+              if firstCall
+                $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
+                  args: {
+                    cmd:  name
+                    args: $utils.stringify(args)
+                  }
+                })
+
+              ## push the subject into the args
+              args = prepareSubject(firstCall, args)
+
+              subject = args[0]
+
+              ret = orig.apply(@, args)
+
+              return ret ? subject
+
+      cy[name] = (args...) ->
+        ensures.ensureRunnable()
+
+        ## this is the first call on cypress
+        ## so create a new chainer instance
+        chain = $Chainer.create(name, args)
+
+        ## store the chain so we can access it later
+        state("chain", chain)
+
+        return chain
+
+      cy.addChainer name, (chainer, args) ->
+        { firstCall, chainerId } = chainer
+
+        ## dont enqueue / inject any new commands if
+        ## onInjectCommand returns false
+        onInjectCommand = state("onInjectCommand")
+
+        if _.isFunction(onInjectCommand)
+          return if onInjectCommand.call(cy, name, args...) is false
+
+        enqueue({
+          name
+          args
+          type
+          chainerId
+          fn: wrap(firstCall)
+        })
+
+        return true
+
+    now: (name, args...) ->
+      Promise.resolve(
+        commandFns[name].apply(cy, args)
+      )
+
+    replayCommandsFrom: (current) ->
+      ## reset each chainerId to the
+      ## current value
+      chainerId = state("chainerId")
+
+      insert = (command) ->
+        command.set("chainerId", chainerId)
+
+        ## clone the command to prevent
+        ## mutating its properties
+        enqueue(command.clone())
+
+      ## - starting with the aliased command
+      ## - walk up to each prev command
+      ## - until you reach a parent command
+      ## - or until the subject is in the DOM
+      ## - from that command walk down inserting
+      ##   every command which changed the subject
+      ## - coming upon an assertion should only be
+      ##   inserted if the previous command should
+      ##   be replayed
+
+      commands = getCommandsUntilFirstParentOrValidSubject(current)
+
+      if commands
+        initialCommand = commands.shift()
+
+        commandsToInsert = _.reduce(commands, (memo, command, index) ->
+          push = ->
+            memo.push(command)
+
+          switch
+            when command.get("type") is "assertion"
+              ## if we're an assertion and the prev command
+              ## is in the memo, then push this one
+              if command.get("prev") in memo
+                push()
+
+            when command.get("subject") isnt initialCommand.get("subject")
+              ## when our subjects dont match then
+              ## reset the initialCommand to this command
+              ## so the next commands can compare against
+              ## this one to figure out the changing subjects
+              initialCommand = command
+
+              push()
+
+          return memo
+
+        , [initialCommand])
+
+        for c in commandsToInsert
+          insert(c)
+
+      ## prevent loop comprehension
+      return null
+
+    onBeforeAppWindowLoad: (contentWindow) ->
+      ## we silence the console when running headlessly
+      ## because console logs are kept around in memory for
+      ## inspection via the developer
+      if not config("isInteractive")
+        silenceConsole(contentWindow)
+
+      ## we set window / document props before the window load event
+      ## so that we properly handle events coming from the application
+      ## from the time that happens BEFORE the load event occurs
+      setWindowDocumentProps(contentWindow, state)
+
+      urlNavigationEvent("before:load")
+
+      contentWindowListeners(contentWindow)
+
+    onSpecWindowUncaughtException: ->
+      ## create the special uncaught exception err
+      err = errors.createUncaughtException.apply(null, arguments)
+
+      if runnable = state("runnable")
+        ## we're using an explicit done callback here
+        if d = state("done")
+          d(err)
+
+        if r = state("reject")
+          return r(err)
+
+      ## else pass the error along
+      return err
+
+    onUncaughtException: ->
+      runnable = state("runnable")
+
+      ## don't do anything if we don't have a current runnable
+      return if not runnable
+
+      ## create the special uncaught exception err
+      err = errors.createUncaughtException.apply(null, arguments)
+
+      results = Cypress.action("cy:uncaught:exception", err, runnable)
+
+      ## dont do anything if any of our uncaught:exception
+      ## listeners returned false
+      return if _.some(results, returnedFalse)
+
+      ## do all the normal fail stuff and promise cancellation
+      ## but dont re-throw the error
+      if r = state("reject")
+        r(err)
+
+      ## per the onerror docs we need to return true here
+      ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+      ## When the function returns true, this prevents the firing of the default event handler.
+      return true
+
+    getStyles: ->
+      snapshots.getStyles()
+
+    checkForEndedEarly: ->
+      ## if our index is above 0 but is below the commands.length
+      ## then we know we've ended early due to a done() and
+      ## we should throw a very specific error message
+      index = state("index")
+      if index > 0 and index < queue.length
+        errors.endedEarlyErr(index, queue)
+
+    setRunnable: (runnable, hookName) ->
+      state("hookName", hookName)
+
+      state("runnable", runnable)
+
+      state("ctx", runnable.ctx)
+
+      fn = runnable.fn
+
+      restore = ->
+        runnable.fn = fn
+
+      runnable.fn = ->
+        restore()
+
+        timeout = config("defaultCommandTimeout")
+
+        ## control timeouts on runnables ourselves
+        if _.isFinite(timeout)
+          timeouts.timeout(timeout)
+
+        ## store the current length of our queue
+        ## before we invoke the runnable.fn
+        currentLength = queue.length
+
+        try
+          ## if we have a fn.length that means we
+          ## are accepting a done callback and need
+          ## to change the semantics around how we
+          ## attach the run queue
+          if fn.length
+            originalDone = arguments[0]
+
+            arguments[0] = done = (err) ->
+              ## TODO: handle no longer error
+              ## when ended early
+              doneEarly()
+
+              originalDone(err)
+
+            ## store this done property
+            ## for async tests
+            state("done", done)
+
+          ret = fn.apply(@, arguments)
+
+          ## if we attached a done callback
+          ## and returned a promise then we
+          ## need to automatically bind to
+          ## .catch() and return done(err)
+          ## TODO: this has gone away in mocha 3.x.x
+          ## due to overspecifying a resolution.
+          ## in those cases we need to remove
+          ## returning a promise
+          if fn.length and ret and ret.catch
+            ret = ret.catch(done)
+
+          ## if we returned a value from fn
+          ## and enqueued some new commands
+          ## and the value isnt currently cy
+          if ret and (queue.length > currentLength) and (not isCy(ret))
+            debugger
+
+          ## if we didn't fire up any cy commands
+          ## then send back mocha what was returned
+          if queue.length is currentLength
+            return ret
+
+          ## kick off the run!
+          ## and return this outer
+          ## bluebird promise
+          return cy.run()
+
+        catch err
+          ## if our runnable.fn throw synchronously
+          ## then it didnt fail from a cypress command
+          ## but we should still teardown and handle
+          ## the error
+          fail(err, runnable)
+
+    run: ->
+      next = ->
+        ## bail if we've been told to abort in case
+        ## an old command continues to run after
+        if stopped
+          return
+
+        ## start at 0 index if we dont have one
+        index = state("index") ? state("index", 0)
+
+        command = queue.at(index)
+
+        ## if the command should be skipped
+        ## just bail and increment index
+        ## and set the subject
+        ## TODO DRY THIS LOGIC UP
+        if command and command.get("skip")
+          ## must set prev + next since other
+          ## operations depend on this state being correct
+          command.set({prev: queue.at(index - 1), next: queue.at(index + 1)})
+          state("index", index + 1)
+          state("subject", command.get("subject"))
+
+          return next()
+
+        ## if we're at the very end
+        if not command
+
+          ## trigger queue is almost finished
+          Cypress.action("cy:command:queue:before:end")
+
+          ## we need to wait after all commands have
+          ## finished running if the application under
+          ## test is no longer stable because we cannot
+          ## move onto the next test until its finished
+          return stability.whenStable ->
+            Cypress.action("cy:command:queue:end")
+
+            return null
+
+        ## store the previous timeout
+        prevTimeout = timeouts.timeout()
+
+        ## store the current runnable
+        runnable = state("runnable")
+
+        Cypress.action("cy:command:start", command)
+
+        cy
+        .set(command)
+        .then ->
+          ## each successful command invocation should
+          ## always reset the timeout for the current runnable
+          ## unless it already has a state.  if it has a state
+          ## and we reset the timeout again, it will always
+          ## cause a timeout later no matter what.  by this time
+          ## mocha expects the test to be done
+          timeouts.timeout(prevTimeout) if not runnable.state
+
+          ## mutate index by incrementing it
+          ## this allows us to keep the proper index
+          ## in between different hooks like before + beforeEach
+          ## else run will be called again and index would start
+          ## over at 0
+          state("index", index += 1)
+
+          Cypress.action("cy:command:end", command)
+
+          if fn = state("onPaused")
+            new Promise (resolve) ->
+              fn(resolve)
+            .then(next)
+          else
+            next()
+
+      inner = null
+
+      ## this ends up being the parent promise wrapper
+      promise = new Promise((resolve, reject) ->
+        ## bubble out the inner promise
+        ## we must use a resolve(null) here
+        ## so the outer promise is first defined
+        ## else this will kick off the 'next' call
+        ## too soon and end up running commands prior
+        ## to promise being defined
+        inner = Promise
+        .resolve(null)
+        .then(next)
+        .then(resolve)
+        .catch(reject)
+
+        ## can't use onCancel argument here because
+        ## its called asynchronously
+
+        ## when we manually reject our outer promise we
+        ## have to immediately cancel the inner one else
+        ## it won't be notified and its callbacks will
+        ## continue to be invoked
+        ## normally we don't have to do this because rejections
+        ## come from the inner promise and bubble out to our outer
+        ##
+        ## but when we manually reject the outer promise we
+        ## have to go in the opposite direction from outer -> inner
+        rejectOuterAndCancelInner = (err) ->
+          inner.cancel()
+          reject(err)
+
+        state("resolve", resolve)
+        state("reject", rejectOuterAndCancelInner)
+      )
+      .catch((err) ->
+        ## since this failed this means that a
+        ## specific command failed and we should
+        ## highlight it in red or insert a new command
+        errors.commandRunningFailed(err)
+
+        fail(err, state("runnable"))
+      )
+      .finally(cleanup)
+
+      ## cancel both promises
+      cancel = ->
+        promise.cancel()
+        inner.cancel()
+
+        ## notify the world
+        Cypress.action("cy:canceled")
+
+      state("cancel", cancel)
+      state("promise", promise)
+
+      ## return this outer bluebird promise
+      return promise
+
+      ## TODO: handle this event
+      # @trigger("set", command)
+
+    set: (command) ->
+      ## bail here prior to creating a new promise
+      ## because we could have stopped / canceled
+      ## prior to ever making it through our first
+      ## command
+      return if stopped
+
+      state("current", command)
+      state("chainerId", command.get("chainerId"))
+
+      stability.whenStable ->
+        ## TODO: handle this event
+        # @trigger "invoke:start", command
+
+        state "nestedIndex", state("index")
+
+        command.get("args")
+
+      ## allow promises to be used in the arguments
+      ## and wait until they're all resolved
+      .all()
+
+      .then (args) =>
+        ## if the first argument is a function and it has an _invokeImmediately
+        ## property that means we are supposed to immediately invoke
+        ## it and use its return value as the argument to our
+        ## current command object
+        if _.isFunction(args[0]) and args[0]._invokeImmediately
+          args[0] = args[0].call(@)
+
+        ## run the command's fn with runnable's context
+        ret = command.get("fn").apply(state("ctx"), args)
+
+        ## allow us to immediately tap into
+        ## return value of our command
+        ## TODO: handle this event
+        # @trigger "command:returned:value", command, ret
+
+        ## we cannot pass our cypress instance or our chainer
+        ## back into bluebird else it will create a thenable
+        ## which is never resolved
+        if isCy(ret) then null else ret
+
+      .then (subject) =>
+        ## if ret is a DOM element and its not an instance of our own jQuery
+        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+          ## set it back to our own jquery object
+          ## to prevent it from being passed downstream
+          subject = $(subject)
+
+        command.set({ subject: subject })
+
+        ## end / snapshot our logs
+        ## if they need it
+        command.finishLogs()
+
+        ## trigger an event here so we know our
+        ## command has been successfully applied
+        ## and we've potentially altered the subject
+        ## TODO: handle this event
+        # @trigger "invoke:subject", subject, command
+
+        ## reset the nestedIndex back to null
+        state("nestedIndex", null)
+
+        ## also reset recentlyReady back to null
+        state("recentlyReady", null)
+
+        state("subject", subject)
+
+        return subject
+  }
+
+  _.each privateProps, (obj, key) =>
+    Object.defineProperty(cy, key, {
       get: ->
-        utils.warning("cy.#{lib} is now deprecated.\n\nThis object is now attached to 'Cypress' and not 'cy'.\n\nPlease update and use: Cypress.#{lib}")
-        Cypress = @Cypress ? $Cypress.prototype
+        $utils.throwErrByPath("miscellaneous.private_property", {
+          args: obj
+        })
+    })
 
-        if lib is "$"
-          ## rebind the context of $
-          ## to Cypress else it will be called
-          ## with our cy instance
-          _.bind(Cypress[lib], Cypress)
-        else
-          Cypress[lib]
-    }
+  ## make cy global in the specWindow
+  specWindow.cy = cy
 
-  @extend = (key, val) ->
-    if _.isObject(key)
-      obj = key
-    else
-      obj = {}
-      obj[key] = val
+  $Events.extend(cy)
 
-    _.extend @prototype, obj
+  return cy
 
-  @set = (Cypress, runnable, hookName) ->
-    return if not cy = Cypress.cy
-
-    cy._setRunnable(runnable, hookName)
-
-  @create = (Cypress, specWindow) ->
-    ## clear out existing listeners
-    ## if we already exist!
-    if existing = Cypress.cy
-      existing.stopListening()
-
-    Cypress.cy = window.cy = new $Cy Cypress, specWindow
-
-require("../cy/aliases")($Cy)
-require("../cy/coordinates")($Cy)
-require("../cy/ensure")($Cy)
-require("../cy/errors")($Cy)
-require("../cy/jquery")($Cy)
-require("../cy/listeners")($Cy)
-require("../cy/props")($Cy)
-require("../cy/retry")($Cy)
-require("../cy/timeout")($Cy)
-require("../cy/url")($Cy)
-
-module.exports = $Cy
+module.exports = {
+  create
+}

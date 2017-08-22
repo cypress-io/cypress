@@ -181,9 +181,9 @@ Yes. You can read more {% url "here" writing-and-organizing-tests#Hooks %}.
 
 ## {% fa fa-angle-right %} I tried to install Cypress in my CI, but I get the error: `EACCES: permission denied`.
 
-First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress-cli` tool" command-line %}.
+First, make sure you have {% url "`node`" https://nodejs.org %} installed on your system. `npm` is a `node` package that is installed globally by default when you install node and is required to install our {% url "`cypress` npm  package" command-line %}.
 
-Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress-cli`.
+Next, you'd want to check that you have the proper permissions for installing on your system or you may need to run `sudo npm install cypress`.
 
 ## {% fa fa-angle-right %} Is there a way to test that a file got downloaded? I want to test that a button click triggers a download.
 
@@ -225,6 +225,6 @@ This is normal. Cypress modifies the traffic between your server and the browser
 
 ## Is there an option to run Cypress with DevTools open? We want to track network and console issues.
 
-No. This is definitely the motivation behind {% issue 448 "this open issue" %}, but there is not a way to run Cypress headlessly with DevTools open. 
+No. This is definitely the motivation behind {% issue 448 "this open issue" %}, but there is not a way to run Cypress headlessly with DevTools open.
 
 You may try running the tests locally and {% url "select the Electron browser" launching-browsers#Electron-Browser %}, that's as close as you'll get with DevTools open and replicating the environment that was run headlessly.

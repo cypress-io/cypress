@@ -9,9 +9,11 @@ human        = require("human-interval")
 morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
+snapshot     = require("snap-shot-it")
 Fixtures     = require("./fixtures")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
+stdout       = require("#{root}../lib/stdout")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 settings     = require("#{root}../lib/util/settings")
@@ -23,6 +25,31 @@ env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
+
+stackTraceLinesRe = /(\s+)at\s(.+)/g
+
+replaceStackTraceLines = (str) ->
+  str.replace(stackTraceLinesRe, "$1at stack trace line")
+
+normalizeStdout = (str) ->
+  ## remove all of the dynamic parts of stdout
+  ## to normalize against what we expected
+  str
+  .replace(/\(\d{1,5}m?s\)/g, "(123ms)")
+  .replace(/\(\d{1,2}s\)/g, "(10s)")
+  .replace(/coffee-\d{3}/g, "coffee-456")
+  .replace(/\/.+\/cypress\/videos\/(.+)\.mp4/g, "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4")
+  .replace(/\/.+\/cypress\/screenshots/g, "/foo/bar/.projects/e2e/cypress/screenshots")
+  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
+  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
+  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
+  .replace(/\r/g, "")
+  .split("\n")
+  .map(replaceStackTraceLines)
+  .join("\n")
+  .split(e2ePath)
+  .join("/foo/bar/.projects/e2e")
+
 
 startServer = (obj) ->
   {onServer, port} = obj
@@ -155,6 +182,12 @@ module.exports = {
 
     new Promise (resolve, reject) ->
       sp = cp.spawn "node", args, {env: _.omit(env, "CYPRESS_DEBUG")}
+
+      ## pipe these to our current process
+      ## so we can see them in the terminal
+      sp.stdout.pipe(process.stdout)
+      sp.stderr.pipe(process.stderr)
+
       sp.stdout.on "data", (buf) ->
         stdout += buf.toString()
       sp.stderr.on "data", (buf) ->
@@ -166,6 +199,14 @@ module.exports = {
             expect(expected).to.eq(code)
           catch err
             return reject(err)
+
+        ## snapshot the stdout!
+        if options.snapshot
+          try
+            str = normalizeStdout(stdout)
+            snapshot(str)
+          catch err
+            reject(err)
 
         resolve({
           code:   code

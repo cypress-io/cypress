@@ -1,6 +1,7 @@
+/* global Cypress */
 (function () {
-  Cypress.trigger("script:error", {
-    type: "SUPPORT_FOLDER",
-    error: ""
+  Cypress.action('spec:script:error', {
+    type: 'SUPPORT_FOLDER',
+    error: '',
   })
 }())

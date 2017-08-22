@@ -1,25 +1,35 @@
+_ = require("lodash")
 lolex = require("lolex")
 
-class $Clock
-  constructor: (win, now, @_methods) ->
-    @_lolexClock = lolex.install(win, now, @_methods)
+install = (win, now, methods) ->
+  lolex.install(win, now, methods)
 
-  tick: (ms) ->
-    @_lolexClock.tick(ms)
+create = (win, now, methods) ->
+  clock = install(win, now, methods)
 
-  restore: ->
-    @_lolexClock.uninstall()
+  tick = (ms) ->
+    clock.tick(ms)
 
-  _bind: (win) ->
-    @_lolexClock = lolex.install(win, @_lolexClock.now, @_methods)
+  restore = ->
+    clock.uninstall()
 
-  _details: ->
-    {
-      now: @_lolexClock.now
-      methods: @_lolexClock.methods
-    }
+  bind = (win) ->
+    clock = install(win, now, methods)
 
-  @create = (args...)->
-    new $Clock(args...)
+  details = ->
+    _.pick(clock, "now", "methods")
 
-module.exports = $Clock
+  return {
+    tick
+
+    restore
+
+    bind
+
+    details
+
+  }
+
+module.exports = {
+  create
+}

@@ -51,7 +51,7 @@ describe "lib/controllers/spec", ->
     @sandbox.stub(errors, "log")
     preprocessor.getFile.rejects(new Error("Reason request failed"))
 
-    @handle(specName, {isHeadless: true}).then =>
+    @handle(specName, {isTextTerminal: true}).then =>
       expect(errors.log).to.be.called
       expect(errors.log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
       expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")

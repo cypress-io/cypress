@@ -20,7 +20,7 @@ module.exports = {
       log("send #{filePath}")
       res.sendFile(filePath)
     .catch (err) ->
-      if config.isHeadless
+      if config.isTextTerminal
         ## bluebird made a change in 3.4.7 where they handle
         ## SyntaxErrors differently here
         ## https://github.com/petkaantonov/bluebird/pull/1295

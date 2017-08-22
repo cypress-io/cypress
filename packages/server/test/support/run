@@ -28,4 +28,6 @@ xvfb-maybe --xvfb-run-args "-s \"-screen 0 1280x1024x8\"" mocha $SPEC \
 --fgrep "$FGREP" \
 --timeout 10000 \
 --recursive \
---compilers ts:@packages/ts/register,coffee:@packages/coffee/register
+--compilers ts:@packages/ts/register,coffee:@packages/coffee/register \
+--reporter mocha-multi-reporters \
+--reporter-options configFile=../../mocha-reporter-config.json

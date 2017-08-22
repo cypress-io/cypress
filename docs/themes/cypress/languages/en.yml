@@ -147,6 +147,12 @@ sidebar:
     within: within
     wrap: wrap
     writefile: writeFile
+    events: Events
+    catalog-of-events: Catalog of Events
+    on: on
+    once: once
+    removelistener: removeListener
+    removealllisteners: removeAllListeners
     utilities: Utilities
     _: _
     $: $
@@ -159,7 +165,7 @@ sidebar:
     env: env
     custom-commands: Commands
     cookies: Cookies
-    dom: Dom
+    dom: dom
     cypress-server: Server
   examples:
     recipes: Recipes

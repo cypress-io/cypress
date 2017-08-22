@@ -1,13 +1,13 @@
 $ = require("jquery")
 _ = require("lodash")
+moment = require("moment")
 
+$Location = require("./location")
 errorMessages = require("./error_messages")
 
 tagOpen     = /\[([a-z\s='"-]+)\]/g
 tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
-
-CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
 defaultOptions = {
   delay: 10
@@ -15,8 +15,8 @@ defaultOptions = {
   timeout: null
   interval: null
   multiple: false
-  waitOnAnimations: null
-  animationDistanceThreshold: null
+  waitForAnimations: true
+  animationDistanceThreshold: 5
 }
 
 module.exports = {
@@ -28,6 +28,16 @@ module.exports = {
 
   logInfo: (msgs...) ->
     console.info(msgs...)
+
+  cloneErr: (err) ->
+    err2 = new Error(err.message)
+    err2.name = err.name
+
+    for own prop, val of err
+      if not err2[prop]
+        err2[prop] = val
+
+    return err2
 
   throwErr: (err, options = {}) ->
     if _.isString(err)
@@ -113,7 +123,7 @@ module.exports = {
     obj = @normalizeObjWithLength(obj)
 
     str = _.reduce obj, (memo, value, key) =>
-      memo.push key.toLowerCase() + ": " + @_stringify(value)
+      memo.push "#{key}".toLowerCase() + ": " + @_stringify(value)
       memo
     , []
 
@@ -225,7 +235,8 @@ module.exports = {
     if @hasDocument(el)
       return "<document>"
 
-    $el = if _.isElement(el) then $(el) else el
+    ## convert this to jquery if its not already one
+    $el = if @isJqueryInstance(el) then el else $(el)
 
     switch form
       when "long"
@@ -276,13 +287,11 @@ module.exports = {
     ## or double quotes
     ("" + text).replace(quotesRe, "\\$1")
 
-  getCypressNamespace: (obj) ->
-    obj and obj[CYPRESS_OBJECT_NAMESPACE]
+  normalizeNumber: (num) ->
+    parsed = Number(num)
 
-  ## backs up an original object to another
-  ## by going through the cypress object namespace
-  setCypressNamespace: (obj, original) ->
-    obj[CYPRESS_OBJECT_NAMESPACE] = original
+    ## return num if this isNaN else return parsed
+    if _.isNaN(parsed) then num else parsed
 
   ## clientX and clientY by their definition
   ## are calculated from viewport edge
@@ -306,4 +315,42 @@ module.exports = {
       break unless val
     val
 
+  isCommandFromThenable: (cmd) ->
+    args = cmd.get("args")
+
+    cmd.get("name") is "then" and
+      args.length is 3 and
+        _.every(args, _.isFunction)
+
+  wrapInjQuery: (obj) ->
+    if @isJqueryInstance(obj) then obj else $(obj)
+
+  isJqueryInstance: (obj) ->
+    ## does it have the jquery property and is the
+    ## constructor a function?
+    !!(obj and obj.jquery and _.isFunction(obj.constructor))
+
+  addTwentyYears: ->
+    moment().add(20, "years").unix()
+
+  locHref: (url, win) ->
+    win.location.href = url
+
+  locReplace: (win, url) ->
+    win.location.replace(url)
+
+  locToString: (win) ->
+    win.location.toString()
+
+  locExisting: ->
+    $Location.create(window.location.href)
+
+  iframeSrc: ($autIframe, url) ->
+    $autIframe.prop("src", url)
+
+  getDistanceBetween: (point1, point2) ->
+    deltaX = point1.x - point2.x
+    deltaY = point1.y - point2.y
+
+    Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 }

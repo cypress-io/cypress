@@ -104,8 +104,12 @@
     }
 
     .paused-label {
-      background-color: #CC4239;
+      align-items: center;
       margin-right: 5px;
+
+      label {
+        background-color: #CC4239;
+      }
     }
 
     i {

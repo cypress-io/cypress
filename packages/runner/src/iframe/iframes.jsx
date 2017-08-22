@@ -1,10 +1,9 @@
-/* global $Cypress */
-
 import Promise from 'bluebird'
 import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import { $ } from '@packages/driver'
 
 import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
@@ -14,8 +13,6 @@ import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
 import windowUtil from '../lib/window-util'
-
-const $ = $Cypress.$
 
 @observer
 export default class Iframes extends Component {
@@ -96,8 +93,8 @@ export default class Iframes extends Component {
     eventManager.setup(config, specPath)
 
     this._loadIframes(specPath)
-    .then(([specWindow, $autIframe]) => {
-      eventManager.run(specWindow, $autIframe)
+    .then(($autIframe) => {
+      eventManager.initialize($autIframe, config)
     })
   }
 
@@ -118,7 +115,7 @@ export default class Iframes extends Component {
       }).appendTo($container)
 
       $specIframe.prop('src', specSrc).one('load', () => {
-        resolve([$specIframe[0].contentWindow, $autIframe])
+        resolve($autIframe)
       })
     })
   }
@@ -143,6 +140,14 @@ export default class Iframes extends Component {
       this.autIframe.highlightEl(snapshot, snapshotProps)
     } else {
       this.autIframe.removeHighlights()
+    }
+  }
+
+  componentDidUpdate () {
+    const cb = this.props.state.callbackAfterUpdate
+
+    if (cb) {
+      cb()
     }
   }
 

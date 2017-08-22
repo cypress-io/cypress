@@ -3,10 +3,9 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
-
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
@@ -14,21 +13,21 @@ module.exports = (Cypress, Commands) ->
         log: true
         force: false
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       consoleProps = {}
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = $Log.command
+        options._log = Cypress.log
           message: deltaOptions
           $el: options.$el
           consoleProps: ->
             ## merge into consoleProps without mutating it
             _.extend {}, consoleProps,
-              "Applied To": utils.getDomElements(options.$el)
+              "Applied To": $utils.getDomElements(options.$el)
               "Options":    deltaOptions
 
         options._log.snapshot("before", {next: "after"})
@@ -45,11 +44,11 @@ module.exports = (Cypress, Commands) ->
       ## behavior
 
       if not options.$el.is("select")
-        node = utils.stringifyElement(options.$el)
-        utils.throwErrByPath "select.invalid_element", { args: { node } }
+        node = $utils.stringifyElement(options.$el)
+        $utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        utils.throwErrByPath "select.multiple_elements", { args: { num } }
+        $utils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -58,15 +57,15 @@ module.exports = (Cypress, Commands) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        utils.throwErrByPath "select.invalid_multiple"
+        $utils.throwErrByPath "select.invalid_multiple"
 
       getOptions = =>
         newLineRe = /\n/g
 
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
-          node = utils.stringifyElement(options.$el)
-          utils.throwErrByPath "select.disabled", { args: { node } }
+          node = $utils.stringifyElement(options.$el)
+          $utils.throwErrByPath "select.disabled", { args: { node } }
 
         values = []
         optionEls = []
@@ -109,19 +108,19 @@ module.exports = (Cypress, Commands) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          utils.throwErrByPath("select.multiple_matches", {
+          $utils.throwErrByPath("select.multiple_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         if not values.length
-          utils.throwErrByPath("select.no_matches", {
+          $utils.throwErrByPath("select.no_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
-            node = utils.stringifyElement($el)
-            utils.throwErrByPath("select.option_disabled", {
+            node = $utils.stringifyElement($el)
+            $utils.throwErrByPath("select.option_disabled", {
               args: { node }
             })
 
@@ -132,7 +131,7 @@ module.exports = (Cypress, Commands) ->
         .try(getOptions)
         .catch (err) =>
           options.error = err
-          @_retry(retryOptions, options)
+          cy.retry(retryOptions, options)
 
       Promise
       .try(retryOptions)
@@ -142,7 +141,7 @@ module.exports = (Cypress, Commands) ->
         ## preserve the selected values
         consoleProps.Selected = values
 
-        @execute("click", {
+        cy.now("click", options.$el, {
           $el: options.$el
           log: false
           verify: false
@@ -165,7 +164,7 @@ module.exports = (Cypress, Commands) ->
           Promise
             .resolve(optionEls) ## why cant we just pass these directly to .each?
             .each (optEl) =>
-              @execute("click", {
+              cy.now("click", optEl, {
                 $el: optEl
                 log: false
                 verify: false
@@ -173,7 +172,6 @@ module.exports = (Cypress, Commands) ->
                 timeout: options.timeout
                 interval: options.interval
               })
-            .cancellable()
             .then =>
               ## reset the selects value after we've
               ## fired all the proper click events
@@ -188,17 +186,13 @@ module.exports = (Cypress, Commands) ->
                 ## select based on the text, setting the val() will just
                 ## select the first one
                 selectedIndex = 0
-                console.log("optionEls:", optionEls)
                 _.each optionEls, ($el) ->
                   index = _.findIndex optionsObjects, (optionObject) ->
                     $el.text() is optionObject.originalText
-                  console.log('index:', index)
                   selectedIndex = index
                   $el.prop("selected", "selected")
 
-                console.log("selectedIndex:", selectedIndex)
                 options.$el[0].selectedIndex = selectedIndex
-                console.log("selectedOptions:", _.map optionEls, ($el) -> $el.get())
                 options.$el[0].selectedOptions = _.map optionEls, ($el) -> $el.get()
 
               input = new Event "input", {
@@ -217,7 +211,7 @@ module.exports = (Cypress, Commands) ->
               options.$el.get(0).dispatchEvent(change)
         ).then =>
           do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
+            cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
         })
   })

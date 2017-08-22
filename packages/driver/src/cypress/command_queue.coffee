@@ -13,7 +13,7 @@ class $CommandQueue
       matchesFilters = _.matches(filters)
 
       logs = _.filter logs, (log) ->
-        matchesFilters(log.attributes)
+        matchesFilters(log.get())
 
     return logs
 

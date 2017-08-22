@@ -211,8 +211,9 @@ describe "lib/cypress", ->
       statePath = null
       beforeEach ->
         # TODO switch to async file system calls
-        statePath = appData.path(formStatePath(@todosPath))
+        statePath = appData.projectsPath(formStatePath(@todosPath))
         rm(statePath) if exists(statePath)
+
       afterEach ->
         rm(statePath)
 
@@ -960,7 +961,7 @@ describe "lib/cypress", ->
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"])
       .then =>
-        expect(console.log).to.be.calledWithMatch('{"name":"@packages/server"')
+        expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
         @expectExitWith(0)
 
   context "--version", ->

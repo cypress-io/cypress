@@ -3,17 +3,16 @@ Promise = require("bluebird")
 
 { delay } = require("./utils")
 $Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
-
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     submit: (subject, options = {}) ->
       _.defaults options,
         log: true
         $el: subject
 
-      @ensureDom(options.$el)
+      cy.ensureDom(options.$el)
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously
@@ -22,24 +21,25 @@ module.exports = (Cypress, Commands) ->
       form = options.$el.get(0)
 
       if options.log
-        options._log = $Log.command
+        options._log = Cypress.log({
           $el: options.$el
           consoleProps: ->
-            "Applied To": utils.getDomElements(options.$el)
+            "Applied To": $utils.getDomElements(options.$el)
             Elements: options.$el.length
+        })
 
         options._log.snapshot("before", {next: "after"})
 
       if not options.$el.is("form")
-        node = utils.stringifyElement(options.$el)
-        word = utils.plural(options.$el, "contains", "is")
-        utils.throwErrByPath("submit.not_on_form", {
+        node = $utils.stringifyElement(options.$el)
+        word = $utils.plural(options.$el, "contains", "is")
+        $utils.throwErrByPath("submit.not_on_form", {
           onFail: options._log
           args: { node, word }
         })
 
       if (num = options.$el.length) and num > 1
-        utils.throwErrByPath("submit.multiple_forms", {
+        $utils.throwErrByPath("submit.multiple_forms", {
           onFail: options._log
           args: { num }
         })
@@ -55,17 +55,17 @@ module.exports = (Cypress, Commands) ->
       ## dont submit the form if our dispatched event was cancelled (false)
       form.submit() if dispatched
 
-      @_timeout(delay, true)
+      cy.timeout(delay, true)
 
       Promise
-        .delay(delay)
-        .then =>
-          do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions
-            })
+      .delay(delay, "submit")
+      .then =>
+        do verifyAssertions = =>
+          cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions
+          })
 
     fill: (subject, obj, options = {}) ->
-      utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
+      $utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
 
   })
