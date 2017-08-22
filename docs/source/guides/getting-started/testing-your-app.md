@@ -334,7 +334,7 @@ No. You shouldn't do that.
 {% note warning 'Anti-Pattern' %}
 Don't use your UI to build up state! It's enormously slow, cumbersome, and unnecessary.
 
-Read about {% url 'best practices' best-practices#Using-your-UI-to-Build-Up-State %} here.
+Read about {% url 'best practices' best-practices %} here.
 {% endnote %}
 
 Using your UI to **log in** is the *exact same scenario* as what we just described above. Logging in is just a prerequisite of state that comes before all of your other tests.
@@ -353,8 +353,7 @@ describe('The Dashboard Page', function(){
 
     // seed a user in the DB that we can control from our tests
     // assuming it generates a random password for us
-    cy
-      .request('POST', '/test/seed/user', { username: 'jane.lane' })
+    cy.request('POST', '/test/seed/user', { username: 'jane.lane' })
       .its('body')
       .as('currentUser')
   })
