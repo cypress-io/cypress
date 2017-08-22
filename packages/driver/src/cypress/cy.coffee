@@ -657,14 +657,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     getStyles: ->
       snapshots.getStyles()
 
-    checkForEndedEarly: ->
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = state("index")
-      if index > 0 and index < queue.length
-        errors.endedEarlyErr(index, queue)
-
     setRunnable: (runnable, hookName) ->
       state("hookName", hookName)
 

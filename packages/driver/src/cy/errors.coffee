@@ -25,28 +25,6 @@ create = (state, config, log) ->
           obj
     })
 
-  endedEarlyErr = (index, queue) ->
-    ## return if we already have an error
-    return if state("error")
-
-    commands = queue.slice(index).reduce (memo, cmd) =>
-      if $utils.isCommandFromThenable(cmd)
-        memo
-      else
-        memo.push "- " + cmd.stringify()
-        memo
-    , []
-
-    err = $utils.cypressErr(
-      $utils.errMessageByPath("miscellaneous.dangling_commands", {
-        numCommands: commands.length
-        commands:    commands.join('\n')
-      })
-    )
-    err.onFail = ->
-
-    commandRunningFailed(err)
-
   createUncaughtException = (msg, source, lineno, colno, err) ->
     current = state("current")
 
@@ -84,8 +62,6 @@ create = (state, config, log) ->
   return {
     ## submit a generic command error
     commandErr
-
-    endedEarlyErr
 
     commandRunningFailed
 
