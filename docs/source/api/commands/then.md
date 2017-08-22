@@ -63,7 +63,7 @@ cy.get('button').then(($btn) => {
 
 ```javascript
 cy.then(() => {
-  return {id: 123}
+    return {id: 123}
   })
   .then((obj) =>{
     // subject is now the obj {id: 123}
