@@ -582,7 +582,6 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     ## it means that this runnable likely failed due to
     ## a double done(err) callback, and we need to fire
     ## this again!
-    debugger
     if fired(TEST_AFTER_RUN_EVENT, runnable)
       fire(TEST_AFTER_RUN_EVENT, runnable, Cypress)
 
