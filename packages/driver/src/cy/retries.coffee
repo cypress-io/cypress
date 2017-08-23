@@ -57,14 +57,10 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
             else
               err
 
-        try
-          $utils.throwErrByPath "miscellaneous.retry_timed_out", {
-            onFail: (options.onFail or log)
-            args: { error: getErrMessage(options.error) }
-          }
-        catch err
-          if r = state("reject")
-            r(err)
+        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
+          onFail: (options.onFail or log)
+          args: { error: getErrMessage(options.error) }
+        }
 
       runnableHasChanged = ->
         ## if we've changed runnables don't retry!
