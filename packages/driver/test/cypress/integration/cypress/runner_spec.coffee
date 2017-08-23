@@ -1,14 +1,11 @@
+pending = []
+
+Cypress.on "test:after:run", (test) ->
+  if test.state is "pending"
+    pending.push(test)
+
 describe "src/cypress/runner", ->
   context "pending tests", ->
-    pending = []
-
-    beforeEach ->
-      cy.on "test:after:run", (test) ->
-        if test.state is "pending"
-          pending.push(test)
-
-      return null
-
     it "is not pending", ->
 
     it "is pending 1"
