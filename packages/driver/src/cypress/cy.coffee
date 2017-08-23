@@ -113,8 +113,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
-  runnableCtx = ->
-    ensures.ensureRunnable()
+  runnableCtx = (name) ->
+    ensures.ensureRunnable(name)
 
     state("runnable").ctx
 
@@ -438,7 +438,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     addCommandSync: (name, fn) ->
       cy[name] = ->
-        fn.apply(runnableCtx(), arguments)
+        fn.apply(runnableCtx(name), arguments)
 
     addChainer: (name, fn) ->
       ## add this function to our chainer class
@@ -505,7 +505,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               return ret ? subject
 
       cy[name] = (args...) ->
-        ensures.ensureRunnable()
+        ensures.ensureRunnable(name)
 
         ## this is the first call on cypress
         ## so create a new chainer instance
@@ -656,14 +656,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     getStyles: ->
       snapshots.getStyles()
-
-    checkForEndedEarly: ->
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = state("index")
-      if index > 0 and index < queue.length
-        errors.endedEarlyErr(index, queue)
 
     setRunnable: (runnable, hookName) ->
       state("hookName", hookName)

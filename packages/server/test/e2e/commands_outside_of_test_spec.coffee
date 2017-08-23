@@ -15,5 +15,5 @@ describe "e2e commands outside of test", ->
     e2e.exec(@, {
       spec: "commands_outside_of_test_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
+      expectedExitCode: 1
     })

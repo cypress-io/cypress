@@ -12,13 +12,19 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Tests Starting)
 
 
-  0 passing (123ms)
+  viewport
+    ✓ changes viewport to iphone-6
+    ✓ does not use viewport
+    ✓ ensures viewport in logs
+
+
+  3 passing (123ms)
 
 
   (Tests Finished)
 
-  - Tests:           0
-  - Passes:          0
+  - Tests:           3
+  - Passes:          3
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds

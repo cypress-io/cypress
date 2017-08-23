@@ -25,6 +25,7 @@ env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
+anyProjectPath = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
 
@@ -47,8 +48,10 @@ normalizeStdout = (str) ->
   .split("\n")
   .map(replaceStackTraceLines)
   .join("\n")
-  .split(e2ePath)
-  .join("/foo/bar/.projects/e2e")
+  .split("2560x1440") ## normalize resolutions
+  .join("1280x720")
+  .split(anyProjectPath)
+  .join("/foo/bar/.projects/any-e2e-project")
 
 
 startServer = (obj) ->
@@ -157,7 +160,7 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    if browser = env.BROWSER
+    if browser = (env.BROWSER or options.browser)
       args.push("--browser=#{browser}")
 
     return args
@@ -194,7 +197,7 @@ module.exports = {
         stderr += buf.toString()
       sp.on "error", reject
       sp.on "exit", (code) ->
-        if expected = options.expectedExitCode
+        if (expected = options.expectedExitCode)?
           try
             expect(expected).to.eq(code)
           catch err

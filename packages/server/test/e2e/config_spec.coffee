@@ -10,8 +10,9 @@ describe "e2e config", ->
   })
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "config_passing_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })
 

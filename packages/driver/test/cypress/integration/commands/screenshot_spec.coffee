@@ -85,6 +85,42 @@ describe "src/cy/commands/screenshot", ->
           ]
         })
 
+  context "runnable:after:run:async hooks", ->
+    beforeEach ->
+      Cypress.config("isInteractive", false)
+
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+
+      cy.stub(Cypress, "action").log(false)
+      .callThrough()
+      .withArgs("cy:test:set:state")
+      .yieldsAsync()
+
+      test = {
+        err: new Error
+      }
+
+      runnable = cy.state("runnable")
+
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        ## this should mutate this property
+        expect(test.isOpen).to.be.true
+
+        expect(Cypress.action).to.be.calledWith("cy:test:set:state", test)
+        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
+          name: undefined
+          testId: runnable.id
+          titles: [
+            "src/cy/commands/screenshot",
+            "runnable:after:run:async hooks",
+            "takes screenshot of hook title with test",
+            '"before each" hook'
+          ]
+        })
+
+    it "takes screenshot of hook title with test", ->
+
   context "#screenshot", ->
     it "nulls out current subject", ->
       Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
