@@ -1,6 +1,6 @@
 exports['e2e busted support file passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
-Added this project: /Users/bmann/Dev/cypress-monorepo/packages/server/.projects/busted-support-file
+Added this project: /foo/bar/.projects/any-e2e-project
 
 -----------------------------------------------------------------------------------
 You are using an older version of the CLI tools.
@@ -13,11 +13,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Tests Starting)
 Oops...we found an error preparing this test file:
 
-  /Users/bmann/Dev/cypress-monorepo/packages/server/.projects/busted-support-file/cypress/support/index.js
+  /foo/bar/.projects/any-e2e-project/cypress/support/index.js
 
 The error was:
 
-Error: Cannot find module './does/not/exist' from '/Users/bmann/Dev/cypress-monorepo/packages/server/.projects/busted-support-file/cypress/support'
+Error: Cannot find module './does/not/exist' from '/foo/bar/.projects/any-e2e-project/cypress/support'
 
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
@@ -48,4 +48,3 @@ Fix the error in your code and re-run your tests.
   (All Done)
 
 `
-

@@ -45,7 +45,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
 
 
   (Video)
@@ -106,7 +106,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
 
 
   (Video)
@@ -161,7 +161,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- bar.png (1280x720)
 
 
   (Video)
@@ -221,7 +221,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
 
 
   (Video)
@@ -295,10 +295,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- baz fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux2 fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- baz fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- bar fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- quux fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- quux2 fails.png (1280x720)
 
 
   (Video)
