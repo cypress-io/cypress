@@ -306,7 +306,7 @@ it('does not forget to return a promise', function(){
 
 ## {% fa fa-exclamation-triangle red %} `cy.visit()` failed because you are attempting to visit a second unique domain
 
-See {% url "`cy.visit()`" visit %} documentation.
+See our {% url "Web Security" web-security#Limitations %} documentation.
 
 # CLI Errors
 

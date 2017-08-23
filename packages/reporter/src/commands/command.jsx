@@ -53,7 +53,7 @@ const Message = observer(({ model }) => (
   <span>
     <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
     <span className='command-message-text' dangerouslySetInnerHTML={{ __html: formattedMessage(getMessage(model)
-      ) }} />
+    ) }} />
   </span>
 ))
 

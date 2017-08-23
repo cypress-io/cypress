@@ -24,7 +24,7 @@ class Specs extends Component {
           Run All Tests
         </a>
         <ul className='outer-files-container list-as-table'>
-          { _.map(specsStore.specs, (spec) => (
+          {_.map(specsStore.specs, (spec) => (
             this._specItem(spec)
           ))}
         </ul>
@@ -39,11 +39,11 @@ class Specs extends Component {
           <div>
             <div>
               <i className='fa fa-folder-open-o fa-fw'></i>
-              { spec.displayName }{' '}
+              {spec.displayName}{' '}
             </div>
             <div>
               <ul className='list-as-table'>
-                { _.map(spec.children.specs, (spec) => (
+                {_.map(spec.children.specs, (spec) => (
                   this._specItem(spec)
                 ))}
               </ul>
@@ -59,7 +59,7 @@ class Specs extends Component {
             <div>
               <div>
                 <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
-                { spec.displayName }
+                {spec.displayName}
               </div>
             </div>
             <div>
@@ -104,13 +104,13 @@ class Specs extends Component {
           <h5>
             No files found in
             <code onClick={this._openIntegrationFolder.bind(this)}>
-              { this.props.project.integrationFolder }
+              {this.props.project.integrationFolder}
             </code>
           </h5>
-            <a className='helper-docs-link' onClick={this._openHelp}>
-              <i className='fa fa-question-circle'></i>{' '}
+          <a className='helper-docs-link' onClick={this._openHelp}>
+            <i className='fa fa-question-circle'></i>{' '}
               Need help?
-            </a>
+          </a>
         </div>
       </div>
     )
