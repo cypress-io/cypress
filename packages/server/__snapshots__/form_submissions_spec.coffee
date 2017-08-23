@@ -99,7 +99,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/form submission fails -- fails without an explicit wait when an element is immediately found.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/form submission fails -- fails without an explicit wait when an element is immediately found.png (1280x720)
 
 
   (Video)

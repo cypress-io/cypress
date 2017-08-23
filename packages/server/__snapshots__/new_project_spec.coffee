@@ -1,6 +1,6 @@
 exports['e2e new project passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
-Added this project: /Users/bmann/Dev/cypress-monorepo/packages/server/.projects/no-scaffolding
+Added this project: /foo/bar/.projects/any-e2e-project
 
 -----------------------------------------------------------------------------------
 You are using an older version of the CLI tools.
@@ -40,4 +40,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

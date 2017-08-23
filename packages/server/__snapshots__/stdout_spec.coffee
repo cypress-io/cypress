@@ -108,9 +108,9 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- failing hook -- is failing.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- passing hook -- is failing.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/stdout_failing_spec -- fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/stdout_failing_spec -- failing hook -- is failing.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/stdout_failing_spec -- passing hook -- is failing.png (1280x720)
 
 
   (Video)

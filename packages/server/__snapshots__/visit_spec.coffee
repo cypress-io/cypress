@@ -164,7 +164,7 @@ From previous event:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
 
 
   (Video)
@@ -243,7 +243,7 @@ This was considered a failure because the status code was not '2xx'.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when server response is 500 -- fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when server response is 500 -- fails.png (1280x720)
 
 
   (Video)
@@ -324,7 +324,7 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when file server response is 404 -- fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when file server response is 404 -- fails.png (1280x720)
 
 
   (Video)
@@ -405,7 +405,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when content type is plaintext -- fails.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when content type is plaintext -- fails.png (1280x720)
 
 
   (Video)
@@ -507,8 +507,8 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds pageLoadTimeout.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds timeout option.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when visit times out -- fails timeout exceeds pageLoadTimeout.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when visit times out -- fails timeout exceeds timeout option.png (1280x720)
 
 
   (Video)

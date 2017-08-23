@@ -134,9 +134,9 @@ https://on.cypress.io/cross-origin-violation
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/web security -- fails when clicking a to another origin.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/web security -- fails when submitted a form and being redirected to another origin.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/web security -- fails when using a javascript redirect to another origin.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/web security -- fails when clicking a to another origin.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/web security -- fails when submitted a form and being redirected to another origin.png (1280x720)
+  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/web security -- fails when using a javascript redirect to another origin.png (1280x720)
 
 
   (Video)

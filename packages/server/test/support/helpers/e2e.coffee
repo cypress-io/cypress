@@ -40,18 +40,17 @@ normalizeStdout = (str) ->
   .replace(/\(\d{1,2}s\)/g, "(10s)")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/\/.+\/cypress\/videos\/(.+)\.mp4/g, "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4")
-  .replace(/\/.+\/cypress\/screenshots/g, "/foo/bar/.projects/e2e/cypress/screenshots")
   .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
   .replace(/Duration\: (.+)/, "Duration:        10 seconds")
   .replace(/\(\d+ seconds?\)/, "(0 seconds)")
   .replace(/\r/g, "")
   .split("\n")
-  .map(replaceStackTraceLines)
-  .join("\n")
+    .map(replaceStackTraceLines)
+    .join("\n")
   .split("2560x1440") ## normalize resolutions
-  .join("1280x720")
+    .join("1280x720")
   .split(anyProjectPath)
-  .join("/foo/bar/.projects/any-e2e-project")
+    .join("/foo/bar/.projects/any-e2e-project")
 
 
 startServer = (obj) ->
