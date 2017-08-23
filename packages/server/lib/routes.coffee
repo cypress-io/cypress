@@ -3,7 +3,6 @@ CacheBuster = require("./util/cache_buster")
 cwd         = require("./cwd")
 logger      = require("./logger")
 spec        = require("./controllers/spec")
-errors      = require("./controllers/errors")
 reporter    = require("./controllers/reporter")
 runner      = require("./controllers/runner")
 xhrs        = require("./controllers/xhrs")
@@ -21,9 +20,6 @@ module.exports = (app, config, request, getRemoteState, project) ->
     test = CacheBuster.strip(req.query.p)
 
     spec.handle(test, req, res, config, next, project)
-
-  app.get "/__cypress/errors/:error", (req, res) ->
-    errors.handle(req, res, config)
 
   app.get "/__cypress/socket.io.js", (req, res) ->
     client.handle(req, res)
