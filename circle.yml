@@ -228,7 +228,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 3 --index 0
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 0
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -237,7 +237,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 3 --index 1
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 1
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -246,7 +246,25 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 3 --index 2
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+
+  "server-e2e-tests-4":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 3
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+
+  "server-e2e-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 4
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -343,6 +361,12 @@ workflows:
           requires:
             - build
       - server-e2e-tests-3:
+          requires:
+            - build
+      - server-e2e-tests-4:
+          requires:
+            - build
+      - server-e2e-tests-5:
           requires:
             - build
       ## TODO: temporarily commenting out
