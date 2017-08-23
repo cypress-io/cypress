@@ -54,7 +54,7 @@ Value to assert against chainer.
 
 A method to be called on the chainer.
 
-**{% fa fa-angle-right %} callbackFn** ***(Function)***
+**{% fa fa-angle-right %} callback function** ***(Function)***
 
 Pass a function that can have any number of explicit assertions within it. Whatever was passed to the function is what is yielded.
 
@@ -63,16 +63,14 @@ Pass a function that can have any number of explicit assertions within it. Whate
 {% yields assertion_indeterminate .and %}
 
 ```javascript
-cy
-  .get('nav')                       // yields <nav>
+cy.get('nav')                       // yields <nav>
   .should('be.visible')             // yields <nav>
   .and('have.class', 'open')        // yields <nav>
 ```
 However, some chainers change the subject. In the example below, `.and()` yields the string `sans-serif` because the chainer `have.css, 'font-family'` changes the subject.
 
 ```javascript
-cy
-  .get('nav')                       // yields <nav>
+cy.get('nav')                       // yields <nav>
   .should('be.visible')             // yields <nav>
   .and('have.css', 'font-family')   // yields 'sans-serif'
   .and('match', /serif/)            // yields 'sans-serif'
@@ -102,8 +100,7 @@ cy.get('button').should('have.class', 'active').and('not.be.disabled')
 ```
 
 ```javascript
-cy
-  .get('a')
+cy.get('a')
   .should('contain', 'Edit User') // yields <a>
   .and('have.attr', 'href')       // yields string value of href
   .and('match', /users/)          // yields string value of href
@@ -115,8 +112,7 @@ cy
 ***Assert the href is equal to '/users'***
 
 ```javascript
-cy
-  .get('#header a')
+cy.get('#header a')
   .should('have.class', 'active')
   .and('have.attr', 'href', '/users')
 ```
@@ -140,8 +136,7 @@ The callback function will be retried over and over again until no assertions wi
 ```
 
 ```javascript
-cy
-  .get('p')
+cy.get('p')
   .should('not.be.empty')
   .and(function($p){
     // should have found 3 elements
@@ -196,8 +191,7 @@ The chainers that come from {% url 'Chai' bundled-tools#Chai %} or {% url 'Chai-
 Whenever you use a callback function, its return value is always ignored. Cypress always forces the command to yield the value from the previous cy command's yield (which in the example below is `<button>`)
 
 ```javascript
-cy
-  .get('button')
+cy.get('button')
   .should('be.active')
   .and(($button) => {
     expect({foo: 'bar'}).to.deep.eq({foo: 'bar'})
@@ -211,6 +205,29 @@ cy
 ## Differences
 
 {% partial then_should_difference %}
+
+## Antipattern
+
+Be sure *not* to include any code that has side effects in your callback function, because the callback function can be called multiple times before it passes without exceptions.
+
+Make sure to throw errors to keep waiting and *not* return `false` value. For example see the difference in the code below:
+
+```html
+<div id="todos">
+  <li>Walk the dog</li>
+  <li>Feed the cat</li>
+  <li>Write JavaScript</li>
+</div>
+```
+
+```javascript
+// BAD, the test passes despite list having only 3 items
+cy.get('#todos li').should(($lis) => $lis.length === 10)
+// GOOD, the test fails because we have 3 items and not 10
+cy.get('#todos li').should(($lis) => {
+  expect($lis.length).to.equal(10)
+})
+```
 
 # Rules
 
@@ -245,11 +262,10 @@ cy.get('input', {timeout: 10000}).should('have.value', 'US').and(($input) => {
 **Chain assertions on the same subject**
 
 ```javascript
-cy
-  .get('.list')
+cy.get('.list')
   .find('input[type="checkbox"]')
-    .should('be.checked')
-    .and('not.be.disabled')
+  .should('be.checked')
+  .and('not.be.disabled')
 ```
 
 The commands above will display in the command log as:
