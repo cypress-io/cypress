@@ -41,7 +41,7 @@ module.exports = {
       .command('run')
       .usage('[options]')
       .description('Runs Cypress Headlessly')
-      .option('-r, --record [bool]',                       text('record'), coerceFalse)
+      .option('--record [bool]',                           text('record'), coerceFalse)
       .option('-k, --key <record_key>',                    text('key'))
       .option('-s, --spec <spec>',                         text('spec'))
       .option('-r, --reporter <reporter>',                 text('reporter'))
