@@ -345,9 +345,10 @@ workflows:
       - server-e2e-tests-3:
           requires:
             - build
-      - driver-unit-tests:
-          requires:
-            - build
+      ## TODO: temporarily commenting out
+      # - driver-unit-tests:
+      #     requires:
+      #       - build
       - driver-integration-tests-1:
           requires:
             - build
