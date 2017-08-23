@@ -25,6 +25,7 @@ env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
+anyProjectPath = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
 
@@ -49,8 +50,8 @@ normalizeStdout = (str) ->
   .join("\n")
   .split("2560x1440") ## normalize resolutions
   .join("1280x720")
-  .split(e2ePath)
-  .join("/foo/bar/.projects/e2e")
+  .split(anyProjectPath)
+  .join("/foo/bar/.projects/any-e2e-project")
 
 
 startServer = (obj) ->
