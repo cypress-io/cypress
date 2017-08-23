@@ -4,7 +4,7 @@ comments: false
 layout: toc-top
 ---
 
-## Using your UI to Build Up State
+<!-- ## Using your UI to Build Up State
 
 - use cy.request
 - seed the database
@@ -15,9 +15,9 @@ layout: toc-top
 
 Mostly WIP.
 
-Began {% url 'discussing here' testing-your-app#Testing-Strategies %}.
+Began {% url 'discussing here' testing-your-app#Testing-Strategies %}. -->
 
-## Acting Too Much like a User
+<!-- ## Acting Too Much like a User
 
 WIP.
 
@@ -71,7 +71,7 @@ WIP.
 
 ## Splitting up the "One Giant Test"
 
-WIP.
+WIP. -->
 
 ## Unnecessary Waiting
 

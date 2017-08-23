@@ -220,6 +220,14 @@ describe "src/cypress/dom", ->
         </div>
       """
 
+      @$elOutOfAncestorOverflowAutoBounds = add """
+        <div style='width: 100px; height: 100px; overflow: auto;'>
+          <div style='width: 1000px; position: relative;'>
+            <span style='position: absolute; left: 300px; top: 0px;'>out of bounds, parent wide, ancestor overflow: auto</span>
+          </div>
+        </div>
+      """
+
       @$elInPosAbsParentsBounds = add """
         <div style='width: 200px; height: 200px; overflow: hidden; position: relative;'>
           <div style='position: absolute;'>
@@ -386,6 +394,9 @@ describe "src/cypress/dom", ->
     it "is hidden when parent overflow-x hidden and out of bounds", ->
       expect(@$elOutOfParentWithOverflowXHiddenBounds.find("span")).to.be.hidden
 
+    it "is hidden when parent is wide and ancestor is overflow auto", ->
+      expect(@$elOutOfAncestorOverflowAutoBounds.find("span")).to.be.hidden
+
     it "is hidden when parent overflow scroll and out of bounds", ->
       expect(@$elOutOfScrollingParentBounds.find("span")).to.be.hidden
 
@@ -398,7 +409,7 @@ describe "src/cypress/dom", ->
     it "is visible when parent overflow hidden and not out of bounds", ->
       expect(@$elInParentBounds.find("span")).to.be.visible
 
-    it "is visible when ancestor is overflow hidden but more distant ancestor is position relative", ->
+    it "is visible when ancestor is overflow hidden but more distant ancestor is the offset parent", ->
       expect(@$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor.find("span")).to.be.visible
 
     it "is hidden when relatively positioned outside ancestor with overflow hidden", ->

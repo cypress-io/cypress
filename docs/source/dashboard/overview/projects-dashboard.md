@@ -9,9 +9,9 @@ A Cypress project represents the directory of files and folders that make up you
 
 Projects can *only* be added to Cypress through our Desktop Application.
 
-1. Click {% fa fa-plus %} Add Project.
+1. Drag your project into the Desktop App or click 'select manually'.
 
-![Add Project in LeftHand Corner](/img/dashboard/add-project-in-desktop-gui.png)
+{% img no-border /img/guides/add-your-first-project-in-guid.png "Adding an empty folder to Cypress Desktop" %}
 
 {% note info  %}
 Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are {% urlHash "setup to be recorded" Set-up-a-Project-to-Record %}.

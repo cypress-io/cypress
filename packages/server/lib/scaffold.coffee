@@ -84,7 +84,7 @@ module.exports = {
     log "fixture folder #{folder}"
 
     ## skip if user has explicitly set fixturesFolder
-    return Promise.resolve() if not isDefault(config, "fixturesFolder")
+    return Promise.resolve() if not config.fixturesFolder or not isDefault(config, "fixturesFolder")
 
     @verifyScaffolding folder, =>
       log "fixture needs to copy example.json"
@@ -94,7 +94,7 @@ module.exports = {
     log "support folder #{folder}, support file #{config.supportFile}"
 
     ## skip if user has explicitly set supportFile
-    return Promise.resolve() if not isDefault(config, "supportFile")
+    return Promise.resolve() if not config.supportFile or not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
       log "copying defaults and commands to #{folder}"

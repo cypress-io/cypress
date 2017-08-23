@@ -39,7 +39,7 @@ cy.window().click()         // Errors, 'window' does not yield DOM element
 
 The position where the click should be issued. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
-![cypress-command-positions-diagram](/img/api/coordinates-diagram.jpg)
+{% img /img/api/coordinates-diagram.jpg "cypress-command-positions-diagram" %}
 
 **{% fa fa-angle-right %} x** ***(Number)***
 

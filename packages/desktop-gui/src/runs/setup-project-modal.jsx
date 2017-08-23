@@ -126,14 +126,14 @@ class SetupProject extends Component {
                   value='me'
                   checked={this.state.owner === 'me'}
                   onChange={this._updateOwner}
-                  />
-                  <img
-                    className='user-avatar'
-                    height='13'
-                    width='13'
-                    src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
-                  />
-                  {' '}Me
+                />
+                <img
+                  className='user-avatar'
+                  height='13'
+                  width='13'
+                  src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
+                />
+                {' '}Me
               </label>
               <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
                 <input
@@ -144,9 +144,9 @@ class SetupProject extends Component {
                   value='org'
                   checked={this.state.owner === 'org'}
                   onChange={this._updateOwner}
-                  />
-                  <i className='fa fa-building-o'></i>
-                  {' '}An Organization
+                />
+                <i className='fa fa-building-o'></i>
+                {' '}An Organization
               </label>
             </div>
           </div>
@@ -182,20 +182,20 @@ class SetupProject extends Component {
           className='form-control float-left'
           value={this.state.orgId || ''}
           onChange={this._updateOrgId}
-          >
-            <option value=''>-- Select Organization --</option>
-            {_.map(orgsStore.orgs, (org) => {
-              if (org.default) return null
+        >
+          <option value=''>-- Select Organization --</option>
+          {_.map(orgsStore.orgs, (org) => {
+            if (org.default) return null
 
-              return (
-                <option
-                  key={org.id}
-                  value={org.id}
-                >
-                  {org.name}
-                </option>
-              )
-            })}
+            return (
+              <option
+                key={org.id}
+                value={org.id}
+              >
+                {org.name}
+              </option>
+            )
+          })}
         </select>
         <a
           href='#'

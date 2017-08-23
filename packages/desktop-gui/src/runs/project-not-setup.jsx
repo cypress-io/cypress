@@ -55,7 +55,7 @@ export default class ProjectNotSetup extends Component {
         <button
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
-          >
+        >
           <i className='fa fa-wrench'></i>{' '}
           Setup Project to Record
         </button>
@@ -81,7 +81,7 @@ export default class ProjectNotSetup extends Component {
         <button
           className='btn btn-warning'
           onClick={this._showSetupProjectModal}
-          >
+        >
           <i className='fa fa-wrench'></i>{' '}
           Setup a New Project
         </button>

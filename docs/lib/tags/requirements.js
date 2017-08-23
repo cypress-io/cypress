@@ -79,6 +79,13 @@ module.exports = function yields (hexo, args) {
     </ul>`
   }
 
+  const scrollability = () => {
+    return `<ul>
+      <li><p>${childCmdDom}.</p></li>
+      <li><p>${cmd} requires the element to be scrollable.</p></li>
+    </ul>`
+  }
+
   const submitability = () => {
     return `<ul>
       <li><p>${childCmdDom}.</p></li>
@@ -175,6 +182,8 @@ module.exports = function yields (hexo, args) {
       return checkability()
     case 'selectability':
       return selectability()
+    case 'scrollability':
+      return scrollability()
     case 'submitability':
       return submitability()
     case 'spread':

@@ -21,7 +21,7 @@ export default class Nav extends Component {
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li className='left-nav'>
-              { this._leftNav() }
+              {this._leftNav()}
             </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
@@ -45,7 +45,7 @@ export default class Nav extends Component {
                 </a>
               </Tooltip>
             </li>
-            { this._userStateButton() }
+            {this._userStateButton()}
           </ul>
         </div>
       </nav>
@@ -102,7 +102,7 @@ export default class Nav extends Component {
             width='13'
             src={`${gravatarUrl(authStore.user.email)}`}
           />
-          {' '}{ authStore.user.displayName }
+          {' '}{authStore.user.displayName}
         </span>
       )
     } else {

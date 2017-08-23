@@ -6,8 +6,8 @@ comments: false
 {% note info %}
 # {% fa fa-graduation-cap %} What You'll Learn
 
-- How to install the Cypress Desktop Application
-- How to install the CLI tool
+- How to install Cypress via `npm`.
+- How to install Cypress via direct download.
 
 {% endnote %}
 
@@ -27,44 +27,29 @@ Mac  | `/Applications/Cypress.app`
 Linux  | `/home/<user>/.cypress/Cypress`
 Windows  | {% issue 74 'not currently supported' %}
 
-There are no dependencies to install the Desktop Application, although if you want to {% url "use Cypress from the Command Line" https://github.com/cypress-io/cypress-cli %} you will need to have `node` installed.
+There are no dependencies to install the Desktop Application, although if you want to {% url "use Cypress from the command line" https://www.npmjs.com/package/cypress %} you will need to have {% url "`node`" https://nodejs.org %} installed.
 
 # Installing
 
-You can install Cypress in 2 different ways:
+You can install Cypress in a few different ways:
 
-* {% url "Cypress CLI Tool" command-line %}
-* {% urlHash "Direct Download" Direct-Download %}
+## {% fa fa-terminal %} Install Cypress via npm
 
-## {% fa fa-terminal %} Command Line Tool
-
-**Install the Cypress CLI tool**
+Installing Cypress using npm allows you to install Cypress per project. This also allows you to maintain specific versions of Cypress per project.
 
 ```shell
-npm install -g cypress-cli
+npm install cypress
 ```
 
-**Install the Desktop Cypress app**
-
-```shell
-cypress install
-```
-
-![cypress-cli](/img/guides/install-cypress-in-command-line.gif)
-
-{% note info %}
-The Cypress CLI Tool contains many additional options such as installing a specific Cypress version. See the {% url "CLI Tool Docs" command-line#cypress-install %}.
-{% endnote %}
+The {% url "cypress npm package" https://www.npmjs.com/package/cypress %} contains many commands such as `cypress run` and `cypress verify`. See the {% url "Command Line Docs" command-line %}.
 
 ## {% fa fa-download %} Direct Download
 
 You can {% url "download Cypress directly here" http://download.cypress.io/desktop %}.
 
-## Continuous Integration
+## {% fa fa-refresh %} Continuous Integration
 
-{% note warning "I'm trying to install Cypress in CI" %}
 Please read our {% url 'Continuous Integration' continuous-integration %} docs for help installing Cypress in CI. When running in linux you'll need to install some {% url 'system dependencies' continuous-integration#Dependencies %}.
-{% endnote %}
 
 # Logging In
 
@@ -72,7 +57,7 @@ After installing, you will need to log in to Cypress. Logging in currently requi
 
 ***To Login:***
 
-- Open the Cypress App -- just double click the app from your OS application's folder.
+- Open the Cypress App -- just double click the app from your OS application's folder or use the {% url "`cypress open`" command-line#cypress-open %} command.
 - Click **Log In with GitHub**.
 - Authorize GitHub access to your account.
 

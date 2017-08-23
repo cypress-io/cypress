@@ -31,7 +31,7 @@ const getPlatformExecutable = () => {
   switch (platform) {
     case 'darwin': return 'Cypress.app/Contents/MacOS/Cypress'
     case 'linux': return 'Cypress/Cypress'
-// TODO handle this error using our standard
+      // TODO handle this error using our standard
     default: throw new Error(`Platform: "${platform}" is not supported.`)
   }
 }

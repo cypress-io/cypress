@@ -165,6 +165,15 @@ describe "lib/scaffold", ->
       .then (files) ->
         expect(files.length).to.eq(0)
 
+    it "does not create any files if supportFile is false", ->
+      @cfg.supportFile = false
+
+      scaffold.support(@supportFolder, @cfg)
+      .then =>
+        glob("**/*", {cwd: @supportFolder})
+      .then (files) ->
+        expect(files.length).to.eq(0)
+
     it "throws if trying to scaffold a file not present in file tree", ->
       supportPath = path.join(@supportFolder, "foo")
       fs.removeAsync(supportPath)
@@ -295,6 +304,15 @@ describe "lib/scaffold", ->
 
     it "does not create any files if fixturesFolder is not default", ->
       @cfg.resolved.fixturesFolder.from = "config"
+
+      scaffold.fixture(@fixturesFolder, @cfg)
+      .then =>
+        glob("**/*", {cwd: @fixturesFolder})
+      .then (files) ->
+        expect(files.length).to.eq(0)
+
+    it "does not create any files if fixturesFolder is false", ->
+      @cfg.fixturesFolder = false
 
       scaffold.fixture(@fixturesFolder, @cfg)
       .then =>

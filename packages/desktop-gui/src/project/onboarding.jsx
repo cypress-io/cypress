@@ -28,7 +28,7 @@ class OnBoading extends Component {
         show={project.onBoardingModalOpen}
         onHide={closeModal}
         backdrop='static'
-        >
+      >
         <div className='modal-body'>
           <div className='empty-onboarding'>
             <h1>To help you get started...</h1>
@@ -36,7 +36,7 @@ class OnBoading extends Component {
               We've added some folders and example tests to your project. Try running the
               <strong onClick={this._openExampleSpec.bind(this)}>
                 <i className='fa fa-file-code-o'></i>{' '}
-                { project.integrationExampleName }{' '}
+                {project.integrationExampleName}{' '}
               </strong>
               tests or add your own test file to
               <strong onClick={this._openIntegrationFolder.bind(this)}>
