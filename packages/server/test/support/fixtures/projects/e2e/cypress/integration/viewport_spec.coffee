@@ -1,6 +1,6 @@
 logs = []
 
-@Cypress.on "log", (attrs, log) ->
+Cypress.on "log:added", (attrs, log) ->
   logs.push(log)
 
 describe "viewport", ->
