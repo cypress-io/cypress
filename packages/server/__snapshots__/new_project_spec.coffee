@@ -16,7 +16,7 @@ Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123
   ✓ is true
   ✓ has Cypress.version
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)

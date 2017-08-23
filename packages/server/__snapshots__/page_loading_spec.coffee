@@ -13,12 +13,12 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   page_loading
-    ✓ sets __cypress.initial, properly injects, and avoids json injection (123ms)
+    ✓ sets __cypress.initial, properly injects, and avoids json injection
     issue #258: opener is undefined during snapshot
-      ✓ causes the xhr to be aborted while in flight (123ms)
+      ✓ causes the xhr to be aborted while in flight
 
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)

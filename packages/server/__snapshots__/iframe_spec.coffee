@@ -13,17 +13,17 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   iframes
-    ✓ can snapshot iframes which arent loaded (123ms)
-    ✓ can access nested iframes over http server (123ms)
-    ✓ can access iframes over file server (123ms)
-    ✓ does not throw on cross origin iframes (123ms)
-    ✓ continues to inject even on 5xx responses (123ms)
-    ✓ injects on file server 4xx errors (123ms)
-    ✓ injects on http request errors (123ms)
-    ✓ does not inject into xhr's (123ms)
+    ✓ can snapshot iframes which arent loaded
+    ✓ can access nested iframes over http server
+    ✓ can access iframes over file server
+    ✓ does not throw on cross origin iframes
+    ✓ continues to inject even on 5xx responses
+    ✓ injects on file server 4xx errors
+    ✓ injects on http request errors
+    ✓ does not inject into xhr's
 
 
-  8 passing (123ms)
+  8 passing
 
 
   (Tests Finished)

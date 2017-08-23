@@ -16,7 +16,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ has Cypress.version set to a string
 
 
-  1 passing (123ms)
+  1 passing
 
 
   (Tests Finished)
@@ -59,7 +59,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) times out looking for a missing element
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) config times out looking for a missing element:

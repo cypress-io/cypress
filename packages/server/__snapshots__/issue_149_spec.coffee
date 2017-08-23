@@ -15,7 +15,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1) fails
   ✓ executes more commands
 
-  1 passing (123ms)
+  1 passing
   1 failing
 
   1)  fails:

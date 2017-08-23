@@ -39,6 +39,7 @@ normalizeStdout = (str) ->
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
   .replace(/\(\d{1,2}s\)/g, "(10s)")
+  .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")

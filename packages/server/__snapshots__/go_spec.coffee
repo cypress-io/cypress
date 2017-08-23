@@ -13,11 +13,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   cy.go
-    ✓ can move between pages correctly (123ms)
-    ✓ can visit two urls and go back and forward (123ms)
+    ✓ can move between pages correctly
+    ✓ can visit two urls and go back and forward
 
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)

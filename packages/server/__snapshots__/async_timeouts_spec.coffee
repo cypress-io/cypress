@@ -16,7 +16,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) bar fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) async bar fails:

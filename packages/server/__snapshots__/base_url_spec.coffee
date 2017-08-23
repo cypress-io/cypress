@@ -13,10 +13,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   base url
-    ✓ can visit (123ms)
+    ✓ can visit
 
 
-  1 passing (123ms)
+  1 passing
 
 
   (Tests Finished)
@@ -56,10 +56,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   base url
-    ✓ can visit (123ms)
+    ✓ can visit
 
 
-  1 passing (123ms)
+  1 passing
 
 
   (Tests Finished)

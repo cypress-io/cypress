@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ bar
 
 
-  2 passing (123ms)
+  2 passing
   1 failing
 
   1)  An uncaught error was detected outside of a test:

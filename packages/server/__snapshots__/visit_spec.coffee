@@ -13,27 +13,27 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   visits
-    ✓ scrolls automatically to div with id=foo (123ms)
-    ✓ can load an http page with a huge amount of elements without timing out (123ms)
-    ✓ can load a local file with a huge amount of elements without timing out (123ms)
+    ✓ scrolls automatically to div with id=foo
+    ✓ can load an http page with a huge amount of elements without timing out
+    ✓ can load a local file with a huge amount of elements without timing out
     issue #225: hash urls
-      ✓ can visit a hash url and loads (123ms)
-      ✓ can visit the same hash url and loads (123ms)
-      ✓ can visit a different hash url and loads (123ms)
+      ✓ can visit a hash url and loads
+      ✓ can visit the same hash url and loads
+      ✓ can visit a different hash url and loads
     issue #230: User Agent headers
       ✓ submits user agent on cy.visit
-      ✓ submits user agent on page load (123ms)
+      ✓ submits user agent on page load
       ✓ submits user agent on cy.request
     issue #255: url with like two domain
-      ✓ passes (123ms)
+      ✓ passes
     issue #272: responses which are never ended still send valid html
-      ✓ handles no response errors on the initial visit (123ms)
-      ✓ handles no response errors when not initially visiting (123ms)
+      ✓ handles no response errors on the initial visit
+      ✓ handles no response errors when not initially visiting
     issue #309: request accept header not set
-      ✓ sets accept header to text/html,*/* (123ms)
+      ✓ sets accept header to text/html,*/*
 
 
-  13 passing (123ms)
+  13 passing
 
 
   (Tests Finished)
@@ -76,7 +76,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when network connection cannot be established fails:
@@ -195,7 +195,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when server response is 500 fails:
@@ -274,7 +274,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when file server response is 404 fails:
@@ -355,7 +355,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when content type is plain/text fails:
@@ -437,7 +437,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     2) fails timeout exceeds timeout option
 
 
-  0 passing (123ms)
+  0 passing
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:

@@ -25,7 +25,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       5) explains where script errored
 
 
-  2 passing (123ms)
+  2 passing
   5 failing
 
   1) s1 without an afterEach hook t1:

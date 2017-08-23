@@ -22,7 +22,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       3) is failing
 
 
-  2 passing (123ms)
+  2 passing
   3 failing
 
   1) stdout_failing_spec fails:
@@ -193,20 +193,20 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   stdout_passing_spec
     file
-      ✓ visits file (123ms)
+      ✓ visits file
     google
-      ✓ visits google (123ms)
+      ✓ visits google
       ✓ google2
     apple
       ✓ apple1
-      ✓ visits apple (123ms)
+      ✓ visits apple
     subdomains
       ✓ cypress1
-      ✓ visits cypress (123ms)
+      ✓ visits cypress
       ✓ cypress3
 
 
-  8 passing (123ms)
+  8 passing
 
 
   (Tests Finished)

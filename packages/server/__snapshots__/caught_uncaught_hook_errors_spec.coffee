@@ -22,7 +22,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t7a
 
 
-  4 passing (123ms)
+  4 passing
   1 failing
 
   1) s1a "before each" hook for "t2a":
@@ -97,7 +97,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t7b
 
 
-  4 passing (123ms)
+  4 passing
   1 failing
 
   1) s1b "before each" hook for "t2b":
@@ -152,7 +152,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) "before each" hook for "t1c"
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  "before each" hook for "t1c":
@@ -213,7 +213,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       ✓ also runs
 
 
-  2 passing (123ms)
+  2 passing
   1 failing
 
   1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":

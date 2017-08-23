@@ -13,8 +13,8 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   redirects + requests
-    ✓ gets and sets cookies from cy.request (123ms)
-    ✓ visits idempotant (123ms)
+    ✓ gets and sets cookies from cy.request
+    ✓ visits idempotant
     ✓ automatically follows redirects
     ✓ can turn off automatically following redirects
     ✓ follows all redirects even when they change methods
@@ -24,10 +24,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ passes even on non 2xx or 3xx status code
     ✓ sets Accept header to */* by default
     ✓ can override the accept header
-    ✓ issue #375: does not duplicate request cookies on 302 redirect (123ms)
+    ✓ issue #375: does not duplicate request cookies on 302 redirect
 
 
-  12 passing (123ms)
+  12 passing
 
 
   (Tests Finished)
@@ -70,7 +70,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when network connection cannot be established fails:
@@ -191,7 +191,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
