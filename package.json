@@ -11,6 +11,7 @@
     "cypress"
   ],
   "peerDependencies": {
+    "babel-eslint": "^7.2.3",
     "eslint": ">= 3.2.1",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1"
