@@ -58,17 +58,11 @@ When writing unit tests, or even in integration-like tests, you often need to ab
 
 # Sinon-Chai
 
-{% fa fa-github %} {% url https://github.com/domenic/sinon-chai %}
+{% fa fa-github %} {% url https://github.com/cypress-io/sinon-chai %}
 
-When working with `stubs` or `spies` you'll regularly want to use those when writing Chai assertions. Cypress bundles in Sinon-Chai which extends Chai allowing you to {% url 'write assertions' https://github.com/domenic/sinon-chai %} about `stubs` and `spies`.
+When working with `stubs` or `spies` you'll regularly want to use those when writing Chai assertions. Cypress bundles in Sinon-Chai which extends Chai allowing you to {% url 'write assertions' https://github.com/cypress-io/sinon-chai %} about `stubs` and `spies`.
 
 > {% fa fa-chevron-right  %} {% url "List of available Sinon-Chai Assertions" assertions#Sinon-Chai %}
-
-# Sinon-As-Promised
-
-{% fa fa-github %} {% url https://github.com/bendrucker/sinon-as-promised %}
-
-Sinon-as-Promised gives you the ability to stub methods that return Promises. To fulfill the async contract of these methods, you would use Sinon-as-Promised to force these methods to easily {% url '`resolve`' https://github.com/bendrucker/sinon-as-promised %} or {% url '`reject`' https://github.com/bendrucker/sinon-as-promised %} at your discretion.
 
 # Other Library Utilities
 
