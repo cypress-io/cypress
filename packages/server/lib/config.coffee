@@ -9,7 +9,7 @@ origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-log      = require("./log")
+log      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
 ## cypress following by _
@@ -265,14 +265,14 @@ module.exports = {
       log("support file does not exist")
       ## supportFile doesn't exist on disk
       if sf is path.resolve(obj.projectRoot, defaults.supportFile)
-        log("support file is default")
-        if fs.existsSync(path.dirname(sf))
-          log("support folder exists")
+        log("support file is default, check if #{path.dirname(sf)} exists")
+        if fs.existsSync(sf)
+          log("support folder exists, set supportFile to false")
           ## if the directory exists, set it to false so it's ignored
           obj.supportFile = false
           return obj
         else
-          log("support folder does not exist")
+          log("support folder does not exist, set to default index.js")
           ## otherwise, set it up to be scaffolded later
           obj.supportFile = path.join(sf, "index.js")
       else
