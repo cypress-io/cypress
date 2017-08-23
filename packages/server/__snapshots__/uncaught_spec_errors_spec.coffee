@@ -199,10 +199,9 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 failing
 
   1) foo "before all" hook for "does not run":
-     foo is not defined
+     Uncaught ReferenceError: foo is not defined
 
-Because this error occured during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
-  Uncaught ReferenceError: foo is not defined
+Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
       at stack trace line
 
 
@@ -222,7 +221,7 @@ Because this error occured during a 'before all' hook we are skipping the remain
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- before all hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
 
 
   (Video)
@@ -311,4 +310,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-
