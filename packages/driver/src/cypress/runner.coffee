@@ -764,13 +764,6 @@ create = (specWindow, mocha, Cypress, cy) ->
         if err
           runnable.err = wrapErr(err)
 
-        ## check for ended early and switch the err
-        ## to that if one exists
-        ## TODO: implement this
-        # try
-          # cy.checkForEndedEarly()
-        # catch err
-
         runnableAfterRunAsync(runnable, Cypress)
         .then ->
           ## once we complete callback with the
