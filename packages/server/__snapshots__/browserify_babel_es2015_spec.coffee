@@ -57,11 +57,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Tests Starting)
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/any-e2e-project/cypress/integration/browserify_babel_es2015_failing_spec.js
+  /foo/bar/.projects/e2e/cypress/integration/browserify_babel_es2015_failing_spec.js
 
 The error was:
 
-SyntaxError: /foo/bar/.projects/any-e2e-project/lib/fail.js: Unexpected token, expected { (1:7)
+SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token, expected { (1:7)
 > 1 | export defalt "foo"
     |        ^
 

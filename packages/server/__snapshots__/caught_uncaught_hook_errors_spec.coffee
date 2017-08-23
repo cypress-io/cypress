@@ -60,7 +60,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1a -- t2a -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1a -- t2a -- before each hook.png (1280x720)
 
 
   (Video)
@@ -123,7 +123,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1b -- t2b -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1b -- t2b -- before each hook.png (1280x720)
 
 
   (Video)
@@ -178,7 +178,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/t1c -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/t1c -- before each hook.png (1280x720)
 
 
   (Video)
@@ -239,7 +239,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook.png (1280x720)
 
 
   (Video)

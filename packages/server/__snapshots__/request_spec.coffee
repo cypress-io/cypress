@@ -160,7 +160,7 @@ From previous event:
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
 
 
   (Video)
@@ -263,7 +263,7 @@ Body: Service Unavailable
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when status code isnt 2xx or 3xx -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when status code isnt 2xx or 3xx -- fails.png (1280x720)
 
 
   (Video)
