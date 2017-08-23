@@ -13,13 +13,16 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Tests Starting)
 
 
-  0 passing (123ms)
+  ✓ is true
+  ✓ has Cypress.version
+
+  2 passing (123ms)
 
 
   (Tests Finished)
 
-  - Tests:           0
-  - Passes:          0
+  - Tests:           2
+  - Passes:          2
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds
