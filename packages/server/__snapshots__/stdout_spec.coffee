@@ -44,8 +44,7 @@ The internal Cypress web server responded with:
 
 
 
-Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
-      at stack trace line
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
       at stack trace line
       at stack trace line
       at stack trace line
@@ -89,7 +88,6 @@ The internal Cypress web server responded with:
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -109,7 +107,7 @@ The internal Cypress web server responded with:
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- failing hook -- is failing.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- failing hook -- is failing -- before each hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- passing hook -- is failing.png (1280x720)
 
 
@@ -230,4 +228,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-
