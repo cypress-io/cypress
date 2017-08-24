@@ -69,8 +69,8 @@ describe "e2e screenshots", ->
         ## png1 should not be within 5k of png2
         expect(sizes[0]).not.to.be.closeTo(sizes[1], 5000)
 
-        ## png3 should not be within 2k of png4
-        expect(sizes[2]).not.to.be.closeTo(sizes[3], 2000)
+        ## png3 should not be within 1.5k of png4
+        expect(sizes[2]).not.to.be.closeTo(sizes[3], 1500)
       .then ->
         Promise.all([
           sizeOf(screenshot1)
