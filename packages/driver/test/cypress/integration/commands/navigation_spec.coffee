@@ -988,8 +988,6 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          debugger
-
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 

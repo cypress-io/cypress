@@ -108,8 +108,7 @@ onServer = (app) ->
         .cookie("2293-session", true)
         .send({})
 
-## TODO: fixme snapshot difference for headers, etc
-describe.skip "e2e requests", ->
+describe "e2e requests", ->
   e2e.setup({
     servers: [{
       port: 2290
@@ -151,4 +150,9 @@ describe.skip "e2e requests", ->
       spec: "request_status_code_failing_spec.coffee"
       snapshot: true
       expectedExitCode: 1
+      onStdout: (stdout) ->
+        stdout
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
     })
