@@ -165,6 +165,73 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
+  runCommand = (command) ->
+    ## bail here prior to creating a new promise
+    ## because we could have stopped / canceled
+    ## prior to ever making it through our first
+    ## command
+    return if stopped
+
+    state("current", command)
+    state("chainerId", command.get("chainerId"))
+
+    stability.whenStable ->
+      ## TODO: handle this event
+      # @trigger "invoke:start", command
+
+      state "nestedIndex", state("index")
+
+      command.get("args")
+
+    ## allow promises to be used in the arguments
+    ## and wait until they're all resolved
+    .all()
+
+    .then (args) =>
+      ## if the first argument is a function and it has an _invokeImmediately
+      ## property that means we are supposed to immediately invoke
+      ## it and use its return value as the argument to our
+      ## current command object
+      if _.isFunction(args[0]) and args[0]._invokeImmediately
+        args[0] = args[0].call(@)
+
+      ## run the command's fn with runnable's context
+      ret = command.get("fn").apply(state("ctx"), args)
+
+      state("commandReturnValue", ret)
+
+      ## we cannot pass our cypress instance or our chainer
+      ## back into bluebird else it will create a thenable
+      ## which is never resolved
+      if isCy(ret) then null else ret
+
+    .then (subject) ->
+      ## if ret is a DOM element and its not an instance of our own jQuery
+      if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+        ## set it back to our own jquery object
+        ## to prevent it from being passed downstream
+        ## TODO: enable turning this off
+        ## wrapSubjectsInJquery: false
+        ## which will just pass subjects downstream
+        ## without modifying them
+        subject = $(subject)
+
+      command.set({ subject: subject })
+
+      ## end / snapshot our logs
+      ## if they need it
+      command.finishLogs()
+
+      ## reset the nestedIndex back to null
+      state("nestedIndex", null)
+
+      ## also reset recentlyReady back to null
+      state("recentlyReady", null)
+
+      state("subject", subject)
+
+      return subject
+
   removeSubject = ->
     state("subject", undefined)
 
@@ -657,73 +724,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     getStyles: ->
       snapshots.getStyles()
 
-    runCommand: (command) ->
-      ## bail here prior to creating a new promise
-      ## because we could have stopped / canceled
-      ## prior to ever making it through our first
-      ## command
-      return if stopped
-
-      state("current", command)
-      state("chainerId", command.get("chainerId"))
-
-      stability.whenStable ->
-        ## TODO: handle this event
-        # @trigger "invoke:start", command
-
-        state "nestedIndex", state("index")
-
-        command.get("args")
-
-      ## allow promises to be used in the arguments
-      ## and wait until they're all resolved
-      .all()
-
-      .then (args) =>
-        ## if the first argument is a function and it has an _invokeImmediately
-        ## property that means we are supposed to immediately invoke
-        ## it and use its return value as the argument to our
-        ## current command object
-        if _.isFunction(args[0]) and args[0]._invokeImmediately
-          args[0] = args[0].call(@)
-
-        ## run the command's fn with runnable's context
-        ret = command.get("fn").apply(state("ctx"), args)
-
-        state("commandReturnValue", ret)
-
-        ## we cannot pass our cypress instance or our chainer
-        ## back into bluebird else it will create a thenable
-        ## which is never resolved
-        if isCy(ret) then null else ret
-
-      .then (subject) ->
-        ## if ret is a DOM element and its not an instance of our own jQuery
-        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
-          ## set it back to our own jquery object
-          ## to prevent it from being passed downstream
-          ## TODO: enable turning this off
-          ## wrapSubjectsInJquery: false
-          ## which will just pass subjects downstream
-          ## without modifying them
-          subject = $(subject)
-
-        command.set({ subject: subject })
-
-        ## end / snapshot our logs
-        ## if they need it
-        command.finishLogs()
-
-        ## reset the nestedIndex back to null
-        state("nestedIndex", null)
-
-        ## also reset recentlyReady back to null
-        state("recentlyReady", null)
-
-        state("subject", subject)
-
-        return subject
-
     run: ->
       next = ->
         ## bail if we've been told to abort in case
@@ -772,8 +772,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cypress.action("cy:command:start", command)
 
-        cy
-        .runCommand(command)
+        runCommand(command)
         .then ->
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
