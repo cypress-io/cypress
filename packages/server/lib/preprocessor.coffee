@@ -1,13 +1,14 @@
 _ = require("lodash")
 EE = require("events")
 path = require("path")
-log = require('debug')('cypress:server:preprocessor')
+log = require("debug")("cypress:server:preprocessor")
 Promise = require("bluebird")
-createPreprocessor = require("./util/browserify-preprocessor")
-appData = require("./util/app_data")
-{ toHashName } = require('./util/saved_state')
 
-PrettyError = require('pretty-error')
+appData = require("./util/app_data")
+cwd = require("./cwd")
+{ toHashName } = require("./util/saved_state")
+
+PrettyError = require("pretty-error")
 pe = new PrettyError()
 pe.skipNodeFiles()
 
@@ -30,7 +31,7 @@ clientSideError = (err) ->
 
   """
   (function () {
-    Cypress.trigger("script:error", {
+    Cypress.action("spec:script:error", {
       type: "BUNDLE_ERROR",
       error: #{JSON.stringify(err)}
     })
@@ -49,6 +50,9 @@ module.exports = {
   clientSideError: clientSideError
 
   prep: (config) ->
+    if not _.isString(config.preprocessor)
+      throw new Error("config.preprocessor must be a string")
+
     emitter = new EE()
 
     preprocessorConfig = {
@@ -61,9 +65,27 @@ module.exports = {
       getOutputPath: _.partial(getOutputPath, config)
     }
 
-    ## TODO: load 'createProcessor' from configured plugins instead of
-    ##       harding coding the browserify one
+    createPreprocessor = try
+      require("cypress-#{config.preprocessor}-preprocessor")
+    catch e
+      try
+        require(path.join(process.cwd(), config.preprocessor))
+      catch e
+        throw new Error("""
+          Could not find preprocessor '#{config.preprocessor}'
+
+          We looked for one of the following, but could not find it:
+          * An npm package named 'cypress-#{config.preprocessor}-preprocessor'
+          * A file located at '#{path.join(process.cwd(), config.preprocessor)}'
+        """)
+
+    if not _.isFunction(createPreprocessor)
+      throw new Error("preprocessor must be a function")
+
     preprocessor = createPreprocessor(preprocessorConfig, emitter, util)
+
+    if not _.isFunction(preprocessor)
+      throw new Error("preprocessor must return a function")
 
   getFile: (filePath, config, options = {}) ->
     filePath = path.join(config.projectRoot, filePath)

@@ -61,6 +61,8 @@ defaults = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
+  preprocessor:                  "browserify"
+  preprocessorOptions:           {}
 
   ## deprecated
   javascripts:                   []
