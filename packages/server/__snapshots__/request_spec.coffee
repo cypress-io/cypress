@@ -117,18 +117,11 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
     at stack trace line
     at stack trace line
-From previous event:
     at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -214,7 +207,7 @@ The request we sent was:
 Method: GET
 URL: http://localhost:2294/statusCode?code=503
 Headers: {
-  "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/53.0.2785.143 Electron/1.4.6 Safari/537.36",
+  "user-agent": "foo",
   "accept": "*/*",
   "accept-encoding": "gzip, deflate"
 }
@@ -228,12 +221,13 @@ Headers: {
   "x-powered-by": "Express",
   "content-type": "text/plain; charset=utf-8",
   "content-length": "19",
-  "etag": "W/\"13-52060a5f\"",
+  "etag": "W/13-52060a5f",
   "date": "Fri, 18 Aug 2017 15:01:13 GMT",
   "connection": "close"
 }
 Body: Service Unavailable
 
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -275,4 +269,3 @@ Body: Service Unavailable
   (All Done)
 
 `
-

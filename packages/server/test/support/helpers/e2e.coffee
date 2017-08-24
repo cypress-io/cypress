@@ -204,6 +204,10 @@ module.exports = {
         ## snapshot the stdout!
         if options.snapshot
           try
+            ## enable callback to modify stdout
+            if ostd = options.onStdout
+              stdout = ostd(stdout)
+
             str = normalizeStdout(stdout)
             snapshot(str)
           catch err
