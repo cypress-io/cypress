@@ -1479,7 +1479,7 @@ describe "src/cy/commands/navigation", ->
         cy
           .visit("/fixtures/jquery.html")
 
-          ## make url timeout after only 100ms
+          ## make get timeout after only 200ms
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
       it "captures cross origin failures", (done) ->

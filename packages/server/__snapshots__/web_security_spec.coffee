@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     3) fails when using a javascript redirect to another origin
 
 
-  0 passing (123ms)
+  0 passing
   3 failing
 
   1) web security fails when clicking <a> to another origin:
@@ -134,9 +134,9 @@ https://on.cypress.io/cross-origin-violation
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/web security -- fails when clicking a to another origin.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/web security -- fails when submitted a form and being redirected to another origin.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/web security -- fails when using a javascript redirect to another origin.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/web security -- fails when clicking a to another origin.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/web security -- fails when submitted a form and being redirected to another origin.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/web security -- fails when using a javascript redirect to another origin.png (1280x720)
 
 
   (Video)
@@ -164,12 +164,12 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   web security
-    ✓ fails when clicking <a> to another origin (123ms)
-    ✓ fails when submitted a form and being redirected to another origin (123ms)
-    ✓ fails when using a javascript redirect to another origin (123ms)
+    ✓ fails when clicking <a> to another origin
+    ✓ fails when submitted a form and being redirected to another origin
+    ✓ fails when using a javascript redirect to another origin
 
 
-  3 passing (123ms)
+  3 passing
 
 
   (Tests Finished)

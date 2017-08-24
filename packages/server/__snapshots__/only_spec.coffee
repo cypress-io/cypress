@@ -16,7 +16,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t3
 
 
-  1 passing (123ms)
+  1 passing
 
 
   (Tests Finished)

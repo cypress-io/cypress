@@ -13,27 +13,27 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   visits
-    ✓ scrolls automatically to div with id=foo (123ms)
-    ✓ can load an http page with a huge amount of elements without timing out (123ms)
-    ✓ can load a local file with a huge amount of elements without timing out (123ms)
+    ✓ scrolls automatically to div with id=foo
+    ✓ can load an http page with a huge amount of elements without timing out
+    ✓ can load a local file with a huge amount of elements without timing out
     issue #225: hash urls
-      ✓ can visit a hash url and loads (123ms)
-      ✓ can visit the same hash url and loads (123ms)
-      ✓ can visit a different hash url and loads (123ms)
+      ✓ can visit a hash url and loads
+      ✓ can visit the same hash url and loads
+      ✓ can visit a different hash url and loads
     issue #230: User Agent headers
       ✓ submits user agent on cy.visit
-      ✓ submits user agent on page load (123ms)
+      ✓ submits user agent on page load
       ✓ submits user agent on cy.request
     issue #255: url with like two domain
-      ✓ passes (123ms)
+      ✓ passes
     issue #272: responses which are never ended still send valid html
-      ✓ handles no response errors on the initial visit (123ms)
-      ✓ handles no response errors when not initially visiting (123ms)
+      ✓ handles no response errors on the initial visit
+      ✓ handles no response errors when not initially visiting
     issue #309: request accept header not set
-      ✓ sets accept header to text/html,*/* (123ms)
+      ✓ sets accept header to text/html,*/*
 
 
-  13 passing (123ms)
+  13 passing
 
 
   (Tests Finished)
@@ -76,7 +76,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when network connection cannot be established fails:
@@ -164,7 +164,7 @@ From previous event:
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
 
 
   (Video)
@@ -195,7 +195,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when server response is 500 fails:
@@ -243,7 +243,7 @@ This was considered a failure because the status code was not '2xx'.
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when server response is 500 -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when server response is 500 -- fails.png (1280x720)
 
 
   (Video)
@@ -274,7 +274,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when file server response is 404 fails:
@@ -324,7 +324,7 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when file server response is 404 -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when file server response is 404 -- fails.png (1280x720)
 
 
   (Video)
@@ -355,7 +355,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when content type is plain/text fails:
@@ -405,7 +405,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when content type is plaintext -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when content type is plaintext -- fails.png (1280x720)
 
 
   (Video)
@@ -437,7 +437,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     2) fails timeout exceeds timeout option
 
 
-  0 passing (123ms)
+  0 passing
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:
@@ -507,8 +507,8 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when visit times out -- fails timeout exceeds pageLoadTimeout.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/when visit times out -- fails timeout exceeds timeout option.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds pageLoadTimeout.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds timeout option.png (1280x720)
 
 
   (Video)

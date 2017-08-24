@@ -13,8 +13,8 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   taking screenshots
-    ✓ manually generates pngs (123ms)
-    ✓ can nest screenshots in folders (123ms)
+    ✓ manually generates pngs
+    ✓ can nest screenshots in folders
     1) generates pngs on failure
     before hooks
       2) "before all" hook for "empty test 1"
@@ -23,7 +23,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       4) "after each" hook for "empty test 2"
 
 
-  2 passing (123ms)
+  2 passing
   4 failing
 
   1) taking screenshots generates pngs on failure:
@@ -65,13 +65,13 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/black.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/red.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foobarbaz.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- after each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/black.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/red.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- after each hook.png (1280x720)
 
 
   (Video)

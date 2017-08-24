@@ -124,7 +124,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   contentWindowListeners = (contentWindow) ->
     $Listeners.bindTo(contentWindow, {
       onError: ->
-        debugger
         ## use a function callback here instead of direct
         ## reference so our users can override this function
         ## if need be

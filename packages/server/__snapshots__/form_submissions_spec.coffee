@@ -13,11 +13,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   form submissions
-    ✓ will find 'form success' message by default (after retrying) (123ms)
-    ✓ needs an explicit should when an element is immediately found (123ms)
+    ✓ will find 'form success' message by default (after retrying)
+    ✓ needs an explicit should when an element is immediately found
 
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)
@@ -60,7 +60,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails without an explicit wait when an element is immediately found
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) form submission fails fails without an explicit wait when an element is immediately found:
@@ -99,7 +99,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/form submission fails -- fails without an explicit wait when an element is immediately found.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/form submission fails -- fails without an explicit wait when an element is immediately found.png (1280x720)
 
 
   (Video)

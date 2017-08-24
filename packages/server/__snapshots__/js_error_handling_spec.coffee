@@ -25,7 +25,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       5) explains where script errored
 
 
-  2 passing (123ms)
+  2 passing
   5 failing
 
   1) s1 without an afterEach hook t1:
@@ -85,11 +85,11 @@ https://on.cypress.io/cross-origin-script-error
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1 -- without an afterEach hook -- t1.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1 -- without an afterEach hook -- t2.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1 -- with an afterEach hook -- t4.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1 -- with an afterEach hook -- t5.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1 -- cross origin script errors -- explains where script errored.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- without an afterEach hook -- t1.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- without an afterEach hook -- t2.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- with an afterEach hook -- t4.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- with an afterEach hook -- t5.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- cross origin script errors -- explains where script errored.png (1280x720)
 
 
   (Video)

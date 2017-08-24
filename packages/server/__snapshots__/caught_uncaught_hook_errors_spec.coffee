@@ -22,7 +22,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t7a
 
 
-  4 passing (123ms)
+  4 passing
   1 failing
 
   1) s1a "before each" hook for "t2a":
@@ -60,7 +60,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1a -- t2a -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1a -- t2a -- before each hook.png (1280x720)
 
 
   (Video)
@@ -97,7 +97,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t7b
 
 
-  4 passing (123ms)
+  4 passing
   1 failing
 
   1) s1b "before each" hook for "t2b":
@@ -123,7 +123,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/s1b -- t2b -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1b -- t2b -- before each hook.png (1280x720)
 
 
   (Video)
@@ -152,7 +152,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) "before each" hook for "t1c"
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  "before each" hook for "t1c":
@@ -178,7 +178,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/t1c -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/t1c -- before each hook.png (1280x720)
 
 
   (Video)
@@ -213,7 +213,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       ✓ also runs
 
 
-  2 passing (123ms)
+  2 passing
   1 failing
 
   1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":
@@ -239,7 +239,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook.png (1280x720)
 
 
   (Video)

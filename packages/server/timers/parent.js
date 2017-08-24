@@ -70,9 +70,6 @@ function fix () {
   // fork the child process
   let child = cp.fork(path.join(__dirname, 'child.js'), [], {
     stdio: 'inherit',
-    env: {
-      ELECTRON_RUN_AS_NODE: true,
-    },
   })
   .on('message', (obj = {}) => {
     const { id } = obj
@@ -91,6 +88,25 @@ function fix () {
     clear(id)
 
     cb(...args)
+  })
+
+  // In linux apparently the child process is never
+  // exiting which causes cypress to hang indefinitely.
+  // It would **SEEM** as if we...
+  // 1. dont need to manually kill our child process
+  //    because it should naturally exit.
+  //    (but of course it doesn't in linux)
+  // 2. use our restore function already defined above.
+  //    however when using the restore function above
+  //    the 'child' reference is null. how is it null?
+  //    it makes no sense. there must be a rip in the
+  //    space time continuum, obviously. that or the
+  //    child reference as the rest of the matter of
+  //    the universe has succumbed to entropy.
+  process.on('exit', () => {
+    child && child.kill()
+
+    restore()
   })
 
   global.setTimeout = function (cb, ms, ...args) {

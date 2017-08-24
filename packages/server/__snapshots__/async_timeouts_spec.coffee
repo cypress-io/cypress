@@ -16,7 +16,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) bar fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) async bar fails:
@@ -40,7 +40,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/async -- bar fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/async -- bar fails.png (1280x720)
 
 
   (Video)
@@ -52,4 +52,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

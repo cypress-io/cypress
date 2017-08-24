@@ -25,7 +25,7 @@ env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
-anyProjectPath = Fixtures.projectPath("")
+pathUpToProjectName = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
 
@@ -36,10 +36,12 @@ normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str
-  .replace(/\(\d{1,5}m?s\)/g, "(123ms)")
+  .split(pathUpToProjectName)
+    .join("/foo/bar/.projects")
   .replace(/\(\d{1,2}s\)/g, "(10s)")
+  .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
-  .replace(/\/.+\/cypress\/videos\/(.+)\.mp4/g, "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4")
+  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
   .replace(/Duration\: (.+)/, "Duration:        10 seconds")
   .replace(/\(\d+ seconds?\)/, "(0 seconds)")
@@ -49,9 +51,6 @@ normalizeStdout = (str) ->
     .join("\n")
   .split("2560x1440") ## normalize resolutions
     .join("1280x720")
-  .split(anyProjectPath)
-    .join("/foo/bar/.projects/any-e2e-project")
-
 
 startServer = (obj) ->
   {onServer, port} = obj

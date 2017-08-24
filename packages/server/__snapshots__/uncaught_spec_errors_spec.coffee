@@ -14,7 +14,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) An uncaught error was detected outside of a test
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  An uncaught error was detected outside of a test:
@@ -45,7 +45,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
 
 
   (Video)
@@ -74,7 +74,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) An uncaught error was detected outside of a test
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  An uncaught error was detected outside of a test:
@@ -106,7 +106,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
 
 
   (Video)
@@ -137,7 +137,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) bar
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) foo bar:
@@ -161,7 +161,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- bar.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar.png (1280x720)
 
 
   (Video)
@@ -195,7 +195,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ runs
 
 
-  1 passing (123ms)
+  1 passing
   1 failing
 
   1) foo "before all" hook for "does not run":
@@ -221,7 +221,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
 
 
   (Video)
@@ -259,7 +259,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ quux6 passes
 
 
-  4 passing (123ms)
+  4 passing
   4 failing
 
   1) foo baz fails:
@@ -295,10 +295,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- baz fails.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- bar fails.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- quux fails.png (1280x720)
-  - /foo/bar/.projects/any-e2e-project/cypress/screenshots/foo -- quux2 fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- baz fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux2 fails.png (1280x720)
 
 
   (Video)

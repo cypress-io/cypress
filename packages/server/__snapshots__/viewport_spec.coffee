@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ ensures viewport in logs
 
 
-  3 passing (123ms)
+  3 passing
 
 
   (Tests Finished)
