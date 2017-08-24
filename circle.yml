@@ -228,7 +228,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 0
+      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 0
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -237,7 +237,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 1
+      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 1
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -246,7 +246,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 2
+      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 2
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -255,16 +255,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 3
-      - store_test_results:
-          path: /tmp/cypress-monorepo
-
-  "server-e2e-tests-5":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 4
+      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 3
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -306,7 +297,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 3 --index 0
+      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 0
 
   "driver-integration-tests-2":
     <<: *defaults
@@ -316,7 +307,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 3 --index 1
+      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 1
 
   "driver-integration-tests-3":
     <<: *defaults
@@ -326,7 +317,17 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 3 --index 2
+      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 2
+
+  "driver-integration-tests-4":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 3
 
   "build-binary":
     <<: *defaults
@@ -366,9 +367,6 @@ workflows:
       - server-e2e-tests-4:
           requires:
             - build
-      - server-e2e-tests-5:
-          requires:
-            - build
       ## TODO: temporarily commenting out
       # - driver-unit-tests:
       #     requires:
@@ -380,6 +378,9 @@ workflows:
           requires:
             - build
       - driver-integration-tests-3:
+          requires:
+            - build
+      - driver-integration-tests-4:
           requires:
             - build
       - build-binary:
