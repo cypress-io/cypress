@@ -483,6 +483,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## store the chain so we can access it later
         state("chain", chain)
 
+        ## if we're the first call onto a cy
+        ## command, then kick off the run
+        if not state("promise")
+          if state("returnedCustomPromise")
+            title = state("runnable").fullTitle()
+
+            msg = $utils.errMessageByPath("miscellaneous.mixing_promises_and_commands", title)
+
+            $utils.warning(msg)
+
+          cy.run()
+
         return chain
 
       cy.addChainer name, (chainer, args) ->
@@ -873,11 +885,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
               originalDone(err)
 
+              ## return null else we there are situations
+              ## where returning a regular bluebird promise
+              ## results in a warning about promise being created
+              ## in a handler but not returned
+              return null
+
             ## store this done property
             ## for async tests
             state("done", done)
 
           ret = fn.apply(@, arguments)
+
+          ## if we returned a value from fn
+          ## and enqueued some new commands
+          ## and the value isnt currently cy
+          if ret and (queue.length > currentLength) and (not isCy(ret))
+            debugger
 
           ## if we attached a done callback
           ## and returned a promise then we
@@ -890,21 +914,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           if fn.length and ret and ret.catch
             ret = ret.catch(done)
 
-          ## if we returned a value from fn
-          ## and enqueued some new commands
-          ## and the value isnt currently cy
-          if ret and (queue.length > currentLength) and (not isCy(ret))
-            debugger
-
           ## if we didn't fire up any cy commands
           ## then send back mocha what was returned
           if queue.length is currentLength
+            if _.isFunction(ret.then)
+              ## indicate we've returned a custom promise
+              state("returnedCustomPromise", true)
+
             return ret
 
-          ## kick off the run!
-          ## and return this outer
-          ## bluebird promise
-          return cy.run()
+          ## the run should already be kicked off
+          ## by now and return this promise
+          return state("promise")
 
         catch err
           ## if our runnable.fn throw synchronously
