@@ -659,17 +659,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## run the command's fn with runnable's context
         ret = command.get("fn").apply(state("ctx"), args)
 
-        ## allow us to immediately tap into
-        ## return value of our command
-        ## TODO: handle this event
-        # @trigger "command:returned:value", command, ret
 
         ## we cannot pass our cypress instance or our chainer
         ## back into bluebird else it will create a thenable
         ## which is never resolved
         if isCy(ret) then null else ret
 
-      .then (subject) =>
+      .then (subject) ->
         ## if ret is a DOM element and its not an instance of our own jQuery
         if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
           ## set it back to our own jquery object
