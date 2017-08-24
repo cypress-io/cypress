@@ -626,7 +626,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     getStyles: ->
       snapshots.getStyles()
 
-    set: (command) ->
+    runCommand: (command) ->
       ## bail here prior to creating a new promise
       ## because we could have stopped / canceled
       ## prior to ever making it through our first
@@ -745,7 +745,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         Cypress.action("cy:command:start", command)
 
         cy
-        .set(command)
+        .runCommand(command)
         .then ->
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
