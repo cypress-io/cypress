@@ -57,13 +57,14 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Cypress detected that an uncaught error was thrown from a cross origin script.
 
-We cannot provide you the stack trace, line number, or file where this error occured.
+We cannot provide you the stack trace, line number, or file where this error occurred.
 
 Check your Developer Tools Console for the actual error - it should be printed there.
 
 It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
 
 https://on.cypress.io/cross-origin-script-error
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -101,4 +102,3 @@ https://on.cypress.io/cross-origin-script-error
   (All Done)
 
 `
-

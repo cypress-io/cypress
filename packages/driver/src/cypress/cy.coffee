@@ -657,6 +657,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       snapshots.getStyles()
 
     setRunnable: (runnable, hookName) ->
+      ## when we're setting a new runnable
+      ## prepare to run again!
+      stopped = false
+
       state("hookName", hookName)
 
       state("runnable", runnable)
