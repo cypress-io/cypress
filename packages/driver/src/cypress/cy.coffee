@@ -30,6 +30,9 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
+isPromiseLike = (ret) ->
+  ret and _.isFunction(ret.then)
+
 returnedFalse = (result) ->
   result is false
 
@@ -57,6 +60,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   onFinishAssertions = ->
     assertions.finishAssertions.apply(null, arguments)
+
+  warnMixingPromisesAndCommands = ->
+    title = state("runnable").fullTitle()
+
+    msg = $utils.errMessageByPath("miscellaneous.mixing_promises_and_commands", title)
+
+    $utils.warning(msg)
 
   $$ = (selector, context) ->
     context ?= state("document")
@@ -195,10 +205,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       if _.isFunction(args[0]) and args[0]._invokeImmediately
         args[0] = args[0].call(@)
 
-      cmd = null
+      enqueuedCmd = null
 
       commandEnqueued = (obj) ->
-        cmd = obj
+        enqueuedCmd = obj
 
       Cypress.once("command:enqueued", commandEnqueued)
 
@@ -216,10 +226,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## we cannot pass our cypress instance or our chainer
       ## back into bluebird else it will create a thenable
       ## which is never resolved
-      if isCy(ret)
-        return null
-      else
-        if cmd and not _.isUndefined(ret)
+      switch
+        when isCy(ret)
+          null
+        when enqueuedCmd and isPromiseLike(ret)
+          $utils.throwErrByPath(
+            "miscellaneous.command_returned_promise_and_commands", {
+              args: {
+                current: command.get("name")
+                called: enqueuedCmd.name
+              }
+            }
+          )
+        when enqueuedCmd and not _.isUndefined(ret)
           ## if we got a return value and we enqueued
           ## a new command and we didn't return cy
           ## or an undefined value then throw
@@ -231,9 +250,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               }
             }
           )
-
-        return ret
-
+        else
+          ret
     .then (subject) ->
       ## if ret is a DOM element and its not an instance of our own jQuery
       if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
@@ -586,7 +604,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## command and we should error
         if ret = state("commandReturnValue")
           ## if this is a custom promise
-          if ret and _.isFunction(ret.then)
+          if isPromiseLike(ret)
             current = state("current")
 
             $utils.throwErrByPath(
@@ -602,11 +620,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## command, then kick off the run
         if not state("promise")
           if state("returnedCustomPromise")
-            title = state("runnable").fullTitle()
-
-            msg = $utils.errMessageByPath("miscellaneous.mixing_promises_and_commands", title)
-
-            $utils.warning(msg)
+            warnMixingPromisesAndCommands()
 
           cy.run()
 
@@ -948,7 +962,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## if we returned a value from fn
           ## and enqueued some new commands
           ## and the value isnt currently cy
-          if ret and (queue.length > currentLength) and (not isCy(ret))
+          ## or a promise
+          if ret and
+            (queue.length > currentLength) and
+              (not isCy(ret)) and
+                (not isPromiseLike(ret))
+
             $utils.throwErrByPath("miscellaneous.returned_value_and_commands", {
               args: $utils.stringify(ret)
             })
@@ -964,18 +983,27 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           if fn.length and ret and ret.catch
             ret = ret.catch(done)
 
-          ## if we didn't fire up any cy commands
-          ## then send back mocha what was returned
-          if queue.length is currentLength
-            if ret and _.isFunction(ret.then)
-              ## indicate we've returned a custom promise
-              state("returnedCustomPromise", true)
+          ## if we returned a promise like object
+          if (not isCy(ret)) and isPromiseLike(ret)
+            ## indicate we've returned a custom promise
+            state("returnedCustomPromise", true)
+
+            ## this means we instantiated a promise
+            ## and we've already invoked multiple
+            ## commands and should warn
+            if queue.length > currentLength
+              warnMixingPromisesAndCommands()
 
             return ret
 
-          ## the run should already be kicked off
-          ## by now and return this promise
-          return state("promise")
+          ## if we're cy or we've enqueued commands
+          if isCy(ret) or (queue.length > currentLength)
+            ## the run should already be kicked off
+            ## by now and return this promise
+            return state("promise")
+
+          ## else just return ret
+          return ret
 
         catch err
           ## if our runnable.fn throw synchronously
