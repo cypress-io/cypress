@@ -221,7 +221,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## always this listener
         Cypress.removeListener("command:enqueued", commandEnqueued)
 
-      state("commandReturnValue", ret)
+      state("commandIntermediateValue", ret)
 
       ## we cannot pass our cypress instance or our chainer
       ## back into bluebird else it will create a thenable
@@ -253,6 +253,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         else
           ret
     .then (subject) ->
+      state("commandIntermediateValue", undefined)
+
       ## if ret is a DOM element and its not an instance of our own jQuery
       if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
@@ -602,7 +604,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## that means we are attempting to invoke
         ## a cypress command within another cypress
         ## command and we should error
-        if ret = state("commandReturnValue")
+        if ret = state("commandIntermediateValue")
           ## if this is a custom promise
           if isPromiseLike(ret)
             current = state("current")
