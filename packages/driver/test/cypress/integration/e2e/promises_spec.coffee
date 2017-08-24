@@ -32,7 +32,7 @@ describe "promises", ->
 
       logs.push(log)
 
-    cy.on "fail2", (err) =>
+    cy.on "fail", (err) =>
       lastLog = @lastLog
 
       expect(logs.length).to.eq(1)
@@ -82,4 +82,3 @@ describe "promises", ->
     .then ->
       cy.wrap({}).then ->
         throw new Error("foo")
-

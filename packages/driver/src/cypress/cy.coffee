@@ -195,15 +195,44 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       if _.isFunction(args[0]) and args[0]._invokeImmediately
         args[0] = args[0].call(@)
 
+      cmd = null
+
+      commandEnqueued = (obj) ->
+        cmd = obj
+
+      Cypress.once("command:enqueued", commandEnqueued)
+
       ## run the command's fn with runnable's context
-      ret = command.get("fn").apply(state("ctx"), args)
+      try
+        ret = command.get("fn").apply(state("ctx"), args)
+      catch err
+        throw err
+      finally
+        ## always this listener
+        Cypress.removeListener("command:enqueued", commandEnqueued)
 
       state("commandReturnValue", ret)
 
       ## we cannot pass our cypress instance or our chainer
       ## back into bluebird else it will create a thenable
       ## which is never resolved
-      if isCy(ret) then null else ret
+      if isCy(ret)
+        return null
+      else
+        if cmd and not _.isUndefined(ret)
+          ## if we got a return value and we enqueued
+          ## a new command and we didn't return cy
+          ## or an undefined value then throw
+          $utils.throwErrByPath(
+            "miscellaneous.returned_value_and_commands_from_custom_command", {
+              args: {
+                current: command.get("name")
+                returned: $utils.stringify(ret)
+              }
+            }
+          )
+
+        return ret
 
     .then (subject) ->
       ## if ret is a DOM element and its not an instance of our own jQuery
@@ -557,7 +586,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## command and we should error
         if ret = state("commandReturnValue")
           ## if this is a custom promise
-          if _.isFunction(ret.then)
+          if ret and _.isFunction(ret.then)
             current = state("current")
 
             $utils.throwErrByPath(
@@ -920,7 +949,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## and enqueued some new commands
           ## and the value isnt currently cy
           if ret and (queue.length > currentLength) and (not isCy(ret))
-            debugger
+            $utils.throwErrByPath("miscellaneous.returned_value_and_commands", {
+              args: $utils.stringify(ret)
+            })
 
           ## if we attached a done callback
           ## and returned a promise then we
@@ -936,7 +967,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## if we didn't fire up any cy commands
           ## then send back mocha what was returned
           if queue.length is currentLength
-            if _.isFunction(ret.then)
+            if ret and _.isFunction(ret.then)
               ## indicate we've returned a custom promise
               state("returnedCustomPromise", true)
 

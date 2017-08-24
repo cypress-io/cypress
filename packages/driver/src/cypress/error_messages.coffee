@@ -294,6 +294,42 @@ module.exports = {
 
       https://on.cypress.io/custom-command-interface-changed
       """
+    returned_value_and_commands_from_custom_command: (obj) ->
+      """
+        Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+
+        The custom command was:
+
+          > #{cmd(obj.current)}
+
+        The return value was:
+
+          > #{obj.returned}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-custom-command
+      """
+    returned_value_and_commands: (ret) ->
+      """
+        Cypress detected that you invoked one or more cy commands but returned a different value.
+
+        The return value was:
+
+          > #{ret}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-test
+      """
     command_returned_promise_and_commands: (obj) ->
       """
         Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.
@@ -314,7 +350,6 @@ module.exports = {
 
         https://on.cypress.io/returning-promise-and-commands-in-custom-command
       """
-
     mixing_promises_and_commands: (title) ->
       """
         Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
