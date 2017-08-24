@@ -626,89 +626,75 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     getStyles: ->
       snapshots.getStyles()
 
-    setRunnable: (runnable, hookName) ->
-      ## when we're setting a new runnable
-      ## prepare to run again!
-      stopped = false
+    set: (command) ->
+      ## bail here prior to creating a new promise
+      ## because we could have stopped / canceled
+      ## prior to ever making it through our first
+      ## command
+      return if stopped
 
-      state("hookName", hookName)
+      state("current", command)
+      state("chainerId", command.get("chainerId"))
 
-      state("runnable", runnable)
+      stability.whenStable ->
+        ## TODO: handle this event
+        # @trigger "invoke:start", command
 
-      state("ctx", runnable.ctx)
+        state "nestedIndex", state("index")
 
-      fn = runnable.fn
+        command.get("args")
 
-      restore = ->
-        runnable.fn = fn
+      ## allow promises to be used in the arguments
+      ## and wait until they're all resolved
+      .all()
 
-      runnable.fn = ->
-        restore()
+      .then (args) =>
+        ## if the first argument is a function and it has an _invokeImmediately
+        ## property that means we are supposed to immediately invoke
+        ## it and use its return value as the argument to our
+        ## current command object
+        if _.isFunction(args[0]) and args[0]._invokeImmediately
+          args[0] = args[0].call(@)
 
-        timeout = config("defaultCommandTimeout")
+        ## run the command's fn with runnable's context
+        ret = command.get("fn").apply(state("ctx"), args)
 
-        ## control timeouts on runnables ourselves
-        if _.isFinite(timeout)
-          timeouts.timeout(timeout)
+        ## allow us to immediately tap into
+        ## return value of our command
+        ## TODO: handle this event
+        # @trigger "command:returned:value", command, ret
 
-        ## store the current length of our queue
-        ## before we invoke the runnable.fn
-        currentLength = queue.length
+        ## we cannot pass our cypress instance or our chainer
+        ## back into bluebird else it will create a thenable
+        ## which is never resolved
+        if isCy(ret) then null else ret
 
-        try
-          ## if we have a fn.length that means we
-          ## are accepting a done callback and need
-          ## to change the semantics around how we
-          ## attach the run queue
-          if fn.length
-            originalDone = arguments[0]
+      .then (subject) =>
+        ## if ret is a DOM element and its not an instance of our own jQuery
+        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+          ## set it back to our own jquery object
+          ## to prevent it from being passed downstream
+          ## TODO: enable turning this off
+          ## wrapSubjectsInJquery: false
+          ## which will just pass subjects downstream
+          ## without modifying them
+          subject = $(subject)
 
-            arguments[0] = done = (err) ->
-              ## TODO: handle no longer error
-              ## when ended early
-              doneEarly()
+        command.set({ subject: subject })
 
-              originalDone(err)
+        ## end / snapshot our logs
+        ## if they need it
+        command.finishLogs()
 
-            ## store this done property
-            ## for async tests
-            state("done", done)
+        ## reset the nestedIndex back to null
+        state("nestedIndex", null)
 
-          ret = fn.apply(@, arguments)
+        ## also reset recentlyReady back to null
+        state("recentlyReady", null)
 
-          ## if we attached a done callback
-          ## and returned a promise then we
-          ## need to automatically bind to
-          ## .catch() and return done(err)
-          ## TODO: this has gone away in mocha 3.x.x
-          ## due to overspecifying a resolution.
-          ## in those cases we need to remove
-          ## returning a promise
-          if fn.length and ret and ret.catch
-            ret = ret.catch(done)
+        state("subject", subject)
 
-          ## if we returned a value from fn
-          ## and enqueued some new commands
-          ## and the value isnt currently cy
-          if ret and (queue.length > currentLength) and (not isCy(ret))
-            debugger
-
-          ## if we didn't fire up any cy commands
-          ## then send back mocha what was returned
-          if queue.length is currentLength
-            return ret
-
-          ## kick off the run!
-          ## and return this outer
-          ## bluebird promise
-          return cy.run()
-
-        catch err
-          ## if our runnable.fn throw synchronously
-          ## then it didnt fail from a cypress command
-          ## but we should still teardown and handle
-          ## the error
-          fail(err, runnable)
+        return subject
 
     run: ->
       next = ->
@@ -847,75 +833,90 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## TODO: handle this event
       # @trigger("set", command)
 
-    set: (command) ->
-      ## bail here prior to creating a new promise
-      ## because we could have stopped / canceled
-      ## prior to ever making it through our first
-      ## command
-      return if stopped
+    setRunnable: (runnable, hookName) ->
+      ## when we're setting a new runnable
+      ## prepare to run again!
+      stopped = false
 
-      state("current", command)
-      state("chainerId", command.get("chainerId"))
+      state("hookName", hookName)
 
-      stability.whenStable ->
-        ## TODO: handle this event
-        # @trigger "invoke:start", command
+      state("runnable", runnable)
 
-        state "nestedIndex", state("index")
+      state("ctx", runnable.ctx)
 
-        command.get("args")
+      fn = runnable.fn
 
-      ## allow promises to be used in the arguments
-      ## and wait until they're all resolved
-      .all()
+      restore = ->
+        runnable.fn = fn
 
-      .then (args) =>
-        ## if the first argument is a function and it has an _invokeImmediately
-        ## property that means we are supposed to immediately invoke
-        ## it and use its return value as the argument to our
-        ## current command object
-        if _.isFunction(args[0]) and args[0]._invokeImmediately
-          args[0] = args[0].call(@)
+      runnable.fn = ->
+        restore()
 
-        ## run the command's fn with runnable's context
-        ret = command.get("fn").apply(state("ctx"), args)
+        timeout = config("defaultCommandTimeout")
 
-        ## allow us to immediately tap into
-        ## return value of our command
-        ## TODO: handle this event
-        # @trigger "command:returned:value", command, ret
+        ## control timeouts on runnables ourselves
+        if _.isFinite(timeout)
+          timeouts.timeout(timeout)
 
-        ## we cannot pass our cypress instance or our chainer
-        ## back into bluebird else it will create a thenable
-        ## which is never resolved
-        if isCy(ret) then null else ret
+        ## store the current length of our queue
+        ## before we invoke the runnable.fn
+        currentLength = queue.length
 
-      .then (subject) =>
-        ## if ret is a DOM element and its not an instance of our own jQuery
-        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
-          ## set it back to our own jquery object
-          ## to prevent it from being passed downstream
-          ## TODO: enable turning this off
-          ## wrapSubjectsInJquery: false
-          ## which will just pass subjects downstream
-          ## without modifying them
-          subject = $(subject)
+        try
+          ## if we have a fn.length that means we
+          ## are accepting a done callback and need
+          ## to change the semantics around how we
+          ## attach the run queue
+          if fn.length
+            originalDone = arguments[0]
 
-        command.set({ subject: subject })
+            arguments[0] = done = (err) ->
+              ## TODO: handle no longer error
+              ## when ended early
+              doneEarly()
 
-        ## end / snapshot our logs
-        ## if they need it
-        command.finishLogs()
+              originalDone(err)
 
-        ## reset the nestedIndex back to null
-        state("nestedIndex", null)
+            ## store this done property
+            ## for async tests
+            state("done", done)
 
-        ## also reset recentlyReady back to null
-        state("recentlyReady", null)
+          ret = fn.apply(@, arguments)
 
-        state("subject", subject)
+          ## if we attached a done callback
+          ## and returned a promise then we
+          ## need to automatically bind to
+          ## .catch() and return done(err)
+          ## TODO: this has gone away in mocha 3.x.x
+          ## due to overspecifying a resolution.
+          ## in those cases we need to remove
+          ## returning a promise
+          if fn.length and ret and ret.catch
+            ret = ret.catch(done)
 
-        return subject
+          ## if we returned a value from fn
+          ## and enqueued some new commands
+          ## and the value isnt currently cy
+          if ret and (queue.length > currentLength) and (not isCy(ret))
+            debugger
+
+          ## if we didn't fire up any cy commands
+          ## then send back mocha what was returned
+          if queue.length is currentLength
+            return ret
+
+          ## kick off the run!
+          ## and return this outer
+          ## bluebird promise
+          return cy.run()
+
+        catch err
+          ## if our runnable.fn throw synchronously
+          ## then it didnt fail from a cypress command
+          ## but we should still teardown and handle
+          ## the error
+          fail(err, runnable)
+
   }
 
   _.each privateProps, (obj, key) =>
