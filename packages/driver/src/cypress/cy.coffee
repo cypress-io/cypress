@@ -1,5 +1,6 @@
 _ = require("lodash")
 $ = require("jquery")
+
 Promise = require("bluebird")
 
 $utils = require("./utils")
@@ -31,34 +32,6 @@ privateProps = {
 
 returnedFalse = (result) ->
   result is false
-
-# window.Cypress ($Cypress)
-#
-# Cypress.config(...)
-#
-# Cypress.Server.defaults()
-# Cypress.Keyboard.defaults()
-# Cypress.Mouse.defaults()
-# Cypress.Commands.add("login")
-#
-# Cypress.on "error"
-# Cypress.on "retry"
-# Cypress.on "uncaughtException"
-#
-# cy.on "error"
-#
-# # Cypress.Log.command()
-#
-# log = Cypress.log()
-#
-# log.snapshot().end()
-# log.set().get()
-#
-# cy.log()
-#
-# cy.foo (Cy)
-
-# { visit, get, find } = cy
 
 silenceConsole = (contentWindow) ->
   if c = contentWindow.console
@@ -104,6 +77,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   xhrs = $Xhrs.create(state)
   aliases = $Aliases.create(state)
+
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, expect, elements.isInDom)
 
@@ -260,7 +234,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## if we dont have a "fail" handler
     ## 1. callback with state("done") when async
     ## 2. throw the error for the promise chain
-
     try
       ## collect all of the callbacks for 'fail'
       rets = Cypress.action("cy:fail", err, state("runnable"))
@@ -460,9 +433,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           cy.ensureDom(subject, name)
 
         args.unshift(subject)
-
-        ## TODO: handle this event
-        Cypress.action("cy:next:subject:prepared", subject, args)
 
         args
 
@@ -925,6 +895,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
+          ## TODO: enable turning this off
+          ## wrapSubjectsInJquery: false
+          ## which will just pass subjects downstream
+          ## without modifying them
           subject = $(subject)
 
         command.set({ subject: subject })
@@ -932,12 +906,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## end / snapshot our logs
         ## if they need it
         command.finishLogs()
-
-        ## trigger an event here so we know our
-        ## command has been successfully applied
-        ## and we've potentially altered the subject
-        ## TODO: handle this event
-        # @trigger "invoke:subject", subject, command
 
         ## reset the nestedIndex back to null
         state("nestedIndex", null)

@@ -193,32 +193,6 @@ class $Cypress
         if @config("isTextTerminal")
           @emit("mocha", "end")
 
-        ## TODO: we may not need to do any of this
-        ## it appears only afterHooksAsync is needed
-        ## for taking a screenshot - which can likely
-        ## be done better (and likely doesnt need to wait
-        ## until after the hooks have run anyway!)
-        ##
-        ## the test:after:run event is only used for
-        ## cleaning up num tests kept in memory
-
-
-        ## if we have a test and err
-        # test = _this.test
-        # err  = test and test.err
-        #
-        # ## and this err is uncaught
-        # if err and err.uncaught
-        #
-        #   ## fire all the events
-        #   testEvents.afterHooksAsync(_this, test)
-        #   .then ->
-        #     testEvents.afterRun(_this, test)
-        #
-        #     end()
-        # else
-        #   end()
-
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that
         ## is about to be invoked
@@ -345,9 +319,6 @@ class $Cypress
 
       when "cy:url:changed"
         @emit("url:changed", args[0])
-
-      when "cy:next:subject:prepared"
-        @emit("next:subject:prepared", args...)
 
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
