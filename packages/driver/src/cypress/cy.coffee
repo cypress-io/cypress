@@ -483,6 +483,25 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## store the chain so we can access it later
         state("chain", chain)
 
+        ## if we are in the middle of a command
+        ## and its return value is a promise
+        ## that means we are attempting to invoke
+        ## a cypress command within another cypress
+        ## command and we should error
+        if ret = state("commandReturnValue")
+          ## if this is a custom promise
+          if _.isFunction(ret.then)
+            current = state("current")
+
+            $utils.throwErrByPath(
+              "miscellaneous.command_returned_promise_and_commands", {
+                args: {
+                  current: current.get("name")
+                  called: name
+                }
+              }
+            )
+
         ## if we're the first call onto a cy
         ## command, then kick off the run
         if not state("promise")
@@ -671,6 +690,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## run the command's fn with runnable's context
         ret = command.get("fn").apply(state("ctx"), args)
 
+        state("commandReturnValue", ret)
 
         ## we cannot pass our cypress instance or our chainer
         ## back into bluebird else it will create a thenable

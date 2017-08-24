@@ -24,6 +24,42 @@ describe "promises", ->
 
         expect(top.console.warn).to.be.calledOnce
 
+  it "throws when returning a promise from a custom command", (done) ->
+    logs = []
+
+    cy.on "log:added", (attrs, log) =>
+      @lastLog = log
+
+      logs.push(log)
+
+    cy.on "fail2", (err) =>
+      lastLog = @lastLog
+
+      expect(logs.length).to.eq(1)
+      expect(lastLog.get("name")).to.eq("foo")
+      expect(lastLog.get("error")).to.eq(err)
+
+      expect(err.message).to.include("Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.")
+      expect(err.message).to.include("> cy.foo()")
+      expect(err.message).to.include("> cy.wrap()")
+
+      done()
+
+    Cypress.Commands.add "foo", ->
+      Cypress.Promise
+      .delay(10)
+      .then ->
+        cy.wrap({})
+
+    cy.foo()
+
+  it "is okay to return promises from custom commands with no cy commands", ->
+    Cypress.Commands.add "foo", ->
+      Cypress.Promise
+      .delay(10)
+
+    cy.foo()
+
   it "can return a promise that throws on its own without warning", (done) ->
     Cypress.Promise
     .delay(10)
