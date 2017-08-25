@@ -201,10 +201,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     .all()
 
     .then (args) ->
-      ## if the first argument is a function and it has an _invokeImmediately
-      ## property that means we are supposed to immediately invoke
-      ## it and use its return value as the argument to our
-      ## current command object
+      ## store this if we enqueue new commands
+      ## to check for promise violations
       enqueuedCmd = null
 
       commandEnqueued = (obj) ->
