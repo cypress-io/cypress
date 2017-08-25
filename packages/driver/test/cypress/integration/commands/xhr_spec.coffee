@@ -1782,6 +1782,37 @@ describe "src/cy/commands/xhr", ->
         cy.then ->
           expect(@lastLog.invoke("renderProps").indicator).to.equal("bad")
 
+  context "abort", ->
+    xhrs = []
+
+    it "does not abort xhr's between tests", ->
+      cy.window().then (win) ->
+        _.times 2, ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/timeout?ms=100")
+          xhr.send()
+
+          xhrs.push(xhr)
+
+    it "has not aborted the xhrs", ->
+      _.each xhrs, (xhr) ->
+        expect(xhr.aborted).not.to.be.false
+
+  context "Cypress.on(window:unload)", ->
+    it "aborts all open XHR's", ->
+      xhrs = []
+
+      cy.window().then (win) ->
+        _.times 2, ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/timeout?ms=100")
+          xhr.send()
+
+          xhrs.push(xhr)
+      .reload().then ->
+        _.each xhrs, (xhr) ->
+          expect(xhr.aborted).to.be.true
+
   context "Cypress.on(before:window:load)", ->
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied

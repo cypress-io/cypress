@@ -18,8 +18,6 @@ abort = ->
     server.abort()
 
 reset = ->
-  abort()
-
   if server
     server.restore()
 
@@ -255,7 +253,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     else
       ## if we don't have a server such as the case when
       ## the last window was cross origin, try to bind
-      ## to it now 
+      ## to it now
       server = startXhrServer(cy, state, config)
 
   Commands.addAll({
