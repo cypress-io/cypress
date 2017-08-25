@@ -336,7 +336,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           return ret
 
-        debugger
         thenFn(el, options, callback, state)
 
       ## generate a real array since bluebird is finicky and
