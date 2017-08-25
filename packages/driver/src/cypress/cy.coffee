@@ -540,7 +540,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
 
-      prepareSubject = (firstCall, args) =>
+      prepareSubject = (firstCall, args) ->
         ## if this is the very first call
         ## on the chainer then make the first
         ## argument undefined (we have no subject)
@@ -554,9 +554,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         args.unshift(subject)
 
+        Cypress.action("cy:next:subject:prepared", subject, args)
+
         args
 
-      wrap = (firstCall) =>
+      wrap = (firstCall) ->
         fn = commandFns[name]
         wrapped = wrapByType(fn, firstCall)
         wrapped.originalFn = fn
@@ -609,10 +611,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## a cypress command within another cypress
         ## command and we should error
         if ret = state("commandIntermediateValue")
-          ## if this is a custom promise
-          if isPromiseLike(ret)
-            current = state("current")
+          current = state("current")
 
+          ## if this is a custom promise
+          if isPromiseLike(ret) and noArgsAreAFunction(current.get("args"))
             $utils.throwErrByPath(
               "miscellaneous.command_returned_promise_and_commands", {
                 args: {
