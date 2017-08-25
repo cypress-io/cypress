@@ -285,6 +285,139 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       return subject
 
+  run = ->
+    next = ->
+      ## bail if we've been told to abort in case
+      ## an old command continues to run after
+      if stopped
+        return
+
+      ## start at 0 index if we dont have one
+      index = state("index") ? state("index", 0)
+
+      command = queue.at(index)
+
+      ## if the command should be skipped
+      ## just bail and increment index
+      ## and set the subject
+      ## TODO DRY THIS LOGIC UP
+      if command and command.get("skip")
+        ## must set prev + next since other
+        ## operations depend on this state being correct
+        command.set({prev: queue.at(index - 1), next: queue.at(index + 1)})
+        state("index", index + 1)
+        state("subject", command.get("subject"))
+
+        return next()
+
+      ## if we're at the very end
+      if not command
+
+        ## trigger queue is almost finished
+        Cypress.action("cy:command:queue:before:end")
+
+        ## we need to wait after all commands have
+        ## finished running if the application under
+        ## test is no longer stable because we cannot
+        ## move onto the next test until its finished
+        return stability.whenStable ->
+          Cypress.action("cy:command:queue:end")
+
+          return null
+
+      ## store the previous timeout
+      prevTimeout = timeouts.timeout()
+
+      ## store the current runnable
+      runnable = state("runnable")
+
+      Cypress.action("cy:command:start", command)
+
+      runCommand(command)
+      .then ->
+        ## each successful command invocation should
+        ## always reset the timeout for the current runnable
+        ## unless it already has a state.  if it has a state
+        ## and we reset the timeout again, it will always
+        ## cause a timeout later no matter what.  by this time
+        ## mocha expects the test to be done
+        timeouts.timeout(prevTimeout) if not runnable.state
+
+        ## mutate index by incrementing it
+        ## this allows us to keep the proper index
+        ## in between different hooks like before + beforeEach
+        ## else run will be called again and index would start
+        ## over at 0
+        state("index", index += 1)
+
+        Cypress.action("cy:command:end", command)
+
+        if fn = state("onPaused")
+          new Promise (resolve) ->
+            fn(resolve)
+          .then(next)
+        else
+          next()
+
+    inner = null
+
+    ## this ends up being the parent promise wrapper
+    promise = new Promise((resolve, reject) ->
+      ## bubble out the inner promise
+      ## we must use a resolve(null) here
+      ## so the outer promise is first defined
+      ## else this will kick off the 'next' call
+      ## too soon and end up running commands prior
+      ## to promise being defined
+      inner = Promise
+      .resolve(null)
+      .then(next)
+      .then(resolve)
+      .catch(reject)
+
+      ## can't use onCancel argument here because
+      ## its called asynchronously
+
+      ## when we manually reject our outer promise we
+      ## have to immediately cancel the inner one else
+      ## it won't be notified and its callbacks will
+      ## continue to be invoked
+      ## normally we don't have to do this because rejections
+      ## come from the inner promise and bubble out to our outer
+      ##
+      ## but when we manually reject the outer promise we
+      ## have to go in the opposite direction from outer -> inner
+      rejectOuterAndCancelInner = (err) ->
+        inner.cancel()
+        reject(err)
+
+      state("resolve", resolve)
+      state("reject", rejectOuterAndCancelInner)
+    )
+    .catch((err) ->
+      ## since this failed this means that a
+      ## specific command failed and we should
+      ## highlight it in red or insert a new command
+      errors.commandRunningFailed(err)
+
+      fail(err, state("runnable"))
+    )
+    .finally(cleanup)
+
+    ## cancel both promises
+    cancel = ->
+      promise.cancel()
+      inner.cancel()
+
+      ## notify the world
+      Cypress.action("cy:canceled")
+
+    state("cancel", cancel)
+    state("promise", promise)
+
+    ## return this outer bluebird promise
+    return promise
+
   removeSubject = ->
     state("subject", undefined)
 
@@ -634,7 +767,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           if state("returnedCustomPromise")
             warnMixingPromisesAndCommands()
 
-          cy.run()
+          run()
 
         return chain
 
@@ -778,142 +911,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     getStyles: ->
       snapshots.getStyles()
-
-    run: ->
-      next = ->
-        ## bail if we've been told to abort in case
-        ## an old command continues to run after
-        if stopped
-          return
-
-        ## start at 0 index if we dont have one
-        index = state("index") ? state("index", 0)
-
-        command = queue.at(index)
-
-        ## if the command should be skipped
-        ## just bail and increment index
-        ## and set the subject
-        ## TODO DRY THIS LOGIC UP
-        if command and command.get("skip")
-          ## must set prev + next since other
-          ## operations depend on this state being correct
-          command.set({prev: queue.at(index - 1), next: queue.at(index + 1)})
-          state("index", index + 1)
-          state("subject", command.get("subject"))
-
-          return next()
-
-        ## if we're at the very end
-        if not command
-
-          ## trigger queue is almost finished
-          Cypress.action("cy:command:queue:before:end")
-
-          ## we need to wait after all commands have
-          ## finished running if the application under
-          ## test is no longer stable because we cannot
-          ## move onto the next test until its finished
-          return stability.whenStable ->
-            Cypress.action("cy:command:queue:end")
-
-            return null
-
-        ## store the previous timeout
-        prevTimeout = timeouts.timeout()
-
-        ## store the current runnable
-        runnable = state("runnable")
-
-        Cypress.action("cy:command:start", command)
-
-        runCommand(command)
-        .then ->
-          ## each successful command invocation should
-          ## always reset the timeout for the current runnable
-          ## unless it already has a state.  if it has a state
-          ## and we reset the timeout again, it will always
-          ## cause a timeout later no matter what.  by this time
-          ## mocha expects the test to be done
-          timeouts.timeout(prevTimeout) if not runnable.state
-
-          ## mutate index by incrementing it
-          ## this allows us to keep the proper index
-          ## in between different hooks like before + beforeEach
-          ## else run will be called again and index would start
-          ## over at 0
-          state("index", index += 1)
-
-          Cypress.action("cy:command:end", command)
-
-          if fn = state("onPaused")
-            new Promise (resolve) ->
-              fn(resolve)
-            .then(next)
-          else
-            next()
-
-      inner = null
-
-      ## this ends up being the parent promise wrapper
-      promise = new Promise((resolve, reject) ->
-        ## bubble out the inner promise
-        ## we must use a resolve(null) here
-        ## so the outer promise is first defined
-        ## else this will kick off the 'next' call
-        ## too soon and end up running commands prior
-        ## to promise being defined
-        inner = Promise
-        .resolve(null)
-        .then(next)
-        .then(resolve)
-        .catch(reject)
-
-        ## can't use onCancel argument here because
-        ## its called asynchronously
-
-        ## when we manually reject our outer promise we
-        ## have to immediately cancel the inner one else
-        ## it won't be notified and its callbacks will
-        ## continue to be invoked
-        ## normally we don't have to do this because rejections
-        ## come from the inner promise and bubble out to our outer
-        ##
-        ## but when we manually reject the outer promise we
-        ## have to go in the opposite direction from outer -> inner
-        rejectOuterAndCancelInner = (err) ->
-          inner.cancel()
-          reject(err)
-
-        state("resolve", resolve)
-        state("reject", rejectOuterAndCancelInner)
-      )
-      .catch((err) ->
-        ## since this failed this means that a
-        ## specific command failed and we should
-        ## highlight it in red or insert a new command
-        errors.commandRunningFailed(err)
-
-        fail(err, state("runnable"))
-      )
-      .finally(cleanup)
-
-      ## cancel both promises
-      cancel = ->
-        promise.cancel()
-        inner.cancel()
-
-        ## notify the world
-        Cypress.action("cy:canceled")
-
-      state("cancel", cancel)
-      state("promise", promise)
-
-      ## return this outer bluebird promise
-      return promise
-
-      ## TODO: handle this event
-      # @trigger("set", command)
 
     setRunnable: (runnable, hookName) ->
       ## when we're setting a new runnable
