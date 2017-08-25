@@ -265,6 +265,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd docs && npm run deps
+      - run: cd docs && npm run lint
+      - run: cd docs && npm run test
       - run: cd docs && npm run build
       - run: cd docs && npm run test-e2e
 
