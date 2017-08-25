@@ -320,6 +320,9 @@ class $Cypress
       when "cy:url:changed"
         @emit("url:changed", args[0])
 
+      when "cy:next:subject:prepared"
+        @emit("next:subject:prepared", args...)
+
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
 
