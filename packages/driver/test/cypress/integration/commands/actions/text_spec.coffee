@@ -99,7 +99,7 @@ describe "src/cy/commands/actions/text", ->
         expect(cy.timeout).to.be.calledWith(50, true, "type")
 
     it "accepts body as subject", ->
-      expect(-> cy.get("body").type("foo")).not.to.throw()
+      cy.get("body").type("foo")
 
     it "does not click when body is subject", ->
       bodyClicked = false
