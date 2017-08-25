@@ -8,6 +8,8 @@ express      = require("express")
 Promise      = require("bluebird")
 evilDns      = require("evil-dns")
 httpProxy    = require("http-proxy")
+la           = require("lazy-ass")
+check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 log          = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
@@ -102,6 +104,7 @@ class Server
     e
 
   open: (config = {}, project) ->
+    la(_.isPlainObject(config), "expected plain config object", config)
     Promise.try =>
       ## always reset any buffers
       ## TODO: change buffers to be an instance

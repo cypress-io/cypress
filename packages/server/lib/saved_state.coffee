@@ -20,17 +20,19 @@ stateFiles = {}
 #   project.open().then(project.state).then(state)
 #   state should have width = 200
 
+# async promise-returning function
 findSavedSate = (projectPath) ->
-  statePath = savedStateUtil.formStatePath(projectPath)
-  fullStatePath = appData.projectsPath(statePath)
-  log('full state path %s', fullStatePath)
-  return stateFiles[fullStatePath] if stateFiles[fullStatePath]
+  savedStateUtil.formStatePath(projectPath)
+  .then (statePath) ->
+    fullStatePath = appData.projectsPath(statePath)
+    log('full state path %s', fullStatePath)
+    return stateFiles[fullStatePath] if stateFiles[fullStatePath]
 
-  log('making new state file around %s', fullStatePath)
-  stateFile = new FileUtil({
-    path: fullStatePath
-  })
-  stateFiles[fullStatePath] = stateFile
-  stateFile
+    log('making new state file around %s', fullStatePath)
+    stateFile = new FileUtil({
+      path: fullStatePath
+    })
+    stateFiles[fullStatePath] = stateFile
+    stateFile
 
 module.exports = findSavedSate

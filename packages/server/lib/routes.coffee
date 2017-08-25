@@ -12,6 +12,8 @@ files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
+la          = require("lazy-ass")
+check       = require("check-more-types")
 
 module.exports = (app, config, request, getRemoteState, watchers, project) ->
   ## routing for the actual specs which are processed automatically
@@ -63,6 +65,7 @@ module.exports = (app, config, request, getRemoteState, watchers, project) ->
   ## TODO: we should additionally send config for the socket.io route, etc
   ## and any other __cypress namespaced files so that the runner does
   ## not have to be aware of anything
+  la(check.unemptyString(config.clientRoute), "missing client route in config", config)
   app.get config.clientRoute, (req, res) ->
     runner.serve(req, res, config, getRemoteState)
 

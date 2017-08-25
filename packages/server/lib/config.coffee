@@ -1,7 +1,7 @@
 _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
-fs       = require("fs")
+fs       = require("fs-extra")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
@@ -187,11 +187,8 @@ module.exports = {
 
     config = @setParentTestsPaths(config)
 
-    config = @setSupportFileAndFolder(config)
-
-    config = @setScaffoldPaths(config)
-
-    return config
+    @setSupportFileAndFolder(config)
+    .then @setScaffoldPaths
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -235,18 +232,22 @@ module.exports = {
 
     return obj
 
+  # async function
   setSupportFileAndFolder: (obj) ->
-    return obj if not obj.supportFile
+    return Promise.resolve(obj) if not obj.supportFile
+
     obj = _.clone(obj)
 
     ## TODO move this logic to find support file into util/path_helpers
-
     sf = obj.supportFile
     log "setting support file #{sf}"
     log "for project root #{obj.projectRoot}"
-    try
+
+    Promise
+    .try ->
       ## resolve full path with extension
       obj.supportFile = require.resolve(sf)
+    .then () ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
         log("require.resolve switched support folder from %s to %s",
           sf, obj.supportFile)
@@ -255,36 +256,38 @@ module.exports = {
         # which can confuse the rest of the code
         # switch it back to "normal" file
         obj.supportFile = path.join(sf, path.basename(obj.supportFile))
-        if not fs.existsSync(obj.supportFile)
-          errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
-        log("switching to found file %s", obj.supportFile)
-    catch err
-      if err.code isnt "MODULE_NOT_FOUND"
-        throw err
-
-      log("support file does not exist")
+        return fs.pathExists(obj.supportFile)
+        .then (found) ->
+          if not found
+            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
+          log("switching to found file %s", obj.supportFile)
+    .catch({code: "MODULE_NOT_FOUND"}, ->
+      log("support file %s does not exist", sf)
       ## supportFile doesn't exist on disk
       if sf is path.resolve(obj.projectRoot, defaults.supportFile)
         log("support file is default, check if #{path.dirname(sf)} exists")
-        if fs.existsSync(sf)
-          log("support folder exists, set supportFile to false")
-          ## if the directory exists, set it to false so it's ignored
-          obj.supportFile = false
+        return fs.pathExists(sf)
+        .then (found) ->
+          if (found)
+            log("support folder exists, set supportFile to false")
+            ## if the directory exists, set it to false so it's ignored
+            obj.supportFile = false
+          else
+            log("support folder does not exist, set to default index.js")
+            ## otherwise, set it up to be scaffolded later
+            obj.supportFile = path.join(sf, "index.js")
           return obj
-        else
-          log("support folder does not exist, set to default index.js")
-          ## otherwise, set it up to be scaffolded later
-          obj.supportFile = path.join(sf, "index.js")
       else
         log("support file is not default")
         ## they have it explicitly set, so it should be there
         errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
-
-    ## set config.supportFolder to its directory
-    obj.supportFolder = path.dirname(obj.supportFile)
-    log "set support folder #{obj.supportFolder}"
-
-    return obj
+    )
+    .then () ->
+      if obj.supportFile
+        ## set config.supportFolder to its directory
+        obj.supportFolder = path.dirname(obj.supportFile)
+        log "set support folder #{obj.supportFolder}"
+      obj
 
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"

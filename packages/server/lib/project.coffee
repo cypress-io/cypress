@@ -121,18 +121,22 @@ class Project extends EE
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
-      if not fs.existsSync(supportFile)
-        errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
+      fs.pathExists(supportFile)
+      .then (found) =>
+        if not found
+          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
 
-      relativePath = path.relative(config.projectRoot, config.supportFile)
-      if config.watchForFileChanges isnt false
-        options = {
-          onChange: _.bind(@server.onTestFileChange, @server, relativePath)
-        }
-      @watchers.watchBundle(relativePath, config, options)
-      ## ignore errors b/c we're just setting up the watching. errors
-      ## are handled by the spec controller
-      .catch ->
+        relativePath = path.relative(config.projectRoot, config.supportFile)
+        if config.watchForFileChanges isnt false
+          options = {
+            onChange: _.bind(@server.onTestFileChange, @server, relativePath)
+          }
+        @watchers.watchBundle(relativePath, config, options)
+        ## ignore errors b/c we're just setting up the watching. errors
+        ## are handled by the spec controller
+        .catch ->
+    else
+      Promise.resolve()
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
@@ -244,13 +248,16 @@ class Project extends EE
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot).set(newState)
+    savedState(@projectRoot)
+    .then (state) ->
+      state.set(newState)
     .then =>
       @cfg.state = newState
       newState
 
   _setSavedState: (cfg) ->
-    savedState(@projectRoot).get()
+    savedState(@projectRoot)
+    .then (state) -> state.get()
     .then (state) ->
       cfg.state = state
       cfg

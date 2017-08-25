@@ -1,7 +1,7 @@
 require("./util/http_overrides")
+require("./fs_warn")(require("fs-extra"))
 
 os      = require("os")
-fs      = require("fs-extra")
 cwd     = require("./cwd")
 Promise = require("bluebird")
 
