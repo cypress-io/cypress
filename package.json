@@ -10,6 +10,14 @@
     "eslintplugin",
     "cypress"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/eslint-plugin-cypress-dev.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cypress-io/eslint-plugin-cypress-dev/issues"
+  },
+  "homepage": "https://github.com/cypress-io/eslint-plugin-cypress-dev#readme",
   "peerDependencies": {
     "babel-eslint": "^7.2.3",
     "eslint": ">= 3.2.1",
