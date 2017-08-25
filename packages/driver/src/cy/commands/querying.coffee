@@ -158,7 +158,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               replay = =>
                 cy.replayCommandsFrom(command)
-                return null
+
+                ## its important to return undefined
+                ## here else we trick cypress into thinking
+                ## we have a promise violation
+                return undefined
 
               ## if we're missing any element
               ## within our subject then filter out
