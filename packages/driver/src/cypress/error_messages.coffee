@@ -294,6 +294,76 @@ module.exports = {
 
       https://on.cypress.io/custom-command-interface-changed
       """
+    returned_value_and_commands_from_custom_command: (obj) ->
+      """
+        Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+
+        The custom command was:
+
+          > #{cmd(obj.current)}
+
+        The return value was:
+
+          > #{obj.returned}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-custom-command
+      """
+    returned_value_and_commands: (ret) ->
+      """
+        Cypress detected that you invoked one or more cy commands but returned a different value.
+
+        The return value was:
+
+          > #{ret}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-test
+      """
+    command_returned_promise_and_commands: (obj) ->
+      """
+        Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.
+
+        The custom command that returned the promise was:
+
+          > #{cmd(obj.current)}
+
+        The cy command you invoked inside the promise was:
+
+          > #{cmd(obj.called)}
+
+        Because Cypress commands are already promise-like, you don't need to wrap them or return your own promise.
+
+        Cypress will resolve your custom command with whatever the final Cypress command yields.
+
+        The reason this is an error instead of a warning is because Cypress internally queues commands serially whereas Promises execute as soon as they are invoked. Attempting to reconcile this would prevent Cypress from ever resolving.
+
+        https://on.cypress.io/returning-promise-and-commands-in-custom-command
+      """
+    mixing_promises_and_commands: (title) ->
+      """
+        Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
+
+        The test title was:
+
+          > #{title}
+
+        While this works in practice, it's often indicative of an anti-pattern. You almost never need to return both a promise and also invoke cy commands.
+
+        Cy commands themselves are already promise like, and you can likely avoid the use of the separate Promise.
+
+        https://on.cypress.io/returning-promise-and-commands-in-test
+      """
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 
