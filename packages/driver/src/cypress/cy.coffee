@@ -910,6 +910,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## prepare to run again!
       stopped = false
 
+      ## reset the promise again
+      state("promise", undefined)
+
       state("hookName", hookName)
 
       state("runnable", runnable)
