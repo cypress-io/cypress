@@ -893,7 +893,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## create the special uncaught exception err
       err = errors.createUncaughtException.apply(null, arguments)
 
-      results = Cypress.action("cy:uncaught:exception", err, runnable)
+      results = Cypress.action("app:uncaught:exception", err, runnable)
 
       ## dont do anything if any of our uncaught:exception
       ## listeners returned false
