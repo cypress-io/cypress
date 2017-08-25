@@ -313,6 +313,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## make sure we don't ever time out this runnable now
       timeouts.clearTimeout()
 
+    ## if a command fails then after each commands
+    ## could also fail unless we clear this out
+    state("commandIntermediateValue", undefined)
+
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
 
