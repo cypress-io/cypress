@@ -14,7 +14,7 @@ Extend one or more of the presets depending on the nature of the package:
   "extends": [
     "plugin:cypress-dev/general",
     "plugin:cypress-dev/tests",
-    "plugin:cypress-dev/rreact"
+    "plugin:cypress-dev/react"
   ]
 }
 ```
