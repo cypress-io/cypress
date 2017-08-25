@@ -30,6 +30,9 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
+noArgsAreAFunction = (args) ->
+  not _.some(args, _.isFunction)
+
 isPromiseLike = (ret) ->
   ret and _.isFunction(ret.then)
 
@@ -197,20 +200,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## and wait until they're all resolved
     .all()
 
-    .then (args) =>
+    .then (args) ->
       ## if the first argument is a function and it has an _invokeImmediately
       ## property that means we are supposed to immediately invoke
       ## it and use its return value as the argument to our
       ## current command object
-      if _.isFunction(args[0]) and args[0]._invokeImmediately
-        args[0] = args[0].call(@)
-
       enqueuedCmd = null
 
       commandEnqueued = (obj) ->
         enqueuedCmd = obj
 
-      Cypress.once("command:enqueued", commandEnqueued)
+      ## only check for command enqueing when none
+      ## of our args are functions else commands
+      ## like cy.then or cy.each would always fail
+      ## since they return promises and queue more
+      ## new commands
+      if noArgsAreAFunction(args)
+        Cypress.once("command:enqueued", commandEnqueued)
 
       ## run the command's fn with runnable's context
       try
