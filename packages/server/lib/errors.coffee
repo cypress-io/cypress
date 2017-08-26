@@ -83,15 +83,6 @@ API = {
 
         https://on.cypress.io/recording-project-runs
         """
-      when "OLD_VERSION_OF_CLI"
-        """
-
-        -----------------------------------------------------------------------------------
-        You are using an older version of the CLI tools.
-
-        Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
-        -----------------------------------------------------------------------------------
-        """
       when "PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION"
         """
         This project has been configured to record runs on our Dashboard.

@@ -233,33 +233,20 @@ describe "lib/cypress", ->
         .then (found) ->
           expect(found, "Finds saved stage file #{statePath}").to.be.true
 
-    it "runs project headlessly and exits with exit code 0 and yells about old version of CLI", ->
+    it "runs project headlessly and exits with exit code 0", ->
       Project.add(@todosPath)
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/__all"})
-        expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
-        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
         @expectExitWith(0)
 
-    it "warns when using old version of the CLI tools", ->
-      Project.add(@todosPath)
-      .then =>
-        ## test that --run-project gets properly aliased to project
-        cypress.start(["--run-project=#{@todosPath}"])
-      .then =>
-        expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
-        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
-        @expectExitWith(0)
-
-    it "does not warn about old version of the CLI tools if --cli-version has been set", ->
+    it "--cli-version has been set", ->
       Project.add(@todosPath)
       .then =>
         ## test that --run-project gets properly aliased to project
         cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0"])
       .then =>
-        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
@@ -495,7 +482,6 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=asdf"])
       .then =>
-        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).to.be.calledWithMatch("You also provided your Record Key, but you did not pass the --record flag.")
         expect(console.log).to.be.calledWithMatch("cypress run --record")
@@ -874,7 +860,6 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
       .then =>
-        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
         expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
         expect(console.log).to.be.calledWithMatch("cypress run --record --key <record_key>")
@@ -888,7 +873,6 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
-        expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
         expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION")
 
@@ -905,7 +889,6 @@ describe "lib/cypress", ->
       .then =>
         delete process.env.CYPRESS_CI_KEY
 
-        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED_ENV_VAR")
         expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
         expect(console.log).to.be.calledWithMatch("cypress ci")
