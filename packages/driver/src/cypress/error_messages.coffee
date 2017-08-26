@@ -72,6 +72,22 @@ module.exports = {
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
     match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
+    invalid_jquery_obj: (obj) ->
+      """
+        You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.
+
+        The chai-jQuery assertion you used was:
+
+          > #{obj.assertion}
+
+        The invalid subject you asserted on was:
+
+          > #{obj.subject}
+
+        To use chai-jQuery assertions your subject must be valid.
+
+        This can sometimes happen if a previous assertion changed the subject.
+      """
 
   chain:
     removed: """
