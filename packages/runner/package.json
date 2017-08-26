@@ -12,7 +12,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "test": "node ./scripts/test.js",
-    "lint": "$(bin-up eslint) --fix srcipts/*.js src/*.js* src/**/*.js*"
+    "lint": "$(bin-up eslint) --fix scripts/*.js src/*.js* src/**/*.js*"
   },
   "files": [
     "dist",

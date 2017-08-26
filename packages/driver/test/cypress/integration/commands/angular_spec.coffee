@@ -222,7 +222,7 @@ describe "src/cy/commands/angular", ->
 
         it "cancels additional finds when aborted", (done) ->
           cy.stub(Cypress.runner, "stop")
-          
+
           retry = _.after 2, =>
             Cypress.stop()
 

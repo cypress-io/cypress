@@ -30,7 +30,7 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "checkForEndedEarly getStyles".split(" ")
+  cy: "getStyles".split(" ")
 }
 
 throwDeprecatedCommandInterface = (key, method) ->
@@ -192,32 +192,6 @@ class $Cypress
 
         if @config("isTextTerminal")
           @emit("mocha", "end")
-
-        ## TODO: we may not need to do any of this
-        ## it appears only afterHooksAsync is needed
-        ## for taking a screenshot - which can likely
-        ## be done better (and likely doesnt need to wait
-        ## until after the hooks have run anyway!)
-        ##
-        ## the test:after:run event is only used for
-        ## cleaning up num tests kept in memory
-
-
-        ## if we have a test and err
-        # test = _this.test
-        # err  = test and test.err
-        #
-        # ## and this err is uncaught
-        # if err and err.uncaught
-        #
-        #   ## fire all the events
-        #   testEvents.afterHooksAsync(_this, test)
-        #   .then ->
-        #     testEvents.afterRun(_this, test)
-        #
-        #     end()
-        # else
-        #   end()
 
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that

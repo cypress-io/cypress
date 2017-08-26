@@ -13,13 +13,13 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   caching
-    ✓ does not cache cy.visit file server requests (123ms)
-    ✓ sets etags on file assets, but no cache-control (123ms)
-    ✓ does not cache cy.visit http server requests (123ms)
-    ✓ respects cache control headers from 3rd party http servers (123ms)
+    ✓ does not cache cy.visit file server requests
+    ✓ sets etags on file assets, but no cache-control
+    ✓ does not cache cy.visit http server requests
+    ✓ respects cache control headers from 3rd party http servers
 
 
-  4 passing (123ms)
+  4 passing
 
 
   (Tests Finished)

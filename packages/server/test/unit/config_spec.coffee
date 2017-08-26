@@ -2,6 +2,7 @@ require("../spec_helper")
 
 _        = require("lodash")
 path     = require("path")
+R        = require("ramda")
 config   = require("#{root}lib/config")
 configUtil = require("#{root}lib/util/config")
 scaffold = require("#{root}lib/scaffold")
@@ -412,7 +413,10 @@ describe "lib/config", ->
     beforeEach ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
         cfg.projectRoot = "/foo/bar/"
-        expect(config.mergeDefaults(cfg, options)[prop]).to.deep.eq(value)
+        config.mergeDefaults(cfg, options)
+        .then R.prop(prop)
+        .then (result) ->
+          expect(result).to.deep.eq(value)
 
     it "port=null", ->
       @defaults "port", null
@@ -504,29 +508,29 @@ describe "lib/config", ->
       @defaults "supportFile", false, {supportFile: false}
 
     it "resets numTestsKeptInMemory to 0 when headless", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
-
-      expect(cfg.numTestsKeptInMemory).to.eq(0)
+      config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
+      .then (cfg) ->
+        expect(cfg.numTestsKeptInMemory).to.eq(0)
 
     it "resets watchForFileChanges to false when headless", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
-
-      expect(cfg.watchForFileChanges).to.be.false
+      config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
+      .then (cfg) ->
+        expect(cfg.watchForFileChanges).to.be.false
 
     it "can override morgan in options", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {morgan: false})
-
-      expect(cfg.morgan).to.be.false
+      config.mergeDefaults({projectRoot: "/foo/bar/"}, {morgan: false})
+      .then (cfg) ->
+        expect(cfg.morgan).to.be.false
 
     it "can override isTextTerminal in options", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
-
-      expect(cfg.isTextTerminal).to.be.true
+      config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
+      .then (cfg) ->
+        expect(cfg.isTextTerminal).to.be.true
 
     it "can override socketId in options", ->
-      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {socketId: 1234})
-
-      expect(cfg.socketId).to.eq(1234)
+      config.mergeDefaults({projectRoot: "/foo/bar/"}, {socketId: 1234})
+      .then (cfg) ->
+        expect(cfg.socketId).to.eq(1234)
 
     it "deletes envFile", ->
       obj = {
@@ -541,15 +545,15 @@ describe "lib/config", ->
         }
       }
 
-      cfg = config.mergeDefaults(obj)
-
-      expect(cfg.environmentVariables).to.deep.eq({
-        foo: "bar"
-        bar: "baz"
-        version: "1.0.1"
-      })
-      expect(cfg.env).to.eq(process.env["CYPRESS_ENV"])
-      expect(cfg).not.to.have.property("envFile")
+      config.mergeDefaults(obj)
+      .then (cfg) ->
+        expect(cfg.environmentVariables).to.deep.eq({
+          foo: "bar"
+          bar: "baz"
+          version: "1.0.1"
+        })
+        expect(cfg.env).to.eq(process.env["CYPRESS_ENV"])
+        expect(cfg).not.to.have.property("envFile")
 
     it "merges env into @config.env", ->
       obj = {
@@ -568,14 +572,14 @@ describe "lib/config", ->
         }
       }
 
-      cfg = config.mergeDefaults(obj, options)
-
-      expect(cfg.environmentVariables).to.deep.eq({
-        host: "localhost"
-        user: "brian"
-        version: "0.13.1"
-        foo: "bar"
-      })
+      config.mergeDefaults(obj, options)
+      .then (cfg) ->
+        expect(cfg.environmentVariables).to.deep.eq({
+          host: "localhost"
+          user: "brian"
+          version: "0.13.1"
+          foo: "bar"
+        })
 
     describe ".resolved", ->
       it "sets reporter and port to cli", ->
@@ -588,38 +592,38 @@ describe "lib/config", ->
           port: 1234
         }
 
-        cfg = config.mergeDefaults(obj, options)
-
-        expect(cfg.resolved).to.deep.eq({
-          port:                       { value: 1234, from: "cli" },
-          hosts:                      { value: null, from: "default" }
-          reporter:                   { value: "json", from: "cli" },
-          reporterOptions:            { value: null, from: "default" },
-          baseUrl:                    { value: null, from: "default" },
-          defaultCommandTimeout:      { value: 4000, from: "default" },
-          pageLoadTimeout:            { value: 60000, from: "default" },
-          requestTimeout:             { value: 5000, from: "default" },
-          responseTimeout:            { value: 30000, from: "default" },
-          execTimeout:                { value: 60000, from: "default" },
-          screenshotOnHeadlessFailure:{ value: true, from: "default" },
-          numTestsKeptInMemory:       { value: 50, from: "default" },
-          waitForAnimations:          { value: true, from: "default" },
-          animationDistanceThreshold: { value: 5, from: "default" },
-          trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
-          watchForFileChanges:        { value: true, from: "default" },
-          chromeWebSecurity:          { value: true, from: "default" },
-          viewportWidth:              { value: 1000, from: "default" },
-          viewportHeight:             { value: 660, from: "default" },
-          fileServerFolder:           { value: "", from: "default" },
-          videoRecording:             { value: true, from: "default" }
-          videoCompression:           { value: 32, from: "default" }
-          videosFolder:               { value: "cypress/videos", from: "default" },
-          supportFile:                { value: "cypress/support", from: "default" },
-          fixturesFolder:             { value: "cypress/fixtures", from: "default" },
-          integrationFolder:          { value: "cypress/integration", from: "default" },
-          screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-          environmentVariables:       { }
-        })
+        config.mergeDefaults(obj, options)
+        .then (cfg) ->
+          expect(cfg.resolved).to.deep.eq({
+            port:                       { value: 1234, from: "cli" },
+            hosts:                      { value: null, from: "default" }
+            reporter:                   { value: "json", from: "cli" },
+            reporterOptions:            { value: null, from: "default" },
+            baseUrl:                    { value: null, from: "default" },
+            defaultCommandTimeout:      { value: 4000, from: "default" },
+            pageLoadTimeout:            { value: 60000, from: "default" },
+            requestTimeout:             { value: 5000, from: "default" },
+            responseTimeout:            { value: 30000, from: "default" },
+            execTimeout:                { value: 60000, from: "default" },
+            screenshotOnHeadlessFailure:{ value: true, from: "default" },
+            numTestsKeptInMemory:       { value: 50, from: "default" },
+            waitForAnimations:          { value: true, from: "default" },
+            animationDistanceThreshold: { value: 5, from: "default" },
+            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            watchForFileChanges:        { value: true, from: "default" },
+            chromeWebSecurity:          { value: true, from: "default" },
+            viewportWidth:              { value: 1000, from: "default" },
+            viewportHeight:             { value: 660, from: "default" },
+            fileServerFolder:           { value: "", from: "default" },
+            videoRecording:             { value: true, from: "default" }
+            videoCompression:           { value: 32, from: "default" }
+            videosFolder:               { value: "cypress/videos", from: "default" },
+            supportFile:                { value: "cypress/support", from: "default" },
+            fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+            integrationFolder:          { value: "cypress/integration", from: "default" },
+            screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
+            environmentVariables:       { }
+          })
 
       it "sets config, envFile and env", ->
         @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
@@ -641,55 +645,55 @@ describe "lib/config", ->
 
         options = {}
 
-        cfg = config.mergeDefaults(obj, options)
-
-        expect(cfg.resolved).to.deep.eq({
-          port:                       { value: 2020, from: "config" },
-          hosts:                      { value: null, from: "default" }
-          reporter:                   { value: "spec", from: "default" },
-          reporterOptions:            { value: null, from: "default" },
-          baseUrl:                    { value: "http://localhost:8080", from: "config" },
-          defaultCommandTimeout:      { value: 4000, from: "default" },
-          pageLoadTimeout:            { value: 60000, from: "default" },
-          requestTimeout:             { value: 5000, from: "default" },
-          responseTimeout:            { value: 30000, from: "default" },
-          execTimeout:                { value: 60000, from: "default" },
-          numTestsKeptInMemory:       { value: 50, from: "default" },
-          waitForAnimations:          { value: true, from: "default" },
-          animationDistanceThreshold: { value: 5, from: "default" },
-          screenshotOnHeadlessFailure:{ value: true, from: "default" },
-          trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
-          watchForFileChanges:        { value: true, from: "default" },
-          chromeWebSecurity:          { value: true, from: "default" },
-          viewportWidth:              { value: 1000, from: "default" },
-          viewportHeight:             { value: 660, from: "default" },
-          fileServerFolder:           { value: "", from: "default" },
-          videoRecording:             { value: true, from: "default" }
-          videoCompression:           { value: 32, from: "default" }
-          videosFolder:               { value: "cypress/videos", from: "default" },
-          supportFile:                { value: "cypress/support", from: "default" },
-          fixturesFolder:             { value: "cypress/fixtures", from: "default" },
-          integrationFolder:          { value: "cypress/integration", from: "default" },
-          screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-          environmentVariables:       {
-            foo: {
-              value: "foo"
-              from: "config"
+        config.mergeDefaults(obj, options)
+        .then (cfg) ->
+          expect(cfg.resolved).to.deep.eq({
+            port:                       { value: 2020, from: "config" },
+            hosts:                      { value: null, from: "default" }
+            reporter:                   { value: "spec", from: "default" },
+            reporterOptions:            { value: null, from: "default" },
+            baseUrl:                    { value: "http://localhost:8080", from: "config" },
+            defaultCommandTimeout:      { value: 4000, from: "default" },
+            pageLoadTimeout:            { value: 60000, from: "default" },
+            requestTimeout:             { value: 5000, from: "default" },
+            responseTimeout:            { value: 30000, from: "default" },
+            execTimeout:                { value: 60000, from: "default" },
+            numTestsKeptInMemory:       { value: 50, from: "default" },
+            waitForAnimations:          { value: true, from: "default" },
+            animationDistanceThreshold: { value: 5, from: "default" },
+            screenshotOnHeadlessFailure:{ value: true, from: "default" },
+            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            watchForFileChanges:        { value: true, from: "default" },
+            chromeWebSecurity:          { value: true, from: "default" },
+            viewportWidth:              { value: 1000, from: "default" },
+            viewportHeight:             { value: 660, from: "default" },
+            fileServerFolder:           { value: "", from: "default" },
+            videoRecording:             { value: true, from: "default" }
+            videoCompression:           { value: 32, from: "default" }
+            videosFolder:               { value: "cypress/videos", from: "default" },
+            supportFile:                { value: "cypress/support", from: "default" },
+            fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+            integrationFolder:          { value: "cypress/integration", from: "default" },
+            screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
+            environmentVariables:       {
+              foo: {
+                value: "foo"
+                from: "config"
+              }
+              bar: {
+                value: "bar"
+                from: "envFile"
+              }
+              baz: {
+                value: "baz"
+                from: "cli"
+              }
+              quux: {
+                value: "quux"
+                from: "env"
+              }
             }
-            bar: {
-              value: "bar"
-              from: "envFile"
-            }
-            baz: {
-              value: "baz"
-              from: "cli"
-            }
-            quux: {
-              value: "quux"
-              from: "env"
-            }
-          }
-        })
+          })
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
@@ -799,8 +803,9 @@ describe "lib/config", ->
       obj = {
         projectRoot: "/_test-output/path/to/project"
       }
-
-      expect(config.setSupportFileAndFolder(obj)).to.eql(obj)
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        expect(result).to.eql(obj)
 
     it "sets the full path to the supportFile and supportFolder if it exists", ->
       projectRoot = process.cwd()
@@ -810,14 +815,15 @@ describe "lib/config", ->
         supportFile: "test/unit/config_spec.coffee"
       })
 
-      expect(config.setSupportFileAndFolder(obj)).to.eql({
-        projectRoot: projectRoot
-        supportFile: "#{projectRoot}/test/unit/config_spec.coffee"
-        supportFolder: "#{projectRoot}/test/unit"
-      })
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          supportFile: "#{projectRoot}/test/unit/config_spec.coffee"
+          supportFolder: "#{projectRoot}/test/unit"
+        })
 
     it "sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default", ->
-      @sandbox.stub(fs, "existsSync").returns(false)
       projectRoot = process.cwd()
 
       obj = config.setAbsolutePaths({
@@ -825,11 +831,13 @@ describe "lib/config", ->
         supportFile: "cypress/support"
       })
 
-      expect(config.setSupportFileAndFolder(obj)).to.eql({
-        projectRoot: projectRoot
-        supportFile: "#{projectRoot}/cypress/support/index.js"
-        supportFolder: "#{projectRoot}/cypress/support"
-      })
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          supportFile: "#{projectRoot}/cypress/support/index.js"
+          supportFolder: "#{projectRoot}/cypress/support"
+        })
 
     it "sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/blank-support")
@@ -839,10 +847,12 @@ describe "lib/config", ->
         supportFile: "cypress/support"
       })
 
-      expect(config.setSupportFileAndFolder(obj)).to.eql({
-        projectRoot: projectRoot
-        supportFile: false
-        })
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          supportFile: false
+          })
 
     it "throws error if supportFile is not default and does not exist", ->
       projectRoot = process.cwd()
@@ -852,7 +862,9 @@ describe "lib/config", ->
         supportFile: "does/not/exist"
       })
 
-      expect(-> config.setSupportFileAndFolder(obj)).to.throw("Support file missing or invalid.")
+      config.setSupportFileAndFolder(obj)
+      .catch (err) ->
+        expect(err.message).to.include("Support file missing or invalid.")
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->

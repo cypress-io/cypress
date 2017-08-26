@@ -5,7 +5,15 @@ $Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 takeScreenshot = (runnable, name, log, timeout) ->
-  titles = [runnable.title]
+  titles = []
+
+  ## if this a hook then push both the current test title
+  ## and our own hook title
+  if runnable.type is "hook"
+    if runnable.ctx and (ct = runnable.ctx.currentTest)
+      titles.push(ct.title, runnable.title)
+  else
+    titles.push(runnable.title)
 
   getParentTitle = (runnable) ->
     if p = runnable.parent

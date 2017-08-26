@@ -294,6 +294,76 @@ module.exports = {
 
       https://on.cypress.io/custom-command-interface-changed
       """
+    returned_value_and_commands_from_custom_command: (obj) ->
+      """
+        Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+
+        The custom command was:
+
+          > #{cmd(obj.current)}
+
+        The return value was:
+
+          > #{obj.returned}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-custom-command
+      """
+    returned_value_and_commands: (ret) ->
+      """
+        Cypress detected that you invoked one or more cy commands but returned a different value.
+
+        The return value was:
+
+          > #{ret}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-test
+      """
+    command_returned_promise_and_commands: (obj) ->
+      """
+        Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.
+
+        The custom command that returned the promise was:
+
+          > #{cmd(obj.current)}
+
+        The cy command you invoked inside the promise was:
+
+          > #{cmd(obj.called)}
+
+        Because Cypress commands are already promise-like, you don't need to wrap them or return your own promise.
+
+        Cypress will resolve your custom command with whatever the final Cypress command yields.
+
+        The reason this is an error instead of a warning is because Cypress internally queues commands serially whereas Promises execute as soon as they are invoked. Attempting to reconcile this would prevent Cypress from ever resolving.
+
+        https://on.cypress.io/returning-promise-and-commands-in-custom-command
+      """
+    mixing_promises_and_commands: (title) ->
+      """
+        Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
+
+        The test title was:
+
+          > #{title}
+
+        While this works in practice, it's often indicative of an anti-pattern. You almost never need to return both a promise and also invoke cy commands.
+
+        Cy commands themselves are already promise like, and you can likely avoid the use of the separate Promise.
+
+        https://on.cypress.io/returning-promise-and-commands-in-test
+      """
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 
@@ -338,16 +408,24 @@ module.exports = {
     orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
     outside_test: """
       Cypress cannot execute commands outside a running test.
+
       This usually happens when you accidentally write commands outside an 'it(...)' test.
-      If that is the case, just move these commands inside an 'it(...)' test.
-      Check your test file for errors.\n
+
+      If that is the case, just move these commands inside an it(...) test.
+
+      Check your test file for errors.
+
       https://on.cypress.io/cannot-execute-commands-outside-test
     """
     outside_test_with_cmd: """
-      Cannot call "#{cmd('{{cmd}}')} outside a running test.
+      Cannot call "#{cmd('{{cmd}}')}" outside a running test.
+
       This usually happens when you accidentally write commands outside an it(...) test.
-      If that is the case, just move these commands inside an 'it(...)' test.
-      Check your test file for errors.\n
+
+      If that is the case, just move these commands inside an it(...) test.
+
+      Check your test file for errors.
+
       https://on.cypress.io/cannot-execute-commands-outside-test
     """
     private_custom_command_interface: "You cannot use the undocumented private command interface: {{method}}"
@@ -606,7 +684,7 @@ module.exports = {
 
       Cypress detected that an uncaught error was thrown from a cross origin script.
 
-      We cannot provide you the stack trace, line number, or file where this error occured.
+      We cannot provide you the stack trace, line number, or file where this error occurred.
 
       Check your Developer Tools Console for the actual error - it should be printed there.
 
@@ -615,7 +693,7 @@ module.exports = {
       https://on.cypress.io/cross-origin-script-error
     """
     error_in_hook: (obj) ->
-      msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+      msg = "Because this error occurred during a '#{obj.hookName}' hook we are skipping "
 
       if t = obj.parentTitle
         msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
@@ -729,7 +807,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {{arg}}"
     invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: '{{alias}}' did not match a route."
     invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
-    timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occured."
+    timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occurred."
 
   window:
     iframe_doc_undefined: "The remote iframe's document is undefined"

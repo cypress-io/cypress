@@ -82,7 +82,8 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState(options.projectPath).get()
+    savedState(options.projectPath)
+    .then (state) -> state.get()
     .then (state) =>
       Windows.open(@getWindowArgs(state, options))
       .then (win) =>

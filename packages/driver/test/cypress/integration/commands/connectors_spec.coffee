@@ -79,9 +79,8 @@ describe "src/cy/commands/connectors", ->
       it "can resolve cypress commands inside of a promise", ->
         _then = false
 
-        cy.then ->
-
-          Promise.delay(10).then =>
+        cy.wrap(null).then ->
+          Promise.delay(10).then ->
             cy.then ->
               _then = true
         .then ->
@@ -90,9 +89,8 @@ describe "src/cy/commands/connectors", ->
       it "can resolve chained cypress commands inside of a promise", ->
         _then = false
 
-        cy.then ->
-
-          Promise.delay(10).then =>
+        cy.wrap(null).then ->
+          Promise.delay(10).then ->
             cy.get("div:first").then ->
               _then = true
         .then ->
@@ -195,7 +193,6 @@ describe "src/cy/commands/connectors", ->
             done()
 
           cy.then ->
-
             cy.wait(5000)
 
             return "foo"

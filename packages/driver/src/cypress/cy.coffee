@@ -1,5 +1,6 @@
 _ = require("lodash")
 $ = require("jquery")
+
 Promise = require("bluebird")
 
 $utils = require("./utils")
@@ -29,36 +30,14 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
+noArgsAreAFunction = (args) ->
+  not _.some(args, _.isFunction)
+
+isPromiseLike = (ret) ->
+  ret and _.isFunction(ret.then)
+
 returnedFalse = (result) ->
   result is false
-
-# window.Cypress ($Cypress)
-#
-# Cypress.config(...)
-#
-# Cypress.Server.defaults()
-# Cypress.Keyboard.defaults()
-# Cypress.Mouse.defaults()
-# Cypress.Commands.add("login")
-#
-# Cypress.on "error"
-# Cypress.on "retry"
-# Cypress.on "uncaughtException"
-#
-# cy.on "error"
-#
-# # Cypress.Log.command()
-#
-# log = Cypress.log()
-#
-# log.snapshot().end()
-# log.set().get()
-#
-# cy.log()
-#
-# cy.foo (Cy)
-
-# { visit, get, find } = cy
 
 silenceConsole = (contentWindow) ->
   if c = contentWindow.console
@@ -85,6 +64,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   onFinishAssertions = ->
     assertions.finishAssertions.apply(null, arguments)
 
+  warnMixingPromisesAndCommands = ->
+    title = state("runnable").fullTitle()
+
+    msg = $utils.errMessageByPath("miscellaneous.mixing_promises_and_commands", title)
+
+    $utils.warning(msg)
+
   $$ = (selector, context) ->
     context ?= state("document")
     new $.fn.init(selector, context)
@@ -104,6 +90,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   xhrs = $Xhrs.create(state)
   aliases = $Aliases.create(state)
+
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, expect, elements.isInDom)
 
@@ -113,8 +100,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
 
-  runnableCtx = ->
-    ensures.ensureRunnable()
+  runnableCtx = (name) ->
+    ensures.ensureRunnable(name)
 
     state("runnable").ctx
 
@@ -124,7 +111,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   contentWindowListeners = (contentWindow) ->
     $Listeners.bindTo(contentWindow, {
       onError: ->
-        debugger
         ## use a function callback here instead of direct
         ## reference so our users can override this function
         ## if need be
@@ -192,6 +178,113 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
+  runCommand = (command) ->
+    ## bail here prior to creating a new promise
+    ## because we could have stopped / canceled
+    ## prior to ever making it through our first
+    ## command
+    return if stopped
+
+    state("current", command)
+    state("chainerId", command.get("chainerId"))
+
+    stability.whenStable ->
+      ## TODO: handle this event
+      # @trigger "invoke:start", command
+
+      state "nestedIndex", state("index")
+
+      command.get("args")
+
+    ## allow promises to be used in the arguments
+    ## and wait until they're all resolved
+    .all()
+
+    .then (args) ->
+      ## store this if we enqueue new commands
+      ## to check for promise violations
+      enqueuedCmd = null
+
+      commandEnqueued = (obj) ->
+        enqueuedCmd = obj
+
+      ## only check for command enqueing when none
+      ## of our args are functions else commands
+      ## like cy.then or cy.each would always fail
+      ## since they return promises and queue more
+      ## new commands
+      if noArgsAreAFunction(args)
+        Cypress.once("command:enqueued", commandEnqueued)
+
+      ## run the command's fn with runnable's context
+      try
+        ret = command.get("fn").apply(state("ctx"), args)
+      catch err
+        throw err
+      finally
+        ## always this listener
+        Cypress.removeListener("command:enqueued", commandEnqueued)
+
+      state("commandIntermediateValue", ret)
+
+      ## we cannot pass our cypress instance or our chainer
+      ## back into bluebird else it will create a thenable
+      ## which is never resolved
+      switch
+        when isCy(ret)
+          null
+        when enqueuedCmd and isPromiseLike(ret)
+          $utils.throwErrByPath(
+            "miscellaneous.command_returned_promise_and_commands", {
+              args: {
+                current: command.get("name")
+                called: enqueuedCmd.name
+              }
+            }
+          )
+        when enqueuedCmd and not _.isUndefined(ret)
+          ## if we got a return value and we enqueued
+          ## a new command and we didn't return cy
+          ## or an undefined value then throw
+          $utils.throwErrByPath(
+            "miscellaneous.returned_value_and_commands_from_custom_command", {
+              args: {
+                current: command.get("name")
+                returned: $utils.stringify(ret)
+              }
+            }
+          )
+        else
+          ret
+    .then (subject) ->
+      state("commandIntermediateValue", undefined)
+
+      ## if ret is a DOM element and its not an instance of our own jQuery
+      if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+        ## set it back to our own jquery object
+        ## to prevent it from being passed downstream
+        ## TODO: enable turning this off
+        ## wrapSubjectsInJquery: false
+        ## which will just pass subjects downstream
+        ## without modifying them
+        subject = $(subject)
+
+      command.set({ subject: subject })
+
+      ## end / snapshot our logs
+      ## if they need it
+      command.finishLogs()
+
+      ## reset the nestedIndex back to null
+      state("nestedIndex", null)
+
+      ## also reset recentlyReady back to null
+      state("recentlyReady", null)
+
+      state("subject", subject)
+
+      return subject
+
   removeSubject = ->
     state("subject", undefined)
 
@@ -219,6 +312,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     if state("runnable")
       ## make sure we don't ever time out this runnable now
       timeouts.clearTimeout()
+
+    ## if a command fails then after each commands
+    ## could also fail unless we clear this out
+    state("commandIntermediateValue", undefined)
 
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
@@ -261,7 +358,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## if we dont have a "fail" handler
     ## 1. callback with state("done") when async
     ## 2. throw the error for the promise chain
-
     try
       ## collect all of the callbacks for 'fail'
       rets = Cypress.action("cy:fail", err, state("runnable"))
@@ -438,7 +534,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     addCommandSync: (name, fn) ->
       cy[name] = ->
-        fn.apply(runnableCtx(), arguments)
+        fn.apply(runnableCtx(name), arguments)
 
     addChainer: (name, fn) ->
       ## add this function to our chainer class
@@ -448,7 +544,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
 
-      prepareSubject = (firstCall, args) =>
+      prepareSubject = (firstCall, args) ->
         ## if this is the very first call
         ## on the chainer then make the first
         ## argument undefined (we have no subject)
@@ -462,12 +558,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         args.unshift(subject)
 
-        ## TODO: handle this event
         Cypress.action("cy:next:subject:prepared", subject, args)
 
         args
 
-      wrap = (firstCall) =>
+      wrap = (firstCall) ->
         fn = commandFns[name]
         wrapped = wrapByType(fn, firstCall)
         wrapped.originalFn = fn
@@ -505,7 +600,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               return ret ? subject
 
       cy[name] = (args...) ->
-        ensures.ensureRunnable()
+        ensures.ensureRunnable(name)
 
         ## this is the first call on cypress
         ## so create a new chainer instance
@@ -513,6 +608,33 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         ## store the chain so we can access it later
         state("chain", chain)
+
+        ## if we are in the middle of a command
+        ## and its return value is a promise
+        ## that means we are attempting to invoke
+        ## a cypress command within another cypress
+        ## command and we should error
+        if ret = state("commandIntermediateValue")
+          current = state("current")
+
+          ## if this is a custom promise
+          if isPromiseLike(ret) and noArgsAreAFunction(current.get("args"))
+            $utils.throwErrByPath(
+              "miscellaneous.command_returned_promise_and_commands", {
+                args: {
+                  current: current.get("name")
+                  called: name
+                }
+              }
+            )
+
+        ## if we're the first call onto a cy
+        ## command, then kick off the run
+        if not state("promise")
+          if state("returnedCustomPromise")
+            warnMixingPromisesAndCommands()
+
+          cy.run()
 
         return chain
 
@@ -657,94 +779,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     getStyles: ->
       snapshots.getStyles()
 
-    checkForEndedEarly: ->
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = state("index")
-      if index > 0 and index < queue.length
-        errors.endedEarlyErr(index, queue)
-
-    setRunnable: (runnable, hookName) ->
-      state("hookName", hookName)
-
-      state("runnable", runnable)
-
-      state("ctx", runnable.ctx)
-
-      fn = runnable.fn
-
-      restore = ->
-        runnable.fn = fn
-
-      runnable.fn = ->
-        restore()
-
-        timeout = config("defaultCommandTimeout")
-
-        ## control timeouts on runnables ourselves
-        if _.isFinite(timeout)
-          timeouts.timeout(timeout)
-
-        ## store the current length of our queue
-        ## before we invoke the runnable.fn
-        currentLength = queue.length
-
-        try
-          ## if we have a fn.length that means we
-          ## are accepting a done callback and need
-          ## to change the semantics around how we
-          ## attach the run queue
-          if fn.length
-            originalDone = arguments[0]
-
-            arguments[0] = done = (err) ->
-              ## TODO: handle no longer error
-              ## when ended early
-              doneEarly()
-
-              originalDone(err)
-
-            ## store this done property
-            ## for async tests
-            state("done", done)
-
-          ret = fn.apply(@, arguments)
-
-          ## if we attached a done callback
-          ## and returned a promise then we
-          ## need to automatically bind to
-          ## .catch() and return done(err)
-          ## TODO: this has gone away in mocha 3.x.x
-          ## due to overspecifying a resolution.
-          ## in those cases we need to remove
-          ## returning a promise
-          if fn.length and ret and ret.catch
-            ret = ret.catch(done)
-
-          ## if we returned a value from fn
-          ## and enqueued some new commands
-          ## and the value isnt currently cy
-          if ret and (queue.length > currentLength) and (not isCy(ret))
-            debugger
-
-          ## if we didn't fire up any cy commands
-          ## then send back mocha what was returned
-          if queue.length is currentLength
-            return ret
-
-          ## kick off the run!
-          ## and return this outer
-          ## bluebird promise
-          return cy.run()
-
-        catch err
-          ## if our runnable.fn throw synchronously
-          ## then it didnt fail from a cypress command
-          ## but we should still teardown and handle
-          ## the error
-          fail(err, runnable)
-
     run: ->
       next = ->
         ## bail if we've been told to abort in case
@@ -793,8 +827,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cypress.action("cy:command:start", command)
 
-        cy
-        .set(command)
+        runCommand(command)
         .then ->
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
@@ -882,77 +915,118 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## TODO: handle this event
       # @trigger("set", command)
 
-    set: (command) ->
-      ## bail here prior to creating a new promise
-      ## because we could have stopped / canceled
-      ## prior to ever making it through our first
-      ## command
-      return if stopped
+    setRunnable: (runnable, hookName) ->
+      ## when we're setting a new runnable
+      ## prepare to run again!
+      stopped = false
 
-      state("current", command)
-      state("chainerId", command.get("chainerId"))
+      ## reset the promise again
+      state("promise", undefined)
 
-      stability.whenStable ->
-        ## TODO: handle this event
-        # @trigger "invoke:start", command
+      state("hookName", hookName)
 
-        state "nestedIndex", state("index")
+      state("runnable", runnable)
 
-        command.get("args")
+      state("ctx", runnable.ctx)
 
-      ## allow promises to be used in the arguments
-      ## and wait until they're all resolved
-      .all()
+      fn = runnable.fn
 
-      .then (args) =>
-        ## if the first argument is a function and it has an _invokeImmediately
-        ## property that means we are supposed to immediately invoke
-        ## it and use its return value as the argument to our
-        ## current command object
-        if _.isFunction(args[0]) and args[0]._invokeImmediately
-          args[0] = args[0].call(@)
+      restore = ->
+        runnable.fn = fn
 
-        ## run the command's fn with runnable's context
-        ret = command.get("fn").apply(state("ctx"), args)
+      runnable.fn = ->
+        restore()
 
-        ## allow us to immediately tap into
-        ## return value of our command
-        ## TODO: handle this event
-        # @trigger "command:returned:value", command, ret
+        timeout = config("defaultCommandTimeout")
 
-        ## we cannot pass our cypress instance or our chainer
-        ## back into bluebird else it will create a thenable
-        ## which is never resolved
-        if isCy(ret) then null else ret
+        ## control timeouts on runnables ourselves
+        if _.isFinite(timeout)
+          timeouts.timeout(timeout)
 
-      .then (subject) =>
-        ## if ret is a DOM element and its not an instance of our own jQuery
-        if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
-          ## set it back to our own jquery object
-          ## to prevent it from being passed downstream
-          subject = $(subject)
+        ## store the current length of our queue
+        ## before we invoke the runnable.fn
+        currentLength = queue.length
 
-        command.set({ subject: subject })
+        try
+          ## if we have a fn.length that means we
+          ## are accepting a done callback and need
+          ## to change the semantics around how we
+          ## attach the run queue
+          if fn.length
+            originalDone = arguments[0]
 
-        ## end / snapshot our logs
-        ## if they need it
-        command.finishLogs()
+            arguments[0] = done = (err) ->
+              ## TODO: handle no longer error
+              ## when ended early
+              doneEarly()
 
-        ## trigger an event here so we know our
-        ## command has been successfully applied
-        ## and we've potentially altered the subject
-        ## TODO: handle this event
-        # @trigger "invoke:subject", subject, command
+              originalDone(err)
 
-        ## reset the nestedIndex back to null
-        state("nestedIndex", null)
+              ## return null else we there are situations
+              ## where returning a regular bluebird promise
+              ## results in a warning about promise being created
+              ## in a handler but not returned
+              return null
 
-        ## also reset recentlyReady back to null
-        state("recentlyReady", null)
+            ## store this done property
+            ## for async tests
+            state("done", done)
 
-        state("subject", subject)
+          ret = fn.apply(@, arguments)
 
-        return subject
+          ## if we returned a value from fn
+          ## and enqueued some new commands
+          ## and the value isnt currently cy
+          ## or a promise
+          if ret and
+            (queue.length > currentLength) and
+              (not isCy(ret)) and
+                (not isPromiseLike(ret))
+
+            $utils.throwErrByPath("miscellaneous.returned_value_and_commands", {
+              args: $utils.stringify(ret)
+            })
+
+          ## if we attached a done callback
+          ## and returned a promise then we
+          ## need to automatically bind to
+          ## .catch() and return done(err)
+          ## TODO: this has gone away in mocha 3.x.x
+          ## due to overspecifying a resolution.
+          ## in those cases we need to remove
+          ## returning a promise
+          if fn.length and ret and ret.catch
+            ret = ret.catch(done)
+
+          ## if we returned a promise like object
+          if (not isCy(ret)) and isPromiseLike(ret)
+            ## indicate we've returned a custom promise
+            state("returnedCustomPromise", true)
+
+            ## this means we instantiated a promise
+            ## and we've already invoked multiple
+            ## commands and should warn
+            if queue.length > currentLength
+              warnMixingPromisesAndCommands()
+
+            return ret
+
+          ## if we're cy or we've enqueued commands
+          if isCy(ret) or (queue.length > currentLength)
+            ## the run should already be kicked off
+            ## by now and return this promise
+            return state("promise")
+
+          ## else just return ret
+          return ret
+
+        catch err
+          ## if our runnable.fn throw synchronously
+          ## then it didnt fail from a cypress command
+          ## but we should still teardown and handle
+          ## the error
+          fail(err, runnable)
+
   }
 
   _.each privateProps, (obj, key) =>

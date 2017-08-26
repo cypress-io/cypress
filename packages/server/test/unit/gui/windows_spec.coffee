@@ -1,6 +1,7 @@
 require("../../spec_helper")
 
 _             = require("lodash")
+delay         = require("delay")
 EE            = require("events").EventEmitter
 BrowserWindow = require("electron").BrowserWindow
 Windows       = require("#{root}../lib/gui/windows")
@@ -48,17 +49,18 @@ describe "lib/gui/windows", ->
 
   context ".trackState", ->
     beforeEach ->
-      @state = savedState()
-      @sandbox.stub(@state, "set")
+      savedState()
+      .then (@state) =>
+        @sandbox.stub(@state, "set")
 
-      @projectPath = undefined
-      @keys = {
-        width: "theWidth"
-        height: "someHeight"
-        x: "anX"
-        y: "aY"
-        devTools: "whatsUpWithDevTools"
-      }
+        @projectPath = undefined
+        @keys = {
+          width: "theWidth"
+          height: "someHeight"
+          x: "anX"
+          y: "aY"
+          devTools: "whatsUpWithDevTools"
+        }
 
     it "saves size and position when window resizes, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
@@ -69,20 +71,23 @@ describe "lib/gui/windows", ->
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
-      expect(@state.set).to.be.calledWith({
-        theWidth: 1
-        someHeight: 2
-        anX: 3
-        aY: 4
-      })
+      delay(100)
+      .then () =>
+        expect(@state.set).to.be.calledWith({
+          theWidth: 1
+          someHeight: 2
+          anX: 3
+          aY: 4
+        })
 
     it "returns if window isDestroyed on resize", ->
       @win.isDestroyed.returns(true)
 
       Windows.trackState(@projectPath, @win, @keys)
       @win.emit("resize")
-
-      expect(@state.set).not.to.be.called
+      delay(100)
+      .then () =>
+        expect(@state.set).not.to.be.called
 
     it "saves position when window moves, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
@@ -91,10 +96,12 @@ describe "lib/gui/windows", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.emit("moved")
 
-      expect(@state.set).to.be.calledWith({
-        anX: 3
-        aY: 4
-      })
+      delay(100)
+      .then () =>
+        expect(@state.set).to.be.calledWith({
+          anX: 3
+          aY: 4
+        })
 
     it "returns if window isDestroyed on moved", ->
       @win.isDestroyed.returns(true)
@@ -102,19 +109,25 @@ describe "lib/gui/windows", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.emit("moved")
 
-      expect(@state.set).not.to.be.called
+      delay(100)
+      .then () =>
+        expect(@state.set).not.to.be.called
 
     it "saves dev tools state when opened", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.webContents.emit("devtools-opened")
 
-      expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
+      delay(100)
+      .then () =>
+        expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
 
     it "saves dev tools state when closed", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.webContents.emit("devtools-closed")
 
-      expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})
+      delay(100)
+      .then () =>
+        expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})
 
   context ".automation", ->
     beforeEach ->

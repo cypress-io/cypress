@@ -562,11 +562,13 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
 
       ## append a friendly message to the error indicating
       ## we're skipping the remaining tests in this suite
-      err.message += "\n\n" +
-      $utils.errMessageByPath("uncaught.error_in_hook", {
-        parentTitle,
-        hookName
-      })
+      err = $utils.appendErrMsg(
+        err,
+        $utils.errMessageByPath("uncaught.error_in_hook", {
+          parentTitle,
+          hookName
+        })
+      )
 
     ## always set runnable err so we can tap into
     ## taking a screenshot on error
@@ -598,7 +600,6 @@ create = (specWindow, mocha, Cypress, cy) ->
   _runner.suite = mocha.getRootSuite()
 
   specWindow.onerror = ->
-    debugger
     err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
 
     ## err will not be returned if cy can associate this
@@ -762,13 +763,6 @@ create = (specWindow, mocha, Cypress, cy) ->
         ## if we have one
         if err
           runnable.err = wrapErr(err)
-
-        ## check for ended early and switch the err
-        ## to that if one exists
-        ## TODO: implement this
-        # try
-          # cy.checkForEndedEarly()
-        # catch err
 
         runnableAfterRunAsync(runnable, Cypress)
         .then ->

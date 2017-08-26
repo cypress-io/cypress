@@ -13,18 +13,18 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   xhrs
-    ✓ can encode + decode headers (123ms)
-    ✓ ensures that request headers + body go out and reach the server unscathed (123ms)
-    ✓ does not inject into json's contents from http server even requesting text/html (123ms)
-    ✓ does not inject into json's contents from file server even requesting text/html (123ms)
+    ✓ can encode + decode headers
+    ✓ ensures that request headers + body go out and reach the server unscathed
+    ✓ does not inject into json's contents from http server even requesting text/html
+    ✓ does not inject into json's contents from file server even requesting text/html
     ✓ works prior to visit
     server with 1 visit
-      ✓ response body (123ms)
-      ✓ request body (123ms)
-      ✓ aborts (123ms)
+      ✓ response body
+      ✓ request body
+      ✓ aborts
 
 
-  8 passing (123ms)
+  8 passing
 
 
   (Tests Finished)

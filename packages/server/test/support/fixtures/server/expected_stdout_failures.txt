@@ -13,7 +13,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       3) is failing
 
 
-  2 passing (123ms)
+  2 passing
   3 failing
 
   1) stdout_failing_spec fails:

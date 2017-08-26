@@ -33,8 +33,8 @@ class Default extends Component {
             onDrop={this._drop}
           >
             <span className="fa-stack fa-lg">
-            <i className="fa fa-folder fa-stack-2x"></i>
-            <i className="fa fa-plus fa-stack-1x"></i>
+              <i className="fa fa-folder fa-stack-2x"></i>
+              <i className="fa fa-plus fa-stack-1x"></i>
             </span>
             <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
           </div>

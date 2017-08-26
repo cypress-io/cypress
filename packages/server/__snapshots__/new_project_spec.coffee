@@ -1,6 +1,6 @@
 exports['e2e new project passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
-Added this project: /Users/bmann/Dev/cypress-monorepo/packages/server/.projects/no-scaffolding
+Added this project: /foo/bar/.projects/no-scaffolding
 
 -----------------------------------------------------------------------------------
 You are using an older version of the CLI tools.
@@ -8,18 +8,21 @@ You are using an older version of the CLI tools.
 Please update the CLI tools by running: npm install -g cypress-cli
 -----------------------------------------------------------------------------------
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
-  0 passing (123ms)
+  ✓ is true
+  ✓ has Cypress.version
+
+  2 passing
 
 
   (Tests Finished)
 
-  - Tests:           0
-  - Passes:          0
+  - Tests:           2
+  - Passes:          2
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds
@@ -31,10 +34,9 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/no-scaffolding/cypress/videos/abc123.mp4 (0 seconds)
 
 
   (All Done)
 
 `
-

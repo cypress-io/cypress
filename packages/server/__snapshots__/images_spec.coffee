@@ -13,11 +13,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   images
-    ✓ can correctly load images when served from http server (123ms)
-    ✓ can correctly load image when served from file system (123ms)
+    ✓ can correctly load images when served from http server
+    ✓ can correctly load image when served from file system
 
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)

@@ -27,7 +27,6 @@ Cypress automatically bundles and wraps these libraries:
 | --- | ---- |
 | [`sinon`](http://sinonjs.org) | provides the {% url `cy.stub()` stub %} and {% url `cy.spy()` spy %} API's |
 | [`lolex`](https://github.com/sinonjs/lolex) | provides the {% url `cy.clock()` clock %} and {% url `cy.tick()` tick %} API's |
-| [`sinon-as-promised`](https://github.com/bendrucker/sinon-as-promised) | makes it easy to stub `Promise` returning functions |
 | [`sinon-chai`](https://github.com/domenic/sinon-chai) | adds `chai` assertions for stubs and spies |
 
 You can refer to each of these libraries documentation for more examples and explanations.

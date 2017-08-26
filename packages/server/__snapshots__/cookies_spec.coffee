@@ -13,15 +13,15 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   cookies
-    ✓ can get all cookies (123ms)
-    ✓ resets cookies between tests correctly (123ms)
+    ✓ can get all cookies
+    ✓ resets cookies between tests correctly
     ✓ should be only two left now
-    ✓ sends cookies to localhost:2121 (123ms)
-    ✓ handles expired cookies (123ms)
-    ✓ issue: #224 sets expired cookies between redirects (123ms)
+    ✓ sends cookies to localhost:2121
+    ✓ handles expired cookies
+    ✓ issue: #224 sets expired cookies between redirects
 
 
-  6 passing (123ms)
+  6 passing
 
 
   (Tests Finished)

@@ -27,7 +27,7 @@ Once Cypress is open, let's create a folder:
 mkdir playground
 ```
 
-Great! Now let's add this folder to Cypress by dragging the folder into the Desktop or clicking 'select manually'.
+Great! Now let's add this folder to Cypress by dragging the folder into the Desktop App or clicking 'select manually'.
 
 {% img no-border /img/guides/add-your-first-project-in-guid.png "Adding an empty folder to Cypress Desktop" %}
 

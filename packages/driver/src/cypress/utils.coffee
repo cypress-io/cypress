@@ -29,6 +29,31 @@ module.exports = {
   logInfo: (msgs...) ->
     console.info(msgs...)
 
+  appendErrMsg: (err, message) ->
+    ## preserve stack
+    ## this is the critical part
+    ## because the browser has a cached
+    ## dynamic stack getter that will
+    ## not be evaluated letare
+    stack = err.stack
+
+    ## preserve message
+    msg = err.message
+
+    ## slice out message
+    stack = stack.split(msg)
+
+    ## append message
+    msg += "\n\n" + message
+
+    ## set message
+    err.message = msg
+
+    ## reset stack
+    err.stack = stack.join(msg)
+
+    return err
+
   cloneErr: (err) ->
     err2 = new Error(err.message)
     err2.name = err.name

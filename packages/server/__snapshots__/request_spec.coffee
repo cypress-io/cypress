@@ -13,8 +13,8 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   redirects + requests
-    ✓ gets and sets cookies from cy.request (123ms)
-    ✓ visits idempotant (123ms)
+    ✓ gets and sets cookies from cy.request
+    ✓ visits idempotant
     ✓ automatically follows redirects
     ✓ can turn off automatically following redirects
     ✓ follows all redirects even when they change methods
@@ -24,10 +24,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ passes even on non 2xx or 3xx status code
     ✓ sets Accept header to */* by default
     ✓ can override the accept header
-    ✓ issue #375: does not duplicate request cookies on 302 redirect (123ms)
+    ✓ issue #375: does not duplicate request cookies on 302 redirect
 
 
-  12 passing (123ms)
+  12 passing
 
 
   (Tests Finished)
@@ -70,7 +70,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when network connection cannot be established fails:
@@ -117,18 +117,11 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
     at stack trace line
     at stack trace line
-From previous event:
     at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -191,7 +184,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
@@ -214,7 +207,7 @@ The request we sent was:
 Method: GET
 URL: http://localhost:2294/statusCode?code=503
 Headers: {
-  "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/53.0.2785.143 Electron/1.4.6 Safari/537.36",
+  "user-agent": "foo",
   "accept": "*/*",
   "accept-encoding": "gzip, deflate"
 }
@@ -228,12 +221,13 @@ Headers: {
   "x-powered-by": "Express",
   "content-type": "text/plain; charset=utf-8",
   "content-length": "19",
-  "etag": "W/\"13-52060a5f\"",
+  "etag": "W/13-52060a5f",
   "date": "Fri, 18 Aug 2017 15:01:13 GMT",
   "connection": "close"
 }
 Body: Service Unavailable
 
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -275,4 +269,3 @@ Body: Service Unavailable
   (All Done)
 
 `
-

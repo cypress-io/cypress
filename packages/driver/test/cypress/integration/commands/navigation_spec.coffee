@@ -988,8 +988,6 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          debugger
-
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -1479,7 +1477,7 @@ describe "src/cy/commands/navigation", ->
         cy
           .visit("/fixtures/jquery.html")
 
-          ## make url timeout after only 100ms
+          ## make get timeout after only 200ms
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
       it "captures cross origin failures", (done) ->

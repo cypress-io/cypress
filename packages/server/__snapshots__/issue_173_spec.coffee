@@ -15,11 +15,12 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1) fails
   ✓ should be able to log
 
-  1 passing (123ms)
+  1 passing
   1 failing
 
   1)  fails:
      CypressError: Timed out retrying: Expected to find element: 'element_does_not_exist', but never found it.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -62,4 +63,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

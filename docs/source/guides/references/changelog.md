@@ -3,6 +3,92 @@ title: Changelog
 comments: false
 ---
 
+# 0.20.0
+
+*Released*
+
+**Features:**
+
+- We have all new docs! Check them out {% url "here" https://docs.cypress.io %}.
+- You can now install `cypress` per project as an `npm` package using `npm install cypress`. The installation and use of the {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} is no longer required.
+- New `cy.trigger()` command. Addresses {% issue 406 %}.
+- New `cy.scrollTo()` command. Addresses {% issue 497 %} & {% issue 313 %}.
+- New `.scrollIntoView()` command. Addresses {% issue 498 %} & {% issue 313 %} & {% issue 519 %}.
+- Input ranges are now more easily testable using the new `cy.trigger()` command. See our new recipe for details on how. Addresses {% issue 287 %}.
+- Testing drag and drop is now possible using the new `cy.trigger()` command. See our new recipe for details on how. Addresses {% issue 386 %}.
+- Updated `.click()` command to accept more position arguments. Addresses {% issue 499 %}.
+- Added support to {% url `.type()` type %} for inputs of type `date`, `time`, `month`, and `week`. Addresses {% issue 27 %}.
+- Updated `Cypress._` to use {% url "lodash" https://lodash.com/ %} instead of {% url "Underscore" http://underscorejs.org/ %}. Addresses {% issue 548 %}.
+- You can now pass a browser option to `cypress run` as `--browser <browser name>`. Addresses {% issue 462 %}.
+- `cypress open` no longer opens a detached process by default. Instead `cypress open` now accepts a new flag `--detached`, which replicates this behavior.
+- We have all new {% url "docker examples" docker-images %} you can check out.
+- The `cypress` npm package now checks the currently installed version on `install` and `run` and does not re-install Cypress if it is already installed. Addresses {% issue 396 %}.
+- We've added a new `Cypress.Commands` interface to handle adding your own custom commands. Addresses {% issue 436 %}.
+- We removed an artificial delay that was being set in between commands. This means test commands now run faster.
+- You can now disable Cypress global exception handler. Addresses {% issue 254 %}
+
+**Breaking Changes:**
+
+- We've removed the undocumented `cy.chain()` command. You should be able to safely remove this from your code. Addresses {% issue 456 %}.
+- If any of an element's parent's overflow is 'hidden', we now calculate if the element is outside of the boundaries of that parent element and validate visibility assertions accordingly. This may cause some tests that were previously passing to now accurately fail. Fixes {% issue 410 %}.
+- {% url `.select()` select %} should now look for the trimmed value inside of an `<option></option>`. This may change the content argument required to select the option you intended in your {% url `.select()` select %} command. Addresses {% issue 175 %}.
+- When passing the option `{ force: true }` to {% url `.click()` click %} and {% url `.type()` type %}, we no longer attempt to scroll the element into view. We've also disabled the check that the element is in view before clicking or typing. Addresses {% issue 553 %}.
+- `Cypress.Dom` has been renamed to `Cypress.dom`.
+
+**Deprecations**
+
+- The {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} has been deprecated. Addresses {% issue 316 %}.
+- The interface for writing custom commands has been deprecated. Please read our docs on the new custom commands interface. Addresses {% issue 436 %} and {% issue 465 %}.
+- `Cypress.Log.command` has been renamed to `Cypress.log`.
+
+**Bugfixes:**
+
+- When editing `cypress.json` file, the dead browser page no longer appears. Fixes {% issue 492 %}.
+- {% url `.type()` type %} should now work on inputs regardless of capitalization of `type` attribute. Fixes {% issue 550 %}.
+- Fixed issues where {% url `.type()` type %} was not appending text properly. Fixes {% issue 503 %} and {% issue 568 %}.
+- Fixed issue where {% url `.type()` type %} with `type="email"` inputs were throwing an error. Fixes {% issue 504 %}.
+- Fixed issue where using {% url `.type()` type %} on an input with a `type` defined in uppercase (`input type="TEXT"`) would throw an error and not type. Fixes {% issue 550 %}.
+- Fixed issue with `.clear()` and `type="number"` inputs. Fixes {% issue 490 %}.
+- Fixed issue where {% url `cy.exec()` exec %} was failing when running Cypress in docker. Fixes {% issue 517 %}.
+- Cypress CLI no longer requires `git` to install. Fixes {% issue 124 %}
+- Improved the reporter's responsive design so controls still show at narrower widths. Fixes {% issue 544 %}.
+- Commands text will no long cut off into ellipses when the Command Log is set to a wider width. Fixes {% issue 528 %}.
+- Fixed issue where setting `fixturesFolder` to `false` would throw an error. Fixes {% issue 450 %}.
+- Fixed issue where Cypress hanged due to `xvfb` permissions. More intuitive output is given during install failures. Fixes {% issue 330 %}.
+- Fixed issue with internal timers being inaccurate from within Electron. Fixes {% issue 572 %}.
+- Cypress will now scroll past multiple elements that cover up an element to be interacted with. It also now factors in elements with `position: sticky`. Fixes {% issue 571 %}.
+- {% url "The checks used to determine an element's actionability" interacting-with-elements#Actionability %} are now run synchronously. This solves some circumstances where the element could have moved or otherwise change between the checks. Fixes {% issue 570 %}.
+- Cypress now scrolls all parent containers (not just `window`) when attempting to {% url "check an element's actionability" interacting-with-elements#Actionability %}. Fixes {% issue 569 %}.
+- Fixed issue where clipped elements with `overflow-y: hidden` were falsely passing as "visible". Fixes {% issue 563 %}.
+- When using {% url `.select()` select %} on a select with multiple options with the same value, we now properly set `selectedIndex` and `selectedOptions` on the `select`. Fixes {% issue 554 %}.
+- Fixed issue where changing any spec file (renaming, adding, deleting) would remove the highlighted styling of the currently active spec file in the Desktop GUI. Fixes {% issue 547 %}.
+- We now get the absolute paths of styles to use when displaying snapshots. This will fix situations where some stylesheets were improperly referenced during the snapshot, so did not display styles correctly. Fixes {% issue 525 %}.
+- Fixed regression where multiple uses of {% url `cy.server()` server %} in a `before` hook was throwing an error. Fixes {% issue 80 %} and {% issue 510 %}.
+- Fixed issue where commands would retry and potentially exceed their timeout values during page transitions. Fixes {% issue 594 %}
+- Fixed issue where server routes were lost after page load if not initiated by a {% url `cy.visit()` visit %} command. Fixes {% issue 177 %}
+
+**Misc:**
+
+- We've moved our entire codebase into one into a private "Monorepo". This is in anticipation for going open source (making the GitHub repo public) and should make it easier for everyone to contribute to our code. Addresses {% issue 256 %}.
+- When element's are not visible due to being covered by another element, the error message now says what element is covering the element.
+- The "Can't start server" error displayed in the Desktop-GUI no longer prevents you from interacting in the Desktop App. It now displays as a warning. Addresses {% issue 407 %}.
+- Updated Cypress' jQuery version from `2.1.4` to `2.2.4`.
+- {% url `cy.focused()` focused %} now automatically retries until the element exists in the DOM. Addresses {% issue 564 %} and {% issue 409 %}.
+- We now support per-project `state.json`. Addresses {% issue 512 %}.
+- The Desktop GUI update window now has messaging about `package.json` versioning. Addresses {% issue 513 %}.
+- The Desktop GUI now accounts for cypress being installed per project as npm module. Addresses {% issue 500 %} and {% issue 514 %}.
+- We now throw when a value other than `cy` is returned from a test or command function. Addresses {% issue 463 %}.
+- Returning a promise in a custom command now throws. Addresses {% issue 435 %}.
+- We now resolve data in custom commands. Addresses {% issue 435 %}.
+- Exposing Cypress Binary should no longer be necessary when cypress is locally installed. Addresses {% issue 379 %}.
+- `cypress install` `-d` option. Addresses {% issue 389 %}.
+- Added an 'App Data' option in the Desktop App that displays app data. Addresses {% issue 475 %}.
+- When {% url `cy.spy()` spy %} or {% url `cy.stub()` stub %} are never called, the error now displays a clearer, grammatically correct error. Addresses {% issue 520 %}.
+- Detection of installed browsers has been improved. Addresses {% issue 511 %}.
+- We can now handle multiple projects per server. Addresses {% issue 512 %}.
+- When commands are clicked on and logged into the console from the Command Log, they now display their 'yield' instead of 'return', since they really yield instead of return.
+
+
 # 0.19.4
 
 *Released 06/18/2017*

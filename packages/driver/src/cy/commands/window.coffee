@@ -35,6 +35,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   setViewportAndSynchronize = (width, height) ->
     viewport = {viewportWidth: width, viewportHeight: height}
 
+    ## store viewport on the state for logs
+    state(viewport)
+
     new Promise (resolve) ->
       if currentViewport.viewportWidth is width and currentViewport.viewportHeight
         ## noop if viewport won't change

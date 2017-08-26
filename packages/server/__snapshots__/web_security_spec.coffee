@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     3) fails when using a javascript redirect to another origin
 
 
-  0 passing (123ms)
+  0 passing
   3 failing
 
   1) web security fails when clicking <a> to another origin:
@@ -45,10 +45,6 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -88,10 +84,6 @@ https://on.cypress.io/cross-origin-violation
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
@@ -117,10 +109,6 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -176,12 +164,12 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   web security
-    ✓ fails when clicking <a> to another origin (123ms)
-    ✓ fails when submitted a form and being redirected to another origin (123ms)
-    ✓ fails when using a javascript redirect to another origin (123ms)
+    ✓ fails when clicking <a> to another origin
+    ✓ fails when submitted a form and being redirected to another origin
+    ✓ fails when using a javascript redirect to another origin
 
 
-  3 passing (123ms)
+  3 passing
 
 
   (Tests Finished)

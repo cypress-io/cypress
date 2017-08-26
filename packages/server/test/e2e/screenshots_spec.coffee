@@ -49,9 +49,9 @@ describe "e2e screenshots", ->
       screenshot2 = path.join(e2ePath, "cypress", "screenshots", "red.png")
       screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foobarbaz.png")
       screenshot4 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- generates pngs on failure.png")
-      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- before all hook.png")
-      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- before each hook.png")
-      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- after each hook.png")
+      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- empty test 1 -- before all hook.png")
+      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- before each hook.png")
+      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- after each hook.png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")
@@ -69,8 +69,8 @@ describe "e2e screenshots", ->
         ## png1 should not be within 5k of png2
         expect(sizes[0]).not.to.be.closeTo(sizes[1], 5000)
 
-        ## png3 should not be within 2k of png4
-        expect(sizes[2]).not.to.be.closeTo(sizes[3], 2000)
+        ## png3 should not be within 1.5k of png4
+        expect(sizes[2]).not.to.be.closeTo(sizes[3], 1500)
       .then ->
         Promise.all([
           sizeOf(screenshot1)

@@ -23,7 +23,7 @@ create = (Cypress, state) ->
   whenStable = (fn) ->
     ## if we are not stable
     if state("isStable") is false
-      return new Promise (resolve) ->
+      return new Promise (resolve, reject) ->
         ## then when we become stable
         state "whenStable", ->
           ## reset this callback function
@@ -32,6 +32,7 @@ create = (Cypress, state) ->
           ## and invoke the original function
           tryFn(fn)
           .then(resolve)
+          .catch(reject)
 
     ## else invoke it right now
     return tryFn(fn)

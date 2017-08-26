@@ -295,7 +295,9 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectPath).set(newState)
+      savedState(projectPath)
+      .then (state) ->
+        state.set(newState)
     , 500
 
     win.on "moved", _.debounce ->
@@ -305,17 +307,23 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectPath).set(newState)
+      savedState(projectPath)
+      .then (state) ->
+        state.set(newState)
     , 500
 
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState(projectPath).set(newState)
+      savedState(projectPath)
+      .then (state) ->
+        state.set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState(projectPath).set(newState)
+      savedState(projectPath)
+      .then (state) ->
+        state.set(newState)
 
 }

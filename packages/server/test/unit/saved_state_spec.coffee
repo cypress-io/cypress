@@ -35,18 +35,24 @@ describe "lib/saved_state", ->
   it "is a function", ->
     expect(savedState).to.be.a("function")
 
-  it "returns an instance of FileUtil", ->
-    expect(savedState()).to.be.instanceof(FileUtil)
+  it "resolves with an instance of FileUtil", ->
+    savedState()
+    .then (state) ->
+      expect(state).to.be.instanceof(FileUtil)
 
   it "sets file path to app data path and file name to 'state'", ->
-    statePath = savedState().path
-    expected = path.join(appData.path(), "projects", "__global__", "state.json")
-    expect(statePath).to.equal(expected)
+    savedState()
+    .then (state) ->
+      statePath = state.path
+      expected = path.join(appData.path(), "projects", "__global__", "state.json")
+      expect(statePath).to.equal(expected)
 
   it "caches state file instance per path", ->
-    a = savedState("/foo/bar")
-    b = savedState("/foo/bar")
-    expect(a).to.equal(b)
+    Promise.all([
+      savedState("/foo/bar"),
+      savedState("/foo/bar")
+    ]).spread (a, b) ->
+      expect(a).to.equal(b)
 
   it "returns different state file for different path", ->
     a = savedState("/foo/bar")
