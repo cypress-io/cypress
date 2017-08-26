@@ -1,12 +1,6 @@
 exports['e2e visit low response timeout passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
 
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -60,12 +54,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
@@ -166,12 +154,6 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 exports['e2e visit low response timeout fails when server responds with 500 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
 
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -243,12 +225,6 @@ This was considered a failure because the status code was not '2xx'.
 
 exports['e2e visit low response timeout fails when file server responds with 404 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
@@ -324,12 +300,6 @@ The internal Cypress web server responded with:
 exports['e2e visit low response timeout fails when content type isnt html 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
 
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -403,12 +373,6 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
 exports['e2e visit normal response timeouts fails when visit times out 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
  > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
