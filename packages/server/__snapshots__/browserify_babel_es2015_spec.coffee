@@ -1,6 +1,4 @@
-exports['e2e browserify, babel, es2015 passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e browserify, babel, es2015 passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -37,9 +35,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e browserify, babel, es2015 fails 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e browserify, babel, es2015 fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
