@@ -133,6 +133,8 @@ create = (options = {}) ->
     hasEnabledStubs = bool
 
   return server = {
+    options
+
     restore
 
     getStack
@@ -146,7 +148,9 @@ create = (options = {}) ->
     getFullyQualifiedUrl
 
     getOptions: ->
-      options
+      ## clone the options to prevent
+      ## accidental mutations
+      _.clone(options)
 
     getRoutes: ->
       routes
