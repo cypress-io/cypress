@@ -35,15 +35,17 @@ API = {
         """
       when "BROWSER_NOT_FOUND"
         """
-        Browser: #{arg1} was not found on your system.
+        Browser: '#{arg1}' was not found on your system.
 
         Available browsers found are: #{arg2}
         """
       when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
         """
-        Warning: Cannot record test run video when using non built-in electron browser
+        Warning: Cypress can only record videos when using the built in 'electron' browser.
 
-        You are using #{arg1}, disabling video recording
+        You have set the browser to: '#{arg1}'
+
+        A video will not be recorded when using this browser.
         """
       when "NOT_LOGGED_IN"
         """

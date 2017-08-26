@@ -52,8 +52,6 @@ module.exports = {
         onBrowserClose: ->
       })
 
-      console.log "----------------------getting browser by name", name
-
       if not browser = getBrowser(name)
         names = _.map(options.browsers, "name").join(", ")
         return errors.throw("BROWSER_NOT_FOUND", name, names)
