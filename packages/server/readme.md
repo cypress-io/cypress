@@ -207,3 +207,13 @@ socket.emit("remote:response", "123-a-guid-as-an-id", {a: "new response data obj
 - `npm i`
 - Open new tab: `npm run watch`
 - `node_modules/.bin/nw .`
+
+## Misc
+
+**important** do not use sync file system methods to work with files. They can fail if
+there are too many files (the `EMILE` exception). Asynchronous file system methods
+all use [graceful-fs](https://github.com/isaacs/node-graceful-fs#readme) to retry and
+get around this problem.
+
+* there is `fs.pathExists(filename)` method that is returning a promise, use that
+  instead of `fs.exists` or `fs.existsSync`.

@@ -2,6 +2,9 @@ require("../../spec_helper")
 
 _ = require("lodash")
 EE = require("events")
+la = require("lazy-ass")
+check = require("check-more-types")
+
 menu = require("#{root}../lib/gui/menu")
 Windows = require("#{root}../lib/gui/windows")
 electron = require("#{root}../lib/browsers/electron")
@@ -31,8 +34,10 @@ describe "lib/browsers/electron", ->
   context ".open", ->
     beforeEach ->
       @sandbox.stub(electron, "_render").resolves(@win)
-      state = savedState()
-      @sandbox.stub(state, "get").resolves(@state)
+      savedState()
+      .then (state) =>
+        la(check.fn(state.get), "state is missing .get to stub", state)
+        @sandbox.stub(state, "get").resolves(@state)
 
     it "calls render with url, state, and options", ->
       electron.open("electron", @url, @options, @automation)
