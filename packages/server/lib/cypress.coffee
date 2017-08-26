@@ -52,9 +52,10 @@ module.exports = {
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
         ## log a warning
-        require("./api").ping().catch (err) ->
-          console.log(err.message)
-          require("./errors").warning("DEV_NO_SERVER")
+        if process.env.CYPRESS_ENV is "development"
+          require("./api").ping().catch (err) ->
+            console.log(err.message)
+            require("./errors").warning("DEV_NO_SERVER")
 
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->

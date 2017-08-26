@@ -1,6 +1,4 @@
-exports['e2e busted support file passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-Added this project: /foo/bar/.projects/busted-support-file
+exports['e2e busted support file passes 1'] = `Added this project: /foo/bar/.projects/busted-support-file
 
 Started video recording: /foo/bar/.projects/busted-support-file/cypress/videos/abc123.mp4
 

@@ -1,6 +1,4 @@
-exports['e2e caught and uncaught hooks errors failing1 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e caught and uncaught hooks errors failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -67,9 +65,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 `
 
-exports['e2e caught and uncaught hooks errors failing2 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e caught and uncaught hooks errors failing2 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -124,9 +120,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 `
 
-exports['e2e caught and uncaught hooks errors failing3 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e caught and uncaught hooks errors failing3 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -173,9 +167,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
 `
 
-exports['e2e caught and uncaught hooks errors failing4 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e caught and uncaught hooks errors failing4 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
