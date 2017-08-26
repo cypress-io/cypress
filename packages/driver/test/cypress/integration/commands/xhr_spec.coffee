@@ -1308,6 +1308,15 @@ describe "src/cy/commands/xhr", ->
             expect(@warn).not.to.be.called
 
     describe "request response alias", ->
+      it "matches xhrs with lowercase methods", ->
+        cy
+          .route(/foo/, {}).as("getFoo")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("get", "/foo")
+            xhr.send()
+          .wait("@getFoo")
+
       it "can pass an alias reference to route", ->
         cy
           .noop({foo: "bar"}).as("foo")
