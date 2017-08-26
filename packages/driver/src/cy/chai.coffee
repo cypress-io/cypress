@@ -45,7 +45,7 @@ chai.use (chai, u) ->
           }
         )
       )
-      err.retry = false
+
       throw err
 
     onError: (err, method, obj, negated) ->
