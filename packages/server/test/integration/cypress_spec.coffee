@@ -581,7 +581,7 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
 
-    it "logs error when browser cannot be found", ->
+    it.only "logs error when browser cannot be found", ->
       browsers.open.restore()
 
       cypress.start(["--run-project=#{@idsPath}", "--cli-version", "--browser=foo"])
@@ -594,7 +594,7 @@ describe "lib/cypress", ->
         found1 = _.find argsSet, (args) ->
           _.find args, (arg) ->
             arg.message and arg.message.includes(
-              "Browser: foo was not found on your system."
+              "Browser: 'foo' was not found on your system."
             )
 
         expect(found1, "foo should not be found").to.be.ok
