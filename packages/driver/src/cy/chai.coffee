@@ -36,8 +36,20 @@ chai.use (chai, u) ->
   chaiUtils = u
 
   $chaiJquery(chai, chaiUtils, {
-    onError: (err, topic, obj, negated) ->
-      switch topic
+    onInvalid: (method, obj) ->
+      err = $utils.cypressErr(
+        $utils.errMessageByPath(
+          "chai.invalid_jquery_obj", {
+            assertion: method
+            subject: $utils.stringifyActual(obj)
+          }
+        )
+      )
+
+      throw err
+
+    onError: (err, method, obj, negated) ->
+      switch method
         when "visible"
           if not negated
             ## add reason hidden unless we expect the element to be hidden

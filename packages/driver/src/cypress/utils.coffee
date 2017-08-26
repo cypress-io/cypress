@@ -144,17 +144,17 @@ module.exports = {
 
     if _.isEmpty(obj) then undefined else obj
 
-  _stringifyObj: (obj) ->
+  stringifyActualObj: (obj) ->
     obj = @normalizeObjWithLength(obj)
 
     str = _.reduce obj, (memo, value, key) =>
-      memo.push "#{key}".toLowerCase() + ": " + @_stringify(value)
+      memo.push "#{key}".toLowerCase() + ": " + @stringifyActual(value)
       memo
     , []
 
     "{" + str.join(", ") + "}"
 
-  _stringify: (value) ->
+  stringifyActual: (value) ->
     switch
       when @hasElement(value)
         @stringifyElement(value, "short")
@@ -167,7 +167,7 @@ module.exports = {
         if len > 3
           "Array[#{len}]"
         else
-          "[" + _.map(value, _.bind(@_stringify, @)).join(", ") + "]"
+          "[" + _.map(value, _.bind(@stringifyActual, @)).join(", ") + "]"
 
       when _.isRegExp(value)
         value.toString()
@@ -177,7 +177,7 @@ module.exports = {
         if len > 2
           "Object{#{len}}"
         else
-          @_stringifyObj(value)
+          @stringifyActualObj(value)
 
       when @_isSymbol(value)
         "Symbol"
@@ -196,7 +196,7 @@ module.exports = {
 
     _
     .chain(values)
-    .map(_.bind(@_stringify, @))
+    .map(_.bind(@stringifyActual, @))
     .without(undefined)
     .join(", ")
     .value()
@@ -210,7 +210,7 @@ module.exports = {
       when _.isUndefined(arg)
         "undefined"
       else
-        @_stringify(arg)
+        @stringifyActual(arg)
 
   hasDom: (obj) ->
     @hasElement(obj) or @hasWindow(obj) or @hasDocument(obj)

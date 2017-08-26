@@ -124,6 +124,18 @@ describe "src/cy/commands/waiting", ->
             null
           .wait("@fetch")
 
+      ## https://github.com/cypress-io/cypress-monorepo/issues/369
+      it "does not mutate 2nd route methods when using shorthand route", ->
+        cy
+          .server()
+          .route("POST", /foo/, {}).as("getFoo")
+          .route(/bar/, {}).as("getBar")
+          .window().then (win) ->
+            win.$.post("/foo")
+            win.$.get("/bar")
+            null
+          .wait("@getBar")
+
       describe "errors", ->
         beforeEach ->
           Cypress.config("defaultCommandTimeout", 50)
