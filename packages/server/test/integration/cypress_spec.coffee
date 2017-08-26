@@ -39,6 +39,34 @@ openProject   = require("#{root}lib/open_project")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
+TYPICAL_BROWSERS = [
+  {
+    name: 'chrome',
+    displayName: 'Chrome',
+    version: '60.0.3112.101',
+    path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    majorVersion: '60'
+  }, {
+    name: 'chromium',
+    displayName: 'Chromium',
+    version: '49.0.2609.0',
+    path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+    majorVersion: '49'
+  }, {
+    name: 'canary',
+    displayName: 'Canary',
+    version: '62.0.3197.0',
+    path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+    majorVersion: '62'
+  }, {
+    name: 'electron',
+    version: '',
+    path: '',
+    majorVersion: '',
+    info: 'Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.'
+  }
+]
+
 describe "lib/cypress", ->
   beforeEach ->
     @timeout(5000)
@@ -54,7 +82,7 @@ describe "lib/cypress", ->
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(browsers, "get").resolves([])
+    @sandbox.stub(browsers, "get").resolves(TYPICAL_BROWSERS)
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
     @sandbox.spy(errors, "warning")
@@ -553,11 +581,31 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
 
-    ## FIXME
-    it.skip "logs error when browser cannot be found", ->
-      cypress.start(["--run-project=#{@idsPath}", "--browser=foo"])
+    it "logs error when browser cannot be found", ->
+      browsers.open.restore()
+
+      cypress.start(["--run-project=#{@idsPath}", "--cli-version", "--browser=foo"])
       .then =>
-        @expectExitWithErr("BROWSER_NOT_FOUND", "browser foo")
+        @expectExitWithErr("BROWSER_NOT_FOUND")
+
+        ## get all the error args
+        argsSet = errors.log.args
+
+        found1 = _.find argsSet, (args) ->
+          _.find args, (arg) ->
+            arg.message and arg.message.includes(
+              "Browser: foo was not found on your system."
+            )
+
+        expect(found1, "foo should not be found").to.be.ok
+
+        found2 = _.find argsSet, (args) ->
+          _.find args, (arg) ->
+            arg.message and arg.message.includes(
+              "Available browsers found are: chrome, chromium, canary, electron"
+            )
+
+        expect(found2, "browser names should be listed").to.be.ok
 
     it "logs error and exits when spec file was specified and does not exist", ->
       Project.add(@todosPath)

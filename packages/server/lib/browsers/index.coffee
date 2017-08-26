@@ -9,8 +9,6 @@ errors        = require("../errors")
 fs              = Promise.promisifyAll(fs)
 instance        = null
 
-BROWSERS = "chrome chromium canary electron".split(" ")
-
 kill = (unbind) ->
   ## cleanup our running browser
   ## instance
@@ -48,14 +46,17 @@ module.exports = {
   open: (name, options = {}, automation) ->
     kill(true)
     .then ->
-      _.defaults options,
+      _.defaults(options, {
         browserArgs: []
         onBrowserOpen: ->
         onBrowserClose: ->
+      })
+
+      console.log "----------------------getting browser by name", name
 
       if not browser = getBrowser(name)
-        keys = _.keys(BROWSERS).join(", ")
-        return errors.throw("BROWSER_NOT_FOUND", name, keys)
+        names = _.map(options.browsers, "name").join(", ")
+        return errors.throw("BROWSER_NOT_FOUND", name, names)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
