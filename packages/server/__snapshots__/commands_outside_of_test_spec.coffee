@@ -5,12 +5,8 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   1) An uncaught error was detected outside of a test
-  No Running Test
-    ✓ foo
-    ✓ bar
 
-
-  2 passing
+  0 passing
   1 failing
 
   1)  An uncaught error was detected outside of a test:
@@ -40,8 +36,8 @@ We dynamically generated a new test to display this failure.
 
   (Tests Finished)
 
-  - Tests:           3
-  - Passes:          2
+  - Tests:           1
+  - Passes:          0
   - Failures:        1
   - Pending:         0
   - Duration:        10 seconds
@@ -64,3 +60,4 @@ We dynamically generated a new test to display this failure.
   (All Done)
 
 `
+
