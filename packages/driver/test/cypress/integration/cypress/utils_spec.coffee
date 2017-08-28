@@ -1,6 +1,23 @@
+_ = Cypress._
 $utils = Cypress.utils
 
 describe "driver/src/cypress/utils", ->
+  context ".cloneErr", ->
+    it "copies properies, message, stack", ->
+      obj = {
+        stack: "stack"
+        message: "message"
+        name: "Foo"
+        code: 123
+      }
+
+      err = $utils.cloneErr(obj)
+
+      expect(err).to.be.instanceof(top.Error)
+
+      for key, val of obj
+        expect(err[key], "key: #{key}").to.eq(obj[key])
+
   context ".appendErrMsg", ->
     it "appends error message", ->
       err = new Error("foo")
