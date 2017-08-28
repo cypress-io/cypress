@@ -8,8 +8,8 @@ Note that this is meant for packages that are part of Cypress and not necessaril
 
 Extend one or more of the presets depending on the nature of the package:
 
-```
-// .eslintc
+```js
+// .eslintrc
 {
   "extends": [
     "plugin:cypress-dev/general",
@@ -33,18 +33,18 @@ Test-specific configuration and rules. Should be used within the `test` director
 
 React and JSX-specific configuration and rules.
 
-# Dependencies
+## Dependencies
 
 Due to a limitation in how ESLint plugins work, your package needs to install the ESLint plugins that this plugin depends on:
 
 If using the `tests` preset:
 
-```
+```bash
 npm install --save-dev eslint-plugin-mocha
 ```
 
 If using the `react` preset:
 
-```
+```bash
 npm install --save-dev babel-eslint eslint-plugin-react
 ```
