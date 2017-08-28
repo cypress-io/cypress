@@ -463,12 +463,13 @@ describe "Routes", ->
           projectRoot: Fixtures.projectPath("failures")
         })
 
-      it "serves error javascript file when there's a syntax error", ->
-        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include("ParseError")
+      _.times 10, (num) =>
+        it "#{num + 1} FLAKY NEEDS INSPECTION: serves error javascript file when there's a syntax error", ->
+          @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include('Cypress.action("spec:script:error", {')
+            expect(res.body).to.include("ParseError")
 
     describe "no-server", ->
       beforeEach ->
