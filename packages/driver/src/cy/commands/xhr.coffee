@@ -295,7 +295,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       options = o = getXhrServer(state).getOptions()
 
       ## enable the entire routing definition to be a function
-      parseArgs = (args...) =>
+      parseArgs = (args...) ->
         switch
           when _.isObject(args[0]) and not _.isRegExp(args[0])
             ## we dont have a specified response
@@ -345,7 +345,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if _.isString(o.method)
           o.method = o.method.toUpperCase()
 
-        _.defaults options, defaults
+        _.defaults(options, defaults)
 
         if not options.url
           $utils.throwErrByPath "route.url_missing"
@@ -384,7 +384,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           route()
 
-      route = =>
+      route = ->
         ## if our response is a string and
         ## a reference to an alias
         if _.isString(o.response) and aliasObj = cy.getAlias(o.response, "route")
