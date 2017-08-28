@@ -1,5 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
+Promise = Cypress.Promise
 
 describe "src/cy/commands/querying", ->
   before ->
@@ -861,6 +862,9 @@ describe "src/cy/commands/querying", ->
             }
 
     describe "alias references", ->
+      beforeEach ->
+        Cypress.config("defaultCommandTimeout", 200)
+
       it "can get alias primitives", ->
         cy
           .noop("foo").as("f")
@@ -921,8 +925,10 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
-              win.$.get("/users", {num: 1})
-              win.$.get("/users", {num: 2})
+              Promise.all([
+                win.$.get("/users", {num: 1})
+                win.$.get("/users", {num: 2})
+              ])
             .get("@getUsers.all").then (xhrs) ->
               expect(xhrs).to.be.an("array")
               expect(xhrs[0].url).to.include "/users?num=1"
@@ -934,30 +940,36 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
-              win.$.get("/users", {num: 1})
-              win.$.get("/users", {num: 2})
+              Promise.all([
+                win.$.get("/users", {num: 1})
+                win.$.get("/users", {num: 2})
+              ])
             .get("@getUsers.1").then (xhr1) ->
               expect(xhr1.url).to.include "/users?num=1"
 
-        it "FLAKY: returns the 2nd xhr", ->
+        it "returns the 2nd xhr", ->
           cy
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
-              win.$.get("/users", {num: 1})
-              win.$.get("/users", {num: 2})
+              Promise.all([
+                win.$.get("/users", {num: 1})
+                win.$.get("/users", {num: 2})
+              ])
             .get("@getUsers.2").then (xhr2) ->
               expect(xhr2.url).to.include "/users?num=2"
 
-        it "FLAKY: returns the 3rd xhr as null", ->
+        it "returns the 3rd xhr as null", ->
           cy
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
             .window().then (win) ->
-              win.$.get("/users", {num: 1})
-              win.$.get("/users", {num: 2})
+              Promise.all([
+                win.$.get("/users", {num: 1})
+                win.$.get("/users", {num: 2})
+              ])
             .get("@getUsers.3").then (xhr3) ->
               expect(xhr3).to.be.null
 
