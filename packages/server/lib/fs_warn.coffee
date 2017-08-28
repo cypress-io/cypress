@@ -1,5 +1,3 @@
-{T, F}  = require("ramda")
-
 ## warn users if somehow synchronous file methods are invoked
 ## these methods due to "too many files" errors are a huge pain
 warnOnSyncFileSystem = ->
@@ -22,14 +20,5 @@ addSyncFileSystemWarnings = (fs) ->
     warnOnSyncFileSystem()
     console.error(getStack())
     oldExistsSync(filename)
-
-  if not fs.pathExists
-    # pathExists was introduced to fs-extra@3.0.0
-    # if it does not exist mimic it using async methods
-    # and convert result into boolean
-    fs.pathExists = (filename) ->
-      fs.statAsync(filename)
-      .then(T)
-      .catch({code: "ENOENT"}, F)
 
 module.exports = addSyncFileSystemWarnings
