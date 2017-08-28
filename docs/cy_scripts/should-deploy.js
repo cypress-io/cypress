@@ -1,8 +1,10 @@
+'use strict'
+
 const got = require('got')
 const git = require('ggit')
 const pluralize = require('pluralize')
 const debug = require('debug')('deploy')
-const { isEmpty, complement, filter, test, tap, path, all, equals, T } = require('ramda')
+const { isEmpty, complement, filter, test, tap, path, all, equals, T, values } = require('ramda')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 
@@ -11,19 +13,52 @@ const docsChanged = complement(isEmpty)
 
 const isForced = process.argv.some(equals('--force'))
 
+const isValidEnvironment = is.oneOf(['staging', 'production'])
+
 /* eslint-disable no-console */
 /* global Promise */
 
-const expectedBranch = 'master'
+function isRightBranch (env) {
+  la(is.unemptyString(env), 'expected environment name', env)
 
-function isRightBranch () {
+  // allow multiple branches to deploy to staging environment,
+  // just add to the keys in this object
+  // "my-fix-branch": "staging"
+  const branchToEnv = {
+    develop: 'staging',
+    master: 'production',
+  }
+
+  const isDocsToStagingBranch = (branch) =>
+    branch.startsWith('docs-') && env === 'staging'
+
+  const isBranchAllowedToDeploy = (branch) => {
+    if (isDocsToStagingBranch(branch)) {
+      console.log('documentation branch %s is allowed to deploy to %s',
+        branch, env)
+      return true
+    }
+
+    if (!values(branchToEnv).includes(env)) {
+      console.log('could not get branch for environment', env)
+      return false
+    }
+
+    const allowed = branchToEnv[branch] === env
+    console.log('branch %s is valid for env %s?', branch, env, allowed)
+    return allowed
+  }
+
+  let branch
   return git.branchName()
     .then(tap((name) => {
       console.log('branch name', name)
+      branch = name
     }))
-    .then(equals(expectedBranch))
+    .then(isBranchAllowedToDeploy)
     .then(tap((rightBranch) => {
-      console.log('is right branch?', rightBranch)
+      console.log('is branch %s allowed to deploy %s?',
+        branch, env, rightBranch)
     }))
 }
 
@@ -38,6 +73,8 @@ function buildUrlForEnvironment (env) {
 }
 
 function lastDeployedCommit (env) {
+  la(is.unemptyString(env), 'missing environment', env)
+
   const url = buildUrlForEnvironment(env)
   la(url, 'could not get build url for environment', env)
 
@@ -49,23 +86,26 @@ function lastDeployedCommit (env) {
     }))
 }
 
-function changedFilesSince (sha) {
-  return git.changedFilesAfter(sha, expectedBranch)
+const changedFilesSince = (branchName) => (sha) => {
+  la(is.unemptyString(branchName), 'missing branch name', branchName)
+  return git.changedFilesAfter(sha, branchName)
     .then(tap((list) => {
-      debug('%s changed since last docs deploy',
-        pluralize('file', list.length, true))
+      debug('%s changed since last docs deploy in branch %s',
+        pluralize('file', list.length, true), branchName)
       debug(list.join('\n'))
     }))
 }
 
-function docsFilesChangedSinceLastDeploy (env) {
+function docsFilesChangedSinceLastDeploy (env, branchName) {
   return lastDeployedCommit(env)
-    .then(changedFilesSince)
+    .then(changedFilesSince(branchName))
     .then(justDocs)
     .then(tap((list) => {
+      console.log('changed files')
+      console.log(list.join('\n'))
       console.log('%d documentation %s changed since last doc deploy',
         list.length, pluralize('file', list.length))
-      console.log(list.join('\n'))
+      console.log('in branch %s against environment %s', branchName, env)
     }))
     .then(docsChanged)
     .then(tap((hasDocumentChanges) => {
@@ -79,20 +119,27 @@ function docsFilesChangedSinceLastDeploy (env) {
 // resolves with boolean true/false
 function shouldDeploy (env = 'production') {
   la(is.unemptyString(env), 'missing deploy check environment')
+  if (!isValidEnvironment(env)) {
+    console.log('invalid environment', env)
+    return Promise.resolve(false)
+  }
 
-  const questions = [
-    isRightBranch(),
-    docsFilesChangedSinceLastDeploy(env),
-  ]
-  return Promise.all(questions)
-    .then(all(equals(true)))
-    .then(Boolean)
-    .then((result) => {
-      if (isForced) {
-        console.log('should deploy is forced!')
-        return isForced
-      }
-      return result
+  return git.branchName()
+    .then((branchName) => {
+      const questions = [
+        isRightBranch(env),
+        docsFilesChangedSinceLastDeploy(env, branchName),
+      ]
+      return Promise.all(questions)
+        .then(all(equals(true)))
+        .then(Boolean)
+        .then((result) => {
+          if (isForced) {
+            console.log('should deploy is forced!')
+            return isForced
+          }
+          return result
+        })
     })
 }
 
@@ -105,7 +152,7 @@ if (!module.parent) {
   //   .then(console.log)
   //   .catch(console.error)
 
-  shouldDeploy()
+  shouldDeploy('staging')
     .then((should) => {
       console.log('should deploy?', should)
     })

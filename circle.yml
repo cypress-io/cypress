@@ -22,6 +22,9 @@ jobs:
     steps:
       - checkout
 
+      # print global NPM cache path
+      - run: echo $(npm -g bin)
+
       ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
       ## See the following information
@@ -69,6 +72,10 @@ jobs:
           key: v5-{{ .Branch }}-deps-ts
       - restore_cache:
           key: v5-{{ .Branch }}-deps-docs
+
+      # show what is already cached globally
+      - run: ls $(npm -g bin)
+      - run: ls $(npm -g bin)/../lib/node_modules
 
       # only installs the root dependencies, without going into packages
       # via postinstall script
@@ -259,6 +266,9 @@ jobs:
       - store_test_results:
           path: /tmp/cypress-monorepo
 
+  #
+  # Documentation jobs
+  #
   "docs-tests":
     <<: *defaults
     steps:
@@ -267,10 +277,43 @@ jobs:
       - run: cd docs && npm run deps
       - run: cd docs && npm run lint
       - run: cd docs && npm run test
-      - run: cd docs && npm run build
-      - run: cd docs && npm run test-e2e
+      # the docs should already have been built
+      - run: cd docs && ls public
+      - run: cd docs && cat public/build.json
+      # - run: cd docs && npm run build
+      # start docs server and run e2e tests
+      - run:
+          name: Start docs server
+          command: cd docs && npm run start
+          background: true
+      - run: sleep 10
+      - restore_cache:
+          key: cypress-tool-{{ .Branch }}
+      - run: cd docs && npm run cypress
+      # cache cypress-cli and Cypress itself
+      # see where our global cache is by version
+      - run: echo $(npm -g bin)
+      - save_cache:
+          key: cypress-tool-{{ .Branch }}
+          paths:
+            - /usr/local/bin/cypress
+            - /usr/local/lib/node_modules/cypress-cli
+            - /home/person/.cypress
 
-  "deploy-docs":
+  "deploy-docs-staging":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd docs && NODE_ENV=staging npm run build
+      # because we already built docs for production
+      # use script that just deploys without rebuilding the production docs
+      - run: cd docs && npm run deploy-prebuilt -- --environment staging
+      - run:
+          name: Print deployed version
+          command: cd docs && cat public/build.json
+
+  "deploy-docs-production":
     <<: *defaults
     steps:
       - restore_cache:
@@ -392,7 +435,19 @@ workflows:
       - docs-tests:
           requires:
             - build
-      - deploy-docs:
+
+      - deploy-docs-staging:
+          filters:
+            branches:
+              only:
+                # allow deploying to staging from "develop"
+                # and branches starting with special prefix
+                - develop
+                - /docs-*/
+          requires:
+            - docs-tests
+
+      - deploy-docs-production:
           filters:
             branches:
               only: master
