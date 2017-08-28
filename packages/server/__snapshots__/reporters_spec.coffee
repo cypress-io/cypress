@@ -1,14 +1,10 @@
-exports['e2e reporters reports error if cannot load reporter 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-Could not load reporter by name module-does-not-exist
+exports['e2e reporters reports error if cannot load reporter 1'] = `Could not load reporter by name module-does-not-exist
 Relative to the project path /foo/bar/.projects/e2e
 
 Learn more at stack trace line
 `
 
-exports['e2e reporters supports junit reporter and reporter options 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e reporters supports junit reporter and reporter options 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -35,9 +31,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e reporters supports local custom reporter 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e reporters supports local custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -66,9 +60,7 @@ finished!
 
 `
 
-exports['e2e reporters supports npm custom reporter 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
+exports['e2e reporters supports npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)

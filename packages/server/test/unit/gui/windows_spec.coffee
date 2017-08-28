@@ -1,7 +1,7 @@
 require("../../spec_helper")
 
 _             = require("lodash")
-delay         = require("delay")
+Promise       = require("bluebird")
 EE            = require("events").EventEmitter
 BrowserWindow = require("electron").BrowserWindow
 Windows       = require("#{root}../lib/gui/windows")
@@ -71,7 +71,9 @@ describe "lib/gui/windows", ->
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
-      delay(100)
+
+      Promise
+      .delay(100)
       .then () =>
         expect(@state.set).to.be.calledWith({
           theWidth: 1
@@ -85,7 +87,9 @@ describe "lib/gui/windows", ->
 
       Windows.trackState(@projectPath, @win, @keys)
       @win.emit("resize")
-      delay(100)
+
+      Promise
+      .delay(100)
       .then () =>
         expect(@state.set).not.to.be.called
 
@@ -96,7 +100,8 @@ describe "lib/gui/windows", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.emit("moved")
 
-      delay(100)
+      Promise
+      .delay(100)
       .then () =>
         expect(@state.set).to.be.calledWith({
           anX: 3
@@ -109,7 +114,8 @@ describe "lib/gui/windows", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.emit("moved")
 
-      delay(100)
+      Promise
+      .delay(100)
       .then () =>
         expect(@state.set).not.to.be.called
 
@@ -117,7 +123,8 @@ describe "lib/gui/windows", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.webContents.emit("devtools-opened")
 
-      delay(100)
+      Promise
+      .delay(100)
       .then () =>
         expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
 
@@ -125,7 +132,8 @@ describe "lib/gui/windows", ->
       Windows.trackState(@projectPath, @win, @keys)
       @win.webContents.emit("devtools-closed")
 
-      delay(100)
+      Promise
+      .delay(100)
       .then () =>
         expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})
 

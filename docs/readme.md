@@ -42,6 +42,16 @@ Link all pages but their name (property key) in `source/_data/sidebar.yml`
 
 ### Deploying
 
+#### Preferred: deploy from CI
+
+Look at `circle.yml` file in the root of the repo. It should have 
+`deploy-docs-staging` and `deploy-docs-production` jobs, which only are triggered for right
+branch and only after tests pass.
+
+#### Should not be required: manual deploy
+
 ```shell
 npm run deploy
 ```
+
+Look at scripts in `cy_scripts` folder for deployment steps.

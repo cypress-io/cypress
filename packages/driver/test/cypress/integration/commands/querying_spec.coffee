@@ -939,7 +939,7 @@ describe "src/cy/commands/querying", ->
             .get("@getUsers.1").then (xhr1) ->
               expect(xhr1.url).to.include "/users?num=1"
 
-        it "returns the 2nd xhr", ->
+        it "FLAKY: returns the 2nd xhr", ->
           cy
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
@@ -950,7 +950,7 @@ describe "src/cy/commands/querying", ->
             .get("@getUsers.2").then (xhr2) ->
               expect(xhr2.url).to.include "/users?num=2"
 
-        it "returns the 3rd xhr as null", ->
+        it "FLAKY: returns the 3rd xhr as null", ->
           cy
             .server()
             .route(/users/, {}).as("getUsers")

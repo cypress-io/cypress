@@ -1,7 +1,8 @@
 const cheerio = require('cheerio')
 
 function isInvalidId (id) {
-  return id === '' ||
+  return typeof id === 'undefined' ||
+    id === '' ||
     id === '#' ||
     id.startsWith('#-')
 }
