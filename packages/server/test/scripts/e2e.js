@@ -55,7 +55,6 @@ glob('test/e2e/**/*')
 
   const args = [
     './test/scripts/run.js',
-    '--run',
     spec,
   ]
 
