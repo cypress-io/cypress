@@ -33,7 +33,7 @@ if (!run) {
 
 const args = [
   '--xvfb-run-args',
-  '"-s \"-screen 0 1280x1024x8\""',
+  '-s \"-screen 0 1280x1024x8\"',
   'mocha',
   run,
 ]
