@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const glob = require('glob')
 
-let eslintRe = /\/\* eslint.+/g
+const eslintRe = /\/\* eslint.+/g
 
 function replaceStringsIn (file) {
   fs.readFile(file, 'utf8', function (err, str) {
