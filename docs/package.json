@@ -13,7 +13,7 @@
     "prebuild": "npm run clean && npm run deps",
     "build": "node --stack-size=8192 ./index.js generate",
     "save-build-json": "git-last --message -f public/build.json",
-    "postbuild": "gulp post:build && npm run save-build-json",
+    "postbuild": "ls public && gulp post:build",
     "clean": "hexo clean",
     "clean-deps": "rm -rf node_modules",
     "convert": "node ./cy_scripts/convert.js",
