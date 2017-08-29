@@ -1,5 +1,6 @@
 <!-- Scripts -->
 <!-- build:js /js/application.js -->
+{{ js('js/global_variable') }}
 {{ js('js/lang_select') }}
 {{ js('js/vendor/scrollingelement') }}
 {{ js('js/vendor/menuspy') }}
