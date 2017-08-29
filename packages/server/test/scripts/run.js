@@ -7,19 +7,21 @@ const minimist = require('minimist')
 
 const options = minimist(process.argv.slice(2))
 
+const run = options._[0]
+
 function exitErr (msg) {
   console.error(chalk.red(msg))
 
   return process.exit(1)
 }
 
-if (!options.run) {
+if (!run) {
   return exitErr(`
     Error: A path to a spec file must be specified!
 
     It should look something like this:
 
-      $ npm test --run ./test/unit/api_spec.coffee
+      $ npm test ./test/unit/api_spec.coffee
 
     If you want to run all a specific group of tests:
 
@@ -33,7 +35,7 @@ const args = [
   '--xvfb-run-args',
   '"-s \"-screen 0 1280x1024x8\""',
   'mocha',
-  options.run,
+  run,
 ]
 
 if (options.fgrep) {

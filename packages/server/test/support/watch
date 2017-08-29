@@ -3,8 +3,8 @@
 CMD="$1"
 ARGS="$2"
 
-npm run $CMD $ARGS --silent & \
+npm run --silent $CMD $ARGS & \
 chokidar 'test/**/*' 'lib/**/*' \
--c "npm run $CMD $ARGS --silent" \
+-c "npm run --silent $CMD $ARGS" \
 --polling \
 --poll-interval=250
