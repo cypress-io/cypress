@@ -198,7 +198,7 @@ jobs:
       - run: npm run all test -- --package socket
       - run: npm run all test -- --package static
       - store_test_results:
-        path: /tmp/cypress-monorepo
+          path: /tmp/cypress-monorepo
 
   "server-unit-tests":
     <<: *defaults
