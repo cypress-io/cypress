@@ -1,5 +1,9 @@
+Promise = Cypress.Promise
+
 describe "driver/src/cypress/index", ->
   beforeEach ->
+    cy.stub(Promise, "config")
+
     @Cypress = Cypress.$Cypress.create({})
 
   context "#backend", ->
