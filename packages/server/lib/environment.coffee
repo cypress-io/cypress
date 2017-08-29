@@ -32,6 +32,9 @@ try
 env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
 
 Promise.config({
+  ## uses cancellation for automation timeouts
+  cancellation: true
+
   ## enable long stack traces in dev
   longStackTraces: env is "development"
 })
