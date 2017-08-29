@@ -47,7 +47,8 @@ args.push(
   '--timeout',
   '10000',
   '--recursive',
-  '--compilers',     'ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '--compilers',
+  'ts:@packages/ts/register,coffee:@packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
@@ -57,10 +58,10 @@ args.push(
 const env = _.clone(process.env)
 
 env.NODE_ENV = 'test'
+env.CYPRESS_ENV = 'test'
 
 if (env.VERBOSE === '1') {
   _.extend(env, {
-    CYPRESS_ENV: 'test',
     CYPRESS_DEBUG: true,
     NODE_DEBUG: 'request',
     BLUEBIRD_DEBUG: 1,

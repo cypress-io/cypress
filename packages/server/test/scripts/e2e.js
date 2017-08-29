@@ -53,9 +53,13 @@ glob('test/e2e/**/*')
 .each((spec = []) => {
   console.log('Running spec', spec)
 
-  const args = [spec]
+  const args = [
+    './test/scripts/run.js',
+    '--run',
+    spec,
+  ]
 
-  return spawn('./test/support/run', args, { stdio: 'inherit' })
+  return spawn('node', args, { stdio: 'inherit' })
   .then((code) => {
     console.log(`${spec} exited with code`, code)
 
