@@ -54,11 +54,12 @@ module.exports = {
 
     return err
 
-  cloneErr: (err) ->
-    err2 = new Error(err.message)
-    err2.name = err.name
+  cloneErr: (obj) ->
+    err2 = new Error(obj.message)
+    err2.name = obj.name
+    err2.stack = obj.stack
 
-    for own prop, val of err
+    for own prop, val of obj
       if not err2[prop]
         err2[prop] = val
 

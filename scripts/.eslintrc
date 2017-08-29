@@ -1,8 +1,0 @@
-{
-  "extends": [
-    "plugin:cypress-dev/general"
-  ],
-  "env": {
-    "node": true
-  }
-}

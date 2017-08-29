@@ -165,6 +165,7 @@ class Project extends EE
     if config.report
       if not Reporter.isValidReporterName(config.reporter, config.projectRoot)
         errors.throw("INVALID_REPORTER_NAME", config.reporter, config.projectRoot)
+
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
     @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)

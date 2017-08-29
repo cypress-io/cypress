@@ -62,6 +62,10 @@ glob('test/cypress/integration/**/*.coffee')
     '--driver',
     '--spec',
     spec.replace('test/', ''),
+    '--reporter',
+    '../../node_modules/mocha-multi-reporters',
+    '--reporter-options',
+    'configFile=../../../mocha-reporter-config.json',
   ]
 
   return spawn('node', args, { stdio: 'inherit' })

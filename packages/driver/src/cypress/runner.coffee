@@ -595,6 +595,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
 
 create = (specWindow, mocha, Cypress, cy) ->
   _id = 0
+  _uncaughtFn = null
 
   _runner = mocha.getRunner()
   _runner.suite = mocha.getRootSuite()
@@ -620,13 +621,14 @@ create = (specWindow, mocha, Cypress, cy) ->
       .join("\n\n")
 
     ## else  do the same thing as mocha here
-    err.message += "\n\n" + append()
+    err = $utils.appendErrMsg(err, append())
 
     throwErr = ->
       throw err
 
-    ## create a runnable to associate for the failure
-    runnable = mocha.createRootTest("An uncaught error was detected outside of a test", throwErr)
+    ## we could not associate this error
+    ## and shouldn't ever start our run
+    _uncaughtFn = throwErr
 
     ## return undefined so the browser does its default
     ## uncaught exception behavior (logging to console)
@@ -699,6 +701,18 @@ create = (specWindow, mocha, Cypress, cy) ->
         @grep(re)
 
     normalizeAll: (tests) ->
+      ## if we have an uncaught error then slice out
+      ## all of the tests and suites and just generate
+      ## a single test since we received an uncaught
+      ## error prior to processing any of mocha's tests
+      ## which could have occurred in a separate support file
+      if _uncaughtFn
+        _runner.suite.suites = []
+        _runner.suite.tests = []
+
+        ## create a runnable to associate for the failure
+        mocha.createRootTest("An uncaught error was detected outside of a test", _uncaughtFn)
+
       normalizeAll(
         _runner.suite,
         tests,
@@ -715,7 +729,7 @@ create = (specWindow, mocha, Cypress, cy) ->
 
       _runnerListeners(_runner, Cypress, _emissions, getTestById, setTest)
 
-      _runner.run (failures) =>
+      _runner.run (failures) ->
         ## if we happen to make it all the way through
         ## the run, then just set _stopped to true here
         _stopped = true

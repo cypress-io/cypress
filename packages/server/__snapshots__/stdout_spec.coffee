@@ -127,8 +127,6 @@ The error was:
 +>
  ^
 ParseError: unexpected >
-    (No stack trace)
-
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -204,3 +202,4 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
+
