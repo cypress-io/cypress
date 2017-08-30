@@ -9,7 +9,7 @@
   "scripts": {
     "pretest": "npm run lint",
     "test": "npm run test-unit",
-    "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=config.json",
+    "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "test-watch": "$(bin-up mocha) --watch",
     "test-dependencies": "$(bin-up deps-ok) && dependency-check . --no-dev",
     "lint": "$(bin-up eslint) --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",

@@ -102,15 +102,15 @@ class $Cypress
     ## slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
-    if not config.isInteractive
-      ## disable long stack traces when
-      ## we are running headlessly for
-      ## performance since users cannot
-      ## interact with the stack traces
-      ## anyway
-      Promise.config({
-        longStackTraces: false
-      })
+    ## enable long stack traces when
+    ## we not are running headlessly
+    ## for debuggability but disable
+    ## them when running headlessly for
+    ## performance since users cannot
+    ## interact with the stack traces
+    Promise.config({
+      longStackTraces: config.isInteractive
+    })
 
     {environmentVariables, remote} = config
 
@@ -359,7 +359,14 @@ class $Cypress
     new Promise (resolve, reject) =>
       fn = (reply) ->
         if e = reply.error
+          ## clone the error object
+          ## and set stack cleaned
+          ## to prevent bluebird from
+          ## attaching long stace traces
+          ## which otherwise make this err
+          ## unusably long
           err = $utils.cloneErr(e)
+          err.__stackCleaned__ = true
           err.backend = true
           reject(err)
         else

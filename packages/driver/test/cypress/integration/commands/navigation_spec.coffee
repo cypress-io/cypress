@@ -1295,7 +1295,7 @@ describe "src/cy/commands/navigation", ->
         cy.visit("https://google.com/foo")
 
   context "#page load", ->
-    it "sets initial=true and then removes", ->
+    it "FLAKY sets initial=true and then removes", ->
       Cookie.remove("__cypress.initial")
 
       expect(Cookie.get("__cypress.initial")).to.be.undefined
