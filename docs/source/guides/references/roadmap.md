@@ -86,7 +86,7 @@ comments: false
 - [x] We now display a warning in the console when returning a promise from a test and also invoking one or cy commands. Fixes {% issue 464 %}.
 - [x] Reduced the number of internal Cypress network requests in the "Network Panel" of Dev Tools. Fixes {% issue 606 %}.
 - [x] We've moved our entire codebase into one into a private "Monorepo". This is in anticipation for going open source (making the GitHub repo public) and should make it easier for everyone to contribute to our code. Fixes {% issue 256 %}.
-- [x] When element's are not visible due to being covered by another element, the error message now says what element is covering the element.
+- [x] When element's are not visible due to being covered by another element, the error message now says what element is covering what element. {% issue 611 %}
 - [x] The "Can't start server" error displayed in the Desktop-GUI no longer prevents you from interacting in the Desktop App. It now displays as a warning. Fixes {% issue 407 %}.
 - [x] {% url `cy.focused()` focused %} now automatically retries until the element exists in the DOM. Fixes {% issue 564 %} and {% issue 409 %}.
 - [x] We now support per-project `state.json`. Fixes {% issue 512 %}.
@@ -98,7 +98,7 @@ comments: false
 - [x] Added an 'App Data' option in the Desktop App that displays app data. Fixes {% issue 475 %}.
 - [x] When {% url `cy.spy()` spy %} or {% url `cy.stub()` stub %} are never called, the error now displays a clearer, grammatically correct error. Fixes {% issue 520 %}.
 - [x] Detection of installed browsers has been improved. Fixes {% issue 511 %}.
-- [x] When commands are clicked on and logged into the console from the Command Log, they now display their 'yield' instead of 'return', since they really yield instead of return.
+- [x] When commands are clicked on and logged into the console from the Command Log, they now display their 'yield' instead of 'return', since they really yield instead of return. {% issue 612 %}
 - [x] The build process of the driver has been modernized. Fixes {% issue 429 %}.
 
 # 1.0.0 (Upcoming)
