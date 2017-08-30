@@ -40,6 +40,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
   findByNgAttr = (name, attr, el, options) ->
+
     selectors = []
     error = "Could not find element for #{name}: '#{el}'.  Searched "
 
@@ -61,15 +62,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.invokeMap(finds, "cancel")
 
     Promise
-      .any(finds)
-      .then (subject) ->
-        cancelAll()
-        return subject
-      .catch Promise.CancellationError, (err) ->
-        cancelAll()
-        throw err
-      .catch Promise.AggregateError, (err) =>
-        $utils.throwErr error
+    .any(finds)
+    .then (subject) ->
+      cancelAll()
+      return subject
+    .catch Promise.AggregateError, (err) ->
+      $utils.throwErr error
 
   Commands.addAll({
     ng: (type, selector, options = {}) ->

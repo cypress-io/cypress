@@ -65,10 +65,12 @@ describe "src/cy/commands/commands", ->
           expect($ce.get(0)).to.eq(ce.get(0))
 
   context "errors", ->
-    it "throws when cannot find command by name", ->
-      try
-        cy.get("body").command("fooDoesNotExist", "bar", "baz")
-      catch err
+    it "throws when cannot find command by name", (done) ->
+      cy.on "fail", (err) ->
         cmds = _.keys(Cypress.Chainer.prototype)
         expect(cmds.length).to.be.gt(1)
         expect(err.message).to.eq("Could not find a command for: 'fooDoesNotExist'.\n\nAvailable commands are: #{cmds.join(", ")}.\n")
+
+        done()
+
+      cy.get("body").command("fooDoesNotExist", "bar", "baz")

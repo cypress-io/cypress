@@ -35,12 +35,6 @@ timedOutWaitingForPageLoad = (ms, log) ->
     args: { ms }
   })
 
-gotResponse = (err) ->
-  err.gotResponse is true
-
-gotInvalidContentType = (err) ->
-  err.invalidContentType is true
-
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
   ## the remote has a hash
   ## or the last char of href
@@ -200,7 +194,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   onPageLoadErr = (err) ->
     state("onPageLoadErr", null)
-    
+
     { originPolicy } = $Location.create(window.location.href)
 
     try
@@ -634,41 +628,42 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## because we're changing top to be a brand new URL
               ## and want to block the rest of our commands
               return Promise.delay(1e9)
-        .catch gotResponse, gotInvalidContentType, (err) ->
-          visitFailedByErr err, err.originalUrl, ->
-            args = {
-              url:         err.originalUrl
-              path:        err.filePath
-              status:      err.status
-              statusText:  err.statusText
-              redirects:   err.redirects
-              contentType: err.contentType
-            }
-
-            msg = switch
-              when err.gotResponse
-                type = if err.filePath then "file" else "http"
-
-                "visit.loading_#{type}_failed"
-
-              when err.invalidContentType
-                "visit.loading_invalid_content_type"
-
-            $utils.throwErrByPath(msg, {
-              onFail: options._log
-              args: args
-            })
         .catch (err) ->
-          visitFailedByErr err, url, ->
-            $utils.throwErrByPath("visit.loading_network_failed", {
-              onFail: options._log
-              args: {
-                url:   url
-                error: err
-                stack: err.stack
-              }
-            })
+          switch
+            when err.gotResponse, err.invalidContentType
+              visitFailedByErr err, err.originalUrl, ->
+                args = {
+                  url:         err.originalUrl
+                  path:        err.filePath
+                  status:      err.status
+                  statusText:  err.statusText
+                  redirects:   err.redirects
+                  contentType: err.contentType
+                }
 
+                msg = switch
+                  when err.gotResponse
+                    type = if err.filePath then "file" else "http"
+
+                    "visit.loading_#{type}_failed"
+
+                  when err.invalidContentType
+                    "visit.loading_invalid_content_type"
+
+                $utils.throwErrByPath(msg, {
+                  onFail: options._log
+                  args: args
+                })
+            else
+              visitFailedByErr err, url, ->
+                $utils.throwErrByPath("visit.loading_network_failed", {
+                  onFail: options._log
+                  args: {
+                    url:   url
+                    error: err
+                    stack: err.stack
+                  }
+                })
 
       visit = ->
         ## if we've visiting for the first time during

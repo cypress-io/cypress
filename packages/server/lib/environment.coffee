@@ -1,11 +1,9 @@
 require("./util/http_overrides")
+require("./fs_warn")(require("fs-extra"))
 
 os      = require("os")
-fs      = require("fs-extra")
 cwd     = require("./cwd")
 Promise = require("bluebird")
-
-Promise.config({cancellation: true})
 
 ## never cut off stack traces
 Error.stackTraceLimit = Infinity
@@ -25,13 +23,20 @@ try
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
 
-getEnv = ->
-  ## instead of setting NODE_ENV we will
-  ## use our own separate CYPRESS_ENV so
-  ## as not to conflict with CI providers
+## instead of setting NODE_ENV we will
+## use our own separate CYPRESS_ENV so
+## as not to conflict with CI providers
 
-  ## use env from package first
-  ## or development as default
-  process.env["CYPRESS_ENV"] or= pkg.env ? "development"
+## use env from package first
+## or development as default
+env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
 
-module.exports = getEnv()
+Promise.config({
+  ## uses cancellation for automation timeouts
+  cancellation: true
+
+  ## enable long stack traces in dev
+  longStackTraces: env is "development"
+})
+
+module.exports = env

@@ -1,12 +1,4 @@
-exports['e2e caught and uncaught hooks errors failing1 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e caught and uncaught hooks errors failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -22,13 +14,14 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t7a
 
 
-  4 passing (123ms)
+  4 passing
   1 failing
 
   1) s1a "before each" hook for "t2a":
      CypressError: Timed out retrying: Expected to find element: '.does-not-exist', but never found it.
 
-Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 's1a'
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 's1a'
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -59,7 +52,7 @@ Because this error occured during a 'before each' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1a -- t2a.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1a -- t2a -- before each hook.png (1280x720)
 
 
   (Video)
@@ -72,15 +65,7 @@ Because this error occured during a 'before each' hook we are skipping the remai
 
 `
 
-exports['e2e caught and uncaught hooks errors failing2 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e caught and uncaught hooks errors failing2 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -96,13 +81,13 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t7b
 
 
-  4 passing (123ms)
+  4 passing
   1 failing
 
   1) s1b "before each" hook for "t2b":
      Uncaught ReferenceError: foo is not defined
 
-Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 's1b'
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 's1b'
       at stack trace line
 
 
@@ -122,7 +107,7 @@ Because this error occured during a 'before each' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1b -- t2b.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s1b -- t2b -- before each hook.png (1280x720)
 
 
   (Video)
@@ -135,15 +120,7 @@ Because this error occured during a 'before each' hook we are skipping the remai
 
 `
 
-exports['e2e caught and uncaught hooks errors failing3 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e caught and uncaught hooks errors failing3 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -151,13 +128,13 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) "before each" hook for "t1c"
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  "before each" hook for "t1c":
      Uncaught ReferenceError: foo is not defined
 
-Because this error occured during a 'before each' hook we are skipping all of the remaining tests.
+Because this error occurred during a 'before each' hook we are skipping all of the remaining tests.
       at stack trace line
 
 
@@ -177,7 +154,7 @@ Because this error occured during a 'before each' hook we are skipping all of th
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/t1c.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/t1c -- before each hook.png (1280x720)
 
 
   (Video)
@@ -190,15 +167,7 @@ Because this error occured during a 'before each' hook we are skipping all of th
 
 `
 
-exports['e2e caught and uncaught hooks errors failing4 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e caught and uncaught hooks errors failing4 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -207,15 +176,18 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   uncaught hook error should continue to fire all mocha events
     s1
       1) "before each" hook for "does not run"
+    s2
+      ✓ does run
+      ✓ also runs
 
 
-  0 passing (123ms)
+  2 passing
   1 failing
 
   1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":
      Uncaught ReferenceError: foo is not defined
 
-Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 's1'
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 's1'
       at stack trace line
 
 
@@ -223,8 +195,8 @@ Because this error occured during a 'before each' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           0
-  - Passes:          0
+  - Tests:           2
+  - Passes:          2
   - Failures:        1
   - Pending:         0
   - Duration:        10 seconds
@@ -235,7 +207,7 @@ Because this error occured during a 'before each' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught hook error should continue to fire all mocha events -- s1 -- does not run.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook.png (1280x720)
 
 
   (Video)
@@ -247,4 +219,3 @@ Because this error occured during a 'before each' hook we are skipping the remai
   (All Done)
 
 `
-

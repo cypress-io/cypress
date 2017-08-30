@@ -30,7 +30,7 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "checkForEndedEarly getStyles".split(" ")
+  cy: "getStyles".split(" ")
 }
 
 throwDeprecatedCommandInterface = (key, method) ->
@@ -102,15 +102,15 @@ class $Cypress
     ## slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
-    if not config.isInteractive
-      ## disable long stack traces when
-      ## we are running headlessly for
-      ## performance since users cannot
-      ## interact with the stack traces
-      ## anyway
-      Promise.config({
-        longStackTraces: false
-      })
+    ## enable long stack traces when
+    ## we not are running headlessly
+    ## for debuggability but disable
+    ## them when running headlessly for
+    ## performance since users cannot
+    ## interact with the stack traces
+    Promise.config({
+      longStackTraces: config.isInteractive
+    })
 
     {environmentVariables, remote} = config
 
@@ -192,32 +192,6 @@ class $Cypress
 
         if @config("isTextTerminal")
           @emit("mocha", "end")
-
-        ## TODO: we may not need to do any of this
-        ## it appears only afterHooksAsync is needed
-        ## for taking a screenshot - which can likely
-        ## be done better (and likely doesnt need to wait
-        ## until after the hooks have run anyway!)
-        ##
-        ## the test:after:run event is only used for
-        ## cleaning up num tests kept in memory
-
-
-        ## if we have a test and err
-        # test = _this.test
-        # err  = test and test.err
-        #
-        # ## and this err is uncaught
-        # if err and err.uncaught
-        #
-        #   ## fire all the events
-        #   testEvents.afterHooksAsync(_this, test)
-        #   .then ->
-        #     testEvents.afterRun(_this, test)
-        #
-        #     end()
-        # else
-        #   end()
 
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that
@@ -352,7 +326,7 @@ class $Cypress
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
 
-      when "cy:uncaught:exception"
+      when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
 
       when "app:page:loading"
@@ -385,7 +359,14 @@ class $Cypress
     new Promise (resolve, reject) =>
       fn = (reply) ->
         if e = reply.error
+          ## clone the error object
+          ## and set stack cleaned
+          ## to prevent bluebird from
+          ## attaching long stace traces
+          ## which otherwise make this err
+          ## unusably long
           err = $utils.cloneErr(e)
+          err.__stackCleaned__ = true
           err.backend = true
           reject(err)
         else

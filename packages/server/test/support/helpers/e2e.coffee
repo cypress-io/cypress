@@ -25,6 +25,7 @@ env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
+pathUpToProjectName = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
 
@@ -35,21 +36,21 @@ normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str
-  .replace(/\(\d{1,5}m?s\)/g, "(123ms)")
+  .split(pathUpToProjectName)
+    .join("/foo/bar/.projects")
   .replace(/\(\d{1,2}s\)/g, "(10s)")
+  .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
-  .replace(/\/.+\/cypress\/videos\/(.+)\.mp4/g, "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4")
-  .replace(/\/.+\/cypress\/screenshots/g, "/foo/bar/.projects/e2e/cypress/screenshots")
+  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
   .replace(/Duration\: (.+)/, "Duration:        10 seconds")
   .replace(/\(\d+ seconds?\)/, "(0 seconds)")
   .replace(/\r/g, "")
   .split("\n")
-  .map(replaceStackTraceLines)
-  .join("\n")
-  .split(e2ePath)
-  .join("/foo/bar/.projects/e2e")
-
+    .map(replaceStackTraceLines)
+    .join("\n")
+  .split("2560x1440") ## normalize resolutions
+    .join("1280x720")
 
 startServer = (obj) ->
   {onServer, port} = obj
@@ -157,7 +158,7 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    if browser = env.BROWSER
+    if browser = (env.BROWSER or options.browser)
       args.push("--browser=#{browser}")
 
     return args
@@ -194,7 +195,7 @@ module.exports = {
         stderr += buf.toString()
       sp.on "error", reject
       sp.on "exit", (code) ->
-        if expected = options.expectedExitCode
+        if (expected = options.expectedExitCode)?
           try
             expect(expected).to.eq(code)
           catch err
@@ -203,6 +204,10 @@ module.exports = {
         ## snapshot the stdout!
         if options.snapshot
           try
+            ## enable callback to modify stdout
+            if ostd = options.onStdout
+              stdout = ostd(stdout)
+
             str = normalizeStdout(stdout)
             snapshot(str)
           catch err

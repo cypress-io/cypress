@@ -27,61 +27,61 @@ describe "Server", ->
         ## get all the config defaults
         ## and allow us to override them
         ## for each test
-        cfg = config.set(obj)
+        config.set(obj)
+        .then (cfg) =>
+          ## use a jar for each test
+          ## but reset it automatically
+          ## between test
+          jar = rp.jar()
 
-        ## use a jar for each test
-        ## but reset it automatically
-        ## between test
-        jar = rp.jar()
+          ## use a custom request promise
+          ## to automatically backfill these
+          ## options including our proxy
+          @rp = (options = {}) =>
+            if _.isString(options)
+              url = options
+              options = {}
 
-        ## use a custom request promise
-        ## to automatically backfill these
-        ## options including our proxy
-        @rp = (options = {}) =>
-          if _.isString(options)
-            url = options
-            options = {}
+            _.defaults options, {
+              url
+              proxy: @proxy
+              jar
+              simple: false
+              followRedirect: false
+              resolveWithFullResponse: true
+            }
+            rp(options)
 
-          _.defaults options, {
-            url
-            proxy: @proxy
-            jar
-            simple: false
-            followRedirect: false
-            resolveWithFullResponse: true
-          }
-          rp(options)
+          open = =>
+            Promise.all([
+              ## open our https server
+              httpsServer.start(8443),
 
-        open = =>
-          Promise.all([
-            ## open our https server
-            httpsServer.start(8443),
+              ## and open our cypress server
+              @server = Server()
 
-            ## and open our cypress server
-            @server = Server()
+              @server.open(cfg)
+              .spread (port) =>
+                if initialUrl
+                  @server._onDomainSet(initialUrl)
 
-            @server.open(cfg)
-            .spread (port) =>
-              if initialUrl
-                @server._onDomainSet(initialUrl)
+                @srv = @server.getHttpServer()
 
-              @srv = @server.getHttpServer()
+                # @session = new (Session({app: @srv}))
 
-              # @session = new (Session({app: @srv}))
+                @proxy = "http://localhost:" + port
 
-              @proxy = "http://localhost:" + port
+                @fileServer = @server._fileServer.address()
+            ])
 
-              @fileServer = @server._fileServer.address()
-          ])
-
-        if @server
-          Promise.join(
-            httpsServer.stop()
-            @server.close()
-          )
-          .then(open)
-        else
-          open()
+          if @server
+            Promise.join(
+              httpsServer.stop()
+              @server.close()
+            )
+            .then(open)
+          else
+            open()
 
     afterEach ->
       nock.cleanAll()

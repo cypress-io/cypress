@@ -806,6 +806,17 @@ describe "src/cy/commands/assertions", ->
 
         expect(@logs.length).to.eq(8)
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.be.ok
+          expect(err.message).to.include("> data")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.data("foo")
+
     context "class", ->
       beforeEach ->
         @$div = $("<div class='foo bar' />")
@@ -829,10 +840,23 @@ describe "src/cy/commands/assertions", ->
           "expected **<div.foo.bar>** not to have class **baz**"
         )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected 'foo' to have class 'bar'"
+          )
+          expect(err.message).to.include("> class")
+          expect(err.message).to.include("> foo")
+
+          done()
+
+        expect("foo").to.have.class("bar")
+
     context "id", ->
       beforeEach ->
         @$div = $("<div id='foo' />")
-        @$div.prop = -> debugger;throw new Error("prop called")
+        @$div.prop = -> throw new Error("prop called")
         @$div.attr = -> throw new Error("attr called")
 
         @$div2 = $("<div />")
@@ -866,6 +890,19 @@ describe "src/cy/commands/assertions", ->
           "expected **<div#foo>** not to have id **bar**"
         )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected [] to have id 'foo'"
+          )
+          expect(err.message).to.include("> id")
+          expect(err.message).to.include("> []")
+
+          done()
+
+        expect([]).to.have.id("foo")
+
     context "html", ->
       beforeEach ->
         @$div = $("<div><button>button</button></div>")
@@ -896,6 +933,19 @@ describe "src/cy/commands/assertions", ->
           expect(l6.get("message")).to.eq(
             "expected **<div>** to have HTML **<span>span</span>**, but the HTML was **<button>button</button>**"
           )
+
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected null to have HTML 'foo'"
+          )
+          expect(err.message).to.include("> html")
+          expect(err.message).to.include("> null")
+
+          done()
+
+        expect(null).to.have.html("foo")
 
     context "text", ->
       beforeEach ->
@@ -928,6 +978,19 @@ describe "src/cy/commands/assertions", ->
             "expected **<div>** to have text **bar**, but the text was **foo**"
           )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected undefined to have text 'foo'"
+          )
+          expect(err.message).to.include("> text")
+          expect(err.message).to.include("> undefined")
+
+          done()
+
+        expect(undefined).to.have.text("foo")
+
     context "value", ->
       beforeEach ->
         @$input = $("<input value='foo' />")
@@ -959,6 +1022,19 @@ describe "src/cy/commands/assertions", ->
             "expected **<input>** to have value **bar**, but the value was **foo**"
           )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to have value 'foo'"
+          )
+          expect(err.message).to.include("> value")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.value("foo")
+
     context "descendents", ->
       beforeEach ->
         @$div = $("<div><button>button</button></div>")
@@ -980,6 +1056,19 @@ describe "src/cy/commands/assertions", ->
         expect(l2.get("message")).to.eq(
           "expected **<div>** not to have descendents **input**"
         )
+
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to have descendents 'foo'"
+          )
+          expect(err.message).to.include("> descendents")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.descendents("foo")
 
     context "visible", ->
       beforeEach ->
@@ -1024,6 +1113,19 @@ describe "src/cy/commands/assertions", ->
             """
           )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to be 'visible'"
+          )
+          expect(err.message).to.include("> visible")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.be.visible
+
     context "hidden", ->
       beforeEach ->
         @$div = $("<div style='display: none'>div</div>").appendTo($("body"))
@@ -1061,6 +1163,19 @@ describe "src/cy/commands/assertions", ->
           ## the error on this log should have this message appended to it
           expect(l6.get("error").message).to.eq("expected '<div>' to be 'hidden'")
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to be 'hidden'"
+          )
+          expect(err.message).to.include("> hidden")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.be.hidden
+
     context "selected", ->
       beforeEach ->
         @$option = $("<option selected>option</option>")
@@ -1085,6 +1200,19 @@ describe "src/cy/commands/assertions", ->
         expect(l2.get("message")).to.eq(
           "expected **<option>** not to be **selected**"
         )
+
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to be 'selected'"
+          )
+          expect(err.message).to.include("> selected")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.be.selected
 
     context "checked", ->
       beforeEach ->
@@ -1111,6 +1239,19 @@ describe "src/cy/commands/assertions", ->
           "expected **<input>** not to be **checked**"
         )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to be 'checked'"
+          )
+          expect(err.message).to.include("> checked")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.be.checked
+
     context "enabled", ->
       beforeEach ->
         @$input = $("<input />")
@@ -1136,6 +1277,19 @@ describe "src/cy/commands/assertions", ->
           "expected **<input>** not to be **enabled**"
         )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to be 'enabled'"
+          )
+          expect(err.message).to.include("> enabled")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.be.enabled
+
     context "disabled", ->
       beforeEach ->
         @$input = $("<input disabled />")
@@ -1160,6 +1314,19 @@ describe "src/cy/commands/assertions", ->
         expect(l2.get("message")).to.eq(
           "expected **<input>** not to be **disabled**"
         )
+
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to be 'disabled'"
+          )
+          expect(err.message).to.include("> disabled")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.be.disabled
 
     context "exist", ->
       it "passes thru non DOM", ->
@@ -1398,6 +1565,19 @@ describe "src/cy/commands/assertions", ->
           "expected **<a>** not to have attribute **href** with the value **https://google.com**, but the value was **https://google.com**"
         )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to have attribute 'foo'"
+          )
+          expect(err.message).to.include("> attr")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.attr("foo")
+
     context "prop", ->
       beforeEach ->
         @$input = $("<input type='checkbox' />")
@@ -1478,12 +1658,25 @@ describe "src/cy/commands/assertions", ->
           "expected **<a>** not to have property **href** with the value **#{href}**, but the value was **#{href}**"
         )
 
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to have property 'foo'"
+          )
+          expect(err.message).to.include("> prop")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.prop("foo")
+
     context "css", ->
       beforeEach ->
         @$div = $("<div style='display: none'>div</div>")
         @$div.css = -> throw new Error("css called")
 
-      it "prop, not prop", ->
+      it "css, not css", ->
         expect(@$div).to.have.css("display") ## 1
         expect(@$div).to.have.css("display", "none") ## 2
         expect(@$div).not.to.have.css("bar") ## 3
@@ -1526,3 +1719,16 @@ describe "src/cy/commands/assertions", ->
         expect(l6.get("message")).to.eq(
           "expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**"
         )
+
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.eq(
+            "expected {} to have CSS property 'foo'"
+          )
+          expect(err.message).to.include("> css")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.css("foo")

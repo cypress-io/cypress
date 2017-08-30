@@ -1,24 +1,6 @@
 e2e      = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
-e2ePath = Fixtures.projectPath("e2e")
-
-normalize = (stdout) ->
-  ## remove all of the dynamic parts of stdout
-  ## to normalize against what we expected
-  stdout
-  .replace(/\(\d{1,5}m?s\)/g, "(123ms)")
-  .replace(/\(\d{1,2}s\)/g, "(10s)")
-  .replace(/coffee-\d{3}/g, "coffee-456")
-  .replace(/\/.+\/cypress\/videos\/(.+)\.mp4/g, "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4")
-  .replace(/\/.+\/cypress\/screenshots/g, "/foo/bar/.projects/e2e/cypress/screenshots")
-  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
-  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
-  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
-  .replace(/\r/g, "")
-  .split(e2ePath)
-  .join("/foo/bar/.projects/e2e")
-
 describe "e2e stdout", ->
   e2e.setup()
 

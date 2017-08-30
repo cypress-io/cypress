@@ -1,12 +1,4 @@
-exports['e2e web security when enabled fails 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e web security when enabled fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -18,7 +10,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     3) fails when using a javascript redirect to another origin
 
 
-  0 passing (123ms)
+  0 passing
   3 failing
 
   1) web security fails when clicking <a> to another origin:
@@ -45,10 +37,6 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -88,10 +76,6 @@ https://on.cypress.io/cross-origin-violation
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
@@ -117,10 +101,6 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -161,27 +141,19 @@ https://on.cypress.io/cross-origin-violation
 
 `
 
-exports['e2e web security when disabled fails 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e web security when disabled fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
   web security
-    ✓ fails when clicking <a> to another origin (123ms)
-    ✓ fails when submitted a form and being redirected to another origin (123ms)
-    ✓ fails when using a javascript redirect to another origin (123ms)
+    ✓ fails when clicking <a> to another origin
+    ✓ fails when submitted a form and being redirected to another origin
+    ✓ fails when using a javascript redirect to another origin
 
 
-  3 passing (123ms)
+  3 passing
 
 
   (Tests Finished)
@@ -205,4 +177,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

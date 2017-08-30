@@ -988,8 +988,6 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          debugger
-
           expect(err.message).to.include("""
             cy.visit() failed trying to load:
 
@@ -1297,7 +1295,7 @@ describe "src/cy/commands/navigation", ->
         cy.visit("https://google.com/foo")
 
   context "#page load", ->
-    it "sets initial=true and then removes", ->
+    it "FLAKY sets initial=true and then removes", ->
       Cookie.remove("__cypress.initial")
 
       expect(Cookie.get("__cypress.initial")).to.be.undefined
@@ -1479,7 +1477,7 @@ describe "src/cy/commands/navigation", ->
         cy
           .visit("/fixtures/jquery.html")
 
-          ## make url timeout after only 100ms
+          ## make get timeout after only 200ms
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
       it "captures cross origin failures", (done) ->

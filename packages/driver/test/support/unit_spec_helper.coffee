@@ -3,8 +3,7 @@ chai = require("chai")
 jsdom = require("jsdom").JSDOM
 sinon = require("sinon")
 Promise = require("bluebird")
-sinonChai = require("sinon-chai")
-sinonPromise = require("sinon-as-promised")(Promise)
+sinonChai = require("@cypress/sinon-chai")
 
 chai
 .use(sinonChai)

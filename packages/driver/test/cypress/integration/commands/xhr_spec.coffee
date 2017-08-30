@@ -212,7 +212,7 @@ describe "src/cy/commands/xhr", ->
             url: /foo/
           }).as("getFoo")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -224,7 +224,7 @@ describe "src/cy/commands/xhr", ->
           .server()
           .route(/foo/).as("getFoo")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -239,7 +239,7 @@ describe "src/cy/commands/xhr", ->
           }).as("getFoo")
           .window().then (win) ->
             win.$("<base href='/'>").appendTo(win.$("head"))
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -254,7 +254,7 @@ describe "src/cy/commands/xhr", ->
           }).as("getFoo")
           .window().then (win) ->
             win.$("<base href='/nested/route/path'>").appendTo(win.$("head"))
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("../foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -266,7 +266,7 @@ describe "src/cy/commands/xhr", ->
           .server()
           .route(/foo/).as("getFoo")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("http://localhost:3501/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -281,7 +281,7 @@ describe "src/cy/commands/xhr", ->
             response: {}
           }).as("getFoo")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("http://localhost:9999/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -293,7 +293,7 @@ describe "src/cy/commands/xhr", ->
           .server()
           .route(/foo/, {}).as("getFoo")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -304,7 +304,7 @@ describe "src/cy/commands/xhr", ->
         cy
           .server({force404: true})
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             new Promise (resolve) ->
               win.$.ajax({
                 method: "POST"
@@ -325,7 +325,7 @@ describe "src/cy/commands/xhr", ->
             response: {}
           }).as("getPhones")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("phones/phones.json")
             null
           .wait("@getPhones")
@@ -337,7 +337,7 @@ describe "src/cy/commands/xhr", ->
       it "does not rewrite CORS", ->
         cy
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             new Promise (resolve) ->
               win.$.get("http://www.google.com/phones/phones.json").fail ->
                 resolve()
@@ -354,7 +354,7 @@ describe "src/cy/commands/xhr", ->
             response: {}
           }).as("getPhones")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("http://www.google.com/phones/phones.json")
             null
           .wait("@getPhones")
@@ -368,7 +368,7 @@ describe "src/cy/commands/xhr", ->
           .server()
           .route("http://localhost:3501/fixtures/app.json").as("getPhones")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("http://localhost:3501/fixtures/app.json")
             null
           .wait("@getPhones")
@@ -385,7 +385,7 @@ describe "src/cy/commands/xhr", ->
       #       stub: false
       #     }).as("getPhones")
       #     .window().then (win) ->
-      #       @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+      #       @open = cy.spy(cy.state("server").options, "onOpen")
       #       win.$.get("http://localhost:3501")
       #       null
       #     .wait("@getPhones")
@@ -406,7 +406,7 @@ describe "src/cy/commands/xhr", ->
           .window().then (win) ->
             ## trick cypress into thinking the remoteOrigin is location:9999
             cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -421,7 +421,7 @@ describe "src/cy/commands/xhr", ->
             response: {}
           }).as("getUsers")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("/users?q=(id eq 123)")
             null
           .wait("@getUsers")
@@ -436,7 +436,7 @@ describe "src/cy/commands/xhr", ->
           .server()
           .route(/accounts/, {}).as("getAccounts")
           .window().then (win) ->
-            @open = cy.spy(cy.state("server").getOptions(), "onOpen")
+            @open = cy.spy(cy.state("server").options, "onOpen")
             win.$.get("/accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true")
             null
           .wait("@getAccounts")
@@ -1013,6 +1013,14 @@ describe "src/cy/commands/xhr", ->
           response: {}
         })
 
+    it "does not mutate other routes when using shorthand", ->
+      cy
+        .route("POST", /foo/, {}).as("getFoo")
+        .route(/bar/, {}).as("getBar")
+        .then ->
+          expect(@route.firstCall.args[0].method).to.eq("POST")
+          expect(@route.secondCall.args[0].method).to.eq("GET")
+
     it "accepts url, response, onRequest", ->
       onRequest = ->
 
@@ -1300,6 +1308,15 @@ describe "src/cy/commands/xhr", ->
             expect(@warn).not.to.be.called
 
     describe "request response alias", ->
+      it "matches xhrs with lowercase methods", ->
+        cy
+          .route(/foo/, {}).as("getFoo")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("get", "/foo")
+            xhr.send()
+          .wait("@getFoo")
+
       it "can pass an alias reference to route", ->
         cy
           .noop({foo: "bar"}).as("foo")
@@ -1781,6 +1798,37 @@ describe "src/cy/commands/xhr", ->
       it "sends correct indicator", ->
         cy.then ->
           expect(@lastLog.invoke("renderProps").indicator).to.equal("bad")
+
+  context "abort", ->
+    xhrs = []
+
+    it "does not abort xhr's between tests", ->
+      cy.window().then (win) ->
+        _.times 2, ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/timeout?ms=100")
+          xhr.send()
+
+          xhrs.push(xhr)
+
+    it "has not aborted the xhrs", ->
+      _.each xhrs, (xhr) ->
+        expect(xhr.aborted).not.to.be.false
+
+  context "Cypress.on(window:unload)", ->
+    it "aborts all open XHR's", ->
+      xhrs = []
+
+      cy.window().then (win) ->
+        _.times 2, ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/timeout?ms=100")
+          xhr.send()
+
+          xhrs.push(xhr)
+      .reload().then ->
+        _.each xhrs, (xhr) ->
+          expect(xhr.aborted).to.be.true
 
   context "Cypress.on(before:window:load)", ->
     it "reapplies server + route automatically before window:load", ->

@@ -1,12 +1,39 @@
-exports['e2e config fails 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
+exports['e2e config passes 1'] = `
+Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
+  (Tests Starting)
 
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
 
+  Cypress.config()
+    ✓ has Cypress.version set to a string
+
+
+  1 passing
+
+
+  (Tests Finished)
+
+  - Tests:           1
+  - Passes:          1
+  - Failures:        0
+  - Pending:         0
+  - Duration:        10 seconds
+  - Screenshots:     0
+  - Video Recorded:  true
+  - Cypress Version: 1.2.3
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+
+
+  (All Done)
+
+`
+
+exports['e2e config fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -16,11 +43,12 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) times out looking for a missing element
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) config times out looking for a missing element:
      CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -63,4 +91,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

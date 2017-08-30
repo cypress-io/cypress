@@ -27,9 +27,13 @@ create = (state, expect, isInDom) ->
         args: { cmd: current.get("name") }
       })
 
-  ensureRunnable = ->
+  ensureRunnable = (name) ->
     if not state("runnable")
-      $utils.throwErrByPath("miscellaneous.outside_test")
+      $utils.throwErrByPath("miscellaneous.outside_test_with_cmd", {
+        args: {
+          cmd: name
+        }
+      })
 
   ensureElementIsNotAnimating = ($el, coords = [], threshold) ->
     lastTwo = coords.slice(-2)

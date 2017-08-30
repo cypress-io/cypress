@@ -40,8 +40,24 @@ Link all pages but their name (property key) in `source/_data/sidebar.yml`
 - https://on.cypress.io/writing-your-first-test
 - https://on.cypress.io/general-questions-faq
 
+### Linting
+
+Danger 📛: because we are minifying client side code using Hexo plugin which in turn calls
+`uglify`, the code should be strictly ES5. Thus everything inside the `theme` should
+be linted with ES5 settings and not upgraded to ES6.
+
 ### Deploying
+
+#### Preferred: deploy from CI
+
+Look at `circle.yml` file in the root of the repo. It should have 
+`deploy-docs-staging` and `deploy-docs-production` jobs, which only are triggered for right
+branch and only after tests pass.
+
+#### Should not be required: manual deploy
 
 ```shell
 npm run deploy
 ```
+
+Look at scripts in `cy_scripts` folder for deployment steps.

@@ -133,6 +133,8 @@ create = (options = {}) ->
     hasEnabledStubs = bool
 
   return server = {
+    options
+
     restore
 
     getStack
@@ -146,7 +148,9 @@ create = (options = {}) ->
     getFullyQualifiedUrl
 
     getOptions: ->
-      options
+      ## clone the options to prevent
+      ## accidental mutations
+      _.clone(options)
 
     getRoutes: ->
       routes
@@ -222,6 +226,10 @@ create = (options = {}) ->
         ## else return null
         return nope()
 
+    methodsMatch: (routeMethod, xhrMethod) ->
+      ## normalize both methods by uppercasing them
+      routeMethod.toUpperCase() is xhrMethod.toUpperCase()
+
     urlsMatch: (routePattern, fullyQualifiedUrl) ->
       match = (str, pattern) =>
         ## be nice to our users and prepend
@@ -247,7 +255,7 @@ create = (options = {}) ->
         testStr(fullyQualifiedUrl, options.stripOrigin(fullyQualifiedUrl))
 
     xhrMatchesRoute: (xhr, route) ->
-      xhr.method is route.method and server.urlsMatch(route.url, xhr.url)
+      server.methodsMatch(route.method, xhr.method) and server.urlsMatch(route.url, xhr.url)
 
     add: (xhr, attrs = {}) ->
       _.extend(xhr, attrs)

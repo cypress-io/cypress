@@ -35,15 +35,17 @@ API = {
         """
       when "BROWSER_NOT_FOUND"
         """
-        Browser: #{arg1} was not found on your system.
+        Browser: '#{arg1}' was not found on your system.
 
         Available browsers found are: #{arg2}
         """
       when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
         """
-        Warning: Cannot record test run video when using non built-in electron browser
+        Warning: Cypress can only record videos when using the built in 'electron' browser.
 
-        You are using #{arg1}, disabling video recording
+        You have set the browser to: '#{arg1}'
+
+        A video will not be recorded when using this browser.
         """
       when "NOT_LOGGED_IN"
         """
@@ -82,15 +84,6 @@ API = {
         Alternatively if you omit the --record flag this project will run without recording.
 
         https://on.cypress.io/recording-project-runs
-        """
-      when "OLD_VERSION_OF_CLI"
-        """
-
-        -----------------------------------------------------------------------------------
-        You are using an older version of the CLI tools.
-
-        Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
-        -----------------------------------------------------------------------------------
         """
       when "PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION"
         """

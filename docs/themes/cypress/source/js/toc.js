@@ -1,4 +1,4 @@
-(function(){
+(function () {
   'use strict';
 
   var header = document.getElementById('header');
@@ -9,11 +9,12 @@
 
   if (!toc) return;
 
+  /* global MenuSpy */
   var ms = new MenuSpy(tocInner)
 
   // we need this to be called after all images have loaded
   // otherwise the height for the menuspy is not properly calculated
-  window.addEventListener('load', function(){
+  window.addEventListener('load', function () {
     // https://github.com/lcdsantos/menuspy
     // This highlights the proper toc link while scrolling
     ms.cacheItems()
@@ -21,23 +22,23 @@
   });
 
   // This keeps the toc within the view
-  function updateSidebarPosition(){
+  function updateSidebarPosition () {
     var scrollTop = document.scrollingElement.scrollTop;
 
-    if (scrollTop > headerHeight){
+    if (scrollTop > headerHeight) {
       toc.classList.add('fixed');
     } else {
       toc.classList.remove('fixed');
     }
   }
 
-  window.addEventListener('scroll', function(){
+  window.addEventListener('scroll', function () {
     window.requestAnimationFrame(updateSidebarPosition);
   });
 
   updateSidebarPosition();
 
-  tocTop.addEventListener('click', function(e){
+  tocTop.addEventListener('click', function (e) {
     e.preventDefault();
     document.scrollingElement.scrollTop = 0;
   });

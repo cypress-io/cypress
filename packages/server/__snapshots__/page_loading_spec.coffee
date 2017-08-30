@@ -1,24 +1,16 @@
-exports['e2e page_loading passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e page_loading passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
   page_loading
-    ✓ sets __cypress.initial, properly injects, and avoids json injection (123ms)
+    ✓ sets __cypress.initial, properly injects, and avoids json injection
     issue #258: opener is undefined during snapshot
-      ✓ causes the xhr to be aborted while in flight (123ms)
+      ✓ causes the xhr to be aborted while in flight
 
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)
@@ -42,4 +34,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

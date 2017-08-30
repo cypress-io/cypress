@@ -1,12 +1,4 @@
-exports['e2e issue 173 failing 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e issue 173 failing 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -15,11 +7,12 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1) fails
   ✓ should be able to log
 
-  1 passing (123ms)
+  1 passing
   1 failing
 
   1)  fails:
      CypressError: Timed out retrying: Expected to find element: 'element_does_not_exist', but never found it.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -62,4 +55,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

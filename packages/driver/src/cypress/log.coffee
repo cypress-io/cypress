@@ -143,8 +143,8 @@ defaults = (state, config, obj) ->
     url:              state("url")
     hookName:         state("hookName")
     testId:           state("runnable").id
-    viewportWidth:    config("viewportWidth")
-    viewportHeight:   config("viewportHeight")
+    viewportWidth:    state("viewportWidth")
+    viewportHeight:   state("viewportHeight")
     referencesAlias:  undefined
     alias:            undefined
     aliasType:        undefined

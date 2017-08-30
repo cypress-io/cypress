@@ -1,27 +1,19 @@
-exports['e2e cookies passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e cookies passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
   cookies
-    ✓ can get all cookies (123ms)
-    ✓ resets cookies between tests correctly (123ms)
+    ✓ can get all cookies
+    ✓ resets cookies between tests correctly
     ✓ should be only two left now
-    ✓ sends cookies to localhost:2121 (123ms)
-    ✓ handles expired cookies (123ms)
-    ✓ issue: #224 sets expired cookies between redirects (123ms)
+    ✓ sends cookies to localhost:2121
+    ✓ handles expired cookies
+    ✓ issue: #224 sets expired cookies between redirects
 
 
-  6 passing (123ms)
+  6 passing
 
 
   (Tests Finished)
@@ -45,4 +37,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

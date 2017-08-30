@@ -30,8 +30,9 @@ describe "lib/project", ->
     settings.read(@todosPath).then (obj = {}) =>
       {@projectId} = obj
 
-      @config  = config.set({projectName: "project", projectRoot: "/foo/bar"})
-      @project = Project(@todosPath)
+      config.set({projectName: "project", projectRoot: "/foo/bar"})
+      .then (@config) =>
+        @project = Project(@todosPath)
 
   afterEach ->
     Fixtures.remove()
@@ -52,10 +53,12 @@ describe "lib/project", ->
       @sandbox.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
       @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
       @project.cfg = { integrationFolder }
-      savedState(@project.projectRoot).remove()
+      savedState(@project.projectRoot)
+      .then (state) -> state.remove()
 
     afterEach ->
-      savedState(@project.projectRoot).remove()
+      savedState(@project.projectRoot)
+      .then (state) -> state.remove()
 
     it "saves state without modification", ->
       @project.saveState()
@@ -89,18 +92,19 @@ describe "lib/project", ->
       @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
-      state = savedState(@todosPath)
-      @sandbox.stub(state, "get").resolves({ reporterWidth: 225 })
-      @project.getConfig({foo: "bar"})
-      .then (cfg) ->
-        expect(cfg).to.deep.eq({
-          integrationFolder
-          isNewProject: false
-          baz: "quux"
-          state: {
-            reporterWidth: 225
-          }
-        })
+      savedState(@todosPath)
+      .then (state) =>
+        @sandbox.stub(state, "get").resolves({ reporterWidth: 225 })
+        @project.getConfig({foo: "bar"})
+        .then (cfg) ->
+          expect(cfg).to.deep.eq({
+            integrationFolder
+            isNewProject: false
+            baz: "quux"
+            state: {
+              reporterWidth: 225
+            }
+          })
 
     it "resolves if cfg is already set", ->
       @project.cfg = {
@@ -116,19 +120,20 @@ describe "lib/project", ->
         })
 
     it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
-      state = savedState(@todosPath)
-      @sandbox.stub(state, "get").resolves({ showedOnBoardingModal: true })
+      savedState(@todosPath)
+      .then (state) =>
+        @sandbox.stub(state, "get").resolves({ showedOnBoardingModal: true })
 
-      @project.getConfig({foo: "bar"})
-      .then (cfg) ->
-        expect(cfg).to.deep.eq({
-          integrationFolder
-          isNewProject: false
-          baz: "quux"
-          state: {
-            showedOnBoardingModal: true
-          }
-        })
+        @project.getConfig({foo: "bar"})
+        .then (cfg) ->
+          expect(cfg).to.deep.eq({
+            integrationFolder
+            isNewProject: false
+            baz: "quux"
+            state: {
+              showedOnBoardingModal: true
+            }
+          })
 
   context "#open", ->
     beforeEach ->
@@ -144,7 +149,7 @@ describe "lib/project", ->
       @project.open(opts).then =>
         expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
 
-    it "calls #scaffold with server config", ->
+    it "calls #scaffold with server config promise", ->
       @project.open().then =>
         expect(@project.scaffold).to.be.calledWith(@config)
 
@@ -282,7 +287,7 @@ describe "lib/project", ->
 
   context "#watchSupportFile", ->
     beforeEach ->
-      @sandbox.stub(fs, "existsSync").returns(true)
+      @sandbox.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
       @sandbox.stub(preprocessor, "getFile").resolves()
@@ -298,24 +303,26 @@ describe "lib/project", ->
 
     it "calls preprocessor.getFile with relative path to file", ->
       @project.watchSupportFile(@config)
-
-      expect(preprocessor.getFile).to.be.calledWith("foo/bar.js", @config)
+      .then () =>
+        expect(preprocessor.getFile).to.be.calledWith("foo/bar.js", @config)
 
     it "calls server.onTestFileChange when file changes", ->
       @project.watchSupportFile(@config)
-      preprocessor.getFile.firstCall.args[2].onChange()
-
-      expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
+      .then () =>
+        preprocessor.getFile.firstCall.args[2].onChange()
+        expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
 
     it "does not add change listener when {watchForFileChanges: false}", ->
       @config.watchForFileChanges = false
       @project.watchSupportFile(@config)
-
-      expect(preprocessor.getFile.firstCall.args[2]).to.be.undefined
+      .then () =>
+        expect(preprocessor.getFile.firstCall.args[2]).to.be.undefined
 
     it "throws when support file does not exist", ->
-      fs.existsSync.returns(false)
-      expect(=> @project.watchSupportFile(@config)).to.throw("Support file missing or invalid.")
+      fs.pathExists.resolves(false)
+      @project.watchSupportFile(@config)
+      .catch (e) ->
+        expect(e.message).to.include("Support file missing or invalid.")
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->

@@ -14,24 +14,36 @@ wrap = (ctx) ->
   ## to be re-wrapped in our own
   ## jquery, so we can control
   ## the methods on it
-  ctx._obj = $(ctx._obj)
+  $(ctx._obj)
 
 $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
   { inspect, flag } = chaiUtils
 
-  assert = (ctx, topic, args...) ->
+  assertDom = (ctx, method, args...) ->
+    if not $utils.hasDom(ctx._obj)
+      try
+        ## always fail the assertion
+        ## if we aren't a DOM like object
+        ctx.assert(false, args...)
+      catch err
+        callbacks.onInvalid(method, ctx._obj)
+
+  assert = (ctx, method, bool, args...) ->
+    assertDom(ctx, method, args...)
+
     try
+      # ## reset obj to wrapped
+      ctx._obj = wrap(ctx)
+
       ## apply the assertion
-      ctx.assert.apply(ctx, args)
+      ctx.assert(bool, args...)
     catch err
-      ## if we failed and have an onError callback
-      if onError = callbacks.onError
-        ## send it up with the obj and whether it was negated
-        onError(err, topic, ctx._obj, flag(ctx, "negate"))
-      else
-        throw err
+      ## send it up with the obj and whether it was negated
+      callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
 
   chai.Assertion.addMethod "data", ->
+    assertDom(@, "data")
+
     a = new chai.Assertion(wrap(@).data())
 
     if flag(@, "negate")
@@ -60,6 +72,14 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
     )
 
   chai.Assertion.addMethod "html", (html) ->
+    assertDom(
+      @,
+      "html",
+      'expected #{this} to have HTML #{exp}',
+      'expected #{this} not to have HTML #{exp}',
+      html
+    )
+
     actual = wrap(@).html()
 
     assert(
@@ -73,6 +93,14 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
     )
 
   chai.Assertion.addMethod "text", (text) ->
+    assertDom(
+      @,
+      "text",
+      'expected #{this} to have text #{exp}',
+      'expected #{this} not to have text #{exp}',
+      text
+    )
+
     actual = wrap(@).text()
 
     assert(
@@ -86,6 +114,14 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
     )
 
   chai.Assertion.addMethod "value", (value) ->
+    assertDom(
+      @,
+      "value",
+      'expected #{this} to have value #{exp}',
+      'expected #{this} not to have value #{exp}',
+      value
+    )
+
     actual = wrap(@).val()
 
     assert(
@@ -149,6 +185,14 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
   _.each attrs, (description, attr) ->
     chai.Assertion.addMethod attr, (name, val) ->
+      assertDom(
+        @,
+        attr,
+        'expected #{this} to have ' + description + ' #{exp}',
+        'expected #{this} not to have ' + description + ' #{exp}',
+        name
+      )
+
       actual = wrap(@)[attr](name)
 
       ## when we only have 1 argument dont worry about val

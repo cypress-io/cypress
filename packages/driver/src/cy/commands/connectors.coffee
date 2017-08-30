@@ -24,6 +24,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## until they're 'really' resolved, so naturally this API
   ## supports nesting promises
   thenFn = (subject, options, fn) ->
+    ctx = @
+
     if _.isFunction(options)
       fn = options
       options = {}
@@ -45,12 +47,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## name could be invoke or its!
     name = state("current").get("name")
 
-    cleanup = =>
-      state("onInjectCommand", null)
-
-    cleanupEnqueue = =>
+    cleanup = ->
+      state("onInjectCommand", undefined)
       cy.removeListener("command:enqueued", enqueuedCommand)
-      null
+      return null
 
     invokedCyCommand = false
 
@@ -66,6 +66,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     current = state("current")
     next    = current.get("next")
 
+    ## TODO: this code may no longer be necessary
     ## if the next command is chained to us then when it eventually
     ## runs we need to reset the subject to be the return value of the
     ## previous command so the subject is continuously juggled forward
@@ -88,8 +89,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       cy.on("next:subject:prepared", checkSubject)
 
-    getRet = =>
-      ret = fn.apply(state("runnable").ctx, args)
+    getRet = ->
+      ret = fn.apply(ctx, args)
 
       if cy.isCy(ret)
         ret = undefined
@@ -105,13 +106,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Promise
     .try(getRet)
     .timeout(options.timeout)
-    .then (ret) =>
-      cleanup()
-
+    .then (ret) ->
       ## if ret is null or undefined then
       ## resolve with the existing subject
       return if _.isUndefined(ret) then subject else ret
-    .catch Promise.TimeoutError, =>
+    .catch Promise.TimeoutError, ->
       $utils.throwErrByPath "invoke_its.timed_out", {
         onFail: options._log
         args: {
@@ -120,7 +119,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           func: fn.toString()
         }
       }
-    .finally(cleanupEnqueue)
+    .finally(cleanup)
 
   invokeFn = (subject, fn, args...) ->
     cy.ensureParent()
@@ -307,7 +306,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## due to the way we queue promises
       next = state("current").get("next")
       if next
-        checkSubject = (newSubject, args) =>
+        checkSubject = (newSubject, args) ->
           return if state("current") isnt next
 
           ## find the new subject and splice it out
@@ -350,7 +349,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "optional" }, {
     then: ->
-      thenFn.apply(null, arguments)
+      thenFn.apply(@, arguments)
 
     ## making this a dual command due to child commands
     ## automatically returning their subject when their
@@ -358,8 +357,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## this and investigate why that is the default behavior
     ## of child commands
     invoke: ->
-      invokeFn.apply(null, arguments)
+      invokeFn.apply(@, arguments)
 
     its: ->
-      invokeFn.apply(null, arguments)
+      invokeFn.apply(@, arguments)
   })

@@ -1,12 +1,4 @@
-exports['e2e uncaught errors failing1 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e uncaught errors failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -14,7 +6,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) An uncaught error was detected outside of a test
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  An uncaught error was detected outside of a test:
@@ -58,15 +50,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e uncaught errors failing2 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e uncaught errors failing2 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -74,7 +58,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) An uncaught error was detected outside of a test
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1)  An uncaught error was detected outside of a test:
@@ -119,15 +103,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e uncaught errors failing3 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e uncaught errors failing3 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -137,7 +113,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) bar
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) foo bar:
@@ -174,15 +150,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e uncaught errors failing4 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e uncaught errors failing4 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -195,14 +163,13 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ runs
 
 
-  1 passing (123ms)
+  1 passing
   1 failing
 
   1) foo "before all" hook for "does not run":
-     foo is not defined
+     Uncaught ReferenceError: foo is not defined
 
-Because this error occured during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
-  Uncaught ReferenceError: foo is not defined
+Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
       at stack trace line
 
 
@@ -222,7 +189,7 @@ Because this error occured during a 'before all' hook we are skipping the remain
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- before all hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
 
 
   (Video)
@@ -235,15 +202,7 @@ Because this error occured during a 'before all' hook we are skipping the remain
 
 `
 
-exports['e2e uncaught errors failing5 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e uncaught errors failing5 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -260,7 +219,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ quux6 passes
 
 
-  4 passing (123ms)
+  4 passing
   4 failing
 
   1) foo baz fails:
@@ -311,4 +270,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

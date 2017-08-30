@@ -1,23 +1,15 @@
-exports['e2e go passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e go passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
   cy.go
-    ✓ can move between pages correctly (123ms)
-    ✓ can visit two urls and go back and forward (123ms)
+    ✓ can move between pages correctly
+    ✓ can visit two urls and go back and forward
 
 
-  2 passing (123ms)
+  2 passing
 
 
   (Tests Finished)
@@ -41,4 +33,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

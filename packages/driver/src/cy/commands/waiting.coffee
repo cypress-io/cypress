@@ -105,12 +105,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       [ index, num ] = getNumRequests(state, alias)
 
-      waitForRequest = =>
+      waitForRequest = ->
         options = _.omit(options, "_runnableTimeout")
         options.timeout = timeout ? Cypress.config("requestTimeout")
         checkForXhr(alias, "request", index, num, options)
 
-      waitForResponse = =>
+      waitForResponse = ->
         options = _.omit(options, "_runnableTimeout")
         options.timeout = timeout ? Cypress.config("responseTimeout")
         checkForXhr(alias, "response", index, num, options)

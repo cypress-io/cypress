@@ -1,39 +1,31 @@
-exports['e2e visit low response timeout passes 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e visit low response timeout passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
   visits
-    ✓ scrolls automatically to div with id=foo (123ms)
-    ✓ can load an http page with a huge amount of elements without timing out (123ms)
-    ✓ can load a local file with a huge amount of elements without timing out (123ms)
+    ✓ scrolls automatically to div with id=foo
+    ✓ can load an http page with a huge amount of elements without timing out
+    ✓ can load a local file with a huge amount of elements without timing out
     issue #225: hash urls
-      ✓ can visit a hash url and loads (123ms)
-      ✓ can visit the same hash url and loads (123ms)
-      ✓ can visit a different hash url and loads (123ms)
+      ✓ can visit a hash url and loads
+      ✓ can visit the same hash url and loads
+      ✓ can visit a different hash url and loads
     issue #230: User Agent headers
       ✓ submits user agent on cy.visit
-      ✓ submits user agent on page load (123ms)
+      ✓ submits user agent on page load
       ✓ submits user agent on cy.request
     issue #255: url with like two domain
-      ✓ passes (123ms)
+      ✓ passes
     issue #272: responses which are never ended still send valid html
-      ✓ handles no response errors on the initial visit (123ms)
-      ✓ handles no response errors when not initially visiting (123ms)
+      ✓ handles no response errors on the initial visit
+      ✓ handles no response errors when not initially visiting
     issue #309: request accept header not set
-      ✓ sets accept header to text/html,*/* (123ms)
+      ✓ sets accept header to text/html,*/*
 
 
-  13 passing (123ms)
+  13 passing
 
 
   (Tests Finished)
@@ -58,15 +50,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -76,7 +60,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when network connection cannot be established fails:
@@ -102,37 +86,8 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
     at stack trace line
     at stack trace line
-From previous event:
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -177,15 +132,7 @@ From previous event:
 
 `
 
-exports['e2e visit low response timeout fails when server responds with 500 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e visit low response timeout fails when server responds with 500 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -195,7 +142,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when server response is 500 fails:
@@ -210,7 +157,6 @@ The response we received from your web server was:
 This was considered a failure because the status code was not '2xx'.
 
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -256,15 +202,7 @@ This was considered a failure because the status code was not '2xx'.
 
 `
 
-exports['e2e visit low response timeout fails when file server responds with 404 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -274,7 +212,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when file server response is 404 fails:
@@ -291,7 +229,6 @@ The internal Cypress web server responded with:
   > 404: Not Found
 
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -337,15 +274,7 @@ The internal Cypress web server responded with:
 
 `
 
-exports['e2e visit low response timeout fails when content type isnt html 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e visit low response timeout fails when content type isnt html 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -355,7 +284,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     1) fails
 
 
-  0 passing (123ms)
+  0 passing
   1 failing
 
   1) when content type is plain/text fails:
@@ -372,7 +301,6 @@ This was considered a failure because responses must have content-type: 'text/ht
 However, you can likely use cy.request() instead of cy.visit().
 
 cy.request() will automatically get and set cookies and enable you to parse responses.
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -418,15 +346,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
 `
 
-exports['e2e visit normal response timeouts fails when visit times out 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e visit normal response timeouts fails when visit times out 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -437,7 +357,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     2) fails timeout exceeds timeout option
 
 
-  0 passing (123ms)
+  0 passing
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:
@@ -464,6 +384,7 @@ When this 'load' event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
      CypressError: Timed out after waiting '500ms' for your remote page to load.
@@ -475,6 +396,7 @@ You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait lon
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
 When this 'load' event occurs, Cypress will continue running commands.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

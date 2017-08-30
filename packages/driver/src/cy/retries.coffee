@@ -19,12 +19,14 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
       ## else fall back to just grabbing the last log per our current command
       log ?= options._log ? current?.getLastLog()
 
-      _.defaults options,
+      _.defaults(options, {
+        _runnable: state("runnable")
         _runnableTimeout: runnableTimeout
         _interval: 16
         _retries: 0
         _start: new Date
         _name: current?.get("name")
+      })
 
       interval = options.interval ? options._interval
 
@@ -55,20 +57,30 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
             else
               err
 
-        try
-          $utils.throwErrByPath "miscellaneous.retry_timed_out", {
-            onFail: (options.onFail or log)
-            args: { error: getErrMessage(options.error) }
-          }
-        catch err
-          if r = state("reject")
-            r(err)
+        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
+          onFail: (options.onFail or log)
+          args: { error: getErrMessage(options.error) }
+        }
+
+      runnableHasChanged = ->
+        ## if we've changed runnables don't retry!
+        options._runnable isnt state("runnable")
 
       ended = ->
+        ## we should NOT retry if
+        ## 1. our promise has been canceled
+        ## 2. or we have an error
+        ## 3. or if the runnables has changed
+
+        ## although bluebird SHOULD cancel these retries
+        ## since they're all connected - apparently they
+        ## are not and the retry code is happening between
+        ## runnables which is bad likely due to the issue below
+        ##
         ## bug in bluebird with not propagating cancelations
         ## fast enough in a series of promises
         ## https://github.com/petkaantonov/bluebird/issues/1424
-        state("canceled") or state("error")
+        state("canceled") or state("error") or runnableHasChanged()
 
       Promise
       .delay(interval)

@@ -16,8 +16,10 @@ mockery.registerMock("morgan", -> morganFn)
 
 describe "lib/server", ->
   beforeEach ->
-    @config = config.set({projectRoot: "/foo/bar/"})
-    @server = Server()
+    config.set({projectRoot: "/foo/bar/"})
+    .then (cfg) =>
+      @config = cfg
+      @server = Server()
 
   afterEach ->
     @server and @server.close()

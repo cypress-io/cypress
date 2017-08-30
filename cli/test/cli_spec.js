@@ -1,6 +1,5 @@
 require('./spec_helper')
 
-const _ = require('lodash')
 const cli = require('../lib/cli')
 const download = require('../lib/download')
 const downloadUtils = require('../lib/download/utils')
@@ -16,10 +15,8 @@ describe('cli', function () {
   it('exits when done', function (done) {
     this.sandbox.stub(run, 'start').resolves()
     this.exec('run --port 7878')
-    _.defer(() => {
-      expect(process.exit).to.be.calledOnce
-      done()
-    })
+
+    process.exit.callsFake(done)
   })
 
   it('run calls run#start with options', function () {

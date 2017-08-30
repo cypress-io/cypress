@@ -1,12 +1,4 @@
-exports['e2e stdout displays errors from failures 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e stdout displays errors from failures 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -22,7 +14,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       3) is failing
 
 
-  2 passing (123ms)
+  2 passing
   3 failing
 
   1) stdout_failing_spec fails:
@@ -44,8 +36,7 @@ The internal Cypress web server responded with:
 
 
 
-Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
-      at stack trace line
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
       at stack trace line
       at stack trace line
       at stack trace line
@@ -89,7 +80,6 @@ The internal Cypress web server responded with:
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -109,7 +99,7 @@ The internal Cypress web server responded with:
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- failing hook -- is failing.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- failing hook -- is failing -- before each hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec -- passing hook -- is failing.png (1280x720)
 
 
@@ -123,15 +113,7 @@ The internal Cypress web server responded with:
 
 `
 
-exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -145,8 +127,6 @@ The error was:
 +>
  ^
 ParseError: unexpected >
-    (No stack trace)
-
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -177,15 +157,7 @@ Fix the error in your code and re-run your tests.
 
 `
 
-exports['e2e stdout does not duplicate suites or tests between visits 1'] = `Error: connect ECONNREFUSED 127.0.0.1:1234
- > The local API server isn't running in development. This may cause problems running the GUI.
-
------------------------------------------------------------------------------------
-You are using an older version of the CLI tools.
-
-Please update the CLI tools by running: npm install -g cypress-cli
------------------------------------------------------------------------------------
-
+exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -193,20 +165,20 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   stdout_passing_spec
     file
-      ✓ visits file (123ms)
+      ✓ visits file
     google
-      ✓ visits google (123ms)
+      ✓ visits google
       ✓ google2
     apple
       ✓ apple1
-      ✓ visits apple (123ms)
+      ✓ visits apple
     subdomains
       ✓ cypress1
-      ✓ visits cypress (123ms)
+      ✓ visits cypress
       ✓ cypress3
 
 
-  8 passing (123ms)
+  8 passing
 
 
   (Tests Finished)
