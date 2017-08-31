@@ -5,6 +5,12 @@ comments: false
 
 # 0.20.0 (Upcoming)
 
+**Summary:**
+
+- `0.20.0` is our biggest technical release ever. It accounts for more than 2000 commits. It's full of breaking changes we wanted to land prior to having our public `1.0.0` release.
+- Cypress is now a real npm module. There is no more need for `cypress-cli`, and instead you will just `npm install cypress --save-dev`. All the same CLI based commands are the same. The GUI has been updated to account for running Cypress as a globally installed single application, and also as a `node_module` dependency.
+- We rewrote the entire driver (we've all been there) and converted all 2500+ tests to be run within Cypress itself.
+
 **Breaking Changes:**
 
 - [x] We've removed the undocumented `cy.chain()` command. You should be able to safely remove this from your code. Fixes {% issue 456 %}.
@@ -20,11 +26,11 @@ comments: false
 
 **Features:**
 
+- [x] You can now install `cypress` per project as an `npm` package using `npm install cypress`. The installation and use of the {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} is no longer required.
 - [x] We have all new docs! Check them out {% url "here" https://docs.cypress.io %}.
 - [x] `chai-jQuery` assertions have improved error messaging, and have had their internal double assertions removed, and can now be made on raw DOM objects. Fixes {% issue 605 %}.
 - [x] `chai-jQuery` assertions now throw a nice error message when you're asserting on a non DOM object. Fixes {% issue 604 %}.
-- [x] You can now install `cypress` per project as an `npm` package using `npm install cypress`. The installation and use of the {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} is no longer required.
-- [x] New `cy.trigger()` command. Useful for triggering arbitrary events. Fixes {% issue 406 %}.
+- [x] New `.trigger()` command. Useful for triggering arbitrary events. Fixes {% issue 406 %}.
 - [x] New `cy.scrollTo()` command. Useful for having a container scroll to a specific position. Fixes {% issue 497 %} & {% issue 313 %}.
 - [x] New `.scrollIntoView()` command. Useful for scrolling an element into view. Fixes {% issue 498 %} & {% issue 313 %} & {% issue 519 %}.
 - [x] Input ranges are now more easily testable using the new `cy.trigger()` command. See our new recipe for details on how. Fixes {% issue 287 %}.
@@ -41,6 +47,7 @@ comments: false
 - [x] Uncaught errors appearing in your spec files or support files are now properly caught, have the right exit code, and display correctly. Fixes {% issue 345 %}
 - [x] Cypress will now scroll past multiple elements that cover up an element to be interacted with. It also now factors in elements with `position: sticky`. Fixes {% issue 571 %} and {% issue 565 %}.
 - [x] Cypress now scrolls all parent containers (not just `window`) when attempting to {% url "check an element's actionability" interacting-with-elements#Actionability %}. Fixes {% issue 569 %}.
+- [x] Using chai's `assert` interface now works correctly in your specs. <OPEN AN ISSUE>
 
 **Dependencies:**
 
@@ -50,10 +57,11 @@ comments: false
 - [x] Updated `jQuery` from version `2.1.4` to `2.2.4`.
 - [x] Removed `chai-jQuery` and rewrote it from scratch
 
-**Deprecations**
+**Deprecations:**
 
 - [x] The {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} has been deprecated. Fixes {% issue 316 %}.
 - [ ] The interface for writing custom commands has been deprecated. Please read our docs on the new custom commands interface. Fixes {% issue 436 %} and {% issue 465 %}.
+- [x] There are no more global in app updates. Versioning should be primarily controlled via `npm` like every other package / dependency in your project. For users not using `npm` you can manually download new versions of Cypress when they're released. <OPEN A NEW ISSUE>
 
 **Bugfixes:**
 
@@ -72,7 +80,6 @@ comments: false
 - [x] Commands text will no long cut off into ellipses when the Command Log is set to a wider width. Fixes {% issue 528 %}.
 - [x] Fixed issue where setting `fixturesFolder` to `false` would throw an error. Fixes {% issue 450 %}.
 - [x] Fixed issue where Cypress hanged due to `xvfb` permissions. More intuitive output is given during install failures. Fixes {% issue 330 %}.
-- [x] Fixed issue with internal timers being inaccurate from within Electron. Fixes {% issue 572 %}.
 - [x] {% url "The checks used to determine an element's actionability" interacting-with-elements#Actionability %} are now run synchronously. This solves some circumstances where the element could have moved or otherwise change between the checks. Fixes {% issue 570 %}.
 - [x] Fixed issue where clipped elements with `overflow-y: hidden` were falsely passing as "visible". Fixes {% issue 563 %}.
 - [x] When using {% url `.select()` select %} on a select with multiple options with the same value, we now properly set `selectedIndex` and `selectedOptions` on the `select`. Fixes {% issue 554 %}.
@@ -80,6 +87,7 @@ comments: false
 - [x] We now get the absolute paths of styles to use when displaying snapshots. This will fix situations where some stylesheets were improperly referenced during the snapshot, so did not display styles correctly. Fixes {% issue 525 %}.
 - [x] Fixed issue where commands would retry and potentially exceed their timeout values during page transitions. Fixes {% issue 594 %}
 - [x] Fixed issue where server routes were lost after page load if not initiated by a {% url `cy.visit()` visit %} command. Fixes {% issue 177 %}
+- [x] Using mocha's `done` callback now works correctly. We've improved mocha's handling of uncaught exceptions and properly associate them to test failures. <OPEN AN ISSUE>
 
 **Misc:**
 
@@ -91,15 +99,17 @@ comments: false
 - [x] {% url `cy.focused()` focused %} now automatically retries until the element exists in the DOM. Fixes {% issue 564 %} and {% issue 409 %}.
 - [x] We now support per-project `state.json`. Fixes {% issue 512 %}.
 - [x] We can now handle multiple projects per server. Fixes {% issue 512 %}.
+- [x] The Desktop GUI can now have projects added by being 'dragged' in. Fixes <OPEN A NEW ISSUE>
 - [x] The Desktop GUI update window now has messaging about `package.json` versioning. Fixes {% issue 513 %}.
 - [x] The Desktop GUI now accounts for cypress being installed per project as npm module. Fixes {% issue 500 %} and {% issue 514 %}.
-- [x] Exposing Cypress Binary should no longer be necessary when cypress is locally installed. Fixes {% issue 379 %}.
 - [x] `cypress install` `-d` option. Fixes {% issue 389 %}.
+- [x] Exposing Cypress Binary should no longer be necessary when cypress is locally installed. Fixes {% issue 379 %}.
 - [x] Added an 'App Data' option in the Desktop App that displays app data. Fixes {% issue 475 %}.
 - [x] When {% url `cy.spy()` spy %} or {% url `cy.stub()` stub %} are never called, the error now displays a clearer, grammatically correct error. Fixes {% issue 520 %}.
 - [x] Detection of installed browsers has been improved. Fixes {% issue 511 %}.
 - [x] When commands are clicked on and logged into the console from the Command Log, they now display their 'yield' instead of 'return', since they really yield instead of return. {% issue 612 %}
 - [x] The build process of the driver has been modernized. Fixes {% issue 429 %}.
+- [x] XHR's from your application are no longer forcefully aborted between tests. <OPEN A NEW ISSUE>
 
 # 1.0.0 (Upcoming)
 
