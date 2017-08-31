@@ -129,9 +129,6 @@ dom = {
   elHasOverflowHidden: ($el) ->
     "hidden" in [$el.css("overflow"), $el.css("overflow-y"), $el.css("overflow-x")]
 
-  elIsPositioned: ($el) ->
-    $el.css("position") in ["relative", "absolute", "fixed", "sticky"]
-
   elHasPositionRelative: ($el) ->
     $el.css("position") is "relative"
 
