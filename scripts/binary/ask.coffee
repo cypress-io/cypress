@@ -15,6 +15,7 @@ getZipFile = ->
   [{
     name: "zipFile"
     type: "string"
+    default: "cypress.zip"
     message: "Which zip file should we upload?"
   }]
 
