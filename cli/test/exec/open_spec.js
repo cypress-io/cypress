@@ -3,10 +3,12 @@ require('../spec_helper')
 const downloadUtils = require('../../lib/download/utils')
 const spawn = require('../../lib/exec/spawn')
 const open = require('../../lib/exec/open')
+const util = require('../../lib/util')
 
 describe('exec open', function () {
   context('#start', function () {
     beforeEach(function () {
+      this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
       this.sandbox.stub(downloadUtils, 'verify').resolves()
       this.sandbox.stub(spawn, 'start').resolves()
     })
@@ -32,15 +34,35 @@ describe('exec open', function () {
       })
     })
 
-    it('spawns --project with --env', function () {
+    it('spawns with --env', function () {
       return open.start({ env: 'host=http://localhost:1337,name=brian' }).then(() => {
         expect(spawn.start).to.be.calledWith(['--env', 'host=http://localhost:1337,name=brian'])
       })
     })
 
-    it('spawns --project with --config', function () {
+    it('spawns with --config', function () {
       return open.start({ config: 'watchForFileChanges=false,baseUrl=localhost' }).then(() => {
         expect(spawn.start).to.be.calledWith(['--config', 'watchForFileChanges=false,baseUrl=localhost'])
+      })
+    })
+
+    it('spawns with cwd as --project if not installed globally', function () {
+      util.isInstalledGlobally.returns(false)
+
+      return open.start().then(() => {
+        expect(spawn.start).to.be.calledWith(['--project', process.cwd()])
+      })
+    })
+
+    it('spawns with --project if specified and installed globally', function () {
+      return open.start({ project: '/path/to/project' }).then(() => {
+        expect(spawn.start).to.be.calledWith(['--project', '/path/to/project'])
+      })
+    })
+
+    it('spawns without --project if not specified and installed globally', function () {
+      return open.start().then(() => {
+        expect(spawn.start).to.be.calledWith([])
       })
     })
   })

@@ -1,6 +1,4 @@
 exports['passes --browser option 1'] = [
-  "--run-project",
-  null,
   "--cli-version",
   "0.0.0",
   "--browser",
@@ -17,8 +15,6 @@ exports['removes --record option when using --browser 1'] = [
 ]
 
 exports['passes --record option 1'] = [
-  "--run-project",
-  null,
   "--record",
   "my record id",
   "--cli-version",
@@ -26,8 +22,6 @@ exports['passes --record option 1'] = [
 ]
 
 exports['does not remove --record option when using --browser 1'] = [
-  "--run-project",
-  null,
   "--record",
   "foo",
   "--cli-version",
@@ -36,3 +30,209 @@ exports['does not remove --record option when using --browser 1'] = [
   "test browser"
 ]
 
+exports['passes --browser option 2'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 2'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 2'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 3'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 3'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 3'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 4'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 4'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 4'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 5'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 5'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 5'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 6'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 6'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 6'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 7'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 7'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 7'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 8'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 8'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 8'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 9'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 9'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 9'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --browser option 10'] = [
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]
+
+exports['passes --record option 10'] = [
+  "--record",
+  "my record id",
+  "--cli-version",
+  "0.0.0"
+]
+
+exports['does not remove --record option when using --browser 10'] = [
+  "--record",
+  "foo",
+  "--cli-version",
+  "0.0.0",
+  "--browser",
+  "test browser"
+]

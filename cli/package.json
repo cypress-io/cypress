@@ -31,6 +31,7 @@
     "getos": "2.8.4",
     "glob": "7.1.2",
     "is-ci": "1.0.10",
+    "is-installed-globally": "0.1.0",
     "lodash": "4.17.4",
     "minimist": "1.2.0",
     "progress": "1.1.8",
