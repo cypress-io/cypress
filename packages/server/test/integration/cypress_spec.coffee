@@ -767,7 +767,7 @@ describe "lib/cypress", ->
 
     beforeEach ->
       @setup = =>
-        @createRun = @sandbox.stub(api, "createRun").withArgs({
+        createRunArgs = {
           projectId:    @projectId
           recordKey:    "token-123"
           commitSha:    "sha-123"
@@ -779,7 +779,9 @@ describe "lib/cypress", ->
           ciProvider: "travis"
           ciBuildNumber: "987"
           ciParams: null
-        })
+          groupId: null
+        }
+        @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
 
       @upload = @sandbox.stub(record, "upload").resolves()
       @sandbox.stub(stdout, "capture").returns({
