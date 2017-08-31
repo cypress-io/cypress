@@ -10,6 +10,7 @@ build
 .vscode
 .publish
 _test-output
+cypress.zip
 
 # from extension
 Cached Theme.pak
