@@ -198,8 +198,9 @@ const runSmokeTest = () => {
 
 const differentFrom = (a) => (b) => a !== b
 
-const logStart = () =>
+const logStart = () => {
   log(chalk.yellow('⧖ Verifying Cypress executable...'))
+}
 
 const logSuccess = () => {
   log(chalk.green('✓ Successfully verified Cypress executable'))
@@ -242,6 +243,7 @@ const maybeVerify = (options = {}) => {
   return getVerifiedVersion()
   .then((verifiedVersion) => {
     if (shouldVerify(verifiedVersion)) {
+      logStart()
       return testVersion(packageVersion)
     }
   })
@@ -252,7 +254,6 @@ const maybeVerify = (options = {}) => {
 
 const verify = (options = {}) => {
   debug('verifying Cypress app')
-  logStart()
 
   _.defaults(options, {
     force: false,
