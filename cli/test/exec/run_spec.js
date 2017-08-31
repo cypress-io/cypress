@@ -103,35 +103,35 @@ describe('exec run', function () {
     it('spawns with --key and xvfb', function () {
       return run.start({ port: '1234' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--port', '1234', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--port', '1234', '--cli-version', pkg.version])
       })
     })
 
     it('spawns with --env', function () {
       return run.start({ env: 'host=http://localhost:1337,name=brian' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--env', 'host=http://localhost:1337,name=brian', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--env', 'host=http://localhost:1337,name=brian', '--cli-version', pkg.version])
       })
     })
 
     it('spawns with --config', function () {
       return run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--config', 'watchForFileChanges=false,baseUrl=localhost', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost', '--cli-version', pkg.version])
       })
     })
 
     it('spawns with --record false', function () {
       return run.start({ record: false })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--record', false, '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--record', false, '--cli-version', pkg.version])
       })
     })
 
     it('spawns with --output-path', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--output-path', '/path/to/output', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output', '--cli-version', pkg.version])
       })
     })
   })

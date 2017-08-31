@@ -5,10 +5,9 @@ const spawn = require('./spawn')
 const path = require('path')
 const packagePath = path.join(__dirname, '..', '..', 'package.json')
 const pkg = require(packagePath)
-const util = require('../util')
 
 const processRunOptions = (options = {}) => {
-  const args = []
+  const args = ['--run-project', options.project]
 
   //// if key is set use that - else attempt to find it by env var
   if (options.key == null) {
@@ -72,10 +71,6 @@ const processRunOptions = (options = {}) => {
     args.push('--browser', options.browser)
   }
 
-  if (options.project) {
-    args.push('--run-project', options.project)
-  }
-
   return args
 }
 
@@ -94,11 +89,8 @@ module.exports = {
       spec: null,
       reporter: null,
       reporterOptions: null,
+      project: process.cwd(),
     })
-
-    if (!util.isInstalledGlobally()) {
-      options.project = process.cwd()
-    }
 
     return downloadUtils.verify().then(run(options))
   },
