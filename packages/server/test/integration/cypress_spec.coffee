@@ -269,14 +269,6 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/__all"})
         @expectExitWith(0)
 
-    it "--cli-version has been set", ->
-      Project.add(@todosPath)
-      .then =>
-        ## test that --run-project gets properly aliased to project
-        cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0"])
-      .then =>
-        @expectExitWith(0)
-
     it "runs project headlessly and exits with exit code 10", ->
       headless.listenForProjectEnd.resolves({failures: 10})
 
@@ -508,7 +500,7 @@ describe "lib/cypress", ->
     it "logs warning when projectId and key but no record option", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=asdf"])
+        cypress.start(["--run-project=#{@todosPath}", "--key=asdf"])
       .then =>
         expect(errors.warning).to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).to.be.calledWithMatch("You also provided your Record Key, but you did not pass the --record flag.")
@@ -518,7 +510,7 @@ describe "lib/cypress", ->
     it "does not log warning when no projectId", ->
       Project.add(@pristinePath)
       .then =>
-        cypress.start(["--run-project=#{@pristinePath}", "--cli-version=0.19.0", "--key=asdf"])
+        cypress.start(["--run-project=#{@pristinePath}", "--key=asdf"])
       .then =>
         expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
@@ -526,7 +518,7 @@ describe "lib/cypress", ->
     it "does not log warning when projectId but --record false", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=asdf", "--record=false"])
+        cypress.start(["--run-project=#{@todosPath}", "--key=asdf", "--record=false"])
       .then =>
         expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
@@ -575,7 +567,7 @@ describe "lib/cypress", ->
     it "logs error when browser cannot be found", ->
       browsers.open.restore()
 
-      cypress.start(["--run-project=#{@idsPath}", "--cli-version", "--browser=foo"])
+      cypress.start(["--run-project=#{@idsPath}", "--browser=foo"])
       .then =>
         @expectExitWithErr("BROWSER_NOT_FOUND")
 
@@ -601,14 +593,14 @@ describe "lib/cypress", ->
     it "logs error and exits when spec file was specified and does not exist", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--cli-version", "--spec=path/to/spec"])
+        cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
       .then =>
         @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--cli-version", "--spec=#{@todosPath}/tests/path/to/spec"])
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
       .then =>
         @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
@@ -663,7 +655,7 @@ describe "lib/cypress", ->
       .then =>
         fs.chmodAsync(permissionsPath, "111")
       .then =>
-        cypress.start(["--run-project=#{permissionsPath}", "--cli-version"])
+        cypress.start(["--run-project=#{permissionsPath}"])
       .then =>
         fs.chmodAsync(permissionsPath, "644")
       .then =>
@@ -885,7 +877,7 @@ describe "lib/cypress", ->
       @createRun.resolves()
       @sandbox.stub(api, "createInstance").resolves()
 
-      cypress.start(["--run-project=#{@pristinePath}", "--cli-version=0.19.0", "--record", "--key=token-123"])
+      cypress.start(["--run-project=#{@pristinePath}", "--record", "--key=token-123"])
       .then =>
         expect(errors.warning).not.to.be.called
         @expectExitWith(3)
@@ -897,7 +889,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
         @expectExitWith(3)
 
@@ -908,7 +900,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
         expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
@@ -935,7 +927,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
         delete process.env.CYPRESS_CI_KEY
 
@@ -987,7 +979,7 @@ describe "lib/cypress", ->
     it "throws when no Record Key was provided", ->
       @setup()
 
-      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--record"])
+      cypress.start(["--run-project=#{@todosPath}", "--record"])
       .then =>
         @expectExitWithErr("RECORD_KEY_MISSING", "cypress run --record --key <record_key>")
 
