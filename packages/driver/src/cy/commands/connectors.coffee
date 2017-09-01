@@ -71,7 +71,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## runs we need to reset the subject to be the return value of the
     ## previous command so the subject is continuously juggled forward
     if next and next.get("chainerId") is current.get("chainerId")
-      checkSubject = (newSubject, args) =>
+      checkSubject = (newSubject, args) ->
         return if state("current") isnt next
 
         ## get whatever the previous commands return
@@ -156,18 +156,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name }
       })
 
-    fail = (prop) =>
+    fail = (prop) ->
       $utils.throwErrByPath("invoke_its.invalid_property", {
         onFail: options._log
         args: { prop, cmd: name }
       })
 
-    failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
+    failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) ->
       $utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
         args: { previousProp, currentProp, value, cmd: name }
       })
 
-    failOnCurrentNullOrUndefinedValue = (prop, value) =>
+    failOnCurrentNullOrUndefinedValue = (prop, value) ->
       $utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
         args: { prop, value, cmd: name }
       })
@@ -203,14 +203,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       , subject
 
-    getValue = =>
+    getValue = ->
       remoteSubject = cy.getRemotejQueryInstance(subject)
 
       actualSubject = remoteSubject or subject
 
       prop = getReducedProp(fn, actualSubject)
 
-      invoke = =>
+      invoke = ->
         switch name
           when "its"
             prop
@@ -252,15 +252,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     ## wrap retrying into its own
     ## separate function
-    retryValue = =>
+    retryValue = ->
       Promise
       .try(getValue)
-      .catch (err) =>
+      .catch (err) ->
         options.error = err
         cy.retry(retryValue, options)
 
-    do resolveValue = =>
-      Promise.try(retryValue).then (value) =>
+    do resolveValue = ->
+      Promise.try(retryValue).then (value) ->
         cy.verifyUpcomingAssertions(value, options, {
           onRetry: resolveValue
         })
@@ -276,6 +276,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       thenFn(subject, options, fn)
 
     each: (subject, options, fn) ->
+      ctx = @
+
       if _.isUndefined(fn)
         fn = options
         options = {}
@@ -321,14 +323,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       endEarly = false
 
-      yieldItem = (el, index) =>
+      yieldItem = (el, index) ->
         return if endEarly
 
         if $utils.hasElement(el)
           el = $(el)
 
         callback = ->
-          ret = fn.call(@, el, index, subject)
+          ret = fn.call(ctx, el, index, subject)
 
           ## if the return value is false then return early
           if ret is false
