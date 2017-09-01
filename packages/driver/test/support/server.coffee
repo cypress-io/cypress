@@ -47,7 +47,7 @@ app.get "/timeout", (req, res) ->
   Promise
   .delay(req.query.ms ? 0)
   .then ->
-    res.send "<html></html>"
+    res.send "<html><body>timeout</body></html>"
 
 app.get "/node_modules/*", (req, res) ->
   res.sendFile(path.join("node_modules", req.params[0]), {
