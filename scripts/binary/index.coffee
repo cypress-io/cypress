@@ -119,9 +119,10 @@ deploy = {
 
   build: (options) ->
     console.log('#build')
-    if !options then options = @parseOptions(process.argv)
+    options ?= @parseOptions(process.argv)
+
     askMissingOptions(['version', 'platform'])(options)
-    .then () ->
+    .then ->
       build(options.platform, options.version, options)
 
   zip: (options) ->
@@ -159,11 +160,13 @@ deploy = {
   #   - upload
   deploy: ->
     options = @parseOptions(process.argv)
+
     askMissingOptions(['version', 'platform'])(options)
-    .then(build)
-    .then(() => @zip(options))
-    # assumes options.zip contains the zipped filename
-    .then(upload)
+    .then (options) =>
+      @build(options)
+      .then => @zip(options)
+      # assumes options.zip contains the zipped filename
+      .then => @upload(options)
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))

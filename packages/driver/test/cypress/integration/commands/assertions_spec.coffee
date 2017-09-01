@@ -663,7 +663,7 @@ describe "src/cy/commands/assertions", ->
 
         describe "property assertions", ->
           it "has property", (done) ->
-            cy.on "log:added", (attrs, log) =>
+            cy.on "log:added", (attrs, log) ->
               if attrs.name is "assert"
                 cy.removeAllListeners("log:added")
 
@@ -678,6 +678,27 @@ describe "src/cy/commands/assertions", ->
             cy
               .get("input:first").then ($input) ->
                 expect($input).to.have.property("foo", "bar")
+
+  context "chai assert", ->
+    beforeEach ->
+      @logs = []
+
+      cy.on "log:added", (attrs, log) =>
+        @logs.push(log)
+
+      return null
+
+    it "equal", ->
+      assert.equal(1, 1, "one is one")
+      expect(@logs[0].get("message")).to.eq("one is one: expected **1** to equal **1**")
+
+    it "isOk", ->
+      assert.isOk({}, "is okay")
+      expect(@logs[0].get("message")).to.eq("is okay: expected **{}** to be truthy")
+
+    it "isFalse", ->
+      assert.isFalse(false, "is false")
+      expect(@logs[0].get("message")).to.eq("is false: expected **false** to be false")
 
   context "chai overrides", ->
     beforeEach ->

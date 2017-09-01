@@ -29,7 +29,7 @@ module.exports = {
 
     repo.getBranch()
 
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey) ->
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
 
@@ -44,6 +44,11 @@ module.exports = {
       message: repo.getMessage()
     })
     .then (git) ->
+      # only send groupId if group option is true
+      if group
+        groupId ?= ciProvider.groupId()
+      else
+        groupId = null
       api.createRun({
         projectId:         projectId
         recordKey:         recordKey
@@ -56,6 +61,7 @@ module.exports = {
         ciParams:          ciProvider.params()
         ciProvider:        ciProvider.name()
         ciBuildNumber:     ciProvider.buildNum()
+        groupId:           groupId
       })
       .catch (err) ->
         switch err.statusCode
@@ -218,7 +224,7 @@ module.exports = {
       .then (cfg) =>
         {projectName} = cfg
 
-        @generateProjectBuildId(projectId, projectPath, projectName, options.key)
+        @generateProjectBuildId(projectId, projectPath, projectName, options.key, options.group, options.groupId)
         .then (buildId) =>
           ## bail if we dont have a buildId
           return if not buildId

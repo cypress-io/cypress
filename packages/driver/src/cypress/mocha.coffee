@@ -139,6 +139,10 @@ patchRunnableResetTimeout = ->
       if runnable.async
         "mocha.async_timed_out"
       else
+        ## TODO: improve this error message. It's not that
+        ## a command necessarily timed out - in fact this is
+        ## a mocha timeout, and a command likely *didn't*
+        ## time out correctly, so we received this message instead.
         "mocha.timed_out"
 
     @timer = setTimeout ->

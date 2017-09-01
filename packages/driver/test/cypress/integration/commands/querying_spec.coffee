@@ -219,6 +219,12 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("have.class", "focused")
 
   context "#within", ->
+    it "invokes callback function with runnable.ctx", ->
+      ctx = @
+
+      cy.get("div:first").within ->
+        expect(ctx is @).to.be.true
+
     it "scopes additional GET finders to the subject", ->
       input = cy.$$("#by-name input:first")
 

@@ -17,6 +17,22 @@ describe "lib/util/ci_provider", ->
     ## restore the env
     process.env = JSON.parse(@env)
 
+  context "grou-id", ->
+    describe "circle", ->
+      beforeEach ->
+        process.env.CIRCLECI = true
+        process.env.CIRCLE_BUILD_URL = "circle build url"
+        process.env.CIRCLE_BUILD_NUM = "4"
+
+      it "grabs workflow id as group id", ->
+        id = "1234-group-id"
+        process.env.CIRCLE_WORKFLOW_ID = id
+        expect(ciProvider.groupId()).to.equal(id)
+
+      it "no group id without workflow id", ->
+        expect(ciProvider.groupId()).to.be.null
+
+
   it "returns 'unknown' when not found", ->
     process.env = {}
 

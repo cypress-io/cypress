@@ -33,3 +33,11 @@ variable.
 Because we had many problems reliably zipping built binary, for now we need
 to build both Mac and Linux binary from Mac (Linux binary is built using
 a Docker container), then zip it **from Mac**, then upload it.
+
+### Linux Docker
+
+If you're Mac you can build the linux binary if you have docker installed.
+
+```
+npm run binary-build-linux
+```

@@ -47,7 +47,7 @@ module.exports = {
     }
 
   getAwsObj: ->
-    fs.readJsonSync(path.join(__dirname, "support", "aws-credentials.json"))
+    fs.readJsonSync(path.join(__dirname, "support", ".aws-credentials.json"))
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/
@@ -58,16 +58,16 @@ module.exports = {
     console.log("target directory %s", dirName)
     dirName
 
-  purgeCache: ({zipName, version, platform}) ->
+  purgeCache: ({version, platform}) ->
     la(check.unemptyString(platform), "missing platform", platform)
     la(check.unemptyString(zipName), "missing zip filename")
     la(check.extension("zip", zipName),
       "zip filename should end with .zip", zipName)
 
     new Promise (resolve, reject) =>
-      name = path.basename(zipName, ".zip")
+      osName = getUploadNameByOs(platform)
 
-      url = [konfig("cdn_url"), "desktop", version, platform, name].join("/")
+      url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
       console.log("purging url", url)
       configFile = path.resolve(__dirname, "support", ".cfcli.yml")
       cp.exec "cfcli purgefile -c #{configFile} #{url}", (err, stdout, stderr) ->
@@ -150,5 +150,5 @@ module.exports = {
 
     upload()
     .then =>
-      @purgeCache({zipName, version, platform})
+      @purgeCache({version, platform})
 }

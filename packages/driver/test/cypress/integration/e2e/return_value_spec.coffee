@@ -27,6 +27,19 @@ describe "return values", ->
 
     return "foo"
 
+  it "stringifies function bodies", (done) ->
+    cy.on "fail", (err) ->
+      expect(err.message).to.include("> function () {")
+      expect(err.message).to.include("return \"foo\";")
+      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
+
+      done()
+
+    cy.wrap(null)
+
+    return ->
+      return "foo"
+
   it "can return undefined when invoking cy commands in custom command", (done) ->
     Cypress.Commands.add "foo", ->
       cy.wrap(null).then ->
@@ -54,5 +67,27 @@ describe "return values", ->
       cy.wrap(null)
 
       return "bar"
+
+    cy.foo()
+
+  it "stringifies function return values", (done) ->
+    cy.on "fail", (err) =>
+      lastLog = @lastLog
+
+      expect(@logs.length).to.eq(1)
+      expect(lastLog.get("name")).to.eq("foo")
+      expect(lastLog.get("error")).to.eq(err)
+      expect(err.message).to.include("> cy.foo()")
+      expect(err.message).to.include("> function () {")
+      expect(err.message).to.include("return \"bar\";")
+      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.")
+
+      done()
+
+    Cypress.Commands.add "foo", ->
+      cy.wrap(null)
+
+      return ->
+        return "bar"
 
     cy.foo()

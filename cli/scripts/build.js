@@ -6,14 +6,14 @@ const fs = Promise.promisifyAll(require('fs-extra'))
 
 // grab the current version from the root monorepo package.json
 const {
- version,
- description,
- author,
- homepage,
- license,
- bugs,
- repository,
-} = require('../../package.json')
+  version,
+  description,
+  author,
+  homepage,
+  license,
+  bugs,
+  repository,
+} = require('@packages/root')
 
 const packageJsonSrc = path.join('package.json')
 const packageJsonDest = path.join('build', 'package.json')

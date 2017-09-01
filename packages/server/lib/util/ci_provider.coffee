@@ -37,6 +37,11 @@ buildNums = (provider) -> {
   travis:   process.env.TRAVIS_BUILD_NUMBER
 }[provider]
 
+groupIds = (provider) -> {
+  # for CircleCI v2 use workflow id to group builds
+  circle:   process.env.CIRCLE_WORKFLOW_ID
+}[provider]
+
 params = (provider) -> {
   appveyor: {
     accountName:  process.env.APPVEYOR_ACCOUNT_NAME
@@ -122,4 +127,7 @@ module.exports = {
 
   buildNum: ->
     buildNums(getProviderName()) ? null
+
+  groupId: ->
+    groupIds(getProviderName()) ? null
 }

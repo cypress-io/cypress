@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const { errors, formError, formErrorText } = require('../../lib/errors')
-const snapshot = require('snap-shot')
+const snapshot = require('snap-shot-it')
 const { omit } = require('ramda')
 
 describe('errors', function () {

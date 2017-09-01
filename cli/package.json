@@ -22,7 +22,7 @@
   "dependencies": {
     "@cypress/xvfb": "1.0.3",
     "bluebird": "3.5.0",
-    "chalk": "2.0.1",
+    "chalk": "2.1.0",
     "commander": "2.9.0",
     "common-tags": "1.4.0",
     "debug": "2.6.8",
@@ -31,6 +31,7 @@
     "getos": "2.8.4",
     "glob": "7.1.2",
     "is-ci": "1.0.10",
+    "is-installed-globally": "0.1.0",
     "lodash": "4.17.4",
     "minimist": "1.2.0",
     "progress": "1.1.8",
@@ -52,7 +53,7 @@
     "dependency-check": "^2.8.0",
     "nock": "^9.0.9",
     "sinon": "^2.1.0",
-    "snap-shot": "^2.17.0"
+    "snap-shot-it": "2.2.0"
   },
   "files": [
     "bin",
