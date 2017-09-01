@@ -418,7 +418,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "dom"}, {
     within: (subject, options, fn) ->
-      cy.ensureDom(subject)
+      ctx = @
 
       if _.isUndefined(fn)
         fn = options
@@ -447,7 +447,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       prevWithinSubject = cy.state("withinSubject")
       cy.state("withinSubject", subject)
 
-      fn.call cy.state("runnable").ctx, subject
+      fn.call(ctx, subject)
 
       cleanup = ->
         cy.removeListener("command:start", setWithinSubject)
