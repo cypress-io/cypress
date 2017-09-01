@@ -39,12 +39,6 @@ describe "lib/util/args", ->
         host: "localhost:8888"
       })
 
-  context "--cli-version", ->
-    it "aliases from --cli-version", ->
-      options = @setup("--cli-version=0.18.8")
-
-      expect(options.cliVersion).to.eq("0.18.8")
-
   context "--config", ->
     it "converts to object literal", ->
       options = @setup("--config", "pageLoadTimeout=10000,waitForAnimations=false")
