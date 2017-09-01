@@ -47,8 +47,6 @@ parseValueActualAndExpected = (value, actual, expected) ->
   obj
 
 create = (state, queue, retryFn) ->
-  overrideAssert = null
-
   getUpcomingAssertions = ->
     current = state("current")
     index   = state("index") + 1
@@ -109,7 +107,7 @@ create = (state, queue, retryFn) ->
       ensureExistenceFor: "dom"
     }
 
-    ensureExistence = =>
+    ensureExistence = ->
       ## by default, ensure existence for dom subjects,
       ## but not non-dom subjects
       switch callbacks.ensureExistenceFor
@@ -271,38 +269,43 @@ create = (state, queue, retryFn) ->
       fn(memo).then (subject) ->
         subjects[i] = subject
 
-    restore = =>
+    restore = ->
       state("upcomingAssertions", [])
 
       ## no matter what we need to
       ## restore the assert fn
-      overrideAssert = null
+      state("overrideAssert", undefined)
+
+    ## store this in case our test ends early
+    ## and we reset between tests
+    state("overrideAssert", overrideAssert)
 
     Promise
-      .reduce(fns, assertions, subject)
-      .then(restore)
-      .then(setSubjectAndSkip)
-      .then =>
+    .reduce(fns, assertions, subject)
+    .then ->
+      restore()
+
+      setSubjectAndSkip()
+
+      finishAssertions(options.assertions)
+
+      onPassFn()
+    .catch (err) ->
+      restore()
+
+      ## when we're told not to retry
+      if err.retry is false
+        ## finish the assertions
         finishAssertions(options.assertions)
-      .then(onPassFn)
-      .catch Promise.CancellationError, ->
-        restore()
-      .catch (err) =>
-        restore()
 
-        ## when we're told not to retry
-        if err.retry is false
-          ## finish the assertions
-          finishAssertions(options.assertions)
+        ## and then push our command into this err
+        try
+          $utils.throwErr(err, { onFail: options._log })
+        catch e
+          err = e
 
-          ## and then push our command into this err
-          try
-            $utils.throwErr(err, { onFail: options._log })
-          catch e
-            err = e
-
-        throw err
-      .catch(onFailFn)
+      throw err
+    .catch(onFailFn)
 
   assertFn = (passed, message, value, actual, expected, error, verifying = false) ->
     ## slice off everything after a ', but' or ' but ' for passing assertions, because
@@ -378,7 +381,7 @@ create = (state, queue, retryFn) ->
   assert = ->
     ## if we've temporarily overriden assertions
     ## then just bail early with this function
-    fn = overrideAssert ? assertFn
+    fn = state("overrideAssert") ? assertFn
     fn.apply(@, arguments)
 
   return {

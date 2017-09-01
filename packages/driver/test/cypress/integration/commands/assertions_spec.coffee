@@ -663,7 +663,7 @@ describe "src/cy/commands/assertions", ->
 
         describe "property assertions", ->
           it "has property", (done) ->
-            cy.on "log:added", (attrs, log) =>
+            cy.on "log:added", (attrs, log) ->
               if attrs.name is "assert"
                 cy.removeAllListeners("log:added")
 
