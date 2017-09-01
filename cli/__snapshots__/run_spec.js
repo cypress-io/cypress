@@ -1,0 +1,29 @@
+exports['exec run #processRunOptions passes --browser option 1'] = [
+  '--run-project',
+  null,
+  '--cli-version',
+  '0.0.0',
+  '--browser',
+  'test browser',
+]
+
+exports['exec run #processRunOptions passes --record option 1'] = [
+  '--run-project',
+  null,
+  '--record',
+  'my record id',
+  '--cli-version',
+  '0.0.0',
+]
+
+exports['exec run #processRunOptions does not remove --record option when using --browser 1'] = [
+  '--run-project',
+  null,
+  '--record',
+  'foo',
+  '--cli-version',
+  '0.0.0',
+  '--browser',
+  'test browser',
+]
+

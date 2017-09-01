@@ -6,7 +6,7 @@ const downloadUtils = require('../../lib/download/utils')
 const cli = require('../../lib/cli')
 const spawn = require('../../lib/exec/spawn')
 const run = require('../../lib/exec/run')
-const snapshot = require('snap-shot')
+const snapshot = require('snap-shot-it')
 const util = require('../../lib/util')
 
 describe('exec run', function () {
