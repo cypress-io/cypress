@@ -4,27 +4,17 @@ const cp = require('child_process')
 const os = require('os')
 const path = require('path')
 const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs-extra'))
+const fs = require('../fs')
 const debug = require('debug')('cypress:cli')
 const R = require('ramda')
 const { stripIndent } = require('common-tags')
 const ProgressBar = require('progress')
 
+const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const { formErrorText, errors } = require('../errors')
 const packagePath = path.join(__dirname, '..', '..', 'package.json')
 const packageVersion = require(packagePath).version
-
-const log = (...messages) => {
-  console.log(...messages) // eslint-disable-line no-console
-}
-
-// splits long text into lines and calls log()
-// on each one to allow easy unit testing for specific message
-const logLines = (text) => {
-  const lines = text.split('\n')
-  R.forEach(log, lines)
-}
 
 const getPlatformExecutable = () => {
   const platform = os.platform()
@@ -199,21 +189,21 @@ const runSmokeTest = () => {
 const differentFrom = (a) => (b) => a !== b
 
 const logStart = () => {
-  log(chalk.yellow('⧖ Verifying Cypress executable...'))
+  logger.log(chalk.yellow('⧖ Verifying Cypress executable...'))
 }
 
 const logSuccess = () => {
-  log(chalk.green('✓ Successfully verified Cypress executable'))
+  logger.log(chalk.green('✓ Successfully verified Cypress executable'))
 }
 
 const logFailed = () => {
-  log()
-  log(chalk.red('✖ Failed to verify Cypress executable.'))
-  log()
+  logger.log()
+  logger.log(chalk.red('✖ Failed to verify Cypress executable.'))
+  logger.log()
 }
 
 const logWarning = (text) => {
-  log(chalk.yellow(`! ${text}`))
+  logger.log(chalk.yellow(`! ${text}`))
 }
 
 function testVersion (version) {
@@ -227,14 +217,13 @@ function testVersion (version) {
     })
 }
 
-const failProcess = () =>
-  process.exit(1)
-
-const explainAndFail = (info) => (err) =>
-  formErrorText(info, err)
-    .then(logLines)
+const explainAndThrow = (info) => (err) => {
+  err.known = true
+  return formErrorText(info, err)
+    .then(logger.logLines)
     .then(logFailed)
-    .then(failProcess)
+    .throw(err)
+}
 
 const maybeVerify = (options = {}) => {
   debug('check if verified')
@@ -247,9 +236,9 @@ const maybeVerify = (options = {}) => {
       return testVersion(packageVersion)
     }
   })
-  .catch({ isAppMissing: true }, explainAndFail(errors.missingApp))
-  .catch({ isXvfbError: true }, explainAndFail(errors.missingXvfb))
-  .catch({ isVerificationError: true }, explainAndFail(errors.missingDependency))
+  .catch({ isAppMissing: true }, explainAndThrow(errors.missingApp))
+  .catch({ isXvfbError: true }, explainAndThrow(errors.missingXvfb))
+  .catch({ isVerificationError: true }, explainAndThrow(errors.missingDependency))
 }
 
 const verify = (options = {}) => {
@@ -262,7 +251,7 @@ const verify = (options = {}) => {
   return getInstalledVersion()
   .then((installedVersion) => {
     if (!installedVersion) {
-      return explainAndFail(errors.missingApp)(new Error('Missing install'))
+      return explainAndThrow(errors.missingApp)(new Error('Missing install'))
     } else if (installedVersion !== packageVersion) {
       // warn if we installed with CYPRESS_VERSION or changed version
       // in the package.json
@@ -274,10 +263,10 @@ const verify = (options = {}) => {
     const executable = getPathToExecutable()
     return fs.statAsync(executable)
       .then(() => {
-        log(chalk.green('✓ Cypress executable found at:'), chalk.cyan(executable))
+        logger.log(chalk.green('✓ Cypress executable found at:'), chalk.cyan(executable))
       })
       .catch(() =>
-        explainAndFail(errors.missingApp)(new Error(stripIndent`
+        explainAndThrow(errors.missingApp)(new Error(stripIndent`
           Cypress executable not found at
           ${executable}
         `))
@@ -286,15 +275,19 @@ const verify = (options = {}) => {
   .then(() => {
     return maybeVerify(options)
   })
-  .catch(explainAndFail(errors.unexpected))
+  .catch((err) => {
+    if (err.known) {
+      throw err
+    }
+    explainAndThrow(errors.unexpected)(err)
+  })
 }
 
 const makeMockBar = (title, barOptions = { total: 100 }) => {
   if (!title) {
     throw new Error('Missing progress bar title')
   }
-  /* eslint-disable no-console */
-  console.log(chalk.blue(`${title}, please wait`))
+  logger.log(chalk.blue(`${title}, please wait`))
   return {
     mock: true,
     curr: 0,
@@ -302,11 +295,11 @@ const makeMockBar = (title, barOptions = { total: 100 }) => {
       this.curr += 1
       if (this.curr >= barOptions.total) {
         this.complete = true
-        console.log(chalk.green(`${title} finished`))
+        logger.log(chalk.green(`${title} finished`))
       }
     },
     terminate () {
-      console.log(`${title} failed`)
+      logger.log(`${title} failed`)
     },
   }
 }
@@ -331,7 +324,6 @@ module.exports = {
   getInstalledVersion,
   getPathToUserExecutable,
   getPathToExecutable,
-  log,
   verify,
   maybeVerify,
   writeInstalledVersion,

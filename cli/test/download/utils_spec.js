@@ -2,15 +2,16 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const chalk = require('chalk')
 const path = require('path')
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs-extra'))
 const EE = require('events').EventEmitter
 const cp = require('child_process')
 const clearModule = require('clear-module')
+const snapshot = require('snap-shot-it')
 
 const packageVersion = require('../../package').version
+const logger = require('../../lib/logger')
 const utils = require('../../lib/download/utils')
 const xvfb = require('../../lib/exec/xvfb')
 
@@ -18,9 +19,9 @@ const distDir = path.join(__dirname, '../../dist')
 const infoFilePath = path.join(distDir, 'info.json')
 
 describe('utils', function () {
-  const verifyingMessage = chalk.yellow('⧖ Verifying Cypress executable...')
-
   beforeEach(function () {
+    logger.reset()
+
     this.sandbox.stub(process, 'exit')
     this.ensureEmptyInstallationDir = () => {
       return fs.removeAsync(distDir).then(() => {
@@ -51,15 +52,10 @@ describe('utils', function () {
 
     describe('mock bar', function () {
       beforeEach(function saveCI () {
-        this.ciFlag = process.env.CI
+        this.sandbox.stub(process.env, 'CI')
         // force recomputing CI flag
         clearModule('is-ci')
         clearModule('ci-info')
-        this.console = this.sandbox.spy(console, 'log')
-      })
-
-      afterEach(function restoreCI () {
-        process.env.CI = this.ciFlag
       })
 
       it('makes valid mock progress bar', function () {
@@ -77,8 +73,8 @@ describe('utils', function () {
       it('prints title in mock bar', function () {
         process.env.CI = '1'
         utils.getProgressBar('test bar', barOptions)
-        const logged = this.console.firstCall.args.join()
-        expect(logged).to.include('test bar')
+        delete process.env.CI
+        snapshot(logger.print())
       })
 
       it('prints message on completing the mock bar', function () {
@@ -87,8 +83,8 @@ describe('utils', function () {
         bar.tick()
         bar.tick()
         bar.tick()
-        const logged = this.console.lastCall.args.join()
-        expect(logged).to.include('finished')
+        delete process.env.CI
+        snapshot(logger.print())
       })
     })
   })
@@ -182,7 +178,6 @@ describe('utils', function () {
 
   context('#verify', function () {
     beforeEach(function () {
-      this.log = this.sandbox.spy(console, 'log')
       this.sandbox.stub(os, 'platform').returns('darwin')
       this.stdout = new EE()
       this.spawnedProcess = _.extend(new EE(), {
@@ -205,7 +200,7 @@ describe('utils', function () {
         return utils.verify()
       })
       .then(() => {
-        expect(this.log).to.be.calledWith('No version of Cypress executable installed')
+        snapshot(logger.print())
         expect(process.exit).to.be.calledWith(1)
       })
     })
@@ -216,8 +211,7 @@ describe('utils', function () {
         return utils.verify()
       })
       .then(() => {
-        const warning = chalk.yellow('! Installed version (bloop) does not match package version (0.0.0)')
-        expect(this.log).to.be.calledWith(warning)
+        snapshot(logger.print())
       })
     })
 
@@ -229,7 +223,7 @@ describe('utils', function () {
         return utils.verify()
       })
       .then(() => {
-        expect(this.log).to.be.calledWith('Cypress executable not found at')
+        snapshot(logger.print())
         expect(process.exit).to.be.calledWith(1)
       })
     })
@@ -243,19 +237,16 @@ describe('utils', function () {
       })
 
       it('shows full path to executable when verifying', function () {
-        const executable = utils.getPathToExecutable()
-        const message1 = chalk.green('✓ Cypress executable found at:')
-        const message2 = chalk.cyan(executable)
         return utils.verify({ force: true })
         .then(() => {
-          expect(this.log).to.be.calledWith(message1, message2)
+          snapshot(logger.print())
         })
       })
 
       it('runs smoke test even if version already verified', function () {
         return utils.verify({ force: true })
         .then(() => {
-          expect(this.log).to.be.calledWith(verifyingMessage)
+          snapshot(logger.print())
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
             '--smoke-test',
             '--ping=222',
@@ -288,7 +279,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(verifyingMessage)
+          snapshot(logger.print())
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
             '--smoke-test',
             '--ping=222',
@@ -305,7 +296,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(verifyingMessage)
+          snapshot(logger.print())
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), [
             '--smoke-test',
             '--ping=222',
@@ -328,8 +319,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.red('✖ Failed to verify Cypress executable.'))
-          expect(this.log).to.be.calledWith('the stderr output')
+          snapshot(logger.print())
         })
       })
 
@@ -345,7 +335,7 @@ describe('utils', function () {
           return fs.readJsonAsync(infoFilePath)
         })
         .then((info) => {
-          expect(this.log).to.be.calledWith(chalk.green('✓ Successfully verified Cypress executable'))
+          snapshot(logger.print())
           expect(info.verifiedVersion).to.equal(packageVersion)
         })
       })
@@ -381,7 +371,7 @@ describe('utils', function () {
           xvfb.start.rejects(err)
           return utils.verify()
           .then(() => {
-            expect(this.log).to.be.calledWith('Looks like your system is missing a must have dependency: XVFB')
+            snapshot(logger.print())
           })
         })
       })

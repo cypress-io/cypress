@@ -7,6 +7,7 @@ const Promise = require('bluebird')
 const download = require('./download')
 const utils = require('./utils')
 const unzip = require('./unzip')
+const logger = require('../logger')
 
 const fs = Promise.promisifyAll(fse)
 
@@ -26,7 +27,7 @@ const install = (options = {}) => {
   if (process.env.CYPRESS_VERSION) {
     needVersion = process.env.CYPRESS_VERSION
     debug('using CYPRESS_VERSION %s', needVersion)
-    utils.log(chalk.yellow(`Forcing CYPRESS_VERSION ${needVersion}`))
+    logger.log(chalk.yellow(`Forcing CYPRESS_VERSION ${needVersion}`))
   }
 
   return utils.getInstalledVersion()
@@ -39,9 +40,9 @@ const install = (options = {}) => {
         throw new Error('')
       })
     } else if (installedVersion === needVersion) {
-      utils.log(chalk.green(`Cypress ${needVersion} already installed.`))
+      logger.log(chalk.green(`Cypress ${needVersion} already installed.`))
     } else if (!installedVersion) {
-      utils.log('Could not find installed Cypress')
+      logger.log('Could not find installed Cypress')
       return utils.clearVersionState().then(() => {
         throw new Error('')
       })
@@ -51,14 +52,14 @@ const install = (options = {}) => {
   })
   .catch((err) => {
     if (hasSomethingToSay(err)) {
-      utils.log(err.message)
+      logger.log(err.message)
     }
-    utils.log(chalk.green(`Installing Cypress (version: ${needVersion}).`))
+    logger.log(chalk.green(`Installing Cypress (version: ${needVersion}).`))
 
     // check to see if needVersion is a valid file
     return fs.statAsync(needVersion)
     .then(() => {
-      utils.log('Installing local Cypress binary from %s', needVersion)
+      logger.log('Installing local Cypress binary from %s', needVersion)
 
       return unzip.start({
         zipDestination: needVersion,

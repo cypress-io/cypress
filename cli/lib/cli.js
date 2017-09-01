@@ -2,6 +2,8 @@ const _ = require('lodash')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
+const logger = require('./logger')
+const util = require('./util')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -52,9 +54,12 @@ module.exports = {
       .option('-c, --config <config>',                     text('config'))
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
-      .action((opts) =>
-        require('./exec/run').start(parseOpts(opts)).then(process.exit)
-      )
+      .action((opts) => {
+        require('./exec/run')
+        .start(parseOpts(opts))
+        .then(util.exit)
+        .catch(util.failGracefully)
+      })
 
     program
       .command('open')
@@ -65,17 +70,29 @@ module.exports = {
       .option('-c, --config <config>',     text('config'))
       .option('-d, --detached [bool]',     text('detached'), coerceFalse)
       .option('-P, --project <project path>', text('project'))
-      .action((opts) => require('./exec/open').start(parseOpts(opts)))
+      .action((opts) => {
+        require('./exec/open')
+        .start(parseOpts(opts))
+        .catch(util.failGracefully)
+      })
 
     program
       .command('install')
       .description('Installs the Cypress executable matching this package\'s version')
-      .action(() => require('./download').install({ force: true }))
+      .action(() => {
+        require('./download')
+        .install({ force: true })
+        .catch(util.failGracefully)
+      })
 
     program
       .command('verify')
       .description('Verifies that Cypress is installed correctly and executable')
-      .action(() => require('./download/utils').verify({ force: true }))
+      .action(() => {
+        require('./download/utils')
+        .verify({ force: true })
+        .catch(util.failGracefully)
+      })
 
     debug('cli starts with arguments %j', process.argv)
     program.parse(process.argv)
@@ -92,8 +109,7 @@ module.exports = {
 }
 
 if (!module.parent) {
-  /* eslint-disable no-console */
-  console.error('This CLI module should be required from another Node module')
-  console.error('and not executed directly')
+  logger.error('This CLI module should be required from another Node module')
+  logger.error('and not executed directly')
   process.exit(-1)
 }

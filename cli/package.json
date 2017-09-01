@@ -7,7 +7,6 @@
     "cypress": "bin/cypress"
   },
   "scripts": {
-    "pretest": "npm run lint",
     "test": "npm run test-unit",
     "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "test-watch": "$(bin-up mocha) --watch",

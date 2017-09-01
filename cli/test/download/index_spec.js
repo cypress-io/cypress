@@ -5,6 +5,7 @@ const download = require('../../lib/download/download')
 const index = require('../../lib/download/index')
 const utils = require('../../lib/download/utils')
 const unzip = require('../../lib/download/unzip')
+const logger = require('../../lib/logger')
 const fse = require('fs-extra')
 
 const packageVersion = require('../../package').version
@@ -22,7 +23,7 @@ describe('index', function () {
 
   context('#install', function () {
     beforeEach(function () {
-      this.sandbox.stub(utils, 'log')
+      this.sandbox.stub(logger, 'log')
       this.sandbox.stub(download, 'start').resolves()
       this.sandbox.stub(utils, 'getInstalledVersion').resolves()
       this.sandbox.stub(utils, 'writeInstalledVersion').resolves()
@@ -41,7 +42,7 @@ describe('index', function () {
         return index.install()
           .then(() => {
             const msg = `Forcing CYPRESS_VERSION ${version}`
-            expect(utils.log.calledWith(msg)).to.be.true
+            expect(logger.log.calledWith(msg)).to.be.true
             expect(download.start).to.be.calledWith({
               displayOpen: false,
               version,
@@ -76,7 +77,7 @@ describe('index', function () {
 
       it('logs message', function () {
         const msg = `Cypress ${packageVersion} already installed.`
-        expect(utils.log.calledWith(msg)).to.be.true
+        expect(logger.log.calledWith(msg)).to.be.true
       })
 
       it('does not download', function () {
@@ -91,8 +92,8 @@ describe('index', function () {
       })
 
       it('logs message', function () {
-        expect(utils.log.calledWith('Cypress executable was not found.')).to.be.true
-        expect(utils.log.calledWith(`Installing Cypress (version: ${packageVersion}).`)).to.be.true
+        expect(logger.log.calledWith('Cypress executable was not found.')).to.be.true
+        expect(logger.log.calledWith(`Installing Cypress (version: ${packageVersion}).`)).to.be.true
       })
 
       it('downloads', function () {
@@ -112,9 +113,9 @@ describe('index', function () {
 
       it('logs message', function () {
         const versionMessage = `Installed version (x.x.x) does not match needed version (${packageVersion}).`
-        expect(utils.log.calledWith(versionMessage)).to.be.true
+        expect(logger.log.calledWith(versionMessage)).to.be.true
         const installMessage = `Installing Cypress (version: ${packageVersion}).`
-        expect(utils.log.calledWith(installMessage)).to.be.true
+        expect(logger.log.calledWith(installMessage)).to.be.true
       })
 
       it('downloads', function () {

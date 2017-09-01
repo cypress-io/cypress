@@ -4,8 +4,29 @@ const downloadUtils = require('../../lib/download/utils')
 const spawn = require('../../lib/exec/spawn')
 const open = require('../../lib/exec/open')
 const util = require('../../lib/util')
+const logger = require('../../lib/logger')
+const fs = require('../../lib/fs')
+const snapshot = require('snap-shot-it')
 
 describe('exec open', function () {
+  beforeEach(function () {
+    logger.reset()
+  })
+
+  context('#start integration', function () {
+    it('logs missing when no installed version', function () {
+      this.sandbox.stub(util, 'exit')
+      this.sandbox.stub(fs, 'readJsonAsync').resolves({})
+
+      return open.start().then(() => {
+        throw new Error('should not resolve')
+      })
+      .catch(() => {
+        snapshot(logger.print())
+      })
+    })
+  })
+
   context('#start', function () {
     beforeEach(function () {
       this.sandbox.stub(util, 'isInstalledGlobally').returns(true)

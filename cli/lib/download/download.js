@@ -12,8 +12,10 @@ const { stripIndent } = require('common-tags')
 const R = require('ramda')
 const pkg = require('../../package.json')
 
+const logger = require('../logger')
 const unzip = require('./unzip')
-const utils = require('./utils')
+const downloadUtils = require('./utils')
+const util = require('../util')
 
 const fs = Promise.promisifyAll(require('fs-extra'))
 
@@ -46,7 +48,7 @@ const download = (options = {}) => {
 
   return new Promise((resolve, reject) => {
     const barOptions = R.pick(['total', 'width'], options)
-    const bar = utils.getProgressBar('Downloading Cypress', barOptions)
+    const bar = downloadUtils.getProgressBar('Downloading Cypress', barOptions)
 
     // nuke the bar on error
     const terminate = (err) => {
@@ -120,8 +122,8 @@ const statusMessage = (err) =>
   err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
 
 const printAndFail = (text) => {
-  console.log(text) //eslint-disable-line no-console
-  process.exit(1)
+  logger.log(text)
+  util.exit(1)
 }
 
 const logErr = (options) => (err) => {
@@ -136,7 +138,7 @@ const logErr = (options) => (err) => {
 }
 
 const truePwd = () => {
-  const cwd = process.cwd()
+  const cwd = util.cwd()
   return _.endsWith(cwd, pkg.name) ? path.join('..', '..') : cwd
 }
 
@@ -145,20 +147,18 @@ const logFinish = (options) => {
   debug('Current caller directory %s', currDirectory)
   const relativeExecutable = path.relative(currDirectory, options.executable)
 
-  /* eslint-disable no-console */
-  console.log(
+  logger.log(
     chalk.white('  -'),
     chalk.blue('Finished Installing'),
     chalk.green(relativeExecutable),
     chalk.gray(`(version: ${options.version})`)
   )
-  /* eslint-enable no-console */
 }
 
 // Why is download displaying instructions how to run things?
 const displayOpeningApp = () => {
   //// TODO: this isn't necessarily true if installed locally
-  utils.log(
+  logger.log(
     chalk.yellow('  You can now open Cypress by running:'),
     chalk.cyan('cypress open')
   )
@@ -171,7 +171,7 @@ const finish = (options) => {
     if (options.displayOpen) {
       displayOpeningApp()
     }
-    return utils.writeInstalledVersion(options.version)
+    return downloadUtils.writeInstalledVersion(options.version)
   })
 }
 
@@ -185,20 +185,20 @@ const start = (options) => {
     total: 100,
     width: 30,
     throttle: 100,
-    zipDestination: path.join(utils.getInstallationDir(), 'cypress.zip'),
-    destination: utils.getInstallationDir(),
-    executable: utils.getPathToUserExecutable(),
+    zipDestination: path.join(downloadUtils.getInstallationDir(), 'cypress.zip'),
+    destination: downloadUtils.getInstallationDir(),
+    executable: downloadUtils.getPathToUserExecutable(),
   })
   debug('zip destination %s', options.zipDestination)
 
-  return utils.ensureInstallationDir()
+  return downloadUtils.ensureInstallationDir()
   .then(() => download(options))
   .catch(logErr(options))
   // Why is download also unzipping? It should only download
   .then(unzip.start)
   .catch((err) => {
     unzip.logErr(err)
-    process.exit(1)
+    util.exit(1)
   })
   .then(() => finish(options))
 }

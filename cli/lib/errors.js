@@ -101,7 +101,7 @@ function addPlatformInformation (info) {
 
 function formError (info, error) {
   return addPlatformInformation(info)
-  .then((info) => merge(info, { message: error.message, stack: error.stack }))
+  .then((info) => merge(error, info))
 }
 
 function formErrorText (info, error) {

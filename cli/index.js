@@ -1,9 +1,10 @@
 const minimist = require('minimist')
 const debug = require('debug')('cypress:cli')
 const args = minimist(process.argv.slice(2))
+const logger = require('./lib/logger')
 
 const reportError = (err) => {
-  console.error(err) // eslint-disable-line no-console
+  logger.error(err)
   process.exit(1)
 }
 

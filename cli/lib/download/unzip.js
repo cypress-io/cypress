@@ -6,6 +6,7 @@ const readline = require('readline')
 const yauzl = require('yauzl')
 const { formErrorText, errors } = require('../errors')
 const utils = require('./utils')
+const logger = require('../logger')
 const debug = require('debug')('cypress:cli')
 
 const fs = Promise.promisifyAll(require('fs-extra'))
@@ -116,7 +117,7 @@ const cleanup = (options) => {
 
 const logErr = (err) => {
   return formErrorText(errors.failedToUnZip, err)
-    .then(console.log) // eslint-disable-line no-console
+    .then(logger.log)
 }
 
 module.exports = {
