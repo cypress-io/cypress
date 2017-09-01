@@ -243,6 +243,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             }
           )
         when enqueuedCmd and not _.isUndefined(ret)
+          ## TODO: clean this up in the utility function
+          ## to conditionally stringify functions
+          ret = if _.isFunction(ret)
+            ret.toString()
+          else
+            $utils.stringify(ret)
+
           ## if we got a return value and we enqueued
           ## a new command and we didn't return cy
           ## or an undefined value then throw
@@ -250,7 +257,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             "miscellaneous.returned_value_and_commands_from_custom_command", {
               args: {
                 current: command.get("name")
-                returned: $utils.stringify(ret)
+                returned: ret
               }
             }
           )
@@ -980,8 +987,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               (not isCy(ret)) and
                 (not isPromiseLike(ret))
 
+            ## TODO: clean this up in the utility function
+            ## to conditionally stringify functions
+            ret = if _.isFunction(ret)
+              ret.toString()
+            else
+              $utils.stringify(ret)
+
             $utils.throwErrByPath("miscellaneous.returned_value_and_commands", {
-              args: $utils.stringify(ret)
+              args: ret
             })
 
           ## if we attached a done callback

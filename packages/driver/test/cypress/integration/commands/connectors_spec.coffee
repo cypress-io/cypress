@@ -808,6 +808,12 @@ describe "src/cy/commands/connectors", ->
       $(doc.body).empty().html(@body)
 
     context "#each", ->
+      it "invokes callback function with runnable.ctx", ->
+        ctx = @
+
+        cy.wrap([1]).each ->
+          expect(ctx is @).to.be.true
+
       it "can each a single element", ->
         count = 0
 

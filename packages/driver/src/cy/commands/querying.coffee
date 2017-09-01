@@ -45,7 +45,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Elements: $el?.length ? 0
         })
 
-      getFocused = =>
+      getFocused = ->
         try
           d = cy.state("document")
           forceFocusedEl = cy.state("forceFocusedEl")
@@ -77,9 +77,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           log(null)
           return null
 
-      do resolveFocused = (failedByNonAssertion = false) =>
+      do resolveFocused = (failedByNonAssertion = false) ->
         Promise.try(getFocused)
-        .then ($el) =>
+        .then ($el) ->
           if options.verify is false
             return $el
 
@@ -93,12 +93,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
     get: (selector, options = {}) ->
-      _.defaults options,
+      ctx = @
+
+      _.defaults(options, {
         retry: true
         withinSubject: cy.state("withinSubject")
         log: true
         command: null
         verify: true
+      })
 
       consoleProps = {}
 
@@ -150,13 +153,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if aliasObj = cy.getAlias(selector.split(".")[0])
         {subject, alias, command} = aliasObj
 
-        return do resolveAlias = =>
+        return do resolveAlias = ->
           switch
             ## if this is a DOM element
             when $utils.hasElement(subject)
               replayFrom = false
 
-              replay = =>
+              replay = ->
                 cy.replayCommandsFrom(command)
 
                 ## its important to return undefined
@@ -168,7 +171,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## within our subject then filter out
               ## anything not currently in the DOM
               if not cy.isInDom(subject)
-                subject = subject.filter (index, el) =>
+                subject = subject.filter (index, el) ->
                   cy.isInDom(el)
 
                 ## if we have nothing left
@@ -186,7 +189,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   ## the commands leading up to the alias
                   if err.type is "length" and err.actual < err.expected
                     replayFrom = true
-                onRetry: =>
+                onRetry: ->
                   if replayFrom
                     replay()
                   else
@@ -214,7 +217,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set({$el: $el})
 
-      getElements = =>
+      getElements = ->
         ## attempt to query for the elements by withinSubject context
         ## and catch any sizzle errors!
         try
@@ -238,15 +241,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## allow retry to be a function which we ensure
         ## returns truthy before returning its
         if _.isFunction(options.onRetry)
-          if ret = options.onRetry.call(@, $el)
+          if ret = options.onRetry.call(ctx, $el)
             log($el)
             return ret
         else
           log($el)
           return $el
 
-      do resolveElements = =>
-        Promise.try(getElements).then ($el) =>
+      do resolveElements = ->
+        Promise.try(getElements).then ($el) ->
           if options.verify is false
             return $el
 
@@ -326,14 +329,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           type: if subject then "child" else "parent"
           consoleProps: -> consoleProps
 
-      getOpts = _.extend _.clone(options),
-        # error: getErr(text, phrase)
-        withinSubject: subject or cy.state("withinSubject") or cy.$$("body")
-        filter: true
-        log: false
-        # retry: false ## dont retry because we perform our own element validation
-        verify: false ## dont verify upcoming assertions, we do that ourselves
-
       setEl = ($el) ->
         return if options.log is false
 
@@ -387,8 +382,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## throw here to cause the .catch to trigger
         throw new Error()
 
-      resolveElements = =>
-        cy.now("get", selector, getOpts).then ($elements) =>
+      resolveElements = ->
+        getOpts = _.extend(_.clone(options), {
+          # error: getErr(text, phrase)
+          withinSubject: subject or cy.state("withinSubject") or cy.$$("body")
+          filter: true
+          log: false
+          # retry: false ## dont retry because we perform our own element validation
+          verify: false ## dont verify upcoming assertions, we do that ourselves
+        })
+
+        cy.now("get", selector, getOpts).then ($elements) ->
           $el = switch
             when $elements and $elements.length
               getFirstDeepestElement($elements)
@@ -399,7 +403,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cy.verifyUpcomingAssertions($el, options, {
             onRetry: resolveElements
-            onFail: (err) =>
+            onFail: (err) ->
               switch err.type
                 when "length"
                   if err.expected > 1
@@ -418,7 +422,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "dom"}, {
     within: (subject, options, fn) ->
-      cy.ensureDom(subject)
+      ctx = @
 
       if _.isUndefined(fn)
         fn = options
@@ -447,7 +451,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       prevWithinSubject = cy.state("withinSubject")
       cy.state("withinSubject", subject)
 
-      fn.call cy.state("runnable").ctx, subject
+      fn.call(ctx, subject)
 
       cleanup = ->
         cy.removeListener("command:start", setWithinSubject)
