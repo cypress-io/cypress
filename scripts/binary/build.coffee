@@ -55,7 +55,7 @@ buildCypressApp = (platform, version, options = {}) ->
   log = _.partialRight(logger, platform)
 
   canBuildInDocker = ->
-    platform == "linux" && os.platform() == "darwin"
+    platform is "linux" and os.platform() is "darwin"
 
   badPlatformMismatch = ->
     console.error("⛔️  cannot build #{platform} from #{os.platform()}")
@@ -65,11 +65,12 @@ buildCypressApp = (platform, version, options = {}) ->
 
   checkPlatform = ->
     log("#checkPlatform")
-    if platform == os.platform() then return
+    if platform is os.platform()
+      return
 
     console.log("trying to build #{platform} from #{os.platform()}")
-    if platform == "linux" && os.platform() == "darwin"
-      console.log("try running ./scripts/build-linux-binary.sh")
+    if platform is "linux" and os.platform() is "darwin"
+      console.log("npm run binary-build-linux")
     Promise.reject(new Error("Build platform mismatch"))
 
   cleanupPlatform = ->
