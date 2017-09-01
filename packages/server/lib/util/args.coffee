@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey cliVersion runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless outputPath".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey cliVersion runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless outputPath group groupId".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseNestedValues = (vals) ->
@@ -48,9 +48,10 @@ module.exports = {
         "env":         "environmentVariables"
         "headless":    "isTextTerminal"
         "show-headless-gui":"showHeadlessGui"
-        "exit-with-code": "exitWithCode"
+        "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
-        "output-path": "outputPath"
+        "output-path":      "outputPath"
+        "group-id":         "groupId"
       }
     })
 

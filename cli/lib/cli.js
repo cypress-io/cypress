@@ -23,6 +23,7 @@ const descriptions = {
     note: using an external browser will cancel video recording of tests.
   `,
   detached: 'runs Cypress application in detached mode',
+  project: 'path to the project',
 }
 
 const text = (description) => {
@@ -42,14 +43,15 @@ module.exports = {
       .usage('[options]')
       .description('Runs Cypress Headlessly')
       .option('--record [bool]',                           text('record'), coerceFalse)
-      .option('-k, --key <record_key>',                    text('key'))
+      .option('-k, --key <record-key>',                    text('key'))
       .option('-s, --spec <spec>',                         text('spec'))
       .option('-r, --reporter <reporter>',                 text('reporter'))
       .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
       .option('-p, --port <port>',                         text('port'))
       .option('-e, --env <env>',                           text('env'))
       .option('-c, --config <config>',                     text('config'))
-      .option('-b, --browser <browser name>',              text('browser'))
+      .option('-b, --browser <browser-name>',              text('browser'))
+      .option('-P, --project <project-path>',              text('project'))
       .action((opts) =>
         require('./exec/run').start(parseOpts(opts)).then(process.exit)
       )
@@ -62,6 +64,7 @@ module.exports = {
       .option('-e, --env <env>',           text('env'))
       .option('-c, --config <config>',     text('config'))
       .option('-d, --detached [bool]',     text('detached'), coerceFalse)
+      .option('-P, --project <project path>', text('project'))
       .action((opts) => require('./exec/open').start(parseOpts(opts)))
 
     program

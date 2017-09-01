@@ -89,6 +89,20 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
 
   createRun: (options = {}) ->
+    body = _.pick(options, [
+      "projectId"
+      "recordKey"
+      "commitSha"
+      "commitBranch"
+      "commitAuthorName"
+      "commitAuthorEmail"
+      "commitMessage"
+      "remoteOrigin"
+      "ciParams"
+      "ciProvider"
+      "ciBuildNumber",
+      "groupId"
+    ])
     rp.post({
       url: Routes.runs()
       json: true
@@ -96,19 +110,7 @@ module.exports = {
       headers: {
         "x-route-version": "2"
       }
-      body: _.pick(options, [
-        "projectId"
-        "recordKey"
-        "commitSha"
-        "commitBranch"
-        "commitAuthorName"
-        "commitAuthorEmail"
-        "commitMessage"
-        "remoteOrigin"
-        "ciParams"
-        "ciProvider"
-        "ciBuildNumber"
-      ])
+      body: body
     })
     .promise()
     .get("buildId")

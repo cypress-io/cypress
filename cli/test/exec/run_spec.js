@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const path = require('path')
 const pkg = require('../../package')
 
 const downloadUtils = require('../../lib/download/utils')
@@ -8,9 +7,11 @@ const cli = require('../../lib/cli')
 const spawn = require('../../lib/exec/spawn')
 const run = require('../../lib/exec/run')
 const snapshot = require('snap-shot')
+const util = require('../../lib/util')
 
 describe('exec run', function () {
   beforeEach(function () {
+    this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
     this.sandbox.stub(process, 'exit')
   })
 
@@ -99,48 +100,38 @@ describe('exec run', function () {
       })
     })
 
-    it('spawns --project with --key and xvfb', function () {
-      let pathToProject = path.resolve(process.cwd(), '.')
-
+    it('spawns with --key and xvfb', function () {
       return run.start({ port: '1234' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--port', '1234', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--port', '1234', '--cli-version', pkg.version])
       })
     })
 
-    it('spawns --project with --env', function () {
-      let pathToProject = path.resolve(process.cwd(), '.')
-
+    it('spawns with --env', function () {
       return run.start({ env: 'host=http://localhost:1337,name=brian' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--env', 'host=http://localhost:1337,name=brian', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--env', 'host=http://localhost:1337,name=brian', '--cli-version', pkg.version])
       })
     })
 
-    it('spawns --project with --config', function () {
-      let pathToProject = path.resolve(process.cwd(), '.')
-
+    it('spawns with --config', function () {
       return run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--config', 'watchForFileChanges=false,baseUrl=localhost', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost', '--cli-version', pkg.version])
       })
     })
 
-    it('spawns --project with --record false', function () {
-      let pathToProject = path.resolve(process.cwd(), '.')
-
+    it('spawns with --record false', function () {
       return run.start({ record: false })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--record', false, '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--record', false, '--cli-version', pkg.version])
       })
     })
 
-    it('spawns --project with --output-path', function () {
-      let pathToProject = path.resolve(process.cwd(), '.')
-
+    it('spawns with --output-path', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', pathToProject, '--output-path', '/path/to/output', '--cli-version', pkg.version])
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output', '--cli-version', pkg.version])
       })
     })
   })

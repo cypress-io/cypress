@@ -268,6 +268,8 @@ jobs:
       - run: cd docs && npm run lint
       - run: cd docs && npm run test
       # the docs should already have been built
+      # but we at least will generate the build info
+      - run: cd docs && npm run save-build-json
       - run: cd docs && ls public
       - run: cd docs && cat public/build.json
       # - run: cd docs && npm run build
@@ -276,7 +278,7 @@ jobs:
           name: Start docs server
           command: cd docs && npm run start
           background: true
-      - run: sleep 10
+      - run: sleep 20
       - restore_cache:
           key: cypress-tool-{{ .Branch }}
       - run: cd docs && npm run cypress
@@ -296,12 +298,15 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd docs && NODE_ENV=staging npm run build
-      # because we already built docs for production
-      # use script that just deploys without rebuilding the production docs
+      - run: cd docs && ls public
+      - run: cd docs && npm run save-build-json
       - run: cd docs && npm run deploy-prebuilt -- --environment staging
       - run:
           name: Print deployed version
           command: cd docs && cat public/build.json
+      - run:
+          name: Test deployed docs
+          command: cd docs && CYPRESS_baseUrl=https://docs-staging.cypress.io npm run cypress
 
   "deploy-docs-production":
     <<: *defaults
@@ -311,6 +316,7 @@ jobs:
       - run: cd docs && NODE_ENV=production npm run build
       # because we already built docs for production
       # use script that just deploys without rebuilding the production docs
+      - run: cd docs && npm run save-build-json
       - run: cd docs && npm run deploy-prebuilt -- --environment production --scrape
       - run: cd docs && cat public/build.json
 
@@ -433,7 +439,7 @@ workflows:
                 # allow deploying to staging from "develop"
                 # and branches starting with special prefix
                 - develop
-                - /docs-*/
+                - /docs-.*/
           requires:
             - docs-tests
 

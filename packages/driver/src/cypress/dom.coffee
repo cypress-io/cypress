@@ -129,9 +129,6 @@ dom = {
   elHasOverflowHidden: ($el) ->
     "hidden" in [$el.css("overflow"), $el.css("overflow-y"), $el.css("overflow-x")]
 
-  elIsPositioned: ($el) ->
-    $el.css("position") in ["relative", "absolute", "fixed", "sticky"]
-
   elHasPositionRelative: ($el) ->
     $el.css("position") is "relative"
 
@@ -185,7 +182,7 @@ dom = {
 
     ## even if overflow is clippable, if an ancestor of the ancestor is the
     ## element's offset parent, the ancestor will not clip the element
-    ## unless the element is position is position relative
+    ## unless the element is position relative
     if not @elHasPositionRelative($el) and @isAncestor($ancestor, $($el[0].offsetParent))
       return false
 

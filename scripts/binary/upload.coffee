@@ -47,7 +47,7 @@ module.exports = {
     }
 
   getAwsObj: ->
-    fs.readJsonSync(path.join(__dirname, "support", "aws-credentials.json"))
+    fs.readJsonSync(path.join(__dirname, "support", ".aws-credentials.json"))
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/

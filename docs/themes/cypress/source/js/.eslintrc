@@ -1,0 +1,14 @@
+{
+  "env": {
+    "node": false,
+    "browser": true,
+    "es6": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 5
+  },
+  "rules": {
+    "no-var": 0,
+    "prefer-template": 0
+  }
+}
