@@ -129,7 +129,7 @@ const runSmokeTest = () => {
       const random = _.random(0, 1000)
       const args = ['--smoke-test', `--ping=${random}`]
       const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
-      debug('command:', smokeTestCommand)
+      debug('smoke test command:', smokeTestCommand)
       const child = cp.spawn(cypressExecPath, args)
 
       child.stderr.on('data', (data) => {
@@ -140,22 +140,15 @@ const runSmokeTest = () => {
         stdout += data.toString()
       })
 
-      if (needsXvfb) {
-        child.on('close', () => {
-          debug('spawn stop, closing XVFB')
-          xvfb.stop()
-        })
-      }
-
       child.on('error', (err) => {
-        debug('spawn error', err)
+        debug('smoke test spawn error', err)
         reject(appMissingError(stripIndent`
           Could not execute Cypress
           ${err.message}
         `))
       })
 
-      child.on('exit', (code) => {
+      child.on('close', (code) => {
         if (code === 0) {
           const smokeTestReturned = stdout.trim()
           debug('smoke test output "%s"', smokeTestReturned)
@@ -166,8 +159,17 @@ const runSmokeTest = () => {
               returned: ${smokeTestReturned}
             `))
           }
+
+          if (needsXvfb) {
+            return xvfb.stop()
+            .then(() => {
+              return resolve()
+            })
+          }
+
           return resolve()
         }
+
         reject(verificationError(stderr))
       })
     })

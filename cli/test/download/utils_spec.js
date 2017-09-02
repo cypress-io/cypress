@@ -195,7 +195,7 @@ describe('utils', function () {
       this.sandbox.stub(xvfb, 'stop').resolves()
       this.sandbox.stub(xvfb, 'isNeeded').returns(false)
       this.sandbox.stub(this.spawnedProcess, 'on')
-      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       return this.ensureEmptyInstallationDir()
     })
 
@@ -264,7 +264,7 @@ describe('utils', function () {
       })
 
       it('clears verified version from state if verification fails', function () {
-        this.spawnedProcess.on.withArgs('exit').yieldsAsync(1)
+        this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
         return utils.verify({ force: true })
         .then(() => {
           return fs.readJsonAsync(infoFilePath).get('verifiedVersion')
@@ -318,7 +318,7 @@ describe('utils', function () {
         this.spawnedProcess.stderr.on.withArgs('data').yields({
           toString: () => 'the stderr output',
         })
-        this.spawnedProcess.on.withArgs('exit').yieldsAsync(1)
+        this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
 
         return fs.outputJsonAsync(infoFilePath, {
           version: packageVersion,
@@ -368,7 +368,7 @@ describe('utils', function () {
         })
 
         it('stops xvfb on spawned process close', function () {
-          this.spawnedProcess.on.withArgs('close').yieldsAsync()
+          this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
           return utils.verify()
           .then(() => {
             expect(xvfb.stop).to.be.called

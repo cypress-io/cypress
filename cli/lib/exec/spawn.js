@@ -12,7 +12,6 @@ module.exports = {
     args = [].concat(args)
 
     _.defaults(options, {
-      verify: false,
       detached: false,
       stdio: [process.stdin, process.stdout, 'ignore'],
     })
@@ -21,8 +20,7 @@ module.exports = {
       return new Promise((resolve, reject) => {
         const cypressPath = downloadUtils.getPathToExecutable()
         debug('spawning Cypress %s', cypressPath)
-        debug('args %j', args)
-        debug('some of the options %j', _.pick(options, ['verify', 'detached']))
+        debug('spawn args %j', args)
 
         const child = cp.spawn(cypressPath, args, options)
         child.on('exit', resolve)
@@ -38,6 +36,8 @@ module.exports = {
       spawn().catch(throwDetailedError(errors.unexpected))
 
     const needsXvfb = xvfb.isNeeded()
+    debug('needs XVFB?', needsXvfb)
+
     if (needsXvfb) {
       return xvfb.start()
       .then(userFriendlySpawn)
