@@ -13,6 +13,7 @@ const {
   license,
   bugs,
   repository,
+  engines,
 } = require('@packages/root')
 
 const packageJsonSrc = path.join('package.json')
@@ -32,6 +33,7 @@ function preparePackageForNpmRelease (json) {
     license,
     bugs,
     repository,
+    engines,
     scripts: {
       postinstall: 'node index.js --exec install',
       size: 't=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";',

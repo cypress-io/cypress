@@ -6,6 +6,9 @@
   "bin": {
     "cypress": "bin/cypress"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "scripts": {
     "test": "npm run test-unit",
     "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
