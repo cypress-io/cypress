@@ -1,12 +1,13 @@
 require('../spec_helper')
 
 const chalk = require('chalk')
+
+const fs = require('../../lib/fs')
 const download = require('../../lib/download/download')
 const index = require('../../lib/download/index')
 const utils = require('../../lib/download/utils')
 const unzip = require('../../lib/download/unzip')
 const logger = require('../../lib/logger')
-const fse = require('fs-extra')
 
 const packageVersion = require('../../package').version
 
@@ -54,7 +55,7 @@ describe('index', function () {
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
         process.env.CYPRESS_VERSION = version
-        this.sandbox.stub(fse, 'statAsync').withArgs(version).resolves()
+        this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
         this.sandbox.stub(unzip, 'start').resolves()
 
         return index.install()

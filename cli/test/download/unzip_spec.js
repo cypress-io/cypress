@@ -1,9 +1,8 @@
 require('../spec_helper')
 
 const path = require('path')
-const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs-extra'))
 
+const fs = require('../../lib/fs')
 const unzip = require('../../lib/download/unzip')
 
 describe('unzip', function () {

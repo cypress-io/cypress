@@ -1,8 +1,7 @@
 const _ = require('lodash')
 const path = require('path')
-const Promise = require('bluebird')
 
-const fs = Promise.promisifyAll(require('fs-extra'))
+const fs = require('../lib/fs')
 
 // grab the current version from the root monorepo package.json
 const {

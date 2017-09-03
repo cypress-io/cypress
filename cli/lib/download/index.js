@@ -1,15 +1,13 @@
 const _ = require('lodash')
 const path = require('path')
 const chalk = require('chalk')
-const fse = require('fs-extra')
 const debug = require('debug')('cypress:cli')
-const Promise = require('bluebird')
+const fs = require('../fs')
 const download = require('./download')
 const utils = require('./utils')
 const unzip = require('./unzip')
 const logger = require('../logger')
 
-const fs = Promise.promisifyAll(fse)
 
 const packagePath = path.join(__dirname, '..', '..', 'package.json')
 const packageVersion = require(packagePath).version

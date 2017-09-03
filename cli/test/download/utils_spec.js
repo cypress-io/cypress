@@ -3,14 +3,13 @@ require('../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
-const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs-extra'))
 const EE = require('events').EventEmitter
 const cp = require('child_process')
 const clearModule = require('clear-module')
 const snapshot = require('snap-shot-it')
 
 const packageVersion = require('../../package').version
+const fs = require('../../lib/fs')
 const logger = require('../../lib/logger')
 const utils = require('../../lib/download/utils')
 const xvfb = require('../../lib/exec/xvfb')

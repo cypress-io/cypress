@@ -1,9 +1,9 @@
 // https://github.com/cypress-io/cypress/issues/316
 
 const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs-extra'))
 const tmp = Promise.promisifyAll(require('tmp'))
 
+const fs = require('./fs')
 const open = require('./exec/open')
 const run = require('./exec/run')
 

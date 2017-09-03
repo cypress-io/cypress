@@ -12,12 +12,12 @@ const { stripIndent } = require('common-tags')
 const R = require('ramda')
 const pkg = require('../../package.json')
 
+const fs = require('../fs')
 const logger = require('../logger')
 const unzip = require('./unzip')
 const downloadUtils = require('./utils')
 const util = require('../util')
 
-const fs = Promise.promisifyAll(require('fs-extra'))
 
 const baseUrl = 'https://download.cypress.io/'
 

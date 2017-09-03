@@ -2,10 +2,9 @@ require('../spec_helper')
 
 const nock = require('nock')
 const path = require('path')
-const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs-extra'))
 const snapshot = require('snap-shot-it')
 
+const fs = require('../../lib/fs')
 const download = require('../../lib/download/download')
 const logger = require('../../lib/logger')
 const unzip = require('../../lib/download/unzip')
