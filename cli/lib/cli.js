@@ -17,19 +17,19 @@ const descriptions = {
   spec: 'runs a specific spec file. defaults to "all"',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
-  port: 'runs Cypress on a specific port. overrides any value in cypress.json. defaults to "2020"',
+  port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
   browser: oneLine`
     runs Cypress in the browser with the given name.
-    note: using an external browser will cancel video recording of tests.
+    note: using an external browser will not record a video.
   `,
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
 }
 
 const text = (description) => {
-  if (descriptions[description] == null) {
+  if (!descriptions[description]) {
     throw new Error(`Could not find description for: ${description}`)
   }
 

@@ -13,16 +13,20 @@ const reportError = (err) => {
 switch (args.exec) {
   case 'install':
     debug('installing Cypress from NPM')
-    require('./lib/download')
-      .install()
-      .catch(reportError)
+
+    require('./lib/install')
+    .install()
+    .catch(reportError)
+
     break
   case 'verify':
     // for simple testing in the monorepo
     debug('verifying Cypress')
+
     require('./lib/download/utils')
-      .verify()
-      .catch(reportError)
+    .verify()
+    .catch(reportError)
+
     break
   default:
     // export our node module interface
