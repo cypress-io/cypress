@@ -14,7 +14,7 @@ switch (args.exec) {
   case 'install':
     debug('installing Cypress from NPM')
 
-    require('./lib/install')
+    require('./lib/tasks')
     .install()
     .catch(reportError)
 
@@ -23,7 +23,7 @@ switch (args.exec) {
     // for simple testing in the monorepo
     debug('verifying Cypress')
 
-    require('./lib/download/utils')
+    require('./lib/tasks')
     .verify()
     .catch(reportError)
 
