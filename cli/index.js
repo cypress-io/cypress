@@ -1,11 +1,12 @@
 const minimist = require('minimist')
 const debug = require('debug')('cypress:cli')
 const args = minimist(process.argv.slice(2))
+const util = require('./lib/util')
 const logger = require('./lib/logger')
 
 const reportError = (err) => {
   logger.error(err)
-  process.exit(1)
+  util.exit1()
 }
 
 // we're being used from the command line

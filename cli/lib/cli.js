@@ -58,7 +58,7 @@ module.exports = {
         require('./exec/run')
         .start(parseOpts(opts))
         .then(util.exit)
-        .catch(util.failGracefully)
+        .catch(util.exit1)
       })
 
     program
@@ -73,7 +73,7 @@ module.exports = {
       .action((opts) => {
         require('./exec/open')
         .start(parseOpts(opts))
-        .catch(util.failGracefully)
+        .catch(util.exit1)
       })
 
     program
@@ -82,7 +82,7 @@ module.exports = {
       .action(() => {
         require('./download')
         .install({ force: true })
-        .catch(util.failGracefully)
+        .catch(util.exit1)
       })
 
     program
@@ -91,7 +91,7 @@ module.exports = {
       .action(() => {
         require('./download/utils')
         .verify({ force: true })
-        .catch(util.failGracefully)
+        .catch(util.exit1)
       })
 
     debug('cli starts with arguments %j', process.argv)

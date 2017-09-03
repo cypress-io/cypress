@@ -9,7 +9,7 @@ module.exports = {
     process.exit(code)
   },
 
-  failGracefully () {
+  exit1 () {
     process.exit(1)
   },
 
