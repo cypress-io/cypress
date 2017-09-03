@@ -11,11 +11,13 @@ module.exports = {
   _xvfb: xvfb, // expose for testing
 
   start () {
+    debug('Starting XVFB')
     return xvfb.startAsync()
       .catch(throwDetailedError(errors.missingXvfb))
   },
 
   stop () {
+    debug('Stopping XVFB')
     return xvfb.stopAsync()
   },
 
