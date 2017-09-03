@@ -1,26 +1,23 @@
 const _ = require('lodash')
-const path = require('path')
 const chalk = require('chalk')
 const debug = require('debug')('cypress:cli')
 const fs = require('../fs')
 const download = require('./download')
+const util = require('../util')
 const utils = require('./utils')
 const unzip = require('./unzip')
 const logger = require('../logger')
-
-
-const packagePath = path.join(__dirname, '..', '..', 'package.json')
-const packageVersion = require(packagePath).version
 
 const hasSomethingToSay = (err) => err && err.message
 
 const install = (options = {}) => {
   debug('installing with options %j', options)
+
   _.defaults(options, {
     force: false,
   })
 
-  let needVersion = packageVersion
+  let needVersion = util.pkgVersion()
 
   if (process.env.CYPRESS_VERSION) {
     needVersion = process.env.CYPRESS_VERSION

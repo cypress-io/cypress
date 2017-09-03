@@ -8,11 +8,11 @@ const cp = require('child_process')
 const clearModule = require('clear-module')
 const snapshot = require('snap-shot-it')
 
-const packageVersion = require('../../package').version
 const fs = require('../../lib/fs')
 const logger = require('../../lib/logger')
 const utils = require('../../lib/download/utils')
 const xvfb = require('../../lib/exec/xvfb')
+const packageVersion = require('../../lib/util').pkgVersion()
 
 const distDir = path.join(__dirname, '../../dist')
 const infoFilePath = path.join(distDir, 'info.json')
