@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const readline = require('readline')
 const yauzl = require('yauzl')
 const { formErrorText, errors } = require('../errors')
-const utils = require('./utils')
+const info = require('./info')
 const logger = require('../logger')
 const debug = require('debug')('cypress:cli')
 
@@ -31,7 +31,7 @@ const _unzip = ({ zipDestination, destination, width }) => () => {
         total,
         width,
       }
-      const bar = utils.getProgressBar('Unzipping Cypress', barOptions)
+      const bar = info.getProgressBar('Unzipping Cypress', barOptions)
 
       const tick = () => {
         count += 1

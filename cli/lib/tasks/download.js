@@ -18,7 +18,6 @@ const unzip = require('./unzip')
 const downloadUtils = require('./utils')
 const util = require('../util')
 
-
 const baseUrl = 'https://download.cypress.io/'
 
 const getOs = () => {

@@ -4,7 +4,7 @@ const debug = require('debug')('cypress:cli')
 const fs = require('../fs')
 const download = require('./download')
 const util = require('../util')
-const utils = require('./utils')
+const info = require('./info')
 const unzip = require('./unzip')
 const logger = require('../logger')
 
@@ -25,20 +25,20 @@ const install = (options = {}) => {
     logger.log(chalk.yellow(`Forcing CYPRESS_VERSION ${needVersion}`))
   }
 
-  return utils.getInstalledVersion()
+  return info.getInstalledVersion()
   .catch(() => {
     throw new Error('Cypress executable was not found.')
   })
   .then((installedVersion) => {
     if (options.force) {
-      return utils.clearVersionState().then(() => {
+      return info.clearVersionState().then(() => {
         throw new Error('')
       })
     } else if (installedVersion === needVersion) {
       logger.log(chalk.green(`Cypress ${needVersion} already installed.`))
     } else if (!installedVersion) {
       logger.log('Could not find installed Cypress')
-      return utils.clearVersionState().then(() => {
+      return info.clearVersionState().then(() => {
         throw new Error('')
       })
     } else {
@@ -58,10 +58,10 @@ const install = (options = {}) => {
 
       return unzip.start({
         zipDestination: needVersion,
-        destination: utils.getInstallationDir(),
-        executable: utils.getPathToUserExecutable(),
+        destination: info.getInstallationDir(),
+        executable: info.getPathToUserExecutable(),
       })
-      .then(() => utils.writeInstalledVersion('unknown'))
+      .then(() => info.writeInstalledVersion('unknown'))
     })
     .catch(() => {
       // else go out and download it from the interwebz

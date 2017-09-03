@@ -10,7 +10,7 @@ const fs = require('../fs')
 const util = require('../util')
 const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
-const utils = require('./utils')
+const info = require('./info')
 
 const { formErrorText, errors } = require('../errors')
 
@@ -50,8 +50,8 @@ const appMissingError = (message) => {
 
 const writeVerifiedVersion = (verifiedVersion) => {
   debug('writing verified version string "%s"', verifiedVersion)
-  return utils.ensureFileInfoContents().then((contents) => {
-    return utils.writeInfoFileContents(_.extend(contents, { verifiedVersion }))
+  return info.ensureFileInfoContents().then((contents) => {
+    return info.writeInfoFileContents(_.extend(contents, { verifiedVersion }))
   })
 }
 
@@ -61,7 +61,7 @@ const runSmokeTest = () => {
   let stdout = ''
   const needsXvfb = xvfb.isNeeded()
   debug('needs XVFB?', needsXvfb)
-  const cypressExecPath = utils.getPathToExecutable()
+  const cypressExecPath = info.getPathToExecutable()
   debug('using Cypress executable %s', cypressExecPath)
 
   // TODO switch to execa for this?
@@ -163,7 +163,7 @@ const maybeVerify = (options = {}) => {
   debug('check if verified')
   const shouldVerify = options.force ? R.T : differentFrom(packageVersion)
 
-  return utils.getVerifiedVersion()
+  return info.getVerifiedVersion()
   .then((verifiedVersion) => {
     if (shouldVerify(verifiedVersion)) {
       logStart()
@@ -182,7 +182,7 @@ const verify = (options = {}) => {
     force: false,
   })
 
-  return utils.getInstalledVersion()
+  return info.getInstalledVersion()
   .then((installedVersion) => {
     if (!installedVersion) {
       return explainAndThrow(errors.missingApp)(new Error('Missing install'))
@@ -194,7 +194,7 @@ const verify = (options = {}) => {
     }
   })
   .then(() => {
-    const executable = utils.getPathToExecutable()
+    const executable = info.getPathToExecutable()
     return fs.statAsync(executable)
       .then(() => {
         logger.log(chalk.green('✓ Cypress executable found at:'), chalk.cyan(executable))
