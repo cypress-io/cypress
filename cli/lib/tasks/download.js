@@ -45,7 +45,7 @@ const prettyDownloadErr = (err, version) => {
   `
   debug(msg)
 
-  return throwFormErrorText(errors.failedDownload(new Error(msg)))
+  return throwFormErrorText(errors.failedDownload)(msg)
 }
 
 const download = (options = {}) => {
