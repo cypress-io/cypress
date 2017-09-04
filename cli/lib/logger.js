@@ -1,10 +1,16 @@
 const R = require('ramda')
+const chalk = require('chalk')
 
 let logs = []
 
 const error = (...messages) => {
   logs.push(messages.join(' '))
-  console.error(...messages) // eslint-disable-line no-console
+  console.error(chalk.red(...messages)) // eslint-disable-line no-console
+}
+
+const warn = (...messages) => {
+  logs.push(messages.join(' '))
+  console.error(chalk.yellow(...messages)) // eslint-disable-line no-console
 }
 
 const log = (...messages) => {
@@ -28,8 +34,9 @@ const reset = () => {
 }
 
 module.exports = {
-  error,
   log,
+  warn,
+  error,
   logLines,
   print,
   reset,
