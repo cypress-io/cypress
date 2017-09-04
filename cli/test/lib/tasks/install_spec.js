@@ -140,6 +140,9 @@ describe('install', function () {
           version: packageVersion,
         })
 
+        // cleans up the zip file
+        expect(fs.removeAsync).to.be.calledWith(downloadDestination)
+
         snapshot(this.stdout.toString())
       })
     })
@@ -207,6 +210,5 @@ describe('install', function () {
         snapshot(this.stdout.toString())
       })
     })
-
   })
 })
