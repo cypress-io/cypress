@@ -18,10 +18,6 @@ module.exports = {
     process.exit(code)
   },
 
-  exit1 () {
-    process.exit(1)
-  },
-
   logErrorExit1 (err) {
     logger.error(err.message)
 

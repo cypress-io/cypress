@@ -58,7 +58,7 @@ module.exports = {
         require('./exec/run')
         .start(parseOpts(opts))
         .then(util.exit)
-        .catch(util.exit1)
+        .catch(util.logErrorExit1)
       })
 
     program
@@ -73,7 +73,7 @@ module.exports = {
       .action((opts) => {
         require('./exec/open')
         .start(parseOpts(opts))
-        .catch(util.exit1)
+        .catch(util.logErrorExit1)
       })
 
     program
@@ -82,7 +82,7 @@ module.exports = {
       .action(() => {
         require('./tasks/install')
         .start({ force: true })
-        .catch(util.exit1)
+        .catch(util.logErrorExit1)
       })
 
     program
@@ -91,7 +91,7 @@ module.exports = {
       .action(() => {
         require('./tasks/verify')
         .start({ force: true })
-        .catch(util.exit1)
+        .catch(util.logErrorExit1)
       })
 
     debug('cli starts with arguments %j', process.argv)
