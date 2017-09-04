@@ -25,7 +25,7 @@ describe('exec open', function () {
       .then(() => {
         expect(spawn.start).to.be.calledWith([], {
           detached: false,
-          stdio: ['ignore', 'inherit', 'ignore'],
+          stdio: 'inherit',
         })
       })
     })

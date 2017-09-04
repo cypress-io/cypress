@@ -34,7 +34,7 @@ module.exports = {
     .then(() => {
       return spawn.start(args, {
         detached: Boolean(options.detached),
-        stdio: ['ignore', 'inherit', 'ignore'],
+        stdio: 'inherit',
       })
     })
   },
