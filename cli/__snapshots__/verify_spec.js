@@ -36,7 +36,7 @@ exports['.verify with force: true shows full path to executable when verifying 1
 exports['.verify with force: true clears verified version from state if verification fails 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [31m✖[39m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m
-   [90m→ Cypress Version: 1.2.3[39m
+   
 [?25h[31mError: Cypress failed to start.[39m
 [31m[39m
 [31mThis is usually caused by a missing library or dependency.[39m
@@ -68,7 +68,7 @@ exports['.verify smoke test logs and runs when current version has not been veri
 exports['.verify smoke test on linux logs error and exits when starting xvfb fails 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [31m✖[39m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m
-   [90m→ Cypress Version: 1.2.3[39m
+   
 [?25h[31mError: Your system is missing the dependency: XVFB[39m
 [31m[39m
 [31mInstall XVFB and run Cypress again.[39m
@@ -86,4 +86,3 @@ exports['.verify smoke test on linux logs error and exits when starting xvfb fai
 [31mPlatform: darwin (test release)[39m
 [31mCypress Version: 1.2.3[39m
 `
-

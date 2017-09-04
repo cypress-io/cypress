@@ -21,6 +21,10 @@ const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
 
+const normalize = (str) => {
+  return str.replace('[90m→ Cypress Version: 1.2.3[39m', '')
+}
+
 context('.verify', function () {
   beforeEach(function () {
     this.stdout = stdout.capture()
@@ -181,7 +185,7 @@ context('.verify', function () {
       .catch((err) => {
         logger.error(err)
 
-        snapshot(ctx.stdout.toString())
+        snapshot(normalize(ctx.stdout.toString()))
 
         return info.getVerifiedVersion()
       })
@@ -272,9 +276,11 @@ context('.verify', function () {
         xvfb.start.rejects(err)
         return verify.start()
         .catch((err) => {
+          expect(xvfb.stop).to.be.calledOnce
+
           logger.error(err)
 
-          snapshot(ctx.stdout.toString())
+          snapshot(normalize(ctx.stdout.toString()))
         })
       })
     })
