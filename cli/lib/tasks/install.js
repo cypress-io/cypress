@@ -2,6 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const chalk = require('chalk')
 const Listr = require('listr')
+const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const Promise = require('bluebird')
@@ -87,7 +88,7 @@ const downloadAndUnzip = (version) => {
   // the verbose renderer else use
   // the default
   const rendererOptions = {
-    renderer: util.isCi() ? 'verbose' : 'default',
+    renderer: util.isCi() ? verbose : 'default',
   }
 
   const tasks = new Listr([
@@ -210,7 +211,7 @@ const start = (options = {}) => {
     }
 
     logger.warn(stripIndent`
-      Installed version (${chalk.cyan(installedVersion)}) does not match needed version (${chalk.cyan(needVersion)}).
+      Installed version ${chalk.cyan(`(${installedVersion})`)} does not match needed version ${chalk.cyan(`(${needVersion})`)}.
     `)
 
     logger.log()

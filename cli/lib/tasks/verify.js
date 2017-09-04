@@ -3,6 +3,7 @@ const cp = require('child_process')
 const chalk = require('chalk')
 const Listr = require('listr')
 const debug = require('debug')('cypress:cli')
+const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
 
@@ -140,7 +141,7 @@ function testBinary (version) {
   // the verbose renderer else use
   // the default
   const rendererOptions = {
-    renderer: util.isCi() ? 'verbose' : 'default',
+    renderer: util.isCi() ? verbose : 'default',
   }
 
 

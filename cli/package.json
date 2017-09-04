@@ -22,6 +22,7 @@
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
   "dependencies": {
+    "@cypress/listr-verbose-renderer": "0.4.1",
     "@cypress/xvfb": "1.0.4",
     "bluebird": "3.5.0",
     "chalk": "2.1.0",
