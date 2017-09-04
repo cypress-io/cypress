@@ -20,9 +20,12 @@ const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
+const replaceRe = /(.+REPLACER)/g
 
 const normalize = (str) => {
-  return str.replace('[90m→ Cypress Version: 1.2.3[39m', '')
+  return str
+  .replace('[90m→ Cypress Version: 1.2.3[39m', 'REPLACER')
+  .replace(replaceRe, '')
 }
 
 context('.verify', function () {
@@ -282,7 +285,7 @@ context('.verify', function () {
 
           logger.error(err)
 
-          snapshot('xfvb fails', normalize(ctx.stdout.toString()))
+          snapshot('xvfb fails', normalize(ctx.stdout.toString()))
         })
       })
     })
