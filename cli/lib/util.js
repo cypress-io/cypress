@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
+const chalk = require('chalk')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', '..', 'package.json'))
 const logger = require('./logger')
@@ -25,6 +26,17 @@ module.exports = {
     logger.error(err.message)
 
     process.exit(1)
+  },
+
+  titleize (...args) {
+    // prepend first arg with space
+    // and pad so that all messages line up
+    args[0] = _.padEnd(` ${args[0]}`, 24)
+
+    // get rid of any falsy values
+    args = _.compact(args)
+
+    return chalk.blue(...args)
   },
 
   calculateEta (percent, elapsed) {

@@ -69,17 +69,6 @@ const downloadAndUnzip = (version) => {
   logger.log(chalk.yellow(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`))
   logger.log()
 
-  const titleize = (...args) => {
-    // prepend first arg with space
-    // and pad so that all messages line up
-    args[0] = _.padEnd(` ${args[0]}`, 24)
-
-    // get rid of any falsy values
-    args = _.compact(args)
-
-    return chalk.blue(...args)
-  }
-
   const progessify = (title, task) => {
     // return higher order function
     return (percentComplete, remaining) => {
@@ -88,13 +77,13 @@ const downloadAndUnzip = (version) => {
       // pluralize seconds remaining
       remaining = chalk.gray(`${remaining}s`)
 
-      task.title = titleize(title, percentComplete, remaining)
+      task.title = util.titleize(title, percentComplete, remaining)
     }
   }
 
   const tasks = new Listr([
     {
-      title: titleize('Downloading Cypress'),
+      title: util.titleize('Downloading Cypress'),
       task: (ctx, task) => {
         // as our download progresses indicate the status
         options.onProgress = progessify('Downloading Cypress', task)
@@ -107,7 +96,7 @@ const downloadAndUnzip = (version) => {
       },
     },
     {
-      title: titleize('Unzipping Cypress'),
+      title: util.titleize('Unzipping Cypress'),
       task: (ctx, task) => {
         // as our unzip progresses indicate the status
         options.downloadDestination = ctx.downloadDestination
@@ -117,7 +106,7 @@ const downloadAndUnzip = (version) => {
       },
     },
     {
-      title: titleize('Finishing Installation'),
+      title: util.titleize('Finishing Installation'),
       task: (ctx, task) => {
         const { downloadDestination } = options
 
@@ -127,7 +116,7 @@ const downloadAndUnzip = (version) => {
         .then(() => {
           const dir = info.getPathToUserExecutableDir()
 
-          task.title = titleize('Finishing Installation', chalk.gray(dir))
+          task.title = util.titleize('Finishing Installation', chalk.gray(dir))
 
           return info.writeInstalledVersion(version)
         })

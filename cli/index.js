@@ -18,7 +18,7 @@ switch (args.exec) {
     debug('verifying Cypress')
 
     require('./lib/tasks/verify')
-    .verify({ force: args.force }) // always force verification
+    .verify({ force: true }) // always force verification
     .catch(util.logErrorExit1)
 
     break
