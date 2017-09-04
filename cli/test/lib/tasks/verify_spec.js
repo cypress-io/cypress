@@ -301,5 +301,25 @@ context('.verify', function () {
         })
       })
     })
+
+    describe('when running in CI', function () {
+      beforeEach(function () {
+        this.sandbox.stub(util, 'isCi').returns(true)
+
+        return info.writeInfoFileContents({
+          version: packageVersion,
+        })
+        .then(() => {
+          return verify.start({ force: true })
+        })
+      })
+
+      it('uses verbose renderer', function () {
+        snapshot(
+          'verifying in ci',
+          util.stripDates(this.stdout.toString())
+        )
+      })
+    })
   })
 })

@@ -88,3 +88,19 @@ You should probably run these commands:
   - npm install --save-dev cypress
 `
 
+exports['installing in ci 1'] = `Installed version (x.x.x) does not match needed version (1.2.3).
+
+Installing Cypress (version: 1.2.3)
+
+[?25l[2m[xx:xx:xx][22m  Downloading Cypress     [started]
+[2m[xx:xx:xx][22m  Downloading Cypress     [completed]
+[2m[xx:xx:xx][22m  Unzipping Cypress       [started]
+[2m[xx:xx:xx][22m  Unzipping Cypress       [completed]
+[2m[xx:xx:xx][22m  Finishing Installation  [started]
+[2m[xx:xx:xx][22m  Finishing Installation  [completed]
+[?25h
+You can now open Cypress by running: node_modules/.bin/cypress open
+
+https://on.cypress.io/installing-cypress
+`
+

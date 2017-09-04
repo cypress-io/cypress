@@ -67,7 +67,7 @@ const downloadAndUnzip = (version) => {
   logger.log(chalk.yellow(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`))
   logger.log()
 
-  const progessify = (title, task) => {
+  const progessify = (task, title) => {
     // return higher order function
     return (percentComplete, remaining) => {
       percentComplete = chalk.white(` ${percentComplete}%`)
@@ -79,20 +79,29 @@ const downloadAndUnzip = (version) => {
     }
   }
 
+  // if we are running in CI then use
+  // the verbose renderer else use
+  // the default
+  const rendererOptions = {
+    renderer: util.isCi() ? 'verbose' : 'default',
+  }
+
   const tasks = new Listr([
     {
       title: util.titleize('Downloading Cypress'),
       task: (ctx, task) => {
         // as our download progresses indicate the status
-        options.onProgress = progessify('Downloading Cypress', task)
+        options.onProgress = progessify(task, 'Downloading Cypress')
 
         return download.start(options)
         .then((downloadDestination) => {
           // save the download destination for unzipping
           ctx.downloadDestination = downloadDestination
 
-          task.title = util.titleize(
-            chalk.green('Downloaded Cypress')
+          util.setTaskTitle(
+            task,
+            util.titleize(chalk.green('Downloaded Cypress')),
+            rendererOptions.renderer
           )
         })
       },
@@ -102,12 +111,14 @@ const downloadAndUnzip = (version) => {
       task: (ctx, task) => {
         // as our unzip progresses indicate the status
         options.downloadDestination = ctx.downloadDestination
-        options.onProgress = progessify('Unzipping Cypress', task)
+        options.onProgress = progessify(task, 'Unzipping Cypress')
 
         return unzip.start(options)
         .then(() => {
-          task.title = util.titleize(
-            chalk.green('Unzipped Cypress')
+          util.setTaskTitle(
+            task,
+            util.titleize(chalk.green('Unzipped Cypress')),
+            rendererOptions.renderer
           )
         })
       },
@@ -123,13 +134,17 @@ const downloadAndUnzip = (version) => {
         .then(() => {
           const dir = info.getPathToUserExecutableDir()
 
-          task.title = util.titleize(chalk.green('Finished Installation'), chalk.gray(dir))
+          util.setTaskTitle(
+            task,
+            util.titleize(chalk.green('Finished Installation'), chalk.gray(dir)),
+            rendererOptions.renderer
+          )
 
           return info.writeInstalledVersion(version)
         })
       },
     },
-  ])
+  ], rendererOptions)
 
   // start the tasks!
   return tasks.run()

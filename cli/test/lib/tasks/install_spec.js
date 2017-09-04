@@ -213,5 +213,22 @@ describe('install', function () {
         snapshot('warning installing as global', this.stdout.toString())
       })
     })
+
+    describe('when running in CI', function () {
+      beforeEach(function () {
+        this.sandbox.stub(util, 'isCi').returns(true)
+
+        info.getInstalledVersion.resolves('x.x.x')
+
+        return install.start()
+      })
+
+      it('uses verbose renderer', function () {
+        snapshot(
+          'installing in ci',
+          util.stripDates(this.stdout.toString())
+        )
+      })
+    })
   })
 })

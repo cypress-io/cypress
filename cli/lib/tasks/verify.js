@@ -136,6 +136,14 @@ function testBinary (version) {
 
   logger.log()
 
+  // if we are running in CI then use
+  // the verbose renderer else use
+  // the default
+  const rendererOptions = {
+    renderer: util.isCi() ? 'verbose' : 'default',
+  }
+
+
   const tasks = new Listr([
     {
       title: util.titleize('Verifying Cypress can run', chalk.gray(dir)),
@@ -152,16 +160,20 @@ function testBinary (version) {
           return writeVerifiedVersion(version)
         })
         .then(() => {
-          task.title = util.titleize(
-            chalk.green('Verified Cypress!'),
-            chalk.gray(dir)
+          util.setTaskTitle(
+            task,
+            util.titleize(
+              chalk.green('Verified Cypress!'),
+              chalk.gray(dir)
+            ),
+            rendererOptions.renderer
           )
         })
         .catch({ isXvfbError: true }, throwFormErrorText(errors.missingXvfb))
         .catch({ isVerificationError: true }, throwFormErrorText(errors.missingDependency))
       },
     },
-  ])
+  ], rendererOptions)
 
   return tasks.run()
 }

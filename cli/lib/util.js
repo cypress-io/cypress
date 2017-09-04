@@ -1,11 +1,18 @@
 const _ = require('lodash')
 const path = require('path')
+const isCi = require('is-ci')
 const chalk = require('chalk')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 
+const datesRe = /(\d+:\d+:\d+)/g
+
 module.exports = {
+  isCi () {
+    return isCi
+  },
+
   cwd () {
     return process.cwd()
   },
@@ -52,6 +59,17 @@ module.exports = {
   secsRemaining (eta) {
     // calculate the seconds reminaing with no decimal places
     return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
+  },
+
+  stripDates (str) {
+    return str.replace(datesRe, 'xx:xx:xx')
+  },
+
+  setTaskTitle (task, title, renderer) {
+    // only update the renderer title when not running in CI
+    if (renderer === 'default') {
+      task.title = title
+    }
   },
 
   isInstalledGlobally () {
