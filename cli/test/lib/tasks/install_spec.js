@@ -66,7 +66,7 @@ describe('install', function () {
             version,
           })
 
-          snapshot(this.stdout.toString())
+          snapshot('specify version in env vars', this.stdout.toString())
         })
       })
 
@@ -98,7 +98,7 @@ describe('install', function () {
       it('logs noop message', function () {
         expect(download.start).not.to.be.called
 
-        snapshot(this.stdout.toString())
+        snapshot('version already installed', this.stdout.toString())
       })
     })
 
@@ -118,7 +118,7 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot(this.stdout.toString())
+        snapshot('continues installing on failure', this.stdout.toString())
       })
     })
 
@@ -143,7 +143,7 @@ describe('install', function () {
         // cleans up the zip file
         expect(fs.removeAsync).to.be.calledWith(downloadDestination)
 
-        snapshot(this.stdout.toString())
+        snapshot('installs without existing installation', this.stdout.toString())
       })
     })
 
@@ -163,7 +163,10 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot(this.stdout.toString())
+        snapshot(
+          'installed version does not match needed version',
+          this.stdout.toString()
+        )
       })
     })
 
@@ -185,7 +188,7 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot(this.stdout.toString())
+        snapshot('forcing true always installs', this.stdout.toString())
       })
     })
 
@@ -207,7 +210,7 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot(this.stdout.toString())
+        snapshot('warning installing as global', this.stdout.toString())
       })
     })
   })
