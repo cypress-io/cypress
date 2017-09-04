@@ -73,7 +73,7 @@ context('.verify', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot(ctx.stdout.toString())
+      snapshot('no version of Cypress installed', ctx.stdout.toString())
     })
   })
 
@@ -118,7 +118,9 @@ context('.verify', function () {
       throw new Error('should have caught error')
     })
     .catch(() => {
-      snapshot(ctx.stdout.toString())
+      snapshot(
+        'warning installed version does not match package version', ctx.stdout.toString()
+      )
     })
   })
 
@@ -135,7 +137,7 @@ context('.verify', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot(ctx.stdout.toString())
+      snapshot('executable cannot be found', ctx.stdout.toString())
     })
   })
 
@@ -168,7 +170,7 @@ context('.verify', function () {
         expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        snapshot(ctx.stdout.toString())
+        snapshot('verification with executable', ctx.stdout.toString())
       })
     })
 
@@ -185,7 +187,7 @@ context('.verify', function () {
       .catch((err) => {
         logger.error(err)
 
-        snapshot(normalize(ctx.stdout.toString()))
+        snapshot('fails verifying Cypress', normalize(ctx.stdout.toString()))
 
         return info.getVerifiedVersion()
       })
@@ -218,7 +220,7 @@ context('.verify', function () {
         expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        snapshot(ctx.stdout.toString())
+        snapshot('no existing version verified', ctx.stdout.toString())
       })
     })
 
@@ -239,7 +241,7 @@ context('.verify', function () {
         expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        snapshot(ctx.stdout.toString())
+        snapshot('current version has not been verified', ctx.stdout.toString())
       })
     })
 
@@ -280,7 +282,7 @@ context('.verify', function () {
 
           logger.error(err)
 
-          snapshot(normalize(ctx.stdout.toString()))
+          snapshot('xfvb fails', normalize(ctx.stdout.toString()))
         })
       })
     })

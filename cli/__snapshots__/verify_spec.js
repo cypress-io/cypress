@@ -1,4 +1,4 @@
-exports['.verify logs error and exits when no version of Cypress is installed 1'] = `[31mError: No version of Cypress is installed.[39m
+exports['no version of Cypress installed 1'] = `[31mError: No version of Cypress is installed.[39m
 [31m[39m
 [31mPlease reinstall Cypress by running: [36mcypress install[31m[39m
 [31m----------[39m
@@ -10,13 +10,13 @@ exports['.verify logs error and exits when no version of Cypress is installed 1'
 [31mCypress Version: 1.2.3[39m
 `
 
-exports['.verify logs warning when installed version does not match package version 1'] = `[33mInstalled version [36mbloop[33m does not match the expected package version [36m1.2.3[33m[39m
+exports['warning installed version does not match package version 1'] = `[33mInstalled version [36mbloop[33m does not match the expected package version [36m1.2.3[33m[39m
 [33m[39m
 [33mNote: there is no guarantee these versions will work properly together.[39m
 
 `
 
-exports['.verify logs error and exits when executable cannot be found 1'] = `[31mError: No version of Cypress is installed.[39m
+exports['executable cannot be found 1'] = `[31mError: No version of Cypress is installed.[39m
 [31m[39m
 [31mPlease reinstall Cypress by running: [36mcypress install[31m[39m
 [31m----------[39m
@@ -28,12 +28,12 @@ exports['.verify logs error and exits when executable cannot be found 1'] = `[3
 [31mCypress Version: 1.2.3[39m
 `
 
-exports['.verify with force: true shows full path to executable when verifying 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['verification with executable 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
 [?25h`
 
-exports['.verify with force: true clears verified version from state if verification fails 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['fails verifying Cypress 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [31m✖[39m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m
    
@@ -55,17 +55,17 @@ exports['.verify with force: true clears verified version from state if verifica
 [31mCypress Version: 1.2.3[39m
 `
 
-exports['.verify smoke test logs and runs when no version has been verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['no existing version verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
 [?25h`
 
-exports['.verify smoke test logs and runs when current version has not been verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['current version has not been verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
 [?25h`
 
-exports['.verify smoke test on linux logs error and exits when starting xvfb fails 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['xfvb fails 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [31m✖[39m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m
    
