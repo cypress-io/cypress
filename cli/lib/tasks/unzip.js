@@ -1,43 +1,60 @@
+const _ = require('lodash')
 const cp = require('child_process')
-const extract = require('extract-zip')
 const os = require('os')
+const yauzl = require('yauzl')
+const debug = require('debug')('cypress:cli')
+const extract = require('extract-zip')
 const Promise = require('bluebird')
 const readline = require('readline')
-const yauzl = require('yauzl')
-const { formErrorText, errors } = require('../errors')
-const info = require('./info')
-const logger = require('../logger')
-const debug = require('debug')('cypress:cli')
 
-const fs = Promise.promisifyAll(require('fs-extra'))
+const { throwFormErrorText, errors } = require('../errors')
+const fs = require('../fs')
+const util = require('../util')
+const info = require('./info')
 
 // expose this function for simple testing
-const _unzip = ({ zipDestination, destination, width }) => () => {
-  debug('unzipping %s', zipDestination)
-  debug('into %s', destination)
+const _unzip = (options = {}) => {
+  _.defaults(options, {
+    onProgress: () => {},
+    zipDestination: info.getInstallationDir(),
+  })
 
-  if (!zipDestination) {
+  const { downloadDestination, zipDestination } = options
+
+  debug('unzipping from %s', downloadDestination)
+  debug('into %s', zipDestination)
+
+  if (!downloadDestination) {
     throw new Error('Missing zip filename')
   }
 
   return new Promise((resolve, reject) => {
-    return yauzl.open(zipDestination, (err, zipFile) => {
+    return yauzl.open(downloadDestination, (err, zipFile) => {
       if (err) return reject(err)
 
-      let count = 0
-      const total = Math.floor(zipFile.entryCount / 500)
+      const total = zipFile.entryCount
 
-      const barOptions = {
-        total,
-        width,
+      debug('zipFile entries count', total)
+
+      const started = new Date()
+
+      let percent = 0
+      let count = 0
+
+      const notify = (percent) => {
+        const elapsed = new Date() - started
+
+        const eta = util.calculateEta(percent, elapsed)
+
+        options.onProgress(percent, util.secsRemaining(eta))
       }
-      const bar = info.getProgressBar('Unzipping Cypress', barOptions)
 
       const tick = () => {
         count += 1
-        if ((count % 500) === 0) {
-          return bar.tick(1)
-        }
+
+        percent = ((count / total) * 100).toFixed(0)
+
+        return notify(percent)
       }
 
       const unzipWithNode = () => {
@@ -48,11 +65,11 @@ const _unzip = ({ zipDestination, destination, width }) => () => {
         }
 
         const obj = {
-          dir: destination,
+          dir: zipDestination,
           onEntry: tick,
         }
 
-        return extract(zipDestination, obj, endFn)
+        return extract(downloadDestination, obj, endFn)
       }
 
       //# we attempt to first unzip with the native osx
@@ -63,22 +80,23 @@ const _unzip = ({ zipDestination, destination, width }) => () => {
       const unzipWithOsx = () => {
         const copyingFileRe = /^copying file/
 
-        const sp = cp.spawn('ditto', ['-xkV', zipDestination, destination])
+        const sp = cp.spawn('ditto', ['-xkV', downloadDestination, zipDestination])
         sp.on('error', () =>
           // f-it just unzip with node
           unzipWithNode()
         )
 
-        sp.on('exit', (code) => {
+        sp.on('close', (code) => {
           if (code === 0) {
-            //# make sure we get to 100% on the progress bar
-            //# because reading in lines is not really accurate
-            bar.tick(100)
+            // make sure we get to 100% on the progress bar
+            // because reading in lines is not really accurate
+            percent = 100
+            notify(percent)
 
             return resolve()
-          } else {
-            return unzipWithNode()
           }
+
+          return unzipWithNode()
         })
 
         return readline.createInterface({
@@ -104,25 +122,22 @@ const _unzip = ({ zipDestination, destination, width }) => () => {
 }
 
 const start = (options = {}) => {
-  //# blow away the executable if its found
-  return fs.statAsync(options.executable)
-  .then(() => fs.removeAsync(options.executable)).then(_unzip(options))
-  .catch(_unzip(options))
-}
+  const dir = info.getPathToUserExecutableDir()
 
-const cleanup = (options) => {
-  debug('removing zip file %s', options.zipDestination)
-  return fs.removeAsync(options.zipDestination)
-}
+  debug('removing existing unzipped directory', dir)
 
-const logErr = (err) => {
-  return formErrorText(errors.failedToUnZip, err)
-    .then(logger.log)
+  // blow away the executable if its found
+  // and dont worry about errors from remove
+  return fs.removeAsync(dir)
+  .catchReturn(null)
+  .then(() => {
+    return _unzip(options)
+  })
+  .catch(throwFormErrorText(errors.failedToUnZip))
 }
 
 module.exports = {
-  cleanup,
-  logErr,
-  start,
   _unzip,
+
+  start,
 }

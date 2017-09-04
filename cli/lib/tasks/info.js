@@ -27,8 +27,8 @@ const getInfoFilePath = () => {
 
 const getInstalledVersion = () => {
   return ensureFileInfoContents()
-    .tap(debug)
-    .get('version')
+  .tap(debug)
+  .get('version')
 }
 
 const getVerifiedVersion = () => {
@@ -40,13 +40,15 @@ const ensureInstallationDir = () => {
 }
 
 const clearVersionState = () => {
-  return ensureFileInfoContents().then((contents) => {
+  return ensureFileInfoContents()
+  .then((contents) => {
     return writeInfoFileContents(_.omit(contents, 'version', 'verifiedVersion'))
   })
 }
 
 const writeInstalledVersion = (version) => {
-  return ensureFileInfoContents().then((contents) => {
+  return ensureFileInfoContents()
+  .then((contents) => {
     return writeInfoFileContents(_.extend(contents, { version }))
   })
 }
@@ -55,7 +57,7 @@ const getPathToExecutable = () => {
   return path.join(getInstallationDir(), getPlatformExecutable())
 }
 
-const getPathToUserExecutable = () => {
+const getPathToUserExecutableDir = () => {
   return path.join(getInstallationDir(), getPlatformExecutable().split('/')[0])
 }
 
@@ -71,16 +73,20 @@ const ensureFileInfoContents = () => {
 }
 
 const writeInfoFileContents = (contents) => {
-  return fs.outputJsonAsync(getInfoFilePath(), contents)
+  return fs.outputJsonAsync(getInfoFilePath(), contents, {
+    spaces: 2,
+  })
 }
 
 module.exports = {
   clearVersionState,
+  writeInfoFileContents,
   ensureInstallationDir,
+  ensureFileInfoContents,
   getVerifiedVersion,
   getInstallationDir,
   getInstalledVersion,
-  getPathToUserExecutable,
+  getPathToUserExecutableDir,
   getPathToExecutable,
   writeInstalledVersion,
 }

@@ -80,7 +80,7 @@ module.exports = {
       .command('install')
       .description('Installs the Cypress executable matching this package\'s version')
       .action(() => {
-        require('./tasks')
+        require('./tasks/install')
         .install({ force: true })
         .catch(util.exit1)
       })
@@ -89,7 +89,7 @@ module.exports = {
       .command('verify')
       .description('Verifies that Cypress is installed correctly and executable')
       .action(() => {
-        require('./tasks')
+        require('./tasks/verify')
         .verify({ force: true })
         .catch(util.exit1)
       })

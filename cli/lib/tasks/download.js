@@ -1,4 +1,3 @@
-const chalk = require('chalk')
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
@@ -7,16 +6,12 @@ const Promise = require('bluebird')
 const request = require('request')
 const url = require('url')
 const debug = require('debug')('cypress:cli')
-const { formErrorText, errors } = require('../errors')
 const { stripIndent } = require('common-tags')
-const R = require('ramda')
-const pkg = require('../../package.json')
 
+const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
-const logger = require('../logger')
-const unzip = require('./unzip')
-const downloadUtils = require('./utils')
 const util = require('../util')
+const info = require('./info')
 
 const baseUrl = 'https://download.cypress.io/'
 
@@ -40,25 +35,29 @@ const getUrl = (version) => {
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
+const statusMessage = (err) =>
+  err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
+
+const prettyDownloadErr = (err, version) => {
+  const msg = stripIndent`
+    URL: ${getUrl(version)}
+    Server response: ${statusMessage(err)}
+  `
+  debug(msg)
+
+  return throwFormErrorText(errors.failedDownload(new Error(msg)))
+}
+
 const download = (options = {}) => {
   if (!options.version) {
     debug('empty Cypress version to download')
   }
 
   return new Promise((resolve, reject) => {
-    const barOptions = R.pick(['total', 'width'], options)
-    const bar = downloadUtils.getProgressBar('Downloading Cypress', barOptions)
+    const url = getUrl(options.version)
 
-    // nuke the bar on error
-    const terminate = (err) => {
-      debug('problem downloading: %s', err.message)
-      bar.clear = true
-      bar.terminate()
-      reject(err)
-    }
-
-    const url = getUrl(options.cypressVersion)
-    debug('Downloading from %s', url)
+    debug('Downloading from', url)
+    debug('Saving file to', options.downloadDestination)
 
     const req = request({
       url,
@@ -76,130 +75,71 @@ const download = (options = {}) => {
       },
     })
 
-    let percent = options.percent
+    // closure
+    let started = null
 
     progress(req, {
       throttle: options.throttle,
     })
     .on('response', (response) => {
+      // start counting now once we've gotten
+      // response headers
+      started = new Date
+
       // if our status code does not start with 200
       if (!(/^2/.test(response.statusCode))) {
         debug('response code %d', response.statusCode)
+
         const err = new Error(stripIndent`
-          Could not download Cypress binary.
-          response code: ${response.statusCode}
-          response message: ${response.statusMessage}
+          Failing downloading the Cypress binary.
+          Response code: ${response.statusCode}
+          Response message: ${response.statusMessage}
         `)
-        terminate(err)
+
+        reject(err)
       }
     })
-    .on('error', terminate)
+
+    .on('error', reject)
+
     .on('progress', (state) => {
-      //// always subtract the previous percent amount since our progress
-      //// notifications are only the total progress, and our progress bar
-      //// expects the delta
-      const current = state.percent - percent
-      percent = state.percent
+      // total time we've elapsed
+      // starting on our first progress notification
+      const elapsed = new Date() - started
 
-      bar.tick(current)
+      const eta = util.calculateEta(state.percent, elapsed)
+
+      // send up our percent and seconds remaining
+      options.onProgress(state.percent, util.secsRemaining(eta))
     })
-    .pipe(fs.createWriteStream(options.zipDestination))
+
+    // save this download here
+    .pipe(fs.createWriteStream(options.downloadDestination))
+
     .on('finish', () => {
-      // make sure we get to 100% on the progress bar
-      const diff = options.total - percent
-      debug('download finish, options.total %d percent %d', options.total, percent)
-      if (diff) {
-        bar.tick(diff)
-      }
+      debug('downloading finished')
 
-      resolve(options)
+      resolve(options.downloadDestination)
     })
-  })
-}
-
-const statusMessage = (err) =>
-  err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
-
-const printAndFail = (text) => {
-  logger.log(text)
-  util.exit(1)
-}
-
-const logErr = (options) => (err) => {
-  debug('logging download error')
-  const msg = stripIndent`
-    URL: ${getUrl(options.version)}
-    Server response: ${statusMessage(err)}
-  `
-  debug(msg)
-  return formErrorText(errors.failedDownload, new Error(msg))
-    .then(printAndFail)
-}
-
-const truePwd = () => {
-  const cwd = util.cwd()
-  return _.endsWith(cwd, pkg.name) ? path.join('..', '..') : cwd
-}
-
-const logFinish = (options) => {
-  const currDirectory = truePwd()
-  debug('Current caller directory %s', currDirectory)
-  const relativeExecutable = path.relative(currDirectory, options.executable)
-
-  logger.log(
-    chalk.white('  -'),
-    chalk.blue('Finished Installing'),
-    chalk.green(relativeExecutable),
-    chalk.gray(`(version: ${options.version})`)
-  )
-}
-
-// Why is download displaying instructions how to run things?
-const displayOpeningApp = () => {
-  //// TODO: this isn't necessarily true if installed locally
-  logger.log(
-    chalk.yellow('  You can now open Cypress by running:'),
-    chalk.cyan('cypress open')
-  )
-}
-
-const finish = (options) => {
-  return unzip.cleanup(options)
-  .then(() => {
-    logFinish(options)
-    if (options.displayOpen) {
-      displayOpeningApp()
-    }
-    return downloadUtils.writeInstalledVersion(options.version)
   })
 }
 
 const start = (options) => {
   _.defaults(options, {
-    displayOpen: true,
     version: null,
-    cypressVersion: null,
-    percent: 0,
-    current: 0,
-    total: 100,
-    width: 30,
     throttle: 100,
-    zipDestination: path.join(downloadUtils.getInstallationDir(), 'cypress.zip'),
-    destination: downloadUtils.getInstallationDir(),
-    executable: downloadUtils.getPathToUserExecutable(),
+    onProgress: () => {},
+    downloadDestination: path.join(info.getInstallationDir(), 'cypress.zip'),
   })
-  debug('zip destination %s', options.zipDestination)
 
-  return downloadUtils.ensureInstallationDir()
-  .then(() => download(options))
-  .catch(logErr(options))
-  // Why is download also unzipping? It should only download
-  .then(unzip.start)
-  .catch((err) => {
-    unzip.logErr(err)
-    util.exit(1)
+  // make sure our 'dist' installation dir exists
+  return info.ensureInstallationDir()
+  .then(() => {
+    return download(options)
   })
-  .then(() => finish(options))
+  .catch((err) => {
+    return prettyDownloadErr(err, options.version)
+  })
 }
 
 module.exports = {
