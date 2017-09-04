@@ -23,14 +23,18 @@ describe('exec spawn', function () {
   context('.start', function () {
     it('passes args + options to spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-      return spawn.start('--foo', { foo: 'bar' }).then(() => {
+
+      return spawn.start('--foo', { foo: 'bar' })
+      .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', ['--foo'], { foo: 'bar' })
       })
     })
 
     it('starts xvfb when needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-      return spawn.start('--foo').then(() => {
+
+      return spawn.start('--foo')
+      .then(() => {
         expect(xvfb.start).to.be.calledOnce
       })
     })
@@ -39,7 +43,9 @@ describe('exec spawn', function () {
       xvfb.isNeeded.returns(false)
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-      return spawn.start('--foo').then(() => {
+
+      return spawn.start('--foo')
+      .then(() => {
         expect(xvfb.start).not.to.be.called
       })
     })
@@ -47,7 +53,9 @@ describe('exec spawn', function () {
     it('stops xvfb when spawn closes', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       this.spawnedProcess.on.withArgs('close').yields()
-      return spawn.start('--foo').then(() => {
+
+      return spawn.start('--foo')
+      .then(() => {
         expect(xvfb.stop).to.be.calledOnce
       })
     })
@@ -75,14 +83,18 @@ describe('exec spawn', function () {
 
     it('unrefs if options.detached is true', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-      return spawn.start(null, { detached: true }).then(() => {
+
+      return spawn.start(null, { detached: true })
+      .then(() => {
         expect(this.spawnedProcess.unref).to.be.calledOnce
       })
     })
 
     it('does not unref by default', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-      return spawn.start().then(() => {
+
+      return spawn.start()
+      .then(() => {
         expect(this.spawnedProcess.unref).not.to.be.called
       })
     })
