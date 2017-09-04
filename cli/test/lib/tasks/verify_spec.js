@@ -1,69 +1,114 @@
+require('../../spec_helper')
+
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
 const EE = require('events').EventEmitter
 const path = require('path')
+const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
 
 const fs = require(`${lib}/fs`)
+const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 const xvfb = require(`${lib}/exec/xvfb`)
 const info = require(`${lib}/tasks/info`)
 const verify = require(`${lib}/tasks/verify`)
-const packageVersion = require(`${lib}/util`).pkgVersion()
 
-const distDir = path.join(__dirname, '../../dist')
-const infoFilePath = path.join(distDir, 'info.json')
+const stdout = require('../../support/stdout')
+
+const packageVersion = '1.2.3'
+const executablePath = '/path/to/executable'
+const installationDir = info.getInstallationDir()
+const infoFilePath = info.getInfoFilePath()
 
 context('.verify', function () {
   beforeEach(function () {
+    this.stdout = stdout.capture()
+    this.io = new EE()
     this.sandbox.stub(os, 'platform').returns('darwin')
-    this.stdout = new EE()
+    this.sandbox.stub(os, 'release').returns('test release')
+    this.ensureEmptyInstallationDir = () => {
+      return fs.removeAsync(installationDir)
+      .then(() => {
+        return info.ensureInstallationDir()
+      })
+    }
     this.spawnedProcess = _.extend(new EE(), {
       unref: this.sandbox.stub(),
       stderr: new EE(),
-      stdout: this.stdout,
+      stdout: this.io,
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
+    this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
+    this.sandbox.stub(info, 'getPathToExecutable').returns(executablePath)
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
+    this.sandbox.stub(Promise, 'delay').resolves()
     this.sandbox.stub(this.spawnedProcess, 'on')
     this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
     return this.ensureEmptyInstallationDir()
   })
 
+  afterEach(function () {
+    stdout.restore()
+  })
+
   it('logs error and exits when no version of Cypress is installed', function () {
-    return fs.outputJsonAsync(infoFilePath, {})
+    const ctx = this
+
+    return info.writeInfoFileContents({})
     .then(() => {
       return verify.start()
     })
     .then(() => {
-      snapshot(logger.print())
-      expect(process.exit).to.be.calledWith(1)
+      throw new Error('should have caught error')
+    })
+    .catch((err) => {
+      logger.error(err)
+
+      snapshot(ctx.stdout.toString())
     })
   })
 
   it('logs warning when installed version does not match package version', function () {
+    const ctx = this
+
+    this.sandbox.stub(fs, 'statAsync')
+    .callThrough()
+    .withArgs(executablePath)
+    .resolves()
+
+    // force this to throw to short circuit actually running smoke test
+    this.sandbox.stub(info, 'getVerifiedVersion').rejects(new Error)
+
     return info.writeInstalledVersion('bloop')
     .then(() => {
       return verify.start()
     })
     .then(() => {
-      snapshot(logger.print())
+      throw new Error('should have caught error')
+    })
+    .catch(() => {
+      snapshot(ctx.stdout.toString())
     })
   })
 
   it('logs error and exits when executable cannot be found', function () {
-    this.sandbox.stub(fs, 'statAsync').rejects()
+    const ctx = this
 
     return info.writeInstalledVersion(packageVersion)
     .then(() => {
       return verify.start()
     })
     .then(() => {
-      snapshot(logger.print())
-      expect(process.exit).to.be.calledWith(1)
+      throw new Error('should have caught error')
+    })
+    .catch((err) => {
+      logger.error(err)
+
+      snapshot(ctx.stdout.toString())
     })
   })
 
@@ -71,7 +116,7 @@ context('.verify', function () {
     beforeEach(function () {
       this.sandbox.stub(fs, 'statAsync').resolves()
       this.sandbox.stub(_, 'random').returns('222')
-      this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
+      this.sandbox.stub(this.io, 'on').yieldsAsync('222')
       return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
     })
 
@@ -109,7 +154,7 @@ context('.verify', function () {
     beforeEach(function () {
       this.sandbox.stub(fs, 'statAsync').resolves()
       this.sandbox.stub(_, 'random').returns('222')
-      this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
+      this.sandbox.stub(this.io, 'on').yieldsAsync('222')
     })
 
     it('logs and runs when no version has been verified', function () {

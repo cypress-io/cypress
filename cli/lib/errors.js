@@ -27,7 +27,7 @@ const failedToUnzip = {
 }
 
 const missingApp = {
-  description: 'No version of Cypress executable is installed.',
+  description: 'No version of Cypress is installed.',
   solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
