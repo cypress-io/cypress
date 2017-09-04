@@ -284,9 +284,12 @@ context('.verify', function () {
         .catch((err) => {
           expect(xvfb.stop).to.be.calledOnce
 
-          logger.error(err)
+          return Promise.delay(1000)
+          .then(() => {
+            logger.error(err)
 
-          snapshot('xvfb fails', normalize(ctx.stdout.toString()))
+            snapshot('xvfb fails', normalize(ctx.stdout.toString()))
+          })
         })
       })
     })
