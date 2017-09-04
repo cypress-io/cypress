@@ -1,6 +1,9 @@
 const R = require('ramda')
 const chalk = require('chalk')
 
+// TODO: if this isnt the first log
+// then push a \n first above it
+// so messages are separated
 let logs = []
 
 const error = (...messages) => {
