@@ -1,12 +1,17 @@
 const os = require('os')
+const chalk = require('chalk')
 const Promise = require('bluebird')
 const getos = Promise.promisify(require('getos'))
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
 
+const util = require('./util')
+
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
+
+const pkgVersion = util.pkgVersion()
 
 // common errors Cypress application can encounter
 const failedDownload = {
@@ -24,56 +29,56 @@ const failedToUnzip = {
 }
 
 const missingApp = {
-  description: 'No version of Cypress executable installed',
+  description: 'No version of Cypress executable is installed.',
   solution: stripIndent`
-    Please reinstall Cypress and run the app again.
-    If the problem persists, search for an existing issue or open a GitHub issue at
-
-      ${issuesUrl}
+    \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
 }
 
 const missingXvfb = {
-  description: 'Looks like your system is missing a must have dependency: XVFB',
+  description: 'Your system is missing the dependency: XVFB',
   solution: stripIndent`
     Install XVFB and run Cypress again.
+
     Our CI documentation provides more information how to configure dependencies
+  `,
+  footer: stripIndent`
+    Read our doc on CI dependencies for more information:
 
       ${requiredDependenciesUrl}
-  `,
+    `,
 }
 
 const missingDependency = {
-  description: 'Problem running Cypress application',
+  description: 'We could not run Cypress.',
   // this message is too Linux specific
   solution: stripIndent`
     This is usually caused by a missing library or dependency.
+
     The error below should indicate which dependency is missing.
-    Read our doc on CI dependencies for more information:
 
       ${requiredDependenciesUrl}
   `,
 }
 
 const versionMismatch = {
-  description: 'Installed version does not match package version',
+  description: 'Installed version does not match package version.',
   solution: 'Install Cypress and verify app again',
 }
 
 const unexpected = {
-  description: 'An unexpected error occurred while verifying the Cypress executable',
+  description: 'An unexpected error occurred while verifying the Cypress executable.',
   solution: stripIndent`
-    Please search Cypress documentation for possible solutions
+    Please search Cypress documentation for possible solutions:
 
       ${docsUrl}
 
-    Find if there is a GitHub issue describing this crash
+    Check if there is a GitHub issue describing this crash:
 
       ${issuesUrl}
 
-    Consider opening a new issue, if you are the first to discover this
+    Consider opening a new issue.
   `,
-  printStack: true,
 }
 
 const getOsVersion = () => {
@@ -89,8 +94,8 @@ const getOsVersion = () => {
 function getPlatformInfo () {
   return getOsVersion()
   .then((version) => stripIndent`
-    Platform: ${os.platform()}
-    Version: ${version}
+    Platform: ${os.platform()} (${version})
+    Cypress Version: ${pkgVersion}
   `)
 }
 
@@ -99,39 +104,70 @@ function addPlatformInformation (info) {
   .then((platform) => merge(info, { platform }))
 }
 
-function formError (info, error) {
-  return addPlatformInformation(info)
-  .then((info) => merge(error, info))
-}
-
-function formErrorText (info, error) {
+function formErrorText (info, msg) {
   const hr = '----------'
-  return formError(info, error)
-  .then((info) => stripIndents`
-    ${hr}
-    ${info.description}
-    ${info.solution}
-    ${hr}
 
-    ${info.message}
-    ${info.printStack ? info.stack : ''}
-    ${hr}
-    ${info.platform}
-  `)
+  return addPlatformInformation(info)
+  .then((obj) => {
+    const formatted = []
+
+    function add (msg) {
+      formatted.push(
+        stripIndents`${msg}`
+      )
+    }
+
+    add(`
+      ${obj.description}
+
+      ${obj.solution}
+
+    `)
+
+    if (msg) {
+      add(`
+        ${hr}
+
+        ${msg}
+
+      `)
+    }
+
+    add(`
+      ${hr}
+
+      ${obj.platform}
+    `)
+
+    if (obj.footer) {
+      add(`
+
+        ${hr}
+
+        ${obj.footer}
+      `)
+    }
+
+    return formatted.join('\n')
+  })
 }
 
 const raise = (text) => {
-  throw new Error(text)
+  const err = new Error(text)
+  err.known = true
+  throw err
 }
 
-const throwDetailedError = (info) => (error) =>
-  formErrorText(info, error)
+const throwFormErrorText = (info) => (msg) => {
+  return formErrorText(info, msg)
   .then(raise)
+}
 
 module.exports = {
-  formError,
+  raise,
+  // formError,
   formErrorText,
-  throwDetailedError,
+  throwFormErrorText,
   errors: {
     missingXvfb,
     missingApp,

@@ -5,7 +5,7 @@ const debug = require('debug')('cypress:cli')
 
 const downloadUtils = require('../download/utils')
 const xvfb = require('./xvfb')
-const { throwDetailedError, errors } = require('../errors')
+const { throwFormErrorText, errors } = require('../errors')
 
 module.exports = {
   start (args, options = {}) {
@@ -23,7 +23,7 @@ module.exports = {
         debug('spawn args %j', args)
 
         const child = cp.spawn(cypressPath, args, options)
-        child.on('exit', resolve)
+        child.on('close', resolve)
         child.on('error', reject)
 
         if (options.detached) {
@@ -33,7 +33,7 @@ module.exports = {
     }
 
     const userFriendlySpawn = () =>
-      spawn().catch(throwDetailedError(errors.unexpected))
+      spawn().catch(throwFormErrorText(errors.unexpected))
 
     const needsXvfb = xvfb.isNeeded()
     debug('needs XVFB?', needsXvfb)

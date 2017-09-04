@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:cli')
-const downloadUtils = require('../download/utils')
 const spawn = require('./spawn')
+const { verify } = require('../tasks/verify')
 
 const processRunOptions = (options = {}) => {
   const args = ['--run-project', options.project]
@@ -86,6 +86,6 @@ module.exports = {
       project: process.cwd(),
     })
 
-    return downloadUtils.verify().then(run(options))
+    return verify().then(run(options))
   },
 }
