@@ -1,14 +1,15 @@
 require('../spec_helper')
 
 const os = require('os')
-const { errors, formError, formErrorText } = require(`${lib}/errors`)
 const snapshot = require('snap-shot-it')
-const { omit } = require('ramda')
+const { errors, formErrorText } = require(`${lib}/errors`)
+const util = require(`${lib}/util`)
 
 describe('errors', function () {
   const { missingXvfb } = errors
 
   beforeEach(function () {
+    this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
     this.sandbox.stub(os, 'platform').returns('test platform')
     this.sandbox.stub(os, 'release').returns('test release')
   })
@@ -17,25 +18,11 @@ describe('errors', function () {
     it('has the following errors', () =>
       snapshot(Object.keys(errors))
     )
-
-    context('#missingXvfb', function () {
-      it('is an error information object', () => {
-        snapshot(missingXvfb)
-      })
-    })
   })
 
-  context('#formError', function () {
-    const withoutStack = omit(['stack'])
-    it('adds platform info to error', () =>
-      // error.stack is too test platform specific
-      snapshot(formError(missingXvfb, withoutStack(new Error('test error'))))
-    )
-  })
-
-  context('#formErrorText', function () {
+  context('.errors.formErrorText', function () {
     it('returns fully formed text message', () =>
-      snapshot(formErrorText(missingXvfb, new Error('test error')))
+      snapshot(formErrorText(missingXvfb))
     )
   })
 })
