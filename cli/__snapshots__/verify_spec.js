@@ -92,3 +92,4 @@ exports['verifying in ci 1'] = `[33mIt looks like this is your first time using
 [?25l[2m[xx:xx:xx][22m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m [started]
 [2m[xx:xx:xx][22m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m [completed]
 [?25h`
+

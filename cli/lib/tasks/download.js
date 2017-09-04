@@ -41,7 +41,7 @@ const statusMessage = (err) =>
 const prettyDownloadErr = (err, version) => {
   const msg = stripIndent`
     URL: ${getUrl(version)}
-    Server response: ${statusMessage(err)}
+    ${statusMessage(err)}
   `
   debug(msg)
 
@@ -91,7 +91,7 @@ const download = (options = {}) => {
         debug('response code %d', response.statusCode)
 
         const err = new Error(stripIndent`
-          Failing downloading the Cypress binary.
+          Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
         `)

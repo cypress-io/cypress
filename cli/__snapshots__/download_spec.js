@@ -4,7 +4,7 @@ exports['download catches download status errors and exits 1'] = `[31mError: Th
 [31m----------[39m
 [31m[39m
 [31mURL: https://download.cypress.io/desktop?os=mac[39m
-[31mServer response: 404 - Not Found[39m
+[31m404 - Not Found[39m
 [31m----------[39m
 [31m[39m
 [31mPlatform: darwin (test release)[39m
