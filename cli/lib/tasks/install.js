@@ -75,7 +75,11 @@ const downloadAndUnzip = (version) => {
       // pluralize seconds remaining
       remaining = chalk.gray(`${remaining}s`)
 
-      task.title = util.titleize(title, percentComplete, remaining)
+      util.setTaskTitle(
+        task,
+        util.titleize(title, percentComplete, remaining),
+        rendererOptions.renderer
+      )
     }
   }
 
