@@ -55,7 +55,7 @@
     "clear-module": "^2.1.0",
     "dependency-check": "^2.8.0",
     "nock": "^9.0.9",
-    "sinon": "^2.1.0",
+    "sinon": "3.2.1",
     "snap-shot-it": "2.2.0"
   },
   "files": [
