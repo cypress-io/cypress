@@ -56,7 +56,7 @@ returned:
 Error: Smoke test returned wrong code.
 command was: /Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/dist/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=187
 returned:
-at child.on (/Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/lib/download/utils.js:153:27)
+at child.on (/Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/lib/tasks/verify.js:153:27)
 at /Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/node_modules/sinon/lib/sinon/behavior.js:92:22
 at _combinedTickCallback (internal/process/next_tick.js:67:7)
 at process._tickCallback (internal/process/next_tick.js:98:9)
@@ -105,7 +105,7 @@ returned:
 Error: Smoke test returned wrong code.
 command was: /Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/dist/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=7
 returned:
-at child.on (/Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/lib/download/utils.js:153:27)
+at child.on (/Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/lib/tasks/verify.js:153:27)
 at /Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/node_modules/sinon/lib/sinon/behavior.js:92:22
 at _combinedTickCallback (internal/process/next_tick.js:67:7)
 at process._tickCallback (internal/process/next_tick.js:98:9)
@@ -153,7 +153,7 @@ returned:
 Error: Smoke test returned wrong code.
 command was: /Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/dist/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=733
 returned:
-at child.on (/Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/lib/download/utils.js:153:27)
+at child.on (/Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/lib/tasks/verify.js:153:27)
 at /Users/chrisbreiding/Dev/cypress/cypress-monorepo/cli/node_modules/sinon/lib/sinon/behavior.js:92:22
 at _combinedTickCallback (internal/process/next_tick.js:67:7)
 at process._tickCallback (internal/process/next_tick.js:98:9)

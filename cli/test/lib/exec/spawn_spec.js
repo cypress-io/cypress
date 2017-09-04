@@ -1,10 +1,10 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const cp = require('child_process')
 
-const downloadUtils = require('../../lib/download/utils')
-const xvfb = require('../../lib/exec/xvfb')
-const spawn = require('../../lib/exec/spawn')
+const verify = require(`${lib}/tasks/verify`)
+const xvfb = require(`${lib}/exec/xvfb`)
+const spawn = require(`${lib}/exec/spawn`)
 
 describe('exec spawn', function () {
   beforeEach(function () {
@@ -17,7 +17,7 @@ describe('exec spawn', function () {
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(true)
-    this.sandbox.stub(downloadUtils, 'getPathToExecutable').returns('/path/to/cypress')
+    this.sandbox.stub(verify, 'getPathToExecutable').returns('/path/to/cypress')
   })
 
   context('#spawn', function () {

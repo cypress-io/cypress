@@ -1,11 +1,11 @@
-require('../spec_helper')
+require('../../spec_helper')
 
-const downloadUtils = require('../../lib/download/utils')
-const spawn = require('../../lib/exec/spawn')
-const open = require('../../lib/exec/open')
-const util = require('../../lib/util')
-const logger = require('../../lib/logger')
-const fs = require('../../lib/fs')
+const verify = require(`${lib}/tasks/verify`)
+const spawn = require(`${lib}/exec/spawn`)
+const open = require(`${lib}/exec/open`)
+const util = require(`${lib}/util`)
+const logger = require(`${lib}/logger`)
+const fs = require(`${lib}/fs`)
 const snapshot = require('snap-shot-it')
 
 describe('exec open', function () {
@@ -30,13 +30,13 @@ describe('exec open', function () {
   context('#start', function () {
     beforeEach(function () {
       this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
-      this.sandbox.stub(downloadUtils, 'verify').resolves()
+      this.sandbox.stub(verify, 'verify').resolves()
       this.sandbox.stub(spawn, 'start').resolves()
     })
 
     it('verifies download', function () {
       return open.start().then(() => {
-        expect(downloadUtils.verify).to.be.called
+        expect(verify.verify).to.be.called
       })
     })
 

@@ -1,15 +1,15 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const nock = require('nock')
 const path = require('path')
 const snapshot = require('snap-shot-it')
 
-const fs = require('../../lib/fs')
-const download = require('../../lib/download/download')
-const logger = require('../../lib/logger')
-const unzip = require('../../lib/download/unzip')
-const downloadUtils = require('../../lib/download/utils')
-const util = require('../../lib/util')
+const fs = require(`${lib}/fs`)
+const download = require(`${lib}/tasks/download`)
+const logger = require(`${lib}/logger`)
+const unzip = require(`${lib}/tasks/unzip`)
+const verify = require(`${lib}/tasks/verify`)
+const util = require(`${lib}/util`)
 
 describe('download', function () {
   const rootFolder = '/home/user/git'
@@ -71,7 +71,7 @@ describe('download', function () {
 
     // not really the download erroring, but the easiest way to
     // test the error handling
-    this.sandbox.stub(downloadUtils, 'ensureInstallationDir').rejects(err)
+    this.sandbox.stub(verify, 'ensureInstallationDir').rejects(err)
 
     return download.start(this.options).then(() => {
       expect(util.exit).to.be.calledWith(1)
@@ -125,7 +125,7 @@ describe('download', function () {
     })
 
     it('logs out Finished Installing', function () {
-      this.sandbox.stub(downloadUtils, 'getPathToUserExecutable').returns('/foo/bar')
+      this.sandbox.stub(verify, 'getPathToUserExecutableDir').returns('/foo/bar')
 
       return download.start(this.options)
       .then(() => {
@@ -135,7 +135,7 @@ describe('download', function () {
 
     it('the reported path is relative', function () {
       const appAt = 'node_modules/cypress/dist/Cypress.app'
-      this.sandbox.stub(downloadUtils, 'getPathToUserExecutable')
+      this.sandbox.stub(verify, 'getPathToUserExecutableDir')
         .returns(path.join(rootFolder, appAt))
 
       return download.start(this.options)

@@ -1,17 +1,18 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const chalk = require('chalk')
 
-const fs = require('../../lib/fs')
-const download = require('../../lib/download/download')
-const index = require('../../lib/download/index')
-const utils = require('../../lib/download/utils')
-const unzip = require('../../lib/download/unzip')
-const logger = require('../../lib/logger')
+const fs = require(`${lib}/fs`)
+const download = require(`${lib}/tasks/download`)
+const install = require(`${lib}/tasks/install`)
+const info = require(`${lib}/tasks/info`)
+const unzip = require(`${lib}/tasks/unzip`)
+const logger = require(`${lib}/logger`)
+const util = require(`${lib}/util`)
 
-const packageVersion = require('../../package').version
+const packageVersion = util.pkgVersion()
 
-describe('index', function () {
+describe('install', function () {
   beforeEach(() => {
     // allow simpler log message comparison without
     // chalk's terminal control strings
@@ -22,13 +23,13 @@ describe('index', function () {
     chalk.enabled = true
   })
 
-  context('#install', function () {
+  context('.start', function () {
     beforeEach(function () {
       this.sandbox.stub(logger, 'log')
       this.sandbox.stub(download, 'start').resolves()
-      this.sandbox.stub(utils, 'getInstalledVersion').resolves()
-      this.sandbox.stub(utils, 'writeInstalledVersion').resolves()
-      this.sandbox.stub(utils, 'clearVersionState').resolves()
+      this.sandbox.stub(info, 'getInstalledVersion').resolves()
+      this.sandbox.stub(info, 'writeInstalledVersion').resolves()
+      this.sandbox.stub(info, 'clearVersionState').resolves()
     })
 
     describe('override version', function () {
@@ -40,7 +41,7 @@ describe('index', function () {
         const version = '0.12.1'
         process.env.CYPRESS_VERSION = version
 
-        return index.install()
+        return install.install()
           .then(() => {
             const msg = `Forcing CYPRESS_VERSION ${version}`
             expect(logger.log.calledWith(msg)).to.be.true
@@ -58,22 +59,22 @@ describe('index', function () {
         this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
         this.sandbox.stub(unzip, 'start').resolves()
 
-        return index.install()
+        return install.start()
           .then(() => {
             expect(unzip.start).calledWith({
               zipDestination: version,
-              destination: utils.getInstallationDir(),
-              executable: utils.getPathToUserExecutable(),
+              destination: info.getInstallationDir(),
+              executable: info.getPathToUserExecutableDir(),
             })
-            expect(utils.writeInstalledVersion).calledWith('unknown')
+            expect(info.writeInstalledVersion).calledWith('unknown')
           })
       })
     })
 
     describe('when version is already installed', function () {
       beforeEach(function () {
-        utils.getInstalledVersion.resolves(packageVersion)
-        return index.install()
+        info.getInstalledVersion.resolves(packageVersion)
+        return install.start()
       })
 
       it('logs message', function () {
@@ -88,8 +89,8 @@ describe('index', function () {
 
     describe('when getting installed version fails', function () {
       beforeEach(function () {
-        utils.getInstalledVersion.rejects(new Error('no'))
-        return index.install()
+        info.getInstalledVersion.rejects(new Error('no'))
+        return install.start()
       })
 
       it('logs message', function () {
@@ -108,8 +109,8 @@ describe('index', function () {
 
     describe('when getting installed version does not match needed version', function () {
       beforeEach(function () {
-        utils.getInstalledVersion.resolves('x.x.x')
-        return index.install()
+        info.getInstalledVersion.resolves('x.x.x')
+        return install.start()
       })
 
       it('logs message', function () {
@@ -130,12 +131,12 @@ describe('index', function () {
 
     describe('with force: true', function () {
       beforeEach(function () {
-        utils.getInstalledVersion.resolves(packageVersion)
-        return index.install({ force: true })
+        info.getInstalledVersion.resolves(packageVersion)
+        return install.start({ force: true })
       })
 
       it('clears version state', function () {
-        expect(utils.clearVersionState).to.be.called
+        expect(info.clearVersionState).to.be.called
       })
 
       it('forces download even if version matches', function () {

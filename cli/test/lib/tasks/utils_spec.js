@@ -1,4 +1,4 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
@@ -8,11 +8,11 @@ const cp = require('child_process')
 const clearModule = require('clear-module')
 const snapshot = require('snap-shot-it')
 
-const fs = require('../../lib/fs')
-const logger = require('../../lib/logger')
-const utils = require('../../lib/download/utils')
-const xvfb = require('../../lib/exec/xvfb')
-const packageVersion = require('../../lib/util').pkgVersion()
+const fs = require(`${lib}/fs`)
+const logger = require(`${lib}/logger`)
+const utils = require(`${lib}/tasks/verify`)
+const xvfb = require(`${lib}/exec/xvfb`)
+const packageVersion = require(`${lib}/util`).pkgVersion()
 
 const distDir = path.join(__dirname, '../../dist')
 const infoFilePath = path.join(distDir, 'info.json')
@@ -142,20 +142,20 @@ describe('utils', function () {
     })
   })
 
-  context('#getPathToUserExecutable', function () {
+  context('#getPathToUserExecutableDir', function () {
     it('resolves path on macOS', function () {
       this.sandbox.stub(os, 'platform').returns('darwin')
-      expect(utils.getPathToUserExecutable()).to.equal(path.join(distDir, 'Cypress.app'))
+      expect(utils.getPathToUserExecutableDir()).to.equal(path.join(distDir, 'Cypress.app'))
     })
 
     it('resolves path on linux', function () {
       this.sandbox.stub(os, 'platform').returns('linux')
-      expect(utils.getPathToUserExecutable()).to.equal(path.join(distDir, 'Cypress'))
+      expect(utils.getPathToUserExecutableDir()).to.equal(path.join(distDir, 'Cypress'))
     })
 
     it('rejects on anything else', function () {
       this.sandbox.stub(os, 'platform').returns('win32')
-      expect(() => utils.getPathToUserExecutable()).to.throw('Platform: "win32" is not supported.')
+      expect(() => utils.getPathToUserExecutableDir()).to.throw('Platform: "win32" is not supported.')
     })
   })
 

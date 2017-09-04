@@ -1,12 +1,12 @@
-require('../spec_helper')
+require('../../spec_helper')
 
-const downloadUtils = require('../../lib/download/utils')
-const cli = require('../../lib/cli')
-const spawn = require('../../lib/exec/spawn')
-const run = require('../../lib/exec/run')
+const verify = require(`${lib}/tasks/verify`)
+const cli = require(`${lib}/cli`)
+const spawn = require(`${lib}/exec/spawn`)
+const run = require(`${lib}/exec/run`)
 const snapshot = require('snap-shot-it')
-const util = require('../../lib/util')
-const logger = require('../../lib/logger')
+const util = require(`${lib}/util`)
+const logger = require(`${lib}/logger`)
 
 describe('exec run', function () {
   beforeEach(function () {
@@ -88,14 +88,14 @@ describe('exec run', function () {
   context('#start', function () {
     beforeEach(function () {
       this.sandbox.stub(spawn, 'start')
-      this.sandbox.stub(downloadUtils, 'verify').resolves()
+      this.sandbox.stub(verify, 'verify').resolves()
       this.log = this.sandbox.spy(logger, 'log')
     })
 
     it('verifies cypress', function () {
       return run.start()
       .then(() => {
-        expect(downloadUtils.verify).to.be.calledOnce
+        expect(verify.verify).to.be.calledOnce
       })
     })
 

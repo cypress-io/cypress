@@ -1,9 +1,9 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const path = require('path')
 
-const fs = require('../../lib/fs')
-const unzip = require('../../lib/download/unzip')
+const fs = require(`${lib}/fs`)
+const unzip = require(`${lib}/tasks/unzip`)
 
 describe('unzip', function () {
   context('#cleanup', () =>

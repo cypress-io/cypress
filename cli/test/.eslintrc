@@ -1,4 +1,7 @@
 {
+  "globals": {
+    "lib": true
+  },
   "extends": [
     "plugin:cypress-dev/tests"
   ]
