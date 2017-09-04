@@ -11,7 +11,7 @@ const run = require(`${lib}/exec/run`)
 const cypress = require(`${lib}/cypress`)
 
 describe('cypress', function () {
-  context('#open', function () {
+  context('.open', function () {
     it('calls open#start, passing in options', function () {
       this.sandbox.stub(open, 'start').resolves()
       cypress.open({ foo: 'foo' })
@@ -19,7 +19,7 @@ describe('cypress', function () {
     })
   })
 
-  context('#run', function () {
+  context('.run', function () {
     beforeEach(function () {
       this.outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
       this.sandbox.stub(tmp, 'fileAsync').resolves(this.outputPath)

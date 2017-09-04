@@ -12,8 +12,6 @@ const info = require('./info')
 const unzip = require('./unzip')
 const logger = require('../logger')
 
-const hasSomethingToSay = (err) => err && err.message
-
 const alreadyInstalledMsg = (installedVersion, needVersion) => {
   logger.log(chalk.yellow(stripIndent`
     Cypress ${chalk.cyan(needVersion)} is already installed. Skipping installation.
@@ -32,7 +30,7 @@ const displayCompletionMsg = () => {
   // check here to see if we are globally installed
   if (util.isInstalledGlobally()) {
     // if we are display a warning
-    logger.log(chalk.yellow(stripIndent`
+    logger.warn(stripIndent`
       It looks like you\'ve installed Cypress globally.
 
       This will work, but it'\s not recommended.
@@ -43,7 +41,7 @@ const displayCompletionMsg = () => {
 
         - ${chalk.cyan('npm uninstall -g cypress')}
         - ${chalk.cyan('npm install --save-dev cypress')}
-    `))
+    `)
 
     return
   }
@@ -173,35 +171,35 @@ const start = (options = {}) => {
   }
 
   return info.getInstalledVersion()
-  .catch(() => {
-    throw new Error('Cypress executable was not found.')
-  })
+  .catchReturn(null)
   .then((installedVersion) => {
     debug('installed version is', installedVersion, 'version needed is', needVersion)
 
     if (options.force) {
       return info.clearVersionState()
-      .then(() => {
-        throw new Error('')
-      })
-    } else if (installedVersion === needVersion) {
-      // our version matches, tell the user this is a noop
-      return alreadyInstalledMsg(installedVersion, needVersion)
-
-    } else if (!installedVersion) {
-      // logger.log('Could not find installed Cypress')
-
-      return info.clearVersionState()
-      .then(() => {
-        throw new Error('')
-      })
-    } else {
-      throw new Error(`Installed version (${installedVersion}) does not match needed version (${needVersion}).`)
     }
+
+    if (installedVersion === needVersion) {
+      // our version matches, tell the user this is a noop
+      alreadyInstalledMsg(installedVersion, needVersion)
+
+      return false
+    }
+
+    if (!installedVersion) {
+      return info.clearVersionState()
+    }
+
+    logger.warn(stripIndent`
+      Installed version (${chalk.cyan(installedVersion)}) does not match needed version (${chalk.cyan(needVersion)}).
+    `)
+
+    logger.log()
   })
-  .catch((err) => {
-    if (hasSomethingToSay(err)) {
-      logger.log(err.message)
+  .then((ret) => {
+    // noop if we've been told not to download
+    if (ret === false) {
+      return
     }
 
     // TODO: what to do about this? let's just not support it

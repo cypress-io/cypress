@@ -1,6 +1,10 @@
 require('../../spec_helper')
 
 const chalk = require('chalk')
+const Promise = require('bluebird')
+const snapshot = require('snap-shot-it')
+
+const stdout = require('../../support/stdout')
 
 const fs = require(`${lib}/fs`)
 const download = require(`${lib}/tasks/download`)
@@ -10,23 +14,34 @@ const unzip = require(`${lib}/tasks/unzip`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
 
-const packageVersion = util.pkgVersion()
+const packageVersion = '1.2.3'
+const downloadDestination = 'path/to/cypress.zip'
 
 describe('install', function () {
-  beforeEach(() => {
+  beforeEach(function () {
+    this.stdout = stdout.capture()
+
     // allow simpler log message comparison without
     // chalk's terminal control strings
     chalk.enabled = false
   })
 
   afterEach(() => {
+    stdout.restore()
+
     chalk.enabled = true
   })
 
   context('.start', function () {
     beforeEach(function () {
-      this.sandbox.stub(logger, 'log')
-      this.sandbox.stub(download, 'start').resolves()
+      logger.reset()
+
+      this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
+      this.sandbox.stub(download, 'start').resolves(downloadDestination)
+      this.sandbox.stub(unzip, 'start').resolves()
+      this.sandbox.stub(Promise, 'delay').resolves()
+      this.sandbox.stub(fs, 'removeAsync').resolves()
+      this.sandbox.stub(info, 'getPathToUserExecutableDir').returns('/path/to/binary/dir/')
       this.sandbox.stub(info, 'getInstalledVersion').resolves()
       this.sandbox.stub(info, 'writeInstalledVersion').resolves()
       this.sandbox.stub(info, 'clearVersionState').resolves()
@@ -34,28 +49,30 @@ describe('install', function () {
 
     describe('override version', function () {
       afterEach(function () {
-        delete process.env.CYPRESS_VERSION
+        delete process.env.CYPRESS_BINARY_VERSION
       })
 
-      it('can specify cypress version in env', function () {
+      it('warns when specifying cypress version in env', function () {
         const version = '0.12.1'
-        process.env.CYPRESS_VERSION = version
+        process.env.CYPRESS_BINARY_VERSION = version
 
-        return install.install()
-          .then(() => {
-            const msg = `Forcing CYPRESS_VERSION ${version}`
-            expect(logger.log.calledWith(msg)).to.be.true
-            expect(download.start).to.be.calledWith({
-              displayOpen: false,
-              version,
-              cypressVersion: version,
-            })
+        return install.start()
+        .then(() => {
+          expect(download.start).to.be.calledWithMatch({
+            version,
           })
+
+          expect(unzip.start).to.be.calledWithMatch({
+            version,
+          })
+
+          snapshot(this.stdout.toString())
+        })
       })
 
-      it('can install local binary zip file without download', function () {
+      it.skip('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
-        process.env.CYPRESS_VERSION = version
+        process.env.CYPRESS_BINARY_VERSION = version
         this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
         this.sandbox.stub(unzip, 'start').resolves()
 
@@ -74,74 +91,122 @@ describe('install', function () {
     describe('when version is already installed', function () {
       beforeEach(function () {
         info.getInstalledVersion.resolves(packageVersion)
+
         return install.start()
       })
 
-      it('logs message', function () {
-        const msg = `Cypress ${packageVersion} already installed.`
-        expect(logger.log.calledWith(msg)).to.be.true
-      })
-
-      it('does not download', function () {
+      it('logs noop message', function () {
         expect(download.start).not.to.be.called
+
+        snapshot(this.stdout.toString())
       })
     })
 
     describe('when getting installed version fails', function () {
       beforeEach(function () {
         info.getInstalledVersion.rejects(new Error('no'))
+
         return install.start()
       })
 
-      it('logs message', function () {
-        expect(logger.log.calledWith('Cypress executable was not found.')).to.be.true
-        expect(logger.log.calledWith(`Installing Cypress (version: ${packageVersion}).`)).to.be.true
-      })
-
-      it('downloads', function () {
-        expect(download.start).to.be.calledWith({
-          displayOpen: false,
-          cypressVersion: packageVersion,
+      it('logs message and starts download', function () {
+        expect(download.start).to.be.calledWithMatch({
           version: packageVersion,
         })
+
+        expect(unzip.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        snapshot(this.stdout.toString())
+      })
+    })
+
+    describe('when there is no install version', function () {
+      beforeEach(function () {
+        info.getInstalledVersion.resolves(null)
+
+        return install.start()
+      })
+
+      it('logs message and starts download', function () {
+        expect(info.clearVersionState).to.be.called
+
+        expect(download.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        expect(unzip.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        snapshot(this.stdout.toString())
       })
     })
 
     describe('when getting installed version does not match needed version', function () {
       beforeEach(function () {
         info.getInstalledVersion.resolves('x.x.x')
+
         return install.start()
       })
 
-      it('logs message', function () {
-        const versionMessage = `Installed version (x.x.x) does not match needed version (${packageVersion}).`
-        expect(logger.log.calledWith(versionMessage)).to.be.true
-        const installMessage = `Installing Cypress (version: ${packageVersion}).`
-        expect(logger.log.calledWith(installMessage)).to.be.true
-      })
-
-      it('downloads', function () {
-        expect(download.start).to.be.calledWith({
-          displayOpen: false,
-          cypressVersion: packageVersion,
+      it('logs message and starts download', function () {
+        expect(download.start).to.be.calledWithMatch({
           version: packageVersion,
         })
+
+        expect(unzip.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        snapshot(this.stdout.toString())
       })
     })
 
     describe('with force: true', function () {
       beforeEach(function () {
         info.getInstalledVersion.resolves(packageVersion)
+
         return install.start({ force: true })
       })
 
-      it('clears version state', function () {
+      it('logs message and starts download', function () {
         expect(info.clearVersionState).to.be.called
-      })
 
-      it('forces download even if version matches', function () {
-        expect(download.start).to.be.called
+        expect(download.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        expect(unzip.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        snapshot(this.stdout.toString())
       })
     })
+
+    describe('as a global install', function () {
+      beforeEach(function () {
+        this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
+
+        info.getInstalledVersion.resolves('x.x.x')
+
+        return install.start()
+      })
+
+      it('logs global warning and download', function () {
+        expect(download.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        expect(unzip.start).to.be.calledWithMatch({
+          version: packageVersion,
+        })
+
+        snapshot(this.stdout.toString())
+      })
+    })
+
   })
 })

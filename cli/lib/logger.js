@@ -5,12 +5,12 @@ let logs = []
 
 const error = (...messages) => {
   logs.push(messages.join(' '))
-  console.error(chalk.red(...messages)) // eslint-disable-line no-console
+  console.log(chalk.red(...messages)) // eslint-disable-line no-console
 }
 
 const warn = (...messages) => {
   logs.push(messages.join(' '))
-  console.error(chalk.yellow(...messages)) // eslint-disable-line no-console
+  console.log(chalk.yellow(...messages)) // eslint-disable-line no-console
 }
 
 const log = (...messages) => {

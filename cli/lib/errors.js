@@ -11,8 +11,6 @@ const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 
-const pkgVersion = util.pkgVersion()
-
 // common errors Cypress application can encounter
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
@@ -40,17 +38,16 @@ const missingXvfb = {
   solution: stripIndent`
     Install XVFB and run Cypress again.
 
-    Our CI documentation provides more information how to configure dependencies
-  `,
-  footer: stripIndent`
-    Read our doc on CI dependencies for more information:
+    Read our documentation on dependencies for more information:
 
       ${requiredDependenciesUrl}
+
+    If you using Docker, we provide containers with all required dependencies installed.
     `,
 }
 
 const missingDependency = {
-  description: 'We could not run Cypress.',
+  description: 'Cypress failed to start.',
   // this message is too Linux specific
   solution: stripIndent`
     This is usually caused by a missing library or dependency.
@@ -58,6 +55,8 @@ const missingDependency = {
     The error below should indicate which dependency is missing.
 
       ${requiredDependenciesUrl}
+
+    If you using Docker, we provide containers with all required dependencies installed.
   `,
 }
 
@@ -95,7 +94,7 @@ function getPlatformInfo () {
   return getOsVersion()
   .then((version) => stripIndent`
     Platform: ${os.platform()} (${version})
-    Cypress Version: ${pkgVersion}
+    Cypress Version: ${util.pkgVersion()}
   `)
 }
 
