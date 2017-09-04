@@ -6,6 +6,7 @@ const cp = require('child_process')
 const EE = require('events').EventEmitter
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
+const stripAnsi = require('strip-ansi')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -23,8 +24,8 @@ const installationDir = info.getInstallationDir()
 // const replaceRe = /(.+REPLACER)/g
 
 const normalize = (str) => {
-  return str
-  .replace('[90m→ Cypress Version: 1.2.3[39m', '')
+  return stripAnsi(str)
+  // .replace('[90m→ Cypress Version: 1.2.3[39m', '')
   // .replace(replaceRe, '')
 }
 
