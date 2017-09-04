@@ -56,7 +56,7 @@
     "dependency-check": "^2.8.0",
     "nock": "^9.0.9",
     "sinon": "3.2.1",
-    "snap-shot-it": "2.2.0"
+    "snap-shot-it": "3.3.0"
   },
   "files": [
     "bin",
