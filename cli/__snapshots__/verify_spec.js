@@ -53,7 +53,9 @@ exports['executable cannot be found 1'] = `[31mError: No version of Cypress is 
 exports['verification with executable 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
-[?25h`
+[?25h
+[33mOpening Cypress...[39m
+`
 
 exports['fails verifying Cypress 1'] = `It looks like this is your first time using Cypress: 1.2.3
 
@@ -80,16 +82,22 @@ Cypress Version: 1.2.3
 exports['no existing version verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
-[?25h`
+[?25h
+[33mOpening Cypress...[39m
+`
 
 exports['current version has not been verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
-[?25h`
+[?25h
+[33mOpening Cypress...[39m
+`
 
 exports['verifying in ci 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l[2m[xx:xx:xx][22m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m [started]
 [2m[xx:xx:xx][22m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m [completed]
-[?25h`
+[?25h
+[33mOpening Cypress...[39m
+`
 
