@@ -92,6 +92,10 @@ const downloadAndUnzip = (version) => {
         .then((downloadDestination) => {
           // save the download destination for unzipping
           ctx.downloadDestination = downloadDestination
+
+          task.title = util.titleize(
+            chalk.green('Downloaded Cypress')
+          )
         })
       },
     },
@@ -103,6 +107,11 @@ const downloadAndUnzip = (version) => {
         options.onProgress = progessify('Unzipping Cypress', task)
 
         return unzip.start(options)
+        .then(() => {
+          task.title = util.titleize(
+            chalk.green('Unzipped Cypress')
+          )
+        })
       },
     },
     {
@@ -116,7 +125,7 @@ const downloadAndUnzip = (version) => {
         .then(() => {
           const dir = info.getPathToUserExecutableDir()
 
-          task.title = util.titleize('Finishing Installation', chalk.gray(dir))
+          task.title = util.titleize(chalk.green('Finished Installation'), chalk.gray(dir))
 
           return info.writeInstalledVersion(version)
         })
@@ -213,8 +222,6 @@ const start = (options = {}) => {
     .catch(() => {
       debug('preparing to download and unzip version', needVersion)
 
-      // else go out and download it from the interwebz
-      // TODO why do we have this?
       return downloadAndUnzip(needVersion)
       .then(() => {
         // wait 1 second for a good user experience
