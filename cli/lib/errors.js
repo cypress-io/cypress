@@ -14,10 +14,10 @@ const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 // common errors Cypress application can encounter
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
-  solution: 'Please check network connectivity and try again',
+  solution: 'Please check network connectivity and try again:',
 }
 
-const failedToUnzip = {
+const failedUnzip = {
   description: 'The Cypress App could not be unzipped.',
   solution: stripIndent`
     Search for an existing issue or open a GitHub issue at
@@ -174,6 +174,6 @@ module.exports = {
     versionMismatch,
     unexpected,
     failedDownload,
-    failedToUnzip,
+    failedUnzip,
   },
 }

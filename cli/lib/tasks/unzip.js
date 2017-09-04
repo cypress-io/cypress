@@ -13,8 +13,9 @@ const util = require('../util')
 const info = require('./info')
 
 // expose this function for simple testing
-const _unzip = (options = {}) => {
+const unzip = (options = {}) => {
   _.defaults(options, {
+    downloadDestination: null,
     onProgress: () => {},
     zipDestination: info.getInstallationDir(),
   })
@@ -131,13 +132,11 @@ const start = (options = {}) => {
   return fs.removeAsync(dir)
   .catchReturn(null)
   .then(() => {
-    return _unzip(options)
+    return unzip(options)
   })
-  .catch(throwFormErrorText(errors.failedToUnZip))
+  .catch(throwFormErrorText(errors.failedUnzip))
 }
 
 module.exports = {
-  _unzip,
-
   start,
 }
