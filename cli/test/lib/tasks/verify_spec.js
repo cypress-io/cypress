@@ -20,12 +20,12 @@ const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
-const replaceRe = /(.+REPLACER)/g
+// const replaceRe = /(.+REPLACER)/g
 
 const normalize = (str) => {
   return str
-  .replace('[90m→ Cypress Version: 1.2.3[39m', 'REPLACER')
-  .replace(replaceRe, '')
+  .replace('[90m→ Cypress Version: 1.2.3[39m', '')
+  // .replace(replaceRe, '')
 }
 
 context('.verify', function () {

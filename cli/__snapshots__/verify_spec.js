@@ -1,7 +1,7 @@
 exports['xvfb fails 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [31m✖[39m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m
-
+   
 [?25h[31mError: Your system is missing the dependency: XVFB[39m
 [31m[39m
 [31mInstall XVFB and run Cypress again.[39m
@@ -58,7 +58,7 @@ exports['verification with executable 1'] = `[33mIt looks like this is your fir
 exports['fails verifying Cypress 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
 
 [?25l [31m✖[39m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m
-
+   
 [?25h[31mError: Cypress failed to start.[39m
 [31m[39m
 [31mThis is usually caused by a missing library or dependency.[39m
