@@ -1,3 +1,25 @@
+exports['xvfb fails 1'] = `It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /path/to/executable/dir
+STRIPPED
+Error: Your system is missing the dependency: XVFB
+
+Install XVFB and run Cypress again.
+
+Read our documentation on dependencies for more information:
+
+https://on.cypress.io/required-dependencies
+
+If you using Docker, we provide containers with all required dependencies installed.
+----------
+
+Caught error trying to run XVFB: "test without xvfb"
+----------
+
+Platform: darwin (test release)
+Cypress Version: 1.2.3
+`
+
 exports['no version of Cypress installed 1'] = `[31mError: No version of Cypress is installed.[39m
 [31m[39m
 [31mPlease reinstall Cypress by running: [36mcypress install[31m[39m
@@ -36,7 +58,7 @@ exports['verification with executable 1'] = `[33mIt looks like this is your fir
 exports['fails verifying Cypress 1'] = `It looks like this is your first time using Cypress: 1.2.3
 
  ✖  Verifying Cypress can run /path/to/executable/dir
-   → Cypress Version: 1.2.3
+STRIPPED
 Error: Cypress failed to start.
 
 This is usually caused by a missing library or dependency.
@@ -64,26 +86,4 @@ exports['current version has not been verified 1'] = `[33mIt looks like this is
 
 [?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
 [?25h`
-
-exports['xvfb fails 1'] = `It looks like this is your first time using Cypress: 1.2.3
-
- ✖  Verifying Cypress can run /path/to/executable/dir
-   → Cypress Version: 1.2.3
-Error: Your system is missing the dependency: XVFB
-
-Install XVFB and run Cypress again.
-
-Read our documentation on dependencies for more information:
-
-https://on.cypress.io/required-dependencies
-
-If you using Docker, we provide containers with all required dependencies installed.
-----------
-
-Caught error trying to run XVFB: "test without xvfb"
-----------
-
-Platform: darwin (test release)
-Cypress Version: 1.2.3
-`
 

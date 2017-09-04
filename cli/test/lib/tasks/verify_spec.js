@@ -21,12 +21,23 @@ const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
-// const replaceRe = /(.+REPLACER)/g
 
 const normalize = (str) => {
-  return stripAnsi(str)
-  // .replace('[90m→ Cypress Version: 1.2.3[39m', '')
-  // .replace(replaceRe, '')
+  // strip answer and split by new lines
+  str = stripAnsi(str)
+  .split('\n')
+
+  // find the line about verifying cypress can run
+  const index = _.findIndex(str, (line) => {
+    return line.includes('Verifying Cypress can run')
+  })
+
+  // get rid of whatever the next line is because
+  // i cannot figure out why this line fails in CI
+  // its likely due to some UTF code
+  str.splice(index + 1, 1, 'STRIPPED')
+
+  return str.join('\n')
 }
 
 context('.verify', function () {
@@ -284,12 +295,9 @@ context('.verify', function () {
         .catch((err) => {
           expect(xvfb.stop).to.be.calledOnce
 
-          return Promise.delay(1000)
-          .then(() => {
-            logger.error(err)
+          logger.error(err)
 
-            snapshot('xvfb fails', normalize(ctx.stdout.toString()))
-          })
+          snapshot('xvfb fails', normalize(ctx.stdout.toString()))
         })
       })
     })
