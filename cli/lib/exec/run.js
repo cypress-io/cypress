@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:cli')
 const spawn = require('./spawn')
-const { verify } = require('../tasks/verify')
+const verify = require('../tasks/verify')
 
 const processRunOptions = (options = {}) => {
   const args = ['--run-project', options.project]
@@ -86,6 +86,7 @@ module.exports = {
       project: process.cwd(),
     })
 
-    return verify().then(run(options))
+    return verify.start()
+    .then(run(options))
   },
 }

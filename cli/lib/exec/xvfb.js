@@ -13,7 +13,7 @@ module.exports = {
   start () {
     debug('Starting XVFB')
     return xvfb.startAsync()
-      .catch(throwFormErrorText(errors.missingXvfb))
+    .catch(throwFormErrorText(errors.missingXvfb))
   },
 
   stop () {
@@ -28,11 +28,11 @@ module.exports = {
   // async method, resolved with Boolean
   verify () {
     return xvfb.startAsync()
-      .then(R.T)
-      .catch((err) => {
-        debug('Could not verify xvfb: %s', err.message)
-        return false
-      })
-      .finally(xvfb.stopAsync)
+    .then(R.T)
+    .catch((err) => {
+      debug('Could not verify xvfb: %s', err.message)
+      return false
+    })
+    .finally(xvfb.stopAsync)
   },
 }

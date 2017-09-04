@@ -184,7 +184,7 @@ const maybeVerify = (options = {}) => {
   })
 }
 
-const verify = (options = {}) => {
+const start = (options = {}) => {
   debug('verifying Cypress app')
 
   _.defaults(options, {
@@ -226,7 +226,7 @@ const verify = (options = {}) => {
 }
 
 module.exports = {
-  verify,
+  start,
 
   maybeVerify,
 }

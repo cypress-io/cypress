@@ -3,7 +3,7 @@ const cp = require('child_process')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 
-const downloadUtils = require('../download/utils')
+const info = require('../tasks/info')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
@@ -18,7 +18,7 @@ module.exports = {
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        const cypressPath = downloadUtils.getPathToExecutable()
+        const cypressPath = info.getPathToExecutable()
         debug('spawning Cypress %s', cypressPath)
         debug('spawn args %j', args)
 

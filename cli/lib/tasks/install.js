@@ -128,7 +128,7 @@ const downloadAndUnzip = (version) => {
   return tasks.run()
 }
 
-const install = (options = {}) => {
+const start = (options = {}) => {
   debug('installing with options %j', options)
 
   _.defaults(options, {
@@ -202,7 +202,7 @@ const install = (options = {}) => {
     .then(() => {
       logger.log('Installing local Cypress binary from %s', needVersion)
 
-      // TODO: move all this shit
+      // TODO: move all this shit, it doesn't work as is now anyway
       return unzip.start({
         zipDestination: needVersion,
         destination: info.getInstallationDir(),
@@ -226,5 +226,5 @@ const install = (options = {}) => {
 }
 
 module.exports = {
-  install,
+  start,
 }

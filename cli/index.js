@@ -9,7 +9,7 @@ switch (args.exec) {
     debug('installing Cypress from NPM')
 
     require('./lib/tasks/install')
-    .install({ force: args.force })
+    .start({ force: args.force })
     .catch(util.logErrorExit1)
 
     break
@@ -18,7 +18,7 @@ switch (args.exec) {
     debug('verifying Cypress')
 
     require('./lib/tasks/verify')
-    .verify({ force: true }) // always force verification
+    .start({ force: true }) // always force verification
     .catch(util.logErrorExit1)
 
     break
