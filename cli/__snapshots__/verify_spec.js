@@ -86,3 +86,4 @@ exports['.verify smoke test on linux logs error and exits when starting xvfb fai
 [31mPlatform: darwin (test release)[39m
 [31mCypress Version: 1.2.3[39m
 `
+
