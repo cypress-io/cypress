@@ -5,7 +5,7 @@ exports['errors individual has the following errors 1'] = [
   'versionMismatch',
   'unexpected',
   'failedDownload',
-  'failedToUnzip',
+  'failedUnzip',
 ]
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `Your system is missing the dependency: XVFB
@@ -21,4 +21,3 @@ If you using Docker, we provide containers with all required dependencies instal
 
 Platform: test platform (test release)
 Cypress Version: 1.2.3`
-

@@ -1,7 +1,7 @@
 const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
-const { verify } = require('../tasks/verify')
+const verify = require('../tasks/verify')
 
 module.exports = {
   start (options = {}) {
@@ -30,7 +30,7 @@ module.exports = {
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
-    return verify()
+    return verify.start()
     .then(() => {
       return spawn.start(args, {
         detached: Boolean(options.detached),

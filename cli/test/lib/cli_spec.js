@@ -15,26 +15,70 @@ describe('cli', function () {
     this.exec = (args) => cli.init().parse(`node test ${args}`.split(' '))
   })
 
-  it('run calls run.start with options + exits with code', function (done) {
-    this.sandbox.stub(run, 'start').resolves(10)
-    this.exec('run --port 7878')
-    expect(run.start).to.be.calledWith({ port: '7878' })
-
-    util.exit.callsFake((code) => {
-      expect(code).to.eq(10)
-      done()
+  context('cypress run', function () {
+    beforeEach(function () {
+      this.sandbox.stub(run, 'start').resolves(0)
     })
-  })
 
-  it('run calls run.start with options + catches errors', function (done) {
-    const err = new Error('foo')
-    this.sandbox.stub(run, 'start').rejects(err)
-    this.exec('run --port 7878')
-    expect(run.start).to.be.calledWith({ port: '7878' })
+    it('calls run.start with options + exits with code', function (done) {
+      run.start.resolves(10)
+      this.exec('run')
 
-    util.logErrorExit1.callsFake((e) => {
-      expect(e).to.eq(err)
-      done()
+      util.exit.callsFake((code) => {
+        expect(code).to.eq(10)
+        done()
+      })
+    })
+
+    it('run.start with options + catches errors', function (done) {
+      const err = new Error('foo')
+      run.start.rejects(err)
+      this.exec('run')
+
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
+    })
+
+    it('calls run with port', function () {
+      this.exec('run --port 7878')
+      expect(run.start).to.be.calledWith({ port: '7878' })
+    })
+
+    it('calls run with spec', function () {
+      this.exec('run --spec cypress/integration/foo_spec.js')
+      expect(run.start).to.be.calledWith({ spec: 'cypress/integration/foo_spec.js' })
+    })
+
+    it('calls run with port with -p arg', function () {
+      this.exec('run -p 8989')
+      expect(run.start).to.be.calledWith({ port: '8989' })
+    })
+
+    it('calls run with env variables', function () {
+      this.exec('run --env foo=bar,host=http://localhost:8888')
+      expect(run.start).to.be.calledWith({ env: 'foo=bar,host=http://localhost:8888' })
+    })
+
+    it('calls run with config', function () {
+      this.exec('run --config watchForFileChanges=false,baseUrl=localhost')
+      expect(run.start).to.be.calledWith({ config: 'watchForFileChanges=false,baseUrl=localhost' })
+    })
+
+    it('calls run with key', function () {
+      this.exec('run --key asdf')
+      expect(run.start).to.be.calledWith({ key: 'asdf' })
+    })
+
+    it('calls run with --record', function () {
+      this.exec('run --record')
+      expect(run.start).to.be.calledWith({ record: true })
+    })
+
+    it('calls run with --record false', function () {
+      this.exec('run --record false')
+      expect(run.start).to.be.calledWith({ record: false })
     })
   })
 
