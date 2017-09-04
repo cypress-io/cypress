@@ -4,7 +4,6 @@ const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
 const EE = require('events').EventEmitter
-const path = require('path')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
 
@@ -19,13 +18,15 @@ const stdout = require('../../support/stdout')
 
 const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
+const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
-const infoFilePath = info.getInfoFilePath()
 
 context('.verify', function () {
   beforeEach(function () {
     this.stdout = stdout.capture()
-    this.io = new EE()
+    this.cpstderr = new EE()
+    this.cpstdout = new EE()
+    this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
     this.sandbox.stub(os, 'platform').returns('darwin')
     this.sandbox.stub(os, 'release').returns('test release')
     this.ensureEmptyInstallationDir = () => {
@@ -36,12 +37,12 @@ context('.verify', function () {
     }
     this.spawnedProcess = _.extend(new EE(), {
       unref: this.sandbox.stub(),
-      stderr: new EE(),
-      stdout: this.io,
+      stderr: this.cpstderr,
+      stdout: this.cpstdout,
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
-    this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
     this.sandbox.stub(info, 'getPathToExecutable').returns(executablePath)
+    this.sandbox.stub(info, 'getPathToUserExecutableDir').returns(executableDir)
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
@@ -69,6 +70,28 @@ context('.verify', function () {
       logger.error(err)
 
       snapshot(ctx.stdout.toString())
+    })
+  })
+
+  it('is noop when verifiedVersion matches expected', function () {
+    const ctx = this
+
+    // make it think the executable exists
+    this.sandbox.stub(fs, 'statAsync').resolves()
+
+    return info.writeInfoFileContents({
+      version: packageVersion,
+      verifiedVersion: packageVersion,
+    })
+    .then(() => {
+      return verify.start()
+    })
+    .then(() => {
+      // nothing should have been logged to stdout
+      // since no verification took place
+      expect(ctx.stdout.toString()).to.be.empty
+
+      expect(cp.spawn).not.to.be.called
     })
   })
 
@@ -116,33 +139,51 @@ context('.verify', function () {
     beforeEach(function () {
       this.sandbox.stub(fs, 'statAsync').resolves()
       this.sandbox.stub(_, 'random').returns('222')
-      this.sandbox.stub(this.io, 'on').yieldsAsync('222')
-      return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
-    })
+      this.sandbox.stub(this.cpstdout, 'on').yieldsAsync('222')
 
-    it('shows full path to executable when verifying', function () {
-      return verify.start({ force: true })
-      .then(() => {
-        snapshot(logger.print())
+      return info.writeInfoFileContents({
+        version: packageVersion,
+        verifiedVersion: packageVersion,
       })
     })
 
-    it('runs smoke test even if version already verified', function () {
+    it('shows full path to executable when verifying', function () {
+      const ctx = this
+
       return verify.start({ force: true })
       .then(() => {
-        snapshot(logger.print())
-        expect(cp.spawn).to.be.calledWith(info.getPathToExecutable(), [
+        expect(cp.spawn).to.be.calledWith(executablePath, [
           '--smoke-test',
           '--ping=222',
         ])
       })
+      .then(() => {
+        return info.getVerifiedVersion()
+      })
+      .then((vv) => {
+        expect(vv).to.eq(packageVersion)
+      })
+      .then(() => {
+        snapshot(ctx.stdout.toString())
+      })
     })
 
     it('clears verified version from state if verification fails', function () {
+      const ctx = this
+
+      const stderr = 'an error about dependencies'
+
+      this.sandbox.stub(this.cpstderr, 'on').withArgs('data').yields(stderr)
+
       this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
+
       return verify.start({ force: true })
-      .then(() => {
-        return fs.readJsonAsync(infoFilePath).get('verifiedVersion')
+      .catch((err) => {
+        logger.error(err)
+
+        snapshot(ctx.stdout.toString())
+
+        return info.getVerifiedVersion()
       })
       .then((verifiedVersion) => {
         expect(verifiedVersion).to.be.null
@@ -154,25 +195,33 @@ context('.verify', function () {
     beforeEach(function () {
       this.sandbox.stub(fs, 'statAsync').resolves()
       this.sandbox.stub(_, 'random').returns('222')
-      this.sandbox.stub(this.io, 'on').yieldsAsync('222')
+      this.sandbox.stub(this.cpstdout, 'on').yieldsAsync('222')
     })
 
     it('logs and runs when no version has been verified', function () {
-      return info.writeInstalledVersion(packageVersion)
+      const ctx = this
+
+      return info.writeInfoFileContents({
+        version: packageVersion,
+      })
       .then(() => {
         return verify.start()
       })
       .then(() => {
-        snapshot(logger.print())
-        expect(cp.spawn).to.be.calledWith(info.getPathToExecutable(), [
-          '--smoke-test',
-          '--ping=222',
-        ])
+        return info.getVerifiedVersion()
+      })
+      .then((vv) => {
+        expect(vv).to.eq(packageVersion)
+      })
+      .then(() => {
+        snapshot(ctx.stdout.toString())
       })
     })
 
     it('logs and runs when current version has not been verified', function () {
-      return fs.outputJsonAsync(path.join(info.getInstallationDir(), 'info.json'), {
+      const ctx = this
+
+      return info.writeInfoFileContents({
         version: packageVersion,
         verifiedVersion: 'different version',
       })
@@ -180,47 +229,13 @@ context('.verify', function () {
         return verify.start()
       })
       .then(() => {
-        snapshot(logger.print())
-        expect(cp.spawn).to.be.calledWith(info.getPathToExecutable(), [
-          '--smoke-test',
-          '--ping=222',
-        ])
+        return info.getVerifiedVersion()
       })
-    })
-
-    it('logs stderr when it fails', function () {
-      this.sandbox.stub(this.spawnedProcess.stderr, 'on')
-      this.spawnedProcess.stderr.on.withArgs('data').yields({
-        toString: () => 'the stderr output',
-      })
-      this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
-
-      return fs.outputJsonAsync(infoFilePath, {
-        version: packageVersion,
-        verifiedVersion: 'different version',
+      .then((vv) => {
+        expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        return verify.start()
-      })
-      .then(() => {
-        snapshot(logger.print())
-      })
-    })
-
-    it('logs success message and writes version when it succeeds', function () {
-      return fs.outputJsonAsync(infoFilePath, {
-        version: packageVersion,
-        verifiedVersion: 'different version',
-      })
-      .then(() => {
-        return verify.start()
-      })
-      .then(() => {
-        return fs.readJsonAsync(infoFilePath)
-      })
-      .then((info) => {
-        snapshot(logger.print())
-        expect(info.verifiedVersion).to.equal(packageVersion)
+        snapshot(ctx.stdout.toString())
       })
     })
 
@@ -228,7 +243,7 @@ context('.verify', function () {
       beforeEach(function () {
         xvfb.isNeeded.returns(true)
 
-        return fs.outputJsonAsync(infoFilePath, {
+        return info.writeInfoFileContents({
           version: packageVersion,
           verifiedVersion: 'different version',
         })
@@ -250,12 +265,16 @@ context('.verify', function () {
       })
 
       it('logs error and exits when starting xvfb fails', function () {
+        const ctx = this
+
         const err = new Error('test without xvfb')
         err.stack = 'xvfb? no dice'
         xvfb.start.rejects(err)
         return verify.start()
-        .then(() => {
-          snapshot(logger.print())
+        .catch((err) => {
+          logger.error(err)
+
+          snapshot(ctx.stdout.toString())
         })
       })
     })

@@ -13,8 +13,6 @@ const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const info = require('./info')
 
-const packageVersion = util.pkgVersion()
-
 const differentFrom = (a, b) => a !== b
 
 const verificationError = (message) => {
@@ -171,6 +169,8 @@ function testBinary (version) {
 const maybeVerify = (options = {}) => {
   return info.getVerifiedVersion()
   .then((verifiedVersion) => {
+    const packageVersion = util.pkgVersion()
+
     debug('has verified version', verifiedVersion)
 
     // verify if packageVersion and verifiedVersion are different
@@ -186,6 +186,8 @@ const maybeVerify = (options = {}) => {
 
 const start = (options = {}) => {
   debug('verifying Cypress app')
+
+  const packageVersion = util.pkgVersion()
 
   _.defaults(options, {
     force: false,
@@ -212,6 +214,8 @@ const start = (options = {}) => {
       `
 
       logger.warn(msg)
+
+      logger.log()
     }
 
     return maybeVerify(options)
