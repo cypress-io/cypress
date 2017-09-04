@@ -2,7 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const chalk = require('chalk')
 const isInstalledGlobally = require('is-installed-globally')
-const pkg = require(path.join(__dirname, '..', '..', 'package.json'))
+const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 
 module.exports = {
