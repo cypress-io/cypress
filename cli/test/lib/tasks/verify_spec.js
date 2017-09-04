@@ -1,0 +1,218 @@
+const _ = require('lodash')
+const os = require('os')
+const cp = require('child_process')
+const EE = require('events').EventEmitter
+const path = require('path')
+const snapshot = require('snap-shot-it')
+
+const fs = require(`${lib}/fs`)
+const logger = require(`${lib}/logger`)
+const xvfb = require(`${lib}/exec/xvfb`)
+const info = require(`${lib}/tasks/info`)
+const verify = require(`${lib}/tasks/verify`)
+const packageVersion = require(`${lib}/util`).pkgVersion()
+
+const distDir = path.join(__dirname, '../../dist')
+const infoFilePath = path.join(distDir, 'info.json')
+
+context('.verify', function () {
+  beforeEach(function () {
+    this.sandbox.stub(os, 'platform').returns('darwin')
+    this.stdout = new EE()
+    this.spawnedProcess = _.extend(new EE(), {
+      unref: this.sandbox.stub(),
+      stderr: new EE(),
+      stdout: this.stdout,
+    })
+    this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
+    this.sandbox.stub(xvfb, 'start').resolves()
+    this.sandbox.stub(xvfb, 'stop').resolves()
+    this.sandbox.stub(xvfb, 'isNeeded').returns(false)
+    this.sandbox.stub(this.spawnedProcess, 'on')
+    this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+    return this.ensureEmptyInstallationDir()
+  })
+
+  it('logs error and exits when no version of Cypress is installed', function () {
+    return fs.outputJsonAsync(infoFilePath, {})
+    .then(() => {
+      return verify.start()
+    })
+    .then(() => {
+      snapshot(logger.print())
+      expect(process.exit).to.be.calledWith(1)
+    })
+  })
+
+  it('logs warning when installed version does not match package version', function () {
+    return info.writeInstalledVersion('bloop')
+    .then(() => {
+      return verify.start()
+    })
+    .then(() => {
+      snapshot(logger.print())
+    })
+  })
+
+  it('logs error and exits when executable cannot be found', function () {
+    this.sandbox.stub(fs, 'statAsync').rejects()
+
+    return info.writeInstalledVersion(packageVersion)
+    .then(() => {
+      return verify.start()
+    })
+    .then(() => {
+      snapshot(logger.print())
+      expect(process.exit).to.be.calledWith(1)
+    })
+  })
+
+  describe('with force: true', function () {
+    beforeEach(function () {
+      this.sandbox.stub(fs, 'statAsync').resolves()
+      this.sandbox.stub(_, 'random').returns('222')
+      this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
+      return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
+    })
+
+    it('shows full path to executable when verifying', function () {
+      return verify.start({ force: true })
+      .then(() => {
+        snapshot(logger.print())
+      })
+    })
+
+    it('runs smoke test even if version already verified', function () {
+      return verify.start({ force: true })
+      .then(() => {
+        snapshot(logger.print())
+        expect(cp.spawn).to.be.calledWith(info.getPathToExecutable(), [
+          '--smoke-test',
+          '--ping=222',
+        ])
+      })
+    })
+
+    it('clears verified version from state if verification fails', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
+      return verify.start({ force: true })
+      .then(() => {
+        return fs.readJsonAsync(infoFilePath).get('verifiedVersion')
+      })
+      .then((verifiedVersion) => {
+        expect(verifiedVersion).to.be.null
+      })
+    })
+  })
+
+  describe('smoke test', function () {
+    beforeEach(function () {
+      this.sandbox.stub(fs, 'statAsync').resolves()
+      this.sandbox.stub(_, 'random').returns('222')
+      this.sandbox.stub(this.stdout, 'on').yieldsAsync('222')
+    })
+
+    it('logs and runs when no version has been verified', function () {
+      return info.writeInstalledVersion(packageVersion)
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        snapshot(logger.print())
+        expect(cp.spawn).to.be.calledWith(info.getPathToExecutable(), [
+          '--smoke-test',
+          '--ping=222',
+        ])
+      })
+    })
+
+    it('logs and runs when current version has not been verified', function () {
+      return fs.outputJsonAsync(path.join(info.getInstallationDir(), 'info.json'), {
+        version: packageVersion,
+        verifiedVersion: 'different version',
+      })
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        snapshot(logger.print())
+        expect(cp.spawn).to.be.calledWith(info.getPathToExecutable(), [
+          '--smoke-test',
+          '--ping=222',
+        ])
+      })
+    })
+
+    it('logs stderr when it fails', function () {
+      this.sandbox.stub(this.spawnedProcess.stderr, 'on')
+      this.spawnedProcess.stderr.on.withArgs('data').yields({
+        toString: () => 'the stderr output',
+      })
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
+
+      return fs.outputJsonAsync(infoFilePath, {
+        version: packageVersion,
+        verifiedVersion: 'different version',
+      })
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        snapshot(logger.print())
+      })
+    })
+
+    it('logs success message and writes version when it succeeds', function () {
+      return fs.outputJsonAsync(infoFilePath, {
+        version: packageVersion,
+        verifiedVersion: 'different version',
+      })
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        return fs.readJsonAsync(infoFilePath)
+      })
+      .then((info) => {
+        snapshot(logger.print())
+        expect(info.verifiedVersion).to.equal(packageVersion)
+      })
+    })
+
+    describe('on linux', function () {
+      beforeEach(function () {
+        xvfb.isNeeded.returns(true)
+
+        return fs.outputJsonAsync(infoFilePath, {
+          version: packageVersion,
+          verifiedVersion: 'different version',
+        })
+      })
+
+      it('starts xvfb', function () {
+        return verify.start()
+        .then(() => {
+          expect(xvfb.start).to.be.called
+        })
+      })
+
+      it('stops xvfb on spawned process close', function () {
+        this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+        return verify.start()
+        .then(() => {
+          expect(xvfb.stop).to.be.called
+        })
+      })
+
+      it('logs error and exits when starting xvfb fails', function () {
+        const err = new Error('test without xvfb')
+        err.stack = 'xvfb? no dice'
+        xvfb.start.rejects(err)
+        return verify.start()
+        .then(() => {
+          snapshot(logger.print())
+        })
+      })
+    })
+  })
+})

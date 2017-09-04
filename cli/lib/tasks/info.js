@@ -83,6 +83,7 @@ module.exports = {
   writeInfoFileContents,
   ensureInstallationDir,
   ensureFileInfoContents,
+  getInfoFilePath,
   getVerifiedVersion,
   getInstallationDir,
   getInstalledVersion,
