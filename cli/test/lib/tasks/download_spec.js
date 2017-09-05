@@ -11,6 +11,7 @@ const info = require(`${lib}/tasks/info`)
 const download = require(`${lib}/tasks/download`)
 
 const stdout = require('../../support/stdout')
+const normalize = require('../../support/normalize')
 
 describe('download', function () {
   const rootFolder = '/home/user/git'
@@ -88,7 +89,7 @@ describe('download', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot('download status errors', util.normalize(ctx.stdout.toString()))
+      snapshot('download status errors', normalize(ctx.stdout.toString()))
     })
   })
 })

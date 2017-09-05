@@ -2,13 +2,9 @@ const _ = require('lodash')
 const path = require('path')
 const isCi = require('is-ci')
 const chalk = require('chalk')
-const stripAnsi = require('strip-ansi')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
-
-const excessWhitespaceRe = /(\s{3,})/
-const datesRe = /(\d+:\d+:\d+)/g
 
 module.exports = {
   isCi () {
@@ -61,16 +57,6 @@ module.exports = {
   secsRemaining (eta) {
     // calculate the seconds reminaing with no decimal places
     return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
-  },
-
-  normalize (str) {
-    // strip dates and ansi codes
-    // and excess whitespace
-    return stripAnsi(
-      str
-      .replace(datesRe, 'xx:xx:xx')
-      .replace(excessWhitespaceRe, ' ')
-    )
   },
 
   setTaskTitle (task, title, renderer) {

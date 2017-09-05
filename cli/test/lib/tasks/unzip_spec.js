@@ -11,6 +11,7 @@ const info = require(`${lib}/tasks/info`)
 const unzip = require(`${lib}/tasks/unzip`)
 
 const stdout = require('../../support/stdout')
+const normalize = require('../../support/normalize')
 
 const dest = info.getInstallationDir()
 
@@ -44,7 +45,7 @@ describe('unzip', function () {
 
       snapshot(
         'unzip error',
-        util.normalize(ctx.stdout.toString())
+        normalize(ctx.stdout.toString())
       )
     })
   })

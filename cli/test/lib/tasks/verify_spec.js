@@ -15,6 +15,7 @@ const info = require(`${lib}/tasks/info`)
 const verify = require(`${lib}/tasks/verify`)
 
 const stdout = require('../../support/stdout')
+const normalize = require('../../support/normalize')
 
 const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
@@ -89,7 +90,7 @@ context('.verify', function () {
 
       snapshot(
         'no version of Cypress installed',
-        util.normalize(ctx.stdout.toString())
+        normalize(ctx.stdout.toString())
       )
     })
   })
@@ -137,7 +138,7 @@ context('.verify', function () {
     .catch(() => {
       snapshot(
         'warning installed version does not match package version',
-        util.normalize(ctx.stdout.toString())
+        normalize(ctx.stdout.toString())
       )
     })
   })
@@ -157,7 +158,7 @@ context('.verify', function () {
 
       snapshot(
         'executable cannot be found',
-        util.normalize(ctx.stdout.toString())
+        normalize(ctx.stdout.toString())
       )
     })
   })
@@ -194,8 +195,8 @@ context('.verify', function () {
         // console.log(ctx.stdout.toString())
         snapshot(
           'verification with executable',
-          util.normalize(ctx.stdout.toString())
-          // util.normalize(ctx.stdout.toString())
+          normalize(ctx.stdout.toString())
+          // normalize(ctx.stdout.toString())
         )
       })
     })
@@ -215,7 +216,7 @@ context('.verify', function () {
 
         snapshot(
           'fails verifying Cypress',
-          util.normalize(slice(ctx.stdout.toString()))
+          normalize(slice(ctx.stdout.toString()))
         )
 
         return info.getVerifiedVersion()
@@ -251,7 +252,7 @@ context('.verify', function () {
       .then(() => {
         snapshot(
           'no existing version verified',
-          util.normalize(ctx.stdout.toString())
+          normalize(ctx.stdout.toString())
         )
       })
     })
@@ -275,7 +276,7 @@ context('.verify', function () {
       .then(() => {
         snapshot(
           'current version has not been verified',
-          util.normalize(ctx.stdout.toString())
+          normalize(ctx.stdout.toString())
         )
       })
     })
@@ -319,7 +320,7 @@ context('.verify', function () {
 
           snapshot(
             'xvfb fails',
-            util.normalize(slice(ctx.stdout.toString()))
+            normalize(slice(ctx.stdout.toString()))
           )
         })
       })
@@ -340,7 +341,7 @@ context('.verify', function () {
       it('uses verbose renderer', function () {
         snapshot(
           'verifying in ci',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })

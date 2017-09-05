@@ -14,6 +14,8 @@ const unzip = require(`${lib}/tasks/unzip`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
 
+const normalize = require('../../support/normalize')
+
 const packageVersion = '1.2.3'
 const downloadDestination = 'path/to/cypress.zip'
 
@@ -69,7 +71,7 @@ describe('install', function () {
 
           snapshot(
             'specify version in env vars',
-            util.normalize(this.stdout.toString())
+            normalize(this.stdout.toString())
           )
         })
       })
@@ -104,7 +106,7 @@ describe('install', function () {
 
         snapshot(
           'version already installed',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
@@ -127,7 +129,7 @@ describe('install', function () {
 
         snapshot(
           'continues installing on failure',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
@@ -155,7 +157,7 @@ describe('install', function () {
 
         snapshot(
           'installs without existing installation',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
@@ -178,7 +180,7 @@ describe('install', function () {
 
         snapshot(
           'installed version does not match needed version',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
@@ -203,7 +205,7 @@ describe('install', function () {
 
         snapshot(
           'forcing true always installs',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
@@ -228,7 +230,7 @@ describe('install', function () {
 
         snapshot(
           'warning installing as global',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
@@ -245,7 +247,7 @@ describe('install', function () {
       it('uses verbose renderer', function () {
         snapshot(
           'installing in ci',
-          util.normalize(this.stdout.toString())
+          normalize(this.stdout.toString())
         )
       })
     })
