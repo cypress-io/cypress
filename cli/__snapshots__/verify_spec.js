@@ -1,60 +1,38 @@
-exports['xvfb fails 1'] = `It looks like this is your first time using Cypress: 1.2.3
+exports['verification with executable 1'] = `It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /path/to/executable/dir
-STRIPPED
-Error: Your system is missing the dependency: XVFB
+ ✔  Verified Cypress! /path/to/executable/dir
 
-Install XVFB and run Cypress again.
+Opening Cypress...
+`
 
-Read our documentation on dependencies for more information:
+exports['no version of Cypress installed 1'] = `Error: No version of Cypress is installed.
 
-https://on.cypress.io/required-dependencies
-
-If you using Docker, we provide containers with all required dependencies installed.
+Please reinstall Cypress by running: cypress install
 ----------
 
-Caught error trying to run XVFB: "test without xvfb"
+Cypress executable not found at: /path/to/executable
 ----------
 
 Platform: darwin (test release)
 Cypress Version: 1.2.3
 `
 
-exports['no version of Cypress installed 1'] = `[31mError: No version of Cypress is installed.[39m
-[31m[39m
-[31mPlease reinstall Cypress by running: [36mcypress install[31m[39m
-[31m----------[39m
-[31m[39m
-[31mCypress executable not found at: [36m/path/to/executable[31m[39m
-[31m----------[39m
-[31m[39m
-[31mPlatform: darwin (test release)[39m
-[31mCypress Version: 1.2.3[39m
-`
+exports['warning installed version does not match package version 1'] = `Installed version bloop does not match the expected package version 1.2.3
 
-exports['warning installed version does not match package version 1'] = `[33mInstalled version [36mbloop[33m does not match the expected package version [36m1.2.3[33m[39m
-[33m[39m
-[33mNote: there is no guarantee these versions will work properly together.[39m
+Note: there is no guarantee these versions will work properly together.
 
 `
 
-exports['executable cannot be found 1'] = `[31mError: No version of Cypress is installed.[39m
-[31m[39m
-[31mPlease reinstall Cypress by running: [36mcypress install[31m[39m
-[31m----------[39m
-[31m[39m
-[31mCypress executable not found at: [36m/path/to/executable[31m[39m
-[31m----------[39m
-[31m[39m
-[31mPlatform: darwin (test release)[39m
-[31mCypress Version: 1.2.3[39m
-`
+exports['executable cannot be found 1'] = `Error: No version of Cypress is installed.
 
-exports['verification with executable 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+Please reinstall Cypress by running: cypress install
+----------
 
-[?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
-[?25h
-[33mOpening Cypress...[39m
+Cypress executable not found at: /path/to/executable
+----------
+
+Platform: darwin (test release)
+Cypress Version: 1.2.3
 `
 
 exports['fails verifying Cypress 1'] = `It looks like this is your first time using Cypress: 1.2.3
@@ -79,25 +57,47 @@ Platform: darwin (test release)
 Cypress Version: 1.2.3
 `
 
-exports['no existing version verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['no existing version verified 1'] = `It looks like this is your first time using Cypress: 1.2.3
 
-[?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
-[?25h
-[33mOpening Cypress...[39m
+ ✔  Verified Cypress! /path/to/executable/dir
+
+Opening Cypress...
 `
 
-exports['current version has not been verified 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['current version has not been verified 1'] = `It looks like this is your first time using Cypress: 1.2.3
 
-[?25l [32m✔[39m [34m [32mVerified Cypress![34m [90m/path/to/executable/dir[34m[39m
-[?25h
-[33mOpening Cypress...[39m
+ ✔  Verified Cypress! /path/to/executable/dir
+
+Opening Cypress...
 `
 
-exports['verifying in ci 1'] = `[33mIt looks like this is your first time using Cypress: [36m1.2.3[33m[39m
+exports['xvfb fails 1'] = `It looks like this is your first time using Cypress: 1.2.3
 
-[?25l[2m[xx:xx:xx][22m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m [started]
-[2m[xx:xx:xx][22m [34m Verifying Cypress can run [90m/path/to/executable/dir[34m[39m [completed]
-[?25h
-[33mOpening Cypress...[39m
+ ✖  Verifying Cypress can run /path/to/executable/dir
+STRIPPED
+Error: Your system is missing the dependency: XVFB
+
+Install XVFB and run Cypress again.
+
+Read our documentation on dependencies for more information:
+
+https://on.cypress.io/required-dependencies
+
+If you using Docker, we provide containers with all required dependencies installed.
+----------
+
+Caught error trying to run XVFB: "test without xvfb"
+----------
+
+Platform: darwin (test release)
+Cypress Version: 1.2.3
+`
+
+exports['verifying in ci 1'] = `It looks like this is your first time using Cypress: 1.2.3
+
+[xx:xx:xx]  Verifying Cypress can run /path/to/executable/dir [started]
+[xx:xx:xx]  Verifying Cypress can run /path/to/executable/dir [completed]
+
+Opening Cypress...
 `
 

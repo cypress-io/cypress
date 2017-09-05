@@ -42,7 +42,10 @@ describe('unzip', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot(ctx.stdout.toString())
+      snapshot(
+        'unzip error',
+        util.normalize(ctx.stdout.toString())
+      )
     })
   })
 

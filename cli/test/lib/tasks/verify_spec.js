@@ -6,7 +6,6 @@ const cp = require('child_process')
 const EE = require('events').EventEmitter
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
-const stripAnsi = require('strip-ansi')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -22,10 +21,9 @@ const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
 
-const normalize = (str) => {
+const slice = (str) => {
   // strip answer and split by new lines
-  str = stripAnsi(str)
-  .split('\n')
+  str = str.split('\n')
 
   // find the line about verifying cypress can run
   const index = _.findIndex(str, (line) => {
@@ -45,6 +43,7 @@ context('.verify', function () {
     this.stdout = stdout.capture()
     this.cpstderr = new EE()
     this.cpstdout = new EE()
+    this.sandbox.stub(util, 'isCi').returns(false)
     this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
     this.sandbox.stub(os, 'platform').returns('darwin')
     this.sandbox.stub(os, 'release').returns('test release')
@@ -88,7 +87,10 @@ context('.verify', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot('no version of Cypress installed', ctx.stdout.toString())
+      snapshot(
+        'no version of Cypress installed',
+        util.normalize(ctx.stdout.toString())
+      )
     })
   })
 
@@ -134,7 +136,8 @@ context('.verify', function () {
     })
     .catch(() => {
       snapshot(
-        'warning installed version does not match package version', ctx.stdout.toString()
+        'warning installed version does not match package version',
+        util.normalize(ctx.stdout.toString())
       )
     })
   })
@@ -152,7 +155,10 @@ context('.verify', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot('executable cannot be found', ctx.stdout.toString())
+      snapshot(
+        'executable cannot be found',
+        util.normalize(ctx.stdout.toString())
+      )
     })
   })
 
@@ -185,7 +191,12 @@ context('.verify', function () {
         expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        snapshot('verification with executable', ctx.stdout.toString())
+        // console.log(ctx.stdout.toString())
+        snapshot(
+          'verification with executable',
+          util.normalize(ctx.stdout.toString())
+          // util.normalize(ctx.stdout.toString())
+        )
       })
     })
 
@@ -202,7 +213,10 @@ context('.verify', function () {
       .catch((err) => {
         logger.error(err)
 
-        snapshot('fails verifying Cypress', normalize(ctx.stdout.toString()))
+        snapshot(
+          'fails verifying Cypress',
+          util.normalize(slice(ctx.stdout.toString()))
+        )
 
         return info.getVerifiedVersion()
       })
@@ -235,7 +249,10 @@ context('.verify', function () {
         expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        snapshot('no existing version verified', ctx.stdout.toString())
+        snapshot(
+          'no existing version verified',
+          util.normalize(ctx.stdout.toString())
+        )
       })
     })
 
@@ -256,7 +273,10 @@ context('.verify', function () {
         expect(vv).to.eq(packageVersion)
       })
       .then(() => {
-        snapshot('current version has not been verified', ctx.stdout.toString())
+        snapshot(
+          'current version has not been verified',
+          util.normalize(ctx.stdout.toString())
+        )
       })
     })
 
@@ -297,14 +317,17 @@ context('.verify', function () {
 
           logger.error(err)
 
-          snapshot('xvfb fails', normalize(ctx.stdout.toString()))
+          snapshot(
+            'xvfb fails',
+            util.normalize(slice(ctx.stdout.toString()))
+          )
         })
       })
     })
 
     describe('when running in CI', function () {
       beforeEach(function () {
-        this.sandbox.stub(util, 'isCi').returns(true)
+        util.isCi.returns(true)
 
         return info.writeInfoFileContents({
           version: packageVersion,
@@ -317,7 +340,7 @@ context('.verify', function () {
       it('uses verbose renderer', function () {
         snapshot(
           'verifying in ci',
-          util.stripDates(this.stdout.toString())
+          util.normalize(this.stdout.toString())
         )
       })
     })

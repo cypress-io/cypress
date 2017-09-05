@@ -8,10 +8,9 @@ Note: there is no guarantee these versions will work properly together.
 
 Installing Cypress (version: 0.12.1)
 
-[?25l [32m✔[39m  Downloaded Cypress     
- [32m✔[39m  Unzipped Cypress       
- [32m✔[39m  Finished Installation   /path/to/binary/dir/
-[?25h
+ ✔  Downloaded Cypress ✔  Unzipped Cypress       
+ ✔  Finished Installation   /path/to/binary/dir/
+
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
@@ -24,10 +23,9 @@ Pass the --force option if you'd like to reinstall anyway.
 
 exports['continues installing on failure 1'] = `Installing Cypress (version: 1.2.3)
 
-[?25l [32m✔[39m  Downloaded Cypress     
- [32m✔[39m  Unzipped Cypress       
- [32m✔[39m  Finished Installation   /path/to/binary/dir/
-[?25h
+ ✔  Downloaded Cypress ✔  Unzipped Cypress       
+ ✔  Finished Installation   /path/to/binary/dir/
+
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
@@ -35,10 +33,9 @@ https://on.cypress.io/installing-cypress
 
 exports['installs without existing installation 1'] = `Installing Cypress (version: 1.2.3)
 
-[?25l [32m✔[39m  Downloaded Cypress     
- [32m✔[39m  Unzipped Cypress       
- [32m✔[39m  Finished Installation   /path/to/binary/dir/
-[?25h
+ ✔  Downloaded Cypress ✔  Unzipped Cypress       
+ ✔  Finished Installation   /path/to/binary/dir/
+
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
@@ -48,10 +45,9 @@ exports['installed version does not match needed version 1'] = `Installed versio
 
 Installing Cypress (version: 1.2.3)
 
-[?25l [32m✔[39m  Downloaded Cypress     
- [32m✔[39m  Unzipped Cypress       
- [32m✔[39m  Finished Installation   /path/to/binary/dir/
-[?25h
+ ✔  Downloaded Cypress ✔  Unzipped Cypress       
+ ✔  Finished Installation   /path/to/binary/dir/
+
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
@@ -59,10 +55,9 @@ https://on.cypress.io/installing-cypress
 
 exports['forcing true always installs 1'] = `Installing Cypress (version: 1.2.3)
 
-[?25l [32m✔[39m  Downloaded Cypress     
- [32m✔[39m  Unzipped Cypress       
- [32m✔[39m  Finished Installation   /path/to/binary/dir/
-[?25h
+ ✔  Downloaded Cypress ✔  Unzipped Cypress       
+ ✔  Finished Installation   /path/to/binary/dir/
+
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
@@ -72,10 +67,9 @@ exports['warning installing as global 1'] = `Installed version (x.x.x) does not 
 
 Installing Cypress (version: 1.2.3)
 
-[?25l [32m✔[39m  Downloaded Cypress     
- [32m✔[39m  Unzipped Cypress       
- [32m✔[39m  Finished Installation   /path/to/binary/dir/
-[?25h
+ ✔  Downloaded Cypress ✔  Unzipped Cypress       
+ ✔  Finished Installation   /path/to/binary/dir/
+
 It looks like you've installed Cypress globally.
 
 This will work, but it's not recommended.
@@ -92,13 +86,13 @@ exports['installing in ci 1'] = `Installed version (x.x.x) does not match needed
 
 Installing Cypress (version: 1.2.3)
 
-[?25l[2m[xx:xx:xx][22m  Downloading Cypress     [started]
-[2m[xx:xx:xx][22m  Downloading Cypress     [completed]
-[2m[xx:xx:xx][22m  Unzipping Cypress       [started]
-[2m[xx:xx:xx][22m  Unzipping Cypress       [completed]
-[2m[xx:xx:xx][22m  Finishing Installation  [started]
-[2m[xx:xx:xx][22m  Finishing Installation  [completed]
-[?25h
+[xx:xx:xx]  Downloading Cypress [started]
+[xx:xx:xx]  Downloading Cypress     [completed]
+[xx:xx:xx]  Unzipping Cypress       [started]
+[xx:xx:xx]  Unzipping Cypress       [completed]
+[xx:xx:xx]  Finishing Installation  [started]
+[xx:xx:xx]  Finishing Installation  [completed]
+
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress

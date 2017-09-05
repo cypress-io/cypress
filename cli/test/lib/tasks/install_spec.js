@@ -36,6 +36,7 @@ describe('install', function () {
     beforeEach(function () {
       logger.reset()
 
+      this.sandbox.stub(util, 'isCi').returns(false)
       this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
       this.sandbox.stub(download, 'start').resolves(downloadDestination)
       this.sandbox.stub(unzip, 'start').resolves()
@@ -66,7 +67,10 @@ describe('install', function () {
             version,
           })
 
-          snapshot('specify version in env vars', this.stdout.toString())
+          snapshot(
+            'specify version in env vars',
+            util.normalize(this.stdout.toString())
+          )
         })
       })
 
@@ -98,7 +102,10 @@ describe('install', function () {
       it('logs noop message', function () {
         expect(download.start).not.to.be.called
 
-        snapshot('version already installed', this.stdout.toString())
+        snapshot(
+          'version already installed',
+          util.normalize(this.stdout.toString())
+        )
       })
     })
 
@@ -118,7 +125,10 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot('continues installing on failure', this.stdout.toString())
+        snapshot(
+          'continues installing on failure',
+          util.normalize(this.stdout.toString())
+        )
       })
     })
 
@@ -143,7 +153,10 @@ describe('install', function () {
         // cleans up the zip file
         expect(fs.removeAsync).to.be.calledWith(downloadDestination)
 
-        snapshot('installs without existing installation', this.stdout.toString())
+        snapshot(
+          'installs without existing installation',
+          util.normalize(this.stdout.toString())
+        )
       })
     })
 
@@ -165,7 +178,7 @@ describe('install', function () {
 
         snapshot(
           'installed version does not match needed version',
-          this.stdout.toString()
+          util.normalize(this.stdout.toString())
         )
       })
     })
@@ -188,7 +201,10 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot('forcing true always installs', this.stdout.toString())
+        snapshot(
+          'forcing true always installs',
+          util.normalize(this.stdout.toString())
+        )
       })
     })
 
@@ -210,13 +226,16 @@ describe('install', function () {
           version: packageVersion,
         })
 
-        snapshot('warning installing as global', this.stdout.toString())
+        snapshot(
+          'warning installing as global',
+          util.normalize(this.stdout.toString())
+        )
       })
     })
 
     describe('when running in CI', function () {
       beforeEach(function () {
-        this.sandbox.stub(util, 'isCi').returns(true)
+        util.isCi.returns(true)
 
         info.getInstalledVersion.resolves('x.x.x')
 
@@ -226,7 +245,7 @@ describe('install', function () {
       it('uses verbose renderer', function () {
         snapshot(
           'installing in ci',
-          util.stripDates(this.stdout.toString())
+          util.normalize(this.stdout.toString())
         )
       })
     })

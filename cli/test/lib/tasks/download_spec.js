@@ -88,7 +88,7 @@ describe('download', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot(ctx.stdout.toString())
+      snapshot('download status errors', util.normalize(ctx.stdout.toString()))
     })
   })
 })
