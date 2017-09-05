@@ -1,3 +1,5 @@
+const Promise = require('bluebird')
+
 module.exports = function note (hexo, args, content) {
   // {% note info Want to see Cypress in action? %}
   // Explore talks, blogs, and podcasts about testing in Cypress.
@@ -30,7 +32,7 @@ module.exports = function note (hexo, args, content) {
     </strong>`
   }
 
-  return hexo.render.render({ text: content, engine: 'markdown' })
+  return Promise.resolve(hexo.render.renderSync({ text: content, engine: 'markdown' }))
   .then((markdown) => {
     return `<blockquote class="note ${className}">${header}${markdown}</blockquote>`
   })

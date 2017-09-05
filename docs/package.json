@@ -77,7 +77,7 @@
     "docsearch.js": "2.3.3",
     "fira": "github:cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "4.7.0",
-    "hexo": "github:cypress-io/hexo#8915e2677f452b3d5786f646b176aedfd2fb8b30",
+    "hexo": "3.3.8",
     "hexo-algoliasearch": "0.2.1",
     "hexo-cli": "^1.0.3",
     "hexo-filter-cleanup": "1.0.7",

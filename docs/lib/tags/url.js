@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const util = require('hexo-util')
 const urlGenerator = require('../url_generator')
 
@@ -7,7 +8,7 @@ function getUrlProps (hexo, href, text) {
   // onRender callback to generate
   // the markdown for each internal document
   const onRender = (text) => {
-    return hexo.render.render({ text, engine: 'markdown' })
+    return hexo.render.renderSync({ text, engine: 'markdown' })
   }
 
   return urlGenerator.validateAndGetUrl(sidebar, href, this.full_source, text, onRender)
@@ -68,7 +69,7 @@ function url (hexo, args) {
     throw new Error(`Invalid url from args ${JSON.stringify(args)}`)
   }
 
-  return hexo.render.render({ text: props.text, engine: 'markdown' })
+  return Promise.resolve(hexo.render.renderSync({ text: props.text, engine: 'markdown' }))
   .then((markdown) => {
     // remove <p> and </p> and \n
     markdown = markdown

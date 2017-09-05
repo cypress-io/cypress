@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const util = require('hexo-util')
 
 function issue (hexo, args) {
@@ -12,7 +13,7 @@ function issue (hexo, args) {
 
   const text = args[1] || `#${num}`
 
-  return hexo.render.render({ text: text, engine: 'markdown' })
+  return Promise.resolve(hexo.render.renderSync({ text, engine: 'markdown' }))
   .then((markdown) => {
     // remove <p> and </p> and \n
     markdown = markdown

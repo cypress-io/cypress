@@ -10,7 +10,7 @@ module.exports = function rawRender (hexo, text, options = {}) {
       return text
     }
 
-    return hexo.render.render({
+    return hexo.render.renderSync({
       text,
       engine,
     })
