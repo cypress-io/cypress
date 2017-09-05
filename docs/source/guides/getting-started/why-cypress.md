@@ -48,7 +48,7 @@ Cypress is a free, {% url "open source" https://www.cypress.io/blog/2017/05/04/c
 
 Our mission is to build a thriving, open source ecosystem that enhances productivity, makes testing an enjoyable experience, and generates developer happiness. We hold ourselves accountable to champion a testing process **that actually works**.
 
-We believe our documentation should be simple and approachable. This means  enabling ours readers to fully understand not just the **what** but **why**.
+We believe our documentation should be simple and approachable. This means enabling our readers to fully understand not just the **what** but **why**.
 
 We want to help developers build a new generation of modern applications faster, better, and without the stress and anxiety associated with managing tests.
 
