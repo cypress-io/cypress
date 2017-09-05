@@ -307,7 +307,7 @@ To work around the need to reference elements, Cypress has a feature {% url 'kno
 
 ***Using {% url `.then()` then %} To Act On A Subject***
 
-Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a {% url '`.then()`' type %} to your command chain. When the previous command resolves, it will call your callback function with the yielded subject as the first argument.
+Want to jump into the command flow and get your hands on the subject directly? No problem, simply add a {% url '`.then()`' then %} to your command chain. When the previous command resolves, it will call your callback function with the yielded subject as the first argument.
 
 If you wish to continue chaining commands after your {% url `.then()` then %}, you'll need to specify the subject you want to yield to those commands, which you can achieve with a simple return value other than `null` or `undefined`. Cypress will yield that to the next command for you.
 
@@ -476,7 +476,7 @@ Cypress cannot yield you primitive values isolated away from other commands. Tha
 These design patterns ensure we can create **deterministic**, **repeatable**, **consistent** tests that are **flake free**.
 
 {% note info %}
-Cypress is built using Promises that come from {% url "Bluebird" http://bluebirdjs.com/ %}. However, Cypress commands do not return these typical Promise instances. Instead we return what's called a `Chainer` that acts like a layer sitting on top of the internal Promise instances.
+Cypress is built using Promises that come from {% url "Bluebird" http://bluebirdjs.com/docs/getting-started.html %}. However, Cypress commands do not return these typical Promise instances. Instead we return what's called a `Chainer` that acts like a layer sitting on top of the internal Promise instances.
 {% endnote %}
 
 ## Commands Are Not Promises
@@ -639,7 +639,7 @@ Can you think of any more?
 {% note success Core Concept %}
 With Cypress, you don't have to assert to have a useful test. Even without assertions, a few lines of Cypress can ensure thousands of lines of code are working properly across the client and server!
 
-This is because many commands have a built in {% urlHash 'Default Assertion' Default-Assertions %} which offer you a high level of guarantee.
+This is because many commands have a built in {% urlHash 'Default Assertion' Default-Assertions %} that offers you a high level of guarantee.
 {% endnote %}
 
 ## Default Assertions
@@ -650,7 +650,7 @@ Many commands have a default, built-in assertion, or rather have requirements th
 
 - {% url `cy.visit()` visit %} expects the page to send `text/html` content with a `200` status code.
 - {% url `cy.request()` request %} expects the remote server to exist and provide a response.
-- {% url `cy.contains()` get %} expects the element with content to eventually exist in the DOM.
+- {% url `cy.contains()` contains %} expects the element with content to eventually exist in the DOM.
 - {% url `cy.get()` get %} expects the element to eventually exist in the DOM.
 - {% url `.find()` find %} also expects the element to eventually exist in the DOM.
 - {% url `.type()` type %} expects the element to eventually be in a *typeable* state.
