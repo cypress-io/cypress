@@ -8,8 +8,24 @@ comments: false
 **Summary:**
 
 - `0.20.0` is our biggest technical release ever. It accounts for more than 2000 commits. It's full of breaking changes we wanted to land prior to having our public `1.0.0` release.
-- Cypress is now a real npm module. There is no more need for `cypress-cli`, and instead you will just `npm install cypress --save-dev`. All the same CLI based commands are the same. The GUI has been updated to account for running Cypress as a globally installed single application, and also as a `node_module` dependency.
+- You can now install Cypress as a real `npm` module, and even `require` it in your node files.
 - We rewrote the entire driver (we've all been there) and converted all 2500+ tests to be run within Cypress itself.
+
+**CLI Changes:**
+
+- You now use `npm` to manage Cypress versions like every other dev dependency.
+- Running `npm install --save-dev cypress` will automatically download the CLI + binary.
+- There is no longer a separate `cypress install` step, but this command still exists if you want to **reinstall** the binary for whatever reason.
+- No need to use `cypress-cli` anymore to manage Cypress versions.
+- The `cypress` module can be `required` in your own node projects to programmatically control Cypress the same way you would from the command line.
+- We've updated the installation experience to account for running locally and in CI so it doesn't generate a ton of logs in `stdout`.
+- The `CYPRESS_VERSION` environment variable is gone because now the version of the binary is controlled by the module version. If for some reason you want to download the binary of a different version you can use the new `CYPRESS_BINARY_VERSION` environment variable - but you'll get a warning message when the versions don't match.
+- If you install cypress globally using `npm install -g cypress` we will warn you that you should check this in as a `devDependency` but Cypress will continue to work in "global mode".
+- Cypress now verifies it can run on your system prior to actually running. It'll do this for each new version the first time you try to use it. Errors it receives from attempting to run will bubble up nicely, so you'll receive output for things like missing linux dependencies instead of absolutely *nothing* like before.
+- We have better error handling and messaging around `Xvfb` failures.
+- There is a new `--browser` option that lets you change the browser that runs from the command line. This works the same way as changing the browser in the GUI, with the exception that any browser other than the default `electron` browser will **not** record a video. This is solvable but requires more work.
+- Whenever you encounter errors in the CLI we'll output helpful debugging information at the bottom of each error.
+- You can use the new environment variable `DEBUG=cypress:cli` to see debugging output from the CLI
 
 **Breaking Changes:**
 
@@ -26,8 +42,6 @@ comments: false
 
 **Features:**
 
-- [x] You can now install `cypress` per project as an `npm` package using `npm install cypress`. The installation and use of the {% url "`cypress-cli` npm package" https://www.npmjs.com/package/cypress-cli %} is no longer required.
-- [x] We have all new docs! Check them out {% url "here" https://docs.cypress.io %}.
 - [x] `chai-jQuery` assertions have improved error messaging, and have had their internal double assertions removed, and can now be made on raw DOM objects. Fixes {% issue 605 %}.
 - [x] `chai-jQuery` assertions now throw a nice error message when you're asserting on a non DOM object. Fixes {% issue 604 %}.
 - [x] New `.trigger()` command. Useful for triggering arbitrary events. Fixes {% issue 406 %}.
@@ -42,12 +56,15 @@ comments: false
 - [x] We have all new {% url "docker examples" docker-images %} you can check out.
 - [x] The `cypress` npm package now checks the currently installed version on `install` and `run` and does not re-install Cypress if it is already installed. Fixes {% issue 396 %}.
 - [x] We've added a new `Cypress.Commands` interface to handle adding your own custom commands. Fixes {% issue 436 %}.
+- [x] You can now overwrite existing commands with `Cypress.Commands.overwrite`. <OPEN A NEW ISSUE>
 - [x] We removed an artificial delay that was being set in between commands. This means test commands now run faster.
 - [x] You can now disable Cypress global exception handler for your application. Fixes {% issue 254 %}
 - [x] Uncaught errors appearing in your spec files or support files are now properly caught, have the right exit code, and display correctly. Fixes {% issue 345 %}
 - [x] Cypress will now scroll past multiple elements that cover up an element to be interacted with. It also now factors in elements with `position: sticky`. Fixes {% issue 571 %} and {% issue 565 %}.
 - [x] Cypress now scrolls all parent containers (not just `window`) when attempting to {% url "check an element's actionability" interacting-with-elements#Actionability %}. Fixes {% issue 569 %}.
 - [x] Using chai's `assert` interface now works correctly in your specs. <OPEN AN ISSUE>
+- [x] Screenshots are now taken during each runnable that fails. Errors in tests will happen there. Errors in hooks will also happen there. Previously a screenshot would only happen after everything (including hooks) ran. Fixes {% issue 394 %}
+- [x] `cy.screenshot()` now synchronizes its state with the reporter. This means you should see error messages (on the left side) on automatic screenshot errors.
 
 **Dependencies:**
 
@@ -88,6 +105,7 @@ comments: false
 - [x] Fixed issue where commands would retry and potentially exceed their timeout values during page transitions. Fixes {% issue 594 %}
 - [x] Fixed issue where server routes were lost after page load if not initiated by a {% url `cy.visit()` visit %} command. Fixes {% issue 177 %}
 - [x] Using mocha's `done` callback now works correctly. We've improved mocha's handling of uncaught exceptions and properly associate them to test failures. <OPEN AN ISSUE>
+- [x] `cy.viewport()` is now synchronized with the UI so that it does not resolve until the DOM has re-rendered using the dimensions.
 
 **Misc:**
 
@@ -95,8 +113,9 @@ comments: false
 - [x] Reduced the number of internal Cypress network requests in the "Network Panel" of Dev Tools. Fixes {% issue 606 %}.
 - [x] We've moved our entire codebase into one into a private "Monorepo". This is in anticipation for going open source (making the GitHub repo public) and should make it easier for everyone to contribute to our code. Fixes {% issue 256 %}.
 - [x] When element's are not visible due to being covered by another element, the error message now says what element is covering what element. {% issue 611 %}
+- [x] Improved the calculations to calculate an elements visibility. Additionally updated error messages to be clearer whenever an element isn't considered visible. Fixes {% issue 613 %}
 - [x] The "Can't start server" error displayed in the Desktop-GUI no longer prevents you from interacting in the Desktop App. It now displays as a warning. Fixes {% issue 407 %}.
-- [x] {% url `cy.focused()` focused %} now automatically retries until the element exists in the DOM. Fixes {% issue 564 %} and {% issue 409 %}.
+- [x] {% url `cy.focused()` focused %} now automatically retries until the element exists in the DOM. This makes it behave the same as `cy.get()` Fixes {% issue 564 %} and {% issue 409 %}.
 - [x] We now support per-project `state.json`. Fixes {% issue 512 %}.
 - [x] We can now handle multiple projects per server. Fixes {% issue 512 %}.
 - [x] The Desktop GUI can now have projects added by being 'dragged' in. Fixes <OPEN A NEW ISSUE>
@@ -110,6 +129,16 @@ comments: false
 - [x] When commands are clicked on and logged into the console from the Command Log, they now display their 'yield' instead of 'return', since they really yield instead of return. {% issue 612 %}
 - [x] The build process of the driver has been modernized. Fixes {% issue 429 %}.
 - [x] XHR's from your application are no longer forcefully aborted between tests. <OPEN A NEW ISSUE>
+- [x] Better error handling when running commands outside of a test. <OPEN A NEW ISSUE>
+- [x] URL changes from navigation events or hashchanges now display more accurately. <OPEN A NEW ISSUE>
+- [x] `cy.go()` snapshots before the navigation and post navigation now. <OPEN A NEW ISSUE>
+- [x] Page load events no longer forcibly `null` out the current subject. This was very unexpected and difficult to debug. Now stale elements or other objects from previous pages are yielded to you.
+- [x] Using an array of the same alias in a `cy.wait()` now yields you those XHR's in the order they were requested. Previously it was based on when the responses were returned.
+- [x] `cy.spy()` and `cy.spy()` now have a `log(false)` to turn off their automatic command logging behavior.
+- [x] Returning `null` from a `.then()` will now change the subject to that. Previously returning `null` would not cause subject changes.
+- [x] We now longer remove spies, stubs, or routes at the end of the very last test. This enables you to continue to manually use your app and have Cypress continue to instrument it.
+- [x] Updated a few things to more aggressively cause GC.
+- [x] Onboarding dialogs will never show up again once they are dismissed. Fixes {% issue 522 %}.
 
 # 1.0.0 (Upcoming)
 
