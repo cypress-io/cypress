@@ -52,7 +52,7 @@ describe "Update Banner", ->
     it "closes modal when X is clicked", ->
       @updaterCheck.resolve(NEW_VERSION)
       cy.contains("Update").click()
-      cy.get(".close").click()
+      cy.get(".modal").find(".close").click()
       cy.get(".modal").should("not.be.visible")
 
   describe "in global mode", ->
