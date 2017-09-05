@@ -1,5 +1,4 @@
-exports['e2e uncaught support file errors failing 1'] = `Added this project: /foo/bar/.projects/uncaught-support-file
-
+exports['e2e uncaught support file errors failing 1'] = `
 Started video recording: /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4
 
   (Tests Starting)
