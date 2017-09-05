@@ -1,11 +1,11 @@
-require('../spec_helper')
+require('../../spec_helper')
 
-const downloadUtils = require('../../lib/download/utils')
-const cli = require('../../lib/cli')
-const spawn = require('../../lib/exec/spawn')
-const run = require('../../lib/exec/run')
 const snapshot = require('snap-shot-it')
-const util = require('../../lib/util')
+
+const util = require(`${lib}/util`)
+const run = require(`${lib}/exec/run`)
+const spawn = require(`${lib}/exec/spawn`)
+const verify = require(`${lib}/tasks/verify`)
 
 describe('exec run', function () {
   beforeEach(function () {
@@ -13,7 +13,7 @@ describe('exec run', function () {
     this.sandbox.stub(process, 'exit')
   })
 
-  context('#processRunOptions', function () {
+  context('.processRunOptions', function () {
     it('passes --browser option', () => {
       const args = run.processRunOptions({
         browser: 'test browser',
@@ -37,64 +37,16 @@ describe('exec run', function () {
     })
   })
 
-  context('cli interface', function () {
-    beforeEach(function () {
-      this.sandbox.stub(run, 'start').resolves()
-      this.parse = (args) => cli.init().parse(`node test ${args}`.split(' '))
-    })
-
-    it('calls run with port', function () {
-      this.parse('run --port 7878')
-      expect(run.start).to.be.calledWith({ port: '7878' })
-    })
-
-    it('calls run with spec', function () {
-      this.parse('run --spec cypress/integration/foo_spec.js')
-      expect(run.start).to.be.calledWith({ spec: 'cypress/integration/foo_spec.js' })
-    })
-
-    it('calls run with port with -p arg', function () {
-      this.parse('run -p 8989')
-      expect(run.start).to.be.calledWith({ port: '8989' })
-    })
-
-    it('calls run with env variables', function () {
-      this.parse('run --env foo=bar,host=http://localhost:8888')
-      expect(run.start).to.be.calledWith({ env: 'foo=bar,host=http://localhost:8888' })
-    })
-
-    it('calls run with config', function () {
-      this.parse('run --config watchForFileChanges=false,baseUrl=localhost')
-      expect(run.start).to.be.calledWith({ config: 'watchForFileChanges=false,baseUrl=localhost' })
-    })
-
-    it('calls run with key', function () {
-      this.parse('run --key asdf')
-      expect(run.start).to.be.calledWith({ key: 'asdf' })
-    })
-
-    it('calls run with --record', function () {
-      this.parse('run --record')
-      expect(run.start).to.be.calledWith({ record: true })
-    })
-
-    it('calls run with --record false', function () {
-      this.parse('run --record false')
-      expect(run.start).to.be.calledWith({ record: false })
-    })
-  })
-
-  context('#start', function () {
+  context('.start', function () {
     beforeEach(function () {
       this.sandbox.stub(spawn, 'start')
-      this.sandbox.stub(downloadUtils, 'verify').resolves()
-      this.log = this.sandbox.spy(console, 'log')
+      this.sandbox.stub(verify, 'start').resolves()
     })
 
     it('verifies cypress', function () {
       return run.start()
       .then(() => {
-        expect(downloadUtils.verify).to.be.calledOnce
+        expect(verify.start).to.be.calledOnce
       })
     })
 

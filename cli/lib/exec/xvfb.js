@@ -3,7 +3,7 @@ const Promise = require('bluebird')
 const Xvfb = require('@cypress/xvfb')
 const R = require('ramda')
 const debug = require('debug')('cypress:cli')
-const { throwDetailedError, errors } = require('../errors')
+const { throwFormErrorText, errors } = require('../errors')
 
 const xvfb = Promise.promisifyAll(new Xvfb({ silent: true }))
 
@@ -13,7 +13,7 @@ module.exports = {
   start () {
     debug('Starting XVFB')
     return xvfb.startAsync()
-      .catch(throwDetailedError(errors.missingXvfb))
+    .catch(throwFormErrorText(errors.missingXvfb))
   },
 
   stop () {
@@ -28,11 +28,11 @@ module.exports = {
   // async method, resolved with Boolean
   verify () {
     return xvfb.startAsync()
-      .then(R.T)
-      .catch((err) => {
-        debug('Could not verify xvfb: %s', err.message)
-        return false
-      })
-      .finally(xvfb.stopAsync)
+    .then(R.T)
+    .catch((err) => {
+      debug('Could not verify xvfb: %s', err.message)
+      return false
+    })
+    .finally(xvfb.stopAsync)
   },
 }

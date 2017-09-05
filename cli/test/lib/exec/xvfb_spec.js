@@ -1,7 +1,7 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const os = require('os')
-const xvfb = require('../../lib/exec/xvfb')
+const xvfb = require(`${lib}/exec/xvfb`)
 
 describe('exec xvfb', function () {
   context('#start', function () {
