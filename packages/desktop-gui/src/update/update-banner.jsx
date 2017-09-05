@@ -114,21 +114,12 @@ class UpdateBanner extends Component {
 
   _openDownload = (e) => {
     e.preventDefault()
-    ipc.externalOpen(`https://download.cypress.io/desktop${this._os()}`)
+    ipc.externalOpen('https://download.cypress.io/desktop')
   }
 
   _openCyOpenDoc = (e) => {
     e.preventDefault()
     ipc.externalOpen(`https://on.cypress.io/how-to-open-cypress`)
-  }
-
-  _os () {
-    switch (appStore.os) {
-      case 'darwin': return '?os=mac'
-      case 'linux':  return '?os=linux64'
-      case 'win32':  return '?os=win'
-      default:       return ''
-    }
   }
 }
 

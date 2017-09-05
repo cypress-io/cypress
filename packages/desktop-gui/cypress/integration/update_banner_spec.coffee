@@ -67,7 +67,7 @@ describe "Update Banner", ->
 
     it "opens download link when Download is clicked", ->
       cy.contains("Download the new version").click().then =>
-        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop?os=linux64")
+        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop")
 
   describe "in project mode", ->
     beforeEach ->
