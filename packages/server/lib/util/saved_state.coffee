@@ -20,6 +20,7 @@ formStatePath = (projectPath) ->
     log('making saved state from %s', cwd())
     if projectPath
       log('for project path %s', projectPath)
+      return projectPath
     else
       log('missing project path, looking for project here')
 
