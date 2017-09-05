@@ -24,18 +24,20 @@ function addPageAnchors (str) {
   if (!$headings.length) return str
 
   $headings.each(function () {
-    const id = $(this).attr('id')
+    const node = $(this)
+    const id = node.attr('id')
 
     if (isInvalidId(id)) {
-      throw new Error(`Bad heading id ${id}
+      // eslint-disable-next-line no-console
+      console.error(`Bad heading id ${id}
         in the section
-        ${$.html()}
+        ${node.html()}
       `)
+    } else {
+      node
+        .addClass('article-heading')
+        .append(`<a class="article-anchor" href="#${id}" aria-hidden="true"></a>`)
     }
-
-    $(this)
-      .addClass('article-heading')
-      .append(`<a class="article-anchor" href="#${id}" aria-hidden="true"></a>`)
   })
 
   return $.html()

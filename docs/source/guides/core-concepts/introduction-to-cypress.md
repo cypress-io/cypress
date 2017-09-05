@@ -53,7 +53,7 @@ Can you read this? If you did, it might sound something like this:
 > 6. Find the element containing the text `Submit`.
 > 7. Click it.
 > 8. Grab the browser URL, ensure it includes `/posts/my-first-post`.
-> 9. Find the `<h1>` tag, ensure it contains the text "My First Post".
+> 9. Find the `h1` tag, ensure it contains the text "My First Post".
 
 This is a relatively simple, straightforward test, but consider how much code has been covered by it, both on the client and the server!
 

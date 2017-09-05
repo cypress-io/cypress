@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "hexo": {
-    "version": "3.3.8"
+    "version": "3.3.7"
   },
   "scripts": {
     "postinstall": "echo 'This project needs: npm run build'",
