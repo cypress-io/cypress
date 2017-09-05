@@ -66,30 +66,6 @@ module.exports = {
       ## no id no problem
       return null
 
-  ensureAndOpenProjectByPath: (id, options) ->
-    ## verify we have a project at this path
-    ## and if not prompt the user to add this
-    ## project. once added then open it.
-    {projectPath} = options
-
-    open = =>
-      @openProject(id, options)
-
-    Project.exists(projectPath)
-    .then (bool) =>
-      ## if we have this project then lets
-      ## immediately open it!
-      return open() if bool
-
-      ## else tell the user we're adding this project
-      console.log(
-        "Added this project:"
-        chalk.cyan(projectPath)
-      )
-
-      Project.add(projectPath)
-      .then(open)
-
   openProject: (id, options) ->
     ## now open the project to boot the server
     ## putting our web client app in headless mode
@@ -486,10 +462,9 @@ module.exports = {
     log("headless mode ready with options %j", Object.keys(options))
     id = @getId()
 
-    ## verify this is an added project
-    ## and then open it, returning our
-    ## project instance
-    @ensureAndOpenProjectByPath(id, options)
+    ## open this project without
+    ## adding it to the global cache
+    @openProject(id, options)
     .call("getProject")
     .then (project) =>
       Promise.all([
