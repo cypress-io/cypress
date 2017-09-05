@@ -6,6 +6,7 @@ const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
+const snapshot = require('snap-shot-it')
 
 describe('cli', function () {
   beforeEach(function () {
@@ -13,6 +14,70 @@ describe('cli', function () {
     this.sandbox.stub(util, 'exit')
     this.sandbox.stub(util, 'logErrorExit1')
     this.exec = (args) => cli.init().parse(`node test ${args}`.split(' '))
+  })
+
+  context('cypress version', function () {
+    /* eslint-disable no-console */
+    beforeEach(function () {
+      this.sandbox.spy(util, 'versions')
+    })
+
+    it('exits with 0', function (done) {
+      process.exit.callsFake((code) => {
+        expect(code).to.eq(0)
+        done()
+      })
+      this.exec('version')
+    })
+
+    it('gets versions', function (done) {
+      process.exit.callsFake(() => {
+        expect(util.versions).to.have.been.called
+        done()
+      })
+      this.exec('version')
+    })
+
+    it('reports package version', function (done) {
+      this.sandbox.spy(console, 'log')
+      process.exit.callsFake(() => {
+        const version = util.pkgVersion()
+        expect(console.log).to.have.been.calledWith('Cypress package version', version)
+        done()
+      })
+      this.exec('version')
+    })
+
+    it('reports package and binary message', function (done) {
+      let output = ''
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(util, 'binaryVersion').returns('X.Y.Z')
+      this.sandbox.stub(console, 'log').callsFake((...args) => {
+        output += `${args.join(' ')}\n`
+      })
+      process.exit.callsFake(() => {
+        console.log.restore()
+        snapshot(output)
+        done()
+      })
+      this.exec('version')
+    })
+
+    it('handles non-existent binary', function (done) {
+      let output = ''
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(util, 'loadJson').throws()
+      this.sandbox.stub(console, 'log').callsFake((...args) => {
+        output += `${args.join(' ')}\n`
+      })
+      process.exit.callsFake(() => {
+        console.log.restore()
+        snapshot(output)
+        done()
+      })
+      this.exec('version')
+    })
+    /* eslint-enable no-console */
   })
 
   context('cypress run', function () {

@@ -41,6 +41,18 @@ module.exports = {
     const program = new commander.Command()
 
     program
+      .command('version')
+      .description('Prints Cypress version')
+      .action(() => {
+        const versions = util.versions()
+        /* eslint-disable no-console */
+        console.log('Cypress package version', versions.package)
+        console.log('Cypress binary version', versions.binary)
+        /* eslint-enable no-console */
+        process.exit(0)
+      })
+
+    program
       .command('run')
       .usage('[options]')
       .description('Runs Cypress Headlessly')
