@@ -194,8 +194,10 @@ const maybeVerify = (options = {}) => {
     if (shouldVerify) {
       return testBinary(packageVersion)
       .then(() => {
-        logger.log()
-        logger.warn('Opening Cypress...')
+        if (options.welcomeMessage) {
+          logger.log()
+          logger.warn('Opening Cypress...')
+        }
       })
     }
   })
@@ -208,6 +210,7 @@ const start = (options = {}) => {
 
   _.defaults(options, {
     force: false,
+    welcomeMessage: true,
   })
 
   return info.getInstalledVersion()

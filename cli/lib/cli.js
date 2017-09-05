@@ -90,7 +90,7 @@ module.exports = {
       .description('Verifies that Cypress is installed correctly and executable')
       .action(() => {
         require('./tasks/verify')
-        .start({ force: true })
+        .start({ force: true, welcomeMessage: false })
         .catch(util.logErrorExit1)
       })
 

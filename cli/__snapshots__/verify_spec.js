@@ -101,3 +101,8 @@ exports['verifying in ci 1'] = `It looks like this is your first time using Cypr
 Opening Cypress...
 `
 
+exports['no welcome message 1'] = `It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /path/to/executable/dir
+`
+

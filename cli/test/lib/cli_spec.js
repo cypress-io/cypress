@@ -121,7 +121,7 @@ describe('cli', function () {
   it('verify calls verify.start with force: true', function () {
     this.sandbox.stub(verify, 'start').resolves()
     this.exec('verify')
-    expect(verify.start).to.be.calledWith({ force: true })
+    expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
   })
 
   it('verify calls verify.start + catches errors', function (done) {

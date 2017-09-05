@@ -281,6 +281,26 @@ context('.verify', function () {
       })
     })
 
+    it('turns off Opening Cypres...', function () {
+      const ctx = this
+
+      return info.writeInfoFileContents({
+        version: packageVersion,
+        verifiedVersion: 'different version',
+      })
+      .then(() => {
+        return verify.start({
+          welcomeMessage: false,
+        })
+      })
+      .then(() => {
+        snapshot(
+          'no welcome message',
+          normalize(ctx.stdout.toString())
+        )
+      })
+    })
+
     describe('on linux', function () {
       beforeEach(function () {
         xvfb.isNeeded.returns(true)
