@@ -194,7 +194,7 @@ Cypress application is valid and should be okay to run: /Applications/Cypress.ap
 
 ## `cypress version`
 
-Output both the version of the the installed Cypress application.
+Output both the version of the the installed Cypress NPM package and binary application.
 
 ```shell
 cypress version
@@ -203,5 +203,13 @@ cypress version
 ***Example Output***
 
 ```shell
-Cypress App: 0.20.0
+Cypress package version: 0.20.0
+Cypress binary version: 0.20.0
+```
+
+If the binary has not been installed yet, or has been deleted, it will print
+
+```shell
+Cypress package version: 0.20.0
+Cypress binary version: unavailable
 ```

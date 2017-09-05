@@ -46,8 +46,8 @@ module.exports = {
       .action(() => {
         const versions = util.versions()
         /* eslint-disable no-console */
-        console.log('Cypress package version', versions.package)
-        console.log('Cypress binary version', versions.binary)
+        console.log('Cypress package version:', versions.package)
+        console.log('Cypress binary version:', versions.binary)
         /* eslint-enable no-console */
         process.exit(0)
       })

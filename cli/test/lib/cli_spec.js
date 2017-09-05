@@ -42,7 +42,7 @@ describe('cli', function () {
       this.sandbox.spy(console, 'log')
       process.exit.callsFake(() => {
         const version = util.pkgVersion()
-        expect(console.log).to.have.been.calledWith('Cypress package version', version)
+        expect(console.log).to.have.been.calledWith('Cypress package version:', version)
         done()
       })
       this.exec('version')
