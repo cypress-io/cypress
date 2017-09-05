@@ -7,14 +7,21 @@ const open = require(`${lib}/exec/open`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
+const execa = require('execa-wrap')
 
 describe('cli', function () {
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
     this.sandbox.stub(util, 'exit')
     this.sandbox.stub(util, 'logErrorExit1')
-    this.exec = (args) => cli.init().parse(`node test ${args}`.split(' '))
+    this.exec = (args) => cli.init(`node test ${args}`.split(' '))
   })
+
+  context('unknown command', () =>
+    it('shows usage and exits', () =>
+      execa('bin/cypress', ['foo']).then(snapshot)
+    )
+  )
 
   context('cypress version', function () {
     /* eslint-disable no-console */

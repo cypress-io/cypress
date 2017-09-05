@@ -28,6 +28,8 @@ const descriptions = {
   project: 'path to the project',
 }
 
+const knownCommands = ['version', 'run', 'open', 'install', 'verify']
+
 const text = (description) => {
   if (!descriptions[description]) {
     throw new Error(`Could not find description for: ${description}`)
@@ -37,7 +39,10 @@ const text = (description) => {
 }
 
 module.exports = {
-  init () {
+  init (args) {
+    if (!args) {
+      args = process.argv
+    }
     const program = new commander.Command()
 
     program
@@ -106,14 +111,21 @@ module.exports = {
         .catch(util.logErrorExit1)
       })
 
-    debug('cli starts with arguments %j', process.argv)
-    program.parse(process.argv)
+    debug('cli starts with arguments %j', args)
+    program.parse(args)
 
-    //# if the process.argv.length
-    //# is less than or equal to 2
-    if (process.argv.length <= 2) {
+    //# if there are no arguments
+    if (args.length <= 2) {
       //# then display the help
       program.help()
+    }
+
+    const firstCommand = args[2]
+    if (!_.includes(knownCommands, firstCommand)) {
+      // eslint-disable-next-line no-console
+      console.error('Unknown command', `"${firstCommand}"`)
+      program.help()
+      util.exit(1)
     }
 
     return program
