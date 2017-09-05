@@ -205,12 +205,11 @@ function validateLocalFile (sidebar, href, source, render) {
       // if we have a hash then render
       // the markdown contents so we can
       // ensure it has the hash present!
-      return render(str)
-      .then((html) => {
-        assertHashIsPresent(pathToFile, source, hash, html)
+      const html = render(str)
 
-        return pathToFile
-      })
+      assertHashIsPresent(pathToFile, source, hash, html)
+
+      return pathToFile
     }
 
     return pathToFile
