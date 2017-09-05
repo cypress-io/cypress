@@ -61,4 +61,12 @@ html.has-updates {
     padding: 3px 8px;
     color: #333;
   }
+
+  a>code {
+    color: $brand-primary;
+
+    &:hover {
+      color: #2c4d97;
+    }
+  }
 }
