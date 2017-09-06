@@ -1,3 +1,6 @@
+exports['cli version and binary version 1'] = `Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z`
+
 exports['cli unknown command shows usage and exits 1'] = `
   command: bin/cypress foo
   code: 0
@@ -8,32 +11,33 @@ exports['cli unknown command shows usage and exits 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Unknown command "foo"
+
+    Usage: cypress [options] [command]
 
 
-  Commands:
+    Commands:
 
-    version          Prints Cypress version
-    run [options]    Runs Cypress Headlessly
-    open [options]   Opens Cypress normally, as a desktop application.
-    install          Installs the Cypress executable matching this package's version
-    verify           Verifies that Cypress is installed correctly and executable
+      version          Prints Cypress version
+      run [options]    Runs Cypress tests from the CLI without the GUI
+      open [options]   Opens Cypress in the interactive GUI.
+      install          Installs the Cypress executable matching this package's version
+      verify           Verifies that Cypress is installed correctly and executable
 
-  Options:
+    Options:
 
-    -h, --help  output usage information
+      -h, --help     output usage information
+      -v, --version  Prints Cypress version
   -------
   stderr:
   -------
-  Unknown command "foo"
+  
   -------
   `
 
-exports['cli cypress version reports package and binary message 1'] = `Cypress package version: 1.2.3
-Cypress binary version: X.Y.Z
-`
+exports['cli version and binary version 2'] = `Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z`
 
-exports['cli cypress version handles non-existent binary 1'] = `Cypress package version: 1.2.3
-Cypress binary version: unavailable
-`
+exports['cli version no binary version 1'] = `Cypress package version: 1.2.3
+Cypress binary version: not installed`
 

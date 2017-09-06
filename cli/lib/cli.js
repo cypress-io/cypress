@@ -2,8 +2,8 @@ const _ = require('lodash')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
-const logger = require('./logger')
 const util = require('./util')
+const logger = require('./logger')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -26,9 +26,10 @@ const descriptions = {
   `,
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
+  version: 'Prints Cypress version',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify']
+const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -43,24 +44,31 @@ module.exports = {
     if (!args) {
       args = process.argv
     }
+
     const program = new commander.Command()
 
+    // bug in commaner not printing name
+    // in usage help docs
+    program._name = 'cypress'
+
     program
+      .option('-v, --version', text('version'))
       .command('version')
-      .description('Prints Cypress version')
+      .description(text('version'))
       .action(() => {
-        const versions = util.versions()
-        /* eslint-disable no-console */
-        console.log('Cypress package version:', versions.package)
-        console.log('Cypress binary version:', versions.binary)
-        /* eslint-enable no-console */
-        process.exit(0)
+        return require('./exec/versions')
+        .getVersions()
+        .then((versions = {}) => {
+          logger.log('Cypress package version:', versions.package)
+          logger.log('Cypress binary version:', versions.binary)
+          process.exit(0)
+        })
       })
 
     program
       .command('run')
       .usage('[options]')
-      .description('Runs Cypress Headlessly')
+      .description('Runs Cypress tests from the CLI without the GUI')
       .option('--record [bool]',                           text('record'), coerceFalse)
       .option('-k, --key <record-key>',                    text('key'))
       .option('-s, --spec <spec>',                         text('spec'))
@@ -81,7 +89,7 @@ module.exports = {
     program
       .command('open')
       .usage('[options]')
-      .description('Opens Cypress normally, as a desktop application.')
+      .description('Opens Cypress in the interactive GUI.')
       .option('-p, --port <port>',         text('port'))
       .option('-e, --env <env>',           text('env'))
       .option('-c, --config <config>',     text('config'))
@@ -112,7 +120,6 @@ module.exports = {
       })
 
     debug('cli starts with arguments %j', args)
-    program.parse(args)
 
     //# if there are no arguments
     if (args.length <= 2) {
@@ -122,13 +129,12 @@ module.exports = {
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
-      // eslint-disable-next-line no-console
-      console.error('Unknown command', `"${firstCommand}"`)
+      logger.error('Unknown command', `"${firstCommand}"`)
       program.help()
-      util.exit(1)
+      return util.exit(1)
     }
 
-    return program
+    return program.parse(args)
   },
 }
 

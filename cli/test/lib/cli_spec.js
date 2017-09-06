@@ -2,8 +2,10 @@ require('../spec_helper')
 
 const cli = require(`${lib}/cli`)
 const util = require(`${lib}/util`)
+const logger = require(`${lib}/logger`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
+const info = require(`${lib}/tasks/info`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
@@ -11,6 +13,7 @@ const execa = require('execa-wrap')
 
 describe('cli', function () {
   beforeEach(function () {
+    logger.reset()
     this.sandbox.stub(process, 'exit')
     this.sandbox.stub(util, 'exit')
     this.sandbox.stub(util, 'logErrorExit1')
@@ -24,67 +27,38 @@ describe('cli', function () {
   )
 
   context('cypress version', function () {
-    /* eslint-disable no-console */
-    beforeEach(function () {
-      this.sandbox.spy(util, 'versions')
-    })
-
-    it('exits with 0', function (done) {
-      process.exit.callsFake((code) => {
-        expect(code).to.eq(0)
-        done()
-      })
-      this.exec('version')
-    })
-
-    it('gets versions', function (done) {
-      process.exit.callsFake(() => {
-        expect(util.versions).to.have.been.called
-        done()
-      })
-      this.exec('version')
-    })
-
     it('reports package version', function (done) {
-      this.sandbox.spy(console, 'log')
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+
+      this.exec('version')
       process.exit.callsFake(() => {
-        const version = util.pkgVersion()
-        expect(console.log).to.have.been.calledWith('Cypress package version:', version)
+        snapshot('cli version and binary version', logger.print())
         done()
       })
-      this.exec('version')
     })
 
     it('reports package and binary message', function (done) {
-      let output = ''
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(util, 'binaryVersion').returns('X.Y.Z')
-      this.sandbox.stub(console, 'log').callsFake((...args) => {
-        output += `${args.join(' ')}\n`
-      })
+      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+
+      this.exec('version')
       process.exit.callsFake(() => {
-        console.log.restore()
-        snapshot(output)
+        snapshot('cli version and binary version', logger.print())
         done()
       })
-      this.exec('version')
     })
 
     it('handles non-existent binary', function (done) {
-      let output = ''
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(util, 'loadJson').throws()
-      this.sandbox.stub(console, 'log').callsFake((...args) => {
-        output += `${args.join(' ')}\n`
-      })
+      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+
+      this.exec('--version')
       process.exit.callsFake(() => {
-        console.log.restore()
-        snapshot(output)
+        snapshot('cli version no binary version', logger.print())
         done()
       })
-      this.exec('version')
     })
-    /* eslint-enable no-console */
   })
 
   context('cypress run', function () {

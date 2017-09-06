@@ -5,7 +5,6 @@ const chalk = require('chalk')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
-const debug = require('debug')('cypress:cli')
 
 const util = {
   isCi () {
@@ -18,29 +17,6 @@ const util = {
 
   pkgVersion () {
     return pkg.version
-  },
-
-  loadJson (filename) {
-    return require(filename)
-  },
-
-  binaryVersion () {
-    const distInfoPath = path.join(__dirname, '..', 'dist', 'info.json')
-    try {
-      const info = util.loadJson(distInfoPath)
-      return info.version
-    } catch (e) {
-      debug(e)
-      return 'unavailable'
-    }
-  },
-
-  // returns object with package and binary versions (if available)
-  versions () {
-    return {
-      package: util.pkgVersion(),
-      binary: util.binaryVersion(),
-    }
   },
 
   exit (code) {
