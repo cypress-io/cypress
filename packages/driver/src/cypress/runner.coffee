@@ -742,7 +742,6 @@ create = (specWindow, mocha, Cypress, cy) ->
 
     onRunnableRun: (runnableRun, runnable, args) ->
       if not runnable.id
-        debugger
         throw new Error("runnable must have an id", runnable.id)
 
       ## if this isnt a hook, then the name is 'test'
