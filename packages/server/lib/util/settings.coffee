@@ -72,6 +72,24 @@ module.exports =
     .catch ->
       null
 
+  exists: (projectRoot) ->
+    file = @_pathToFile(projectRoot, "cypress.json")
+
+    ## first check if cypress.json exists
+    fs.statAsync(file)
+    .then ->
+      ## if it does also check that the projectRoot
+      ## directory is writable
+      fs.accessAsync(projectRoot, fs.W_OK)
+    .catch {code: "ENOENT"}, (err) =>
+      ## cypress.json does not exist, we missing project
+      @_err("PROJECT_DOES_NOT_EXIST", projectRoot, err)
+    .catch (err) =>
+      throw err if errors.isCypressErr(err)
+
+      ## else we cannot read due to folder permissions
+      @_logReadErr(file, err)
+
   read: (projectRoot) ->
     file = @_pathToFile(projectRoot, "cypress.json")
 

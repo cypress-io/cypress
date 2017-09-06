@@ -462,45 +462,48 @@ module.exports = {
     log("headless mode ready with options %j", Object.keys(options))
     id = @getId()
 
-    ## open this project without
-    ## adding it to the global cache
-    @openProject(id, options)
-    .call("getProject")
-    .then (project) =>
-      Promise.all([
-        @getProjectId(project, options.projectId)
+    ## let's first make sure this project exists
+    Project.ensureExists(options.projectPath)
+    .then =>
+      ## open this project without
+      ## adding it to the global cache
+      @openProject(id, options)
+      .call("getProject")
+      .then (project) =>
+        Promise.all([
+          @getProjectId(project, options.projectId)
 
-        project.getConfig(),
-      ])
-      .spread (projectId, config) =>
-        ## if we have a project id and a key but record hasnt
-        ## been set
-        if haveProjectIdAndKeyButNoRecordOption(projectId, options)
-          ## log a warning telling the user
-          ## that they either need to provide us
-          ## with a RECORD_KEY or turn off
-          ## record mode
-          errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+          project.getConfig(),
+        ])
+        .spread (projectId, config) =>
+          ## if we have a project id and a key but record hasnt
+          ## been set
+          if haveProjectIdAndKeyButNoRecordOption(projectId, options)
+            ## log a warning telling the user
+            ## that they either need to provide us
+            ## with a RECORD_KEY or turn off
+            ## record mode
+            errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
-        @trashAssets(config)
-        .then =>
-          @runTests({
-            id:               id
-            project:          project
-            videosFolder:     config.videosFolder
-            videoRecording:   config.videoRecording
-            videoCompression: config.videoCompression
-            spec:             options.spec
-            gui:              options.showHeadlessGui
-            browser:          options.browser
-            outputPath:       options.outputPath
-          })
-        .get("stats")
-        .finally =>
-          @copy(config.videosFolder, config.screenshotsFolder)
+          @trashAssets(config)
           .then =>
-            if options.allDone isnt false
-              @allDone()
+            @runTests({
+              id:               id
+              project:          project
+              videosFolder:     config.videosFolder
+              videoRecording:   config.videoRecording
+              videoCompression: config.videoCompression
+              spec:             options.spec
+              gui:              options.showHeadlessGui
+              browser:          options.browser
+              outputPath:       options.outputPath
+            })
+          .get("stats")
+          .finally =>
+            @copy(config.videosFolder, config.screenshotsFolder)
+            .then =>
+              if options.allDone isnt false
+                @allDone()
 
   run: (options) ->
     app = require("electron").app

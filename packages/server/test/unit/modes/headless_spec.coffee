@@ -363,6 +363,7 @@ describe "lib/modes/headless", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
+      @sandbox.stub(Project, "ensureExists").resolves()
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
@@ -397,6 +398,7 @@ describe "lib/modes/headless", ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
+      @sandbox.stub(Project, "ensureExists").resolves()
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
