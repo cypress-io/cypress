@@ -6,6 +6,11 @@ describe "driver/src/cypress/index", ->
 
     @Cypress = Cypress.$Cypress.create({})
 
+  context "$Cypress", ->
+    it "is attached but not global", ->
+      expect(window.$Cypress).to.be.undefined
+      expect(window.top.$Cypress).to.be.undefined
+
   context "#backend", ->
     it "sets __stackCleaned__ on errors", (done) ->
       cy.stub(@Cypress, "emit")
@@ -24,3 +29,10 @@ describe "driver/src/cypress/index", ->
         expect(err.stack).not.to.include("From previous event")
 
         done()
+
+  context "Log", ->
+    it "throws when using Cypress.Log.command()", ->
+      fn = ->
+        Cypress.Log.command({})
+
+      expect(fn).to.throw(/has been renamed to Cypress.log/)
