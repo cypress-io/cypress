@@ -191,12 +191,11 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
+      .delay(100) // give a little padding for listr
       .then(() => {
-        // console.log(ctx.stdout.toString())
         snapshot(
           'verification with executable',
           normalize(ctx.stdout.toString())
-          // normalize(ctx.stdout.toString())
         )
       })
     })
@@ -249,6 +248,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
+      .delay(100) // give a little padding for listr
       .then(() => {
         snapshot(
           'no existing version verified',
@@ -273,6 +273,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
+      .delay(100) // give a little padding for listr
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -293,6 +294,7 @@ context('.verify', function () {
           welcomeMessage: false,
         })
       })
+      .delay(100) // give a little padding for listr
       .then(() => {
         snapshot(
           'no welcome message',
