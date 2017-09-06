@@ -24,6 +24,7 @@ preprocessor = require("./preprocessor")
 git         = require("./util/git")
 settings    = require("./util/settings")
 scaffoldLog = require("debug")("cypress:server:scaffold")
+log         = require("debug")("cypress:server:project")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -59,10 +60,10 @@ class Project extends EE
     }
 
     if process.env.CYPRESS_MEMORY
-      log = ->
+      logMemory = ->
         console.log("memory info", process.memoryUsage())
 
-      @memoryCheck = setInterval(log, 1000)
+      @memoryCheck = setInterval(logMemory, 1000)
 
     @getConfig(options)
     .then (cfg) =>
@@ -237,7 +238,7 @@ class Project extends EE
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
-        scaffoldLog "untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}"
+        scaffoldLog("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
       .return(cfg)
 
@@ -424,10 +425,13 @@ class Project extends EE
     _.extend({}, clientProject, {state: state})
 
   @_getProject = (clientProject, authToken) ->
+    log("get project from api", clientProject.id, clientProject.path)
     api.getProject(clientProject.id, authToken)
     .then (project) ->
+      log("got project from api")
       Project._mergeDetails(clientProject, project)
     .catch (err) ->
+      log("failed to get project from api", err.statusCode)
       switch err.statusCode
         when 404
           ## project doesn't exist
@@ -439,26 +443,40 @@ class Project extends EE
           throw err
 
   @getProjectStatuses = (clientProjects = []) ->
+    log("get project statuses for #{clientProjects.length} projects")
     user.ensureAuthToken()
     .then (authToken) ->
+      log("got auth token #{authToken}")
       api.getProjects(authToken).then (projects = []) ->
+        log("got #{projects.length} projects")
         projectsIndex = _.keyBy(projects, "id")
         Promise.all(_.map clientProjects, (clientProject) ->
+          log("looking at", clientProject.path)
           ## not a CI project, just mark as valid and return
           if not clientProject.id
+            log("no project id")
             return Project._mergeState(clientProject, "VALID")
 
           if project = projectsIndex[clientProject.id]
+            log("found matching:", project)
             ## merge in details for matching project
-            return Project._mergeDetails(clientProject, project)
+            Project._mergeDetails(clientProject, project)
           else
+            log("did not find matching:", project)
             ## project has id, but no matching project found
             ## check if it doesn't exist or if user isn't authorized
             Project._getProject(clientProject, authToken)
         )
 
   @getProjectStatus = (clientProject) ->
+    log("get project status for", clientProject.id, clientProject.path)
+
+    if not clientProject.id
+      log("no project id")
+      return Promise.resolve(Project._mergeState(clientProject, "VALID"))
+
     user.ensureAuthToken().then (authToken) ->
+      log("got auth token #{authToken}")
       Project._getProject(clientProject, authToken)
 
   @remove = (path) ->

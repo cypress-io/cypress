@@ -27,30 +27,6 @@ describe "lib/modes/headless", ->
         capitalization: "lowercase"
       })
 
-  context ".ensureAndOpenProjectByPath", ->
-    beforeEach ->
-      @sandbox.stub(openProject, "create").resolves(@projectInstance)
-
-    it "creates the project if it exists at projectPath", ->
-      @sandbox.stub(Project, "exists").resolves(true)
-      @sandbox.spy(Project, "add")
-
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
-      .then ->
-        expect(Project.add).not.to.be.called
-        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
-
-    it "prompts to add the project if it doesnt exist at projectPath", ->
-      @sandbox.stub(Project, "exists").resolves(false)
-      @sandbox.spy(Project, "add")
-      @sandbox.spy(console, "log")
-
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
-      .then ->
-        expect(console.log).to.be.calledWithMatch("Added this project:", "/_test-output/path/to/project")
-        expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
-        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
-
   context ".openProject", ->
     it "calls openProject.create with projectPath + options", ->
       @sandbox.stub(openProject, "create").resolves()
@@ -388,7 +364,7 @@ describe "lib/modes/headless", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(openProject)
+      @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
       @sandbox.spy(headless,  "waitForBrowserToConnect")
@@ -422,7 +398,7 @@ describe "lib/modes/headless", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(openProject)
+      @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
       @sandbox.spy(headless,  "waitForBrowserToConnect")
@@ -439,10 +415,10 @@ describe "lib/modes/headless", ->
       .then (stats) ->
         expect(stats).to.deep.eq({failures: 10})
 
-    it "passes id + options to ensureAndOpenProjectByPath", ->
+    it "passes id + options to openProject", ->
       headless.run({foo: "bar"})
       .then ->
-        expect(headless.ensureAndOpenProjectByPath).to.be.calledWithMatch(1234, {foo: "bar"})
+        expect(headless.openProject).to.be.calledWithMatch(1234, {foo: "bar"})
 
     it "passes project + id to waitForBrowserToConnect", ->
       headless.run()

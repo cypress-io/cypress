@@ -2,6 +2,8 @@ const _ = require('lodash')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
+const logger = require('./logger')
+const util = require('./util')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -15,19 +17,19 @@ const descriptions = {
   spec: 'runs a specific spec file. defaults to "all"',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
-  port: 'runs Cypress on a specific port. overrides any value in cypress.json. defaults to "2020"',
+  port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
   browser: oneLine`
     runs Cypress in the browser with the given name.
-    note: using an external browser will cancel video recording of tests.
+    note: using an external browser will not record a video.
   `,
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
 }
 
 const text = (description) => {
-  if (descriptions[description] == null) {
+  if (!descriptions[description]) {
     throw new Error(`Could not find description for: ${description}`)
   }
 
@@ -52,9 +54,12 @@ module.exports = {
       .option('-c, --config <config>',                     text('config'))
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
-      .action((opts) =>
-        require('./exec/run').start(parseOpts(opts)).then(process.exit)
-      )
+      .action((opts) => {
+        require('./exec/run')
+        .start(parseOpts(opts))
+        .then(util.exit)
+        .catch(util.logErrorExit1)
+      })
 
     program
       .command('open')
@@ -65,17 +70,29 @@ module.exports = {
       .option('-c, --config <config>',     text('config'))
       .option('-d, --detached [bool]',     text('detached'), coerceFalse)
       .option('-P, --project <project path>', text('project'))
-      .action((opts) => require('./exec/open').start(parseOpts(opts)))
+      .action((opts) => {
+        require('./exec/open')
+        .start(parseOpts(opts))
+        .catch(util.logErrorExit1)
+      })
 
     program
       .command('install')
       .description('Installs the Cypress executable matching this package\'s version')
-      .action(() => require('./download').install({ force: true }))
+      .action(() => {
+        require('./tasks/install')
+        .start({ force: true })
+        .catch(util.logErrorExit1)
+      })
 
     program
       .command('verify')
       .description('Verifies that Cypress is installed correctly and executable')
-      .action(() => require('./download/utils').verify({ force: true }))
+      .action(() => {
+        require('./tasks/verify')
+        .start({ force: true, welcomeMessage: false })
+        .catch(util.logErrorExit1)
+      })
 
     debug('cli starts with arguments %j', process.argv)
     program.parse(process.argv)
@@ -92,8 +109,7 @@ module.exports = {
 }
 
 if (!module.parent) {
-  /* eslint-disable no-console */
-  console.error('This CLI module should be required from another Node module')
-  console.error('and not executed directly')
+  logger.error('This CLI module should be required from another Node module')
+  logger.error('and not executed directly')
   process.exit(-1)
 }

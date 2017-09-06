@@ -32,17 +32,6 @@ packages/server/.cy
 packages/server/.projects
 packages/server/support
 
-# from docs
-docs/public
-docs/db.json
-docs/.deploy*/
-docs/cypress/screenshots
-docs/cypress/videos
-docs/themes/cypress/source/css/vendor
-docs/themes/cypress/source/js/vendor
-docs/themes/cypress/source/fonts/vendor
-docs/support
-
 # CLI tool
 cli/build
 

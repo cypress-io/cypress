@@ -37,8 +37,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "precommit-lint",
-      "git add"
+      "precommit-lint"
     ]
   },
   "devDependencies": {

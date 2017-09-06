@@ -761,6 +761,19 @@ describe "lib/project", ->
           state: "VALID"
         })
 
+    it "returns project, marked as valid, if it does not have an id, without querying api", ->
+      @sandbox.stub(api, "getProject")
+
+      @clientProject.id = undefined
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: undefined
+          path: "/_test-output/path/to/project"
+          state: "VALID"
+        })
+        expect(api.getProject).not.to.be.called
+
     it "marks project as invalid if api 404s", ->
       @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
 

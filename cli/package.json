@@ -6,8 +6,10 @@
   "bin": {
     "cypress": "bin/cypress"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "scripts": {
-    "pretest": "npm run lint",
     "test": "npm run test-unit",
     "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "test-watch": "$(bin-up mocha) --watch",
@@ -20,18 +22,20 @@
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
   "dependencies": {
-    "@cypress/xvfb": "1.0.3",
+    "@cypress/listr-verbose-renderer": "0.4.1",
+    "@cypress/xvfb": "1.0.4",
     "bluebird": "3.5.0",
     "chalk": "2.1.0",
     "commander": "2.9.0",
     "common-tags": "1.4.0",
     "debug": "2.6.8",
     "extract-zip": "1.6.5",
-    "fs-extra": "1.0.0",
+    "fs-extra": "4.0.1",
     "getos": "2.8.4",
     "glob": "7.1.2",
     "is-ci": "1.0.10",
     "is-installed-globally": "0.1.0",
+    "listr": "0.12.0",
     "lodash": "4.17.4",
     "minimist": "1.2.0",
     "progress": "1.1.8",
@@ -52,8 +56,9 @@
     "clear-module": "^2.1.0",
     "dependency-check": "^2.8.0",
     "nock": "^9.0.9",
-    "sinon": "^2.1.0",
-    "snap-shot-it": "2.2.0"
+    "sinon": "3.2.1",
+    "snap-shot-it": "3.3.0",
+    "strip-ansi": "4.0.0"
   },
   "files": [
     "bin",

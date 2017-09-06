@@ -1,35 +1,24 @@
 exports['errors individual has the following errors 1'] = [
-  'missingXvfb',
-  'missingApp',
-  'missingDependency',
-  'versionMismatch',
-  'unexpected',
-  'failedDownload',
-  'failedToUnzip',
+  "missingXvfb",
+  "missingApp",
+  "missingDependency",
+  "versionMismatch",
+  "unexpected",
+  "failedDownload",
+  "failedUnzip"
 ]
 
-exports['errors individual #missingXvfb is an error information object 1'] = {
-  'description': 'Looks like your system is missing a must have dependency: XVFB',
-  'solution': 'Install XVFB and run Cypress again.\nOur CI documentation provides more information how to configure dependencies\n\n  https://on.cypress.io/required-dependencies',
-}
+exports['errors .errors.formErrorText returns fully formed text message 1'] = `Your system is missing the dependency: XVFB
 
-exports['errors #formError adds platform info to error 1'] = {
-  'description': 'Looks like your system is missing a must have dependency: XVFB',
-  'solution': 'Install XVFB and run Cypress again.\nOur CI documentation provides more information how to configure dependencies\n\n  https://on.cypress.io/required-dependencies',
-  'platform': 'Platform: test platform\nVersion: test release',
-}
-
-exports['errors #formErrorText returns fully formed text message 1'] = `----------
-Looks like your system is missing a must have dependency: XVFB
 Install XVFB and run Cypress again.
-Our CI documentation provides more information how to configure dependencies
+
+Read our documentation on dependencies for more information:
 
 https://on.cypress.io/required-dependencies
+
+If you using Docker, we provide containers with all required dependencies installed.
 ----------
 
-test error
-
-----------
-Platform: test platform
-Version: test release`
+Platform: test platform (test release)
+Cypress Version: 1.2.3`
 

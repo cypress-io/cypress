@@ -40,13 +40,6 @@ describe "lib/saved_state", ->
     .then (state) ->
       expect(state).to.be.instanceof(FileUtil)
 
-  it "sets file path to app data path and file name to 'state'", ->
-    savedState()
-    .then (state) ->
-      statePath = state.path
-      expected = path.join(appData.path(), "projects", "__global__", "state.json")
-      expect(statePath).to.equal(expected)
-
   it "caches state file instance per path", ->
     Promise.all([
       savedState("/foo/bar"),
@@ -58,3 +51,14 @@ describe "lib/saved_state", ->
     a = savedState("/foo/bar")
     b = savedState("/foo/baz")
     expect(a).to.not.equal(b)
+
+  it "sets path to project name + hash if projectPath", ->
+    savedState("/foo/the-project-name")
+    .then (state) ->
+      expect(state.path).to.include("the-project-name")
+
+  it "sets path __global__ if no projectPath", ->
+    savedState()
+    .then (state) ->
+      expected = path.join(appData.path(), "projects", "__global__", "state.json")
+      expect(state.path).to.equal(expected)
