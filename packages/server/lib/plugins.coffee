@@ -1,4 +1,5 @@
 _ = require("lodash")
+nodeCache = require("./node_cache")
 
 registeredEvents = {}
 
