@@ -132,7 +132,17 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       onNavigation: (args...) ->
         Cypress.action("app:navigation:changed", args...)
       onAlert: (str) ->
+        Cypress.action("app:window:alert", str)
       onConfirm: (str) ->
+        results = Cypress.action("app:window:confirm", str)
+
+        ## return false if ANY results are false
+        ## else true
+        ret = !_.some(results, returnedFalse)
+
+        Cypress.action("app:window:confirmed", str, ret)
+
+        return ret
     })
 
   enqueue = (obj) ->

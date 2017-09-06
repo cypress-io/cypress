@@ -25,6 +25,7 @@ builtInCommands = [
   require("../cy/commands/local_storage")
   require("../cy/commands/location")
   require("../cy/commands/misc")
+  require("../cy/commands/popups")
   require("../cy/commands/navigation")
   require("../cy/commands/querying")
   require("../cy/commands/request")
