@@ -6,7 +6,7 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 
-module.exports = {
+const util = {
   isCi () {
     return isCi
   },
@@ -70,3 +70,5 @@ module.exports = {
     return isInstalledGlobally
   },
 }
+
+module.exports = util
