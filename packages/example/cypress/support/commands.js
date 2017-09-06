@@ -10,11 +10,11 @@
 // https://on.cypress.io/api/commands
 // ***********************************************
 //
-// Cypress.addParentCommand("login", function(email, password){
-//   var email    = email || "joe@example.com"
-//   var password = password || "foobar"
+// Cypress.Commands.add("login", function(email, password){
+//   const email    = email || "joe@example.com"
+//   const password = password || "foobar"
 //
-//   var log = Cypress.Log.command({
+//   const log = Cypress.log({
 //     name: "login",
 //     message: [email, password],
 //     onConsole: function(){

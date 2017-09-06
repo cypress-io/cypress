@@ -6,7 +6,6 @@ moment = require("moment")
 Promise = require("bluebird")
 sinon = require("sinon")
 lolex = require("lolex")
-Cookies = require("js-cookie")
 bililiteRange = require("../vendor/bililiteRange")
 
 $Chainer = require("./cypress/chainer")
@@ -32,6 +31,11 @@ proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
   cy: "getStyles".split(" ")
 }
+
+## provide the old interface and
+## throw a deprecation message
+$Log.command = ->
+  $utils.throwErrByPath("miscellaneous.command_log_renamed")
 
 throwDeprecatedCommandInterface = (key, method) ->
   signature = switch method
@@ -481,12 +485,4 @@ class $Cypress
 ## via the runner + integration spec helper
 $Cypress.$ = $
 
-## expose globally (temporarily for the runner)
-window.$Cypress = $Cypress
-
 module.exports = $Cypress
-
-## QUESTION:
-## Do we need to expose $Cypress?
-## how do we attach submodules / other utilities?
-## move things around / reorganize how its attached

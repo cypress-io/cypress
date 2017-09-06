@@ -380,6 +380,11 @@ module.exports = {
 
         https://on.cypress.io/returning-promise-and-commands-in-test
       """
+    command_log_renamed: """
+      Cypress.Log.command() has been renamed to Cypress.log()
+
+      Please update your code. You should be able to safely do a find/replace.
+    """
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 
@@ -395,7 +400,6 @@ module.exports = {
 
       https://on.cypress.io/command-queue-ended-early
     """
-    deprecated: "Command Options such as: '{{{opt}}: {{value}}}' have been deprecated. Instead write this as an assertion: #{cmd('should', '\'{{assertion}}\'')}."
     invalid_command: "Could not find a command for: '{{name}}'.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: '{{name}}'. An existing command does not exist by that name."
     invoking_child_without_parent: (obj) ->
@@ -415,10 +419,7 @@ module.exports = {
         .click()       // then child command comes second
 
       """
-    method_not_implemented: "The method {{method}} is not yet implemented"
-    module_not_registered: "$Cypress.Module: {{name}} not registered."
     no_cy: "Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call Cypress.$()"
-    no_sandbox: "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
     no_runner: "Cannot call Cypress#run without a runner instance."
     no_subject: "Subject is {{subject}}. You cannot call #{cmd('{{cmd}}')} without a subject."
     orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
@@ -447,11 +448,11 @@ module.exports = {
     private_custom_command_interface: "You cannot use the undocumented private command interface: {{method}}"
     private_property: (obj) ->
       """
-      You are accessing a private property directly on Cypress which has been renamed.
+      You are accessing a private property directly on cy which has been renamed.
 
       This was never documented nor supported.
 
-      Please go through the getter function: #{cmd(obj.name, "...")}
+      Please go through the public getter function: #{cmd(obj.name, "...")}
 
       #{if obj.url then "https://on.cypress.io/#{obj.name}" else ""}
       """
