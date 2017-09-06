@@ -287,7 +287,7 @@ API = {
         """
         Could not find any tests to run.
 
-        We did not find a Cypress project at this path: #{chalk.blue(arg1)}
+        We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
         """
 
   get: (type, arg1, arg2) ->
