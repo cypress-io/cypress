@@ -52,7 +52,7 @@ describe "Update Banner", ->
     it "closes modal when X is clicked", ->
       @updaterCheck.resolve(NEW_VERSION)
       cy.contains("Update").click()
-      cy.get(".close").click()
+      cy.get(".modal").find(".close").click()
       cy.get(".modal").should("not.be.visible")
 
   describe "in global mode", ->
@@ -67,7 +67,7 @@ describe "Update Banner", ->
 
     it "opens download link when Download is clicked", ->
       cy.contains("Download the new version").click().then =>
-        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop?os=linux64")
+        expect(@ipc.externalOpen).to.be.calledWith("https://download.cypress.io/desktop")
 
   describe "in project mode", ->
     beforeEach ->
@@ -78,6 +78,10 @@ describe "Update Banner", ->
 
     it "modal has info about updating package.json", ->
       cy.get(".modal").contains("npm install --save-dev cypress@#{NEW_VERSION}")
+
+    it "links to 'open' doc on click of open command", ->
+      cy.get(".modal").contains("cypress open").click().then =>
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/how-to-open-cypress")
 
     it "opens changelog when new version is clicked", ->
       cy.get(".modal").contains(NEW_VERSION).click().then =>
