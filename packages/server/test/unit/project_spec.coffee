@@ -17,6 +17,7 @@ Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/preprocessor")
+plugins      = require("#{root}lib/plugins")
 git          = require("#{root}lib/util/git")
 
 describe "lib/project", ->
@@ -142,6 +143,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(Server.prototype, "open").resolves([])
+      @sandbox.stub(plugins, "init")
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -161,6 +163,10 @@ describe "lib/project", ->
       opts = {}
       @project.open(opts).then =>
         expect(@project.getConfig).to.be.calledWith(opts)
+
+    it "initializes the plugins", ->
+      @project.open({}).then =>
+        expect(plugins.init).to.be.calledWith(@config)
 
     it "updates config.state when saved state changes", ->
       @sandbox.spy(@project, "saveState")
@@ -322,7 +328,7 @@ describe "lib/project", ->
       fs.pathExists.resolves(false)
       @project.watchSupportFile(@config)
       .catch (e) ->
-        expect(e.message).to.include("Support file missing or invalid.")
+        expect(e.message).to.include("The support file is missing or invalid.")
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->

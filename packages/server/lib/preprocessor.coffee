@@ -6,6 +6,7 @@ Promise = require("bluebird")
 
 appData = require("./util/app_data")
 cwd = require("./cwd")
+plugins = require("./plugins")
 { toHashName } = require("./util/saved_state")
 
 PrettyError = require("pretty-error")
@@ -42,70 +43,74 @@ getOutputPath = (config, filePath) ->
   appData.projectsPath(toHashName(config.projectRoot), "bundles", filePath)
 
 emitter = new EE()
-preprocessor = null
 fileProcessors = {}
+
+setDefaultPreprocessor = ->
+  browserify = require("cypress-browserify-preprocessor")
+  plugins.register "on:spec:file:preprocessor", browserify({
+    extensions: [".js", ".jsx", ".coffee", ".cjsx"]
+    ignoreWatch: [
+      "**/.git/**"
+      "**/.nyc_output/**"
+      "**/.sass-cache/**"
+      "**/bower_components/**"
+      "**/coverage/**"
+      "**/node_modules/**"
+    ]
+    transforms: {
+      cjsxify: {}
+      babelify: {
+        ast: false
+        babelrc: false
+        plugins: ["plugin-add-module-exports"]
+        presets: ["preset-latest", "preset-react"]
+      }
+    }
+  })
 
 module.exports = {
   errorMessage: errorMessage
   clientSideError: clientSideError
-
-  prep: (config) ->
-    if not _.isString(config.preprocessor)
-      throw new Error("config.preprocessor must be a string")
-
-    emitter = new EE()
-
-    preprocessorConfig = {
-      shouldWatch: !config.isTextTerminal
-    }
-
-    log("prep preprocessor:", preprocessorConfig)
-
-    util = {
-      getOutputPath: _.partial(getOutputPath, config)
-    }
-
-    createPreprocessor = try
-      require("cypress-#{config.preprocessor}-preprocessor")
-    catch e
-      try
-        require(path.join(process.cwd(), config.preprocessor))
-      catch e
-        throw new Error("""
-          Could not find preprocessor '#{config.preprocessor}'
-
-          We looked for one of the following, but could not find it:
-          * An npm package named 'cypress-#{config.preprocessor}-preprocessor'
-          * A file located at '#{path.join(process.cwd(), config.preprocessor)}'
-        """)
-
-    if not _.isFunction(createPreprocessor)
-      throw new Error("preprocessor must be a function")
-
-    preprocessor = createPreprocessor(preprocessorConfig, emitter, util)
-
-    if not _.isFunction(preprocessor)
-      throw new Error("preprocessor must return a function")
 
   getFile: (filePath, config, options = {}) ->
     filePath = path.join(config.projectRoot, filePath)
 
     log("getFile #{filePath}")
 
+    preprocessorOptions = {
+      shouldWatch: !config.isTextTerminal
+    }
+
+    util = {
+      getOutputPath: _.partial(getOutputPath, config)
+      onClose: (cb) ->
+        emitter.on("close:#{filePath}", cb)
+        emitter.on("close", cb)
+    }
+
+    log("prep preprocessor:", preprocessorOptions)
+
+    if not plugins.has("on:spec:file:preprocessor")
+      setDefaultPreprocessor()
+
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
       log("- headless and already processed")
       return fileProcessor
 
-    if not preprocessor
-      throw new Error("preprocessor must be prepped before getting file")
-
     if _.isFunction(options.onChange)
       log("- add update listener for #{filePath}")
-      emitter.on("update:#{filePath}", options.onChange)
 
-    fileProcessors[filePath] = Promise.resolve(preprocessor(filePath))
+      util.fileUpdated = (changedFilePath) ->
+        if changedFilePath is filePath
+          options.onChange(changedFilePath)
 
-    return fileProcessors[filePath]
+    preprocessor = Promise.resolve(
+      plugins.execute("on:spec:file:preprocessor", filePath, preprocessorOptions, util)
+    )
+
+    fileProcessors[filePath] = preprocessor
+
+    return preprocessor
 
   removeFile: (filePath) ->
     return if not fileProcessors[filePath]

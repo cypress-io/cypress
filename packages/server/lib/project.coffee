@@ -19,6 +19,7 @@ Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
+plugins     = require("./plugins")
 preprocessor = require("./preprocessor")
 git         = require("./util/git")
 settings    = require("./util/settings")
@@ -66,7 +67,7 @@ class Project extends EE
     @getConfig(options)
     .then (cfg) =>
       process.chdir(@projectRoot)
-      preprocessor.prep(cfg)
+      plugins.init(cfg)
 
       @server.open(cfg, @)
       .spread (port, warning) =>

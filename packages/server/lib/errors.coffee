@@ -229,13 +229,31 @@ API = {
         "The automation client disconnected. Cannot continue running tests."
       when "SUPPORT_FILE_NOT_FOUND"
         """
-        Support file missing or invalid.
+        The support file is missing or invalid.
 
         Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
 
         Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid
+        """
+      when "PLUGINS_FILE_NOT_FOUND"
+        """
+        The plugins file is missing or invalid.
+
+        Your pluginsFile is set to '#{arg1}', but either the file is missing or it's invalid. The pluginsFile must be a .js or .coffee file.
+
+        Correct your cypress.json, create the appropriate file, or set pluginsFile to false if a support file is not necessary for your project.
+
+        Learn more at https://on.cypress.io/plugins-file-missing-or-invalid
+        """
+      when "PLUGINS_FILE_ERROR"
+        """
+        We encountered the following error while loading the plugins file. This may be a syntax error in the file or a permissions issue.
+
+        We attempted to load the file at '#{chalk.blue(arg1)}'
+
+        #{chalk.yellow(arg2)}
         """
       when "BUNDLE_ERROR"
         ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
