@@ -18,6 +18,9 @@ module.exports = {
 
     registeredEvents = {}
 
+    if nodeCache.has(config.pluginsFile)
+      nodeCache.clear(config.pluginsFile)
+
     try
       plugins = require(config.pluginsFile)
     catch e

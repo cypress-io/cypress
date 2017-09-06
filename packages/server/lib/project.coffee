@@ -11,7 +11,6 @@ user        = require("./user")
 cache       = require("./cache")
 config      = require("./config")
 logger      = require("./logger")
-debug       = require("./log")
 errors      = require("./errors")
 Server      = require("./server")
 scaffold    = require("./scaffold")
@@ -23,8 +22,8 @@ plugins     = require("./plugins")
 preprocessor = require("./preprocessor")
 git         = require("./util/git")
 settings    = require("./util/settings")
-scaffoldLog = require("debug")("cypress:server:scaffold")
-log         = require("debug")("cypress:server:project")
+scaffoldLog = require("log")("cypress:server:scaffold")
+log         = require("log")("cypress:server:project")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -47,10 +46,10 @@ class Project extends EE
     @cfg         = null
     @memoryCheck = null
     @automation  = null
-    debug("Project created %s", @projectRoot)
+    log("Project created %s", @projectRoot)
 
   open: (options = {}) ->
-    debug("opening project instance %s", @projectRoot)
+    log("opening project instance %s", @projectRoot)
     @server = Server()
 
     _.defaults options, {
@@ -110,7 +109,7 @@ class Project extends EE
       api.getProjectRuns(projectId, authToken)
 
   close: ->
-    debug("closing project instance %s", @projectRoot)
+    log("closing project instance %s", @projectRoot)
     if @memoryCheck
       clearInterval(@memoryCheck)
 
@@ -188,12 +187,12 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("onSetRunnables")
-        debug("runnables", runnables)
+        log("onSetRunnables")
+        log("runnables", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
-        debug("onMocha", event)
+        log("onMocha", event)
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
@@ -318,7 +317,7 @@ class Project extends EE
     [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
-    debug("scaffolding project %s", @projectRoot)
+    log("scaffolding project %s", @projectRoot)
 
     scaffolds = []
 

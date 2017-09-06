@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 plugins = require("#{root}lib/plugins")
+nodeCache = require("#{root}lib/node_cache")
 
 describe "lib/plugins", ->
   beforeEach ->
@@ -13,6 +14,13 @@ describe "lib/plugins", ->
   context "#init", ->
     it "is noop if no pluginsFile", ->
       expect( -> plugins.init({})).not.to.throw()
+
+    it "clears plugin from cache if already required", ->
+      @sandbox.stub(nodeCache, "has").returns(true)
+      @sandbox.stub(nodeCache, "clear")
+      mockery.registerMock("cypress-plugin", ->)
+      plugins.init({ pluginsFile: "cypress-plugin" })
+      expect(nodeCache.clear).to.be.calledWith("cypress-plugin")
 
     it "calls function exported by pluginsFile", ->
       plugin = @sandbox.spy()
