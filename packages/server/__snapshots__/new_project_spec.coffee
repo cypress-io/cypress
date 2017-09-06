@@ -1,5 +1,4 @@
-exports['e2e new project passes 1'] = `Added this project: /foo/bar/.projects/no-scaffolding
-
+exports['e2e new project passes 1'] = `
 Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123.mp4
 
   (Tests Starting)
