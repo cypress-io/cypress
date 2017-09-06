@@ -70,8 +70,6 @@ jobs:
           key: v5-{{ .Branch }}-deps-static
       - restore_cache:
           key: v5-{{ .Branch }}-deps-ts
-      - restore_cache:
-          key: v5-{{ .Branch }}-deps-docs
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
@@ -154,10 +152,6 @@ jobs:
           key: v5-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
           paths:
             - packages/ts/node_modules
-      - save_cache:
-          key: v5-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
-          paths:
-            - docs/node_modules
 
       - run: npm run stop-only
       ## now go build all of subpackages
@@ -255,70 +249,6 @@ jobs:
       - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 3
       - store_test_results:
           path: /tmp/cypress-monorepo
-
-  #
-  # Documentation jobs
-  #
-  "docs-tests":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && npm run deps
-      - run: cd docs && npm run lint
-      - run: cd docs && npm run test
-      # the docs should already have been built
-      # but we at least will generate the build info
-      - run: cd docs && npm run save-build-json
-      - run: cd docs && ls public
-      - run: cd docs && cat public/build.json
-      # - run: cd docs && npm run build
-      # start docs server and run e2e tests
-      - run:
-          name: Start docs server
-          command: cd docs && npm run start
-          background: true
-      - run: sleep 20
-      - restore_cache:
-          key: cypress-tool-{{ .Branch }}
-      - run: cd docs && npm run cypress
-      # cache cypress-cli and Cypress itself
-      # see where our global cache is by version
-      - run: echo $(npm -g bin)
-      - save_cache:
-          key: cypress-tool-{{ .Branch }}
-          paths:
-            - /usr/local/bin/cypress
-            - /usr/local/lib/node_modules/cypress-cli
-            - /home/person/.cypress
-
-  "deploy-docs-staging":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && NODE_ENV=staging npm run build
-      - run: cd docs && ls public
-      - run: cd docs && npm run save-build-json
-      - run: cd docs && npm run deploy-prebuilt -- --environment staging
-      - run:
-          name: Print deployed version
-          command: cd docs && cat public/build.json
-      - run:
-          name: Test deployed docs
-          command: cd docs && CYPRESS_baseUrl=https://docs-staging.cypress.io npm run cypress
-
-  "deploy-docs-production":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && NODE_ENV=production npm run build
-      # because we already built docs for production
-      # use script that just deploys without rebuilding the production docs
-      - run: cd docs && npm run save-build-json
-      - run: cd docs && npm run deploy-prebuilt -- --environment production --scrape
-      - run: cd docs && cat public/build.json
 
   ## TODO: commenting out for now until these run
   # "driver-unit-tests":
@@ -427,29 +357,6 @@ workflows:
       - build-binary:
           requires:
             - build
-      # test and deploy documentation site
-      - docs-tests:
-          requires:
-            - build
-
-      - deploy-docs-staging:
-          filters:
-            branches:
-              only:
-                # allow deploying to staging from "develop"
-                # and branches starting with special prefix
-                - develop
-                - /docs-.*/
-          requires:
-            - docs-tests
-
-      - deploy-docs-production:
-          filters:
-            branches:
-              only: master
-          requires:
-            - docs-tests
-
 #
 # things to run in the 4th CI container
 #
