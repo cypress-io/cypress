@@ -57,8 +57,6 @@ API = {
         "Timed out waiting for the browser to connect. #{arg1}"
       when "TESTS_DID_NOT_START_FAILED"
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
-      when "PROJECT_DOES_NOT_EXIST"
-        "You need to add a project to run tests."
       when "RECORD_KEY_MISSING"
         """
         You passed the --record flag but did not provide us your Record Key.
@@ -284,6 +282,12 @@ API = {
         Relative to the project path #{chalk.yellow(arg2)}
 
         Learn more at https://on.cypress.io/reporters
+        """
+      when "PROJECT_DOES_NOT_EXIST"
+        """
+        Could not find any tests to run.
+
+        We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
         """
 
   get: (type, arg1, arg2) ->
