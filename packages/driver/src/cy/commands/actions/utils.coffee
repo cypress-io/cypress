@@ -2,7 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$dom = require("../../../cypress/dom")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 delay = 50
@@ -77,7 +77,7 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
         currentScrollLeft = $container.scrollLeft()
 
         if onScroll
-          type = if $utils.hasWindow($container) then "window" else "container"
+          type = if $dom.isWindow($container) then "window" else "container"
           onScroll($container, type)
 
         ## TODO: right here we could set all of the scrollable
@@ -86,7 +86,7 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
         ##
         ## then the runner could ask the driver to scroll each one
         ## into its correct position until it passed
-        # if $utils.hasWindow($container)
+        # if $dom.isWindow($container)
         #   log.set("scrollBy", { x: -width, y: -height })
 
         ## we want to scroll in the opposite direction (up not down)
@@ -171,8 +171,8 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
     if log
       log.set consoleProps: ->
         obj = {}
-        obj["Tried to Click"]     = $utils.getDomElements($el)
-        obj["But its Covered By"] = $utils.getDomElements($elAtCoords)
+        obj["Tried to Click"]     = $dom.getElements($el)
+        obj["But its Covered By"] = $dom.getElements($elAtCoords)
         obj
 
     throw err

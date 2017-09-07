@@ -1,8 +1,8 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
 { delay, dispatchPrimedChangeEvents, focusable } = require("./utils")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -22,15 +22,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log = Cypress.log
           $el: options.$el
           consoleProps: ->
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not (options.$el.is(focusable) or $utils.hasWindow(options.$el))
+      if not (options.$el.is(focusable) or $dom.isWindow(options.$el))
         return if options.error is false
 
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         $utils.throwErrByPath("focus.invalid_element", {
           onFail: options._log
           args: { node }
@@ -161,7 +161,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $el: options.$el
           message: deltaOptions
           consoleProps: ->
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
 
       cy.ensureDom(options.$el, "blur", options._log)
 
@@ -182,7 +182,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
-          node = $utils.stringifyElement($focused)
+          node = $dom.stringify($focused)
           $utils.throwErrByPath("blur.wrong_focused_element", {
             onFail: options._log
             args: { node }

@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-$utils = require("../../cypress/utils")
+$dom = require("../../dom")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "optional" }, {
@@ -26,12 +26,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       return null
 
     wrap: (arg, options = {}) ->
-      _.defaults options, {log: true}
+      _.defaults(options, { log: true })
 
       if options.log isnt false
         options._log = Cypress.log()
 
-        if $utils.hasElement(arg)
+        if $dom.isElement(arg)
           options._log.set({$el: arg})
 
       do resolveWrap = =>

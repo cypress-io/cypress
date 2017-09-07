@@ -1,7 +1,7 @@
 _ = require("lodash")
 $ = require("jquery")
 
-$utils = require("../cypress/utils")
+$dom = require("../dom")
 
 create = (state) ->
   return {
@@ -11,7 +11,7 @@ create = (state) ->
       contains = (el) ->
         $.contains(doc, el)
 
-      if $utils.hasDocument($el)
+      if $dom.isDocument($el)
         ## change $el to be the root
         ## document element
         $el = $el.documentElement

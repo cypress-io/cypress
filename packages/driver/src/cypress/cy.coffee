@@ -1,8 +1,8 @@
 _ = require("lodash")
 $ = require("jquery")
-
 Promise = require("bluebird")
 
+$dom = require("../dom")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -277,7 +277,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state("commandIntermediateValue", undefined)
 
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off

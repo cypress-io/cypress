@@ -1,6 +1,6 @@
 _ = require("lodash")
 $ = require("jquery")
-$utils = require("./utils")
+$dom = require("../dom")
 
 selectors = "visible hidden selected checked enabled disabled".split(" ")
 attrs = {
@@ -20,7 +20,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
   { inspect, flag } = chaiUtils
 
   assertDom = (ctx, method, args...) ->
-    if not $utils.hasDom(ctx._obj)
+    if not $dom.isDom(ctx._obj)
       try
         ## always fail the assertion
         ## if we aren't a DOM like object
@@ -146,7 +146,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
   chai.Assertion.overwriteProperty "empty", (_super) ->
     return ->
-      if $utils.hasDom(@_obj)
+      if $dom.isDom(@_obj)
         assert(
           @,
           "empty",
@@ -160,7 +160,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
   chai.Assertion.overwriteMethod "match", (_super) ->
     return (selector) ->
-      if $utils.hasDom(@_obj)
+      if $dom.isDom(@_obj)
         assert(
           @,
           "match",

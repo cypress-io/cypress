@@ -2,8 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
-$dom = require("../../../cypress/dom")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 findScrollableParent = ($el, win) ->
@@ -11,10 +10,10 @@ findScrollableParent = ($el, win) ->
 
   ## if we're at the body, we just want to pass in
   ## window into jQuery scrollTo
-  if $parent.is("body,html") or $utils.hasDocument($parent)
+  if $parent.is("body,html") or $dom.isDocument($parent)
     return win
 
-  return $parent if $dom.elIsScrollable($parent)
+  return $parent if $dom.isScrollable($parent)
 
   findScrollableParent($parent, win)
 
@@ -77,8 +76,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps: ->
             obj = {
               ## merge into consoleProps without mutating it
-              "Applied To": $utils.getDomElements(options.$el)
-              "Scrolled Element": $utils.getDomElements(options.$el)
+              "Applied To": $dom.getElements(options.$el)
+              "Scrolled Element": $dom.getElements(options.$el)
             }
 
             return obj
@@ -227,7 +226,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps: ->
             obj = {
               ## merge into consoleProps without mutating it
-              "Scrolled Element": $utils.getDomElements(options.$el)
+              "Scrolled Element": $dom.getElements(options.$el)
             }
 
             return obj

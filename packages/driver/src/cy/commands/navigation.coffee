@@ -3,9 +3,9 @@ moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
 
-$Location = require("../../cypress/location")
 $utils = require("../../cypress/utils")
-
+$Log = require("../../cypress/log")
+$Location = require("../../cypress/location")
 
 id                    = null
 previousDomainVisited = null

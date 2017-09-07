@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 { delay } = require("./utils")
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -24,14 +24,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log = Cypress.log({
           $el: options.$el
           consoleProps: ->
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
             Elements: options.$el.length
         })
 
         options._log.snapshot("before", {next: "after"})
 
       if not options.$el.is("form")
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         word = $utils.plural(options.$el, "contains", "is")
         $utils.throwErrByPath("submit.not_on_form", {
           onFail: options._log

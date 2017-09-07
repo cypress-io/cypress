@@ -1,6 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
+$dom = require("../dom")
 $utils = require("../cypress/utils")
 
 ## TODO
@@ -20,14 +21,14 @@ isAssertionType = (cmd) ->
 
 isDomSubjectAndMatchesValue = (value, subject) ->
   allElsAreTheSame = ->
-    els1 = $utils.getDomElements(value)
-    els2 = $utils.getDomElements(subject)
+    els1 = $dom.getElements(value)
+    els2 = $dom.getElements(subject)
 
     ## no difference
     _.difference(els1, els2).length is 0
 
-  $utils.hasDom(value) and
-    $utils.hasDom(subject) and
+  $dom.isDom(value) and
+    $dom.isDom(subject) and
       allElsAreTheSame()
 
 ## Rules:
@@ -37,7 +38,7 @@ isDomSubjectAndMatchesValue = (value, subject) ->
 parseValueActualAndExpected = (value, actual, expected) ->
   obj = {actual: actual, expected: expected}
 
-  if $utils.isJqueryInstance(value)
+  if $dom.isJquery(value)
     obj.subject = value
 
     if _.isUndefined(actual) or actual isnt expected
@@ -113,7 +114,7 @@ create = (state, queue, retryFn) ->
       switch callbacks.ensureExistenceFor
         when "dom"
           $el = determineEl(options.$el, subject)
-          return if not $utils.isJqueryInstance($el)
+          return if not $dom.isJquery($el)
 
           cy.ensureElExistence($el)
 
@@ -319,8 +320,8 @@ create = (state, queue, retryFn) ->
 
     obj = parseValueActualAndExpected(value, actual, expected)
 
-    if $utils.hasElement(value)
-      obj.$el = $utils.wrapInjQuery(value)
+    if $dom.isElement(value)
+      obj.$el = $dom.wrapInjQuery(value)
 
     current = state("current")
 

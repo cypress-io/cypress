@@ -4,8 +4,7 @@ Promise = require("bluebird")
 moment = require("moment")
 
 { delay, waitForActionability } = require("./utils")
-$dom = require("../../../cypress/dom")
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 
@@ -67,7 +66,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $el: options.$el
           consoleProps: ->
             "Typed":      chars
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
             "table": ->
               {
@@ -79,12 +78,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log.snapshot("before", {next: "after"})
 
       isBody      = options.$el.is("body")
-      isTextLike  = $dom.elIsTextLike(options.$el)
-      isDate      = $dom.elIsType(options.$el, "date")
-      isTime      = $dom.elIsType(options.$el, "time")
-      isMonth     = $dom.elIsType(options.$el, "month")
-      isWeek      = $dom.elIsType(options.$el, "week")
-      hasTabIndex = $dom.elMatchesSelector(options.$el, "[tabindex]")
+      isTextLike  = $dom.isTextLike(options.$el)
+      isDate      = $dom.isType(options.$el, "date")
+      isTime      = $dom.isType(options.$el, "time")
+      isMonth     = $dom.isType(options.$el, "month")
+      isWeek      = $dom.isType(options.$el, "week")
+      hasTabIndex = $dom.isSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
       ## TODO: can't be readonly
@@ -92,7 +91,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
       if not isBody and not isTextLike and not hasTabIndex
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         $utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
           args: { node }
@@ -157,8 +156,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
           $el = $(el)
-          ($dom.elMatchesSelector($el, "input") and $dom.elIsType($el, "submit")) or
-          ($dom.elMatchesSelector($el, "button") and not $dom.elIsType($el, "button"))
+          ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
+          ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
 
       type = =>
         simulateSubmitHandler = =>
@@ -227,7 +226,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           isMonth or
           isWeek or
           isTime or
-          ($dom.elIsType(options.$el, "number") and _.includes(options.chars, "."))
+          ($dom.isType(options.$el, "number") and _.includes(options.chars, "."))
 
         ## see comment in updateValue below
         typed = ""
@@ -383,13 +382,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             message: deltaOptions
             $el: $el
             consoleProps: ->
-              "Applied To": $utils.getDomElements($el)
+              "Applied To": $dom.getElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
 
-        node = $utils.stringifyElement($el)
+        node = $dom.stringify($el)
 
-        if not $dom.elIsTextLike($el)
+        if not $dom.isTextLike($el)
           word = $utils.plural(subject, "contains", "is")
           $utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log

@@ -1,5 +1,5 @@
 _ = require("lodash")
-$dom = require("../cypress/dom")
+$dom = require("../dom")
 $utils = require("../cypress/utils")
 
 commandOptions = ["exist", "exists", "visible", "length"]
@@ -49,7 +49,7 @@ create = (state, expect, isInDom) ->
     ## the points
     if $utils.getDistanceBetween(point1, point2) > threshold
       cmd  = state("current").get("name")
-      node = $utils.stringifyElement($el)
+      node = $dom.stringify($el)
       $utils.throwErrByPath("dom.animating", {
         args: { cmd, node }
       })
@@ -60,7 +60,7 @@ create = (state, expect, isInDom) ->
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
-      node = $utils.stringifyElement(subject)
+      node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.disabled", {
         onFail
@@ -74,7 +74,7 @@ create = (state, expect, isInDom) ->
 
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonElIsHidden(subject)
-      node   = $utils.stringifyElement(subject)
+      node   = $dom.stringify(subject)
       $utils.throwErrByPath("dom.not_visible", {
         onFail
         args: { cmd, node, reason }
@@ -85,21 +85,21 @@ create = (state, expect, isInDom) ->
 
     cmd ?= state("current").get("name")
 
-    isWindow = $utils.hasWindow(subject)
+    isWindow = $dom.isWindow(subject)
 
     ## think about dropping the 'cmd' part
     ## and adding exactly what the subject is
     ## if its an object or array, just say Object or Array
     ## but if its a primitive, just print out its value like
     ## true, false, 0, 1, 3, "foo", "bar"
-    if not $utils.hasDom(subject)
+    if not $dom.isDom(subject)
       $utils.throwErrByPath("dom.non_dom", {
         onFail: log
         args: { cmd }
       })
 
     if not (isWindow or isInDom(subject))
-      node = $utils.stringifyElement(subject)
+      node = $dom.stringify(subject)
       $utils.throwErrByPath("dom.detached", {
         onFail: log
         args: { cmd, node }
@@ -130,7 +130,7 @@ create = (state, expect, isInDom) ->
 
   ensureElExistence = ($el) ->
     ## dont throw if this isnt even a DOM object
-    # return if not $utils.isJqueryInstance($el)
+    # return if not $dom.isJquery($el)
 
     ## ensure that we either had some assertions
     ## or that the element existed
@@ -144,16 +144,16 @@ create = (state, expect, isInDom) ->
   ensureDescendents = ($el1, $el2, onFail) ->
     cmd = state("current").get("name")
 
-    if not $utils.isDescendent($el1, $el2)
+    if not $dom.isDescendent($el1, $el2)
       if $el2
-        element1 = $utils.stringifyElement($el1)
-        element2 = $utils.stringifyElement($el2)
+        element1 = $dom.stringify($el1)
+        element2 = $dom.stringify($el2)
         $utils.throwErrByPath("dom.covered", {
           onFail
           args: { cmd, element1, element2 }
         })
       else
-        node = $utils.stringifyElement($el1)
+        node = $dom.stringify($el1)
         $utils.throwErrByPath("dom.center_hidden", {
           onFail
           args: { cmd, node }
@@ -173,11 +173,11 @@ create = (state, expect, isInDom) ->
     })
 
   ensureScrollability = ($el, cmd) ->
-    return true if $dom.elIsScrollable($el)
+    return true if $dom.isScrollable($el)
 
     ## prep args to throw in error since we can't scroll
     cmd   ?= state("current").get("name")
-    node  = $utils.stringifyElement($el)
+    node  = $dom.stringify($el)
 
     $utils.throwErrByPath("dom.not_scrollable", {
       args: { cmd, node }

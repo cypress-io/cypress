@@ -2,6 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
+$dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
 priorityElement = "input[type='submit'], button, a, label"
@@ -37,7 +38,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $el: $el
           consoleProps: ->
             ret = if $el
-              $utils.getDomElements($el)
+              $dom.getElements($el)
             else
               "--nothing--"
             Yielded: ret
@@ -132,7 +133,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           switch aliasType
             when "dom"
               _.extend consoleProps,
-                Yielded: $utils.getDomElements(value)
+                Yielded: $dom.getElements(value)
                 Elements: value?.length
 
             when "primitive"
@@ -155,7 +156,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return do resolveAlias = ->
           switch
             ## if this is a DOM element
-            when $utils.hasElement(subject)
+            when $dom.isElement(subject)
               replayFrom = false
 
               replay = ->
@@ -211,7 +212,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Yielded = $utils.getDomElements($el)
+        consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -277,7 +278,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     contains: (subject, filter, text, options = {}) ->
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
-      if subject and not $utils.hasElement(subject)
+      if subject and not $dom.isElement(subject)
         subject = null
 
       switch
@@ -297,12 +298,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getPhrase = (type, negated) ->
         switch
           when filter and subject
-            node = $utils.stringifyElement(subject, "short")
+            node = $dom.stringify(subject, "short")
             "within the element: #{node} and with the selector: '#{filter}' "
           when filter
             "within the selector: '#{filter}' "
           when subject
-            node = $utils.stringifyElement(subject, "short")
+            node = $dom.stringify(subject, "short")
             "within the element: #{node} "
           else
             ""
@@ -320,7 +321,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if options.log isnt false
         consoleProps = {
           Content: text
-          "Applied To": $utils.getDomElements(subject or cy.state("withinSubject"))
+          "Applied To": $dom.getElements(subject or cy.state("withinSubject"))
         }
 
         options._log = Cypress.log
@@ -331,7 +332,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Yielded = $utils.getDomElements($el)
+        consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})

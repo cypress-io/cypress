@@ -2,7 +2,6 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
 $Mouse = require("../../../cypress/mouse")
 
 {
@@ -13,6 +12,7 @@ $Mouse = require("../../../cypress/mouse")
   getPositionFromArguments
 } = require("./utils")
 
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -101,7 +101,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
-              "Applied To":   $utils.getDomElements($el)
+              "Applied To":   $dom.getElements($el)
               "Elements":     $el.length
               "Coords":       coords
               "Options":      deltaOptions
@@ -109,7 +109,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              consoleObj["Actual Element Clicked"] = $utils.getDomElements($elToClick)
+              consoleObj["Actual Element Clicked"] = $dom.getElements($elToClick)
 
             consoleObj.groups = ->
               groups = [{
@@ -271,7 +271,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           log = Cypress.log
             $el: $el
             consoleProps: ->
-              "Applied To":   $utils.getDomElements($el)
+              "Applied To":   $dom.getElements($el)
               "Elements":     $el.length
 
         cy.ensureVisibility $el, log

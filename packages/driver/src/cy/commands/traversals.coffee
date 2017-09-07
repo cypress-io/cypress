@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-$utils = require("../../cypress/utils")
+$dom = require("../../dom")
 
 traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
 
@@ -24,7 +24,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       consoleProps = {
         Selector: getSelector()
-        "Applied To": $utils.getDomElements(subject)
+        "Applied To": $dom.getElements(subject)
       }
 
       if options.log isnt false
@@ -35,7 +35,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Yielded = $utils.getDomElements($el)
+        consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -58,6 +58,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onRetry: getElements
           onFail: (err) ->
             if err.type is "existence"
-              node = $utils.stringifyElement(subject, "short")
+              node = $dom.stringify(subject, "short")
               err.displayMessage += " Queried from element: #{node}"
         })

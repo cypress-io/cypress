@@ -2,6 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
+$dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
 returnFalseIfThenable = (key, args...) ->
@@ -139,7 +140,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     options._log = Cypress.log
       message: message
-      $el: if $utils.hasElement(subject) then subject else null
+      $el: if $dom.isElement(subject) then subject else null
       consoleProps: ->
         Subject: subject
 
@@ -223,8 +224,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               })
 
       getFormattedElement = ($el) ->
-        if $utils.hasElement($el)
-          $utils.getDomElements($el)
+        if $dom.isElement($el)
+          $dom.getElements($el)
         else
           $el
 
@@ -325,7 +326,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       yieldItem = (el, index) ->
         return if endEarly
 
-        if $utils.hasElement(el)
+        if $dom.isElement(el)
           el = $(el)
 
         callback = ->

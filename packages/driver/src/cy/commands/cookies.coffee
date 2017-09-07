@@ -1,8 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Location = require("../../cypress/location")
+$dom = require("../../dom")
 $utils = require("../../cypress/utils")
+$Location = require("../../cypress/location")
 
 COOKIE_PROPS = "name value path secure httpOnly expiry domain".split(" ")
 

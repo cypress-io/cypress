@@ -1,8 +1,8 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
 { waitForActionability, getPositionFromArguments } = require("./utils")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 dispatch = (target, eventName, options) ->
@@ -65,7 +65,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## if we're window or document then dispatch early
       ## and avoid waiting for actionability
-      if $utils.hasWindow(subject) or $utils.hasDocument(subject)
+      if $dom.isWindow(subject) or $dom.isDocument(subject)
         dispatchEarly = true
       else
         subject = options.$el.first()

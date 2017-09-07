@@ -2,7 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
@@ -61,7 +61,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       matchingElements.push(el)
 
     consoleProps = {
-      "Applied To":   $utils.getDomElements($el)
+      "Applied To":   $dom.getElements($el)
       "Elements":     $el.length
     }
 
@@ -81,7 +81,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       options._log.snapshot("before", {next: "after"})
 
       if not isAcceptableElement($el)
-        node   = $utils.stringifyElement($el)
+        node   = $dom.stringify($el)
         word   = $utils.plural(options.$el, "contains", "is")
         phrase = if type is "check" then " and :radio" else ""
         $utils.throwErrByPath "check_uncheck.invalid_element", {

@@ -28,7 +28,7 @@ describe "src/cypress/dom", ->
 
       expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element. You passed: 'null'")
 
-  context "#elIsScrollable", ->
+  context "#isScrollable", ->
     beforeEach ->
       @add = (el) =>
         $(el).appendTo(cy.$$("body"))
@@ -37,7 +37,7 @@ describe "src/cypress/dom", ->
       @add("<div style='height: 1000px;' />")
       win = cy.state("window")
 
-      fn = => $dom.elIsScrollable(win)
+      fn = => $dom.isScrollable(win)
 
       expect(fn()).to.be.true
 
@@ -47,7 +47,7 @@ describe "src/cypress/dom", ->
 
       win = cy.state("window")
 
-      fn = -> $dom.elIsScrollable(win)
+      fn = -> $dom.isScrollable(win)
 
       expect(fn()).to.be.false
 
@@ -58,7 +58,7 @@ describe "src/cypress/dom", ->
         </div>
         """
 
-      fn = => $dom.elIsScrollable(noScroll)
+      fn = => $dom.isScrollable(noScroll)
 
       expect(fn()).to.be.false
 
@@ -71,7 +71,7 @@ describe "src/cypress/dom", ->
         </div>
         """
 
-      fn = => $dom.elIsScrollable(noOverflow)
+      fn = => $dom.isScrollable(noOverflow)
 
       expect(fn()).to.be.false
 
@@ -82,7 +82,7 @@ describe "src/cypress/dom", ->
         </div>
       """
 
-      fn = => $dom.elIsScrollable(vertScrollable)
+      fn = => $dom.isScrollable(vertScrollable)
 
       expect(fn()).to.be.true
 
@@ -93,7 +93,7 @@ describe "src/cypress/dom", ->
         </div>
       """
 
-      fn = => $dom.elIsScrollable(horizScrollable)
+      fn = => $dom.isScrollable(horizScrollable)
 
       expect(fn()).to.be.true
 
@@ -104,7 +104,7 @@ describe "src/cypress/dom", ->
         </div>
       """
 
-      fn = => $dom.elIsScrollable(forcedScroll)
+      fn = => $dom.isScrollable(forcedScroll)
 
       expect(fn()).to.be.true
 

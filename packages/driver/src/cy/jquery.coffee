@@ -1,6 +1,6 @@
 $ = require("jquery")
 
-$utils = require("../cypress/utils")
+$dom = require("../dom")
 
 remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
   remoteJQuery and (remoteJQuery isnt $)
@@ -13,7 +13,7 @@ create = (state) ->
     getRemotejQueryInstance: (subject) ->
       remoteJQuery = jquery()
 
-      if $utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+      if $dom.isElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
 
         return remoteSubject
