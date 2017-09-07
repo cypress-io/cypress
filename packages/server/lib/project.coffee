@@ -22,8 +22,8 @@ plugins     = require("./plugins")
 preprocessor = require("./preprocessor")
 git         = require("./util/git")
 settings    = require("./util/settings")
-scaffoldLog = require("log")("cypress:server:scaffold")
-log         = require("log")("cypress:server:project")
+scaffoldLog = require("debug")("cypress:server:scaffold")
+log         = require("debug")("cypress:server:project")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -95,7 +95,10 @@ class Project extends EE
           @scaffold(cfg)
         )
         .then =>
-          @watchSupportFile(cfg)
+          Promise.join(
+            @watchSupportFile(cfg)
+            @watchPluginsFile(cfg)
+          )
 
     # return our project instance
     .return(@)
@@ -141,6 +144,25 @@ class Project extends EE
         .catch ->
     else
       Promise.resolve()
+
+  watchPluginsFile: (config) ->
+    log("attempt watch plugins file: #{config.pluginsFile}")
+    if not config.pluginsFile
+      return Promise.resolve()
+
+    fs.pathExists(config.pluginsFile)
+    .then (found) =>
+      log("plugins file found? #{found}")
+      ## ignore if not found. plugins#init will throw the right error
+      return if not found
+
+      log("watch plugins file")
+      @watchers.watch(config.pluginsFile, {
+        onChange: =>
+          log("plugins file changed")
+          ## re-init plugins after a change
+          plugins.init(config)
+      })
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to

@@ -330,6 +330,38 @@ describe "lib/project", ->
       .catch (e) ->
         expect(e.message).to.include("The support file is missing or invalid.")
 
+  context "#watchPluginsFile", ->
+    beforeEach ->
+      @sandbox.stub(fs, "pathExists").resolves(true)
+      @project = Project("/_test-output/path/to/project")
+      @project.watchers = { watch: @sandbox.spy() }
+      @sandbox.stub(plugins, "init")
+      @config = {
+        pluginsFile: "/path/to/plugins-file"
+      }
+
+    it "does nothing when {pluginsFile: false}", ->
+      @config.pluginsFile = false
+      @project.watchPluginsFile(@config).then =>
+        expect(@project.watchers.watch).not.to.be.called
+
+    it "does nothing if pluginsFile does not exist", ->
+      fs.pathExists.resolves(false)
+      @project.watchPluginsFile(@config).then =>
+        expect(@project.watchers.watch).not.to.be.called
+
+    it "watches the pluginsFile", ->
+      @project.watchPluginsFile(@config).then =>
+        expect(@project.watchers.watch).to.be.calledWith(@config.pluginsFile)
+        expect(@project.watchers.watch.lastCall.args[1]).to.be.an("object")
+        expect(@project.watchers.watch.lastCall.args[1].onChange).to.be.a("function")
+
+    it "calls plugins.init when file changes", ->
+      @project.watchPluginsFile(@config)
+      .then () =>
+        @project.watchers.watch.firstCall.args[1].onChange()
+        expect(plugins.init).to.be.calledWith(@config)
+
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
