@@ -391,7 +391,7 @@ describe "src/cy/commands/agents", ->
           expect(@consoleProps["Context"]).to.eq(@context)
 
         it "includes return value", ->
-          expect(@consoleProps["Yielded"]).to.eq("return value")
+          expect(@consoleProps["Returned"]).to.eq("return value")
 
   context ".spy(obj, 'method')", ->
     beforeEach ->
