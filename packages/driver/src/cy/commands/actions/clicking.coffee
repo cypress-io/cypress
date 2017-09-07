@@ -304,11 +304,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## return our original subject when our promise resolves
       Promise
-        .resolve(subject.toArray())
-        .each(dblclick)
-        .return(subject)
-        .catch Promise.CancellationError, (err) ->
-          _.invokeMap(dblclicks, "cancel")
-          throw err
-
+      .resolve(subject.toArray())
+      .each(dblclick)
+      .return(subject)
   })
