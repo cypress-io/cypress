@@ -1,9 +1,12 @@
 _ = require("lodash")
+log = require("debug")("cypress:server:plugins")
 nodeCache = require("./node_cache")
 
 registeredEvents = {}
 
 register = (event, callback) ->
+  log("register event '#{event}'")
+
   if not _.isString(event)
     throw new Error("The plugin register function must be called with an event as its 1st argument. You passed '#{event}'.")
 
@@ -14,16 +17,20 @@ register = (event, callback) ->
 
 module.exports = {
   init: (config) ->
+    log("plugins.init '%s'", config.pluginsFile)
+
     return if not config.pluginsFile
 
     registeredEvents = {}
 
     if nodeCache.has(config.pluginsFile)
+      log("has cached plugin, clear it")
       nodeCache.clear(config.pluginsFile)
 
     try
       plugins = require(config.pluginsFile)
     catch e
+      log("failed to require pluginsFile:\n%s", e.stack)
       throw new Error("""
         The pluginsFile threw an error when required. Either the file is missing, an exception was thrown by the file, or there is a syntax error in the file.
 
@@ -35,6 +42,7 @@ module.exports = {
     if not _.isFunction(plugins)
       throw new Error("The pluginsFile must export a function. Your pluginsFile (#{config.pluginsFile}) exported #{plugins}.")
 
+    log("call the plugins function")
     plugins(register, config)
 
   register: register
@@ -43,6 +51,7 @@ module.exports = {
     !!registeredEvents[event]
 
   execute: (event, args...) ->
+    log("execute plugin event '#{event}' with args: %s", args...)
     registeredEvents[event](args...)
 
   ## for testing purposes
