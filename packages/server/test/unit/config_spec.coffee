@@ -799,7 +799,7 @@ describe "lib/config", ->
       })
 
   context ".setSupportFileAndFolder", ->
-    it "does nothing if supportFile is false", ->
+    it "does nothing if supportFile is falsey", ->
       obj = {
         projectRoot: "/_test-output/path/to/project"
       }
@@ -840,7 +840,7 @@ describe "lib/config", ->
         })
 
     it "sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default", ->
-      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/blank-support")
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/empty-folders")
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
@@ -865,6 +865,72 @@ describe "lib/config", ->
       config.setSupportFileAndFolder(obj)
       .catch (err) ->
         expect(err.message).to.include("The support file is missing or invalid.")
+
+  context ".setPluginsFile", ->
+    it "does nothing if pluginsFile is falsey", ->
+      obj = {
+        projectRoot: "/_test-output/path/to/project"
+      }
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql(obj)
+
+    it "sets the full path to the pluginsFile if it exists", ->
+      projectRoot = process.cwd()
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: "test/unit/config_spec.coffee"
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: "#{projectRoot}/test/unit/config_spec.coffee"
+        })
+
+    it "sets the pluginsFile to default index.js if does not exist", ->
+      projectRoot = process.cwd()
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: "cypress/plugins"
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: "#{projectRoot}/cypress/plugins/index.js"
+        })
+
+    it "set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/empty-folders")
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        pluginsFile: "cypress/plugins"
+      })
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: false
+        })
+
+    it "throws error if pluginsFile is not default and does not exist", ->
+      projectRoot = process.cwd()
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: "does/not/exist"
+      }
+
+      config.setPluginsFile(obj)
+      .catch (err) ->
+        expect(err.message).to.include("The plugins file is missing or invalid.")
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->

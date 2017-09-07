@@ -241,20 +241,16 @@ API = {
         """
         The plugins file is missing or invalid.
 
-        Your pluginsFile is set to '#{arg1}', but either the file is missing or it's invalid. The pluginsFile must be a .js or .coffee file.
+        Your pluginsFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The pluginsFile must be a .js or .coffee file.
 
-        Correct your cypress.json, create the appropriate file, or set pluginsFile to false if a support file is not necessary for your project.
+        Correct your cypress.json, create or fix the file, or set pluginsFile to false if a plugins file is not necessary for your project.
 
         Learn more at https://on.cypress.io/plugins-file-missing-or-invalid
-        """
-      when "PLUGINS_FILE_ERROR"
-        """
-        We encountered the following error while loading the plugins file. This may be a syntax error in the file or a permissions issue.
 
-        We attempted to load the file at '#{chalk.blue(arg1)}'
+        #{if arg2 then "The following error was thrown:" else ""}
 
-        #{chalk.yellow(arg2)}
-        """
+        #{if arg2 then chalk.yellow(arg2) else ""}
+        """.trim()
       when "BUNDLE_ERROR"
         ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
         ## THE ERROR MESSAGE IN THE RUNNER TOO
