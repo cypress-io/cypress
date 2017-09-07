@@ -237,7 +237,7 @@ API = {
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid
         """
-      when "PLUGINS_FILE_NOT_FOUND"
+      when "PLUGINS_FILE_ERROR"
         """
         The plugins file is missing or invalid.
 

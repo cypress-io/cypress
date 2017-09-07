@@ -30,18 +30,18 @@ describe "lib/plugins", ->
       expect(plugin).to.be.calledWith(plugins.register, config)
 
     it "throws error if pluginsFile is missing", ->
-      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The pluginsFile threw an error when required")
+      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The plugins file is missing or invalid")
 
     it "throws error if requiring pluginsFile errors", ->
       ## path for substitute is relative to lib/plugins.coffee
       mockery.registerSubstitute("cypress-plugin", "../test/fixtures/plugins/throws-error")
-      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The pluginsFile threw an error when required")
+      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The plugins file is missing or invalid")
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("error thrown by pluginsFile")
 
     it "throws error if pluginsFile has syntax error", ->
       ## path for substitute is relative to lib/plugins.coffee
       mockery.registerSubstitute("cypress-plugin", "../test/fixtures/plugins/syntax-error")
-      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The pluginsFile threw an error when required")
+      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The plugins file is missing or invalid")
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("Unexpected token")
 
     it "throws error if pluginsFile does not export a function", ->

@@ -337,7 +337,7 @@ module.exports = {
       else
         log("plugins file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("PLUGINS_FILE_NOT_FOUND", path.resolve(obj.projectRoot, pluginsFile))
+        errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
     .return(obj)
 
   setParentTestsPaths: (obj) ->

@@ -1,5 +1,6 @@
 _ = require("lodash")
 log = require("debug")("cypress:server:plugins")
+errors = require("./errors")
 nodeCache = require("./node_cache")
 
 registeredEvents = {}
@@ -31,13 +32,7 @@ module.exports = {
       plugins = require(config.pluginsFile)
     catch e
       log("failed to require pluginsFile:\n%s", e.stack)
-      throw new Error("""
-        The pluginsFile threw an error when required. Either the file is missing, an exception was thrown by the file, or there is a syntax error in the file.
-
-        pluginsFile: #{config.pluginsFile}
-
-        #{e.stack}
-      """)
+      errors.throw("PLUGINS_FILE_ERROR", config.pluginsFile, e.stack)
 
     if not _.isFunction(plugins)
       throw new Error("The pluginsFile must export a function. Your pluginsFile (#{config.pluginsFile}) exported #{plugins}.")
