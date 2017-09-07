@@ -7,8 +7,8 @@ $elements = require("./elements")
 { isWindow } = $window
 { isDocument } = $document
 { wrapInjQuery, isJquery } = $jquery
-{ isVisible, isHidden, getReasonElIsHidden } = $visibility
-{ isType, isElement, isScrollable, stringify, getElements, isAttachedToDom, isTextLike, isSelector, getFirstFixedOrStickyPositionParent, isDescendent } = $elements
+{ isVisible, isHidden, getReasonIsHidden } = $visibility
+{ isType, isElement, isScrollable, stringify, getElements, isAttachedToDom, isTextLike, isSelector, isDescendent, positionProps, getFirstFixedOrStickyPositionParent, getFirstScrollableParent } = $elements
 
 isDom = (obj) ->
   isElement(obj) or isWindow(obj) or isDocument(obj)
@@ -49,9 +49,13 @@ module.exports = {
 
   stringify
 
+  positionProps
+
   getElements
 
-  getReasonElIsHidden
+  getReasonIsHidden
+
+  getFirstScrollableParent
 
   getFirstFixedOrStickyPositionParent
 

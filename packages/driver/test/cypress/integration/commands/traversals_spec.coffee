@@ -1,6 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
-utils = Cypress.utils
+dom = Cypress.dom
 
 helpers = require("../../support/helpers")
 
@@ -52,7 +52,7 @@ describe "src/cy/commands/traversals", ->
         it "throws on too many elements after timing out waiting for length", (done) ->
           el = cy.$$("#list")[name](arg)
 
-          node = utils.stringifyElement cy.$$("#list"), "short"
+          node = dom.stringify cy.$$("#list"), "short"
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
@@ -63,7 +63,7 @@ describe "src/cy/commands/traversals", ->
         it "throws on too few elements after timing out waiting for length", (done) ->
           el = cy.$$("#list")[name](arg)
 
-          node = utils.stringifyElement cy.$$("#list"), "short"
+          node = dom.stringify cy.$$("#list"), "short"
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
@@ -87,7 +87,7 @@ describe "src/cy/commands/traversals", ->
 
         it "returns no elements", (done) ->
           errIncludes = (el, node) =>
-            node = utils.stringifyElement cy.$$(node), "short"
+            node = dom.stringify cy.$$(node), "short"
 
             cy.on "fail", (err) ->
               expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"

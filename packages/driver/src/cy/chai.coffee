@@ -53,7 +53,7 @@ chai.use (chai, u) ->
         when "visible"
           if not negated
             ## add reason hidden unless we expect the element to be hidden
-            reason = $dom.getReasonElIsHidden(obj)
+            reason = $dom.getReasonIsHidden(obj)
             err.message += "\n\n" + reason
 
       ## always rethrow the error!

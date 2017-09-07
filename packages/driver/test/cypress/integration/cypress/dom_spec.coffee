@@ -421,10 +421,10 @@ describe "src/cypress/dom", ->
     it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
       expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
 
-    describe "#getReasonElIsHidden", ->
+    describe "#getReasonIsHidden", ->
       beforeEach ->
         @reasonIs = ($el, str) ->
-          expect($dom.getReasonElIsHidden($el)).to.eq(str)
+          expect($dom.getReasonIsHidden($el)).to.eq(str)
 
       it "has 'display: none'", ->
         @reasonIs @$displayNone, "This element '<button>' is not visible because it has CSS property: 'display: none'"

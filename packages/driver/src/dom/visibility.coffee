@@ -197,8 +197,8 @@ parentHasVisibilityNone = ($el) ->
     ## continue walking
     return parentHasVisibilityNone($el.parent())
 
-getReasonElIsHidden = ($el) ->
-  node = $element.stringify($el, "short")
+getReasonIsHidden = ($el) ->
+  node = $elements.stringify($el, "short")
 
   ## returns the reason in human terms why an element is considered not visible
   switch
@@ -206,11 +206,11 @@ getReasonElIsHidden = ($el) ->
       "This element '#{node}' is not visible because it has CSS property: 'display: none'"
 
     when $parent = parentHasDisplayNone($el.parent())
-      parentNode = $element.stringify($parent, "short")
+      parentNode = $elements.stringify($parent, "short")
       "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'display: none'"
 
     when $parent = parentHasVisibilityNone($el.parent())
-      parentNode = $element.stringify($parent, "short")
+      parentNode = $elements.stringify($parent, "short")
       "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'visibility: hidden'"
 
     when elHasVisibilityHidden($el)
@@ -222,7 +222,7 @@ getReasonElIsHidden = ($el) ->
       "This element '#{node}' is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
 
     when $parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
-      parentNode  = $element.stringify($parent, "short")
+      parentNode  = $elements.stringify($parent, "short")
       width       = elOffsetWidth($parent)
       height      = elOffsetHeight($parent)
       "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
@@ -238,5 +238,5 @@ module.exports = {
 
   isHidden
 
-  getReasonElIsHidden
+  getReasonIsHidden
 }

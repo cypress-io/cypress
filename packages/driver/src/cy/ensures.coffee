@@ -73,7 +73,7 @@ create = (state, expect, isInDom) ->
     cmd = state("current").get("name")
 
     if not (subject.length is subject.filter(":visible").length)
-      reason = $dom.getReasonElIsHidden(subject)
+      reason = $dom.getReasonIsHidden(subject)
       node   = $dom.stringify(subject)
       $utils.throwErrByPath("dom.not_visible", {
         onFail

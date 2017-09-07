@@ -123,7 +123,7 @@ getFirstScrollableParent = ($el) ->
     ## we'll simply return null here and let our
     ## caller deal with situations where they're
     ## needing to scroll the window or scrollableElement
-    if $parent.is("html,body") or $dom.isDocument($parent)
+    if $parent.is("html,body") or $document.isDocument($parent)
       return null
 
     if isScrollable($parent)
