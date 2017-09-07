@@ -5,6 +5,15 @@ $Log = require("../../../cypress/log")
 { waitForActionability, getPositionFromArguments } = require("./utils")
 $utils = require("../../../cypress/utils")
 
+dispatch = (target, eventName, options) ->
+  event = new Event(eventName, options)
+
+  ## some options, like clientX & clientY, must be set on the
+  ## instance instead of passing them into the constructor
+  _.extend(event, options)
+
+  target.dispatchEvent(event)
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "dom" }, {
     trigger: (subject, eventName, positionOrX, y, options = {}) ->
@@ -51,11 +60,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       win = state("window")
-      $el = options.$el.first()
-      el = $el.get(0)
+
+      dispatchEarly = false
+
+      ## if we're window or document then dispatch early
+      ## and avoid waiting for actionability
+      if $utils.hasWindow(subject) or $utils.hasDocument(subject)
+        dispatchEarly = true
+      else
+        subject = options.$el.first()
 
       trigger = ->
-        waitForActionability(cy, $el, win, options, {
+        if dispatchEarly
+          return dispatch(subject, eventName, eventOptions)
+
+        waitForActionability(cy, subject, win, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:app:scrolled", $el, type)
 
@@ -71,20 +90,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               pageY: coords.y
             }, eventOptions)
 
-            event = new Event(eventName, eventOptions)
-
-            ## some options, like clientX & clientY, must be set on the
-            ## instance instead of passing them into the constructor
-            _.extend(event, eventOptions)
-
-            el.dispatchEvent(event)
+            dispatch($elToClick.get(0), eventName, eventOptions)
       })
 
       Promise
       .try(trigger)
-      .then =>
-        do verifyAssertions = =>
-          cy.verifyUpcomingAssertions($el, options, {
+      .then ->
+        do verifyAssertions = ->
+          cy.verifyUpcomingAssertions(subject, options, {
             onRetry: verifyAssertions
           })
   })

@@ -227,7 +227,7 @@ Log = (state, config, obj) ->
       if attributes.id
         delete obj.id
 
-      _.extend attributes, obj
+      _.extend(attributes, obj)
 
       ## if we have an consoleProps function
       ## then re-wrap it
@@ -331,6 +331,12 @@ Log = (state, config, obj) ->
         ## wrap the element in jquery
         ## if its just a plain element
         return @set("$el", $($el), {silent: true})
+
+      ## if we've passed something like
+      ## <window> or <document> here or
+      ## a primitive then unset $el
+      if not $utils.isJqueryInstance($el)
+        return @unset("$el")
 
       ## make sure all $el elements are visible!
       obj = {

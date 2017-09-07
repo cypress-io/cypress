@@ -102,6 +102,52 @@ describe "src/cy/commands/actions/trigger", ->
 
       cy.get("#scrolledBtn").trigger("mouseover")
 
+    it "does not change the subject", ->
+      $input = cy.$$("input:first")
+
+      cy.get("input:first").trigger("keydown").then ($el) ->
+        expect($el.get(0)).to.eq($input.get(0))
+
+    it "can trigger events on the window", ->
+      expected = false
+
+      win = cy.state("window")
+
+      $(win).on "scroll", (e) ->
+        expected = true
+
+      cy
+        .window().trigger("scroll")
+        .then ->
+          expect(expected).to.be.true
+
+    it "can trigger custom events on the window", ->
+      expected = false
+
+      win = cy.state("window")
+
+      $(win).on "foo", (e) ->
+        expect(e.detail).to.deep.eq({foo: "bar"})
+        expected = true
+
+      cy
+        .window().trigger("foo", {
+          detail: { foo: "bar" }
+        })
+        .then ->
+          expect(expected).to.be.true
+
+    it "can trigger events on the document", ->
+      expected = false
+
+      doc = cy.state("document")
+
+      $(doc).on "dragover", ->
+        expected = true
+
+      cy.document().trigger("dragover").then ->
+        expect(expected).to.be.true
+
     describe "actionability", ->
       it "can trigger on elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").trigger("mousedown")
@@ -178,6 +224,26 @@ describe "src/cy/commands/actions/trigger", ->
           ## - element scrollIntoView (retry covered)
           ## - window
           expect(scrolled).to.deep.eq(["element", "element", "element", "element"])
+
+      it "issues event to descendent", ->
+        mouseovers = 0
+
+        $btn = $("<button>", {
+          id: "button-covered-in-span"
+        })
+        .prependTo(cy.$$("body"))
+
+        $span = $("<span>span in button</span>")
+        .css({ padding: 5, display: "inline-block", backgroundColor: "yellow" })
+        .appendTo($btn)
+
+        $btn.on "mouseover", -> mouseovers += 1
+        $span.on "mouseover", -> mouseovers += 1
+
+        cy
+          .get("#button-covered-in-span").trigger("mouseover")
+          .then ->
+            expect(mouseovers).to.eq(2)
 
       it "scrolls the window past a fixed position element when being covered", ->
         $btn = $("<button>button covered</button>")
