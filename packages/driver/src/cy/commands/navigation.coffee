@@ -281,6 +281,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           resp
 
   Cypress.on "before:window:load", (contentWindow) ->
+    ## TODO: just use a closure here
     current = state("current")
 
     return if not current
