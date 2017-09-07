@@ -4,7 +4,6 @@ UrlParse = require("url-parse")
 Promise = require("bluebird")
 
 $Location = require("../../cypress/location")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 

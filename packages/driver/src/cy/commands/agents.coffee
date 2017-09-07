@@ -3,7 +3,6 @@ sinon = require("sinon")
 
 Promise = require("bluebird")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 counts = null

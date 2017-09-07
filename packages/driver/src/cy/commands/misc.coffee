@@ -1,6 +1,5 @@
 _ = require("lodash")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->

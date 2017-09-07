@@ -1,7 +1,6 @@
 _ = require("lodash")
 
 $Clock = require("../../cypress/clock")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 ## create a global clock

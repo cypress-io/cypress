@@ -2,7 +2,6 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $Location = require("../../cypress/location")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->

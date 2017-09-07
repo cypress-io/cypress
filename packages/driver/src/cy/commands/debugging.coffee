@@ -1,8 +1,5 @@
 _ = require("lodash")
 
-$Cy = require("../../cypress/cy")
-$Cypress = require("../../cypress")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 resume = (state, resumeAll = true) ->

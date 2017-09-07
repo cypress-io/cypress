@@ -2,7 +2,6 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 returnFalseIfThenable = (key, args...) ->

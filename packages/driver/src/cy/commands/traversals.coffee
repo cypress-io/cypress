@@ -1,6 +1,5 @@
 _ = require("lodash")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
