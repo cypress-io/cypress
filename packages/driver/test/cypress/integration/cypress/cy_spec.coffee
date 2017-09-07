@@ -236,8 +236,6 @@ describe "driver/src/cypress/cy", ->
         return fn(@)
 
     it "can modify parent commands", ->
-      cy.on "fail", (err) -> debugger
-
       cy.wrap("bar").then (str) ->
         expect(str).to.eq("foobar")
 
