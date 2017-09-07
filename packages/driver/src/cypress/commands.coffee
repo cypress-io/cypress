@@ -1,4 +1,5 @@
 _ = require("lodash")
+$utils = require("./utils")
 
 builtInCommands = [
   require("../cy/commands/actions/checkbox")
@@ -73,10 +74,12 @@ create = (Cypress, cy, state, config, log) ->
 
     originalFn = original.fn
 
-    overrideFn = _.wrap originalFn, ->
-      fn.apply(@, arguments)
+    overridden = _.clone(original)
+    overridden.fn = (args...) ->
+      args = [].concat(originalFn, args)
+      fn.apply(@, args)
 
-    original.fn = overrideFn
+    cy.addCommand(overridden)
 
   Commands = {
     _commands: commands ## for testing

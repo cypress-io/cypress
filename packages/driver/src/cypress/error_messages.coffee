@@ -446,15 +446,13 @@ module.exports = {
       https://on.cypress.io/cannot-execute-commands-outside-test
     """
     private_custom_command_interface: "You cannot use the undocumented private command interface: {{method}}"
-    private_property: (obj) ->
+    private_property:
       """
-      You are accessing a private property directly on cy which has been renamed.
+      You are accessing a private property directly on 'cy' which has been renamed.
 
       This was never documented nor supported.
 
-      Please go through the public getter function: #{cmd(obj.name, "...")}
-
-      #{if obj.url then "https://on.cypress.io/#{obj.name}" else ""}
+      Please go through the public function: #{cmd('state', "...")}
       """
     retry_timed_out: "Timed out retrying: {{error}}"
 
