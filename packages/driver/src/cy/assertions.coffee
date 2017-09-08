@@ -321,7 +321,7 @@ create = (state, queue, retryFn) ->
     obj = parseValueActualAndExpected(value, actual, expected)
 
     if $dom.isElement(value)
-      obj.$el = $dom.wrapInjQuery(value)
+      obj.$el = $dom.wrap(value)
 
     current = state("current")
 

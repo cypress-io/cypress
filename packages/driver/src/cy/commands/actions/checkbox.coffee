@@ -28,8 +28,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     log: true
     force: false
 
-  cy.ensureDom(options.$el)
-
   isNoop = ($el) ->
     switch type
       when "check"
@@ -94,7 +92,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       ## and bail
       if isNoop($el)
         ## still ensure visibility even if the command is noop
-        cy.ensureVisibility $el, options._log
+        cy.ensureVisibility($el, options._log)
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
@@ -139,7 +137,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     check: (subject, values, options) ->
       checkOrUncheck.call(@, "check", subject, values, options)
 

@@ -147,8 +147,24 @@ describe "driver/src/cypress/cy", ->
         Cypress.Commands.add "c2", {prevSubject: true},  (subject, arg) ->
           return [subject, arg]
 
-        Cypress.Commands.add "dom", {prevSubject: "dom"}, (subject, arg) ->
-          debugger
+        Cypress.Commands.add "winOnly", { prevSubject: "window" }, ->
+
+        Cypress.Commands.add "docOnly", { prevSubject: "document" }, ->
+
+        Cypress.Commands.add "elOnly", { prevSubject: "element" }, ->
+
+        Cypress.Commands.add "elWinOnly", { prevSubject: ["element", "window"] }, ->
+
+      it "is called with the correct ctx", ->
+        ctx = @
+        expected = false
+
+        Cypress.Commands.add "childCtx", { prevSubject: true }, ->
+          expect(@ is ctx).to.be.true
+          expected = true
+
+        cy.wrap(null).childCtx().then ->
+          expect(expected).to.be.true
 
       it "inherits subjects", ->
         cy
@@ -180,12 +196,52 @@ describe "driver/src/cypress/cy", ->
         cy.wrap("foo")
         cy.c()
 
-      it "fails when previous subject isnt DOM", (done) ->
+      it "fails when previous subject becomes detached", (done) ->
+        cy.$$("button:first").click ->
+          $(@).remove()
+
         cy.on "fail", (err) ->
-          expect(err.message).to.include("Cannot call cy.dom() on a non-DOM subject.")
+          expect(err.message).to.include("cy.parent() failed because this element is detached from the DOM.")
+          expect(err.message).to.include('<button id="button">button</button>')
+          expect(err.message).to.include("> cy.click()")
           done()
 
-        cy.wrap("foo").dom()
+        cy.get("button:first").click().parent()
+
+      it "fails when previous subject isnt window", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.winOnly() failed because it requires the subject be a global 'window' object.")
+          expect(err.message).to.include("{foo: bar}")
+          expect(err.message).to.include("> cy.wrap()")
+          done()
+
+        cy.wrap({foo: 'bar'}).winOnly()
+
+      it "fails when previous subject isnt document", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.docOnly() failed because it requires the subject be a global 'document' object.")
+          expect(err.message).to.include("[1, 2, 3]")
+          expect(err.message).to.include("> cy.wrap()")
+          done()
+
+        cy.wrap([1,2,3]).docOnly()
+
+      it "fails when previous subject isnt an element or window", (done) ->
+        firstPassed = false
+
+        cy.on "fail", (err) ->
+          expect(firstPassed).to.be.true
+          expect(err.message).to.include("cy.elWinOnly() failed because it requires a DOM element.")
+          expect(err.message).to.include("string")
+          expect(err.message).to.include("> cy.wrap()")
+          expect(err.message).to.include("All 2 subject validations failed")
+          done()
+
+        cy.window().elWinOnly()
+        .then ->
+          firstPassed = true
+
+          cy.wrap("string").elWinOnly()
 
     describe "dual commands", ->
       beforeEach ->

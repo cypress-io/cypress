@@ -23,7 +23,7 @@ isNaNOrInfinity = (item) ->
   return _.isNaN(num) or !_.isFinite(num)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     scrollIntoView: (subject, options = {}) ->
       if !_.isObject(options)
         $utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
@@ -37,13 +37,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if subject.length > 1
         $utils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
 
-      _.defaults options,
+      _.defaults(options, {
         $el: subject
         $parent: state("window")
         log: true
         duration: 0
         easing: "swing"
         axis: "xy"
+      })
 
       ## figure out the options which actually change the behavior of clicks
       deltaOptions = $utils.filterOutOptions(options)
@@ -119,7 +120,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
   })
 
-  Commands.addAll({ prevSubject: "optional" }, {
+  Commands.addAll({ prevSubject: ["optional", "element", "window"] }, {
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
       ## check for undefined or null values
       if not xOrPosition?
@@ -177,9 +178,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       y ?= 0
       x ?= 0
 
-      if subject
-        ## if they passed something here, need to ensure it's DOM
-        cy.ensureDom(subject)
+      ## if our subject is window let it fall through
+      if subject and (not $dom.isWindow(subject))
+        ## if they passed something here, its a DOM element
         $container = subject
       else
         isWin = true
@@ -195,7 +196,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if $container.length > 1
         $utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
-      _.defaults options,
+      _.defaults(options, {
         $el: $container
         log: true
         duration: 0
@@ -203,6 +204,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         axis: "xy"
         x: x
         y: y
+      })
 
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
@@ -236,7 +238,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log = Cypress.log(log)
 
-      ensureScrollability = =>
+      ensureScrollability = ->
         try
           ## make sure our container can even be scrolled
           cy.ensureScrollability($container, "scrollTo")
@@ -245,7 +247,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cy.retry(ensureScrollability, options)
 
       scrollTo = ->
-        new Promise (resolve, reject) =>
+        new Promise (resolve, reject) ->
           ## scroll our axis'
           $(options.$el).scrollTo({left: x, top: y}, {
             axis:     options.axis

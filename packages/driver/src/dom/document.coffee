@@ -4,6 +4,11 @@ isDocument = (obj) ->
   catch
     false
 
+getDocumentFromElement = (el) ->
+  el.ownerDocument
+
 module.exports = {
   isDocument
+
+  getDocumentFromElement
 }

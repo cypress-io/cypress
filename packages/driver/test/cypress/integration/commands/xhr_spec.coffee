@@ -1697,7 +1697,6 @@ describe "src/cy/commands/xhr", ->
       it "logs request + response headers", ->
         cy.then ->
           consoleProps = @lastLog.invoke("consoleProps")
-          debugger
           expect(consoleProps.Request.headers).to.be.an("object")
           expect(consoleProps.Response.headers).to.be.an("object")
 
@@ -1933,7 +1932,6 @@ describe "src/cy/commands/xhr", ->
       ## currently this does not fail. we'll wait until someone cares
       # it "errors if response was null or undefined", (done) ->
       #   cy.on "fail", (err) ->
-      #     debugger
 
       #   cy
       #     .server()

@@ -29,6 +29,40 @@ isAncestor = ($el, $maybeAncestor) ->
 isSelector = ($el, selector) ->
   $el.is(selector)
 
+isDetached = ($el) ->
+  not isAttached($el)
+
+isAttached = ($el) ->
+  ## if we're being given window or document
+  ## always assume these are attached
+  if $window.isWindow($el) or $document.isDocument($el)
+    ## its probably possible these are stale but not
+    ## worth the trouble of trying to verify them.
+    ## there is a code path when forcing focus and
+    ## blur on the window where this is necessary.
+    return true
+
+  ## normalize into an array
+  els = [].concat($jquery.unwrap($el))
+
+  ## we could be passed an empty array here
+  ## which in that case it is not attached
+  if els.length is 0
+    return false
+
+  ## get the document from the first element
+  doc = $document.getDocumentFromElement(els[0])
+
+  ## TODO: i guess its possible each element
+  ## is technically bound to a differnet document
+  ## but c'mon
+  isIn = (el) ->
+    $.contains(doc, el)
+
+  ## return false unless every single
+  ## el is attached to its document
+  _.every(els, isIn)
+
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
   type = (type) -> isType($el, type)
@@ -156,13 +190,13 @@ positionProps = ($el, adjustments = {}) ->
 getElements = ($el) ->
   return if not $el?.length
 
-  if $el.length is 1
-    $el.get(0)
+  ## unroll the jquery object
+  els = $jquery.unwrap($el)
+
+  if els.length is 1
+    els[0]
   else
-    _.reduce $el, (memo, el) ->
-      memo.push(el)
-      memo
-    , []
+    els
 
 ## short form css-inlines the element
 ## long form returns the outerHTML
@@ -176,7 +210,7 @@ stringify = (el, form = "long") ->
     return "<document>"
 
   ## convert this to jquery if its not already one
-  $el = $jquery.wrapInjQuery(el)
+  $el = $jquery.wrap(el)
 
   switch form
     when "long"
@@ -218,6 +252,11 @@ module.exports = {
   isScrollOrAuto
 
   isFocusable
+
+  isAttached
+
+  isDetached
+
   isAncestor
 
   isScrollable

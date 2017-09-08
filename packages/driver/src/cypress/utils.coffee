@@ -153,7 +153,7 @@ module.exports = {
 
   stringifyActual: (value) ->
     switch
-      when $dom.isElement(value)
+      when $dom.isDom(value)
         $dom.stringify(value, "short")
 
       when _.isFunction(value)

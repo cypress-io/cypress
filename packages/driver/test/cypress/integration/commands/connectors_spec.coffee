@@ -517,9 +517,10 @@ describe "src/cy/commands/connectors", ->
 
           cy.noop({}).invoke("foo")
 
-        it "throws without a subject (even as a dual command)", (done) ->
+        it "throws without a subject", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.invoke() is a child command which operates on an existing subject.  Child commands must be called after a parent command."
+            expect(err.message).to.include("cy.invoke(queue)")
+            expect(err.message).to.include("child command before running a parent command")
             done()
 
           cy.invoke("queue")
@@ -546,7 +547,7 @@ describe "src/cy/commands/connectors", ->
 
         it "ensures subject", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "Subject is undefined. You cannot call cy.its() without a subject."
+            expect(err.message).to.include "cy.its() errored because your subject is currently: 'undefined'"
             done()
 
           cy.noop(undefined).its("attr")
@@ -718,6 +719,14 @@ describe "src/cy/commands/connectors", ->
 
           return null
 
+        it "throws without a subject", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include("cy.its(wat)")
+            expect(err.message).to.include("child command before running a parent command")
+            done()
+
+          cy.its("wat")
+
         it "does not display parenthesis on command", (done) ->
           obj = {
             foo: {
@@ -772,7 +781,6 @@ describe "src/cy/commands/connectors", ->
             cy.wrap({foo: val}).its("foo.toString")
 
         it "throws two args were passed as subject", (done) ->
-
           cy.on "fail", (err) =>
             lastLog = @lastLog
 

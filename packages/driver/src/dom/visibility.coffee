@@ -1,6 +1,6 @@
-$ = require("jquery")
 _ = require("lodash")
 
+$jquery = require("./jquery")
 $document = require("./document")
 $elements = require("./elements")
 
@@ -11,18 +11,16 @@ OVERFLOW_PROPS = ["hidden", "scroll", "auto"]
 isVisible = (el) ->
   not isHidden(el, "isVisible()")
 
-## assign this fn to jquery and to our revealing module
-## at the same time. #pro
-isHidden = (el, filter) ->
+## TODO: we should prob update dom
+## to be passed in $utils as a dependency
+## because of circular references
+isHidden = (el, name) ->
   if not $elements.isElement(el)
-    throw new Error("MOVE THIS ERROR INTO CY CODE")
+    name ?= "isHidden()"
 
-    ## TODO: this should probably not throw here!??!?!
-    $utils.throwErrByPath("dom.non_dom_is_hidden", {
-      args: { el, filter: filter or "isHidden()" }
-    })
+    throw new Error("Cypress.dom.#{name} must be passed a basic DOM element.")
 
-  $el = $(el)
+  $el = $jquery.wrap(el)
 
   ## in Cypress-land we consider the element hidden if
   ## either its offsetHeight or offsetWidth is 0 because
@@ -78,7 +76,7 @@ canClipContent = ($el, $ancestor) ->
   ## even if overflow is clippable, if an ancestor of the ancestor is the
   ## element's offset parent, the ancestor will not clip the element
   ## unless the element is position relative
-  if not elHasPositionRelative($el) and $elements.isAncestor($ancestor, $($el[0].offsetParent))
+  if not elHasPositionRelative($el) and $elements.isAncestor($ancestor, $jquery.wrap($el[0].offsetParent))
     return false
 
   return true
@@ -90,7 +88,7 @@ elDescendentsHavePositionFixedOrAbsolute = ($parent, $child) ->
   $els = $child.parentsUntil($parent).add($child)
 
   _.some $els.get(), (el) ->
-    fixedOrAbsoluteRe.test $(el).css("position")
+    fixedOrAbsoluteRe.test $jquery.wrap(el).css("position")
 
 ## walks up the tree and compares the target's size and position
 ## with that of its ancestors to determine if it's hidden due to being

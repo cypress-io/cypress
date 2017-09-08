@@ -8,14 +8,12 @@ $utils = require("../../../cypress/utils")
 newLineRe = /\n/g
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
         $el: subject
         log: true
         force: false
-
-      cy.ensureDom(options.$el)
 
       consoleProps = {}
 

@@ -89,7 +89,6 @@ describe "src/cy/commands/fixtures", ->
 
       it "throws when fixture cannot be found without extension", (done) ->
         cy.on "fail", (err) =>
-          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -107,7 +106,6 @@ describe "src/cy/commands/fixtures", ->
       it "throws when fixture cannot be found with extension", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
-          debugger
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)

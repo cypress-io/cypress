@@ -15,7 +15,7 @@ dispatch = (target, eventName, options) ->
   target.dispatchEvent(event)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: ["element", "window", "document"] }, {
     trigger: (subject, eventName, positionOrX, y, options = {}) ->
       {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
 

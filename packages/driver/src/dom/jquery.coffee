@@ -1,8 +1,17 @@
 $ = require("jquery")
 _ = require("lodash")
 
-wrapInjQuery = (obj) ->
+## wrap the object in jquery
+wrap = (obj) ->
   if isJquery(obj) then obj else $(obj)
+
+## pull out the raw elements if this is wrapped
+unwrap = (obj) ->
+  if isJquery(obj)
+    ## return an array of elements
+    obj.toArray()
+  else
+    obj
 
 isJquery = (obj) ->
   ## does it have the jquery property and is the
@@ -12,7 +21,9 @@ isJquery = (obj) ->
 ## doing a little jiggle wiggle here
 ## to avoid circular dependencies
 module.exports = {
-  wrapInjQuery
+  wrap
+
+  unwrap
 
   isJquery
 }

@@ -9,6 +9,7 @@ $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
+
 dateRegex = /^\d{4}-\d{2}-\d{2}$/
 monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
@@ -18,11 +19,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run", ->
     $Keyboard.resetModifiers(state("document"), state("window"))
 
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     type: (subject, chars, options = {}) ->
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
-      _.defaults options,
+      _.defaults(options, {
         $el: subject
         log: true
         verify: true
@@ -31,8 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         release: true
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
-
-      cy.ensureDom(options.$el)
+      })
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
@@ -159,8 +159,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
           ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
 
-      type = =>
-        simulateSubmitHandler = =>
+      type = ->
+        simulateSubmitHandler = ->
           form = options.$el.parents("form")
 
           return if not form.length
@@ -210,14 +210,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## consider changing type to a Promise and juggle logging
             cy.now("submit", form, {log: false, $el: form})
 
-        dispatchChangeEvent = (id) =>
+        dispatchChangeEvent = (id) ->
           change = document.createEvent("HTMLEvents")
           change.initEvent("change", true, false)
 
           dispatched = options.$el.get(0).dispatchEvent(change)
 
           if id and updateTable
-            updateTable.call(@, id, null, "change", null, dispatched)
+            updateTable(id, null, "change", null, dispatched)
 
           return dispatched
 
@@ -250,7 +250,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             else
               rng.text(key, "end")
 
-          onBeforeType: (totalKeys) =>
+          onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to
             ## type, ensure we raise the timeout to account
             ## for the delay being added to each keystroke
@@ -263,7 +263,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if isTypeableButNotAnInput
               return false
 
-          onBeforeEvent: (id, key, column, which) =>
+          onBeforeEvent: (id, key, column, which) ->
             ## if we are an element which isnt text like but we have
             ## a tabindex then it can receive keyboard events but
             ## should not fire input or textInput and should not fire
@@ -271,13 +271,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if column in inputEvents and isTypeableButNotAnInput
               return false
 
-          onEvent: (id, key, column, which, value) =>
-            updateTable.apply(@, arguments) if updateTable
+          onEvent: (id, key, column, which, value) ->
+            updateTable.apply(null, arguments) if updateTable
 
           ## fires only when the 'value'
           ## of input/text/contenteditable
           ## changes
-          onTypeChange: =>
+          onTypeChange: ->
             ## never fire any change events for contenteditable
             return if options.$el.is("[contenteditable]")
 
@@ -285,7 +285,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               dispatchChangeEvent()
               state "changeEvent", null
 
-          onEnterPressed: (changed, id) =>
+          onEnterPressed: (changed, id) ->
             ## dont dispatch change events or handle
             ## submit event if we've pressed enter into
             ## a textarea or contenteditable
@@ -300,7 +300,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## handle submit event handler here
             simulateSubmitHandler()
 
-          onNoMatchingSpecialChars: (chars, allChars) =>
+          onNoMatchingSpecialChars: (chars, allChars) ->
             if chars is "{tab}"
               $utils.throwErrByPath("type.tab", { onFail: options._log })
             else
@@ -311,7 +311,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         })
 
-      handleFocused = =>
+      handleFocused = ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
@@ -344,18 +344,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
       handleFocused()
-      .then =>
+      .then ->
         cy.timeout(delay, true, "type")
 
         Promise
         .delay(delay, "type")
-        .then =>
+        .then ->
           ## command which consume cy.type may
           ## want to handle verification themselves
           if options.verify is false
             return options.$el
 
-          do verifyAssertions = =>
+          do verifyAssertions = ->
             cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
@@ -363,15 +363,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
       ## what about the new HTML5 ones?
-      _.defaults options,
+      _.defaults(options, {
         log: true
         force: false
-
-      cy.ensureDom(subject)
+      })
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
-      clear = (el, index) =>
+      clear = (el, index) ->
         $el = $(el)
 
         if options.log
@@ -411,8 +410,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       Promise
       .resolve(subject.toArray())
       .each(clear)
-      .then =>
-        do verifyAssertions = =>
+      .then ->
+        do verifyAssertions = ->
           cy.verifyUpcomingAssertions(subject, options, {
             onRetry: verifyAssertions
           })

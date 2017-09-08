@@ -72,8 +72,8 @@ describe "src/cy/commands/traversals", ->
           cy.get("#list")[name](arg).should("have.length", el.length + 1)
 
         it "without a dom element", (done) ->
-          cy.noop({})[name](arg)
           cy.on "fail", -> done()
+          cy.noop({})[name](arg)
 
         it "throws when subject is not in the document", (done) ->
           cy.on "command:end", =>
@@ -147,7 +147,7 @@ describe "src/cy/commands/traversals", ->
             obj = {Command: name}
             obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
 
-            yielded = Cypress.utils.getDomElements($el)
+            yielded = Cypress.dom.getElements($el)
 
             _.extend obj, {
               "Applied To": helpers.getFirstSubjectByName("get").get(0)

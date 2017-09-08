@@ -153,8 +153,6 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("not.exist").then ->
           lastLog = @lastLog
 
-          debugger
-
           expect(@lastLog.invoke("consoleProps")).to.deep.eq {
             Command: "focused"
             Yielded: "--nothing--"

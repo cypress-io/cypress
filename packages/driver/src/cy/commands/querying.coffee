@@ -24,9 +24,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({
     focused: (options = {}) ->
-      _.defaults options,
+      _.defaults(options, {
         verify: true
         log: true
+      })
 
       if options.log
         options._log = Cypress.log()
@@ -47,21 +48,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getFocused = ->
         try
-          d = cy.state("document")
           forceFocusedEl = cy.state("forceFocusedEl")
           if forceFocusedEl
-            if cy.isInDom(forceFocusedEl)
+            if $dom.isAttached(forceFocusedEl)
               el = forceFocusedEl
             else
               cy.state("forceFocusedEl", null)
           else
-            el = d.activeElement
+            el = cy.state("document").activeElement
 
           ## return null if we have an el but
           ## the el is body or the el is currently the
           ## blacklist focused el
           if el and el isnt cy.state("blacklistFocusedEl")
-            el = $(el)
+            el = $dom.wrap(el)
 
             if el.is("body")
               log(null)
@@ -84,7 +84,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             return $el
 
           if not $el
-            $el = $(null)
+            $el = $dom.wrap(null)
             $el.selector = "focused"
 
           ## pass in a null jquery object for assertions
@@ -170,9 +170,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## if we're missing any element
               ## within our subject then filter out
               ## anything not currently in the DOM
-              if not cy.isInDom(subject)
+              if $dom.isDetached(subject)
                 subject = subject.filter (index, el) ->
-                  cy.isInDom(el)
+                  $dom.isAttached(el)
 
                 ## if we have nothing left
                 ## just go replay the commands
@@ -420,7 +420,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         restoreContains()
   })
 
-  Commands.addAll({ prevSubject: "dom"}, {
+  Commands.addAll({ prevSubject: "element" }, {
     within: (subject, options, fn) ->
       ctx = @
 

@@ -30,7 +30,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     if clock
       clock.bind(contentWindow)
 
-  Commands.addUtility({
+  Commands.addAll({ type: "utility" }, {
     clock: (subject, now, methods, options = {}) ->
       ctx = @
 

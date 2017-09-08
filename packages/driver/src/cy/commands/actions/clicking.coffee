@@ -15,17 +15,14 @@ $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  isAttached = ($elToClick) ->
-    cy.isInDom($elToClick)
-
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
       {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
 
-      _.defaults options,
+      _.defaults(options, {
         $el: subject
         log: true
         verify: true
@@ -37,8 +34,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         errorOnSelect: true
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
-
-      cy.ensureDom(options.$el)
+      })
 
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
@@ -89,10 +85,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## handle mouse events removing DOM elements
           ## https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
-          if isAttached($elToClick)
+          if $dom.isAttached($elToClick)
             domEvents.mouseUp = $Mouse.mouseUp($elToClick, coords, win)
 
-          if isAttached($elToClick)
+          if $dom.isAttached($elToClick)
             domEvents.click   = $Mouse.click($elToClick, coords, win)
 
           if options._log
@@ -190,7 +186,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onReady: ($elToClick, coords) ->
             ## TODO: get focused through a callback here
             cy.now("focused", {log: false, verify: false})
-            .then ($focused) =>
+            .then ($focused) ->
               ## record the previously focused element before
               ## issuing the mousedown because browsers may
               ## automatically shift the focus to the element
@@ -203,7 +199,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## our element to be removed from the DOM
               ## just resolve after mouse down and dont
               ## send a focus event
-              if domEvents.mouseDown.preventedDefault or not isAttached($elToClick)
+              if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
                 afterMouseDown($elToClick, coords)
               else
                 ## retrieve the first focusable $el in our parent chain
@@ -254,8 +250,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults options,
         log: true
 
-      cy.ensureDom(subject)
-
       dblclicks = []
 
       dblclick = (el, index) =>
@@ -273,7 +267,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               "Applied To":   $dom.getElements($el)
               "Elements":     $el.length
 
-        cy.ensureVisibility $el, log
+        cy.ensureVisibility($el, log)
 
         p = cy.now("focus", $el, {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {

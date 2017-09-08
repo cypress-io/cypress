@@ -3,12 +3,9 @@ _ = require("lodash")
 $dom = require("../../dom")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addUtility({
+  Commands.addAll({ type: "utility", prevSubject: true }, {
     as: (subject, str) ->
       ctx = @
-
-      cy.ensureParent()
-      cy.ensureSubject()
 
       cy.validateAlias(str)
 

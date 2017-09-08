@@ -102,7 +102,7 @@ chai.use (chai, u) ->
 
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 
-  overrideChaiAsserts = (assertFn, isInDom) ->
+  overrideChaiAsserts = (assertFn) ->
     _this = @
 
     chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
@@ -167,9 +167,9 @@ chai.use (chai, u) ->
           length = $utils.normalizeNumber(length)
 
           ## filter out anything not currently in our document
-          if not isInDom(obj)
+          if $dom.isDetached(obj)
             obj = @_obj = obj.filter (index, el) ->
-              isInDom(el)
+              $dom.isAttached(el)
 
           node = if obj and obj.length then $dom.stringify(obj, "short") else obj.selector
 
@@ -226,7 +226,7 @@ chai.use (chai, u) ->
 
           try
             @assert(
-              isContained = isInDom(obj),
+              isAttached = $dom.isAttached(obj),
               "expected \#{act} to exist in the DOM",
               "expected \#{act} not to exist in the DOM",
               node,
@@ -239,7 +239,7 @@ chai.use (chai, u) ->
 
             getLongExistsMessage = (obj) ->
               ## if we expected not for an element to exist
-              if isContained
+              if isAttached
                 "Expected #{node} not to exist in the DOM, but it was continuously found."
               else
                 "Expected to find element: '#{obj.selector}', but never found it."
@@ -303,12 +303,12 @@ chai.use (chai, u) ->
       assert
     }
 
-  create = (specWindow, assertFn, isInDom) ->
+  create = (specWindow, assertFn) ->
     # restoreOverrides()
     restoreAsserts()
 
     # overrideChai()
-    overrideChaiAsserts(assertFn, isInDom)
+    overrideChaiAsserts(assertFn)
 
     return setSpecWindowGlobals(specWindow)
 

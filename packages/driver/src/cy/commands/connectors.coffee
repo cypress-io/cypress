@@ -107,7 +107,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     .try(getRet)
     .timeout(options.timeout)
     .then (ret) ->
-      ## if ret is null or undefined then
+      ## if ret is undefined then
       ## resolve with the existing subject
       return if _.isUndefined(ret) then subject else ret
     .catch Promise.TimeoutError, ->
@@ -122,9 +122,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     .finally(cleanup)
 
   invokeFn = (subject, fn, args...) ->
-    cy.ensureParent()
-    cy.ensureSubject()
-
     options = {}
 
     getMessage = ->
@@ -282,10 +279,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         fn = options
         options = {}
 
-      if not subject
-        ## return early if we dont have what we need
-        return subject
-
       if not _.isFunction(fn)
         $utils.throwErrByPath("each.invalid_argument")
 
@@ -349,10 +342,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .return(subject)
   })
 
+  ## temporarily keeping this as a dual command
+  ## but it will move to a child command once
+  ## cy.resolve + cy.wrap are upgraded to handle
+  ## promises
   Commands.addAll({ prevSubject: "optional" }, {
     then: ->
       thenFn.apply(@, arguments)
+  })
 
+  Commands.addAll({ prevSubject: true }, {
     ## making this a dual command due to child commands
     ## automatically returning their subject when their
     ## return values are undefined.  prob should rethink

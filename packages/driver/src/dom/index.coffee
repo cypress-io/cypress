@@ -6,9 +6,9 @@ $elements = require("./elements")
 
 { isWindow } = $window
 { isDocument } = $document
-{ wrapInjQuery, isJquery } = $jquery
+{ wrap, unwrap, isJquery } = $jquery
 { isVisible, isHidden, getReasonIsHidden } = $visibility
-{ isType, isElement, isScrollable, stringify, getElements, isAttachedToDom, isTextLike, isSelector, isDescendent, positionProps, getFirstFixedOrStickyPositionParent, getFirstScrollableParent } = $elements
+{ isType, isFocusable, isElement, isScrollable, stringify, getElements, isDetached, isAttached, isTextLike, isSelector, isDescendent, positionProps, getFirstFixedOrStickyPositionParent, getFirstScrollableParent } = $elements
 
 isDom = (obj) ->
   isElement(obj) or isWindow(obj) or isDocument(obj)
@@ -19,6 +19,10 @@ isDom = (obj) ->
 ## purposes or for overriding. Everything else
 ## can be tucked away behind these interfaces.
 module.exports = {
+  wrap
+
+  unwrap
+
   isDom
 
   isType
@@ -33,6 +37,10 @@ module.exports = {
 
   isScrollable
 
+  isDetached
+
+  isAttached
+
   isSelector
 
   isDescendent
@@ -43,11 +51,7 @@ module.exports = {
 
   isWindow
 
-  isAttachedToDom
-
   isJquery
-
-  wrapInjQuery
 
   stringify
 

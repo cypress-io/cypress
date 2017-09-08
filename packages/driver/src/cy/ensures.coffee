@@ -2,30 +2,70 @@ _ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
 
-commandOptions = ["exist", "exists", "visible", "length"]
-VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"]
+VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
 
 returnFalse = -> return false
 
-create = (state, expect, isInDom) ->
-  ensureSubject = ->
-    subject = state("subject")
+create = (state, expect) ->
+  ## TODO: we should probably normalize all subjects
+  ## into an array and loop through each and verify
+  ## each element in the array is valid. as it stands
+  ## we only validate the first
+  validateType = (subject, type, cmd) ->
+    name = cmd.get("name")
+    prev = cmd.get("prev")
 
-    if not subject?
-      cmd = state("current").get("name")
-      $utils.throwErrByPath("miscellaneous.no_subject", {
-        args: { subject, cmd }
-      })
+    switch
+      when type is "element"
+        ## if this is an element then ensure its currently attached
+        ## to its document context
+        if $dom.isElement(subject)
+          ensureAttached(subject, name)
 
-    return subject
+        ## always ensure this is an element
+        ensureElement(subject, name)
 
-  ensureParent = ->
+      when type is "document"
+        ensureDocument(subject, name)
+
+      when type is "window"
+        ensureWindow(subject, name)
+
+  ensureSubjectByType = (subject, type, name) ->
     current = state("current")
 
-    if not current.get("prev")
-      $utils.throwErrByPath("miscellaneous.orphan", {
-        args: { cmd: current.get("name") }
-      })
+    types = [].concat(type)
+
+    ## if we have an optional subject and nothing's
+    ## here then just return cuz we good to go
+    if ("optional" in types) and _.isUndefined(subject)
+      return
+
+    ## okay we either have a subject and either way
+    ## slice out optional so we can verify against
+    ## the various types
+    types = _.without(types, "optional")
+
+    ## if we have no types then bail
+    return if types.length is 0
+
+    errors = []
+
+    for type in types
+      try
+        validateType(subject, type, current)
+      catch err
+        errors.push(err)
+
+    ## every validation failed and we had more than one validation
+    if (errors.length is types.length)
+      err = errors[0]
+
+      if types.length > 1
+        ## append a nice error message telling the user this
+        err = $utils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+
+      throw err
 
   ensureRunnable = (name) ->
     if not state("runnable")
@@ -55,8 +95,6 @@ create = (state, expect, isInDom) ->
       })
 
   ensureReceivability = (subject, onFail) ->
-    subject ?= cy.ensureSubject()
-
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
@@ -68,8 +106,6 @@ create = (state, expect, isInDom) ->
       })
 
   ensureVisibility = (subject, onFail) ->
-    subject ?= cy.ensureSubject()
-
     cmd = state("current").get("name")
 
     if not (subject.length is subject.filter(":visible").length)
@@ -80,40 +116,65 @@ create = (state, expect, isInDom) ->
         args: { cmd, node, reason }
       })
 
-  ensureDom = (subject, cmd, log) ->
-    subject ?= cy.ensureSubject()
+  ensureAttached = (subject, name, onFail) ->
+    if $dom.isDetached(subject)
+      prev = state("current").get("prev")
 
-    cmd ?= state("current").get("name")
-
-    isWindow = $dom.isWindow(subject)
-
-    ## think about dropping the 'cmd' part
-    ## and adding exactly what the subject is
-    ## if its an object or array, just say Object or Array
-    ## but if its a primitive, just print out its value like
-    ## true, false, 0, 1, 3, "foo", "bar"
-    if not $dom.isDom(subject)
-      $utils.throwErrByPath("dom.non_dom", {
-        onFail: log
-        args: { cmd }
+      $utils.throwErrByPath("subject.not_attached", {
+        onFail
+        args: {
+          name
+          subject: $dom.stringify(subject),
+          previous: prev.get("name")
+        }
       })
 
-    if not (isWindow or isInDom(subject))
-      node = $dom.stringify(subject)
-      $utils.throwErrByPath("dom.detached", {
-        onFail: log
-        args: { cmd, node }
+  ensureElement = (subject, name, onFail) ->
+    if not $dom.isElement(subject)
+      prev = state("current").get("prev")
+
+      $utils.throwErrByPath("subject.not_element", {
+        onFail
+        args: {
+          name
+          subject: $utils.stringifyActual(subject)
+          previous: prev.get("name")
+        }
       })
 
-    return subject
+  ensureWindow = (subject, name, log) ->
+    if not $dom.isWindow(subject)
+      prev = state("current").get("prev")
+
+      $utils.throwErrByPath("subject.not_window_or_document", {
+        args: {
+          name
+          type: "window"
+          subject: $utils.stringifyActual(subject)
+          previous: prev.get("name")
+        }
+      })
+
+  ensureDocument = (subject, name, log) ->
+    if not $dom.isDocument(subject)
+      prev = state("current").get("prev")
+
+      $utils.throwErrByPath("subject.not_window_or_document", {
+        args: {
+          name
+          type: "document"
+          subject: $utils.stringifyActual(subject)
+          previous: prev.get("name")
+        }
+      })
 
   ensureExistence = (subject) ->
-    returnFalse = =>
+    returnFalse = ->
       cleanup()
 
       return false
 
-    cleanup = =>
+    cleanup = ->
       state("onBeforeLog", null)
 
     ## prevent any additional logs this is an implicit assertion
@@ -184,19 +245,23 @@ create = (state, expect, isInDom) ->
     })
 
   return {
-    ensureSubject
+    ensureSubjectByType
 
-    ensureParent
+    ensureElement
+
+    ensureAttached
 
     ensureRunnable
+
+    ensureWindow
+
+    ensureDocument
 
     ensureElementIsNotAnimating
 
     ensureReceivability
 
     ensureVisibility
-
-    ensureDom
 
     ensureExistence
 

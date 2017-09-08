@@ -6,13 +6,11 @@ $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     submit: (subject, options = {}) ->
       _.defaults options,
         log: true
         $el: subject
-
-      cy.ensureDom(options.$el)
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously
@@ -59,13 +57,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       Promise
       .delay(delay, "submit")
-      .then =>
+      .then ->
         do verifyAssertions = =>
           cy.verifyUpcomingAssertions(options.$el, options, {
             onRetry: verifyAssertions
           })
-
-    fill: (subject, obj, options = {}) ->
-      $utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
-
   })
