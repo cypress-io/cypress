@@ -1,15 +1,21 @@
 _ = require("lodash")
+$ = require("jquery")
 $jquery = require("./jquery")
 $window = require("./window")
 $document = require("./document")
 
 fixedOrStickyRe = /(fixed|sticky)/
 
+focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
+
 isElement = (obj) ->
   try
     !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
   catch
     false
+
+isFocusable = ($el) ->
+  $el.is(focusable)
 
 isType = ($el, type) ->
   ($el.attr("type") or "").toLowerCase() is type
@@ -211,6 +217,7 @@ module.exports = {
 
   isScrollOrAuto
 
+  isFocusable
   isAncestor
 
   isScrollable

@@ -7,7 +7,6 @@ $Mouse = require("../../../cypress/mouse")
 {
   delay,
   dispatchPrimedChangeEvents,
-  focusable,
   waitForActionability,
   getPositionFromArguments
 } = require("./utils")
@@ -76,7 +75,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
         getFirstFocusableEl = ($el) ->
-          return $el if $el.is(focusable)
+          return $el if $dom.isFocusable($el)
 
           parent = $el.parent()
 

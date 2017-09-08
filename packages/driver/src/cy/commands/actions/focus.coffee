@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-{ delay, dispatchPrimedChangeEvents, focusable } = require("./utils")
+{ delay, dispatchPrimedChangeEvents } = require("./utils")
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
@@ -27,7 +27,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not (options.$el.is(focusable) or $dom.isWindow(options.$el))
+      if not ($dom.isFocusable(options.$el) or $dom.isWindow(options.$el))
         return if options.error is false
 
         node = $dom.stringify(options.$el)

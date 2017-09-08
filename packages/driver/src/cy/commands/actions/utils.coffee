@@ -7,8 +7,6 @@ $utils = require("../../../cypress/utils")
 
 delay = 50
 
-focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
-
 dispatchPrimedChangeEvents = (state) ->
   ## if we have a changeEvent, dispatch it
   if changeEvent = state("changeEvent")
@@ -265,9 +263,6 @@ waitForActionability = (cy, $el, win, options, callbacks) ->
 module.exports = {
   delay
   dispatchPrimedChangeEvents
-  focusable
-  # getCoords
   getPositionFromArguments
-  # waitForAnimations
   waitForActionability
 }

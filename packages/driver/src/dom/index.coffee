@@ -27,6 +27,8 @@ module.exports = {
 
   isHidden
 
+  isFocusable
+
   isTextLike
 
   isScrollable
