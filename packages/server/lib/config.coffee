@@ -16,8 +16,30 @@ pathHelpers = require("./util/path_helpers")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder videosFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFile".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges trashAssetsBeforeHeadlessRuns chromeWebSecurity videoRecording videoCompression viewportWidth viewportHeight supportFile fileServerFolder supportFolder fixturesFolder integrationFolder videosFolder screenshotsFolder environmentVariables hosts".split(" ")
+folders = """
+  fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
+  supportFile        supportFolder    unitFolder          videosFolder
+""".trim().split(/\s+/)
+
+configKeys = """
+  animationDistanceThreshold      fileServerFolder
+  baseUrl                         fixturesFolder
+  chromeWebSecurity               integrationFolder
+  environmentVariables            pluginsFile
+  hosts                           screenshotsFolder
+  numTestsKeptInMemory            supportFile
+  port                            supportFolder
+  reporter                        videosFolder
+  reporterOptions                 defaultCommandTimeout
+  screenshotOnHeadlessFailure
+  trashAssetsBeforeHeadlessRuns   execTimeout
+  viewportWidth                   pageLoadTimeout
+  viewportHeight                  requestTimeout
+  videoRecording                  responseTimeout
+  videoCompression
+  watchForFileChanges
+  waitForAnimations
+""".trim().split(/\s+/)
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
