@@ -67,7 +67,6 @@ class Project extends EE
     @getConfig(options)
     .then (cfg) =>
       process.chdir(@projectRoot)
-      plugins.init(cfg)
 
       @server.open(cfg, @)
       .spread (port, warning) =>
@@ -95,6 +94,8 @@ class Project extends EE
           @scaffold(cfg)
         )
         .then =>
+          plugins.init(cfg)
+
           Promise.join(
             @watchSupportFile(cfg)
             @watchPluginsFile(cfg)
@@ -358,13 +359,9 @@ class Project extends EE
     ## if we're in headed mode add these other scaffolding
     ## tasks
     if not config.isTextTerminal
-      ## ensure integration folder is created
-      ## and example spec if dir doesnt exit
       push(scaffold.integration(config.integrationFolder, config))
-
-      ## ensure fixtures dir is created
-      ## and example fixture if dir doesnt exist
       push(scaffold.fixture(config.fixturesFolder, config))
+      push(scaffold.plugins(path.dirname(config.pluginsFile), config))
 
     Promise.all(scaffolds)
 

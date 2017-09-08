@@ -619,6 +619,7 @@ describe "lib/config", ->
             videoCompression:           { value: 32, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
+            pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -672,6 +673,7 @@ describe "lib/config", ->
             videoCompression:           { value: 32, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
+            pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },

@@ -4,14 +4,13 @@ path       = require("path")
 glob       = require("glob")
 Promise    = require("bluebird")
 cypressEx  = require("@packages/example")
+snapshot   = require("snap-shot-it")
 config     = require("#{root}lib/config")
 Project    = require("#{root}lib/project")
 scaffold   = require("#{root}lib/scaffold")
 Fixtures   = require("#{root}/test/support/helpers/fixtures")
 
 glob = Promise.promisify(glob)
-
-supportFolder = "cypress/support"
 
 describe "lib/scaffold", ->
   beforeEach ->
@@ -185,102 +184,74 @@ describe "lib/scaffold", ->
         expect(err.stack).to.contain("not in the scaffolded file tree")
 
     it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
-      ## todos has a _support folder so let's first nuke it and then scaffold
       scaffold.support(@supportFolder, @cfg)
       .then =>
-        fs.readFileAsync(@supportFolder + "/commands.js", "utf8")
-        .then (str) =>
-          expect(str).to.eq """
-          // ***********************************************
-          // This example commands.js shows you how to
-          // create the custom command: 'login'.
-          //
-          // The commands.js file is a great place to
-          // modify existing commands and create custom
-          // commands for use throughout your tests.
-          //
-          // You can read more about custom commands here:
-          // https://on.cypress.io/custom-commands
-          // ***********************************************
-          //
-          // Cypress.Commands.add("login", function(email, password){
-          //   var email    = email || "joe@example.com"
-          //   var password = password || "foobar"
-          //
-          //   var log = Cypress.Log.command({
-          //     name: "login",
-          //     message: [email, password],
-          //     consoleProps: function(){
-          //       return {
-          //         email: email,
-          //         password: password
-          //       }
-          //     }
-          //   })
-          //
-          //   cy
-          //     .visit("/login", {log: false})
-          //     .contains("Log In", {log: false})
-          //     .get("#email", {log: false}).type(email, {log: false})
-          //     .get("#password", {log: false}).type(password, {log: false})
-          //     .get("button", {log: false}).click({log: false}) //this should submit the form
-          //     .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
-          //     .url({log: false}).should("match", /dashboard/, {log: false})
-          //     .then(function(){
-          //       log.snapshot().end()
-          //     })
-          // })
+        Promise.join(
+          fs.readFileAsync(@supportFolder + "/commands.js", "utf8")
+          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8")
+          fs.readFileAsync(@supportFolder + "/index.js", "utf8")
+        ).spread (commandsContents, defaultsContents, indexContents) ->
+          snapshot(commandsContents)
+          snapshot(defaultsContents)
+          snapshot(indexContents)
 
-          """
+  context ".plugins", ->
+    beforeEach ->
+      pristinePath = Fixtures.projectPath("pristine")
 
-          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) =>
-            expect(str).to.eq """
-            // ***********************************************
-            // This example defaults.js shows you how to
-            // customize the internal behavior of Cypress.
-            //
-            // The defaults.js file is a great place to
-            // override defaults used throughout all tests.
-            //
-            // ***********************************************
-            //
-            // Cypress.Server.defaults({
-            //   delay: 500,
-            //   whitelist: function(xhr){}
-            // })
+      config.get(pristinePath).then (@cfg) =>
+        {@pluginsFile} = @cfg
+        @pluginsFolder = path.dirname(@pluginsFile)
 
-            // Cypress.Cookies.defaults({
-            //   whitelist: ["session_id", "remember_token"]
-            // })
-            """
+    it "does not create any files if pluginsFile directory already exists", ->
+      ## first remove it
+      fs.removeAsync(@pluginsFolder)
+      .then =>
+        ## create the pluginsFolder ourselves manually
+        fs.ensureDirAsync(@pluginsFolder)
+      .then =>
+        ## now scaffold
+        scaffold.plugins(@pluginsFolder, @cfg)
+      .then =>
+        glob("**/*", {cwd: @pluginsFolder})
+      .then (files) ->
+        ## ensure no files exist
+        expect(files.length).to.eq(0)
 
-            fs.readFileAsync(@supportFolder + "/index.js", "utf8").then (str) =>
-              expect(str).to.eq """
-              // ***********************************************************
-              // This example support/index.js is processed and
-              // loaded automatically before your other test files.
-              //
-              // This is a great place to put global configuration and
-              // behavior that modifies Cypress.
-              //
-              // You can change the location of this file or turn off
-              // automatically serving support files with the
-              // 'supportFile' configuration option.
-              //
-              // You can read more here:
-              // https://on.cypress.io/guides/configuration#section-global
-              // ***********************************************************
+    it "does not create any files if pluginsFile is not default", ->
+      @cfg.resolved.pluginsFile.from = "config"
 
-              // Import commands.js and defaults.js
-              // using ES2015 syntax:
-              import "./commands"
-              import "./defaults"
+      scaffold.plugins(@pluginsFolder, @cfg)
+      .then =>
+        glob("**/*", {cwd: @pluginsFolder})
+      .then (files) ->
+        expect(files.length).to.eq(0)
 
-              // Alternatively you can use CommonJS syntax:
-              // require("./commands")
-              // require("./defaults")
+    it "does not create any files if pluginsFile is false", ->
+      @cfg.pluginsFile = false
 
-              """
+      scaffold.plugins(@pluginsFile, @cfg)
+      .then =>
+        glob("**/*", {cwd: @pluginsFile})
+      .then (files) ->
+        expect(files.length).to.eq(0)
+
+    it "throws if trying to scaffold a file not present in file tree", ->
+      pluginsPath = path.join(@pluginsFile, "foo")
+      fs.removeAsync(pluginsPath)
+      .then =>
+        scaffold.plugins(pluginsPath, @cfg)
+      .then ->
+        throw new Error("Should throw the right error")
+      .catch (err = {}) =>
+        expect(err.stack).to.contain("not in the scaffolded file tree")
+
+    it "creates plugins/index.js when pluginsFolder does not exist", ->
+      scaffold.plugins(@pluginsFolder, @cfg)
+      .then =>
+        fs.readFileAsync(@pluginsFolder + "/index.js", "utf8")
+        .then (contents) =>
+          snapshot(contents.replace(/`/g, "<backtick>"))
 
   context ".fixture", ->
     beforeEach ->
@@ -345,67 +316,15 @@ describe "lib/scaffold", ->
   context ".fileTree", ->
     beforeEach ->
       todosPath = Fixtures.projectPath("todos")
-
       config.get(todosPath).then (@cfg) =>
 
     it "returns tree-like structure of scaffolded", ->
-      expect(scaffold.fileTree(@cfg)).eql([
-        {
-          name: "tests"
-          children: [
-            {
-              name: "example_spec.js"
-            },{
-              name: "_fixtures"
-              children: [
-                { name: "example.json" }
-              ]
-            },{
-              name: "_support"
-              children: [
-                { name: "commands.js" }
-                { name: "defaults.js" }
-                { name: "index.js" }
-              ]
-            }
-          ]
-        }
-      ])
+      snapshot(scaffold.fileTree(@cfg))
 
     it "leaves out fixtures if configured to false", ->
       @cfg.fixturesFolder = false
-      expect(scaffold.fileTree(@cfg)).eql([
-        {
-          name: "tests"
-          children: [
-            {
-              name: "example_spec.js"
-            },{
-              name: "_support"
-              children: [
-                { name: "commands.js" }
-                { name: "defaults.js" }
-                { name: "index.js" }
-              ]
-            }
-          ]
-        }
-      ])
+      snapshot(scaffold.fileTree(@cfg))
 
     it "leaves out support if configured to false", ->
       @cfg.supportFile = false
-      expect(scaffold.fileTree(@cfg)).eql([
-        {
-          name: "tests"
-          children: [
-            {
-              name: "example_spec.js"
-            },{
-              name: "_fixtures"
-              children: [
-                { name: "example.json" }
-              ]
-            }
-          ]
-        }
-      ])
+      snapshot(scaffold.fileTree(@cfg))

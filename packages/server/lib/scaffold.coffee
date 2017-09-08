@@ -88,7 +88,7 @@ module.exports = {
 
     @verifyScaffolding folder, =>
       log("copying example.json into #{folder}")
-      @_copy("example.json", folder, config)
+      @_copy("fixtures/example.json", folder, config)
 
   support: (folder, config) ->
     log("support folder #{folder}, support file #{config.supportFile}")
@@ -97,13 +97,23 @@ module.exports = {
     return Promise.resolve() if not config.supportFile or not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
-      log("copying defaults and commands to #{folder}")
+      log("copying defaults.js, commands.js, and index.js to #{folder}")
       Promise.join(
-        @_copy("defaults.js", folder, config)
-        @_copy("commands.js", folder, config)
-        @_copy("index.js", folder, config)
+        @_copy("support/defaults.js", folder, config)
+        @_copy("support/commands.js", folder, config)
+        @_copy("support/index.js", folder, config)
       )
     )
+
+  plugins: (folder, config) ->
+    log("plugins folder #{folder}")
+
+    ## skip if user has explicitly set pluginsFile
+    return Promise.resolve() if not config.pluginsFile or not isDefault(config, "pluginsFile")
+
+    @verifyScaffolding folder, =>
+      log("copying index.js into #{folder}")
+      @_copy("plugins/index.js", folder, config)
 
   _copy: (file, folder, config) ->
     ## allow file to be relative or absolute
@@ -147,7 +157,6 @@ module.exports = {
     getFilePath = (dir, name) ->
       path.relative(config.projectRoot, path.join(dir, name))
 
-    log("example spec from integration folder %s", config.integrationFolder)
     files = [
       getFilePath(config.integrationFolder, "example_spec.js")
     ]
@@ -158,12 +167,17 @@ module.exports = {
       ])
 
     if config.supportFolder and config.supportFile isnt false
-      log "supporting files from folder #{config.supportFolder}"
       files = files.concat([
         getFilePath(config.supportFolder, "commands.js")
         getFilePath(config.supportFolder, "defaults.js")
         getFilePath(config.supportFolder, "index.js")
       ])
+
+    if config.pluginsFile and config.pluginsFile isnt false
+      files = files.concat([
+        getFilePath(path.dirname(config.pluginsFile), "index.js")
+      ])
+
     log("scaffolded files %j", files)
 
     return @_fileListToTree(files)
