@@ -4,11 +4,17 @@ isDocument = (obj) ->
   catch
     false
 
+hasActiveWindow = (doc) ->
+  ## does this document have a currently active window (defaultView)
+  return !!doc.defaultView
+
 getDocumentFromElement = (el) ->
   el.ownerDocument
 
 module.exports = {
   isDocument
+
+  hasActiveWindow
 
   getDocumentFromElement
 }

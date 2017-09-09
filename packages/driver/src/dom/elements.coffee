@@ -33,14 +33,19 @@ isDetached = ($el) ->
   not isAttached($el)
 
 isAttached = ($el) ->
-  ## if we're being given window or document
-  ## always assume these are attached
-  if $window.isWindow($el) or $document.isDocument($el)
-    ## its probably possible these are stale but not
-    ## worth the trouble of trying to verify them.
+  ## if we're being given window
+  ## then these are automaticallyed attached
+  if $window.isWindow($el)
     ## there is a code path when forcing focus and
-    ## blur on the window where this is necessary.
+    ## blur on the window where this check is necessary.
     return true
+
+  ## if this is a document we can simply check
+  ## whether or not it has a defaultView (window).
+  ## documents which are part of stale pages
+  ## will have this property null'd out
+  if $document.isDocument($el)
+    return $document.hasActiveWindow($el)
 
   ## normalize into an array
   els = [].concat($jquery.unwrap($el))
@@ -59,9 +64,11 @@ isAttached = ($el) ->
   isIn = (el) ->
     $.contains(doc, el)
 
-  ## return false unless every single
-  ## el is attached to its document
-  _.every(els, isIn)
+  ## make sure the document is currently
+  ## active (it has a window) and
+  ## make sure every single element
+  ## is attached to this document
+  return $document.hasActiveWindow(doc) and _.every(els, isIn)
 
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
