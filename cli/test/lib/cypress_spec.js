@@ -2,6 +2,8 @@ require('../spec_helper')
 
 const os = require('os')
 const path = require('path')
+const R = require('ramda')
+const snapshot = require('snap-shot-it')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
 
@@ -20,36 +22,56 @@ describe('cypress', function () {
   })
 
   context('.run', function () {
+    let outputPath
     beforeEach(function () {
-      this.outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
-      this.sandbox.stub(tmp, 'fileAsync').resolves(this.outputPath)
+      outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
+      this.sandbox.stub(tmp, 'fileAsync').resolves(outputPath)
       this.sandbox.stub(run, 'start').resolves()
-      return fs.outputJsonAsync(this.outputPath, {
+      return fs.outputJsonAsync(outputPath, {
         code: 0,
         failingTests: [],
       })
     })
 
-    it('calls run#start, passing in options', function () {
-      return cypress.run({ foo: 'foo' }).then(() => {
-        expect(run.start).to.be.called
-        expect(run.start.lastCall.args[0].foo).to.equal('foo')
-      })
-    })
+    const getCallArgs = R.path(['lastCall', 'args', 0])
+    const normalizeCallArgs = (args) => {
+      expect(args.outputPath).to.equal(outputPath)
+      delete args.outputPath
+      return args
+    }
+    const getStartArgs = () => {
+      expect(run.start).to.be.called
+      return normalizeCallArgs(getCallArgs(run.start))
+    }
+
+    it('calls run#start, passing in options', () =>
+      cypress.run({ foo: 'foo' })
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args.foo).to.equal('foo')
+        })
+    )
+
+    it('normalizes env option if passed an object', () =>
+      cypress.run({ env: { foo: 'bar' } })
+        .then(getStartArgs)
+        .then(snapshot)
+    )
+
+    it('normalizes env option if passed an object with multiple properties', () =>
+      cypress.run({ env: { foo: 'bar', another: 'one' } })
+        .then(getStartArgs)
+        .then(snapshot)
+    )
 
     it('gets random tmp file and passes it to run#start', function () {
       return cypress.run().then(() => {
-        expect(run.start.lastCall.args[0].outputPath).to.equal(this.outputPath)
+        expect(run.start.lastCall.args[0].outputPath).to.equal(outputPath)
       })
     })
 
-    it('resolves with contents of tmp file', function () {
-      return cypress.run().then((results) => {
-        expect(results).to.eql({
-          code: 0,
-          failingTests: [],
-        })
-      })
-    })
+    it('resolves with contents of tmp file', () =>
+      cypress.run().then(snapshot)
+    )
   })
 })

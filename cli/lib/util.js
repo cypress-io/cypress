@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const R = require('ramda')
 const path = require('path')
 const isCi = require('is-ci')
 const chalk = require('chalk')
@@ -6,7 +7,25 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 
+const joinWithEq = (x, y) => `${x}=${y}`
+
+// converts an object (single level) into
+// key1=value1,key2=value2,...
+const objectToString = (obj) =>
+  R.zipWith(joinWithEq, R.keys(obj), R.values(obj)).join(',')
+
+const normalizeEnv = (env) =>
+  _.isPlainObject(env) ? objectToString(env) : env
+
+function normalizeModuleOptions (options = {}) {
+  return R.evolve({
+    env: normalizeEnv,
+  })(options)
+}
+
 const util = {
+  normalizeModuleOptions,
+
   isCi () {
     return isCi
   },
