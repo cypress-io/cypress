@@ -15,8 +15,8 @@ create = (state, expect) ->
     name = cmd.get("name")
     prev = cmd.get("prev")
 
-    switch
-      when type is "element"
+    switch type
+      when "element"
         ## if this is an element then ensure its currently attached
         ## to its document context
         if $dom.isElement(subject)
@@ -25,10 +25,10 @@ create = (state, expect) ->
         ## always ensure this is an element
         ensureElement(subject, name)
 
-      when type is "document"
+      when "document"
         ensureDocument(subject, name)
 
-      when type is "window"
+      when "window"
         ensureWindow(subject, name)
 
   ensureSubjectByType = (subject, type, name) ->
