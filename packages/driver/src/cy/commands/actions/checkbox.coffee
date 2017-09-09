@@ -2,7 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
@@ -27,8 +27,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     $el: subject
     log: true
     force: false
-
-  cy.ensureDom(options.$el)
 
   isNoop = ($el) ->
     switch type
@@ -61,7 +59,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       matchingElements.push(el)
 
     consoleProps = {
-      "Applied To":   $utils.getDomElements($el)
+      "Applied To":   $dom.getElements($el)
       "Elements":     $el.length
     }
 
@@ -81,7 +79,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       options._log.snapshot("before", {next: "after"})
 
       if not isAcceptableElement($el)
-        node   = $utils.stringifyElement($el)
+        node   = $dom.stringify($el)
         word   = $utils.plural(options.$el, "contains", "is")
         phrase = if type is "check" then " and :radio" else ""
         $utils.throwErrByPath "check_uncheck.invalid_element", {
@@ -94,7 +92,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       ## and bail
       if isNoop($el)
         ## still ensure visibility even if the command is noop
-        cy.ensureVisibility $el, options._log
+        cy.ensureVisibility($el, options._log)
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
@@ -139,7 +137,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     check: (subject, values, options) ->
       checkOrUncheck.call(@, "check", subject, values, options)
 

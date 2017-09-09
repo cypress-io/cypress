@@ -1,3 +1,6 @@
+## TODO: try to remove the state from here
+## and move all of these functions into dom/coordinates
+
 _ = require("lodash")
 $ = require("jquery")
 

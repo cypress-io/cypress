@@ -1,7 +1,6 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 getNumRequests = (state, alias) =>

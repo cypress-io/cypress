@@ -2,6 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
+$dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
 bRe            = /(\*\*)(.+)(\*\*)/
@@ -110,15 +111,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       else
         memo[value]
 
-    applyChainers = =>
+    applyChainers = ->
       ## if we're not doing existence or length assertions
       ## then check to ensure the subject exists
       ## in the DOM if its a DOM subject
       ## because its possible we're asserting about an
       ## element which has left the DOM and we always
       ## want to auto-fail on those
-      if not exp.isCheckingExistence and $utils.hasElement(subject)
-        cy.ensureDom(subject, "should")
+      if not exp.isCheckingExistence and $dom.isElement(subject)
+        cy.ensureAttached(subject, "should")
 
       _.reduce chainers, (memo, value) =>
         if value not of memo
@@ -140,7 +141,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       return subject
 
 
-  Commands.addAssertion({
+  Commands.addAll({ type: "assertion", prevSubject: true },{
     should: ->
       shouldFn.apply(@, arguments)
 

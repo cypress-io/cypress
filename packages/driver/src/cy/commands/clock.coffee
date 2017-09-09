@@ -1,7 +1,6 @@
 _ = require("lodash")
 
 $Clock = require("../../cypress/clock")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 ## create a global clock
@@ -31,7 +30,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     if clock
       clock.bind(contentWindow)
 
-  Commands.addUtility({
+  Commands.addAll({ type: "utility" }, {
     clock: (subject, now, methods, options = {}) ->
       ctx = @
 

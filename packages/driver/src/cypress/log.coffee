@@ -3,6 +3,7 @@ $ = require("jquery")
 
 $Snapshots = require("../cy/snapshots")
 $Events = require("./events")
+$dom = require("../dom")
 $utils = require("./utils")
 
 ## adds class methods for command, route, and agent logging
@@ -28,12 +29,10 @@ reduceMemory = (attrs) ->
       attrs[key] = null
 
 toSerializedJSON = (attrs) ->
-  hasWindow   = $utils.hasWindow
-  hasDocument = $utils.hasDocument
-  hasElement  = $utils.hasElement
-
-  isDomLike = (value) ->
-    hasWindow(value) or hasDocument(value) or hasElement(value)
+  isDom      = $dom.isDom
+  isWindow   = $dom.isWindow
+  isDocument = $dom.isDocument
+  isElement  = $dom.isElement
 
   stringify = (value, key) ->
     return null if key in BLACKLIST_PROPS
@@ -42,8 +41,8 @@ toSerializedJSON = (attrs) ->
       when _.isArray(value)
         _.map(value, stringify)
 
-      when isDomLike(value)
-        $utils.stringifyElement(value, "short")
+      when isDom(value)
+        $dom.stringify(value, "short")
 
       when _.isFunction(value) and groupsOrTableRe.test(key)
         value()
@@ -118,8 +117,8 @@ defaults = (state, config, obj) ->
         ## if we don't have a current command just bail
         return {} if not current
 
-        ret = if $utils.hasElement(current.get("subject"))
-          $utils.getDomElements(current.get("subject"))
+        ret = if $dom.isElement(current.get("subject"))
+          $dom.getElements(current.get("subject"))
         else
           current.get("subject")
 
@@ -227,7 +226,7 @@ Log = (state, config, obj) ->
       if attributes.id
         delete obj.id
 
-      _.extend attributes, obj
+      _.extend(attributes, obj)
 
       ## if we have an consoleProps function
       ## then re-wrap it
@@ -331,6 +330,12 @@ Log = (state, config, obj) ->
         ## wrap the element in jquery
         ## if its just a plain element
         return @set("$el", $($el), {silent: true})
+
+      ## if we've passed something like
+      ## <window> or <document> here or
+      ## a primitive then unset $el
+      if not $dom.isJquery($el)
+        return @unset("$el")
 
       ## make sure all $el elements are visible!
       obj = {

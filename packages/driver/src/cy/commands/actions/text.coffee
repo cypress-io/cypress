@@ -4,12 +4,12 @@ Promise = require("bluebird")
 moment = require("moment")
 
 { delay, waitForActionability } = require("./utils")
-$dom = require("../../../cypress/dom")
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 
 inputEvents = "textInput input".split(" ")
+
 dateRegex = /^\d{4}-\d{2}-\d{2}$/
 monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
@@ -19,11 +19,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run", ->
     $Keyboard.resetModifiers(state("document"), state("window"))
 
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     type: (subject, chars, options = {}) ->
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
-      _.defaults options,
+      _.defaults(options, {
         $el: subject
         log: true
         verify: true
@@ -32,8 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         release: true
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
-
-      cy.ensureDom(options.$el)
+      })
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
@@ -67,7 +66,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $el: options.$el
           consoleProps: ->
             "Typed":      chars
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
             "table": ->
               {
@@ -79,12 +78,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log.snapshot("before", {next: "after"})
 
       isBody      = options.$el.is("body")
-      isTextLike  = $dom.elIsTextLike(options.$el)
-      isDate      = $dom.elIsType(options.$el, "date")
-      isTime      = $dom.elIsType(options.$el, "time")
-      isMonth     = $dom.elIsType(options.$el, "month")
-      isWeek      = $dom.elIsType(options.$el, "week")
-      hasTabIndex = $dom.elMatchesSelector(options.$el, "[tabindex]")
+      isTextLike  = $dom.isTextLike(options.$el)
+      isDate      = $dom.isType(options.$el, "date")
+      isTime      = $dom.isType(options.$el, "time")
+      isMonth     = $dom.isType(options.$el, "month")
+      isWeek      = $dom.isType(options.$el, "week")
+      hasTabIndex = $dom.isSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
       ## TODO: can't be readonly
@@ -92,7 +91,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
       if not isBody and not isTextLike and not hasTabIndex
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         $utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
           args: { node }
@@ -157,11 +156,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
           $el = $(el)
-          ($dom.elMatchesSelector($el, "input") and $dom.elIsType($el, "submit")) or
-          ($dom.elMatchesSelector($el, "button") and not $dom.elIsType($el, "button"))
+          ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
+          ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
 
-      type = =>
-        simulateSubmitHandler = =>
+      type = ->
+        simulateSubmitHandler = ->
           form = options.$el.parents("form")
 
           return if not form.length
@@ -211,14 +210,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## consider changing type to a Promise and juggle logging
             cy.now("submit", form, {log: false, $el: form})
 
-        dispatchChangeEvent = (id) =>
+        dispatchChangeEvent = (id) ->
           change = document.createEvent("HTMLEvents")
           change.initEvent("change", true, false)
 
           dispatched = options.$el.get(0).dispatchEvent(change)
 
           if id and updateTable
-            updateTable.call(@, id, null, "change", null, dispatched)
+            updateTable(id, null, "change", null, dispatched)
 
           return dispatched
 
@@ -227,7 +226,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           isMonth or
           isWeek or
           isTime or
-          ($dom.elIsType(options.$el, "number") and _.includes(options.chars, "."))
+          ($dom.isType(options.$el, "number") and _.includes(options.chars, "."))
 
         ## see comment in updateValue below
         typed = ""
@@ -251,7 +250,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             else
               rng.text(key, "end")
 
-          onBeforeType: (totalKeys) =>
+          onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to
             ## type, ensure we raise the timeout to account
             ## for the delay being added to each keystroke
@@ -264,7 +263,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if isTypeableButNotAnInput
               return false
 
-          onBeforeEvent: (id, key, column, which) =>
+          onBeforeEvent: (id, key, column, which) ->
             ## if we are an element which isnt text like but we have
             ## a tabindex then it can receive keyboard events but
             ## should not fire input or textInput and should not fire
@@ -272,13 +271,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if column in inputEvents and isTypeableButNotAnInput
               return false
 
-          onEvent: (id, key, column, which, value) =>
-            updateTable.apply(@, arguments) if updateTable
+          onEvent: (id, key, column, which, value) ->
+            updateTable.apply(null, arguments) if updateTable
 
           ## fires only when the 'value'
           ## of input/text/contenteditable
           ## changes
-          onTypeChange: =>
+          onTypeChange: ->
             ## never fire any change events for contenteditable
             return if options.$el.is("[contenteditable]")
 
@@ -286,7 +285,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               dispatchChangeEvent()
               state "changeEvent", null
 
-          onEnterPressed: (changed, id) =>
+          onEnterPressed: (changed, id) ->
             ## dont dispatch change events or handle
             ## submit event if we've pressed enter into
             ## a textarea or contenteditable
@@ -301,7 +300,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## handle submit event handler here
             simulateSubmitHandler()
 
-          onNoMatchingSpecialChars: (chars, allChars) =>
+          onNoMatchingSpecialChars: (chars, allChars) ->
             if chars is "{tab}"
               $utils.throwErrByPath("type.tab", { onFail: options._log })
             else
@@ -312,7 +311,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         })
 
-      handleFocused = =>
+      handleFocused = ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
@@ -345,18 +344,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
       handleFocused()
-      .then =>
+      .then ->
         cy.timeout(delay, true, "type")
 
         Promise
         .delay(delay, "type")
-        .then =>
+        .then ->
           ## command which consume cy.type may
           ## want to handle verification themselves
           if options.verify is false
             return options.$el
 
-          do verifyAssertions = =>
+          do verifyAssertions = ->
             cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
@@ -364,15 +363,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
       ## what about the new HTML5 ones?
-      _.defaults options,
+      _.defaults(options, {
         log: true
         force: false
-
-      cy.ensureDom(subject)
+      })
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
-      clear = (el, index) =>
+      clear = (el, index) ->
         $el = $(el)
 
         if options.log
@@ -383,13 +381,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             message: deltaOptions
             $el: $el
             consoleProps: ->
-              "Applied To": $utils.getDomElements($el)
+              "Applied To": $dom.getElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
 
-        node = $utils.stringifyElement($el)
+        node = $dom.stringify($el)
 
-        if not $dom.elIsTextLike($el)
+        if not $dom.isTextLike($el)
           word = $utils.plural(subject, "contains", "is")
           $utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log
@@ -412,8 +410,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       Promise
       .resolve(subject.toArray())
       .each(clear)
-      .then =>
-        do verifyAssertions = =>
+      .then ->
+        do verifyAssertions = ->
           cy.verifyUpcomingAssertions(subject, options, {
             onRetry: verifyAssertions
           })

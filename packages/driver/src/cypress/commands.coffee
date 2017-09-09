@@ -1,4 +1,5 @@
 _ = require("lodash")
+$utils = require("./utils")
 
 builtInCommands = [
   require("../cy/commands/actions/checkbox")
@@ -37,11 +38,11 @@ builtInCommands = [
 ]
 
 getTypeByPrevSubject = (prevSubject) ->
-  switch prevSubject
-    when true, "dom"
-      "child"
-    when "optional"
+  switch
+    when prevSubject is "optional"
       "dual"
+    when !!prevSubject
+      "child"
     else
       "parent"
 
@@ -73,10 +74,12 @@ create = (Cypress, cy, state, config, log) ->
 
     originalFn = original.fn
 
-    overrideFn = _.wrap originalFn, ->
-      fn.apply(@, arguments)
+    overridden = _.clone(original)
+    overridden.fn = (args...) ->
+      args = [].concat(originalFn, args)
+      fn.apply(@, args)
 
-    original.fn = overrideFn
+    cy.addCommand(overridden)
 
   Commands = {
     _commands: commands ## for testing
@@ -117,46 +120,23 @@ create = (Cypress, cy, state, config, log) ->
         fn = options
         options = {}
 
-      type = getTypeByPrevSubject(options.prevSubject)
+      { prevSubject } = options
 
-      ## should we enforce the prev subject be DOM?
-      enforceDom = options.prevSubject is "dom"
+      ## normalize type by how they validate their
+      ## previous subject (unless they're explicitly set)
+      type = options.type ?= getTypeByPrevSubject(prevSubject)
 
       store({
         name
         fn
         type
-        enforceDom
+        prevSubject
       })
 
     addChainer: (obj) ->
       ## perp loop
       for name, fn of obj
         cy.addChainer(name, fn)
-
-      ## prevent loop comprehension
-      null
-
-    addAssertion: (obj) ->
-      ## perf loop
-      for name, fn of obj
-        store({
-          name
-          fn,
-          type: "assertion"
-        })
-
-      ## prevent loop comprehension
-      null
-
-    addUtility: (obj) ->
-      ## perf loop
-      for name, fn of obj
-        store({
-          name
-          fn,
-          type: "utility"
-        })
 
       ## prevent loop comprehension
       null

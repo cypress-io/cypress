@@ -1,8 +1,7 @@
 _ = require("lodash")
 
-$LocalStorage = require("../../cypress/local_storage")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
+$LocalStorage = require("../../cypress/local_storage")
 
 clearLocalStorage = (state, keys) ->
   local = window.localStorage

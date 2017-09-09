@@ -45,6 +45,10 @@ describe "src/cy/commands/actions/scrolling", ->
         cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
           expect($el.get(0)).to.eq @scrollVert.get(0)
 
+      it "can use window", ->
+        cy.window().scrollTo("10px").then (win) ->
+          expect(win.pageXOffset).to.eq(10)
+
     describe "x axis only", ->
       it "scrolls x axis to num px", ->
         expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
@@ -329,7 +333,9 @@ describe "src/cy/commands/actions/scrolling", ->
       context "subject errors", ->
         it "throws when not passed DOM element as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "Cannot call cy.scrollTo() on a non-DOM subject."
+            expect(err.message).to.include "cy.scrollTo() failed because it requires a DOM element."
+            expect(err.message).to.include "{foo: bar}"
+            expect(err.message).to.include "> cy.noop()"
             done()
 
           cy.noop({foo: "bar"}).scrollTo("250px")
@@ -617,22 +623,27 @@ describe "src/cy/commands/actions/scrolling", ->
       context "subject errors", ->
         it "throws when not passed DOM element as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
+            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+            expect(err.message).to.include "{foo: bar}"
+            expect(err.message).to.include "> cy.noop()"
             done()
 
           cy.noop({foo: "bar"}).scrollIntoView()
 
         it "throws when passed window object as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "Cannot call cy.scrollIntoView() on Window subject."
+            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+            expect(err.message).to.include "<window>"
+            expect(err.message).to.include "> cy.window()"
             done()
 
           cy.window().scrollIntoView()
 
-        ## FIXME: fails due to dom assertion changes
-        it.skip "throws when passed document object as subject", (done) ->
+        it "throws when passed document object as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
+            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+            expect(err.message).to.include "<document>"
+            expect(err.message).to.include "> cy.document()"
             done()
 
           cy.document().scrollIntoView()

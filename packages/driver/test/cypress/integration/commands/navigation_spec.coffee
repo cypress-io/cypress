@@ -1608,7 +1608,7 @@ describe "src/cy/commands/navigation", ->
                 "visit", "then", "get", "find", "click", "then"
               ])
 
-              expect(cy.isInDom(subject)).to.be.false
+              expect(Cypress.dom.isDetached(subject)).to.be.true
 
               expect(subject.get(0)).to.eq($input.get(0))
 

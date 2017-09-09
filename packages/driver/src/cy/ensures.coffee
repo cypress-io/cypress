@@ -1,31 +1,71 @@
 _ = require("lodash")
-$dom = require("../cypress/dom")
+$dom = require("../dom")
 $utils = require("../cypress/utils")
 
-commandOptions = ["exist", "exists", "visible", "length"]
-VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"]
+VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
 
 returnFalse = -> return false
 
-create = (state, expect, isInDom) ->
-  ensureSubject = ->
-    subject = state("subject")
+create = (state, expect) ->
+  ## TODO: we should probably normalize all subjects
+  ## into an array and loop through each and verify
+  ## each element in the array is valid. as it stands
+  ## we only validate the first
+  validateType = (subject, type, cmd) ->
+    name = cmd.get("name")
+    prev = cmd.get("prev")
 
-    if not subject?
-      cmd = state("current").get("name")
-      $utils.throwErrByPath("miscellaneous.no_subject", {
-        args: { subject, cmd }
-      })
+    switch type
+      when "element"
+        ## if this is an element then ensure its currently attached
+        ## to its document context
+        if $dom.isElement(subject)
+          ensureAttached(subject, name)
 
-    return subject
+        ## always ensure this is an element
+        ensureElement(subject, name)
 
-  ensureParent = ->
+      when "document"
+        ensureDocument(subject, name)
+
+      when "window"
+        ensureWindow(subject, name)
+
+  ensureSubjectByType = (subject, type, name) ->
     current = state("current")
 
-    if not current.get("prev")
-      $utils.throwErrByPath("miscellaneous.orphan", {
-        args: { cmd: current.get("name") }
-      })
+    types = [].concat(type)
+
+    ## if we have an optional subject and nothing's
+    ## here then just return cuz we good to go
+    if ("optional" in types) and _.isUndefined(subject)
+      return
+
+    ## okay we either have a subject and either way
+    ## slice out optional so we can verify against
+    ## the various types
+    types = _.without(types, "optional")
+
+    ## if we have no types then bail
+    return if types.length is 0
+
+    errors = []
+
+    for type in types
+      try
+        validateType(subject, type, current)
+      catch err
+        errors.push(err)
+
+    ## every validation failed and we had more than one validation
+    if (errors.length is types.length)
+      err = errors[0]
+
+      if types.length > 1
+        ## append a nice error message telling the user this
+        err = $utils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+
+      throw err
 
   ensureRunnable = (name) ->
     if not state("runnable")
@@ -49,18 +89,16 @@ create = (state, expect, isInDom) ->
     ## the points
     if $utils.getDistanceBetween(point1, point2) > threshold
       cmd  = state("current").get("name")
-      node = $utils.stringifyElement($el)
+      node = $dom.stringify($el)
       $utils.throwErrByPath("dom.animating", {
         args: { cmd, node }
       })
 
   ensureReceivability = (subject, onFail) ->
-    subject ?= cy.ensureSubject()
-
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
-      node = $utils.stringifyElement(subject)
+      node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.disabled", {
         onFail
@@ -68,52 +106,75 @@ create = (state, expect, isInDom) ->
       })
 
   ensureVisibility = (subject, onFail) ->
-    subject ?= cy.ensureSubject()
-
     cmd = state("current").get("name")
 
     if not (subject.length is subject.filter(":visible").length)
-      reason = $dom.getReasonElIsHidden(subject)
-      node   = $utils.stringifyElement(subject)
+      reason = $dom.getReasonIsHidden(subject)
+      node   = $dom.stringify(subject)
       $utils.throwErrByPath("dom.not_visible", {
         onFail
         args: { cmd, node, reason }
       })
 
-  ensureDom = (subject, cmd, log) ->
-    subject ?= cy.ensureSubject()
+  ensureAttached = (subject, name, onFail) ->
+    if $dom.isDetached(subject)
+      prev = state("current").get("prev")
 
-    cmd ?= state("current").get("name")
-
-    isWindow = $utils.hasWindow(subject)
-
-    ## think about dropping the 'cmd' part
-    ## and adding exactly what the subject is
-    ## if its an object or array, just say Object or Array
-    ## but if its a primitive, just print out its value like
-    ## true, false, 0, 1, 3, "foo", "bar"
-    if not $utils.hasDom(subject)
-      $utils.throwErrByPath("dom.non_dom", {
-        onFail: log
-        args: { cmd }
+      $utils.throwErrByPath("subject.not_attached", {
+        onFail
+        args: {
+          name
+          subject: $dom.stringify(subject),
+          previous: prev.get("name")
+        }
       })
 
-    if not (isWindow or isInDom(subject))
-      node = $utils.stringifyElement(subject)
-      $utils.throwErrByPath("dom.detached", {
-        onFail: log
-        args: { cmd, node }
+  ensureElement = (subject, name, onFail) ->
+    if not $dom.isElement(subject)
+      prev = state("current").get("prev")
+
+      $utils.throwErrByPath("subject.not_element", {
+        onFail
+        args: {
+          name
+          subject: $utils.stringifyActual(subject)
+          previous: prev.get("name")
+        }
       })
 
-    return subject
+  ensureWindow = (subject, name, log) ->
+    if not $dom.isWindow(subject)
+      prev = state("current").get("prev")
+
+      $utils.throwErrByPath("subject.not_window_or_document", {
+        args: {
+          name
+          type: "window"
+          subject: $utils.stringifyActual(subject)
+          previous: prev.get("name")
+        }
+      })
+
+  ensureDocument = (subject, name, log) ->
+    if not $dom.isDocument(subject)
+      prev = state("current").get("prev")
+
+      $utils.throwErrByPath("subject.not_window_or_document", {
+        args: {
+          name
+          type: "document"
+          subject: $utils.stringifyActual(subject)
+          previous: prev.get("name")
+        }
+      })
 
   ensureExistence = (subject) ->
-    returnFalse = =>
+    returnFalse = ->
       cleanup()
 
       return false
 
-    cleanup = =>
+    cleanup = ->
       state("onBeforeLog", null)
 
     ## prevent any additional logs this is an implicit assertion
@@ -130,7 +191,7 @@ create = (state, expect, isInDom) ->
 
   ensureElExistence = ($el) ->
     ## dont throw if this isnt even a DOM object
-    # return if not $utils.isJqueryInstance($el)
+    # return if not $dom.isJquery($el)
 
     ## ensure that we either had some assertions
     ## or that the element existed
@@ -144,16 +205,16 @@ create = (state, expect, isInDom) ->
   ensureDescendents = ($el1, $el2, onFail) ->
     cmd = state("current").get("name")
 
-    if not $utils.isDescendent($el1, $el2)
+    if not $dom.isDescendent($el1, $el2)
       if $el2
-        element1 = $utils.stringifyElement($el1)
-        element2 = $utils.stringifyElement($el2)
+        element1 = $dom.stringify($el1)
+        element2 = $dom.stringify($el2)
         $utils.throwErrByPath("dom.covered", {
           onFail
           args: { cmd, element1, element2 }
         })
       else
-        node = $utils.stringifyElement($el1)
+        node = $dom.stringify($el1)
         $utils.throwErrByPath("dom.center_hidden", {
           onFail
           args: { cmd, node }
@@ -173,30 +234,34 @@ create = (state, expect, isInDom) ->
     })
 
   ensureScrollability = ($el, cmd) ->
-    return true if $dom.elIsScrollable($el)
+    return true if $dom.isScrollable($el)
 
     ## prep args to throw in error since we can't scroll
     cmd   ?= state("current").get("name")
-    node  = $utils.stringifyElement($el)
+    node  = $dom.stringify($el)
 
     $utils.throwErrByPath("dom.not_scrollable", {
       args: { cmd, node }
     })
 
   return {
-    ensureSubject
+    ensureSubjectByType
 
-    ensureParent
+    ensureElement
+
+    ensureAttached
 
     ensureRunnable
+
+    ensureWindow
+
+    ensureDocument
 
     ensureElementIsNotAnimating
 
     ensureReceivability
 
     ensureVisibility
-
-    ensureDom
 
     ensureExistence
 

@@ -8,15 +8,15 @@ sinon = require("sinon")
 lolex = require("lolex")
 bililiteRange = require("../vendor/bililiteRange")
 
+$dom = require("./dom")
+$errorMessages = require("./cypress/error_messages")
 $Chainer = require("./cypress/chainer")
 $Command = require("./cypress/command")
 $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
-$dom = require("./cypress/dom")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$ErrorMessages = require("./cypress/error_messages")
 $Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
@@ -24,7 +24,6 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
-
 $utils = require("./cypress/utils")
 
 proxies = {
@@ -431,46 +430,34 @@ class $Cypress
   ## all of the constructors
   ## to enable users to monkeypatch
   $Cypress: $Cypress
-
   Cy: $Cy
-
   Chainer: $Chainer
-
+  Cookies: $Cookies
+  Command: $Command
+  Commands: $Commands
   dom: $dom
+  errorMessages: $errorMessages
   Keyboard: $Keyboard
   Location: $Location
-
   Log: $Log
-
   LocalStorage: $LocalStorage
-
+  Mocha: $Mocha
+  Runner: $Runner
   Server: $Server
-
   utils: $utils
-
   _: _
-
   moment: moment
-
   Blob: blobUtil
-
   Promise: Promise
-
   minimatch: minimatch
-
   sinon: sinon
-
   lolex: lolex
-
   bililiteRange: bililiteRange
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   @create = (config) ->
     new $Cypress(config)
-
-  @extend = (obj) ->
-    _.extend @prototype, obj
 
   ## proxy all of the methods in proxies
   ## to their corresponding objects

@@ -1,6 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
-utils = Cypress.utils
+dom = Cypress.dom
 
 helpers = require("../../support/helpers")
 
@@ -52,7 +52,7 @@ describe "src/cy/commands/traversals", ->
         it "throws on too many elements after timing out waiting for length", (done) ->
           el = cy.$$("#list")[name](arg)
 
-          node = utils.stringifyElement cy.$$("#list"), "short"
+          node = dom.stringify cy.$$("#list"), "short"
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
@@ -63,7 +63,7 @@ describe "src/cy/commands/traversals", ->
         it "throws on too few elements after timing out waiting for length", (done) ->
           el = cy.$$("#list")[name](arg)
 
-          node = utils.stringifyElement cy.$$("#list"), "short"
+          node = dom.stringify cy.$$("#list"), "short"
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
@@ -72,8 +72,8 @@ describe "src/cy/commands/traversals", ->
           cy.get("#list")[name](arg).should("have.length", el.length + 1)
 
         it "without a dom element", (done) ->
-          cy.noop({})[name](arg)
           cy.on "fail", -> done()
+          cy.noop({})[name](arg)
 
         it "throws when subject is not in the document", (done) ->
           cy.on "command:end", =>
@@ -87,7 +87,7 @@ describe "src/cy/commands/traversals", ->
 
         it "returns no elements", (done) ->
           errIncludes = (el, node) =>
-            node = utils.stringifyElement cy.$$(node), "short"
+            node = dom.stringify cy.$$(node), "short"
 
             cy.on "fail", (err) ->
               expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
@@ -147,7 +147,7 @@ describe "src/cy/commands/traversals", ->
             obj = {Command: name}
             obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
 
-            yielded = Cypress.utils.getDomElements($el)
+            yielded = Cypress.dom.getElements($el)
 
             _.extend obj, {
               "Applied To": helpers.getFirstSubjectByName("get").get(0)

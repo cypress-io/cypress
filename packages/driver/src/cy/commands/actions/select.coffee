@@ -2,20 +2,18 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 newLineRe = /\n/g
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
         $el: subject
         log: true
         force: false
-
-      cy.ensureDom(options.$el)
 
       consoleProps = {}
 
@@ -29,7 +27,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps: ->
             ## merge into consoleProps without mutating it
             _.extend {}, consoleProps,
-              "Applied To": $utils.getDomElements(options.$el)
+              "Applied To": $dom.getElements(options.$el)
               "Options":    deltaOptions
 
         options._log.snapshot("before", {next: "after"})
@@ -46,7 +44,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## behavior
 
       if not options.$el.is("select")
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         $utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
@@ -64,7 +62,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getOptions = ->
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
-          node = $utils.stringifyElement(options.$el)
+          node = $dom.stringify(options.$el)
           $utils.throwErrByPath "select.disabled", { args: { node } }
 
         values = []
@@ -119,7 +117,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
-            node = $utils.stringifyElement($el)
+            node = $dom.stringify($el)
             $utils.throwErrByPath("select.option_disabled", {
               args: { node }
             })

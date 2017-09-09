@@ -3,7 +3,7 @@ $ = require("jquery")
 chai = require("chai")
 sinonChai = require("@cypress/sinon-chai")
 
-$dom = require("../cypress/dom")
+$dom = require("../dom")
 $utils = require("../cypress/utils")
 $chaiJquery = require("../cypress/chai_jquery")
 
@@ -53,7 +53,7 @@ chai.use (chai, u) ->
         when "visible"
           if not negated
             ## add reason hidden unless we expect the element to be hidden
-            reason = $dom.getReasonElIsHidden(obj)
+            reason = $dom.getReasonIsHidden(obj)
             err.message += "\n\n" + reason
 
       ## always rethrow the error!
@@ -102,7 +102,7 @@ chai.use (chai, u) ->
 
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 
-  overrideChaiAsserts = (assertFn, isInDom) ->
+  overrideChaiAsserts = (assertFn) ->
     _this = @
 
     chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
@@ -111,9 +111,9 @@ chai.use (chai, u) ->
       obj = assert._obj
 
       ## if we are formatting a DOM object
-      if $utils.hasDom(obj)
+      if $dom.isDom(obj)
         ## replace object with our formatted one
-        assert._obj = $utils.stringifyElement(obj, "short")
+        assert._obj = $dom.stringify(obj, "short")
 
       msg = getMessage.call(@, assert, args)
 
@@ -125,7 +125,7 @@ chai.use (chai, u) ->
 
     chai.Assertion.overwriteMethod "match", (_super) ->
       return (regExp) ->
-        if _.isRegExp(regExp) or $utils.hasDom(@_obj)
+        if _.isRegExp(regExp) or $dom.isDom(@_obj)
           _super.apply(@, arguments)
         else
           err = $utils.cypressErr($utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
@@ -136,7 +136,7 @@ chai.use (chai, u) ->
       return (text) ->
         obj = @_obj
 
-        if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
+        if not ($dom.isJquery(obj) or $dom.isElement(obj))
           return _super.apply(@, arguments)
 
         escText = $utils.escapeQuotes(text)
@@ -161,17 +161,17 @@ chai.use (chai, u) ->
         return (length) ->
           obj = @_obj
 
-          if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
+          if not ($dom.isJquery(obj) or $dom.isElement(obj))
             return _super.apply(@, arguments)
 
           length = $utils.normalizeNumber(length)
 
           ## filter out anything not currently in our document
-          if not isInDom(obj)
+          if $dom.isDetached(obj)
             obj = @_obj = obj.filter (index, el) ->
-              isInDom(el)
+              $dom.isAttached(el)
 
-          node = if obj and obj.length then $utils.stringifyElement(obj, "short") else obj.selector
+          node = if obj and obj.length then $dom.stringify(obj, "short") else obj.selector
 
           ## if our length assertion fails we need to check to
           ## ensure that the length argument is a finite number
@@ -212,7 +212,7 @@ chai.use (chai, u) ->
       return ->
         obj = @_obj
 
-        if not ($utils.isJqueryInstance(obj) or $utils.hasElement(obj))
+        if not ($dom.isJquery(obj) or $dom.isElement(obj))
           try
             _super.apply(@, arguments)
           catch e
@@ -222,11 +222,11 @@ chai.use (chai, u) ->
           if not obj.length
             @_obj = null
 
-          node = if obj and obj.length then $utils.stringifyElement(obj, "short") else obj.selector
+          node = if obj and obj.length then $dom.stringify(obj, "short") else obj.selector
 
           try
             @assert(
-              isContained = isInDom(obj),
+              isAttached = $dom.isAttached(obj),
               "expected \#{act} to exist in the DOM",
               "expected \#{act} not to exist in the DOM",
               node,
@@ -239,7 +239,7 @@ chai.use (chai, u) ->
 
             getLongExistsMessage = (obj) ->
               ## if we expected not for an element to exist
-              if isContained
+              if isAttached
                 "Expected #{node} not to exist in the DOM, but it was continuously found."
               else
                 "Expected to find element: '#{obj.selector}', but never found it."
@@ -303,12 +303,12 @@ chai.use (chai, u) ->
       assert
     }
 
-  create = (specWindow, assertFn, isInDom) ->
+  create = (specWindow, assertFn) ->
     # restoreOverrides()
     restoreAsserts()
 
     # overrideChai()
-    overrideChaiAsserts(assertFn, isInDom)
+    overrideChaiAsserts(assertFn)
 
     return setSpecWindowGlobals(specWindow)
 

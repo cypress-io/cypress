@@ -3,10 +3,9 @@ moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
 
-$Location = require("../../cypress/location")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
-
+$Log = require("../../cypress/log")
+$Location = require("../../cypress/location")
 
 id                    = null
 previousDomainVisited = null
@@ -282,6 +281,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           resp
 
   Cypress.on "before:window:load", (contentWindow) ->
+    ## TODO: just use a closure here
     current = state("current")
 
     return if not current

@@ -2,17 +2,15 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 { delay } = require("./utils")
-$Log = require("../../../cypress/log")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: "element" }, {
     submit: (subject, options = {}) ->
       _.defaults options,
         log: true
         $el: subject
-
-      cy.ensureDom(options.$el)
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously
@@ -24,14 +22,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log = Cypress.log({
           $el: options.$el
           consoleProps: ->
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
             Elements: options.$el.length
         })
 
         options._log.snapshot("before", {next: "after"})
 
       if not options.$el.is("form")
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         word = $utils.plural(options.$el, "contains", "is")
         $utils.throwErrByPath("submit.not_on_form", {
           onFail: options._log
@@ -59,13 +57,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       Promise
       .delay(delay, "submit")
-      .then =>
+      .then ->
         do verifyAssertions = =>
           cy.verifyUpcomingAssertions(options.$el, options, {
             onRetry: verifyAssertions
           })
-
-    fill: (subject, obj, options = {}) ->
-      $utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
-
   })

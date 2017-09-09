@@ -153,8 +153,6 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("not.exist").then ->
           lastLog = @lastLog
 
-          debugger
-
           expect(@lastLog.invoke("consoleProps")).to.deep.eq {
             Command: "focused"
             Yielded: "--nothing--"
@@ -479,7 +477,7 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it "retries finding elements until something is found", ->
+    it "FLAKY retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before

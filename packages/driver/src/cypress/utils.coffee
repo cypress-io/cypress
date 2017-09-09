@@ -3,7 +3,8 @@ _ = require("lodash")
 moment = require("moment")
 
 $Location = require("./location")
-errorMessages = require("./error_messages")
+$dom = require("../dom")
+$errorMessages = require("./error_messages")
 
 tagOpen     = /\[([a-z\s='"-]+)\]/g
 tagClosed   = /\[\/([a-z]+)\]/g
@@ -103,7 +104,7 @@ module.exports = {
     err
 
   errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath errorMessages, errPath
+    if not errMessage = @getObjValueByPath $errorMessages, errPath
       throw new Error "Error message path '#{errPath}' does not exist"
 
     if _.isFunction(errMessage)
@@ -112,11 +113,6 @@ module.exports = {
       _.reduce args, (message, argValue, argKey) ->
         message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
       , errMessage
-
-  ## TODO: replace this w/ lodash _.isSymbol
-  ## which is a more extensive check for symbol
-  _isSymbol: (value) ->
-    typeof value is 'symbol'
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
@@ -157,8 +153,8 @@ module.exports = {
 
   stringifyActual: (value) ->
     switch
-      when @hasElement(value)
-        @stringifyElement(value, "short")
+      when $dom.isDom(value)
+        $dom.stringify(value, "short")
 
       when _.isFunction(value)
         "function(){}"
@@ -180,7 +176,7 @@ module.exports = {
         else
           @stringifyActualObj(value)
 
-      when @_isSymbol(value)
+      when _.isSymbol(value)
         "Symbol"
 
       when _.isUndefined(value)
@@ -212,86 +208,6 @@ module.exports = {
         "undefined"
       else
         @stringifyActual(arg)
-
-  hasDom: (obj) ->
-    @hasElement(obj) or @hasWindow(obj) or @hasDocument(obj)
-
-  hasWindow: (obj) ->
-    try
-      !!(obj and $.isWindow(obj[0])) or $.isWindow(obj)
-    catch
-      false
-
-  hasElement: (obj) ->
-    try
-      !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
-    catch
-      false
-
-  hasDocument: (obj) ->
-    try
-      !!((obj and obj.nodeType is 9) or (obj and obj[0] and obj[0].nodeType is 9))
-    catch
-      false
-
-  isDescendent: ($el1, $el2) ->
-    return false if not $el2
-
-    !!(($el1.get(0) is $el2.get(0)) or $el1.has($el2).length)
-
-  getDomElements: ($el) ->
-    return if not $el?.length
-
-    if $el.length is 1
-      $el.get(0)
-    else
-      _.reduce $el, (memo, el) ->
-        memo.push(el)
-        memo
-      , []
-
-  ## short form css-inlines the element
-  ## long form returns the outerHTML
-  stringifyElement: (el, form = "long") ->
-    ## if we are formatting the window object
-    if @hasWindow(el)
-      return "<window>"
-
-    ## if we are formatting the document object
-    if @hasDocument(el)
-      return "<document>"
-
-    ## convert this to jquery if its not already one
-    $el = if @isJqueryInstance(el) then el else $(el)
-
-    switch form
-      when "long"
-        text     = _.chain($el.text()).clean().truncate({length: 10 }).value()
-        children = $el.children().length
-        str      = $el.clone().empty().prop("outerHTML")
-        switch
-          when children then str.replace("></", ">...</")
-          when text     then str.replace("></", ">#{text}</")
-          else
-            str
-      when "short"
-        str = $el.prop("tagName").toLowerCase()
-        if id = $el.prop("id")
-          str += "#" + id
-
-        ## using attr here instead of class because
-        ## svg's return an SVGAnimatedString object
-        ## instead of a normal string when calling
-        ## the property 'class'
-        if klass = $el.attr("class")
-          str += "." + klass.split(/\s+/).join(".")
-
-        ## if we have more than one element,
-        ## format it so that the user can see there's more
-        if $el.length > 1
-          "[ <#{str}>, #{$el.length - 1} more... ]"
-        else
-          "<#{str}>"
 
   plural: (obj, plural, singular) ->
     obj = if _.isNumber(obj) then obj else obj.length
@@ -347,14 +263,6 @@ module.exports = {
     cmd.get("name") is "then" and
       args.length is 3 and
         _.every(args, _.isFunction)
-
-  wrapInjQuery: (obj) ->
-    if @isJqueryInstance(obj) then obj else $(obj)
-
-  isJqueryInstance: (obj) ->
-    ## does it have the jquery property and is the
-    ## constructor a function?
-    !!(obj and obj.jquery and _.isFunction(obj.constructor))
 
   addTwentyYears: ->
     moment().add(20, "years").unix()
