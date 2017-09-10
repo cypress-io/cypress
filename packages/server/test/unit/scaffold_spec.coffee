@@ -193,43 +193,29 @@ describe "lib/scaffold", ->
           expect(str).to.eq """
           // ***********************************************
           // This example commands.js shows you how to
-          // create the custom command: 'login'.
+          // create various custom commands and overwrite
+          // existing commands.
           //
-          // The commands.js file is a great place to
-          // modify existing commands and create custom
-          // commands for use throughout your tests.
-          //
-          // You can read more about custom commands here:
+          // For more comprehensive examples of custom
+          // commands please read more here:
           // https://on.cypress.io/custom-commands
           // ***********************************************
           //
-          // Cypress.Commands.add("login", function(email, password){
-          //   var email    = email || "joe@example.com"
-          //   var password = password || "foobar"
           //
-          //   var log = Cypress.Log.command({
-          //     name: "login",
-          //     message: [email, password],
-          //     consoleProps: function(){
-          //       return {
-          //         email: email,
-          //         password: password
-          //       }
-          //     }
-          //   })
+          // -- This is a parent command --
+          // Cypress.Commands.add("login", (email, password) => { ... })
           //
-          //   cy
-          //     .visit("/login", {log: false})
-          //     .contains("Log In", {log: false})
-          //     .get("#email", {log: false}).type(email, {log: false})
-          //     .get("#password", {log: false}).type(password, {log: false})
-          //     .get("button", {log: false}).click({log: false}) //this should submit the form
-          //     .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
-          //     .url({log: false}).should("match", /dashboard/, {log: false})
-          //     .then(function(){
-          //       log.snapshot().end()
-          //     })
-          // })
+          //
+          // -- This is a child command --
+          // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
+          //
+          //
+          // -- This is a dual command --
+          // Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
+          //
+          //
+          // -- This is will overwrite an existing command --
+          // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
           """
 
@@ -237,7 +223,7 @@ describe "lib/scaffold", ->
             expect(str).to.eq """
             // ***********************************************************
             // This example support/index.js is processed and
-            // loaded automatically before your other test files.
+            // loaded automatically before your test files.
             //
             // This is a great place to put global configuration and
             // behavior that modifies Cypress.
@@ -250,8 +236,7 @@ describe "lib/scaffold", ->
             // https://on.cypress.io/configuration
             // ***********************************************************
 
-            // Import commands.js
-            // using ES2015 syntax:
+            // Import commands.js using ES2015 syntax:
             import "./commands"
 
             // Alternatively you can use CommonJS syntax:
