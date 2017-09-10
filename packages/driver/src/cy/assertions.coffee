@@ -62,8 +62,7 @@ create = (state, queue, retryFn) ->
 
       ## grab all of the queued commands which are
       ## assertions and match our current chainerId
-      # assertions.push(cmd)
-      if cmd.is("assertion")# and cmd.get("chainerId") is current.get("chainerId")
+      if cmd.is("assertion")
         assertions.push(cmd)
       else
         break
