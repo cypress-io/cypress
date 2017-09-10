@@ -62,7 +62,8 @@ create = (state, queue, retryFn) ->
 
       ## grab all of the queued commands which are
       ## assertions and match our current chainerId
-      if cmd.is("assertion") and cmd.get("chainerId") is current.get("chainerId")
+      # assertions.push(cmd)
+      if cmd.is("assertion")# and cmd.get("chainerId") is current.get("chainerId")
         assertions.push(cmd)
       else
         break
@@ -73,7 +74,7 @@ create = (state, queue, retryFn) ->
     _.map(cmds, injectAssertion)
 
   injectAssertion = (cmd) ->
-    return (subject) =>
+    return (subject) ->
       ## set assertions to itself or empty array
       if not cmd.get("assertions")
         cmd.set("assertions", [])

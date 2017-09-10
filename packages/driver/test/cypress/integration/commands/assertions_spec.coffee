@@ -79,6 +79,29 @@ describe "src/cy/commands/assertions", ->
       obj = {requestJSON: {teamIds: [2]}}
       cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
+    ## TODO: make cy.then retry
+    it.skip "outer assertions retry on cy.then", ->
+      obj = {foo: "bar"}
+
+      cy.wrap(obj).then ->
+        setTimeout ->
+          obj.foo = "baz"
+        , 1000
+
+        return obj
+      .should("deep.eq", {foo: "baz"})
+
+    it "does it retry when wrapped", ->
+      obj = { foo: "bar" }
+
+      cy.wrap(obj).then ->
+        setTimeout ->
+          obj.foo = "baz"
+        , 100
+
+        return cy.wrap(obj)
+      .should("deep.eq", { foo: "baz" })
+
     describe "function argument", ->
       it "waits until function is true", ->
         button = cy.$$("button:first")
