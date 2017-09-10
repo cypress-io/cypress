@@ -184,7 +184,7 @@ describe "lib/scaffold", ->
       .catch (err = {}) =>
         expect(err.stack).to.contain("not in the scaffolded file tree")
 
-    it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
+    it "creates supportFolder and commands.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
       scaffold.support(@supportFolder, @cfg)
       .then =>
@@ -193,94 +193,56 @@ describe "lib/scaffold", ->
           expect(str).to.eq """
           // ***********************************************
           // This example commands.js shows you how to
-          // create the custom command: 'login'.
+          // create various custom commands and overwrite
+          // existing commands.
           //
-          // The commands.js file is a great place to
-          // modify existing commands and create custom
-          // commands for use throughout your tests.
-          //
-          // You can read more about custom commands here:
+          // For more comprehensive examples of custom
+          // commands please read more here:
           // https://on.cypress.io/custom-commands
           // ***********************************************
           //
-          // Cypress.Commands.add("login", function(email, password){
-          //   var email    = email || "joe@example.com"
-          //   var password = password || "foobar"
           //
-          //   var log = Cypress.Log.command({
-          //     name: "login",
-          //     message: [email, password],
-          //     consoleProps: function(){
-          //       return {
-          //         email: email,
-          //         password: password
-          //       }
-          //     }
-          //   })
+          // -- This is a parent command --
+          // Cypress.Commands.add("login", (email, password) => { ... })
           //
-          //   cy
-          //     .visit("/login", {log: false})
-          //     .contains("Log In", {log: false})
-          //     .get("#email", {log: false}).type(email, {log: false})
-          //     .get("#password", {log: false}).type(password, {log: false})
-          //     .get("button", {log: false}).click({log: false}) //this should submit the form
-          //     .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
-          //     .url({log: false}).should("match", /dashboard/, {log: false})
-          //     .then(function(){
-          //       log.snapshot().end()
-          //     })
-          // })
+          //
+          // -- This is a child command --
+          // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
+          //
+          //
+          // -- This is a dual command --
+          // Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
+          //
+          //
+          // -- This is will overwrite an existing command --
+          // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
           """
 
-          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) =>
+          fs.readFileAsync(@supportFolder + "/index.js", "utf8").then (str) =>
             expect(str).to.eq """
-            // ***********************************************
-            // This example defaults.js shows you how to
-            // customize the internal behavior of Cypress.
+            // ***********************************************************
+            // This example support/index.js is processed and
+            // loaded automatically before your test files.
             //
-            // The defaults.js file is a great place to
-            // override defaults used throughout all tests.
+            // This is a great place to put global configuration and
+            // behavior that modifies Cypress.
             //
-            // ***********************************************
+            // You can change the location of this file or turn off
+            // automatically serving support files with the
+            // 'supportFile' configuration option.
             //
-            // Cypress.Server.defaults({
-            //   delay: 500,
-            //   whitelist: function(xhr){}
-            // })
+            // You can read more here:
+            // https://on.cypress.io/configuration
+            // ***********************************************************
 
-            // Cypress.Cookies.defaults({
-            //   whitelist: ["session_id", "remember_token"]
-            // })
+            // Import commands.js using ES2015 syntax:
+            import "./commands"
+
+            // Alternatively you can use CommonJS syntax:
+            // require("./commands")
+
             """
-
-            fs.readFileAsync(@supportFolder + "/index.js", "utf8").then (str) =>
-              expect(str).to.eq """
-              // ***********************************************************
-              // This example support/index.js is processed and
-              // loaded automatically before your other test files.
-              //
-              // This is a great place to put global configuration and
-              // behavior that modifies Cypress.
-              //
-              // You can change the location of this file or turn off
-              // automatically serving support files with the
-              // 'supportFile' configuration option.
-              //
-              // You can read more here:
-              // https://on.cypress.io/guides/configuration#section-global
-              // ***********************************************************
-
-              // Import commands.js and defaults.js
-              // using ES2015 syntax:
-              import "./commands"
-              import "./defaults"
-
-              // Alternatively you can use CommonJS syntax:
-              // require("./commands")
-              // require("./defaults")
-
-              """
 
   context ".fixture", ->
     beforeEach ->
@@ -364,7 +326,6 @@ describe "lib/scaffold", ->
               name: "_support"
               children: [
                 { name: "commands.js" }
-                { name: "defaults.js" }
                 { name: "index.js" }
               ]
             }
@@ -384,7 +345,6 @@ describe "lib/scaffold", ->
               name: "_support"
               children: [
                 { name: "commands.js" }
-                { name: "defaults.js" }
                 { name: "index.js" }
               ]
             }

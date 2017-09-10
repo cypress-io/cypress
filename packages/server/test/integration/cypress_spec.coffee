@@ -389,8 +389,6 @@ describe "lib/cypress", ->
           fs.statAsync path.join(supportFolder, "index.js")
         .then =>
           fs.statAsync path.join(supportFolder, "commands.js")
-        .then =>
-          fs.statAsync path.join(supportFolder, "defaults.js")
 
     it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       config.get(@idsPath)
