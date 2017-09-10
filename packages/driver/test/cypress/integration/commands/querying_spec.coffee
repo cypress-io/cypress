@@ -1460,9 +1460,12 @@ describe "src/cy/commands/querying", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
           expect(@lastLog.get("$el").get(0)).to.eq($label.get(0))
 
-      it "sets type to parent when subject doesnt have an element", ->
-        cy.noop({}).contains("foo").then ->
+      it "sets type to parent when subject isnt element", ->
+        cy.window().contains("foo").then ->
           expect(@lastLog.get("type")).to.eq "parent"
+
+          cy.document().contains("foo").then ->
+            expect(@lastLog.get("type")).to.eq "parent"
 
       it "sets type to child when used as a child command", ->
         cy.get("body").contains("foo").then ->
