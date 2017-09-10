@@ -74,7 +74,7 @@ create = (state, queue, retryFn) ->
     _.map(cmds, injectAssertion)
 
   injectAssertion = (cmd) ->
-    return (subject) =>
+    return (subject) ->
       ## set assertions to itself or empty array
       if not cmd.get("assertions")
         cmd.set("assertions", [])

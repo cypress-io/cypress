@@ -274,10 +274,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.now("get", "html", {log: false}).then(log)
   })
 
-  Commands.addAll({ prevSubject: ["optional", "element"] }, {
+  Commands.addAll({ prevSubject: ["optional", "window", "document", "element"] }, {
     contains: (subject, filter, text, options = {}) ->
-      ## nuke our subject if its present but not an element
-      ## since we want contains to operate as a parent command
+      ## nuke our subject if its present but not an element.
+      ## in these cases its either window or document but
+      ## we dont care.
+      ## we'll null out the subject so it will show up as a parent
+      ## command since its behavior is identical to using it
+      ## as a parent command: cy.contains()
       if subject and not $dom.isElement(subject)
         subject = null
 
