@@ -274,7 +274,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.now("get", "html", {log: false}).then(log)
   })
 
-  Commands.addAll({ prevSubject: "optional" }, {
+  Commands.addAll({ prevSubject: ["optional", "element"] }, {
     contains: (subject, filter, text, options = {}) ->
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
