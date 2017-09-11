@@ -79,6 +79,16 @@ describe "Global Mode", ->
       cy.get(".project-drop p:first").should("contain", "Drag your project here")
       cy.get(".project-drop a").should("have.text", "select manually")
 
+    it "handles drops of non-files gracefully", (done) ->
+      cy.window().then (win) ->
+        win.onerror = (message) ->
+          done("Should not cause error but threw: #{message}")
+      ## user could drag and drop a link or text, not a file
+      @dropEvent.dataTransfer.files = []
+      cy.get(".project-drop").trigger("drop", @dropEvent)
+      cy.wait(300).then ->
+        done()
+
     describe "dragging and dropping project", ->
       it "highlights/unhighlights drop area when dragging over it/leaving it", ->
         cy
