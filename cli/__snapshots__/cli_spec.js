@@ -1,7 +1,5 @@
-exports['cli version and binary version 1'] = `Cypress package version: 1.2.3
-Cypress binary version: X.Y.Z`
-
 exports['cli unknown command shows usage and exits 1'] = `
+
   command: bin/cypress foo
   code: 0
   failed: false
@@ -33,11 +31,20 @@ exports['cli unknown command shows usage and exits 1'] = `
   -------
   
   -------
-  `
+  
+`
 
-exports['cli version and binary version 2'] = `Cypress package version: 1.2.3
-Cypress binary version: X.Y.Z`
+exports['cli version and binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
 
-exports['cli version no binary version 1'] = `Cypress package version: 1.2.3
-Cypress binary version: not installed`
+exports['cli version and binary version 2'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
 
+exports['cli version no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
+`
