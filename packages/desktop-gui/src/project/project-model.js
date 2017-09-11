@@ -197,6 +197,8 @@ export default class Project {
   }
 
   @action clearWarning () {
+    if (!this.warning) return
+
     this.dismissedWarnings[this._serializeWarning(this.warning)] = true
     this.warning = null
   }
