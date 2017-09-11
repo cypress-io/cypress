@@ -11,8 +11,6 @@
     "build": "./bin/build.sh && gulp build",
     "predeploy": "npm run build",
     "deploy": "gulp deploy",
-    "prerelease": "npm run build",
-    "release": "releaser",
     "lint": "$(bin-up eslint) --fix *.js bin/*.js lib/*.js test/*.js",
     "pretest": "npm run lint"
   },
@@ -21,7 +19,6 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/releaser": "0.1.12",
     "bin-up": "^1.0.1",
     "chai": "^3.5.0",
     "cypress-example-kitchensink": "0.7.0",
