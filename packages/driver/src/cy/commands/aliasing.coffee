@@ -1,14 +1,11 @@
 _ = require("lodash")
 
-$utils = require("../../cypress/utils")
+$dom = require("../../dom")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addUtility({
+  Commands.addAll({ type: "utility", prevSubject: true }, {
     as: (subject, str) ->
       ctx = @
-
-      cy.ensureParent()
-      cy.ensureSubject()
 
       cy.validateAlias(str)
 
@@ -37,7 +34,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           log.set({
             alias:     str
-            aliasType: if $utils.hasElement(subject) then "dom" else "primitive"
+            aliasType: if $dom.isElement(subject) then "dom" else "primitive"
           })
 
       cy.addAlias(ctx, {subject: subject, command: prev, alias: str})

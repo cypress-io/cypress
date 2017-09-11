@@ -6,6 +6,8 @@ const fs = require('fs')
 const path = require('path')
 const glob = require('glob')
 
+const eslintRe = /\/. eslint.+\s+/g
+
 function replaceStringsIn (file) {
   fs.readFile(file, 'utf8', function (err, str) {
     if (err) throw err
@@ -19,6 +21,7 @@ function replaceStringsIn (file) {
     replace("to.eq('localhost')", "to.eq('example.cypress.io')")
     replace("to.eq('8080')", "to.eq('')")
     replace("to.eq('http:')", "to.eq('https:')")
+    replace(eslintRe, "")
     replace("imgSrcToDataURL('/assets", "imgSrcToDataURL('https://example.cypress.io/assets")
 
     fs.writeFile(file, str, function (err) {
@@ -33,7 +36,7 @@ function replaceStringsIn (file) {
 glob('./app/**/*.html', { realpath: true }, function (err, files) {
   if (err) throw err
 
-  let spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
+  const spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
 
   files.push(spec)
 

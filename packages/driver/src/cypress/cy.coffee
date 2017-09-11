@@ -1,8 +1,8 @@
 _ = require("lodash")
 $ = require("jquery")
-
 Promise = require("bluebird")
 
+$dom = require("../dom")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -11,7 +11,6 @@ $Aliases = require("../cy/aliases")
 $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
-$Elements = require("../cy/elements")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -82,17 +81,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
   assertions = $Assertions.create(state, queue, retries.retry)
 
-  elements = $Elements.create(state)
   jquery = $jQuery.create(state)
   location = $Location.create(state)
 
-  { expect } = $Chai.create(specWindow, assertions.assert, elements.isInDom)
+  { expect } = $Chai.create(specWindow, assertions.assert)
 
   xhrs = $Xhrs.create(state)
   aliases = $Aliases.create(state)
 
   errors = $Errors.create(state, config, log)
-  ensures = $Ensures.create(state, expect, elements.isInDom)
+  ensures = $Ensures.create(state, expect)
 
   coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
   snapshots = $Snapshots.create($$, state)
@@ -122,7 +120,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
-        Cypress.action("app:before:window:unload", e)
+        Cypress.action("app:window:before:unload", e)
 
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
@@ -132,7 +130,17 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       onNavigation: (args...) ->
         Cypress.action("app:navigation:changed", args...)
       onAlert: (str) ->
+        Cypress.action("app:window:alert", str)
       onConfirm: (str) ->
+        results = Cypress.action("app:window:confirm", str)
+
+        ## return false if ANY results are false
+        ## else true
+        ret = !_.some(results, returnedFalse)
+
+        Cypress.action("app:window:confirmed", str, ret)
+
+        return ret
     })
 
   enqueue = (obj) ->
@@ -173,7 +181,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     memo.unshift(command)
 
     ## break and return the memo
-    if command.get("type") is "parent" or cy.isInDom(command.get("subject"))
+    if command.get("type") is "parent" or $dom.isAttached(command.get("subject"))
       return memo
 
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
@@ -222,7 +230,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       catch err
         throw err
       finally
-        ## always this listener
+        ## always remove this listener
         Cypress.removeListener("command:enqueued", commandEnqueued)
 
       state("commandIntermediateValue", ret)
@@ -267,7 +275,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state("commandIntermediateValue", undefined)
 
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $utils.hasElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off
@@ -428,6 +436,36 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   removeSubject = ->
     state("subject", undefined)
 
+  pushSubjectAndValidate = (name, args, firstCall, prevSubject) ->
+    if firstCall
+      ## if we have a prevSubject then error
+      ## since we're invoking this improperly
+      if prevSubject and ("optional" not in [].concat(prevSubject))
+        $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
+          args: {
+            cmd:  name
+            args: $utils.stringifyActual(args[0])
+          }
+        })
+
+      ## else if this is the very first call
+      ## on the chainer then make the first
+      ## argument undefined (we have no subject)
+      removeSubject()
+
+    subject = state("subject")
+
+    if prevSubject
+      ## make sure our current subject is valid for
+      ## what we expect in this command
+      ensures.ensureSubjectByType(subject, prevSubject, name)
+
+    args.unshift(subject)
+
+    Cypress.action("cy:next:subject:prepared", subject, args)
+
+    args
+
   doneEarly = ->
     stopped = true
 
@@ -533,9 +571,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     isStopped
 
-    ## has element in dom sync
-    isInDom: elements.isInDom
-
     ## timeout sync methods
     timeout: timeouts.timeout
     clearTimeout: timeouts.clearTimeout
@@ -578,9 +613,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     verifyUpcomingAssertions: assertions.verifyUpcomingAssertions
 
     ## ensure sync methods
-    ensureSubject: ensures.ensureSubject
-    ensureParent: ensures.ensureParent
-    ensureDom: ensures.ensureDom
+    ensureWindow: ensures.ensureWindow
+    ensureElement: ensures.ensureElement
+    ensureDocument: ensures.ensureDocument
+    ensureAttached: ensures.ensureAttached
     ensureExistence: ensures.ensureExistence
     ensureElExistence: ensures.ensureElExistence
     ensureVisibility: ensures.ensureVisibility
@@ -609,7 +645,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## by trying to talk to the contentWindow document to see if
       ## its accessible.
       ## when we find ourselves in a cross origin situation, then our
-      ## proxy has not injected Cypress.action('before:window:load')
+      ## proxy has not injected Cypress.action('window:before:load')
       ## so Cypress.onBeforeAppWindowLoad() was never called
       $autIframe.on "load", ->
         ## if setting these props failed
@@ -680,27 +716,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## add this function to our chainer class
       $Chainer.add(name, fn)
 
-    addCommand: ({name, fn, type, enforceDom}) ->
+    addCommand: ({name, fn, type, prevSubject}) ->
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
-
-      prepareSubject = (firstCall, args) ->
-        ## if this is the very first call
-        ## on the chainer then make the first
-        ## argument undefined (we have no subject)
-        if firstCall
-          removeSubject()
-
-        subject = state("subject")
-
-        if enforceDom
-          cy.ensureDom(subject, name)
-
-        args.unshift(subject)
-
-        Cypress.action("cy:next:subject:prepared", subject, args)
-
-        args
 
       wrap = (firstCall) ->
         fn = commandFns[name]
@@ -709,35 +727,17 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         wrapped
 
       wrapByType = (fn, firstCall) ->
-        switch type
-          when "parent"
-            return fn
+        if type is "parent"
+          return fn
 
-          when "dual", "utility"
-            _.wrap fn, (orig, args...) ->
-              ## push the subject into the args
-              args = prepareSubject(firstCall, args)
+        ## child, dual, assertion, utility command
+        ## pushes the previous subject into them
+        ## after verifying its of the correct type
+        return (args...) ->
+          ## push the subject into the args
+          args = pushSubjectAndValidate(name, args, firstCall, prevSubject)
 
-              return orig.apply(@, args)
-
-          when "child", "assertion"
-            _.wrap fn, (orig, args...) ->
-              if firstCall
-                $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
-                  args: {
-                    cmd:  name
-                    args: $utils.stringify(args)
-                  }
-                })
-
-              ## push the subject into the args
-              args = prepareSubject(firstCall, args)
-
-              subject = args[0]
-
-              ret = orig.apply(@, args)
-
-              return ret ? subject
+          fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
         ensures.ensureRunnable(name)

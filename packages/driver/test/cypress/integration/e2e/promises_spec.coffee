@@ -58,7 +58,7 @@ describe "promises", ->
       expect(lastLog.get("name")).to.eq("foo")
       expect(lastLog.get("error")).to.eq(err)
 
-      expect(err.message).to.include("Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.")
+      expect(err.message).to.include("Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.")
       expect(err.message).to.include("> cy.foo()")
       expect(err.message).to.include("> cy.wrap()")
 
@@ -87,7 +87,7 @@ describe "promises", ->
       expect(lastLog.get("name")).to.eq("foo")
       expect(lastLog.get("error")).to.eq(err)
 
-      expect(err.message).to.include("Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.")
+      expect(err.message).to.include("Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.")
       expect(err.message).to.include("> cy.foo()")
       expect(err.message).to.include("> cy.wrap()")
 

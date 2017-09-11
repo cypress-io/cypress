@@ -16,7 +16,7 @@ describe "src/cypress/dom", ->
       fn = ->
         $dom.isHidden(null)
 
-      expect(fn).to.throw("Cypress.dom.isHidden() must be passed a basic DOM element. You passed: 'null'")
+      expect(fn).to.throw("Cypress.dom.isHidden() must be passed a basic DOM element.")
 
   context "isVisible", ->
     it "exposes isVisible", ->
@@ -26,9 +26,9 @@ describe "src/cypress/dom", ->
       fn = ->
         $dom.isVisible(null)
 
-      expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element. You passed: 'null'")
+      expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element.")
 
-  context "#elIsScrollable", ->
+  context "#isScrollable", ->
     beforeEach ->
       @add = (el) =>
         $(el).appendTo(cy.$$("body"))
@@ -37,7 +37,7 @@ describe "src/cypress/dom", ->
       @add("<div style='height: 1000px;' />")
       win = cy.state("window")
 
-      fn = => $dom.elIsScrollable(win)
+      fn = => $dom.isScrollable(win)
 
       expect(fn()).to.be.true
 
@@ -47,7 +47,7 @@ describe "src/cypress/dom", ->
 
       win = cy.state("window")
 
-      fn = -> $dom.elIsScrollable(win)
+      fn = -> $dom.isScrollable(win)
 
       expect(fn()).to.be.false
 
@@ -58,7 +58,7 @@ describe "src/cypress/dom", ->
         </div>
         """
 
-      fn = => $dom.elIsScrollable(noScroll)
+      fn = => $dom.isScrollable(noScroll)
 
       expect(fn()).to.be.false
 
@@ -71,7 +71,7 @@ describe "src/cypress/dom", ->
         </div>
         """
 
-      fn = => $dom.elIsScrollable(noOverflow)
+      fn = => $dom.isScrollable(noOverflow)
 
       expect(fn()).to.be.false
 
@@ -82,7 +82,7 @@ describe "src/cypress/dom", ->
         </div>
       """
 
-      fn = => $dom.elIsScrollable(vertScrollable)
+      fn = => $dom.isScrollable(vertScrollable)
 
       expect(fn()).to.be.true
 
@@ -93,7 +93,7 @@ describe "src/cypress/dom", ->
         </div>
       """
 
-      fn = => $dom.elIsScrollable(horizScrollable)
+      fn = => $dom.isScrollable(horizScrollable)
 
       expect(fn()).to.be.true
 
@@ -104,7 +104,7 @@ describe "src/cypress/dom", ->
         </div>
       """
 
-      fn = => $dom.elIsScrollable(forcedScroll)
+      fn = => $dom.isScrollable(forcedScroll)
 
       expect(fn()).to.be.true
 
@@ -421,10 +421,10 @@ describe "src/cypress/dom", ->
     it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
       expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
 
-    describe "#getReasonElIsHidden", ->
+    describe "#getReasonIsHidden", ->
       beforeEach ->
         @reasonIs = ($el, str) ->
-          expect($dom.getReasonElIsHidden($el)).to.eq(str)
+          expect($dom.getReasonIsHidden($el)).to.eq(str)
 
       it "has 'display: none'", ->
         @reasonIs @$displayNone, "This element '<button>' is not visible because it has CSS property: 'display: none'"

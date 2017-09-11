@@ -1,10 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Location = require("../../cypress/location")
-$Log = require("../../cypress/log")
-$Server = require("../../cypress/server")
 $utils = require("../../cypress/utils")
+$Server = require("../../cypress/server")
+$Location = require("../../cypress/location")
 
 validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i
 
@@ -246,7 +245,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     return null
 
-  Cypress.on "before:window:load", (contentWindow) ->
+  Cypress.on "window:before:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
       server.bindTo(contentWindow)

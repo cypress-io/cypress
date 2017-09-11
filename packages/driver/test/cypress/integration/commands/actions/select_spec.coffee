@@ -74,7 +74,7 @@ describe "src/cy/commands/actions/select", ->
       cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
-    it "lists the input as the focused element", ->
+    it "lists the select as the focused element", ->
       select = cy.$$("select:first")
 
       cy.get("select:first").select("de_train").focused().then ($focused) ->

@@ -607,18 +607,6 @@ describe "lib/project", ->
       Project.remove("/_test-output/path/to/project").then ->
         expect(cache.removeProject).to.be.calledWith("/_test-output/path/to/project")
 
-  context ".exists", ->
-    beforeEach ->
-      @sandbox.stub(cache, "getProjectPaths").resolves(["foo", "bar", "baz"])
-
-    it "is true if path is in paths", ->
-      Project.exists("bar").then (ret) ->
-        expect(ret).to.be.true
-
-    it "is false if path isnt in paths", ->
-      Project.exists("quux").then (ret) ->
-        expect(ret).to.be.false
-
   context ".id", ->
     it "returns project id", ->
       Project.id(@todosPath).then (id) =>

@@ -2,17 +2,63 @@ require('../spec_helper')
 
 const cli = require(`${lib}/cli`)
 const util = require(`${lib}/util`)
+const logger = require(`${lib}/logger`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
+const info = require(`${lib}/tasks/info`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
+const snapshot = require('snap-shot-it')
+const execa = require('execa-wrap')
 
 describe('cli', function () {
   beforeEach(function () {
+    logger.reset()
     this.sandbox.stub(process, 'exit')
     this.sandbox.stub(util, 'exit')
     this.sandbox.stub(util, 'logErrorExit1')
-    this.exec = (args) => cli.init().parse(`node test ${args}`.split(' '))
+    this.exec = (args) => cli.init(`node test ${args}`.split(' '))
+  })
+
+  context('unknown command', () =>
+    it('shows usage and exits', () =>
+      execa('bin/cypress', ['foo']).then(snapshot)
+    )
+  )
+
+  context('cypress version', function () {
+    it('reports package version', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        snapshot('cli version and binary version', logger.print())
+        done()
+      })
+    })
+
+    it('reports package and binary message', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        snapshot('cli version and binary version', logger.print())
+        done()
+      })
+    })
+
+    it('handles non-existent binary', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+
+      this.exec('--version')
+      process.exit.callsFake(() => {
+        snapshot('cli version no binary version', logger.print())
+        done()
+      })
+    })
   })
 
   context('cypress run', function () {

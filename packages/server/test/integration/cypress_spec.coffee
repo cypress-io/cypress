@@ -75,6 +75,7 @@ describe "lib/cypress", ->
     Fixtures.scaffold()
     @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
+    @noScaffolding = Fixtures.projectPath("no-scaffolding")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
@@ -270,13 +271,13 @@ describe "lib/cypress", ->
 
       user.set({authToken: "auth-token-123"})
       .then =>
-        cypress.start(["--run-project=#{@pristinePath}"])
+        cypress.start(["--run-project=#{@noScaffolding}"])
       .then =>
         @expectExitWith(0)
       .then =>
         expect(api.createProject).not.to.be.called
 
-        Project(@pristinePath).getProjectId()
+        Project(@noScaffolding).getProjectId()
         .then ->
           throw new Error("should have caught error but didnt")
         .catch (err) ->
@@ -326,19 +327,38 @@ describe "lib/cypress", ->
         .then =>
           fs.statAsync path.join(cfg.integrationFolder, "example_spec.js")
 
-    it "does not scaffolds out when headless", ->
-      config.get(@pristinePath)
-      .then (cfg) =>
-        fs.statAsync(cfg.integrationFolder)
-        .then ->
-          throw new Error("integrationFolder should not exist!")
-        .catch {code: "ENOENT"}, =>
-          cypress.start(["--run-project=#{@pristinePath}"])
-        .then =>
-          fs.statAsync(cfg.integrationFolder)
-        .then ->
-          throw new Error("integrationFolder should not exist!")
-        .catch {code: "ENOENT"}, =>
+    it "does not scaffold when headless and exits with error when no existing project", ->
+      ensureDoesNotExist = (inspection, index) ->
+        if not inspection.isRejected()
+          throw new Error("File or folder was scaffolded at index: #{index}")
+
+        expect(inspection.reason()).to.have.property("code", "ENOENT")
+
+      Promise.all([
+        fs.statAsync(path.join(@pristinePath, "cypress")).reflect()
+        fs.statAsync(path.join(@pristinePath, "cypress.json")).reflect()
+      ])
+      .each(ensureDoesNotExist)
+      .then =>
+        cypress.start(["--run-project=#{@pristinePath}"])
+      .then =>
+        Promise.all([
+          fs.statAsync(path.join(@pristinePath, "cypress")).reflect()
+          fs.statAsync(path.join(@pristinePath, "cypress.json")).reflect()
+        ])
+      .each(ensureDoesNotExist)
+      .then =>
+        @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @pristinePath)
+
+    it "does not scaffold integration or example_spec when headless", ->
+      settings.write(@pristinePath, {})
+      .then =>
+        cypress.start(["--run-project=#{@pristinePath}"])
+      .then =>
+        fs.statAsync(path.join(@pristinePath, "cypress", "integration"))
+      .then =>
+        throw new Error("integration folder should not exist!")
+      .catch {code: "ENOENT"}, =>
 
     it "scaffolds out fixtures + files if they do not exist", ->
       config.get(@pristinePath)
@@ -369,8 +389,6 @@ describe "lib/cypress", ->
           fs.statAsync path.join(supportFolder, "index.js")
         .then =>
           fs.statAsync path.join(supportFolder, "commands.js")
-        .then =>
-          fs.statAsync path.join(supportFolder, "defaults.js")
 
     it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       config.get(@idsPath)
@@ -399,7 +417,7 @@ describe "lib/cypress", ->
       bundle._watching = false
       watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
 
-      cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
+      cypress.start(["--run-project=#{@noScaffolding}", "--no-headless"])
       .then =>
         expect(watchBundle).to.be.calledWith("cypress/support/index.js")
         expect(bundle._watching).to.be.true
@@ -578,17 +596,20 @@ describe "lib/cypress", ->
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
       permissionsPath = path.resolve("./permissions")
 
-      fs.ensureDirAsync(permissionsPath)
+      cypressJson = path.join(permissionsPath, "cypress.json")
+
+      fs.outputFileAsync(cypressJson, "{}")
       .then =>
-        fs.chmodAsync(permissionsPath, "111")
+        ## read only
+        fs.chmodAsync(permissionsPath, "555")
       .then =>
         cypress.start(["--run-project=#{permissionsPath}"])
       .then =>
-        fs.chmodAsync(permissionsPath, "644")
+        fs.chmodAsync(permissionsPath, "777")
       .then =>
         fs.removeAsync(permissionsPath)
       .then =>
-        @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
+        @expectExitWithErr("ERROR_READING_FILE", path.join(permissionsPath, "cypress.json"))
 
     describe "morgan", ->
       it "sets morgan to false", ->

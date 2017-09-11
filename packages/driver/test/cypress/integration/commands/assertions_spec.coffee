@@ -79,6 +79,30 @@ describe "src/cy/commands/assertions", ->
       obj = {requestJSON: {teamIds: [2]}}
       cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
+    ## TODO: make cy.then retry
+    ## https://github.com/cypress-io/cypress/issues/627
+    it.skip "outer assertions retry on cy.then", ->
+      obj = {foo: "bar"}
+
+      cy.wrap(obj).then ->
+        setTimeout ->
+          obj.foo = "baz"
+        , 1000
+
+        return obj
+      .should("deep.eq", {foo: "baz"})
+
+    it "does it retry when wrapped", ->
+      obj = { foo: "bar" }
+
+      cy.wrap(obj).then ->
+        setTimeout ->
+          obj.foo = "baz"
+        , 100
+
+        return cy.wrap(obj)
+      .should("deep.eq", { foo: "baz" })
+
     describe "function argument", ->
       it "waits until function is true", ->
         button = cy.$$("button:first")
@@ -316,15 +340,13 @@ describe "src/cy/commands/assertions", ->
           $(@).addClass("foo").remove()
 
         cy.on "fail", (err) =>
+          names = _.invokeMap(@logs, "get", "name")
 
-          expect(err.message).to.include "cy.should() failed because this element you are chaining off of has become detached or removed from the DOM:"
-          # expect(@logs.length).to.eq(3)
-          # expect(lastLog.get("name")).to.eq("should")
-          # expect(lastLog.get("error")).to.eq(err)
-          # expect(lastLog.get("state")).to.eq("failed")
-          # expect(lastLog.get("snapshots").length).to.eq(1)
-          # expect(lastLog.get("snapshots")[0]).to.be.an("object")
-          # expect(lastLog.get("message")).to.eq("have.class, foo")
+          ## the 'should' is not here because based on
+          ## when we check for the element to be detached
+          ## it never actually runs the assertion
+          expect(names).to.deep.eq(["get", "click"])
+          expect(err.message).to.include "cy.should() failed because this element is detached"
           done()
 
         cy.get("button:first").click().should("have.class", "foo").then ->
@@ -338,8 +360,12 @@ describe "src/cy/commands/assertions", ->
         cy.on "command:retry", _.after 2, _.once ->
           button.addClass("foo").remove()
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.should() failed because this element you are chaining off of has become detached or removed from the DOM:"
+        cy.on "fail", (err) =>
+          names = _.invokeMap(@logs, "get", "name")
+
+          ## should is present here due to the retry
+          expect(names).to.deep.eq(["get", "click", "assert"])
+          expect(err.message).to.include "cy.should() failed because this element is detached"
           done()
 
         cy.get("button:first").click().should("have.class", "foo").then ->

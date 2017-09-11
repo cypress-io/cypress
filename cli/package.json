@@ -14,6 +14,7 @@
     "test-unit": "$(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "test-watch": "$(bin-up mocha) --watch",
     "test-dependencies": "$(bin-up deps-ok) && dependency-check . --no-dev",
+    "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
     "lint": "$(bin-up eslint) --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prebuild": "npm run test-dependencies && ./scripts/build.sh",
     "build": "node ./scripts/build.js",
@@ -47,7 +48,7 @@
     "yauzl": "2.8.0"
   },
   "devDependencies": {
-    "@cypress/releaser": "^0.2.1",
+    "@cypress/releaser": "0.2.2",
     "@cypress/sinon-chai": "1.0.0",
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
@@ -55,6 +56,7 @@
     "chai": "^3.5.0",
     "clear-module": "^2.1.0",
     "dependency-check": "^2.8.0",
+    "execa-wrap": "1.0.0",
     "nock": "^9.0.9",
     "sinon": "3.2.1",
     "snap-shot-it": "3.3.0",

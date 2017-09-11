@@ -97,9 +97,8 @@ module.exports = {
     return Promise.resolve() if not config.supportFile or not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
-      log("copying defaults.js, commands.js, and index.js to #{folder}")
+      log("copying commands.js and index.js to #{folder}")
       Promise.join(
-        @_copy("support/defaults.js", folder, config)
         @_copy("support/commands.js", folder, config)
         @_copy("support/index.js", folder, config)
       )
@@ -169,7 +168,6 @@ module.exports = {
     if config.supportFolder and config.supportFile isnt false
       files = files.concat([
         getFilePath(config.supportFolder, "commands.js")
-        getFilePath(config.supportFolder, "defaults.js")
         getFilePath(config.supportFolder, "index.js")
       ])
 

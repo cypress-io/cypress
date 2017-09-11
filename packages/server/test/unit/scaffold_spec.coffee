@@ -183,16 +183,14 @@ describe "lib/scaffold", ->
       .catch (err = {}) =>
         expect(err.stack).to.contain("not in the scaffolded file tree")
 
-    it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
+    it "creates supportFolder and commands.js and index.js when supportFolder does not exist", ->
       scaffold.support(@supportFolder, @cfg)
       .then =>
         Promise.join(
           fs.readFileAsync(@supportFolder + "/commands.js", "utf8")
-          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8")
           fs.readFileAsync(@supportFolder + "/index.js", "utf8")
-        ).spread (commandsContents, defaultsContents, indexContents) ->
+        ).spread (commandsContents, indexContents) ->
           snapshot(commandsContents)
-          snapshot(defaultsContents)
           snapshot(indexContents)
 
   context ".plugins", ->
@@ -221,11 +219,6 @@ describe "lib/scaffold", ->
     it "does not create any files if pluginsFile is not default", ->
       @cfg.resolved.pluginsFile.from = "config"
 
-      scaffold.plugins(@pluginsFolder, @cfg)
-      .then =>
-        glob("**/*", {cwd: @pluginsFolder})
-      .then (files) ->
-        expect(files.length).to.eq(0)
 
     it "does not create any files if pluginsFile is false", ->
       @cfg.pluginsFile = false
@@ -235,23 +228,6 @@ describe "lib/scaffold", ->
         glob("**/*", {cwd: @pluginsFile})
       .then (files) ->
         expect(files.length).to.eq(0)
-
-    it "throws if trying to scaffold a file not present in file tree", ->
-      pluginsPath = path.join(@pluginsFile, "foo")
-      fs.removeAsync(pluginsPath)
-      .then =>
-        scaffold.plugins(pluginsPath, @cfg)
-      .then ->
-        throw new Error("Should throw the right error")
-      .catch (err = {}) =>
-        expect(err.stack).to.contain("not in the scaffolded file tree")
-
-    it "creates plugins/index.js when pluginsFolder does not exist", ->
-      scaffold.plugins(@pluginsFolder, @cfg)
-      .then =>
-        fs.readFileAsync(@pluginsFolder + "/index.js", "utf8")
-        .then (contents) =>
-          snapshot(contents.replace(/`/g, "<backtick>"))
 
   context ".fixture", ->
     beforeEach ->

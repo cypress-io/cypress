@@ -1,36 +1,39 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
-{ delay, dispatchPrimedChangeEvents, focusable } = require("./utils")
+{ delay, dispatchPrimedChangeEvents } = require("./utils")
+$dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({ prevSubject: "dom" }, {
+  Commands.addAll({ prevSubject: ["element", "window"] }, {
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
       ## but allow them to be silenced
-      _.defaults options,
+      _.defaults(options, {
         $el: subject
         error: true
         log: true
         verify: true
+      })
 
-      cy.ensureDom(options.$el, "focus")
+      if isWin = $dom.isWindow(options.$el)
+        ## get this into a jquery object
+        options.$el = $dom.wrap(options.$el)
 
       if options.log
         options._log = Cypress.log
           $el: options.$el
           consoleProps: ->
-            "Applied To": $utils.getDomElements(options.$el)
+            "Applied To": $dom.getElements(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not (options.$el.is(focusable) or $utils.hasWindow(options.$el))
+      if not (isWin or $dom.isFocusable(options.$el))
         return if options.error is false
 
-        node = $utils.stringifyElement(options.$el)
+        node = $dom.stringify(options.$el)
         $utils.throwErrByPath("focus.invalid_element", {
           onFail: options._log
           args: { node }
@@ -49,7 +52,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cleanup = null
       hasFocused = false
 
-      promise = new Promise (resolve, reject) =>
+      promise = new Promise (resolve, reject) ->
         ## we need to bind to the focus event here
         ## because some browsers will not ever fire
         ## the focus event if the window itself is not
@@ -58,7 +61,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         cleanup = ->
           options.$el.off("focus", focused)
 
-        focused = =>
+        focused = ->
           hasFocused = true
 
           ## set this back to null unless we are
@@ -71,33 +74,41 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cy.timeout(delay, true)
 
+          ## TODO: this is really weird how we're
+          ## resolving the promise here but letting
+          ## the lower promise also still run
           Promise
           .delay(delay)
           .then(resolve)
 
         options.$el.on("focus", focused)
 
+        ## does this synchronously fire?
+        ## if it does we don't need this
+        ## lower promise
         options.$el.get(0).focus()
 
         Promise
         .resolve(null)
-        .then =>
+        .then ->
           ## fallback if our focus event never fires
           ## to simulate the focus + focusin
           return if hasFocused
 
-          simulate = =>
+          simulate = ->
+            win = cy.state("window")
+
             cy.state("forceFocusedEl", options.$el.get(0))
 
             ## todo handle relatedTarget's per the spec
             focusinEvt = new FocusEvent "focusin", {
               bubbles: true
-              view: cy.state("window")
+              view: win
               relatedTarget: null
             }
 
             focusEvt = new FocusEvent "focus", {
-              view: cy.state("window")
+              view: win
               relatedTarget: null
             }
 
@@ -108,16 +119,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## http://www.w3.org/TR/DOM-Level-3-Events/#h-events-focusevent-event-order
             options.$el.get(0).dispatchEvent(focusEvt)
             options.$el.get(0).dispatchEvent(focusinEvt)
-            # options.$el.cySimulate("focus")
-            # options.$el.cySimulate("focusin")
 
-          cy.now("focused", {log: false, verify: false}).then ($focused) =>
+          cy.now("focused", {log: false, verify: false}).then ($focused) ->
             ## only blur if we have a focused element AND its not
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
 
               cy.now("blur", $focused, {$el: $focused, error: false, verify: false, log: false})
-              .then =>
+              .then ->
                 simulate()
             else
               simulate()
@@ -129,16 +138,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       promise
       .timeout(timeout)
-      .catch Promise.TimeoutError, (err) =>
+      .catch Promise.TimeoutError, (err) ->
         cleanup()
 
         return if options.error is false
 
         $utils.throwErrByPath "focus.timed_out", { onFail: options._log }
-      .then =>
+      .then ->
         return options.$el if options.verify is false
 
-        do verifyAssertions = =>
+        do verifyAssertions = ->
           cy.verifyUpcomingAssertions(options.$el, options, {
             onRetry: verifyAssertions
       })
@@ -146,12 +155,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
       ## but allow them to be silenced
-      _.defaults options,
+      _.defaults(options, {
         $el: subject
         error: true
         log: true
         verify: true
         force: false
+      })
+
+      if isWin = $dom.isWindow(options.$el)
+        ## get this into a jquery object
+        options.$el = $dom.wrap(options.$el)
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
@@ -161,9 +175,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $el: options.$el
           message: deltaOptions
           consoleProps: ->
-            "Applied To": $utils.getDomElements(options.$el)
-
-      cy.ensureDom(options.$el, "blur", options._log)
+            "Applied To": $dom.getElements(options.$el)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
@@ -173,16 +185,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num }
         })
 
-      cy.now("focused", {log: false, verify: false}).then ($focused) =>
-        if options.force isnt true and not $focused
+      cy.now("focused", {log: false, verify: false}).then ($focused) ->
+        ## if we haven't forced the blur, and we don't currently
+        ## have a focused element OR we aren't the window then error
+        if (options.force isnt true) and (not $focused) and (not isWin)
           return if options.error is false
 
           $utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
 
-        if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
+        ## if we're currently window dont check for the wrong
+        ## focused element because window will not show up
+        ## as $focused
+        if (options.force isnt true) and (not isWin) and (
+          options.$el.get(0) isnt $focused.get(0)
+        )
           return if options.error is false
 
-          node = $utils.stringifyElement($focused)
+          node = $dom.stringify($focused)
           $utils.throwErrByPath("blur.wrong_focused_element", {
             onFail: options._log
             args: { node }
@@ -193,7 +212,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         cleanup = null
         hasBlurred = false
 
-        promise = new Promise (resolve) =>
+        promise = new Promise (resolve) ->
           ## we need to bind to the blur event here
           ## because some browsers will not ever fire
           ## the blur event if the window itself is not
@@ -202,7 +221,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cleanup = ->
             options.$el.off("blur", blurred)
 
-          blurred = =>
+          blurred = ->
             hasBlurred = true
 
             ## set this back to null unless we are
@@ -215,8 +234,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             cy.timeout(delay, true)
 
             Promise
-              .delay(delay)
-              .then(resolve)
+            .delay(delay)
+            .then(resolve)
 
           options.$el.on("blur", blurred)
 
@@ -228,10 +247,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           Promise
           .resolve(null)
-          .then =>
+          .then ->
             ## fallback if our blur event never fires
             ## to simulate the blur + focusout
             return if hasBlurred
+
+            win = cy.state("window")
 
             cy.state("blacklistFocusedEl", options.$el.get(0))
 
@@ -239,14 +260,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             focusoutEvt = new FocusEvent "focusout", {
               bubbles: true
               cancelable: false
-              view: cy.state("window")
+              view: win
               relatedTarget: null
             }
 
             blurEvt = new FocusEvent "blur", {
               bubble: false
               cancelable: false
-              view: cy.state("window")
+              view: win
               relatedTarget: null
             }
 
@@ -254,18 +275,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             options.$el.get(0).dispatchEvent(focusoutEvt)
 
         promise
-          .timeout(timeout)
-          .catch Promise.TimeoutError, (err) =>
-            cleanup()
+        .timeout(timeout)
+        .catch Promise.TimeoutError, (err) ->
+          cleanup()
 
-            return if options.error is false
+          return if options.error is false
 
-            $utils.throwErrByPath "blur.timed_out", { onFail: command }
-          .then =>
-            return options.$el if options.verify is false
+          $utils.throwErrByPath "blur.timed_out", { onFail: command }
+        .then ->
+          return options.$el if options.verify is false
 
-            do verifyAssertions = =>
-              cy.verifyUpcomingAssertions(options.$el, options, {
-                onRetry: verifyAssertions
-          })
+          do verifyAssertions = ->
+            cy.verifyUpcomingAssertions(options.$el, options, {
+              onRetry: verifyAssertions
+        })
   })

@@ -5,15 +5,14 @@ Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123
 
 
   ✓ is true
-  ✓ has Cypress.version
 
-  2 passing
+  1 passing
 
 
   (Tests Finished)
 
-  - Tests:           2
-  - Passes:          2
+  - Tests:           1
+  - Passes:          1
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds

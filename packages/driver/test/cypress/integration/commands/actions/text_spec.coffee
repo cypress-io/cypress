@@ -379,8 +379,6 @@ describe "src/cy/commands/actions/text", ->
 
         cy.get(":text:first").type("foo{enter}bar{leftarrow}")
 
-      it "foo", ->
-
     describe "events", ->
       it "receives keydown event", (done) ->
         $txt = cy.$$(":text:first")
@@ -2055,9 +2053,9 @@ describe "src/cy/commands/actions/text", ->
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.noop({}).type("foo")
-
         cy.on "fail", -> done()
+
+        cy.noop({}).type("foo")
 
       it "throws when subject is not in the document", (done) ->
         typed = 0

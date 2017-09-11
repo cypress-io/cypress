@@ -1,3 +1,4 @@
+$dom = require("../dom")
 $utils = require("../cypress/utils")
 
 crossOriginScriptRe = /^script error/i
@@ -16,8 +17,8 @@ create = (state, config, log) ->
         ## and we can add Applied To if there is a prev command
         ## and it is a parent
         if current.get("type") isnt "parent" and prev = current.get("prev")
-          ret = if $utils.hasElement(prev.get("subject"))
-            $utils.getDomElements(prev.get("subject"))
+          ret = if $dom.isElement(prev.get("subject"))
+            $dom.getElements(prev.get("subject"))
           else
             prev.get("subject")
 

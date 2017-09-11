@@ -6,18 +6,17 @@ moment = require("moment")
 Promise = require("bluebird")
 sinon = require("sinon")
 lolex = require("lolex")
-Cookies = require("js-cookie")
 bililiteRange = require("../vendor/bililiteRange")
 
+$dom = require("./dom")
+$errorMessages = require("./cypress/error_messages")
 $Chainer = require("./cypress/chainer")
 $Command = require("./cypress/command")
 $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
-$dom = require("./cypress/dom")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$ErrorMessages = require("./cypress/error_messages")
 $Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
@@ -25,13 +24,17 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
-
 $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
   cy: "getStyles".split(" ")
 }
+
+## provide the old interface and
+## throw a deprecation message
+$Log.command = ->
+  $utils.throwErrByPath("miscellaneous.command_log_renamed")
 
 throwDeprecatedCommandInterface = (key, method) ->
   signature = switch method
@@ -297,14 +300,12 @@ class $Cypress
       when "cy:viewport:changed"
         @emit("viewport:changed", args...)
 
-      when "cy:app:scrolled"
-        @emit("app:scrolled", args...)
-
       when "cy:command:start"
         @emit("command:start", args...)
 
       when "cy:command:end"
         @emit("command:end", args...)
+        
       when "cy:command:retry"
         @emit("command:retry", args...)
 
@@ -326,16 +327,28 @@ class $Cypress
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
 
+      when "cy:scrolled"
+        @emit("scrolled", args...)
+
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
+
+      when "app:window:alert"
+        @emit("window:alert", args[0])
+
+      when "app:window:confirm"
+        @emitMap("window:confirm", args[0])
+
+      when "app:window:confirmed"
+        @emit("window:confirmed", args...)
 
       when "app:page:loading"
         @emit("page:loading", args[0])
 
-      when "app:before:window:load"
+      when "app:window:before:load"
         @cy.onBeforeAppWindowLoad(args[0])
 
-        @emit("before:window:load", args[0])
+        @emit("window:before:load", args[0])
 
       when "app:navigation:changed"
         @emit("navigation:changed", args...)
@@ -346,8 +359,8 @@ class $Cypress
       when "app:window:load"
         @emit("window:load", args[0])
 
-      when "app:before:window:unload"
-        @emit("before:window:unload", args[0])
+      when "app:window:before:unload"
+        @emit("window:before:unload", args[0])
 
       when "app:window:unload"
         @emit("window:unload", args[0])
@@ -418,46 +431,34 @@ class $Cypress
   ## all of the constructors
   ## to enable users to monkeypatch
   $Cypress: $Cypress
-
   Cy: $Cy
-
   Chainer: $Chainer
-
+  Cookies: $Cookies
+  Command: $Command
+  Commands: $Commands
   dom: $dom
+  errorMessages: $errorMessages
   Keyboard: $Keyboard
   Location: $Location
-
   Log: $Log
-
   LocalStorage: $LocalStorage
-
+  Mocha: $Mocha
+  Runner: $Runner
   Server: $Server
-
   utils: $utils
-
   _: _
-
   moment: moment
-
   Blob: blobUtil
-
   Promise: Promise
-
   minimatch: minimatch
-
   sinon: sinon
-
   lolex: lolex
-
   bililiteRange: bililiteRange
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   @create = (config) ->
     new $Cypress(config)
-
-  @extend = (obj) ->
-    _.extend @prototype, obj
 
   ## proxy all of the methods in proxies
   ## to their corresponding objects
@@ -472,12 +473,4 @@ class $Cypress
 ## via the runner + integration spec helper
 $Cypress.$ = $
 
-## expose globally (temporarily for the runner)
-window.$Cypress = $Cypress
-
 module.exports = $Cypress
-
-## QUESTION:
-## Do we need to expose $Cypress?
-## how do we attach submodules / other utilities?
-## move things around / reorganize how its attached

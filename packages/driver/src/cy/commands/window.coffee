@@ -1,7 +1,6 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 viewports = {
@@ -19,10 +18,18 @@ viewports = {
 
 validOrientations = ["landscape", "portrait"]
 
+## NOTE: this is outside the function because its 'global' state to the
+## cypress application and not local to the specific run. the last
+## viewport set is always the 'current' viewport as opposed to the
+## config. there was a bug where re-running tests without a hard
+## refresh would cause viewport to hang
+currentViewport = null
+
 module.exports = (Commands, Cypress, cy, state, config) ->
-  ## keep track of the current viewport so we know if the viewport
-  ## command is actually changing it or not
-  defaultViewport = currentViewport = _.pick(config(), "viewportWidth", "viewportHeight")
+  defaultViewport = _.pick(config(), "viewportWidth", "viewportHeight")
+
+  ## currentViewport could already be set due to previous runs
+  currentViewport ?= defaultViewport
 
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means

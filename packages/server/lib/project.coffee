@@ -520,9 +520,9 @@ class Project extends EE
   @id = (path) ->
     Project(path).getProjectId()
 
-  @exists = (path) ->
-    @paths().then (paths) ->
-      path in paths
+  @ensureExists = (path) ->
+    ## do we have a cypress.json for this project?
+    settings.exists(path)
 
   @config = (path) ->
     Project(path).getConfig()

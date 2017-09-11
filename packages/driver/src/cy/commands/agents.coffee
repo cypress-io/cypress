@@ -3,7 +3,6 @@ sinon = require("sinon")
 
 Promise = require("bluebird")
 
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 counts = null
@@ -65,7 +64,7 @@ onInvoke = (Cypress, obj, args) ->
       consoleObj[display(obj.name)] = obj.obj
       consoleObj.Arguments = obj.call.args
       consoleObj.Context = obj.call.thisValue
-      consoleObj.Yielded = obj.call.returnValue
+      consoleObj.Returned = obj.call.returnValue
 
       if obj.error
         consoleObj.Error = obj.error.stack

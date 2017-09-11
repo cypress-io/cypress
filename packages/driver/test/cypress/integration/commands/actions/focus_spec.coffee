@@ -83,6 +83,16 @@ describe "src/cy/commands/actions/focus", ->
         .then ->
           expect(blurred).to.be.true
 
+    it "can focus the window", ->
+      win = cy.state("window")
+
+      stub = cy.stub()
+
+      $(win).on("focus", stub)
+
+      cy.window().focus().then ->
+        expect(stub).to.be.calledOnce
+
     it "can focus [contenteditable]", ->
       ce = cy.$$("[contenteditable]:first")
 
@@ -259,7 +269,6 @@ describe "src/cy/commands/actions/focus", ->
         $last = cy.$$("input:last")
 
         $first.on "focus", ->
-          debugger
           $(@).remove()
 
         cy.on "fail", (err) ->
@@ -356,6 +365,16 @@ describe "src/cy/commands/actions/focus", ->
       cy.get("input:first").focus().blur().then ($input) ->
         expect($input).to.match input
 
+    it "can blur the window", ->
+      win = cy.state("window")
+
+      stub = cy.stub()
+
+      $(win).on("blur", stub)
+
+      cy.window().focus().blur().then ->
+        expect(stub).to.be.calledOnce
+
     it "can blur [contenteditable]", ->
       ce = cy.$$("[contenteditable]:first")
 
@@ -413,8 +432,6 @@ describe "src/cy/commands/actions/focus", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "fail", (err) -> debugger
-
         cy.$$(":text:first").blur ->
           _.delay =>
             $(@).addClass("blured")

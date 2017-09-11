@@ -168,11 +168,6 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
       """
-    detached: """
-      #{cmd('{{cmd}}')} failed because this element you are chaining off of has become detached or removed from the DOM:\n
-      {{node}}\n
-      https://on.cypress.io/element-has-detached-from-dom
-    """
     disabled: """
       #{cmd('{{cmd}}')} failed because this element is disabled:\n
       {{node}}\n
@@ -180,8 +175,6 @@ module.exports = {
       https://on.cypress.io/element-cannot-be-interacted-with
     """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
-    non_dom: "Cannot call #{cmd('{{cmd}}')} on a non-DOM subject."
-    non_dom_is_hidden: "Cypress.dom.{{filter}} must be passed a basic DOM element. You passed: '{{el}}'"
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
       {{node}}\n
@@ -348,9 +341,9 @@ module.exports = {
       """
     command_returned_promise_and_commands: (obj) ->
       """
-        Cypress detected that you returned a promise from a custom command while also invoking one or more cy commands in that promise.
+        Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.
 
-        The custom command that returned the promise was:
+        The command that returned the promise was:
 
           > #{cmd(obj.current)}
 
@@ -360,11 +353,11 @@ module.exports = {
 
         Because Cypress commands are already promise-like, you don't need to wrap them or return your own promise.
 
-        Cypress will resolve your custom command with whatever the final Cypress command yields.
+        Cypress will resolve your command with whatever the final Cypress command yields.
 
         The reason this is an error instead of a warning is because Cypress internally queues commands serially whereas Promises execute as soon as they are invoked. Attempting to reconcile this would prevent Cypress from ever resolving.
 
-        https://on.cypress.io/returning-promise-and-commands-in-custom-command
+        https://on.cypress.io/returning-promise-and-commands-in-another-command
       """
     mixing_promises_and_commands: (title) ->
       """
@@ -380,6 +373,11 @@ module.exports = {
 
         https://on.cypress.io/returning-promise-and-commands-in-test
       """
+    command_log_renamed: """
+      Cypress.Log.command() has been renamed to Cypress.log()
+
+      Please update your code. You should be able to safely do a find/replace.
+    """
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 
@@ -395,7 +393,6 @@ module.exports = {
 
       https://on.cypress.io/command-queue-ended-early
     """
-    deprecated: "Command Options such as: '{{{opt}}: {{value}}}' have been deprecated. Instead write this as an assertion: #{cmd('should', '\'{{assertion}}\'')}."
     invalid_command: "Could not find a command for: '{{name}}'.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: '{{name}}'. An existing command does not exist by that name."
     invoking_child_without_parent: (obj) ->
@@ -406,7 +403,7 @@ module.exports = {
 
       #{cmd(obj.cmd, obj.args)}
 
-      A child command must be chained after a parent because it operates on an existing subject.
+      A child command must be chained after a parent because it operates on a previous subject.
 
       For example - if we were issuing the child command 'click'...
 
@@ -415,13 +412,8 @@ module.exports = {
         .click()       // then child command comes second
 
       """
-    method_not_implemented: "The method {{method}} is not yet implemented"
-    module_not_registered: "$Cypress.Module: {{name}} not registered."
     no_cy: "Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call Cypress.$()"
-    no_sandbox: "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
     no_runner: "Cannot call Cypress#run without a runner instance."
-    no_subject: "Subject is {{subject}}. You cannot call #{cmd('{{cmd}}')} without a subject."
-    orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
     outside_test: """
       Cypress cannot execute commands outside a running test.
 
@@ -445,15 +437,13 @@ module.exports = {
       https://on.cypress.io/cannot-execute-commands-outside-test
     """
     private_custom_command_interface: "You cannot use the undocumented private command interface: {{method}}"
-    private_property: (obj) ->
+    private_property:
       """
-      You are accessing a private property directly on Cypress which has been renamed.
+      You are accessing a private property directly on 'cy' which has been renamed.
 
       This was never documented nor supported.
 
-      Please go through the getter function: #{cmd(obj.name, "...")}
-
-      #{if obj.url then "https://on.cypress.io/#{obj.name}" else ""}
+      Please go through the public function: #{cmd('state', "...")}
       """
     retry_timed_out: "Timed out retrying: {{error}}"
 
@@ -656,6 +646,68 @@ module.exports = {
 
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be an array."
+
+  subject:
+    not_dom: (obj) ->
+      """
+      #{cmd(obj.name)} failed because it requires a valid DOM object.
+
+      The subject received was:
+
+        > #{obj.subject}
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+
+      Cypress only considers the 'window', 'document', or any 'element' to be valid DOM objects.
+      """
+    not_attached: (obj) ->
+      """
+      #{cmd(obj.name)} failed because this element is detached from the DOM.
+
+      #{obj.subject}
+
+      Cypress requires elements be attached in the DOM to interact with them.
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+
+      This DOM element likely became detached somewhere between the previous and current command.
+
+      Common situations why this happens:
+        - Your JS framework re-rendered asynchronously
+        - Your app code reacted to an event firing and removed the element
+
+      You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.
+
+      https://on.cypress.io/element-has-detached-from-dom
+      """
+    not_window_or_document: (obj) ->
+      """
+      #{cmd(obj.name)} failed because it requires the subject be a global '#{obj.type}' object.
+
+      The subject received was:
+
+        > #{obj.subject}
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+      """
+    not_element: (obj) ->
+      """
+      #{cmd(obj.name)} failed because it requires a DOM element.
+
+      The subject received was:
+
+        > #{obj.subject}
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+      """
 
   submit:
     multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."

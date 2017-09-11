@@ -14,6 +14,11 @@ describe "src/cy/commands/aliasing", ->
     $(doc.body).empty().html(@body)
 
   context "#as", ->
+    it "is special utility command", ->
+      cy.wrap("foo").as("f").then ->
+        cmd = cy.queue.find({name: "as"})
+        expect(cmd.get("type")).to.eq("utility")
+
     it "does not change the subject", ->
       body = cy.$$("body")
 
@@ -85,6 +90,14 @@ describe "src/cy/commands/aliasing", ->
             expect(@quux).to.eq("quux")
 
     describe "errors", ->
+      it "throws as a parent command", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("before running a parent command")
+          expect(err.message).to.include("cy.as(foo)")
+          done()
+
+        cy.as("foo")
+
       _.each [null, undefined, {}, [], 123], (value) =>
         it "throws if when passed: #{value}", (done) ->
           cy.on "fail", (err) ->
@@ -168,7 +181,6 @@ describe "src/cy/commands/aliasing", ->
       #   cy
       #     .get("div:first")
       #     .noop({}).as("foo").then ->
-      #       debugger
 
   context "#replayCommandsFrom", ->
     describe "subject in document", ->

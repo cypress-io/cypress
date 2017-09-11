@@ -1697,7 +1697,6 @@ describe "src/cy/commands/xhr", ->
       it "logs request + response headers", ->
         cy.then ->
           consoleProps = @lastLog.invoke("consoleProps")
-          debugger
           expect(consoleProps.Request.headers).to.be.an("object")
           expect(consoleProps.Response.headers).to.be.an("object")
 
@@ -1830,7 +1829,7 @@ describe "src/cy/commands/xhr", ->
         _.each xhrs, (xhr) ->
           expect(xhr.aborted).to.be.true
 
-  context "Cypress.on(before:window:load)", ->
+  context "Cypress.on(window:before:load)", ->
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
@@ -1933,7 +1932,6 @@ describe "src/cy/commands/xhr", ->
       ## currently this does not fail. we'll wait until someone cares
       # it "errors if response was null or undefined", (done) ->
       #   cy.on "fail", (err) ->
-      #     debugger
 
       #   cy
       #     .server()

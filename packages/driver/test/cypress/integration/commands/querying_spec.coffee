@@ -153,8 +153,6 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("not.exist").then ->
           lastLog = @lastLog
 
-          debugger
-
           expect(@lastLog.invoke("consoleProps")).to.deep.eq {
             Command: "focused"
             Yielded: "--nothing--"
@@ -479,7 +477,7 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it "retries finding elements until something is found", ->
+    it "FLAKY retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before
@@ -1462,13 +1460,12 @@ describe "src/cy/commands/querying", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
           expect(@lastLog.get("$el").get(0)).to.eq($label.get(0))
 
-      it "sets type to parent when used as a parent command", ->
-        cy.contains("foo").then ->
+      it "sets type to parent when subject isnt element", ->
+        cy.window().contains("foo").then ->
           expect(@lastLog.get("type")).to.eq "parent"
 
-      it "sets type to parent when subject doesnt have an element", ->
-        cy.noop({}).contains("foo").then ->
-          expect(@lastLog.get("type")).to.eq "parent"
+          cy.document().contains("foo").then ->
+            expect(@lastLog.get("type")).to.eq "parent"
 
       it "sets type to child when used as a child command", ->
         cy.get("body").contains("foo").then ->
@@ -1531,6 +1528,10 @@ describe "src/cy/commands/querying", ->
           done()
 
         cy.contains(undefined)
+
+      it "throws when passed a subject not an element", (done) ->
+        cy.on "fail", -> done()
+        cy.wrap("foo").contains("bar")
 
       it "throws when there is no filter and no subject", (done) ->
         cy.on "fail", (err) ->

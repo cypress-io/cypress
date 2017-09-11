@@ -1,8 +1,5 @@
 _ = require("lodash")
 
-$Cy = require("../../cypress/cy")
-$Cypress = require("../../cypress")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
 
 resume = (state, resumeAll = true) ->
@@ -38,7 +35,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "resume:all", ->
     resume(state)
 
-  Commands.addUtility({
+  Commands.addAll({ type: "utility", prevSubject: "optional" }, {
     ## pause should indefinitely pause until the user
     ## presses a key or clicks in the UI to continue
     pause: (subject, options = {}) ->

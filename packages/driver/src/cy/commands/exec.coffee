@@ -1,8 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
@@ -23,7 +22,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not cmd or not _.isString(cmd)
-        utils.throwErrByPath("exec.invalid_argument", {
+        $utils.throwErrByPath("exec.invalid_argument", {
           onFail: options._log,
           args: { cmd: cmd ? '' }
         })
@@ -48,13 +47,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         output += "\nStdout:\n#{_.truncate(result.stdout, { length: 200 })}" if result.stdout
         output += "\nStderr:\n#{_.truncate(result.stderr, { length: 200 })}" if result.stderr
 
-        utils.throwErrByPath "exec.non_zero_exit", {
+        $utils.throwErrByPath "exec.non_zero_exit", {
           onFail: options._log
           args: { cmd, output, code: result.code }
         }
 
       .catch Promise.TimeoutError, { timedout: true }, (err) ->
-        utils.throwErrByPath "exec.timed_out", {
+        $utils.throwErrByPath "exec.timed_out", {
           onFail: options._log
           args: { cmd, timeout: options.timeout }
         }
@@ -63,7 +62,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## re-throw if timedout error from above
         throw error if error.name is "CypressError"
 
-        utils.throwErrByPath("exec.failed", {
+        $utils.throwErrByPath("exec.failed", {
           onFail: options._log
           args: { cmd, error }
         })

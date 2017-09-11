@@ -337,7 +337,7 @@ describe "src/cy/commands/actions/clicking", ->
       it "does not scroll when being forced", ->
         scrolled = []
 
-        cy.on "app:scrolled", ($el, type) ->
+        cy.on "scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy
@@ -359,7 +359,7 @@ describe "src/cy/commands/actions/clicking", ->
         retried = false
         clicked = false
 
-        cy.on "app:scrolled", ($el, type) ->
+        cy.on "scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", ($el, type) ->
@@ -390,7 +390,7 @@ describe "src/cy/commands/actions/clicking", ->
         scrolled = []
         retried = false
 
-        cy.on "app:scrolled", ($el, type) ->
+        cy.on "scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", _.after 3, ->
@@ -423,7 +423,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         scrolled = []
 
-        cy.on "app:scrolled", ($el, type) ->
+        cy.on "scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -457,7 +457,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         scrolled = []
 
-        cy.on "app:scrolled", ($el, type) ->
+        cy.on "scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -511,7 +511,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         scrolled = []
 
-        cy.on "app:scrolled", ($el, type) ->
+        cy.on "scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -720,7 +720,6 @@ describe "src/cy/commands/actions/clicking", ->
         $btn.on "click", clicked
 
         cy.get("#button-covered-in-span").click("right")
-
 
       it "can click bottomLeft", (done) ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
@@ -939,7 +938,6 @@ describe "src/cy/commands/actions/clicking", ->
         $btn = cy.$$("#three-buttons button").show().last().hide()
 
         cy.on "fail", (err) =>
-          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(4)
@@ -1195,11 +1193,17 @@ describe "src/cy/commands/actions/clicking", ->
           expect(console.Coords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
 
       it "#consoleProps actual element clicked", ->
-        $btn = $("<button>", id: "button-covered-in-span").prependTo(cy.$$("body"))
-        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        $btn = $("<button>", {
+          id: "button-covered-in-span"
+        })
+        .prependTo(cy.$$("body"))
+
+        $span = $("<span>span in button</span>")
+        .css({ padding: 5, display: "inline-block", backgroundColor: "yellow" })
+        .appendTo($btn)
 
         cy.get("#button-covered-in-span").click().then ->
-          expect(@lastLog.invoke("consoleProps")["Actual Element Clicked"]).to.eq span.get(0)
+          expect(@lastLog.invoke("consoleProps")["Actual Element Clicked"]).to.eq $span.get(0)
 
       it "#consoleProps groups MouseDown", ->
         cy.$$("input:first").mousedown -> return false

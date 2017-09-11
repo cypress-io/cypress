@@ -6,8 +6,8 @@ Thanks for taking the time to contribute! :smile:
 
 - Join the [Cypress Gitter chat](https://gitter.im/cypress-io/cypress) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
 - Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [contact us](mailto:support@cypress.io).
-- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](./docs/contributing.md).
-- Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag.
+- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+- Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
 
@@ -290,7 +290,7 @@ npm rebuild node-sass
 
 ## Writing Documentation
 
-See our [Documentation Contributing Guideline](docs/CONTRIBUTING.md)
+See our [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Commiting Code
 

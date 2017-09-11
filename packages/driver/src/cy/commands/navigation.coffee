@@ -3,10 +3,9 @@ moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
 
-$Location = require("../../cypress/location")
-$Log = require("../../cypress/log")
 $utils = require("../../cypress/utils")
-
+$Log = require("../../cypress/log")
+$Location = require("../../cypress/location")
 
 id                    = null
 previousDomainVisited = null
@@ -281,7 +280,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "before:window:load", (contentWindow) ->
+  Cypress.on "window:before:load", (contentWindow) ->
+    ## TODO: just use a closure here
     current = state("current")
 
     return if not current
@@ -392,12 +392,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## clear the current timeout
             cy.clearTimeout()
 
-            cy.once("before:window:unload", beforeUnload)
+            cy.once("window:before:unload", beforeUnload)
 
             didLoad = new Promise (resolve) ->
               cleanup = ->
                 cy.removeListener("window:load", resolve)
-                cy.removeListener("before:window:unload", beforeUnload)
+                cy.removeListener("window:before:unload", beforeUnload)
 
               cy.once("window:load", resolve)
 

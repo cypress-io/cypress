@@ -6,13 +6,15 @@ const tmp = Promise.promisifyAll(require('tmp'))
 const fs = require('./fs')
 const open = require('./exec/open')
 const run = require('./exec/run')
+const util = require('./util')
 
-module.exports = {
+const cypressModuleApi = {
   open (options = {}) {
     return open.start(options)
   },
 
   run (options = {}) {
+    options = util.normalizeModuleOptions(options)
     return tmp.fileAsync()
     .then((outputPath) => {
       options.outputPath = outputPath
@@ -33,3 +35,5 @@ module.exports = {
     })
   },
 }
+
+module.exports = cypressModuleApi
