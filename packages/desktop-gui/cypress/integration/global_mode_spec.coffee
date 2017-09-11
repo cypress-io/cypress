@@ -83,21 +83,21 @@ describe "Global Mode", ->
       it "highlights/unhighlights drop area when dragging over it/leaving it", ->
         cy
           .get(".project-drop")
-            .ttrigger("dragover")
+            .trigger("dragover")
               .should("have.class", "is-dragging-over")
-            .ttrigger("dragleave")
+            .trigger("dragleave")
               .should("not.have.class", "is-dragging-over")
 
       it "unhighlights drop area when dropping a project on it", ->
         cy
           .get(".project-drop")
-            .ttrigger("dragover")
+            .trigger("dragover")
               .should("have.class", "is-dragging-over")
-            .ttrigger("drop", @dropEvent)
+            .trigger("drop", @dropEvent)
               .should("not.have.class", "is-dragging-over")
 
       it "adds project and opens it when dropped", ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent)
+        cy.get(".project-drop").trigger("drop", @dropEvent)
         cy.shouldBeOnProjectSpecs()
 
     describe "selecting project", ->
@@ -119,7 +119,7 @@ describe "Global Mode", ->
 
     describe "going to project", ->
       beforeEach ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent)
+        cy.get(".project-drop").trigger("drop", @dropEvent)
 
       it "displays Back button", ->
         cy.get('.left-nav a').invoke("text").should("include", "Back")
