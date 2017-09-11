@@ -1,2 +1,3 @@
 __snapshots__
 packages/server/lib/scaffold/index.js
+packages/example/cypress/support
