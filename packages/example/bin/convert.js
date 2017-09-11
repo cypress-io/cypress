@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const glob = require('glob')
 
-const eslintRe = /\/\* eslint.+/g
+const eslintRe = /\/. eslint.+\s+/g
 
 function replaceStringsIn (file) {
   fs.readFile(file, 'utf8', function (err, str) {
@@ -36,7 +36,7 @@ function replaceStringsIn (file) {
 glob('./app/**/*.html', { realpath: true }, function (err, files) {
   if (err) throw err
 
-  let spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
+  const spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
 
   files.push(spec)
 
