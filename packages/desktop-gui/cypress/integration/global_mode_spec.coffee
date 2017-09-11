@@ -58,7 +58,7 @@ describe "Global Mode", ->
 
     it "opens link to docs on click 'installing...'", ->
       cy.contains("a", "installing it via").click().then ->
-        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/adding-new-project")
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/installing-via-npm")
 
     it "dismisses notice when close is clicked", ->
       cy.get(".local-install-notice .close").click()
@@ -79,25 +79,35 @@ describe "Global Mode", ->
       cy.get(".project-drop p:first").should("contain", "Drag your project here")
       cy.get(".project-drop a").should("have.text", "select manually")
 
+    it "handles drops of non-files gracefully", (done) ->
+      cy.window().then (win) ->
+        win.onerror = (message) ->
+          done("Should not cause error but threw: #{message}")
+      ## user could drag and drop a link or text, not a file
+      @dropEvent.dataTransfer.files = []
+      cy.get(".project-drop").trigger("drop", @dropEvent)
+      cy.wait(300).then ->
+        done()
+
     describe "dragging and dropping project", ->
       it "highlights/unhighlights drop area when dragging over it/leaving it", ->
         cy
           .get(".project-drop")
-            .ttrigger("dragover")
+            .trigger("dragover")
               .should("have.class", "is-dragging-over")
-            .ttrigger("dragleave")
+            .trigger("dragleave")
               .should("not.have.class", "is-dragging-over")
 
       it "unhighlights drop area when dropping a project on it", ->
         cy
           .get(".project-drop")
-            .ttrigger("dragover")
+            .trigger("dragover")
               .should("have.class", "is-dragging-over")
-            .ttrigger("drop", @dropEvent)
+            .trigger("drop", @dropEvent)
               .should("not.have.class", "is-dragging-over")
 
       it "adds project and opens it when dropped", ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent)
+        cy.get(".project-drop").trigger("drop", @dropEvent)
         cy.shouldBeOnProjectSpecs()
 
     describe "selecting project", ->
@@ -119,7 +129,7 @@ describe "Global Mode", ->
 
     describe "going to project", ->
       beforeEach ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent)
+        cy.get(".project-drop").trigger("drop", @dropEvent)
 
       it "displays Back button", ->
         cy.get('.left-nav a').invoke("text").should("include", "Back")

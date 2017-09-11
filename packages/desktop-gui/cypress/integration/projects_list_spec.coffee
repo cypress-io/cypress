@@ -134,12 +134,12 @@ describe "Global Mode", ->
         @getProjects.resolve(@aCoupleProjects)
 
       it "puts project at start when dropped", ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent).should =>
+        cy.get(".project-drop").trigger("drop", @dropEvent).should =>
           @assertOrder(["id-bar", "id-a", "id-b"])
 
       it "puts project at start when dropped and it already exists", ->
         @dropEvent.dataTransfer.files[0].path = "/project/b"
-        cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
+        cy.get(".project-drop").trigger("drop", @dropEvent).then =>
           @assertOrder(["id-b", "id-a"])
 
       it "puts project at start when selected", ->
