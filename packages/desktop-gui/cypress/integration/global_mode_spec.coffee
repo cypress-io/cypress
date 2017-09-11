@@ -58,7 +58,7 @@ describe "Global Mode", ->
 
     it "opens link to docs on click 'installing...'", ->
       cy.contains("a", "installing it via").click().then ->
-        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/adding-new-project")
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/installing-via-npm")
 
     it "dismisses notice when close is clicked", ->
       cy.get(".local-install-notice .close").click()
