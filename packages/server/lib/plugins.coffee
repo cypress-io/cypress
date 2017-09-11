@@ -29,7 +29,8 @@ module.exports = {
       nodeCache.clear(config.pluginsFile)
 
     try
-      plugins = require(config.pluginsFile)
+      log("require pluginsFile")
+      plugins = nodeCache.require(config.pluginsFile)
     catch e
       log("failed to require pluginsFile:\n%s", e.stack)
       errors.throw("PLUGINS_FILE_ERROR", config.pluginsFile, e.stack)

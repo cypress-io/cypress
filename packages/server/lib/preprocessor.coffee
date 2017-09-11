@@ -3,6 +3,12 @@ EE = require("events")
 path = require("path")
 log = require("debug")("cypress:server:preprocessor")
 Promise = require("bluebird")
+babelify = require("babelify")
+cjsxify = require("./util/cjsxify")
+
+presetReact            = require("babel-preset-react")
+presetLatest           = require("babel-preset-latest")
+pluginAddModuleExports = require("babel-plugin-add-module-exports")
 
 appData = require("./util/app_data")
 cwd = require("./cwd")
@@ -46,6 +52,8 @@ emitter = new EE()
 fileProcessors = {}
 
 setDefaultPreprocessor = ->
+  log("set default preprocessor")
+
   browserify = require("cypress-browserify-preprocessor")
   plugins.register "on:spec:file:preprocessor", browserify({
     extensions: [".js", ".jsx", ".coffee", ".cjsx"]
@@ -57,15 +65,15 @@ setDefaultPreprocessor = ->
       "**/coverage/**"
       "**/node_modules/**"
     ]
-    transforms: {
-      cjsxify: {}
-      babelify: {
+    onBundle: (bundle) ->
+      log("bundle received")
+      bundle.transform(cjsxify)
+      bundle.transform(babelify, {
         ast: false
         babelrc: false
-        plugins: ["plugin-add-module-exports"]
-        presets: ["preset-latest", "preset-react"]
-      }
-    }
+        plugins: [pluginAddModuleExports]
+        presets: [presetLatest, presetReact]
+      })
   })
 
 module.exports = {

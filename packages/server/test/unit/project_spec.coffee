@@ -234,8 +234,9 @@ describe "lib/project", ->
       @sandbox.stub(scaffold, "integration").resolves()
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
+      @sandbox.stub(scaffold, "plugins").resolves()
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", pluginsFile: "pf/index.js"}
 
     it "calls scaffold.integration with integrationFolder", ->
       @project.scaffold(@obj).then =>
@@ -248,6 +249,10 @@ describe "lib/project", ->
     it "calls support.scaffold with supportFolder", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
+
+    it "calls support.plugins with pluginsFile directory", ->
+      @project.scaffold(@obj).then =>
+        expect(scaffold.plugins).to.be.calledWith("pf")
 
   context "#watchSettings", ->
     beforeEach ->

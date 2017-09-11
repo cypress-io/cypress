@@ -1,2 +1,0 @@
-/* eslint-ignore */
-{

@@ -7,45 +7,50 @@ describe "lib/plugins", ->
   beforeEach ->
     plugins._reset()
 
-  afterEach ->
-    mockery.deregisterMock("cypress-plugin")
-    mockery.deregisterSubstitute("cypress-plugin")
-
   context "#init", ->
+    beforeEach ->
+      @sandbox.stub(nodeCache, "require").returns(->)
+      @sandbox.stub(nodeCache, "has").returns(false)
+
     it "is noop if no pluginsFile", ->
       expect( -> plugins.init({})).not.to.throw()
 
     it "clears plugin from cache if already required", ->
-      @sandbox.stub(nodeCache, "has").returns(true)
+      nodeCache.has.returns(true)
       @sandbox.stub(nodeCache, "clear")
       mockery.registerMock("cypress-plugin", ->)
       plugins.init({ pluginsFile: "cypress-plugin" })
       expect(nodeCache.clear).to.be.calledWith("cypress-plugin")
 
+    it "requires pluginsFile via node cache", ->
+      plugins.init({ pluginsFile: "cypress-plugin" })
+      expect(nodeCache.require).to.be.calledWith("cypress-plugin")
+
     it "calls function exported by pluginsFile", ->
       plugin = @sandbox.spy()
-      mockery.registerMock("cypress-plugin", plugin)
+      nodeCache.require.returns(plugin)
       config = { pluginsFile: "cypress-plugin" }
       plugins.init(config)
       expect(plugin).to.be.calledWith(plugins.register, config)
 
     it "throws error if pluginsFile is missing", ->
+      nodeCache.require.throws({ code: "MODULE_NOT_FOUND" })
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The plugins file is missing or invalid")
 
     it "throws error if requiring pluginsFile errors", ->
       ## path for substitute is relative to lib/plugins.coffee
-      mockery.registerSubstitute("cypress-plugin", "../test/fixtures/plugins/throws-error")
+      nodeCache.require.throws({ stack: "error thrown by pluginsFile" })
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The plugins file is missing or invalid")
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("error thrown by pluginsFile")
 
     it "throws error if pluginsFile has syntax error", ->
       ## path for substitute is relative to lib/plugins.coffee
-      mockery.registerSubstitute("cypress-plugin", "../test/fixtures/plugins/syntax-error")
+      nodeCache.require.throws({ stack: "Unexpected token" })
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The plugins file is missing or invalid")
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("Unexpected token")
 
     it "throws error if pluginsFile does not export a function", ->
-      mockery.registerMock("cypress-plugin", "foo")
+      nodeCache.require.returns(null)
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The pluginsFile must export a function")
 
   context "#register", ->
