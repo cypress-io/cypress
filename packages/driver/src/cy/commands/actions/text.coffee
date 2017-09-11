@@ -319,7 +319,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         .then ($focused) =>
           waitForActionability(cy, options.$el, win, options, {
             onScroll: ($el, type) ->
-              Cypress.action("cy:app:scrolled", $el, type)
+              Cypress.action("cy:scrolled", $el, type)
 
             onReady: ($elToClick, coords) ->
               ## if we dont have a focused element

@@ -1829,7 +1829,7 @@ describe "src/cy/commands/xhr", ->
         _.each xhrs, (xhr) ->
           expect(xhr.aborted).to.be.true
 
-  context "Cypress.on(before:window:load)", ->
+  context "Cypress.on(window:before:load)", ->
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe

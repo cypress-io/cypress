@@ -245,7 +245,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     return null
 
-  Cypress.on "before:window:load", (contentWindow) ->
+  Cypress.on "window:before:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
       server.bindTo(contentWindow)

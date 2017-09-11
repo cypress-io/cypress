@@ -24,7 +24,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## its reset function
   Cypress.prependListener("test:before:run", reset)
 
-  Cypress.on "before:window:load", (contentWindow) ->
+  Cypress.on "window:before:load", (contentWindow) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
     if clock

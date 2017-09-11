@@ -76,7 +76,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         waitForActionability(cy, subject, win, options, {
           onScroll: ($el, type) ->
-            Cypress.action("cy:app:scrolled", $el, type)
+            Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
             if options._log

@@ -300,14 +300,12 @@ class $Cypress
       when "cy:viewport:changed"
         @emit("viewport:changed", args...)
 
-      when "cy:app:scrolled"
-        @emit("app:scrolled", args...)
-
       when "cy:command:start"
         @emit("command:start", args...)
 
       when "cy:command:end"
         @emit("command:end", args...)
+        
       when "cy:command:retry"
         @emit("command:retry", args...)
 
@@ -329,6 +327,9 @@ class $Cypress
       when "cy:collect:run:state"
         @emitThen("collect:run:state")
 
+      when "cy:scrolled"
+        @emit("scrolled", args...)
+
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
 
@@ -344,10 +345,10 @@ class $Cypress
       when "app:page:loading"
         @emit("page:loading", args[0])
 
-      when "app:before:window:load"
+      when "app:window:before:load"
         @cy.onBeforeAppWindowLoad(args[0])
 
-        @emit("before:window:load", args[0])
+        @emit("window:before:load", args[0])
 
       when "app:navigation:changed"
         @emit("navigation:changed", args...)
@@ -358,8 +359,8 @@ class $Cypress
       when "app:window:load"
         @emit("window:load", args[0])
 
-      when "app:before:window:unload"
-        @emit("before:window:unload", args[0])
+      when "app:window:before:unload"
+        @emit("window:before:unload", args[0])
 
       when "app:window:unload"
         @emit("window:unload", args[0])
