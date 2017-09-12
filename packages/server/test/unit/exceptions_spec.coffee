@@ -76,6 +76,9 @@ describe "lib/exceptions", ->
           at bar <path>
         """)
 
+      it "handles strippable properties being undefined gracefully", ->
+        expect(-> exception.getErr({})).not.to.throw()
+
   context ".getVersion", ->
     it "returns version from package.json", ->
       @sandbox.stub(pkg, "version", "0.1.2")

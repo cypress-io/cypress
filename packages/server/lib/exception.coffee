@@ -11,7 +11,7 @@ pkg      = require("@packages/root")
 ## borrowed from https://github.com/atom/metrics/blob/master/lib/metrics.coffee#L168
 pathRE = /'?((\/|\\|[a-z]:\\)[^\s']+)+'?/ig
 stripPath = (text) ->
-  text.replace(pathRE, "<path>")
+  (text or "").replace(pathRE, "<path>")
 
 ## POST https://api.cypress.io/exceptions
 ## sets request body
