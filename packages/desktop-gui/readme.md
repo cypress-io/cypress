@@ -2,7 +2,7 @@
 
 ![core-desktop-gui](https://cloud.githubusercontent.com/assets/1271364/18134339/0fab0644-6f6c-11e6-8816-5d4528de6108.png)
 
-The desktop GUI is the desktop application [installed](https://on.cypress.io/guides/installing-and-running#section-installing) to the user's OS using the `cypress install` command from the [Cypress CLI](https://github.com/cypress-io/cypress-cli) or through [direct download](http://download.cypress.io/desktop).
+The desktop GUI is the desktop application [installed](https://on.cypress.io/installing-cypress) to the user's OS using the `cypress install` command from the [Cypress CLI](https://on.cypress.io/cli) or through [direct download](http://download.cypress.io/desktop).
 
 The desktop GUI has the following responsibilities:
 
