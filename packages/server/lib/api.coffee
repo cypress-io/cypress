@@ -1,13 +1,11 @@
 _          = require("lodash")
 os         = require("os")
-getos      = require("getos")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 Routes     = require("./util/routes")
-
-getos = Promise.promisify(getos)
+system     = require("./util/system")
 
 rp = request.defaults (params = {}, callback) ->
   headers = params.headers ?= {}
@@ -30,17 +28,6 @@ formatResponseBody = (err) ->
     err.message = [err.statusCode, body].join("\n\n")
 
   throw err
-
-osVersion = (platform) ->
-  Promise.try ->
-    if platform is "linux"
-      getos()
-      .then (obj) ->
-        [obj.dist, obj.release].join(" - ")
-      .catch (err) ->
-        os.release()
-    else
-      os.release()
 
 module.exports = {
   ping: ->
@@ -117,10 +104,8 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
 
   createInstance: (options = {}) ->
-    platform = os.platform()
-
-    osVersion(platform)
-    .then (v) ->
+    system.info()
+    .then (systemInfo) ->
       rp.post({
         url: Routes.instances(options.buildId)
         json: true
@@ -128,18 +113,10 @@ module.exports = {
         headers: {
           "x-route-version": "3"
         }
-        body: {
+        body: _.extend({
           spec:           options.spec
           browserName:    "Electron"
-          browserVersion: process.versions.chrome
-          osName:         platform
-          osVersion:      v
-          osCpus:         os.cpus()
-          osMemory:       {
-            free:         os.freemem()
-            total:        os.totalmem()
-          }
-        }
+        }, systemInfo)
       })
       .promise()
       .get("instanceId")

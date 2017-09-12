@@ -10,6 +10,7 @@ cache         = require("#{root}lib/cache")
 exception     = require("#{root}lib/exception")
 Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
+system        = require("#{root}lib/util/system")
 pkg           = require("@packages/root")
 
 describe "lib/exceptions", ->
@@ -54,26 +55,26 @@ describe "lib/exceptions", ->
     describe "path stripping", ->
       beforeEach ->
         @err = {
-          name: "Path not found: /Users/ruby/dev/foo.js"
+          name: "Path not found: /Users/ruby/dev/"
           message: "Could not find /Users/ruby/dev/foo.js"
           stack: """
-            Error at /Users/ruby/dev/index.js
-            at foo /Users/ruby/dev/foo.js
-            at bar /Users/ruby/dev/bar.js
+            Error at /Users/ruby/dev/index.js:102
+            at foo /Users/ruby/dev/foo.js:4
+            at bar /Users/ruby/dev/bar.js:92
           """
         }
 
-      it "strips paths from name", ->
-        expect(exception.getErr(@err).name).to.equal("Path not found: <path>")
+      it "strips paths from name, leaving file name and line number", ->
+        expect(exception.getErr(@err).name).to.equal("Path not found: <stripped-path>")
 
-      it "strips paths from message", ->
-        expect(exception.getErr(@err).message).to.equal("Could not find <path>")
+      it "strips paths from message, leaving file name and line number", ->
+        expect(exception.getErr(@err).message).to.equal("Could not find <stripped-path>foo.js")
 
-      it "strips paths from stack", ->
+      it "strips paths from stack, leaving file name and line number", ->
         expect(exception.getErr(@err).stack).to.equal("""
-          Error at <path>
-          at foo <path>
-          at bar <path>
+          Error at <stripped-path>index.js:102
+          at foo <stripped-path>foo.js:4
+          at bar <stripped-path>bar.js:92
         """)
 
       it "handles strippable properties being undefined gracefully", ->
@@ -82,37 +83,27 @@ describe "lib/exceptions", ->
   context ".getVersion", ->
     it "returns version from package.json", ->
       @sandbox.stub(pkg, "version", "0.1.2")
-
-      exception.getVersion().then (v) ->
-        expect(v).to.eq("0.1.2")
+      expect(exception.getVersion()).to.eq("0.1.2")
 
   context ".getBody", ->
     beforeEach ->
-      @sandbox.stub(cache, "read").resolves({foo: "foo"})
-      @sandbox.stub(logger, "getLogs").resolves([])
       @err = new Error()
       @sandbox.stub(pkg, "version", "0.1.2")
+      @sandbox.stub(system, "info").resolves({
+        system: "info"
+      })
 
     it "sets err", ->
       exception.getBody(@err).then (body) ->
         expect(body.err).to.be.an("object")
 
-    it "sets cache", ->
-      exception.getBody(@err).then (body) ->
-        expect(body.cache).to.deep.eq {foo: "foo"}
-
-    it "sets logs", ->
-      exception.getBody(@err).then (body) ->
-        expect(body.logs).to.deep.eq []
-
-    it "sets settings", ->
-      settings = {projectId: "abc123"}
-      exception.getBody(@err, settings).then (body) ->
-        expect(body.settings).to.eq settings
-
     it "sets version", ->
       exception.getBody(@err).then (body) ->
-        expect(body.version).to.eq "0.1.2"
+        expect(body.version).to.eq("0.1.2")
+
+    it "sets system info", ->
+      exception.getBody(@err).then (body) ->
+        expect(body.system).to.eq("info")
 
   context ".create", ->
     beforeEach ->
@@ -136,9 +127,6 @@ describe "lib/exceptions", ->
 
         @sandbox.stub(exception, "getBody").resolves({
           err: @err
-          cache: {}
-          logs: []
-          settings: {}
           version: "0.1.2"
         })
 
@@ -152,9 +140,6 @@ describe "lib/exceptions", ->
         exception.create().then =>
           body = {
             err: @err
-            cache: {}
-            logs: []
-            settings: {}
             version: "0.1.2"
           }
 
