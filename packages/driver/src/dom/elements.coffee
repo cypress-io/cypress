@@ -183,13 +183,15 @@ getFirstScrollableParent = ($el) ->
 positionProps = ($el, adjustments = {}) ->
   el = $el[0]
 
+  rect = el.getBoundingClientRect()
+
   return {
-    width: el.offsetWidth
-    height: el.offsetHeight
-    top: el.offsetTop + (adjustments.top or 0)
-    right: el.offsetLeft + el.offsetWidth
-    bottom: el.offsetTop + el.offsetHeight
-    left: el.offsetLeft + (adjustments.left or 0)
+    width: rect.width
+    height: rect.height
+    top: rect.top
+    right: rect.right
+    bottom: rect.bottom
+    left: rect.left
     scrollTop: el.scrollTop
     scrollLeft: el.scrollLeft
   }

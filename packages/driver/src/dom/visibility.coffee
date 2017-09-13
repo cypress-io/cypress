@@ -3,6 +3,7 @@ _ = require("lodash")
 $jquery = require("./jquery")
 $document = require("./document")
 $elements = require("./elements")
+$win = require("./window")
 
 fixedOrAbsoluteRe = /(fixed|absolute)/
 
@@ -110,10 +111,12 @@ elIsOutOfBoundsOfAncestorsOverflow = ($el, $prevAncestor, $ancestor, adjustments
   ## offsets to the left and top positions of the $el
   ## so we can make correct comparisons of the boundaries.
   if ancestor is $prevAncestor[0].offsetParent
-    adjustments.left += ancestor.offsetLeft
-    adjustments.top += ancestor.offsetTop
+    adjustments.left += ancestor.getBoundingClientRect().left
+    adjustments.top += ancestor.getBoundingClientRect().top
 
   elProps = $elements.positionProps($el, adjustments)
+
+  win = $win.getWindowByElement($el[0])
 
   if canClipContent($el, $ancestor)
     ancestorProps = $elements.positionProps($ancestor)
@@ -121,13 +124,13 @@ elIsOutOfBoundsOfAncestorsOverflow = ($el, $prevAncestor, $ancestor, adjustments
     ## target el is out of bounds
     return true if (
       ## target el is to the right of the ancestor's visible area
-      elProps.left > ancestorProps.width + ancestorProps.left + ancestorProps.scrollLeft or
+      elProps.left > ancestorProps.width + ancestorProps.left + win.pageXOffset or
 
       ## target el is to the left of the ancestor's visible area
       elProps.left + elProps.width < ancestorProps.left or
 
       ## target el is under the ancestor's visible area
-      elProps.top > ancestorProps.height + ancestorProps.top + ancestorProps.scrollTop or
+      elProps.top > ancestorProps.height + ancestorProps.top + win.pageYOffset or
 
       ## target el is above the ancestor's visible area
       elProps.top + elProps.height < ancestorProps.top
