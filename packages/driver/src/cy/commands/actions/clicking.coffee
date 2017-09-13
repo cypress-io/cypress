@@ -68,7 +68,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
         ## 2. check to figure out the element listed at those coordinates
-        ## 3. if this element is ourself or our descendents, click whatever was returned
+        ## 3. if this element is ourself or our descendants, click whatever was returned
         ## 4. else throw an error because something is covering us up
         getFirstFocusableEl = ($el) ->
           return $el if $dom.isFocusable($el)
