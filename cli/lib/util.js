@@ -14,12 +14,13 @@ const joinWithEq = (x, y) => `${x}=${y}`
 const objectToString = (obj) =>
   R.zipWith(joinWithEq, R.keys(obj), R.values(obj)).join(',')
 
-const normalizeEnv = (env) =>
+const normalizeObject = (env) =>
   _.isPlainObject(env) ? objectToString(env) : env
 
 function normalizeModuleOptions (options = {}) {
   return R.evolve({
-    env: normalizeEnv,
+    env: normalizeObject,
+    config: normalizeObject,
   })(options)
 }
 

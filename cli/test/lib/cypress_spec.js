@@ -52,6 +52,16 @@ describe('cypress', function () {
         })
     )
 
+    it('normalizes config object', () => {
+      const config = {
+        pageLoadTime: 10000,
+        watchForFileChanges: false,
+      }
+      return cypress.run({ config })
+        .then(getStartArgs)
+        .then(snapshot)
+    })
+
     it('normalizes env option if passed an object', () =>
       cypress.run({ env: { foo: 'bar' } })
         .then(getStartArgs)
