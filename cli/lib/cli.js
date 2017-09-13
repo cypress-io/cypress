@@ -121,16 +121,17 @@ module.exports = {
 
     debug('cli starts with arguments %j', args)
 
-    //# if there are no arguments
+    // if there are no arguments
     if (args.length <= 2) {
-      //# then display the help
+      // then display the help
       program.help()
+      // exits
     }
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
       logger.error('Unknown command', `"${firstCommand}"`)
-      program.help()
+      program.outputHelp()
       return util.exit(1)
     }
 

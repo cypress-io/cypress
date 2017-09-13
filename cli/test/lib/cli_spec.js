@@ -20,11 +20,11 @@ describe('cli', function () {
     this.exec = (args) => cli.init(`node test ${args}`.split(' '))
   })
 
-  context('unknown command', () =>
+  context('unknown command', () => {
     it('shows usage and exits', () =>
       execa('bin/cypress', ['foo']).then(snapshot)
     )
-  )
+  })
 
   context('cypress version', function () {
     it('reports package version', function (done) {

@@ -1,8 +1,8 @@
 exports['cli unknown command shows usage and exits 1'] = `
 
   command: bin/cypress foo
-  code: 0
-  failed: false
+  code: 1
+  failed: true
   killed: false
   signal: null
   timedOut: false
