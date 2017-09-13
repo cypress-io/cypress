@@ -29,7 +29,7 @@ const descriptions = {
   version: 'Prints Cypress version',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version']
+const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -50,6 +50,13 @@ module.exports = {
     // bug in commaner not printing name
     // in usage help docs
     program._name = 'cypress'
+
+    program
+      .command('help')
+      .description('Shows CLI help and exits')
+      .action(() => {
+        program.help()
+      })
 
     program
       .option('-v, --version', text('version'))

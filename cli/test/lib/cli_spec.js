@@ -20,6 +20,20 @@ describe('cli', function () {
     this.exec = (args) => cli.init(`node test ${args}`.split(' '))
   })
 
+  context('help command', () => {
+    it('shows help', () =>
+      execa('bin/cypress', ['help']).then(snapshot)
+    )
+
+    it('shows help for -h', () =>
+      execa('bin/cypress', ['-h']).then(snapshot)
+    )
+
+    it('shows help for --help', () =>
+      execa('bin/cypress', ['--help']).then(snapshot)
+    )
+  })
+
   context('unknown command', () => {
     it('shows usage and exits', () =>
       execa('bin/cypress', ['foo']).then(snapshot)
