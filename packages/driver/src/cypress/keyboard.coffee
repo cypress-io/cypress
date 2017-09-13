@@ -6,7 +6,28 @@ $Cypress = require("../cypress")
 
 charsBetweenCurlyBraces = /({.+?})/
 
+# Keyboard event map
+# https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+keyStandardMap = {
+  # Cypress keyboard key : Standard value
+  "{backspace}": "Backspace",
+  "{del}": "Delete",
+  "{downarrow}": "ArrowDown",
+  "{enter}": "Enter",
+  "{esc}": "Escape",
+  "{leftarrow}": "ArrowLeft",
+  "{rightarrow}": "ArrowRight",
+  "{uparrow}": "ArrowUp",
+  "{alt}": "Alt",
+  "{ctrl}": "Control",
+  "{meta}": "Meta",
+  "{shift}": "Shift"
+}
+
 $Keyboard = {
+  keyToStandard: (key) ->
+    keyStandardMap[key] || key
+
   charCodeMap: {
     33:  49,  ## ! --- 1
     64:  50,  ## @ --- 2
@@ -62,9 +83,10 @@ $Keyboard = {
       bounds = rng.bounds()
       if @boundsAreEqual(bounds)
         rng.bounds([bounds[0], bounds[0] + 1])
-      options.charCode = 46
-      options.keypress = false
+      options.charCode  = 46
+      options.keypress  = false
       options.textInput = false
+      options.setKey    = "{del}"
       @ensureKey el, null, options, ->
         prev = rng.all()
         rng.text("", "end")
@@ -87,6 +109,7 @@ $Keyboard = {
       options.charCode  = 8
       options.keypress  = false
       options.textInput = false
+      options.setKey    = "{backspace}"
       @ensureKey el, null, options, ->
         prev = rng.all()
         rng.text("", "end")
@@ -106,6 +129,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{esc}"
       @ensureKey el, null, options
 
     # "{tab}": (el, rng) ->
@@ -124,6 +148,7 @@ $Keyboard = {
       options.charCode  = 13
       options.textInput = false
       options.input     = false
+      options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
         rng.insertEOL()
         changed = options.prev isnt rng.all()
@@ -140,6 +165,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{leftarrow}"
       @ensureKey el, null, options, ->
         switch
           when @boundsAreEqual(bounds)
@@ -167,6 +193,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{uparrow}"
       @ensureKey(el, null, options)
 
     ## charCode = 39
@@ -180,6 +207,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{rightarrow}"
       @ensureKey el, null, options, ->
         switch
           when @boundsAreEqual(bounds)
@@ -204,6 +232,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{downarrow}"
       @ensureKey(el, null, options)
   }
 
@@ -370,7 +399,7 @@ $Keyboard = {
         Promise
         .resolve options.onNoMatchingSpecialChars(chars, allChars)
         .delay(options.delay)
-        
+
       else
         Promise
         .each chars.split(""), (char) =>
@@ -448,9 +477,14 @@ $Keyboard = {
       }
 
     if keys
+      # special key like "{enter}" might have 'key = \n'
+      # in which case the original intent will be in options.setKey
+      # "normal" keys will have their value in "key" argument itself
+      standardKey = $Keyboard.keyToStandard(options.setKey || key)
       _.extend event, {
         charCode: charCode
         detail: 0
+        key: standardKey
         keyCode: keyCode
         layerX: 0
         layerY: 0
@@ -459,7 +493,6 @@ $Keyboard = {
         view: options.window
         which: which
       }
-
 
     args = [options.id, key, eventType, charCodeAt]
 
