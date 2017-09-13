@@ -134,13 +134,13 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       actual
     )
 
-  chai.Assertion.addMethod "descendents", (selector) ->
+  chai.Assertion.addMethod "descendants", (selector) ->
     assert(
       @,
-      "descendents",
+      "descendants",
       wrap(@).has(selector).length > 0,
-      'expected #{this} to have descendents #{exp}',
-      'expected #{this} not to have descendents #{exp}',
+      'expected #{this} to have descendants #{exp}',
+      'expected #{this} not to have descendants #{exp}',
       selector
     )
 
