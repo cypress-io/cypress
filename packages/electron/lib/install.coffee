@@ -54,8 +54,6 @@ module.exports = {
     pkgr    = require("electron-packager")
     icons   = require("@cypress/icons")
 
-    pkgr    = Promise.promisify(pkgr)
-
     _.defaults(options, {
       dist: paths.getPathToDist()
       dir: "app"
@@ -66,7 +64,7 @@ module.exports = {
       asar: false
       prune: true
       overwrite: true
-      version: electronVersion
+      electronVersion
       icon: icons.getPathToIcon("cypress.icns")
     })
 
