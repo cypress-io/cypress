@@ -154,10 +154,8 @@ describe "src/cypress/dom", ->
         </div>"""
 
       @$childPosFixed = add """
-        <div id="childPosFixed" style='width: 0; height: 100px; overflow: hidden;'>
-          <div style='height: 500px; width: 500px;'>
-            <span style='position: fixed;'>position: fixed</span>
-          </div>
+        <div id="childPosFixed" style='width: 100px; height: 100px; overflow: hidden;'>
+          <button style='position: fixed; top: 0;'>position: fixed</button>
         </div>"""
 
       @$descendentPosAbs = add """
@@ -168,11 +166,31 @@ describe "src/cypress/dom", ->
         </div>"""
 
       @$descendentPosFixed = add """
-        <div style='width: 0; height: 100px; overflow: hidden;'>
-          <div style='height: 500px; width: 500px; position: fixed;'>
-            <span>no width, descendant position: fixed</span>
+        <div id="descendentPosFixed" style='width: 0; height: 100px; overflow: hidden;'>
+          <div style='height: 500px; width: 500px; position: fixed; top: 0; right: 0;'>
+            <button>no width, descendant position: fixed</button>
           </div>
         </div>"""
+
+      @$descendantInPosFixed = add """
+        <div>
+          <div id="descendantInPosFixed" style="width: 200px; position: fixed; bottom: 0; right: 0">
+            underneath
+            <div style="width: 200px; position: fixed; bottom: 0; right: 0">on top of the other</div>
+          </div>
+        </div>
+      """
+
+      @$coveredUpPosFixed = add """
+        <div>
+          <div id="coveredUpPosFixed" style="position: fixed; bottom: 0; left: 0">underneath</div>
+          <div style="position: fixed; bottom: 0; left: 0">on top</div>
+        </div>
+      """
+
+      @$offScreenPosFixed = add """
+        <div id="offScreenPosFixed" style="position: fixed; bottom: 0; left: -100px;">off screen</div>
+      """
 
       @$parentPosAbs = add """
         <div style='width: 0; height: 100px; overflow: hidden; position: absolute;'>
@@ -326,6 +344,9 @@ describe "src/cypress/dom", ->
         </div>
       """
 
+      # scroll the 2nd element into view so that
+      # there is always a scrollTop so we ensure
+      # its factored in (window vs viewport) calculations
       scrollThisIntoView.get(1).scrollIntoView()
 
     it "is hidden if .css(visibility) is hidden", ->
@@ -385,16 +406,28 @@ describe "src/cypress/dom", ->
       expect(@$childPosAbs.find("span")).not.be.hidden
 
     it "is visible if child has position: fixed", ->
-      cy.wrap(@$childPosFixed.find("span")).should("be.visible")
-      cy.wrap(@$childPosFixed.find("span")).should("not.be.hidden")
+      expect(@$childPosFixed.find("button")).to.be.visible
+      expect(@$childPosFixed.find("button")).not.to.be.hidden
+
+    it "is visible if descendent from parent has position: fixed", ->
+      expect(@$descendentPosFixed.find("button")).to.be.visible
+      expect(@$descendentPosFixed.find("button")).not.to.be.hidden
+
+    it "is visible if has position: fixed and descendent is found", ->
+      expect(@$descendantInPosFixed.find("#descendantInPosFixed")).to.be.visible
+      expect(@$descendantInPosFixed.find("#descendantInPosFixed")).not.to.be.hidden
+
+    it "is hidden if position: fixed and covered up", ->
+      expect(@$coveredUpPosFixed).to.be.hidden
+      expect(@$coveredUpPosFixed).not.to.be.visible
+
+    it "is hidden if position: fixed and off screent", ->
+      expect(@$offScreenPosFixed).to.be.hidden
+      expect(@$offScreenPosFixed).not.to.be.visible
 
     it "is visible if descendent from parent has position: absolute", ->
       expect(@$descendentPosAbs.find("span")).to.be.visible
       expect(@$descendentPosAbs.find("span")).to.not.be.hidden
-
-    it "is visible if descendent from parent has position: fixed", ->
-      expect(@$descendentPosFixed.find("span")).to.be.visible
-      expect(@$descendentPosFixed.find("span")).to.not.be.hidden
 
     it "is hidden if only the parent has position absolute", ->
       expect(@$parentPosAbs.find("span")).to.be.hidden
@@ -450,10 +483,10 @@ describe "src/cypress/dom", ->
       expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
 
     it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
-      cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor").find("span").should("be.hidden")
+      cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
 
     it "is visible when in ancestor's bounds due to ancestor's transform", ->
-      cy.get("#ancestorTransformMakesElInBoundsOfAncestor").find("span").eq(1).should("be.visible")
+      cy.get("#ancestorTransformMakesElInBoundsOfAncestor span").eq(1).should("be.visible")
 
     describe "#getReasonIsHidden", ->
       beforeEach ->
