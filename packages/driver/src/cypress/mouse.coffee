@@ -2,18 +2,22 @@ Promise = require("bluebird")
 
 $Cypress = require("../cypress")
 $Keyboard = require("./keyboard")
-utils = require("./utils")
+$dom = require("../dom")
 
 stopPropagation = window.MouseEvent.prototype.stopPropagation
 
 module.exports = {
-  mouseDown: ($elToClick, coords, win) ->
+  mouseDown: ($elToClick, fromViewport) ->
+    el = $elToClick.get(0)
+
+    win = $dom.getWindowByElement(el)
+
     mdownEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
       cancelable: true
       view: win
-      clientX: utils.getClientX(coords, win)
-      clientY: utils.getClientY(coords, win)
+      clientX: fromViewport.left
+      clientY: fromViewport.top
       buttons: 1
       detail: 1
     })
@@ -27,7 +31,7 @@ module.exports = {
       @_hasStoppedPropagation = true
       stopPropagation.apply(@, arguments)
 
-    cancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+    cancelled = !el.dispatchEvent(mdownEvt)
 
     props = {
       preventedDefault: cancelled
@@ -38,13 +42,17 @@ module.exports = {
     props.modifiers = modifiers.join(", ") if modifiers.length
     props
 
-  mouseUp: ($elToClick, coords, win) ->
+  mouseUp: ($elToClick, fromViewport) ->
+    el = $elToClick.get(0)
+
+    win = $dom.getWindowByElement(el)
+
     mupEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
       cancelable: true
       view: win
-      clientX: utils.getClientX(coords, win)
-      clientY: utils.getClientY(coords, win)
+      clientX: fromViewport.left
+      clientY: fromViewport.top
       buttons: 0
       detail: 1
     })
@@ -58,7 +66,7 @@ module.exports = {
       @_hasStoppedPropagation = true
       stopPropagation.apply(@, arguments)
 
-    cancelled = !$elToClick.get(0).dispatchEvent(mupEvt)
+    cancelled = !el.dispatchEvent(mupEvt)
 
     props = {
       preventedDefault: cancelled
@@ -69,13 +77,17 @@ module.exports = {
     props.modifiers = modifiers.join(", ") if modifiers.length
     props
 
-  click: ($elToClick, coords, win) ->
+  click: ($elToClick, fromViewport) ->
+    el = $elToClick.get(0)
+
+    win = $dom.getWindowByElement(el)
+
     clickEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
       cancelable: true
       view: win
-      clientX: utils.getClientX(coords, win)
-      clientY: utils.getClientY(coords, win)
+      clientX: fromViewport.left
+      clientY: fromViewport.top
       buttons: 0
       detail: 1
     })
@@ -89,7 +101,7 @@ module.exports = {
       @_hasStoppedPropagation = true
       stopPropagation.apply(@, arguments)
 
-    cancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
+    cancelled = !el.dispatchEvent(clickEvt)
 
     props = {
       preventedDefault: cancelled

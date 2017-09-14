@@ -19,7 +19,6 @@ $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
-$Coordinates = require("../cy/coordinates")
 $CommandQueue = require("./command_queue")
 
 crossOriginScriptRe = /^script error/i
@@ -92,7 +91,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, expect)
 
-  coordinates = $Coordinates.create(state, ensures.ensureValidPosition)
   snapshots = $Snapshots.create($$, state)
 
   isCy = (val) ->
@@ -602,11 +600,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## retry sync methods
     retry: retries.retry
-
-    ## coordinates sync methods
-    getAbsoluteCoordinates: coordinates.getAbsoluteCoordinates
-    getElementAtCoordinates: coordinates.getElementAtCoordinates
-    getAbsoluteCoordinatesRelativeToXY: coordinates.getAbsoluteCoordinatesRelativeToXY
 
     ## assertions sync methods
     assert: assertions.assert

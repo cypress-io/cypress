@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <style>
+      .slider {
+        position: absolute;
+        top: 200px;
+        left: 200px;
+
+        width: 400px;
+        height: 400px;
+
+        overflow: hidden;
+
+        white-space: nowrap;
+      }
+
+      .slider-offset {
+        display: block;
+
+        width: 100%;
+        height: 100%;
+
+        overflow: visible;
+        font-size: 0px;
+
+        transform: translateX(0);
+        transition: transform 1s;
+      }
+
+      .slider-content {
+        display: inline-block;
+
+        font-size: 14px;
+        width: 100%;
+
+        overflow: hidden;
+      }
+
+      .slider-content > input {
+        display: block;
+
+        width: 50%;
+
+        margin: auto;
+      }
+    </style>
+    <script>
+        window.changeSlide = function(num) {
+          var el = document.querySelector('.slider-offset');
+          el.style.transform = 'translateX(-' + (num * 100) + '%)';
+        }
+    </script>
+  </head>
+  <body>
+    <div class="slider">
+      <div class="slider-offset">
+        <div class="slider-content">
+          <input name="test1" type="text" placeholder="First slide" />
+        </div>
+        <div class="slider-content">
+          <input name="test2" type="text" placeholder="Second slide" />
+        </div>
+        <div class="slider-content">
+          <input name="test3" type="text" placeholder="Third slide" />
+        </div>
+      </div>
+    </div>
+
+    <button id="button-1" onclick="changeSlide(0)">Show first slide</button>
+    <button id="button-2" onclick="changeSlide(1)">Show second slide</button>
+    <button id="button-3" onclick="changeSlide(2)">Show third slide</button>
+
+  <!--
+  The element to test is nested in multiple parents, with different overflow rules in each elements.
+  The `.slider` element if the frame to see the data, so its overflow has to be hidden;
+  The `.slide-offset` element is meant to have the width of each slider so that we can then set `transform: translateX(slideNum * -100%)` to show the slide slideNum. Since the slides are its children, its overflow need to be visible.
+  Each `.slide-content` element is a slider container, since the content might get out of the slide but we don't want it to bleed in another slide, its overflow need to be hidden.
+  -->
+</body>
+</html>

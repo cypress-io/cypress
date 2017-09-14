@@ -3,10 +3,16 @@ _ = require("lodash")
 $jquery = require("./jquery")
 $document = require("./document")
 $elements = require("./elements")
+$coordinates = require("./coordinates")
 
 fixedOrAbsoluteRe = /(fixed|absolute)/
 
 OVERFLOW_PROPS = ["hidden", "scroll", "auto"]
+
+## WARNING:
+## developer beware. visibility is a sink hole
+## that leads to sheer madness. you should
+## avoid this file before its too late.
 
 isVisible = (el) ->
   not isHidden(el, "isVisible()")
@@ -73,10 +79,12 @@ canClipContent = ($el, $ancestor) ->
   if not elHasClippableOverflow($ancestor)
     return false
 
+  $offsetParent = $jquery.wrap($el[0].offsetParent)
+
   ## even if overflow is clippable, if an ancestor of the ancestor is the
   ## element's offset parent, the ancestor will not clip the element
   ## unless the element is position relative
-  if not elHasPositionRelative($el) and $elements.isAncestor($ancestor, $jquery.wrap($el[0].offsetParent))
+  if not elHasPositionRelative($el) and $elements.isAncestor($ancestor, $offsetParent)
     return false
 
   return true
@@ -90,50 +98,60 @@ elDescendentsHavePositionFixedOrAbsolute = ($parent, $child) ->
   _.some $els.get(), (el) ->
     fixedOrAbsoluteRe.test $jquery.wrap(el).css("position")
 
-## walks up the tree and compares the target's size and position
-## with that of its ancestors to determine if it's hidden due to being
-## out of bounds of any ancestors that hide overflow
-elIsOutOfBoundsOfAncestorsOverflow = ($el, $prevAncestor, $ancestor, adjustments) ->
-  $prevAncestor ?= $el
-  $ancestor ?= $el.parent()
-  adjustments ?= {left: 0, top: 0}
+elIsNotElementFromPoint = ($el) ->
+  elProps = $coordinates.getElementPositioning($el)
 
+  {top, left} = elProps.fromViewport
+
+  doc = $document.getDocumentFromElement($el.get(0))
+
+  if el = $coordinates.getElementAtPointFromViewport(doc, left, top)
+    $elAtPoint = $jquery.wrap(el)
+
+  ## if the element at point is not a descendent
+  ## of our $el then we know it's being covered or its
+  ## not visible
+  return not $elements.isDescendent($el, $elAtPoint)
+
+elIsOutOfBoundsOfAncestorsOverflow = ($el, $ancestor) ->
+  if $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
+    if $stickyOrFixedEl.css("position") is "fixed"
+      ## if we have a fixed position element that means
+      ## it is fixed 'relative' to the viewport which means
+      ## it MUST be available with elementFromPoint because
+      ## that is also relative to the viewport
+      return elIsNotElementFromPoint($stickyOrFixedEl)
+
+  $ancestor ?= $el.parent()
+
+  ## no ancestor, not out of bounds!
   return false if not $ancestor
 
   ## if we've reached the top parent, which is document
   ## then we're in bounds all the way up, return false
   return false if $ancestor.is("body,html") or $document.isDocument($ancestor)
 
-  ancestor = $ancestor[0]
-
-  ## as we walk up the tree, we add any offset parent's
-  ## offsets to the left and top positions of the $el
-  ## so we can make correct comparisons of the boundaries.
-  if ancestor is $prevAncestor[0].offsetParent
-    adjustments.left += ancestor.offsetLeft
-    adjustments.top += ancestor.offsetTop
-
-  elProps = $elements.positionProps($el, adjustments)
+  elProps = $coordinates.getElementPositioning($el)
 
   if canClipContent($el, $ancestor)
-    ancestorProps = $elements.positionProps($ancestor)
+    ancestorProps = $coordinates.getElementPositioning($ancestor)
 
     ## target el is out of bounds
     return true if (
       ## target el is to the right of the ancestor's visible area
-      elProps.left > ancestorProps.width + ancestorProps.left + ancestorProps.scrollLeft or
+      elProps.fromWindow.left > (ancestorProps.width + ancestorProps.fromWindow.left) or
 
       ## target el is to the left of the ancestor's visible area
-      elProps.left + elProps.width < ancestorProps.left or
+      (elProps.fromWindow.left + elProps.width) < ancestorProps.fromWindow.left or
 
       ## target el is under the ancestor's visible area
-      elProps.top > ancestorProps.height + ancestorProps.top + ancestorProps.scrollTop or
+      elProps.fromWindow.top > (ancestorProps.height + ancestorProps.fromWindow.top) or
 
       ## target el is above the ancestor's visible area
-      elProps.top + elProps.height < ancestorProps.top
+      (elProps.fromWindow.top + elProps.height) < ancestorProps.fromWindow.top
     )
 
-  elIsOutOfBoundsOfAncestorsOverflow($el, $ancestor, $ancestor.parent(), adjustments)
+  elIsOutOfBoundsOfAncestorsOverflow($el, $ancestor.parent())
 
 elIsHiddenByAncestors = ($el, $origEl) ->
   ## store the original $el
@@ -196,6 +214,10 @@ parentHasVisibilityNone = ($el) ->
     return parentHasVisibilityNone($el.parent())
 
 getReasonIsHidden = ($el) ->
+  ## TODO: need to add in the reason an element
+  ## is hidden when its fixed position and its
+  ## either being covered or there is no el
+
   node = $elements.stringify($el, "short")
 
   ## returns the reason in human terms why an element is considered not visible
