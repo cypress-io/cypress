@@ -8,8 +8,9 @@ stopPropagation = window.MouseEvent.prototype.stopPropagation
 
 module.exports = {
   mouseDown: ($elToClick, fromViewport) ->
-    debugger
-    win = $dom.getWindowByElement($elToClick.get(0))
+    el = $elToClick.get(0)
+
+    win = $dom.getWindowByElement(el)
 
     mdownEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
@@ -30,7 +31,7 @@ module.exports = {
       @_hasStoppedPropagation = true
       stopPropagation.apply(@, arguments)
 
-    cancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+    cancelled = !el.dispatchEvent(mdownEvt)
 
     props = {
       preventedDefault: cancelled
@@ -42,7 +43,9 @@ module.exports = {
     props
 
   mouseUp: ($elToClick, fromViewport) ->
-    win = $dom.getWindowByElement($elToClick.get(0))
+    el = $elToClick.get(0)
+
+    win = $dom.getWindowByElement(el)
 
     mupEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
@@ -63,7 +66,7 @@ module.exports = {
       @_hasStoppedPropagation = true
       stopPropagation.apply(@, arguments)
 
-    cancelled = !$elToClick.get(0).dispatchEvent(mupEvt)
+    cancelled = !el.dispatchEvent(mupEvt)
 
     props = {
       preventedDefault: cancelled
@@ -75,7 +78,9 @@ module.exports = {
     props
 
   click: ($elToClick, fromViewport) ->
-    win = $dom.getWindowByElement($elToClick.get(0))
+    el = $elToClick.get(0)
+
+    win = $dom.getWindowByElement(el)
 
     clickEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
@@ -96,7 +101,7 @@ module.exports = {
       @_hasStoppedPropagation = true
       stopPropagation.apply(@, arguments)
 
-    cancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
+    cancelled = !el.dispatchEvent(clickEvt)
 
     props = {
       preventedDefault: cancelled
