@@ -54,7 +54,7 @@ fileProcessors = {}
 setDefaultPreprocessor = ->
   log("set default preprocessor")
 
-  browserify = require("cypress-browserify-preprocessor")
+  browserify = require("@cypress/browserify-preprocessor")
   plugins.register "on:spec:file:preprocessor", browserify({
     extensions: [".js", ".jsx", ".coffee", ".cjsx"]
     ignoreWatch: [
