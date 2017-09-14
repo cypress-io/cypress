@@ -201,7 +201,9 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   ## 5 pixels of x/y
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 
-waitForActionability = (cy, $el, win, options, callbacks) ->
+waitForActionability = (cy, $el, options, callbacks) ->
+  win = $dom.getWindowByElement($el.get(0))
+
   { _log, force, position } = options
 
   { onReady, onScroll } = callbacks

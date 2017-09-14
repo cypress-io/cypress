@@ -59,8 +59,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num: options.$el.length }
         })
 
-      win = state("window")
-
       dispatchEarly = false
 
       ## if we're window or document then dispatch early
@@ -74,7 +72,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if dispatchEarly
           return dispatch(subject, eventName, eventOptions)
 
-        waitForActionability(cy, subject, win, options, {
+        waitForActionability(cy, subject, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 

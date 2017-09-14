@@ -182,7 +182,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## because we're issuing the clicks synchonrously
         ## once we establish the coordinates and the element
         ## passes all of the internal checks
-        waitForActionability(cy, $el, win, options, {
+        waitForActionability(cy, $el, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 

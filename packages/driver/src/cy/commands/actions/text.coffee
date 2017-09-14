@@ -316,8 +316,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return type() if isBody
 
         cy.now("focused", {log: false, verify: false})
-        .then ($focused) =>
-          waitForActionability(cy, options.$el, win, options, {
+        .then ($focused) ->
+          waitForActionability(cy, options.$el, options, {
             onScroll: ($el, type) ->
               Cypress.action("cy:scrolled", $el, type)
 
