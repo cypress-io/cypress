@@ -81,15 +81,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           getFirstFocusableEl($el.parent())
 
-        afterMouseDown = ($elToClick, coords) =>
+        afterMouseDown = ($elToClick, coords) ->
+          ## we need to use both of these
+          { fromWindow, fromViewport } = coords
+
           ## handle mouse events removing DOM elements
           ## https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
           if $dom.isAttached($elToClick)
-            domEvents.mouseUp = $Mouse.mouseUp($elToClick, coords, win)
+            domEvents.mouseUp = $Mouse.mouseUp($elToClick, fromViewport)
 
           if $dom.isAttached($elToClick)
-            domEvents.click   = $Mouse.click($elToClick, coords, win)
+            domEvents.click   = $Mouse.click($elToClick, fromViewport)
 
           if options._log
             consoleObj = options._log.invoke("consoleProps")
@@ -98,7 +101,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleObj = _.defaults consoleObj ? {}, {
               "Applied To":   $dom.getElements($el)
               "Elements":     $el.length
-              "Coords":       coords
+              "Coords":       fromWindow ## always absolute
               "Options":      deltaOptions
             }
 
@@ -135,7 +138,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if options._log
               ## because we snapshot and output a command per click
               ## we need to manually snapshot + end them
-              options._log.set({coords: coords, consoleProps: consoleProps})
+              options._log.set({coords: fromWindow, consoleProps: consoleProps})
 
             ## we need to split this up because we want the coordinates
             ## to mutate our passed in options._log but we dont necessary
@@ -193,7 +196,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## without firing the focus event
               $previouslyFocusedEl = $focused
 
-              domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords, win)
+              domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
 
               ## if mousedown was cancelled then or caused
               ## our element to be removed from the DOM

@@ -321,7 +321,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             onScroll: ($el, type) ->
               Cypress.action("cy:scrolled", $el, type)
 
-            onReady: ($elToClick, coords) ->
+            onReady: ($elToClick) ->
               ## if we dont have a focused element
               ## or if we do and its not ourselves
               ## then issue the click

@@ -21,7 +21,7 @@ describe "src/cy/commands/actions/clicking", ->
     it "receives native click event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getAbsoluteCoordinates($btn)
+      coords = cy.getElementCoordinatesByPosition($btn)
 
       $btn.on "click", (e) =>
         obj = _.pick(e.originalEvent, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -58,18 +58,17 @@ describe "src/cy/commands/actions/clicking", ->
     it "sends native mousedown event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getAbsoluteCoordinates($btn)
-
       win = cy.state("window")
 
-      $btn.get(0).addEventListener "mousedown", (e) =>
-        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+      $btn.get(0).addEventListener "mousedown", (e) ->
+        ## calculate after scrolling
+        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+        obj = _.pick(e, "bubbles", "cancelable", "view", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
           view: win
-          clientX: coords.x - win.pageXOffset
-          clientY: coords.y - win.pageYOffset
           button: 0
           buttons: 1
           which: 1
@@ -81,6 +80,9 @@ describe "src/cy/commands/actions/clicking", ->
           detail: 1
           type: "mousedown"
         }
+
+        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
 
       cy.get("#button").click()
@@ -88,18 +90,16 @@ describe "src/cy/commands/actions/clicking", ->
     it "sends native mouseup event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getAbsoluteCoordinates($btn)
-
       win = cy.state("window")
 
-      $btn.get(0).addEventListener "mouseup", (e) =>
-        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+      $btn.get(0).addEventListener "mouseup", (e) ->
+        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+        obj = _.pick(e, "bubbles", "cancelable", "view", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
           view: win
-          clientX: coords.x - win.pageXOffset
-          clientY: coords.y - win.pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -111,6 +111,9 @@ describe "src/cy/commands/actions/clicking", ->
           detail: 1
           type: "mouseup"
         }
+
+        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
 
       cy.get("#button").click()
@@ -130,13 +133,13 @@ describe "src/cy/commands/actions/clicking", ->
     it "records correct clientX when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
-      coords = cy.getAbsoluteCoordinates($btn)
-
       win = cy.state("window")
 
       $btn.get(0).addEventListener "click", (e) =>
+        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
         expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientX).to.eq coords.x - win.pageXOffset
+        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         done()
 
       cy.get("#scrolledBtn").click()
@@ -144,13 +147,13 @@ describe "src/cy/commands/actions/clicking", ->
     it "records correct clientY when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
-      coords = cy.getAbsoluteCoordinates($btn)
-
       win = cy.state("window")
 
       $btn.get(0).addEventListener "click", (e) =>
+        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
         expect(win.pageYOffset).to.be.gt(0)
-        expect(e.clientY).to.eq coords.y - win.pageYOffset
+        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
 
       cy.get("#scrolledBtn").click()
@@ -583,7 +586,7 @@ describe "src/cy/commands/actions/clicking", ->
       it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
         $btn = cy.$$("button:first")
 
-        coords = cy.getAbsoluteCoordinates($btn)
+        coords = cy.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
@@ -598,7 +601,7 @@ describe "src/cy/commands/actions/clicking", ->
 
         $btn = cy.$$("button:first")
 
-        coords = cy.getAbsoluteCoordinates($btn)
+        coords = cy.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
@@ -1155,7 +1158,7 @@ describe "src/cy/commands/actions/clicking", ->
           lastLog = @lastLog
 
           $btn.blur() ## blur which removes focus styles which would change coords
-          coords = cy.getAbsoluteCoordinates($btn)
+          coords = cy.getElementCoordinatesByPosition($btn)
           expect(lastLog.get("coords")).to.deep.eq coords
 
       it "ends", ->
@@ -1182,7 +1185,7 @@ describe "src/cy/commands/actions/clicking", ->
           lastLog = @lastLog
 
           console   = lastLog.invoke("consoleProps")
-          coords    = cy.getAbsoluteCoordinates($button)
+          coords    = cy.getElementCoordinatesByPosition($button)
           logCoords = lastLog.get("coords")
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1

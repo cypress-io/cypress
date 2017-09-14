@@ -1,14 +1,16 @@
 $jquery = require("./jquery")
 $window = require("./window")
 $document = require("./document")
-$visibility = require("./visibility")
 $elements = require("./elements")
+$visibility = require("./visibility")
+$coordinates = require("./coordinates")
 
-{ isWindow } = $window
+{ isWindow, getWindowByElement } = $window
 { isDocument } = $document
 { wrap, unwrap, isJquery } = $jquery
 { isVisible, isHidden, getReasonIsHidden } = $visibility
-{ isType, isFocusable, isElement, isScrollable, stringify, getElements, isDetached, isAttached, isTextLike, isSelector, isDescendent, positionProps, getFirstFixedOrStickyPositionParent, getFirstScrollableParent } = $elements
+{ isType, isFocusable, isElement, isScrollable, stringify, getElements, isDetached, isAttached, isTextLike, isSelector, isDescendent,  getFirstFixedOrStickyPositionParent, getFirstScrollableParent } = $elements
+{ getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport } = $coordinates
 
 isDom = (obj) ->
   isElement(obj) or isWindow(obj) or isDocument(obj)
@@ -55,14 +57,20 @@ module.exports = {
 
   stringify
 
-  positionProps
-
   getElements
+
+  getWindowByElement
 
   getReasonIsHidden
 
   getFirstScrollableParent
 
   getFirstFixedOrStickyPositionParent
+
+  getElementPositioning
+
+  getElementAtPointFromViewport
+
+  getElementCoordinatesByPosition
 
 }

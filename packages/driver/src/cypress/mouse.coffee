@@ -2,18 +2,21 @@ Promise = require("bluebird")
 
 $Cypress = require("../cypress")
 $Keyboard = require("./keyboard")
-utils = require("./utils")
+$dom = require("../dom")
 
 stopPropagation = window.MouseEvent.prototype.stopPropagation
 
 module.exports = {
-  mouseDown: ($elToClick, coords, win) ->
+  mouseDown: ($elToClick, fromViewport) ->
+    debugger
+    win = $dom.getWindowByElement($elToClick.get(0))
+
     mdownEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
       cancelable: true
       view: win
-      clientX: utils.getClientX(coords, win)
-      clientY: utils.getClientY(coords, win)
+      clientX: fromViewport.x
+      clientY: fromViewport.y
       buttons: 1
       detail: 1
     })
@@ -38,13 +41,15 @@ module.exports = {
     props.modifiers = modifiers.join(", ") if modifiers.length
     props
 
-  mouseUp: ($elToClick, coords, win) ->
+  mouseUp: ($elToClick, fromViewport) ->
+    win = $dom.getWindowByElement($elToClick.get(0))
+
     mupEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
       cancelable: true
       view: win
-      clientX: utils.getClientX(coords, win)
-      clientY: utils.getClientY(coords, win)
+      clientX: fromViewport.x
+      clientY: fromViewport.y
       buttons: 0
       detail: 1
     })
@@ -69,13 +74,15 @@ module.exports = {
     props.modifiers = modifiers.join(", ") if modifiers.length
     props
 
-  click: ($elToClick, coords, win) ->
+  click: ($elToClick, fromViewport) ->
+    win = $dom.getWindowByElement($elToClick.get(0))
+
     clickEvtProps = $Keyboard.mixinModifiers({
       bubbles: true
       cancelable: true
       view: win
-      clientX: utils.getClientX(coords, win)
-      clientY: utils.getClientY(coords, win)
+      clientX: fromViewport.x
+      clientY: fromViewport.y
       buttons: 0
       detail: 1
     })

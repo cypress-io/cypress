@@ -36,13 +36,14 @@ getPositionFromArguments = (positionOrX, y, options) ->
 getFixedOrStickyEl = ($el) ->
   $dom.getFirstFixedOrStickyPositionParent($el)
 
-ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
+ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
   $elAtCoords = null
 
-  ensureDescendents = (coords) ->
+  ensureDescendents = (fromViewport) ->
     ## figure out the deepest element we are about to interact
     ## with at these coordinates
-    $elAtCoords = cy.getElementAtCoordinates(coords.x, coords.y)
+    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.x, fromViewport.y)
+      $elAtCoords = $dom.wrap(elAtCoords)
 
     cy.ensureDescendents($el, $elAtCoords, log)
 
@@ -50,8 +51,8 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
 
   ensureDescendentsAndScroll = ->
     try
-      ## use the initial coords
-      ensureDescendents(coords)
+      ## use the initial coords fromViewport
+      ensureDescendents(fromViewport)
     catch err
       ## if we're being covered by a fixed position element then
       ## we're going to attempt to continously scroll the element
@@ -67,7 +68,7 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
       scrollContainerPastElement = ($container, $fixed) ->
         ## get the width + height of the $fixed
         ## since this is what we are scrolling past!
-        { width, height } = $dom.positionProps($fixed)
+        { width, height } = $dom.getElementPositioning($fixed)
 
         ## what is this container currently scrolled?
         ## using jquery here which normalizes window scroll props
@@ -138,22 +139,25 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
             try
               ## now that we've changed scroll positions
               ## we must recalculate whether this element is covered
-              ## since the element's top / left positions change
-              coords = getCoordinatesForEl(cy, $el, options)
+              ## since the element's top / left positions change.
+              fromViewport = getCoordinatesForEl(cy, $el, options).fromViewport
 
-              ensureDescendents(coords)
+              ## this is a relative calculation based on the viewport
+              ## so these are the only coordinates we care about
+              ensureDescendents(fromViewport)
             catch err
               ## we failed here, but before scrolling the next container
               ## we need to first verify that the element covering up
               ## is the same one as before our scroll
-              $elAtCoords = cy.getElementAtCoordinates(coords.x, coords.y)
+              if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.x, fromViewport.y)
+                $elAtCoords = $dom.wrap(elAtCoords)
 
-              ## get the fixed element again
-              $fixed = getFixedOrStickyEl($elAtCoords)
+                ## get the fixed element again
+                $fixed = getFixedOrStickyEl($elAtCoords)
 
-              ## and possibly recursively scroll past it
-              ## if we haven't see it before
-              possiblyScrollMultipleTimes($fixed)
+                ## and possibly recursively scroll past it
+                ## if we haven't see it before
+                possiblyScrollMultipleTimes($fixed)
           else
             scrollContainers(scrollables)
 
@@ -181,9 +185,10 @@ ensureElIsNotCovered = (cy, win, $el, coords, options, log, onScroll) ->
 getCoordinatesForEl = (cy, $el, options) ->
   ## determine if this element is animating
   if options.x and options.y
-    cy.getAbsoluteCoordinatesRelativeToXY($el, options.x, options.y)
+    cy.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
   else
-    cy.getAbsoluteCoordinates($el, options.position)
+    # cy.getElementCoordinatesByPosition($el, options.position)
+    $dom.getElementCoordinatesByPosition($el, options.position)
 
 ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   ## if we dont have at least 2 points
@@ -230,21 +235,24 @@ waitForActionability = (cy, $el, win, options, callbacks) ->
         ## ensure its 'receivable'
         cy.ensureReceivability($el, _log)
 
-      ## now go get the coords
+      ## now go get all the coords for this element
       coords = getCoordinatesForEl(cy, $el, options)
 
       ## if force is true OR waitForAnimations is false
       ## then do not perform these additional ensures...
       if (force isnt true) and (options.waitForAnimations isnt false)
-        ## store the coords
-        coordsHistory.push(coords)
+        ## store the coords that were absolute
+        ## from the window
+        coordsHistory.push(coords.fromWindow)
 
         ## then we ensure the element isnt animating
         ensureNotAnimating(cy, $el, coordsHistory, options.animationDistanceThreshold)
 
-        ## figures out the element and coordinates and ensures
-        ## this is a descendent
-        $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords, options, _log, onScroll)
+        ## now that we know our element isn't animating its time
+        ## to figure out if its being covered by another element.
+        ## this calculation is relative from the viewport so we
+        ## only care about fromViewport coords
+        $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
 
       ## pass our final object into onReady
       return onReady($elAtCoords ? $el, coords)

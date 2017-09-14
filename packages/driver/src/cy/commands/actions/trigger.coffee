@@ -79,15 +79,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
+            { fromWindow, fromViewport } = coords
+
             if options._log
               ## display the red dot at these coords
               options._log.set({coords: coords})
 
             eventOptions = _.extend({
-              clientX: $utils.getClientX(coords, win)
-              clientY: $utils.getClientY(coords, win)
-              pageX: coords.x
-              pageY: coords.y
+              clientX: fromViewport.x
+              clientY: fromViewport.y
+              pageX: fromWindow.x
+              pageY: fromWindow.y
             }, eventOptions)
 
             dispatch($elToClick.get(0), eventName, eventOptions)

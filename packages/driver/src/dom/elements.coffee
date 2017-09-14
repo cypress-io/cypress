@@ -180,22 +180,6 @@ getFirstScrollableParent = ($el) ->
 
   return search($el)
 
-positionProps = ($el, adjustments = {}) ->
-  el = $el[0]
-
-  rect = el.getBoundingClientRect()
-
-  return {
-    width: rect.width
-    height: rect.height
-    top: rect.top
-    right: rect.right
-    bottom: rect.bottom
-    left: rect.left
-    scrollTop: el.scrollTop
-    scrollLeft: el.scrollLeft
-  }
-
 getElements = ($el) ->
   return if not $el?.length
 
@@ -275,8 +259,6 @@ module.exports = {
   isDescendent
 
   stringify
-
-  positionProps
 
   getElements
 
