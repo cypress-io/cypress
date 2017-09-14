@@ -37,6 +37,16 @@ describe('util', function () {
       }
       snapshot(normalizeModuleOptions(options))
     })
+
+    it('converts config object', () => {
+      const options = {
+        config: {
+          baseUrl: 'http://localhost:2000',
+          watchForFileChanges: false,
+        },
+      }
+      snapshot(normalizeModuleOptions(options))
+    })
   })
 
   it('.exit', function () {

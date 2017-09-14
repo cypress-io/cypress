@@ -1,14 +1,15 @@
 exports['errors individual has the following errors 1'] = [
-  "missingXvfb",
-  "missingApp",
-  "missingDependency",
-  "versionMismatch",
-  "unexpected",
-  "failedDownload",
-  "failedUnzip"
+  'missingXvfb',
+  'missingApp',
+  'missingDependency',
+  'versionMismatch',
+  'unexpected',
+  'failedDownload',
+  'failedUnzip',
 ]
 
-exports['errors .errors.formErrorText returns fully formed text message 1'] = `Your system is missing the dependency: XVFB
+exports['errors .errors.formErrorText returns fully formed text message 1'] = `
+Your system is missing the dependency: XVFB
 
 Install XVFB and run Cypress again.
 
@@ -20,5 +21,5 @@ If you using Docker, we provide containers with all required dependencies instal
 ----------
 
 Platform: test platform (test release)
-Cypress Version: 1.2.3`
-
+Cypress Version: 1.2.3
+`

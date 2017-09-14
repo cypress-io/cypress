@@ -384,7 +384,7 @@ describe "src/cy/commands/actions/text", ->
         $txt = cy.$$(":text:first")
 
         $txt.on "keydown", (e) =>
-          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -392,6 +392,7 @@ describe "src/cy/commands/actions/text", ->
             charCode: 0 ## deprecated
             ctrlKey: false
             detail: 0
+            key: "a"
             keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
             layerX: 0
             layerY: 0
@@ -413,7 +414,7 @@ describe "src/cy/commands/actions/text", ->
         $txt = cy.$$(":text:first")
 
         $txt.on "keypress", (e) =>
-          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -421,6 +422,7 @@ describe "src/cy/commands/actions/text", ->
             charCode: 97 ## deprecated
             ctrlKey: false
             detail: 0
+            key: "a"
             keyCode: 97 ## deprecated
             layerX: 0
             layerY: 0
@@ -442,7 +444,7 @@ describe "src/cy/commands/actions/text", ->
         $txt = cy.$$(":text:first")
 
         $txt.on "keyup", (e) =>
-          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -450,6 +452,7 @@ describe "src/cy/commands/actions/text", ->
             charCode: 0 ## deprecated
             ctrlKey: false
             detail: 0
+            key: "a"
             keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
             layerX: 0
             layerY: 0
@@ -825,6 +828,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$(":text:first").on "keydown", (e) ->
             expect(e.which).to.eq 27
             expect(e.keyCode).to.eq 27
+            expect(e.key).to.eq "Escape"
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{esc}")
@@ -871,6 +875,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$(":text:first").on "keydown", _.after 2, (e) ->
             expect(e.which).to.eq 8
             expect(e.keyCode).to.eq 8
+            expect(e.key).to.eq "Backspace"
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}")
@@ -933,6 +938,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$(":text:first").on "keydown", _.after 2, (e) ->
             expect(e.which).to.eq 46
             expect(e.keyCode).to.eq 46
+            expect(e.key).to.eq "Delete"
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}")
@@ -1003,6 +1009,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$(":text:first").on "keydown", (e) ->
             expect(e.which).to.eq 37
             expect(e.keyCode).to.eq 37
+            expect(e.key).to.eq "ArrowLeft"
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then ($input) ->
@@ -1067,6 +1074,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$(":text:first").on "keydown", (e) ->
             expect(e.which).to.eq 39
             expect(e.keyCode).to.eq 39
+            expect(e.key).to.eq "ArrowRight"
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
@@ -1104,6 +1112,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$("#comments").on "keydown", (e) ->
             expect(e.which).to.eq 38
             expect(e.keyCode).to.eq 38
+            expect(e.key).to.eq "ArrowUp"
             done()
 
           cy.get("#comments").type("{uparrow}").then ($input) ->
@@ -1132,6 +1141,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$("#comments").on "keydown", (e) ->
             expect(e.which).to.eq 40
             expect(e.keyCode).to.eq 40
+            expect(e.key).to.eq "ArrowDown"
             done()
 
           cy.get("#comments").type("{downarrow}").then ($input) ->
@@ -1171,6 +1181,7 @@ describe "src/cy/commands/actions/text", ->
           cy.$$("#input-types textarea").on "keydown", _.after 2, (e) ->
             expect(e.which).to.eq 13
             expect(e.keyCode).to.eq 13
+            expect(e.key).to.eq "Enter"
             e.preventDefault()
 
           cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
@@ -1182,6 +1193,7 @@ describe "src/cy/commands/actions/text", ->
             expect(e.which).to.eq 13
             expect(e.keyCode).to.eq 13
             expect(e.charCode).to.eq 13
+            expect(e.key).to.eq "Enter"
             e.preventDefault()
 
           cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->

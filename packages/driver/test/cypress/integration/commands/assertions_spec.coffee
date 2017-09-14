@@ -1082,14 +1082,14 @@ describe "src/cy/commands/assertions", ->
 
         expect({}).to.have.value("foo")
 
-    context "descendents", ->
+    context "descendants", ->
       beforeEach ->
         @$div = $("<div><button>button</button></div>")
         @$div.has = -> throw new Error("has called")
 
-      it "descendents, not descendents", ->
-        expect(@$div).to.have.descendents("button") ## 1
-        expect(@$div).not.to.have.descendents("input") ## 2
+      it "descendants, not descendants", ->
+        expect(@$div).to.have.descendants("button") ## 1
+        expect(@$div).not.to.have.descendants("input") ## 2
 
         expect(@logs.length).to.eq(2)
 
@@ -1097,25 +1097,25 @@ describe "src/cy/commands/assertions", ->
         l2 = @logs[1]
 
         expect(l1.get("message")).to.eq(
-          "expected **<div>** to have descendents **button**"
+          "expected **<div>** to have descendants **button**"
         )
 
         expect(l2.get("message")).to.eq(
-          "expected **<div>** not to have descendents **input**"
+          "expected **<div>** not to have descendants **input**"
         )
 
       it "throws when obj is not DOM", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
-            "expected {} to have descendents 'foo'"
+            "expected {} to have descendants 'foo'"
           )
-          expect(err.message).to.include("> descendents")
+          expect(err.message).to.include("> descendants")
           expect(err.message).to.include("> {}")
 
           done()
 
-        expect({}).to.have.descendents("foo")
+        expect({}).to.have.descendants("foo")
 
     context "visible", ->
       beforeEach ->

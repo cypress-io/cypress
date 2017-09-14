@@ -56,10 +56,10 @@
     "chai": "^3.5.0",
     "clear-module": "^2.1.0",
     "dependency-check": "^2.8.0",
-    "execa-wrap": "1.0.0",
+    "execa-wrap": "1.1.0",
     "nock": "^9.0.9",
     "sinon": "3.2.1",
-    "snap-shot-it": "3.3.0",
+    "snap-shot-it": "4.0.0",
     "strip-ansi": "4.0.0"
   },
   "files": [

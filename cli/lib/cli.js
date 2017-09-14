@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const path = require('path')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
@@ -9,7 +10,9 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = (opts) => _.pick(opts, 'spec', 'reporter', 'reporterOptions', 'path', 'destination', 'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached')
+const parseOpts = (opts) => _.pick(opts,
+  'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
+  'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached')
 
 const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -29,7 +32,7 @@ const descriptions = {
   version: 'Prints Cypress version',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version']
+const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -50,6 +53,13 @@ module.exports = {
     // bug in commaner not printing name
     // in usage help docs
     program._name = 'cypress'
+
+    program
+      .command('help')
+      .description('Shows CLI help and exits')
+      .action(() => {
+        program.help()
+      })
 
     program
       .option('-v, --version', text('version'))
@@ -80,8 +90,13 @@ module.exports = {
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
       .action((opts) => {
+        const parsedOptions = parseOpts(opts)
+        if (parsedOptions.project) {
+          parsedOptions.project = path.resolve(parsedOptions.project)
+        }
+        debug('parsed cli options', parsedOptions)
         require('./exec/run')
-        .start(parseOpts(opts))
+        .start(parsedOptions)
         .then(util.exit)
         .catch(util.logErrorExit1)
       })
@@ -121,16 +136,17 @@ module.exports = {
 
     debug('cli starts with arguments %j', args)
 
-    //# if there are no arguments
+    // if there are no arguments
     if (args.length <= 2) {
-      //# then display the help
+      // then display the help
       program.help()
+      // exits
     }
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
       logger.error('Unknown command', `"${firstCommand}"`)
-      program.help()
+      program.outputHelp()
       return util.exit(1)
     }
 

@@ -68,7 +68,7 @@ For some issues, there are places you can check for more information. This may h
 
 - For issues in the web browser, check the JavaScript console and your Network tab in your DevTools
 - Click on any command in the Command Log where the failure occurred, this will log more information about the error to the JavaScript console.
-- Use Cypress' [`debug`](https://on.cypress.io/api/debug) or [`pause`](https://on.cypress.io/api/pause) commands to step through your commands.
+- Use Cypress' [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
 - Ask other Cypress users for help in our [gitter channel](https://gitter.im/cypress-io/cypress).
 
 ### Reproducibility
