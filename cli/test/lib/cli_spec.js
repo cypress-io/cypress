@@ -10,6 +10,7 @@ const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
 const execa = require('execa-wrap')
+const path = require('path')
 
 describe('cli', function () {
   beforeEach(function () {
@@ -139,6 +140,18 @@ describe('cli', function () {
     it('calls run with --record false', function () {
       this.exec('run --record false')
       expect(run.start).to.be.calledWith({ record: false })
+    })
+
+    it('calls run with relative --project folder', function () {
+      this.sandbox.stub(path, 'resolve')
+        .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
+      this.exec('run --project foo/bar')
+      expect(run.start).to.be.calledWith({ project: '/mock/absolute/foo/bar' })
+    })
+
+    it('calls run with absolute --project folder', function () {
+      this.exec('run --project /tmp/foo/bar')
+      expect(run.start).to.be.calledWith({ project: '/tmp/foo/bar' })
     })
   })
 

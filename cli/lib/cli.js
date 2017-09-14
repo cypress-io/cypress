@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const path = require('path')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
@@ -9,7 +10,9 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = (opts) => _.pick(opts, 'spec', 'reporter', 'reporterOptions', 'path', 'destination', 'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached')
+const parseOpts = (opts) => _.pick(opts,
+  'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
+  'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached')
 
 const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -87,8 +90,13 @@ module.exports = {
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
       .action((opts) => {
+        const parsedOptions = parseOpts(opts)
+        if (parsedOptions.project) {
+          parsedOptions.project = path.resolve(parsedOptions.project)
+        }
+        debug('parsed cli options', parsedOptions)
         require('./exec/run')
-        .start(parseOpts(opts))
+        .start(parsedOptions)
         .then(util.exit)
         .catch(util.logErrorExit1)
       })
