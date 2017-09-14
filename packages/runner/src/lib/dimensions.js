@@ -18,8 +18,8 @@ function addHitBoxLayer (coords, body) {
   const dotHeight = 4
   const dotWidth = 4
 
-  const top  = coords.y - height / 2
-  const left = coords.x - width / 2
+  const top  = coords.top - height / 2
+  const left = coords.left - width / 2
 
   const dotTop  = height / 2 - dotHeight / 2
   const dotLeft = width / 2 - dotWidth / 2

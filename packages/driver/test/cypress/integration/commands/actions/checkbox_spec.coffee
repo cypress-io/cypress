@@ -417,8 +417,8 @@ describe "src/cy/commands/actions/checkbox", ->
       it "passes in coords", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
-          coords = cy.getAbsoluteCoordinates($input)
-          expect(lastLog.get("coords")).to.deep.eq coords
+          { fromWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
+          expect(lastLog.get("coords")).to.deep.eq(fromWindow)
 
       it "ends command when checkbox is already checked", ->
         cy.get("[name=colors][value=blue]").check().check().then ->
@@ -430,12 +430,12 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
 
-          coords = cy.getAbsoluteCoordinates($input)
+          { fromWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq 1
-          expect(console.Coords).to.deep.eq coords
+          expect(console.Coords).to.deep.eq(fromWindow)
 
       it "#consoleProps when checkbox is already checked", ->
         cy.get("[name=colors][value=blue]").invoke("prop", "checked", true).check().then ($input) ->
@@ -819,12 +819,12 @@ describe "src/cy/commands/actions/checkbox", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
           lastLog = @lastLog
 
-          coords = cy.getAbsoluteCoordinates($input)
+          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
-          expect(console.Elements).to.eq 1
-          expect(console.Coords).to.deep.eq coords
+          expect(console.Elements).to.eq(1)
+          expect(console.Coords).to.deep.eq(fromWindow)
 
       it "#consoleProps when checkbox is already unchecked", ->
         cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->

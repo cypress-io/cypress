@@ -214,6 +214,10 @@ parentHasVisibilityNone = ($el) ->
     return parentHasVisibilityNone($el.parent())
 
 getReasonIsHidden = ($el) ->
+  ## TODO: need to add in the reason an element
+  ## is hidden when its fixed position and its
+  ## either being covered or there is no el
+
   node = $elements.stringify($el, "short")
 
   ## returns the reason in human terms why an element is considered not visible

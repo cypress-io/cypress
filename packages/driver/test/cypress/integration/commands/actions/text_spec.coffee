@@ -213,14 +213,14 @@ describe "src/cy/commands/actions/text", ->
       it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
         $txt = cy.$$(":text:first")
 
-        coords = cy.getAbsoluteCoordinates($txt)
+        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
         cy.get(":text:first").type("foo", {animationDistanceThreshold: 1000}).then ->
           args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([coords, coords])
+          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
           expect(args[2]).to.eq(1000)
 
       it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
@@ -228,14 +228,14 @@ describe "src/cy/commands/actions/text", ->
 
         $txt = cy.$$(":text:first")
 
-        coords = cy.getAbsoluteCoordinates($txt)
+        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
         cy.get(":text:first").type("foo").then ->
           args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([coords, coords])
+          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
           expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "input types where no extra formatting required", ->
@@ -2006,13 +2006,13 @@ describe "src/cy/commands/actions/text", ->
       context "#consoleProps", ->
         it "has all of the regular options", ->
           cy.get("input:first").type("foobar").then ($input) ->
-            coords = cy.getAbsoluteCoordinates($input)
+            { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
             console = @lastLog.invoke("consoleProps")
             expect(console.Command).to.eq("type")
             expect(console.Typed).to.eq("foobar")
             expect(console["Applied To"]).to.eq $input.get(0)
-            expect(console.Coords.x).to.be.closeTo coords.x, 1
-            expect(console.Coords.y).to.be.closeTo coords.y, 1
+            expect(console.Coords.left).to.be.closeTo(fromWindow.left, 1)
+            expect(console.Coords.top).to.be.closeTo(fromWindow.top, 1)
 
         it "has a table of keys", ->
           cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->

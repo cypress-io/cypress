@@ -21,16 +21,14 @@ describe "src/cy/commands/actions/clicking", ->
     it "receives native click event", (done) ->
       $btn = cy.$$("#button")
 
-      coords = cy.getElementCoordinatesByPosition($btn)
-
       $btn.on "click", (e) =>
-        obj = _.pick(e.originalEvent, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+        obj = _.pick(e.originalEvent, "bubbles", "cancelable", "view", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
           view: cy.state("window")
-          clientX: coords.x - cy.state("window").pageXOffset
-          clientY: coords.y - cy.state("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -42,6 +40,9 @@ describe "src/cy/commands/actions/clicking", ->
           detail: 1
           type: "click"
         }
+
+        expect(e.clientX).to.be.closeTo(fromViewport.left, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.top, 1)
         done()
 
       cy.get("#button").click()
@@ -81,8 +82,8 @@ describe "src/cy/commands/actions/clicking", ->
           type: "mousedown"
         }
 
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientX).to.be.closeTo(fromViewport.left, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.top, 1)
         done()
 
       cy.get("#button").click()
@@ -112,8 +113,8 @@ describe "src/cy/commands/actions/clicking", ->
           type: "mouseup"
         }
 
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientX).to.be.closeTo(fromViewport.left, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.top, 1)
         done()
 
       cy.get("#button").click()
@@ -139,7 +140,7 @@ describe "src/cy/commands/actions/clicking", ->
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
+        expect(e.clientX).to.be.closeTo(fromViewport.left, 1)
         done()
 
       cy.get("#scrolledBtn").click()
@@ -153,7 +154,7 @@ describe "src/cy/commands/actions/clicking", ->
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         expect(win.pageYOffset).to.be.gt(0)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.top, 1)
         done()
 
       cy.get("#scrolledBtn").click()
@@ -586,14 +587,14 @@ describe "src/cy/commands/actions/clicking", ->
       it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
         $btn = cy.$$("button:first")
 
-        coords = cy.getElementCoordinatesByPosition($btn)
+        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
         cy.get("button:first").click({animationDistanceThreshold: 1000}).then ->
           args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([coords, coords])
+          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
           expect(args[2]).to.eq(1000)
 
       it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
@@ -601,14 +602,14 @@ describe "src/cy/commands/actions/clicking", ->
 
         $btn = cy.$$("button:first")
 
-        coords = cy.getElementCoordinatesByPosition($btn)
+        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
         cy.get("button:first").click().then ->
           args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([coords, coords])
+          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
           expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "assertion verification", ->
@@ -767,12 +768,18 @@ describe "src/cy/commands/actions/clicking", ->
 
     describe "relative coordinate arguments", ->
       it "can specify x and y", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-span")
+        .css({height: 100, width: 100})
+        .prependTo(cy.$$("body"))
+
+        $span = $("<span>span</span>")
+        .css({position: "absolute", left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow"})
+        .appendTo($btn)
 
         clicked = _.after 2, -> done()
 
-        span.on "click", clicked
+        $span.on "click", clicked
         $btn.on "click", clicked
 
         cy.get("#button-covered-in-span").click(75, 78)
@@ -1025,7 +1032,7 @@ describe "src/cy/commands/actions/clicking", ->
         ## return null so we are just forcing it to return null to simulate
         ## the element being "hidden" so to speak but still displacing space
 
-        cy.stub(cy, "getElementAtCoordinates").returns(null)
+        cy.stub(Cypress.dom, "getElementAtPointFromViewport").returns(null)
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "cy.click() failed because the center of this element is hidden from view:"
@@ -1158,8 +1165,8 @@ describe "src/cy/commands/actions/clicking", ->
           lastLog = @lastLog
 
           $btn.blur() ## blur which removes focus styles which would change coords
-          coords = cy.getElementCoordinatesByPosition($btn)
-          expect(lastLog.get("coords")).to.deep.eq coords
+          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          expect(lastLog.get("coords")).to.deep.eq(fromWindow)
 
       it "ends", ->
         logs = []
@@ -1185,15 +1192,15 @@ describe "src/cy/commands/actions/clicking", ->
           lastLog = @lastLog
 
           console   = lastLog.invoke("consoleProps")
-          coords    = cy.getElementCoordinatesByPosition($button)
+          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           logCoords = lastLog.get("coords")
-          expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
-          expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
+          expect(logCoords.left).to.be.closeTo(fromWindow.left, 1) ## ensure we are within 1
+          expect(logCoords.top).to.be.closeTo(fromWindow.top, 1) ## ensure we are within 1
           expect(console.Command).to.eq "click"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq 1
-          expect(console.Coords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
-          expect(console.Coords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
+          expect(console.Coords.left).to.be.closeTo(fromWindow.left, 1) ## ensure we are within 1
+          expect(console.Coords.top).to.be.closeTo(fromWindow.top, 1) ## ensure we are within 1
 
       it "#consoleProps actual element clicked", ->
         $btn = $("<button>", {

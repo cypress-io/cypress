@@ -1,5 +1,4 @@
 $window = require("./window")
-# $document = require("./document")
 
 getElementAtPointFromViewport = (doc, left, top) ->
   doc.elementFromPoint(left, top)
@@ -30,18 +29,18 @@ getElementPositioning = ($el) ->
     }
   }
 
-normalizeCoords = (x, y, xPosition = "center", yPosition = "center") ->
-  xCoords = switch xPosition
-    when "left"   then Math.ceil(x)
-    when "center" then Math.floor(x)
-    when "right"  then Math.floor(x) - 1
+normalizeCoords = (left, top, xPosition = "center", yPosition = "center") ->
+  left = switch xPosition
+    when "left"   then Math.ceil(left)
+    when "center" then Math.floor(left)
+    when "right"  then Math.floor(left) - 1
 
-  yCoords = switch yPosition
-    when "top"    then Math.ceil(y)
-    when "center" then Math.floor(y)
-    when "bottom" then Math.floor(y) - 1
+  top = switch yPosition
+    when "top"    then Math.ceil(top)
+    when "center" then Math.floor(top)
+    when "bottom" then Math.floor(top) - 1
 
-  return { x: xCoords, y: yCoords }
+  return { top, left }
 
 getTopLeftCoordinates = (rect) ->
   x = rect.left
@@ -88,11 +87,27 @@ getBottomRightCoordinates = (rect) ->
   y = rect.top + rect.height
   normalizeCoords(x, y, "right", "bottom")
 
-getElementCoordinatesByPositionRelativeToXY = (state, $el, x, y) ->
-  rect = getBoundingClientRect($el, state)
-  x    = rect.left + x
-  y    = rect.top + y
-  normalizeCoords(x, y)
+getElementCoordinatesByPositionRelativeToXY = ($el, x, y) ->
+  positionProps = getElementPositioning($el)
+
+  { fromViewport, fromWindow } = positionProps
+
+  fromViewport.left += x
+  fromViewport.top += y
+
+  fromWindow.left += x
+  fromWindow.top += y
+
+  normalizeFromViewport = normalizeCoords(fromViewport.left, fromViewport.top)
+  normalizeFromWindow = normalizeCoords(fromWindow.left, fromWindow.top)
+
+  fromViewport.left = normalizeFromViewport.left
+  fromViewport.top = normalizeFromViewport.top
+
+  fromWindow.left = normalizeFromWindow.left
+  fromWindow.top = normalizeFromWindow.top
+
+  return positionProps
 
 getElementCoordinatesByPosition = ($el, position = "center") ->
   positionProps = getElementPositioning($el)
@@ -143,9 +158,13 @@ calculations = {
 }
 
 module.exports = {
+  normalizeCoords
+
   getElementPositioning
 
   getElementAtPointFromViewport
 
   getElementCoordinatesByPosition
+
+  getElementCoordinatesByPositionRelativeToXY
 }

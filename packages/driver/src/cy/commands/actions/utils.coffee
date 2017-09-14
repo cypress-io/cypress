@@ -42,7 +42,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
   ensureDescendents = (fromViewport) ->
     ## figure out the deepest element we are about to interact
     ## with at these coordinates
-    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.x, fromViewport.y)
+    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.left, fromViewport.top)
       $elAtCoords = $dom.wrap(elAtCoords)
 
     cy.ensureDescendents($el, $elAtCoords, log)
@@ -149,7 +149,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
               ## we failed here, but before scrolling the next container
               ## we need to first verify that the element covering up
               ## is the same one as before our scroll
-              if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.x, fromViewport.y)
+              if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.left, fromViewport.top)
                 $elAtCoords = $dom.wrap(elAtCoords)
 
                 ## get the fixed element again
@@ -185,9 +185,9 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
 getCoordinatesForEl = (cy, $el, options) ->
   ## determine if this element is animating
   if options.x and options.y
-    cy.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
+    $dom.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
   else
-    # cy.getElementCoordinatesByPosition($el, options.position)
+    # Cypress.dom.getElementCoordinatesByPosition($el, options.position)
     $dom.getElementCoordinatesByPosition($el, options.position)
 
 ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
