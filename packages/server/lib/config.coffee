@@ -290,7 +290,7 @@ module.exports = {
       ## supportFile doesn't exist on disk
       if sf is path.resolve(obj.projectRoot, defaults.supportFile)
         log("support file is default, check if #{path.dirname(sf)} exists")
-        return fs.pathExists(path.dirname(sf))
+        return fs.pathExists(sf)
         .then (found) ->
           if found
             log("support folder exists, set supportFile to false")
@@ -345,7 +345,7 @@ module.exports = {
       log("plugins file does not exist")
       if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
         log("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
-        fs.pathExists(path.dirname(pluginsFile))
+        fs.pathExists(pluginsFile)
         .then (found) ->
           if found
             log("plugins folder exists, set pluginsFile to false")

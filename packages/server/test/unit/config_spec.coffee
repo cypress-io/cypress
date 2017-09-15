@@ -826,7 +826,7 @@ describe "lib/config", ->
         })
 
     it "sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default", ->
-      projectRoot = process.cwd()
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/no-scaffolding")
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
@@ -854,7 +854,7 @@ describe "lib/config", ->
         expect(result).to.eql({
           projectRoot: projectRoot
           supportFile: false
-          })
+        })
 
     it "throws error if supportFile is not default and does not exist", ->
       projectRoot = process.cwd()
@@ -893,7 +893,7 @@ describe "lib/config", ->
         })
 
     it "sets the pluginsFile to default index.js if does not exist", ->
-      projectRoot = process.cwd()
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/no-scaffolding")
 
       obj = {
         projectRoot: projectRoot
