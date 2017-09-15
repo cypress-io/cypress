@@ -460,6 +460,7 @@ describe "lib/socket", ->
         setTimeout =>
           expect(@io.emit).to.be.calledWith("watched:file:changed")
           done()
+        , 200
 
       it "sends onChange option to preprocessor if config.watchForFileChanges is false", ->
         @cfg.watchForFileChanges = false

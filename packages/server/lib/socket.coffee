@@ -58,10 +58,8 @@ class Socket
     ## this will weed out directories as well
     return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
 
-    console.log("foo")
     fs.statAsync(filePath)
     .then =>
-      console.log("bar")
       @io.emit("watched:file:changed")
     .catch ->
       log("could not find test file that changed: #{filePath}")
