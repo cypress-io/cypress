@@ -356,12 +356,17 @@ class Project extends EE
     ## and example support file if dir doesnt exist
     push(scaffold.support(config.supportFolder, config))
 
+    ## TODO: we currently always scaffold the plugins file
+    ## even when headlessly or else it will cause an error when
+    ## we try to load it and it's not there
+    if config.pluginsFile
+      push(scaffold.plugins(path.dirname(config.pluginsFile), config))
+
     ## if we're in headed mode add these other scaffolding
     ## tasks
     if not config.isTextTerminal
       push(scaffold.integration(config.integrationFolder, config))
       push(scaffold.fixture(config.fixturesFolder, config))
-      push(scaffold.plugins(path.dirname(config.pluginsFile), config))
 
     Promise.all(scaffolds)
 

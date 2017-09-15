@@ -254,6 +254,11 @@ describe "lib/project", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.plugins).to.be.calledWith("pf")
 
+    it "does not call support.plugins if config.pluginsFile is falsey", ->
+      @obj.pluginsFile = false
+      @project.scaffold(@obj).then =>
+        expect(scaffold.plugins).not.to.be.called
+
   context "#watchSettings", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
