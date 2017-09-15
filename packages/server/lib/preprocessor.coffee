@@ -86,10 +86,14 @@ module.exports = {
     log("getFile #{filePath}")
 
     preprocessorOptions = {
-      shouldWatch: !config.isTextTerminal
+      shouldWatch: not config.isTextTerminal
     }
 
     util = {
+      fileUpdated: (changedFilePath) ->
+        log("file updated: #{filePath}")
+        if _.isFunction(options.onChange) and changedFilePath is filePath
+          options.onChange(changedFilePath)
       getOutputPath: _.partial(getOutputPath, config)
       onClose: (cb) ->
         emitter.on("close:#{filePath}", cb)
@@ -102,15 +106,8 @@ module.exports = {
       setDefaultPreprocessor()
 
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
-      log("- headless and already processed")
+      log("headless and already processed")
       return fileProcessor
-
-    if _.isFunction(options.onChange)
-      log("- add update listener for #{filePath}")
-
-      util.fileUpdated = (changedFilePath) ->
-        if changedFilePath is filePath
-          options.onChange(changedFilePath)
 
     preprocessor = Promise.resolve(
       plugins.execute("on:spec:file:preprocessor", filePath, preprocessorOptions, util)

@@ -57,6 +57,12 @@ describe "lib/preprocessor", ->
       preprocessor.getFile("/path/to/test.coffee", @config).then (filePath) ->
         expect(filePath).to.equal("/path/to/output.js")
 
+    it "calls provides util.fileUpdated", ->
+      preprocessor.getFile("/path/to/test.coffee", @config)
+      expect(=>
+        @plugin.lastCall.args[2].fileUpdated()
+      ).not.to.throw()
+
     it "calls onChange option when util.fileUpdated is called with same file path", ->
       onChange = @sandbox.spy()
       preprocessor.getFile("/path/to/test.coffee", @config, { onChange })
