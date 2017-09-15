@@ -39,7 +39,12 @@ module.exports = {
       throw new Error("The pluginsFile must export a function. Your pluginsFile (#{config.pluginsFile}) exported #{plugins}.")
 
     log("call the plugins function")
-    plugins(register, config)
+
+    try
+      plugins(register, config)
+    catch e
+      log("pluginsFile threw an error:", e.stack)
+      errors.throw("PLUGINS_FUNCTION_ERROR", config.pluginsFile, e.stack)
 
   register: register
 

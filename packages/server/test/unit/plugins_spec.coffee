@@ -53,6 +53,11 @@ describe "lib/plugins", ->
       nodeCache.require.returns(null)
       expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The pluginsFile must export a function")
 
+    it "throws error if pluginsFile function throws an error", ->
+      nodeCache.require.returns(-> foo.bar())
+      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("The function exported by the plugins file threw an error")
+      expect(-> plugins.init({ pluginsFile: "cypress-plugin" })).to.throw("foo is not defined")
+
   context "#register", ->
     it "registers callback for event", ->
       foo = @sandbox.spy()

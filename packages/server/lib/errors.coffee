@@ -249,6 +249,16 @@ API = {
 
         #{if arg2 then chalk.yellow(arg2) else ""}
         """.trim()
+      when "PLUGINS_FUNCTION_ERROR"
+        """
+        The function exported by the plugins file threw an error.
+
+        We invoked the function exported by '#{arg1}', but it threw an error.
+
+        This is likely an error in the code of the plugins file itself.
+
+        #{chalk.yellow(arg2)}
+        """.trim()
       when "BUNDLE_ERROR"
         ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
         ## THE ERROR MESSAGE IN THE RUNNER TOO
