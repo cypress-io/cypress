@@ -193,3 +193,34 @@ import './commands'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 `
+
+exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = [
+  {
+    "name": "tests",
+    "children": [
+      {
+        "name": "example_spec.js"
+      },
+      {
+        "name": "_fixtures",
+        "children": [
+          {
+            "name": "example.json"
+          }
+        ]
+      },
+      {
+        "name": "_support",
+        "children": [
+          {
+            "name": "commands.js"
+          },
+          {
+            "name": "index.js"
+          }
+        ]
+      }
+    ]
+  }
+]
+

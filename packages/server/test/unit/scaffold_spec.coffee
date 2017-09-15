@@ -293,6 +293,7 @@ describe "lib/scaffold", ->
     beforeEach ->
       todosPath = Fixtures.projectPath("todos")
       config.get(todosPath).then (@cfg) =>
+        @cfg.pluginsFile = path.join(@cfg.projectRoot, "cypress/plugins/index.js")
 
     it "returns tree-like structure of scaffolded", ->
       snapshot(scaffold.fileTree(@cfg))
@@ -303,4 +304,8 @@ describe "lib/scaffold", ->
 
     it "leaves out support if configured to false", ->
       @cfg.supportFile = false
+      snapshot(scaffold.fileTree(@cfg))
+
+    it "leaves out plugins if configured to false", ->
+      @cfg.pluginsFile = false
       snapshot(scaffold.fileTree(@cfg))
