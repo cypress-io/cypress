@@ -2,6 +2,8 @@ cp      = require("child_process")
 Promise = require("bluebird")
 os      = require("os")
 execa   = require("execa")
+path    = require("path")
+la      = require("lazy-ass")
 
 # resolves with zipped filename
 macZip = (src, dest) ->
@@ -29,8 +31,13 @@ macZip = (src, dest) ->
 
 # resolves with zipped filename
 linuxZip = (src, dest) ->
-  # cmd = "tar -zcvf #{dest} #{src}"
-  cmd = "zip -r #{dest} #{src}"
+  # in Linux switch to the folder containing source folder
+  la(path.isAbsolut(src), "source path should be absolute", src)
+  la(path.isAbsolut(dest), "destination path should be absolute", dest)
+  parentFolder = path.dirname(src)
+  relativeSource = path.basename(src)
+
+  cmd = "cd #{parentFolder} && zip -r #{dest} #{relativeSource}"
   console.log("linux zip: #{cmd}")
   execa.shell(cmd)
   .then((result) ->
