@@ -160,7 +160,7 @@ module.exports = {
       getFilePath(config.integrationFolder, "example_spec.js")
     ]
 
-    if config.fixturesFolder and config.fixturesFolder isnt false
+    if config.fixturesFolder
       files = files.concat([
         getFilePath(config.fixturesFolder, "example.json")
       ])
@@ -171,7 +171,7 @@ module.exports = {
         getFilePath(config.supportFolder, "index.js")
       ])
 
-    if config.pluginsFile and config.pluginsFile isnt false
+    if config.pluginsFile
       files = files.concat([
         getFilePath(path.dirname(config.pluginsFile), "index.js")
       ])
