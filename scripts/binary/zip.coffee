@@ -32,8 +32,8 @@ macZip = (src, dest) ->
 # resolves with zipped filename
 linuxZip = (src, dest) ->
   # in Linux switch to the folder containing source folder
-  la(path.isAbsolut(src), "source path should be absolute", src)
-  la(path.isAbsolut(dest), "destination path should be absolute", dest)
+  la(path.isAbsolute(src), "source path should be absolute", src)
+  la(path.isAbsolute(dest), "destination path should be absolute", dest)
   parentFolder = path.dirname(src)
   relativeSource = path.basename(src)
 
