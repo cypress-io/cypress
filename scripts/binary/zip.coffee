@@ -29,7 +29,8 @@ macZip = (src, dest) ->
 
 # resolves with zipped filename
 linuxZip = (src, dest) ->
-  cmd = "tar -zcvf #{dest} #{src}"
+  # cmd = "tar -zcvf #{dest} #{src}"
+  cmd = "zip -r #{dest} #{src}"
   console.log("linux zip: #{cmd}")
   execa.shell(cmd)
   .then((result) ->
@@ -43,7 +44,7 @@ linuxZip = (src, dest) ->
   )
 
 zippers = {
-  linux: macZip
+  linux: linuxZip
   darwin: macZip
 }
 
