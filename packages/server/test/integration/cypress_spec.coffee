@@ -12,7 +12,6 @@ Fixtures   = require("../support/helpers/fixtures")
 extension  = require("@packages/extension")
 pkg        = require("@packages/root")
 git        = require("#{root}lib/util/git")
-bundle     = require("#{root}lib/util/bundle")
 connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -406,21 +405,6 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch -> done()
-
-    it "does not watch supportFile when headless", ->
-      bundle._watching = false
-      cypress.start(["--run-project=#{@pristinePath}"])
-      .then =>
-        expect(bundle._watching).to.be.false
-
-    it "does watch supportFile when not headless", ->
-      bundle._watching = false
-      watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
-
-      cypress.start(["--run-project=#{@noScaffolding}", "--no-headless"])
-      .then =>
-        expect(watchBundle).to.be.calledWith("cypress/support/index.js")
-        expect(bundle._watching).to.be.true
 
     it "runs project headlessly and displays gui", ->
       cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"])
