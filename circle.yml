@@ -313,6 +313,13 @@ jobs:
       - run: cd build/linux && zip -r ../../cypress.zip Cypress
       - run: npm run binary-upload -- --platform linux --version "0.20.1-linux" --zip cypress.zip
 
+  "build-binary-single-command":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: npm run binary-deploy -- --platform linux --version "0.20.1-linux-deploy"
+
 workflows:
   version: 2
   build_and_test:
@@ -359,6 +366,9 @@ workflows:
           requires:
             - build
       - build-binary:
+          requires:
+            - build
+      - build-binary-single-command:
           requires:
             - build
 #
