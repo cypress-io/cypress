@@ -11,6 +11,7 @@ Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
 check   = require("check-more-types")
+const { configFromEnvOrJsonFile } = require('@cypress/env-or-json-file')
 
 fs = Promise.promisifyAll(fs)
 
@@ -31,6 +32,17 @@ getUploadNameByOs = (os) ->
     throw new Error("Cannot find upload name for OS #{os}")
   name
 
+getS3Credentials = () ->
+  key = path.join('support', '.aws-credentials.json')
+  config = configFromEnvOrJsonFile(key)
+  if (!config) {
+    console.error('⛔️  Cannot find AWS credentials')
+    console.error('Using @cypress/env-or-json-file module')
+    console.error('and key', key)
+    throw new Error('AWS config not found')
+  }
+  config
+
 module.exports = {
   getPublisher: ->
     aws = @getAwsObj()
@@ -47,7 +59,7 @@ module.exports = {
     }
 
   getAwsObj: ->
-    fs.readJsonSync(path.join(__dirname, "support", ".aws-credentials.json"))
+    getS3Credentials()
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/

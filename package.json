@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@cypress/bumpercar": "^1.0.6",
+    "@cypress/env-or-json-file": "^1.0.1",
     "@cypress/npm-run-all": "^4.0.4",
     "@cypress/questions-remain": "^1.0.1",
     "ansi-styles": "^3.1.0",
