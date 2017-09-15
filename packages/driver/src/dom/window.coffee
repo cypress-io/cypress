@@ -1,4 +1,9 @@
 $ = require("jquery")
+$document = require("./document")
+
+getWindowByElement = (el) ->
+  doc = $document.getDocumentFromElement(el)
+  getWindowByDocument(doc)
 
 getWindowByDocument = (doc) ->
   ## parentWindow for IE
@@ -11,6 +16,8 @@ isWindow = (obj) ->
     false
 
 module.exports = {
+  getWindowByElement
+
   getWindowByDocument
 
   isWindow

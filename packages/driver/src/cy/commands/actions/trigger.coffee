@@ -59,8 +59,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num: options.$el.length }
         })
 
-      win = state("window")
-
       dispatchEarly = false
 
       ## if we're window or document then dispatch early
@@ -74,20 +72,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if dispatchEarly
           return dispatch(subject, eventName, eventOptions)
 
-        waitForActionability(cy, subject, win, options, {
+        waitForActionability(cy, subject, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
+            { fromWindow, fromViewport } = coords
+
             if options._log
               ## display the red dot at these coords
-              options._log.set({coords: coords})
+              options._log.set({coords: fromWindow})
 
             eventOptions = _.extend({
-              clientX: $utils.getClientX(coords, win)
-              clientY: $utils.getClientY(coords, win)
-              pageX: coords.x
-              pageY: coords.y
+              clientX: fromViewport.left
+              clientY: fromViewport.top
+              pageX: fromWindow.left
+              pageY: fromWindow.top
             }, eventOptions)
 
             dispatch($elToClick.get(0), eventName, eventOptions)

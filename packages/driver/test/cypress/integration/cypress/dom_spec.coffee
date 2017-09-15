@@ -113,6 +113,9 @@ describe "src/cypress/dom", ->
       add = (el) =>
         $(el).appendTo(cy.$$("body"))
 
+      ## ensure all tests run against a scrollable window
+      scrollThisIntoView = add "<div style='height: 1000px;' /><div>Should be in view</div>"
+
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
       @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>parent visibility: hidden</button></div>"
       @$displayNone = add "<button style='display: none'>display: none</button>"
@@ -151,10 +154,8 @@ describe "src/cypress/dom", ->
         </div>"""
 
       @$childPosFixed = add """
-        <div style='width: 0; height: 100px; overflow: hidden;'>
-          <div style='height: 500px; width: 500px;'>
-            <span style='position: fixed;'>position: fixed</span>
-          </div>
+        <div id="childPosFixed" style='width: 100px; height: 100px; overflow: hidden;'>
+          <button style='position: fixed; top: 0;'>position: fixed</button>
         </div>"""
 
       @$descendentPosAbs = add """
@@ -165,11 +166,31 @@ describe "src/cypress/dom", ->
         </div>"""
 
       @$descendentPosFixed = add """
-        <div style='width: 0; height: 100px; overflow: hidden;'>
-          <div style='height: 500px; width: 500px; position: fixed;'>
-            <span>no width, descendant position: fixed</span>
+        <div id="descendentPosFixed" style='width: 0; height: 100px; overflow: hidden;'>
+          <div style='height: 500px; width: 500px; position: fixed; top: 0; right: 0;'>
+            <button>no width, descendant position: fixed</button>
           </div>
         </div>"""
+
+      @$descendantInPosFixed = add """
+        <div>
+          <div id="descendantInPosFixed" style="width: 200px; position: fixed; bottom: 0; right: 0">
+            underneath
+            <div style="width: 200px; position: fixed; bottom: 0; right: 0">on top of the other</div>
+          </div>
+        </div>
+      """
+
+      @$coveredUpPosFixed = add """
+        <div>
+          <div id="coveredUpPosFixed" style="position: fixed; bottom: 0; left: 0">underneath</div>
+          <div style="position: fixed; bottom: 0; left: 0">on top</div>
+        </div>
+      """
+
+      @$offScreenPosFixed = add """
+        <div id="offScreenPosFixed" style="position: fixed; bottom: 0; left: -100px;">off screen</div>
+      """
 
       @$parentPosAbs = add """
         <div style='width: 0; height: 100px; overflow: hidden; position: absolute;'>
@@ -191,7 +212,7 @@ describe "src/cypress/dom", ->
       """
 
       @$elOutOfParentBoundsToRight = add """
-        <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
+        <div id="elOutOfParentBoundsToRight" style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
           <span style='position: absolute; left: 200px; top: 0px;'>position: absolute, out of bounds right</span>
         </div>
       """
@@ -203,7 +224,7 @@ describe "src/cypress/dom", ->
       """
 
       @$elOutOfParentBoundsBelow = add """
-        <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
+        <div id="elOutOfParentBoundsBelow" style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
           <span style='position: absolute; left: 0px; top: 200px;'>position: absolute, out of bounds below</span>
         </div>
       """
@@ -300,6 +321,34 @@ describe "src/cypress/dom", ->
         </div>
       """
 
+      add """
+        <div id="ancestorTransformMakesElOutOfBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
+          <div style='transform: translateX(-100px); width: 200px;'>
+            <div style='width: 100px;'>
+              <span>out of ancestor's bounds due to ancestor translate</span>
+            </div>
+          </div>
+        </div>
+      """
+
+      add """
+        <div id="ancestorTransformMakesElInBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
+          <div style='transform: translateX(-100px); width: 300px;'>
+            <div style='display: inline-block; width: 100px;'>
+              <span>out of ancestor's bounds due to ancestor translate</span>
+            </div>
+            <div style='display: inline-block; width: 100px;'>
+              <span>in ancestor's bounds due to ancestor translate</span>
+            </div>
+          </div>
+        </div>
+      """
+
+      # scroll the 2nd element into view so that
+      # there is always a scrollTop so we ensure
+      # its factored in (window vs viewport) calculations
+      scrollThisIntoView.get(1).scrollIntoView()
+
     it "is hidden if .css(visibility) is hidden", ->
       expect(@$visHidden.is(":hidden")).to.be.true
       expect(@$visHidden.is(":visible")).to.be.false
@@ -357,16 +406,28 @@ describe "src/cypress/dom", ->
       expect(@$childPosAbs.find("span")).not.be.hidden
 
     it "is visible if child has position: fixed", ->
-      expect(@$childPosFixed.find("span")).to.be.visible
-      expect(@$childPosFixed.find("span")).to.not.be.hidden
+      expect(@$childPosFixed.find("button")).to.be.visible
+      expect(@$childPosFixed.find("button")).not.to.be.hidden
+
+    it "is visible if descendent from parent has position: fixed", ->
+      expect(@$descendentPosFixed.find("button")).to.be.visible
+      expect(@$descendentPosFixed.find("button")).not.to.be.hidden
+
+    it "is visible if has position: fixed and descendent is found", ->
+      expect(@$descendantInPosFixed.find("#descendantInPosFixed")).to.be.visible
+      expect(@$descendantInPosFixed.find("#descendantInPosFixed")).not.to.be.hidden
+
+    it "is hidden if position: fixed and covered up", ->
+      expect(@$coveredUpPosFixed).to.be.hidden
+      expect(@$coveredUpPosFixed).not.to.be.visible
+
+    it "is hidden if position: fixed and off screent", ->
+      expect(@$offScreenPosFixed).to.be.hidden
+      expect(@$offScreenPosFixed).not.to.be.visible
 
     it "is visible if descendent from parent has position: absolute", ->
       expect(@$descendentPosAbs.find("span")).to.be.visible
       expect(@$descendentPosAbs.find("span")).to.not.be.hidden
-
-    it "is visible if descendent from parent has position: fixed", ->
-      expect(@$descendentPosFixed.find("span")).to.be.visible
-      expect(@$descendentPosFixed.find("span")).to.not.be.hidden
 
     it "is hidden if only the parent has position absolute", ->
       expect(@$parentPosAbs.find("span")).to.be.hidden
@@ -420,6 +481,12 @@ describe "src/cypress/dom", ->
 
     it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
       expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
+
+    it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
+      cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
+
+    it "is visible when in ancestor's bounds due to ancestor's transform", ->
+      cy.get("#ancestorTransformMakesElInBoundsOfAncestor span").eq(1).should("be.visible")
 
     describe "#getReasonIsHidden", ->
       beforeEach ->

@@ -99,12 +99,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
           options._log.snapshot().end()
 
         return null
-      else
-        ## set the coords only if we are actually
-        ## going to go out and click this bad boy
-        coords = cy.getAbsoluteCoordinates($el)
-        consoleProps.Coords = coords
-        options._log.set "coords", coords
 
     ## if we didnt pass in any values or our
     ## el's value is in the array then check it
@@ -126,7 +120,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   Promise
   .resolve(options.$el.toArray())
   .each(checkOrUncheckEl)
-  .then =>
+  .then ->
     ## filter down our $el to the
     ## matching elements
     options.$el = options.$el.filter(matchingElements)

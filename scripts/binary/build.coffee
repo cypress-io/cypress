@@ -189,7 +189,7 @@ buildCypressApp = (platform, version, options = {}) ->
       dir
       dist
       platform
-      "app-version": version
+      appVersion: version
     })
 
   removeDevElectronApp = ->
