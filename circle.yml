@@ -305,9 +305,13 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      # build binary on Linux for Linux with same version
+      # - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      # - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
+      - run: npm run binary-build -- --platform linux --version "0.20.1-linux"
       - run: ls -la build/linux/Cypress
+      - run: zip -r cypress.zip build/linux/Cypress
+      - run: npm run binary-upload -- --platform linux --version "0.20.1-linux"
 
 workflows:
   version: 2
