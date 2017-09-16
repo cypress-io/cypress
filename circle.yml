@@ -10,6 +10,8 @@ defaults: &defaults
         ## this enables colors + fixes failing unit tests
         TERM: xterm
 
+        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
+
         npm_config_loglevel: warn
         # even when running as non-root user
         # need to set unsafe perm to be able to do `npm postinstall`
@@ -269,6 +271,8 @@ jobs:
           command: cd packages/driver && npm start
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 0
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "driver-integration-tests-2":
     <<: *defaults
@@ -279,6 +283,8 @@ jobs:
           command: cd packages/driver && npm start
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 1
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "driver-integration-tests-3":
     <<: *defaults
@@ -289,6 +295,8 @@ jobs:
           command: cd packages/driver && npm start
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 2
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "driver-integration-tests-4":
     <<: *defaults
@@ -299,6 +307,8 @@ jobs:
           command: cd packages/driver && npm start
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 3
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "desktop-gui-integration-tests-1":
     <<: *defaults
@@ -307,6 +317,8 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd packages/desktop-gui && npm run build-prod
       - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 0
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "desktop-gui-integration-tests-2":
     <<: *defaults
@@ -315,6 +327,8 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd packages/desktop-gui && npm run build-prod
       - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 1
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "desktop-gui-integration-tests-3":
     <<: *defaults
@@ -323,6 +337,8 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: cd packages/desktop-gui && npm run build-prod
       - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 2
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "build-binary":
     <<: *defaults

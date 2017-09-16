@@ -24,7 +24,7 @@ const started = new Date()
 let numFailed = 0
 
 // turn this back on for driver + desktop gui tests
-process.env.COPY_CIRCLE_ARTIFACTS = 1
+process.env.COPY_CIRCLE_ARTIFACTS = 'true'
 
 function isLoadBalanced (options) {
   return _.isNumber(options.index) && _.isNumber(options.parallel)

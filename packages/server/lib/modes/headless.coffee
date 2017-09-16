@@ -376,7 +376,13 @@ module.exports = {
   copy: (videosFolder, screenshotsFolder) ->
     Promise.try ->
       ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
-      if (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
+      shouldCopy = (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
+
+      log("Should copy Circle Artifacts?", shouldCopy)
+
+      if shouldCopy
+        log("Copying Circle Artifacts", ca)
+
         Promise.join(
           ss.copy(screenshotsFolder, ca)
           video.copy(videosFolder, ca)
