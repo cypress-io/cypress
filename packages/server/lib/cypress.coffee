@@ -151,9 +151,6 @@ module.exports = {
         when options.exitWithCode?
           options.mode = "exitWithCode"
 
-        when options.driver
-          options.mode = "driver"
-
         ## enable old CLI tools to record
         when options.record or options.ci
           options.mode = "record"
@@ -235,11 +232,6 @@ module.exports = {
       when "exitWithCode"
         require("./modes/exit")(options)
         .then(exit)
-        .catch(exitErr)
-
-      when "driver"
-        require("./modes")(mode, options)
-        .get("failures")
         .catch(exitErr)
 
       when "headless"
