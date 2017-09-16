@@ -3,10 +3,10 @@ $ = require("jquery")
 Promise = require("bluebird")
 moment = require("moment")
 
-{ delay, waitForActionability } = require("./utils")
 $dom = require("../../../dom")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
+$actionability = require("../../actionability")
 
 inputEvents = "textInput input".split(" ")
 
@@ -317,7 +317,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         cy.now("focused", {log: false, verify: false})
         .then ($focused) ->
-          waitForActionability(cy, options.$el, options, {
+          $actionability.verify(cy, options.$el, options, {
             onScroll: ($el, type) ->
               Cypress.action("cy:scrolled", $el, type)
 
@@ -345,10 +345,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       handleFocused()
       .then ->
-        cy.timeout(delay, true, "type")
+        cy.timeout($actionability.delay, true, "type")
 
         Promise
-        .delay(delay, "type")
+        .delay($actionability.delay, "type")
         .then ->
           ## command which consume cy.type may
           ## want to handle verification themselves
