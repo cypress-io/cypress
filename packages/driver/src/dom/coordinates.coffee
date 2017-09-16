@@ -1,7 +1,7 @@
 $window = require("./window")
 
-getElementAtPointFromViewport = (doc, left, top) ->
-  doc.elementFromPoint(left, top)
+getElementAtPointFromViewport = (doc, x, y) ->
+  doc.elementFromPoint(x, y)
 
 getElementPositioning = ($el) ->
   el = $el[0]
@@ -14,8 +14,10 @@ getElementPositioning = ($el) ->
 
   center = getCenterCoordinates(rect)
 
-  topCenter = center.top
-  leftCenter = center.left
+  ## add the center coordinates
+  ## because its useful to any caller
+  topCenter = center.y
+  leftCenter = center.x
 
   return {
     scrollTop: el.scrollTop
@@ -38,7 +40,7 @@ getElementPositioning = ($el) ->
     }
   }
 
-normalizeCoords = (left, top, xPosition = "center", yPosition = "center") ->
+getCoordsByPosition = (left, top, xPosition = "center", yPosition = "center") ->
   left = switch xPosition
     when "left"   then Math.ceil(left)
     when "center" then Math.floor(left)
@@ -49,52 +51,59 @@ normalizeCoords = (left, top, xPosition = "center", yPosition = "center") ->
     when "center" then Math.floor(top)
     when "bottom" then Math.floor(top) - 1
 
-  return { top, left }
+  ## returning x/y here because this is
+  ## about the target position we want
+  ## to fire the event at based on what
+  ## the desired xPosition and yPosition is
+  return {
+    x: left
+    y: top
+  }
 
 getTopLeftCoordinates = (rect) ->
   x = rect.left
   y = rect.top
-  normalizeCoords(x, y, "left", "top")
+  getCoordsByPosition(x, y, "left", "top")
 
 getTopCoordinates = (rect) ->
   x = rect.left + rect.width / 2
   y = rect.top
-  normalizeCoords(x, y, "center", "top")
+  getCoordsByPosition(x, y, "center", "top")
 
 getTopRightCoordinates = (rect) ->
   x = rect.left + rect.width
   y = rect.top
-  normalizeCoords(x, y, "right", "top")
+  getCoordsByPosition(x, y, "right", "top")
 
 getLeftCoordinates = (rect) ->
   x = rect.left
   y = rect.top + rect.height / 2
-  normalizeCoords(x, y, "left", "center")
+  getCoordsByPosition(x, y, "left", "center")
 
 getCenterCoordinates = (rect) ->
   x = rect.left + rect.width / 2
   y = rect.top + rect.height / 2
-  normalizeCoords(x, y, "center", "center")
+  getCoordsByPosition(x, y, "center", "center")
 
 getRightCoordinates = (rect) ->
   x = rect.left + rect.width
   y = rect.top + rect.height / 2
-  normalizeCoords(x, y, "right", "center")
+  getCoordsByPosition(x, y, "right", "center")
 
 getBottomLeftCoordinates = (rect) ->
   x = rect.left
   y = rect.top + rect.height
-  normalizeCoords(x, y, "left", "bottom")
+  getCoordsByPosition(x, y, "left", "bottom")
 
 getBottomCoordinates = (rect) ->
   x = rect.left + rect.width / 2
   y = rect.top + rect.height
-  normalizeCoords(x, y, "center", "bottom")
+  getCoordsByPosition(x, y, "center", "bottom")
 
 getBottomRightCoordinates = (rect) ->
   x = rect.left + rect.width
   y = rect.top + rect.height
-  normalizeCoords(x, y, "right", "bottom")
+  getCoordsByPosition(x, y, "right", "bottom")
 
 getElementCoordinatesByPositionRelativeToXY = ($el, x, y) ->
   positionProps = getElementPositioning($el)
@@ -107,14 +116,14 @@ getElementCoordinatesByPositionRelativeToXY = ($el, x, y) ->
   fromWindow.left += x
   fromWindow.top += y
 
-  normalizeFromViewport = normalizeCoords(fromViewport.left, fromViewport.top)
-  normalizeFromWindow = normalizeCoords(fromWindow.left, fromWindow.top)
+  viewportTargetCoords = getTopLeftCoordinates(fromViewport)
+  windowTargetCoords = getTopLeftCoordinates(fromWindow)
 
-  fromViewport.left = normalizeFromViewport.left
-  fromViewport.top = normalizeFromViewport.top
+  fromViewport.x = viewportTargetCoords.x
+  fromViewport.y = viewportTargetCoords.y
 
-  fromWindow.left = normalizeFromWindow.left
-  fromWindow.top = normalizeFromWindow.top
+  fromWindow.x = windowTargetCoords.x
+  fromWindow.y = windowTargetCoords.y
 
   return positionProps
 
@@ -136,25 +145,29 @@ getElementCoordinatesByPosition = ($el, position = "center") ->
 
   fn = calculations[fnName]
 
-  normalizeFromViewport = fn({
+  ## get the desired x/y coords based on
+  ## what position we're trying to target
+  viewportTargetCoords = fn({
     width
     height
     top: fromViewport.top
     left: fromViewport.left
   })
 
-  normalizeFromWindow = fn({
+  ## get the desired x/y coords based on
+  ## what position we're trying to target
+  windowTargetCoords = fn({
     width
     height
     top: fromWindow.top
     left: fromWindow.left
   })
 
-  fromViewport.top = normalizeFromViewport.top
-  fromViewport.left = normalizeFromViewport.left
+  fromViewport.x = viewportTargetCoords.x
+  fromViewport.y = viewportTargetCoords.y
 
-  fromWindow.top = normalizeFromWindow.top
-  fromWindow.left = normalizeFromWindow.left
+  fromWindow.x = windowTargetCoords.x
+  fromWindow.y = windowTargetCoords.y
 
   ## return an object with both sets
   ## of normalized coordinates for both
@@ -179,7 +192,7 @@ calculations = {
 }
 
 module.exports = {
-  normalizeCoords
+  getCoordsByPosition
 
   getElementPositioning
 

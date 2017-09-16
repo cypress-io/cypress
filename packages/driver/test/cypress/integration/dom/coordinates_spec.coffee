@@ -50,9 +50,9 @@ describe "src/dom/coordinates", ->
       Object.defineProperty(win, "pageYOffset", pageYOffset)
       Object.defineProperty(win, "pageXOffset", pageXOffset)
 
-  context ".normalizeCoords", ->
+  context ".getCoordsByPosition", ->
     it "rounds down x and y values to object", ->
-      expect(Cypress.dom.normalizeCoords(5.96, 7.68)).to.deep.eq({left: 5, top: 7})
+      expect(Cypress.dom.getCoordsByPosition(5.96, 7.68)).to.deep.eq({x: 5, y: 7})
 
   context ".getElementAtPointFromViewport", ->
     it "returns same element based on x/y coords", ->
@@ -66,54 +66,91 @@ describe "src/dom/coordinates", ->
       expect(Cypress.dom.getElementAtPointFromViewport(@doc, 1e9, 1e9)).to.be.null
 
   context ".getElementCoordinatesByPosition", ->
+    beforeEach ->
+      @fromWindowPos = (pos) =>
+        Cypress.dom.getElementCoordinatesByPosition(@$button, pos)
+        .fromWindow
+
     describe "topLeft", ->
       it "returns top left x/y including padding + border", ->
+        obj = @fromWindowPos("topLeft")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "topLeft").fromWindow).to.deep.eq {left: 60, top: 35}
+        expect(obj.x).to.eq(60)
+        expect(obj.y).to.eq(35)
 
     describe "top", ->
       it "returns top center x/y including padding + border", ->
+        obj = @fromWindowPos("top")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "top").fromWindow).to.deep.eq {left: 110, top: 35}
+        expect(obj.x).to.eq(110)
+        expect(obj.y).to.eq(35)
 
     describe "topRight", ->
       it "returns top right x/y including padding + border", ->
+        obj = @fromWindowPos("topRight")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "topRight").fromWindow).to.deep.eq {left: 159, top: 35}
+        expect(obj.x).to.eq(159)
+        expect(obj.y).to.eq(35)
 
     describe "left", ->
       it "returns center left x/y including padding + border", ->
+        obj = @fromWindowPos("left")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "left").fromWindow).to.deep.eq {left: 60, top: 80}
+        expect(obj.x).to.eq(60)
+        expect(obj.y).to.eq(80)
 
     describe "center", ->
       it "returns center x/y including padding + border", ->
+        obj = @fromWindowPos()
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button).fromWindow).to.deep.eq {left: 110, top: 80}
+        expect(obj.x).to.eq(110)
+        expect(obj.y).to.eq(80)
 
       it "returns width / height factoring in rotation transforms", ->
         ## normally our outerWidth is 100 and outerHeight is 70
         ## after we've been rotated these are reversed and our previous
         ## calculation would be wrong. using getBoundingClientRect passes this test
         @$button.css({transform: "rotate(90deg)"})
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button).fromWindow).to.deep.eq {left: 110, top: 80}
+
+        obj = @fromWindowPos()
+
+        ## padding is added to the line-height but width includes the padding
+        expect(obj.x).to.eq(110)
+        expect(obj.y).to.eq(80)
 
     describe "right", ->
       it "returns center right x/y including padding + border", ->
+        obj = @fromWindowPos("right")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "right").fromWindow).to.deep.eq {left: 159, top: 80}
+        expect(obj.x).to.eq(159)
+        expect(obj.y).to.eq(80)
 
     describe "bottomLeft", ->
       it "returns bottom left x/y including padding + border", ->
+        obj = @fromWindowPos("bottomLeft")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "bottomLeft").fromWindow).to.deep.eq {left: 60, top: 124}
+        expect(obj.x).to.eq(60)
+        expect(obj.y).to.eq(124)
 
     context "bottom", ->
       it "returns bottom center x/y including padding + border", ->
+        obj = @fromWindowPos("bottom")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "bottom").fromWindow).to.deep.eq {left: 110, top: 124}
+        expect(obj.x).to.eq(110)
+        expect(obj.y).to.eq(124)
 
     context "bottomRight", ->
       it "returns bottom right x/y including padding + border", ->
+        obj = @fromWindowPos("bottomRight")
+
         ## padding is added to the line-height but width includes the padding
-        expect(Cypress.dom.getElementCoordinatesByPosition(@$button, "bottomRight").fromWindow).to.deep.eq {left: 159, top: 124}
+        expect(obj.x).to.eq(159)
+        expect(obj.y).to.eq(124)

@@ -101,7 +101,7 @@ elIsFixed = ($el) ->
   if $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
     $stickyOrFixedEl.css("position") is "fixed"
 
-elAtPoint = ($el) ->
+elAtCenterPoint = ($el) ->
   elProps = $coordinates.getElementPositioning($el)
 
   { topCenter, leftCenter } = elProps.fromViewport
@@ -125,7 +125,7 @@ elIsNotElementFromPoint = ($el) ->
   ## it is fixed 'relative' to the viewport which means
   ## it MUST be available with elementFromPoint because
   ## that is also relative to the viewport
-  $elAtPoint = elAtPoint($el)
+  $elAtPoint = elAtCenterPoint($el)
 
   ## if the element at point is not a descendent
   ## of our $el then we know it's being covered or its
@@ -267,7 +267,7 @@ getReasonIsHidden = ($el) ->
       if elIsFixed($el)
         if elIsNotElementFromPoint($el)
           ## show the long element here
-          covered = $elements.stringify(elAtPoint($el))
+          covered = $elements.stringify(elAtCenterPoint($el))
 
           return """
           This element '#{node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:

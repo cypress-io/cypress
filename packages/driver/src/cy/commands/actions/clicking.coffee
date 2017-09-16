@@ -101,7 +101,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleObj = _.defaults consoleObj ? {}, {
               "Applied To":   $dom.getElements($el)
               "Elements":     $el.length
-              "Coords":       fromWindow ## always absolute
+              "Coords":       _.pick(fromWindow, "x", "y") ## always absolute
               "Options":      deltaOptions
             }
 

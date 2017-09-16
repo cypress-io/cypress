@@ -28,8 +28,8 @@ describe "src/cy/commands/actions/trigger", ->
           type: "mouseover"
         }
 
-        expect(e.clientX).to.be.closeTo(fromViewport.left, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.top, 1)
+        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
 
       cy.get("#button").trigger("mouseover")
@@ -84,7 +84,7 @@ describe "src/cy/commands/actions/trigger", ->
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientX).to.be.closeTo(fromViewport.left, 1)
+        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         done()
 
       cy.get("#scrolledBtn").trigger("mouseover")
@@ -98,7 +98,7 @@ describe "src/cy/commands/actions/trigger", ->
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientY).to.be.closeTo(fromViewport.top, 1)
+        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
 
       cy.get("#scrolledBtn").trigger("mouseover")
@@ -758,7 +758,9 @@ describe "src/cy/commands/actions/trigger", ->
           lastLog = @lastLog
 
           { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          expect(lastLog.get("coords")).to.deep.eq(fromWindow)
+          expect(lastLog.get("coords")).to.deep.eq(
+            _.pick(fromWindow, "x", "y")
+          )
 
       it "#consoleProps", ->
         cy.get("button:first").trigger("mouseover").then ($button) =>
@@ -766,8 +768,8 @@ describe "src/cy/commands/actions/trigger", ->
           { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           logCoords    = @lastLog.get("coords")
           eventOptions = consoleProps["Event options"]
-          expect(logCoords.left).to.be.closeTo(fromWindow.left, 1) ## ensure we are within 1
-          expect(logCoords.top).to.be.closeTo(fromWindow.top, 1) ## ensure we are within 1
+          expect(logCoords.x).to.be.closeTo(fromWindow.x, 1) ## ensure we are within 1
+          expect(logCoords.y).to.be.closeTo(fromWindow.y, 1) ## ensure we are within 1
           expect(consoleProps.Command).to.eq "trigger"
           expect(eventOptions.bubbles).to.be.true
           expect(eventOptions.cancelable).to.be.true

@@ -40,7 +40,9 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
   $elAtCoords = null
 
   getElementAtPointFromViewport = (fromViewport) ->
-    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.leftCenter, fromViewport.topCenter)
+    ## get the element at point from the viewport based
+    ## on the desired x/y normalized coordinations
+    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.x, fromViewport.y)
       $elAtCoords = $dom.wrap(elAtCoords)
 
   ensureDescendents = (fromViewport) ->

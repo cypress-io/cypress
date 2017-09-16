@@ -81,13 +81,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             if options._log
               ## display the red dot at these coords
-              options._log.set({coords: fromWindow})
+              options._log.set({
+                coords: fromWindow
+              })
 
             eventOptions = _.extend({
-              clientX: fromViewport.left
-              clientY: fromViewport.top
-              pageX: fromWindow.left
-              pageY: fromWindow.top
+              clientX: fromViewport.x
+              clientY: fromViewport.y
+              pageX: fromWindow.x
+              pageY: fromWindow.y
             }, eventOptions)
 
             dispatch($elToClick.get(0), eventName, eventOptions)

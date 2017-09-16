@@ -375,8 +375,8 @@ describe "src/cy/commands/actions/select", ->
           expect(console.Command).to.eq("select")
           expect(console.Selected).to.deep.eq ["de_dust2"]
           expect(console["Applied To"]).to.eq $select.get(0)
-          expect(console.Coords.left).to.be.closeTo(fromWindow.left, 10)
-          expect(console.Coords.top).to.be.closeTo(fromWindow.top, 10)
+          expect(console.Coords.x).to.be.closeTo(fromWindow.x, 10)
+          expect(console.Coords.y).to.be.closeTo(fromWindow.y, 10)
 
       it "logs only one select event", ->
         types = []
