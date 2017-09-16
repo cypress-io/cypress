@@ -1,5 +1,9 @@
 /* eslint-disable no-console */
 
+// this file is a little cypress test runner helper
+// so that we can utilize our own monorepo when testing
+// things like the driver, or desktop-gui, or reporter
+
 require('@packages/coffee/register')
 
 const _ = require('lodash')
@@ -8,7 +12,7 @@ const path = require('path')
 const minimist = require('minimist')
 const Promise = require('bluebird')
 
-const humanTime = require('../../../server/lib/util/human_time.coffee')
+const humanTime = require('../packages/server/lib/util/human_time.coffee')
 
 const glob = Promise.promisify(require('glob'))
 
@@ -30,7 +34,23 @@ function spawn (cmd, args, opts) {
   })
 }
 
-glob('test/cypress/integration/**/*.coffee')
+_.defaults(options, {
+  dir: '',
+  glob: 'cypress/integration/**/*',
+})
+
+// let us pass in project or resolve it to process.cwd() and dir
+options.project = options.project || path.resolve(process.cwd(), options.dir)
+
+// normalize and set to absolute path based on process.cwd
+options.glob = path.resolve(options.project, options.glob)
+
+console.log(options)
+
+glob(options.glob, {
+  nodir: true,
+  realpath: true,
+})
 .then((specs = []) => {
   if (options.spec) {
     return _.filter(specs, (spec) => {
@@ -52,23 +72,35 @@ glob('test/cypress/integration/**/*.coffee')
 })
 .tap(console.log)
 .each((spec = []) => {
-  console.log('Running spec', spec)
+  console.log('\nRunning spec', spec)
+
+  // get the path to xvfb-maybe binary
+  const cmd = path.join(__dirname, '..', 'node_modules', '.bin', 'xvfb-maybe')
+
+  const configFile = path.join(__dirname, '..', 'mocha-reporter-config.json')
 
   const args = [
-    'test/scripts/run-integration',
-    '--project',
-    path.resolve('test'),
-    '--browser=chrome',
-    '--driver',
+    '-s \"-screen 0 1280x1024x8\"',
+    '--',
+    'node',
+    path.resolve('..', '..', 'scripts', 'start.js'), // launch root monorepo start
+    '--run-project',
+    options.project,
     '--spec',
-    spec.replace('test/', ''),
+    spec,
     '--reporter',
-    '../../node_modules/mocha-multi-reporters',
+    path.resolve(__dirname, '..', 'node_modules', 'mocha-multi-reporters'),
     '--reporter-options',
-    'configFile=../../../mocha-reporter-config.json',
+    `configFile=${configFile}`,
   ]
 
-  return spawn('node', args, { stdio: 'inherit' })
+  if (options.browser) {
+    args.push('--browser', options.browser)
+  }
+
+  console.log(cmd, args)
+
+  return spawn(cmd, args, { stdio: 'inherit' })
   .then((code) => {
     console.log(`${spec} exited with code`, code)
 
@@ -82,6 +114,7 @@ glob('test/cypress/integration/**/*.coffee')
 .then(() => {
   const duration = new Date() - started
 
+  console.log('')
   console.log('Total duration:', humanTime(duration))
   console.log('Exiting with final code:', numFailed)
 

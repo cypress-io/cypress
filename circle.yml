@@ -268,7 +268,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 0
+      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 0
 
   "driver-integration-tests-2":
     <<: *defaults
@@ -278,7 +278,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 1
+      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 1
 
   "driver-integration-tests-3":
     <<: *defaults
@@ -288,7 +288,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 2
+      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 2
 
   "driver-integration-tests-4":
     <<: *defaults
@@ -298,7 +298,8 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 3
+      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 3
+
 
   "build-binary":
     <<: *defaults
@@ -364,5 +365,5 @@ workflows:
 #     command: |
 #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
 #         # ./bin/cypress --project=./packages/example --path-to-cypress
-#         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+#         # npm start -- --project=./packages/example
 #       fi

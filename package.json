@@ -78,7 +78,7 @@
     "lodash": "^4.17.4",
     "mocha": "^3.5.0",
     "mocha-junit-reporter": "^1.13.0",
-    "mocha-multi-reporters": "^1.1.4",
+    "mocha-multi-reporters": "^1.1.5",
     "obfuscator": "^0.5.4",
     "plist": "^2.1.0",
     "pluralize": "^6.0.0",
@@ -87,7 +87,8 @@
     "typescript": "^2.3.4",
     "vagrant": "0.0.1",
     "vinyl-paths": "^2.1.0",
-    "xvfb": "^0.2.3"
+    "xvfb": "^0.2.3",
+    "xvfb-maybe": "^0.2.1"
   },
   "author": "Brian Mann",
   "license": "MIT",
