@@ -5,7 +5,7 @@ Promise = Cypress.Promise
 fail = (str) ->
   throw new Error(str)
 
-describe "src/cy/commands/actions/clicking", ->
+describe "src/cy/commands/actions/click", ->
   before ->
     cy
       .visit("/fixtures/dom.html")

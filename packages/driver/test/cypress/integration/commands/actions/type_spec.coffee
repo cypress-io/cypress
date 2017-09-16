@@ -4,7 +4,7 @@ Keyboard = Cypress.Keyboard
 bililiteRange = Cypress.bililiteRange
 Promise = Cypress.Promise
 
-describe "src/cy/commands/actions/text", ->
+describe "src/cy/commands/actions/type", ->
   before ->
     cy
       .visit("/fixtures/dom.html")
