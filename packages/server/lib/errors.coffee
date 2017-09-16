@@ -4,6 +4,10 @@ chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
+listPaths = (paths) ->
+  _.map paths, (p) ->
+    "- " + chalk.yellow(p)
+
 API = {
   # forms well-formatted user-friendly error for most common
   # errors Cypress can encounter
@@ -278,8 +282,11 @@ API = {
         """
       when "INVALID_REPORTER_NAME"
         """
-        Could not load reporter by name #{chalk.yellow(arg1)}
-        Relative to the project path #{chalk.yellow(arg2)}
+        Could not load reporter by name: #{chalk.yellow(arg1)}
+
+        We searched for the reporter in these paths:
+
+        #{listPaths(arg2).join("\n")}
 
         Learn more at https://on.cypress.io/reporters
         """

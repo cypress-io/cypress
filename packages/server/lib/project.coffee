@@ -165,7 +165,8 @@ class Project extends EE
     ## then record these via mocha reporter
     if config.report
       if not Reporter.isValidReporterName(config.reporter, config.projectRoot)
-        errors.throw("INVALID_REPORTER_NAME", config.reporter, config.projectRoot)
+        paths = Reporter.getSearchPathsForReporter(config.reporter, config.projectRoot)
+        errors.throw("INVALID_REPORTER_NAME", config.reporter, paths)
 
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 

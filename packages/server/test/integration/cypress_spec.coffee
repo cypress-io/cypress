@@ -611,6 +611,11 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("ERROR_READING_FILE", path.join(permissionsPath, "cypress.json"))
 
+    it "logs error and exits when reporter does not exist", ->
+      cypress.start(["--run-project=#{@todosPath}", "--reporter", "foobarbaz"])
+      .then =>
+        @expectExitWithErr("INVALID_REPORTER_NAME", "foobarbaz")
+
     describe "morgan", ->
       it "sets morgan to false", ->
         cypress.start(["--run-project=#{@todosPath}"])

@@ -185,15 +185,26 @@ class Reporter
     try
       ## try local
       log("loading local reporter by name #{reporterName}")
-      return require(path.join(projectRoot, reporterName))
+
+      ## using path.resolve() here so we can just pass an
+      ## absolute path as the reporterName which avoids
+      ## joining projectRoot unnecessarily
+      return require(path.resolve(projectRoot, reporterName))
     catch err
       ## try npm. if this fails, we're out of options, so let it throw
       log("loading NPM reporter module #{reporterName} from #{projectRoot}")
+
       try
-        return require(path.join(projectRoot, "node_modules", reporterName))
+        return require(path.resolve(projectRoot, "node_modules", reporterName))
       catch err
         msg = "Could not find reporter module #{reporterName} relative to #{projectRoot}"
         throw new Error(msg)
+
+  @getSearchPathsForReporter = (reporterName, projectRoot) ->
+    _.uniq([
+      path.resolve(projectRoot, reporterName),
+      path.resolve(projectRoot, "node_modules", reporterName)
+    ])
 
   @isValidReporterName = (reporterName, projectRoot) ->
     try
