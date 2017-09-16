@@ -1,12 +1,9 @@
 $dom = Cypress.dom
 $ = Cypress.$.bind(Cypress)
 
-describe "src/cypress/dom", ->
+describe "src/cypress/dom/visibility", ->
   beforeEach ->
     cy.visit("/fixtures/generic.html")
-
-  it "attaches to Cypress namespace", ->
-    expect($dom).to.be.an("object")
 
   context "isHidden", ->
     it "exposes isHidden", ->
