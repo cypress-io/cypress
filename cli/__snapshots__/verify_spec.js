@@ -12,7 +12,7 @@ Cypress Version: 1.2.3
 
 `
 
-exports['warning installed version does not match package version 1'] = `
+exports['warning installed version does not match verified version 1'] = `
 Installed version bloop does not match the expected package version 1.2.3
 
 Note: there is no guarantee these versions will work properly together.
@@ -78,6 +78,19 @@ Opening Cypress...
 
 exports['current version has not been verified 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /path/to/executable/dir
+
+Opening Cypress...
+
+`
+
+exports['current version has not been verified 2'] = `
+Installed version 9.8.7 does not match the expected package version 1.2.3
+
+Note: there is no guarantee these versions will work properly together.
+
+It looks like this is your first time using Cypress: 9.8.7
 
  ✔  Verified Cypress! /path/to/executable/dir
 
