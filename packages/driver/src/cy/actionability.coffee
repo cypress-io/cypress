@@ -2,10 +2,12 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$dom = require("../../../dom")
-$utils = require("../../../cypress/utils")
+$dom = require("../dom")
+$utils = require("../cypress/utils")
 
 delay = 50
+
+getFixedOrStickyEl = $dom.getFirstFixedOrStickyPositionParent
 
 dispatchPrimedChangeEvents = (state) ->
   ## if we have a changeEvent, dispatch it
@@ -33,17 +35,19 @@ getPositionFromArguments = (positionOrX, y, options) ->
 
   return {options, position, x, y}
 
-getFixedOrStickyEl = ($el) ->
-  $dom.getFirstFixedOrStickyPositionParent($el)
-
 ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
   $elAtCoords = null
+
+  getElementAtPointFromViewport = (fromViewport) ->
+    ## get the element at point from the viewport based
+    ## on the desired x/y normalized coordinations
+    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.x, fromViewport.y)
+      $elAtCoords = $dom.wrap(elAtCoords)
 
   ensureDescendents = (fromViewport) ->
     ## figure out the deepest element we are about to interact
     ## with at these coordinates
-    if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.left, fromViewport.top)
-      $elAtCoords = $dom.wrap(elAtCoords)
+    $elAtCoords = getElementAtPointFromViewport(fromViewport)
 
     cy.ensureDescendents($el, $elAtCoords, log)
 
@@ -149,9 +153,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
               ## we failed here, but before scrolling the next container
               ## we need to first verify that the element covering up
               ## is the same one as before our scroll
-              if elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromViewport.left, fromViewport.top)
-                $elAtCoords = $dom.wrap(elAtCoords)
-
+              if $elAtCoords = getElementAtPointFromViewport(fromViewport)
                 ## get the fixed element again
                 $fixed = getFixedOrStickyEl($elAtCoords)
 
@@ -201,7 +203,7 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   ## 5 pixels of x/y
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 
-waitForActionability = (cy, $el, options, callbacks) ->
+verify = (cy, $el, options, callbacks) ->
   win = $dom.getWindowByElement($el.get(0))
 
   { _log, force, position } = options
@@ -209,7 +211,7 @@ waitForActionability = (cy, $el, options, callbacks) ->
   { onReady, onScroll } = callbacks
 
   if not onReady
-    throw new Error("waitForActionability must be passed an onReady callback")
+    throw new Error("actionability.verify must be passed an onReady callback")
 
   ## if we have a position we must validate
   ## this ahead of time else bail early
@@ -272,7 +274,7 @@ waitForActionability = (cy, $el, options, callbacks) ->
 
 module.exports = {
   delay
+  verify
   dispatchPrimedChangeEvents
   getPositionFromArguments
-  waitForActionability
 }

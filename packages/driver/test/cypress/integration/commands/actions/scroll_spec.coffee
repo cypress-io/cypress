@@ -1,7 +1,7 @@
 $ = Cypress.$Cypress.$
 _ = Cypress._
 
-describe "src/cy/commands/actions/scrolling", ->
+describe "src/cy/commands/actions/scroll", ->
   before ->
     cy
       .visit("/fixtures/scrolling.html")

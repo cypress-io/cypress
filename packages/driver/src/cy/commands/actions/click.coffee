@@ -4,15 +4,9 @@ Promise = require("bluebird")
 
 $Mouse = require("../../../cypress/mouse")
 
-{
-  delay,
-  dispatchPrimedChangeEvents,
-  waitForActionability,
-  getPositionFromArguments
-} = require("./utils")
-
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
@@ -20,7 +14,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
-      {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
+      {options, position, x, y} = $actionability.getPositionFromArguments(positionOrX, y, options)
 
       _.defaults(options, {
         $el: subject
@@ -101,7 +95,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleObj = _.defaults consoleObj ? {}, {
               "Applied To":   $dom.getElements($el)
               "Elements":     $el.length
-              "Coords":       fromWindow ## always absolute
+              "Coords":       _.pick(fromWindow, "x", "y") ## always absolute
               "Options":      deltaOptions
             }
 
@@ -132,7 +126,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleObj
 
           return Promise
-          .delay(delay, "click")
+          .delay($actionability.delay, "click")
           .then ->
             ## display the red dot at these coords
             if options._log
@@ -176,13 +170,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        cy.timeout(delay, true, "click")
+        cy.timeout($actionability.delay, true, "click")
 
         ## must use callbacks here instead of .then()
         ## because we're issuing the clicks synchonrously
         ## once we establish the coordinates and the element
         ## passes all of the internal checks
-        waitForActionability(cy, $el, options, {
+        $actionability.verify(cy, $el, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 
@@ -218,7 +212,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     ## method might not get triggered if
                     ## our window is in focus since the
                     ## browser may fire blur events naturally
-                    dispatchPrimedChangeEvents(state)
+                    $actionability.dispatchPrimedChangeEvents(state)
 
                     ## send in a focus event!
                     cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
@@ -261,7 +255,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        cy.timeout(delay, true, "dblclick")
+        cy.timeout($actionability.delay, true, "dblclick")
 
         if options.log
           log = Cypress.log
@@ -288,7 +282,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## chaining thenable promises
           return null
 
-        .delay(delay, "dblclick")
+        .delay($actionability.delay, "dblclick")
 
         dblclicks.push(p)
 

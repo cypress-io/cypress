@@ -43,7 +43,15 @@ isHidden = (el, name) ->
       ## to see if its hidden by a parent
       elIsHiddenByAncestors($el) or
 
-        elIsOutOfBoundsOfAncestorsOverflow($el)
+        ## if this is a fixed element check if its covered
+        (
+          if elIsFixed($el)
+            elIsNotElementFromPoint($el)
+          else
+            ## else check if el is outside the bounds
+            ## of its ancestors overflow
+            elIsOutOfBoundsOfAncestorsOverflow($el)
+        )
 
 elHasNoEffectiveWidthOrHeight = ($el) ->
   elOffsetWidth($el) <= 0 or elOffsetHeight($el) <= 0 or $el[0].getClientRects().length <= 0
@@ -89,6 +97,20 @@ canClipContent = ($el, $ancestor) ->
 
   return true
 
+elIsFixed = ($el) ->
+  if $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
+    $stickyOrFixedEl.css("position") is "fixed"
+
+elAtCenterPoint = ($el) ->
+  elProps = $coordinates.getElementPositioning($el)
+
+  { topCenter, leftCenter } = elProps.fromViewport
+
+  doc = $document.getDocumentFromElement($el.get(0))
+
+  if el = $coordinates.getElementAtPointFromViewport(doc, leftCenter, topCenter)
+    $jquery.wrap(el)
+
 elDescendentsHavePositionFixedOrAbsolute = ($parent, $child) ->
   ## create an array of all elements between $parent and $child
   ## including child but excluding parent
@@ -99,14 +121,11 @@ elDescendentsHavePositionFixedOrAbsolute = ($parent, $child) ->
     fixedOrAbsoluteRe.test $jquery.wrap(el).css("position")
 
 elIsNotElementFromPoint = ($el) ->
-  elProps = $coordinates.getElementPositioning($el)
-
-  {top, left} = elProps.fromViewport
-
-  doc = $document.getDocumentFromElement($el.get(0))
-
-  if el = $coordinates.getElementAtPointFromViewport(doc, left, top)
-    $elAtPoint = $jquery.wrap(el)
+  ## if we have a fixed position element that means
+  ## it is fixed 'relative' to the viewport which means
+  ## it MUST be available with elementFromPoint because
+  ## that is also relative to the viewport
+  $elAtPoint = elAtCenterPoint($el)
 
   ## if the element at point is not a descendent
   ## of our $el then we know it's being covered or its
@@ -114,14 +133,6 @@ elIsNotElementFromPoint = ($el) ->
   return not $elements.isDescendent($el, $elAtPoint)
 
 elIsOutOfBoundsOfAncestorsOverflow = ($el, $ancestor) ->
-  if $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
-    if $stickyOrFixedEl.css("position") is "fixed"
-      ## if we have a fixed position element that means
-      ## it is fixed 'relative' to the viewport which means
-      ## it MUST be available with elementFromPoint because
-      ## that is also relative to the viewport
-      return elIsNotElementFromPoint($stickyOrFixedEl)
-
   $ancestor ?= $el.parent()
 
   ## no ancestor, not out of bounds!
@@ -227,10 +238,12 @@ getReasonIsHidden = ($el) ->
 
     when $parent = parentHasDisplayNone($el.parent())
       parentNode = $elements.stringify($parent, "short")
+
       "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'display: none'"
 
     when $parent = parentHasVisibilityNone($el.parent())
       parentNode = $elements.stringify($parent, "short")
+
       "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'visibility: hidden'"
 
     when elHasVisibilityHidden($el)
@@ -239,19 +252,33 @@ getReasonIsHidden = ($el) ->
     when elHasNoOffsetWidthOrHeight($el)
       width  = elOffsetWidth($el)
       height = elOffsetHeight($el)
+
       "This element '#{node}' is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
 
     when $parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
       parentNode  = $elements.stringify($parent, "short")
       width       = elOffsetWidth($parent)
       height      = elOffsetHeight($parent)
+
       "This element '#{node}' is not visible because its parent '#{parentNode}' has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
 
-    when elIsOutOfBoundsOfAncestorsOverflow($el)
-      "This element '#{node}' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
-
     else
-      "Cypress could not determine why this element '#{node}' is not visible."
+      ## nested else --___________--
+      if elIsFixed($el)
+        if elIsNotElementFromPoint($el)
+          ## show the long element here
+          covered = $elements.stringify(elAtCenterPoint($el))
+
+          return """
+          This element '#{node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
+
+          #{covered}
+          """
+      else
+        if elIsOutOfBoundsOfAncestorsOverflow($el)
+          return "This element '#{node}' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
+
+      return "Cypress could not determine why this element '#{node}' is not visible."
 
 module.exports = {
   isVisible

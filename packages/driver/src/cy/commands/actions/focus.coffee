@@ -1,9 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-{ delay, dispatchPrimedChangeEvents } = require("./utils")
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: ["element", "window"] }, {
@@ -72,13 +72,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cleanup()
 
-          cy.timeout(delay, true)
+          cy.timeout($actionability.delay, true)
 
           ## TODO: this is really weird how we're
           ## resolving the promise here but letting
           ## the lower promise also still run
           Promise
-          .delay(delay)
+          .delay($actionability.delay)
           .then(resolve)
 
         options.$el.on("focus", focused)
@@ -231,17 +231,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             cleanup()
 
-            cy.timeout(delay, true)
+            cy.timeout($actionability.delay, true)
 
             Promise
-            .delay(delay)
+            .delay($actionability.delay)
             .then(resolve)
 
           options.$el.on("blur", blurred)
 
           ## for simplicity we allow change events
           ## to be triggered by a manual blur
-          dispatchPrimedChangeEvents(state)
+          $actionability.dispatchPrimedChangeEvents(state)
 
           options.$el.get(0).blur()
 

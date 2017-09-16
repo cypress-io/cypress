@@ -16,8 +16,8 @@ module.exports = {
       bubbles: true
       cancelable: true
       view: win
-      clientX: fromViewport.left
-      clientY: fromViewport.top
+      clientX: fromViewport.x
+      clientY: fromViewport.y
       buttons: 1
       detail: 1
     })
@@ -51,8 +51,8 @@ module.exports = {
       bubbles: true
       cancelable: true
       view: win
-      clientX: fromViewport.left
-      clientY: fromViewport.top
+      clientX: fromViewport.x
+      clientY: fromViewport.y
       buttons: 0
       detail: 1
     })
@@ -86,8 +86,8 @@ module.exports = {
       bubbles: true
       cancelable: true
       view: win
-      clientX: fromViewport.left
-      clientY: fromViewport.top
+      clientX: fromViewport.x
+      clientY: fromViewport.y
       buttons: 0
       detail: 1
     })

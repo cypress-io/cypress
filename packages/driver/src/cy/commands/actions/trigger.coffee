@@ -1,9 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-{ waitForActionability, getPositionFromArguments } = require("./utils")
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$actionability = require("../../actionability")
 
 dispatch = (target, eventName, options) ->
   event = new Event(eventName, options)
@@ -17,7 +17,7 @@ dispatch = (target, eventName, options) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: ["element", "window", "document"] }, {
     trigger: (subject, eventName, positionOrX, y, options = {}) ->
-      {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
+      {options, position, x, y} = $actionability.getPositionFromArguments(positionOrX, y, options)
 
       _.defaults(options, {
         log: true
@@ -72,7 +72,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if dispatchEarly
           return dispatch(subject, eventName, eventOptions)
 
-        waitForActionability(cy, subject, options, {
+        $actionability.verify(cy, subject, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 
@@ -81,13 +81,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             if options._log
               ## display the red dot at these coords
-              options._log.set({coords: fromWindow})
+              options._log.set({
+                coords: fromWindow
+              })
 
             eventOptions = _.extend({
-              clientX: fromViewport.left
-              clientY: fromViewport.top
-              pageX: fromWindow.left
-              pageY: fromWindow.top
+              clientX: fromViewport.x
+              clientY: fromViewport.y
+              pageX: fromWindow.x
+              pageY: fromWindow.y
             }, eventOptions)
 
             dispatch($elToClick.get(0), eventName, eventOptions)

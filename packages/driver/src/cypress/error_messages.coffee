@@ -139,19 +139,25 @@ module.exports = {
 
   dom:
     animating: """
-      #{cmd('{{cmd}}')} could not be issued because this element is currently animating:\n
-      {{node}}\n
+      #{cmd('{{cmd}}')} could not be issued because this element is currently animating:
+
+      {{node}}
+
       You can fix this problem by:
         - Passing {force: true} which disables all error checking
         - Passing {waitForAnimations: false} which disables waiting on animations
-        - Passing {animationDistanceThreshold: 20} which decreases the sensitivity\n
+        - Passing {animationDistanceThreshold: 20} which decreases the sensitivity
+        
       https://on.cypress.io/element-is-animating
     """
     animation_check_failed: "Not enough coord points provided to calculate distance."
     center_hidden: """
-      #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:\n
-      {{node}}\n
-      Fix this problem, or use {force: true} to disable error checking.\n
+      #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
       https://on.cypress.io/element-cannot-be-interacted-with
     """
     covered: (obj) ->
@@ -169,9 +175,12 @@ module.exports = {
       https://on.cypress.io/element-cannot-be-interacted-with
       """
     disabled: """
-      #{cmd('{{cmd}}')} failed because this element is disabled:\n
-      {{node}}\n
-      Fix this problem, or use {force: true} to disable error checking.\n
+      #{cmd('{{cmd}}')} failed because this element is disabled:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
       https://on.cypress.io/element-cannot-be-interacted-with
     """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
@@ -180,10 +189,14 @@ module.exports = {
       {{node}}\n
     """
     not_visible: """
-      #{cmd('{{cmd}}')} failed because this element is not visible:\n
-      {{node}}\n
-      {{reason}}\n
-      Fix this problem, or use {force: true} to disable error checking.\n
+      #{cmd('{{cmd}}')} failed because this element is not visible:
+
+      {{node}}
+
+      {{reason}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
       https://on.cypress.io/element-cannot-be-interacted-with
     """
 
