@@ -300,6 +300,29 @@ jobs:
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 3
 
+  "desktop-gui-integration-tests-1":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 0
+
+  "desktop-gui-integration-tests-2":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 1
+
+  "desktop-gui-integration-tests-3":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 2
 
   "build-binary":
     <<: *defaults
@@ -351,6 +374,15 @@ workflows:
           requires:
             - build
       - driver-integration-tests-4:
+          requires:
+            - build
+      - desktop-gui-integration-tests-1:
+          requires:
+            - build
+      - desktop-gui-integration-tests-2:
+          requires:
+            - build
+      - desktop-gui-integration-tests-3:
           requires:
             - build
       - build-binary:

@@ -45,7 +45,7 @@ options.project = options.project || path.resolve(process.cwd(), options.dir)
 // normalize and set to absolute path based on process.cwd
 options.glob = path.resolve(options.project, options.glob)
 
-console.log(options)
+console.log('Specs found:')
 
 glob(options.glob, {
   nodir: true,
@@ -97,8 +97,6 @@ glob(options.glob, {
   if (options.browser) {
     args.push('--browser', options.browser)
   }
-
-  console.log(cmd, args)
 
   return spawn(cmd, args, { stdio: 'inherit' })
   .then((code) => {
