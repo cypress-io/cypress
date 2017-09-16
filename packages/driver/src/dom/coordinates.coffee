@@ -12,6 +12,11 @@ getElementPositioning = ($el) ->
   ## are relative to the top left of the viewport
   rect = el.getBoundingClientRect()
 
+  center = getCenterCoordinates(rect)
+
+  topCenter = center.top
+  leftCenter = center.left
+
   return {
     scrollTop: el.scrollTop
     scrollLeft: el.scrollLeft
@@ -22,10 +27,14 @@ getElementPositioning = ($el) ->
       left: rect.left
       right: rect.right
       bottom: rect.bottom
+      topCenter
+      leftCenter
     }
     fromWindow: {
       top: rect.top + win.pageYOffset
       left: rect.left + win.pageXOffset
+      topCenter: topCenter + win.pageYOffset
+      leftCenter: leftCenter + win.pageXOffset
     }
   }
 
@@ -127,22 +136,34 @@ getElementCoordinatesByPosition = ($el, position = "center") ->
 
   fn = calculations[fnName]
 
+  normalizeFromViewport = fn({
+    width
+    height
+    top: fromViewport.top
+    left: fromViewport.left
+  })
+
+  normalizeFromWindow = fn({
+    width
+    height
+    top: fromWindow.top
+    left: fromWindow.left
+  })
+
+  fromViewport.top = normalizeFromViewport.top
+  fromViewport.left = normalizeFromViewport.left
+
+  fromWindow.top = normalizeFromWindow.top
+  fromWindow.left = normalizeFromWindow.left
+
   ## return an object with both sets
   ## of normalized coordinates for both
   ## the window and the viewport
   return {
-    fromViewport: fn({
-      width
-      height
-      top: fromViewport.top
-      left: fromViewport.left
-    }),
-    fromWindow: fn({
-      width
-      height
-      top: fromWindow.top
-      left: fromWindow.left
-    })
+    width
+    height
+    fromViewport
+    fromWindow
   }
 
 calculations = {

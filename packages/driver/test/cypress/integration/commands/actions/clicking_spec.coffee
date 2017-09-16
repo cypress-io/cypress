@@ -1027,6 +1027,42 @@ describe "src/cy/commands/actions/clicking", ->
 
         cy.get("#button-covered-in-span").click()
 
+      it "throws when element is fixed position and being covered", (done) ->
+        $btn = $("<button>button covered</button>")
+        .attr("id", "button-covered-in-span")
+        .css({position: "fixed", left: 0, top: 0})
+        .prependTo(cy.$$("body"))
+
+        $span = $("<span>span on button</span>")
+        .css({position: "fixed", left: 0, top: 0, padding: 20, display: "inline-block", backgroundColor: "yellow", zIndex: 10})
+        .prependTo(cy.$$("body"))
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          ## get + click logs
+          expect(@logs.length).eq(2)
+          expect(lastLog.get("error")).to.eq(err)
+
+          ## there should still be 2 snapshots on error (before + after)
+          expect(lastLog.get("snapshots").length).to.eq(2)
+          expect(lastLog.get("snapshots")[0]).to.be.an("object")
+          expect(lastLog.get("snapshots")[0].name).to.eq("before")
+          expect(lastLog.get("snapshots")[1]).to.be.an("object")
+          expect(lastLog.get("snapshots")[1].name).to.eq("after")
+          expect(err.message).to.include "cy.click() failed because this element is not visible:"
+          expect(err.message).to.include ">button ...</button>"
+          expect(err.message).to.include "'<button#button-covered-in-span>' is not visible because it has CSS property: 'position: fixed' and its being covered"
+          expect(err.message).to.include ">span on...</span>"
+
+          console = lastLog.invoke("consoleProps")
+          expect(console["Tried to Click"]).to.be.undefined
+          expect(console["But its Covered By"]).to.be.undefined
+
+          done()
+
+        cy.get("#button-covered-in-span").click()
+
       it "throws when element is hidden and theres no element specifically covering it", (done) ->
         ## i cant come up with a way to easily make getElementAtCoordinates
         ## return null so we are just forcing it to return null to simulate

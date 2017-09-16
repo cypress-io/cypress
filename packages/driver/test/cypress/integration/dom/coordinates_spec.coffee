@@ -15,6 +15,41 @@ describe "src/dom/coordinates", ->
     @$button = $("<button style='position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black'>foo</button>")
     .appendTo(cy.$$("body"))
 
+  context ".getElementPositioning", ->
+    ## this is necessary so that document.elementFromPoint
+    ## does not miss elements
+    it "returns the leftCenter and topCenter normalized", ->
+      win = Cypress.dom.getWindowByElement(@$button.get(0))
+
+      pageYOffset = Object.getOwnPropertyDescriptor(win, "pageYOffset")
+      pageXOffset = Object.getOwnPropertyDescriptor(win, "pageXOffset")
+
+      Object.defineProperty(win, "pageYOffset", {
+        value: 10
+      })
+
+      Object.defineProperty(win, "pageXOffset", {
+        value: 20
+      })
+
+      cy.stub(@$button.get(0), "getBoundingClientRect").returns({
+        top: 100.9
+        left: 60.9
+        width: 50
+        height: 40
+      })
+
+      { fromViewport, fromWindow } = Cypress.dom.getElementPositioning(@$button)
+
+      expect(fromViewport.topCenter).to.eq(120)
+      expect(fromViewport.leftCenter).to.eq(85)
+
+      expect(fromWindow.topCenter).to.eq(130)
+      expect(fromWindow.leftCenter).to.eq(105)
+
+      Object.defineProperty(win, "pageYOffset", pageYOffset)
+      Object.defineProperty(win, "pageXOffset", pageXOffset)
+
   context ".normalizeCoords", ->
     it "rounds down x and y values to object", ->
       expect(Cypress.dom.normalizeCoords(5.96, 7.68)).to.deep.eq({left: 5, top: 7})
