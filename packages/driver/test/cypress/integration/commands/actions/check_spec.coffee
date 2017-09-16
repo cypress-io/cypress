@@ -435,7 +435,9 @@ describe "src/cy/commands/actions/check", ->
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq 1
-          expect(console.Coords).to.deep.eq(fromWindow)
+          expect(console.Coords).to.deep.eq(
+            _.pick(fromWindow, "x", "y")
+          )
 
       it "#consoleProps when checkbox is already checked", ->
         cy.get("[name=colors][value=blue]").invoke("prop", "checked", true).check().then ($input) ->
@@ -824,7 +826,9 @@ describe "src/cy/commands/actions/check", ->
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(fromWindow)
+          expect(console.Coords).to.deep.eq(
+            _.pick(fromWindow, "x", "y")
+          )
 
       it "#consoleProps when checkbox is already unchecked", ->
         cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->

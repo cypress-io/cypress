@@ -758,9 +758,7 @@ describe "src/cy/commands/actions/trigger", ->
           lastLog = @lastLog
 
           { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          expect(lastLog.get("coords")).to.deep.eq(
-            _.pick(fromWindow, "x", "y")
-          )
+          expect(lastLog.get("coords")).to.deep.eq(fromWindow, "x", "y")
 
       it "#consoleProps", ->
         cy.get("button:first").trigger("mouseover").then ($button) =>
