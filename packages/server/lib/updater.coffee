@@ -40,6 +40,7 @@ NwUpdater.prototype.checkNewVersion = (cb) ->
     request.get({
       url: @manifest.manifestUrl,
       headers: {
+        "x-cypress-version": pkg.version
         "x-machine-id": id
       }
     }, gotManifest.bind(@))
