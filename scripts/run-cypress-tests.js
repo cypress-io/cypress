@@ -11,6 +11,7 @@ const cp = require('child_process')
 const path = require('path')
 const minimist = require('minimist')
 const Promise = require('bluebird')
+const xvfb = require('../cli/lib/exec/xvfb')
 
 const humanTime = require('../packages/server/lib/util/human_time.coffee')
 
@@ -45,76 +46,89 @@ options.project = options.project || path.resolve(process.cwd(), options.dir)
 // normalize and set to absolute path based on process.cwd
 options.glob = path.resolve(options.project, options.glob)
 
-console.log('Specs found:')
+function run () {
+  console.log('Specs found:')
 
-glob(options.glob, {
-  nodir: true,
-  realpath: true,
-})
-.then((specs = []) => {
-  if (options.spec) {
-    return _.filter(specs, (spec) => {
-      return spec.includes(options.spec)
+  return glob(options.glob, {
+    nodir: true,
+    realpath: true,
+  })
+  .then((specs = []) => {
+    if (options.spec) {
+      return _.filter(specs, (spec) => {
+        return spec.includes(options.spec)
+      })
+    }
+
+    if (isLoadBalanced(options)) {
+      // take the total number of specs and divide by our
+      // total number of parallel nodes, ceiling the number
+      const size = Math.ceil(specs.length / options.parallel)
+
+      // chunk the specs by the total nodes
+      // and then just grab this index's specs
+      return _.chunk(specs, size)[options.index]
+    }
+
+    return specs
+  })
+  .tap(console.log)
+  .each((spec = []) => {
+    console.log('\nRunning spec', spec)
+
+    // get the path to xvfb-maybe binary
+    // const cmd = path.join(__dirname, '..', 'node_modules', '.bin', 'xvfb-maybe')
+
+    const configFile = path.join(__dirname, '..', 'mocha-reporter-config.json')
+
+    const args = [
+      // '-as',
+      // '\"-screen 0 1280x720x16\"',
+      // '--',
+      // 'node',
+      path.resolve('..', '..', 'scripts', 'start.js'), // launch root monorepo start
+      '--run-project',
+      options.project,
+      '--spec',
+      spec,
+      '--reporter',
+      path.resolve(__dirname, '..', 'node_modules', 'mocha-multi-reporters'),
+      '--reporter-options',
+      `configFile=${configFile}`,
+    ]
+
+    if (options.browser) {
+      args.push('--browser', options.browser)
+    }
+
+    return spawn('node', args, { stdio: 'inherit' })
+    .then((code) => {
+      console.log(`${spec} exited with code`, code)
+
+      numFailed += code
     })
-  }
-
-  if (isLoadBalanced(options)) {
-    // take the total number of specs and divide by our
-    // total number of parallel nodes, ceiling the number
-    const size = Math.ceil(specs.length / options.parallel)
-
-    // chunk the specs by the total nodes
-    // and then just grab this index's specs
-    return _.chunk(specs, size)[options.index]
-  }
-
-  return specs
-})
-.tap(console.log)
-.each((spec = []) => {
-  console.log('\nRunning spec', spec)
-
-  // get the path to xvfb-maybe binary
-  const cmd = path.join(__dirname, '..', 'node_modules', '.bin', 'xvfb-maybe')
-
-  const configFile = path.join(__dirname, '..', 'mocha-reporter-config.json')
-
-  const args = [
-    '-as \"-screen 0 1280x720x16\"',
-    '--',
-    'node',
-    path.resolve('..', '..', 'scripts', 'start.js'), // launch root monorepo start
-    '--run-project',
-    options.project,
-    '--spec',
-    spec,
-    '--reporter',
-    path.resolve(__dirname, '..', 'node_modules', 'mocha-multi-reporters'),
-    '--reporter-options',
-    `configFile=${configFile}`,
-  ]
-
-  if (options.browser) {
-    args.push('--browser', options.browser)
-  }
-
-  return spawn(cmd, args, { stdio: 'inherit' })
-  .then((code) => {
-    console.log(`${spec} exited with code`, code)
-
-    numFailed += code
+    .catch((err) => {
+      console.log(err)
+      throw err
+    })
   })
-  .catch((err) => {
-    console.log(err)
-    throw err
+  .then(() => {
+    const duration = new Date() - started
+
+    console.log('')
+    console.log('Total duration:', humanTime(duration))
+    console.log('Exiting with final code:', numFailed)
+
+    process.exit(numFailed)
   })
-})
-.then(() => {
-  const duration = new Date() - started
+}
 
-  console.log('')
-  console.log('Total duration:', humanTime(duration))
-  console.log('Exiting with final code:', numFailed)
+const needsXvfb = xvfb.isNeeded()
 
-  process.exit(numFailed)
-})
+if (needsXvfb) {
+  return xvfb.start()
+  .then(run)
+  .finally(xvfb.stop)
+} else {
+  return run()
+}

@@ -86,9 +86,7 @@
     "stop-only": "^1.1.0",
     "typescript": "^2.3.4",
     "vagrant": "0.0.1",
-    "vinyl-paths": "^2.1.0",
-    "xvfb": "^0.2.3",
-    "xvfb-maybe": "^0.2.1"
+    "vinyl-paths": "^2.1.0"
   },
   "author": "Brian Mann",
   "license": "MIT",
