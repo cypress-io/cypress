@@ -305,20 +305,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      # build binary on Linux for Linux with same version
-      # - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      # - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      - run: npm run binary-build -- --platform linux --version "0.20.1-linux"
-      - run: ls -la build/linux/Cypress
-      - run: cd build/linux && zip -r ../../cypress.zip Cypress
-      - run: npm run binary-upload -- --platform linux --version "0.20.1-linux" --zip cypress.zip
-
-  "build-binary-single-command":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: npm run binary-deploy -- --platform linux --version "0.20.1-linux-deploy"
+      - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
 
 workflows:
   version: 2
@@ -368,9 +355,7 @@ workflows:
       - build-binary:
           requires:
             - build
-      - build-binary-single-command:
-          requires:
-            - build
+
 #
 # things to run in the 4th CI container
 #
