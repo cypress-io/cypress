@@ -80,7 +80,7 @@ glob(options.glob, {
   const configFile = path.join(__dirname, '..', 'mocha-reporter-config.json')
 
   const args = [
-    '-s \"-screen 0 1280x1024x8\"',
+    '-as \"-screen 0 1280x720x16\"',
     '--',
     'node',
     path.resolve('..', '..', 'scripts', 'start.js'), // launch root monorepo start
