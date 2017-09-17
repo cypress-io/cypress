@@ -53,7 +53,10 @@ takeScreenshot = (runnable, name, log, timeout) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "runnable:after:run:async", (test, runnable) ->
-    if test.err and config("screenshotOnHeadlessFailure") and not config("isInteractive")
+    ## we want to take a screenshot if we have an error, we're
+    ## to take a screenshot and we are running from a terminal
+    ## which means we're exiting at the end
+    if test.err and config("screenshotOnHeadlessFailure") and config("isTextTerminal")
 
       new Promise (resolve) ->
         ## open up our test so we can see it during the screenshot

@@ -423,7 +423,7 @@ module.exports = {
 
     ## if we've been told to record and we're not spawning a headed browser
     browserCanBeRecorded = (name) ->
-      name == "electron"
+      name is "electron"
 
     if videoRecording
       if browserCanBeRecorded(browser)
