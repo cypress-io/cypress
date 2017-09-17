@@ -221,7 +221,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 0
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 0
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -230,7 +230,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 1
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 1
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -239,7 +239,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 2
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 2
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -248,19 +248,18 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 3
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 3
       - store_test_results:
           path: /tmp/cypress-monorepo
 
-  ## TODO: commenting out for now until these run
-  # "driver-unit-tests":
-  #   <<: *defaults
-  #   parallelism: 2
-  #   steps:
-  #     - restore_cache:
-  #         key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-  #     - run: chrome --version
-  #     - run: npm run all test-unit -- --package driver
+  "server-e2e-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 4
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "driver-integration-tests-1":
     <<: *defaults
@@ -270,7 +269,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 0
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 0
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -282,7 +281,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 1
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 1
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -294,7 +293,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 2
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 2
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -306,7 +305,19 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && npm run test-integration -- --parallel 4 --index 3
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 3
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 4
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -376,10 +387,9 @@ workflows:
       - server-e2e-tests-4:
           requires:
             - build
-      ## TODO: temporarily commenting out
-      # - driver-unit-tests:
-      #     requires:
-      #       - build
+      - server-e2e-tests-5:
+          requires:
+            - build
       - driver-integration-tests-1:
           requires:
             - build
@@ -390,6 +400,9 @@ workflows:
           requires:
             - build
       - driver-integration-tests-4:
+          requires:
+            - build
+      - driver-integration-tests-5:
           requires:
             - build
       - desktop-gui-integration-tests-1:
