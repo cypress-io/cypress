@@ -21,50 +21,29 @@ describe "src/cy/commands/navigation", ->
     afterEach ->
       cy.state("window", @win)
 
-    it "calls into window.location.reload", (done) ->
-      fn = (arg) ->
-        expect(arg).to.be.false
+    it "calls into window.location.reload", ->
+      locReload = cy.spy(Cypress.utils, "locReload")
 
-        done()
+      cy.reload().then ->
+        expect(locReload).to.be.calledWith(false)
 
-      win = {location: {reload: fn}}
+    it "can pass forceReload", ->
+      locReload = cy.spy(Cypress.utils, "locReload")
 
-      cy.state("window", win)
+      cy.reload(true).then ->
+        expect(locReload).to.be.calledWith(true)
 
-      cy.reload()
+    it "can pass forceReload + options", ->
+      locReload = cy.spy(Cypress.utils, "locReload")
 
-    it "can pass forceReload", (done) ->
-      fn = (arg) ->
-        expect(arg).to.be.true
-        done()
+      cy.reload(true, {}).then ->
+        expect(locReload).to.be.calledWith(true)
 
-      win = {location: {reload: fn}}
+    it "can pass just options", ->
+      locReload = cy.spy(Cypress.utils, "locReload")
 
-      cy.state("window", win)
-
-      cy.reload(true)
-
-    it "can pass forceReload + options", (done) ->
-      fn = (arg) ->
-        expect(arg).to.be.true
-        done()
-
-      win = {location: {reload: fn}}
-
-      cy.state("window", win)
-
-      cy.reload(true, {})
-
-    it "can pass just options", (done) ->
-      fn = (arg) ->
-        expect(arg).to.be.false
-        done()
-
-      win = {location: {reload: fn}}
-
-      cy.state("window", win)
-
-      cy.reload({})
+      cy.reload({}).then ->
+        expect(locReload).to.be.calledWith(false)
 
     it "returns the window object", ->
       cy
@@ -91,10 +70,10 @@ describe "src/cy/commands/navigation", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy(Promise.prototype, "timeout")
 
-      Cypress.config("pageLoadTimeout", 456)
+      Cypress.config("pageLoadTimeout", 4567)
 
       cy.reload().then ->
-        expect(timeout).to.be.calledWith(456, "reload")
+        expect(timeout).to.be.calledWith(4567, "reload")
 
     it "fires stability:changed and window events events", ->
       stub1= cy.stub()
@@ -169,6 +148,8 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
+        locReload = cy.spy(Cypress.utils, "locReload")
+
         cy
           .visit("/timeout?ms=100").then ->
             expected = false
@@ -251,12 +232,12 @@ describe "src/cy/commands/navigation", ->
 
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy Promise.prototype, "timeout"
-      Cypress.config("pageLoadTimeout", 456)
+      Cypress.config("pageLoadTimeout", 4567)
 
       cy
         .visit("/fixtures/jquery.html")
         .go("back").then ->
-          expect(timeout).to.be.calledWith(456, "go")
+          expect(timeout).to.be.calledWith(4567, "go")
 
     it "removes listeners", ->
       cy
@@ -434,10 +415,10 @@ describe "src/cy/commands/navigation", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy Promise.prototype, "timeout"
 
-      Cypress.config("pageLoadTimeout", 1500)
+      Cypress.config("pageLoadTimeout", 4567)
 
       cy.visit("/fixtures/jquery.html").then ->
-        expect(timeout).to.be.calledWith(1500)
+        expect(timeout).to.be.calledWith(4567)
 
     it "removes window:load listeners", ->
       listeners = cy.listeners("window:load")
@@ -692,18 +673,21 @@ describe "src/cy/commands/navigation", ->
             @logs.slice(0).forEach (log) ->
               expect(log.get("event")).to.be.false
 
-      it "logs immediately before resolving", (done) ->
+      it "logs immediately before resolving", ->
+        expected = false
+
         cy.on "log:added", (attrs, log) ->
           cy.removeAllListeners("log:added")
 
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
-            message: "localhost:3500/app/foo#/hash"
+            message: "localhost:3500/fixtures/jquery.html#/hash"
           }
 
-          done()
+          expected = true
 
-        cy.visit("localhost:3500/app/foo#/hash")
+        cy.visit("localhost:3500/fixtures/jquery.html#/hash").then ->
+          expect(expected).to.be.true
 
       it "logs obj once complete", ->
         cy.visit("http://localhost:3500/fixtures/generic.html").then ->
@@ -1295,7 +1279,7 @@ describe "src/cy/commands/navigation", ->
         cy.visit("https://google.com/foo")
 
   context "#page load", ->
-    it "FLAKY sets initial=true and then removes", ->
+    it "sets initial=true and then removes", ->
       Cookie.remove("__cypress.initial")
 
       expect(Cookie.get("__cypress.initial")).to.be.undefined
@@ -1311,11 +1295,16 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/form.html")
         .then ->
-          cy.on "window:unload", ->
+          cy.once "window:unload", ->
             expect(cy.state("onPageLoadErr")).to.be.a("function")
 
           null
         .get("a:first").click().then ->
+          listeners = cy.listeners("window:load")
+
+          ## everything should have unbound properly
+          expect(listeners.length).to.eq(0)
+
           expect(expected).to.be.true
 
           expect(cy.state("onPageLoadErr")).to.be.null

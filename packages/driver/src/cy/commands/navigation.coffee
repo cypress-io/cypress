@@ -211,7 +211,9 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   loading = ->
     new Promise (resolve, reject) ->
-      cy.on "window:load", ->
+      cy.once "window:load", ->
+        cy.state("onPageLoadErr", null)
+
         options._log.set("message", "--page loaded--").snapshot().end()
 
         resolve()
@@ -223,15 +225,13 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
   loading()
   .timeout(options.timeout, "page load")
   .catch Promise.TimeoutError, ->
+    ## clean this up
+    cy.state("onPageLoadErr", null)
+
     try
       timedOutWaitingForPageLoad(options.timeout, options._log)
     catch err
       reject(err)
-  .finally ->
-    ## clean this up
-    cy.state("onPageLoadErr", null)
-
-    return null
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
@@ -351,11 +351,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cy.once("window:load", resolve)
 
-          state("window").location.reload(forceReload)
+          $utils.locReload(forceReload, state("window"))
 
       reload()
       .timeout(options.timeout, "reload")
-      .catch Promise.TimeoutError, (err) =>
+      .catch Promise.TimeoutError, (err) ->
         timedOutWaitingForPageLoad(options.timeout, options._log)
       .finally ->
         cleanup?()
@@ -373,7 +373,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       win = state("window")
 
-      goNumber = (num) =>
+      goNumber = (num) ->
         if num is 0
           $utils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
@@ -413,8 +413,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## with the remove window (just like cy.visit)
               state("window")
 
-            Promise.delay(100)
-            .then =>
+            Promise
+            .delay(100)
+            .then ->
               knownCommandCausedInstability = false
 
               ## if we've didUnload then we know we're
@@ -427,14 +428,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         go()
         .timeout(options.timeout, "go")
-        .catch Promise.TimeoutError, (err) =>
+        .catch Promise.TimeoutError, (err) ->
           timedOutWaitingForPageLoad(options.timeout, options._log)
         .finally ->
           cleanup?()
 
           return null
 
-      goString = (str) =>
+      goString = (str) ->
         switch str
           when "forward" then goNumber(1)
           when "back"    then goNumber(-1)
