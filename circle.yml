@@ -177,7 +177,7 @@ jobs:
 
   "unit-tests":
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
