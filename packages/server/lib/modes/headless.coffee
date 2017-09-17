@@ -381,11 +381,19 @@ module.exports = {
       log("Should copy Circle Artifacts?", shouldCopy)
 
       if shouldCopy
-        log("Copying Circle Artifacts", ca)
+        log("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
 
+        ## copy each of the screenshots and videos
+        ## to artifacts using each basename of the folders
         Promise.join(
-          ss.copy(screenshotsFolder, ca)
-          video.copy(videosFolder, ca)
+          ss.copy(
+            screenshotsFolder,
+            path.join(ca, path.basename(screenshotsFolder))
+          ),
+          video.copy(
+            videosFolder,
+            path.join(ca, path.basename(videosFolder))
+          )
         )
 
   allDone: ->
