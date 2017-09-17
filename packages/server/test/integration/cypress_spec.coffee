@@ -423,7 +423,7 @@ describe "lib/cypress", ->
         expect(bundle._watching).to.be.true
 
     it "runs project headlessly and displays gui", ->
-      cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"])
+      cypress.start(["--run-project=#{@todosPath}", "--headed"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {
           url: "http://localhost:8888/__/#/tests/__all"

@@ -78,6 +78,15 @@ describe('exec run', function () {
       })
     })
 
+    it('spawns with --headed true', function () {
+      return run.start({ headed: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--headed', true,
+        ])
+      })
+    })
+
     it('spawns with --output-path', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {

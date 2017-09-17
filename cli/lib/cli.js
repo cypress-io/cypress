@@ -12,7 +12,7 @@ const coerceFalse = (arg) => {
 
 const parseOpts = (opts) => _.pick(opts,
   'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-  'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached')
+  'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached', 'headed')
 
 const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -30,6 +30,7 @@ const descriptions = {
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   version: 'Prints Cypress version',
+  headed: 'displays the Electron browser instead of running headlessly',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -80,6 +81,7 @@ module.exports = {
       .usage('[options]')
       .description('Runs Cypress tests from the CLI without the GUI')
       .option('--record [bool]',                           text('record'), coerceFalse)
+      .option('--headed',                                  text('headed'))
       .option('-k, --key <record-key>',                    text('key'))
       .option('-s, --spec <spec>',                         text('spec'))
       .option('-r, --reporter <reporter>',                 text('reporter'))

@@ -98,10 +98,9 @@ module.exports = {
 
   getElectronProps: (showGui, project, write) ->
     obj = {
-      width:             1280
-      height:            720
-      show:              showGui
-      devTools:          showGui
+      width:  1280
+      height: 720
+      show:   showGui
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
@@ -508,7 +507,7 @@ module.exports = {
               videoRecording:   config.videoRecording
               videoCompression: config.videoCompression
               spec:             options.spec
-              gui:              options.showHeadlessGui
+              gui:              options.headed
               browser:          options.browser
               outputPath:       options.outputPath
             })

@@ -57,16 +57,12 @@ describe "lib/modes/headless", ->
       expect(props.width).to.eq(1280)
       expect(props.height).to.eq(720)
 
-    it "sets show and devTools to boolean", ->
+    it "sets show to boolean", ->
       props = headless.getElectronProps(false)
-
       expect(props.show).to.be.false
-      expect(props.devTools).to.be.false
 
       props = headless.getElectronProps(true)
-
       expect(props.show).to.be.true
-      expect(props.devTools).to.be.true
 
     it "sets recordFrameRate and onPaint when write is true", ->
       write = @sandbox.stub()
@@ -437,7 +433,7 @@ describe "lib/modes/headless", ->
           project: @projectInstance
         })
 
-    it "passes showHeadlessGui to openProject.launch", ->
-      headless.run({showHeadlessGui: true})
+    it "passes headed to openProject.launch", ->
+      headless.run({headed: true})
       .then ->
         expect(openProject.launch).to.be.calledWithMatch("electron", undefined, {show: true})

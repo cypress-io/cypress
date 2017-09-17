@@ -65,6 +65,10 @@ const processRunOptions = (options = {}) => {
     args.push('--browser', options.browser)
   }
 
+  if (options.headed) {
+    args.push('--headed', options.headed)
+  }
+
   return args
 }
 
