@@ -444,17 +444,17 @@ describe "src/cy/commands/actions/scroll", ->
           expect(console.Command).to.eq("scrollTo")
           expect(console["Scrolled Element"]).to.eq $container.get(0)
 
-  context "#scrollIntoView", ->
+  context.only "#scrollIntoView", ->
     beforeEach ->
-      @_body        = cy.$$("body")
+      # @_body        = cy.$$("body")
+      @win = cy.state("window")
       @scrollVert   = cy.$$("#scroll-into-view-vertical")
       @scrollHoriz  = cy.$$("#scroll-into-view-horizontal")
       @scrollBoth   = cy.$$("#scroll-into-view-both")
 
       ## reset the scrollable containers back
       ## to furthest left and top
-      @_body.scrollTop(0)
-      @_body.scrollLeft(0)
+      @win.scrollTo(0, 0)
 
       @scrollVert.scrollTop(0)
       @scrollVert.scrollLeft(0)
@@ -472,265 +472,262 @@ describe "src/cy/commands/actions/scroll", ->
         expect($div).to.match div
 
     it "scrolls x axis of window to element", ->
-      expect(@_body.get(0).scrollTop).to.eq(0)
-      expect(@_body.get(0).scrollLeft).to.eq(0)
+      expect(@win.pageYOffset).to.eq(0)
+      expect(@win.pageXOffset).to.eq(0)
 
       cy.get("#scroll-into-view-win-horizontal div").scrollIntoView()
-      cy.get("body").then ($body) ->
-        expect($body.get(0).scrollTop).to.eq(0)
-
-        ## it'll scroll to the position, but this depends on
-        ## the size of the window??
-        cy.wrap($body).should("have.prop", "scrollLeft").and("not.eq", 0)
+      cy.window().then (win) ->
+        expect(win.pageYOffset).to.eq(0)
+        expect(win.pageXOffset).not.to.eq(0)
 
     it "scrolls y axis of window to element", ->
-      expect(@_body.get(0).scrollTop).to.eq(0)
-      expect(@_body.get(0).scrollLeft).to.eq(0)
+      expect(@win.pageYOffset).to.eq(0)
+      expect(@win.pageXOffset).to.eq(0)
 
       cy.get("#scroll-into-view-win-vertical div").scrollIntoView()
-      cy.get("body").then ($body) ->
-        expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
-        expect(@_body).to.have.prop("scrollLeft").and.eq(200)
-
-    it "scrolls both axes of window to element", ->
-      expect(@_body.get(0).scrollTop).to.eq(0)
-      expect(@_body.get(0).scrollLeft).to.eq(0)
-
-      cy.get("#scroll-into-view-win-both div").scrollIntoView()
-      cy.get("body").then ($body) ->
-        expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
-        expect(@_body).to.have.prop("scrollLeft").and.not.eq(0)
-
-    it "scrolls x axis of container to element", ->
-      expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
-      expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
-
-      cy.get("#scroll-into-view-horizontal h5").scrollIntoView().then ($el) ->
-        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
-        expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
-
-    it "scrolls y axis of container to element", ->
-      expect(@scrollVert.get(0).scrollTop).to.eq(0)
-      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
-
-      cy.get("#scroll-into-view-vertical h5").scrollIntoView().then ($el) ->
-        expect(@scrollVert.get(0).scrollTop).to.eq(300)
-        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
-
-    it "scrolls both axes of container to element", ->
-      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
-      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView().then ($el) ->
-        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
-        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
-
-    it "calls jQuery scroll to", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(scrollTo).to.be.called
-
-    it "sets duration to 0 by default", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
-
-    it "sets axis to correct x or y", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(scrollTo).to.be.calledWithMatch({}, {axis: "xy"})
-
-    it "scrolling resolves after a set duration", ->
-      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
-      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
-
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView({duration: 500}).then ->
-        expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
-        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
-        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
-
-    it "accepts duration string option", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "500"}).then ->
-        expect(scrollTo.args[0][1].duration).to.eq "500"
-
-    it "accepts offset string option", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView({offset: 500}).then ->
-        expect(scrollTo.args[0][1].offset).to.eq 500
-
-    it "accepts offset object option", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
-        expect(scrollTo.args[0][1].offset).to.deep.eq {left: 500, top: 200}
-
-    it "has easing set to swing by default", ->
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(scrollTo.args[0][1].easing).to.eq "swing"
-
-    it "scrolling resolves after easing", ->
-      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
-      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
-
-      scrollTo = cy.spy($.fn, "scrollTo")
-
-      cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
-        expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
-        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
-        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
-
-    describe "assertion verification", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, log) =>
-          if log.get("name") is "assert"
-            @lastLog = log
-
-        return null
-
-      it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, ->
-          cy.$$("#scroll-into-view-win-vertical div").addClass("scrolled")
-
-        cy
-          .contains("scroll into view vertical")
-          .scrollIntoView()
-          .should("have.class", "scrolled").then ->
-            lastLog = @lastLog
-
-            expect(lastLog.get("name")).to.eq("assert")
-            expect(lastLog.get("state")).to.eq("passed")
-            expect(lastLog.get("ended")).to.be.true
-
-    describe "errors", ->
-      beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
-        @logs = []
-
-        cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-          @logs.push(log)
-
-        return null
-
-      context "subject errors", ->
-        it "throws when not passed DOM element as subject", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
-            expect(err.message).to.include "{foo: bar}"
-            expect(err.message).to.include "> cy.noop()"
-            done()
-
-          cy.noop({foo: "bar"}).scrollIntoView()
-
-        it "throws when passed window object as subject", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
-            expect(err.message).to.include "<window>"
-            expect(err.message).to.include "> cy.window()"
-            done()
-
-          cy.window().scrollIntoView()
-
-        it "throws when passed document object as subject", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
-            expect(err.message).to.include "<document>"
-            expect(err.message).to.include "> cy.document()"
-            done()
-
-          cy.document().scrollIntoView()
-
-        it "throws if scrollable container is multiple elements", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() can only be used to scroll to 1 element, you tried to scroll to 2 elements."
-            done()
-
-          cy.get("button").scrollIntoView()
-
-      context "argument errors", ->
-        it "throws if arg passed as non-object", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() can only be called with an options object. Your argument was: foo"
-            done()
-
-          cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
-
-      context "option errors", ->
-        it "throws if duration is not a number or valid string", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
-            done()
-
-          cy.get("#scroll-into-view-both h5").scrollIntoView({ duration: "foo" })
-
-        it "throws if unrecognized easing", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid easing. Your easing was: flower"
-            done()
-
-          cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })
-
-    describe ".log", ->
-      beforeEach ->
-        @logs = []
-
-        cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-          @logs.push(log)
-
-        return null
-
-      it "logs out scrollIntoView", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("name")).to.eq "scrollIntoView"
-
-      it "passes in $el", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("$el").get(0)).to.eq $container.get(0)
-
-      it "logs duration options", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "1"}).then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("message")).to.eq "{duration: 1}"
-
-      it "logs easing options", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("message")).to.eq "{easing: linear}"
-
-      it "logs offset options", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("message")).to.eq "{offset: {left: 500, top: 200}}"
-
-      it "snapshots immediately", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("snapshots").length).to.eq(1)
-          expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-      it "#consoleProps", ->
-        cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
-          console = @lastLog.invoke("consoleProps")
-          expect(console.Command).to.eq("scrollIntoView")
-          expect(console["Applied To"]).to.eq $container.get(0)
-          expect(console["Scrolled Element"]).to.exist
+      cy.window().then (win) ->
+        expect(win.pageYOffset).not.to.eq(0)
+        expect(win.pageXOffset).to.eq(200)
+
+    # it "scrolls both axes of window to element", ->
+    #   expect(@_body.get(0).scrollTop).to.eq(0)
+    #   expect(@_body.get(0).scrollLeft).to.eq(0)
+    #
+    #   cy.get("#scroll-into-view-win-both div").scrollIntoView()
+    #   cy.get("body").then ($body) ->
+    #     expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
+    #     expect(@_body).to.have.prop("scrollLeft").and.not.eq(0)
+    #
+    # it "scrolls x axis of container to element", ->
+    #   expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+    #   expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+    #
+    #   cy.get("#scroll-into-view-horizontal h5").scrollIntoView().then ($el) ->
+    #     expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+    #     expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
+    #
+    # it "scrolls y axis of container to element", ->
+    #   expect(@scrollVert.get(0).scrollTop).to.eq(0)
+    #   expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+    #
+    #   cy.get("#scroll-into-view-vertical h5").scrollIntoView().then ($el) ->
+    #     expect(@scrollVert.get(0).scrollTop).to.eq(300)
+    #     expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+    #
+    # it "scrolls both axes of container to element", ->
+    #   expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+    #   expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView().then ($el) ->
+    #     expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+    #     expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+    #
+    # it "calls jQuery scroll to", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+    #     expect(scrollTo).to.be.called
+    #
+    # it "sets duration to 0 by default", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+    #     expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
+    #
+    # it "sets axis to correct x or y", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+    #     expect(scrollTo).to.be.calledWithMatch({}, {axis: "xy"})
+    #
+    # it "scrolling resolves after a set duration", ->
+    #   expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+    #   expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+    #
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView({duration: 500}).then ->
+    #     expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
+    #     expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+    #     expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+    #
+    # it "accepts duration string option", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "500"}).then ->
+    #     expect(scrollTo.args[0][1].duration).to.eq "500"
+    #
+    # it "accepts offset string option", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView({offset: 500}).then ->
+    #     expect(scrollTo.args[0][1].offset).to.eq 500
+    #
+    # it "accepts offset object option", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
+    #     expect(scrollTo.args[0][1].offset).to.deep.eq {left: 500, top: 200}
+    #
+    # it "has easing set to swing by default", ->
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+    #     expect(scrollTo.args[0][1].easing).to.eq "swing"
+    #
+    # it "scrolling resolves after easing", ->
+    #   expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+    #   expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+    #
+    #   scrollTo = cy.spy($.fn, "scrollTo")
+    #
+    #   cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
+    #     expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
+    #     expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+    #     expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+    #
+    # describe "assertion verification", ->
+    #   beforeEach ->
+    #     cy.on "log:added", (attrs, log) =>
+    #       if log.get("name") is "assert"
+    #         @lastLog = log
+    #
+    #     return null
+    #
+    #   it "eventually passes the assertion", ->
+    #     cy.on "command:retry", _.after 2, ->
+    #       cy.$$("#scroll-into-view-win-vertical div").addClass("scrolled")
+    #
+    #     cy
+    #       .contains("scroll into view vertical")
+    #       .scrollIntoView()
+    #       .should("have.class", "scrolled").then ->
+    #         lastLog = @lastLog
+    #
+    #         expect(lastLog.get("name")).to.eq("assert")
+    #         expect(lastLog.get("state")).to.eq("passed")
+    #         expect(lastLog.get("ended")).to.be.true
+    #
+    # describe "errors", ->
+    #   beforeEach ->
+    #     Cypress.config("defaultCommandTimeout", 50)
+    #
+    #     @logs = []
+    #
+    #     cy.on "log:added", (attrs, log) =>
+    #       @lastLog = log
+    #       @logs.push(log)
+    #
+    #     return null
+    #
+    #   context "subject errors", ->
+    #     it "throws when not passed DOM element as subject", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+    #         expect(err.message).to.include "{foo: bar}"
+    #         expect(err.message).to.include "> cy.noop()"
+    #         done()
+    #
+    #       cy.noop({foo: "bar"}).scrollIntoView()
+    #
+    #     it "throws when passed window object as subject", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+    #         expect(err.message).to.include "<window>"
+    #         expect(err.message).to.include "> cy.window()"
+    #         done()
+    #
+    #       cy.window().scrollIntoView()
+    #
+    #     it "throws when passed document object as subject", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+    #         expect(err.message).to.include "<document>"
+    #         expect(err.message).to.include "> cy.document()"
+    #         done()
+    #
+    #       cy.document().scrollIntoView()
+    #
+    #     it "throws if scrollable container is multiple elements", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() can only be used to scroll to 1 element, you tried to scroll to 2 elements."
+    #         done()
+    #
+    #       cy.get("button").scrollIntoView()
+    #
+    #   context "argument errors", ->
+    #     it "throws if arg passed as non-object", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() can only be called with an options object. Your argument was: foo"
+    #         done()
+    #
+    #       cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
+    #
+    #   context "option errors", ->
+    #     it "throws if duration is not a number or valid string", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
+    #         done()
+    #
+    #       cy.get("#scroll-into-view-both h5").scrollIntoView({ duration: "foo" })
+    #
+    #     it "throws if unrecognized easing", (done) ->
+    #       cy.on "fail", (err) =>
+    #         expect(err.message).to.include "cy.scrollIntoView() must be called with a valid easing. Your easing was: flower"
+    #         done()
+    #
+    #       cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })
+    #
+    # describe ".log", ->
+    #   beforeEach ->
+    #     @logs = []
+    #
+    #     cy.on "log:added", (attrs, log) =>
+    #       @lastLog = log
+    #       @logs.push(log)
+    #
+    #     return null
+    #
+    #   it "logs out scrollIntoView", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+    #       lastLog = @lastLog
+    #
+    #       expect(lastLog.get("name")).to.eq "scrollIntoView"
+    #
+    #   it "passes in $el", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
+    #       lastLog = @lastLog
+    #
+    #       expect(lastLog.get("$el").get(0)).to.eq $container.get(0)
+    #
+    #   it "logs duration options", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "1"}).then ->
+    #       lastLog = @lastLog
+    #
+    #       expect(lastLog.get("message")).to.eq "{duration: 1}"
+    #
+    #   it "logs easing options", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
+    #       lastLog = @lastLog
+    #
+    #       expect(lastLog.get("message")).to.eq "{easing: linear}"
+    #
+    #   it "logs offset options", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
+    #       lastLog = @lastLog
+    #
+    #       expect(lastLog.get("message")).to.eq "{offset: {left: 500, top: 200}}"
+    #
+    #   it "snapshots immediately", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+    #       lastLog = @lastLog
+    #
+    #       expect(lastLog.get("snapshots").length).to.eq(1)
+    #       expect(lastLog.get("snapshots")[0]).to.be.an("object")
+    #
+    #   it "#consoleProps", ->
+    #     cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
+    #       console = @lastLog.invoke("consoleProps")
+    #       expect(console.Command).to.eq("scrollIntoView")
+    #       expect(console["Applied To"]).to.eq $container.get(0)
+    #       expect(console["Scrolled Element"]).to.exist
