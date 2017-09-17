@@ -475,30 +475,31 @@ describe "src/cy/commands/actions/scroll", ->
       expect(@_body.get(0).scrollTop).to.eq(0)
       expect(@_body.get(0).scrollLeft).to.eq(0)
 
-      cy.get("#scroll-into-view-win-horizontal div").scrollIntoView().then ($el) ->
-        expect(@_body.get(0).scrollTop).to.eq(0)
+      cy.get("#scroll-into-view-win-horizontal div").scrollIntoView()
+      cy.get("body").then ($body) ->
+        expect($body.get(0).scrollTop).to.eq(0)
 
         ## it'll scroll to the position, but this depends on
         ## the size of the window??
-        cy.wrap(@_body).should("have.prop", "scrollLeft").and("not.eq", 0)
+        cy.wrap($body).should("have.prop", "scrollLeft").and("not.eq", 0)
 
     it "scrolls y axis of window to element", ->
       expect(@_body.get(0).scrollTop).to.eq(0)
       expect(@_body.get(0).scrollLeft).to.eq(0)
 
-      cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        cy.wrap(@_body).should ($body) ->
-          expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
-          expect(@_body).to.have.prop("scrollLeft").and.eq(200)
+      cy.get("#scroll-into-view-win-vertical div").scrollIntoView()
+      cy.get("body").then ($body) ->
+        expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
+        expect(@_body).to.have.prop("scrollLeft").and.eq(200)
 
     it "scrolls both axes of window to element", ->
       expect(@_body.get(0).scrollTop).to.eq(0)
       expect(@_body.get(0).scrollLeft).to.eq(0)
 
-      cy.get("#scroll-into-view-win-both div").scrollIntoView().then ($el) ->
-        cy.wrap(@_body).should ($body) ->
-          expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
-          expect(@_body).to.have.prop("scrollLeft").and.not.eq(0)
+      cy.get("#scroll-into-view-win-both div").scrollIntoView()
+      cy.get("body").then ($body) ->
+        expect(@_body).to.have.prop("scrollTop").and.not.eq(0)
+        expect(@_body).to.have.prop("scrollLeft").and.not.eq(0)
 
     it "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
