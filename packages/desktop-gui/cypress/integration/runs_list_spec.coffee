@@ -139,9 +139,10 @@ describe "Runs List", ->
                 }
                 """})
 
-              it "shows failure message", ->
+                ## block the subsequent tests until
+                ## this is displayed in the DOM
                 cy.contains("Request Failed")
-                cy.contains('"cheese": "off the cracker"')
+                cy.contains("off the cracker")
 
               it "enables button", ->
                 cy.contains("Request Access").should("not.be.disabled")
@@ -217,9 +218,8 @@ describe "Runs List", ->
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
           .get(".modal-body")
-          .contains(".btn", "Setup Project").click()
-          .end()
-          .contains("To record your first")
+            .contains(".btn", "Setup Project").click()
+        cy.contains("To record your first")
 
     describe "unexpected error", ->
       beforeEach ->
@@ -273,9 +273,8 @@ describe "Runs List", ->
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
           .get(".modal-body")
-          .contains(".btn", "Setup Project").click()
-          .end()
-          .contains("To record your first")
+            .contains(".btn", "Setup Project").click()
+        cy.contains("To record your first")
 
     describe "no runs", ->
       context "having never setup CI", ->

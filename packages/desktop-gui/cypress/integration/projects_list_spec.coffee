@@ -66,12 +66,13 @@ describe "Global Mode", ->
       describe "when project statuses have loaded", ->
         beforeEach ->
           @getProjectStatuses.resolve(@projectStatuses)
-          cy.get(".projects-list li") ## ensures projects have loaded
 
-        it "updates local storage with project statuses", ->
+          ## ensures projects have loaded
+          cy.get(".projects-list li").should("have.length", 5)
+
+        it "updates local storage with projects", ->
           localStorageProjects = @getLocalStorageProjects()
           expect(localStorageProjects.length).to.equal(5)
-          expect(localStorageProjects[0].orgId).to.equal(@projectStatuses[0].orgId)
 
         it "updates project names", ->
           cy.get(".projects-list li .project-name").eq(3).should("have.text", "Client Work")
