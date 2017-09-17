@@ -6,8 +6,8 @@ describe "src/cy/commands/screenshot", ->
     cy.stub(Cypress, "automation").callThrough()
 
   context "runnable:after:run:async", ->
-    it "is noop when isInteractive", ->
-      Cypress.config("isInteractive", true)
+    it "is noop when not isTextTerminal", ->
+      Cypress.config("isTextTerminal", false)
 
       cy.spy(Cypress, "action").log(false)
 
