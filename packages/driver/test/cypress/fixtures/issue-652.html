@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title>Bb Router</title>
+        <script src="/node_modules/jquery/dist/jquery.js"></script>
+        <script src="/node_modules/underscore/underscore.js"></script>
+        <script src="/node_modules/backbone/backbone.js"></script>
+    </head>
+    <body>
+        <a href="#one">one</a> <a href="#two">two</a> <a href="#three">three</a>
+        <div id="visited"></div>
+        <script>
+            var Workspace = Backbone.Router.extend({
+
+                routes: {
+                    "one": "one",
+                    "two": "two",
+                    "three": "three"
+                },
+
+                one: function() {
+                    $('#visited').append('<div>one</div>');
+                },
+
+                two: function() {
+                    $('#visited').append('<div>two</div>');
+                },
+
+                three: function() {
+                    $('#visited').append('<div>three</div>');
+                }
+            });
+
+            new Workspace();
+
+            Backbone.history.start();
+
+        </script>
+    </body>
+</html>

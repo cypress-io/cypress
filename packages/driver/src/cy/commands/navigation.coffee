@@ -481,6 +481,36 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       $autIframe = state("$autIframe")
       runnable   = state("runnable")
 
+      changeIframeSrc = (url, event) ->
+        ## when the remote iframe's load event fires
+        ## callback fn
+        new Promise (resolve) ->
+          ## if we're listening for hashchange
+          ## events then change the strategy
+          ## to listen to this event emitting
+          ## from the window and not cy
+          ## see issue 652 for why.
+          ## the hashchange events are firing too
+          ## fast for us. They even resolve asynchronously
+          ## before other application's hashchange events
+          ## have even fired.
+          if event is "hashchange"
+            win.addEventListener("hashchange", resolve)
+          else
+            cy.once(event, resolve)
+
+          cleanup = ->
+            if event is "hashchange"
+              win.removeEventListener("hashchange", resolve)
+            else
+              cy.removeListener(event, resolve)
+
+            knownCommandCausedInstability = false
+
+          knownCommandCausedInstability = true
+
+          $utils.iframeSrc($autIframe, url)
+
       onLoad = ->
         ## reset window on load
         win = state("window")
@@ -521,8 +551,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## for this, and so we need to resolve onLoad immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
-          $utils.iframeSrc($autIframe, remote.href)
-          return onLoad()
+          return changeIframeSrc(remote.href, "hashchange")
+          .then(onLoad)
 
         if existingHash
           ## strip out the existing hash if we have one
@@ -564,22 +594,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             url = $Location.fullyQualifyUrl(url)
 
-            changeIframeSrc = ->
-              ## when the remote iframe's load event fires
-              ## callback fn
-              new Promise (resolve) ->
-                cy.once("window:load", resolve)
-
-                cleanup = ->
-                  cy.removeListener("window:load", resolve)
-
-                  knownCommandCausedInstability = false
-
-                knownCommandCausedInstability = true
-
-                $utils.iframeSrc($autIframe, url)
-
-            changeIframeSrc()
+            changeIframeSrc(url, "window:load")
             .then(onLoad)
           else
             ## if we've already visited a new superDomain
