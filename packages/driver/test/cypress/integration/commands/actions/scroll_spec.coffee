@@ -444,7 +444,7 @@ describe "src/cy/commands/actions/scroll", ->
           expect(console.Command).to.eq("scrollTo")
           expect(console["Scrolled Element"]).to.eq $container.get(0)
 
-  context.only "#scrollIntoView", ->
+  context "#scrollIntoView", ->
     beforeEach ->
       # @_body        = cy.$$("body")
       @win = cy.state("window")
