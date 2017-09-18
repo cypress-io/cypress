@@ -367,27 +367,32 @@ describe "lib/modes/headless", ->
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
-      @sandbox.spy(errors, "get")
+      @sandbox.spy(errors, "warning")
       @sandbox.stub(@projectInstance, "getConfig").resolves({
         proxyUrl: "http://localhost:12345",
         videoRecording: true,
         videosFolder: "videos"
       })
 
-    it "shows no errors for default browser", ->
+    it "shows no warnings for default browser", ->
       headless.run()
       .then ->
-        expect(errors.get).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.not.be.called
 
-    it "shows no errors for electron browser", ->
+    it "shows no warnings for electron browser", ->
       headless.run({browser: "electron"})
       .then ->
-        expect(errors.get).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
-    it "disabled video recording for non-electron browser", ->
+    it "disables video recording on headed runs", ->
+      headless.run({headed: true})
+      .then ->
+        expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")
+
+    it "disables video recording for non-electron browser", ->
       headless.run({browser: "chrome"})
       .then ->
-        expect(errors.get).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
   context ".run", ->
     beforeEach ->

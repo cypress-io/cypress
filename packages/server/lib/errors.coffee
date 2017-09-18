@@ -43,6 +43,14 @@ API = {
 
         Available browsers found are: #{arg2}
         """
+      when "CANNOT_RECORD_VIDEO_HEADED"
+        """
+        Warning: Cypress can only record videos when running headlessly.
+
+        You have set the 'electron' browser to run headed.
+
+        A video will not be recorded when using this mode.
+        """
       when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
         """
         Warning: Cypress can only record videos when using the built in 'electron' browser.
