@@ -179,20 +179,18 @@ function testBinary (version) {
   return tasks.run()
 }
 
-const maybeVerify = (options = {}) => {
+const maybeVerify = (installedVersion, options = {}) => {
   return info.getVerifiedVersion()
   .then((verifiedVersion) => {
-    const packageVersion = util.pkgVersion()
-
     debug('has verified version', verifiedVersion)
 
     // verify if packageVersion and verifiedVersion are different
-    const shouldVerify = options.force || differentFrom(packageVersion, verifiedVersion)
+    const shouldVerify = options.force || differentFrom(installedVersion, verifiedVersion)
 
     debug('run verification check?', shouldVerify)
 
     if (shouldVerify) {
-      return testBinary(packageVersion)
+      return testBinary(installedVersion)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
@@ -238,7 +236,7 @@ const start = (options = {}) => {
       logger.log()
     }
 
-    return maybeVerify(options)
+    return maybeVerify(installedVersion, options)
   })
   .catch((err) => {
     if (err.known) {

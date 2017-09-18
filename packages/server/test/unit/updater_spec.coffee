@@ -47,6 +47,15 @@ describe "lib/updater", ->
 
       @updater = Updater({})
 
+    it "sends x-cypress-version", (done) ->
+      @updater.getClient().checkNewVersion =>
+        expect(@get).to.be.calledWithMatch({
+          headers: {
+            "x-cypress-version": pkg.version
+          }
+        })
+        done()
+
     it "sends x-machine-id", (done) ->
       nmi.machineId()
       .then (id) =>
@@ -57,7 +66,6 @@ describe "lib/updater", ->
             }
           })
           done()
-      return
 
     it "sends x-machine-id as null on error", (done) ->
       @sandbox.stub(nmi, "machineId").rejects(new Error())
@@ -70,7 +78,6 @@ describe "lib/updater", ->
         })
 
         done()
-      return
 
   context "#check", ->
     beforeEach ->

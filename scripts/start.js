@@ -20,4 +20,5 @@ if (projectArgIndex > -1) {
     }
   }
 }
+
 require('@packages/server')

@@ -4,7 +4,7 @@ Keyboard = Cypress.Keyboard
 bililiteRange = Cypress.bililiteRange
 Promise = Cypress.Promise
 
-describe "src/cy/commands/actions/text", ->
+describe "src/cy/commands/actions/type", ->
   before ->
     cy
       .visit("/fixtures/dom.html")
@@ -2011,8 +2011,8 @@ describe "src/cy/commands/actions/text", ->
             expect(console.Command).to.eq("type")
             expect(console.Typed).to.eq("foobar")
             expect(console["Applied To"]).to.eq $input.get(0)
-            expect(console.Coords.left).to.be.closeTo(fromWindow.left, 1)
-            expect(console.Coords.top).to.be.closeTo(fromWindow.top, 1)
+            expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1)
+            expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
 
         it "has a table of keys", ->
           cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->

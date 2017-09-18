@@ -117,7 +117,7 @@ context('.verify', function () {
     })
   })
 
-  it('logs warning when installed version does not match package version', function () {
+  it('logs warning when installed version does not match verified version', function () {
     const ctx = this
 
     this.sandbox.stub(fs, 'statAsync')
@@ -137,7 +137,7 @@ context('.verify', function () {
     })
     .catch(() => {
       snapshot(
-        'warning installed version does not match package version',
+        'warning installed version does not match verified version',
         normalize(ctx.stdout.toString())
       )
     })
@@ -282,7 +282,32 @@ context('.verify', function () {
       })
     })
 
-    it('turns off Opening Cypres...', function () {
+    it('logs and runs when installed version is different than verified version', function () {
+      const ctx = this
+
+      return info.writeInfoFileContents({
+        version: '9.8.7',
+        verifiedVersion: packageVersion,
+      })
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        return info.getVerifiedVersion()
+      })
+      .then((vv) => {
+        expect(vv).to.eq('9.8.7')
+      })
+      .delay(100) // give a little padding for listr
+      .then(() => {
+        snapshot(
+          'current version has not been verified',
+          normalize(ctx.stdout.toString())
+        )
+      })
+    })
+
+    it('turns off Opening Cypress...', function () {
       const ctx = this
 
       return info.writeInfoFileContents({

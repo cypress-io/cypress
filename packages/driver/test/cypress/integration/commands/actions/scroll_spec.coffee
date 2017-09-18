@@ -1,7 +1,7 @@
 $ = Cypress.$Cypress.$
 _ = Cypress._
 
-describe "src/cy/commands/actions/scrolling", ->
+describe "src/cy/commands/actions/scroll", ->
   before ->
     cy
       .visit("/fixtures/scrolling.html")
@@ -446,15 +446,14 @@ describe "src/cy/commands/actions/scrolling", ->
 
   context "#scrollIntoView", ->
     beforeEach ->
-      @_body        = cy.$$("body")
+      @win          = cy.state("window")
       @scrollVert   = cy.$$("#scroll-into-view-vertical")
       @scrollHoriz  = cy.$$("#scroll-into-view-horizontal")
       @scrollBoth   = cy.$$("#scroll-into-view-both")
 
       ## reset the scrollable containers back
       ## to furthest left and top
-      @_body.scrollTop(0)
-      @_body.scrollLeft(0)
+      @win.scrollTo(0, 0)
 
       @scrollVert.scrollTop(0)
       @scrollVert.scrollLeft(0)
@@ -472,31 +471,31 @@ describe "src/cy/commands/actions/scrolling", ->
         expect($div).to.match div
 
     it "scrolls x axis of window to element", ->
-      expect(@_body.get(0).scrollTop).to.eq(0)
-      expect(@_body.get(0).scrollLeft).to.eq(0)
+      expect(@win.pageYOffset).to.eq(0)
+      expect(@win.pageXOffset).to.eq(0)
 
-      cy.get("#scroll-into-view-win-horizontal div").scrollIntoView().then ($el) ->
-        expect(@_body.get(0).scrollTop).to.eq(0)
-
-        ## it'll scorll to the position, but this depends on
-        ## the size of the window??
-        expect(@_body.get(0).scrollLeft).to.not.eq(0)
+      cy.get("#scroll-into-view-win-horizontal div").scrollIntoView()
+      cy.window().then (win) ->
+        expect(win.pageYOffset).to.eq(0)
+        expect(win.pageXOffset).not.to.eq(0)
 
     it "scrolls y axis of window to element", ->
-      expect(@_body.get(0).scrollTop).to.eq(0)
-      expect(@_body.get(0).scrollLeft).to.eq(0)
+      expect(@win.pageYOffset).to.eq(0)
+      expect(@win.pageXOffset).to.eq(0)
 
-      cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        expect(@_body.get(0).scrollTop).to.not.eq(0)
-        expect(@_body.get(0).scrollLeft).to.eq(200)
+      cy.get("#scroll-into-view-win-vertical div").scrollIntoView()
+      cy.window().then (win) ->
+        expect(win.pageYOffset).not.to.eq(0)
+        expect(win.pageXOffset).to.eq(200)
 
     it "scrolls both axes of window to element", ->
-      expect(@_body.get(0).scrollTop).to.eq(0)
-      expect(@_body.get(0).scrollLeft).to.eq(0)
+      expect(@win.pageYOffset).to.eq(0)
+      expect(@win.pageXOffset).to.eq(0)
 
-      cy.get("#scroll-into-view-win-both div").scrollIntoView().then ($el) ->
-        expect(@_body.get(0).scrollTop).to.not.eq(0)
-        expect(@_body.get(0).scrollLeft).to.not.eq(0)
+      cy.get("#scroll-into-view-win-both div").scrollIntoView()
+      cy.window().then (win) ->
+        expect(win.pageYOffset).not.to.eq(0)
+        expect(win.pageXOffset).not.to.eq(0)
 
     it "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)

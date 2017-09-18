@@ -53,6 +53,7 @@ describe "src/cy/commands/waiting", ->
           .route("GET", /.*/, response).as("fetch")
           .window().then (win) ->
             win.$.get("/foo")
+            null
           .wait("@fetch").then (xhr) ->
             expect(xhr.responseBody).to.deep.eq response
 
@@ -191,6 +192,7 @@ describe "src/cy/commands/waiting", ->
             .route(/foo/, {}).as("foo")
             .window().then (win) ->
               win.$.get("/foo")
+              null
             .wait(["@foo", "@bar"])
 
         it "throws when 2nd alias is missing '@' but matches an available alias", (done) ->
@@ -204,6 +206,7 @@ describe "src/cy/commands/waiting", ->
             .route(/bar/, {}).as("bar")
             .window().then (win) ->
               win.$.get("/foo")
+              null
             .wait(["@foo", "bar"])
 
         it "throws when 2nd alias isnt a route alias", (done) ->
@@ -217,6 +220,7 @@ describe "src/cy/commands/waiting", ->
             .get("body").as("bar")
             .window().then (win) ->
               win.$.get("/foo")
+              null
             .wait(["@foo", "@bar"])
 
         it "throws whenever an alias times out", (done) ->
@@ -527,6 +531,7 @@ describe "src/cy/commands/waiting", ->
           .window().then (win) ->
             win.$.get("/users")
             win.$.get("/posts")
+            null
           .wait(["@getUsers", "@getPosts"]).spread (xhr1, xhr2) ->
             expect(xhr1.responseBody).to.deep.eq resp1
             expect(xhr2.responseBody).to.deep.eq resp2
@@ -767,6 +772,7 @@ describe "src/cy/commands/waiting", ->
             .route(/bar/, {}).as("getBar")
             .window().then (win) ->
               xhrGet(win, "/foo")
+              null
             .wait(["@getFoo", "@getBar"])
 
       describe "function argument errors", ->
@@ -781,6 +787,7 @@ describe "src/cy/commands/waiting", ->
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               xhrGet(win, "/foo")
+              null
             .wait("@getFoo").then ->
               lastLog = @lastLog
 
@@ -794,6 +801,7 @@ describe "src/cy/commands/waiting", ->
             .window().then (win) ->
               xhrGet(win, "/foo")
               xhrGet(win, "/bar")
+              null
             .wait(["@getFoo", "@getBar"]).then (xhrs) ->
               lastLog = @lastLog
 
@@ -805,6 +813,7 @@ describe "src/cy/commands/waiting", ->
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               xhrGet(win, "/foo")
+              null
             .wait("@getFoo").then (xhr) ->
               expect(@lastLog.invoke("consoleProps")).to.deep.eq {
                 Command: "wait"
@@ -820,6 +829,7 @@ describe "src/cy/commands/waiting", ->
             .window().then (win) ->
               xhrGet(win, "/foo")
               xhrGet(win, "/bar")
+              null
             .wait(["@getFoo", "@getBar"]).then (xhrs) ->
               expect(@lastLog.invoke("consoleProps")).to.deep.eq {
                 Command: "wait"

@@ -407,7 +407,7 @@ describe "lib/cypress", ->
         .catch -> done()
 
     it "runs project headlessly and displays gui", ->
-      cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"])
+      cypress.start(["--run-project=#{@todosPath}", "--headed"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {
           url: "http://localhost:8888/__/#/tests/__all"
@@ -594,6 +594,11 @@ describe "lib/cypress", ->
         fs.removeAsync(permissionsPath)
       .then =>
         @expectExitWithErr("ERROR_READING_FILE", path.join(permissionsPath, "cypress.json"))
+
+    it "logs error and exits when reporter does not exist", ->
+      cypress.start(["--run-project=#{@todosPath}", "--reporter", "foobarbaz"])
+      .then =>
+        @expectExitWithErr("INVALID_REPORTER_NAME", "foobarbaz")
 
     describe "morgan", ->
       it "sets morgan to false", ->

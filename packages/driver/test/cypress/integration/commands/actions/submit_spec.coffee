@@ -2,7 +2,7 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
-describe "src/cy/commands/actions/form", ->
+describe "src/cy/commands/actions/submit", ->
   before ->
     cy
       .visit("/fixtures/dom.html")

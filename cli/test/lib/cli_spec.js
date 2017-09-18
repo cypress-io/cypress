@@ -153,6 +153,11 @@ describe('cli', function () {
       this.exec('run --project /tmp/foo/bar')
       expect(run.start).to.be.calledWith({ project: '/tmp/foo/bar' })
     })
+
+    it('calls run with heded', function () {
+      this.exec('run --headed')
+      expect(run.start).to.be.calledWith({ headed: true })
+    })
   })
 
   it('open calls open.start with options', function () {

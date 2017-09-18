@@ -31,8 +31,7 @@ describe "Update Banner", ->
       cy.get("html").should("not.have.class", "has-updates")
 
     it "checks for update on show", ->
-      cy.then ->
-        expect(@ipc.updaterCheck).to.be.called
+      cy.wrap(@ipc.updaterCheck).should("be.called")
 
     it "displays banner if new version is available", ->
       @updaterCheck.resolve(NEW_VERSION)

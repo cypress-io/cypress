@@ -98,10 +98,9 @@ module.exports = {
 
   getElectronProps: (showGui, project, write) ->
     obj = {
-      width:             1280
-      height:            720
-      show:              showGui
-      devTools:          showGui
+      width:  1280
+      height: 720
+      show:   showGui
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
@@ -203,15 +202,15 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browser, spec, write, gui, project, screenshots } = options
+    { browser, spec, write, headed, project, screenshots } = options
 
-    gui = !!gui
+    headed = !!headed
 
     browser ?= "electron"
 
     browserOpts = switch browser
       when "electron"
-        @getElectronProps(gui, project, write)
+        @getElectronProps(headed, project, write)
       else
         {}
 
@@ -225,11 +224,8 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, gui) ->
+  listenForProjectEnd: (project, headed) ->
     new Promise (resolve) ->
-      ## dont ever end if we're in 'gui' debugging mode
-      return if gui
-
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
         ## early too: (Ended Early: true)
@@ -303,9 +299,9 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, gui, screenshots, started, end, name, cname, videoCompression, outputPath } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, outputPath } = options
 
-    @listenForProjectEnd(project, gui)
+    @listenForProjectEnd(project, headed)
     .then (obj) =>
       if end
         obj.video = name
@@ -376,10 +372,24 @@ module.exports = {
   copy: (videosFolder, screenshotsFolder) ->
     Promise.try ->
       ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
-      if (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
+      shouldCopy = (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
+
+      log("Should copy Circle Artifacts?", shouldCopy)
+
+      if shouldCopy
+        log("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
+
+        ## copy each of the screenshots and videos
+        ## to artifacts using each basename of the folders
         Promise.join(
-          ss.copy(screenshotsFolder, ca)
-          video.copy(videosFolder, ca)
+          ss.copy(
+            screenshotsFolder,
+            path.join(ca, path.basename(screenshotsFolder))
+          ),
+          video.copy(
+            videosFolder,
+            path.join(ca, path.basename(videosFolder))
+          )
         )
 
   allDone: ->
@@ -409,18 +419,22 @@ module.exports = {
 
     ## if we've been told to record and we're not spawning a headed browser
     browserCanBeRecorded = (name) ->
-      name == "electron"
+      name is "electron" and not options.headed
 
     if videoRecording
       if browserCanBeRecorded(browser)
         if !videosFolder
           throw new Error("Missing videoFolder for recording")
+
         id2       = @getId()
         name      = path.join(videosFolder, id2 + ".mp4")
         cname     = path.join(videosFolder, id2 + "-compressed.mp4")
         recording = @createRecording(name)
       else
-        errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
+        if browser is "electron" and options.headed
+          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+        else
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -435,7 +449,7 @@ module.exports = {
       .then (started) =>
         Promise.props({
           stats:      @waitForTestsToFinishRunning({
-            gui:              options.gui
+            headed:           options.headed
             project:          options.project
             videoCompression: options.videoCompression
             outputPath:       options.outputPath
@@ -448,8 +462,8 @@ module.exports = {
 
           connection: @waitForBrowserToConnect({
             id:          options.id
-            gui:         options.gui
             spec:        options.spec
+            headed:      options.headed
             project:     options.project
             webSecurity: options.webSecurity
             write
@@ -494,7 +508,7 @@ module.exports = {
               videoRecording:   config.videoRecording
               videoCompression: config.videoCompression
               spec:             options.spec
-              gui:              options.showHeadlessGui
+              headed:           options.headed
               browser:          options.browser
               outputPath:       options.outputPath
             })

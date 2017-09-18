@@ -5,10 +5,12 @@ defaults: &defaults
   working_directory: ~/cypress-monorepo
   docker:
     # the Docker image with Cypress dependencies and Chrome browser
-    - image: cypress/internal:chrome58
+    - image: cypress/internal:chrome61
       environment:
         ## this enables colors + fixes failing unit tests
         TERM: xterm
+
+        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
         npm_config_loglevel: warn
         # even when running as non-root user
@@ -175,7 +177,7 @@ jobs:
 
   "unit-tests":
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
@@ -219,7 +221,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 0
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 0
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -228,7 +230,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 1
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 1
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -237,7 +239,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 2
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 2
       - store_test_results:
           path: /tmp/cypress-monorepo
 
@@ -246,19 +248,18 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/server && npm run test-e2e -- --parallel 4 --index 3
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 3
       - store_test_results:
           path: /tmp/cypress-monorepo
 
-  ## TODO: commenting out for now until these run
-  # "driver-unit-tests":
-  #   <<: *defaults
-  #   parallelism: 2
-  #   steps:
-  #     - restore_cache:
-  #         key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-  #     - run: chrome --version
-  #     - run: npm run all test-unit -- --package driver
+  "server-e2e-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 4
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "driver-integration-tests-1":
     <<: *defaults
@@ -268,7 +269,11 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 0
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 0
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "driver-integration-tests-2":
     <<: *defaults
@@ -278,7 +283,11 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 1
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 1
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "driver-integration-tests-3":
     <<: *defaults
@@ -288,7 +297,11 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 2
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "driver-integration-tests-4":
     <<: *defaults
@@ -298,16 +311,68 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: cd packages/driver && xvfb-run -as "-screen 0 1280x720x16" npm run test-integration -- --parallel 4 --index 3
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 3
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 4
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "desktop-gui-integration-tests-1":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 0
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "desktop-gui-integration-tests-2":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 1
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "desktop-gui-integration-tests-3":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "build-binary":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      - run: ls -la build/linux/Cypress
+      - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
 
 workflows:
   version: 2
@@ -338,10 +403,9 @@ workflows:
       - server-e2e-tests-4:
           requires:
             - build
-      ## TODO: temporarily commenting out
-      # - driver-unit-tests:
-      #     requires:
-      #       - build
+      - server-e2e-tests-5:
+          requires:
+            - build
       - driver-integration-tests-1:
           requires:
             - build
@@ -354,9 +418,22 @@ workflows:
       - driver-integration-tests-4:
           requires:
             - build
+      - driver-integration-tests-5:
+          requires:
+            - build
+      - desktop-gui-integration-tests-1:
+          requires:
+            - build
+      - desktop-gui-integration-tests-2:
+          requires:
+            - build
+      - desktop-gui-integration-tests-3:
+          requires:
+            - build
       - build-binary:
           requires:
             - build
+
 #
 # things to run in the 4th CI container
 #
@@ -365,5 +442,5 @@ workflows:
 #     command: |
 #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
 #         # ./bin/cypress --project=./packages/example --path-to-cypress
-#         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+#         # npm start -- --project=./packages/example
 #       fi

@@ -211,7 +211,9 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   loading = ->
     new Promise (resolve, reject) ->
-      cy.on "window:load", ->
+      cy.once "window:load", ->
+        cy.state("onPageLoadErr", null)
+
         options._log.set("message", "--page loaded--").snapshot().end()
 
         resolve()
@@ -223,15 +225,13 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
   loading()
   .timeout(options.timeout, "page load")
   .catch Promise.TimeoutError, ->
+    ## clean this up
+    cy.state("onPageLoadErr", null)
+
     try
       timedOutWaitingForPageLoad(options.timeout, options._log)
     catch err
       reject(err)
-  .finally ->
-    ## clean this up
-    cy.state("onPageLoadErr", null)
-
-    return null
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
@@ -351,11 +351,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cy.once("window:load", resolve)
 
-          state("window").location.reload(forceReload)
+          $utils.locReload(forceReload, state("window"))
 
       reload()
       .timeout(options.timeout, "reload")
-      .catch Promise.TimeoutError, (err) =>
+      .catch Promise.TimeoutError, (err) ->
         timedOutWaitingForPageLoad(options.timeout, options._log)
       .finally ->
         cleanup?()
@@ -373,7 +373,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       win = state("window")
 
-      goNumber = (num) =>
+      goNumber = (num) ->
         if num is 0
           $utils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
@@ -413,8 +413,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## with the remove window (just like cy.visit)
               state("window")
 
-            Promise.delay(100)
-            .then =>
+            Promise
+            .delay(100)
+            .then ->
               knownCommandCausedInstability = false
 
               ## if we've didUnload then we know we're
@@ -427,14 +428,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         go()
         .timeout(options.timeout, "go")
-        .catch Promise.TimeoutError, (err) =>
+        .catch Promise.TimeoutError, (err) ->
           timedOutWaitingForPageLoad(options.timeout, options._log)
         .finally ->
           cleanup?()
 
           return null
 
-      goString = (str) =>
+      goString = (str) ->
         switch str
           when "forward" then goNumber(1)
           when "back"    then goNumber(-1)
@@ -481,6 +482,36 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       $autIframe = state("$autIframe")
       runnable   = state("runnable")
 
+      changeIframeSrc = (url, event) ->
+        ## when the remote iframe's load event fires
+        ## callback fn
+        new Promise (resolve) ->
+          ## if we're listening for hashchange
+          ## events then change the strategy
+          ## to listen to this event emitting
+          ## from the window and not cy
+          ## see issue 652 for why.
+          ## the hashchange events are firing too
+          ## fast for us. They even resolve asynchronously
+          ## before other application's hashchange events
+          ## have even fired.
+          if event is "hashchange"
+            win.addEventListener("hashchange", resolve)
+          else
+            cy.once(event, resolve)
+
+          cleanup = ->
+            if event is "hashchange"
+              win.removeEventListener("hashchange", resolve)
+            else
+              cy.removeListener(event, resolve)
+
+            knownCommandCausedInstability = false
+
+          knownCommandCausedInstability = true
+
+          $utils.iframeSrc($autIframe, url)
+
       onLoad = ->
         ## reset window on load
         win = state("window")
@@ -521,8 +552,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## for this, and so we need to resolve onLoad immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
-          $utils.iframeSrc($autIframe, remote.href)
-          return onLoad()
+          return changeIframeSrc(remote.href, "hashchange")
+          .then(onLoad)
 
         if existingHash
           ## strip out the existing hash if we have one
@@ -564,22 +595,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             url = $Location.fullyQualifyUrl(url)
 
-            changeIframeSrc = ->
-              ## when the remote iframe's load event fires
-              ## callback fn
-              new Promise (resolve) ->
-                cy.once("window:load", resolve)
-
-                cleanup = ->
-                  cy.removeListener("window:load", resolve)
-
-                  knownCommandCausedInstability = false
-
-                knownCommandCausedInstability = true
-
-                $utils.iframeSrc($autIframe, url)
-
-            changeIframeSrc()
+            changeIframeSrc(url, "window:load")
             .then(onLoad)
           else
             ## if we've already visited a new superDomain

@@ -1,5 +1,9 @@
-exports['e2e reporters reports error if cannot load reporter 1'] = `Could not load reporter by name module-does-not-exist
-Relative to the project path /foo/bar/.projects/e2e
+exports['e2e reporters reports error if cannot load reporter 1'] = `Could not load reporter by name: module-does-not-exist
+
+We searched for the reporter in these paths:
+
+- /foo/bar/.projects/e2e/module-does-not-exist
+- /foo/bar/.projects/e2e/node_modules/module-does-not-exist
 
 Learn more at stack trace line
 `

@@ -1,12 +1,9 @@
 $dom = Cypress.dom
 $ = Cypress.$.bind(Cypress)
 
-describe "src/cypress/dom", ->
+describe "src/cypress/dom/visibility", ->
   beforeEach ->
     cy.visit("/fixtures/generic.html")
-
-  it "attaches to Cypress namespace", ->
-    expect($dom).to.be.an("object")
 
   context "isHidden", ->
     it "exposes isHidden", ->
@@ -418,8 +415,8 @@ describe "src/cypress/dom", ->
       expect(@$descendantInPosFixed.find("#descendantInPosFixed")).not.to.be.hidden
 
     it "is hidden if position: fixed and covered up", ->
-      expect(@$coveredUpPosFixed).to.be.hidden
-      expect(@$coveredUpPosFixed).not.to.be.visible
+      expect(@$coveredUpPosFixed.find("#coveredUpPosFixed")).to.be.hidden
+      expect(@$coveredUpPosFixed.find("#coveredUpPosFixed")).not.to.be.visible
 
     it "is hidden if position: fixed and off screent", ->
       expect(@$offScreenPosFixed).to.be.hidden
@@ -516,6 +513,13 @@ describe "src/cypress/dom", ->
 
       it "element sits outside boundaries of parent with overflow clipping", ->
         @reasonIs @$elOutOfParentBoundsToRight.find("span"), "This element '<span>' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'"
+
+      it "element is fixed and being covered", ->
+        @reasonIs @$coveredUpPosFixed.find("#coveredUpPosFixed"), """
+        This element '<div#coveredUpPosFixed>' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
+
+        <div style="position: fixed; bottom: 0; left: 0">on top</div>
+        """
 
       it "cannot determine why element is not visible", ->
         @reasonIs @$btnOpacity, "Cypress could not determine why this element '<button>' is not visible."

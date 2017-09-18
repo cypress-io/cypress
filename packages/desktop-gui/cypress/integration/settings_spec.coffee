@@ -69,11 +69,10 @@ describe "Settings", ->
       it "wraps config line in proper classes", ->
         cy
           .get(".line").first().within ->
-            cy
-              .contains("animationDistanceThreshold").should("have.class", "key").end()
-              .contains(":").should("have.class", "colon").end()
-              .contains("5").should("have.class", "default").end()
-              .contains(",").should("have.class", "comma")
+            cy.contains("animationDistanceThreshold").should("have.class", "key")
+            cy.contains(":").should("have.class", "colon")
+            cy.contains("5").should("have.class", "default")
+            cy.contains(",").should("have.class", "comma")
 
       it "displays 'true' values", ->
         cy.get(".line").contains("true")

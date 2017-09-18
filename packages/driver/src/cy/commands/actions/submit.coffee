@@ -1,9 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-{ delay } = require("./utils")
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
@@ -53,10 +53,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## dont submit the form if our dispatched event was cancelled (false)
       form.submit() if dispatched
 
-      cy.timeout(delay, true)
+      cy.timeout($actionability.delay, true)
 
       Promise
-      .delay(delay, "submit")
+      .delay($actionability.delay, "submit")
       .then ->
         do verifyAssertions = =>
           cy.verifyUpcomingAssertions(options.$el, options, {

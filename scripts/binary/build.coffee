@@ -17,11 +17,11 @@ electron = require("@packages/electron")
 signOsxApp = require("electron-osx-sign")
 debug = require("debug")("cypress:binary")
 
-linkPackages = require('../link-packages')
 meta = require("./meta")
+smoke = require("./smoke")
 packages = require("./util/packages")
-Darwin = require("./darwin")
-Linux = require("./linux")
+xvfb = require("../../cli/lib/exec/xvfb")
+linkPackages = require('../link-packages')
 
 rootPackage = require("@packages/root")
 
@@ -30,19 +30,6 @@ fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
-
-runDarwinSmokeTest = ->
-  darwin = new Darwin("darwin")
-  darwin.runSmokeTest()
-
-runLinuxSmokeTest = ->
-  linux = new Linux("linux")
-  linux.runSmokeTest()
-
-smokeTests = {
-  darwin: runDarwinSmokeTest,
-  linux: runLinuxSmokeTest
-}
 
 # can pass options to better control the build
 # for example
@@ -205,14 +192,22 @@ buildCypressApp = (platform, version, options = {}) ->
     console.log("Removing unnecessary folder #{electronDistFolder}")
     fs.removeAsync(electronDistFolder).catch(_.noop)
 
-  runSmokeTest = ->
-    log("#runSmokeTest")
-    # console.log("skipping smoke test for now")
-    smokeTest = smokeTests[platform]
-    smokeTest()
+  runSmokeTests = ->
+    log("#runSmokeTests")
+
+    run = ->
+      smoke.test(meta.buildAppExecutable(platform))
+
+    if xvfb.isNeeded()
+      xvfb.start()
+      .then(run)
+      .finally(xvfb.stop)
+    else
+      run()
 
   codeSign = ->
-    if (platform != "darwin") then return Promise.resolve()
+    if platform isnt "darwin"
+      return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
     log("#codeSign", appFolder)
@@ -251,7 +246,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(elBuilder)
   .then(removeDevElectronApp)
   .then(copyPackageProxies(buildAppDir))
-  .then(runSmokeTest)
+  .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
   .return({

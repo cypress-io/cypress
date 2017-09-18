@@ -11,6 +11,7 @@ Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
 check   = require("check-more-types")
+configFromEnvOrJsonFile = require('@cypress/env-or-json-file').configFromEnvOrJsonFile
 
 fs = Promise.promisifyAll(fs)
 
@@ -31,6 +32,17 @@ getUploadNameByOs = (os) ->
     throw new Error("Cannot find upload name for OS #{os}")
   name
 
+getS3Credentials = () ->
+  key = path.join('scripts', 'binary', 'support', '.aws-credentials.json')
+
+  config = configFromEnvOrJsonFile(key)
+  if !config
+    console.error('⛔️  Cannot find AWS credentials')
+    console.error('Using @cypress/env-or-json-file module')
+    console.error('and key', key)
+    throw new Error('AWS config not found')
+  config
+
 module.exports = {
   getPublisher: ->
     aws = @getAwsObj()
@@ -47,7 +59,7 @@ module.exports = {
     }
 
   getAwsObj: ->
-    fs.readJsonSync(path.join(__dirname, "support", ".aws-credentials.json"))
+    getS3Credentials()
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/
@@ -57,6 +69,26 @@ module.exports = {
     dirName = [aws.folder, version, osName, null].join("/")
     console.log("target directory %s", dirName)
     dirName
+
+  hasCloudflareEnvironmentVars: () ->
+    check.unemptyString(process.env.CF_TOKEN) &&
+    check.unemptyString(process.env.CF_EMAIL) &&
+    check.unemptyString(process.env.CF_DOMAIN)
+
+  # depends on the credentials file or environment variables
+  makeCloudflarePurgeCommand: (url) ->
+    configFile = path.resolve(__dirname, "support", ".cfcli.yml")
+    if fs.existsSync(configFile)
+      console.log("using CF credentials file")
+      return "cfcli purgefile -c #{configFile} #{url}"
+    else if @hasCloudflareEnvironmentVars()
+      console.log("using CF environment variables")
+      token = process.env.CF_TOKEN
+      email = process.env.CF_EMAIL
+      domain = process.env.CF_DOMAIN
+      return "cfcli purgefile -e #{email} -k #{token} -d #{domain} #{url}"
+    else
+      throw new Error("Cannot form Cloudflare purge command without credentials")
 
   purgeCache: ({version, platform}) ->
     la(check.unemptyString(platform), "missing platform", platform)
@@ -69,8 +101,8 @@ module.exports = {
 
       url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
       console.log("purging url", url)
-      configFile = path.resolve(__dirname, "support", ".cfcli.yml")
-      cp.exec "cfcli purgefile -c #{configFile} #{url}", (err, stdout, stderr) ->
+      purgeCommand = @makeCloudflarePurgeCommand(url)
+      cp.exec purgeCommand, (err, stdout, stderr) ->
         if err
           console.error("Could not purge #{url}")
           console.error(err.message)
