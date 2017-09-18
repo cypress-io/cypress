@@ -45,12 +45,20 @@ buildAppDir = (platform, args...) ->
     when "linux"
       buildDir(platform, "resources", "app", args...)
 
+buildAppExecutable = (platform) ->
+  switch platform
+    when "darwin"
+      buildDir(platform, "Cypress.app", "Contents", "MacOS", "Cypress")
+    when "linux"
+      buildDir(platform, "Cypress")
+
 module.exports = {
   isValidPlatform
   buildDir
   distDir
   zipDir
   buildAppDir
+  buildAppExecutable
   cacheDir: path.join(process.cwd(), "cache"),
   platforms
 }

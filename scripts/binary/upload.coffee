@@ -33,7 +33,8 @@ getUploadNameByOs = (os) ->
   name
 
 getS3Credentials = () ->
-  key = path.join('support', '.aws-credentials.json')
+  key = path.join('scripts', 'binary', 'support', '.aws-credentials.json')
+
   config = configFromEnvOrJsonFile(key)
   if !config
     console.error('⛔️  Cannot find AWS credentials')

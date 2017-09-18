@@ -1,4 +1,3 @@
-konfig   = require("konfig")()
 path     = require("path")
 fs       = require("fs-extra")
 Promise  = require("bluebird")
@@ -34,27 +33,3 @@ module.exports =
 
   path: (fixture) ->
     path.join(root, "test", "support", "fixtures", fixture)
-
-  ensureNwZip: ->
-    zip = path.join(root, "test", "support", "fixtures", "nw", "cypress.zip")
-
-    downloadFixture = ->
-      fs.ensureDirSync zip.split("/cypress.zip").join("")
-
-      file = fs.createWriteStream(zip)
-      url  = [konfig.app.cdn_url, "desktop", "fixture", "cypress.zip"].join("/")
-
-      request.get(url).pipe(file)
-
-      new Promise (resolve, reject) ->
-        file.on "finish", ->
-          file.closeAsync().then(resolve)
-
-        file.on "error", (err) ->
-          fs.unlinkAsync().then ->
-            reject(err)
-
-    ## check to see if fixtures/nw/cypress.zip exist
-    fs.statAsync(zip)
-      ## if cypress.zip doesnt exist go download it from s3
-      .catch(downloadFixture)

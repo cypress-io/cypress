@@ -18,9 +18,6 @@ bump     = require("./bump")
 meta     = require("./meta")
 build    = require("./build")
 upload   = require("./upload")
-Base     = require("./base")
-Linux    = require("./linux")
-Darwin   = require("./darwin")
 
 success = (str) ->
   console.log chalk.bgGreen(" " + chalk.black(str) + " ")
@@ -50,20 +47,6 @@ process.chdir(cwd)
 
 deploy = {
   meta:   meta
-  Base:   Base
-  Darwin: Darwin
-  Linux:  Linux
-
-  # getPlatform: (platform, options) ->
-  #   platform ?= os.platform()
-  #
-  #   Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
-  #
-  #   throw new Error("Platform: '#{platform}' not found") if not Platform
-  #
-  #   options ?= @parseOptions(process.argv.slice(2))
-  #
-  #   (new Platform(platform, options))
 
   parseOptions: (argv) ->
     opts = minimist(argv, {
