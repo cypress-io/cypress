@@ -37,7 +37,7 @@ linuxZip = (src, dest) ->
   parentFolder = path.dirname(src)
   relativeSource = path.basename(src)
 
-  cmd = "cd #{parentFolder} && zip -r #{dest} #{relativeSource}"
+  cmd = "cd #{parentFolder} && zip -r9 #{dest} #{relativeSource}"
   console.log("linux zip: #{cmd}")
   execa.shell(cmd)
   .then((result) ->
