@@ -13,7 +13,6 @@
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
-    "dist",
     "lib"
   ],
   "devDependencies": {
