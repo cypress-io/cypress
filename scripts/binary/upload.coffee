@@ -11,7 +11,7 @@ Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
 check   = require("check-more-types")
-configFromEnvOrJsonFile = require('@cypress/env-or-json-file').configFromEnvOrJsonFile
+{configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 
 fs = Promise.promisifyAll(fs)
 
@@ -39,7 +39,8 @@ getS3Credentials = () ->
   if !config
     console.error('⛔️  Cannot find AWS credentials')
     console.error('Using @cypress/env-or-json-file module')
-    console.error('and key', key)
+    console.error('and filename', key)
+    console.error('which is environment variable', filenameToShellVariable(key))
     throw new Error('AWS config not found')
   config
 
