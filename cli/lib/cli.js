@@ -10,9 +10,19 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = (opts) => _.pick(opts,
-  'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-  'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached', 'headed')
+const parseOpts = (opts) =>  {
+  opts = _.pick(opts,
+    'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
+    'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached', 'headed')
+
+  if (opts.project) {
+    opts.project = path.resolve(opts.project)
+  }
+
+  debug('parsed cli options', opts)
+
+  return opts
+}
 
 const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -92,13 +102,8 @@ module.exports = {
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
       .action((opts) => {
-        const parsedOptions = parseOpts(opts)
-        if (parsedOptions.project) {
-          parsedOptions.project = path.resolve(parsedOptions.project)
-        }
-        debug('parsed cli options', parsedOptions)
         require('./exec/run')
-        .start(parsedOptions)
+        .start(parseOpts(opts))
         .then(util.exit)
         .catch(util.logErrorExit1)
       })
