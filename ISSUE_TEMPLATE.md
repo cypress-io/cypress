@@ -7,10 +7,10 @@
 ### Is this a Feature or Bug?
 
 
-### Current behavior:
+### Current behaviour:
 
 
-### Desired behavior:
+### Desired behaviour:
 
 
 ### How to reproduce:
