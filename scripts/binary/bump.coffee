@@ -6,33 +6,37 @@ path      = require("path")
 
 fs = Promise.promisifyAll(fs)
 
+car = null
+
 PROVIDERS = {
   circle: [
-    "cypress-io/cypress-dashboard"
-    "cypress-io/cypress-core-example"
-    "cypress-io/cypress-core-desktop-gui"
-    "cypress-io/cypress-example-kitchensink"
-    "cypress-io/cypress-example-todomvc"
-    "cypress-io/cypress-example-piechopper"
-    "cypress-io/cypress-example-recipes"
-    "cypress-io/cypress-example-node-versions"
-    "cypress-io/cypress-example-module-api"
+    # "cypress-io/cypress-dashboard"
+    # "cypress-io/cypress-core-example"
+    # "cypress-io/cypress-core-desktop-gui"
+    # "cypress-io/cypress-example-kitchensink"
+    # "cypress-io/cypress-example-todomvc"
+    # "cypress-io/cypress-example-piechopper"
+    # "cypress-io/cypress-example-recipes"
+    "cypress-io/cypress-test-example-repos"
+    "cypress-io/cypress-test-node-versions"
+    "cypress-io/cypress-test-nested-projects"
+    "cypress-io/cypress-test-module-api"
     "cypress-io/cypress-test-ci-environments"
   ]
 
-  travis: [
-    # "cypress-io/cypress-dashboard"
-    "cypress-io/cypress-core-example"
-    "cypress-io/cypress-core-desktop-gui"
-    "cypress-io/cypress-example-kitchensink"
-    "cypress-io/cypress-example-todomvc"
-    "cypress-io/cypress-example-piechopper"
-    "cypress-io/cypress-example-recipes"
-  ]
+  # travis: [
+  #   # "cypress-io/cypress-dashboard"
+  #   "cypress-io/cypress-core-example"
+  #   "cypress-io/cypress-core-desktop-gui"
+  #   "cypress-io/cypress-example-kitchensink"
+  #   "cypress-io/cypress-example-todomvc"
+  #   "cypress-io/cypress-example-piechopper"
+  #   "cypress-io/cypress-example-recipes"
+  # ]
 }
 
 awaitEachProjectAndProvider = (fn) ->
-  ciJson = path.join(__dirname, "support/ci.json")
+  ciJson = path.join(__dirname, "support/.ci.json")
   creds = fs.readJsonSync(ciJson, "utf8")
 
   fs.readJsonAsync(ciJson)
@@ -58,7 +62,7 @@ module.exports = {
   version: (version) ->
     awaitEachProjectAndProvider (project, provider) ->
       car.updateProjectEnv(project, provider, {
-        CYPRESS_VERSION: version
+        CYPRESS_BINARY_VERSION: version
       })
 
   run: ->
