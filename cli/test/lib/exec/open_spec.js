@@ -66,6 +66,17 @@ describe('exec open', function () {
       })
     })
 
+    it('spawns with --project passed in as options even when not installed globally', function () {
+      util.isInstalledGlobally.returns(false)
+
+      return open.start({ project: '/path/to/project' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(
+          ['--project', '/path/to/project']
+        )
+      })
+    })
+
     it('spawns with --project if specified and installed globally', function () {
       return open.start({ project: '/path/to/project' })
       .then(() => {
