@@ -160,23 +160,42 @@ describe('cli', function () {
     })
   })
 
-  it('open calls open.start with options', function () {
-    this.sandbox.stub(open, 'start').resolves()
-    this.exec('open --port 7878')
-    expect(open.start).to.be.calledWith({ port: '7878' })
-  })
+  context('cypress open', function () {
+    beforeEach(function () {
+      this.sandbox.stub(open, 'start').resolves(0)
+    })
 
-  it('open calls open.start + catches errors', function (done) {
-    const err = new Error('foo')
+    it('calls open.start with relative --project folder', function () {
+      this.sandbox.stub(path, 'resolve')
+        .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
+      this.exec('open --project foo/bar')
+      expect(open.start).to.be.calledWith({ project: '/mock/absolute/foo/bar' })
+    })
 
-    this.sandbox.stub(open, 'start').rejects(err)
-    this.exec('open --port 7878')
+    it('calls open.start with absolute --project folder', function () {
+      this.exec('open --project /tmp/foo/bar')
+      expect(open.start).to.be.calledWith({ project: '/tmp/foo/bar' })
+    })
 
-    util.logErrorExit1.callsFake((e) => {
-      expect(e).to.eq(err)
-      done()
+    it('calls open.start with options', function () {
+      // this.sandbox.stub(open, 'start').resolves()
+      this.exec('open --port 7878')
+      expect(open.start).to.be.calledWith({ port: '7878' })
+    })
+
+    it('calls open.start + catches errors', function (done) {
+      const err = new Error('foo')
+
+      open.start.rejects(err)
+      this.exec('open --port 7878')
+
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
     })
   })
+
 
   it('install calls install.start with force: true', function () {
     this.sandbox.stub(install, 'start').resolves()

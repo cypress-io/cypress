@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@cypress/bumpercar": "^1.0.6",
-    "@cypress/env-or-json-file": "^1.0.1",
+    "@cypress/env-or-json-file": "^1.1.0",
     "@cypress/npm-run-all": "^4.0.4",
     "@cypress/questions-remain": "^1.0.1",
     "ansi-styles": "^3.1.0",
@@ -62,6 +62,7 @@
     "eslint-plugin-cypress-dev": "^1.0.0",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.3.0",
+    "filesize": "^3.5.10",
     "fs-extra": "^2.1.2",
     "gulp": "^3.9.1",
     "gulp-awspublish": "^3.3.0",

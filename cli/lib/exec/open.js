@@ -5,7 +5,7 @@ const verify = require('../tasks/verify')
 
 module.exports = {
   start (options = {}) {
-    if (!util.isInstalledGlobally()) {
+    if (!util.isInstalledGlobally() && !options.project) {
       options.project = process.cwd()
     }
 
