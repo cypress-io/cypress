@@ -36,20 +36,10 @@ describe "lib/preprocessor", ->
       preprocessor.getFile("/path/to/test.coffee", @config)
       expect(@plugin).to.be.calledWith(path.join(@todosPath, "/path/to/test.coffee"))
 
-    it "executes the plugin with shouldWatch: false when isTextTerminal: true", ->
-      @config.isTextTerminal = true
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(@plugin.lastCall.args[1]).to.be.eql({ shouldWatch: false })
-
-    it "executes the plugin with shouldWatch: true when isTextTerminal: false", ->
-      @config.isTextTerminal = false
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(@plugin.lastCall.args[1]).to.be.eql({ shouldWatch: true })
-
     it "executes the plugin with util to get output path", ->
       preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(@plugin.lastCall.args[2].getOutputPath).to.be.a("function")
-      actualPath = @plugin.lastCall.args[2].getOutputPath("/output/path.js")
+      expect(@plugin.lastCall.args[1].getOutputPath).to.be.a("function")
+      actualPath = @plugin.lastCall.args[1].getOutputPath("/output/path.js")
       expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", "/output/path.js")
       expect(actualPath).to.equal(expectedPath)
 
@@ -60,19 +50,19 @@ describe "lib/preprocessor", ->
     it "calls provides util.fileUpdated", ->
       preprocessor.getFile("/path/to/test.coffee", @config)
       expect(=>
-        @plugin.lastCall.args[2].fileUpdated()
+        @plugin.lastCall.args[1].fileUpdated()
       ).not.to.throw()
 
     it "calls onChange option when util.fileUpdated is called with same file path", ->
       onChange = @sandbox.spy()
       preprocessor.getFile("/path/to/test.coffee", @config, { onChange })
-      @plugin.lastCall.args[2].fileUpdated(path.join(@todosPath, "/path/to/test.coffee"))
+      @plugin.lastCall.args[1].fileUpdated(path.join(@todosPath, "/path/to/test.coffee"))
       expect(onChange).to.be.calledWith(path.join(@todosPath, "/path/to/test.coffee"))
 
     it "does not onChange option when util.fileUpdated is called with different file path", ->
       onChange = @sandbox.spy()
       preprocessor.getFile("/path/to/test.coffee", @config, { onChange })
-      @plugin.lastCall.args[2].fileUpdated(path.join(@todosPath, "/path/to/other.coffee"))
+      @plugin.lastCall.args[1].fileUpdated(path.join(@todosPath, "/path/to/other.coffee"))
       expect(onChange).not.to.be.called
 
     it "invokes plugin again when isTextTerminal: false", ->
@@ -91,7 +81,7 @@ describe "lib/preprocessor", ->
     it "calls plugin's onClose callback", ->
       preprocessor.getFile("/path/to/test.coffee", @config)
       onClose = @sandbox.spy()
-      @plugin.lastCall.args[2].onClose(onClose)
+      @plugin.lastCall.args[1].onClose(onClose)
       fullPath = path.join(@todosPath, "/path/to/test.coffee")
       preprocessor.removeFile(fullPath)
       expect(onClose).to.be.called
@@ -100,7 +90,7 @@ describe "lib/preprocessor", ->
     it "calls plugin's onClose callback", ->
       preprocessor.getFile("/path/to/test.coffee", @config)
       onClose = @sandbox.spy()
-      @plugin.lastCall.args[2].onClose(onClose)
+      @plugin.lastCall.args[1].onClose(onClose)
       fullPath = path.join(@todosPath, "/path/to/test.coffee")
       preprocessor.close()
       expect(onClose).to.be.called

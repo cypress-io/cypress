@@ -51,11 +51,11 @@ getOutputPath = (config, filePath) ->
 emitter = new EE()
 fileProcessors = {}
 
-setDefaultPreprocessor = ->
+setDefaultPreprocessor = (config) ->
   log("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  plugins.register "on:spec:file:preprocessor", browserify({
+  plugins.register "on:spec:file:preprocessor", browserify(config, {
     extensions: [".js", ".jsx", ".coffee", ".cjsx"]
     watchifyOptions: {
       ignoreWatch: [
@@ -93,10 +93,6 @@ module.exports = {
 
     log("getFile #{filePath}")
 
-    preprocessorOptions = {
-      shouldWatch: not config.isTextTerminal
-    }
-
     util = {
       fileUpdated: (changedFilePath) ->
         log("file updated: #{filePath}")
@@ -108,17 +104,15 @@ module.exports = {
         emitter.on("close", cb)
     }
 
-    log("prep preprocessor:", preprocessorOptions)
-
     if not plugins.has("on:spec:file:preprocessor")
-      setDefaultPreprocessor()
+      setDefaultPreprocessor(config)
 
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
       log("headless and already processed")
       return fileProcessor
 
     preprocessor = Promise.resolve(
-      plugins.execute("on:spec:file:preprocessor", filePath, preprocessorOptions, util)
+      plugins.execute("on:spec:file:preprocessor", filePath, util)
     )
 
     fileProcessors[filePath] = preprocessor
