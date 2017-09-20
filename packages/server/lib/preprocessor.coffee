@@ -6,8 +6,8 @@ Promise = require("bluebird")
 babelify = require("babelify")
 cjsxify = require("./util/cjsxify")
 
-presetReact            = require("babel-preset-react")
-presetLatest           = require("babel-preset-latest")
+presetReact = require("babel-preset-react")
+presetLatest = require("babel-preset-latest")
 pluginAddModuleExports = require("babel-plugin-add-module-exports")
 
 appData = require("./util/app_data")
@@ -57,23 +57,31 @@ setDefaultPreprocessor = ->
   browserify = require("@cypress/browserify-preprocessor")
   plugins.register "on:spec:file:preprocessor", browserify({
     extensions: [".js", ".jsx", ".coffee", ".cjsx"]
-    ignoreWatch: [
-      "**/.git/**"
-      "**/.nyc_output/**"
-      "**/.sass-cache/**"
-      "**/bower_components/**"
-      "**/coverage/**"
-      "**/node_modules/**"
+    watchifyOptions: {
+      ignoreWatch: [
+        "**/.git/**"
+        "**/.nyc_output/**"
+        "**/.sass-cache/**"
+        "**/bower_components/**"
+        "**/coverage/**"
+        "**/node_modules/**"
+      ]
+    }
+    transforms: [
+      {
+        transform: cjsxify
+        options: {}
+      }
+      {
+        transform: babelify
+        options: {
+          ast: false
+          babelrc: false
+          plugins: [pluginAddModuleExports]
+          presets: [presetLatest, presetReact]
+        }
+      }
     ]
-    onBundle: (bundle) ->
-      log("bundle received")
-      bundle.transform(cjsxify)
-      bundle.transform(babelify, {
-        ast: false
-        babelrc: false
-        plugins: [pluginAddModuleExports]
-        presets: [presetLatest, presetReact]
-      })
   })
 
 module.exports = {
