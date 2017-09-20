@@ -4,6 +4,7 @@ EE = require("events")
 Fixtures = require("../support/helpers/fixtures")
 fs = require("fs-extra")
 path = require("path")
+snapshot = require("snap-shot-it")
 appData = require("#{root}lib/util/app_data")
 { toHashName } = require("#{root}lib/util/saved_state")
 
@@ -27,9 +28,6 @@ describe "lib/preprocessor", ->
       preprocessor: "custom"
       projectRoot: @todosPath
     }
-
-  afterEach ->
-    mockery.deregisterMock("cypress-custom-preprocessor")
 
   context "#getFile", ->
     it "executes the plugin with the file path", ->
@@ -76,6 +74,18 @@ describe "lib/preprocessor", ->
       preprocessor.getFile("/path/to/test.coffee", @config)
       preprocessor.getFile("/path/to/test.coffee", @config)
       expect(@plugin).to.be.calledOnce
+
+    it "uses default preprocessor if none registered", ->
+      plugins._reset()
+      @sandbox.stub(plugins, "register")
+      @sandbox.stub(plugins, "execute").returns(->)
+      browserifyFn = ->
+      browserify = @sandbox.stub().returns(browserifyFn)
+      mockery.registerMock("@cypress/browserify-preprocessor", browserify)
+      preprocessor.getFile("/path/to/test.coffee", @config)
+      expect(plugins.register).to.be.calledWith("on:spec:file:preprocessor", browserifyFn)
+      expect(browserify).to.be.calledWith(@config)
+      snapshot(browserify.lastCall.args[1])
 
   context "#removeFile", ->
     it "calls plugin's onClose callback", ->
