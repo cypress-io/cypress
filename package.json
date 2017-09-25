@@ -1,0 +1,74 @@
+{
+  "name": "@cypress/webpack-preprocessor",
+  "description": "Cypress preprocessor for bundling JavaScript via webpack",
+  "version": "0.0.1",
+  "author": "Chris Breiding <chris@cypress.io>",
+  "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
+  "config": {
+    "pre-git": {
+      "pre-push": [
+        "npm run secure",
+        "npm run license",
+        "npm run ban -- --all",
+        "npm run size"
+      ],
+      "post-commit": [],
+      "post-merge": []
+    }
+  },
+  "engines": {
+    "node": ">=6.5"
+  },
+  "files": [
+    "*.js"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "cypress-preprocessor",
+    "webpack"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress-webpack-preprocessor.git"
+  },
+  "scripts": {
+    "ban": "ban",
+    "deps": "deps-ok && dependency-check --no-dev .",
+    "license": "license-checker --production --onlyunknown --csv",
+    "lint": "eslint --fix *.js",
+    "secure": "nsp check",
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "test": "mocha",
+    "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'"
+  },
+  "devDependencies": {
+    "babel-preset-env": "1.6.0",
+    "babel-preset-react": "6.24.1",
+    "ban-sensitive-files": "1.9.0",
+    "chai": "4.1.2",
+    "chokidar-cli": "1.2.0",
+    "dependency-check": "2.9.1",
+    "deps-ok": "1.2.1",
+    "dont-crack": "1.2.1",
+    "eslint": "4.6.1",
+    "eslint-plugin-cypress-dev": "1.0.0",
+    "eslint-plugin-mocha": "4.11.0",
+    "license-checker": "13.0.3",
+    "mocha": "3.5.0",
+    "mockery": "2.1.0",
+    "nsp": "2.7.0",
+    "pre-git": "3.15.3",
+    "sinon": "3.2.1",
+    "sinon-chai": "2.13.0"
+  },
+  "dependencies": {
+    "babel-core": "6.26.0",
+    "babel-loader": "7.1.2",
+    "bluebird": "3.5.0",
+    "debug": "3.0.1",
+    "webpack": "3.6.0"
+  }
+}
