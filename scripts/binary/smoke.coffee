@@ -45,12 +45,17 @@ runProjectTest = (buildAppExecutable, e2e) ->
       console.log("cannot record video on this platform yet, disabling")
       env.CYPRESS_VIDEO_RECORDING = "false"
 
-    cp.spawn(buildAppExecutable, [
+    args = [
       "--run-project=#{e2e}",
       "--spec=cypress/integration/simple_passing_spec.coffee"
-    ], {
+    ]
+    options = {
       stdio: "inherit", env: env
-    })
+    }
+    console.log("running project test")
+    console.log(buildAppExecutable, args.join(" "))
+
+    cp.spawn(buildAppExecutable, args, options)
     .on "exit", (code) ->
       if code is 0
         resolve()
