@@ -56,7 +56,7 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
-    "rebuild-node-sass": "^1.0.1",
+    "rebuild-node-sass": "^1.1.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "zunder": "^4.1.1"

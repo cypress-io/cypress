@@ -1,5 +1,6 @@
 import { detectBrowserLinux } from './linux'
 import { detectBrowserDarwin } from './darwin'
+import { detectBrowserWindows } from './windows'
 import { log } from './log'
 import { Browser, NotInstalledError } from './types'
 import { browsers } from './browsers'
@@ -27,7 +28,8 @@ type Detectors = {
 }
 const detectors: Detectors = {
   darwin: detectBrowserDarwin,
-  linux: detectBrowserLinux
+  linux: detectBrowserLinux,
+  win32: detectBrowserWindows
 }
 
 function lookup(platform: NodeJS.Platform, obj: Browser): Promise<Object> {
@@ -61,6 +63,7 @@ function checkOneBrowser(browser: Browser) {
     throw err
   }
 
+  log('checking one browser %s', browser.name)
   return lookup(platform, browser)
     .then(merge(browser))
     .then(pickBrowserProps)

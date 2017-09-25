@@ -37,3 +37,4 @@ cli/build
 
 # Building app binary
 scripts/binary/support
+package-lock.json

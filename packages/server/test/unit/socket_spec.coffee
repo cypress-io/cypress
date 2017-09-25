@@ -435,8 +435,8 @@ describe "lib/socket", ->
         expect(result).to.be.undefined
 
       it "returns undefined if #testFilePath matches arguments", ->
-        @socket.testFilePath = "tests/test1.js"
-        result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
+        @socket.testFilePath = path.join("tests", "test1.js")
+        result = @socket.watchTestFileByPath(@cfg, path.join("integration", "test1.js"), @watchers)
         expect(result).to.be.undefined
 
       it "closes existing watched test file", ->

@@ -61,7 +61,15 @@ deploy = {
     opts.runTests = false if opts["skip-tests"]
     if not opts.platform and os.platform() == meta.platforms.linux
       # only can build Linux on Linux
-      opts.platform = "linux"
+      opts.platform = meta.platforms.linux
+
+    # windows aliases
+    if opts.platform == "win32" or opts.platform == "win" or opts.platform == "windows"
+      opts.platform = meta.platforms.windows
+
+    if not opts.platform and os.platform() == meta.platforms.windows
+      # only can build Windows binary on Windows platform
+      opts.platform = meta.platforms.windows
 
     # be a little bit user-friendly and allow aliased values
     if opts.platform == "mac"

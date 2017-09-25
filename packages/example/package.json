@@ -6,12 +6,12 @@
   "scripts": {
     "postinstall": "echo '@packages/example needs: npm run build'",
     "clean-deps": "rm -rf node_modules",
-    "test": "NODE_ENV=test mocha",
+    "test": "cross-env NODE_ENV=test mocha",
     "test-e2e": "cypress run",
-    "build": "./bin/build.sh && gulp build",
+    "build": "node ./bin/build.js && gulp build",
     "predeploy": "npm run build",
     "deploy": "gulp deploy",
-    "lint": "$(bin-up eslint) --fix *.js bin/*.js lib/*.js test/*.js",
+    "lint": "bin-up eslint --fix *.js bin/*.js lib/*.js test/*.js",
     "pretest": "npm run lint"
   },
   "files": [
@@ -19,8 +19,9 @@
     "lib"
   ],
   "devDependencies": {
-    "bin-up": "^1.0.1",
+    "bin-up": "^1.1.0",
     "chai": "^3.5.0",
+    "cross-env": "^5.0.5",
     "cypress-example-kitchensink": "0.8.0",
     "glob": "^7.0.3",
     "gulp": "^3.9.1",
@@ -28,6 +29,7 @@
     "gulp-gh-pages": "^0.5.4",
     "gulp-rev-all": "^0.8.22",
     "mocha": "^2.4.5",
-    "run-sequence": "^1.1.5"
+    "run-sequence": "^1.1.5",
+    "shelljs": "^0.7.8"
   }
 }

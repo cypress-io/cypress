@@ -6,6 +6,9 @@ glob = require("glob")
 Promise = require("bluebird")
 la = require("lazy-ass")
 check = require("check-more-types")
+execa = require("execa")
+R = require("ramda")
+os = require("os")
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -16,27 +19,27 @@ pathToPackageJson = (pkg) ->
   path.join(pkg, "package.json")
 
 npmRun = (args, cwd) ->
-  new Promise (resolve, reject) ->
-    reject = _.once(reject)
+  command = "npm " + args.join(" ")
+  console.log(command)
+  if cwd
+    console.log("in folder:", cwd)
 
-    cp.spawn("npm", args, { stdio: "inherit", cwd })
-    .on "error", reject
-    .on "exit", (code) ->
-      if code is 0
-        resolve()
-      else
-        msg = "npm " + args.join(" ") + " failed with exit code: #{code}"
-        reject(new Error(msg))
+  la(check.maybe.string(cwd), "invalid CWD string", cwd)
+  execa("npm", args, { stdio: "inherit", cwd })
+  # if everything is ok, resolve with nothing
+  .then R.always(undefined)
+  .catch (result) ->
+    msg = "#{command} failed with exit code: #{result.code}"
+    throw new Error(msg)
 
-
-runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js", "--skip-packages", "cli,docs"])
+runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js", "--skip-packages", "cli"])
 
 # removes transpiled JS files in the original package folders
-runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js", "--skip-packages", "cli,docs"])
+runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js", "--skip-packages", "cli"])
 
-# builds all the packages except for cli and docs
+# builds all the packages except for cli
 runAllBuild = _.partial(npmRun,
-  ["run", "all", "build", "--", "--serial", "--skip-packages", "cli,docs"])
+  ["run", "all", "build", "--", "--serial", "--skip-packages", "cli"])
 
 copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
@@ -100,6 +103,7 @@ npmInstallAll = (pathToPackages) ->
 
 
   retryNpmInstall = (pkg) ->
+    console.log("installing", pkg)
     npmInstall = _.partial(npmRun, ["install", "--production", "--quiet"])
     npmInstall(pkg)
     .catch {code: "EMFILE"}, ->
@@ -126,6 +130,12 @@ ensureFoundSomething = (files) ->
     throw new Error("Could not find any files")
   files
 
+symlinkType = () ->
+  if os.platform() == "win32"
+    "junction"
+  else
+    "dir"
+
 symlinkAll = (pathToDistPackages, pathTo) ->
   console.log("symlink these packages", pathToDistPackages)
   la(check.unemptyString(pathToDistPackages),
@@ -142,8 +152,10 @@ symlinkAll = (pathToDistPackages, pathTo) ->
     dest = pathTo("node_modules", "@packages", path.basename(pkg))
     relativeDest = path.relative(dest + '/..', pkg)
 
-    console.log(relativeDest, "link ->", dest)
-    fs.ensureSymlinkAsync(relativeDest, dest)
+    type = symlinkType()
+    console.log(relativeDest, "link ->", dest, "type", type)
+
+    fs.ensureSymlinkAsync(relativeDest, dest, symlinkType)
     .catch((err) ->
       if not err.message.includes "EEXIST"
         throw err

@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 
 const _ = require('lodash')
-const cp = require('child_process')
 const chalk = require('chalk')
 const minimist = require('minimist')
+const execa = require('execa')
+const os = require('os')
 
 const options = minimist(process.argv.slice(2))
 
@@ -14,6 +15,9 @@ function exitErr (msg) {
 
   return process.exit(1)
 }
+
+const isWindows = () =>
+  os.platform() === 'win32'
 
 if (!run) {
   return exitErr(`
@@ -31,21 +35,32 @@ if (!run) {
   `)
 }
 
-const args = [
-  '--xvfb-run-args',
-  '-as \"-screen 0 1280x1024x8\"',
-  'mocha',
-  run,
-]
+const commandAndArguments = {
+  command: '',
+  args: [],
+}
+
+if (isWindows()) {
+  commandAndArguments.command = 'mocha'
+  commandAndArguments.args = [run]
+} else {
+  commandAndArguments.command = 'xvfb-maybe'
+  commandAndArguments.args = [
+    '--xvfb-run-args ' +
+    '"-as \\"-screen 0 1280x1024x8\\""',
+    'mocha',
+    run,
+  ]
+}
 
 if (options.fgrep) {
-  args.push(
+  commandAndArguments.args.push(
     '--fgrep',
     options.fgrep
   )
 }
 
-args.push(
+commandAndArguments.args.push(
   '--timeout',
   '10000',
   '--recursive',
@@ -84,8 +99,10 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
-cp.spawn('xvfb-maybe', args, {
-  env,
-  stdio: 'inherit',
-})
-.on('exit', process.exit)
+const cmd = `${commandAndArguments.command} ${
+  commandAndArguments.args.join(' ')}`
+console.log('test command:')
+console.log(cmd)
+
+const child = execa.shell(cmd, { env, stdio: 'inherit' })
+child.on('exit', process.exit)
