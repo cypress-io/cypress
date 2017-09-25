@@ -10,6 +10,7 @@ environment:
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
+  - npm install -g npm@5
   # Output useful info for debugging.
   - node --version
   - npm --version
