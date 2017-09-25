@@ -3,14 +3,24 @@ fse = require("fs-extra")
 cp = require("child_process")
 path = require("path")
 Promise = require("bluebird")
+os = require("os")
 Fixtures = require("../../packages/server/test/support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fse)
+
+canRecordVideo = () ->
+  os.platform() != "win32"
 
 runSmokeTest = (buildAppExecutable) ->
   new Promise (resolve, reject) ->
     rand = "" + Math.random()
     console.log("executable path #{buildAppExecutable}")
+
+    hasRightResponse = (stdout) ->
+      # there could be more debug lines in the output, so find 1 line with
+      # expected random value
+      lines = stdout.split('\n').map((s) -> s.trim())
+      return lines.includes(rand)
 
     cp.exec "#{buildAppExecutable} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
       stdout = stdout.replace(/\s/, "")
@@ -19,7 +29,7 @@ runSmokeTest = (buildAppExecutable) ->
         console.error("smoke test failed with error %s", err.message)
         return reject(err)
 
-      if stdout isnt rand
+      if !hasRightResponse(stdout)
         throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
       else
         console.log("smokeTest passes")
@@ -31,8 +41,13 @@ runProjectTest = (buildAppExecutable, e2e) ->
   new Promise (resolve, reject) ->
     env = _.omit(process.env, "CYPRESS_ENV")
 
+    if !canRecordVideo()
+      console.log("cannot record video on this platform yet, disabling")
+      env.CYPRESS_VIDEO_RECORDING = "false"
+
     cp.spawn(buildAppExecutable, [
-      "--run-project=#{e2e}", "--spec=cypress/integration/simple_passing_spec.coffee"
+      "--run-project=#{e2e}",
+      "--spec=cypress/integration/simple_passing_spec.coffee"
     ], {
       stdio: "inherit", env: env
     })
