@@ -67,7 +67,7 @@
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
   "dependencies": {
-    "@cypress/browserify-preprocessor": "cypress-io/cypress-browserify-preprocessor#62f39207de6eb554ab84d1de2c2c62bae72217c0",
+    "@cypress/browserify-preprocessor": "cypress-io/cypress-browserify-preprocessor#ddd95fab8c38010c6f7c0c28b63332fa3931da64",
     "@cypress/icons": "0.5.4",
     "@cypress/mocha-teamcity-reporter": "^1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.3",
