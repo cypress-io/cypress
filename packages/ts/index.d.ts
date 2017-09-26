@@ -1,15 +1,7 @@
 // missing type definitions for 3rd party libraries
 // https://glebbahmutov.com/blog/trying-typescript/#manual-types-for-3rd-party-libraries
-declare module 'execa' {
-  type ExecaResult = {
-    stdout: string
-  }
-  interface Execa {
-    shell: (cmd:string) => Promise<ExecaResult>
-  }
-  const execa: Execa
-  export = execa
-}
+
+// for execa module use @types/execa
 
 declare module 'plist' {
   interface Plist {
