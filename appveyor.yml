@@ -1,0 +1,29 @@
+# https://www.appveyor.com/docs/lang/nodejs-iojs/
+# Test against the latest version of this Node.js version
+environment:
+  nodejs_version: "6"
+
+# https://www.appveyor.com/docs/build-cache/
+# cache:
+#   - node_modules
+
+# Install scripts. (runs after repo cloning)
+install:
+  - ps: Install-Product node $env:nodejs_version
+  # Output useful info for debugging.
+  - node --version
+  - npm --version
+  # install root modules
+  - npm install
+
+# Post-install test scripts.
+test_script:
+  # Output useful info for debugging.
+  - node --version
+  - npm --version
+  - npm run binary-build -- --platform windows --version 0.20.2-win
+  # - cd packages/server && npm run test-unit
+  # - npm test
+
+# Don't actually build.
+build: off

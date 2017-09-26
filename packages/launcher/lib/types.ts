@@ -1,7 +1,7 @@
 /** TODO this are typical browser names, not just Mac */
 export type MacBrowserName = 'chrome' | 'chromium' | 'canary' | string
 
-export type PlatformName = 'darwin' | 'linux'
+export type PlatformName = 'darwin' | 'linux' | 'win32'
 
 export type Browser = {
   /** short browser name */

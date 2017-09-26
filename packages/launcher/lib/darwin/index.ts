@@ -39,9 +39,11 @@ export function detectBrowserDarwin(browser: Browser) {
     return detectBrowserLinux(browser)
   }
 
-  return fn().then(merge({ name: browser.name })).catch(() => {
-    log('could not detect %s using traditional Mac methods', browser.name)
-    log('trying linux search')
-    return detectBrowserLinux(browser)
-  })
+  return fn()
+    .then(merge({ name: browser.name }))
+    .catch(() => {
+      log('could not detect %s using traditional Mac methods', browser.name)
+      log('trying linux search')
+      return detectBrowserLinux(browser)
+    })
 }

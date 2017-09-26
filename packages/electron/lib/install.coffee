@@ -5,6 +5,7 @@ path    = require("path")
 Promise = require("bluebird")
 pkg     = require("../package.json")
 paths   = require("./paths")
+log     = require("debug")("cypress:electron")
 
 fs = Promise.promisifyAll(fs)
 
@@ -54,6 +55,9 @@ module.exports = {
     pkgr    = require("electron-packager")
     icons   = require("@cypress/icons")
 
+    iconPath =  icons.getPathToIcon("cypress")
+    log("package icon", iconPath)
+
     _.defaults(options, {
       dist: paths.getPathToDist()
       dir: "app"
@@ -65,9 +69,10 @@ module.exports = {
       prune: true
       overwrite: true
       electronVersion
-      icon: icons.getPathToIcon("cypress.icns")
+      icon: iconPath
     })
 
+    log("packager options %j", options)
     pkgr(options)
     .then (appPaths) ->
       appPaths[0]

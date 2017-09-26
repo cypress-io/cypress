@@ -16,6 +16,7 @@ coffee = require("@packages/coffee")
 electron = require("@packages/electron")
 signOsxApp = require("electron-osx-sign")
 debug = require("debug")("cypress:binary")
+R = require("ramda")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -30,6 +31,12 @@ fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
+
+logBuiltAllPackages = () ->
+  console.log("built all packages")
+
+logBuiltAllJs = () ->
+  console.log("built all JS")
 
 # can pass options to better control the build
 # for example
@@ -77,7 +84,10 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#buildPackages")
 
     packages.runAllBuild()
+    # Promise.resolve()
+    .then(R.tap(logBuiltAllPackages))
     .then(packages.runAllBuildJs)
+    .then(R.tap(logBuiltAllJs))
 
   copyPackages = ->
     log("#copyPackages")

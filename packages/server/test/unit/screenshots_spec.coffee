@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+path        = require("path")
 Fixtures    = require("../support/helpers/fixtures")
 config      = require("#{root}lib/config")
 settings    = require("#{root}lib/util/settings")
@@ -23,14 +24,15 @@ describe "lib/screenshots", ->
     it "outputs file and returns size and path", ->
       screenshots.save({name: "foo/tweet"}, image, @cfg.screenshotsFolder)
       .then (obj) =>
-        path = @cfg.screenshotsFolder + "/footweet.png"
+        expectedPath = path.normalize(@cfg.screenshotsFolder + "/footweet.png")
+        actualPath = path.normalize(obj.path)
 
         expect(obj.size).to.eq("279 B")
-        expect(obj.path).to.eq(path)
+        expect(actualPath).to.eq(expectedPath)
         expect(obj.width).to.eq(10)
         expect(obj.height).to.eq(10)
 
-        fs.statAsync(path)
+        fs.statAsync(expectedPath)
 
   context ".copy", ->
     it "doesnt yell over ENOENT errors", ->

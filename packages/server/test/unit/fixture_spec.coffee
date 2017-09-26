@@ -6,6 +6,11 @@ Promise        = require("bluebird")
 config         = require("#{root}lib/config")
 fixture        = require("#{root}lib/fixture")
 FixturesHelper = require("#{root}/test/support/helpers/fixtures")
+os             = require("os")
+eol            = require("eol")
+
+isWindows = () ->
+  os.platform() == "win32"
 
 fs = Promise.promisifyAll(fs)
 
@@ -43,6 +48,7 @@ describe "lib/fixture", ->
     it "throws when json is invalid", ->
       e =
         """
+        'bad_json.json' is not valid JSON.
         Parse error on line 2:
         {  "bad": "json""should": "not parse
         ----------------^
@@ -53,7 +59,15 @@ describe "lib/fixture", ->
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) ->
-        expect(err.message).to.eq "'bad_json.json' is not valid JSON.\n#{e}"
+        if isWindows()
+          # there is weird trailing whitespace in the lines
+          # of the error message on Windows
+          expect(err.message).to.include "'bad_json.json' is not valid JSON."
+          expect(err.message).to.include "Parse error on line 2:"
+          expect(err.message).to.include "Expecting 'EOF', '}', ':', ',', ']', got 'STRING'"
+        else
+          # on other platforms can match the error directly
+          expect(eol.auto(err.message)).to.eq eol.auto(e)
 
     it "reformats json and writes back even on parse error", ->
       fixture.get(@fixturesFolder, "bad_json.json")

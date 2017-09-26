@@ -11,6 +11,5 @@
   "scripts": {
     "test": "echo 'Nothing to test for the coffee package'"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

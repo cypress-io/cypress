@@ -30,6 +30,9 @@ getPlatformQuestion = ->
     },{
       name: "Linux"
       value: "linux"
+    }, {
+      name: "Windows",
+      value: "win32"
     }]
   }]
 

@@ -16,8 +16,8 @@ const globAsync = Promise.promisify(glob)
 
 const packageNameFromPath = (fullPath) => {
   return fullPath
-  .replace(`${process.cwd()}/`, '')
-  .replace('packages/', '')
+  .replace(`${process.cwd()}${path.sep}`, '')
+  .replace(`packages${path.sep}`, '')
 }
 
 const nonPackageDirs = ['cli/']

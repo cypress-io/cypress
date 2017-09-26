@@ -6,7 +6,8 @@ R = require("ramda")
 # canonical platform names
 platforms = {
   darwin: "darwin"
-  linux: "linux"
+  linux: "linux",
+  windows: "win32"
 }
 
 isValidPlatform = check.oneOf(R.values(platforms))
@@ -17,11 +18,14 @@ isValidPlatform = check.oneOf(R.values(platforms))
 ##   <platform>/ = linux or darwin
 ##     ... platform-specific files
 buildDir = (platform, args...) ->
-  la(isValidPlatform(platform), "invalid platform", platform)
+  la(isValidPlatform(platform),
+    "invalid build platform", platform, "valid choices", R.values(platforms))
   switch platform
     when "darwin"
       path.resolve("build", platform, args...)
     when "linux"
+      path.resolve("build", platform, "Cypress", args...)
+    when "win32"
       path.resolve("build", platform, "Cypress", args...)
 
 ## returns a path into the /dist directory
