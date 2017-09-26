@@ -9,6 +9,10 @@ to output debug log messages. To turn on, use
 DEBUG=cypress:launcher npm test
 ```
 
+## Demo
+
+To see browsers detected on your machine, just run `node index.js`
+
 ## Changelog
 
 #### 0.1.1 - *(04/20/17)*

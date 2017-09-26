@@ -367,6 +367,13 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
+  "run-launcher":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/launcher && node index.js
+
   "build-binary":
     <<: *defaults
     steps:
@@ -431,6 +438,9 @@ workflows:
           requires:
             - build
       - build-binary:
+          requires:
+            - build
+      - run-launcher:
           requires:
             - build
 

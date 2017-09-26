@@ -119,7 +119,7 @@ class UpdateBanner extends Component {
 
   _openCyOpenDoc = (e) => {
     e.preventDefault()
-    ipc.externalOpen(`https://on.cypress.io/how-to-open-cypress`)
+    ipc.externalOpen('https://on.cypress.io/how-to-open-cypress')
   }
 }
 
