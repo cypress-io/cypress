@@ -19,6 +19,7 @@ exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
   ## but cannot figure out how null is
   ## being passed into exit
+  log("about to exit with code", code)
   process.exit(code)
 
 exit0 = ->
@@ -63,6 +64,7 @@ module.exports = {
           fn = (code) ->
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
+            log("electron finished with", code)
             resolve({failures: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
