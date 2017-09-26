@@ -4,18 +4,6 @@
   "version": "0.0.1",
   "author": "Chris Breiding <chris@cypress.io>",
   "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
-  "config": {
-    "pre-git": {
-      "pre-push": [
-        "npm run secure",
-        "npm run license",
-        "npm run ban -- --all",
-        "npm run size"
-      ],
-      "post-commit": [],
-      "post-merge": []
-    }
-  },
   "engines": {
     "node": ">=6.5"
   },
@@ -60,7 +48,6 @@
     "mocha": "3.5.0",
     "mockery": "2.1.0",
     "nsp": "2.7.0",
-    "pre-git": "3.15.3",
     "sinon": "3.2.1",
     "sinon-chai": "2.13.0"
   },
