@@ -128,6 +128,7 @@ describe "Settings", ->
 
         it "displays first Record Key", ->
           cy
+            .get(".loading-record-keys").should("not.exist")
             .get(".settings-record-keys")
               .contains("cypress run --record --key #{@keys[0].id}")
 
@@ -137,6 +138,16 @@ describe "Settings", ->
 
         it "does not display cypress run command", ->
           cy
+            .get(".loading-record-keys").should("not.exist")
+            .get(".settings-record-keys").should("not.contain", "cypress run")
+
+      describe "when record keys is null", ->
+        beforeEach ->
+          @getRecordKeys.resolve(null)
+
+        it "does not display cypress run command", ->
+          cy
+            .get(".loading-record-keys").should("not.exist")
             .get(".settings-record-keys").should("not.contain", "cypress run")
 
     context "on:focus:tests clicked", ->
