@@ -19,7 +19,7 @@ install:
   - npm install
 
 environment:
-  CYPRESS_BINARY_VERSION: 0.20.2-win
+  CYPRESS_BINARY_VERSION: "0.20.2-win"
 
 # Post-install test scripts.
 test_script:
@@ -40,6 +40,7 @@ test_script:
   # will install fresh binary because CYPRESS_BINARY_VERSION variable
   - npm install ../cli/build
   - .\node_modules\.bin\cypress verify
+
   # - cd packages/server && npm run test-unit
   # - npm test
 
