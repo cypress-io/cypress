@@ -1,3 +1,9 @@
+branches:
+  only:
+    - master
+    - develop
+    - /win*/
+
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 # Test against the latest version of this Node.js version
 environment:
