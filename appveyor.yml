@@ -23,6 +23,7 @@ test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
+  - 7z
   - cd packages/launcher && node index.js && cd ../..
   - npm run binary-build -- --platform windows --version 0.20.2-win
   # - cd packages/server && npm run test-unit
