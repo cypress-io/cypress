@@ -399,9 +399,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          environment:
-            CYPRESS_BINARY_VERSION: $NEXT_LINUX_BINARY_VERSION
-          command: npm i ../cli/build
+          command: CYPRESS_BINARY_VERSION=$NEXT_LINUX_BINARY_VERSION npm i ../cli/build
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
