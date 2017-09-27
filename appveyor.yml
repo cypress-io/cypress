@@ -18,6 +18,9 @@ install:
   # install root modules
   - npm install
 
+environment:
+  CYPRESS_BINARY_VERSION: 0.20.2-win
+
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
@@ -25,7 +28,18 @@ test_script:
   - npm --version
   - 7z
   - cd packages/launcher && node index.js && cd ../..
-  - npm run binary-build -- --platform windows --version 0.20.2-win
+  - npm run binary-build -- --platform windows --version $CYPRESS_BINARY_VERSION
+  - npm run binary-zip
+  - npm run binary-upload -- --version $CYPRESS_BINARY_VERSION --zip cypress.zip
+  # build CLI NPM package
+  - cd cli && npm run build && cd ..
+  # start new projet
+  - mkdir test-win-binary
+  - cd test-win-binary
+  - npm init -y
+  # will install fresh binary because CYPRESS_BINARY_VERSION variable
+  - npm install ../cli/build
+  - .\node_modules\.bin\cypress verify
   # - cd packages/server && npm run test-unit
   # - npm test
 
