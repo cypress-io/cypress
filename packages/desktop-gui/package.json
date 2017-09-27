@@ -12,7 +12,6 @@
     "clean-deps": "rm -rf node_modules",
     "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
     "test": "echo 'No unit tests to run, but there are e2e tests'",
-    "pretest": "npm run lint",
     "test-integration": "node ../../scripts/run-cypress-tests.js"
   },
   "files": [
