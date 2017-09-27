@@ -26,6 +26,7 @@ test_script:
   - 7z
   - cd packages/launcher && node index.js && cd ../..
   - npm run binary-build -- --platform windows --version 0.20.2-win
+  - npm run binary-zip
   # - cd packages/server && npm run test-unit
   # - npm test
 
