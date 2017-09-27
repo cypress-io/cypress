@@ -24,8 +24,8 @@ install:
   # install root modules
   - npm install
 
-environment:
-  CYPRESS_BINARY_VERSION: "0.20.2-win"
+# environment:
+#   CYPRESS_BINARY_VERSION: "0.20.2-win"
 
 # Post-install test scripts.
 test_script:
