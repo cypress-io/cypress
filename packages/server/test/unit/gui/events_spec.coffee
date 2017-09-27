@@ -415,11 +415,9 @@ describe "lib/gui/events", ->
         .then (assert) =>
           assert.sendErrCalledWith(err)
 
-      it "emits bus 'focus:tests' onFocusTests", ->
+      it "sends 'focus:tests' onFocusTests", ->
         open = @sandbox.stub(Project.prototype, "open")
         @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
-        # @bus.on "focus:tests"
 
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
@@ -427,6 +425,39 @@ describe "lib/gui/events", ->
         .then (assert) =>
           open.lastCall.args[0].onFocusTests()
           assert.sendCalledWith(undefined)
+
+      it "sends 'config:changed' onSettingsChanged", ->
+        open = @sandbox.stub(Project.prototype, "open")
+        @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
+
+        @handleEvent("open:project", "/_test-output/path/to/project")
+        .then =>
+          @handleEvent("on:config:changed")
+        .then (assert) =>
+          open.lastCall.args[0].onSettingsChanged()
+          assert.sendCalledWith(undefined)
+
+      it "sends 'spec:changed' onSpecChanged", ->
+        open = @sandbox.stub(Project.prototype, "open")
+        @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
+
+        @handleEvent("open:project", "/_test-output/path/to/project")
+        .then =>
+          @handleEvent("on:spec:changed")
+        .then (assert) =>
+          open.lastCall.args[0].onSpecChanged("/path/to/spec.coffee")
+          assert.sendCalledWith("/path/to/spec.coffee")
+
+      it "sends 'project:warning' onWarning", ->
+        open = @sandbox.stub(Project.prototype, "open")
+        @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
+
+        @handleEvent("open:project", "/_test-output/path/to/project")
+        .then =>
+          @handleEvent("on:project:warning")
+        .then (assert) =>
+          open.lastCall.args[0].onWarning({name: "foo", message: "foo"})
+          assert.sendCalledWith({name: "foo", message: "foo"})
 
     describe "close:project", ->
       beforeEach ->
