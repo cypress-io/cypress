@@ -92,6 +92,10 @@ export default class Project {
     return this.state === Project.VALID
   }
 
+  @computed get isInvalid () {
+    return this.state === Project.INVALID
+  }
+
   @computed get isSetupForRecording () {
     return this.id && this.isValid
   }

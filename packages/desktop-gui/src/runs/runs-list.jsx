@@ -96,7 +96,7 @@ class RunsList extends Component {
     }
 
     // If the project is invalid
-    if (project.isValid) {
+    if (project.isInvalid) {
       return this._emptyWithoutSetup(false)
     }
 
@@ -204,7 +204,7 @@ class RunsList extends Component {
         <button
           className='btn btn-primary'
           onClick={showLogin}
-          >
+        >
           <i className='fa fa-user'></i>{' '}
           Log In
         </button>
