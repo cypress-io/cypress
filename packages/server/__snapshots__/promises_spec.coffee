@@ -17,6 +17,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   2)  catches promise errors and calls done with err even when async:
      Error: foo
       at stack trace line
+      at stack trace line
 
 
 
