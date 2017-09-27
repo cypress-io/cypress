@@ -72,7 +72,14 @@ linuxZip = (src, dest) ->
 windowsZip = (src, dest) ->
   # use 7Zip to zip
   # http://www.7-zip.org/
-  cmd = "7z a #{dest} #{src}#{path.sep}*"
+  # zips entire source directory including top level folder name
+  #   Cypress/
+  #     foo.txt
+  # creates cypress.zip for example
+  # unzip cypress.zip to get back the folder
+  #   Cypress/
+  #     foo.txt
+  cmd = "7z a #{dest} #{src}"
   console.log("windows zip: #{cmd}")
 
   onZipFinished = () ->

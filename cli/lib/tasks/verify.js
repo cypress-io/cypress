@@ -249,6 +249,5 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
-
   maybeVerify,
 }
