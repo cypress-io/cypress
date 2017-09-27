@@ -63,6 +63,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
 
 

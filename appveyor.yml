@@ -10,6 +10,8 @@ environment:
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
+  # NPM v3 has flaky permission issues on Windows
+  - npm install -g npm@5
   # Output useful info for debugging.
   - node --version
   - npm --version
@@ -21,6 +23,7 @@ test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
+  - cd packages/launcher && node index.js && cd ../..
   - npm run binary-build -- --platform windows --version 0.20.2-win
   # - cd packages/server && npm run test-unit
   # - npm test

@@ -298,7 +298,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq('9.8.7')
       })
-      .delay(100) // give a little padding for listr
+      .delay(300) // give a little padding for listr
       .then(() => {
         snapshot(
           'current version has not been verified',

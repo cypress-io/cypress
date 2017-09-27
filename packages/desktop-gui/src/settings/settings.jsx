@@ -18,7 +18,7 @@ class Settings extends Component {
   componentWillMount () {
     projectsApi.getRecordKeys().then((keys = []) => {
       this.setState({
-        keys,
+        keys: keys || [], // guard against keys being null
         isLoadingKeys: false,
       })
     })

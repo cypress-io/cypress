@@ -34,6 +34,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
 
 

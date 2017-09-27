@@ -51,6 +51,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
   3) stdout_failing_spec passing hook is failing:
      CypressError: cy.visit() failed trying to load:
@@ -66,6 +67,7 @@ The internal Cypress web server responded with:
   > 404: Not Found
 
 
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

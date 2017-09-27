@@ -86,6 +86,7 @@ jobs:
 
       ## now install all of the sub packages node_modules
       - run: npm run all install -- --serial
+      - run: npm run all prune
 
       # save each node_modules folder per package
       - save_cache:
@@ -367,6 +368,13 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
+  "run-launcher":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/launcher && node index.js
+
   "build-binary":
     <<: *defaults
     steps:
@@ -431,6 +439,9 @@ workflows:
           requires:
             - build
       - build-binary:
+          requires:
+            - build
+      - run-launcher:
           requires:
             - build
 
