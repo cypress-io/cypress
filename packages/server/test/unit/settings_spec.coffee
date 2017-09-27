@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 path = require("path")
+R = require("ramda")
 settings = require("#{root}lib/util/settings")
 
 projectRoot = process.cwd()
@@ -46,11 +47,16 @@ describe "lib/settings", ->
         expect(err.message).to.include("SyntaxError")
         expect(err.message).to.include(projectRoot)
 
+    noArguments = R.nAry(0)
+
     it "does not write initial file", ->
       settings.readEnv(projectRoot)
       .then (obj) ->
         expect(obj).to.deep.eq({})
-        expect(fs.existsSync("cypress.env.json")).to.be.false
+      .then () ->
+        fs.pathExists("cypress.env.json")
+      .then (found) ->
+        expect(found).to.be.false
 
   context ".id", ->
     beforeEach ->

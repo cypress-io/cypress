@@ -9,9 +9,11 @@ human        = require("human-interval")
 morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
+snapshot     = require("snap-shot-it")
 Fixtures     = require("./fixtures")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
+stdout       = require("#{root}../lib/stdout")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 settings     = require("#{root}../lib/util/settings")
@@ -23,6 +25,32 @@ env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
+pathUpToProjectName = Fixtures.projectPath("")
+
+stackTraceLinesRe = /(\s+)at\s(.+)/g
+
+replaceStackTraceLines = (str) ->
+  str.replace(stackTraceLinesRe, "$1at stack trace line")
+
+normalizeStdout = (str) ->
+  ## remove all of the dynamic parts of stdout
+  ## to normalize against what we expected
+  str
+  .split(pathUpToProjectName)
+    .join("/foo/bar/.projects")
+  .replace(/\(\d{1,2}s\)/g, "(10s)")
+  .replace(/\s\(\d+m?s\)/g, "")
+  .replace(/coffee-\d{3}/g, "coffee-456")
+  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
+  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
+  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
+  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
+  .replace(/\r/g, "")
+  .split("\n")
+    .map(replaceStackTraceLines)
+    .join("\n")
+  .split("2560x1440") ## normalize resolutions
+    .join("1280x720")
 
 startServer = (obj) ->
   {onServer, port} = obj
@@ -130,7 +158,7 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    if browser = env.BROWSER
+    if browser = (env.BROWSER or options.browser)
       args.push("--browser=#{browser}")
 
     return args
@@ -155,17 +183,35 @@ module.exports = {
 
     new Promise (resolve, reject) ->
       sp = cp.spawn "node", args, {env: _.omit(env, "CYPRESS_DEBUG")}
+
+      ## pipe these to our current process
+      ## so we can see them in the terminal
+      sp.stdout.pipe(process.stdout)
+      sp.stderr.pipe(process.stderr)
+
       sp.stdout.on "data", (buf) ->
         stdout += buf.toString()
       sp.stderr.on "data", (buf) ->
         stderr += buf.toString()
       sp.on "error", reject
       sp.on "exit", (code) ->
-        if expected = options.expectedExitCode
+        if (expected = options.expectedExitCode)?
           try
             expect(expected).to.eq(code)
           catch err
             return reject(err)
+
+        ## snapshot the stdout!
+        if options.snapshot
+          try
+            ## enable callback to modify stdout
+            if ostd = options.onStdout
+              stdout = ostd(stdout)
+
+            str = normalizeStdout(stdout)
+            snapshot(str)
+          catch err
+            reject(err)
 
         resolve({
           code:   code

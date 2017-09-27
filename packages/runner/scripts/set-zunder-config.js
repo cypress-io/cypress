@@ -5,6 +5,7 @@ module.exports = function setZunderConfig (zunder) {
     prodDir: 'dist',
     resolutions: ['react', 'react-dom', 'mobx', 'mobx-react', 'lodash'],
     scriptName: 'cypress_runner.js',
+    stylesheetGlobs: ['src/**/*.scss', '../reporter/src/**/*.scss'],
     stylesheetName: 'cypress_runner.css',
     staticGlobs: {
       'static/**': '',

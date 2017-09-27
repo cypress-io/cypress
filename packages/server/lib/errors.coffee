@@ -4,6 +4,10 @@ chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
+listPaths = (paths) ->
+  _.map paths, (p) ->
+    "- " + chalk.yellow(p)
+
 API = {
   # forms well-formatted user-friendly error for most common
   # errors Cypress can encounter
@@ -35,15 +39,25 @@ API = {
         """
       when "BROWSER_NOT_FOUND"
         """
-        Browser: #{arg1} was not found on your system.
+        Browser: '#{arg1}' was not found on your system.
 
         Available browsers found are: #{arg2}
         """
+      when "CANNOT_RECORD_VIDEO_HEADED"
+        """
+        Warning: Cypress can only record videos when running headlessly.
+
+        You have set the 'electron' browser to run headed.
+
+        A video will not be recorded when using this mode.
+        """
       when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
         """
-        Warning: Cannot record test run video when using non built-in electron browser
+        Warning: Cypress can only record videos when using the built in 'electron' browser.
 
-        You are using #{arg1}, disabling video recording
+        You have set the browser to: '#{arg1}'
+
+        A video will not be recorded when using this browser.
         """
       when "NOT_LOGGED_IN"
         """
@@ -55,8 +69,6 @@ API = {
         "Timed out waiting for the browser to connect. #{arg1}"
       when "TESTS_DID_NOT_START_FAILED"
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
-      when "PROJECT_DOES_NOT_EXIST"
-        "You need to add a project to run tests."
       when "RECORD_KEY_MISSING"
         """
         You passed the --record flag but did not provide us your Record Key.
@@ -82,15 +94,6 @@ API = {
         Alternatively if you omit the --record flag this project will run without recording.
 
         https://on.cypress.io/recording-project-runs
-        """
-      when "OLD_VERSION_OF_CLI"
-        """
-
-        -----------------------------------------------------------------------------------
-        You are using an older version of the CLI tools.
-
-        Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
-        -----------------------------------------------------------------------------------
         """
       when "PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION"
         """
@@ -240,7 +243,7 @@ API = {
 
         Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
 
-        Correct your cypress.json or create the appropriate file.
+        Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid
         """
@@ -284,6 +287,22 @@ API = {
         Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
 
         Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+        """
+      when "INVALID_REPORTER_NAME"
+        """
+        Could not load reporter by name: #{chalk.yellow(arg1)}
+
+        We searched for the reporter in these paths:
+
+        #{listPaths(arg2).join("\n")}
+
+        Learn more at https://on.cypress.io/reporters
+        """
+      when "PROJECT_DOES_NOT_EXIST"
+        """
+        Could not find any tests to run.
+
+        We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
         """
 
   get: (type, arg1, arg2) ->

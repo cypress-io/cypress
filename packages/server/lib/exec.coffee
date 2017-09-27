@@ -94,6 +94,7 @@ module.exports = {
     .timeout(options.timeout)
     .catch Promise.TimeoutError, ->
       child.kill() if child
+
       err = new Error("Process timed out")
       err.timedout = true
       throw err

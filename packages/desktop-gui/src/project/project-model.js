@@ -200,6 +200,7 @@ export default class Project {
     if (this.warning) {
       this.dismissedWarnings[this._serializeWarning(this.warning)] = true
     }
+
     this.warning = null
   }
 

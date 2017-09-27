@@ -9,6 +9,13 @@ describe "e2e config", ->
     }
   })
 
+  it "passes", ->
+    e2e.exec(@, {
+      spec: "config_passing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 0
+    })
+
   it "fails", ->
     ## this tests that config is applied correctly
     ## from modified cypress.json
@@ -18,9 +25,6 @@ describe "e2e config", ->
 
     e2e.exec(@, {
       spec: "config_failing_spec.coffee"
+      snapshot: true
       expectedExitCode: 1
     })
-    .get("stdout")
-    .then (stdout) ->
-      expect(stdout).not.to.include("1 passing")
-      expect(stdout).to.include("CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.")

@@ -1,14 +1,18 @@
 require("../spec_helper")
 
 _   = require("lodash")
+R   = require("ramda")
 cp  = require("child_process")
 pr  = require("../support/helpers/process")
-pkg = require("@packages/root")
+pkg = require("../../package.json")
+root = require("@packages/root")
+execa = require("execa")
+semver = require("semver")
 
 anyLineWithCaret = (str) ->
   str[0] is ">"
 
-parse = (str) ->
+clean = (str) ->
   ## remove blank lines and slice off any line
   ## starting with a caret because thats junk
   ## from npm logs
@@ -32,16 +36,16 @@ describe "CLI Interface", ->
     cp.exec "npm start -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
-      expect(parse(stdout)).to.eq("12345")
+      expect(clean(stdout)).to.eq("12345")
       done()
 
   it "writes out package.json and exits", (done) ->
     cp.exec "npm start -- --return-pkg", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
-      pkg = JSON.parse(parse(stdout))
-      expect(pkg.name).to.eq("@packages/server")
-      expect(pkg.productName).to.eq("Cypress", stdout)
+      json = JSON.parse(clean(stdout))
+      expect(json.name).to.eq("cypress")
+      expect(json.productName).to.eq("Cypress", stdout)
       done()
 
   ## this tests that our exit codes are correct.
@@ -51,31 +55,46 @@ describe "CLI Interface", ->
   ## caused false-positives in CI because tests were failing
   ## but the exit code was always zero
   context "exit codes", ->
-    beforeEach ->
-      ## run the start script directly
-      ## instead of going through npm wrapper
-      @start = pkg.scripts.start
+    describe "from start script command", ->
+      beforeEach ->
+        ## run the start script directly
+        ## instead of going through npm wrapper
+        @start = pkg.scripts.start
 
-    it "exits with code 22", (done) ->
-      s = cp.exec("#{@start} --exit-with-code=22")
-      s.on "close", (code) ->
-        expect(code).to.eq(22)
-        done()
+      it "exits with code 22", (done) ->
+        s = cp.exec("#{@start} --exit-with-code=22")
+        s.on "close", (code) ->
+          expect(code).to.eq(22)
+          done()
 
-    it "exits with code 0", (done) ->
-      s = cp.exec("#{@start} --exit-with-code=0")
-      s.on "close", (code) ->
-        expect(code).to.eq(0)
-        done()
+      it "exits with code 0", (done) ->
+        s = cp.exec("#{@start} --exit-with-code=0")
+        s.on "close", (code) ->
+          expect(code).to.eq(0)
+          done()
 
-    it "npm slurps up exit value and exits with 1 on failure", (done) ->
-      s = cp.exec("npm start -- --exit-with-code=10")
-      s.on "close", (code) ->
-        expect(code).to.eq(1)
-        done()
+    describe "through NPM script", ->
+      npmVersion = null
 
-    it "npm passes on 0 exit code", (done) ->
-      s = cp.exec("npm start -- --exit-with-code=0")
-      s.on "close", (code) ->
-        expect(code).to.eq(0)
-        done()
+      isNpmSlurpingCode = () ->
+        semver.lt(npmVersion, '4.0.0')
+
+      beforeEach ->
+        execa("npm", ["-version"])
+        .then R.prop("stdout")
+        .then (version) ->
+          npmVersion = version
+          expect(npmVersion).to.be.a.string
+
+      it "npm slurps up or not exit value on failure", (done) ->
+        expectedCode = if isNpmSlurpingCode() then 1 else 10
+        s = cp.exec("npm start -- --exit-with-code=10")
+        s.on "close", (code) ->
+          expect(code).to.eq(expectedCode)
+          done()
+
+      it "npm passes on 0 exit code", (done) ->
+        s = cp.exec("npm start -- --exit-with-code=0")
+        s.on "close", (code) ->
+          expect(code).to.eq(0)
+          done()

@@ -2,9 +2,12 @@ fs      = require("fs-extra")
 path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
+la      = require("lazy-ass")
+check   = require("check-more-types")
 log     = require("debug")("cypress:server:appdata")
 pkg     = require("@packages/root")
 cwd     = require("../cwd")
+os      = require("os")
 
 fs   = Promise.promisifyAll(fs)
 name = pkg.productName or pkg.name
@@ -12,6 +15,12 @@ data = ospath.data()
 
 if not name
   throw new Error("Root package is missing name")
+
+getSymlinkType = ->
+  if os.platform() == "win32" 
+    "junction" 
+  else 
+    "dir"
 
 isProduction = ->
   process.env.CYPRESS_ENV is "production"
@@ -34,12 +43,16 @@ module.exports = {
     src  = path.dirname(@path())
     dest = cwd(".cy")
 
-    fs.ensureSymlinkAsync(src, dest, "dir")
+    log("symlink folder from %s to %s", src, dest)
+    symlinkType = getSymlinkType()
+    fs.ensureSymlinkAsync(src, dest, symlinkType)
 
   removeSymlink: ->
     fs.removeAsync(cwd(".cy")).catch(->)
 
   path: (paths...) ->
+    la(check.unemptyString(process.env.CYPRESS_ENV),
+      "expected CYPRESS_ENV, found", process.env.CYPRESS_ENV)
     p = path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
     log("path: %s", p)
     p

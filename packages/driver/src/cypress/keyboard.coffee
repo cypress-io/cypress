@@ -6,7 +6,28 @@ $Cypress = require("../cypress")
 
 charsBetweenCurlyBraces = /({.+?})/
 
+# Keyboard event map
+# https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+keyStandardMap = {
+  # Cypress keyboard key : Standard value
+  "{backspace}": "Backspace",
+  "{del}": "Delete",
+  "{downarrow}": "ArrowDown",
+  "{enter}": "Enter",
+  "{esc}": "Escape",
+  "{leftarrow}": "ArrowLeft",
+  "{rightarrow}": "ArrowRight",
+  "{uparrow}": "ArrowUp",
+  "{alt}": "Alt",
+  "{ctrl}": "Control",
+  "{meta}": "Meta",
+  "{shift}": "Shift"
+}
+
 $Keyboard = {
+  keyToStandard: (key) ->
+    keyStandardMap[key] || key
+
   charCodeMap: {
     33:  49,  ## ! --- 1
     64:  50,  ## @ --- 2
@@ -62,9 +83,10 @@ $Keyboard = {
       bounds = rng.bounds()
       if @boundsAreEqual(bounds)
         rng.bounds([bounds[0], bounds[0] + 1])
-      options.charCode = 46
-      options.keypress = false
+      options.charCode  = 46
+      options.keypress  = false
       options.textInput = false
+      options.setKey    = "{del}"
       @ensureKey el, null, options, ->
         prev = rng.all()
         rng.text("", "end")
@@ -87,6 +109,7 @@ $Keyboard = {
       options.charCode  = 8
       options.keypress  = false
       options.textInput = false
+      options.setKey    = "{backspace}"
       @ensureKey el, null, options, ->
         prev = rng.all()
         rng.text("", "end")
@@ -106,6 +129,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{esc}"
       @ensureKey el, null, options
 
     # "{tab}": (el, rng) ->
@@ -124,6 +148,7 @@ $Keyboard = {
       options.charCode  = 13
       options.textInput = false
       options.input     = false
+      options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
         rng.insertEOL()
         changed = options.prev isnt rng.all()
@@ -140,6 +165,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{leftarrow}"
       @ensureKey el, null, options, ->
         switch
           when @boundsAreEqual(bounds)
@@ -167,6 +193,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{uparrow}"
       @ensureKey(el, null, options)
 
     ## charCode = 39
@@ -180,6 +207,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{rightarrow}"
       @ensureKey el, null, options, ->
         switch
           when @boundsAreEqual(bounds)
@@ -204,6 +232,7 @@ $Keyboard = {
       options.keypress  = false
       options.textInput = false
       options.input     = false
+      options.setKey    = "{downarrow}"
       @ensureKey(el, null, options)
   }
 
@@ -237,9 +266,15 @@ $Keyboard = {
 
     el = options.$el.get(0)
 
-    ## if el does not have this property
     bililiteRangeSelection = el.bililiteRangeSelection
     rng = bililiteRange(el).bounds("selection")
+
+    ## if the value has changed since previously typing, we need to
+    ## update the caret position if the value has changed
+    if el.prevValue and @expectedValueDoesNotMatchCurrentValue(el.prevValue, rng)
+      @moveCaretToEnd(rng)
+      el.prevValue = rng.all()
+      bililiteRangeSelection = el.bililiteRangeSelection = rng.bounds()
 
     ## store the previous text value
     ## so we know to fire change events
@@ -247,7 +282,6 @@ $Keyboard = {
     options.prev = rng.all()
 
     resetBounds = (start, end) ->
-
       if start? and end?
         bounds = [start, end]
       else
@@ -312,29 +346,23 @@ $Keyboard = {
 
     options.onBeforeType @countNumIndividualKeyStrokes(keys)
 
-    promises = []
-
     ## should make each keystroke async to mimic
     ## how keystrokes come into javascript naturally
     Promise
-      .each keys, (key) =>
-        @typeChars(el, rng, key, promises, options)
-      .cancellable()
-      .then =>
-        ## if after typing we ended up changing
-        ## our value then fire the onTypeChange callback
-        if @expectedValueDoesNotMatchCurrentValue(options.prev, rng)
-          options.onTypeChange()
+    .each keys, (key) =>
+      @typeChars(el, rng, key, options)
+    .then =>
+      ## if after typing we ended up changing
+      ## our value then fire the onTypeChange callback
+      if @expectedValueDoesNotMatchCurrentValue(options.prev, rng)
+        options.onTypeChange()
 
-        ## after typing be sure to clear all ranges
-        if sel = options.window.getSelection()
-          sel.removeAllRanges()
+      ## after typing be sure to clear all ranges
+      if sel = options.window.getSelection()
+        sel.removeAllRanges()
 
-        unless options.release is false
-          @resetModifiers(el, options.window)
-      .catch Promise.CancellationError, (err) ->
-        _.invokeMap(promises, "cancel")
-        throw err
+      unless options.release is false
+        @resetModifiers(el, options.window)
 
   countNumIndividualKeyStrokes: (keys) ->
     _.reduce keys, (memo, chars) =>
@@ -348,43 +376,36 @@ $Keyboard = {
         memo + chars.length
     , 0
 
-  typeChars: (el, rng, chars, promises, options) ->
+  typeChars: (el, rng, chars, options) ->
     options = _.clone(options)
     options.rng = rng
 
-    if @isSpecialChar(chars)
-      p = Promise
+    switch
+      when @isSpecialChar(chars)
+        Promise
         .resolve @handleSpecialChars(el, chars, options)
         .delay(options.delay)
-        .cancellable()
-      promises.push(p)
-      p
-    else if @isModifier(chars)
-      p = Promise
+
+      when @isModifier(chars)
+        Promise
         .resolve @handleModifier(el, chars, options)
         .delay(options.delay)
-        .cancellable()
-      promises.push(p)
-      p
-    else if charsBetweenCurlyBraces.test(chars)
-      ## between curly braces, but not a valid special
-      ## char or modifier
-      allChars = _.keys(@specialChars).concat(_.keys(@modifierChars)).join(", ")
-      p = Promise
+
+      when charsBetweenCurlyBraces.test(chars)
+        ## between curly braces, but not a valid special
+        ## char or modifier
+        allChars = _.keys(@specialChars).concat(_.keys(@modifierChars)).join(", ")
+
+        Promise
         .resolve options.onNoMatchingSpecialChars(chars, allChars)
         .delay(options.delay)
-        .cancellable()
-      promises.push(p)
-      p
-    else
-      Promise
+
+      else
+        Promise
         .each chars.split(""), (char) =>
-          p = Promise
-            .resolve @typeKey(el, char, options)
-            .delay(options.delay)
-            .cancellable()
-          promises.push(p)
-          p
+          Promise
+          .resolve @typeKey(el, char, options)
+          .delay(options.delay)
 
   getCharCode: (key) ->
     code = key.charCodeAt(0)
@@ -456,9 +477,14 @@ $Keyboard = {
       }
 
     if keys
+      # special key like "{enter}" might have 'key = \n'
+      # in which case the original intent will be in options.setKey
+      # "normal" keys will have their value in "key" argument itself
+      standardKey = $Keyboard.keyToStandard(options.setKey || key)
       _.extend event, {
         charCode: charCode
         detail: 0
+        key: standardKey
         keyCode: keyCode
         layerX: 0
         layerY: 0
@@ -467,7 +493,6 @@ $Keyboard = {
         view: options.window
         which: which
       }
-
 
     args = [options.id, key, eventType, charCodeAt]
 
@@ -495,6 +520,10 @@ $Keyboard = {
 
     @ensureKey el, key, options, ->
       options.updateValue(options.rng, key)
+      ## update the selection that's cached on the element
+      ## and store the value for comparison in any future typing
+      el.bililiteRangeSelection = options.rng.bounds()
+      el.prevValue = el.value
 
   ensureKey: (el, key, options, fn) ->
     options.id        = _.uniqueId("char")

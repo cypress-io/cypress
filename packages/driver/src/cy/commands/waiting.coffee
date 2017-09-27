@@ -1,66 +1,68 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$utils = require("../../cypress/utils")
 
-$Cy.extend({
-  _waitNumber: (subject, ms, options) ->
+getNumRequests = (state, alias) =>
+  requests = state("aliasRequests") ? {}
+  index = requests[alias] ?= 0
+
+  requests[alias] += 1
+
+  state("aliasRequests", requests)
+
+  [index, _.ordinalize(requests[alias])]
+
+throwErr = (arg) ->
+  $utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+
+module.exports = (Commands, Cypress, cy, state, config) ->
+  waitFunction = ->
+    $utils.throwErrByPath("wait.fn_deprecated")
+
+  waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
-    @_timeout(ms, true)
+    cy.timeout(ms, true, "wait")
 
     if options.log isnt false
-      options._log = Cypress.Log.command
+      options._log = Cypress.log({
         consoleProps: -> {
           "Waited For": "#{ms}ms before continuing"
           "Yielded": subject
         }
+      })
 
     Promise
-      .delay(ms)
-      .return(subject)
+    .delay(ms, "wait")
+    .return(subject)
 
-  _waitFunction: (subject, fn, options) ->
-    utils.throwErrByPath("wait.fn_deprecated")
-
-  _waitString: (subject, str, options) ->
+  waitString = (subject, str, options) ->
     if options.log isnt false
-      log = options._log = Cypress.Log.command
+      log = options._log = Cypress.log({
         type: "parent"
         aliasType: "route"
+      })
 
-    getNumRequests = (alias) =>
-      requests = @state("aliasRequests") ? {}
-      requests[alias] ?= 0
-      requests[alias] += 1
-
-      @state("aliasRequests", requests)
-
-      _.ordinalize requests[alias]
-
-    checkForXhr = (alias, type, num, options) ->
+    checkForXhr = (alias, type, index, num, options) ->
       options.type = type
 
       ## append .type to the alias
-      xhr = @getLastXhrByAlias(alias + "." + type)
+      xhr = cy.getIndexedXhrByAlias(alias + "." + type, index)
 
       ## return our xhr object
       return Promise.resolve(xhr) if xhr
 
-      options.error = utils.errMessageByPath "wait.timed_out", {
+      options.error = $utils.errMessageByPath "wait.timed_out", {
         timeout: options.timeout
         alias
         num
         type
       }
 
-
       args = arguments
 
-      @_retry ->
-        args.options = _.omit(options, "timeout")
-        checkForXhr.apply(@, args)
+      cy.retry ->
+        checkForXhr.apply(null, args)
       , options
 
     waitForXhr = (str, options) ->
@@ -68,8 +70,8 @@ $Cy.extend({
       ## since we support alias property 'request'
       [str, str2] = str.split(".")
 
-      if not aliasObj = @getAlias(str, "wait", log)
-        @aliasNotFoundFor(str, "wait", log)
+      if not aliasObj = cy.getAlias(str, "wait", log)
+        cy.aliasNotFoundFor(str, "wait", log)
 
       ## if this alias is for a route then poll
       ## until we find the response xhr object
@@ -78,7 +80,7 @@ $Cy.extend({
 
       str = _.compact([alias, str2]).join(".")
 
-      type = @getXhrTypeByAlias(str)
+      type = cy.getXhrTypeByAlias(str)
 
       ## if we have a command then continue to
       ## build up an array of referencesAlias
@@ -90,7 +92,7 @@ $Cy.extend({
         log.set "referencesAlias", aliases
 
       if command.get("name") isnt "route"
-        utils.throwErrByPath("wait.invalid_alias", {
+        $utils.throwErrByPath("wait.invalid_alias", {
           onFail: options._log
           args: { alias }
         })
@@ -100,17 +102,17 @@ $Cy.extend({
       ## the error related to a previous xhr
       timeout = options.timeout
 
-      num = getNumRequests(alias)
+      [ index, num ] = getNumRequests(state, alias)
 
-      waitForRequest = =>
+      waitForRequest = ->
         options = _.omit(options, "_runnableTimeout")
         options.timeout = timeout ? Cypress.config("requestTimeout")
-        checkForXhr.call(@, alias, "request", num, options)
+        checkForXhr(alias, "request", index, num, options)
 
-      waitForResponse = =>
+      waitForResponse = ->
         options = _.omit(options, "_runnableTimeout")
         options.timeout = timeout ? Cypress.config("responseTimeout")
-        checkForXhr.call(@, alias, "response", num, options)
+        checkForXhr(alias, "response", index, num, options)
 
       ## if we were only waiting for the request
       ## then resolve immediately do not wait for response
@@ -119,39 +121,27 @@ $Cy.extend({
       else
         waitForRequest().then(waitForResponse)
 
-    ## we have to juggle a separate array of promises
-    ## in order to cancel them when one bombs
-    ## so they dont just keep retrying and retrying
-    xhrs = []
-
     Promise
-      .map [].concat(str), (str) =>
-        ## we may get back an xhr value instead
-        ## of a promise, so we have to wrap this
-        ## in another promise :-(
-        xhr = Promise.resolve waitForXhr.call(@, str, _.omit(options, "error"))
-        xhrs.push(xhr)
-        xhr
-      .then (responses) ->
-        ## if we only asked to wait for one alias
-        ## then return that, else return the array of xhr responses
-        ret = if responses.length is 1 then responses[0] else responses
+    .map [].concat(str), (str) ->
+      ## we may get back an xhr value instead
+      ## of a promise, so we have to wrap this
+      ## in another promise :-(
+      waitForXhr(str, _.omit(options, "error"))
+    .then (responses) ->
+      ## if we only asked to wait for one alias
+      ## then return that, else return the array of xhr responses
+      ret = if responses.length is 1 then responses[0] else responses
 
-        if options._log
-          options._log.set "consoleProps", -> {
-            "Waited For": (@referencesAlias || []).join(", ")
-            "Yielded": ret
-          }
+      if log
+        log.set "consoleProps", -> {
+          "Waited For": (log.get("referencesAlias") || []).join(", ")
+          "Yielded": ret
+        }
 
-          options._log.snapshot().end()
+        log.snapshot().end()
 
-        return ret
-      .catch (err) ->
-        _(xhrs).invoke("cancel")
-        throw err
-})
+      return ret
 
-module.exports = (Cypress, Commands) ->
   Commands.addAll({ prevSubject: "optional" }, {
     wait: (subject, msOrFnOrAlias, options = {}) ->
       ## check to ensure options is an object
@@ -159,22 +149,22 @@ module.exports = (Cypress, Commands) ->
       ## to wait on multiple aliases and forget to make this
       ## an array
       if _.isString(options)
-        utils.throwErrByPath("wait.invalid_arguments")
+        $utils.throwErrByPath("wait.invalid_arguments")
 
       _.defaults options, {log: true}
 
       args = [subject, msOrFnOrAlias, options]
 
-      throwErr = (arg) ->
-        utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
-
       try
         switch
-          when _.isFinite(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
-          when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
-          when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
+          when _.isFinite(msOrFnOrAlias)
+            waitNumber.apply(null, args)
+          when _.isFunction(msOrFnOrAlias)
+            waitFunction()
+          when _.isString(msOrFnOrAlias)
+            waitString.apply(null, args)
           when _.isArray(msOrFnOrAlias) and not _.isEmpty(msOrFnOrAlias)
-            @_waitString.apply(@, args)
+            waitString.apply(null, args)
           else
             ## figure out why this error failed
             arg = switch

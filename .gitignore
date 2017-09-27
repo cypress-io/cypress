@@ -10,6 +10,7 @@ build
 .vscode
 .publish
 _test-output
+cypress.zip
 
 # from extension
 Cached Theme.pak
@@ -31,19 +32,9 @@ packages/server/.cy
 packages/server/.projects
 packages/server/support
 
-# from docs
-docs/public
-docs/db.json
-docs/.deploy*/
-docs/cypress/screenshots
-docs/cypress/videos
-docs/themes/cypress/source/css/vendor
-docs/themes/cypress/source/js/vendor
-docs/themes/cypress/source/fonts/vendor
-docs/support
-
 # CLI tool
 cli/build
 
 # Building app binary
 scripts/binary/support
+package-lock.json

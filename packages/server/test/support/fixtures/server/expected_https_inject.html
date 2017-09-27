@@ -7,10 +7,5 @@
           throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing!. This should never happen and likely is a bug. Please open an issue!');
         };
 
-        window.onerror = function(){
-          Cypress.onUncaughtException.apply(Cypress, arguments);
-        }
-    </script>
-    <script type='text/javascript'>
-      Cypress.onBeforeLoad(window);
+      Cypress.action('app:window:before:load', window);
     </script></head><body>https server</body></html>

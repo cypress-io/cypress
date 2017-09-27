@@ -1,8 +1,5 @@
-/* global $Cypress */
-
 import _ from 'lodash'
-
-const $ = $Cypress.$
+import { $ } from '@packages/driver'
 
 const resetStyles = `
   border: none !important;

@@ -1,43 +1,17 @@
 _ = require("lodash")
 
-$Cy = require("../../cypress/cy")
-utils = require("../../cypress/utils")
+$dom = require("../../dom")
 
-blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
-
-$Cy.extend({
-  _validateAlias: (alias) ->
-    if not _.isString(alias)
-      utils.throwErrByPath "as.invalid_type"
-
-    if _.isBlank(alias)
-      utils.throwErrByPath "as.empty_string"
-
-    if alias in blacklist
-      utils.throwErrByPath "as.reserved_word", { args: { alias } }
-
-  _addAlias: (aliasObj) ->
-    {alias, subject} = aliasObj
-    aliases = @state("aliases") ? {}
-    aliases[alias] = aliasObj
-    @state("aliases", aliases)
-
-    remoteSubject = @_getRemotejQueryInstance(subject)
-    ## assign the subject to our runnable ctx
-    @assign(alias, remoteSubject ? subject)
-})
-
-module.exports = (Cypress, Commands) ->
-  Commands.addUtility({
+module.exports = (Commands, Cypress, cy, state, config) ->
+  Commands.addAll({ type: "utility", prevSubject: true }, {
     as: (subject, str) ->
-      @ensureParent()
-      @ensureSubject()
+      ctx = @
 
-      @_validateAlias(str)
+      cy.validateAlias(str)
 
       ## this is the previous command
       ## which we are setting the alias as
-      prev = @state("current").get("prev")
+      prev = state("current").get("prev")
       prev.set("alias", str)
 
       noLogFromPreviousCommandisAlreadyAliased = ->
@@ -46,10 +20,10 @@ module.exports = (Cypress, Commands) ->
 
       ## we also need to set the alias on the last command log
       ## that matches our chainerId
-      if log = _.last(@queue.logs({
+      if log = _.last(cy.queue.logs({
         instrument: "command"
         event: false
-        chainerId: @state("chainerId")
+        chainerId: state("chainerId")
       }))
 
         ## make sure this alias hasn't already been applied
@@ -60,10 +34,10 @@ module.exports = (Cypress, Commands) ->
 
           log.set({
             alias:     str
-            aliasType: if utils.hasElement(subject) then "dom" else "primitive"
+            aliasType: if $dom.isElement(subject) then "dom" else "primitive"
           })
 
-      @_addAlias({subject: subject, command: prev, alias: str})
+      cy.addAlias(ctx, {subject: subject, command: prev, alias: str})
 
       return subject
   })

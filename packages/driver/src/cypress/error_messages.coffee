@@ -71,7 +71,23 @@ module.exports = {
 
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
-    match_invalid_argument: "'chai#match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
+    match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
+    invalid_jquery_obj: (obj) ->
+      """
+        You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.
+
+        The chai-jQuery assertion you used was:
+
+          > #{obj.assertion}
+
+        The invalid subject you asserted on was:
+
+          > #{obj.subject}
+
+        To use chai-jQuery assertions your subject must be valid.
+
+        This can sometimes happen if a previous assertion changed the subject.
+      """
 
   chain:
     removed: """
@@ -93,7 +109,7 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass {multiple: true} if you want to serially click each element."
+    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
     on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
@@ -123,19 +139,25 @@ module.exports = {
 
   dom:
     animating: """
-      #{cmd('{{cmd}}')} could not be issued because this element is currently animating:\n
-      {{node}}\n
+      #{cmd('{{cmd}}')} could not be issued because this element is currently animating:
+
+      {{node}}
+
       You can fix this problem by:
         - Passing {force: true} which disables all error checking
         - Passing {waitForAnimations: false} which disables waiting on animations
-        - Passing {animationDistanceThreshold: 20} which decreases the sensitivity\n
+        - Passing {animationDistanceThreshold: 20} which decreases the sensitivity
+        
       https://on.cypress.io/element-is-animating
     """
     animation_check_failed: "Not enough coord points provided to calculate distance."
     center_hidden: """
-      #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:\n
-      {{node}}\n
-      Fix this problem, or use {force: true} to disable error checking.\n
+      #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
       https://on.cypress.io/element-cannot-be-interacted-with
     """
     covered: (obj) ->
@@ -152,29 +174,29 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
       """
-    detached: """
-      #{cmd('{{cmd}}')} failed because this element you are chaining off of has become detached or removed from the DOM:\n
-      {{node}}\n
-      https://on.cypress.io/element-has-detached-from-dom
-    """
     disabled: """
-      #{cmd('{{cmd}}')} failed because this element is disabled:\n
-      {{node}}\n
-      Fix this problem, or use {force: true} to disable error checking.\n
+      #{cmd('{{cmd}}')} failed because this element is disabled:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
       https://on.cypress.io/element-cannot-be-interacted-with
     """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
-    non_dom: "Cannot call #{cmd('{{cmd}}')} on a non-DOM subject."
-    non_dom_is_hidden: "$Cypress.Dom.{{filter}} must be passed a basic DOM element. You passed: '{{el}}'"
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
       {{node}}\n
     """
     not_visible: """
-      #{cmd('{{cmd}}')} failed because this element is not visible:\n
-      {{node}}\n
-      {{reason}}\n
-      Fix this problem, or use {force: true} to disable error checking.\n
+      #{cmd('{{cmd}}')} failed because this element is not visible:
+
+      {{node}}
+
+      {{reason}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
       https://on.cypress.io/element-cannot-be-interacted-with
     """
 
@@ -294,6 +316,81 @@ module.exports = {
 
       https://on.cypress.io/custom-command-interface-changed
       """
+    returned_value_and_commands_from_custom_command: (obj) ->
+      """
+        Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+
+        The custom command was:
+
+          > #{cmd(obj.current)}
+
+        The return value was:
+
+          > #{obj.returned}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-custom-command
+      """
+    returned_value_and_commands: (ret) ->
+      """
+        Cypress detected that you invoked one or more cy commands but returned a different value.
+
+        The return value was:
+
+          > #{ret}
+
+        Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+
+        For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+
+        In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+
+        https://on.cypress.io/returning-value-and-commands-in-test
+      """
+    command_returned_promise_and_commands: (obj) ->
+      """
+        Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.
+
+        The command that returned the promise was:
+
+          > #{cmd(obj.current)}
+
+        The cy command you invoked inside the promise was:
+
+          > #{cmd(obj.called)}
+
+        Because Cypress commands are already promise-like, you don't need to wrap them or return your own promise.
+
+        Cypress will resolve your command with whatever the final Cypress command yields.
+
+        The reason this is an error instead of a warning is because Cypress internally queues commands serially whereas Promises execute as soon as they are invoked. Attempting to reconcile this would prevent Cypress from ever resolving.
+
+        https://on.cypress.io/returning-promise-and-commands-in-another-command
+      """
+    mixing_promises_and_commands: (title) ->
+      """
+        Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
+
+        The test title was:
+
+          > #{title}
+
+        While this works in practice, it's often indicative of an anti-pattern. You almost never need to return both a promise and also invoke cy commands.
+
+        Cy commands themselves are already promise like, and you can likely avoid the use of the separate Promise.
+
+        https://on.cypress.io/returning-promise-and-commands-in-test
+      """
+    command_log_renamed: """
+      Cypress.Log.command() has been renamed to Cypress.log()
+
+      Please update your code. You should be able to safely do a find/replace.
+    """
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 
@@ -309,7 +406,6 @@ module.exports = {
 
       https://on.cypress.io/command-queue-ended-early
     """
-    deprecated: "Command Options such as: '{{{opt}}: {{value}}}' have been deprecated. Instead write this as an assertion: #{cmd('should', '\'{{assertion}}\'')}."
     invalid_command: "Could not find a command for: '{{name}}'.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: '{{name}}'. An existing command does not exist by that name."
     invoking_child_without_parent: (obj) ->
@@ -320,7 +416,7 @@ module.exports = {
 
       #{cmd(obj.cmd, obj.args)}
 
-      A child command must be chained after a parent because it operates on an existing subject.
+      A child command must be chained after a parent because it operates on a previous subject.
 
       For example - if we were issuing the child command 'click'...
 
@@ -329,37 +425,38 @@ module.exports = {
         .click()       // then child command comes second
 
       """
-    method_not_implemented: "The method {{method}} is not yet implemented"
-    module_not_registered: "$Cypress.Module: {{name}} not registered."
     no_cy: "Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call Cypress.$()"
-    no_sandbox: "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
     no_runner: "Cannot call Cypress#run without a runner instance."
-    no_subject: "Subject is {{subject}}. You cannot call #{cmd('{{cmd}}')} without a subject."
-    orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
     outside_test: """
       Cypress cannot execute commands outside a running test.
+
       This usually happens when you accidentally write commands outside an 'it(...)' test.
-      If that is the case, just move these commands inside an 'it(...)' test.
-      Check your test file for errors.\n
+
+      If that is the case, just move these commands inside an it(...) test.
+
+      Check your test file for errors.
+
       https://on.cypress.io/cannot-execute-commands-outside-test
     """
     outside_test_with_cmd: """
-      Cannot call "#{cmd('{{cmd}}')} outside a running test.
+      Cannot call "#{cmd('{{cmd}}')}" outside a running test.
+
       This usually happens when you accidentally write commands outside an it(...) test.
-      If that is the case, just move these commands inside an 'it(...)' test.
-      Check your test file for errors.\n
+
+      If that is the case, just move these commands inside an it(...) test.
+
+      Check your test file for errors.
+
       https://on.cypress.io/cannot-execute-commands-outside-test
     """
     private_custom_command_interface: "You cannot use the undocumented private command interface: {{method}}"
-    private_property: (obj) ->
+    private_property:
       """
-      You are accessing a private property directly on Cypress which has been renamed.
+      You are accessing a private property directly on 'cy' which has been renamed.
 
       This was never documented nor supported.
 
-      Please go through the getter function: #{cmd(obj.name, "...")}
-
-      #{if obj.url then "https://on.cypress.io/#{obj.name}" else ""}
+      Please go through the public function: #{cmd('state', "...")}
       """
     retry_timed_out: "Timed out retrying: {{error}}"
 
@@ -563,6 +660,68 @@ module.exports = {
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be an array."
 
+  subject:
+    not_dom: (obj) ->
+      """
+      #{cmd(obj.name)} failed because it requires a valid DOM object.
+
+      The subject received was:
+
+        > #{obj.subject}
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+
+      Cypress only considers the 'window', 'document', or any 'element' to be valid DOM objects.
+      """
+    not_attached: (obj) ->
+      """
+      #{cmd(obj.name)} failed because this element is detached from the DOM.
+
+      #{obj.subject}
+
+      Cypress requires elements be attached in the DOM to interact with them.
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+
+      This DOM element likely became detached somewhere between the previous and current command.
+
+      Common situations why this happens:
+        - Your JS framework re-rendered asynchronously
+        - Your app code reacted to an event firing and removed the element
+
+      You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.
+
+      https://on.cypress.io/element-has-detached-from-dom
+      """
+    not_window_or_document: (obj) ->
+      """
+      #{cmd(obj.name)} failed because it requires the subject be a global '#{obj.type}' object.
+
+      The subject received was:
+
+        > #{obj.subject}
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+      """
+    not_element: (obj) ->
+      """
+      #{cmd(obj.name)} failed because it requires a DOM element.
+
+      The subject received was:
+
+        > #{obj.subject}
+
+      The previous command that ran was:
+
+        > #{cmd(obj.previous)}
+      """
+
   submit:
     multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
     not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
@@ -606,7 +765,7 @@ module.exports = {
 
       Cypress detected that an uncaught error was thrown from a cross origin script.
 
-      We cannot provide you the stack trace, line number, or file where this error occured.
+      We cannot provide you the stack trace, line number, or file where this error occurred.
 
       Check your Developer Tools Console for the actual error - it should be printed there.
 
@@ -615,7 +774,7 @@ module.exports = {
       https://on.cypress.io/cross-origin-script-error
     """
     error_in_hook: (obj) ->
-      msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+      msg = "Because this error occurred during a '#{obj.hookName}' hook we are skipping "
 
       if t = obj.parentTitle
         msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
@@ -729,7 +888,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {{arg}}"
     invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: '{{alias}}' did not match a route."
     invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
-    timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occured."
+    timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occurred."
 
   window:
     iframe_doc_undefined: "The remote iframe's document is undefined"

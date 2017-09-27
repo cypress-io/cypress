@@ -3,6 +3,7 @@ require("../spec_helper")
 fs        = require("fs-extra")
 path      = require("path")
 Promise   = require("bluebird")
+eol       = require("eol")
 extension = require("../../index")
 cwd       = process.cwd()
 
@@ -21,14 +22,20 @@ describe "Extension", ->
 
   context ".getPathToExtension", ->
     it "returns path to dist", ->
-      expect(extension.getPathToExtension()).to.eq(cwd + "/dist")
+      result = extension.getPathToExtension()
+      expected = path.join(cwd, "dist")
+      expect(path.normalize(result)).to.eq(path.normalize(expected))
 
     it "returns path to files in dist", ->
-      expect(extension.getPathToExtension("background.js")).to.eq(cwd + "/dist/background.js")
+      result = extension.getPathToExtension("background.js")
+      expected = path.join(cwd, "/dist/background.js")
+      expect(path.normalize(result)).to.eq(path.normalize(expected))
 
   context ".getPathToTheme", ->
     it "returns path to theme", ->
-      expect(extension.getPathToTheme()).to.eq(cwd + "/theme")
+      result = extension.getPathToTheme()
+      expected = path.join(cwd, "theme")
+      expect(path.normalize(result)).to.eq(path.normalize(expected))
 
   context ".getPathToRoot", ->
     it "returns path to root", ->
@@ -44,7 +51,8 @@ describe "Extension", ->
     it "rewrites the background.js source", ->
       extension.setHostAndPath("http://dev.local:8080", "/__foo")
       .then (str) ->
-        expect(str).to.eq """
+        result = eol.auto(str)
+        expected = eol.auto """
         (function() {
           var HOST, PATH, automation, client, fail, invoke,
             slice = [].slice;
@@ -69,6 +77,7 @@ describe "Extension", ->
         }).call(this);
 
         """
+        expect(result).to.eq(expected)
 
     it "does not mutate background.js", ->
       fs.readFileAsync(@src, "utf8")

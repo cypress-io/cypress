@@ -32,7 +32,7 @@ module.exports = {
     appData.projectsPath(toHashName(projectRoot), "bundles", filePath)
 
   build: (filePath, config) ->
-    if config.isHeadless and built = builtFiles[filePath]
+    if config.isTextTerminal and built = builtFiles[filePath]
       return built
 
     log "bundler for project #{config.projectRoot} for file #{filePath}"
@@ -42,6 +42,9 @@ module.exports = {
     absolutePath = path.join(config.projectRoot, filePath)
     log "input absolute path #{absolutePath}"
 
+    outputPath = @outputPath(config.projectRoot, filePath)
+    log "output path #{absolutePath}"
+
     bundler = browserify({
       entries:      [absolutePath]
       extensions:   [".js", ".jsx", ".coffee", ".cjsx"]
@@ -49,7 +52,7 @@ module.exports = {
       packageCache: {}
     })
 
-    if not config.isHeadless
+    if not config.isTextTerminal
       @_watching = true ## for testing purposes
 
       bundler.plugin(watchify, {
@@ -65,30 +68,37 @@ module.exports = {
 
     bundle = =>
       new Promise (resolve, reject) =>
-        outputPath = @outputPath(config.projectRoot, filePath)
         log "making bundle #{outputPath}"
-        ## TODO: only ensure directory when first run and not on updates?
-        fs.ensureDirAsync(path.dirname(outputPath))
-        .then =>
-          bundler
-          .bundle()
-          .on "error", (err) =>
-            if config.isHeadless
-              err.filePath = absolutePath
-              ## backup the original stack before its
-              ## potentially modified from bluebird
-              err.originalStack = err.stack
-              reject(err)
-            else
-              stringStream(@clientSideError(err))
-              .pipe(fs.createWriteStream(outputPath))
 
-              ## TODO: do we need to wait for the 'end'
-              ## event here before resolving?
+        onError = (err) =>
+          if config.isTextTerminal
+            err.filePath = absolutePath
+            ## backup the original stack before its
+            ## potentially modified from bluebird
+            err.originalStack = err.stack
+            reject(err)
+          else
+            ws = fs.createWriteStream(outputPath)
+            ws.on "finish", ->
+              log("browserify: send error to client: #{err.stack}")
               resolve()
-          .on "end", ->
-            resolve()
-          .pipe(fs.createWriteStream(outputPath))
+            ws.on "error", ->
+              log("browserify: failed to send error to client: #{err.stack}")
+              resolve()
+
+            stringStream(@clientSideError(err))
+            .pipe(ws)
+
+        ws = fs.createWriteStream(outputPath)
+        ws.on "finish", ->
+          log("browserify: finished bundling #{outputPath}")
+          resolve()
+        ws.on("error", onError)
+
+        bundler
+        .bundle()
+        .on("error", onError)
+        .pipe(ws)
 
     bundler
     .transform(cjsxify)
@@ -113,7 +123,7 @@ module.exports = {
           emitter.emit("update", updatedFilePath)
         return
 
-    latestBundle = bundle()
+    latestBundle = fs.ensureDirAsync(path.dirname(outputPath)).then(bundle)
 
     return builtFiles[filePath] = {
       ## set to empty function in the case where we
@@ -146,7 +156,7 @@ module.exports = {
 
     """
     (function () {
-      Cypress.trigger("script:error", {
+      Cypress.action("spec:script:error", {
         type: "BUNDLE_ERROR",
         error: #{JSON.stringify(err)}
       })

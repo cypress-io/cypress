@@ -1,10 +1,14 @@
+/* global document */
+
 'use strict'
 
-var chai = require('chai')
-var jsdom = require('jsdom').jsdom
-var sinonChai = require('sinon-chai')
+const chai = require('chai')
+const jsdom = require('jsdom').jsdom
+const sinonChai = require('sinon-chai')
+const $Cypress = require('@packages/driver')
+const io = require('@packages/socket')
 
-var exposedProperties = ['window', 'navigator', 'document']
+const exposedProperties = ['window', 'navigator', 'document']
 
 // http://airbnb.io/enzyme/docs/guides/jsdom.html
 global.document = jsdom('')
@@ -16,12 +20,12 @@ Object.keys(document.defaultView).forEach((property) => {
   }
 })
 global.navigator = {
-  userAgent: 'node.js'
+  userAgent: 'node.js',
 }
 
 // enzyme, and therefore chai-enzyme, needs to be required after
 // global.navigator is set up (https://github.com/airbnb/enzyme/issues/395)
-var chaiEnzyme = require('chai-enzyme')
+const chaiEnzyme = require('chai-enzyme')
 
 chai.use(chaiEnzyme())
 chai.use(sinonChai)
@@ -37,5 +41,5 @@ class Runner {
 }
 
 global.Mocha = { Runnable, Runner }
-global.$Cypress = { create: () => {} }
-global.io = { connect: () => { return { emit: () => {}, on: () => {} } } }
+$Cypress.create = () => {}
+io.connect = () => { return { emit: () => {}, on: () => {} } }

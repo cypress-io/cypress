@@ -147,9 +147,9 @@ class RunsList extends Component {
       <div className='runs'>
         <header>
           <h5>Runs
-          <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
+            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
             See All <i className='fa fa-external-link'></i>
-          </a>
+            </a>
 
           </h5>
           <div>

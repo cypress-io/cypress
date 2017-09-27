@@ -5,6 +5,7 @@ path    = require("path")
 Promise = require("bluebird")
 pkg     = require("../package.json")
 paths   = require("./paths")
+log     = require("debug")("cypress:electron")
 
 fs = Promise.promisifyAll(fs)
 
@@ -54,7 +55,8 @@ module.exports = {
     pkgr    = require("electron-packager")
     icons   = require("@cypress/icons")
 
-    pkgr    = Promise.promisify(pkgr)
+    iconPath =  icons.getPathToIcon("cypress")
+    log("package icon", iconPath)
 
     _.defaults(options, {
       dist: paths.getPathToDist()
@@ -66,15 +68,19 @@ module.exports = {
       asar: false
       prune: true
       overwrite: true
-      version: electronVersion
-      icon: icons.getPathToIcon("cypress.icns")
+      electronVersion
+      icon: iconPath
     })
 
+    log("packager options %j", options)
     pkgr(options)
     .then (appPaths) ->
       appPaths[0]
+    # Promise.resolve("tmp\\Cypress-win32-x64")
     .then (appPath) =>
       ## and now move the tmp into dist
+      console.log("moving created file from", appPath)
+      console.log("to", options.dist)
       @move(appPath, options.dist)
 
     .catch (err) ->

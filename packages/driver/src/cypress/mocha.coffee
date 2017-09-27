@@ -1,242 +1,203 @@
 _ = require("lodash")
-Backbone = require("backbone")
-utils = require("./utils")
+$utils = require("./utils")
 
-Mocha = require("mocha").Mocha
+## in the browser mocha is coming back
+## as window
+mocha = require("mocha")
+
+Mocha = mocha.Mocha ? mocha
+Test = Mocha.Test
 Runner = Mocha.Runner
 Runnable = Mocha.Runnable
 
 runnerRun            = Runner::run
 runnerFail           = Runner::fail
 runnableRun          = Runnable::run
+runnableClearTimeout = Runnable::clearTimeout
 runnableResetTimeout = Runnable::resetTimeout
 
-class $Mocha
-  constructor: (@Cypress, specWindow) ->
-    reporter = $Cypress.reporter ? ->
+## don't let mocha polute the global namespace
+delete window.mocha
+delete window.Mocha
 
-    @mocha = new Mocha
-      reporter: reporter
-      enableTimeouts: false
+ui = (specWindow, _mocha) ->
+  ## Override mocha.ui so that the pre-require event is emitted
+  ## with the iframe's `window` reference, rather than the parent's.
+  _mocha.ui = (name) ->
+    @_ui = Mocha.interfaces[name]
 
-    @override()
-    @listeners()
+    if not @_ui
+      $utils.throwErrByPath("mocha.invalid_interface", { args: { name } })
 
-    @specWindow = specWindow
+    @_ui = @_ui(@suite)
 
-    @set(specWindow)
-
-  override: ->
-    ## these should probably be class methods
-    ## since they alter the global Mocha and
-    ## are not localized to this mocha instance
-    @patchRunnerFail()
-    @patchRunnableRun()
-    @patchRunnableResetTimeout()
+    ## this causes the mocha globals in the spec window to be defined
+    ## such as describe, it, before, beforeEach, etc
+    @suite.emit("pre-require", specWindow, null, @)
 
     return @
 
-  listeners: ->
-    @listenTo @Cypress, "abort", =>
-      ## during abort we always want to reset
-      ## the mocha instance grep to all
-      ## so its picked back up by mocha
-      ## naturally when the iframe spec reloads
-      @grep /.*/
+  _mocha.ui("bdd")
 
-    @listenTo @Cypress, "stop", => @stop()
+set = (specWindow, _mocha) ->
+  ## Mocha is usually defined in the spec when used normally
+  ## in the browser or node, so we add it as a global
+  ## for our users too
+  M = specWindow.Mocha = Mocha
+  m = specWindow.mocha = _mocha
 
+  ## also attach the Mocha class
+  ## to the mocha instance for clarity
+  m.Mocha = M
+
+  ## this needs to be part of the configuration of cypress.json
+  ## we can't just forcibly use bdd
+  ui(specWindow, _mocha)
+
+globals = (specWindow, reporter) ->
+  reporter ?= ->
+
+  _mocha = new Mocha({
+    reporter: reporter
+    enableTimeouts: false
+  })
+
+  ## set mocha props on the specWindow
+  set(specWindow, _mocha)
+
+  ## return the newly created mocha instance
+  return _mocha
+
+getRunner = (_mocha) ->
+  Runner::run = ->
+    ## reset our runner#run function
+    ## so the next time we call it
+    ## its normal again!
+    restoreRunnerRun()
+
+    ## return the runner instance
     return @
 
-  ## pass our options down to the runner
-  options: (runner) ->
-    runner.options(@mocha.options)
+  _mocha.run()
 
-  grep: (re) ->
-    @mocha.grep(re)
+restoreRunnableClearTimeout = ->
+  Runnable::clearTimeout = runnableClearTimeout
 
-  getRunner: ->
-    _this = @
+restoreRunnableResetTimeout = ->
+  Runnable::resetTimeout = runnableResetTimeout
 
-    Runner::run = ->
-      ## reset our runner#run function
-      ## so the next time we call it
-      ## its normal again!
-      _this.restoreRunnerRun()
+restoreRunnerRun = ->
+  Runner::run = runnerRun
 
-      ## return the runner instance
-      return @
+restoreRunnerFail = ->
+  Runner::fail = runnerFail
 
-    @mocha.run()
+restoreRunnableRun = ->
+  Runnable::run = runnableRun
 
-  patchRunnerFail: ->
-    ## matching the current Runner.prototype.fail except
-    ## changing the logic for determing whether this is a valid err
-    Runner::fail = _.wrap runnerFail, (orig, runnable, err) ->
-      ## if this isnt a correct error object then just bail
-      ## and call the original function
-      if Object.prototype.toString.call(err) isnt "[object Error]"
-        return orig.call(@, runnable, err)
+patchRunnerFail = ->
+  ## matching the current Runner.prototype.fail except
+  ## changing the logic for determing whether this is a valid err
+  Runner::fail = (runnable, err) ->
+    ## if this isnt a correct error object then just bail
+    ## and call the original function
+    if Object.prototype.toString.call(err) isnt "[object Error]"
+      return runnerFail.call(@, runnable, err)
 
-      ## else replicate the normal mocha functionality
-      ++@failures
+    ## else replicate the normal mocha functionality
+    ++@failures
 
-      runnable.state = "failed"
+    runnable.state = "failed"
 
-      @emit("fail", runnable, err)
+    @emit("fail", runnable, err)
 
-  patchRunnableRun: ->
-    _this = @
-    Cypress = @Cypress
+patchRunnableRun = (Cypress) ->
+  Runnable::run = (args...) ->
+    runnable = @
 
-    Runnable::run = _.wrap runnableRun, (orig, args...) ->
+    Cypress.action("mocha:runnable:run", runnableRun, runnable, args)
 
-      runnable = @
+patchRunnableClearTimeout = ->
+  Runnable::clearTimeout = ->
+    ## call the original
+    runnableClearTimeout.apply(@, arguments)
 
-      ## if cy was enqueued within the test
-      ## then we know we should forcibly return cy
-      invokedCy = _.once ->
-        runnable._invokedCy = true
+    ## nuke the timer property
+    ## for testing purposes
+    @timer = null
 
-      @fn = _.wrap @fn, (orig, args...) ->
-        _this.listenTo Cypress, "enqueue", invokedCy
+patchRunnableResetTimeout = ->
+  Runnable::resetTimeout = ->
+    runnable = @
 
-        unbind = ->
-          _this.stopListening Cypress, "enqueue", invokedCy
-          runnable.fn = orig
+    ms = @timeout() or 1e9
 
-        try
-          ## call the original function with
-          ## our called ctx (from mocha)
-          ## and apply the new args in case
-          ## we have a done callback
-          result = orig.apply(@, args)
+    @clearTimeout()
 
-          unbind()
+    getErrPath = ->
+      ## we've yield an explicit done callback
+      if runnable.async
+        "mocha.async_timed_out"
+      else
+        ## TODO: improve this error message. It's not that
+        ## a command necessarily timed out - in fact this is
+        ## a mocha timeout, and a command likely *didn't*
+        ## time out correctly, so we received this message instead.
+        "mocha.timed_out"
 
-          ## if we invoked cy in this function
-          ## then forcibly return last cy chain
-          if runnable._invokedCy
-            return Cypress.cy.state("chain")
+    @timer = setTimeout ->
+      errMessage = $utils.errMessageByPath(getErrPath(), { ms })
+      runnable.callback new Error(errMessage)
+      runnable.timedOut = true
+    , ms
 
-          ## else return regular result
-          return result
-        catch e
-          unbind()
-          throw e
+restore = ->
+  restoreRunnerRun()
+  restoreRunnerFail()
+  restoreRunnableRun()
+  restoreRunnableClearTimeout()
+  restoreRunnableResetTimeout()
 
-      orig.apply(@, args)
+override = (Cypress) ->
+  patchRunnerFail()
+  patchRunnableRun(Cypress)
+  patchRunnableClearTimeout()
+  patchRunnableResetTimeout()
 
-  patchRunnableResetTimeout: ->
-    Runnable::resetTimeout = _.wrap runnableResetTimeout, (orig) ->
-      runnable = @
+create = (specWindow, Cypress, reporter) ->
+  restore()
 
-      ms = @timeout() or 1e9
+  override(Cypress)
 
-      @clearTimeout()
+  ## generate the mocha + Mocha globals
+  ## on the specWindow, and get the new
+  ## _mocha instance
+  _mocha = globals(specWindow, reporter)
 
-      getErrPath = ->
-        ## we've yield an explicit done callback
-        if runnable.async
-          "mocha.async_timed_out"
-        else
-          "mocha.timed_out"
+  _runner = getRunner(_mocha)
 
-      @timer = setTimeout ->
-        errMessage = utils.errMessageByPath(getErrPath(), { ms })
-        runnable.callback new Error(errMessage)
-        runnable.timedOut = true
-      , ms
+  return {
+    _mocha
 
-  set: (contentWindow) ->
-    ## create our own mocha objects from our parents if its not already defined
-    ## Mocha is needed for the id generator
-    contentWindow.Mocha ?= Mocha
-    contentWindow.mocha ?= @mocha
+    createRootTest: (title, fn) ->
+      r = new Test(title, fn)
+      _runner.suite.addTest(r)
+      r
 
-    @clone(contentWindow)
+    getRunner: ->
+      _runner
 
-    ## this needs to be part of the configuration of cypress.json
-    ## we can't just forcibly use bdd
-    @ui(contentWindow, "bdd")
+    getRootSuite: ->
+      _mocha.suite
 
-  clone: (contentWindow) ->
-    mocha = contentWindow.mocha
+    options: (runner) ->
+      runner.options(_mocha.options)
+  }
 
-    ## remove all of the listeners from the previous root suite
-    @mocha.suite.removeAllListeners()
+module.exports = {
+  restore
 
-    ## We clone the outermost root level suite - and replace
-    ## the existing root suite with a new one. this wipes out
-    ## all references to hooks / tests / suites and thus
-    ## prevents holding reference to old suites / tests
-    @mocha.suite = mocha.suite.clone()
+  globals
 
-  ui: (contentWindow, name) ->
-    mocha = contentWindow.mocha
-
-    ## Override mocha.ui so that the pre-require event is emitted
-    ## with the iframe's `window` reference, rather than the parent's.
-    mocha.ui = (name) ->
-      @_ui = Mocha.interfaces[name]
-      utils.throwErrByPath("mocha.invalid_interface", { args: { name } }) if not @_ui
-      @_ui = @_ui(@suite)
-      @suite.emit 'pre-require', contentWindow, null, @
-      return @
-
-    mocha.ui name
-
-  stop: ->
-    @stopListening()
-    @restore()
-
-    ## remove any listeners from the mocha.suite
-    @mocha.suite.removeAllListeners()
-
-    @mocha.suite.suites = []
-    @mocha.suite.tests  = []
-
-    ## null it out to break any references
-    @mocha.suite = null
-
-    @Cypress.mocha = null
-
-    delete @specWindow.mocha
-    delete @specWindow
-    delete @mocha
-
-    return @
-
-  restore: ->
-    @restoreRunnerRun()
-    @restoreRunnerFail()
-    @restoreRunnableRun()
-    @restoreRunnableResetTimeout()
-
-    return @
-
-  restoreRunnableResetTimeout: ->
-    Runnable::resetTimeout = runnableResetTimeout
-
-  restoreRunnerRun: ->
-    Runner::run = runnerRun
-
-  restoreRunnerFail: ->
-    Runner::fail = runnerFail
-
-  restoreRunnableRun: ->
-    Runnable::run = runnableRun
-
-  _.extend $Mocha.prototype, Backbone.Events
-
-  @create = (Cypress, specWindow) ->
-    ## clear out existing listeners
-    ## if we already exist!
-    if existing = Cypress.mocha
-      existing.stopListening()
-
-    ## we dont want the default global mocha instance on our window
-    delete window.mocha
-    Cypress.mocha = new $Mocha Cypress, specWindow
-
-module.exports = $Mocha
+  create
+}

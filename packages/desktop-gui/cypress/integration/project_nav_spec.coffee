@@ -60,7 +60,7 @@ describe "Project Nav", ->
           .get("@runsNav")
             .should("have.class", "active")
 
-      it "displays runs page", ->
+      it.only "displays runs page", ->
         cy
           .get(".runs-container li")
           .should("have.length", 4)

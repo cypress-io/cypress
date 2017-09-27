@@ -27,30 +27,6 @@ describe "lib/modes/headless", ->
         capitalization: "lowercase"
       })
 
-  context ".ensureAndOpenProjectByPath", ->
-    beforeEach ->
-      @sandbox.stub(openProject, "create").resolves(@projectInstance)
-
-    it "creates the project if it exists at projectPath", ->
-      @sandbox.stub(Project, "exists").resolves(true)
-      @sandbox.spy(Project, "add")
-
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
-      .then ->
-        expect(Project.add).not.to.be.called
-        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
-
-    it "prompts to add the project if it doesnt exist at projectPath", ->
-      @sandbox.stub(Project, "exists").resolves(false)
-      @sandbox.spy(Project, "add")
-      @sandbox.spy(console, "log")
-
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "/_test-output/path/to/project"})
-      .then ->
-        expect(console.log).to.be.calledWithMatch("Added this project:", "/_test-output/path/to/project")
-        expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
-        expect(openProject.create).to.be.calledWith("/_test-output/path/to/project")
-
   context ".openProject", ->
     it "calls openProject.create with projectPath + options", ->
       @sandbox.stub(openProject, "create").resolves()
@@ -71,7 +47,7 @@ describe "lib/modes/headless", ->
           morgan: false
           socketId: 1234
           report: true
-          isHeadless: true
+          isTextTerminal: true
         })
 
   context ".getElectronProps", ->
@@ -81,16 +57,12 @@ describe "lib/modes/headless", ->
       expect(props.width).to.eq(1280)
       expect(props.height).to.eq(720)
 
-    it "sets show and devTools to boolean", ->
+    it "sets show to boolean", ->
       props = headless.getElectronProps(false)
-
       expect(props.show).to.be.false
-      expect(props.devTools).to.be.false
 
       props = headless.getElectronProps(true)
-
       expect(props.show).to.be.true
-      expect(props.devTools).to.be.true
 
     it "sets recordFrameRate and onPaint when write is true", ->
       write = @sandbox.stub()
@@ -243,15 +215,16 @@ describe "lib/modes/headless", ->
         .then (ret) ->
           expect(ret).to.be.undefined
 
-      it "does not resolve if socketId does not match id", (done) ->
+      it "does not resolve if socketId does not match id", ->
         process.nextTick =>
           @projectInstance.emit("socket:connected", 12345)
 
         headless
           .waitForSocketConnection(@projectInstance, 1234)
           .timeout(50)
+          .then ->
+            throw new Error("should time out and not resolve")
           .catch Promise.TimeoutError, (err) ->
-            done()
 
       it "actually removes the listener", ->
         process.nextTick =>
@@ -386,42 +359,49 @@ describe "lib/modes/headless", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
+      @sandbox.stub(Project, "ensureExists").resolves()
       @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(openProject)
+      @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
-      @sandbox.spy(errors, "get")
+      @sandbox.spy(errors, "warning")
       @sandbox.stub(@projectInstance, "getConfig").resolves({
         proxyUrl: "http://localhost:12345",
         videoRecording: true,
         videosFolder: "videos"
       })
 
-    it "shows no errors for default browser", ->
+    it "shows no warnings for default browser", ->
       headless.run()
       .then ->
-        expect(errors.get).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.not.be.called
 
-    it "shows no errors for electron browser", ->
+    it "shows no warnings for electron browser", ->
       headless.run({browser: "electron"})
       .then ->
-        expect(errors.get).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
-    it "disabled video recording for non-electron browser", ->
+    it "disables video recording on headed runs", ->
+      headless.run({headed: true})
+      .then ->
+        expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")
+
+    it "disables video recording for non-electron browser", ->
       headless.run({browser: "chrome"})
       .then ->
-        expect(errors.get).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
   context ".run", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
+      @sandbox.stub(Project, "ensureExists").resolves()
       @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(openProject)
+      @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
       @sandbox.spy(headless,  "waitForBrowserToConnect")
@@ -438,10 +418,10 @@ describe "lib/modes/headless", ->
       .then (stats) ->
         expect(stats).to.deep.eq({failures: 10})
 
-    it "passes id + options to ensureAndOpenProjectByPath", ->
+    it "passes id + options to openProject", ->
       headless.run({foo: "bar"})
       .then ->
-        expect(headless.ensureAndOpenProjectByPath).to.be.calledWithMatch(1234, {foo: "bar"})
+        expect(headless.openProject).to.be.calledWithMatch(1234, {foo: "bar"})
 
     it "passes project + id to waitForBrowserToConnect", ->
       headless.run()
@@ -458,7 +438,7 @@ describe "lib/modes/headless", ->
           project: @projectInstance
         })
 
-    it "passes showHeadlessGui to openProject.launch", ->
-      headless.run({showHeadlessGui: true})
+    it "passes headed to openProject.launch", ->
+      headless.run({headed: true})
       .then ->
         expect(openProject.launch).to.be.calledWithMatch("electron", undefined, {show: true})

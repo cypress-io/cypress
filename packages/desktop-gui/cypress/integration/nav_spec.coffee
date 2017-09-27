@@ -17,21 +17,13 @@ describe "Navigation", ->
 
       start()
 
-  it "displays link to docs", ->
-    cy.get(".main-nav").contains("Docs")
+  it "displays and opens link to docs on click", ->
+    cy.get("nav").find(".fa-graduation-cap").click().then ->
+      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
 
-  it "opens link to docs on click", ->
-    cy
-      .get(".main-nav").contains("Docs").click().then ->
-        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io")
-
-  it "displays link to chat", ->
-    cy.get(".main-nav").contains("Chat")
-
-  it "opens link to chat on click", ->
-    cy
-      .get(".main-nav").contains("Chat").click().then ->
-        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/chat")
+  it "displays and opens link to support on click", ->
+    cy.get("nav").find(".fa-question-circle").click().then ->
+      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/support")
 
   it "shows loading spinner where user or 'Log in' will be", ->
     cy.get(".main-nav li:last .fa-spinner")

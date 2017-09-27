@@ -49,3 +49,4 @@ describe "lib/server", ->
           expect(onError).to.be.calledWithMatch(err, socket, head, 8444)
 
           done()
+      return

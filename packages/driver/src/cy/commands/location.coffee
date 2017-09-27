@@ -1,43 +1,24 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$Cy = require("../../cypress/cy")
+$utils = require("../../cypress/utils")
 $Location = require("../../cypress/location")
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
 
-$Cy.extend({
-  __location: (win) ->
-    win.location.toString()
-
-  _getLocation: (key, win) ->
-    try
-      remoteUrl = @__location(win ? @privateState("window"))
-      location  = $Location.create(remoteUrl)
-
-      if key
-        location[key]
-      else
-        location
-    catch e
-      ""
-})
-
-module.exports = (Cypress, Commands) ->
+module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     url: (options = {}) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: ""
 
       getHref = =>
-        @_getLocation("href")
+        cy.getRemoteLocation("href")
 
       do resolveHref = =>
         Promise.try(getHref).then (href) =>
-          @verifyUpcomingAssertions(href, options, {
+          cy.verifyUpcomingAssertions(href, options, {
             onRetry: resolveHref
           })
 
@@ -45,15 +26,15 @@ module.exports = (Cypress, Commands) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: ""
 
       getHash = =>
-        @_getLocation("hash")
+        cy.getRemoteLocation("hash")
 
       do resolveHash = =>
         Promise.try(getHash).then (hash) =>
-          @verifyUpcomingAssertions(hash, options, {
+          cy.verifyUpcomingAssertions(hash, options, {
             onRetry: resolveHash
           })
 
@@ -68,23 +49,23 @@ module.exports = (Cypress, Commands) ->
       _.defaults options, {log: true}
 
       getLocation = =>
-        location = @_getLocation()
+        location = cy.getRemoteLocation()
 
         ret = if _.isString(key)
           ## use existential here because we only want to throw
           ## on null or undefined values (and not empty strings)
           location[key] ?
-            utils.throwErrByPath("location.invalid_key", { args: { key } })
+            $utils.throwErrByPath("location.invalid_key", { args: { key } })
         else
           location
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: key ? ""
 
       do resolveLocation = =>
         Promise.try(getLocation).then (ret) =>
-          @verifyUpcomingAssertions(ret, options, {
+          cy.verifyUpcomingAssertions(ret, options, {
             onRetry: resolveLocation
           })
   })

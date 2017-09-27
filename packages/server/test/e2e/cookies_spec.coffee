@@ -51,7 +51,8 @@ describe "e2e cookies", ->
   })
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "cookies_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })

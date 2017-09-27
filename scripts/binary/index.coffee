@@ -18,9 +18,6 @@ bump     = require("./bump")
 meta     = require("./meta")
 build    = require("./build")
 upload   = require("./upload")
-Base     = require("./base")
-Linux    = require("./linux")
-Darwin   = require("./darwin")
 
 success = (str) ->
   console.log chalk.bgGreen(" " + chalk.black(str) + " ")
@@ -50,20 +47,6 @@ process.chdir(cwd)
 
 deploy = {
   meta:   meta
-  Base:   Base
-  Darwin: Darwin
-  Linux:  Linux
-
-  # getPlatform: (platform, options) ->
-  #   platform ?= os.platform()
-  #
-  #   Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
-  #
-  #   throw new Error("Platform: '#{platform}' not found") if not Platform
-  #
-  #   options ?= @parseOptions(process.argv.slice(2))
-  #
-  #   (new Platform(platform, options))
 
   parseOptions: (argv) ->
     opts = minimist(argv, {
@@ -78,7 +61,15 @@ deploy = {
     opts.runTests = false if opts["skip-tests"]
     if not opts.platform and os.platform() == meta.platforms.linux
       # only can build Linux on Linux
-      opts.platform = "linux"
+      opts.platform = meta.platforms.linux
+
+    # windows aliases
+    if opts.platform == "win32" or opts.platform == "win" or opts.platform == "windows"
+      opts.platform = meta.platforms.windows
+
+    if not opts.platform and os.platform() == meta.platforms.windows
+      # only can build Windows binary on Windows platform
+      opts.platform = meta.platforms.windows
 
     # be a little bit user-friendly and allow aliased values
     if opts.platform == "mac"
@@ -119,9 +110,10 @@ deploy = {
 
   build: (options) ->
     console.log('#build')
-    if !options then options = @parseOptions(process.argv)
+    options ?= @parseOptions(process.argv)
+
     askMissingOptions(['version', 'platform'])(options)
-    .then () ->
+    .then ->
       build(options.platform, options.version, options)
 
   zip: (options) ->
@@ -159,11 +151,13 @@ deploy = {
   #   - upload
   deploy: ->
     options = @parseOptions(process.argv)
+
     askMissingOptions(['version', 'platform'])(options)
-    .then(build)
-    .then(() => @zip(options))
-    # assumes options.zip contains the zipped filename
-    .then(upload)
+    .then (options) =>
+      @build(options)
+      .then => @zip(options)
+      # assumes options.zip contains the zipped filename
+      .then => @upload(options)
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))

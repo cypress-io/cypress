@@ -19,6 +19,7 @@ exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
   ## but cannot figure out how null is
   ## being passed into exit
+  log("about to exit with code", code)
   process.exit(code)
 
 exit0 = ->
@@ -52,9 +53,10 @@ module.exports = {
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
         ## log a warning
-        require("./api").ping().catch (err) ->
-          console.log(err.message)
-          require("./errors").warning("DEV_NO_SERVER")
+        if process.env.CYPRESS_ENV is "development"
+          require("./api").ping().catch (err) ->
+            console.log(err.message)
+            require("./errors").warning("DEV_NO_SERVER")
 
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
@@ -62,6 +64,7 @@ module.exports = {
           fn = (code) ->
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
+            log("electron finished with", code)
             resolve({failures: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
@@ -71,45 +74,45 @@ module.exports = {
     require("./open_project").open(options.project, options)
 
   runServer: (options) ->
-    args = {}
-
-    _.defaults options, { autoOpen: true }
-
-    if not options.project
-      throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project /path/to/project'\n\n")
-
-    if options.debug
-      args.debug = "--debug"
-
-    ## just spawn our own index.js file again
-    ## but put ourselves in project mode so
-    ## we actually boot a project!
-    _.extend(args, {
-      script:  "index.js"
-      watch:  ["--watch", "lib"]
-      ignore: ["--ignore", "lib/public"]
-      verbose: "--verbose"
-      exts:   ["-e", "coffee,js"]
-      args:   ["--", "--config", "port=2020", "--mode", "openProject", "--project", options.project]
-    })
-
-    args = _.chain(args).values().flatten().value()
-
-    cp.spawn("nodemon", args, {stdio: "inherit"})
-
-    ## auto open in dev mode directly to our
-    ## default cypress web app client
-    if options.autoOpen
-      _.delay ->
-        require("./browsers").launch("chrome", "http://localhost:2020/__", {
-          proxyServer: "http://localhost:2020"
-        })
-      , 2000
-
-    if options.debug
-      cp.spawn("node-inspector", [], {stdio: "inherit"})
-
-      require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+    # args = {}
+    #
+    # _.defaults options, { autoOpen: true }
+    #
+    # if not options.project
+    #   throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project /path/to/project'\n\n")
+    #
+    # if options.debug
+    #   args.debug = "--debug"
+    #
+    # ## just spawn our own index.js file again
+    # ## but put ourselves in project mode so
+    # ## we actually boot a project!
+    # _.extend(args, {
+    #   script:  "index.js"
+    #   watch:  ["--watch", "lib"]
+    #   ignore: ["--ignore", "lib/public"]
+    #   verbose: "--verbose"
+    #   exts:   ["-e", "coffee,js"]
+    #   args:   ["--", "--config", "port=2020", "--mode", "openProject", "--project", options.project]
+    # })
+    #
+    # args = _.chain(args).values().flatten().value()
+    #
+    # cp.spawn("nodemon", args, {stdio: "inherit"})
+    #
+    # ## auto open in dev mode directly to our
+    # ## default cypress web app client
+    # if options.autoOpen
+    #   _.delay ->
+    #     require("./browsers").launch("chrome", "http://localhost:2020/__", {
+    #       proxyServer: "http://localhost:2020"
+    #     })
+    #   , 2000
+    #
+    # if options.debug
+    #   cp.spawn("node-inspector", [], {stdio: "inherit"})
+    #
+    #   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
     require("./logger").info("starting desktop app", args: argv)

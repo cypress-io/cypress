@@ -5,10 +5,12 @@ defaults: &defaults
   working_directory: ~/cypress-monorepo
   docker:
     # the Docker image with Cypress dependencies and Chrome browser
-    - image: cypress/internal:chrome58
+    - image: cypress/internal:chrome61
       environment:
         ## this enables colors + fixes failing unit tests
         TERM: xterm
+
+        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
         npm_config_loglevel: warn
         # even when running as non-root user
@@ -21,6 +23,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+
+      # print global NPM cache path
+      - run: echo $(npm -g bin)
 
       ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
@@ -67,8 +72,10 @@ jobs:
           key: v5-{{ .Branch }}-deps-static
       - restore_cache:
           key: v5-{{ .Branch }}-deps-ts
-      - restore_cache:
-          key: v5-{{ .Branch }}-deps-docs
+
+      # show what is already cached globally
+      - run: ls $(npm -g bin)
+      - run: ls $(npm -g bin)/../lib/node_modules
 
       # only installs the root dependencies, without going into packages
       # via postinstall script
@@ -79,6 +86,7 @@ jobs:
 
       ## now install all of the sub packages node_modules
       - run: npm run all install -- --serial
+      - run: npm run all prune
 
       # save each node_modules folder per package
       - save_cache:
@@ -147,11 +155,8 @@ jobs:
           key: v5-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
           paths:
             - packages/ts/node_modules
-      - save_cache:
-          key: v5-{{ .Branch }}-deps-docs-{{ checksum "docs/package.json" }}
-          paths:
-            - docs/node_modules
 
+      - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run build
 
@@ -173,7 +178,7 @@ jobs:
 
   "unit-tests":
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
@@ -184,10 +189,13 @@ jobs:
       - run: npm run all test -- --package extension
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
+      # how to pass Mocha reporter through zunder?
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
       - run: npm run all test -- --package socket
       - run: npm run all test -- --package static
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "server-unit-tests":
     <<: *defaults
@@ -196,6 +204,8 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-unit -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
   "server-integration-tests":
     <<: *defaults
@@ -204,51 +214,173 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-integration -- --package server
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
-  "server-e2e-tests":
+  "server-e2e-tests-1":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: npm run all test-e2e -- --package server
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 0
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
-  "docs-tests":
+  "server-e2e-tests-2":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && npm run deps
-      - run: cd docs && npm run build
-      - run: cd docs && npm run test-e2e
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 1
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
-  "deploy-docs":
+  "server-e2e-tests-3":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd docs && NODE_ENV=production npm run build
-      # because we already built docs for production
-      # use script that just deploys without rebuilding the production docs
-      - run: cd docs && npm run deploy-prebuilt -- --environment production --scrape
-      - run: cd docs && cat public/build.json
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
 
-  "driver-unit-tests":
+  "server-e2e-tests-4":
     <<: *defaults
-    parallelism: 2
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: chrome --version
-      - run: xvfb-run -as "-screen 0 1280x720x16" npm run all test -- --package driver
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 3
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+
+  "server-e2e-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/server && npm run test-e2e -- --parallel 5 --index 4
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+
+  "driver-integration-tests-1":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 0
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-2":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 1
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-3":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-4":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 3
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-5":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: cd packages/driver && npm start
+          background: true
+      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 4
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "desktop-gui-integration-tests-1":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 0
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "desktop-gui-integration-tests-2":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 1
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "desktop-gui-integration-tests-3":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/desktop-gui && npm run build-prod
+      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 2
+      - store_test_results:
+          path: /tmp/cypress-monorepo
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "run-launcher":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run: cd packages/launcher && node index.js
 
   "build-binary":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: echo "Building version 0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      - run: npm run binary-build -- --platform linux --version "0.0.0-$CIRCLE_BRANCH-${CIRCLE_SHA1:0:7}"
-      - run: ls -la build/linux/Cypress
+      - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
 
 workflows:
   version: 2
@@ -267,25 +399,51 @@ workflows:
       - server-integration-tests:
           requires:
             - build
-      - server-e2e-tests:
+      - server-e2e-tests-1:
           requires:
             - build
-      - driver-unit-tests:
+      - server-e2e-tests-2:
+          requires:
+            - build
+      - server-e2e-tests-3:
+          requires:
+            - build
+      - server-e2e-tests-4:
+          requires:
+            - build
+      - server-e2e-tests-5:
+          requires:
+            - build
+      - driver-integration-tests-1:
+          requires:
+            - build
+      - driver-integration-tests-2:
+          requires:
+            - build
+      - driver-integration-tests-3:
+          requires:
+            - build
+      - driver-integration-tests-4:
+          requires:
+            - build
+      - driver-integration-tests-5:
+          requires:
+            - build
+      - desktop-gui-integration-tests-1:
+          requires:
+            - build
+      - desktop-gui-integration-tests-2:
+          requires:
+            - build
+      - desktop-gui-integration-tests-3:
           requires:
             - build
       - build-binary:
           requires:
             - build
-      # test and deploy documentation site
-      - docs-tests:
+      - run-launcher:
           requires:
             - build
-      - deploy-docs:
-          filters:
-            branches:
-              only: master
-          requires:
-            - docs-tests
 
 #
 # things to run in the 4th CI container
@@ -295,5 +453,5 @@ workflows:
 #     command: |
 #       if [ $CIRCLE_NODE_INDEX == 3 ]; then
 #         # ./bin/cypress --project=./packages/example --path-to-cypress
-#         # xvfb-run -as "-screen 0 1280x720x16" npm start -- --project=./packages/example
+#         # npm start -- --project=./packages/example
 #       fi

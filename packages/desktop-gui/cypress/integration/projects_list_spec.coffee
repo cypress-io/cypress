@@ -66,12 +66,13 @@ describe "Projects List", ->
       describe "when project statuses have loaded", ->
         beforeEach ->
           @getProjectStatuses.resolve(@projectStatuses)
-          cy.get(".projects-list li") ## ensures projects have loaded
 
-        it "updates local storage with project statuses", ->
+          ## ensures projects have loaded
+          cy.get(".projects-list li").should("have.length", 5)
+
+        it "updates local storage with projects", ->
           localStorageProjects = @getLocalStorageProjects()
           expect(localStorageProjects.length).to.equal(5)
-          expect(localStorageProjects[0].orgId).to.equal(@projectStatuses[0].orgId)
 
         it "updates project names", ->
           cy.get(".projects-list li .project-name").eq(3).should("have.text", "Client Work")
@@ -134,12 +135,12 @@ describe "Projects List", ->
         @getProjects.resolve(@aCoupleProjects)
 
       it "puts project at start when dropped", ->
-        cy.get(".project-drop").ttrigger("drop", @dropEvent).should =>
+        cy.get(".project-drop").trigger("drop", @dropEvent).should =>
           @assertOrder(["id-bar", "id-a", "id-b"])
 
       it "puts project at start when dropped and it already exists", ->
         @dropEvent.dataTransfer.files[0].path = "/project/b"
-        cy.get(".project-drop").ttrigger("drop", @dropEvent).then =>
+        cy.get(".project-drop").trigger("drop", @dropEvent).then =>
           @assertOrder(["id-b", "id-a"])
 
       it "puts project at start when selected", ->
@@ -172,7 +173,7 @@ describe "Projects List", ->
       it "does not display api errors", ->
         @error.isApiError = true
         @getProjectStatuses.reject(@error)
-        cy.get(".alert").should("not.exist")
+        cy.contains("Failed to get project statuses").should("not.exist")
 
   describe "if user becomes unauthenticated", ->
     beforeEach ->

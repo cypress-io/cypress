@@ -71,35 +71,34 @@ module.exports = {
   isNewProject
 
   integration: (folder, config) ->
-    log "integration folder #{folder}"
+    log("integration folder #{folder}")
 
     ## skip if user has explicitly set integrationFolder
     return Promise.resolve() if not isDefault(config, "integrationFolder")
 
     @verifyScaffolding folder, =>
-      log "copying examples into #{folder}"
+      log("copying examples into #{folder}")
       @_copy(INTEGRATION_EXAMPLE_SPEC, folder, config)
 
   fixture: (folder, config) ->
-    log "fixture folder #{folder}"
+    log("fixture folder #{folder}")
 
     ## skip if user has explicitly set fixturesFolder
-    return Promise.resolve() if not isDefault(config, "fixturesFolder")
+    return Promise.resolve() if not config.fixturesFolder or not isDefault(config, "fixturesFolder")
 
     @verifyScaffolding folder, =>
-      log "fixture needs to copy example.json"
+      log("copying example.json into #{folder}")
       @_copy("example.json", folder, config)
 
   support: (folder, config) ->
-    log "support folder #{folder}, support file #{config.supportFile}"
+    log("support folder #{folder}, support file #{config.supportFile}")
 
     ## skip if user has explicitly set supportFile
-    return Promise.resolve() if not isDefault(config, "supportFile")
+    return Promise.resolve() if not config.supportFile or not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
-      log "copying defaults and commands to #{folder}"
+      log("copying index and commands to #{folder}")
       Promise.join(
-        @_copy("defaults.js", folder, config)
         @_copy("commands.js", folder, config)
         @_copy("index.js", folder, config)
       )
@@ -133,8 +132,10 @@ module.exports = {
     # console.log('-- verify', folder)
     log "verify scaffolding in #{folder}"
     fs.statAsync(folder)
+    .then ->
+      log("folder #{folder} already exists")
     .catch =>
-      log "missing folder #{folder}"
+      log("missing folder #{folder}")
       fn.call(@)
 
   fileTree: (config = {}) ->
@@ -159,7 +160,6 @@ module.exports = {
       log "supporting files from folder #{config.supportFolder}"
       files = files.concat([
         getFilePath(config.supportFolder, "commands.js")
-        getFilePath(config.supportFolder, "defaults.js")
         getFilePath(config.supportFolder, "index.js")
       ])
     log("scaffolded files %j", files)

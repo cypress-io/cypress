@@ -16,12 +16,16 @@ coffee = require("@packages/coffee")
 electron = require("@packages/electron")
 signOsxApp = require("electron-osx-sign")
 debug = require("debug")("cypress:binary")
+R = require("ramda")
+la = require("lazy-ass")
+check = require("check-more-types")
+execa = require("execa")
 
-linkPackages = require('../link-packages')
 meta = require("./meta")
+smoke = require("./smoke")
 packages = require("./util/packages")
-Darwin = require("./darwin")
-Linux = require("./linux")
+xvfb = require("../../cli/lib/exec/xvfb")
+linkPackages = require('../link-packages')
 
 rootPackage = require("@packages/root")
 
@@ -31,18 +35,11 @@ fs = Promise.promisifyAll(fse)
 logger = (msg, platform) ->
   console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
-runDarwinSmokeTest = ->
-  darwin = new Darwin("darwin")
-  darwin.runSmokeTest()
+logBuiltAllPackages = () ->
+  console.log("built all packages")
 
-runLinuxSmokeTest = ->
-  linux = new Linux("linux")
-  linux.runSmokeTest()
-
-smokeTests = {
-  darwin: runDarwinSmokeTest,
-  linux: runLinuxSmokeTest
-}
+logBuiltAllJs = () ->
+  console.log("built all JS")
 
 # can pass options to better control the build
 # for example
@@ -54,8 +51,18 @@ buildCypressApp = (platform, version, options = {}) ->
 
   log = _.partialRight(logger, platform)
 
+  testVersion = (folderNameFn) -> () ->
+    dir = folderNameFn()
+    la(check.unemptyString(dir), "missing folder for platform", platform)
+    console.log("testing package version in folder", dir)
+    execa("node", ["index.js", "--version"], {
+      cwd: dir
+    }).then (result) ->
+      # TODO validate version string
+      console.log(result.stdout)
+
   canBuildInDocker = ->
-    platform == "linux" && os.platform() == "darwin"
+    platform is "linux" and os.platform() is "darwin"
 
   badPlatformMismatch = ->
     console.error("⛔️  cannot build #{platform} from #{os.platform()}")
@@ -65,11 +72,12 @@ buildCypressApp = (platform, version, options = {}) ->
 
   checkPlatform = ->
     log("#checkPlatform")
-    if platform == os.platform() then return
+    if platform is os.platform()
+      return
 
     console.log("trying to build #{platform} from #{os.platform()}")
-    if platform == "linux" && os.platform() == "darwin"
-      console.log("try running ./scripts/build-linux-binary.sh")
+    if platform is "linux" and os.platform() is "darwin"
+      console.log("npm run binary-build-linux")
     Promise.reject(new Error("Build platform mismatch"))
 
   cleanupPlatform = ->
@@ -79,7 +87,9 @@ buildCypressApp = (platform, version, options = {}) ->
       log("skipClean")
       return
 
-    cleanup = =>
+    cleanup = ->
+      dir = distDir()
+      la(check.unemptyString(dir), "empty dist dir", dir, "for platform", platform)
       fs.removeAsync(distDir())
 
     cleanup()
@@ -89,7 +99,10 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#buildPackages")
 
     packages.runAllBuild()
+    # Promise.resolve()
+    .then(R.tap(logBuiltAllPackages))
     .then(packages.runAllBuildJs)
+    .then(R.tap(logBuiltAllJs))
 
   copyPackages = ->
     log("#copyPackages")
@@ -188,7 +201,7 @@ buildCypressApp = (platform, version, options = {}) ->
       dir
       dist
       platform
-      "app-version": version
+      appVersion: version
     })
 
   removeDevElectronApp = ->
@@ -201,17 +214,29 @@ buildCypressApp = (platform, version, options = {}) ->
     # hint: you can see all symlinks in the build folder
     # using "find build/darwin/Cypress.app/ -type l -ls"
     electronDistFolder = meta.buildAppDir(platform, "packages", "electron", "dist")
+    la(check.unemptyString(electronDistFolder),
+      "empty electron dist folder for platform", platform)
+
     console.log("Removing unnecessary folder #{electronDistFolder}")
     fs.removeAsync(electronDistFolder).catch(_.noop)
 
-  runSmokeTest = ->
-    log("#runSmokeTest")
-    # console.log("skipping smoke test for now")
-    smokeTest = smokeTests[platform]
-    smokeTest()
+  runSmokeTests = ->
+    log("#runSmokeTests")
+
+    run = ->
+      smoke.test(meta.buildAppExecutable(platform))
+
+    if xvfb.isNeeded()
+      xvfb.start()
+      .then(run)
+      .finally(xvfb.stop)
+    else
+      run()
 
   codeSign = ->
-    if (platform != "darwin") then return Promise.resolve()
+    if platform isnt "darwin"
+      # do we need to code sign on Windows?
+      return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
     log("#codeSign", appFolder)
@@ -247,10 +272,12 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(convertCoffeeToJs)
   .then(removeTypeScript)
   .then(cleanJs)
-  .then(elBuilder)
+  .then(testVersion(distDir))
+  .then(elBuilder) # should we delete everything in the buildDir()?
   .then(removeDevElectronApp)
   .then(copyPackageProxies(buildAppDir))
-  .then(runSmokeTest)
+  .then(testVersion(buildAppDir))
+  .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
   .return({

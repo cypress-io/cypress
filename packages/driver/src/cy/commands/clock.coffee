@@ -1,39 +1,39 @@
 _ = require("lodash")
-$Clock = require("../../cypress/clock")
-$Cy = require("../../cypress/cy")
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
 
+$Clock = require("../../cypress/clock")
+$utils = require("../../cypress/utils")
+
+## create a global clock
 clock = null
 
-## for testing purposes
-$Cy.extend({
-  _getClock: ->
-    clock
-  _setClock: (c) ->
-    clock = c
-})
+module.exports = (Commands, Cypress, cy, state, config) ->
+  reset = ->
+    if clock
+      clock.restore({ log: false })
 
-module.exports = (Cypress, Commands) ->
-
-  Cypress.on "test:before:run", ->
-    ## remove clock before each test run, so a new one is created
-    ## when user calls cy.clock()
     clock = null
 
-  Cypress.on "before:window:load", (contentWindow) ->
+  ## reset before a run
+  reset()
+
+  ## remove clock before each test run, so a new one is created
+  ## when user calls cy.clock()
+  ##
+  ## this MUST be prepended else if we are stubbing or spying on
+  ## global timers they will be reset in agents before this runs
+  ## its reset function
+  Cypress.prependListener("test:before:run", reset)
+
+  Cypress.on "window:before:load", (contentWindow) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
     if clock
-      clock._bind(contentWindow)
+      clock.bind(contentWindow)
 
-  Cypress.on "restore", ->
-    ## restore the clock if we've created one
-    if clock
-      clock.restore(false)
-
-  Commands.addUtility({
+  Commands.addAll({ type: "utility" }, {
     clock: (subject, now, methods, options = {}) ->
+      ctx = @
+
       if clock
         return clock
 
@@ -46,10 +46,10 @@ module.exports = (Cypress, Commands) ->
         methods = undefined
 
       if now? and !_.isNumber(now)
-        utils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: JSON.stringify(now)}})
+        $utils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: JSON.stringify(now)}})
 
       if methods? and not (_.isArray(methods) and _.every(methods, _.isString))
-        utils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: JSON.stringify(methods)}})
+        $utils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: JSON.stringify(methods)}})
 
       _.defaults options, {
         log: true
@@ -59,11 +59,11 @@ module.exports = (Cypress, Commands) ->
         if not options.log
           return
 
-        details = clock._details()
+        details = clock.details()
         logNow = details.now
         logMethods = details.methods.slice()
 
-        $Log.command({
+        Cypress.log({
           name: name
           message: message ? ""
           type: "parent"
@@ -76,38 +76,54 @@ module.exports = (Cypress, Commands) ->
             }, consoleProps)
         })
 
-      clock = $Clock.create(@privateState("window"), now, methods)
+      clock = $Clock.create(state("window"), now, methods)
 
-      clock.tick = _.wrap clock.tick, (tick, ms) ->
+      tick = clock.tick
+
+      clock.tick = (ms) ->
         if ms? and not _.isNumber(ms)
-          utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
+          $utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
 
         theLog = log("tick", "#{ms}ms", false, {
-          "Now": clock._details().now + ms
+          "Now": clock.details().now + ms
           "Ticked": "#{ms} milliseconds"
         })
+
         if theLog
           theLog.snapshot("before", {next: "after"})
-        ret = tick.call(clock, ms)
+
+        ret = tick.apply(@, arguments)
+
         if theLog
           theLog.snapshot().end()
+
         return ret
 
-      clock.restore = _.wrap clock.restore, (restore, shouldLog = true) =>
-        ret = restore.call(clock)
-        if shouldLog
+      restore = clock.restore
+
+      clock.restore = (options = {}) ->
+        ret = restore.apply(@, arguments)
+
+        if options.log isnt false
           log("restore")
-        @assign("clock", null)
+
+        ctx.clock = null
+
         clock = null
+
+        state("clock", clock)
+
         return ret
 
       log("clock")
 
-      @assign("clock", clock)
+      state("clock", clock)
+
+      return ctx.clock = clock
 
     tick: (subject, ms) ->
       if not clock
-        utils.throwErrByPath("tick.no_clock")
+        $utils.throwErrByPath("tick.no_clock")
 
       clock.tick(ms)
 

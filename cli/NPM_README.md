@@ -1,48 +1,23 @@
-# cypress
+# Cypress
 
-> Testing the way it should be
+## What is this?
+
+Cypress comes packaged as an `npm` module, which is all you need to get started.
+
+After installing you'll be able to:
+
+- Open Cypress from the CLI
+- Run Cypress from the CLI
+- `require` Cypress as a module
 
 ## Install
 
-Requires Node version >= 0.12
+Requires Node version >= 4.0.0
 
 ```sh
 npm install --save-dev cypress
 ```
 
-## Open Cypress desktop GUI application
+## Documentation
 
-To open Cypress app, there are two alternatives from the
-command line
-
-```sh
-./node_modules/.bin/cypress open
-$(npm bin)/cypress open
-```
-
-or you can add new a script to your `package.json`
-
-```json
-{
-  "scripts": {
-    "open": "cypress open"
-  }
-}
-```
-
-and then call `npm run open`
-
-## Run tests
-
-To run e2e tests in headless mode execute `$(npm bin)/cypress run`
-
-## Load Cypress as an NPM module
-
-```js
-const cy = require('cypress')
-// opens desktop GUI application and returns a promise
-cy.open(options)
-// runs e2e tests in headless browser
-// and returns a promise with test results
-cy.run(options).then(results, console.error)
-```
+Please [visit our documentation](https://on.cypress.io/cli) for a full list of commands and examples.

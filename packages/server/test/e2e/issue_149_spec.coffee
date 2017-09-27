@@ -10,8 +10,9 @@ describe "e2e issue 149", ->
   ## https://github.com/cypress-io/cypress/issues/149
 
   it "failing", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "issue_149_spec.coffee"
+      snapshot: true
       expectedExitCode: 1
     })
     .then ->

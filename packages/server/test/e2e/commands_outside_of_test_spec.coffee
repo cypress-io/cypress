@@ -12,7 +12,8 @@ describe "e2e commands outside of test", ->
     ## perhaps we should dynamically generate a test to
     ## associate it for stdout? how else would a user know
     ## whats going on?
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "commands_outside_of_test_spec.coffee"
-      expectedExitCode: 0
+      snapshot: true
+      expectedExitCode: 1
     })

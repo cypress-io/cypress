@@ -85,7 +85,7 @@ class UpdateBanner extends Component {
             <span>Run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
           </li>
           <li>
-            <span>Run <code>cypress open</code> to open the new version of the app.</span>
+            <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>
           </li>
         </ol>
       )
@@ -114,16 +114,12 @@ class UpdateBanner extends Component {
 
   _openDownload = (e) => {
     e.preventDefault()
-    ipc.externalOpen(`https://download.cypress.io/desktop${this._os()}`)
+    ipc.externalOpen('https://download.cypress.io/desktop')
   }
 
-  _os () {
-    switch (appStore.os) {
-      case 'darwin': return '?os=mac'
-      case 'linux':  return '?os=linux64'
-      case 'win32':  return '?os=win'
-      default:       return ''
-    }
+  _openCyOpenDoc = (e) => {
+    e.preventDefault()
+    ipc.externalOpen('https://on.cypress.io/how-to-open-cypress')
   }
 }
 

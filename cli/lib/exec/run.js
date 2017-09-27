@@ -1,10 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:cli')
-const downloadUtils = require('../download/utils')
 const spawn = require('./spawn')
-const path = require('path')
-const packagePath = path.join(__dirname, '..', '..', 'package.json')
-const pkg = require(packagePath)
+const verify = require('../tasks/verify')
 
 const processRunOptions = (options = {}) => {
   const args = ['--run-project', options.project]
@@ -64,11 +61,12 @@ const processRunOptions = (options = {}) => {
     args.push('--output-path', options.outputPath)
   }
 
-  //// send in the CLI version
-  args.push('--cli-version', pkg.version)
-
   if (options.browser) {
     args.push('--browser', options.browser)
+  }
+
+  if (options.headed) {
+    args.push('--headed', options.headed)
   }
 
   return args
@@ -92,6 +90,7 @@ module.exports = {
       project: process.cwd(),
     })
 
-    return downloadUtils.verify().then(run(options))
+    return verify.start()
+    .then(run(options))
   },
 }

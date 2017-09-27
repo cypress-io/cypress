@@ -28,6 +28,6 @@ module.exports = {
     stats = _.pick(stats, KEYS)
 
     _.each stats, (val, key) =>
-      console.log(@format(color ,val, key))
+      console.log(@format(color, val, key))
 
 }

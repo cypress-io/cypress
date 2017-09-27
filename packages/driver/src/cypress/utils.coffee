@@ -1,13 +1,14 @@
 $ = require("jquery")
 _ = require("lodash")
+moment = require("moment")
 
-errorMessages = require("./error_messages")
+$Location = require("./location")
+$dom = require("../dom")
+$errorMessages = require("./error_messages")
 
 tagOpen     = /\[([a-z\s='"-]+)\]/g
 tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
-
-CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
 defaultOptions = {
   delay: 10
@@ -15,8 +16,8 @@ defaultOptions = {
   timeout: null
   interval: null
   multiple: false
-  waitOnAnimations: null
-  animationDistanceThreshold: null
+  waitForAnimations: true
+  animationDistanceThreshold: 5
 }
 
 module.exports = {
@@ -28,6 +29,42 @@ module.exports = {
 
   logInfo: (msgs...) ->
     console.info(msgs...)
+
+  appendErrMsg: (err, message) ->
+    ## preserve stack
+    ## this is the critical part
+    ## because the browser has a cached
+    ## dynamic stack getter that will
+    ## not be evaluated letare
+    stack = err.stack
+
+    ## preserve message
+    msg = err.message
+
+    ## slice out message
+    stack = stack.split(msg)
+
+    ## append message
+    msg += "\n\n" + message
+
+    ## set message
+    err.message = msg
+
+    ## reset stack
+    err.stack = stack.join(msg)
+
+    return err
+
+  cloneErr: (obj) ->
+    err2 = new Error(obj.message)
+    err2.name = obj.name
+    err2.stack = obj.stack
+
+    for own prop, val of obj
+      if not err2[prop]
+        err2[prop] = val
+
+    return err2
 
   throwErr: (err, options = {}) ->
     if _.isString(err)
@@ -67,7 +104,7 @@ module.exports = {
     err
 
   errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath errorMessages, errPath
+    if not errMessage = @getObjValueByPath $errorMessages, errPath
       throw new Error "Error message path '#{errPath}' does not exist"
 
     if _.isFunction(errMessage)
@@ -76,11 +113,6 @@ module.exports = {
       _.reduce args, (message, argValue, argKey) ->
         message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
       , errMessage
-
-  ## TODO: replace this w/ lodash _.isSymbol
-  ## which is a more extensive check for symbol
-  _isSymbol: (value) ->
-    typeof value is 'symbol'
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
@@ -109,20 +141,20 @@ module.exports = {
 
     if _.isEmpty(obj) then undefined else obj
 
-  _stringifyObj: (obj) ->
+  stringifyActualObj: (obj) ->
     obj = @normalizeObjWithLength(obj)
 
     str = _.reduce obj, (memo, value, key) =>
-      memo.push key.toLowerCase() + ": " + @_stringify(value)
+      memo.push "#{key}".toLowerCase() + ": " + @stringifyActual(value)
       memo
     , []
 
     "{" + str.join(", ") + "}"
 
-  _stringify: (value) ->
+  stringifyActual: (value) ->
     switch
-      when @hasElement(value)
-        @stringifyElement(value, "short")
+      when $dom.isDom(value)
+        $dom.stringify(value, "short")
 
       when _.isFunction(value)
         "function(){}"
@@ -132,7 +164,7 @@ module.exports = {
         if len > 3
           "Array[#{len}]"
         else
-          "[" + _.map(value, _.bind(@_stringify, @)).join(", ") + "]"
+          "[" + _.map(value, _.bind(@stringifyActual, @)).join(", ") + "]"
 
       when _.isRegExp(value)
         value.toString()
@@ -142,9 +174,9 @@ module.exports = {
         if len > 2
           "Object{#{len}}"
         else
-          @_stringifyObj(value)
+          @stringifyActualObj(value)
 
-      when @_isSymbol(value)
+      when _.isSymbol(value)
         "Symbol"
 
       when _.isUndefined(value)
@@ -161,7 +193,7 @@ module.exports = {
 
     _
     .chain(values)
-    .map(_.bind(@_stringify, @))
+    .map(_.bind(@stringifyActual, @))
     .without(undefined)
     .join(", ")
     .value()
@@ -175,86 +207,7 @@ module.exports = {
       when _.isUndefined(arg)
         "undefined"
       else
-        @_stringify(arg)
-
-  hasDom: (obj) ->
-    @hasElement(obj) or @hasWindow(obj) or @hasDocument(obj)
-
-  hasWindow: (obj) ->
-    try
-      !!(obj and $.isWindow(obj[0])) or $.isWindow(obj)
-    catch
-      false
-
-  hasElement: (obj) ->
-    try
-      !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
-    catch
-      false
-
-  hasDocument: (obj) ->
-    try
-      !!((obj and obj.nodeType is 9) or (obj and obj[0] and obj[0].nodeType is 9))
-    catch
-      false
-
-  isDescendent: ($el1, $el2) ->
-    return false if not $el2
-
-    !!(($el1.get(0) is $el2.get(0)) or $el1.has($el2).length)
-
-  getDomElements: ($el) ->
-    return if not $el?.length
-
-    if $el.length is 1
-      $el.get(0)
-    else
-      _.reduce $el, (memo, el) ->
-        memo.push(el)
-        memo
-      , []
-
-  ## short form css-inlines the element
-  ## long form returns the outerHTML
-  stringifyElement: (el, form = "long") ->
-    ## if we are formatting the window object
-    if @hasWindow(el)
-      return "<window>"
-
-    ## if we are formatting the document object
-    if @hasDocument(el)
-      return "<document>"
-
-    $el = if _.isElement(el) then $(el) else el
-
-    switch form
-      when "long"
-        text     = _.chain($el.text()).clean().truncate({length: 10 }).value()
-        children = $el.children().length
-        str      = $el.clone().empty().prop("outerHTML")
-        switch
-          when children then str.replace("></", ">...</")
-          when text     then str.replace("></", ">#{text}</")
-          else
-            str
-      when "short"
-        str = $el.prop("tagName").toLowerCase()
-        if id = $el.prop("id")
-          str += "#" + id
-
-        ## using attr here instead of class because
-        ## svg's return an SVGAnimatedString object
-        ## instead of a normal string when calling
-        ## the property 'class'
-        if klass = $el.attr("class")
-          str += "." + klass.split(/\s+/).join(".")
-
-        ## if we have more than one element,
-        ## format it so that the user can see there's more
-        if $el.length > 1
-          "[ <#{str}>, #{$el.length - 1} more... ]"
-        else
-          "<#{str}>"
+        @stringifyActual(arg)
 
   plural: (obj, plural, singular) ->
     obj = if _.isNumber(obj) then obj else obj.length
@@ -276,23 +229,11 @@ module.exports = {
     ## or double quotes
     ("" + text).replace(quotesRe, "\\$1")
 
-  getCypressNamespace: (obj) ->
-    obj and obj[CYPRESS_OBJECT_NAMESPACE]
+  normalizeNumber: (num) ->
+    parsed = Number(num)
 
-  ## backs up an original object to another
-  ## by going through the cypress object namespace
-  setCypressNamespace: (obj, original) ->
-    obj[CYPRESS_OBJECT_NAMESPACE] = original
-
-  ## clientX and clientY by their definition
-  ## are calculated from viewport edge
-  ## and should subtract the pageX or pageY offset
-  ## see img: https://camo.githubusercontent.com/9963a83071b4b14c8dee6699335630f29d668d1f/68747470733a2f2f692d6d73646e2e7365632e732d6d7366742e636f6d2f64796e696d672f49433536313937302e706e67
-  getClientX: (coords, win) ->
-    coords.x - win.pageXOffset
-
-  getClientY: (coords, win) ->
-    coords.y - win.pageYOffset
+    ## return num if this isNaN else return parsed
+    if _.isNaN(parsed) then num else parsed
 
   getObjValueByPath: (obj, keyPath) ->
     if not _.isObject obj
@@ -306,4 +247,37 @@ module.exports = {
       break unless val
     val
 
+  isCommandFromThenable: (cmd) ->
+    args = cmd.get("args")
+
+    cmd.get("name") is "then" and
+      args.length is 3 and
+        _.every(args, _.isFunction)
+
+  addTwentyYears: ->
+    moment().add(20, "years").unix()
+
+  locReload: (forceReload, win) ->
+    win.location.reload(forceReload)
+
+  locHref: (url, win) ->
+    win.location.href = url
+
+  locReplace: (win, url) ->
+    win.location.replace(url)
+
+  locToString: (win) ->
+    win.location.toString()
+
+  locExisting: ->
+    $Location.create(window.location.href)
+
+  iframeSrc: ($autIframe, url) ->
+    $autIframe.prop("src", url)
+
+  getDistanceBetween: (point1, point2) ->
+    deltaX = point1.x - point2.x
+    deltaY = point1.y - point2.y
+
+    Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 }

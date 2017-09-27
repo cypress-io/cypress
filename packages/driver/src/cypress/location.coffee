@@ -9,8 +9,6 @@
 _ = require("lodash")
 UrlParse = require("url-parse")
 
-$Cypress = require("../cypress")
-
 reHttp = /^https?:\/\//
 reWww = /^www/
 
@@ -104,26 +102,6 @@ class $Location
       superDomain: @getSuperDomain()
       toString: _.bind(@getToString, @)
     }
-
-  ## override pathname + query here
-  @override = (Cypress, win, navigated) ->
-
-    # getHistory = =>
-    #   new Promise (resolve) ->
-    #     Cypress.trigger "history:entries", resolve
-
-    ## history does not fire events until a click or back has happened
-    ## so we have to know when they do manually
-    _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
-      ## dont use lodash wrap here because its potentially very
-      ## confusing for users and this manually override is faster anyway
-      return if not orig = win.history?[attr]
-
-      win.history[attr] = ->
-        orig.apply(@, arguments)
-
-        ## let our function know we've navigated
-        navigated(attr, arguments)
 
   @isFullyQualifiedUrl = (url) ->
     reHttp.test(url)

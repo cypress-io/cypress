@@ -12,7 +12,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "test": "node ./scripts/test.js",
-    "lint": "$(bin-up eslint) --fix srcipts/*.js src/*.js* src/**/*.js*"
+    "lint": "$(bin-up eslint) --fix scripts/*.js src/*.js* src/**/*.js*"
   },
   "files": [
     "dist",
@@ -22,14 +22,14 @@
     "@cypress/react-tooltip": "^0.2.5",
     "@cypress/releaser": "0.1.12",
     "bin-up": "^1.0.0",
-    "bluebird": "^3.4.0",
+    "bluebird": "3.5.0",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.7.1",
     "classnames": "^2.2.5",
     "enzyme": "^2.8.2",
     "font-awesome": "^4.6.3",
     "jsdom": "^9.4.1",
-    "lodash": "^4.15.0",
+    "lodash": "4.17.4",
     "mobx": "^3.1.15",
     "mobx-react": "^4.2.1",
     "prop-types": "^15.5.9",
@@ -37,9 +37,9 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
-    "rebuild-node-sass": "^1.0.1",
+    "rebuild-node-sass": "^1.1.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "zunder": "^5.0.1"
+    "zunder": "^5.1.0"
   }
 }

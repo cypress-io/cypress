@@ -1,9 +1,10 @@
-log = require('../log')
-cwd = require('../cwd')
-fs = require('fs')
+log       = require('../log')
+cwd       = require('../cwd')
+fs        = require('fs-extra')
+md5       = require('md5')
+sanitize  = require("sanitize-filename")
+Promise   = require("bluebird")
 { basename, join, isAbsolute } = require('path')
-md5 = require('md5')
-sanitize = require("sanitize-filename")
 
 toHashName = (projectPath) ->
   throw new Error("Missing project path") unless projectPath
@@ -12,26 +13,35 @@ toHashName = (projectPath) ->
   hash = md5(projectPath)
   "#{name}-#{hash}"
 
+# async promise-returning method
 formStatePath = (projectPath) ->
-  log('making saved state from %s', cwd())
-  if projectPath
-    log('for project path %s', projectPath)
-  else
-    log('missing project path, looking for project here')
-    cypressJsonPath = cwd('cypress.json')
-    if fs.existsSync(cypressJsonPath)
-      log('found cypress file %s', cypressJsonPath)
-      projectPath = cwd()
+  Promise.resolve()
+  .then ->
+    log('making saved state from %s', cwd())
+    if projectPath
+      log('for project path %s', projectPath)
+      return projectPath
+    else
+      log('missing project path, looking for project here')
 
-  fileName = "state.json"
-  if projectPath
-    log("state path for project #{projectPath}")
-    statePath = join(toHashName(projectPath), fileName)
-  else
-    log("state path for global mode")
-    statePath = join("__global__", fileName)
+      cypressJsonPath = cwd('cypress.json')
+      fs.pathExists(cypressJsonPath)
+      .then (found) ->
+        if found
+          log('found cypress file %s', cypressJsonPath)
+          projectPath = cwd()
+        return projectPath
 
-  return statePath
+  .then (projectPath) ->
+    fileName = "state.json"
+    if projectPath
+      log("state path for project #{projectPath}")
+      statePath = join(toHashName(projectPath), fileName)
+    else
+      log("state path for global mode")
+      statePath = join("__global__", fileName)
+
+    return statePath
 
 module.exports = {
   toHashName: toHashName,

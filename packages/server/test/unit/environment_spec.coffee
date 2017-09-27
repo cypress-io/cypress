@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+Promise = require("bluebird")
 pkg = require("@packages/root")
 
 describe "lib/environment", ->
@@ -7,6 +8,8 @@ describe "lib/environment", ->
     @env = process.env["CYPRESS_ENV"]
 
   beforeEach ->
+    @sandbox.stub(Promise, "config")
+
     @expectedEnv = (env) ->
       require("#{root}lib/environment")
       expect(process.env["CYPRESS_ENV"]).to.eq(env)

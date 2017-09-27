@@ -2,6 +2,11 @@ cp      = require("child_process")
 Promise = require("bluebird")
 os      = require("os")
 execa   = require("execa")
+path    = require("path")
+la      = require("lazy-ass")
+fs      = require("fs")
+R       = require("ramda")
+filesize = require("filesize")
 
 # resolves with zipped filename
 macZip = (src, dest) ->
@@ -27,23 +32,44 @@ macZip = (src, dest) ->
       console.log("✅ ditto zip finished")
       resolve(dest)
 
+megaBytes = (bytes) ->
+  1024 * 1024 * bytes
+
+checkZipSize = (zipPath) ->
+  stats = fs.statSync(zipPath)
+  zipSize = filesize(stats.size, {round: 0})
+  console.log("zip file size #{zipSize}")
+  MAX_ZIP_FILE_SIZE = megaBytes(120)
+  if stats.size > MAX_ZIP_FILE_SIZE
+    throw new Error("Zip file is too large: #{zipSize}")
+
 # resolves with zipped filename
 linuxZip = (src, dest) ->
-  cmd = "tar -zcvf #{dest} #{src}"
+  # in Linux switch to the folder containing source folder
+  la(path.isAbsolute(src), "source path should be absolute", src)
+  la(path.isAbsolute(dest), "destination path should be absolute", dest)
+  parentFolder = path.dirname(src)
+  relativeSource = path.basename(src)
+
+  cmd = "cd #{parentFolder} && zip -r9 #{dest} #{relativeSource}"
   console.log("linux zip: #{cmd}")
-  execa.shell(cmd)
-  .then((result) ->
+
+  onZipFinished = () ->
     console.log("✅ zip finished")
-    dest
-  )
-  .catch((err) ->
+
+  onError = (err) ->
     console.error("⛔️ could not zip #{src} into #{dest}")
     console.error(err.message)
     throw err
-  )
+
+  execa.shell(cmd)
+  .then onZipFinished
+  .then R.always(dest)
+  .then R.tap(checkZipSize)
+  .catch onError
 
 zippers = {
-  linux: macZip
+  linux: linuxZip
   darwin: macZip
 }
 
@@ -56,4 +82,6 @@ module.exports = {
     if !zipper
       throw new Error("Missing zip function for platform #{platform}")
     zipper(src, dest)
+
+  checkZipSize
 }

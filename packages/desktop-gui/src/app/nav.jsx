@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import appStore from '../lib/app-store'
 import authApi from '../auth/auth-api'
@@ -19,23 +20,31 @@ export default class Nav extends Component {
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li className='left-nav'>
-              { this._leftNav() }
+              {this._leftNav()}
             </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
             <li>
-              <a onClick={this._openDocs} href='#'>
-                <i className='fa fa-graduation-cap'></i>{' '}
-                Docs
-              </a>
+              <Tooltip
+                title='Support'
+                placement='bottom'
+                className='cy-tooltip'>
+                <a onClick={this._openSupport} href='#'>
+                  <i className='fa fa-question-circle'></i>{' '}
+                </a>
+              </Tooltip>
             </li>
             <li>
-              <a onClick={this._openChat} href='#'>
-                <i className='fa fa-comments'></i>{' '}
-                Chat
-              </a>
+              <Tooltip
+                title='Docs'
+                placement='bottom'
+                className='cy-tooltip'>
+                <a onClick={this._openDocs} href='#'>
+                  <i className='fa fa-graduation-cap'></i>{' '}
+                </a>
+              </Tooltip>
             </li>
-            { this._userStateButton() }
+            {this._userStateButton()}
           </ul>
         </div>
       </nav>
@@ -110,7 +119,7 @@ export default class Nav extends Component {
             width='13'
             src={`${gravatarUrl(authStore.user.email)}`}
           />
-          {' '}{ authStore.user.displayName }
+          {' '}{authStore.user.displayName}
         </span>
       )
     } else {
@@ -138,8 +147,8 @@ export default class Nav extends Component {
     ipc.externalOpen('https://on.cypress.io')
   }
 
-  _openChat (e) {
+  _openSupport (e) {
     e.preventDefault()
-    ipc.externalOpen('https://on.cypress.io/chat')
+    ipc.externalOpen('https://on.cypress.io/support')
   }
 }

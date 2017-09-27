@@ -1,13 +1,11 @@
 _          = require("lodash")
 os         = require("os")
-getos      = require("getos")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 Routes     = require("./util/routes")
-
-getos = Promise.promisify(getos)
+system     = require("./util/system")
 
 rp = request.defaults (params = {}, callback) ->
   headers = params.headers ?= {}
@@ -31,20 +29,10 @@ formatResponseBody = (err) ->
 
   throw err
 
+
 tagError = (err) ->
   err.isApiError = true
   throw err
-
-osVersion = (platform) ->
-  Promise.try ->
-    if platform is "linux"
-      getos()
-      .then (obj) ->
-        [obj.dist, obj.release].join(" - ")
-      .catch (err) ->
-        os.release()
-    else
-      os.release()
 
 module.exports = {
   ping: ->
@@ -98,6 +86,20 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
+    body = _.pick(options, [
+      "projectId"
+      "recordKey"
+      "commitSha"
+      "commitBranch"
+      "commitAuthorName"
+      "commitAuthorEmail"
+      "commitMessage"
+      "remoteOrigin"
+      "ciParams"
+      "ciProvider"
+      "ciBuildNumber",
+      "groupId"
+    ])
     rp.post({
       url: Routes.runs()
       json: true
@@ -105,19 +107,7 @@ module.exports = {
       headers: {
         "x-route-version": "2"
       }
-      body: _.pick(options, [
-        "projectId"
-        "recordKey"
-        "commitSha"
-        "commitBranch"
-        "commitAuthorName"
-        "commitAuthorEmail"
-        "commitMessage"
-        "remoteOrigin"
-        "ciParams"
-        "ciProvider"
-        "ciBuildNumber"
-      ])
+      body: body
     })
     .promise()
     .get("buildId")
@@ -125,10 +115,8 @@ module.exports = {
     .catch(tagError)
 
   createInstance: (options = {}) ->
-    platform = os.platform()
-
-    osVersion(platform)
-    .then (v) ->
+    system.info()
+    .then (systemInfo) ->
       rp.post({
         url: Routes.instances(options.buildId)
         json: true
@@ -136,18 +124,10 @@ module.exports = {
         headers: {
           "x-route-version": "3"
         }
-        body: {
+        body: _.extend({
           spec:           options.spec
           browserName:    "Electron"
-          browserVersion: process.versions.chrome
-          osName:         platform
-          osVersion:      v
-          osCpus:         os.cpus()
-          osMemory:       {
-            free:         os.freemem()
-            total:        os.totalmem()
-          }
-        }
+        }, systemInfo)
       })
       .promise()
       .get("instanceId")

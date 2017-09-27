@@ -3,29 +3,27 @@ const cp = require('child_process')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 
-const downloadUtils = require('../download/utils')
+const info = require('../tasks/info')
 const xvfb = require('./xvfb')
-const { throwDetailedError, errors } = require('../errors')
+const { throwFormErrorText, errors } = require('../errors')
 
 module.exports = {
   start (args, options = {}) {
     args = [].concat(args)
 
     _.defaults(options, {
-      verify: false,
       detached: false,
       stdio: [process.stdin, process.stdout, 'ignore'],
     })
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        const cypressPath = downloadUtils.getPathToExecutable()
+        const cypressPath = info.getPathToExecutable()
         debug('spawning Cypress %s', cypressPath)
-        debug('args %j', args)
-        debug('some of the options %j', _.pick(options, ['verify', 'detached']))
+        debug('spawn args %j', args)
 
         const child = cp.spawn(cypressPath, args, options)
-        child.on('exit', resolve)
+        child.on('close', resolve)
         child.on('error', reject)
 
         if (options.detached) {
@@ -35,9 +33,11 @@ module.exports = {
     }
 
     const userFriendlySpawn = () =>
-      spawn().catch(throwDetailedError(errors.unexpected))
+      spawn().catch(throwFormErrorText(errors.unexpected))
 
     const needsXvfb = xvfb.isNeeded()
+    debug('needs XVFB?', needsXvfb)
+
     if (needsXvfb) {
       return xvfb.start()
       .then(userFriendlySpawn)

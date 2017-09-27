@@ -26,15 +26,15 @@ kill = (unbind) ->
 cleanup = ->
   instance = null
 
+getBrowser = (name) ->
+  switch name
+    ## normalize all the chrome* browsers
+    when "chrome", "chromium", "canary"
+      require("./chrome")
+    when "electron"
+      require("./electron")
+
 process.once "exit", kill
-
-browsers = {
-  chrome:   require("./chrome")
-  electron: require("./electron")
-}
-
-## normalize all the chrome* browsers
-browsers.chromium = browsers.canary = browsers.chrome
 
 module.exports = {
   get: utils.getBrowsers
@@ -46,14 +46,15 @@ module.exports = {
   open: (name, options = {}, automation) ->
     kill(true)
     .then ->
-      _.defaults options,
+      _.defaults(options, {
         browserArgs: []
         onBrowserOpen: ->
         onBrowserClose: ->
+      })
 
-      if not browser = browsers[name]
-        keys = _.keys(browsers).join(", ")
-        errors.throw("BROWSER_NOT_FOUND", name, keys)
+      if not browser = getBrowser(name)
+        names = _.map(options.browsers, "name").join(", ")
+        return errors.throw("BROWSER_NOT_FOUND", name, names)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)

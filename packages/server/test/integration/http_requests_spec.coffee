@@ -65,59 +65,59 @@ describe "Routes", ->
       ## get all the config defaults
       ## and allow us to override them
       ## for each test
-      cfg = config.set(obj)
+      config.set(obj)
+      .then  (cfg) =>
+        ## use a jar for each test
+        ## but reset it automatically
+        ## between test
+        jar = rp.jar()
 
-      ## use a jar for each test
-      ## but reset it automatically
-      ## between test
-      jar = rp.jar()
+        ## use a custom request promise
+        ## to automatically backfill these
+        ## options including our proxy
+        @rp = (options = {}) =>
+          if _.isString(options)
+            url = options
+            options = {}
 
-      ## use a custom request promise
-      ## to automatically backfill these
-      ## options including our proxy
-      @rp = (options = {}) =>
-        if _.isString(options)
-          url = options
-          options = {}
+          _.defaults options, {
+            url,
+            proxy: @proxy,
+            jar,
+            simple: false,
+            followRedirect: false,
+            resolveWithFullResponse: true
+          }
+          rp(options)
 
-        _.defaults options, {
-          url,
-          proxy: @proxy,
-          jar,
-          simple: false,
-          followRedirect: false,
-          resolveWithFullResponse: true
-        }
-        rp(options)
+        open = =>
+          Promise.all([
+            ## open our https server
+            httpsServer.start(8443),
 
-      open = =>
-        Promise.all([
-          ## open our https server
-          httpsServer.start(8443),
+            ## and open our cypress server
+            @server = Server(Watchers())
 
-          ## and open our cypress server
-          @server = Server(Watchers())
+            @server.open(cfg)
+            .spread (port) =>
+              if initialUrl
+                @server._onDomainSet(initialUrl)
 
-          @server.open(cfg)
-          .then (port) =>
-            if initialUrl
-              @server._onDomainSet(initialUrl)
+              @srv = @server.getHttpServer()
 
-            @srv = @server.getHttpServer()
+              @session = new (Session({app: @srv}))
 
-            @session = new (Session({app: @srv}))
+              @proxy = "http://localhost:" + port
+          ])
 
-            @proxy = "http://localhost:" + port
-        ])
-
-      if @server
-        Promise.join(
-          httpsServer.stop()
-          @server.close()
-        )
-        .then(open)
-      else
-        open()
+        if @server
+          Promise.join(
+            httpsServer.stop()
+            @server.close()
+          )
+          .then(open)
+        else
+          open()
 
   afterEach ->
     evilDns.clear()
@@ -256,23 +256,17 @@ describe "Routes", ->
     beforeEach ->
       @setup("http://localhost:8443")
 
-    it "can get runner.js", ->
-      @rp("http://localhost:8443/__cypress/runner/runner.js")
+    it "can get cypress_runner.js", ->
+      @rp("http://localhost:8443/__cypress/runner/cypress_runner.js")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/React/)
 
-    it "can get runner.css", ->
-      @rp("http://localhost:8443/__cypress/runner/runner.css")
+    it "can get cypress_runner.css", ->
+      @rp("http://localhost:8443/__cypress/runner/cypress_runner.css")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/spec-iframe/)
-
-    it "can get reporter.css", ->
-      @rp("http://localhost:8443/__cypress/reporter/reporter.css")
-      .then (res) ->
-        expect(res.statusCode).to.eq(200)
-        expect(res.body).to.match(/command-name-assert/)
 
   context "GET /__cypress/files", ->
     beforeEach ->
@@ -458,7 +452,7 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
           expect(res.body).to.include("Cannot find module")
 
     describe "failures", ->
@@ -473,7 +467,7 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
           expect(res.body).to.include("ParseError")
 
     describe "no-server", ->
@@ -1944,7 +1938,7 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
-            expect(res.body).to.include("Cypress.onBeforeLoad")
+            expect(res.body).to.include("Cypress.action(")
 
       it "injects performantly on a huge amount of elements over http", ->
         Fixtures.scaffold()
@@ -2039,7 +2033,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include("Cypress.onBeforeLoad")
+            expect(res.body).to.include("Cypress.action(")
 
       it "injects even on 5xx responses", ->
         @setup("https://www.google.com")
@@ -2332,7 +2326,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.match(/index.html content/)
-            expect(res.body).to.match(/Cypress\.onBeforeLoad/)
+            expect(res.body).to.match(/Cypress\.action/)
 
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")

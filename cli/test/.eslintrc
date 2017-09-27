@@ -1,9 +1,8 @@
 {
-  "env": {
-    "mocha": true
-  },
   "globals": {
-    "expect": true,
-    "Promise": true
-  }
+    "lib": true
+  },
+  "extends": [
+    "plugin:cypress-dev/tests"
+  ]
 }

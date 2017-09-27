@@ -17,4 +17,23 @@ describe "taking screenshots", ->
       .visit('http://localhost:3322/color/yellow')
       .wait(1500)
       .then ->
+        ## failure 1
         throw new Error("fail whale")
+
+  context "before hooks", ->
+    before ->
+      ## failure 2
+      throw new Error("before hook failing")
+
+    it "empty test 1", ->
+
+  context "each hooks", ->
+    beforeEach ->
+      ## failure 3
+      throw new Error("before each hook failed")
+
+    afterEach ->
+      ## failure 4
+      throw new Error("after each hook failed")
+
+    it "empty test 2", ->

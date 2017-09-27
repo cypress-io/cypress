@@ -1,10 +1,11 @@
-count        = 0
-onBeforeLoad = Cypress.onBeforeLoad
+count  = 0
+action = Cypress.action
 
-Cypress.onBeforeLoad = ->
-  count += 1
+Cypress.action = (str) ->
+  if str is "app:window:before:load"
+    count += 1
 
-  onBeforeLoad.apply(@, arguments)
+  action.apply(@, arguments)
 
 ensureWeCanTalkToTheIframe = ($iframe) ->
   h1 = $iframe.contents().find("h1")

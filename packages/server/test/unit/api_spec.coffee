@@ -968,16 +968,15 @@ describe "lib/api", ->
       api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
         expect(p.timeout).to.be.calledWith(3000)
 
-    it "times out after exceeding timeout", (done) ->
+    it "times out after exceeding timeout", ->
       ## force our connection to be delayed 5 seconds
       @setup({foo: "bar"}, "auth-token-123", 5000)
 
       ## and set the timeout to only be 50ms
       api.createRaygunException({foo: "bar"}, "auth-token-123", 50)
       .then ->
-        done("errored: it did not catch the timeout error!")
+        throw new Error("errored: it did not catch the timeout error!")
       .catch Promise.TimeoutError, ->
-        done()
 
     it "tags errors", ->
       nock("http://localhost:1234")

@@ -66,30 +66,6 @@ module.exports = {
       ## no id no problem
       return null
 
-  ensureAndOpenProjectByPath: (id, options) ->
-    ## verify we have a project at this path
-    ## and if not prompt the user to add this
-    ## project. once added then open it.
-    {projectPath} = options
-
-    open = =>
-      @openProject(id, options)
-
-    Project.exists(projectPath)
-    .then (bool) =>
-      ## if we have this project then lets
-      ## immediately open it!
-      return open() if bool
-
-      ## else tell the user we're adding this project
-      console.log(
-        "Added this project:"
-        chalk.cyan(projectPath)
-      )
-
-      Project.add(projectPath)
-      .then(open)
-
   openProject: (id, options) ->
     ## now open the project to boot the server
     ## putting our web client app in headless mode
@@ -99,7 +75,7 @@ module.exports = {
       morgan:       false
       socketId:     id
       report:       true
-      isHeadless:   options.isHeadless ? true
+      isTextTerminal:   options.isTextTerminal ? true
     })
     .catch {portInUse: true}, (err) ->
       ## TODO: this needs to move to emit exitEarly
@@ -122,10 +98,9 @@ module.exports = {
 
   getElectronProps: (showGui, project, write) ->
     obj = {
-      width:             1280
-      height:            720
-      show:              showGui
-      devTools:          showGui
+      width:  1280
+      height: 720
+      show:   showGui
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
@@ -227,15 +202,15 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browser, spec, write, gui, project, screenshots } = options
+    { browser, spec, write, headed, project, screenshots } = options
 
-    gui = !!gui
+    headed = !!headed
 
     browser ?= "electron"
 
     browserOpts = switch browser
       when "electron"
-        @getElectronProps(gui, project, write)
+        @getElectronProps(headed, project, write)
       else
         {}
 
@@ -249,11 +224,8 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, gui) ->
+  listenForProjectEnd: (project, headed) ->
     new Promise (resolve) ->
-      ## dont ever end if we're in 'gui' debugging mode
-      return if gui
-
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
         ## early too: (Ended Early: true)
@@ -327,9 +299,9 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, gui, screenshots, started, end, name, cname, videoCompression, outputPath } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, outputPath } = options
 
-    @listenForProjectEnd(project, gui)
+    @listenForProjectEnd(project, headed)
     .then (obj) =>
       if end
         obj.video = name
@@ -400,10 +372,24 @@ module.exports = {
   copy: (videosFolder, screenshotsFolder) ->
     Promise.try ->
       ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
-      if (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
+      shouldCopy = (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
+
+      log("Should copy Circle Artifacts?", shouldCopy)
+
+      if shouldCopy
+        log("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
+
+        ## copy each of the screenshots and videos
+        ## to artifacts using each basename of the folders
         Promise.join(
-          ss.copy(screenshotsFolder, ca)
-          video.copy(videosFolder, ca)
+          ss.copy(
+            screenshotsFolder,
+            path.join(ca, path.basename(screenshotsFolder))
+          ),
+          video.copy(
+            videosFolder,
+            path.join(ca, path.basename(videosFolder))
+          )
         )
 
   allDone: ->
@@ -433,18 +419,22 @@ module.exports = {
 
     ## if we've been told to record and we're not spawning a headed browser
     browserCanBeRecorded = (name) ->
-      name == "electron"
+      name is "electron" and not options.headed
 
     if videoRecording
       if browserCanBeRecorded(browser)
         if !videosFolder
           throw new Error("Missing videoFolder for recording")
+
         id2       = @getId()
         name      = path.join(videosFolder, id2 + ".mp4")
         cname     = path.join(videosFolder, id2 + "-compressed.mp4")
         recording = @createRecording(name)
       else
-        errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
+        if browser is "electron" and options.headed
+          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+        else
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -459,7 +449,7 @@ module.exports = {
       .then (started) =>
         Promise.props({
           stats:      @waitForTestsToFinishRunning({
-            gui:              options.gui
+            headed:           options.headed
             project:          options.project
             videoCompression: options.videoCompression
             outputPath:       options.outputPath
@@ -472,8 +462,8 @@ module.exports = {
 
           connection: @waitForBrowserToConnect({
             id:          options.id
-            gui:         options.gui
             spec:        options.spec
+            headed:      options.headed
             project:     options.project
             webSecurity: options.webSecurity
             write
@@ -486,50 +476,48 @@ module.exports = {
     log("headless mode ready with options %j", Object.keys(options))
     id = @getId()
 
-    ## verify this is an added project
-    ## and then open it, returning our
-    ## project instance
-    @ensureAndOpenProjectByPath(id, options)
-    .call("getProject")
-    .then (project) =>
-      Promise.all([
-        @getProjectId(project, options.projectId)
+    ## let's first make sure this project exists
+    Project.ensureExists(options.projectPath)
+    .then =>
+      ## open this project without
+      ## adding it to the global cache
+      @openProject(id, options)
+      .call("getProject")
+      .then (project) =>
+        Promise.all([
+          @getProjectId(project, options.projectId)
 
-        project.getConfig(),
-      ])
-      .spread (projectId, config) =>
-        ## if we have a project id and a key but record hasnt
-        ## been set
-        if haveProjectIdAndKeyButNoRecordOption(projectId, options)
-          ## log a warning telling the user
-          ## that they either need to provide us
-          ## with a RECORD_KEY or turn off
-          ## record mode
-          errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+          project.getConfig(),
+        ])
+        .spread (projectId, config) =>
+          ## if we have a project id and a key but record hasnt
+          ## been set
+          if haveProjectIdAndKeyButNoRecordOption(projectId, options)
+            ## log a warning telling the user
+            ## that they either need to provide us
+            ## with a RECORD_KEY or turn off
+            ## record mode
+            errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
-        ## old version of the CLI tools
-        if not options.cliVersion
-          errors.warning("OLD_VERSION_OF_CLI")
-
-        @trashAssets(config)
-        .then =>
-          @runTests({
-            id:               id
-            project:          project
-            videosFolder:     config.videosFolder
-            videoRecording:   config.videoRecording
-            videoCompression: config.videoCompression
-            spec:             options.spec
-            gui:              options.showHeadlessGui
-            browser:          options.browser
-            outputPath:       options.outputPath
-          })
-        .get("stats")
-        .finally =>
-          @copy(config.videosFolder, config.screenshotsFolder)
+          @trashAssets(config)
           .then =>
-            if options.allDone isnt false
-              @allDone()
+            @runTests({
+              id:               id
+              project:          project
+              videosFolder:     config.videosFolder
+              videoRecording:   config.videoRecording
+              videoCompression: config.videoCompression
+              spec:             options.spec
+              headed:           options.headed
+              browser:          options.browser
+              outputPath:       options.outputPath
+            })
+          .get("stats")
+          .finally =>
+            @copy(config.videosFolder, config.screenshotsFolder)
+            .then =>
+              if options.allDone isnt false
+                @allDone()
 
   run: (options) ->
     app = require("electron").app

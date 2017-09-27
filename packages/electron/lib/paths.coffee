@@ -7,14 +7,14 @@ execPath = {
   darwin:  "Cypress.app/Contents/MacOS/Cypress"
   freebsd: "Cypress"
   linux:   "Cypress"
-  # win32:   "dist/Cypress.exe"
+  win32:   "Cypress.exe"
 }
 
 resourcesPath = {
   darwin:  "Cypress.app/Contents/Resources"
   freebsd: "resources"
   linux:   "resources"
-  # win32:   "resources"
+  win32:   "resources"
 }
 
 unknownPlatformErr = ->
@@ -44,4 +44,9 @@ module.exports = {
   getPathToVersion: ->
     @getPathToDist("version")
 
+  getSymlinkType: ->
+    if os.platform() == "win32" 
+      "junction" 
+    else 
+      "dir"
 }

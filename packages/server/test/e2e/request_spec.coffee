@@ -132,44 +132,27 @@ describe "e2e requests", ->
   })
 
   it "passes", ->
-    e2e.start(@, {
+    e2e.exec(@, {
       spec: "request_spec.coffee"
+      snapshot: true
       expectedExitCode: 0
     })
 
   it "fails when network immediately fails", ->
     e2e.exec(@, {
       spec: "request_http_network_error_failing_spec.coffee"
+      snapshot: true
       expectedExitCode: 1
     })
-    .get("stdout")
-    .then (stdout) ->
-      expect(stdout).to.include("http://localhost:16795")
-      expect(stdout).to.include("We attempted to make an http request to this URL but the request failed without a response.")
-      expect(stdout).to.include("> Error: connect ECONNREFUSED 127.0.0.1:16795")
-      expect(stdout).to.include("The request we sent was:")
-      expect(stdout).to.include("Method: GET")
-      expect(stdout).to.include("URL: http://localhost:16795")
 
   it "fails on status code", ->
     e2e.exec(@, {
       spec: "request_status_code_failing_spec.coffee"
+      snapshot: true
       expectedExitCode: 1
+      onStdout: (stdout) ->
+        stdout
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
     })
-    .get("stdout")
-    .then (stdout) ->
-      expect(stdout).to.include("http://localhost:2294/statusCode?code=503")
-      expect(stdout).to.include("The response we received from your web server was:")
-      expect(stdout).to.include("> 503: Service Unavailable")
-      expect(stdout).to.include("This was considered a failure because the status code was not '2xx' or '3xx'.")
-      expect(stdout).to.include("If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'")
-      expect(stdout).to.include("The request we sent was:")
-      expect(stdout).to.include("Method: GET")
-      expect(stdout).to.include("URL: http://localhost:2294/statusCode?code=503")
-      expect(stdout).to.include("Headers: {\n")
-      expect(stdout).to.include("user-agent")
-      expect(stdout).to.include("\"accept\": \"*/*\"")
-      expect(stdout).to.include("The response we got was:")
-      expect(stdout).to.include("Status: 503 - Service Unavailable")
-      expect(stdout).to.include("x-powered-by\": \"Express\"")
-      expect(stdout).to.include("Body: Service Unavailable")

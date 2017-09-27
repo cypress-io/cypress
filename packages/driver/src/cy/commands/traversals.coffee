@@ -1,13 +1,12 @@
 _ = require("lodash")
 
-$Log = require("../../cypress/log")
-utils = require("../../cypress/utils")
+$dom = require("../../dom")
 
-module.exports = (Cypress, Commands) ->
-  traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
+traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
 
+module.exports = (Commands, Cypress, cy, state, config) ->
   _.each traversals, (traversal) ->
-    Commands.add traversal, {prevSubject: "dom"}, (subject, arg1, arg2, options) ->
+    Commands.add traversal, { prevSubject: "element" }, (subject, arg1, arg2, options) ->
       if _.isObject(arg2)
         options = arg2
 
@@ -18,8 +17,6 @@ module.exports = (Cypress, Commands) ->
 
       _.defaults options, {log: true}
 
-      @ensureNoCommandOptions(options)
-
       getSelector = ->
         args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value()
         args = _.without(args, null, undefined)
@@ -27,23 +24,23 @@ module.exports = (Cypress, Commands) ->
 
       consoleProps = {
         Selector: getSelector()
-        "Applied To": utils.getDomElements(subject)
+        "Applied To": $dom.getElements(subject)
       }
 
       if options.log isnt false
-        options._log = $Log.command
+        options._log = Cypress.log
           message: getSelector()
           consoleProps: -> consoleProps
 
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Yielded = utils.getDomElements($el)
+        consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
 
-      do getElements = =>
+      do getElements = ->
         ## catch sizzle errors here
         try
           $el = subject[traversal].call(subject, arg1, arg2)
@@ -57,10 +54,10 @@ module.exports = (Cypress, Commands) ->
 
         setEl($el)
 
-        @verifyUpcomingAssertions($el, options, {
+        cy.verifyUpcomingAssertions($el, options, {
           onRetry: getElements
           onFail: (err) ->
             if err.type is "existence"
-              node = utils.stringifyElement(subject, "short")
+              node = $dom.stringify(subject, "short")
               err.displayMessage += " Queried from element: #{node}"
         })

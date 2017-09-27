@@ -2,33 +2,32 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$Log = require("../../../cypress/log")
-utils = require("../../../cypress/utils")
+$dom = require("../../../dom")
+$utils = require("../../../cypress/utils")
 
-module.exports = (Cypress, Commands) ->
+newLineRe = /\n/g
 
-  Commands.addAll({ prevSubject: "dom" }, {
+module.exports = (Commands, Cypress, cy, state, config) ->
+  Commands.addAll({ prevSubject: "element" }, {
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
         $el: subject
         log: true
         force: false
 
-      @ensureDom(options.$el)
-
       consoleProps = {}
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = $Log.command
+        options._log = Cypress.log
           message: deltaOptions
           $el: options.$el
           consoleProps: ->
             ## merge into consoleProps without mutating it
             _.extend {}, consoleProps,
-              "Applied To": utils.getDomElements(options.$el)
+              "Applied To": $dom.getElements(options.$el)
               "Options":    deltaOptions
 
         options._log.snapshot("before", {next: "after"})
@@ -45,11 +44,11 @@ module.exports = (Cypress, Commands) ->
       ## behavior
 
       if not options.$el.is("select")
-        node = utils.stringifyElement(options.$el)
-        utils.throwErrByPath "select.invalid_element", { args: { node } }
+        node = $dom.stringify(options.$el)
+        $utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        utils.throwErrByPath "select.multiple_elements", { args: { num } }
+        $utils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -58,15 +57,13 @@ module.exports = (Cypress, Commands) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        utils.throwErrByPath "select.invalid_multiple"
+        $utils.throwErrByPath "select.invalid_multiple"
 
-      getOptions = =>
-        newLineRe = /\n/g
-
+      getOptions = ->
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
-          node = utils.stringifyElement(options.$el)
-          utils.throwErrByPath "select.disabled", { args: { node } }
+          node = $dom.stringify(options.$el)
+          $utils.throwErrByPath "select.disabled", { args: { node } }
 
         values = []
         optionEls = []
@@ -109,40 +106,41 @@ module.exports = (Cypress, Commands) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          utils.throwErrByPath("select.multiple_matches", {
+          $utils.throwErrByPath("select.multiple_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         if not values.length
-          utils.throwErrByPath("select.no_matches", {
+          $utils.throwErrByPath("select.no_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
-            node = utils.stringifyElement($el)
-            utils.throwErrByPath("select.option_disabled", {
+            node = $dom.stringify($el)
+            $utils.throwErrByPath("select.option_disabled", {
               args: { node }
             })
 
         {values, optionEls, optionsObjects, notAllUniqueValues}
 
-      retryOptions = =>
+      retryOptions = ->
         Promise
         .try(getOptions)
-        .catch (err) =>
+        .catch (err) ->
           options.error = err
-          @_retry(retryOptions, options)
+
+          cy.retry(retryOptions, options)
 
       Promise
       .try(retryOptions)
-      .then (obj = {}) =>
+      .then (obj = {}) ->
         {values, optionEls, optionsObjects, notAllUniqueValues} = obj
 
         ## preserve the selected values
         consoleProps.Selected = values
 
-        @execute("click", {
+        cy.now("click", options.$el, {
           $el: options.$el
           log: false
           verify: false
@@ -151,7 +149,7 @@ module.exports = (Cypress, Commands) ->
           force: options.force
           timeout: options.timeout
           interval: options.interval
-        }).then( =>
+        }).then( ->
 
           ## TODO:
           ## 1. test cancellation
@@ -163,61 +161,56 @@ module.exports = (Cypress, Commands) ->
           ## 7. test that select still has focus (i think it already does have a test)
           ## 8. test that multiple=true selects receive option event for each selected option
           Promise
-            .resolve(optionEls) ## why cant we just pass these directly to .each?
-            .each (optEl) =>
-              @execute("click", {
-                $el: optEl
-                log: false
-                verify: false
-                force: true ## always force the click to happen on the <option>
-                timeout: options.timeout
-                interval: options.interval
-              })
-            .cancellable()
-            .then =>
-              ## reset the selects value after we've
-              ## fired all the proper click events
-              ## for the options
-              ## TODO: shouldn't we be updating the values
-              ## as we click the <option> instead of
-              ## all afterwards?
-              options.$el.val(values)
+          .resolve(optionEls) ## why cant we just pass these directly to .each?
+          .each (optEl) ->
+            cy.now("click", optEl, {
+              $el: optEl
+              log: false
+              verify: false
+              force: true ## always force the click to happen on the <option>
+              timeout: options.timeout
+              interval: options.interval
+            })
+          .then ->
+            ## reset the selects value after we've
+            ## fired all the proper click events
+            ## for the options
+            ## TODO: shouldn't we be updating the values
+            ## as we click the <option> instead of
+            ## all afterwards?
+            options.$el.val(values)
 
-              if notAllUniqueValues
-                ## if all the values are the same and the user is trying to
-                ## select based on the text, setting the val() will just
-                ## select the first one
-                selectedIndex = 0
-                console.log("optionEls:", optionEls)
-                _.each optionEls, ($el) ->
-                  index = _.findIndex optionsObjects, (optionObject) ->
-                    $el.text() is optionObject.originalText
-                  console.log('index:', index)
-                  selectedIndex = index
-                  $el.prop("selected", "selected")
+            if notAllUniqueValues
+              ## if all the values are the same and the user is trying to
+              ## select based on the text, setting the val() will just
+              ## select the first one
+              selectedIndex = 0
+              _.each optionEls, ($el) ->
+                index = _.findIndex optionsObjects, (optionObject) ->
+                  $el.text() is optionObject.originalText
+                selectedIndex = index
+                $el.prop("selected", "selected")
 
-                console.log("selectedIndex:", selectedIndex)
-                options.$el[0].selectedIndex = selectedIndex
-                console.log("selectedOptions:", _.map optionEls, ($el) -> $el.get())
-                options.$el[0].selectedOptions = _.map optionEls, ($el) -> $el.get()
+              options.$el[0].selectedIndex = selectedIndex
+              options.$el[0].selectedOptions = _.map optionEls, ($el) -> $el.get()
 
-              input = new Event "input", {
-                bubbles: true
-                cancelable: false
-              }
+            input = new Event "input", {
+              bubbles: true
+              cancelable: false
+            }
 
-              options.$el.get(0).dispatchEvent(input)
+            options.$el.get(0).dispatchEvent(input)
 
-              ## yup manually create this change event
-              ## 1.6.5. HTML event types
-              ## scroll down to 'change'
-              change = document.createEvent("HTMLEvents")
-              change.initEvent("change", true, false)
+            ## yup manually create this change event
+            ## 1.6.5. HTML event types
+            ## scroll down to 'change'
+            change = document.createEvent("HTMLEvents")
+            change.initEvent("change", true, false)
 
-              options.$el.get(0).dispatchEvent(change)
-        ).then =>
-          do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
+            options.$el.get(0).dispatchEvent(change)
+        ).then ->
+          do verifyAssertions = ->
+            cy.verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
-        })
+            })
   })

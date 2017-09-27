@@ -11,6 +11,7 @@ record     = require("#{root}../lib/modes/record")
 headless   = require("#{root}../lib/modes/headless")
 git        = require("#{root}../lib/util/git")
 ciProvider = require("#{root}../lib/util/ci_provider")
+snapshot   = require("snap-shot-it")
 
 describe "lib/modes/record", ->
   beforeEach ->
@@ -70,19 +71,24 @@ describe "lib/modes/record", ->
       api.createRun.resolves()
 
       record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
-        expect(api.createRun).to.be.calledWith({
-          projectId: "id-123"
-          recordKey: "key-123"
-          commitSha: "sha-123"
-          commitBranch: "master"
-          commitAuthorName: "brian"
-          commitAuthorEmail: "brian@cypress.io"
-          commitMessage: "such hax"
-          remoteOrigin: "https://github.com/foo/bar.git"
-          ciProvider: "circle"
-          ciBuildNumber: "build-123"
-          ciParams: {foo: "bar"}
-        })
+        snapshot(api.createRun.firstCall.args)
+
+    it "passes groupId", ->
+      api.createRun.resolves()
+
+      group = true
+      groupId = "gr123"
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
+        snapshot(api.createRun.firstCall.args)
+
+    it "figures out groupId from CI environment variables", ->
+      @sandbox.stub(ciProvider, "groupId").returns("ci-group-123")
+
+      api.createRun.resolves()
+
+      group = true
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group).then ->
+        snapshot(api.createRun.firstCall.args)
 
     it "handles status code errors of 401", ->
       err = new Error

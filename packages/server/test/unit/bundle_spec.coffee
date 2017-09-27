@@ -53,7 +53,7 @@ describe "lib/util/bundle", ->
 
     describe "headless mode", ->
       beforeEach ->
-        @config.isHeadless = true
+        @config.isTextTerminal = true
         bundle.build("file.js", @config)
 
       it "does not watch", ->
@@ -72,7 +72,7 @@ describe "lib/util/bundle", ->
     it "send javascript string with the error", ->
       expect(bundle.clientSideError("an error")).to.equal("""
       (function () {
-        Cypress.trigger("script:error", {
+        Cypress.action("spec:script:error", {
           type: "BUNDLE_ERROR",
           error: "an error"
         })
