@@ -28,9 +28,9 @@ test_script:
   - npm --version
   - 7z
   - cd packages/launcher && node index.js && cd ../..
-  - npm run binary-build -- --platform windows --version $CYPRESS_BINARY_VERSION
+  - npm run binary-build -- --platform windows --version $env:CYPRESS_BINARY_VERSION
   - npm run binary-zip
-  - npm run binary-upload -- --version $CYPRESS_BINARY_VERSION --zip cypress.zip
+  - npm run binary-upload -- --version $env:CYPRESS_BINARY_VERSION --zip cypress.zip
   # build CLI NPM package
   - cd cli && npm run build && cd ..
   # start new projet
