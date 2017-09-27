@@ -27,6 +27,7 @@ test_script:
   - cd packages/launcher && node index.js && cd ../..
   - npm run binary-build -- --platform windows --version 0.20.2-win
   - npm run binary-zip
+  - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
   # - cd packages/server && npm run test-unit
   # - npm test
 
