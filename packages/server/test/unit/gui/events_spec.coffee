@@ -459,6 +459,17 @@ describe "lib/gui/events", ->
           open.lastCall.args[0].onWarning({name: "foo", message: "foo"})
           assert.sendCalledWith({name: "foo", message: "foo"})
 
+      it "sends 'project:error' onError", ->
+        open = @sandbox.stub(Project.prototype, "open")
+        @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
+
+        @handleEvent("open:project", "/_test-output/path/to/project")
+        .then =>
+          @handleEvent("on:project:error")
+        .then (assert) =>
+          open.lastCall.args[0].onError({name: "foo", message: "foo"})
+          assert.sendCalledWith({name: "foo", message: "foo"})
+
     describe "close:project", ->
       beforeEach ->
         @sandbox.stub(Project.prototype, "close").withArgs({sync: true}).resolves()

@@ -94,12 +94,12 @@ class Project extends EE
           @scaffold(cfg)
         )
         .then =>
-          plugins.init(cfg)
-
           Promise.join(
             @watchSupportFile(cfg)
-            @watchPluginsFile(cfg)
+            @watchPluginsFile(cfg, options)
           )
+        .then ->
+          plugins.init(cfg)
 
     # return our project instance
     .return(@)
@@ -146,7 +146,7 @@ class Project extends EE
     else
       Promise.resolve()
 
-  watchPluginsFile: (config) ->
+  watchPluginsFile: (config, options) ->
     log("attempt watch plugins file: #{config.pluginsFile}")
     if not config.pluginsFile
       return Promise.resolve()
@@ -162,7 +162,11 @@ class Project extends EE
         onChange: =>
           log("plugins file changed")
           ## re-init plugins after a change
-          plugins.init(config)
+          Promise
+          .try ->
+            plugins.init(config)
+          .catch (err) ->
+            options.onError(err)
       })
 
   watchSettings: (onSettingsChanged) ->

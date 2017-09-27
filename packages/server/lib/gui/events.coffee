@@ -9,7 +9,6 @@ Windows     = require("./windows")
 api         = require("../api")
 open        = require("../util/open")
 user        = require("../user")
-logger      = require("../logger")
 errors      = require("../errors")
 Updater     = require("../updater")
 Project     = require("../project")
@@ -18,7 +17,7 @@ openProject = require("../open_project")
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
     try
-      logger.info("sending ipc data", type: type, data: data)
+      log("sending ipc data", {type: type, data: data})
       event.sender.send("response", data)
 
   sendErr = (err) ->
@@ -50,6 +49,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "on:config:changed"
       onBus("config:changed")
+
+    when "on:project:error"
+      onBus("project:error")
 
     when "on:project:warning"
       onBus("project:warning")
@@ -188,6 +190,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
           options.onFocusTests()
         bus.emit("focus:tests")
 
+      onError = (err) ->
+        bus.emit("project:error", errors.clone(err, {html: true}))
+
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
@@ -195,6 +200,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onFocusTests: onFocusTests
         onSpecChanged: onSpecChanged
         onSettingsChanged: onSettingsChanged
+        onError: onError
         onWarning: onWarning
       })
       .call("getConfig")
