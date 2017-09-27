@@ -39,7 +39,8 @@ class AppStore {
 
   @action setLocalInstallNoticeDismissed (isDismissed) {
     this.localInstallNoticeDismissed = isDismissed
-    localData.set('local-install-notice-dimissed', isDismissed)   }
+    localData.set('local-install-notice-dimissed', isDismissed)
+  }
 
   @action setError (err) {
     this.error = err
