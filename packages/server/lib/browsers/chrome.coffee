@@ -36,6 +36,10 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
 
+  ## needed for https://github.com/cypress-io/cypress/issues/573
+  ## list of flags here: https://cs.chromium.org/chromium/src/third_party/WebKit/Source/platform/runtime_enabled_features.json5
+  "--disable-blink-features=BlockCredentialedSubresources"
+
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   "--metrics-recording-only"
