@@ -33,6 +33,8 @@ defaultArgs = [
   "--disable-new-avatar-menu"
   "--allow-insecure-localhost"
   "--reduce-security-for-testing"
+  "--enable-automation"
+  "--disable-infobars"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
