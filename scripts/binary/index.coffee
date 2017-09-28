@@ -85,7 +85,7 @@ deploy = {
         when "run"
           bump.run()
         when "version"
-          ask.whichVersion(meta.distDir)
+          ask.whichVersion(meta.distDir(""))
           .then (v) ->
             bump.version(v)
 

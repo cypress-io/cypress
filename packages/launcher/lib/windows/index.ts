@@ -77,7 +77,7 @@ function getWindowsBrowser(
 
   return pathExists(exePath)
     .then(exists => {
-      console.log('found %s ?', exePath, exists)
+      log('found %s ?', exePath, exists)
       if (!exists) {
         throw notInstalledErr(`Browser ${name} file not found at ${exePath}`)
       }

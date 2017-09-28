@@ -382,6 +382,29 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
 
+  "test-binary":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      # build NPM package
+      - run: cd cli && npm run build
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          # install NPM from built NPM package folder
+          name: Install Cypress
+          working_directory: test-binary
+          # force installing the freshly built binary
+          command: CYPRESS_BINARY_VERSION=$NEXT_LINUX_BINARY_VERSION npm i ../cli/build
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: $(npm bin)/cypress verify
+
 workflows:
   version: 2
   build_and_test:
@@ -438,12 +461,15 @@ workflows:
       - desktop-gui-integration-tests-3:
           requires:
             - build
-      - build-binary:
-          requires:
-            - build
       - run-launcher:
           requires:
             - build
+      - build-binary:
+          requires:
+            - build
+      - test-binary:
+          requires:
+            - build-binary
 
 #
 # things to run in the 4th CI container
