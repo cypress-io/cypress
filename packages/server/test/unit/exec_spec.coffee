@@ -2,7 +2,6 @@ require("../spec_helper")
 
 _ = require("lodash")
 cp = require("#{root}lib/util/child_process")
-R = require("ramda")
 os = require("os")
 exec = require("#{root}lib/exec")
 
@@ -20,15 +19,18 @@ runCommand = (cmd, options = {}) ->
 
 fail = (message) -> throw new Error(message)
 
-pickMainProps = R.pick(["stdout", "stderr", "code"])
-
 describe "lib/exec", ->
   @timeout(10000)
 
   describe "basic tests", ->
+    it "returns only stdout, stderr, and code", ->
+      runCommand("echo foo")
+      .then (result) ->
+        props = Object.keys(result)
+        expect(props).to.deep.eq(["stdout", "stderr", "code"])
+
     it "reports the stdout, stderr, and code for single word", ->
       runCommand("echo foo")
-      .then pickMainProps
       .then (result) ->
         expected = {
           stdout: "foo",
@@ -45,7 +47,6 @@ describe "lib/exec", ->
 
     it "reports the stdout, stderr, and code for single quoted word", ->
       runCommand("echo 'foo'")
-      .then pickMainProps
       .then (result) ->
         expected = {
           stdout: "'foo'",
@@ -56,7 +57,6 @@ describe "lib/exec", ->
 
     it "reports the stdout, stderr, and code", ->
       runCommand("echo 'foo bar'")
-      .then pickMainProps
       .then (result) ->
         expected = {
           stdout: "'foo bar'",
@@ -118,7 +118,6 @@ describe "lib/exec", ->
 
     it "reports the stdout, stderr, and code for single quoted word", ->
       runCommand("echo 'foo'")
-      .then pickMainProps
       .then (result) ->
         expected = {
           stdout: "foo",
@@ -129,7 +128,6 @@ describe "lib/exec", ->
 
     it "reports the stdout, stderr, and code", ->
       runCommand("echo 'foo bar'")
-      .then pickMainProps
       .then (result) ->
         expected = {
           stdout: "foo bar",

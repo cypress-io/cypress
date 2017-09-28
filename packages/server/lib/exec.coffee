@@ -20,6 +20,7 @@ module.exports = {
         cwd: projectRoot,
         env: _.extend({}, process.env, options.env)
       })
+      # do we want to return all fields returned by execa?
       .then pickMainProps
       .catch pickMainProps # transform rejection into an object
       .then trimStdio
