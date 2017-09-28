@@ -22,7 +22,7 @@
     "test-debug": "NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* node --inspect --debug-brk ./node_modules/.bin/_mocha --opts test/support/mocha.opts --watch",
     "codecov": "codecov",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "lint": "$(bin-up coffeelint) test/*.coffee test/unit/*.coffee test/integration/*.coffee"
+    "lint": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee"
   },
   "files": [
     "config",
@@ -31,7 +31,7 @@
   ],
   "devDependencies": {
     "@cypress/sinon-chai": "^1.0.0",
-    "bin-up": "^1.0.1",
+    "bin-up": "^1.1.0",
     "body-parser": "1.12.4",
     "chokidar-cli": "^1.2.0",
     "codecov": "^1.0.1",
