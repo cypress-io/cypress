@@ -6,6 +6,11 @@ log     = require("./log")
 
 pickMainProps = R.pick(["stdout", "stderr", "code"])
 
+trimStdio = R.evolve({
+  stdout: R.trim,
+  stderr: R.trim
+})
+
 module.exports = {
   run: (projectRoot, options) ->
     child = null
@@ -17,6 +22,7 @@ module.exports = {
       }).catch (e)->
         # transform rejection into an object
         pickMainProps(e)
+      .then trimStdio
 
     Promise
     .try(run)
