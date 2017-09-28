@@ -19,9 +19,9 @@ module.exports = {
       return execa.shell(options.cmd, {
         cwd: projectRoot,
         env: _.extend({}, process.env, options.env)
-      }).catch (e)->
-        # transform rejection into an object
-        pickMainProps(e)
+      })
+      .then pickMainProps
+      .catch pickMainProps # transform rejection into an object
       .then trimStdio
 
     Promise
