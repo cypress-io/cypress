@@ -22,6 +22,8 @@ const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
 
+const LISTR_DELAY = 500 // for its animation
+
 const slice = (str) => {
   // strip answer and split by new lines
   str = str.split('\n')
@@ -191,7 +193,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'verification with executable',
@@ -248,7 +250,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'no existing version verified',
@@ -273,7 +275,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -298,7 +300,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq('9.8.7')
       })
-      .delay(300) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -319,7 +321,7 @@ context('.verify', function () {
           welcomeMessage: false,
         })
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'no welcome message',
