@@ -1,5 +1,6 @@
 _         = require("lodash")
 fs        = require("fs")
+auth      = require("basic-auth")
 bodyParser = require("body-parser")
 express   = require("express")
 http      = require("http")
@@ -61,6 +62,16 @@ app.get "/buffer", (req, res) ->
   fs.readFile path.join(__dirname, "../cypress/fixtures/sample.pdf"), (err, bytes) ->
     res.type("pdf")
     res.send(bytes)
+
+app.get "/basic_auth", (req, res) ->
+  user = auth(req)
+
+  if user and (user.name is "cypress" and user.pass is "password123")
+    res.send("<html><body>basic auth worked</body></html>")
+  else
+    res
+    .set("WWW-Authenticate", "Basic")
+    .sendStatus(401)
 
 app.use(express.static(path.join(__dirname, "..", "cypress")))
 
