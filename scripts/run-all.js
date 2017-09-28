@@ -163,7 +163,7 @@ module.exports = (cmd, options) => {
     }
     const parallel = runSerially
     return runAll(tasks, {
-      parallel: parallel,
+      parallel,
       printLabel: tasks.length > 1,
       stdout: process.stdout,
       stderr: collectStderr,
