@@ -10,7 +10,7 @@ exports['captures mocha output 1'] = `
   stdout:
   -------
   > cypress@0.20.1 test-mocha <folder path>
-  > mocha --reporter spec <spec relative path>
+  > mocha --reporter spec scripts/spec.js
 
 
 
