@@ -182,6 +182,11 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      # make sure mocha runs
+      - run: npm run test-mocha
+      # make sure our snapshots are compared correctly
+      - run: npm run test-mocha-snapshot
+      # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package coffee
       - run: npm run all test -- --package desktop-gui
