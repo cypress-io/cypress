@@ -8,6 +8,35 @@ cwd      = require("../cwd")
 whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exitWithCode hosts browser headless outputPath group groupId".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
+# returns true if the given string has double quote character "
+# only at the last position.
+hasStrayEndQuote = (s) ->
+  quoteAt = s.indexOf('"')
+  quoteAt == s.length - 1
+
+removeLastCharacter = (s) ->
+  s.substr(0, s.length - 1)
+
+normalizeBackslash = (s) ->
+  if hasStrayEndQuote(s)
+    removeLastCharacter(s)
+  else
+    s
+
+normalizeBackslashes = (options) ->
+  ## remove stray double quote from runProject and other path properties
+  ## due to bug in NPM passing arguments with
+  ## backslash at the end
+  ## https://github.com/cypress-io/cypress-monorepo/issues/535
+  # these properties are paths and likely to have backslash on Windows
+  pathProperties = ["runProject", "project", "appPath", "execPath"]
+
+  pathProperties.forEach (property) ->
+    if options[property]
+      options[property] = normalizeBackslash(options[property])
+
+  options
+
 parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
   ## {foo: 'bar', version: '1.2.3'}
@@ -96,6 +125,8 @@ module.exports = {
       ## and pull up and flatten any whitelisted
       ## config directly into our options
       _.extend options, config.whitelist(c)
+
+    options = normalizeBackslashes(options)
 
     ## normalize project to projectPath
     if p = options.project or options.runProject

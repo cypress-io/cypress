@@ -3,7 +3,7 @@ Promise  = require("bluebird")
 path     = require("path")
 fs       = require("fs-extra")
 errors   = require("../errors")
-log      = require("./log")
+log      = require("../log")
 
 ## TODO:
 ## think about adding another PSemaphore
