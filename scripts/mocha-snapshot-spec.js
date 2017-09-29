@@ -1,12 +1,11 @@
 const execa = require('execa-wrap')
 const snapshot = require('snap-shot-it')
-const { join } = require('path')
 
 function normalize (s) {
   // assuming the test command tests this spec file
-  const scriptPath = join('scripts', 'spec.js')
+  // and the command is hardcoded in package.json
+  // using forward slashes
   return s.replace(process.cwd(), '<folder path>')
-    .replace(scriptPath, '<spec relative path>')
 }
 
 /* eslint-env mocha */
