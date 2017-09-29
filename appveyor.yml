@@ -11,9 +11,12 @@ environment:
   CYPRESS_BINARY_VERSION: "0.20.2-win"
 
 # https://www.appveyor.com/docs/build-cache/
-cache:
-  - node_modules
-  # todo: cache node_modules in each package
+# hmm, seems there is NPM on windows problem
+# with installing over cached folder
+# https://github.com/npm/npm/issues/17747
+# cache:
+#   - node_modules
+#   # todo: cache node_modules in each package
 
 # Install scripts. (runs after repo cloning)
 install:
