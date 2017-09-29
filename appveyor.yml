@@ -33,8 +33,8 @@ install:
   - npm run link
   # install every package one by one
   - npm run all install -- --serial
-  - npm prune
-  - npm run all prune -- --serial
+  # - npm prune
+  # - npm run all prune -- --serial
   - npm run all build -- --serial
 
 # Post-install test scripts.
