@@ -5,7 +5,7 @@ shellEnv = require("shell-env")
 log      = require("./log")
 utils    = require("./util/shell")
 
-pickMainProps = R.pick(["stdout", "stderr", "code"])
+pickMainProps = R.pick(["stdout", "stderr", "code", "shell", "cmd"])
 
 trimStdio = R.evolve({
   stdout: R.trim,
