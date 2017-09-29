@@ -44,6 +44,11 @@ test_script:
   - npm --version
   - 7z
   - cd packages/launcher && node index.js && cd ../..
+  # make sure mocha runs
+  - npm run test-mocha
+  # make sure our snapshots are compared correctly
+  - npm run test-mocha-snapshot
+  # the other larger tests
   - npm run binary-build -- --platform windows --version 0.20.2-win
   - npm run binary-zip
   - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
