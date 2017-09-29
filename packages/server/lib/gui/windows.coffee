@@ -273,13 +273,18 @@ module.exports = {
 
       if options.type is "GITHUB_LOGIN"
         new Promise (resolve, reject) ->
+          win.once "closed", ->
+            err = new Error("Window closed by user")
+            err.windowClosed = true
+            reject(err)
+
           win.webContents.on "will-navigate", (e, url) ->
             urlChanged(url, resolve)
 
           win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
             urlChanged(newUrl, resolve)
       else
-        Promise.resolve(win)
+        return win
 
   trackState: (projectPath, win, keys) ->
     isDestroyed = ->

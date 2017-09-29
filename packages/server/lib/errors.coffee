@@ -63,7 +63,7 @@ API = {
         """
         You're not logged in.
 
-        Run `cypress open` to open the Desktop App and login.
+        Run `cypress open` to open the Desktop App and log in.
         """
       when "TESTS_DID_NOT_START_RETRYING"
         "Timed out waiting for the browser to connect. #{arg1}"

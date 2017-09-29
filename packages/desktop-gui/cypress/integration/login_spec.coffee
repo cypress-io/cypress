@@ -46,10 +46,11 @@ describe "Login", ->
       cy
         .get(".login")
           .contains("button", "Log In with GitHub").as("loginBtn")
+          .click()
 
     it "triggers ipc 'window:open' on click", ->
       cy
-        .get("@loginBtn").click().then ->
+        .then ->
           expect(@ipc.windowOpen).to.be.calledWithExactly({
             position: "center"
             focus: true
@@ -61,11 +62,14 @@ describe "Login", ->
           })
 
     it "disables login button", ->
-      cy.get("@loginBtn").click().should("be.disabled")
+      cy.get("@loginBtn").should("be.disabled")
+
+    it "shows spinner with 'Logging In'", ->
+      cy.get("@loginBtn").invoke("text").should("contain", "Logging in...")
 
     context "on 'window:open' ipc response", ->
       beforeEach ->
-        cy.get("@loginBtn").click().then ->
+        cy.get("@loginBtn").then ->
           @openWindow.resolve("code-123")
 
       it "triggers ipc 'log:in'", ->
@@ -162,3 +166,11 @@ describe "Login", ->
         it "login button should be enabled", ->
           cy
             .get("@loginBtn").should("not.be.disabled")
+
+    describe "when user closes window before logging in", ->
+      beforeEach ->
+        @openWindow.reject({windowClosed: true, name: "foo", message: "There's an error"})
+
+      it "no longer shows logging in spinner", ->
+        cy.get(".login-content .alert").should("not.exist")
+        cy.contains("button", "Log In with GitHub").should("not.be.disabled")

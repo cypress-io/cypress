@@ -4,12 +4,15 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
+import Loader from 'react-loader'
 
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizations-api'
+
+import LoginForm from '../auth/login-form'
 
 @observer
 class SetupProject extends Component {
@@ -33,21 +36,51 @@ class SetupProject extends Component {
   }
 
   componentDidMount () {
+    this._handlePolling()
+  }
+
+  componentDidUpdate () {
+    this._handlePolling()
+  }
+
+  componentWillUnmount () {
+    this._stopPolling()
+  }
+
+  _handlePolling () {
+    if (this._shouldPoll()) {
+      this._poll()
+    } else {
+      this._stopPolling()
+    }
+  }
+
+  _shouldPoll () {
+    return authStore.isAuthenticated
+  }
+
+  _poll () {
     getOrgs()
     pollOrgs()
   }
 
-  componentWillUnmount () {
+  _stopPolling () {
     stopPollingOrgs()
   }
 
   render () {
-    if (!orgsStore.isLoaded) return null
+    if (!authStore.isAuthenticated) {
+      return this._loginMessage()
+    }
+
+    if (!orgsStore.isLoaded) {
+      this._loading()
+    }
 
     return (
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h4>Setup Project</h4>
+        <h4>Set Up Project</h4>
         <form
           onSubmit={this._submit}>
           {this._nameField()}
@@ -66,11 +99,31 @@ class SetupProject extends Component {
                     <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
                     null
                 }
-                <span>Setup Project</span>
+                <span>Set Up Project</span>
               </button>
             </div>
           </div>
         </form>
+      </div>
+    )
+  }
+
+  _loginMessage () {
+    return (
+      <div className='setup-project-modal modal-body os-dialog'>
+        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <h4>Please Log In</h4>
+        <p>You must log in to set up your project to record.</p>
+        <LoginForm />
+      </div>
+    )
+  }
+
+  _loading () {
+    return (
+      <div className='setup-project-modal modal-body os-dialog'>
+        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <Loader color='#888' scale={0.5} />
       </div>
     )
   }

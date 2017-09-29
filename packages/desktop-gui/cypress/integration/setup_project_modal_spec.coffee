@@ -1,4 +1,4 @@
-describe "Setup Project", ->
+describe "Set Up Project", ->
   beforeEach ->
     cy.fixture("user").as("user")
     cy.fixture("projects").as("projects")
@@ -12,7 +12,6 @@ describe "Setup Project", ->
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
-      cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       @config.projectId = null
@@ -21,6 +20,9 @@ describe "Setup Project", ->
       cy.stub(@ipc, "getRuns").resolves([])
       cy.stub(@ipc, "getRecordKeys").resolves(@keys)
       cy.stub(@ipc, "externalOpen")
+
+      @getCurrentUser = @util.deferred()
+      cy.stub(@ipc, "getCurrentUser").resolves(@getCurrentUser.promise)
 
       @getOrgs = @util.deferred()
       cy.stub(@ipc, "getOrgs").returns(@getOrgs.promise)
@@ -37,77 +39,69 @@ describe "Setup Project", ->
         .get(".navbar-default a")
           .contains("Runs").click()
 
-  it "displays empty message", ->
+  it "displays 'need to set up' message", ->
     cy.contains("You Have No Recorded Runs")
 
-  context "modal display", ->
+  describe "when there is a current user", ->
     beforeEach ->
-      @getOrgs.resolve(@orgs)
-      cy.get(".btn").contains("Setup Project").click()
+      @getCurrentUser.resolve(@user)
 
-    it "clicking link opens setup project window", ->
-      cy.get(".modal").should("be.visible")
-
-    it "submit button is disabled", ->
-      cy
-        .get(".modal").contains(".btn", "Setup Project")
-          .should("be.disabled")
-
-  context "project name", ->
-    beforeEach ->
-      @getOrgs.resolve(@orgs)
-      cy.get(".btn").contains("Setup Project").click()
-
-    it "prefills Project Name", ->
-      cy.get("#projectName").should("have.value", "bar")
-
-    it "allows me to change Project Name value", ->
-      cy
-        .get("#projectName").clear().type("New Project Here")
-          .should("have.value", "New Project Here")
-
-  context "selecting owner", ->
-    describe "default", ->
+    describe "general behavior", ->
       beforeEach ->
         @getOrgs.resolve(@orgs)
-        cy.get(".btn").contains("Setup Project").click()
+        cy.get(".btn").contains("Set Up Project").click()
 
-      it "has no owner selected by default", ->
-        cy.get("#me").should("not.be.selected")
-        cy.get("#org").should("not.be.selected")
+      it "clicking link opens setup project window", ->
+        cy.get(".modal").should("be.visible")
 
-      it "org docs are linked", ->
+      it "submit button is disabled", ->
         cy
-          .contains("label", "Who should own this")
-            .find("a").click().then ->
-              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-are-organizations")
+          .get(".modal").contains(".btn", "Set Up Project")
+            .should("be.disabled")
 
-    describe "select me", ->
-      beforeEach ->
-        @getOrgs.resolve(@orgs)
+      it "prefills Project Name", ->
+        cy.get("#projectName").should("have.value", "bar")
+
+      it "allows me to change Project Name value", ->
         cy
-          .get(".btn").contains("Setup Project").click()
-          .get(".privacy-radio").should("not.be.visible")
-          .get(".modal-content")
-            .contains(".btn", "Me").click()
+          .get("#projectName").clear().type("New Project Here")
+            .should("have.value", "New Project Here")
 
-      it "access docs are linked", ->
-        cy
-          .contains("label", "Who should see the runs")
-            .find("a").click().then ->
-              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-project-access")
+      describe "default owner", ->
+        it "has no owner selected by default", ->
+          cy.get("#me").should("not.be.selected")
+          cy.get("#org").should("not.be.selected")
 
-      it "displays public & private radios with no preselects", ->
-        cy
-          .get(".privacy-radio").should("be.visible")
-            .find("input").should("not.be.checked")
+        it "org docs are linked", ->
+          cy
+            .contains("label", "Who should own this")
+              .find("a").click().then ->
+                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-are-organizations")
 
-    describe "select organization", ->
-      context "with organization", ->
+      describe "selecting me as owner", ->
+        beforeEach ->
+          cy
+            .get(".privacy-radio").should("not.be.visible")
+            .get(".modal-content")
+              .contains(".btn", "Me").click()
+
+        it "access docs are linked", ->
+          cy
+            .contains("label", "Who should see the runs")
+              .find("a").click().then ->
+                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-project-access")
+
+        it "displays public & private radios with no preselects", ->
+          cy
+            .get(".privacy-radio").should("be.visible")
+              .find("input").should("not.be.checked")
+
+    describe "selecting an organization", ->
+      context "with organizations", ->
         beforeEach ->
           @getOrgs.resolve(@orgs)
           cy
-            .get(".btn").contains("Setup Project").click()
+            .get(".btn").contains("Set Up Project").click()
             .get(".modal-content")
               .contains(".btn", "An Organization").click()
 
@@ -142,11 +136,11 @@ describe "Setup Project", ->
             .get(".btn").contains("An Organization").click()
             .get("#organizations-select").should("have.value", "")
 
-      context "with no organizations", ->
+      context "without organizations", ->
         beforeEach ->
           @getOrgs.resolve([])
           cy
-            .get(".btn").contains("Setup Project").click()
+            .get(".btn").contains("Set Up Project").click()
             .get(".modal-content")
               .contains(".btn", "An Organization").click()
 
@@ -163,7 +157,7 @@ describe "Setup Project", ->
           @getOrgs.resolve(@orgs)
           cy
             .clock()
-            .get(".btn").contains("Setup Project").click()
+            .get(".btn").contains("Set Up Project").click()
             .get(".modal-content")
               .contains(".btn", "An Organization").click()
 
@@ -180,152 +174,168 @@ describe "Setup Project", ->
             .get("#organizations-select").find("option")
               .contains("Foo Bar Devs")
 
-  describe "on submit", ->
-    beforeEach ->
-      @getOrgs.resolve(@orgs)
-      cy
-        .contains(".btn", "Setup Project").click()
-        .get(".modal-body")
-          .contains(".btn", "Me").click()
-        .get(".privacy-radio").find("input").last().check()
-        .get(".modal-body")
-          .contains(".btn", "Setup Project").click()
-
-    it "disables button", ->
-      cy
-        .get(".modal-body")
-        .contains(".btn", "Setup Project")
-        .should("be.disabled")
-
-    it "shows spinner", ->
-      cy
-        .get(".modal-body")
-        .contains(".btn", "Setup Project")
-        .find("i")
-        .should("be.visible")
-
-  describe "successfully submit form", ->
-    beforeEach ->
-      @getOrgs.resolve(@orgs)
-      @setupDashboardProject.resolve({
-        id: "project-id-123"
-        public: true
-        orgId: "000"
-      })
-
-      cy.contains(".btn", "Setup Project").click()
-
-    it "sends project name, org id, and public flag to ipc event", ->
-      cy
-        .get(".modal-body")
-          .contains(".btn", "An Organization").click()
-        .get("#projectName").clear().type("New Project")
-        .get("select").select("Acme Developers")
-        .get(".privacy-radio").find("input").first().check()
-        .get(".modal-body")
-          .contains(".btn", "Setup Project").click()
-        .then =>
-          expect(@ipc.setupDashboardProject).to.be.calledWith({
-            projectName: "New Project"
-            orgId: "777"
-            public: true
-          })
-
-    context "org/public", ->
+    describe "on submit", ->
       beforeEach ->
+        @getOrgs.resolve(@orgs)
         cy
-          .get(".modal-body")
-            .contains(".btn", "An Organization").click()
-          .get("select").select("Acme Developers")
-          .get(".privacy-radio").find("input").first().check()
-          .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
-
-      it "sends data from form to ipc event", ->
-        expect(@ipc.setupDashboardProject).to.be.calledWith({
-          projectName: "bar"
-          orgId: "777"
-          public: true
-        })
-
-    context "me/private", ->
-      beforeEach ->
-        cy
+          .contains(".btn", "Set Up Project").click()
           .get(".modal-body")
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
           .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
+            .contains(".btn", "Set Up Project").click()
 
-      it "sends data from form to ipc event", ->
-        expect(@ipc.setupDashboardProject).to.be.calledWith({
-          projectName: "bar"
-          orgId: "000"
-          public: false
-        })
-
-    context "me/public", ->
-      beforeEach ->
+      it "disables button", ->
         cy
           .get(".modal-body")
-            .contains(".btn", "Me").click()
-          .get(".privacy-radio").find("input").first().check()
-          .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
+          .contains(".btn", "Set Up Project")
+          .should("be.disabled")
 
-      it "sends data from form to ipc event", ->
-        expect(@ipc.setupDashboardProject).to.be.calledWith({
-          projectName: "bar"
-          orgId: "000"
+      it "shows spinner", ->
+        cy
+          .get(".modal-body")
+          .contains(".btn", "Set Up Project")
+          .find("i")
+          .should("be.visible")
+
+    describe "successfully submit form", ->
+      beforeEach ->
+        @getOrgs.resolve(@orgs)
+        @setupDashboardProject.resolve({
+          id: "project-id-123"
           public: true
+          orgId: "000"
         })
 
-      it "closes modal", ->
-        cy.get(".modal").should("not.be.visible")
+        cy.contains(".btn", "Set Up Project").click()
 
-      it "updates localStorage projects cache", ->
-        expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
+      it "sends project name, org id, and public flag to ipc event", ->
+        cy
+          .get(".modal-body")
+            .contains(".btn", "An Organization").click()
+          .get("#projectName").clear().type("New Project")
+          .get("select").select("Acme Developers")
+          .get(".privacy-radio").find("input").first().check()
+          .get(".modal-body")
+            .contains(".btn", "Set Up Project").click()
+          .then =>
+            expect(@ipc.setupDashboardProject).to.be.calledWith({
+              projectName: "New Project"
+              orgId: "777"
+              public: true
+            })
 
-      it "displays empty runs page", ->
-        cy.contains("To record your first")
+      context "org/public", ->
+        beforeEach ->
+          cy
+            .get(".modal-body")
+              .contains(".btn", "An Organization").click()
+            .get("select").select("Acme Developers")
+            .get(".privacy-radio").find("input").first().check()
+            .get(".modal-body")
+              .contains(".btn", "Set Up Project").click()
 
-      describe "welcome page", ->
+        it "sends data from form to ipc event", ->
+          expect(@ipc.setupDashboardProject).to.be.calledWith({
+            projectName: "bar"
+            orgId: "777"
+            public: true
+          })
+
+      context "me/private", ->
+        beforeEach ->
+          cy
+            .get(".modal-body")
+              .contains(".btn", "Me").click()
+            .get(".privacy-radio").find("input").last().check()
+            .get(".modal-body")
+              .contains(".btn", "Set Up Project").click()
+
+        it "sends data from form to ipc event", ->
+          expect(@ipc.setupDashboardProject).to.be.calledWith({
+            projectName: "bar"
+            orgId: "000"
+            public: false
+          })
+
+      context "me/public", ->
+        beforeEach ->
+          cy
+            .get(".modal-body")
+              .contains(".btn", "Me").click()
+            .get(".privacy-radio").find("input").first().check()
+            .get(".modal-body")
+              .contains(".btn", "Set Up Project").click()
+
+        it "sends data from form to ipc event", ->
+          expect(@ipc.setupDashboardProject).to.be.calledWith({
+            projectName: "bar"
+            orgId: "000"
+            public: true
+          })
+
+        it "closes modal", ->
+          cy.get(".modal").should("not.be.visible")
+
+        it "updates localStorage projects cache", ->
+          expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
+
+        it "displays empty runs page", ->
+          cy.contains("To record your first")
+
         it "displays command to run with the record key", ->
           cy.contains("cypress run --record --key record-key-123")
 
-  describe "errors", ->
+    describe "errors", ->
+      beforeEach ->
+        @getOrgs.resolve(@orgs)
+        cy
+          .contains(".btn", "Set Up Project").click()
+          .get(".modal-body")
+            .contains(".btn", "Me").click()
+          .get(".privacy-radio").find("input").last().check()
+          .get(".modal-body")
+            .contains(".btn", "Set Up Project").click()
+
+      it "logs user out when 401", ->
+        @setupDashboardProject.reject({ name: "", message: "", statusCode: 401 })
+        cy.shouldBeLoggedOut()
+
+      it "displays error name and message when unexpected", ->
+        @setupDashboardProject.reject({
+          name: "Fatal Error!"
+          message: """
+          {
+            "system": "down",
+            "toxicity": "of the city"
+          }
+          """
+        })
+        cy.contains('"system": "down"')
+
+    describe "when get orgs 401s", ->
+      beforeEach ->
+        cy
+          .contains(".btn", "Set Up Project").click()
+          .then =>
+            @getOrgs.reject({ name: "", message: "", statusCode: 401 })
+
+      it "logs user out", ->
+        cy.shouldBeLoggedOut()
+
+  describe "when there is no current user", ->
     beforeEach ->
-      @getOrgs.resolve(@orgs)
-      cy
-        .contains(".btn", "Setup Project").click()
-        .get(".modal-body")
-          .contains(".btn", "Me").click()
-        .get(".privacy-radio").find("input").last().check()
-        .get(".modal-body")
-          .contains(".btn", "Setup Project").click()
+      @getCurrentUser.resolve(null)
+      cy.get(".btn").contains("Set Up Project").click()
 
-    it "logs user out when 401", ->
-      @setupDashboardProject.reject({ name: "", message: "", statusCode: 401 })
-      cy.shouldBeLoggedOut()
+    it "shows login", ->
+      cy.get(".modal").contains("Log In with GitHub")
 
-    it "displays error name and message when unexpected", ->
-      @setupDashboardProject.reject({
-        name: "Fatal Error!"
-        message: """
-        {
-          "system": "down",
-          "toxicity": "of the city"
-        }
-        """
-      })
-      cy.contains('"system": "down"')
+    describe "when login succeeds", ->
+      beforeEach ->
+        cy.stub(@ipc, "windowOpen").resolves()
+        cy.stub(@ipc, "logIn").resolves(@user)
+        cy.contains("button", "Log In with GitHub").click()
 
-  describe "when get orgs 401s", ->
-    beforeEach ->
-      cy
-        .contains(".btn", "Setup Project").click()
-        .then =>
-          @getOrgs.reject({ name: "", message: "", statusCode: 401 })
-
-    it "logs user out", ->
-      cy.shouldBeLoggedOut()
+      it "shows setup", ->
+        cy.contains("h4", "Set Up Project")

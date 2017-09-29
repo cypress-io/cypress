@@ -29,6 +29,7 @@ describe "Runs List", ->
       cy.stub(@ipc, "requestAccess")
       cy.stub(@ipc, "setupDashboardProject")
       cy.stub(@ipc, "externalOpen")
+      cy.stub(@ipc, "windowOpen").resolves()
 
       @openProject = @util.deferred()
       cy.stub(@ipc, "openProject").returns(@openProject.promise)
@@ -100,18 +101,15 @@ describe "Runs List", ->
         .then =>
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
 
-  context "without a current user", ->
+  context "without a project id", ->
     beforeEach ->
-      @getCurrentUser.resolve(null)
+      @getCurrentUser.resolve(@user)
+      @config.projectId = undefined
       @openProject.resolve(@config)
       @goToRuns()
 
-    it "shows login message", ->
-      cy.get(".empty h4").should("contain", "Please Log In")
-
-    it "shows login modal after clicking 'Log In'", ->
-      cy.contains(".empty button", "Log In").click()
-      cy.get(".login")
+    it "displays 'need to set up' message", ->
+      cy.contains("You Have No Recorded Runs")
 
   describe "polling runs", ->
     beforeEach ->
@@ -172,7 +170,7 @@ describe "Runs List", ->
         @ipcError({statusCode: 403})
         cy.contains("Request access")
 
-      it "displays missing project id error", ->
+      it "displays 'need to set up' message", ->
         @ipcError({type: "NO_PROJECT_ID"})
         cy.contains("You Have No Recorded Runs")
 
@@ -331,6 +329,11 @@ describe "Runs List", ->
               it "shows login message", ->
                 cy.get(".empty h4").should("contain", "Please Log In")
 
+              it "clicking 'Log In with GitHub' opens login", ->
+                cy.contains("button", "Log In with GitHub").click().then ->
+                  expect(@ipc.windowOpen).to.be.called
+                  expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+
     describe "timed out error", ->
       beforeEach ->
         @openProject.resolve(@config)
@@ -368,17 +371,17 @@ describe "Runs List", ->
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
 
-      it "displays 'you have no runs'", ->
+      it "displays 'need to set up' message", ->
         cy.contains("You Have No Recorded Runs")
 
-      it "clears message after setting up CI", ->
+      it "clears message after setting up to record", ->
         cy
-          .get(".btn").contains("Setup Project").click()
+          .get(".btn").contains("Set Up Project").click()
           .get(".modal-body")
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
           .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
+            .contains(".btn", "Set Up Project").click()
         cy.contains("To record your first")
 
     describe "unexpected error", ->
@@ -423,17 +426,17 @@ describe "Runs List", ->
 
       it "clicking link opens setup project window", ->
         cy
-          .get(".btn").contains("Setup a New Project").click()
+          .get(".btn").contains("Set Up a New Project").click()
           .get(".modal").should("be.visible")
 
       it "clears message after setting up CI", ->
         cy
-          .get(".btn").contains("Setup a New Project").click()
+          .get(".btn").contains("Set Up a New Project").click()
           .get(".modal-body")
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
           .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
+            .contains(".btn", "Set Up Project").click()
         cy.contains("To record your first")
 
     describe "no runs", ->
@@ -445,10 +448,10 @@ describe "Runs List", ->
           @goToRuns().then =>
             @getRuns.resolve([])
 
-        it "displays empty message", ->
+        it "displays 'need to set up' message", ->
           cy.contains("You Have No Recorded Runs")
 
-    context "having previously setup CI", ->
+    context "having previously set up CI", ->
       beforeEach ->
         @openProject.resolve(@config)
         @goToRuns().then =>

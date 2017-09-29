@@ -11,8 +11,10 @@ import runsApi from './runs-api'
 import projectsApi from '../projects/projects-api'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
-import Run from './runs-list-item'
+
 import ErrorMessage from './error-message'
+import LoginForm from '../auth/login-form'
+import Run from './runs-list-item'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 
@@ -54,6 +56,7 @@ class RunsList extends Component {
   _shouldPollRuns () {
     return (
       authStore.isAuthenticated &&
+      !this.runsStore.error &&
       !!this.props.project.id
     )
   }
@@ -90,6 +93,11 @@ class RunsList extends Component {
   render () {
     const { project } = this.props
 
+    // no project id means they have not set up to record
+    if (!project.id) {
+      return this._projectNotSetup()
+    }
+
     // not logged in
     if (!authStore.isAuthenticated) {
       return this._loginMessage()
@@ -97,7 +105,7 @@ class RunsList extends Component {
 
     // If the project is invalid
     if (project.isInvalid) {
-      return this._emptyWithoutSetup(false)
+      return this._projectNotSetup(false)
     }
 
     // OR if user does not have acces to the project
@@ -109,14 +117,18 @@ class RunsList extends Component {
     if (this.runsStore.error) {
       // project id missing, probably removed manually from cypress.json
       if (errors.isMissingProjectId(this.runsStore.error)) {
-        return this._emptyWithoutSetup()
+        return this._projectNotSetup()
 
       // the project is invalid
       } else if (errors.isNotFound(this.runsStore.error)) {
-        return this._emptyWithoutSetup(false)
+        return this._projectNotSetup(false)
+
+      // they have been logged out
+      } else if (errors.isUnauthenticated(this.runsStore.error)) {
+        return this._loginMessage()
 
       // they are not authorized to see runs
-      } else if (errors.isUnauthenticated(this.runsStore.error) || errors.isUnauthorized(this.runsStore.error)) {
+      } else if (errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
       // other error, but only show if we don't already have runs
@@ -133,7 +145,7 @@ class RunsList extends Component {
 
       // AND they've never setup CI
       if (!project.id) {
-        return this._emptyWithoutSetup()
+        return this._projectNotSetup()
 
       // OR they have setup CI
       } else {
@@ -187,10 +199,6 @@ class RunsList extends Component {
   }
 
   _loginMessage () {
-    const showLogin = () => {
-      authStore.setShowingLogin(true)
-    }
-
     return (
       <div className='empty empty-log-in'>
         <h4>Please Log In to View Runs</h4>
@@ -201,18 +209,12 @@ class RunsList extends Component {
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
         </div>
         <p>After runs are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
-        <button
-          className='btn btn-primary'
-          onClick={showLogin}
-        >
-          <i className='fa fa-user'></i>{' '}
-          Log In
-        </button>
+        <LoginForm />
       </div>
     )
   }
 
-  _emptyWithoutSetup (isValid = true) {
+  _projectNotSetup (isValid = true) {
     return (
       <ProjectNotSetup
         project={this.props.project}

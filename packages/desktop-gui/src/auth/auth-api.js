@@ -21,10 +21,6 @@ class AuthApi {
   }
 
   login () {
-    const alreadyOpen = (err) => {
-      return err && err.alreadyOpen
-    }
-
     return ipc.windowOpen({
       position: 'center',
       focus: true,
@@ -41,7 +37,7 @@ class AuthApi {
       authStore.setUser(user)
       return null
     })
-    .catch(alreadyOpen, () => {})
+    .catch({ alreadyOpen: true }, () => {})
   }
 
   logOut () {
