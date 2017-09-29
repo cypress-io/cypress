@@ -22,8 +22,10 @@ install:
   # Output useful info for debugging.
   - node --version
   - npm --version
-  # install root modules
-  - npm install
+  # install root modules only
+  - npm install --ignore-scripts
+  # install every package one by one
+  - npm run all install -- --serial
 
 # Post-install test scripts.
 test_script:
