@@ -33,7 +33,9 @@
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
-    "release": "gulp release"
+    "release": "gulp release",
+    "test-mocha": "mocha --reporter spec scripts/spec.js",
+    "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js"
   },
   "lint-staged": {
     "*.js": [
@@ -63,6 +65,7 @@
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.3.0",
     "execa": "^0.8.0",
+    "execa-wrap": "^1.1.0",
     "filesize": "^3.5.10",
     "fs-extra": "^2.1.2",
     "gulp": "^3.9.1",
@@ -85,6 +88,7 @@
     "plist": "^2.1.0",
     "pluralize": "^6.0.0",
     "prefixed-list": "^1.0.1",
+    "snap-shot-it": "^4.0.1",
     "stop-only": "^1.1.0",
     "typescript": "^2.3.4",
     "vagrant": "0.0.1",
