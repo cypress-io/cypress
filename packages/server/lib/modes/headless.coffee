@@ -322,11 +322,10 @@ module.exports = {
       finish = ->
         writeOutput()
         .then ->
-          project
-          .getConfig()
-          .then (cfg) ->
-            obj.config = cfg
-          .return(obj)
+          project.getConfig()
+        .then (cfg) ->
+          obj.config = cfg
+        .return(obj)
 
       @displayStats(testResults)
 
@@ -338,12 +337,17 @@ module.exports = {
       if ft and ft.length
         obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
-      if end
-        @postProcessRecording(end, name, cname, videoCompression)
-        .then(finish)
-        ## TODO: add a catch here
-      else
-        finish()
+      ## always close the browser now as opposed to letting
+      ## it exit naturally with the parent process due to
+      ## electron bug in windows
+      openProject.closeBrowser()
+      .then =>
+        if end
+          @postProcessRecording(end, name, cname, videoCompression)
+          .then(finish)
+          ## TODO: add a catch here
+        else
+          finish()
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true
