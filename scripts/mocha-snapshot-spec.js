@@ -6,6 +6,7 @@ function normalize (s) {
   // and the command is hardcoded in package.json
   // using forward slashes
   return s.replace(process.cwd(), '<folder path>')
+    .replace(/passing \(\d+ms\)/, 'passing (<time>ms)')
 }
 
 /* eslint-env mocha */

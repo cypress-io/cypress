@@ -18,7 +18,7 @@ exports['captures mocha output 1'] = `
       ✓ works
 
 
-    1 passing (10ms)
+    1 passing (<time>ms)
   -------
   stderr:
   -------
