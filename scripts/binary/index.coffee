@@ -18,6 +18,8 @@ bump     = require("./bump")
 meta     = require("./meta")
 build    = require("./build")
 upload   = require("./upload")
+{uploadNpmPackage} = require("./upload-npm-package")
+{uploadUniqueBinary} = require("./upload-unique-binary")
 
 success = (str) ->
   console.log chalk.bgGreen(" " + chalk.black(str) + " ")
@@ -125,6 +127,17 @@ deploy = {
       options.zip = path.resolve(zippedFilename(options.platform))
       zip.ditto(zipDir, options.zip)
 
+  # upload Cypres NPM package file
+  "upload-npm-package": (args = process.argv) ->
+    console.log('#packageUpload')
+    uploadNpmPackage(args)
+
+  # upload Cypres binary zip file under unique hash
+  "upload-unique-binary": (args = process.argv) ->
+    console.log('#uniqueBinaryUpload')
+    uploadUniqueBinary(args)
+
+  # upload Cypress binary ZIP file
   upload: (options) ->
     console.log('#upload')
     if !options then options = @parseOptions(process.argv)
