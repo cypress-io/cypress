@@ -396,6 +396,7 @@ jobs:
       - run: cat binary-url.json
       - run: mkdir /tmp/urls
       - run: cp binary-url.json /tmp/urls
+      - run: cp cypress.zip /tmp/urls
       - run: ls /tmp/urls
       - persist_to_workspace:
           root: /tmp/urls
@@ -443,7 +444,7 @@ jobs:
           paths:
             - npm-package-url.json
 
-  "test-binary":
+  "test-next-version":
     <<: *defaults
     steps:
       - restore_cache:
@@ -451,7 +452,7 @@ jobs:
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la /tmp/urls
-      - run: cat /tmp/urls/*
+      - run: cat /tmp/urls/*.json
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -476,11 +477,15 @@ jobs:
               --npm /tmp/urls/npm-package-url.json \
               --binary /tmp/urls/binary-url.json
 
-  "test-binary-local-npm-package":
+  "test-next-version-locally":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: /tmp/urls
+      # make sure we have cypress.zip received
+      - run: ls -l /tmp/urls/cypress.zip
       # build NPM package
       - run: cd cli && npm run build
       - run: mkdir test-binary
@@ -493,7 +498,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=$NEXT_LINUX_BINARY_VERSION npm i ../cli/build
+          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i ../cli/build
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -563,6 +568,7 @@ workflows:
             branches:
               only:
                 - develop
+                - bump-via-commit-537
           requires:
             - build
       - build-binary:
@@ -570,16 +576,28 @@ workflows:
             branches:
               only:
                 - develop
+                - bump-via-commit-537
           requires:
             - build
-      - test-binary:
+      - test-next-version:
           filters:
             branches:
               only:
                 - develop
+                - bump-via-commit-537
           requires:
             - build-npm-package
             - build-binary
+      # enable once we can point CYPRESS_BINARY_VERSION at an existing file
+      # - test-next-version-locally:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - bump-via-commit-537
+      #     requires:
+      #       - build-npm-package
+      #       - build-binary
 
 #
 # things to run in the 4th CI container

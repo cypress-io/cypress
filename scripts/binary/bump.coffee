@@ -5,7 +5,10 @@ bumpercar = require("@cypress/bumpercar")
 path      = require("path")
 la        = require('lazy-ass')
 check     = require('check-more-types')
+R         = require("ramda")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
+makeEmptyGithubCommit = require("make-empty-github-commit")
+parse = require("parse-github-repo-url")
 
 fs = Promise.promisifyAll(fs)
 
@@ -21,16 +24,11 @@ PROVIDERS = {
     # "cypress-io/cypress-example-piechopper"
     # "cypress-io/cypress-example-recipes"
 
-    # this project has single CI job using Circle v1.0
-    # that can be just triggered through API
     "cypress-io/cypress-test-module-api"
-
-    # the rest uses workflows in Circle v2.0
-    # which require dummy commit to run correctly
-    # "cypress-io/cypress-test-example-repos"
-    # "cypress-io/cypress-test-node-versions"
-    # "cypress-io/cypress-test-nested-projects"
-    # "cypress-io/cypress-test-ci-environments"
+    "cypress-io/cypress-test-node-versions"
+    "cypress-io/cypress-test-nested-projects"
+    "cypress-io/cypress-test-ci-environments"
+    "cypress-io/cypress-test-example-repos"
   ]
 
   # travis: [
@@ -76,7 +74,7 @@ awaitEachProjectAndProvider = (fn) ->
   .then ->
     _.map PROVIDERS, (projects, provider) ->
       Promise.map projects, (project) ->
-        fn(project, provider)
+        fn(project, provider, creds)
   .all()
 
 module.exports = {
@@ -93,13 +91,39 @@ module.exports = {
     la(check.unemptyString(binaryVersionOrUrl),
       "missing binary version or url", binaryVersionOrUrl)
 
-    awaitEachProjectAndProvider (project, provider) ->
+    result = {
+      versionName: nameOrUrl,
+      binary: binaryVersionOrUrl
+    }
+
+    updateProject = (project, provider) ->
+      console.log("setting environment variables in", project)
       car.updateProjectEnv(project, provider, {
         CYPRESS_NPM_PACKAGE_NAME: nameOrUrl,
         CYPRESS_BINARY_VERSION: binaryVersionOrUrl
       })
+    awaitEachProjectAndProvider(updateProject)
+    .then R.always(result)
 
-  run: ->
-    awaitEachProjectAndProvider (project, provider) ->
-      car.runProject(project, provider)
+  run: (message) ->
+    if not message
+      message =
+        """
+        Testing new Cypress version
+
+        CI build url #{process.env.CIRCLE_BUILD_URL}
+        """
+    awaitEachProjectAndProvider (project, provider, creds) ->
+      # instead of triggering CI via API
+      # car.runProject(project, provider)
+      # make empty commit to trigger CIs
+
+      parsedRepo = parse(project)
+      console.log("running project", project)
+      makeEmptyGithubCommit({
+        owner: parsedRepo[0],
+        repo: parsedRepo[1],
+        token: creds.githubToken,
+        message
+      })
 }
