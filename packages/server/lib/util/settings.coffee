@@ -3,6 +3,7 @@ Promise  = require("bluebird")
 path     = require("path")
 fs       = require("fs-extra")
 errors   = require("../errors")
+log      = require("../log")
 
 ## TODO:
 ## think about adding another PSemaphore
@@ -83,6 +84,7 @@ module.exports =
       fs.accessAsync(projectRoot, fs.W_OK)
     .catch {code: "ENOENT"}, (err) =>
       ## cypress.json does not exist, we missing project
+      log("cannot find file %s", file)
       @_err("PROJECT_DOES_NOT_EXIST", projectRoot, err)
     .catch (err) =>
       throw err if errors.isCypressErr(err)

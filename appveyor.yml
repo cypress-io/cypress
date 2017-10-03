@@ -1,11 +1,22 @@
+branches:
+  only:
+    - master
+    - develop
+    - /win*/
+
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 # Test against the latest version of this Node.js version
 environment:
   nodejs_version: "6"
+  CYPRESS_BINARY_VERSION: "0.20.2-win"
 
 # https://www.appveyor.com/docs/build-cache/
+# hmm, seems there is NPM on windows problem
+# with installing over cached folder
+# https://github.com/npm/npm/issues/17747
 # cache:
 #   - node_modules
+#   # todo: cache node_modules in each package
 
 # Install scripts. (runs after repo cloning)
 install:
@@ -15,16 +26,42 @@ install:
   # Output useful info for debugging.
   - node --version
   - npm --version
-  # install root modules
-  - npm install
+  # install root modules only
+  - npm install --ignore-scripts
+  # because we skipped scripts, we need to do
+  # everything from "postinstall" script as commands
+  - npm run link
+  # install every package one by one
+  - npm run all install -- --serial
+  # - npm prune
+  # - npm run all prune -- --serial
+  - npm run all build -- --serial
 
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
+  - 7z
   - cd packages/launcher && node index.js && cd ../..
+  # make sure mocha runs
+  - npm run test-mocha
+  # make sure our snapshots are compared correctly
+  - npm run test-mocha-snapshot
+  # the other larger tests
   - npm run binary-build -- --platform windows --version 0.20.2-win
+  - npm run binary-zip
+  - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
+  # build CLI NPM package
+  - cd cli && npm run build && cd ..
+  # start new projet
+  - mkdir test-win-binary
+  - cd test-win-binary
+  - npm init -y
+  # # will install fresh binary because CYPRESS_BINARY_VERSION variable
+  - npm install ../cli/build
+  - .\node_modules\.bin\cypress verify
+
   # - cd packages/server && npm run test-unit
   # - npm test
 

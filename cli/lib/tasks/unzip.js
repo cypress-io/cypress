@@ -114,6 +114,7 @@ const unzip = (options = {}) => {
         case 'darwin':
           return unzipWithOsx()
         case 'linux':
+        case 'win32':
           return unzipWithNode()
         default:
           return
@@ -139,4 +140,14 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
+}
+
+// demo / test
+if (!module.parent && process.env.ZIP) {
+  /* eslint-disable no-console */
+  console.log('unzipping file', process.env.ZIP)
+  start({
+    downloadDestination: process.env.ZIP,
+  }).catch(console.error)
+  /* eslint-enable no-console */
 }

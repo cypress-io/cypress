@@ -11,6 +11,7 @@ la       = require("lazy-ass")
 check    = require("check-more-types")
 debug    = require("debug")("cypress:binary")
 questionsRemain = require("@cypress/questions-remain")
+R        = require("ramda")
 
 zip      = require("./zip")
 ask      = require("./ask")
@@ -27,10 +28,7 @@ success = (str) ->
 fail = (str) ->
   console.log chalk.bgRed(" " + chalk.black(str) + " ")
 
-zippedFilename = (platform) ->
-  # TODO use .tar.gz for linux archive. For now to preserve
-  # same file format as before use .zip
-  if platform is "linux" then "cypress.zip" else "cypress.zip"
+zippedFilename = R.always("cypress.zip")
 
 # goes through the list of properties and asks relevant question
 # resolves with all relevant options set
@@ -57,7 +55,8 @@ deploy = {
         "skip-clean": false
       }
       alias: {
-        skipClean: "skip-clean"
+        skipClean: "skip-clean",
+        zip: ["zipFile", "zip-file", "filename"]
       }
     })
     opts.runTests = false if opts["skip-tests"]
