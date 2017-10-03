@@ -57,22 +57,22 @@ test_script:
   - npm pack
   - cd ../..
   - echo Uploading NPM windows package
-  - ps: |
+  - cmd: |
       node scripts/binary.js upload-npm-package \
-        --file cli/build/cypress-$env.NEXT_DEV_VERSION.tgz \
-        --version $env.NEXT_DEV_VERSION \
-        --hash $env:APPVEYOR_REPO_BRANCH-$env:APPVEYOR_REPO_COMMIT-$env:APPVEYOR_BUILD_ID
+        --file cli/build/cypress-%NEXT_DEV_VERSION%.tgz \
+        --version %NEXT_DEV_VERSION% \
+        --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID%
   - cat npm-package-url.json
 
   - echo Building binary %NEXT_DEV_VERSION%
   - npm run binary-build -- --platform windows --version %NEXT_DEV_VERSION%
   - npm run binary-zip
   - ls -l *.zip
-  - ps: |
+  - cmd: |
       node scripts/binary.js upload-unique-binary \
         --file cypress.zip \
-        --version $env:NEXT_DEV_VERSION \
-        --hash $env:APPVEYOR_REPO_BRANCH-$env:APPVEYOR_REPO_COMMIT-$env:APPVEYOR_BUILD_ID
+        --version %NEXT_DEV_VERSION% \
+        --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID%
   - cat binary-url.json
   # - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
   # build CLI NPM package
