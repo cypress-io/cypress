@@ -162,7 +162,7 @@ module.exports = (cmd, options) => {
     if (runSerially) {
       console.log('⚠️ running jobs serially')
     }
-    const parallel = runSerially
+    const parallel = !runSerially
     return runAll(tasks, {
       parallel,
       printLabel: tasks.length > 1,
