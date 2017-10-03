@@ -54,7 +54,7 @@ test_script:
   - npm run build
   - cd build
   # - npm run size
-  - npm run pack
+  - npm pack
   - cd ../..
   - echo Uploading NPM windows package
   - ps: |
