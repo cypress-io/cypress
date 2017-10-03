@@ -6,6 +6,7 @@ const cp = require('child_process')
 const EE = require('events').EventEmitter
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
+const { stripIndent } = require('common-tags')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -224,6 +225,44 @@ context('.verify', function () {
       })
       .then((verifiedVersion) => {
         expect(verifiedVersion).to.be.null
+      })
+    })
+  })
+
+  describe('smoke test with DEBUG output', function () {
+    beforeEach(function () {
+      this.sandbox.stub(fs, 'statAsync').resolves()
+      this.sandbox.stub(_, 'random').returns('222')
+      const stdoutWithDebugOutput = stripIndent`
+        some debug output
+        date: more debug output
+        222
+        after that more text
+      `
+      this.sandbox.stub(this.cpstdout, 'on').yieldsAsync(stdoutWithDebugOutput)
+    })
+
+    it('finds ping value in the verbose output', function () {
+      const ctx = this
+
+      return info.writeInfoFileContents({
+        version: packageVersion,
+      })
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        return info.getVerifiedVersion()
+      })
+      .then((vv) => {
+        expect(vv).to.eq(packageVersion)
+      })
+      .delay(LISTR_DELAY)
+      .then(() => {
+        snapshot(
+          'verbose stdout output',
+          normalize(ctx.stdout.toString())
+        )
       })
     })
   })
