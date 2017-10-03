@@ -11,6 +11,7 @@ build
 .publish
 _test-output
 cypress.zip
+tmp/
 
 # from extension
 Cached Theme.pak
