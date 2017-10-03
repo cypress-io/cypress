@@ -73,8 +73,7 @@ describe "Login", ->
           @openWindow.resolve("code-123")
 
       it "triggers ipc 'log:in'", ->
-        cy.then ->
-          expect(@ipc.logIn).to.be.calledWith("code-123")
+        cy.wrap(@ipc.logIn).should("be.calledWith", "code-123")
 
       it "displays spinner with 'Logging in...' and disables button", ->
         cy.contains("Logging in...").should("be.disabled")

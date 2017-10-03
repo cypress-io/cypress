@@ -284,7 +284,7 @@ describe "Runs List", ->
               @ipc.getRuns.onCall(2).returns(@getRuns.promise)
 
             it "retries getting runs", ->
-              expect(@ipc.getRuns.callCount).to.above(1)
+              cy.wrap(@ipc.getRuns).its("callCount").should("be.above", 1)
 
             it "shows loading spinner", ->
               cy.get(".loader")
