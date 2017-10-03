@@ -26,8 +26,9 @@ class RunsList extends Component {
 
   componentWillMount () {
     this.runsStore = new RunsStore()
+  }
 
-    this._getRuns()
+  componentDidMount () {
     this._handlePolling()
     this._getKey()
   }
@@ -42,7 +43,9 @@ class RunsList extends Component {
   }
 
   _getRuns = () => {
-    runsApi.loadRuns(this.runsStore)
+    if (authStore.isAuthenticated && !!this.props.project.id) {
+      runsApi.loadRuns(this.runsStore)
+    }
   }
 
   _handlePolling () {
@@ -62,6 +65,9 @@ class RunsList extends Component {
   }
 
   _poll () {
+    if (runsApi.isPolling()) return
+
+    runsApi.loadRuns(this.runsStore)
     runsApi.pollRuns(this.runsStore)
   }
 

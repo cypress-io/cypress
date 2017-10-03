@@ -10,7 +10,7 @@ import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
-import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizations-api'
+import orgsApi from '../organizations/organizations-api'
 
 import LoginForm from '../auth/login-form'
 
@@ -60,12 +60,14 @@ class SetupProject extends Component {
   }
 
   _poll () {
-    getOrgs()
-    pollOrgs()
+    if (orgsApi.isPolling()) return
+
+    orgsApi.getOrgs()
+    orgsApi.pollOrgs()
   }
 
   _stopPolling () {
-    stopPollingOrgs()
+    orgsApi.stopPollingOrgs()
   }
 
   render () {

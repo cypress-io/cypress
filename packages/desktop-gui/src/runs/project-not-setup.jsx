@@ -12,12 +12,8 @@ export default class ProjectNotSetup extends Component {
     project: PropTypes.object,
   }
 
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      setupProjectModalOpen: false,
-    }
+  state = {
+    setupProjectModalOpen: false,
   }
 
   render () {

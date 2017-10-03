@@ -75,6 +75,9 @@ describe "Runs List", ->
         .then =>
           @getRuns.resolve(@runs)
 
+    it "fetches runs", ->
+      expect(@ipc.getRuns).to.be.called
+
     it "lists runs", ->
       cy
         .get(".runs-container li")
@@ -100,6 +103,16 @@ describe "Runs List", ->
         .click()
         .then =>
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
+
+  context "without a current user", ->
+    beforeEach ->
+      @getCurrentUser.resolve(null)
+      @openProject.resolve(@config)
+
+      @goToRuns()
+
+    it "does not fetch runs", ->
+      expect(@ipc.getRuns).not.to.be.called
 
   context "without a project id", ->
     beforeEach ->
@@ -268,10 +281,10 @@ describe "Runs List", ->
               @requestAccess.reject({name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
               @getRuns = @util.deferred()
               @ipc.getRuns.onCall(1).returns(@getRuns.promise)
-              cy.wait(1)
+              @ipc.getRuns.onCall(2).returns(@getRuns.promise)
 
             it "retries getting runs", ->
-              expect(@ipc.getRuns.callCount).to.equal(2)
+              expect(@ipc.getRuns.callCount).to.above(1)
 
             it "shows loading spinner", ->
               cy.get(".loader")
@@ -368,6 +381,7 @@ describe "Runs List", ->
       beforeEach ->
         @openProject.resolve(@config)
         @ipc.setupDashboardProject.resolves(@validCiProject)
+        @ipc.getRuns.onCall(1).resolves([])
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
 
@@ -376,7 +390,7 @@ describe "Runs List", ->
 
       it "clears message after setting up to record", ->
         cy
-          .get(".btn").contains("Set Up Project").click()
+          .contains(".btn", "Set Up Project").click()
           .get(".modal-body")
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
@@ -426,12 +440,12 @@ describe "Runs List", ->
 
       it "clicking link opens setup project window", ->
         cy
-          .get(".btn").contains("Set Up a New Project").click()
+          .contains(".btn", "Set Up a New Project").click()
           .get(".modal").should("be.visible")
 
       it "clears message after setting up CI", ->
         cy
-          .get(".btn").contains("Set Up a New Project").click()
+          .contains(".btn", "Set Up a New Project").click()
           .get(".modal-body")
             .contains(".btn", "Me").click()
           .get(".privacy-radio").find("input").last().check()
