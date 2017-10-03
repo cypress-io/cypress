@@ -48,7 +48,24 @@ test_script:
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
-  - npm run binary-build -- --platform windows --version $env:NEXT_DEV_VERSION
+  - echo Building Windows NPM package $NEXT_DEV_VERSION
+  - npm --no-git-tag-version version $NEXT_DEV_VERSION
+  - cd cli
+  - npm run build
+  - cd build
+  - npm run size
+  - npm run pack
+  - cd ../..
+  - echo Uploading NPM windows package
+  - ps: |
+      node scripts/binary.js upload-npm-package \
+        --file cli/build/cypress-$env.NEXT_DEV_VERSION.tgz \
+        --version $env.NEXT_DEV_VERSION \
+        --hash $env:APPVEYOR_REPO_BRANCH-$env:APPVEYOR_REPO_COMMIT-$env:APPVEYOR_BUILD_ID
+  - cat npm-package-url.json
+
+  - echo Building binary $NEXT_DEV_VERSION
+  - npm run binary-build -- --platform windows --version $NEXT_DEV_VERSION
   - npm run binary-zip
   - ls -l *.zip
   - ps: |
