@@ -8,7 +8,6 @@ branches:
 # Test against the latest version of this Node.js version
 environment:
   nodejs_version: "6"
-  CYPRESS_BINARY_VERSION: "0.20.2-win"
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem
@@ -49,18 +48,25 @@ test_script:
   # make sure our snapshots are compared correctly
   - npm run test-mocha-snapshot
   # the other larger tests
-  - npm run binary-build -- --platform windows --version 0.20.2-win
+  - npm run binary-build -- --platform windows --version $env:NEXT_DEV_VERSION
   - npm run binary-zip
-  - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
+  - ls -l *.zip
+  - ps: |
+      node scripts/binary.js upload-unique-binary \
+        --file cypress.zip \
+        --version $env:NEXT_DEV_VERSION \
+        --hash $env:APPVEYOR_REPO_BRANCH-$env:APPVEYOR_REPO_COMMIT-$env:APPVEYOR_BUILD_ID
+  - cat binary-url.json
+  # - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
   # build CLI NPM package
-  - cd cli && npm run build && cd ..
-  # start new projet
-  - mkdir test-win-binary
-  - cd test-win-binary
-  - npm init -y
-  # # will install fresh binary because CYPRESS_BINARY_VERSION variable
-  - npm install ../cli/build
-  - .\node_modules\.bin\cypress verify
+  # - cd cli && npm run build && cd ..
+  # # start new projet
+  # - mkdir test-win-binary
+  # - cd test-win-binary
+  # - npm init -y
+  # # # will install fresh binary because CYPRESS_BINARY_VERSION variable
+  # - npm install ../cli/build
+  # - .\node_modules\.bin\cypress verify
 
   # - cd packages/server && npm run test-unit
   # - npm test
