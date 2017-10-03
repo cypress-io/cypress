@@ -11,6 +11,9 @@ fs = Promise.promisifyAll(fse)
 canRecordVideo = () ->
   os.platform() != "win32"
 
+shouldSkipProjectTest = () ->
+  os.platform() == "win32"
+
 runSmokeTest = (buildAppExecutable) ->
   new Promise (resolve, reject) ->
     rand = "" + Math.random()
@@ -36,6 +39,10 @@ runSmokeTest = (buildAppExecutable) ->
         resolve()
 
 runProjectTest = (buildAppExecutable, e2e) ->
+  if shouldSkipProjectTest()
+    console.log("skipping project test")
+    return Promise.resolve()
+
   console.log("running project test")
 
   new Promise (resolve, reject) ->
@@ -63,6 +70,10 @@ runProjectTest = (buildAppExecutable, e2e) ->
         reject(new Error("running project tests failed with: '#{code}' errors."))
 
 runFailingProjectTest = (buildAppExecutable, e2e) ->
+  if shouldSkipProjectTest()
+    console.log("skipping failing project test")
+    return Promise.resolve()
+
   console.log("running failing project test")
 
   verifyScreenshots = ->

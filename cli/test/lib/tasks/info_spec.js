@@ -81,6 +81,13 @@ describe('info', function () {
     })
   })
 
+  context('.getPathToExecutable', function () {
+    it('resolves path on windows', function () {
+      this.sandbox.stub(os, 'platform').returns('win32')
+      expect(info.getPathToExecutable()).to.endWith('.exe')
+    })
+  })
+
   context('.getPathToUserExecutableDir', function () {
     it('resolves path on macOS', function () {
       this.sandbox.stub(os, 'platform').returns('darwin')
@@ -92,9 +99,14 @@ describe('info', function () {
       expect(info.getPathToUserExecutableDir()).to.equal(path.join(installationDir, 'Cypress'))
     })
 
-    it('rejects on anything else', function () {
+    it('resolves path on windows', function () {
       this.sandbox.stub(os, 'platform').returns('win32')
-      expect(() => info.getPathToUserExecutableDir()).to.throw('Platform: "win32" is not supported.')
+      expect(info.getPathToUserExecutableDir()).to.endWith('Cypress')
+    })
+
+    it('rejects on anything else', function () {
+      this.sandbox.stub(os, 'platform').returns('unknown')
+      expect(() => info.getPathToUserExecutableDir()).to.throw('Platform: "unknown" is not supported.')
     })
   })
 

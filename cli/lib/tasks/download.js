@@ -15,6 +15,12 @@ const info = require('./info')
 
 const baseUrl = 'https://download.cypress.io/'
 
+const isString = (s) =>
+  typeof s === 'string'
+
+const isUrl = (s) =>
+  isString(s) && /^https:/.test(s)
+
 const getOs = () => {
   const platform = os.platform()
 
@@ -32,6 +38,10 @@ const prepend = (urlPath) => {
 }
 
 const getUrl = (version) => {
+  if (isUrl(version)) {
+    debug('version is already an url', version)
+    return version
+  }
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 

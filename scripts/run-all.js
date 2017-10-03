@@ -158,8 +158,13 @@ module.exports = (cmd, options) => {
   })
   .then((dirs) => mapTasks(cmd, dirs))
   .then((tasks) => {
+    const runSerially = Boolean(options.serial)
+    if (runSerially) {
+      console.log('⚠️ running jobs serially')
+    }
+    const parallel = !runSerially
     return runAll(tasks, {
-      parallel: !options.serial,
+      parallel,
       printLabel: tasks.length > 1,
       stdout: process.stdout,
       stderr: collectStderr,
