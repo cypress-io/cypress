@@ -46,7 +46,7 @@ test_script:
   # make sure mocha runs
   - npm run test-mocha
   # make sure our snapshots are compared correctly
-  - npm run test-mocha-snapshot
+  # - npm run test-mocha-snapshot
   # the other larger tests
   - npm run binary-build -- --platform windows --version $env:NEXT_DEV_VERSION
   - npm run binary-zip
