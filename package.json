@@ -43,7 +43,7 @@
     ]
   },
   "devDependencies": {
-    "@cypress/bumpercar": "^1.0.6",
+    "@cypress/bumpercar": "^1.1.0",
     "@cypress/env-or-json-file": "^1.2.0",
     "@cypress/npm-run-all": "^4.0.4",
     "@cypress/questions-remain": "^1.0.1",
@@ -57,6 +57,7 @@
     "cloudflare-cli": "^2.1.0",
     "coffeelint": "^1.16.0",
     "common-tags": "^1.4.0",
+    "console.table": "^0.9.1",
     "debug": "^2.6.8",
     "del": "^3.0.0",
     "deps-ok": "^1.2.0",
