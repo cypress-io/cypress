@@ -7,20 +7,20 @@ const { getNameAndBinary } = require('./utils')
 
 /* eslint-disable no-console */
 
-const { npmUrl, binaryUrl } = getNameAndBinary(process.argv)
-la(is.unemptyString(npmUrl), 'missing npm url')
-la(is.unemptyString(binaryUrl), 'missing binary url')
+const { npm, binary } = getNameAndBinary(process.argv)
+la(is.unemptyString(npm), 'missing npm url')
+la(is.unemptyString(binary), 'missing binary url')
 
-console.log('testing NPM from', npmUrl)
-console.log('and binary from', binaryUrl)
+console.log('testing NPM from', npm)
+console.log('and binary from', binary)
 const cwd = options.cwd || process.cwd()
 console.log('in', cwd)
 
-execa.shell(`npm install ${npmUrl}`, {
+execa.shell(`npm install ${npm}`, {
   cwd,
   stdio: 'inherit',
   env: {
-    CYPRESS_BINARY_VERSION: binaryUrl,
+    CYPRESS_BINARY_VERSION: binary,
   },
 })
 .then(console.log)
