@@ -34,7 +34,7 @@
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
-    "release": "gulp release",
+    "binary-release": "node ./scripts/binary.js release",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js"
   },

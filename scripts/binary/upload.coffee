@@ -54,7 +54,7 @@ module.exports = {
       }
     }
 
-    src = path.join(meta.buildDir, "manifest.json")
+    src = path.resolve("manifest.json")
     fs.outputJsonAsync(src, obj).return(src)
 
   s3Manifest: (version) ->
@@ -65,8 +65,13 @@ module.exports = {
     headers = {}
     headers["Cache-Control"] = "no-cache"
 
+    manifest = null
+
     new Promise (resolve, reject) =>
-      @createRemoteManifest(aws.folder, version).then (src) ->
+      @createRemoteManifest(aws.folder, version)
+      .then (src) ->
+        manifest = src
+
         gulp.src(src)
         .pipe rename (p) ->
           p.dirname = aws.folder + "/" + p.dirname
@@ -76,6 +81,8 @@ module.exports = {
         .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
+    .finally ->
+      fs.removeAsync(manifest)
 
   toS3: ({zipFile, version, platform}) ->
     console.log("#uploadToS3 ⏳")

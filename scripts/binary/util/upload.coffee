@@ -11,9 +11,17 @@ Promise = require("bluebird")
 konfig  = require("../../../packages/server/lib/konfig")
 
 getS3Credentials = () ->
-  key = path.join('scripts', 'binary', 'support', '.aws-credentials.json')
+  ## gleb: fix this plzzzzzz
+  old = process.cwd()
+
+  process.chdir(path.resolve(__dirname, '..'))
+
+  key = path.join('support', '.aws-credentials.json')
 
   config = configFromEnvOrJsonFile(key)
+
+  process.chdir(old)
+  
   if !config
     console.error('⛔️  Cannot find AWS credentials')
     console.error('Using @cypress/env-or-json-file module')

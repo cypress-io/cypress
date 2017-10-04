@@ -67,8 +67,17 @@ remapProjects = (projectsByProvider) ->
 PROJECTS = remapProjects(_PROVIDERS)
 
 getCiConfig = ->
+  ## gleb: fix this plzzzzzz
+  old = process.cwd()
+
+  process.chdir(__dirname)
+
   key = "support/.ci.json"
+
   config = configFromEnvOrJsonFile(key)
+
+  process.chdir(old)
+
   if !config
     console.error('⛔️  Cannot find CI credentials')
     console.error('Using @cypress/env-or-json-file module')

@@ -102,12 +102,12 @@ deploy = {
         success("Release Complete")
       .catch (err) ->
         fail("Release Failed")
-        reject(err)
+        throw err
 
     if v = options.version
       release(v)
     else
-      ask.whichRelease(meta.distDir)
+      ask.whichRelease(meta.distDir(""))
       .then(release)
 
   build: (options) ->
