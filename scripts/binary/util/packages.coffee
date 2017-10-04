@@ -183,6 +183,8 @@ module.exports = {
   symlinkAll
 
   runAllCleanJs
+
+  forceNpmInstall
 }
 
 if not module.parent
