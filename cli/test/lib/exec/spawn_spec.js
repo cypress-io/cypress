@@ -12,6 +12,12 @@ describe('exec spawn', function () {
     this.spawnedProcess = this.sandbox.stub({
       on: () => {},
       unref: () => {},
+      stdout: {
+        pipe: () => {},
+      },
+      stderr: {
+        pipe: () => {},
+      },
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
     this.sandbox.stub(xvfb, 'start').resolves()

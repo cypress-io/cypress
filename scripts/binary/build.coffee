@@ -113,6 +113,16 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#npmInstallPackages")
 
     packages.npmInstallAll(distDir("packages", "*"))
+    .then () ->
+      if os.platform() != "win32"
+        return
+      # on windows include both versions of FFMPEG
+      console.log("installing FFMPEG win32-x64")
+      serverFolder = distDir("packages", "server")
+      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-x64")
+      .then () ->
+        console.log("installing FFMPEG win32-ia32")
+        packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
 
   createRootPackage = ->
     log("#createRootPackage", platform, version)
