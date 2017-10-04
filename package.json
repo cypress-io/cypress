@@ -32,6 +32,7 @@
     "binary-zip": "node ./scripts/binary.js zip",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-deploy": "node ./scripts/binary.js deploy",
+    "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
     "release": "gulp release",
     "test-mocha": "mocha --reporter spec scripts/spec.js",

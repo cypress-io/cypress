@@ -65,7 +65,6 @@ remapProjects = (projectsByProvider) ->
 # make flat list of objects
 # {repo, provider}
 PROJECTS = remapProjects(_PROVIDERS)
-console.table(PROJECTS)
 
 getCiConfig = ->
   key = "support/.ci.json"
@@ -101,6 +100,8 @@ awaitEachProjectAndProvider = (fn) ->
 module.exports = {
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform) ->
+    console.table(PROJECTS)
+
     la(check.unemptyString(nameOrUrl),
       "missing cypress name or url to set", nameOrUrl)
 

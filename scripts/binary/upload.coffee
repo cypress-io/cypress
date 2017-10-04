@@ -21,6 +21,8 @@ fs = Promise.promisifyAll(fs)
 zipName = "cypress.zip"
 
 module.exports = {
+  zipName
+
   getPublisher: ->
     uploadUtils.getPublisher(@getAwsObj)
 
@@ -35,16 +37,6 @@ module.exports = {
     dirName = [aws.folder, version, osName, null].join("/")
     console.log("target directory %s", dirName)
     dirName
-
-  purgeCache: ({version, platform}) ->
-    la(check.unemptyString(platform), "missing platform", platform)
-    la(check.unemptyString(zipName), "missing zip filename")
-    la(check.extension("zip", zipName),
-      "zip filename should end with .zip", zipName)
-
-    osName = uploadUtils.getUploadNameByOs(platform)
-    url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
-    uploadUtils.purgeCache(url)
 
   createRemoteManifest: (folder, version) ->
     getUrl = (uploadOsName) ->
@@ -117,6 +109,6 @@ module.exports = {
         .on "end", resolve
 
     upload()
-    .then =>
-      @purgeCache({version, platform})
+    .then ->
+      uploadUtils.purgeDesktopAppFromCache({version, platform, zipName})
 }
