@@ -1,3 +1,4 @@
+require("console.table")
 _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
@@ -14,7 +15,13 @@ fs = Promise.promisifyAll(fs)
 
 car = null
 
-PROVIDERS = {
+# all the projects to trigger / run / change environment variables for
+_PROVIDERS = {
+  appVeyor: [
+    # "cypress-io/cypress-example-kitchensink"
+    "cypress-io/cypress-test-tiny"
+  ]
+
   circle: [
     # "cypress-io/cypress-dashboard"
     # "cypress-io/cypress-core-example"
@@ -24,6 +31,7 @@ PROVIDERS = {
     # "cypress-io/cypress-example-piechopper"
     # "cypress-io/cypress-example-recipes"
 
+    "cypress-io/cypress-test-tiny"
     "cypress-io/cypress-test-module-api"
     "cypress-io/cypress-test-node-versions"
     "cypress-io/cypress-test-nested-projects"
@@ -41,6 +49,23 @@ PROVIDERS = {
   #   "cypress-io/cypress-example-recipes"
   # ]
 }
+
+remapProjects = (projectsByProvider) ->
+  # could also be remap + flatten
+  list = []
+  addToList = (projects, provider) ->
+    projects.forEach (repo) ->
+      list.push({
+        repo,
+        provider
+      })
+  R.mapObjIndexed(addToList, projectsByProvider)
+  list
+
+# make flat list of objects
+# {repo, provider}
+PROJECTS = remapProjects(_PROVIDERS)
+console.table(PROJECTS)
 
 getCiConfig = ->
   key = "support/.ci.json"
@@ -70,16 +95,12 @@ awaitEachProjectAndProvider = (fn) ->
     }
   })
 
-  Promise.resolve()
-  .then ->
-    _.map PROVIDERS, (projects, provider) ->
-      Promise.map projects, (project) ->
-        fn(project, provider, creds)
-  .all()
+  Promise.mapSeries PROJECTS, (project) ->
+    fn(project.repo, project.provider, creds)
 
 module.exports = {
   # in each project, set a couple of environment variables
-  version: (nameOrUrl, binaryVersionOrUrl) ->
+  version: (nameOrUrl, binaryVersionOrUrl, platform) ->
     la(check.unemptyString(nameOrUrl),
       "missing cypress name or url to set", nameOrUrl)
 

@@ -5,14 +5,21 @@ const is = require('check-more-types')
 const { getNameAndBinary } = require('./utils')
 const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
+const os = require('os')
 
 /* eslint-disable no-console */
 
-const { npmUrl, binaryUrl } = getNameAndBinary(process.argv)
-la(is.unemptyString(npmUrl), 'missing npm url')
-la(is.unemptyString(binaryUrl), 'missing binary url')
+const { npm, binary } = getNameAndBinary(process.argv)
+la(is.unemptyString(npm), 'missing npm url')
+la(is.unemptyString(binary), 'missing binary url')
+const platform = os.platform()
 
-bump.version(npmUrl, binaryUrl)
+console.log('bumping versions for other projects')
+console.log('npm:', npm)
+console.log('binary:', binary)
+console.log('platform:', platform)
+
+bump.version(npm, binary, platform)
   .then((result) => {
     console.log('bumped all test projects with new env variables')
     console.log(result)
