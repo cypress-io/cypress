@@ -68,9 +68,38 @@ linuxZip = (src, dest) ->
   .then R.tap(checkZipSize)
   .catch onError
 
+# resolves with zipped filename
+windowsZip = (src, dest) ->
+  # use 7Zip to zip
+  # http://www.7-zip.org/
+  # zips entire source directory including top level folder name
+  #   Cypress/
+  #     foo.txt
+  # creates cypress.zip for example
+  # unzip cypress.zip to get back the folder
+  #   Cypress/
+  #     foo.txt
+  cmd = "7z a #{dest} #{src}"
+  console.log("windows zip: #{cmd}")
+
+  onZipFinished = () ->
+    console.log("✅ zip finished")
+
+  onError = (err) ->
+    console.error("⛔️ could not zip #{src} into #{dest}")
+    console.error(err.message)
+    throw err
+
+  execa.shell(cmd)
+  .then onZipFinished
+  .then R.always(dest)
+  .then R.tap(checkZipSize)
+  .catch onError
+
 zippers = {
   linux: linuxZip
   darwin: macZip
+  win32: windowsZip
 }
 
 module.exports = {

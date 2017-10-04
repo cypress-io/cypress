@@ -116,7 +116,6 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -201,7 +200,6 @@ Headers: {
 }
 Body: Service Unavailable
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

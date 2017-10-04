@@ -6,6 +6,7 @@ const cp = require('child_process')
 const EE = require('events').EventEmitter
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
+const { stripIndent } = require('common-tags')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -21,6 +22,8 @@ const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 const installationDir = info.getInstallationDir()
+
+const LISTR_DELAY = 500 // for its animation
 
 const slice = (str) => {
   // strip answer and split by new lines
@@ -191,7 +194,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'verification with executable',
@@ -226,6 +229,44 @@ context('.verify', function () {
     })
   })
 
+  describe('smoke test with DEBUG output', function () {
+    beforeEach(function () {
+      this.sandbox.stub(fs, 'statAsync').resolves()
+      this.sandbox.stub(_, 'random').returns('222')
+      const stdoutWithDebugOutput = stripIndent`
+        some debug output
+        date: more debug output
+        222
+        after that more text
+      `
+      this.sandbox.stub(this.cpstdout, 'on').yieldsAsync(stdoutWithDebugOutput)
+    })
+
+    it('finds ping value in the verbose output', function () {
+      const ctx = this
+
+      return info.writeInfoFileContents({
+        version: packageVersion,
+      })
+      .then(() => {
+        return verify.start()
+      })
+      .then(() => {
+        return info.getVerifiedVersion()
+      })
+      .then((vv) => {
+        expect(vv).to.eq(packageVersion)
+      })
+      .delay(LISTR_DELAY)
+      .then(() => {
+        snapshot(
+          'verbose stdout output',
+          normalize(ctx.stdout.toString())
+        )
+      })
+    })
+  })
+
   describe('smoke test', function () {
     beforeEach(function () {
       this.sandbox.stub(fs, 'statAsync').resolves()
@@ -248,7 +289,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'no existing version verified',
@@ -273,7 +314,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq(packageVersion)
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -298,7 +339,7 @@ context('.verify', function () {
       .then((vv) => {
         expect(vv).to.eq('9.8.7')
       })
-      .delay(300) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -319,7 +360,7 @@ context('.verify', function () {
           welcomeMessage: false,
         })
       })
-      .delay(100) // give a little padding for listr
+      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'no welcome message',

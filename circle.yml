@@ -182,6 +182,11 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      # make sure mocha runs
+      - run: npm run test-mocha
+      # make sure our snapshots are compared correctly
+      - run: npm run test-mocha-snapshot
+      # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package coffee
       - run: npm run all test -- --package desktop-gui
@@ -380,7 +385,129 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
+      # instead of building / zipping and uploading all in single command
+      # - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
+      # build, zip and upload as a unique file
+      - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
+      - run: npm run binary-zip -- --platform linux
+      - run: ls -l *.zip
+      - run:
+          name: upload unique binary
+          command: |
+            node scripts/binary.js upload-unique-binary \
+              --file cypress.zip \
+              --version $NEXT_DEV_VERSION \
+              --hash $CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
+      - run: cat binary-url.json
+      - run: mkdir /tmp/urls
+      - run: cp binary-url.json /tmp/urls
+      - run: cp cypress.zip /tmp/urls
+      - run: ls /tmp/urls
+      - persist_to_workspace:
+          root: /tmp/urls
+          paths:
+            - binary-url.json
+
+  "build-npm-package":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: bump NPM version
+          command: npm --no-git-tag-version version $NEXT_DEV_VERSION
+      - run:
+          name: build NPM package
+          working_directory: cli
+          command: npm run build
+      - run:
+          name: list NPM package contents
+          working_directory: cli/build
+          command: npm run size
+      - run:
+          name: pack NPM package
+          working_directory: cli/build
+          command: npm pack
+      - run:
+          name: list created NPM package
+          working_directory: cli/build
+          command: ls -l
+      # created file should have filename cypress-<version>.tgz
+      - run:
+          name: upload NPM package
+          command: |
+            node scripts/binary.js upload-npm-package \
+              --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
+              --version $NEXT_DEV_VERSION \
+              --hash $CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
+      - run: cat npm-package-url.json
+      - run: mkdir /tmp/urls
+      - run: cp npm-package-url.json /tmp/urls
+      - run: ls /tmp/urls
+      - persist_to_workspace:
+          root: /tmp/urls
+          paths:
+            - npm-package-url.json
+
+  "test-next-version":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: /tmp/urls
+      - run: ls -la /tmp/urls
+      - run: cat /tmp/urls/*.json
+      - run: mkdir /tmp/testing
+      - run:
+          name: create dummy package
+          working_directory: /tmp/testing
+          command: npm init -y
+      - run:
+          # install NPM from unique urls
+          name: Install Cypress
+          command: |
+            node scripts/test-unique-npm-and-binary.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json \
+              --cwd /tmp/testing
+      - run:
+          name: Verify Cypress binary
+          working_directory: /tmp/testing
+          command: $(npm bin)/cypress verify
+      - run:
+          name: Running other test projects with new NPM package and binary
+          command: |
+            node scripts/test-other-projects.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json
+
+  "test-next-version-locally":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: /tmp/urls
+      # make sure we have cypress.zip received
+      - run: ls -l /tmp/urls/cypress.zip
+      # build NPM package
+      - run: cd cli && npm run build
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          # install NPM from built NPM package folder
+          name: Install Cypress
+          working_directory: test-binary
+          # force installing the freshly built binary
+          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i ../cli/build
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: $(npm bin)/cypress verify
 
 workflows:
   version: 2
@@ -438,12 +565,44 @@ workflows:
       - desktop-gui-integration-tests-3:
           requires:
             - build
-      - build-binary:
-          requires:
-            - build
       - run-launcher:
           requires:
             - build
+      - build-npm-package:
+          filters:
+            branches:
+              only:
+                - develop
+                - bump-via-commit-537
+          requires:
+            - build
+      - build-binary:
+          filters:
+            branches:
+              only:
+                - develop
+                - bump-via-commit-537
+          requires:
+            - build
+      - test-next-version:
+          filters:
+            branches:
+              only:
+                - develop
+                - bump-via-commit-537
+          requires:
+            - build-npm-package
+            - build-binary
+      # enable once we can point CYPRESS_BINARY_VERSION at an existing file
+      # - test-next-version-locally:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #           - bump-via-commit-537
+      #     requires:
+      #       - build-npm-package
+      #       - build-binary
 
 #
 # things to run in the 4th CI container

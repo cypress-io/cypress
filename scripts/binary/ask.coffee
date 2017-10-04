@@ -92,7 +92,7 @@ getBumpTasks = ->
     type: "list"
     message: "Which bump task?"
     choices: [{
-      name: "Bump Cypress Version for all CI providers"
+      name: "Bump Cypress Binary Version for all CI providers"
       value: "version"
     },{
       name: "Run All Projects for all CI providers"
@@ -120,10 +120,10 @@ whichZipFile = ->
 whichVersion = (distDir) ->
   ## realpath returns the absolute full path
   glob("*/package.json", {cwd: distDir, realpath: true})
-  .map (pkg) =>
+  .map (pkg) ->
     fs.readJsonAsync(pkg)
     .get("version")
-  .then (versions) =>
+  .then (versions) ->
     versions = _.uniq(versions)
 
     prompt(getVersions(versions))

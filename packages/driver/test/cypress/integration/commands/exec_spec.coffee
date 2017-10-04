@@ -34,7 +34,8 @@ describe "src/cy/commands/exec", ->
         })
 
     it "really works", ->
-      cy.exec("echo foo").its("stdout").should("eq", "foo\n")
+      # output is trimmed
+      cy.exec("echo foo").its("stdout").should("eq", "foo")
 
     describe ".log", ->
       beforeEach ->
@@ -271,8 +272,9 @@ describe "src/cy/commands/exec", ->
 
             { Yielded } = lastLog.invoke("consoleProps")
 
+            # output is trimmed
             expect(Yielded).to.deep.eq({
-              stdout: "foo\n"
+              stdout: "foo"
               stderr: ""
               code: 1
             })
