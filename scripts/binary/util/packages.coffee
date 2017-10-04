@@ -85,6 +85,12 @@ copyAllToDist = (distDir) ->
   .then ->
     console.log("Finished Copying", new Date() - started)
 
+forceNpmInstall = (packagePath, packageToInstall) ->
+  console.log("Force installing %s", packageToInstall)
+  console.log("in %s", packagePath)
+  la(check.unemptyString(packageToInstall), "missing package to install")
+  npmRun(["install", "--force", packageToInstall], packagePath)
+
 npmInstallAll = (pathToPackages) ->
   ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
   ## 313,416,512 bytes (376.6 MB on disk) for 23,576 items
@@ -178,3 +184,7 @@ module.exports = {
 
   runAllCleanJs
 }
+
+if not module.parent
+  console.log("demo force install")
+  forceNpmInstall("packages/server", "@ffmpeg-installer/win32-x64")
