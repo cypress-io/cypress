@@ -362,7 +362,7 @@ describe "Runs List", ->
                 cy.shouldBeLoggedOut()
 
               it "shows login message", ->
-                cy.get(".empty h4").should("contain", "Please Log In")
+                cy.get(".empty h4").should("contain", "Log In")
 
               it "clicking 'Log In with GitHub' opens login", ->
                 cy.contains("button", "Log In with GitHub").click().then ->
@@ -397,7 +397,7 @@ describe "Runs List", ->
         cy.shouldBeLoggedOut()
 
       it "shows login message", ->
-        cy.get(".empty h4").should("contain", "Please Log In")
+        cy.get(".empty h4").should("contain", "Log In")
 
     describe "no project id error", ->
       beforeEach ->
