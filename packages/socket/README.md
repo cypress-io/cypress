@@ -1,6 +1,6 @@
 # Cypress Core Socket
 
-This is a shared lib for holding both the `socket.io` server and client.
+> This is a shared lib for holding both the `socket.io` server and client.
 
 
 ## Usage
@@ -38,29 +38,22 @@ socket.getPathToClientSource()
 // returns your/path/to/node_modules/socket.io-client/socket.io.js0
 ```
 
+## Install
+
+Root install is preferred (see `CONTRIBUTING.md`), but if you must
+
+* `npm install`
 
 ## Development
 
 ### Watching
 
 ```bash
-npm test
+npm run test-watch
 ```
 
 ### Testing
 
 ```bash
-npm test-once
+npm test
 ```
-
-
-## Changelog
-
-#### 0.2.1 - *(04/20/17)*
-- bump cypress releaser dep
-
-#### 0.2.0 - *(06/17/16)*
-- added socket.getClientVersion and socket.getClientSource methods
-
-#### 0.1.0 - *(04/29/16)*
-- initial release

@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "clean-deps": "rm -rf node_modules",
-    "test": "NODE_ENV=test $(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "NODE_ENV=test $(bin-up mocha) --watch",
+    "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
     "https": "node https.js",
     "release": "releaser"
   },
@@ -16,8 +16,9 @@
   ],
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
-    "bin-up": "^1.0.1",
+    "bin-up": "^1.1.0",
     "chai": "^3.5.0",
+    "cross-env": "^5.0.5",
     "http-mitm-proxy": "^0.5.1",
     "request": "^2.72.0",
     "request-promise": "^3.0.0",

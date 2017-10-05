@@ -1,14 +1,30 @@
 # Cypress Driver
 
+> JavaScript library that is loaded inside the browser that helps execute the tests
+
+## Install
+
+Root install is preferred (see `CONTRIBUTING.md`), but if you must
+
+* `npm install`
+* `npm run build`
+
+## Testing
+
+This project is not tested, the existing test commands are obsolete and will be removed
+in the future; all tests have been moved to other packages.
+
 ## Debugging
 
-To see logs of what the driver is doing:
+To see logs of what the driver is doing from command line:
 
 ```bash
 DEBUG=cypress:driver npm start
 
 DEBUG=cypress:driver npm run build
 ```
+
+In the browser
 
 ```js
 localStorage.debug = "cypress:driver"
