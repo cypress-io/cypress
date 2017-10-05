@@ -19,6 +19,7 @@ bump     = require("./bump")
 meta     = require("./meta")
 build    = require("./build")
 upload   = require("./upload")
+uploadUtils = require("./util/upload")
 {uploadNpmPackage} = require("./upload-npm-package")
 {uploadUniqueBinary} = require("./upload-unique-binary")
 
@@ -28,7 +29,7 @@ success = (str) ->
 fail = (str) ->
   console.log chalk.bgRed(" " + chalk.black(str) + " ")
 
-zippedFilename = R.always("cypress.zip")
+zippedFilename = R.always(upload.zipName)
 
 # goes through the list of properties and asks relevant question
 # resolves with all relevant options set
@@ -101,12 +102,12 @@ deploy = {
         success("Release Complete")
       .catch (err) ->
         fail("Release Failed")
-        reject(err)
+        throw err
 
     if v = options.version
       release(v)
     else
-      ask.whichRelease(meta.distDir)
+      ask.whichRelease(meta.distDir(""))
       .then(release)
 
   build: (options) ->
@@ -156,6 +157,18 @@ deploy = {
         version: options.version,
         platform: options.platform
       })
+
+  # purge all platforms of a desktop app for specific version
+  "purge-version": (args = process.argv) ->
+    console.log('#purge-version')
+    options = minimist(args, {
+      string: 'version',
+      alias: {
+        version: 'v'
+      }
+    })
+    la(check.unemptyString(options.version), "missing app version to purge", options)
+    uploadUtils.purgeDesktopAppAllPlatforms(options.version, upload.zipName)
 
   # goes through the entire pipeline:
   #   - build

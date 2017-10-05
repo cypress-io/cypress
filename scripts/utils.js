@@ -34,6 +34,26 @@ function getNameAndBinary (args = process.argv) {
   }
 }
 
+function getJustVersion (npmNameOrUrl) {
+  la(is.unemptyString(npmNameOrUrl), 'missing NPM string', npmNameOrUrl)
+
+  if (npmNameOrUrl.startsWith('cypress')) {
+    return npmNameOrUrl
+  }
+  if (is.url(npmNameOrUrl)) {
+    // try finding semver in the url
+    // https://something/0.20.3/something...
+    const re = /\/(\d+\.\d+\.\d+(-\w+)?)\//
+    const matches = re.exec(npmNameOrUrl)
+    if (matches) {
+      return matches[1]
+    }
+  }
+
+  return npmNameOrUrl
+}
+
 module.exports = {
   getNameAndBinary,
+  getJustVersion,
 }

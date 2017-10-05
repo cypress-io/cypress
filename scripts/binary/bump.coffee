@@ -65,11 +65,19 @@ remapProjects = (projectsByProvider) ->
 # make flat list of objects
 # {repo, provider}
 PROJECTS = remapProjects(_PROVIDERS)
-console.table(PROJECTS)
 
 getCiConfig = ->
+  ## gleb: fix this plzzzzzz
+  old = process.cwd()
+
+  process.chdir(__dirname)
+
   key = "support/.ci.json"
+
   config = configFromEnvOrJsonFile(key)
+
+  process.chdir(old)
+
   if !config
     console.error('⛔️  Cannot find CI credentials')
     console.error('Using @cypress/env-or-json-file module')
@@ -80,8 +88,10 @@ getCiConfig = ->
 
 awaitEachProjectAndProvider = (fn) ->
   creds = getCiConfig()
+  # TODO only check tokens for providers we really going to use
   la(check.unemptyString(creds.githubToken), "missing githubToken")
   la(check.unemptyString(creds.circleToken), "missing circleToken")
+  la(check.unemptyString(creds.appVeyorToken), "missing appVeyorToken")
 
   ## configure a new Bumpercar
   car = bumpercar.create({
@@ -92,6 +102,9 @@ awaitEachProjectAndProvider = (fn) ->
       circle: {
         circleToken: creds.circleToken
       }
+      appVeyor: {
+        appVeyorToken: creds.appVeyorToken
+      }
     }
   })
 
@@ -101,6 +114,8 @@ awaitEachProjectAndProvider = (fn) ->
 module.exports = {
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform) ->
+    console.table(PROJECTS)
+
     la(check.unemptyString(nameOrUrl),
       "missing cypress name or url to set", nameOrUrl)
 

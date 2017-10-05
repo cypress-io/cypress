@@ -2,7 +2,7 @@ require('@packages/coffee/register')
 
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const { getNameAndBinary } = require('./utils')
+const { getNameAndBinary, getJustVersion } = require('./utils')
 const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
@@ -27,13 +27,23 @@ bump.version(npm, binary, platform)
     la(is.unemptyString(result.versionName), 'missing versionName', result)
     la(is.unemptyString(result.binary), 'missing binary', result)
 
-    const message = stripIndent`
-      Testing new Cypress version
+    const shortNpmVersion = getJustVersion(result.versionName)
+    console.log('short NPM version', shortNpmVersion)
+
+    let message = stripIndent`
+      Testing new Cypress version ${shortNpmVersion}
 
       NPM package: ${result.versionName}
       Binary: ${result.binary}
-      CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
     `
+    if (process.env.CIRCLE_BUILD_URL) {
+      message += '\n'
+      message += stripIndent`
+        CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
+      `
+    }
+    console.log('commit message')
+    console.log(message)
     return bump.run(message)
   })
   .catch((e) => {

@@ -3,6 +3,8 @@ require('../../spec_helper')
 const os = require('os')
 const nock = require('nock')
 const snapshot = require('snap-shot-it')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -31,6 +33,23 @@ describe('download', function () {
 
   afterEach(function () {
     stdout.restore()
+  })
+
+  context('download url', () => {
+    it('returns url', () => {
+      const url = download.getUrl()
+      la(is.url(url), url)
+    })
+
+    it('returns latest desktop url', () => {
+      const url = download.getUrl()
+      snapshot('latest desktop url', normalize(url))
+    })
+
+    it('returns specific desktop version url', () => {
+      const url = download.getUrl('0.20.2')
+      snapshot('specific version desktop url', normalize(url))
+    })
   })
 
   it('sets options.version to response x-version', function () {

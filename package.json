@@ -20,9 +20,9 @@
     "clean-deps": "npm run all clean-deps",
     "docker": "./scripts/run-docker-local.sh",
     "lint-js": "eslint --fix scripts/*.js",
-    "lint-coffee": "coffeelint scripts/*.coffee scripts/**/*.coffee",
+    "lint-coffee": "coffeelint scripts/**/*.coffee",
     "lint": "npm run lint-js && npm run lint-coffee",
-    "pretest": "npm run lint && npm run all lint",
+    "pretest": "npm run lint && npm run all lint && npm run test-scripts",
     "precommit": "lint-staged",
     "precommit-lint": "eslint --fix",
     "prepush": "npm run stop-only",
@@ -32,8 +32,10 @@
     "binary-zip": "node ./scripts/binary.js zip",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-deploy": "node ./scripts/binary.js deploy",
+    "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
-    "release": "gulp release",
+    "binary-release": "node ./scripts/binary.js release",
+    "test-scripts": "mocha --reporter spec scripts/unit/*spec.js",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js"
   },
@@ -43,7 +45,7 @@
     ]
   },
   "devDependencies": {
-    "@cypress/bumpercar": "^1.1.0",
+    "@cypress/bumpercar": "^1.1.1",
     "@cypress/env-or-json-file": "^1.2.0",
     "@cypress/npm-run-all": "^4.0.4",
     "@cypress/questions-remain": "^1.0.1",

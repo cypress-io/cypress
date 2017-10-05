@@ -1,11 +1,11 @@
 exports['errors individual has the following errors 1'] = [
-  'missingXvfb',
-  'missingApp',
-  'missingDependency',
-  'versionMismatch',
-  'unexpected',
-  'failedDownload',
-  'failedUnzip',
+  "missingXvfb",
+  "missingApp",
+  "missingDependency",
+  "versionMismatch",
+  "unexpected",
+  "failedDownload",
+  "failedUnzip"
 ]
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
