@@ -27,6 +27,16 @@ const cliOptions = minimist(process.argv, {
   },
 })
 
+const shorten = (s) =>
+  s.substr(0, 7)
+
+const getShortCommit = () => {
+  const sha = process.env.APPVEYOR_REPO_COMMIT || process.env.CIRCLE_SHA1
+  if (sha) {
+    return shorten(sha)
+  }
+}
+
 bump.version(npm, binary, platform, cliOptions.provider)
   .then((result) => {
     console.log('bumped all test projects with new env variables')
@@ -38,8 +48,14 @@ bump.version(npm, binary, platform, cliOptions.provider)
     const shortNpmVersion = getJustVersion(result.versionName)
     console.log('short NPM version', shortNpmVersion)
 
+    let subject = 'Testing new Cypress version ${shortNpmVersion}'
+    const shortSha = getShortCommit()
+    if (shortSha) {
+      subject += ` ${shortSha}`
+    }
+
     let message = stripIndent`
-      Testing new Cypress version ${shortNpmVersion}
+      ${subject}
 
       NPM package: ${result.versionName}
       Binary: ${result.binary}
@@ -50,6 +66,15 @@ bump.version(npm, binary, platform, cliOptions.provider)
         CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
       `
     }
+    if (process.env.APPVEYOR) {
+      const slug = process.env.APPVEYOR_PROJECT_SLUG
+      const build = process.env.APPVEYOR_BUILD_ID
+      message += '\n'
+      message += stripIndent`
+        AppVeyor: ${slug} ${build}
+      `
+    }
+
     console.log('commit message')
     console.log(message)
     return bump.run(message, cliOptions.provider)

@@ -162,8 +162,17 @@ module.exports = {
         """
         Testing new Cypress version
 
-        CI build url #{process.env.CIRCLE_BUILD_URL}
         """
+      if process.env.CIRCLE_BUILD_URL
+        message += "\n"
+        message += "Circle CI build url #{process.env.CIRCLE_BUILD_URL}"
+
+      if process.env.APPVEYOR
+        slug = process.env.APPVEYOR_PROJECT_SLUG
+        build = process.env.APPVEYOR_BUILD_ID
+        message += "\n"
+        message += "AppVeyor CI #{slug} #{build}"
+
     makeCommit = (project, provider, creds) ->
       # instead of triggering CI via API
       # car.runProject(project, provider)
