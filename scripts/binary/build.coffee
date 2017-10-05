@@ -147,7 +147,10 @@ buildCypressApp = (platform, version, options = {}) ->
   copyPackageProxies = (destinationFolder) ->
     () ->
       log("#copyPackageProxies")
+      la(check.fn(destinationFolder),
+        "missing destination folder function", destinationFolder)
       dest = destinationFolder("node_modules", "@packages")
+      la(check.unemptyString(dest), "missing destination folder", dest)
       source = path.join(process.cwd(), "node_modules", "@packages")
       fs.unlinkAsync(dest).catch(_.noop)
       .then(() ->
@@ -223,11 +226,12 @@ buildCypressApp = (platform, version, options = {}) ->
 
     # hint: you can see all symlinks in the build folder
     # using "find build/darwin/Cypress.app/ -type l -ls"
+    console.log("platform", platform)
     electronDistFolder = meta.buildAppDir(platform, "packages", "electron", "dist")
     la(check.unemptyString(electronDistFolder),
       "empty electron dist folder for platform", platform)
 
-    console.log("Removing unnecessary folder #{electronDistFolder}")
+    console.log("Removing unnecessary folder '#{electronDistFolder}'")
     fs.removeAsync(electronDistFolder).catch(_.noop)
 
   runSmokeTests = ->
