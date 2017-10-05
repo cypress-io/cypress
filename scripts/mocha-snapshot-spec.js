@@ -7,6 +7,9 @@ function normalize (s) {
   // using forward slashes
   return s.replace(process.cwd(), '<folder path>')
     .replace(/passing \(\d+ms\)/, 'passing (<time>ms)')
+    .replace(/cypress@(\d+\.\d+\.\d+)/, 'cypress@x.y.z')
+    .replace(/✓/g, 'Y') // Mocha check on Mac
+    .replace(/√/g, 'Y') // Mocha check on Windows
 }
 
 /* eslint-env mocha */
