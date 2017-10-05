@@ -207,14 +207,16 @@ class RunsList extends Component {
   _loginMessage () {
     return (
       <div className='empty empty-log-in'>
-        <h4>Please Log In to View Runs</h4>
-        <p>Cypress can record screenshots, videos and failures when running <code>cypress run</code>, but you must be logged in to view them.</p>
+        <h4>Log In to View Runs</h4>
+        <p>
+          After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard Service</a>.
+        </p>
         <div className='runs-screenshots'>
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
         </div>
-        <p>After runs are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
+
         <LoginForm />
       </div>
     )
@@ -291,7 +293,7 @@ class RunsList extends Component {
             Recorded runs will show up{' '}
             <a href='#' onClick={this._openRunGuide}>here</a>{' '}
             and on your{' '}
-            <a href='#' onClick={this._openRuns}>Cypress Dashboard</a>.
+            <a href='#' onClick={this._openRuns}>Cypress Dashboard Service</a>.
           </p>
         </div>
       </div>

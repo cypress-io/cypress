@@ -34,13 +34,6 @@ describe "Login", ->
     cy.contains("Cypress Dashboard").click().then ->
       expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
 
-  it "displays help link", ->
-    cy.get(".login").contains("a", "Need help?")
-
-  it "opens link to login docs on click of help link", ->
-    cy.get(".login").contains("a", "Need help?").click().then ->
-      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/logging-in")
-
   describe "click 'Log In with GitHub'", ->
     beforeEach ->
       cy

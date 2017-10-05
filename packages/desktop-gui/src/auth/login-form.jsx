@@ -27,10 +27,6 @@ class LoginForm extends Component {
         >
           {this._buttonContent()}
         </button>
-        <a className='helper-docs-link' onClick={this._openHelp}>
-          <i className='fa fa-question-circle'></i>{' '}
-          Need help?
-        </a>
       </div>
     )
   }
@@ -106,10 +102,6 @@ class LoginForm extends Component {
         error,
       })
     })
-  }
-
-  _openHelp () {
-    ipc.externalOpen('https://on.cypress.io/logging-in')
   }
 
   _openAuthDoc () {
