@@ -20,7 +20,7 @@
     "clean-deps": "npm run all clean-deps",
     "docker": "./scripts/run-docker-local.sh",
     "lint-js": "eslint --fix scripts/*.js",
-    "lint-coffee": "coffeelint scripts/*.coffee scripts/**/*.coffee",
+    "lint-coffee": "coffeelint scripts/**/*.coffee",
     "lint": "npm run lint-js && npm run lint-coffee",
     "pretest": "npm run lint && npm run all lint",
     "precommit": "lint-staged",
