@@ -18,8 +18,8 @@ car = null
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
   appVeyor: [
-    # "cypress-io/cypress-example-kitchensink"
     "cypress-io/cypress-test-tiny"
+    "cypress-io/cypress-example-kitchensink"
   ]
 
   circle: [
@@ -109,6 +109,8 @@ awaitEachProjectAndProvider = (fn, filter = R.identity) ->
   })
 
   filteredProjects = R.filter(filter, PROJECTS)
+  if check.empty(filteredProjects)
+    console.log("⚠️ zero filtered projects left after filtering")
   console.table("filtered projects", filteredProjects)
   Promise.mapSeries filteredProjects, (project) ->
     fn(project.repo, project.provider, creds)
@@ -117,6 +119,7 @@ awaitEachProjectAndProvider = (fn, filter = R.identity) ->
 # for example appVeyor should be used for Windows testing
 getFilterByProvider = (providerName) ->
   if providerName
+    console.log("only allow projects for provider", providerName)
     projectFilter = R.propEq("provider", providerName)
   else
     projectFilter = R.identity
