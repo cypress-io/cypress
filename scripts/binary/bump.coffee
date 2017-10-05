@@ -86,7 +86,7 @@ getCiConfig = ->
     throw new Error('CI config not found')
   config
 
-awaitEachProjectAndProvider = (fn) ->
+awaitEachProjectAndProvider = (fn, filter = R.identity) ->
   creds = getCiConfig()
   # TODO only check tokens for providers we really going to use
   la(check.unemptyString(creds.githubToken), "missing githubToken")
@@ -108,13 +108,24 @@ awaitEachProjectAndProvider = (fn) ->
     }
   })
 
-  Promise.mapSeries PROJECTS, (project) ->
+  filteredProjects = R.filter(filter, PROJECTS)
+  console.table("filtered projects", filteredProjects)
+  Promise.mapSeries filteredProjects, (project) ->
     fn(project.repo, project.provider, creds)
+
+# do not trigger all projects if there is specific provider
+# for example appVeyor should be used for Windows testing
+getFilterByProvider = (providerName) ->
+  if providerName
+    projectFilter = R.propEq("provider", providerName)
+  else
+    projectFilter = R.identity
+  projectFilter
 
 module.exports = {
   # in each project, set a couple of environment variables
-  version: (nameOrUrl, binaryVersionOrUrl, platform) ->
-    console.table(PROJECTS)
+  version: (nameOrUrl, binaryVersionOrUrl, platform, providerName) ->
+    console.table("All possible projects", PROJECTS)
 
     la(check.unemptyString(nameOrUrl),
       "missing cypress name or url to set", nameOrUrl)
@@ -132,16 +143,20 @@ module.exports = {
       binary: binaryVersionOrUrl
     }
 
+    projectFilter = getFilterByProvider(providerName)
+
     updateProject = (project, provider) ->
       console.log("setting environment variables in", project)
       car.updateProjectEnv(project, provider, {
         CYPRESS_NPM_PACKAGE_NAME: nameOrUrl,
         CYPRESS_BINARY_VERSION: binaryVersionOrUrl
       })
-    awaitEachProjectAndProvider(updateProject)
+    awaitEachProjectAndProvider(updateProject, projectFilter)
     .then R.always(result)
 
-  run: (message) ->
+  run: (message, providerName) ->
+    projectFilter = getFilterByProvider(providerName)
+
     if not message
       message =
         """
@@ -149,7 +164,7 @@ module.exports = {
 
         CI build url #{process.env.CIRCLE_BUILD_URL}
         """
-    awaitEachProjectAndProvider (project, provider, creds) ->
+    makeCommit = (project, provider, creds) ->
       # instead of triggering CI via API
       # car.runProject(project, provider)
       # make empty commit to trigger CIs
@@ -162,4 +177,5 @@ module.exports = {
         token: creds.githubToken,
         message
       })
+    awaitEachProjectAndProvider(makeCommit, projectFilter)
 }
