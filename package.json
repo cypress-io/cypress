@@ -22,7 +22,7 @@
     "lint-js": "eslint --fix scripts/*.js",
     "lint-coffee": "coffeelint scripts/**/*.coffee",
     "lint": "npm run lint-js && npm run lint-coffee",
-    "pretest": "npm run lint && npm run all lint",
+    "pretest": "npm run lint && npm run all lint && npm run test-scripts",
     "precommit": "lint-staged",
     "precommit-lint": "eslint --fix",
     "prepush": "npm run stop-only",
@@ -35,6 +35,7 @@
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
     "binary-release": "node ./scripts/binary.js release",
+    "test-scripts": "mocha --reporter spec scripts/unit/*spec.js",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js"
   },

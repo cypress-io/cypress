@@ -88,8 +88,10 @@ getCiConfig = ->
 
 awaitEachProjectAndProvider = (fn) ->
   creds = getCiConfig()
+  # TODO only check tokens for providers we really going to use
   la(check.unemptyString(creds.githubToken), "missing githubToken")
   la(check.unemptyString(creds.circleToken), "missing circleToken")
+  la(check.unemptyString(creds.appVeyorToken), "missing appVeyorToken")
 
   ## configure a new Bumpercar
   car = bumpercar.create({
@@ -99,6 +101,9 @@ awaitEachProjectAndProvider = (fn) ->
       }
       circle: {
         circleToken: creds.circleToken
+      }
+      appVeyor: {
+        appVeyorToken: creds.appVeyorToken
       }
     }
   })
