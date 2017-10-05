@@ -18,8 +18,8 @@ car = null
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
   appVeyor: [
-    # "cypress-io/cypress-example-kitchensink"
     "cypress-io/cypress-test-tiny"
+    "cypress-io/cypress-example-kitchensink"
   ]
 
   circle: [
