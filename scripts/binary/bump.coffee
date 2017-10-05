@@ -109,6 +109,8 @@ awaitEachProjectAndProvider = (fn, filter = R.identity) ->
   })
 
   filteredProjects = R.filter(filter, PROJECTS)
+  if check.empty(filteredProjects)
+    console.log("⚠️ zero filtered projects left after filtering")
   console.table("filtered projects", filteredProjects)
   Promise.mapSeries filteredProjects, (project) ->
     fn(project.repo, project.provider, creds)
