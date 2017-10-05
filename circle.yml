@@ -480,7 +480,8 @@ jobs:
           command: |
             node scripts/test-other-projects.js \
               --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json
+              --binary /tmp/urls/binary-url.json \
+              --provider circle
 
   "test-next-version-locally":
     <<: *defaults

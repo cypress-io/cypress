@@ -6,6 +6,7 @@ const { getNameAndBinary, getJustVersion } = require('./utils')
 const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
+const minimist = require('minimist')
 
 /* eslint-disable no-console */
 
@@ -19,7 +20,14 @@ console.log('npm:', npm)
 console.log('binary:', binary)
 console.log('platform:', platform)
 
-bump.version(npm, binary, platform)
+const cliOptions = minimist(process.argv, {
+  string: 'provider',
+  alias: {
+    provider: 'p',
+  },
+})
+
+bump.version(npm, binary, platform, cliOptions.provider)
   .then((result) => {
     console.log('bumped all test projects with new env variables')
     console.log(result)
@@ -44,7 +52,7 @@ bump.version(npm, binary, platform)
     }
     console.log('commit message')
     console.log(message)
-    return bump.run(message)
+    return bump.run(message, cliOptions.provider)
   })
   .catch((e) => {
     console.error('could not bump test projects')

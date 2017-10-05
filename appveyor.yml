@@ -81,6 +81,8 @@ test_script:
 
   # - cd packages/server && npm run test-unit
   # - npm test
+  - echo Running other test projects with new NPM package and binary
+  - node scripts/test-other-projects.js --npm npm-package-url.json --binary /binary-url.json --provider appveyor
 
 # Don't actually build.
 build: off
