@@ -117,6 +117,7 @@ awaitEachProjectAndProvider = (fn, filter = R.identity) ->
 # for example appVeyor should be used for Windows testing
 getFilterByProvider = (providerName) ->
   if providerName
+    console.log("only allow projects for provider", providerName)
     projectFilter = R.propEq("provider", providerName)
   else
     projectFilter = R.identity
