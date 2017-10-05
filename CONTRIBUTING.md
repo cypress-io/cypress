@@ -186,8 +186,10 @@ npm run build
 npm start
 ```
 
-If there are errors building the packages, run with `DEBUG=cypress:run ...`
-option to see more details
+If there are errors building the packages, run with `DEBUG=cypress:*`
+option to see more details.
+
+This outputs a lot of debugging lines. To focus on an individual module run with `DEBUG=cypress:launcher` for instance.
 
 #### Tasks
 
@@ -247,7 +249,15 @@ DEBUG=cypress:launcher npm test
 If you want to see log messages from all Cypress projects use wild card
 
 ```bash
-DEBUG=cypress:* ...
+DEBUG=cypress:*
+```
+
+Or for an individual package:
+
+```bash
+DEBUG=cypress:cli
+DEBUG=cypress:server
+DEBUG=cypress:launcher
 ```
 
 ### Coding Style
@@ -256,6 +266,14 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 [eslint-plugin-cypress-dev](https://github.com/cypress-io/eslint-plugin-cypress-dev) plugin.
 
 ### Tests
+
+TODO: switch this from saying to run all the tests, and instead run the test for a given package.
+
+Our true e2e tests are in packages/server, which test the full stack all together. To run those - do XYZ.
+
+Mention difference in packages for unit, integration, and e2e tests.
+
+Make a note these are really long, and we spin up like 16 instances to do it all.
 
 Since it is generally best to do single runs of tests serially instead of in parallel, this repo has some convenience scripts to run all the tests for all the packages sequentially:
 
