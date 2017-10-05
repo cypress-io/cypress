@@ -20,6 +20,7 @@ _PROVIDERS = {
   appVeyor: [
     "cypress-io/cypress-test-tiny"
     "cypress-io/cypress-example-kitchensink"
+    "cypress-io/cypress-example-todomvc"
   ]
 
   circle: [
