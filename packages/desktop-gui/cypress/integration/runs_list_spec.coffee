@@ -189,6 +189,7 @@ describe "Runs List", ->
       @getCurrentUser.resolve(null)
       @config.projectId = undefined
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
       @goToRuns()
 
     it "displays 'need to set up' message", ->

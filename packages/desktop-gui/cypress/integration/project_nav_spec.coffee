@@ -16,6 +16,7 @@ describe "Project Nav", ->
       cy.stub(@ipc, "getRecordKeys").resolves([])
       cy.stub(@ipc, "launchBrowser")
       cy.stub(@ipc, "closeBrowser").resolves(null)
+      cy.stub(@ipc, "pingApiServer").resolves()
       cy.stub(@ipc, "closeProject")
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "offOpenProject")

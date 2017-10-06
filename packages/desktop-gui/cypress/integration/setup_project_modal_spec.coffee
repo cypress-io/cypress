@@ -19,6 +19,7 @@ describe "Set Up Project", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "getRuns").resolves([])
       cy.stub(@ipc, "getRecordKeys").resolves(@keys)
+      cy.stub(@ipc, "pingApiServer").resolves()
       cy.stub(@ipc, "externalOpen")
 
       @getCurrentUser = @util.deferred()
