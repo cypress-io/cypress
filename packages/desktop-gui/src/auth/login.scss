@@ -77,4 +77,10 @@
 
 .login-no-api-server {
   text-align: center;
+
+  em {
+    color: #333;
+    font-style: normal;
+    font-family: $font-mono;
+  }
 }
