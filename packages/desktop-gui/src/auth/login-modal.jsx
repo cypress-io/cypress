@@ -68,8 +68,8 @@ class Login extends Component {
     return (
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h3>Log In</h3>
-        <p>Logging in isn't required for normal usage of Cypress, but provides access to data from the <a onClick={this._openDashboard}>Cypress Dashboard</a>, so you can view the recorded runs for the current project.</p>
+        <h1><i className='fa fa-lock'></i> Log In</h1>
+        <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
         <LoginForm onSuccess={this._close} />
       </div>
     )

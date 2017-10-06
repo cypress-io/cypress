@@ -184,6 +184,28 @@ describe "Runs List", ->
     it "displays 'need to set up' message", ->
       cy.contains("You Have No Recorded Runs")
 
+  context "without a current user and without project id", ->
+    beforeEach ->
+      @getCurrentUser.resolve(null)
+      @config.projectId = undefined
+      @openProject.resolve(@config)
+      @goToRuns()
+
+    it "displays 'need to set up' message", ->
+      cy.contains("You Have No Recorded Runs")
+
+    describe "click setup project", ->
+      beforeEach ->
+        cy.contains("Set Up Project").click()
+
+      it "shows login message", ->
+        cy.get(".login h1").should("contain", "Log In")
+
+      it "clicking 'Log In with GitHub' opens login", ->
+        cy.contains("button", "Log In with GitHub").click().then ->
+          expect(@ipc.windowOpen).to.be.called
+          expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+
   describe "polling runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
@@ -403,7 +425,7 @@ describe "Runs List", ->
                 cy.shouldBeLoggedOut()
 
               it "shows login message", ->
-                cy.get(".empty h4").should("contain", "Please Log In")
+                cy.get(".empty h4").should("contain", "Log In")
 
               it "clicking 'Log In with GitHub' opens login", ->
                 cy.contains("button", "Log In with GitHub").click().then ->
@@ -438,7 +460,7 @@ describe "Runs List", ->
         cy.shouldBeLoggedOut()
 
       it "shows login message", ->
-        cy.get(".empty h4").should("contain", "Please Log In")
+        cy.get(".empty h4").should("contain", "Log In")
 
     describe "no project id error", ->
       beforeEach ->
