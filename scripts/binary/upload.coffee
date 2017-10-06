@@ -48,9 +48,17 @@ module.exports = {
       name: "Cypress"
       version: version
       packages: {
+        ## keep these for compatibility purposes
+        ## although they are now deprecated
         mac: getUrl("osx64")
         win: getUrl("win64")
         linux64: getUrl("linux64")
+
+        ## start adding the new ones
+        ## using node's platform
+        darwin: getUrl("osx64")
+        win32: getUrl("win64")
+        linux: getUrl("linux64")
       }
     }
 
