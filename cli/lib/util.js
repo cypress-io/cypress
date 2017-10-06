@@ -24,6 +24,12 @@ function normalizeModuleOptions (options = {}) {
   })(options)
 }
 
+function stdoutLineMatches (expectedLine, stdout) {
+  const lines = stdout.split('\n').map(R.trim)
+  const lineMatches = R.equals(expectedLine)
+  return lines.some(lineMatches)
+}
+
 const util = {
   normalizeModuleOptions,
 
@@ -89,6 +95,8 @@ const util = {
   isInstalledGlobally () {
     return isInstalledGlobally
   },
+
+  stdoutLineMatches,
 }
 
 module.exports = util

@@ -34,7 +34,10 @@ const getOs = () => {
 }
 
 const prepend = (urlPath) => {
-  return `${url.resolve(baseUrl, urlPath)}?os=${getOs()}`
+  const endpoint = url.resolve(baseUrl, urlPath)
+  const osName = getOs()
+  const arch = os.arch()
+  return `${endpoint}?os=${osName}&arch=${arch}`
 }
 
 const getUrl = (version) => {
@@ -154,4 +157,5 @@ const start = (options) => {
 
 module.exports = {
   start,
+  getUrl,
 }

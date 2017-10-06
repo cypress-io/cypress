@@ -4,40 +4,11 @@ This is a shared lib for Cypress which manages installing + building the Cypress
 
 It is a simple wrapper that `symlinks` while in development.
 
-## Changelog
+## Install
 
-#### 0.3.4 - *(04/20/17)*
-- fix require path
+Root install is preferred (see `CONTRIBUTING.md`), but if you must
 
-#### 0.3.3 - *(04/20/17)*
-- bump cypress icons dep
+* `npm install`
+* `npm run build`
 
-#### 0.3.2 - *(04/20/17)*
-- bump cypress coffee script and releaser dep
-
-#### 0.3.1 - *(11/15/16)*
-- bump electron to 1.4.6
-
-#### 0.3.0 - *(11/07/16)*
-- bump electron
-
-#### 0.2.1 - *(08/26/16)*
-- downgrade electron, bump node
-
-#### 0.2.0 - *(08/26/16)*
-- bump electron to 1.3.4
-
-#### 0.1.0 - *(08/26/16)*
-- accept install options
-
-#### 0.0.4 - *(08/24/16)*
-- fixed bug with paths during linux install
-
-#### 0.0.3 - *(08/01/16)*
-- fix dep being devDep
-
-#### 0.0.2 - *(07/06/16)*
-- accept args + cb on open
-
-#### 0.0.1 - *(07/06/16)*
-- initial release
+Note: `npm run build` just installs Electron binary for this platform

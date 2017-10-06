@@ -1,29 +1,18 @@
 # Cypress Core Extension
 
+> Intercepts requests from the website under test
+
+## Install
+
+Root install is preferred (see `CONTRIBUTING.md`), but if you must
+
+* `npm install`
+* `npm run build`
+
 ## Developing
 
 **Testing**
 
 ```bash
-npm run test-once
+npm test
 ```
-
-## Changelog
-
-#### 0.1.5 - *(04/20/17)*
-- bump cypress coffee script and releaser dep
-
-#### 0.1.4 - *(10/21/16)*
-- add server destroy to https helper
-
-#### 0.1.3 - *(08/24/16)*
-- ref fork
-
-#### 0.1.2 - *(08/24/16)*
-- fix segfault errors
-
-#### 0.1.1 - *(08/24/16)*
-- fix devDep to dep
-
-#### 0.1.0 - *(06/28/16)*
-- initial release

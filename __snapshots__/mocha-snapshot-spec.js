@@ -9,13 +9,13 @@ exports['captures mocha output 1'] = `
 
   stdout:
   -------
-  > cypress@0.20.1 test-mocha <folder path>
+  > cypress@x.y.z test-mocha <folder path>
   > mocha --reporter spec scripts/spec.js
 
 
 
     mocha sanity check
-      ✓ works
+      Y works
 
 
     1 passing (<time>ms)
