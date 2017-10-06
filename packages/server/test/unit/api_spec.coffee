@@ -544,7 +544,7 @@ describe "lib/api", ->
         })
 
     it "handles nmi errors", ->
-      @sandbox.stub(nmi, "machineId").rejects(new Error)
+      @sandbox.stub(nmi, "machineId").rejects(new Error("foo"))
 
       nock("http://localhost:1234", {
         "badheaders": ["x-machine-id"]
