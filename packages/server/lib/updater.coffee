@@ -1,13 +1,13 @@
+_              = require("lodash")
 fs             = require("fs-extra")
 nmi            = require("node-machine-id")
+debug          = require("debug")("cypress:server:updater")
 semver         = require("semver")
 request        = require("request")
 NwUpdater      = require("node-webkit-updater")
-_              = require("lodash")
 pkg            = require("@packages/root")
 cwd            = require("./cwd")
 konfig         = require("./konfig")
-logger         = require("./logger")
 
 ## backup the original cwd
 localCwd = cwd()
@@ -81,16 +81,18 @@ class Updater
       cb.apply(@, args)
 
   check: (options = {}) ->
-    logger.info "checking for new version"
+    debug("checking for new version of Cypress. current version is", pkg.version)
 
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
+      debug("latest version of Cypress is:", manifest.version)
+
       if newVersionExists
-        logger.info "new version exists", version: manifest.version
+        debug("new version of Cypress exists:", manifest.version)
         options.onNewVersion?(manifest)
       else
-        logger.info "new version does not exist"
+        debug("new version of Cypress does not exist")
         options.onNoNewVersion?()
 
   @check = (options = {}) ->
