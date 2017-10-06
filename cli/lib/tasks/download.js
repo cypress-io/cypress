@@ -21,23 +21,11 @@ const isString = (s) =>
 const isUrl = (s) =>
   isString(s) && /^https:/.test(s)
 
-const getOs = () => {
-  const platform = os.platform()
-
-  switch (platform) {
-    case 'darwin': return 'mac'
-    case 'linux': return 'linux64'
-    case 'win32': return 'win'
-    // TODO handle this error using our standard
-    default: throw new Error(`Platform: "${platform}" is not supported.`)
-  }
-}
-
 const prepend = (urlPath) => {
   const endpoint = url.resolve(baseUrl, urlPath)
-  const osName = getOs()
+  const platform = os.platform()
   const arch = os.arch()
-  return `${endpoint}?os=${osName}&arch=${arch}`
+  return `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
 const getUrl = (version) => {
