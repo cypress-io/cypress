@@ -78,7 +78,7 @@ class Login extends Component {
   _noApiServer () {
     return (
       <div className='modal-body login login-no-api-server'>
-        <h4>Cannot connect to API server</h4>
+        <h4><i className='fa fa-wifi'></i> Cannot connect to API server</h4>
         <p>Logging in requires connecting to an external API server.</p>
         <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
