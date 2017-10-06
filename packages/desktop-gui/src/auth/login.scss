@@ -1,16 +1,17 @@
 .login {
+  min-height: 100px;
+
   h3 {
     margin-bottom: 15px;
     font-weight: 200;
     font-size: 24px;
   }
 
-  p {
+  > p {
     color: #666;
   }
 
   .alert.alert-danger {
-    background-color: #e06666;
     border: 0;
     margin: 0px auto 15px;
     width: 100%;
@@ -18,13 +19,11 @@
     font-size: 13px;
 
     p {
-      color: #eee;
       line-height: 20px;
     }
 
     a {
       cursor: pointer;
-      color: #eee;
       border-bottom: 1px dashed #fff;
       font-size: 13px;
     }
@@ -32,11 +31,15 @@
 }
 
 .login-content {
-  margin: 0 auto;
   overflow: auto;
   padding: 20px;
   text-align: center;
-  width: 300px;
+
+  button {
+    display: block;
+    margin: 0 auto 1em;
+    width: 250px;
+  }
 
   a {
     color: #3B94D9;
@@ -60,4 +63,8 @@
 .login-spinner {
   margin: 10px 0;
   color: #777;
+}
+
+.login-no-api-server {
+  text-align: center;
 }

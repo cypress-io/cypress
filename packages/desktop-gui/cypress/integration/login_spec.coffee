@@ -18,6 +18,9 @@ describe "Login", ->
       cy.stub(@ipc, "clearGithubCookies")
       cy.stub(@ipc, "logOut").resolves()
 
+      @pingApiServer = @util.deferred()
+      cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
+
       @openWindow = @util.deferred()
       cy.stub(@ipc, "windowOpen").returns(@openWindow.promise)
 
@@ -27,149 +30,194 @@ describe "Login", ->
       start()
       cy.contains("Log In").click()
 
-  it "has Github Login button", ->
-    cy.get(".login").contains("button", "Log In with GitHub")
+  it "pings api server", ->
+    expect(@ipc.pingApiServer).to.be.called
+    cy.get(".loader")
 
-  it "opens dashboard on clicking 'Cypress Dashboard'", ->
-    cy.contains("Cypress Dashboard").click().then ->
-      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
-
-  it "displays help link", ->
-    cy.get(".login").contains("a", "Need help?")
-
-  it "opens link to login docs on click of help link", ->
-    cy.get(".login").contains("a", "Need help?").click().then ->
-      expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/logging-in")
-
-  describe "click 'Log In with GitHub'", ->
+  describe "when connected to api server", ->
     beforeEach ->
-      cy
-        .get(".login")
-          .contains("button", "Log In with GitHub").as("loginBtn")
-          .click()
+      @pingApiServer.resolve()
 
-    it "triggers ipc 'window:open' on click", ->
-      cy
-        .then ->
-          expect(@ipc.windowOpen).to.be.calledWithExactly({
-            position: "center"
-            focus: true
-            width: 1000
-            height: 635
-            preload: false
-            title: "Login"
-            type: "GITHUB_LOGIN"
-          })
+    it "has Github Login button", ->
+      cy.get(".login").contains("button", "Log In with GitHub")
 
-    it "disables login button", ->
-      cy.get("@loginBtn").should("be.disabled")
+    it "opens dashboard on clicking 'Cypress Dashboard'", ->
+      cy.contains("Cypress Dashboard").click().then ->
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
 
-    it "shows spinner with 'Logging In'", ->
-      cy.get("@loginBtn").invoke("text").should("contain", "Logging in...")
+    it "displays help link", ->
+      cy.get(".login").contains("a", "Need help?")
 
-    context "on 'window:open' ipc response", ->
+    it "opens link to login docs on click of help link", ->
+      cy.get(".login").contains("a", "Need help?").click().then ->
+        expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/logging-in")
+
+    describe "click 'Log In with GitHub'", ->
       beforeEach ->
-        cy.get("@loginBtn").then ->
-          @openWindow.resolve("code-123")
+        cy
+          .get(".login")
+            .contains("button", "Log In with GitHub").as("loginBtn")
+            .click()
 
-      it "triggers ipc 'log:in'", ->
-        cy.wrap(@ipc.logIn).should("be.calledWith", "code-123")
+      it "triggers ipc 'window:open' on click", ->
+        cy
+          .then ->
+            expect(@ipc.windowOpen).to.be.calledWithExactly({
+              position: "center"
+              focus: true
+              width: 1000
+              height: 635
+              preload: false
+              title: "Login"
+              type: "GITHUB_LOGIN"
+            })
 
-      it "displays spinner with 'Logging in...' and disables button", ->
-        cy.contains("Logging in...").should("be.disabled")
+      it "disables login button", ->
+        cy.get("@loginBtn").should("be.disabled")
 
-      describe "on ipc log:in success", ->
+      it "shows spinner with 'Logging In'", ->
+        cy.get("@loginBtn").invoke("text").should("contain", "Logging in...")
+
+      context "on 'window:open' ipc response", ->
         beforeEach ->
-          @login.resolve(@user)
+          cy.get("@loginBtn").then ->
+            @openWindow.resolve("code-123")
 
-        it "goes to previous view", ->
-          cy.shouldBeOnIntro()
+        it "triggers ipc 'log:in'", ->
+          cy.wrap(@ipc.logIn).should("be.calledWith", "code-123")
 
-        it "displays username in UI", ->
-          cy
-            .get("nav a").should ($a) ->
-              expect($a).to.contain(@user.name)
+        it "displays spinner with 'Logging in...' and disables button", ->
+          cy.contains("Logging in...").should("be.disabled")
 
-        it "closes modal", ->
-          cy.get(".modal").should("not.be.visible")
+        describe "on ipc log:in success", ->
+          beforeEach ->
+            @login.resolve(@user)
 
-        context "log out", ->
-          it "displays login button on logout", ->
+          it "goes to previous view", ->
+            cy.shouldBeOnIntro()
+
+          it "displays username in UI", ->
             cy
-              .get("nav a").contains("Jane").click()
-            cy
-              .contains("Log Out").click()
-              .get(".nav").contains("Log In")
+              .get("nav a").should ($a) ->
+                expect($a).to.contain(@user.name)
 
-          it "calls clear:github:cookies", ->
-            cy
-              .get("nav a").contains("Jane").click()
-            cy
-              .contains("Log Out").click().then ->
-                expect(@ipc.clearGithubCookies).to.be.called
+          it "closes modal", ->
+            cy.get(".modal").should("not.be.visible")
 
-          it "calls log:out", ->
-            cy
-              .get("nav a").contains("Jane").click()
-            cy
-              .contains("Log Out").click().then ->
-                expect(@ipc.logOut).to.be.called
+          context "log out", ->
+            it "displays login button on logout", ->
+              cy
+                .get("nav a").contains("Jane").click()
+              cy
+                .contains("Log Out").click()
+                .get(".nav").contains("Log In")
 
-          it "has login button enabled when returning to login after logout", ->
-            cy.get("nav a").contains("Jane").click()
-            cy.contains("Log Out").click()
-            cy.contains("Log In").click()
-            cy.get(".login button").eq(1)
-              .should("not.be.disabled")
-              .invoke("text")
-              .should("include", "Log In with GitHub")
+            it "calls clear:github:cookies", ->
+              cy
+                .get("nav a").contains("Jane").click()
+              cy
+                .contains("Log Out").click().then ->
+                  expect(@ipc.clearGithubCookies).to.be.called
 
-      describe "on ipc 'log:in' error", ->
+            it "calls log:out", ->
+              cy
+                .get("nav a").contains("Jane").click()
+              cy
+                .contains("Log Out").click().then ->
+                  expect(@ipc.logOut).to.be.called
+
+            it "has login button enabled when returning to login after logout", ->
+              cy.get("nav a").contains("Jane").click()
+              cy.contains("Log Out").click()
+              cy.contains("Log In").click()
+              cy.get(".login button").eq(1)
+                .should("not.be.disabled")
+                .invoke("text")
+                .should("include", "Log In with GitHub")
+
+        describe "on ipc 'log:in' error", ->
+          beforeEach ->
+            @login.reject({name: "foo", message: "There's an error"})
+
+          it "displays error in ui", ->
+            cy
+              .get(".alert-danger")
+                .should("be.visible")
+                .contains("There's an error")
+
+          it "login button should be enabled", ->
+            cy
+              .get("@loginBtn").should("not.be.disabled")
+
+        describe "on ipc 'log:in' unauthorized error", ->
+          beforeEach ->
+            @login.reject({
+              error: "Your email: 'foo@bar.com' has not been authorized."
+              message: "Your email: 'foo@bar.com' has not been authorized."
+              name: "StatusCodeError"
+              statusCode: 401
+            })
+
+          it "displays error in ui", ->
+            cy
+              .get(".alert-danger")
+                .should("be.visible")
+                .contains("Your email: 'foo@bar.com' has not been authorized")
+
+          it "displays authorized help link", ->
+            cy
+              .contains("a", "Why am I not authorized?")
+
+          it "opens link to docs on click of help link", ->
+            cy
+              .contains("a", "Why am I not authorized?").click().then ->
+                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/email-not-authorized")
+
+          it "login button should be enabled", ->
+            cy
+              .get("@loginBtn").should("not.be.disabled")
+
+      describe "when user closes window before logging in", ->
         beforeEach ->
-          @login.reject({name: "foo", message: "There's an error"})
+          @openWindow.reject({windowClosed: true, name: "foo", message: "There's an error"})
 
-        it "displays error in ui", ->
-          cy
-            .get(".alert-danger")
-              .should("be.visible")
-              .contains("There's an error")
+        it "no longer shows logging in spinner", ->
+          cy.get(".login-content .alert").should("not.exist")
+          cy.contains("button", "Log In with GitHub").should("not.be.disabled")
 
-        it "login button should be enabled", ->
-          cy
-            .get("@loginBtn").should("not.be.disabled")
+  describe "when not connected to api server", ->
+    beforeEach ->
+      @pingApiServerAgain = @util.deferred()
+      @ipc.pingApiServer.onCall(1).returns(@pingApiServerAgain.promise)
 
-      describe "on ipc 'log:in' unauthorized error", ->
-        beforeEach ->
-          @login.reject({
-            error: "Your email: 'foo@bar.com' has not been authorized."
-            message: "Your email: 'foo@bar.com' has not been authorized."
-            name: "StatusCodeError"
-            statusCode: 401
-          })
+      @pingApiServer.reject({
+        apiUrl: "http://api.server"
+        message: "ECONNREFUSED"
+      })
 
-        it "displays error in ui", ->
-          cy
-            .get(".alert-danger")
-              .should("be.visible")
-              .contains("Your email: 'foo@bar.com' has not been authorized")
+    it "shows 'cannot connect to api server' message", ->
+      cy.contains("Cannot connect to API server")
+      cy.contains("http://api.server")
+      cy.contains("ECONNREFUSED")
 
-        it "displays authorized help link", ->
-          cy
-            .contains("a", "Why am I not authorized?")
-
-        it "opens link to docs on click of help link", ->
-          cy
-            .contains("a", "Why am I not authorized?").click().then ->
-              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/email-not-authorized")
-
-        it "login button should be enabled", ->
-          cy
-            .get("@loginBtn").should("not.be.disabled")
-
-    describe "when user closes window before logging in", ->
+    describe "trying again", ->
       beforeEach ->
-        @openWindow.reject({windowClosed: true, name: "foo", message: "There's an error"})
+        cy.contains("Try Again").click()
 
-      it "no longer shows logging in spinner", ->
-        cy.get(".login-content .alert").should("not.exist")
-        cy.contains("button", "Log In with GitHub").should("not.be.disabled")
+      it "pings again", ->
+        cy.get(".loader").then ->
+          expect(@ipc.pingApiServer).to.be.calledTwice
+
+      it "shows new error on failure", ->
+        @pingApiServerAgain.reject({
+          apiUrl: "http://api.server"
+          message: "WHADJAEXPECT"
+        })
+
+        cy.contains("Cannot connect to API server")
+        cy.contains("http://api.server")
+        cy.contains("WHADJAEXPECT")
+
+      it "shows login", ->
+        @pingApiServerAgain.resolve()
+        cy.get(".login").contains("button", "Log In with GitHub")
