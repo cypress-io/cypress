@@ -19,8 +19,9 @@ car = null
 _PROVIDERS = {
   appVeyor: [
     "cypress-io/cypress-test-tiny"
-    "cypress-io/cypress-example-kitchensink"
-    "cypress-io/cypress-example-todomvc"
+    "cypress-io/cypress-test-example-repos"
+    # "cypress-io/cypress-example-kitchensink"
+    # "cypress-io/cypress-example-todomvc"
   ]
 
   circle: [
