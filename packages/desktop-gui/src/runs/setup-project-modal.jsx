@@ -112,10 +112,10 @@ class SetupProject extends Component {
 
   _loginMessage () {
     return (
-      <div className='setup-project-modal modal-body os-dialog'>
+      <div className='login modal-body'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h4>Please Log In</h4>
-        <p>You must log in to set up your project to record.</p>
+        <h1><i className='fa fa-lock'></i> Log In</h1>
+        <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
         <LoginForm />
       </div>
     )
