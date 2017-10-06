@@ -22,6 +22,7 @@ describe "Settings", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeBrowser").resolves()
       cy.stub(@ipc, "closeProject").resolves()
+      cy.stub(@ipc, "pingApiServer").resolves()
       cy.stub(@ipc, "onConfigChanged")
       cy.stub(@ipc, "onFocusTests")
       cy.stub(@ipc, "externalOpen")
