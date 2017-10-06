@@ -22,6 +22,10 @@ import ProjectNotSetup from './project-not-setup'
 class RunsList extends Component {
   state = {
     recordKey: null,
+    isLoading: true,
+    hasApiServer: false,
+    apiUrl: '',
+    apiError: null,
   }
 
   componentWillMount () {
@@ -29,6 +33,7 @@ class RunsList extends Component {
   }
 
   componentDidMount () {
+    this._pingApiServer()
     this._handlePolling()
     this._getKey()
   }
@@ -40,6 +45,26 @@ class RunsList extends Component {
 
   componentWillUnmount () {
     this._stopPolling()
+  }
+
+  _pingApiServer = () => {
+    this.setState({ isLoading: true })
+
+    ipc.pingApiServer()
+    .then(() => {
+      this.setState({
+        apiError: null,
+        hasApiServer: true,
+        isLoading: false,
+      })
+    })
+    .catch(({ apiUrl, message }) => {
+      this.setState({
+        apiError: message,
+        apiUrl,
+        isLoading: false,
+      })
+    })
   }
 
   _getRuns = () => {
@@ -98,6 +123,16 @@ class RunsList extends Component {
 
   render () {
     const { project } = this.props
+
+    // pinging api server to see if we can show anything
+    if (this.state.isLoading) {
+      return <Loader color='#888' scale={0.5}/>
+    }
+
+    // no connection to api server, can't load any runs
+    if (!this.state.hasApiServer) {
+      return this._noApiServer()
+    }
 
     // no project id means they have not set up to record
     if (!project.id) {
@@ -201,6 +236,27 @@ class RunsList extends Component {
       <span className='last-updated'>
         Last updated: {this.runsStore.lastUpdated}
       </span>
+    )
+  }
+
+  _noApiServer () {
+    return (
+      <div className='empty empty-no-api-server'>
+        <h4>Cannot connect to API server</h4>
+        <p>Viewing runs requires connecting to an external API server.</p>
+        <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
+        <p>
+          <button
+            className='btn btn-default btn-sm'
+            onClick={this._pingApiServer}
+          >
+            <i className='fa fa-refresh'></i>{' '}
+            Try Again
+          </button>
+        </p>
+        <p>The following error was encountered:</p>
+        <pre className='alert alert-danger'><code>{this.state.apiError}</code></pre>
+      </div>
     )
   }
 

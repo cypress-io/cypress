@@ -16,6 +16,8 @@ logs     = require("#{root}../lib/gui/logs")
 events   = require("#{root}../lib/gui/events")
 dialog   = require("#{root}../lib/gui/dialog")
 Windows  = require("#{root}../lib/gui/windows")
+connect  = require("#{root}../lib/util/connect")
+konfig   = require("#{root}../lib/konfig")
 
 describe "lib/gui/events", ->
   beforeEach ->
@@ -582,3 +584,36 @@ describe "lib/gui/events", ->
         @handleEvent("request:access", "org-id-123").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")
+
+    describe "ping:api:server", ->
+      it "returns ensures url", ->
+        @sandbox.stub(connect, "ensureUrl").resolves()
+
+        @handleEvent("ping:api:server").then =>
+          expect(connect.ensureUrl).to.be.calledWith(konfig("api_url"))
+          @expectSendCalledWith()
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(connect, "ensureUrl").rejects(err)
+
+        @handleEvent("ping:api:server").then =>
+          @expectSendErrCalledWith(err)
+          expect(err.apiUrl).to.equal(konfig("api_url"))
+
+      it "sends first of aggregate error", ->
+        err = new Error("AggregateError")
+        err.message = "aggregate error"
+        err[0] = {
+          code: "ECONNREFUSED"
+          port: 1234
+          address: "127.0.0.1"
+        }
+        err.length = 1
+        @sandbox.stub(connect, "ensureUrl").rejects(err)
+
+        @handleEvent("ping:api:server").then =>
+          @expectSendErrCalledWith(err)
+          expect(err.name).to.equal("ECONNREFUSED 127.0.0.1:1234")
+          expect(err.message).to.equal("ECONNREFUSED 127.0.0.1:1234")
+          expect(err.apiUrl).to.equal(konfig("api_url"))

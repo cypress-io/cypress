@@ -37,6 +37,9 @@ describe "Runs List", ->
       @getCurrentUser = @util.deferred()
       cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
 
+      @pingApiServer = @util.deferred()
+      cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
+
       @getProjectStatus = @util.deferred()
       cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
 
@@ -45,26 +48,79 @@ describe "Runs List", ->
 
       start()
 
-  context "displays page", ->
+  context "page display", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
       @getRuns.resolve(@runs)
       @goToRuns()
 
-    it "navigates to runs page", ->
-      cy.contains("h5", "Runs")
-
-    it "highlight run nav", ->
+    it "highlights run nav", ->
       cy
         .get(".navbar-default a")
           .contains("Runs").should("have.class", "active")
+
+  context "api server connection", ->
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
+      @getRuns.resolve(@runs)
+      @goToRuns()
+
+    it "pings api server", ->
+      expect(@ipc.pingApiServer).to.be.called
+      cy.get(".loader")
+
+    describe "success", ->
+      beforeEach ->
+        @pingApiServer.resolve()
+
+      it "shows runs", ->
+        cy.contains("h5", "Runs")
+
+    describe "failure", ->
+      beforeEach ->
+        @pingApiServerAgain = @util.deferred()
+        @ipc.pingApiServer.onCall(1).returns(@pingApiServerAgain.promise)
+
+        @pingApiServer.reject({
+          apiUrl: "http://api.server"
+          message: "ECONNREFUSED"
+        })
+
+      it "shows 'cannot connect to api server' message", ->
+        cy.contains("Cannot connect to API server")
+        cy.contains("http://api.server")
+        cy.contains("ECONNREFUSED")
+
+      describe "trying again", ->
+        beforeEach ->
+          cy.contains("Try Again").click()
+
+        it "pings again", ->
+          cy.get(".loader").then ->
+            expect(@ipc.pingApiServer).to.be.calledTwice
+
+        it "shows new error on failure", ->
+          @pingApiServerAgain.reject({
+            apiUrl: "http://api.server"
+            message: "WHADJAEXPECT"
+          })
+
+          cy.contains("Cannot connect to API server")
+          cy.contains("http://api.server")
+          cy.contains("WHADJAEXPECT")
+
+        it "shows runs", ->
+          @pingApiServerAgain.resolve()
+          cy.contains("h5", "Runs")
 
   context "with a current user", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @config.projectId = @projects[0].id
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
 
       timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
@@ -108,6 +164,7 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(null)
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
 
       @goToRuns()
 
@@ -119,6 +176,7 @@ describe "Runs List", ->
       @getCurrentUser.resolve(@user)
       @config.projectId = undefined
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
       @goToRuns()
 
     it "displays 'need to set up' message", ->
@@ -128,6 +186,7 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
@@ -195,6 +254,7 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
@@ -227,6 +287,7 @@ describe "Runs List", ->
   context "error states", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
+      @pingApiServer.resolve()
 
     describe "permissions error", ->
       beforeEach ->

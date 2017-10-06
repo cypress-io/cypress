@@ -181,8 +181,6 @@ API = {
 
         https://on.cypress.io/dashboard
         """
-      when "DEV_NO_SERVER"
-        " > The local API server isn't running in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
         "Can't find 'projectId' in the 'cypress.json' file for this project: " + chalk.blue(arg1)
       when "NO_PROJECT_FOUND_AT_PROJECT_ROOT"
