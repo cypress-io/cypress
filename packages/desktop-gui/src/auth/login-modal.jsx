@@ -7,8 +7,14 @@ import LoginForm from './login-form'
 import authStore from './auth-store'
 import ipc from '../lib/ipc'
 
+const close = () => {
+  authStore.setShowingLogin(false)
+}
+
+// LoginContent is a separate component so that it pings the api
+// server whenever it is displayed
 @observer
-class Login extends Component {
+class LoginContent extends Component {
   state = {
     isLoading: true,
     hasApiServer: false,
@@ -41,21 +47,10 @@ class Login extends Component {
   }
 
   render () {
-    return (
-      <BootstrapModal
-        show={authStore.isShowingLogin}
-        onHide={this._close}
-        backdrop='static'
-      >
-        {this._content()}
-      </BootstrapModal>
-    )
-  }
-
-  _content () {
     if (this.state.isLoading) {
       return (
         <div className='modal-body login'>
+          <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
           <Loader color='#888' scale={0.5}/>
         </div>
       )
@@ -70,7 +65,7 @@ class Login extends Component {
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h1><i className='fa fa-lock'></i> Log In</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
-        <LoginForm onSuccess={this._close} />
+        <LoginForm onSuccess={close} />
       </div>
     )
   }
@@ -78,6 +73,7 @@ class Login extends Component {
   _noApiServer () {
     return (
       <div className='modal-body login login-no-api-server'>
+        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h4><i className='fa fa-wifi'></i> Cannot connect to API server</h4>
         <p>Logging in requires connecting to an external API server.</p>
         <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
@@ -96,13 +92,19 @@ class Login extends Component {
     )
   }
 
-  _close = () => {
-    authStore.setShowingLogin(false)
-  }
-
   _openDashboard () {
     ipc.externalOpen('https://on.cypress.io/dashboard')
   }
 }
+
+const Login = observer(() => (
+  <BootstrapModal
+    show={authStore.isShowingLogin}
+    onHide={close}
+    backdrop='static'
+  >
+    {authStore.isShowingLogin && <LoginContent />}
+  </BootstrapModal>
+))
 
 export default Login

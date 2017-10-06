@@ -211,6 +211,15 @@ describe "Login", ->
         cy.contains("http://api.server")
         cy.contains("WHADJAEXPECT")
 
-      it "shows login", ->
+      it "shows login on success", ->
         @pingApiServerAgain.resolve()
+        cy.get(".login").contains("button", "Log In with GitHub")
+
+    describe "closing login", ->
+      beforeEach ->
+        cy.get(".login .close").click()
+
+      it "shows log in if connected and opened again", ->
+        @pingApiServerAgain.resolve()
+        cy.contains("Log In").click()
         cy.get(".login").contains("button", "Log In with GitHub")
