@@ -68,8 +68,7 @@ describe "Runs List", ->
       @goToRuns()
 
     it "pings api server", ->
-      ## login also calls pingApiServer, make sure this did too
-      expect(@ipc.pingApiServer).to.be.calledTwice
+      expect(@ipc.pingApiServer).to.be.called
       cy.get(".loader")
 
     describe "success", ->
@@ -82,8 +81,7 @@ describe "Runs List", ->
     describe "failure", ->
       beforeEach ->
         @pingApiServerAgain = @util.deferred()
-        ## login also calls pingApiServer, so this is the 3rd call
-        @ipc.pingApiServer.onCall(2).returns(@pingApiServerAgain.promise)
+        @ipc.pingApiServer.onCall(1).returns(@pingApiServerAgain.promise)
 
         @pingApiServer.reject({
           apiUrl: "http://api.server"
@@ -101,7 +99,7 @@ describe "Runs List", ->
 
         it "pings again", ->
           cy.get(".loader").then ->
-            expect(@ipc.pingApiServer).to.be.calledThrice
+            expect(@ipc.pingApiServer).to.be.calledTwice
 
         it "shows new error on failure", ->
           @pingApiServerAgain.reject({
