@@ -172,6 +172,7 @@ module.exports = {
       url: Routes.signin({code: code})
       json: true
       headers: {
+        "x-accept-terms": "true"
         "x-route-version": "3"
       }
     })
