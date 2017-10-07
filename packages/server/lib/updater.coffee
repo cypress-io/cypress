@@ -86,7 +86,8 @@ class Updater
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
-      debug("latest version of Cypress is:", manifest.version)
+      if manifest
+        debug("latest version of Cypress is:", manifest.version)
 
       if newVersionExists
         debug("new version of Cypress exists:", manifest.version)
