@@ -178,6 +178,7 @@ module.exports = {
     .then (id) ->
       h = {
         "x-route-version": "3"
+        "x-accept-terms": "true"
       }
 
       if id

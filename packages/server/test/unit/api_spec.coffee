@@ -552,6 +552,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
+      .matchHeader("x-accept-terms", "true")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {
