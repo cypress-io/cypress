@@ -1,3 +1,4 @@
+import human from 'human-interval'
 import React, { Component } from 'react'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
@@ -12,7 +13,7 @@ class UpdateBanner extends Component {
 
   componentDidMount () {
     if (!appStore.isDev) {
-      this.checkId = setInterval(this._checkForUpdate, (5 * 60 * 1000))
+      this.checkId = setInterval(this._checkForUpdate, human('60 minutes'))
       this._checkForUpdate()
     }
   }

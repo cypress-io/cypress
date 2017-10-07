@@ -13,8 +13,8 @@ beforeEach ->
       JSON.parse(JSON.stringify(obj))
   }
 
-Cypress.Commands.add "visitIndex", ->
-  cy.visit("/dist/index.html")
+Cypress.Commands.add "visitIndex", (options = {}) ->
+  cy.visit("/dist/index.html", options)
 
 Cypress.Commands.add "shouldBeOnLogin", ->
   cy.contains("Log In with GitHub")
