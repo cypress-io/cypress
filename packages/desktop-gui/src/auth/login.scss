@@ -1,12 +1,12 @@
 .login {
   padding: 20px 50px;
+
   h1 {
     margin-bottom: 15px;
-    // font-weight: 00;
     font-size: 24px;
   }
 
-  p {
+  > p {
     color: #666;
     line-height: 1.7em;
   }
@@ -18,21 +18,17 @@
   }
 
   .alert.alert-danger {
-    background-color: #fbe2e4;
-    border: 1px solid #f5c6cb;
-    margin: 0px auto 15px;
+    margin: 0 auto 15px;
     width: 100%;
     padding: 10px;
     font-size: 13px;
 
     p {
-      color: #b73844;
       line-height: 20px;
     }
 
     a {
       cursor: pointer;
-      color: #b73844;
       border-bottom: 1px dashed #b73844;
       font-size: 13px;
 
@@ -45,11 +41,15 @@
 }
 
 .login-content {
-  margin: 0 auto;
   overflow: auto;
   padding: 20px;
   text-align: center;
-  width: 300px;
+
+  button {
+    display: block;
+    margin: 0 auto 1em;
+    width: 250px;
+  }
 
   a {
     color: $brand-primary;
@@ -90,4 +90,14 @@
 .login-spinner {
   margin: 10px 0;
   color: #777;
+}
+
+.login-no-api-server {
+  text-align: center;
+
+  em {
+    color: #333;
+    font-style: normal;
+    font-family: $font-mono;
+  }
 }

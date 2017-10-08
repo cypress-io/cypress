@@ -10,6 +10,7 @@ describe "Navigation", ->
       cy.stub(@ipc, "getProjects").resolves([])
       cy.stub(@ipc, "getProjectStatuses").resolves([])
       cy.stub(@ipc, "logOut").resolves({})
+      cy.stub(@ipc, "pingApiServer").resolves()
       cy.stub(@ipc, "externalOpen")
 
       @getCurrentUser = @util.deferred()
