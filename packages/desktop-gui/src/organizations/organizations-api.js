@@ -18,6 +18,10 @@ const getOrgs = () => {
   return null
 }
 
+const isPolling = () => {
+  return !!pollId
+}
+
 const pollOrgs = () => {
   if (pollId) return
 
@@ -31,9 +35,9 @@ const stopPollingOrgs = () => {
   pollId = null
 }
 
-
-export {
+export default {
   getOrgs,
+  isPolling,
   pollOrgs,
   stopPollingOrgs,
 }

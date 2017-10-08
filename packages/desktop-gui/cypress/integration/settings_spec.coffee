@@ -22,6 +22,7 @@ describe "Settings", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeBrowser").resolves()
       cy.stub(@ipc, "closeProject").resolves()
+      cy.stub(@ipc, "pingApiServer").resolves()
       cy.stub(@ipc, "onConfigChanged")
       cy.stub(@ipc, "onFocusTests")
       cy.stub(@ipc, "externalOpen")
@@ -99,56 +100,72 @@ describe "Settings", ->
       it "displays project id section", ->
         cy.contains(@config.projectId)
 
-    describe "when record keys panels is opened", ->
+    describe "when record key panels is opened", ->
       beforeEach ->
         cy.contains("Record Key").click()
 
-      it "displays record keys section", ->
+      it "displays record key section", ->
         cy.contains("A Record Key sends")
 
       it "opens ci guide when learn more is clicked", ->
         cy
-          .get(".settings-record-keys").contains("Learn More").click().then ->
+          .get(".settings-record-key").contains("Learn More").click().then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-record-key")
 
-      it "loads the project's record keys", ->
+      it "loads the project's record key", ->
         expect(@ipc.getRecordKeys).to.be.called
 
       it "shows spinner", ->
-        cy.get(".settings-record-keys .fa-spinner")
+        cy.get(".settings-record-key .fa-spinner")
 
-      it "opens admin project settings when record keys link is clicked", ->
-        cy
-          .get(".settings-record-keys").contains("You can change").click().then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
-
-      describe "when record keys load", ->
+      describe "when record key loads", ->
         beforeEach ->
           @getRecordKeys.resolve(@keys)
 
         it "displays first Record Key", ->
           cy
             .get(".loading-record-keys").should("not.exist")
-            .get(".settings-record-keys")
+            .get(".settings-record-key")
               .contains("cypress run --record --key #{@keys[0].id}")
+
+        it "opens admin project settings when record key link is clicked", ->
+          cy
+            .get(".settings-record-key").contains("You can change").click().then ->
+              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
       describe "when there are no keys", ->
         beforeEach ->
           @getRecordKeys.resolve([])
 
-        it "does not display cypress run command", ->
-          cy
-            .get(".loading-record-keys").should("not.exist")
-            .get(".settings-record-keys").should("not.contain", "cypress run")
+        it "displays empty message", ->
+          cy.get(".settings-record-key .empty-well").should("contain", "This project has no record keys")
 
-      describe "when record keys is null", ->
+        it "opens dashboard project settings when clicking 'Dashboard'", ->
+          cy.get(".settings-record-key .empty-well a").click().then ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
+
+      describe "when the user is logged out", ->
         beforeEach ->
-          @getRecordKeys.resolve(null)
+          @getRecordKeys.resolve([])
+          cy.logOut()
 
-        it "does not display cypress run command", ->
-          cy
-            .get(".loading-record-keys").should("not.exist")
-            .get(".settings-record-keys").should("not.contain", "cypress run")
+        it "shows message that user must be logged in to view record keys", ->
+          cy.get(".empty-well").should("contain", "must be logged in")
+
+        it "opens login modal after clicking 'Log In'", ->
+          cy.get(".empty-well button").click()
+          cy.get(".login")
+
+        it "re-loads and shows the record key when user logs in", ->
+          cy.stub(@ipc, "windowOpen").resolves("code-123")
+          cy.stub(@ipc, "logIn").resolves(@user)
+          @ipc.getRecordKeys.onCall(1).resolves(@keys)
+
+          cy.get(".empty-well button").click()
+          cy.contains("Log In with GitHub").click().should =>
+            expect(@ipc.getRecordKeys).to.be.calledTwice
+          cy.get(".settings-record-key")
+            .contains("cypress run --record --key #{@keys[0].id}")
 
     context "on:focus:tests clicked", ->
       beforeEach ->

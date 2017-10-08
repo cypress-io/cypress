@@ -1,11 +1,10 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-
 import Tooltip from '@cypress/react-tooltip'
 
-import appApi from '../lib/app-api'
 import appStore from '../lib/app-store'
-import authStore from '../lib/auth-store'
+import authApi from '../auth/auth-api'
+import authStore from '../auth/auth-store'
 import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
@@ -17,7 +16,7 @@ import Dropdown from '../dropdown/dropdown'
 export default class Nav extends Component {
   render () {
     return (
-      <nav className='navbar navbar-inverse navbar-fixed-top'>
+      <nav className='main-nav navbar navbar-inverse navbar-fixed-top'>
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li className='left-nav'>
@@ -78,7 +77,25 @@ export default class Nav extends Component {
   }
 
   _userStateButton = () => {
-    if (!authStore.isAuthenticated) return null
+    if (authStore.isLoading) {
+      return (
+        <li>
+          <div>
+            <i className='fa fa-user' /> <i className='fa fa-spinner fa-spin' />
+          </div>
+        </li>
+      )
+    }
+
+    if (!authStore.isAuthenticated) {
+      return (
+        <li>
+          <a onClick={this._showLogin}>
+            <i className='fa fa-user' /> Log In
+          </a>
+        </li>
+      )
+    }
 
     return (
       <Dropdown
@@ -117,8 +134,12 @@ export default class Nav extends Component {
 
   _select = (item) => {
     if (item.id === 'logout') {
-      appApi.logOut()
+      authApi.logOut()
     }
+  }
+
+  _showLogin () {
+    authStore.setShowingLogin(true)
   }
 
   _openDocs (e) {

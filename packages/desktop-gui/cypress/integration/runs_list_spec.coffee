@@ -29,12 +29,16 @@ describe "Runs List", ->
       cy.stub(@ipc, "requestAccess")
       cy.stub(@ipc, "setupDashboardProject")
       cy.stub(@ipc, "externalOpen")
+      cy.stub(@ipc, "windowOpen").resolves()
 
       @openProject = @util.deferred()
       cy.stub(@ipc, "openProject").returns(@openProject.promise)
 
       @getCurrentUser = @util.deferred()
       cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
+
+      @pingApiServer = @util.deferred()
+      cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
 
       @getProjectStatus = @util.deferred()
       cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
@@ -44,276 +48,84 @@ describe "Runs List", ->
 
       start()
 
-  context "displays page", ->
+  context "page display", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
       @getRuns.resolve(@runs)
       @goToRuns()
 
-    it "navigates to runs page", ->
-      cy.contains("h5", "Runs")
-
-    it "highlight run nav", ->
+    it "highlights run nav", ->
       cy
         .get(".navbar-default a")
           .contains("Runs").should("have.class", "active")
 
-  context "error states", ->
+  context "api server connection", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
+      @openProject.resolve(@config)
+      @getRuns.resolve(@runs)
+      @goToRuns()
 
-    describe "permissions error", ->
+    it "pings api server", ->
+      expect(@ipc.pingApiServer).to.be.called
+      cy.get(".loader")
+
+    describe "success", ->
       beforeEach ->
-        @openProject.resolve(@config)
-        @goToRuns()
+        @pingApiServer.resolve()
 
-      context "statusCode: 403", ->
-        beforeEach ->
-          @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
+      it "shows runs", ->
+        cy.contains("h5", "Runs")
 
-        it "displays permissions message", ->
-          cy.contains("Request Access")
-
-      context "any case", ->
-        beforeEach ->
-          @requestAccess = @util.deferred()
-          @ipc.requestAccess.returns(@requestAccess.promise)
-          @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
-
-        context "request access", ->
-          beforeEach ->
-            cy.contains("Request Access").click()
-
-          it "sends requests access with org id", ->
-            expect(@ipc.requestAccess).to.be.calledWith("d8104707-a348-4653-baea-7da9c7d52448")
-
-          it "disables button", ->
-            cy.contains("Request Access").should("be.disabled")
-
-          it "hides 'Request Access' text", ->
-            cy.contains("Request Access").find("span").should("not.be.visible")
-
-          it "shows spinner", ->
-            cy.contains("Request Access").find("> i").should("be.visible")
-
-          describe "when request succeeds", ->
-            beforeEach ->
-              @requestAccess.resolve()
-
-            it "shows success message", ->
-              cy.contains("Request Sent")
-
-            it "'persists' request state (until app is reloaded at least)", ->
-              @ipc.getRuns.onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
-
-              cy.get(".navbar-default a").contains("Tests").click()
-              cy.get(".navbar-default a").contains("Runs").click()
-              cy.contains("Request Sent")
-
-          describe "when request succeeds and user is already a member", ->
-            beforeEach ->
-              @requestAccess.reject({name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
-              @getRuns = @util.deferred()
-              @ipc.getRuns.onCall(1).returns(@getRuns.promise)
-              cy.wait(1)
-
-            it "retries getting runs", ->
-              expect(@ipc.getRuns.callCount).to.equal(2)
-
-            it "shows loading spinner", ->
-              cy.get(".loader")
-
-            it "shows runs when getting runs succeeds", ->
-              @getRuns.resolve(@runs)
-              cy
-                .get(".runs-container li")
-                .should("have.length", @runs.length)
-
-          describe "when request fails", ->
-            describe "for unknown reason", ->
-              beforeEach ->
-                @requestAccess.reject({name: "foo", message: """
-                {
-                  "cheese": "off the cracker"
-                }
-                """})
-
-                ## block the subsequent tests until
-                ## this is displayed in the DOM
-                cy.contains("Request Failed")
-                cy.contains("off the cracker")
-
-              it "enables button", ->
-                cy.contains("Request Access").should("not.be.disabled")
-
-              it "shows 'Request Access' text", ->
-                cy.contains("Request Access").find("span").should("be.visible")
-
-              it "hides spinner", ->
-                cy.contains("Request Access").find("> i").should("not.be.visible")
-
-            describe "because requested was denied", ->
-              beforeEach ->
-                @requestAccess.reject({type: "DENIED", name: "foo", message: "There's an error"})
-
-              it "shows 'success' message", ->
-                cy.contains("Request Sent")
-
-            describe "because request was already sent", ->
-              beforeEach ->
-                @requestAccess.reject({type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
-
-              it "shows 'success' message", ->
-                cy.contains("Request Sent")
-
-            describe "because user became unauthenticated", ->
-              beforeEach ->
-                @requestAccess.reject({name: "", message: "", statusCode: 401})
-
-              it "redirects to login", ->
-                cy.shouldBeOnLogin()
-
-    describe "timed out error", ->
+    describe "failure", ->
       beforeEach ->
-        @openProject.resolve(@config)
-        @goToRuns().then =>
-          @getRuns.reject({name: "foo", message: "There's an error", type: "TIMED_OUT"})
+        @pingApiServerAgain = @util.deferred()
+        @ipc.pingApiServer.onCall(1).returns(@pingApiServerAgain.promise)
 
-      it "displays timed out message", ->
-        cy.contains("timed out")
-
-    describe "not found error", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @goToRuns().then =>
-          @getRuns.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
-
-      it "displays empty message", ->
-        cy.contains("Runs Cannot Be Displayed")
-
-    describe "unauthenticated error", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @goToRuns().then =>
-          @getRuns.reject({name: "", message: "", statusCode: 401})
-
-      it "redirects to login", ->
-        cy.shouldBeOnLogin()
-
-    describe "no project id error", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @ipc.setupDashboardProject.resolves(@validCiProject)
-        @goToRuns().then =>
-          @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
-
-      it "displays 'you have no runs'", ->
-        cy.contains("You Have No Recorded Runs")
-
-      it "clears message after setting up CI", ->
-        cy
-          .get(".btn").contains("Setup Project").click()
-          .get(".modal-body")
-            .contains(".btn", "Me").click()
-          .get(".privacy-radio").find("input").last().check()
-          .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
-        cy.contains("To record your first")
-
-    describe "unexpected error", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @goToRuns().then =>
-          @getRuns.reject({name: "foo", message: """
-          {
-            "no runs": "for you"
-          }
-          """, type: "UNKNOWN"})
-
-      it "displays unexpected error message", ->
-        cy.contains("unexpected error")
-        cy.contains('"no runs": "for you"')
-
-    describe "unauthorized project", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @getProjectStatus.resolve({
-          state: "UNAUTHORIZED"
+        @pingApiServer.reject({
+          apiUrl: "http://api.server"
+          message: "ECONNREFUSED"
         })
 
-        @goToRuns()
+      it "shows 'cannot connect to api server' message", ->
+        cy.contains("Cannot connect to API server")
+        cy.contains("http://api.server")
+        cy.contains("ECONNREFUSED")
 
-      it "displays permissions message", ->
-        cy.contains("Request access")
-
-    describe "invalid project", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @ipc.setupDashboardProject.resolves(@validCiProject)
-
-        @getProjectStatus.resolve({
-          state: "INVALID"
-        })
-
-        @goToRuns()
-
-      it "displays empty message", ->
-        cy.contains("Runs Cannot Be Displayed")
-
-      it "clicking link opens setup project window", ->
-        cy
-          .get(".btn").contains("Setup a New Project").click()
-          .get(".modal").should("be.visible")
-
-      it "clears message after setting up CI", ->
-        cy
-          .get(".btn").contains("Setup a New Project").click()
-          .get(".modal-body")
-            .contains(".btn", "Me").click()
-          .get(".privacy-radio").find("input").last().check()
-          .get(".modal-body")
-            .contains(".btn", "Setup Project").click()
-        cy.contains("To record your first")
-
-    describe "no runs", ->
-      context "having never setup CI", ->
+      describe "trying again", ->
         beforeEach ->
-          @config.projectId = null
-          @openProject.resolve(@config)
+          cy.contains("Try again").click()
 
-          @goToRuns().then =>
-            @getRuns.resolve([])
+        it "pings again", ->
+          cy.get(".loader").then ->
+            expect(@ipc.pingApiServer).to.be.calledTwice
 
-        it "displays empty message", ->
-          cy.contains("You Have No Recorded Runs")
+        it "shows new error on failure", ->
+          @pingApiServerAgain.reject({
+            apiUrl: "http://api.server"
+            message: "WHADJAEXPECT"
+          })
 
-    context "having previously setup CI", ->
-      beforeEach ->
-        @openProject.resolve(@config)
-        @goToRuns().then =>
-          @getRuns.resolve([])
+          cy.contains("Cannot connect to API server")
+          cy.contains("http://api.server")
+          cy.contains("WHADJAEXPECT")
 
-      it "displays empty message", ->
-        cy.contains("To record your first")
+        it "shows runs", ->
+          @pingApiServerAgain.resolve()
+          cy.contains("h5", "Runs")
 
-      it "opens project id guide on clicking 'Why?'", ->
-        cy
-          .contains("Why?").click()
-          .then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-project-id")
+      describe "api help link", ->
+        it "goes to external api help link", ->
+          cy.contains("Learn more").click().then ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/help-connect-to-api")
 
-      it "opens dashboard on clicking 'Cypress Dashboard'", ->
-        cy
-          .contains("Cypress Dashboard").click()
-          .then ->
-            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")
-
-  describe "list runs", ->
+  context "with a current user", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @config.projectId = @projects[0].id
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
 
       timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
@@ -323,6 +135,9 @@ describe "Runs List", ->
           @goToRuns()
         .then =>
           @getRuns.resolve(@runs)
+
+    it "fetches runs", ->
+      expect(@ipc.getRuns).to.be.called
 
     it "lists runs", ->
       cy
@@ -350,10 +165,56 @@ describe "Runs List", ->
         .then =>
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
 
+  context "without a current user", ->
+    beforeEach ->
+      @getCurrentUser.resolve(null)
+      @openProject.resolve(@config)
+      @pingApiServer.resolve()
+
+      @goToRuns()
+
+    it "does not fetch runs", ->
+      expect(@ipc.getRuns).not.to.be.called
+
+  context "without a project id", ->
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
+      @config.projectId = undefined
+      @openProject.resolve(@config)
+      @pingApiServer.resolve()
+      @goToRuns()
+
+    it "displays 'need to set up' message", ->
+      cy.contains("You Have No Recorded Runs")
+
+  context "without a current user and without project id", ->
+    beforeEach ->
+      @getCurrentUser.resolve(null)
+      @config.projectId = undefined
+      @openProject.resolve(@config)
+      @pingApiServer.resolve()
+      @goToRuns()
+
+    it "displays 'need to set up' message", ->
+      cy.contains("You Have No Recorded Runs")
+
+    describe "click setup project", ->
+      beforeEach ->
+        cy.contains("Set Up Project").click()
+
+      it "shows login message", ->
+        cy.get(".login h1").should("contain", "Log In")
+
+      it "clicking 'Log In with GitHub' opens login", ->
+        cy.contains("button", "Log In with GitHub").click().then ->
+          expect(@ipc.windowOpen).to.be.called
+          expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+
   describe "polling runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
@@ -409,7 +270,7 @@ describe "Runs List", ->
         @ipcError({statusCode: 403})
         cy.contains("Request access")
 
-      it "displays missing project id error", ->
+      it "displays 'need to set up' message", ->
         @ipcError({type: "NO_PROJECT_ID"})
         cy.contains("You Have No Recorded Runs")
 
@@ -421,6 +282,7 @@ describe "Runs List", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
+      @pingApiServer.resolve()
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
@@ -449,3 +311,266 @@ describe "Runs List", ->
 
       it "stops spinning the refresh button", ->
         cy.get(".runs header button i").should("not.have.class", "fa-spin")
+
+  context "error states", ->
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
+      @pingApiServer.resolve()
+
+    describe "permissions error", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @goToRuns()
+
+      context "statusCode: 403", ->
+        beforeEach ->
+          @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
+
+        it "displays permissions message", ->
+          cy.contains("Request Access")
+
+      context "any case", ->
+        beforeEach ->
+          @requestAccess = @util.deferred()
+          @ipc.requestAccess.returns(@requestAccess.promise)
+          @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
+
+        context "request access", ->
+          beforeEach ->
+            cy.contains("Request Access").click()
+
+          it "sends requests access with org id", ->
+            expect(@ipc.requestAccess).to.be.calledWith("d8104707-a348-4653-baea-7da9c7d52448")
+
+          it "disables button", ->
+            cy.contains("Request Access").should("be.disabled")
+
+          it "hides 'Request Access' text", ->
+            cy.contains("Request Access").find("span").should("not.be.visible")
+
+          it "shows spinner", ->
+            cy.contains("Request Access").find("> i").should("be.visible")
+
+          describe "when request succeeds", ->
+            beforeEach ->
+              @requestAccess.resolve()
+
+            it "shows success message", ->
+              cy.contains("Request Sent")
+
+            it "'persists' request state (until app is reloaded at least)", ->
+              @ipc.getRuns.onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
+
+              cy.get(".navbar-default a").contains("Tests").click()
+              cy.get(".navbar-default a").contains("Runs").click()
+              cy.contains("Request Sent")
+
+          describe "when request succeeds and user is already a member", ->
+            beforeEach ->
+              @requestAccess.reject({name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
+              @getRuns = @util.deferred()
+              @ipc.getRuns.onCall(1).returns(@getRuns.promise)
+              @ipc.getRuns.onCall(2).returns(@getRuns.promise)
+
+            it "retries getting runs", ->
+              cy.wrap(@ipc.getRuns).its("callCount").should("be.above", 1)
+
+            it "shows loading spinner", ->
+              cy.get(".loader")
+
+            it "shows runs when getting runs succeeds", ->
+              @getRuns.resolve(@runs)
+              cy
+                .get(".runs-container li")
+                .should("have.length", @runs.length)
+
+          describe "when request fails", ->
+            describe "for unknown reason", ->
+              beforeEach ->
+                @requestAccess.reject({name: "foo", message: """
+                {
+                  "cheese": "off the cracker"
+                }
+                """})
+
+                ## block the subsequent tests until
+                ## this is displayed in the DOM
+                cy.contains("Request Failed")
+                cy.contains("off the cracker")
+
+              it "enables button", ->
+                cy.contains("Request Access").should("not.be.disabled")
+
+              it "shows 'Request Access' text", ->
+                cy.contains("Request Access").find("span").should("be.visible")
+
+              it "hides spinner", ->
+                cy.contains("Request Access").find("> i").should("not.be.visible")
+
+            describe "because requested was denied", ->
+              beforeEach ->
+                @requestAccess.reject({type: "DENIED", name: "foo", message: "There's an error"})
+
+              it "shows 'success' message", ->
+                cy.contains("Request Sent")
+
+            describe "because request was already sent", ->
+              beforeEach ->
+                @requestAccess.reject({type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
+
+              it "shows 'success' message", ->
+                cy.contains("Request Sent")
+
+            describe "because user became unauthenticated", ->
+              beforeEach ->
+                @requestAccess.reject({name: "", message: "", statusCode: 401})
+
+              it "logs user out", ->
+                cy.shouldBeLoggedOut()
+
+              it "shows login message", ->
+                cy.get(".empty h4").should("contain", "Log In")
+
+              it "clicking 'Log In with GitHub' opens login", ->
+                cy.contains("button", "Log In with GitHub").click().then ->
+                  expect(@ipc.windowOpen).to.be.called
+                  expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+
+    describe "timed out error", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: "There's an error", type: "TIMED_OUT"})
+
+      it "displays timed out message", ->
+        cy.contains("timed out")
+
+    describe "not found error", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
+
+      it "displays empty message", ->
+        cy.contains("Runs Cannot Be Displayed")
+
+    describe "unauthenticated error", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @goToRuns().then =>
+          @getRuns.reject({name: "", message: "", statusCode: 401})
+
+      it "logs user out", ->
+        cy.shouldBeLoggedOut()
+
+      it "shows login message", ->
+        cy.get(".empty h4").should("contain", "Log In")
+
+    describe "no project id error", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @ipc.setupDashboardProject.resolves(@validCiProject)
+        @ipc.getRuns.onCall(1).resolves([])
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
+
+      it "displays 'need to set up' message", ->
+        cy.contains("You Have No Recorded Runs")
+
+      it "clears message after setting up to record", ->
+        cy
+          .contains(".btn", "Set Up Project").click()
+          .get(".modal-body")
+            .contains(".btn", "Me").click()
+          .get(".privacy-radio").find("input").last().check()
+          .get(".modal-body")
+            .contains(".btn", "Set Up Project").click()
+        cy.contains("To record your first")
+
+    describe "unexpected error", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: """
+          {
+            "no runs": "for you"
+          }
+          """, type: "UNKNOWN"})
+
+      it "displays unexpected error message", ->
+        cy.contains("unexpected error")
+        cy.contains('"no runs": "for you"')
+
+    describe "unauthorized project", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @getProjectStatus.resolve({
+          state: "UNAUTHORIZED"
+        })
+
+        @goToRuns()
+
+      it "displays permissions message", ->
+        cy.contains("Request access")
+
+    describe "invalid project", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @ipc.setupDashboardProject.resolves(@validCiProject)
+
+        @getProjectStatus.resolve({
+          state: "INVALID"
+        })
+
+        @goToRuns()
+
+      it "displays empty message", ->
+        cy.contains("Runs Cannot Be Displayed")
+
+      it "clicking link opens setup project window", ->
+        cy
+          .contains(".btn", "Set Up a New Project").click()
+          .get(".modal").should("be.visible")
+
+      it "clears message after setting up CI", ->
+        cy
+          .contains(".btn", "Set Up a New Project").click()
+          .get(".modal-body")
+            .contains(".btn", "Me").click()
+          .get(".privacy-radio").find("input").last().check()
+          .get(".modal-body")
+            .contains(".btn", "Set Up Project").click()
+        cy.contains("To record your first")
+
+    describe "no runs", ->
+      context "having never setup CI", ->
+        beforeEach ->
+          @config.projectId = null
+          @openProject.resolve(@config)
+
+          @goToRuns().then =>
+            @getRuns.resolve([])
+
+        it "displays 'need to set up' message", ->
+          cy.contains("You Have No Recorded Runs")
+
+    context "having previously set up CI", ->
+      beforeEach ->
+        @openProject.resolve(@config)
+        @goToRuns().then =>
+          @getRuns.resolve([])
+
+      it "displays empty message", ->
+        cy.contains("To record your first")
+
+      it "opens project id guide on clicking 'Why?'", ->
+        cy
+          .contains("Why?").click()
+          .then ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-project-id")
+
+      it "opens dashboard on clicking 'Cypress Dashboard'", ->
+        cy
+          .contains("Cypress Dashboard").click()
+          .then ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")

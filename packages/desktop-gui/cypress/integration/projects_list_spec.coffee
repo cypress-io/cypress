@@ -1,4 +1,4 @@
-describe "Global Mode", ->
+describe "Projects List", ->
   beforeEach ->
     cy.fixture("user").as("user")
     cy.fixture("projects").as("projects")
@@ -160,14 +160,20 @@ describe "Global Mode", ->
     describe "errors", ->
       beforeEach ->
         @getProjects.resolve(@projects)
-        @getProjectStatuses.reject({
+        @error = {
           name: ""
           message: "Failed to get project statuses"
-        })
+        }
 
       it "displays error above list", ->
+        @getProjectStatuses.reject(@error)
         cy.get(".alert").should("contain", "Failed to get project statuses")
         cy.get(".projects-list li").should("have.length", @projects.length)
+
+      it "does not display api errors", ->
+        @error.isApiError = true
+        @getProjectStatuses.reject(@error)
+        cy.contains("Failed to get project statuses").should("not.exist")
 
   describe "if user becomes unauthenticated", ->
     beforeEach ->
@@ -180,14 +186,14 @@ describe "Global Mode", ->
     afterEach ->
       window.onunhandledrejection = undefined
 
-    it "redirects to login when get:projects returns 401", ->
+    it "logs user out when get:projects returns 401", ->
       @getProjects.reject(@unauthError)
-      cy.shouldBeOnLogin()
+      cy.shouldBeLoggedOut()
 
-    it "redirects to login when get:project:statuses returns 401", ->
+    it "logs user out when get:project:statuses returns 401", ->
       @getProjects.resolve([])
       @getProjectStatuses.reject(@unauthError)
-      cy.shouldBeOnLogin()
+      cy.shouldBeLoggedOut()
 
   describe "when there are projects in local storage that no longer exist", ->
     beforeEach ->

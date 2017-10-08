@@ -41,6 +41,14 @@ describe "lib/user", ->
         expect(api.createSignout).not.to.be.called
         expect(cache.removeUser).to.be.calledOnce
 
+    it "removes the session from cache even if api.createSignout rejects", ->
+      @sandbox.stub(api, "createSignout").withArgs("abc-123").rejects(new Error("ECONNREFUSED"))
+      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
+      @sandbox.spy(cache, "removeUser")
+
+      user.logOut().catch ->
+        expect(cache.removeUser).to.be.calledOnce
+
   context ".getLoginUrl", ->
     it "calls api.getLoginUrl", ->
       @sandbox.stub(api, "getLoginUrl").resolves("https://github.com/login")
@@ -55,7 +63,7 @@ describe "lib/user", ->
       user.ensureAuthToken().then (st) ->
         expect(st).to.eq("abc-123")
 
-    it "throws NOT_LOGGED_IN when no authToken", ->
+    it "throws NOT_LOGGED_IN when no authToken, tagged as api error", ->
       @sandbox.stub(cache, "getUser").resolves(null)
 
       user.ensureAuthToken()
@@ -64,4 +72,5 @@ describe "lib/user", ->
       .catch (err) ->
         expectedErr = errors.get("NOT_LOGGED_IN")
         expect(err.message).to.eq(expectedErr.message)
+        expect(err.isApiError).to.be.true
         expect(err.type).to.eq(expectedErr.type)

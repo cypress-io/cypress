@@ -69,26 +69,6 @@ export default class Project {
     this.update(props)
   }
 
-  @action update (props) {
-    if (!props) return
-
-    _.each(validProps, (prop) => {
-      this._updateProp(props, prop)
-    })
-  }
-
-  _updateProp (props, prop) {
-    if (props[prop] != null) this[prop] = props[prop]
-  }
-
-  clientDetails () {
-    return _.pick(this, 'id', 'path')
-  }
-
-  serialize () {
-    return _.pick(this, cacheProps)
-  }
-
   @computed get displayName () {
     if (this.name) return this.name
 
@@ -104,8 +84,20 @@ export default class Project {
     return '...'.concat(truncatedPath)
   }
 
+  @computed get isUnauthorized () {
+    return this.state === Project.UNAUTHORIZED
+  }
+
   @computed get isValid () {
     return this.state === Project.VALID
+  }
+
+  @computed get isInvalid () {
+    return this.state === Project.INVALID
+  }
+
+  @computed get isSetupForRecording () {
+    return this.id && this.isValid
   }
 
   @computed get otherBrowsers () {
@@ -118,6 +110,18 @@ export default class Project {
 
   @computed get defaultBrowser () {
     return this.browsers[0]
+  }
+
+  @action update (props) {
+    if (!props) return
+
+    _.each(validProps, (prop) => {
+      this._updateProp(props, prop)
+    })
+  }
+
+  _updateProp (props, prop) {
+    if (props[prop] != null) this[prop] = props[prop]
   }
 
   @action setLoading (isLoading) {
@@ -197,22 +201,31 @@ export default class Project {
   }
 
   @action clearWarning () {
-    if (!this.warning) return
+    if (this.warning) {
+      this.dismissedWarnings[this._serializeWarning(this.warning)] = true
+    }
 
-    this.dismissedWarnings[this._serializeWarning(this.warning)] = true
     this.warning = null
+  }
+
+  _serializeWarning (warning) {
+    return `${warning.type}:${warning.name}:${warning.message}`
   }
 
   @action setApiError = (err = {}) => {
     this.apiError = err
   }
 
-  setChosenBrowserByName (name) {
+  @action setChosenBrowserByName (name) {
     const browser = _.find(this.browsers, { name }) || this.defaultBrowser
     this.setChosenBrowser(browser)
   }
 
-  _serializeWarning (warning) {
-    return `${warning.type}:${warning.name}:${warning.message}`
+  clientDetails () {
+    return _.pick(this, 'id', 'path')
+  }
+
+  serialize () {
+    return _.pick(this, cacheProps)
   }
 }

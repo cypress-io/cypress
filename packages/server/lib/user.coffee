@@ -19,22 +19,12 @@ module.exports = {
       .return(user)
 
   logOut: ->
-    remove = ->
-      cache.removeUser()
-
-    @get()
-    .then (user) ->
+    @get().then (user) ->
       authToken = user and user.authToken
 
-      ## if we have a authToken
-      ## then send it up
-      if authToken
-        api.createSignout(authToken)
-        .then(remove)
-      else
-        ## else just remove the
-        ## user from cache
-        remove()
+      cache.removeUser().then ->
+        if authToken
+          api.createSignout(authToken)
 
   ensureAuthToken: ->
     @get().then (user) ->
@@ -43,5 +33,9 @@ module.exports = {
         return at
       else
         ## else throw the not logged in error
-        errors.throw("NOT_LOGGED_IN")
+        error = errors.get("NOT_LOGGED_IN")
+        ## tag it as api error since the user is only relevant
+        ## in regards to the api
+        error.isApiError = true
+        throw error
 }
