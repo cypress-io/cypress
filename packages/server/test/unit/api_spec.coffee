@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 rp       = require("request-promise")
 os       = require("os")
+nmi      = require("node-machine-id")
 pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
@@ -659,10 +660,34 @@ describe "lib/api", ->
 
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
+      @sandbox.stub(nmi, "machineId").resolves("12345")
+
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
+      .matchHeader("x-machine-id", "12345")
+      .post("/signin")
+      .query({code: "abc-123"})
+      .reply(200, {
+        name: "brian"
+      })
+
+      api.createSignin("abc-123").then (user) ->
+        expect(user).to.deep.eq({
+          name: "brian"
+        })
+
+    it "handles nmi errors", ->
+      @sandbox.stub(nmi, "machineId").rejects(new Error("foo"))
+
+      nock("http://localhost:1234", {
+        "badheaders": ["x-machine-id"]
+      })
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-accept-terms", "true")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {

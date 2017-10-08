@@ -1,3 +1,5 @@
+human = require("human-interval")
+
 OLD_VERSION = "1.3.3"
 NEW_VERSION = "1.3.4"
 
@@ -9,7 +11,10 @@ describe "Update Banner", ->
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
-    cy.visitIndex().then (win) ->
+    cy.visitIndex({
+      onBeforeLoad: (win) ->
+        cy.spy(win, "setInterval")
+    }).then (win) ->
       { @start, @ipc } = win.App
 
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
@@ -23,6 +28,10 @@ describe "Update Banner", ->
     beforeEach ->
       cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION})
       @start()
+
+    it "checks for updates every 60 minutes", ->
+      cy.window().then (win) ->
+        expect(win.setInterval.firstCall.args[1]).to.eq(human("60 minutes"))
 
     it "does not display update banner when no update available", ->
       @updaterCheck.resolve(false)

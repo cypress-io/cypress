@@ -1,5 +1,6 @@
 _          = require("lodash")
 os         = require("os")
+nmi        = require("node-machine-id")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
@@ -29,10 +30,14 @@ formatResponseBody = (err) ->
 
   throw err
 
-
 tagError = (err) ->
   err.isApiError = true
   throw err
+
+machineId = ->
+  nmi.machineId()
+  .catch ->
+    return null
 
 module.exports = {
   ping: ->
@@ -183,21 +188,29 @@ module.exports = {
     .catch(tagError)
 
   createSignin: (code) ->
-    rp.post({
-      url: Routes.signin({code: code})
-      json: true
-      headers: {
+    machineId()
+    .then (id) ->
+      h = {
         "x-route-version": "3"
+        "x-accept-terms": "true"
       }
-    })
-    .catch errors.StatusCodeError, (err) ->
-      ## reset message to error which is a pure body
-      ## representation of what was sent back from
-      ## the API
-      err.message = err.error
 
-      throw err
-    .catch(tagError)
+      if id
+        h["x-machine-id"] = id
+
+      rp.post({
+        url: Routes.signin({code: code})
+        json: true
+        headers: h
+      })
+      .catch errors.StatusCodeError, (err) ->
+        ## reset message to error which is a pure body
+        ## representation of what was sent back from
+        ## the API
+        err.message = err.error
+
+        throw err
+      .catch(tagError)
 
   createSignout: (authToken) ->
     rp.post({
