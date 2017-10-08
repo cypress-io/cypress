@@ -21,7 +21,7 @@ getS3Credentials = () ->
   config = configFromEnvOrJsonFile(key)
 
   process.chdir(old)
-  
+
   if !config
     console.error('⛔️  Cannot find AWS credentials')
     console.error('Using @cypress/env-or-json-file module')
@@ -55,7 +55,7 @@ hasCloudflareEnvironmentVars = () ->
 
 # depends on the credentials file or environment variables
 makeCloudflarePurgeCommand = (url) ->
-  configFile = path.resolve(__dirname, "support", ".cfcli.yml")
+  configFile = path.resolve(__dirname, "..", "support", ".cfcli.yml")
   if fs.existsSync(configFile)
     console.log("using CF credentials file")
     return "cfcli purgefile -c #{configFile} #{url}"
