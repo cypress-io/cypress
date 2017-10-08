@@ -195,7 +195,7 @@ describe "Login", ->
 
     describe "trying again", ->
       beforeEach ->
-        cy.contains("Try Again").click()
+        cy.contains("Try again").click()
 
       it "pings again", ->
         cy.get(".loader").then ->
@@ -214,6 +214,11 @@ describe "Login", ->
       it "shows login on success", ->
         @pingApiServerAgain.resolve()
         cy.get(".login").contains("button", "Log In with GitHub")
+
+    describe "api help link", ->
+      it "goes to external api help link", ->
+        cy.contains("Learn more").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/help-connect-to-api")
 
     describe "closing login", ->
       beforeEach ->

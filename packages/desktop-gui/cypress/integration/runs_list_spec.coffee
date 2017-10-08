@@ -95,7 +95,7 @@ describe "Runs List", ->
 
       describe "trying again", ->
         beforeEach ->
-          cy.contains("Try Again").click()
+          cy.contains("Try again").click()
 
         it "pings again", ->
           cy.get(".loader").then ->
@@ -114,6 +114,11 @@ describe "Runs List", ->
         it "shows runs", ->
           @pingApiServerAgain.resolve()
           cy.contains("h5", "Runs")
+
+      describe "api help link", ->
+        it "goes to external api help link", ->
+          cy.contains("Learn more").click().then ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/help-connect-to-api")
 
   context "with a current user", ->
     beforeEach ->

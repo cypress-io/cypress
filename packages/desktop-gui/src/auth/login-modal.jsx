@@ -75,25 +75,29 @@ class LoginContent extends Component {
       <div className='modal-body login login-no-api-server'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h4><i className='fa fa-wifi'></i> Cannot connect to API server</h4>
-        <p>Logging in requires connecting to an external API server.</p>
-        <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
+        <p>Logging in requires connecting to an external API server. We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
           <button
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
             <i className='fa fa-refresh'></i>{' '}
-            Try Again
+            Try again
           </button>
         </p>
         <p>The following error was encountered:</p>
         <pre className='alert alert-danger'><code>{this.state.apiError}</code></pre>
+        <a onClick={this._openAPIHelp}>Learn more</a>
       </div>
     )
   }
 
   _openDashboard () {
     ipc.externalOpen('https://on.cypress.io/dashboard')
+  }
+
+  _openAPIHelp () {
+    ipc.externalOpen('https://on.cypress.io/help-connect-to-api')
   }
 }
 
