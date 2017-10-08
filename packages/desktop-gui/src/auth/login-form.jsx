@@ -27,6 +27,7 @@ class LoginForm extends Component {
         >
           {this._buttonContent()}
         </button>
+        <p className='terms'>By logging in, you agree to the <a href="https://on.cypress.io/terms-of-use">Terms of Use</a> and <a href="https://on.cypress.io/privacy-policy">Privacy Policy</a>.</p>
       </div>
     )
   }

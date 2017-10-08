@@ -54,6 +54,23 @@
   a {
     color: $brand-primary;
   }
+
+  .terms {
+    color: #aaa;
+    font-size: 0.9em;
+    line-height: 1.5em;
+
+    a {
+      color: #aaa;
+      border-bottom: 1px solid #ddd;
+
+      &:hover, &:focus, &:active {
+        color: #888;
+        border-bottom: 1px solid #888;
+        text-decoration: none;
+      }
+    }
+  }
 }
 
 .btn-login {
