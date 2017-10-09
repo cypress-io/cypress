@@ -61,14 +61,6 @@ class LoginForm extends Component {
           <strong>Can't Log In</strong>
         </p>
         <p>{this._errorMessage(error.message)}</p>
-        {error.statusCode === 401 ?
-          <p>
-            <a onClick={this._openAuthDoc}>
-              <i className='fa fa-question-circle'></i>{' '}
-              Why am I not authorized?
-            </a>
-          </p>
-          : null}
       </div>
     )
   }
@@ -103,10 +95,6 @@ class LoginForm extends Component {
         error,
       })
     })
-  }
-
-  _openAuthDoc () {
-    ipc.externalOpen('https://on.cypress.io/email-not-authorized')
   }
 
   _openTerms () {
