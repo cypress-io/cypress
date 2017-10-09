@@ -27,7 +27,7 @@ class LoginForm extends Component {
         >
           {this._buttonContent()}
         </button>
-        <p className='terms'>By logging in, you agree to the <a href="https://on.cypress.io/terms-of-use">Terms of Use</a> and <a href="https://on.cypress.io/privacy-policy">Privacy Policy</a>.</p>
+        <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
   }
@@ -61,14 +61,6 @@ class LoginForm extends Component {
           <strong>Can't Log In</strong>
         </p>
         <p>{this._errorMessage(error.message)}</p>
-        {error.statusCode === 401 ?
-          <p>
-            <a onClick={this._openAuthDoc}>
-              <i className='fa fa-question-circle'></i>{' '}
-              Why am I not authorized?
-            </a>
-          </p>
-          : null}
       </div>
     )
   }
@@ -105,8 +97,12 @@ class LoginForm extends Component {
     })
   }
 
-  _openAuthDoc () {
-    ipc.externalOpen('https://on.cypress.io/email-not-authorized')
+  _openTerms () {
+    ipc.externalOpen('https://on.cypress.io/terms-of-use')
+  }
+
+  _openPrivacy () {
+    ipc.externalOpen('https://on.cypress.io/privacy-policy')
   }
 }
 

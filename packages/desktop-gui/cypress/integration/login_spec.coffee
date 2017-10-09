@@ -142,34 +142,6 @@ describe "Login", ->
             cy
               .get("@loginBtn").should("not.be.disabled")
 
-        describe "on ipc 'log:in' unauthorized error", ->
-          beforeEach ->
-            @login.reject({
-              error: "Your email: 'foo@bar.com' has not been authorized."
-              message: "Your email: 'foo@bar.com' has not been authorized."
-              name: "StatusCodeError"
-              statusCode: 401
-            })
-
-          it "displays error in ui", ->
-            cy
-              .get(".alert-danger")
-                .should("be.visible")
-                .contains("Your email: 'foo@bar.com' has not been authorized")
-
-          it "displays authorized help link", ->
-            cy
-              .contains("a", "Why am I not authorized?")
-
-          it "opens link to docs on click of help link", ->
-            cy
-              .contains("a", "Why am I not authorized?").click().then ->
-                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/email-not-authorized")
-
-          it "login button should be enabled", ->
-            cy
-              .get("@loginBtn").should("not.be.disabled")
-
       describe "when user closes window before logging in", ->
         beforeEach ->
           @openWindow.reject({windowClosed: true, name: "foo", message: "There's an error"})
@@ -177,6 +149,18 @@ describe "Login", ->
         it "no longer shows logging in spinner", ->
           cy.get(".login-content .alert").should("not.exist")
           cy.contains("button", "Log In with GitHub").should("not.be.disabled")
+
+    describe "Dashboard link in message", ->
+      it "opens link to Dashboard Service on click", ->
+        cy.contains("a", "Cypress Dashboard Service").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
+
+    describe "terms and privacy message", ->
+      it "opens links to terms and privacy on click", ->
+        cy.contains("a", "Terms of Use").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/terms-of-use")
+        cy.contains("a", "Privacy Policy").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/privacy-policy")
 
   describe "when not connected to api server", ->
     beforeEach ->
