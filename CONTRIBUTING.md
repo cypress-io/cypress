@@ -41,6 +41,7 @@ Build status | Description
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
   - [Tests](#tests)
+  - [Packages](#packages)
 - [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
   - [Pull Requests](#pull-requests)
@@ -317,6 +318,17 @@ $ npm run docker
 cd packages/desktop-gui
 npm rebuild node-sass
 ```
+
+### Packages
+
+#### Desktop-Gui
+
+##### Connecting to the API
+
+Currently, if you want to work on the code around logging in, viewing runs, and setting up new projects to record, this requires connecting to a locally running API server.
+
+Our API server is only accessible to cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
+
 
 ## Writing Documentation
 
