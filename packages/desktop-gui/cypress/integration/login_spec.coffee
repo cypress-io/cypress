@@ -178,6 +178,19 @@ describe "Login", ->
           cy.get(".login-content .alert").should("not.exist")
           cy.contains("button", "Log In with GitHub").should("not.be.disabled")
 
+    describe "Dashboard link in message", ->
+      it "opens link to Dashboard Service on click", ->
+        cy.contains("a", "Cypress Dashboard Service").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
+
+    describe "terms and privacy message", ->
+      it "opens links to terms and privacy on click", ->
+        cy.contains("a", "Terms of Use").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/terms-of-use")
+        cy.contains("a", "Privacy Policy").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/privacy-policy")
+
+
   describe "when not connected to api server", ->
     beforeEach ->
       @pingApiServerAgain = @util.deferred()
