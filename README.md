@@ -11,25 +11,11 @@ This monorepo is made up of various packages, all of which are found under the `
 
 Some, like `https-proxy` and `launcher`, run solely in node and support the Cypress server. Others, like `desktop-gui` and `runner`, create the GUI parts of the Cypress app. All packages can require each other using `const server = require('@packages/server')` syntax.
 
-[CLI Documentation](https://on.cypress.io/cli)
+## Documentation
 
-## Badges
-
-Let the world know your project is using Cypress.io to test with this cool badge
-
-[![badge](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
-
-### Markdown
-
-```
-[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
-```
-
-### SVG image
-
-```
-https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
-```
+- [Main Docs](https://on.cypress.io)
+- [Roadmap](https://on.cypress.io/roadmap)
+- [Changelog](https://on.cypress.io/changelog)
 
 ## Development
 
@@ -37,8 +23,18 @@ Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo or
 
 ## Deployment
 
-Please see out [deployment document](DEPLOY.md)
+Please see out [deployment document](DEPLOY.md).
 
 ## License
 
 This project is licensed under the terms of the [MIT license](/LICENSE.md).
+
+## Badges
+
+Let the world know your project is using Cypress.io to test with this cool badge
+
+[![badge](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+
+```
+[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+```
