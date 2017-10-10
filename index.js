@@ -7,7 +7,7 @@ const createDeferred = require('./deferred')
 const bundles = {}
 
 // by default, we transform JavaScript (up to anything at stage-4) and JSX
-const defaults = {
+const defaultOptions = {
   webpackOptions: {
     module: {
       rules: [
@@ -35,7 +35,7 @@ const defaults = {
 //
 // register('on:spec:file:preprocessor', webpack(config, userOptions))
 //
-module.exports = (config, userOptions = {}) => {
+const preprocessor = (config, userOptions = {}) => {
   if (!config || typeof config.isTextTerminal !== 'boolean') {
     throw new Error(`Cypress Webpack Preprocessor must be called with the Cypress config as its first argument. You passed: ${JSON.stringify(config, null, 2)}`)
   }
@@ -74,8 +74,8 @@ module.exports = (config, userOptions = {}) => {
     const outputPath = util.getOutputPath(filePath)
 
     // user can override the default options
-    let webpackOptions = Object.assign({}, defaults.webpackOptions, userOptions.webpackOptions)
-    let watchOptions = Object.assign({}, defaults.watchOptions, userOptions.watchOptions)
+    let webpackOptions = Object.assign({}, defaultOptions.webpackOptions, userOptions.webpackOptions)
+    let watchOptions = Object.assign({}, defaultOptions.watchOptions, userOptions.watchOptions)
 
     // we need to set entry and output
     webpackOptions = Object.assign(webpackOptions, {
@@ -167,3 +167,8 @@ module.exports = (config, userOptions = {}) => {
     return bundles[filePath]
   }
 }
+
+// provide a clone of the default options
+preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
+
+module.exports = preprocessor
