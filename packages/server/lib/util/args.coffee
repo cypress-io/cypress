@@ -44,7 +44,7 @@ parseNestedValues = (vals) ->
   .chain(vals)
   .split(",")
   .map (pair) ->
-    pair.split("=")
+    pair.split(/=(.+)/)
   .fromPairs()
   .mapValues(coerce)
   .value()
