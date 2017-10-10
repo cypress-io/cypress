@@ -10,6 +10,8 @@ const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
 function getStdio () {
+  // https://github.com/cypress-io/cypress/issues/717
+  // need to switch this else windows crashes
   if (os.platform() === 'win32') {
     return ['inherit', 'pipe', 'pipe']
   }
@@ -36,6 +38,7 @@ module.exports = {
         child.on('close', resolve)
         child.on('error', reject)
 
+        // if these are defined then we manually pipe for windows
         child.stdout && child.stdout.pipe(process.stdout)
         child.stderr && child.stderr.pipe(devNull())
 
