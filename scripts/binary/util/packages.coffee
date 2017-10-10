@@ -4,6 +4,7 @@ cp = require("child_process")
 path = require("path")
 glob = require("glob")
 Promise = require("bluebird")
+retry = require("bluebird-retry")
 la = require("lazy-ass")
 check = require("check-more-types")
 execa = require("execa")
@@ -45,9 +46,10 @@ copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
     dest = path.join(distDir, relative)
 
-    console.log(relative, "->", dest)
+    retry ->
+      console.log(relative, "->", dest)
 
-    fs.copyAsync(relative, dest)
+      fs.copyAsync(relative, dest)
 
   copyPackage = (pkg) ->
     ## copies the package to dist
@@ -84,6 +86,12 @@ copyAllToDist = (distDir) ->
     .map(copyPackage, {concurrency: 1})
   .then ->
     console.log("Finished Copying", new Date() - started)
+
+forceNpmInstall = (packagePath, packageToInstall) ->
+  console.log("Force installing %s", packageToInstall)
+  console.log("in %s", packagePath)
+  la(check.unemptyString(packageToInstall), "missing package to install")
+  npmRun(["install", "--force", packageToInstall], packagePath)
 
 npmInstallAll = (pathToPackages) ->
   ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
@@ -177,4 +185,10 @@ module.exports = {
   symlinkAll
 
   runAllCleanJs
+
+  forceNpmInstall
 }
+
+if not module.parent
+  console.log("demo force install")
+  forceNpmInstall("packages/server", "@ffmpeg-installer/win32-x64")

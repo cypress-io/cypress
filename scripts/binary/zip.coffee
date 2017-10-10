@@ -39,7 +39,8 @@ checkZipSize = (zipPath) ->
   stats = fs.statSync(zipPath)
   zipSize = filesize(stats.size, {round: 0})
   console.log("zip file size #{zipSize}")
-  MAX_ZIP_FILE_SIZE = megaBytes(120)
+  MAX_ALLOWED_SIZE_MB = if os.platform() == "win32" then 200 else 120
+  MAX_ZIP_FILE_SIZE = megaBytes(MAX_ALLOWED_SIZE_MB)
   if stats.size > MAX_ZIP_FILE_SIZE
     throw new Error("Zip file is too large: #{zipSize}")
 
@@ -68,9 +69,38 @@ linuxZip = (src, dest) ->
   .then R.tap(checkZipSize)
   .catch onError
 
+# resolves with zipped filename
+windowsZip = (src, dest) ->
+  # use 7Zip to zip
+  # http://www.7-zip.org/
+  # zips entire source directory including top level folder name
+  #   Cypress/
+  #     foo.txt
+  # creates cypress.zip for example
+  # unzip cypress.zip to get back the folder
+  #   Cypress/
+  #     foo.txt
+  cmd = "7z a #{dest} #{src}"
+  console.log("windows zip: #{cmd}")
+
+  onZipFinished = () ->
+    console.log("✅ zip finished")
+
+  onError = (err) ->
+    console.error("⛔️ could not zip #{src} into #{dest}")
+    console.error(err.message)
+    throw err
+
+  execa.shell(cmd)
+  .then onZipFinished
+  .then R.always(dest)
+  .then R.tap(checkZipSize)
+  .catch onError
+
 zippers = {
   linux: linuxZip
   darwin: macZip
+  win32: windowsZip
 }
 
 module.exports = {

@@ -11,6 +11,7 @@ la       = require("lazy-ass")
 check    = require("check-more-types")
 debug    = require("debug")("cypress:binary")
 questionsRemain = require("@cypress/questions-remain")
+R        = require("ramda")
 
 zip      = require("./zip")
 ask      = require("./ask")
@@ -18,6 +19,9 @@ bump     = require("./bump")
 meta     = require("./meta")
 build    = require("./build")
 upload   = require("./upload")
+uploadUtils = require("./util/upload")
+{uploadNpmPackage} = require("./upload-npm-package")
+{uploadUniqueBinary} = require("./upload-unique-binary")
 
 success = (str) ->
   console.log chalk.bgGreen(" " + chalk.black(str) + " ")
@@ -25,10 +29,7 @@ success = (str) ->
 fail = (str) ->
   console.log chalk.bgRed(" " + chalk.black(str) + " ")
 
-zippedFilename = (platform) ->
-  # TODO use .tar.gz for linux archive. For now to preserve
-  # same file format as before use .zip
-  if platform is "linux" then "cypress.zip" else "cypress.zip"
+zippedFilename = R.always(upload.zipName)
 
 # goes through the list of properties and asks relevant question
 # resolves with all relevant options set
@@ -55,7 +56,8 @@ deploy = {
         "skip-clean": false
       }
       alias: {
-        skipClean: "skip-clean"
+        skipClean: "skip-clean",
+        zip: ["zipFile", "zip-file", "filename"]
       }
     })
     opts.runTests = false if opts["skip-tests"]
@@ -86,7 +88,7 @@ deploy = {
         when "run"
           bump.run()
         when "version"
-          ask.whichVersion(meta.distDir)
+          ask.whichVersion(meta.distDir(""))
           .then (v) ->
             bump.version(v)
 
@@ -100,12 +102,12 @@ deploy = {
         success("Release Complete")
       .catch (err) ->
         fail("Release Failed")
-        reject(err)
+        throw err
 
     if v = options.version
       release(v)
     else
-      ask.whichRelease(meta.distDir)
+      ask.whichRelease(meta.distDir(""))
       .then(release)
 
   build: (options) ->
@@ -125,6 +127,17 @@ deploy = {
       options.zip = path.resolve(zippedFilename(options.platform))
       zip.ditto(zipDir, options.zip)
 
+  # upload Cypres NPM package file
+  "upload-npm-package": (args = process.argv) ->
+    console.log('#packageUpload')
+    uploadNpmPackage(args)
+
+  # upload Cypres binary zip file under unique hash
+  "upload-unique-binary": (args = process.argv) ->
+    console.log('#uniqueBinaryUpload')
+    uploadUniqueBinary(args)
+
+  # upload Cypress binary ZIP file
   upload: (options) ->
     console.log('#upload')
     if !options then options = @parseOptions(process.argv)
@@ -144,6 +157,18 @@ deploy = {
         version: options.version,
         platform: options.platform
       })
+
+  # purge all platforms of a desktop app for specific version
+  "purge-version": (args = process.argv) ->
+    console.log('#purge-version')
+    options = minimist(args, {
+      string: 'version',
+      alias: {
+        version: 'v'
+      }
+    })
+    la(check.unemptyString(options.version), "missing app version to purge", options)
+    uploadUtils.purgeDesktopAppAllPlatforms(options.version, upload.zipName)
 
   # goes through the entire pipeline:
   #   - build

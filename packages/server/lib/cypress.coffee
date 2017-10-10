@@ -19,6 +19,7 @@ exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
   ## but cannot figure out how null is
   ## being passed into exit
+  log("about to exit with code", code)
   process.exit(code)
 
 exit0 = ->
@@ -28,6 +29,7 @@ exitErr = (err) ->
   ## log errors to the console
   ## and potentially raygun
   ## and exit with 1
+  log('exiting with err', err)
   require("./errors").log(err)
   .then -> exit(1)
 
@@ -49,20 +51,12 @@ module.exports = {
         ## and pass our options directly to main
         require("./modes")(mode, options)
       else
-        ## sanity check to ensure we're running
-        ## the local dev server. dont crash just
-        ## log a warning
-        if process.env.CYPRESS_ENV is "development"
-          require("./api").ping().catch (err) ->
-            console.log(err.message)
-            require("./errors").warning("DEV_NO_SERVER")
-
-        ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
           fn = (code) ->
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
+            log("electron finished with", code)
             resolve({failures: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 

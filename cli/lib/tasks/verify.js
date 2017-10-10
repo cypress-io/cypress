@@ -84,7 +84,8 @@ const runSmokeTest = () => {
         if (code === 0) {
           const smokeTestReturned = stdout.trim()
           debug('smoke test output "%s"', smokeTestReturned)
-          if (smokeTestReturned !== String(random)) {
+
+          if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
             return reject(new Error(stripIndent`
               Smoke test returned wrong code.
 
@@ -249,6 +250,5 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
-
   maybeVerify,
 }

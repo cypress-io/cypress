@@ -12,12 +12,8 @@ export default class ProjectNotSetup extends Component {
     project: PropTypes.object,
   }
 
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      setupProjectModalOpen: false,
-    }
+  state = {
+    setupProjectModalOpen: false,
   }
 
   render () {
@@ -57,7 +53,7 @@ export default class ProjectNotSetup extends Component {
           onClick={this._showSetupProjectModal}
         >
           <i className='fa fa-wrench'></i>{' '}
-          Setup Project to Record
+          Set Up Project to Record
         </button>
       </div>
     )
@@ -83,7 +79,7 @@ export default class ProjectNotSetup extends Component {
           onClick={this._showSetupProjectModal}
         >
           <i className='fa fa-wrench'></i>{' '}
-          Setup a New Project
+          Set Up a New Project
         </button>
         <p>
           <small>The new project will have no previous run data.</small>

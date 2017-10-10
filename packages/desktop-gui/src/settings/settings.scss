@@ -1,4 +1,14 @@
-#settings {
+.settings {
+  .settings-project-id,
+  .settings-record-key {
+    display: none;
+  }
+
+  &.show-project-id .settings-project-id,
+  &.show-record-key .settings-record-key {
+    display: block;
+  }
+
   .learn-more {
     position: absolute;
     top: 15px;
@@ -120,10 +130,10 @@
   .rc-collapse-item {
     margin-bottom: 0;
     position: relative;
-    border-bottom: 0;
+    border-top: none;
 
-    &:last-child {
-      border-bottom: 1px solid #eee;
+    &:first-child {
+      border-top: 1px solid #eee;
     }
   }
 
@@ -166,7 +176,7 @@
   border-bottom: 1px solid #ddd;
 }
 
-.settings-record-keys {
+.settings-record-key {
   margin-bottom: 2em;
 
   p.text-muted.manage-btn {
@@ -181,6 +191,10 @@
 
   .empty-well {
     margin: 10px 0;
+
+    button {
+      margin-top: 10px;
+    }
   }
 }
 

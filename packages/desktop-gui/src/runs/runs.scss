@@ -7,6 +7,18 @@
   }
 }
 
+.empty-no-api-server {
+  em {
+    color: #333;
+    font-style: normal;
+    font-family: $font-mono;
+  }
+
+  pre {
+    margin: 1em 0;
+  }
+}
+
 .first-run-instructions {
   padding: 40px 130px;
 
@@ -268,7 +280,6 @@
 .user-avatar {
   border-radius: 100px;
 }
-
 
 .setup-project-modal {
   a>i {

@@ -17,6 +17,9 @@ electron = require("@packages/electron")
 signOsxApp = require("electron-osx-sign")
 debug = require("debug")("cypress:binary")
 R = require("ramda")
+la = require("lazy-ass")
+check = require("check-more-types")
+execa = require("execa")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -48,6 +51,16 @@ buildCypressApp = (platform, version, options = {}) ->
 
   log = _.partialRight(logger, platform)
 
+  testVersion = (folderNameFn) -> () ->
+    dir = folderNameFn()
+    la(check.unemptyString(dir), "missing folder for platform", platform)
+    console.log("testing package version in folder", dir)
+    execa("node", ["index.js", "--version"], {
+      cwd: dir
+    }).then (result) ->
+      # TODO validate version string
+      console.log(result.stdout)
+
   canBuildInDocker = ->
     platform is "linux" and os.platform() is "darwin"
 
@@ -74,7 +87,9 @@ buildCypressApp = (platform, version, options = {}) ->
       log("skipClean")
       return
 
-    cleanup = =>
+    cleanup = ->
+      dir = distDir()
+      la(check.unemptyString(dir), "empty dist dir", dir, "for platform", platform)
       fs.removeAsync(distDir())
 
     cleanup()
@@ -98,6 +113,16 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#npmInstallPackages")
 
     packages.npmInstallAll(distDir("packages", "*"))
+    .then () ->
+      if os.platform() != "win32"
+        return
+      # on windows include both versions of FFMPEG
+      console.log("installing FFMPEG win32-x64")
+      serverFolder = distDir("packages", "server")
+      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-x64")
+      .then () ->
+        console.log("installing FFMPEG win32-ia32")
+        packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
 
   createRootPackage = ->
     log("#createRootPackage", platform, version)
@@ -122,7 +147,10 @@ buildCypressApp = (platform, version, options = {}) ->
   copyPackageProxies = (destinationFolder) ->
     () ->
       log("#copyPackageProxies")
+      la(check.fn(destinationFolder),
+        "missing destination folder function", destinationFolder)
       dest = destinationFolder("node_modules", "@packages")
+      la(check.unemptyString(dest), "missing destination folder", dest)
       source = path.join(process.cwd(), "node_modules", "@packages")
       fs.unlinkAsync(dest).catch(_.noop)
       .then(() ->
@@ -198,8 +226,12 @@ buildCypressApp = (platform, version, options = {}) ->
 
     # hint: you can see all symlinks in the build folder
     # using "find build/darwin/Cypress.app/ -type l -ls"
+    console.log("platform", platform)
     electronDistFolder = meta.buildAppDir(platform, "packages", "electron", "dist")
-    console.log("Removing unnecessary folder #{electronDistFolder}")
+    la(check.unemptyString(electronDistFolder),
+      "empty electron dist folder for platform", platform)
+
+    console.log("Removing unnecessary folder '#{electronDistFolder}'")
     fs.removeAsync(electronDistFolder).catch(_.noop)
 
   runSmokeTests = ->
@@ -217,6 +249,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
   codeSign = ->
     if platform isnt "darwin"
+      # do we need to code sign on Windows?
       return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
@@ -253,9 +286,11 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(convertCoffeeToJs)
   .then(removeTypeScript)
   .then(cleanJs)
-  .then(elBuilder)
+  .then(testVersion(distDir))
+  .then(elBuilder) # should we delete everything in the buildDir()?
   .then(removeDevElectronApp)
   .then(copyPackageProxies(buildAppDir))
+  .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)

@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import ipcBus from './ipc-bus'
 import errors from './errors'
-import authStore from './auth-store'
+import authStore from '../auth/auth-store'
 
 const ipc = {
   isUnauthed (error) {
@@ -51,6 +51,7 @@ register('open:project', false)
 register('on:config:changed', false)
 register('on:spec:changed', false)
 register('on:project:warning', false)
+register('ping:api:server')
 register('remove:project')
 register('request:access')
 register('setup:dashboard:project')

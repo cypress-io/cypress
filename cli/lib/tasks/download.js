@@ -15,23 +15,24 @@ const info = require('./info')
 
 const baseUrl = 'https://download.cypress.io/'
 
-const getOs = () => {
-  const platform = os.platform()
+const isString = (s) =>
+  typeof s === 'string'
 
-  switch (platform) {
-    case 'darwin': return 'mac'
-    case 'linux': return 'linux64'
-    case 'win32': return 'win'
-    // TODO handle this error using our standard
-    default: throw new Error(`Platform: "${platform}" is not supported.`)
-  }
-}
+const isUrl = (s) =>
+  isString(s) && /^https:/.test(s)
 
 const prepend = (urlPath) => {
-  return `${url.resolve(baseUrl, urlPath)}?os=${getOs()}`
+  const endpoint = url.resolve(baseUrl, urlPath)
+  const platform = os.platform()
+  const arch = os.arch()
+  return `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
 const getUrl = (version) => {
+  if (isUrl(version)) {
+    debug('version is already an url', version)
+    return version
+  }
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
@@ -144,4 +145,5 @@ const start = (options) => {
 
 module.exports = {
   start,
+  getUrl,
 }

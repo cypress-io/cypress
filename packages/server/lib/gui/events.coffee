@@ -2,7 +2,7 @@ _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 dialog      = require("./dialog")
-pgk         = require("./package")
+pkg         = require("./package")
 logs        = require("./logs")
 Windows     = require("./windows")
 api         = require("../api")
@@ -13,6 +13,8 @@ errors      = require("../errors")
 Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
+connect     = require("../util/connect")
+konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -117,7 +119,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "get:options"
-      pgk(options)
+      pkg(options)
       .then(send)
       .catch(sendErr)
 
@@ -252,6 +254,19 @@ handleEvent = (options, bus, event, id, type, arg) ->
       openProject.getProject()
       .saveState({ showedOnBoardingModal: true })
       .then(sendNull)
+
+    when "ping:api:server"
+      apiUrl = konfig("api_url")
+      connect.ensureUrl(apiUrl)
+      .then(send)
+      .catch (err) ->
+        ## if it's an aggegrate error, just send the first one
+        if err.length
+          subErr = err[0]
+          err.name = subErr.name or "#{subErr.code} #{subErr.address}:#{subErr.port}"
+          err.message = subErr.message or "#{subErr.code} #{subErr.address}:#{subErr.port}"
+        err.apiUrl = apiUrl
+        sendErr(err)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

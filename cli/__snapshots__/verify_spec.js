@@ -138,3 +138,12 @@ It looks like this is your first time using Cypress: 1.2.3
 Opening Cypress...
 
 `
+
+exports['verbose stdout output 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /path/to/executable/dir
+
+Opening Cypress...
+
+`

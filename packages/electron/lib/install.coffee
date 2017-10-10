@@ -76,8 +76,11 @@ module.exports = {
     pkgr(options)
     .then (appPaths) ->
       appPaths[0]
+    # Promise.resolve("tmp\\Cypress-win32-x64")
     .then (appPath) =>
       ## and now move the tmp into dist
+      console.log("moving created file from", appPath)
+      console.log("to", options.dist)
       @move(appPath, options.dist)
 
     .catch (err) ->

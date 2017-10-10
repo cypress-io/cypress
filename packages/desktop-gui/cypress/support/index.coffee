@@ -13,15 +13,19 @@ beforeEach ->
       JSON.parse(JSON.stringify(obj))
   }
 
-Cypress.Commands.add "visitIndex", ->
-  cy.visit("/dist/index.html")
-
-Cypress.Commands.add "shouldBeOnLogin", ->
-  cy.contains("Log In with GitHub")
+Cypress.Commands.add "visitIndex", (options = {}) ->
+  cy.visit("/dist/index.html", options)
 
 Cypress.Commands.add "shouldBeOnIntro", ->
-  cy.get(".nav .logo")
+  cy.get(".main-nav .logo")
 
 Cypress.Commands.add "shouldBeOnProjectSpecs", ->
   cy.contains(".folder", "integration")
   cy.contains(".folder", "unit")
+
+Cypress.Commands.add "logOut", ->
+  cy.contains("Jane Lane").click()
+  cy.contains("Log Out").click()
+
+Cypress.Commands.add "shouldBeLoggedOut", ->
+  cy.contains(".main-nav a", "Log In")

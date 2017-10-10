@@ -10,6 +10,37 @@ describe('util', function () {
     this.sandbox.stub(logger, 'error')
   })
 
+  context('stdoutLineMatches', () => {
+    const { stdoutLineMatches } = util
+
+    it('is a function', () => {
+      expect(stdoutLineMatches).to.be.a.function
+    })
+
+    it('matches entire output', () => {
+      const line = '444'
+      expect(stdoutLineMatches(line, line)).to.be.true
+    })
+
+    it('matches a line in output', () => {
+      const line = '444'
+      const stdout = ['start', line, 'something else'].join('\n')
+      expect(stdoutLineMatches(line, stdout)).to.be.true
+    })
+
+    it('matches a trimmed line in output', () => {
+      const line = '444'
+      const stdout = ['start', `  ${line} `, 'something else'].join('\n')
+      expect(stdoutLineMatches(line, stdout)).to.be.true
+    })
+
+    it('does not find match', () => {
+      const line = '445'
+      const stdout = ['start', '444', 'something else'].join('\n')
+      expect(stdoutLineMatches(line, stdout)).to.be.false
+    })
+  })
+
   context('normalizeModuleOptions', () => {
     const { normalizeModuleOptions } = util
 

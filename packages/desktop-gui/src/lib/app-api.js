@@ -1,19 +1,12 @@
+import authApi from '../auth/auth-api'
 import ipc from './ipc'
-import authStore from './auth-store'
 
 const appApi = {
-  logOut () {
-    authStore.setUser(null)
-
-    ipc.clearGithubCookies()
-    ipc.logOut()
-  },
-
   listenForMenuClicks () {
     ipc.onMenuClicked((err, item) => {
       switch (item) {
         case 'log:out':
-          this.logOut()
+          authApi.logOut()
           break
         default:
           return

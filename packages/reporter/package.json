@@ -13,7 +13,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "test": "node ./scripts/test.js",
-    "lint": "$(bin-up eslint) --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
+    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
   },
   "files": [
     "dist"
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@cypress/react-tooltip": "^0.2.5",
     "@cypress/releaser": "0.1.12",
-    "bin-up": "^1.0.0",
+    "bin-up": "^1.1.0",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.8.0",
     "classnames": "^2.2.5",

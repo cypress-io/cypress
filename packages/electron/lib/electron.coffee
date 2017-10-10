@@ -53,9 +53,15 @@ module.exports = {
       log("spawning %s", execPath)
       cp.spawn(execPath, argv, {stdio: "inherit"})
       .on "close", (code) ->
+        log("electron closing with code", code)
+        if code
+          log("original command was")
+          log(execPath, argv.join(" "))
         if cb
+          log("calling callback with code", code)
           cb(code)
         else
+          log("process.exit with code", code)
           process.exit(code)
 
     .catch (err) ->

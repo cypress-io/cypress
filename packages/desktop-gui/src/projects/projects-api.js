@@ -38,6 +38,7 @@ const loadProjects = (shouldLoad = true) => {
     return null
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch({ isApiError: true }, () => {}) // ignore api errors
   .catch((err) => {
     projectsStore.setError(err)
   })

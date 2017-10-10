@@ -15,6 +15,20 @@ Thanks for taking the time to contribute! :smile:
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - Write Code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
 
+## CI status
+
+Build status | Description
+:--- | :---
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions)
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-ci-environments.svg?style=svg&circle-token=66a4d36c3966cbe476f13e7dfbe3af0693db3fb9)](https://circleci.com/gh/cypress-io/cypress-test-ci-environments) | [cypress-test-ci-environments](https://github.com/cypress-io/cypress-test-ci-environments)
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-module-api.svg?style=svg&circle-token=317f79ae796e0ffd6cc7dd90859c0f67e5a306e7)](https://circleci.com/gh/cypress-io/cypress-test-module-api) | [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api)
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-nested-projects.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-nested-projects) | [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects)
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-on.svg?style=svg&circle-token=51ba85f5720654ee58212f45f6b9afc56d55d52a)](https://circleci.com/gh/cypress-io/cypress-on) | [cypress-on](https://github.com/cypress-io/cypress-on)
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)
+[![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper) | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)
+[![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/) | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)
+[![Build status](https://ci.appveyor.com/api/projects/status/cex75ymsl03vnof1?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress-monorepo) | Windows CI
+
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
@@ -27,6 +41,7 @@ Thanks for taking the time to contribute! :smile:
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
   - [Tests](#tests)
+  - [Packages](#packages)
 - [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
   - [Pull Requests](#pull-requests)
@@ -153,7 +168,7 @@ Here is a list of the core packages in this repository with a short description,
 
 ### Requirements
 
-You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project.
+You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project. We use [avn](https://github.com/wbyoung/avn) utility to switch to the right version in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
 
 ### Getting Started
 
@@ -168,12 +183,14 @@ This will install this repo's direct dependencies as well as the dependencies fo
 **Then, build all the packages and start the app:**
 
 ```bash
-npm run all build
+npm run build
 npm start
 ```
 
-If there are errors building the packages, run with `DEBUG=cypress:run ...`
-option to see more details
+If there are errors building the packages, run with `DEBUG=cypress:*`
+option to see more details.
+
+This outputs a lot of debugging lines. To focus on an individual module run with `DEBUG=cypress:launcher` for instance.
 
 #### Tasks
 
@@ -181,24 +198,19 @@ Each package is responsible for building itself and testing itself and can do so
 
 Task | Purpose
 ---- | -------
-`build-dev` | Build all assets for development
-`build-prod` | Build all assets for production
+`build` | Build the package
+`build-dev` | Build all assets for development (if makes sense)
+`build-prod` | Build all assets for production (if makes sense)
 `watch-dev` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
-`server` | Run a server for serving files
+`start` | Run a server for serving files
 `clean` | Remove any assets created by `build-dev` or `build-prod`
 `clean-deps` | Remove any dependencies installed (usually by npm or bower)
-`test-all` | Run all tests in watch mode
-`test-all-once` | Run all tests
-`test-all-unit` | Run unit tests in watch mode
-`test-all-unit-once` | Run unit tests
-`test-all-integration` | Run integration tests in watch mode
-`test-all-integration-once` | Run integration tests
-`test-all-e2e` | Run end-2-end tests in watch mode
-`test-all-e2e-once` | Run end-2-end tests
+`test` | Runs all tests once
+`test-watch` | Run all tests in watch mode
 
-Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
+Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run. For most packages, there are unit, integration and e2e tests, which can be triggered by `npm run test-unit`, `npm run test-integration` and `npm run test-e2e` respectively.
 
-You can run `npm run all <script>` from the root directory to run a script in every package that utilizes that script. Many times, you may only be working on one or two packages at a time, so it won't be necessary or desirable to run a script for every package. You can use the `--packages` option to specify in which package(s) to run the script.
+You can run `npm run all <script name>` from the root directory to run a script in every package that utilizes that script. Many times, you may only be working on one or two packages at a time, so it won't be necessary or desirable to run a script for every package. You can use the `--packages` option to specify in which package(s) to run the script.
 
 You can even run `npm run all install` to install all npm dependencies for each package. Note that this is already done automatically for you when you run `npm install`.
 
@@ -238,20 +250,39 @@ DEBUG=cypress:launcher npm test
 If you want to see log messages from all Cypress projects use wild card
 
 ```bash
-DEBUG=cypress:* ...
+DEBUG=cypress:*
+```
+
+Or for an individual package:
+
+```bash
+DEBUG=cypress:cli
+DEBUG=cypress:server
+DEBUG=cypress:launcher
 ```
 
 ### Coding Style
 
+We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
+[eslint-plugin-cypress-dev](https://github.com/cypress-io/eslint-plugin-cypress-dev) plugin.
+
 ### Tests
+
+TODO: switch this from saying to run all the tests, and instead run the test for a given package.
+
+Our true e2e tests are in packages/server, which test the full stack all together. To run those - do XYZ.
+
+Mention difference in packages for unit, integration, and e2e tests.
+
+Make a note these are really long, and we spin up like 16 instances to do it all.
 
 Since it is generally best to do single runs of tests serially instead of in parallel, this repo has some convenience scripts to run all the tests for all the packages sequentially:
 
 ```bash
-npm run test-once ## same as 'npm run all test-once -- --serial'
-npm run test-unit-once ## same as 'npm run all test-unit-once -- --serial'
-npm run test-integration-once ## same as 'npm run all test-integration-once -- --serial'
-npm run test-e2e-once ## same as 'npm run all test-e2e-once -- --serial'
+npm run test ## same as 'npm run all test -- --serial'
+npm run test-unit ## same as 'npm run all test-unit -- --serial'
+npm run test-integration ## same as 'npm run all test-integration -- --serial'
+npm run test-e2e ## same as 'npm run all test-e2e -- --serial'
 ```
 
 #### Docker
@@ -259,7 +290,7 @@ npm run test-e2e-once ## same as 'npm run all test-e2e-once -- --serial'
 Sometimes tests pass locally, but fail on CI. Our CI environment should be
 dockerized. In order to run the same image locally, there is script
 [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that assumes that you
-have pulled the image `cypress/internal:chrome58` (see
+have pulled the image `cypress/internal:chrome61` (see
 [circle.yml](circle.yml) for the current image name).
 
 The image will start and will map the root of the repository to
@@ -269,7 +300,7 @@ favorite environment and rerun tests inside the docker environment.
 **hint** sometimes building inside the image has problems with `node-sass`
 library
 
-```bash
+```text
 Error: Missing binding /cypress-monorepo/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
 Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
 
@@ -288,15 +319,38 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
+### Packages
+
+#### Desktop-Gui
+
+##### Connecting to the API
+
+Currently, if you want to work on the code around logging in, viewing runs, and setting up new projects to record, this requires connecting to a locally running API server.
+
+Our API server is only accessible to cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
+
+
 ## Writing Documentation
 
-See our [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+Cypress documentation lives in separate repository with its own dependencies and build tools.
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Commiting Code
+
+### Branches
+
+The repository is setup with two main (protected) branches.
+
+- `master` is the code already published in the last Cypress version
+- `develop` is the current latest "edge" code. This branch is set as the default branch, and all pull requests should be made against this branch.
 
 ### Pull Requests
 
 - When opening a PR for a specific issue already open, please use the `address #[issue number]` or `closes #[issue number]` syntax in the pull request description.
+
+### Testing
+
+This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress-monorepo). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
 
 ## Deployment
 
