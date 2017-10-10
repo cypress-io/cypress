@@ -4,6 +4,7 @@ cp = require("child_process")
 path = require("path")
 glob = require("glob")
 Promise = require("bluebird")
+retry = require("bluebird-retry")
 la = require("lazy-ass")
 check = require("check-more-types")
 execa = require("execa")
@@ -45,9 +46,10 @@ copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
     dest = path.join(distDir, relative)
 
-    console.log(relative, "->", dest)
+    retry ->
+      console.log(relative, "->", dest)
 
-    fs.copyAsync(relative, dest)
+      fs.copyAsync(relative, dest)
 
   copyPackage = (pkg) ->
     ## copies the package to dist
