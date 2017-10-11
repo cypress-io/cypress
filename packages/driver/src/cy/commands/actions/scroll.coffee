@@ -223,8 +223,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if options.log
         deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
 
+        messageArgs = []
+        if !position
+          messageArgs.push(x)
+          messageArgs.push(y)
+        else
+          messageArgs.push(position)
+        if deltaOptions
+          messageArgs.push($utils.stringify(deltaOptions))
+
         log = {
-          message: deltaOptions
+          message: messageArgs.join(', '),
           consoleProps: ->
             obj = {
               ## merge into consoleProps without mutating it
