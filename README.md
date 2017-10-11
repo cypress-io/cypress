@@ -1,7 +1,6 @@
 Build status | Description
 :--- | :---
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-monorepo.svg?style=svg&circle-token=ad2c9212a3dc5b80fe92c8780b2533be1ef42d7e)](https://circleci.com/gh/cypress-io/cypress-monorepo) | `develop` branch
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-monorepo/tree/master.svg?style=svg&circle-token=ad2c9212a3dc5b80fe92c8780b2533be1ef42d7e)](https://circleci.com/gh/cypress-io/cypress-monorepo/tree/master) | `master` branch
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) | `develop` branch
 
 # Cypress
 
