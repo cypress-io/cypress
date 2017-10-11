@@ -41,6 +41,7 @@ Build status | Description
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
   - [Tests](#tests)
+  - [Packages](#packages)
 - [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
   - [Pull Requests](#pull-requests)
@@ -186,8 +187,10 @@ npm run build
 npm start
 ```
 
-If there are errors building the packages, run with `DEBUG=cypress:run ...`
-option to see more details
+If there are errors building the packages, run with `DEBUG=cypress:*`
+option to see more details.
+
+This outputs a lot of debugging lines. To focus on an individual module run with `DEBUG=cypress:launcher` for instance.
 
 #### Tasks
 
@@ -247,7 +250,15 @@ DEBUG=cypress:launcher npm test
 If you want to see log messages from all Cypress projects use wild card
 
 ```bash
-DEBUG=cypress:* ...
+DEBUG=cypress:*
+```
+
+Or for an individual package:
+
+```bash
+DEBUG=cypress:cli
+DEBUG=cypress:server
+DEBUG=cypress:launcher
 ```
 
 ### Coding Style
@@ -256,6 +267,14 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 [eslint-plugin-cypress-dev](https://github.com/cypress-io/eslint-plugin-cypress-dev) plugin.
 
 ### Tests
+
+TODO: switch this from saying to run all the tests, and instead run the test for a given package.
+
+Our true e2e tests are in packages/server, which test the full stack all together. To run those - do XYZ.
+
+Mention difference in packages for unit, integration, and e2e tests.
+
+Make a note these are really long, and we spin up like 16 instances to do it all.
 
 Since it is generally best to do single runs of tests serially instead of in parallel, this repo has some convenience scripts to run all the tests for all the packages sequentially:
 
@@ -300,6 +319,17 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
+### Packages
+
+#### Desktop-Gui
+
+##### Connecting to the API
+
+Currently, if you want to work on the code around logging in, viewing runs, and setting up new projects to record, this requires connecting to a locally running API server.
+
+Our API server is only accessible to cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
+
+
 ## Writing Documentation
 
 Cypress documentation lives in separate repository with its own dependencies and build tools.
@@ -317,6 +347,8 @@ The repository is setup with two main (protected) branches.
 ### Pull Requests
 
 - When opening a PR for a specific issue already open, please use the `address #[issue number]` or `closes #[issue number]` syntax in the pull request description.
+- Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need. 
+![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 
 ### Testing
 

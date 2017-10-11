@@ -2,6 +2,10 @@ import ipc from '../lib/ipc'
 
 let pollId
 
+const isPolling = () => {
+  return !!pollId
+}
+
 const loadRuns = (runsStore) => {
   runsStore.setLoading(true)
 
@@ -33,6 +37,7 @@ const stopPollingRuns = () => {
 }
 
 export default {
+  isPolling,
   loadRuns,
   pollRuns,
   stopPollingRuns,

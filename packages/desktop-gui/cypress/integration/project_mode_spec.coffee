@@ -15,26 +15,14 @@ describe "Project Mode", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
 
       @getCurrentUser = @util.deferred()
-      cy.stub(@ipc, "getCurrentUser").returns(@getCurrentUser.promise)
 
       start()
 
-  describe "with a current user", ->
-    beforeEach ->
-      @getCurrentUser.resolve(@user)
+  it "goes straight to project specs list", ->
+    cy.shouldBeOnProjectSpecs()
 
-    it "goes straight to project specs list", ->
-      cy.shouldBeOnProjectSpecs()
+  it "sets title as project path", ->
+    cy.title().should("eq", "/foo/bar")
 
-    it "sets title as project path", ->
-      cy.title().should("eq", "/foo/bar")
-
-    it "shows project name in nav", ->
-      cy.get('.left-nav').should("have.text", "bar")
-
-  describe "without a current user", ->
-    beforeEach ->
-      @getCurrentUser.resolve(null)
-
-    it "goes to login", ->
-      cy.shouldBeOnLogin()
+  it "shows project name in nav", ->
+    cy.get('.left-nav').should("have.text", "bar")

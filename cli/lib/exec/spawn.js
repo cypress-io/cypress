@@ -1,11 +1,23 @@
 const _ = require('lodash')
+const os = require('os')
 const cp = require('child_process')
 const Promise = require('bluebird')
+const devNull = require('dev-null')
 const debug = require('debug')('cypress:cli')
 
 const info = require('../tasks/info')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
+
+function getStdio () {
+  // https://github.com/cypress-io/cypress/issues/717
+  // need to switch this else windows crashes
+  if (os.platform() === 'win32') {
+    return ['inherit', 'pipe', 'pipe']
+  }
+
+  return ['inherit', 'inherit', 'ignore']
+}
 
 module.exports = {
   start (args, options = {}) {
@@ -13,7 +25,7 @@ module.exports = {
 
     _.defaults(options, {
       detached: false,
-      stdio: [process.stdin, process.stdout, 'ignore'],
+      stdio: getStdio(),
     })
 
     const spawn = () => {
@@ -25,6 +37,10 @@ module.exports = {
         const child = cp.spawn(cypressPath, args, options)
         child.on('close', resolve)
         child.on('error', reject)
+
+        // if these are defined then we manually pipe for windows
+        child.stdout && child.stdout.pipe(process.stdout)
+        child.stderr && child.stderr.pipe(devNull())
 
         if (options.detached) {
           child.unref()

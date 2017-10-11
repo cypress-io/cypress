@@ -29,6 +29,7 @@ exitErr = (err) ->
   ## log errors to the console
   ## and potentially raygun
   ## and exit with 1
+  log('exiting with err', err)
   require("./errors").log(err)
   .then -> exit(1)
 
@@ -50,15 +51,6 @@ module.exports = {
         ## and pass our options directly to main
         require("./modes")(mode, options)
       else
-        ## sanity check to ensure we're running
-        ## the local dev server. dont crash just
-        ## log a warning
-        if process.env.CYPRESS_ENV is "development"
-          require("./api").ping().catch (err) ->
-            console.log(err.message)
-            require("./errors").warning("DEV_NO_SERVER")
-
-        ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
           fn = (code) ->

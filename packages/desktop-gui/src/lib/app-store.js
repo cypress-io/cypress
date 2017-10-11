@@ -8,6 +8,7 @@ class AppStore {
   @observable newVersion
   @observable version
   @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
+  @observable error
 
   @computed get displayVersion () {
     return this.isDev ? `${this.version} (dev)` : this.version
@@ -39,6 +40,10 @@ class AppStore {
   @action setLocalInstallNoticeDismissed (isDismissed) {
     this.localInstallNoticeDismissed = isDismissed
     localData.set('local-install-notice-dimissed', isDismissed)
+  }
+
+  @action setError (err) {
+    this.error = err
   }
 }
 

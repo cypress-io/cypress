@@ -6,12 +6,22 @@ check = require("check-more-types")
 cp = require("child_process")
 fs = require("fs")
 os = require("os")
+Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
+konfig  = require("../../../packages/server/lib/konfig")
 
 getS3Credentials = () ->
-  key = path.join('scripts', 'binary', 'support', '.aws-credentials.json')
+  ## gleb: fix this plzzzzzz
+  old = process.cwd()
+
+  process.chdir(path.resolve(__dirname, '..'))
+
+  key = path.join('support', '.aws-credentials.json')
 
   config = configFromEnvOrJsonFile(key)
+
+  process.chdir(old)
+
   if !config
     console.error('⛔️  Cannot find AWS credentials')
     console.error('Using @cypress/env-or-json-file module')
@@ -45,7 +55,7 @@ hasCloudflareEnvironmentVars = () ->
 
 # depends on the credentials file or environment variables
 makeCloudflarePurgeCommand = (url) ->
-  configFile = path.resolve(__dirname, "support", ".cfcli.yml")
+  configFile = path.resolve(__dirname, "..", "support", ".cfcli.yml")
   if fs.existsSync(configFile)
     console.log("using CF credentials file")
     return "cfcli purgefile -c #{configFile} #{url}"
@@ -58,6 +68,7 @@ makeCloudflarePurgeCommand = (url) ->
   else
     throw new Error("Cannot form Cloudflare purge command without credentials")
 
+# purges a given url from Cloudflare
 purgeCache = (url) ->
   la(check.url(url), "missing url to purge", url)
 
@@ -71,6 +82,34 @@ purgeCache = (url) ->
         return reject(err)
       console.log("#purgeCache: #{url}")
       resolve()
+
+getDestktopUrl = (version, osName, zipName) ->
+  url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
+  url
+
+# purges desktop application url from Cloudflare cache
+purgeDesktopAppFromCache = ({version, platform, zipName}) ->
+  la(check.unemptyString(version), "missing desktop version", version)
+  la(check.unemptyString(platform), "missing platform", platform)
+  la(check.unemptyString(zipName), "missing zip filename")
+  la(check.extension("zip", zipName),
+    "zip filename should end with .zip", zipName)
+
+  osName = getUploadNameByOs(platform)
+  la(check.unemptyString(osName), "missing osName", osName)
+  url = getDestktopUrl(version, osName, zipName)
+  purgeCache(url)
+
+# purges links to desktop app for all platforms
+# for a given version
+purgeDesktopAppAllPlatforms = (version, zipName) ->
+  la(check.unemptyString(version), "missing desktop version", version)
+  la(check.unemptyString(zipName), "missing zipName", zipName)
+
+  platforms = ["darwin", "linux", "win32"]
+  console.log("purging all desktop links for version #{version} from Cloudflare")
+  Promise.mapSeries platforms, (platform) ->
+    purgeDesktopAppFromCache({version, platform, zipName})
 
 getUploadNameByOs = (osName = os.platform()) ->
   uploadNames = {
@@ -91,6 +130,8 @@ module.exports = {
   getS3Credentials,
   getPublisher,
   purgeCache,
+  purgeDesktopAppFromCache,
+  purgeDesktopAppAllPlatforms,
   getUploadNameByOs,
   saveUrl
 }

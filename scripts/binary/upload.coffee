@@ -21,6 +21,8 @@ fs = Promise.promisifyAll(fs)
 zipName = "cypress.zip"
 
 module.exports = {
+  zipName
+
   getPublisher: ->
     uploadUtils.getPublisher(@getAwsObj)
 
@@ -36,16 +38,6 @@ module.exports = {
     console.log("target directory %s", dirName)
     dirName
 
-  purgeCache: ({version, platform}) ->
-    la(check.unemptyString(platform), "missing platform", platform)
-    la(check.unemptyString(zipName), "missing zip filename")
-    la(check.extension("zip", zipName),
-      "zip filename should end with .zip", zipName)
-
-    osName = uploadUtils.getUploadNameByOs(platform)
-    url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
-    uploadUtils.purgeCache(url)
-
   createRemoteManifest: (folder, version) ->
     getUrl = (uploadOsName) ->
       {
@@ -56,13 +48,21 @@ module.exports = {
       name: "Cypress"
       version: version
       packages: {
+        ## keep these for compatibility purposes
+        ## although they are now deprecated
         mac: getUrl("osx64")
         win: getUrl("win64")
         linux64: getUrl("linux64")
+
+        ## start adding the new ones
+        ## using node's platform
+        darwin: getUrl("osx64")
+        win32: getUrl("win64")
+        linux: getUrl("linux64")
       }
     }
 
-    src = path.join(meta.buildDir, "manifest.json")
+    src = path.resolve("manifest.json")
     fs.outputJsonAsync(src, obj).return(src)
 
   s3Manifest: (version) ->
@@ -73,8 +73,13 @@ module.exports = {
     headers = {}
     headers["Cache-Control"] = "no-cache"
 
+    manifest = null
+
     new Promise (resolve, reject) =>
-      @createRemoteManifest(aws.folder, version).then (src) ->
+      @createRemoteManifest(aws.folder, version)
+      .then (src) ->
+        manifest = src
+
         gulp.src(src)
         .pipe rename (p) ->
           p.dirname = aws.folder + "/" + p.dirname
@@ -84,6 +89,8 @@ module.exports = {
         .pipe awspublish.reporter()
         .on "error", reject
         .on "end", resolve
+    .finally ->
+      fs.removeAsync(manifest)
 
   toS3: ({zipFile, version, platform}) ->
     console.log("#uploadToS3 ⏳")
@@ -117,6 +124,6 @@ module.exports = {
         .on "end", resolve
 
     upload()
-    .then =>
-      @purgeCache({version, platform})
+    .then ->
+      uploadUtils.purgeDesktopAppFromCache({version, platform, zipName})
 }

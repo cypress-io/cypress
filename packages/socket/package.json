@@ -5,8 +5,8 @@
   "main": "index.js",
   "browser": "./lib/client.js",
   "scripts": {
-    "test": "NODE_ENV=test $(bin-up mocha) --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "NODE_ENV=test mocha --watch",
+    "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
@@ -18,7 +18,8 @@
   },
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
-    "bin-up": "^1.0.1",
-    "chai": "^3.5.0"
+    "bin-up": "^1.1.0",
+    "chai": "^3.5.0",
+    "cross-env": "^5.0.5"
   }
 }

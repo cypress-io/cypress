@@ -30,6 +30,7 @@
     "commander": "2.9.0",
     "common-tags": "1.4.0",
     "debug": "2.6.8",
+    "dev-null": "0.1.1",
     "extract-zip": "1.6.5",
     "fs-extra": "4.0.1",
     "getos": "2.8.4",

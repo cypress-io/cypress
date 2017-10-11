@@ -4,15 +4,17 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
-import authStore from '../lib/auth-store'
+import authStore from '../auth/auth-store'
 import RunsStore from './runs-store'
 import errors from '../lib/errors'
 import runsApi from './runs-api'
 import projectsApi from '../projects/projects-api'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
-import Run from './runs-list-item'
+
 import ErrorMessage from './error-message'
+import LoginForm from '../auth/login-form'
+import Run from './runs-list-item'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 
@@ -20,12 +22,18 @@ import ProjectNotSetup from './project-not-setup'
 class RunsList extends Component {
   state = {
     recordKey: null,
+    isLoading: true,
+    hasApiServer: false,
+    apiUrl: '',
+    apiError: null,
   }
 
   componentWillMount () {
     this.runsStore = new RunsStore()
+  }
 
-    this._getRuns()
+  componentDidMount () {
+    this._pingApiServer()
     this._handlePolling()
     this._getKey()
   }
@@ -39,8 +47,30 @@ class RunsList extends Component {
     this._stopPolling()
   }
 
+  _pingApiServer = () => {
+    this.setState({ isLoading: true })
+
+    ipc.pingApiServer()
+    .then(() => {
+      this.setState({
+        apiError: null,
+        hasApiServer: true,
+        isLoading: false,
+      })
+    })
+    .catch(({ apiUrl, message }) => {
+      this.setState({
+        apiError: message,
+        apiUrl,
+        isLoading: false,
+      })
+    })
+  }
+
   _getRuns = () => {
-    runsApi.loadRuns(this.runsStore)
+    if (authStore.isAuthenticated && !!this.props.project.id) {
+      runsApi.loadRuns(this.runsStore)
+    }
   }
 
   _handlePolling () {
@@ -54,11 +84,15 @@ class RunsList extends Component {
   _shouldPollRuns () {
     return (
       authStore.isAuthenticated &&
+      !this.runsStore.error &&
       !!this.props.project.id
     )
   }
 
   _poll () {
+    if (runsApi.isPolling()) return
+
+    runsApi.loadRuns(this.runsStore)
     runsApi.pollRuns(this.runsStore)
   }
 
@@ -90,13 +124,33 @@ class RunsList extends Component {
   render () {
     const { project } = this.props
 
+    // pinging api server to see if we can show anything
+    if (this.state.isLoading) {
+      return <Loader color='#888' scale={0.5}/>
+    }
+
+    // no connection to api server, can't load any runs
+    if (!this.state.hasApiServer) {
+      return this._noApiServer()
+    }
+
+    // no project id means they have not set up to record
+    if (!project.id) {
+      return this._projectNotSetup()
+    }
+
+    // not logged in
+    if (!authStore.isAuthenticated) {
+      return this._loginMessage()
+    }
+
     // If the project is invalid
-    if (project.state === Project.INVALID) {
-      return this._emptyWithoutSetup(false)
+    if (project.isInvalid) {
+      return this._projectNotSetup(false)
     }
 
     // OR if user does not have acces to the project
-    if (project.state === Project.UNAUTHORIZED) {
+    if (project.isUnauthorized) {
       return this._permissionMessage()
     }
 
@@ -104,14 +158,18 @@ class RunsList extends Component {
     if (this.runsStore.error) {
       // project id missing, probably removed manually from cypress.json
       if (errors.isMissingProjectId(this.runsStore.error)) {
-        return this._emptyWithoutSetup()
+        return this._projectNotSetup()
 
       // the project is invalid
       } else if (errors.isNotFound(this.runsStore.error)) {
-        return this._emptyWithoutSetup(false)
+        return this._projectNotSetup(false)
+
+      // they have been logged out
+      } else if (errors.isUnauthenticated(this.runsStore.error)) {
+        return this._loginMessage()
 
       // they are not authorized to see runs
-      } else if (errors.isUnauthenticated(this.runsStore.error) || errors.isUnauthorized(this.runsStore.error)) {
+      } else if (errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
       // other error, but only show if we don't already have runs
@@ -128,7 +186,7 @@ class RunsList extends Component {
 
       // AND they've never setup CI
       if (!project.id) {
-        return this._emptyWithoutSetup()
+        return this._projectNotSetup()
 
       // OR they have setup CI
       } else {
@@ -181,7 +239,47 @@ class RunsList extends Component {
     )
   }
 
-  _emptyWithoutSetup (isValid = true) {
+  _noApiServer () {
+    return (
+      <div className='empty empty-no-api-server'>
+        <h4><i className='fa fa-wifi'></i> Cannot connect to API server</h4>
+        <p>Viewing runs requires connecting to an external API server.</p>
+        <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
+        <p>
+          <button
+            className='btn btn-default btn-sm'
+            onClick={this._pingApiServer}
+          >
+            <i className='fa fa-refresh'></i>{' '}
+            Try again
+          </button>
+        </p>
+        <p>The following error was encountered:</p>
+        <pre className='alert alert-danger'><code>{this.state.apiError}</code></pre>
+        <a onClick={this._openAPIHelp}>Learn more</a>
+      </div>
+    )
+  }
+
+  _loginMessage () {
+    return (
+      <div className='empty empty-log-in'>
+        <h4>Log In to View Runs</h4>
+        <p>
+          After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard Service</a>.
+        </p>
+        <div className='runs-screenshots'>
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
+        </div>
+
+        <LoginForm />
+      </div>
+    )
+  }
+
+  _projectNotSetup (isValid = true) {
     return (
       <ProjectNotSetup
         project={this.props.project}
@@ -252,7 +350,7 @@ class RunsList extends Component {
             Recorded runs will show up{' '}
             <a href='#' onClick={this._openRunGuide}>here</a>{' '}
             and on your{' '}
-            <a href='#' onClick={this._openRuns}>Cypress Dashboard</a>.
+            <a href='#' onClick={this._openRuns}>Cypress Dashboard Service</a>.
           </p>
         </div>
       </div>
@@ -281,6 +379,10 @@ class RunsList extends Component {
 
   _openRun = (runId) => {
     ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${runId}`)
+  }
+
+  _openAPIHelp () {
+    ipc.externalOpen('https://on.cypress.io/help-connect-to-api')
   }
 }
 

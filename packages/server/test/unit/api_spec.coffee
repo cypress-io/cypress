@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 rp       = require("request-promise")
 os       = require("os")
+nmi      = require("node-machine-id")
 pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
@@ -24,6 +25,18 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(orgs)
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/organizations")
+      .reply(500, {})
+
+      api.getOrgs("auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".getProjects", ->
     it "GET /projects + returns projects", ->
       projects = []
@@ -36,6 +49,18 @@ describe "lib/api", ->
       api.getProjects("auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(projects)
+
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects")
+      .reply(500, {})
+
+      api.getProjects("auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
 
   context ".getProject", ->
     it "GET /projects/:id + returns project", ->
@@ -50,6 +75,18 @@ describe "lib/api", ->
       api.getProject("id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(project)
+
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123")
+      .reply(500, {})
+
+      api.getProject("id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
 
   context ".getProjectRuns", ->
     it "GET /projects/:id/builds + returns builds", ->
@@ -79,7 +116,12 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "get").returns({
-        catch: -> @
+        catch: -> {
+          catch: -> {
+            then: (fn) -> fn()
+          }
+          then: (fn) -> fn()
+        }
         then: (fn) -> fn()
       })
 
@@ -113,6 +155,18 @@ describe "lib/api", ->
           }
         """)
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123/builds")
+      .reply(500, {})
+
+      api.getProjectRuns("id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".ping", ->
     it "GET /ping", ->
       nock("http://localhost:1234")
@@ -125,13 +179,21 @@ describe "lib/api", ->
       .then (resp) ->
         expect(resp).to.eq("OK")
 
-  context ".createRun", ->
-    it "POST /builds + returns buildId", ->
+    it "tags errors", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", {
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/ping")
+      .reply(500, {})
+
+      api.ping()
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
+  context ".createRun", ->
+    beforeEach ->
+      @buildProps = {
         projectId:         "id-123"
         recordKey:         "token-123"
         commitSha:         "sha"
@@ -143,24 +205,19 @@ describe "lib/api", ->
         ciProvider:        "circle"
         ciBuildNumber:      "987"
         ciParams:          { foo: "bar" }
-      })
+      }
+
+    it "POST /builds + returns buildId", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .post("/builds", @buildProps)
       .reply(200, {
         buildId: "new-build-id-123"
       })
 
-      api.createRun({
-        projectId:         "id-123"
-        recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
-      })
+      api.createRun(@buildProps)
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
 
@@ -238,6 +295,9 @@ describe "lib/api", ->
         promise: -> {
           get: -> {
             catch: -> {
+              catch: -> {
+                then: (fn) -> fn()
+              }
               then: (fn) -> fn()
             }
           }
@@ -248,11 +308,41 @@ describe "lib/api", ->
       .then ->
         expect(rp.post).to.be.calledWithMatch({timeout: 10000})
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/builds", @buildProps)
+      .reply(500, {})
+
+      api.createRun(@buildProps)
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".createInstance", ->
     beforeEach ->
       Object.defineProperty(process.versions, "chrome", {
         value: "53"
       })
+
+      @postProps = {
+        spec: "cypress/integration/app_spec.js"
+        browserName: "Electron"
+        browserVersion: "53"
+        osName: "darwin"
+        osVersion: "10.10.10"
+        osCpus: [{model: "foo"}]
+        osMemory: {
+          free:  1000
+          total: 2000
+        }
+      }
+
+      @createProps = {
+        buildId: "build-id-123"
+        spec: "cypress/integration/app_spec.js"
+      }
 
     it "POSTs /builds/:id/instances", ->
       @sandbox.stub(os, "release").returns("10.10.10")
@@ -266,26 +356,12 @@ describe "lib/api", ->
       .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances", {
-        spec: "cypress/integration/app_spec.js"
-        browserName: "Electron"
-        browserVersion: "53"
-        osName: "darwin"
-        osVersion: "10.10.10"
-        osCpus: [{model: "foo"}]
-        osMemory: {
-          free:  1000
-          total: 2000
-        }
-      })
+      .post("/builds/build-id-123/instances", @postProps)
       .reply(200, {
         instanceId: "instance-id-123"
       })
 
-      api.createInstance({
-        buildId: "build-id-123"
-        spec: "cypress/integration/app_spec.js"
-      })
+      api.createInstance(@createProps)
       .then (instanceId) ->
         expect(instanceId).to.eq("instance-id-123")
 
@@ -340,6 +416,9 @@ describe "lib/api", ->
         promise: -> {
           get: -> {
             catch: -> {
+              catch: -> {
+                then: (fn) -> fn()
+              }
               then: (fn) -> fn()
             }
           }
@@ -350,17 +429,25 @@ describe "lib/api", ->
       .then ->
         expect(rp.post).to.be.calledWithMatch({timeout: 10000})
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/builds/build-id-123/instances", @postProps)
+      .reply(500, {})
+
+      api.createInstance(@createProps)
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".updateInstance", ->
     beforeEach ->
       Object.defineProperty(process.versions, "chrome", {
         value: "53"
       })
 
-    it "PUTs /instances/:id", ->
-      nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-cypress-version", pkg.version)
-      .put("/instances/instance-id-123", {
+      @putProps = {
         tests: 1
         passes: 2
         failures: 3
@@ -373,10 +460,9 @@ describe "lib/api", ->
         cypressConfig: {}
         ciProvider: "circle"
         stdout: "foo\nbar\nbaz"
-      })
-      .reply(200)
+      }
 
-      api.updateInstance({
+      @updateProps = {
         instanceId: "instance-id-123"
         tests: 1
         passes: 2
@@ -390,7 +476,16 @@ describe "lib/api", ->
         cypressConfig: {}
         ciProvider: "circle"
         stdout: "foo\nbar\nbaz"
-      })
+      }
+
+    it "PUTs /instances/:id", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123", @putProps)
+      .reply(200)
+
+      api.updateInstance(@updateProps)
 
     it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
@@ -442,6 +537,18 @@ describe "lib/api", ->
       api.updateInstance({})
       .then ->
         expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .put("/instances/instance-id-123", @putProps)
+      .reply(500, {})
+
+      api.updateInstance(@updateProps)
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
 
   context ".updateInstanceStdout", ->
     it "PUTs /instances/:id/stdout", ->
@@ -509,6 +616,23 @@ describe "lib/api", ->
       .then ->
         expect(rp.put).to.be.calledWithMatch({timeout: 10000})
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .put("/instances/instance-id-123/stdout", {
+        stdout: "foobarbaz\n"
+      })
+      .reply(500, {})
+
+      api.updateInstanceStdout({
+        instanceId: "instance-id-123"
+        stdout: "foobarbaz\n"
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".getLoginUrl", ->
     it "GET /auth + returns the url", ->
       nock("http://localhost:1234")
@@ -522,12 +646,48 @@ describe "lib/api", ->
       api.getLoginUrl().then (url) ->
         expect(url).to.eq("https://github.com/authorize")
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/auth")
+      .reply(500, {})
+
+      api.getLoginUrl()
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
+      @sandbox.stub(nmi, "machineId").resolves("12345")
+
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
+      .matchHeader("x-machine-id", "12345")
+      .post("/signin")
+      .query({code: "abc-123"})
+      .reply(200, {
+        name: "brian"
+      })
+
+      api.createSignin("abc-123").then (user) ->
+        expect(user).to.deep.eq({
+          name: "brian"
+        })
+
+    it "handles nmi errors", ->
+      @sandbox.stub(nmi, "machineId").rejects(new Error("foo"))
+
+      nock("http://localhost:1234", {
+        "badheaders": ["x-machine-id"]
+      })
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-accept-terms", "true")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {
@@ -554,6 +714,18 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.eq("Your email: 'brian@gmail.com' has not been authorized.")
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/signin")
+      .reply(500, {})
+
+      api.createSignin("abc-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".createSignout", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234")
@@ -565,19 +737,40 @@ describe "lib/api", ->
 
       api.createSignout("auth-token-123")
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/signout")
+      .reply(500, {})
+
+      api.createSignout("auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".createProject", ->
+    beforeEach ->
+      @postProps = {
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
+        remoteOrigin: "remoteOrigin"
+      }
+
+      @createProps = {
+        projectName: "foobar"
+        orgId: "org-id-123"
+        public: true
+      }
+
     it "POST /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/projects", {
-        name: "foobar"
-        orgId: "org-id-123"
-        public: true
-        remoteOrigin: "remoteOrigin"
-      })
+      .post("/projects", @postProps)
       .reply(200, {
         id: "id-123"
         name: "foobar"
@@ -585,13 +778,7 @@ describe "lib/api", ->
         public: true
       })
 
-      projectDetails = {
-        projectName: "foobar"
-        orgId: "org-id-123"
-        public: true
-      }
-
-      api.createProject(projectDetails, "remoteOrigin", "auth-token-123")
+      api.createProject(@createProps, "remoteOrigin", "auth-token-123")
       .then (projectDetails) ->
         expect(projectDetails).to.eql({
           id: "id-123"
@@ -640,6 +827,17 @@ describe "lib/api", ->
           }
         """)
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/projects", @postProps)
+      .reply(500, {})
+
+      api.createProject(@createProps, "remoteOrigin", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
 
   context ".getProjectRecordKeys", ->
     it "GET /projects/:id/keys + returns keys", ->
@@ -654,6 +852,18 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(recordKeys)
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123/keys")
+      .reply(500, {})
+
+      api.getProjectRecordKeys("id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".requestAccess", ->
     it "POST /projects/:id/membership_requests + returns response", ->
       nock("http://localhost:1234")
@@ -664,7 +874,6 @@ describe "lib/api", ->
       api.requestAccess("project-id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.be.undefined
-
 
     it "POST /projects/:id/membership_requests failure formatting", ->
       nock("http://localhost:1234")
@@ -692,6 +901,18 @@ describe "lib/api", ->
           }
         """)
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/projects/project-id-123/membership_requests")
+      .reply(500, {})
+
+      api.requestAccess("project-id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
@@ -707,6 +928,18 @@ describe "lib/api", ->
       .then (resp) ->
         expect(resp).to.eq("token-123")
 
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/project-123/token")
+      .reply(500, {})
+
+      api.getProjectToken("project-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".updateProjectToken", ->
     it "PUTs /projects/:id/token", ->
       nock("http://localhost:1234")
@@ -721,6 +954,18 @@ describe "lib/api", ->
       api.updateProjectToken("project-123", "auth-token-123")
       .then (resp) ->
         expect(resp).to.eq("token-123")
+
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .put("/projects/project-id-123/token")
+      .reply(500, {})
+
+      api.updateProjectToken("project-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
 
   context ".createRaygunException", ->
     beforeEach ->
@@ -757,3 +1002,17 @@ describe "lib/api", ->
       .then ->
         throw new Error("errored: it did not catch the timeout error!")
       .catch Promise.TimeoutError, ->
+
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/exceptions", {foo: "bar"})
+      .reply(500, {})
+
+      api.createRaygunException({foo: "bar"}, "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true

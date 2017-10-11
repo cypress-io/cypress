@@ -23,7 +23,7 @@ describe "lib/errors", ->
         expect(@log).to.be.calledWithMatch(red.close)
 
     it "can change the color", ->
-      err = errors.get("DEV_NO_SERVER")
+      err = errors.get("NOT_LOGGED_IN")
       errors.log(err, "yellow").then =>
         yellow = style.yellow
 

@@ -63,7 +63,7 @@ API = {
         """
         You're not logged in.
 
-        Run `cypress open` to open the Desktop App and login.
+        Run `cypress open` to open the Desktop App and log in.
         """
       when "TESTS_DID_NOT_START_RETRYING"
         "Timed out waiting for the browser to connect. #{arg1}"
@@ -181,8 +181,6 @@ API = {
 
         https://on.cypress.io/dashboard
         """
-      when "DEV_NO_SERVER"
-        " > The local API server isn't running in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
         "Can't find 'projectId' in the 'cypress.json' file for this project: " + chalk.blue(arg1)
       when "NO_PROJECT_FOUND_AT_PROJECT_ROOT"

@@ -1,6 +1,7 @@
 require('../../spec_helper')
 
 const cp = require('child_process')
+const os = require('os')
 
 const info = require(`${lib}/tasks/info`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -12,6 +13,12 @@ describe('exec spawn', function () {
     this.spawnedProcess = this.sandbox.stub({
       on: () => {},
       unref: () => {},
+      stdout: {
+        pipe: () => {},
+      },
+      stderr: {
+        pipe: () => {},
+      },
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
     this.sandbox.stub(xvfb, 'start').resolves()
@@ -96,6 +103,34 @@ describe('exec spawn', function () {
       return spawn.start()
       .then(() => {
         expect(this.spawnedProcess.unref).not.to.be.called
+      })
+    })
+
+    it('uses inherit/inherit/ignore when not windows', function () {
+      this.sandbox.stub(os, 'platform').returns('darwin')
+
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start()
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2]).to.deep.eq({
+          detached: false,
+          stdio: ['inherit', 'inherit', 'ignore'],
+        })
+      })
+    })
+
+    it('uses inherit/pipe/pipe when windows', function () {
+      this.sandbox.stub(os, 'platform').returns('win32')
+
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start()
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2]).to.deep.eq({
+          detached: false,
+          stdio: ['inherit', 'pipe', 'pipe'],
+        })
       })
     })
   })

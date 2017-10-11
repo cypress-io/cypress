@@ -6,7 +6,7 @@ os = require("os")
 exec = require("#{root}lib/exec")
 
 isWindows = () ->
-  os.platform() == "win32"
+  os.platform() is "win32"
 
 runCommand = (cmd, options = {}) ->
   _.defaults(options, {
