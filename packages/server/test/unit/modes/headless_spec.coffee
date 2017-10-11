@@ -159,14 +159,28 @@ describe "lib/modes/headless", ->
     it "calls video process with name, cname and videoCompression", ->
       end = -> Promise.resolve()
 
-      headless.postProcessRecording(end, "foo", "foo-compress", 32)
+      headless.postProcessRecording(end, "foo", "foo-compress", 32, false, false)
       .then ->
         expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process when videoCompression is false", ->
       end = -> Promise.resolve()
 
-      headless.postProcessRecording(end, "foo", "foo-compress", false)
+      headless.postProcessRecording(end, "foo", "foo-compress", false, false, false)
+      .then ->
+        expect(video.process).not.to.be.called
+
+    it "calls video process if there are failing tests and we have set to only upload videos if tests fail", ->
+      end = -> Promise.resolve()
+
+      headless.postProcessRecording(end, "foo", "foo-compress", 32, true, true)
+      .then ->
+        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+
+    it "does not call video process if there are no failing tests and we have set to only upload videos if tests fail", ->
+      end = -> Promise.resolve()
+
+      headless.postProcessRecording(end, "foo", "foo-compress", false, true, false)
       .then ->
         expect(video.process).not.to.be.called
 
@@ -267,13 +281,14 @@ describe "lib/modes/headless", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
+        uploadVideoOnlyOnFailure: false
         gui: false
         screenshots
         started
         end
       })
       .then (obj) ->
-        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false, true)
 
         results = headless.collectTestResults(obj)
         expect(headless.displayStats).to.be.calledWith(results)
@@ -311,13 +326,14 @@ describe "lib/modes/headless", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
+        uploadVideoOnlyOnFailure: false
         gui: false
         screenshots
         started
         end
       })
       .then (obj) ->
-        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false, true)
 
         results = headless.collectTestResults(obj)
         expect(headless.displayStats).to.be.calledWith(results)

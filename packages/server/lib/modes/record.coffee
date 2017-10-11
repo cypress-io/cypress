@@ -95,7 +95,7 @@ module.exports = {
         null
 
   upload: (options = {}) ->
-    {video, screenshots, videoUrl, screenshotUrls} = options
+    {video, uploadVideo, screenshots, videoUrl, screenshotUrls} = options
 
     uploads = []
     count   = 0
@@ -118,7 +118,7 @@ module.exports = {
         .catch(fail)
       )
 
-    if videoUrl
+    if videoUrl and uploadVideo
       send(video, videoUrl)
 
     if screenshotUrls
@@ -169,6 +169,7 @@ module.exports = {
     .then (resp = {}) =>
       @upload({
         video:          stats.video
+        uploadVideo:    !stats.config.uploadVideoOnlyOnFailure or stats.failures
         screenshots:    stats.screenshots
         videoUrl:       resp.videoUploadUrl
         screenshotUrls: resp.screenshotUploadUrls

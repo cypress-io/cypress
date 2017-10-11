@@ -151,13 +151,13 @@ module.exports = {
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
 
-  postProcessRecording: (end, name, cname, videoCompression) ->
+  postProcessRecording: (end, name, cname, videoCompression, uploadVideoOnlyOnFailure, isFailure) ->
     ## once this ended promises resolves
     ## then begin processing the file
     end()
     .then ->
       ## dont process anything if videoCompress is off
-      return if videoCompression is false
+      return if videoCompression is false or (uploadVideoOnlyOnFailure is true and isFailure is false)
 
       console.log("")
       console.log("")
@@ -299,7 +299,7 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, outputPath } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, uploadVideoOnlyOnFailure, outputPath } = options
 
     @listenForProjectEnd(project, headed)
     .then (obj) =>
@@ -334,8 +334,12 @@ module.exports = {
 
       ft = obj.failingTests
 
-      if ft and ft.length
+      hasFailingTests = ft and ft.length
+
+      if hasFailingTests
         obj.failingTests = Reporter.setVideoTimestamp(started, ft)
+
+      isFailure = hasFailingTests or obj.failures
 
       ## always close the browser now as opposed to letting
       ## it exit naturally with the parent process due to
@@ -343,7 +347,7 @@ module.exports = {
       openProject.closeBrowser()
       .then =>
         if end
-          @postProcessRecording(end, name, cname, videoCompression)
+          @postProcessRecording(end, name, cname, videoCompression, uploadVideoOnlyOnFailure, !!isFailure)
           .then(finish)
           ## TODO: add a catch here
         else
@@ -453,10 +457,11 @@ module.exports = {
       .then (started) =>
         Promise.props({
           stats:      @waitForTestsToFinishRunning({
-            headed:           options.headed
-            project:          options.project
-            videoCompression: options.videoCompression
-            outputPath:       options.outputPath
+            headed:                   options.headed
+            project:                  options.project
+            videoCompression:         options.videoCompression
+            uploadVideoOnlyOnFailure: options.uploadVideoOnlyOnFailure
+            outputPath:               options.outputPath
             end
             name
             cname
@@ -506,15 +511,16 @@ module.exports = {
           @trashAssets(config)
           .then =>
             @runTests({
-              id:               id
-              project:          project
-              videosFolder:     config.videosFolder
-              videoRecording:   config.videoRecording
-              videoCompression: config.videoCompression
-              spec:             options.spec
-              headed:           options.headed
-              browser:          options.browser
-              outputPath:       options.outputPath
+              id:                       id
+              project:                  project
+              videosFolder:             config.videosFolder
+              videoRecording:           config.videoRecording
+              videoCompression:         config.videoCompression
+              uploadVideoOnlyOnFailure: config.uploadVideoOnlyOnFailure
+              spec:                     options.spec
+              headed:                   options.headed
+              browser:                  options.browser
+              outputPath:               options.outputPath
             })
           .get("stats")
           .finally =>

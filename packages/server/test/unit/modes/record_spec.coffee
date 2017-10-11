@@ -252,6 +252,7 @@ describe "lib/modes/record", ->
             name: "foo"
             path: "path/to/screenshot"
           }]
+          uploadVideo: true
           videoUrl: resp.videoUploadUrl
           screenshotUrls: resp.screenshotUploadUrls
         })
