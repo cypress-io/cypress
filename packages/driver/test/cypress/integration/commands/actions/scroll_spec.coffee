@@ -423,13 +423,13 @@ describe "src/cy/commands/actions/scroll", ->
         cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then ->
           lastLog = @lastLog
 
-          expect(lastLog.get("message")).to.eq "{duration: 1}"
+          expect(lastLog.get("message")).to.eq "25, 0, {duration: 1}"
 
       it "logs easing options", ->
         cy.get("#scroll-to-both").scrollTo(25, { easing: 'linear' }).then ->
           lastLog = @lastLog
 
-          expect(lastLog.get("message")).to.eq "{easing: linear}"
+          expect(lastLog.get("message")).to.eq "25, 0, {easing: linear}"
 
       it "snapshots immediately", ->
         cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then ->
@@ -439,9 +439,12 @@ describe "src/cy/commands/actions/scroll", ->
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
       it "#consoleProps", ->
-        cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
+        cy.get("#scroll-to-both").scrollTo(25, {duration: 1}).then ($container) ->
           console = @lastLog.invoke("consoleProps")
           expect(console.Command).to.eq("scrollTo")
+          expect(console.X).to.eq(25)
+          expect(console.Y).to.eq(0)
+          expect(console.Options).to.eq('{duration: 1}')
           expect(console["Scrolled Element"]).to.eq $container.get(0)
 
   context "#scrollIntoView", ->
