@@ -380,7 +380,7 @@ module.exports = {
 
       log("Should copy Circle Artifacts?", shouldCopy)
 
-      if shouldCopy
+      if shouldCopy and videosFolder and screenshotsFolder
         log("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
 
         ## copy each of the screenshots and videos
