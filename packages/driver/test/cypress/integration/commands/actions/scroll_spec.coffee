@@ -444,7 +444,7 @@ describe "src/cy/commands/actions/scroll", ->
           expect(console.Command).to.eq("scrollTo")
           expect(console.X).to.eq(25)
           expect(console.Y).to.eq(0)
-          expect(console.Options).to.eq('{duration: 1}')
+          expect(console.Options).to.eq("{duration: 1}")
           expect(console["Scrolled Element"]).to.eq $container.get(0)
 
   context "#scrollIntoView", ->

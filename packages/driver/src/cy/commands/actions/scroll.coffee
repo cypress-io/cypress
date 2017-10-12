@@ -235,7 +235,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           messageArgs.push(deltaOptions)
 
         log = {
-          message: messageArgs.join(', '),
+          message: messageArgs.join(", "),
           consoleProps: ->
             ## merge into consoleProps without mutating it
             obj = {}
