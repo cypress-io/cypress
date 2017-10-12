@@ -169,7 +169,7 @@ module.exports = {
     .then (resp = {}) =>
       @upload({
         video:          stats.video
-        uploadVideo:    !stats.config.uploadVideoOnlyOnFailure or stats.failures
+        uploadVideo:    stats.config.videoUploadOnPassing or stats.failures != 0
         screenshots:    stats.screenshots
         videoUrl:       resp.videoUploadUrl
         screenshotUrls: resp.screenshotUploadUrls

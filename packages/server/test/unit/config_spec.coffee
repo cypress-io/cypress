@@ -306,13 +306,13 @@ describe "lib/config", ->
           @setup({videoRecording: 42})
           @expectValidationFails("be a boolean")
 
-      context "uploadVideoOnlyOnFailure", ->
+      context "videoUploadOnPassing", ->
         it "passes if a boolean", ->
-          @setup({uploadVideoOnlyOnFailure: false})
+          @setup({videoUploadOnPassing: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({uploadVideoOnlyOnFailure: 99})
+          @setup({videoUploadOnPassing: 99})
           @expectValidationFails("be a boolean")
 
       context "videosFolder", ->
@@ -489,8 +489,8 @@ describe "lib/config", ->
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
 
-    it "uploadVideoOnlyOnFailure=false", ->
-      @defaults "uploadVideoOnlyOnFailure", false
+    it "videoUploadOnPassing=true", ->
+      @defaults "videoUploadOnPassing", true
 
     it "trashAssetsBeforeHeadlessRuns=32", ->
       @defaults "trashAssetsBeforeHeadlessRuns", true
@@ -629,7 +629,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            uploadVideoOnlyOnFailure:   { value: false, from: "default" }
+            videoUploadOnPassing:       { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
@@ -683,7 +683,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            uploadVideoOnlyOnFailure:   { value: false, from: "default" }
+            videoUploadOnPassing:       { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
