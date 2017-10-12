@@ -273,7 +273,7 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: cd packages/driver && npm start && wait-on http://localhost:3500
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 0
       - store_test_results:
@@ -287,7 +287,7 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: cd packages/driver && npm start && wait-on http://localhost:3500
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 1
       - store_test_results:
@@ -301,7 +301,7 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: cd packages/driver && npm start && wait-on http://localhost:3500
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 2
       - store_test_results:
@@ -315,7 +315,7 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: cd packages/driver && npm start && wait-on http://localhost:3500
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 3
       - store_test_results:
@@ -329,7 +329,7 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: cd packages/driver && npm start && wait-on http://localhost:3500
           background: true
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 4
       - store_test_results:
