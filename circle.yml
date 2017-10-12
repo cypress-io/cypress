@@ -275,7 +275,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: wait-on http://localhost:3500
+      - run: $(npm bin)/wait-on http://localhost:3500
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 0
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -290,7 +290,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: wait-on http://localhost:3500
+      - run: $(npm bin)/wait-on http://localhost:3500
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 1
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -305,7 +305,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: wait-on http://localhost:3500
+      - run: $(npm bin)/wait-on http://localhost:3500
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 2
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -320,7 +320,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: wait-on http://localhost:3500
+      - run: $(npm bin)/wait-on http://localhost:3500
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 3
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -335,7 +335,7 @@ jobs:
       - run:
           command: cd packages/driver && npm start
           background: true
-      - run: wait-on http://localhost:3500
+      - run: $(npm bin)/wait-on http://localhost:3500
       - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 4
       - store_test_results:
           path: /tmp/cypress-monorepo
