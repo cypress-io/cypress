@@ -226,11 +226,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         )
 
         messageArgs = []
-        if !position
+        if position
+          messageArgs.push(position)
+        else
           messageArgs.push(x)
           messageArgs.push(y)
-        else
-          messageArgs.push(position)
         if deltaOptions
           messageArgs.push(deltaOptions)
 
