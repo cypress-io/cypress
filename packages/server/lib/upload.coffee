@@ -5,12 +5,14 @@ Promise = require("bluebird")
 
 fs = Promise.promisifyAll(fs)
 
-module.exports = (pathToFile, url) ->
-  fs
-  .readFileAsync(pathToFile)
-  .then (buf) ->
-    rp({
-      url: url
-      method: "PUT"
-      body: buf
-    })
+module.exports = {
+  send: (pathToFile, url) ->
+    fs
+    .readFileAsync(pathToFile)
+    .then (buf) ->
+      rp({
+        url: url
+        method: "PUT"
+        body: buf
+      })
+}
