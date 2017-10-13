@@ -686,13 +686,14 @@ describe "lib/cypress", ->
           "--run-project=#{@todosPath}",
           "--videoRecording=false"
           "--env",
-          "version=0.12.1,foo=bar,host=http://localhost:8888"
+          "version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor"
         ])
         .then =>
           expect(openProject.getProject().cfg.environmentVariables).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
             host: "http://localhost:8888"
+            baz: "quux=dolor"
           })
 
           @expectExitWith(0)
