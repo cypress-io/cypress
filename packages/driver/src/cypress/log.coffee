@@ -1,5 +1,6 @@
 _ = require("lodash")
 $ = require("jquery")
+clone = require("clone")
 
 $Snapshots = require("../cy/snapshots")
 $Events = require("./events")
@@ -51,7 +52,12 @@ toSerializedJSON = (attrs) ->
         value.toString()
 
       when _.isObject(value)
-        _.mapValues(value, stringify)
+        ## clone to nuke circular references
+        ## and blow away anything that throws
+        try
+          _.mapValues(clone(value), stringify)
+        catch err
+          null
 
       else
         value
