@@ -15,7 +15,7 @@ parentOrChildRe = /parent|child/
 ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
 DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
-BLACKLIST_PROPS = "snapshots zone".split(" ").map((key) -> new RegExp(key))
+BLACKLIST_PROPS = "snapshots".split(" ")
 
 delay = null
 counter = 0
@@ -36,7 +36,7 @@ toSerializedJSON = (attrs) ->
   isElement  = $dom.isElement
 
   stringify = (value, key) ->
-    return null if BLACKLIST_PROPS.some((r) -> r.test(key))
+    return null if key in BLACKLIST_PROPS
 
     switch
       when _.isArray(value)
