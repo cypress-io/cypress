@@ -28,6 +28,7 @@ config     = require("#{root}lib/config")
 cache      = require("#{root}lib/cache")
 stdout     = require("#{root}lib/stdout")
 errors     = require("#{root}lib/errors")
+upload     = require("#{root}lib/upload")
 cypress    = require("#{root}lib/cypress")
 Project    = require("#{root}lib/project")
 Server     = require("#{root}lib/server")
@@ -226,31 +227,6 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
       @sandbox.stub(browsers, "open")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
-
-    context "state", ->
-      statePath = null
-      beforeEach ->
-        formStatePath(@todosPath)
-        .then (statePathStart) ->
-          statePath = appData.projectsPath(statePathStart)
-          fs.pathExists(statePath)
-          .then (found) ->
-            if found
-              fs.unlink(statePath)
-
-      afterEach ->
-        fs.unlink(statePath)
-
-      it "saves project state", ->
-        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
-        .then =>
-          @expectExitWith(0)
-        .then ->
-          openProject.getProject().saveState()
-        .then () ->
-          fs.pathExists(statePath)
-        .then (found) ->
-          expect(found, "Finds saved stage file #{statePath}").to.be.true
 
     it "runs project headlessly and exits with exit code 0", ->
       cypress.start(["--run-project=#{@todosPath}"])
@@ -616,6 +592,31 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("INVALID_REPORTER_NAME", "foobarbaz")
 
+    describe "state", ->
+      statePath = null
+      beforeEach ->
+        formStatePath(@todosPath)
+        .then (statePathStart) ->
+          statePath = appData.projectsPath(statePathStart)
+          fs.pathExists(statePath)
+          .then (found) ->
+            if found
+              fs.unlink(statePath)
+
+      afterEach ->
+        fs.unlink(statePath)
+
+      it "saves project state", ->
+        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+        .then =>
+          @expectExitWith(0)
+        .then ->
+          openProject.getProject().saveState()
+        .then () ->
+          fs.pathExists(statePath)
+        .then (found) ->
+          expect(found, "Finds saved stage file #{statePath}").to.be.true
+
     describe "morgan", ->
       it "sets morgan to false", ->
         cypress.start(["--run-project=#{@todosPath}"])
@@ -720,11 +721,10 @@ describe "lib/cypress", ->
         }
         @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
 
-      @upload = @sandbox.stub(record, "upload").resolves()
+      @sandbox.stub(upload, "send").resolves()
       @sandbox.stub(stdout, "capture").returns({
         toString: -> "foobarbaz"
       })
-
 
       @sandbox.stub(ciProvider, "name").returns("travis")
       @sandbox.stub(ciProvider, "buildNum").returns("987")
@@ -747,6 +747,7 @@ describe "lib/cypress", ->
         pending: 4
         duration: 5
         video: true
+        shouldUploadVideo: true
         screenshots: []
         failingTests: []
         config: {}
@@ -760,8 +761,6 @@ describe "lib/cypress", ->
         .then (id) =>
           @projectId = id
       ])
-
-    ## TODO: add tests around uploadingAssets + upload
 
     it "runs project in ci and exits with number of failures", ->
       @setup()
@@ -787,12 +786,17 @@ describe "lib/cypress", ->
         cypressConfig: {}
         ciProvider: "travis"
         stdout: "foobarbaz"
-      }).resolves()
+      }).resolves({
+        videoUploadUrl: "http://video.url"
+      })
 
       cypress.start(["--run-project=#{@todosPath}", "--record",  "--key=token-123"])
       .then =>
         expect(@createInstance).to.be.calledOnce
         expect(@updateInstance).to.be.calledOnce
+
+        expect(upload.send).to.be.calledOnce
+
         @expectExitWith(3)
 
     it "runs project by specific absolute spec and exits with status 3", ->

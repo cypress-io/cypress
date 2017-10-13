@@ -159,28 +159,28 @@ describe "lib/modes/headless", ->
     it "calls video process with name, cname and videoCompression", ->
       end = -> Promise.resolve()
 
-      headless.postProcessRecording(end, "foo", "foo-compress", 32, true, false)
+      headless.postProcessRecording(end, "foo", "foo-compress", 32, true)
       .then ->
         expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process when videoCompression is false", ->
       end = -> Promise.resolve()
 
-      headless.postProcessRecording(end, "foo", "foo-compress", false, true, false)
+      headless.postProcessRecording(end, "foo", "foo-compress", false, true)
       .then ->
         expect(video.process).not.to.be.called
 
-    it "calls video process if there are failing tests and we have set not to upload video on passing", ->
+    it "calls video process if we have been told to upload videos", ->
       end = -> Promise.resolve()
 
-      headless.postProcessRecording(end, "foo", "foo-compress", 32, false, true)
+      headless.postProcessRecording(end, "foo", "foo-compress", 32, true)
       .then ->
         expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process if there are no failing tests and we have set not to upload video on passing", ->
       end = -> Promise.resolve()
 
-      headless.postProcessRecording(end, "foo", "foo-compress", false, false, false)
+      headless.postProcessRecording(end, "foo", "foo-compress", 32, false)
       .then ->
         expect(video.process).not.to.be.called
 
@@ -281,14 +281,14 @@ describe "lib/modes/headless", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
-        videoUploadOnPassing: true
+        videoUploadOnPasses: true
         gui: false
         screenshots
         started
         end
       })
       .then (obj) ->
-        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true, true)
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         results = headless.collectTestResults(obj)
         expect(headless.displayStats).to.be.calledWith(results)
@@ -304,6 +304,7 @@ describe "lib/modes/headless", ->
           failingTests: [1,2,3]
           screenshots:  screenshots
           video:        "foo.mp4"
+          shouldUploadVideo: true
         })
 
     it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
@@ -326,14 +327,14 @@ describe "lib/modes/headless", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
-        videoUploadOnPassing: true
+        videoUploadOnPasses: true
         gui: false
         screenshots
         started
         end
       })
       .then (obj) ->
-        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true, true)
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         results = headless.collectTestResults(obj)
         expect(headless.displayStats).to.be.calledWith(results)
@@ -350,7 +351,32 @@ describe "lib/modes/headless", ->
           failingTests: []
           screenshots:  screenshots
           video:        "foo.mp4"
+          shouldUploadVideo: true
         })
+
+    it "should not upload video when videoUploadOnPasses is false and no failing tests", ->
+      process.nextTick =>
+        @projectInstance.emit("end", {
+          failingTests: []
+        })
+
+      @sandbox.spy(headless, "postProcessRecording")
+      @sandbox.spy(video, "process")
+      end = @sandbox.stub().resolves()
+
+      headless.waitForTestsToFinishRunning({
+        project: @projectInstance,
+        name: "foo.mp4"
+        cname: "foo-compressed.mp4"
+        videoCompression: 32
+        videoUploadOnPasses: false
+        gui: false
+        end
+      })
+      .then (obj) ->
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false)
+
+        expect(video.process).not.to.be.called
 
   context ".listenForProjectEnd", ->
     it "resolves with end event + argument", ->

@@ -151,13 +151,14 @@ module.exports = {
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
 
-  postProcessRecording: (end, name, cname, videoCompression, videoUploadOnPassing, isFailure) ->
+  postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
     ## once this ended promises resolves
     ## then begin processing the file
     end()
     .then ->
       ## dont process anything if videoCompress is off
-      return if videoCompression is false or (videoUploadOnPassing is false and isFailure is false)
+      ## or we've been told not to upload the video
+      return if videoCompression is false or shouldUploadVideo is false
 
       console.log("")
       console.log("")
@@ -299,7 +300,7 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPassing, outputPath } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath } = options
 
     @listenForProjectEnd(project, headed)
     .then (obj) =>
@@ -339,7 +340,9 @@ module.exports = {
       if hasFailingTests
         obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
-      isFailure = hasFailingTests or obj.failures
+      ## we should upload the video if we upload on passes (by default)
+      ## or if we have any failures
+      suv = obj.shouldUploadVideo = !!(videoUploadOnPasses is true or hasFailingTests)
 
       ## always close the browser now as opposed to letting
       ## it exit naturally with the parent process due to
@@ -347,7 +350,7 @@ module.exports = {
       openProject.closeBrowser()
       .then =>
         if end
-          @postProcessRecording(end, name, cname, videoCompression, videoUploadOnPassing, !!isFailure)
+          @postProcessRecording(end, name, cname, videoCompression, suv)
           .then(finish)
           ## TODO: add a catch here
         else
@@ -460,7 +463,7 @@ module.exports = {
             headed:               options.headed
             project:              options.project
             videoCompression:     options.videoCompression
-            videoUploadOnPassing: options.videoUploadOnPassing
+            videoUploadOnPasses:  options.videoUploadOnPasses
             outputPath:           options.outputPath
             end
             name
@@ -516,7 +519,7 @@ module.exports = {
               videosFolder:         config.videosFolder
               videoRecording:       config.videoRecording
               videoCompression:     config.videoCompression
-              videoUploadOnPassing: config.videoUploadOnPassing
+              videoUploadOnPasses:  config.videoUploadOnPasses
               spec:                 options.spec
               headed:               options.headed
               browser:              options.browser

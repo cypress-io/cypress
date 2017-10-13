@@ -113,7 +113,7 @@ module.exports = {
         console.log("  - Failed Uploading #{nums()}", chalk.red(pathToFile))
 
       uploads.push(
-        upload(pathToFile, url)
+        upload.send(pathToFile, url)
         .then(success)
         .catch(fail)
       )
@@ -169,7 +169,7 @@ module.exports = {
     .then (resp = {}) =>
       @upload({
         video:          stats.video
-        uploadVideo:    stats.config.videoUploadOnPassing or stats.failures != 0
+        uploadVideo:    stats.shouldUploadVideo
         screenshots:    stats.screenshots
         videoUrl:       resp.videoUploadUrl
         screenshotUrls: resp.screenshotUploadUrls
@@ -223,7 +223,7 @@ module.exports = {
 
       Project.config(projectPath)
       .then (cfg) =>
-        {projectName} = cfg
+        { projectName } = cfg
 
         @generateProjectBuildId(projectId, projectPath, projectName, options.key, options.group, options.groupId)
         .then (buildId) =>

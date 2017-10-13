@@ -306,13 +306,13 @@ describe "lib/config", ->
           @setup({videoRecording: 42})
           @expectValidationFails("be a boolean")
 
-      context "videoUploadOnPassing", ->
+      context "videoUploadOnPasses", ->
         it "passes if a boolean", ->
-          @setup({videoUploadOnPassing: false})
+          @setup({videoUploadOnPasses: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({videoUploadOnPassing: 99})
+          @setup({videoUploadOnPasses: 99})
           @expectValidationFails("be a boolean")
 
       context "videosFolder", ->
@@ -489,8 +489,8 @@ describe "lib/config", ->
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
 
-    it "videoUploadOnPassing=true", ->
-      @defaults "videoUploadOnPassing", true
+    it "videoUploadOnPasses=true", ->
+      @defaults "videoUploadOnPasses", true
 
     it "trashAssetsBeforeHeadlessRuns=32", ->
       @defaults "trashAssetsBeforeHeadlessRuns", true
@@ -629,7 +629,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            videoUploadOnPassing:       { value: true, from: "default" }
+            videoUploadOnPasses:       { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
@@ -683,7 +683,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            videoUploadOnPassing:       { value: true, from: "default" }
+            videoUploadOnPasses:       { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },

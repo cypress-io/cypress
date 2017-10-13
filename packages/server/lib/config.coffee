@@ -17,7 +17,7 @@ cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder videosFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFile".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges trashAssetsBeforeHeadlessRuns chromeWebSecurity videoRecording videoCompression videoUploadOnPassing viewportWidth viewportHeight supportFile fileServerFolder supportFolder fixturesFolder integrationFolder videosFolder screenshotsFolder environmentVariables hosts".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges trashAssetsBeforeHeadlessRuns chromeWebSecurity videoRecording videoCompression videoUploadOnPasses viewportWidth viewportHeight supportFile fileServerFolder supportFolder fixturesFolder integrationFolder videosFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -44,7 +44,7 @@ defaults = {
   execTimeout:                   60000
   videoRecording:                true
   videoCompression:              32
-  videoUploadOnPassing:          true
+  videoUploadOnPasses:          true
   chromeWebSecurity:             true
   waitForAnimations:             true
   animationDistanceThreshold:    5
@@ -89,7 +89,7 @@ validationRules = {
   trashAssetsBeforeHeadlessRuns: v.isBoolean
   videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
-  videoUploadOnPassing: v.isBoolean
+  videoUploadOnPasses: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
   viewportWidth: v.isNumber

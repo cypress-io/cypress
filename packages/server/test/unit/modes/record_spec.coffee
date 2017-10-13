@@ -5,6 +5,7 @@ api        = require("#{root}../lib/api")
 stdout     = require("#{root}../lib/stdout")
 errors     = require("#{root}../lib/errors")
 logger     = require("#{root}../lib/logger")
+upload     = require("#{root}../lib/upload")
 Project    = require("#{root}../lib/project")
 terminal   = require("#{root}../lib/util/terminal")
 record     = require("#{root}../lib/modes/record")
@@ -229,7 +230,7 @@ describe "lib/modes/record", ->
 
       api.updateInstance.resolves(resp)
 
-      @sandbox.stub(record, "upload").resolves()
+      @sandbox.stub(upload, "send").resolves()
 
       record.uploadAssets("id-123", {
         tests: 1
@@ -239,23 +240,52 @@ describe "lib/modes/record", ->
         duration: 5
         video: "path/to/video"
         screenshots: [{
+          clientId: 1
           name: "foo"
-          path: "path/to/screenshot"
+          path: "path/to/screenshot1"
+        }, {
+          clientId: 2
+          name: "bar"
+          path: "path/to/screenshot2"
         }]
         failingTests: ["foo"]
         config: {foo: "bar"}
+        shouldUploadVideo: true
       })
       .then ->
-        expect(record.upload).to.be.calledWith({
+        expect(upload.send.callCount).to.be.eq(3)
+        expect(upload.send.firstCall).to.be.calledWith("path/to/video", "https://s3.upload.video")
+        expect(upload.send.secondCall).to.be.calledWith("path/to/screenshot1", "https://s3.upload.screenshot/1")
+        expect(upload.send.thirdCall).to.be.calledWith("path/to/screenshot2", "https://s3.upload.screenshot/2")
+
+        ## reset the stub
+        upload.send.reset()
+
+        ## does not upload the video
+        record.uploadAssets("id-123", {
+          tests: 1
+          passes: 2
+          failures: 3
+          pending: 4
+          duration: 5
           video: "path/to/video"
           screenshots: [{
+            clientId: 1
             name: "foo"
-            path: "path/to/screenshot"
+            path: "path/to/screenshot1"
+          }, {
+            clientId: 2
+            name: "bar"
+            path: "path/to/screenshot2"
           }]
-          uploadVideo: true
-          videoUrl: resp.videoUploadUrl
-          screenshotUrls: resp.screenshotUploadUrls
+          failingTests: ["foo"]
+          config: {foo: "bar"}
+          shouldUploadVideo: false
         })
+        .then ->
+          expect(upload.send.callCount).to.be.eq(2)
+          expect(upload.send.firstCall).to.be.calledWith("path/to/screenshot1", "https://s3.upload.screenshot/1")
+          expect(upload.send.secondCall).to.be.calledWith("path/to/screenshot2", "https://s3.upload.screenshot/2")
 
     it "logs warning on error", ->
       err = new Error("foo")
