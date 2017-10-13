@@ -12,7 +12,7 @@ npm install --save-dev cypress-webpack-preprocessor
 
 ## Usage
 
-In your project's [plugins file](https://on.cypress.io/guides/plugins):
+In your project's [plugins file](https://on.cypress.io/guides/guides/plugins.html):
 
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
