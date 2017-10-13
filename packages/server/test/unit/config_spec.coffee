@@ -306,6 +306,15 @@ describe "lib/config", ->
           @setup({videoRecording: 42})
           @expectValidationFails("be a boolean")
 
+      context "videoUploadOnPasses", ->
+        it "passes if a boolean", ->
+          @setup({videoUploadOnPasses: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({videoUploadOnPasses: 99})
+          @expectValidationFails("be a boolean")
+
       context "videosFolder", ->
         it "passes if a string", ->
           @setup({videosFolder: "_videos"})
@@ -480,6 +489,9 @@ describe "lib/config", ->
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
 
+    it "videoUploadOnPasses=true", ->
+      @defaults "videoUploadOnPasses", true
+
     it "trashAssetsBeforeHeadlessRuns=32", ->
       @defaults "trashAssetsBeforeHeadlessRuns", true
 
@@ -617,6 +629,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
+            videoUploadOnPasses:       { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
@@ -670,6 +683,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
+            videoUploadOnPasses:       { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
