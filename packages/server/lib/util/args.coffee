@@ -8,11 +8,13 @@ cwd      = require("../cwd")
 whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exitWithCode hosts browser headless outputPath group groupId".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
+everythingAfterFirstEqualRe = /=(.+)/
+
 # returns true if the given string has double quote character "
 # only at the last position.
 hasStrayEndQuote = (s) ->
   quoteAt = s.indexOf('"')
-  quoteAt == s.length - 1
+  quoteAt is s.length - 1
 
 removeLastCharacter = (s) ->
   s.substr(0, s.length - 1)
@@ -44,7 +46,7 @@ parseNestedValues = (vals) ->
   .chain(vals)
   .split(",")
   .map (pair) ->
-    pair.split(/=(.+)/)
+    pair.split(everythingAfterFirstEqualRe)
   .fromPairs()
   .mapValues(coerce)
   .value()
