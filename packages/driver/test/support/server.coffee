@@ -51,6 +51,9 @@ app.use(require("method-override")())
 #       root: __dirname
 #     })
 
+app.head "/", (req, res) ->
+  res.sendStatus(200)
+
 app.get "/timeout", (req, res) ->
   Promise
   .delay(req.query.ms ? 0)
