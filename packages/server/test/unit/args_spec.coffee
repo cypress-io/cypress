@@ -42,11 +42,12 @@ describe "lib/util/args", ->
 
   context "--env", ->
     it "converts to object literal", ->
-      options = @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888")
+      options = @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888,bar=qux=")
       expect(options.environmentVariables).to.deep.eq({
         foo: "bar"
         version: "0.12.1"
         host: "localhost:8888"
+        bar: "qux="
       })
 
   context "--config", ->
@@ -78,7 +79,7 @@ describe "lib/util/args", ->
   context ".toObject", ->
     beforeEach ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
-      @obj = @setup("--get-key", "--hosts=*.foobar.com=127.0.0.1", "--env=foo=bar,baz=quux", "--config", "requestTimeout=1234,responseTimeout=9876")
+      @obj = @setup("--get-key", "--hosts=*.foobar.com=127.0.0.1", "--env=foo=bar,baz=quux,bar=foo=quz", "--config", "requestTimeout=1234,responseTimeout=9876")
 
     it "coerces booleans", ->
       expect(@setup("--foo=true").foo).be.true
@@ -93,10 +94,11 @@ describe "lib/util/args", ->
         getKey: true
         _hosts: "*.foobar.com=127.0.0.1"
         hosts: {"*.foobar.com": "127.0.0.1"}
-        _environmentVariables: "foo=bar,baz=quux"
+        _environmentVariables: "foo=bar,baz=quux,bar=foo=quz"
         environmentVariables: {
           foo: "bar"
           baz: "quux"
+          bar: "foo=quz"
         }
         config: {
           requestTimeout: 1234
@@ -114,7 +116,7 @@ describe "lib/util/args", ->
         "--hosts=*.foobar.com=127.0.0.1"
         "--requestTimeout=1234"
         "--responseTimeout=9876"
-        "--environmentVariables=foo=bar,baz=quux"
+        "--environmentVariables=foo=bar,baz=quux,bar=foo=quz"
       ])
 
   context "--updating", ->

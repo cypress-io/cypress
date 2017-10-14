@@ -221,15 +221,34 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $utils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
 
       if options.log
-        deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
+        deltaOptions = $utils.stringify(
+          $utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
+        )
+
+        messageArgs = []
+        if position
+          messageArgs.push(position)
+        else
+          messageArgs.push(x)
+          messageArgs.push(y)
+        if deltaOptions
+          messageArgs.push(deltaOptions)
 
         log = {
-          message: deltaOptions
+          message: messageArgs.join(", "),
           consoleProps: ->
-            obj = {
-              ## merge into consoleProps without mutating it
-              "Scrolled Element": $dom.getElements(options.$el)
-            }
+            ## merge into consoleProps without mutating it
+            obj = {}
+
+            if position
+              obj.Position = position
+            else
+              obj.X = x
+              obj.Y = y
+            if deltaOptions
+              obj.Options = deltaOptions
+
+            obj["Scrolled Element"] = $dom.getElements(options.$el)
 
             return obj
         }

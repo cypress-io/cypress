@@ -17,29 +17,35 @@ car = null
 
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
-  appVeyor: [
-    "cypress-io/cypress-test-tiny"
-    "cypress-io/cypress-test-example-repos"
-    # "cypress-io/cypress-example-kitchensink"
-    # "cypress-io/cypress-example-todomvc"
-  ]
+  appVeyor: {
+    main: "cypress-io/cypress"
+    others: [
+      "cypress-io/cypress-test-tiny"
+      "cypress-io/cypress-test-example-repos"
+      # "cypress-io/cypress-example-kitchensink"
+      # "cypress-io/cypress-example-todomvc"
+    ]
+  }
 
-  circle: [
-    # "cypress-io/cypress-dashboard"
-    # "cypress-io/cypress-core-example"
-    # "cypress-io/cypress-core-desktop-gui"
-    # "cypress-io/cypress-example-kitchensink"
-    # "cypress-io/cypress-example-todomvc"
-    # "cypress-io/cypress-example-piechopper"
-    # "cypress-io/cypress-example-recipes"
+  circle: {
+    main: "cypress-io/cypress"
+    others: [
+      # "cypress-io/cypress-dashboard"
+      # "cypress-io/cypress-core-example"
+      # "cypress-io/cypress-core-desktop-gui"
+      # "cypress-io/cypress-example-kitchensink"
+      # "cypress-io/cypress-example-todomvc"
+      # "cypress-io/cypress-example-piechopper"
+      # "cypress-io/cypress-example-recipes"
 
-    "cypress-io/cypress-test-tiny"
-    "cypress-io/cypress-test-module-api"
-    "cypress-io/cypress-test-node-versions"
-    "cypress-io/cypress-test-nested-projects"
-    "cypress-io/cypress-test-ci-environments"
-    "cypress-io/cypress-test-example-repos"
-  ]
+      "cypress-io/cypress-test-tiny"
+      "cypress-io/cypress-test-module-api"
+      "cypress-io/cypress-test-node-versions"
+      "cypress-io/cypress-test-nested-projects"
+      "cypress-io/cypress-test-ci-environments"
+      "cypress-io/cypress-test-example-repos"
+    ]
+  }
 
   # travis: [
   #   # "cypress-io/cypress-dashboard"
@@ -53,20 +59,32 @@ _PROVIDERS = {
 }
 
 remapProjects = (projectsByProvider) ->
-  # could also be remap + flatten
   list = []
-  addToList = (projects, provider) ->
-    projects.forEach (repo) ->
+
+  _.mapValues projectsByProvider, (provider, name) ->
+    provider.others.forEach (repo) ->
       list.push({
-        repo,
-        provider
+        repo
+        provider: name
       })
-  R.mapObjIndexed(addToList, projectsByProvider)
+
+  list
+
+remapMain = (projectsByProvider) ->
+  list = []
+
+  _.mapValues projectsByProvider, (provider, name) ->
+    list.push({
+      repo: provider.main
+      provider: name
+    })
+
   list
 
 # make flat list of objects
 # {repo, provider}
 PROJECTS = remapProjects(_PROVIDERS)
+MAIN_PROJECTS = remapMain(_PROVIDERS)
 
 getCiConfig = ->
   ## gleb: fix this plzzzzzz
@@ -88,7 +106,7 @@ getCiConfig = ->
     throw new Error('CI config not found')
   config
 
-awaitEachProjectAndProvider = (fn, filter = R.identity) ->
+awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
   creds = getCiConfig()
   # TODO only check tokens for providers we really going to use
   la(check.unemptyString(creds.githubToken), "missing githubToken")
@@ -110,7 +128,7 @@ awaitEachProjectAndProvider = (fn, filter = R.identity) ->
     }
   })
 
-  filteredProjects = R.filter(filter, PROJECTS)
+  filteredProjects = R.filter(filter, projects)
   if check.empty(filteredProjects)
     console.log("⚠️ zero filtered projects left after filtering")
   console.table("filtered projects", filteredProjects)
@@ -128,6 +146,20 @@ getFilterByProvider = (providerName) ->
   projectFilter
 
 module.exports = {
+  nextVersion: (version) ->
+    console.table("All possible projects", MAIN_PROJECTS)
+
+    la(check.unemptyString(version),
+      "missing next version to set", version)
+
+    updateProject = (project, provider) ->
+      console.log("setting environment variables in", project)
+      car.updateProjectEnv(project, provider, {
+        NEXT_DEV_VERSION: version,
+      })
+
+    awaitEachProjectAndProvider(MAIN_PROJECTS, updateProject)
+
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform, providerName) ->
     console.table("All possible projects", PROJECTS)
@@ -156,7 +188,7 @@ module.exports = {
         CYPRESS_NPM_PACKAGE_NAME: nameOrUrl,
         CYPRESS_BINARY_VERSION: binaryVersionOrUrl
       })
-    awaitEachProjectAndProvider(updateProject, projectFilter)
+    awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter)
     .then R.always(result)
 
   run: (message, providerName) ->
@@ -191,5 +223,5 @@ module.exports = {
         token: creds.githubToken,
         message
       })
-    awaitEachProjectAndProvider(makeCommit, projectFilter)
+    awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)
 }

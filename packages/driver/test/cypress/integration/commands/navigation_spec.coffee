@@ -67,7 +67,7 @@ describe "src/cy/commands/navigation", ->
 
         expect(cy.listeners("window:load")).to.deep.eq(listeners)
 
-    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
+    it "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy(Promise.prototype, "timeout")
 
       Cypress.config("pageLoadTimeout", 4567)
@@ -230,7 +230,7 @@ describe "src/cy/commands/navigation", ->
 
       $(doc.body).empty().html(@body)
 
-    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
+    it "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy Promise.prototype, "timeout"
       Cypress.config("pageLoadTimeout", 4567)
 
@@ -412,7 +412,7 @@ describe "src/cy/commands/navigation", ->
               expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
   context "#visit", ->
-    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
+    it "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy Promise.prototype, "timeout"
 
       Cypress.config("pageLoadTimeout", 4567)

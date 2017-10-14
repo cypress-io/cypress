@@ -74,6 +74,19 @@ getReleases = (releases) ->
       }
   }]
 
+getNextVersion = ({ version }) ->
+  [{
+    name: "nextVersion"
+    type: "input"
+    message: "Bump next version to...? (currently: #{version})"
+    default: ->
+      a = version.split(".")
+      v = a[a.length - 1]
+      v = Number(v) + 1
+      a.splice(a.length - 1, 1, v)
+      a.join(".")
+  }]
+
 getVersions = (releases) ->
   [{
     name: "version"
@@ -97,6 +110,20 @@ getBumpTasks = ->
     },{
       name: "Run All Projects for all CI providers"
       value: "run"
+    }]
+  }]
+
+getCommitVersion = (version) ->
+  [{
+    name: "commit"
+    type: "list"
+    message: "Commit this new version to git? (currently: #{version})"
+    choices: [{
+      name: "Yes: commit and push this new release version."
+      value: true
+    },{
+      name: "No:  do not commit."
+      value: false
     }]
   }]
 
@@ -149,7 +176,16 @@ whichBumpTask = ->
   prompt(getBumpTasks())
   .get("task")
 
+nextVersion = (version) ->
+  prompt(getNextVersion(version))
+  .get("nextVersion")
+
+toCommit = ({ version }) ->
+  prompt(getCommitVersion(version))
+  .get("commit")
+
 module.exports = {
+  toCommit
   getZipFile
   getPlatformQuestion
   getQuestions
@@ -157,6 +193,7 @@ module.exports = {
   getVersions
   getBumpTasks
   deployNewVersion
+  nextVersion
   whichZipFile
   whichVersion
   whichRelease
