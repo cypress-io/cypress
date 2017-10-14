@@ -1,5 +1,6 @@
 _           = require("lodash")
 url         = require("url")
+debug       = require("debug")("cypress:server:cors")
 parseDomain = require("parse-domain")
 
 localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
@@ -32,6 +33,8 @@ module.exports = {
     obj.tld      = parsed.tld
     obj.domain   = parsed.domain
     # obj.protocol = protocol
+
+    debug("Parsed URL %o", obj)
 
     return obj
 

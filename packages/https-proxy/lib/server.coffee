@@ -20,6 +20,8 @@ class Server
 
   connect: (req, socket, head, options = {}) ->
     if not head or head.length is 0
+      log("Writing socket connection headers for URL:", req.url)
+
       socket.once "data", (data) =>
         @connect(req, socket, data, options)
 
@@ -36,7 +38,10 @@ class Server
         ## if onDirectConnection return true
         ## then dont proxy, just pass this through
         if odc.call(@, req, socket, head) is true
+          log("Making direct connection to #{req.url}")
           return @_makeDirectConnection(req, socket, head)
+        else
+          log("Not making direct connection to #{req.url}")
 
       socket.pause()
 
@@ -66,8 +71,6 @@ class Server
 
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
-
-    log("Making direct connection to %s:%s", hostname, port)
 
     @_makeConnection(socket, head, port, hostname)
 
