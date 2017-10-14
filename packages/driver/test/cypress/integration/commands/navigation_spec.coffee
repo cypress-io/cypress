@@ -67,7 +67,7 @@ describe "src/cy/commands/navigation", ->
 
         expect(cy.listeners("window:load")).to.deep.eq(listeners)
 
-    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
+    it "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = cy.spy(Promise.prototype, "timeout")
 
       Cypress.config("pageLoadTimeout", 4567)
