@@ -4,6 +4,7 @@ cwd = process.cwd()
 path     = require("path")
 _        = require("lodash")
 os       = require("os")
+gift     = require("gift")
 chalk    = require("chalk")
 Promise  = require("bluebird")
 minimist = require("minimist")
@@ -23,6 +24,9 @@ uploadUtils = require("./util/upload")
 {uploadNpmPackage} = require("./upload-npm-package")
 {uploadUniqueBinary} = require("./upload-unique-binary")
 
+## initialize on existing repo
+repo = Promise.promisifyAll(gift(cwd))
+
 success = (str) ->
   console.log chalk.bgGreen(" " + chalk.black(str) + " ")
 
@@ -40,11 +44,20 @@ askMissingOptions = (properties = []) ->
     version: ask.deployNewVersion,
     # note: zip file might not be absolute
     zip: ask.whichZipFile
+    nextVersion: ask.nextVersion
+    commit: ask.toCommit
   }
   return questionsRemain(_.pick(questions, properties))
 
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)
+
+commitVersion = (version) ->
+  msg = "release #{version} [skip ci]"
+
+  repo.commitAsync(msg, {
+    'allow-empty': true,
+  })
 
 deploy = {
   meta:   meta
@@ -96,19 +109,21 @@ deploy = {
     ## read off the argv
     options = @parseOptions(process.argv)
 
-    release = (version) =>
+    release = ({ version, commit, nextVersion }) =>
       upload.s3Manifest(version)
+      .then ->
+        if commit
+          commitVersion(version)
+      .then ->
+        bump.nextVersion(nextVersion)
       .then ->
         success("Release Complete")
       .catch (err) ->
         fail("Release Failed")
         throw err
 
-    if v = options.version
-      release(v)
-    else
-      ask.whichRelease(meta.distDir(""))
-      .then(release)
+    askMissingOptions(['version', 'commit', 'nextVersion'])(options)
+    .then(release)
 
   build: (options) ->
     console.log('#build')
