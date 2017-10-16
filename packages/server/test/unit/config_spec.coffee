@@ -217,6 +217,19 @@ describe "lib/config", ->
           @setup({pageLoadTimeout: "foo"})
           @expectValidationFails("be a number")
 
+      context "pluginsFile", ->
+        it "passes if a string", ->
+          @setup({pluginsFile: "cypress/plugins"})
+          @expectValidationPasses()
+
+        it "passes if false", ->
+          @setup({pluginsFile: false})
+          @expectValidationPasses()
+
+        it "fails if not a string or false", ->
+          @setup({pluginsFile: 42})
+          @expectValidationFails("be a string")
+
       context "port", ->
         it "passes if a number", ->
           @setup({port: 10})

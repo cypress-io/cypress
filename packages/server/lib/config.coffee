@@ -106,6 +106,7 @@ validationRules = {
   integrationFolder: v.isString
   numTestsKeptInMemory: v.isNumber
   pageLoadTimeout: v.isNumber
+  pluginsFile: v.isStringOrFalse
   port: v.isNumber
   reporter: v.isString
   requestTimeout: v.isNumber
