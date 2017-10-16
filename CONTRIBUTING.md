@@ -27,7 +27,7 @@ Build status | Description
 [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)
 [![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper) | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)
 [![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/) | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)
-[![Build status](https://ci.appveyor.com/api/projects/status/cex75ymsl03vnof1?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress-monorepo) | Windows CI
+[![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress) | Windows CI
 
 ## Table of Contents
 

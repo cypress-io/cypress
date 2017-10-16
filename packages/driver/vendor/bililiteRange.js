@@ -30,6 +30,20 @@
 // a bit of weirdness with IE11: using 'focus' is flaky, even if I'm not bubbling, as far as I can tell.
 var focusEvent = 'onfocusin' in document.createElement('input') ? 'focusin' : 'focus';
 
+// https://github.com/cypress-io/cypress/issues/647
+var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set
+
+var nativeTextareaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set
+
+function setValue (el, val) {
+  if (el.tagName.toLowerCase() === "input") {
+    return nativeInputValueSetter.call(el, val)
+  }
+
+  return nativeTextareaValueSetter.call(el, val)
+}
+
+
 // IE11 normalize is buggy (http://connect.microsoft.com/IE/feedback/details/809424/node-normalize-removes-text-if-dashes-are-present)
 var n = document.createElement('div');
 n.appendChild(document.createTextNode('x-'));
@@ -521,7 +535,7 @@ InputRange.prototype._nativeGetText = function(rng){
 };
 InputRange.prototype._nativeSetText = function(text, rng){
   var val = this._el.value;
-  this._el.value = val.substring(0, rng[0]) + text + val.substring(rng[1]);
+  setValue(this._el, val.substring(0, rng[0]) + text + val.substring(rng[1]));
 };
 InputRange.prototype._nativeEOL = function(){
   this.text('\n');
@@ -533,10 +547,10 @@ InputRange.prototype._nativeTop = function(rng){
   clone.style.position = 'absolute';
   this._el.parentNode.insertBefore(clone, this._el);
   clone.style.height = '1px';
-  clone.value = this._el.value.slice(0, rng[0]);
+  setValue(clone, this._el.value.slice(0, rng[0]));
   var top = clone.scrollHeight;
   // this gives the bottom of the text, so we have to subtract the height of a single line
-  clone.value = 'X';
+  setValue(clone, 'X');
   top -= clone.scrollHeight;
   clone.parentNode.removeChild(clone);
   return top;

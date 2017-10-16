@@ -166,10 +166,18 @@ class Server
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
+            urlToCheck = "https://" + req.url
+
+            isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, @_remoteProps)
+
+            word = if isMatching then "does" else "does not"
+
+            log("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+
             ## make a direct connection only if
             ## our req url does not match the origin policy
             ## which is the superDomain + port
-            not cors.urlMatchesOriginPolicyProps("https://" + req.url, @_remoteProps)
+            return not isMatching
         })
 
       @_server.on "upgrade", onUpgrade
@@ -251,7 +259,7 @@ class Server
     #   }
     # }
 
-    _.extend({},  {
+    props = _.extend({},  {
       props:      @_remoteProps
       origin:     @_remoteOrigin
       strategy:   @_remoteStrategy
@@ -259,6 +267,10 @@ class Server
       domainName: @_remoteDomainName
       fileServer: @_remoteFileServer
     })
+
+    log("Getting remote state: %o", props)
+
+    return props
 
   _onRequest: (headers, automationRequest, options) ->
     @_request.send(headers, automationRequest, options)

@@ -1,4 +1,8 @@
 path        = require("path")
+la          = require("lazy-ass")
+check       = require("check-more-types")
+debug       = require("debug")("cypress:server:routes")
+
 CacheBuster = require("./util/cache_buster")
 cwd         = require("./cwd")
 logger      = require("./logger")
@@ -11,8 +15,6 @@ files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
-la          = require("lazy-ass")
-check       = require("check-more-types")
 
 module.exports = (app, config, request, getRemoteState, project) ->
   ## routing for the actual specs which are processed automatically
@@ -63,6 +65,7 @@ module.exports = (app, config, request, getRemoteState, project) ->
   ## not have to be aware of anything
   la(check.unemptyString(config.clientRoute), "missing client route in config", config)
   app.get config.clientRoute, (req, res) ->
+    debug("Serving Cypress front-end by requested URL:", req.url)
     runner.serve(req, res, config, getRemoteState)
 
   app.all "*", (req, res, next) ->

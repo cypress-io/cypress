@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
@@ -73,6 +73,7 @@
     "execa-wrap": "^1.1.0",
     "filesize": "^3.5.10",
     "fs-extra": "^2.1.2",
+    "gift": "^0.10.0",
     "gulp": "^3.9.1",
     "gulp-awspublish": "^3.3.0",
     "gulp-coffee": "^2.3.4",

@@ -38,6 +38,7 @@ configKeys = """
   viewportHeight                  responseTimeout
   videoRecording
   videoCompression
+  videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
 """.trim().split(/\s+/)
@@ -68,6 +69,7 @@ defaults = {
   execTimeout:                   60000
   videoRecording:                true
   videoCompression:              32
+  videoUploadOnPasses:          true
   chromeWebSecurity:             true
   waitForAnimations:             true
   animationDistanceThreshold:    5
@@ -114,6 +116,7 @@ validationRules = {
   trashAssetsBeforeHeadlessRuns: v.isBoolean
   videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
+  videoUploadOnPasses: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
   viewportWidth: v.isNumber
