@@ -644,16 +644,16 @@ describe "lib/gui/events", ->
       it "returns ensures url", ->
         @sandbox.stub(connect, "ensureUrl").resolves()
 
-        @handleEvent("ping:api:server").then =>
+        @handleEvent("ping:api:server").then (assert) =>
           expect(connect.ensureUrl).to.be.calledWith(konfig("api_url"))
-          @expectSendCalledWith()
+          assert.sendCalledWith()
 
       it "catches errors", ->
         err = new Error("foo")
         @sandbox.stub(connect, "ensureUrl").rejects(err)
 
-        @handleEvent("ping:api:server").then =>
-          @expectSendErrCalledWith(err)
+        @handleEvent("ping:api:server").then (assert) =>
+          assert.sendErrCalledWith(err)
           expect(err.apiUrl).to.equal(konfig("api_url"))
 
       it "sends first of aggregate error", ->
@@ -667,8 +667,8 @@ describe "lib/gui/events", ->
         err.length = 1
         @sandbox.stub(connect, "ensureUrl").rejects(err)
 
-        @handleEvent("ping:api:server").then =>
-          @expectSendErrCalledWith(err)
+        @handleEvent("ping:api:server").then (assert) =>
+          assert.sendErrCalledWith(err)
           expect(err.name).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.message).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.apiUrl).to.equal(konfig("api_url"))
