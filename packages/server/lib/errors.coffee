@@ -239,7 +239,7 @@ API = {
         """
         The support file is missing or invalid.
 
-        Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
+        Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file or, if you're using a preprocessor plugin, it must be supported by that plugin.
 
         Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
 

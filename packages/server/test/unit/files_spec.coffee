@@ -40,6 +40,25 @@ describe "lib/controllers/files", ->
       @config.fixturesFolder = false
       expect(=> filesController.getTestFiles(@config)).not.to.throw()
 
+    it "by default, returns all files as long as they have a name and extension", ->
+      config.get(FixturesHelper.projectPath("various-file-types"))
+      .then (cfg) ->
+        filesController.getTestFiles(cfg)
+      .then (files) ->
+        expect(files.integration.length).to.equal(3)
+        expect(files.integration[0].name).to.equal("coffee_spec.coffee")
+        expect(files.integration[1].name).to.equal("js_spec.js")
+        expect(files.integration[2].name).to.equal("ts_spec.ts")
+
+    it "returns files matching config.specsGlob", ->
+      config.get(FixturesHelper.projectPath("various-file-types"))
+      .then (cfg) ->
+        cfg.specsGlob = "**/*.coffee"
+        filesController.getTestFiles(cfg)
+      .then (files) ->
+        expect(files.integration.length).to.equal(1)
+        expect(files.integration[0].name).to.equal("coffee_spec.coffee")
+
 describe "lib/files", ->
   beforeEach ->
     FixturesHelper.scaffold()

@@ -54,10 +54,6 @@ class Socket
   onTestFileChange: (filePath) ->
     log("test file changed: #{filePath}")
 
-    ## return if we're not a js or coffee file.
-    ## this will weed out directories as well
-    return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
-
     fs.statAsync(filePath)
     .then =>
       @io.emit("watched:file:changed")

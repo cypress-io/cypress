@@ -491,14 +491,6 @@ describe "lib/socket", ->
         beforeEach ->
           @sandbox.spy(fs, "statAsync")
 
-        it "does not emit if not a js or coffee files", ->
-          @socket.onTestFileChange("foo/bar")
-          expect(fs.statAsync).not.to.be.called
-
-        it "does not emit if a tmp file", ->
-          @socket.onTestFileChange("foo/subl-123.js.tmp")
-          expect(fs.statAsync).not.to.be.called
-
         it "calls statAsync on .js file", ->
           @socket.onTestFileChange("foo/bar.js").catch(->).then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.js")

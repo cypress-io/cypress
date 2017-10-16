@@ -262,6 +262,15 @@ describe "lib/config", ->
           @setup({screenshotOnHeadlessFailure: 42})
           @expectValidationFails("be a boolean")
 
+      context "specsGlob", ->
+        it "passes if a string", ->
+          @setup({specsGlob: "**/*.coffee"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({specsGlob: 42})
+          @expectValidationFails("be a string")
+
       context "supportFile", ->
         it "passes if a string", ->
           @setup({supportFile: "cypress/support"})
@@ -624,6 +633,7 @@ describe "lib/config", ->
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             environmentVariables:       { }
+            specsGlob:                  { value: "**/*.*", from: "default" }
           })
 
       it "sets config, envFile and env", ->
@@ -677,6 +687,7 @@ describe "lib/config", ->
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
+            specsGlob:                  { value: "**/*.*", from: "default" }
             environmentVariables:       {
               foo: {
                 value: "foo"
