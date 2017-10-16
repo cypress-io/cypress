@@ -273,10 +273,15 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: npm start
           background: true
-      - run: cd packages/driver && $(npm bin)/wait-on http://localhost:3500
-      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 0
+          working_directory: packages/driver
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run test-integration -- --parallel 5 --index 0
+          working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
       - store_artifacts:
@@ -288,10 +293,15 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: npm start
+          working_directory: packages/driver
           background: true
-      - run: cd packages/driver && $(npm bin)/wait-on http://localhost:3500
-      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 1
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run test-integration -- --parallel 5 --index 1
+          working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
       - store_artifacts:
@@ -303,10 +313,15 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: npm start
+          working_directory: packages/driver
           background: true
-      - run: cd packages/driver && $(npm bin)/wait-on http://localhost:3500
-      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 2
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run test-integration -- --parallel 5 --index 2
+          working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
       - store_artifacts:
@@ -318,10 +333,15 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: npm start
+          working_directory: packages/driver
           background: true
-      - run: cd packages/driver && $(npm bin)/wait-on http://localhost:3500
-      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 3
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run test-integration -- --parallel 5 --index 3
+          working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
       - store_artifacts:
@@ -333,10 +353,15 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: cd packages/driver && npm start
+          command: npm start
+          working_directory: packages/driver
           background: true
-      - run: cd packages/driver && $(npm bin)/wait-on http://localhost:3500
-      - run: cd packages/driver && npm run test-integration -- --parallel 5 --index 4
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run test-integration -- --parallel 5 --index 4
+          working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
       - store_artifacts:
@@ -347,8 +372,12 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run: cd packages/desktop-gui && npm run build-prod
-      - run: cd packages/desktop-gui && npm run test-integration -- --parallel 3 --index 0
+      - run:
+          command: npm run build-prod
+          working_directory: packages/desktop-gui
+      - run:
+          command: npm run test-integration -- --parallel 3 --index 0
+          working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
       - store_artifacts:
