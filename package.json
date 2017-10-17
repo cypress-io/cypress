@@ -10,6 +10,7 @@
   "files": [
     "*.js"
   ],
+  "private": false,
   "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
   "keywords": [
     "cypress",
@@ -31,7 +32,7 @@
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "mocha",
     "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "devDependencies": {
     "babel-preset-env": "1.6.0",
