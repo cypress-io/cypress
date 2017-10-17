@@ -1,4 +1,4 @@
-# Cypress Webpack Preprocessor
+# Cypress Webpack Preprocessor [![CircleCI](https://circleci.com/gh/cypress-io/cypress-webpack-preprocessor.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-webpack-preprocessor)
 
 Cypress preprocessor for bundling JavaScript via webpack
 
