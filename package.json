@@ -1,7 +1,7 @@
 {
   "name": "@cypress/webpack-preprocessor",
   "description": "Cypress preprocessor for bundling JavaScript via webpack",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "author": "Chris Breiding <chris@cypress.io>",
   "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
   "engines": {
@@ -30,7 +30,8 @@
     "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "mocha",
-    "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'"
+    "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "devDependencies": {
     "babel-preset-env": "1.6.0",
@@ -38,16 +39,20 @@
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
     "chokidar-cli": "1.2.0",
+    "condition-circle": "1.5.0",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
     "dont-crack": "1.2.1",
     "eslint": "4.6.1",
     "eslint-plugin-cypress-dev": "1.0.0",
     "eslint-plugin-mocha": "4.11.0",
+    "github-post-release": "1.13.1",
     "license-checker": "13.0.3",
     "mocha": "3.5.0",
     "mockery": "2.1.0",
     "nsp": "2.7.0",
+    "semantic-release": "8.2.0",
+    "simple-commit-message": "3.3.1",
     "sinon": "3.2.1",
     "sinon-chai": "2.13.0"
   },
@@ -57,5 +62,14 @@
     "bluebird": "3.5.0",
     "debug": "3.0.1",
     "webpack": "3.6.0"
+  },
+  "release": {
+    "verifyConditions": "condition-circle",
+    "analyzeCommits": "simple-commit-message",
+    "generateNotes": "github-post-release",
+    "verifyRelease": {
+      "path": "dont-crack",
+      "test-against": []
+    }
   }
 }
