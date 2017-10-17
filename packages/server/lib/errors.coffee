@@ -253,8 +253,6 @@ API = {
 
         Correct your cypress.json, create or fix the file, or set pluginsFile to false if a plugins file is not necessary for your project.
 
-        Learn more at https://on.cypress.io/plugins-file-missing-or-invalid
-
         #{if arg2 then "The following error was thrown:" else ""}
 
         #{if arg2 then chalk.yellow(arg2) else ""}
