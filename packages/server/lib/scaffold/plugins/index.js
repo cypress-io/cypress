@@ -1,9 +1,6 @@
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
 //
-// Currently,
-// behavior that modifies Cypress.
-//
 // You can change the location of this file or turn off loading
 // the plugins file with the 'pluginsFile' configuration option.
 //
@@ -26,10 +23,8 @@ module.exports = (register, config) => {
   * Registering 'on:spec:file:preprocessor' will override the default
   * preprocessing. This includes watching the spec file, so the plugin
   * you register needs to handle that too.
-  *
-  * TODO: add link to doc with preprocessor plugin details
   */
-  // register('on:spec:file:preprocessor', (filePath, options, util) => {
+  // register('on:spec:file:preprocessor', (filePath, util) => {
   //   return filePath
   // })
 }
