@@ -7,7 +7,7 @@ Cypress preprocessor for bundling JavaScript via webpack
 Requires [Node](https://nodejs.org/en/) version 6.5.0 or above.
 
 ```sh
-npm install --save-dev cypress-webpack-preprocessor
+npm install --save-dev @cypress/webpack-preprocessor
 ```
 
 ## Usage
@@ -27,6 +27,7 @@ module.exports = (register, config) => {
 Pass in options as the second argument to `webpack`:
 
 ```javascript
+const webpack = require('@cypress/webpack-preprocessor')
 module.exports = (register, config) => {
   const options = {
     // send in the options from your webpack.config.js, so it works the same
