@@ -1,3 +1,9 @@
 machine:
   node:
-    version: 6.5.0
+    # need Node 8 for latest semantic release
+    version: 8
+test:
+  override:
+    - npm test
+  post:
+    - npm run semantic-release || true
