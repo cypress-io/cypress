@@ -257,6 +257,16 @@ API = {
 
         #{if arg2 then chalk.yellow(arg2) else ""}
         """.trim()
+      when "PLUGINS_DIDNT_EXPORT_FUNCTION"
+        """
+        The pluginsFile must export a function.
+
+        We loaded the pluginsFile from: #{arg1}
+
+        It exported:
+
+        #{JSON.stringify(arg2)}
+        """
       when "PLUGINS_FUNCTION_ERROR"
         """
         The function exported by the plugins file threw an error.

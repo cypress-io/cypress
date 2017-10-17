@@ -36,7 +36,7 @@ module.exports = {
       errors.throw("PLUGINS_FILE_ERROR", config.pluginsFile, e.stack)
 
     if not _.isFunction(plugins)
-      throw new Error("The pluginsFile must export a function. Your pluginsFile (#{config.pluginsFile}) exported #{plugins}.")
+      errors.throw("PLUGINS_DIDNT_EXPORT_FUNCTION", config.pluginsFile, plugins)
 
     log("call the plugins function")
 
