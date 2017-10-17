@@ -35,8 +35,6 @@
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "devDependencies": {
-    "babel-preset-env": "1.6.0",
-    "babel-preset-react": "6.24.1",
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
     "chokidar-cli": "1.2.0",
@@ -60,6 +58,8 @@
   "dependencies": {
     "babel-core": "6.26.0",
     "babel-loader": "7.1.2",
+    "babel-preset-env": "1.6.0",
+    "babel-preset-react": "6.24.1",
     "bluebird": "3.5.0",
     "debug": "3.0.1",
     "webpack": "3.6.0"
