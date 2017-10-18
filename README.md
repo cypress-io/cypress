@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
   </a>
   <a href="https://gitter.im/cypress-io/cypress">
-    <img src="https://badges.gitter.im/gitterHQ/gitter.png" alt="Gitter chat"/>
+    <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
   </a>
 </p>
 
