@@ -24,8 +24,6 @@
   </a>
 </p>
 
-***
-
 ## What is Cypress?
 
 <p align="center">
