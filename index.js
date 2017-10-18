@@ -33,7 +33,7 @@ const defaultOptions = {
 // export a function that returns another function, making it easy for users
 // to configure like so:
 //
-// register('on:spec:file:preprocessor', webpack(config, userOptions))
+// on('file:preprocessor', webpack(config, userOptions))
 //
 const preprocessor = (config, userOptions = {}) => {
   if (!config || typeof config.isTextTerminal !== 'boolean') {
@@ -44,7 +44,7 @@ const preprocessor = (config, userOptions = {}) => {
 
 
   // we return function that accepts the arguments provided by
-  // the event 'on:spec:file:preprocessor'
+  // the event 'file:preprocessor'
   //
   // this function will get called for the support file when a project is loaded
   // (if the support file is not disabled)

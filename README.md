@@ -17,8 +17,8 @@ In your project's [plugins file](https://on.cypress.io/guides/guides/plugins.htm
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
 
-module.exports = (register, config) => {
-  register('on:spec:file:preprocessor', webpack(config))
+module.exports = (on, config) => {
+  on('file:preprocessor', webpack(config))
 }
 ```
 
@@ -28,7 +28,7 @@ Pass in options as the second argument to `webpack`:
 
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
-module.exports = (register, config) => {
+module.exports = (on, config) => {
   const options = {
     // send in the options from your webpack.config.js, so it works the same
     // as your app's code
@@ -36,7 +36,7 @@ module.exports = (register, config) => {
     watchOptions: {},
   }
 
-  register('on:spec:file:preprocessor', webpack(config, options))
+  on('file:preprocessor', webpack(config, options))
 }
 ```
 
@@ -83,11 +83,11 @@ If, for example, you want to update the options for the `babel-loader` to add th
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
 
-module.exports = (register, config) => {
+module.exports = (on, config) => {
   const options = webpack.defaultOptions
   options.webpackOptions.module.rules[0].use.options.presets.push('babel-preset-stage-3')
 
-  register('on:spec:file:preprocessor', webpack(config, options))
+  on('file:preprocessor', webpack(config, options))
 }
 ```
 
