@@ -22,7 +22,7 @@ Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo or
 
 ## Deployment
 
-Please see out [deployment document](DEPLOY.md).
+Please see our [deployment document](DEPLOY.md).
 
 ## License
 
