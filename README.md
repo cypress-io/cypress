@@ -1,3 +1,20 @@
+<p align="center">
+  <img src="https://cloud.githubusercontent.com/assets/1268976/20607953/d7ae489c-b24a-11e6-9cc4-91c6c74c5e88.png"/>
+</p>
+<p align="center">
+  <a href="https://on.cypress.io">Documentation</a> |
+  <a href="https://on.cypress.io/changelog">Changelog</a> |
+  <a href="https://github.com/cypress-io/cypress/projects">Roadmap</a>
+</p>
+
+<h3 align="center">
+  Automated testing for the modern web
+</h3>
+
+<p align="center">
+  Cypress is a next generation testing tool that helps developers write tests while building apps.
+</p>
+
 Build status | Description
 :--- | :---
 [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) | `develop` branch
