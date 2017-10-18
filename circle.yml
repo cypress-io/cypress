@@ -437,9 +437,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      # instead of building / zipping and uploading all in single command
-      # - run: npm run binary-deploy -- --platform linux --version $NEXT_LINUX_BINARY_VERSION
-      # build, zip and upload as a unique file
+      - run: $(npm bin)/print-arch
       - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform linux
       - run: ls -l *.zip
