@@ -30,7 +30,14 @@
 
 [![npm version](https://badge.fury.io/js/cypress.svg)](https://badge.fury.io/js/cypress)
 
-Please follow our [Installation Instructions](https://on.cypress.io/installing-cypress).
+Install Cypress for Mac, Linux, or Windows, then [get started](https://docs.cypress.io/guides/getting-started/installing-cypress.html#What-You’ll-Learn).
+
+```bash
+npm install cypress --save-dev
+```
+
+![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
+
 
 ## Contributing
 
