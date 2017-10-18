@@ -188,8 +188,6 @@ jobs:
       - run: npm run test-mocha-snapshot
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
-      - run: npm run all test -- --package coffee
-      - run: npm run all test -- --package desktop-gui
       - run: npm run all test -- --package electron
       - run: npm run all test -- --package extension
       - run: npm run all test -- --package https-proxy
