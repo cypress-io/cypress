@@ -24,7 +24,7 @@
   </a>
 </p>
 
-<iframe src="https://player.vimeo.com/video/237527670" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+[![Why Cypress Video](https://user-images.githubusercontent.com/1271364/31739717-dbdff0ee-b41c-11e7-9b16-bfa1b6ac1814.png)](https://player.vimeo.com/video/237527670)
 
 ## Installing
 
