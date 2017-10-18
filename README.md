@@ -16,9 +16,12 @@
 </p>
 
 <p align="center">
-  [![npm](https://img.shields.io/npm/dm/cypress.svg)]()
-  [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/cypress-io/cypress)
-
+  <a href="https://www.npmjs.com/package/cypress">
+    <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
+  </a>
+  <a href="https://gitter.im/cypress-io/cypress">
+    <img src="https://badges.gitter.im/gitterHQ/gitter.png" alt="Gitter chat"/>
+  </a>
 </p>
 
 <iframe src="https://player.vimeo.com/video/237527670" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
