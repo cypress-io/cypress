@@ -20,11 +20,11 @@ module.exports = (register, config) => {
   */
 
   /**
-  * Registering 'on:spec:file:preprocessor' will override the default
+  * Registering 'file:preprocessor' will override the default
   * preprocessing. This includes watching the spec file, so the plugin
   * you register needs to handle that too.
   */
-  // register('on:spec:file:preprocessor', (filePath, util) => {
+  // register('file:preprocessor', (filePath, util) => {
   //   return filePath
   // })
 }

@@ -20,7 +20,7 @@ describe "lib/preprocessor", ->
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
 
     @plugin = @sandbox.stub().returns("/path/to/output.js")
-    plugins.register("on:spec:file:preprocessor", @plugin)
+    plugins.register("file:preprocessor", @plugin)
 
     preprocessor.close()
 
@@ -83,7 +83,7 @@ describe "lib/preprocessor", ->
       browserify = @sandbox.stub().returns(browserifyFn)
       mockery.registerMock("@cypress/browserify-preprocessor", browserify)
       preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(plugins.register).to.be.calledWith("on:spec:file:preprocessor", browserifyFn)
+      expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn)
       expect(browserify).to.be.calledWith(@config)
       snapshot(browserify.lastCall.args[1])
 

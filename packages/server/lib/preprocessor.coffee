@@ -55,7 +55,7 @@ setDefaultPreprocessor = (config) ->
   log("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  plugins.register "on:spec:file:preprocessor", browserify(config, {
+  plugins.register "file:preprocessor", browserify(config, {
     extensions: [".js", ".jsx", ".coffee", ".cjsx"]
     watchifyOptions: {
       ignoreWatch: [
@@ -104,7 +104,7 @@ module.exports = {
         emitter.on("close", cb)
     }
 
-    if not plugins.has("on:spec:file:preprocessor")
+    if not plugins.has("file:preprocessor")
       setDefaultPreprocessor(config)
 
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
@@ -112,7 +112,7 @@ module.exports = {
       return fileProcessor
 
     preprocessor = Promise.resolve(
-      plugins.execute("on:spec:file:preprocessor", filePath, util)
+      plugins.execute("file:preprocessor", filePath, util)
     )
 
     fileProcessors[filePath] = preprocessor
