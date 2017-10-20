@@ -15,7 +15,8 @@ shell.set('-e') // any error is fatal
 // https://www.appveyor.com/docs/environment-variables/
 
 const isRightBranch = () =>
-  process.env.APPVEYOR_REPO_BRANCH === 'develop'
+  process.env.APPVEYOR_REPO_BRANCH === 'develop' ||
+  process.env.APPVEYOR_REPO_BRANCH === 'win-build-shell'
 
 const isPullRequest = () =>
   Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
