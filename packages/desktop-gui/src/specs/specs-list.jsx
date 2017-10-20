@@ -34,11 +34,7 @@ class Specs extends Component {
 
   _specItem (spec) {
     if (spec.hasChildren()) {
-      if (spec.isExpanded) {
-        return this._expandedFolderContent(spec)
-      } else {
-        return this._collapsedFolderContent(spec)
-      }
+      return this._folderContent(spec)
     } else {
       return this._specContent(spec)
     }
@@ -76,36 +72,28 @@ class Specs extends Component {
     specsStore.setExpandSpecFolder(specFolderPath)
   }
 
-  _collapsedFolderContent(spec) {
+  _folderContent(spec) {
+    const isExpanded = spec.isExpanded
+
     return (
-      <li key={spec.path} className='folder folder-collapsed'>
+      <li key={spec.path} className={`folder  ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
           <div onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className='folder-collapse-icon fa fa-caret-right fa-fw'></i>
-            <i className='fa fa-folder-o fa-fw'></i>
+            <i className={`folder-collapse-icon fa fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
+            <i className={`fa fa-fw ${isExpanded ? 'fa-folder-open-o' : 'fa-folder-o'}`}></i>
             <div className='folder-display-name'>{spec.displayName}{' '}</div>
           </div>
-        </div>
-      </li>
-    )
-  }
-  
-  _expandedFolderContent(spec) {
-    return (
-      <li key={spec.path} className='folder folder-expanded'>
-        <div>
-          <div onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className='folder-collapse-icon fa fa-caret-down fa-fw'></i>
-            <i className='fa fa-folder-open-o fa-fw'></i>
-            <div className='folder-display-name'>{spec.displayName}{' '}</div>
-          </div>
-          <div>
-            <ul className='list-as-table'>
-              {_.map(spec.children.specs, (spec) => (
-                this._specItem(spec)
-              ))}
-            </ul>
-          </div>
+          {
+            isExpanded ?
+              <div>
+                <ul className='list-as-table'>
+                  {_.map(spec.children.specs, (spec) => (
+                    this._specItem(spec)
+                  ))}
+                </ul>
+              </div> :
+              null
+          }
         </div>
       </li>
     )
