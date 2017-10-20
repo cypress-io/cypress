@@ -49,15 +49,17 @@ describe "Project", ->
         expect(@ipc.openProject).to.be.called
         cy.shouldBeOnProjectSpecs()
 
-  describe "collapsing specs", -> 
+  describe "collapsing specs", ->
     beforeEach ->
       @start()
-      
+
     it "sets folder collapsed when clicked", ->
+      cy.get(".folder:first").should("have.class", "folder-expanded")
       cy.get(".folder .folder-display-name:first").click()
       cy.get(".folder:first").should("have.class", "folder-collapsed")
 
     it "hides children when folder clicked", ->
+      cy.get(".file").should("have.length", 7)
       cy.get(".folder .folder-display-name:first").click()
       cy.get(".file").should("have.length", 2)
 
@@ -69,6 +71,8 @@ describe "Project", ->
 
     it "hides children for every folder collapsed", ->
       lastExpandedFolderSelector = ".folder-expanded:last > div > div > .folder-display-name:last"
+
+      cy.get(".file").should("have.length", 7)
 
       cy.get(lastExpandedFolderSelector).click()
       cy.get(".file").should("have.length", 6)
