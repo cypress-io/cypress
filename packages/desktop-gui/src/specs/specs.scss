@@ -64,6 +64,7 @@
   }
 
   .folder {
+    cursor: pointer;
     font-weight: 500;
     font-size: 15px;
     color: #636363;
@@ -76,12 +77,10 @@
     &>div>div {
       padding-bottom: 0;
     }
-  }
 
-  .folder-toggle-icon {
-    display: inline-block;
-    text-align: right;
-    width: 10px;
+    .folder-display-name {
+      display: inline-block;
+    }
   }
 
   .file>a {
@@ -91,7 +90,6 @@
     font-family: $font-sans;
     color: #637eb9;
     font-size: 15px;
-
 
     i {
       font-size: 13px;
@@ -172,6 +170,10 @@
         margin-right: 0;
       }
 
+      i.folder-collapse-icon {
+        display: inline-block;
+      }
+
       &:after {
         content: "tests"
       }
@@ -181,6 +183,10 @@
 
       &>.list-as-table>.folder,
       &>.list-as-table>.file>a {
+        
+        i.folder-collapse-icon {
+          display: none;
+        }
 
         &>div>div:first-child {
           padding-left: 20px;

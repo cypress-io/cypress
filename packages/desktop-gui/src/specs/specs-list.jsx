@@ -78,12 +78,12 @@ class Specs extends Component {
 
   _collapsedFolderContent(spec) {
     return (
-      <li key={spec.path} className='folder'>
+      <li key={spec.path} className='folder folder-collapsed'>
         <div>
           <div onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className='folder-toggle-icon'>+</i>
-            <i className='fa fa-folder-open-o fa-fw'></i>
-            {spec.displayName}{' '}
+            <i className='folder-collapse-icon fa fa-caret-right fa-fw'></i>
+            <i className='fa fa-folder-o fa-fw'></i>
+            <div className='folder-display-name'>{spec.displayName}{' '}</div>
           </div>
         </div>
       </li>
@@ -92,12 +92,12 @@ class Specs extends Component {
   
   _expandedFolderContent(spec) {
     return (
-      <li key={spec.path} className='folder'>
+      <li key={spec.path} className='folder folder-expanded'>
         <div>
           <div onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className='folder-toggle-icon'>-</i>
+            <i className='folder-collapse-icon fa fa-caret-down fa-fw'></i>
             <i className='fa fa-folder-open-o fa-fw'></i>
-            {spec.displayName}{' '}
+            <div className='folder-display-name'>{spec.displayName}{' '}</div>
           </div>
           <div>
             <ul className='list-as-table'>
@@ -118,7 +118,6 @@ class Specs extends Component {
         <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
           <div>
             <div>
-              <i className='folder-toggle-icon'></i>
               <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
               {spec.displayName}
             </div>
