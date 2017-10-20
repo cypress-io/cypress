@@ -74,6 +74,11 @@
       font-size: 13px;
     }
 
+    i.folder-collapse-icon {
+      display: inline-block;
+      margin-right: 0px;
+    }
+    
     &>div>div {
       padding-bottom: 0;
     }
@@ -170,7 +175,7 @@
         display: none;
         margin-right: 0;
       }
-
+      
       i.folder-collapse-icon {
         display: inline-block;
       }
@@ -184,10 +189,6 @@
 
       &>.list-as-table>.folder,
       &>.list-as-table>.file>a {
-
-        i.folder-collapse-icon {
-          display: none;
-        }
 
         &>div>div:first-child {
           padding-left: 20px;
