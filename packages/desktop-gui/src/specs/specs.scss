@@ -80,6 +80,7 @@
 
     .folder-display-name {
       display: inline-block;
+      margin-right: 5px;
     }
   }
 
@@ -183,7 +184,7 @@
 
       &>.list-as-table>.folder,
       &>.list-as-table>.file>a {
-        
+
         i.folder-collapse-icon {
           display: none;
         }
