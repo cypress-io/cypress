@@ -64,18 +64,18 @@ test_script:
   # Only upload binary / NPM package from "develop" branch
   # should this move into a batch file?
   - IF %APPVEYOR_REPO_BRANCH%==develop IF %APPVEYOR_REPO_NAME%==cypress-io/cypress (
-    echo Uploading NPM windows package &&
-    node scripts/binary.js upload-npm-package --file cli/build/cypress-%NEXT_DEV_VERSION%.tgz --version %NEXT_DEV_VERSION% --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID% &&
-    cat npm-package-url.json &&
-    echo Building binary %NEXT_DEV_VERSION% &&
-    npm run binary-build -- --platform windows --version %NEXT_DEV_VERSION% &&
-    npm run binary-zip &&
-    ls -l *.zip &&
-    node scripts/binary.js upload-unique-binary --file cypress.zip --version %NEXT_DEV_VERSION% --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID% &&
-    cat binary-url.json &&
-    echo Running other test projects with new NPM package and binary &&
-    node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor
-  )
+      echo Uploading NPM windows package &&
+      node scripts/binary.js upload-npm-package --file cli/build/cypress-%NEXT_DEV_VERSION%.tgz --version %NEXT_DEV_VERSION% --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID% &&
+      cat npm-package-url.json &&
+      echo Building binary %NEXT_DEV_VERSION% &&
+      npm run binary-build -- --platform windows --version %NEXT_DEV_VERSION% &&
+      npm run binary-zip &&
+      ls -l *.zip &&
+      node scripts/binary.js upload-unique-binary --file cypress.zip --version %NEXT_DEV_VERSION% --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID% &&
+      cat binary-url.json &&
+      echo Running other test projects with new NPM package and binary &&
+      node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor
+    )
 
 # Don't actually build.
 build: off
