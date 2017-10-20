@@ -302,7 +302,7 @@ favorite environment and rerun tests inside the docker environment.
 **hint** sometimes building inside the image has problems with `node-sass` library
 
 ```text
-Error: Missing binding /cypress-monorepo/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
+Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
 Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
 
 Found bindings for the following environments:
@@ -378,7 +378,7 @@ The repository is setup with two main (protected) branches.
 
 ### Testing
 
-This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress-monorepo). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
+This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
 
 ## Deployment
 
