@@ -29,6 +29,7 @@ describe "lib/modes/record", ->
     afterEach ->
       delete process.env.CIRCLE_BRANCH
       delete process.env.TRAVIS_BRANCH
+      delete process.env.BUILDKITE_BRANCH
       delete process.env.CI_BRANCH
 
     it "gets branch from process.env.CIRCLE_BRANCH", ->
