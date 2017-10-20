@@ -78,6 +78,12 @@
     }
   }
 
+  .folder-toggle-icon {
+    display: inline-block;
+    text-align: right;
+    width: 10px;
+  }
+
   .file>a {
     font-weight: 300;
     border-bottom: 1px dotted #eeeeee;

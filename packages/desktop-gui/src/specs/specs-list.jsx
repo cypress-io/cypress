@@ -33,41 +33,14 @@ class Specs extends Component {
   }
 
   _specItem (spec) {
-    if (spec.children.specs && spec.children.specs.length) {
-      return (
-        <li key={spec.path} className='folder'>
-          <div>
-            <div>
-              <i className='fa fa-folder-open-o fa-fw'></i>
-              {spec.displayName}{' '}
-            </div>
-            <div>
-              <ul className='list-as-table'>
-                {_.map(spec.children.specs, (spec) => (
-                  this._specItem(spec)
-                ))}
-              </ul>
-            </div>
-          </div>
-        </li>
-      )
+    if (spec.hasChildren()) {
+      if (spec.isExpanded) {
+        return this._expandedFolderContent(spec)
+      } else {
+        return this._collapsedFolderContent(spec)
+      }
     } else {
-      const isChosen = specsStore.isChosenSpec(spec)
-      return (
-        <li key={spec.path} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
-            <div>
-              <div>
-                <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
-                {spec.displayName}
-              </div>
-            </div>
-            <div>
-              <div></div>
-            </div>
-          </a>
-        </li>
-      )
+      return this._specContent(spec)
     }
   }
 
@@ -95,6 +68,67 @@ class Specs extends Component {
     let project = this.props.project
 
     projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
+  }
+
+  _selectSpecFolder (specFolderPath, e) {
+    e.preventDefault()
+
+    specsStore.setExpandSpecFolder(specFolderPath)
+  }
+
+  _collapsedFolderContent(spec) {
+    return (
+      <li key={spec.path} className='folder'>
+        <div>
+          <div onClick={this._selectSpecFolder.bind(this, spec)}>
+            <i className='folder-toggle-icon'>+</i>
+            <i className='fa fa-folder-open-o fa-fw'></i>
+            {spec.displayName}{' '}
+          </div>
+        </div>
+      </li>
+    )
+  }
+  
+  _expandedFolderContent(spec) {
+    return (
+      <li key={spec.path} className='folder'>
+        <div>
+          <div onClick={this._selectSpecFolder.bind(this, spec)}>
+            <i className='folder-toggle-icon'>-</i>
+            <i className='fa fa-folder-open-o fa-fw'></i>
+            {spec.displayName}{' '}
+          </div>
+          <div>
+            <ul className='list-as-table'>
+              {_.map(spec.children.specs, (spec) => (
+                this._specItem(spec)
+              ))}
+            </ul>
+          </div>
+        </div>
+      </li>
+    )
+  }
+
+  _specContent(spec) {
+    const isChosen = specsStore.isChosenSpec(spec)
+    return (
+      <li key={spec.path} className='file'>
+        <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
+          <div>
+            <div>
+              <i className='folder-toggle-icon'></i>
+              <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
+              {spec.displayName}
+            </div>
+          </div>
+          <div>
+            <div></div>
+          </div>
+        </a>
+      </li>
+    )
   }
 
   _empty () {
