@@ -22,9 +22,11 @@ install:
   - ps: Install-Product node $env:nodejs_version
   # NPM v3 has flaky permission issues on Windows
   - npm install -g npm@5
+  - npm install -g @bahmutov/print-env
   # Output useful info for debugging.
   - node --version
   - npm --version
+  - print-env APPVEYOR
   # install root modules only
   - npm install --ignore-scripts
   - .\node_modules\.bin\print-arch
