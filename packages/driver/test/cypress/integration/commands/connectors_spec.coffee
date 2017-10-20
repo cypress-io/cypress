@@ -22,6 +22,13 @@ describe "src/cy/commands/connectors", ->
           expect(two).to.eq(2)
           expect(three).to.eq(3)
 
+      it "spreads a jQuery wrapper into individual arguments", ->
+        cy.noop($("div")).spread (first, second) ->
+          expect(first.tagName).to.eq('DIV');
+          expect(first.innerText).to.eq("div")
+          expect(second.tagName).to.eq('DIV');
+          expect(second.innerText).to.contain("Nested Find")
+
       it "passes timeout option to spread", ->
         cy.timeout(50)
 
@@ -32,9 +39,9 @@ describe "src/cy/commands/connectors", ->
         beforeEach ->
           Cypress.config("defaultCommandTimeout", 50)
 
-        it "throws when subject isn't an array", (done) ->
+        it "throws when subject isn't array-like", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.spread() requires the existing subject be an array."
+            expect(err.message).to.eq "cy.spread() requires the existing subject be array-like."
             done()
 
           cy.noop({}).spread ->
