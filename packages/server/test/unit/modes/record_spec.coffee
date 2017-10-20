@@ -29,6 +29,7 @@ describe "lib/modes/record", ->
     afterEach ->
       delete process.env.CIRCLE_BRANCH
       delete process.env.TRAVIS_BRANCH
+      delete process.env.BUILDKITE_BRANCH
       delete process.env.CI_BRANCH
 
     it "gets branch from process.env.CIRCLE_BRANCH", ->
@@ -45,6 +46,13 @@ describe "lib/modes/record", ->
 
       record.getBranch(@repo).then (ret) ->
         expect(ret).to.eq("bem/travis")
+
+    it "gets branch from process.env.BUILDKITE_BRANCH", ->
+      process.env.BUILDKITE_BRANCH = "bem/buildkite"
+      process.env.CI_BRANCH     = "bem/ci"
+
+      record.getBranch(@repo).then (ret) ->
+        expect(ret).to.eq("bem/buildkite")
 
     it "gets branch from process.env.CI_BRANCH", ->
       process.env.CI_BRANCH     = "bem/ci"

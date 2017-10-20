@@ -23,7 +23,7 @@ logException = (err) ->
 
 module.exports = {
   getBranch: (repo) ->
-    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
+    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "BUILDKITE_BRANCH", "CI_BRANCH"]
       if b = process.env[branch]
         return Promise.resolve(b)
 
