@@ -116,9 +116,6 @@ getCiConfig = ->
 
 awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
   creds = getCiConfig()
-  la(check.unemptyString(creds.circleToken), "missing circleToken")
-  la(check.unemptyString(creds.appVeyorToken), "missing appVeyorToken")
-  la(check.unemptyString(creds.buildkiteToken), "missing buildkiteToken")
 
   ## configure a new Bumpercar
   providers = {}
@@ -140,6 +137,7 @@ awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
     }
   providerNames = Object.keys(providers)
   console.log("configured providers", providerNames)
+  la(check.not.empty(providerNames), "empty list of providers")
 
   car = bumpercar.create({providers})
 
@@ -168,7 +166,7 @@ module.exports = {
       "missing next version to set", version)
 
     updateProject = (project, provider) ->
-      console.log("setting environment variables in", project)
+      console.log("setting %s environment variables in project %s", provider, project)
       car.updateProjectEnv(project, provider, {
         NEXT_DEV_VERSION: version,
       })
