@@ -17,6 +17,14 @@ car = null
 
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
+  buildkite: {
+    main: "cypress-io/cypress"
+    others: [
+      "cypress-io/cypress-test-tiny"
+      "cypress-io/cypress-example-kitchensink"
+    ]
+  }
+
   appVeyor: {
     main: "cypress-io/cypress"
     others: [
