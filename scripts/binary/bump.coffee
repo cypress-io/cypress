@@ -116,25 +116,32 @@ getCiConfig = ->
 
 awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
   creds = getCiConfig()
-  # TODO only check tokens for providers we really going to use
-  la(check.unemptyString(creds.githubToken), "missing githubToken")
   la(check.unemptyString(creds.circleToken), "missing circleToken")
   la(check.unemptyString(creds.appVeyorToken), "missing appVeyorToken")
+  la(check.unemptyString(creds.buildkiteToken), "missing buildkiteToken")
 
   ## configure a new Bumpercar
-  car = bumpercar.create({
-    providers: {
-      travis: {
-        githubToken: creds.githubToken
-      }
-      circle: {
-        circleToken: creds.circleToken
-      }
-      appVeyor: {
-        appVeyorToken: creds.appVeyorToken
-      }
+  providers = {}
+  if check.unemptyString(creds.githubToken)
+    providers.travis = {
+      githubToken: creds.githubToken
     }
-  })
+  if check.unemptyString(creds.circleToken)
+    providers.circle = {
+      circleToken: creds.circleToken
+    }
+  if check.unemptyString(creds.appVeyorToken)
+    providers.appVeyor = {
+      appVeyorToken: creds.appVeyorToken
+    }
+  if check.unemptyString(creds.buildkiteToken)
+    providers.buildkite = {
+      buildkiteToken: creds.buildkiteToken
+    }
+  providerNames = Object.keys(providers)
+  console.log("configured providers", providerNames)
+
+  car = bumpercar.create({providers})
 
   filteredProjects = R.filter(filter, projects)
   if check.empty(filteredProjects)
