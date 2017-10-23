@@ -80,6 +80,9 @@ jobs:
       # only installs the root dependencies, without going into packages
       # via postinstall script
       - run: npm install --ignore-scripts
+      - run:
+          name: Top level packages
+          command: npm ls --depth=0 || true
 
       ## symlink all of our sub packages in node_modules
       - run: npm run link
