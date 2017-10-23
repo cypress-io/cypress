@@ -134,8 +134,12 @@ getUploadNameByOs = (osName = os.platform()) ->
   name
 
 saveUrl = (filename) -> (url) ->
+  la(check.unemptyString(filename), "missing filename", filename)
+  la(check.url(url), "invalid url to save", url)
   s = JSON.stringify({url})
   fs.writeFileSync(filename, s)
+  console.log("saved url", url)
+  console.log("into file", filename)
 
 module.exports = {
   getS3Credentials,
