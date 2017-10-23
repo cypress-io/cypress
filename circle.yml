@@ -490,7 +490,7 @@ jobs:
           command: |
             node scripts/binary.js upload-npm-package \
               --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
-              --version $NEXT_DEV_VERSION \
+              --version $NEXT_DEV_VERSION
       - run: cat npm-package-url.json
       - run: mkdir /tmp/urls
       - run: cp npm-package-url.json /tmp/urls
