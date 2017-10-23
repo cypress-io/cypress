@@ -642,28 +642,15 @@ workflows:
             branches:
               only:
                 - develop
-                - bump-via-commit-537
           requires:
             - build-npm-package
             - build-binary
-      # enable once we can point CYPRESS_BINARY_VERSION at an existing file
-      # - test-next-version-locally:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - bump-via-commit-537
-      #     requires:
-      #       - build-npm-package
-      #       - build-binary
-
-#
-# things to run in the 4th CI container
-#
-# - run:
-#     name: Example e2e tests
-#     command: |
-#       if [ $CIRCLE_NODE_INDEX == 3 ]; then
-#         # ./bin/cypress --project=./packages/example --path-to-cypress
-#         # npm start -- --project=./packages/example
-#       fi
+      - test-next-version-locally:
+          filters:
+            branches:
+              only:
+                - develop
+                - binary-path-701
+          requires:
+            - build-npm-package
+            - build-binary
