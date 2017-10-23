@@ -16,8 +16,13 @@ const util = require(`${lib}/util`)
 
 const normalize = require('../../support/normalize')
 
+const LISTR_DELAY = 1000
+
 const packageVersion = '1.2.3'
-const downloadDestination = 'path/to/cypress.zip'
+const downloadDestination = {
+  filename: 'path/to/cypress.zip',
+  downloaded: true,
+}
 
 describe('install', function () {
   beforeEach(function () {
@@ -115,7 +120,7 @@ describe('install', function () {
       beforeEach(function () {
         info.getInstalledVersion.rejects(new Error('no'))
 
-        return install.start()
+        return install.start().delay(LISTR_DELAY)
       })
 
       it('logs message and starts download', function () {

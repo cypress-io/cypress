@@ -12,6 +12,8 @@ const util = require('../util')
 const info = require('./info')
 const unzip = require('./unzip')
 const logger = require('../logger')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const alreadyInstalledMsg = (installedVersion, needVersion) => {
   logger.log(chalk.yellow(stripIndent`
@@ -65,7 +67,8 @@ const downloadAndUnzip = (version) => {
   }
 
   // let the user know what version of cypress we're downloading!
-  logger.log(chalk.yellow(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`))
+  const message = chalk.yellow(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
+  logger.log(message)
   logger.log()
 
   const progessify = (task, title) => {
@@ -99,9 +102,10 @@ const downloadAndUnzip = (version) => {
         options.onProgress = progessify(task, 'Downloading Cypress')
 
         return download.start(options)
-        .then((downloadDestination) => {
+        .then(({ filename, downloaded }) => {
           // save the download destination for unzipping
-          ctx.downloadDestination = downloadDestination
+          ctx.downloadDestination = filename
+          ctx.downloaded = downloaded
 
           util.setTaskTitle(
             task,
@@ -131,13 +135,25 @@ const downloadAndUnzip = (version) => {
     {
       title: util.titleize('Finishing Installation'),
       task: (ctx, task) => {
-        const { downloadDestination } = options
+        const { downloadDestination, version } = options
+        la(is.unemptyString(downloadDestination), 'missing download destination', options)
+        la(is.bool(ctx.downloaded), 'missing downloaded flag', ctx)
 
-        debug('removing zip file %s', downloadDestination)
+        const removeFile = () => {
+          // debug('removing zip file %s', downloadDestination)
+          return fs.removeAsync(downloadDestination)
+        }
+        const skipFileRemoval = () => {
+          // debug('not removing file %s', downloadDestination)
+          // debug('because it was not downloaded (probably was local file already)')
+          return Promise.resolve()
+        }
+        const cleanup = ctx.downloaded ? removeFile : skipFileRemoval
 
-        return fs.removeAsync(downloadDestination)
+        cleanup()
         .then(() => {
           const dir = info.getPathToUserExecutableDir()
+          // debug('finished installation in', dir)
 
           util.setTaskTitle(
             task,
