@@ -81,11 +81,10 @@ describe('install', function () {
         })
       })
 
-      it.skip('can install local binary zip file without download', function () {
+      it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
         process.env.CYPRESS_BINARY_VERSION = version
         this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
-        this.sandbox.stub(unzip, 'start').resolves()
 
         return install.start()
           .then(() => {
