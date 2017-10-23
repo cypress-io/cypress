@@ -158,7 +158,9 @@ describe('install', function () {
         })
 
         // cleans up the zip file
-        expect(fs.removeAsync).to.be.calledWith(downloadDestination)
+        expect(fs.removeAsync).to.be.calledWith(
+          downloadDestination.filename
+        )
 
         snapshot(
           'installs without existing installation',

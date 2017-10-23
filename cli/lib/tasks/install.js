@@ -140,20 +140,20 @@ const downloadAndUnzip = (version) => {
         la(is.bool(ctx.downloaded), 'missing downloaded flag', ctx)
 
         const removeFile = () => {
-          // debug('removing zip file %s', downloadDestination)
+          debug('removing zip file %s', downloadDestination)
           return fs.removeAsync(downloadDestination)
         }
         const skipFileRemoval = () => {
-          // debug('not removing file %s', downloadDestination)
-          // debug('because it was not downloaded (probably was local file already)')
+          debug('not removing file %s', downloadDestination)
+          debug('because it was not downloaded (probably was local file already)')
           return Promise.resolve()
         }
         const cleanup = ctx.downloaded ? removeFile : skipFileRemoval
 
-        cleanup()
+        return cleanup()
         .then(() => {
           const dir = info.getPathToUserExecutableDir()
-          // debug('finished installation in', dir)
+          debug('finished installation in', dir)
 
           util.setTaskTitle(
             task,
