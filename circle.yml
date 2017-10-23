@@ -459,6 +459,7 @@ jobs:
           root: /tmp/urls
           paths:
             - binary-url.json
+            - cypress.zip
 
   "build-npm-package":
     <<: *defaults
