@@ -148,22 +148,33 @@ const download = (options = {}) => {
     return downloadFromUrl(options)
   }
 
-  const possibleFile = formAbsolutePath(options.version)
   debug('need to download Cypress version %s', options.version)
-  debug('checking local file', possibleFile, 'cwd', process.cwd())
-
-  return fs.pathExists(possibleFile)
+  // first check the original filename
+  return fs.pathExists(options.version)
     .then((exists) => {
       if (exists) {
-        debug('found local file', possibleFile)
-        debug('skipping download')
+        debug('found file right away', options.version)
         return {
-          filename: possibleFile,
+          filename: options.version,
           downloaded: false,
         }
-      } else {
-        return downloadFromUrl(options)
       }
+
+      const possibleFile = formAbsolutePath(options.version)
+      debug('checking local file', possibleFile, 'cwd', process.cwd())
+      return fs.pathExists(possibleFile)
+        .then((exists) => {
+          if (exists) {
+            debug('found local file', possibleFile)
+            debug('skipping download')
+            return {
+              filename: possibleFile,
+              downloaded: false,
+            }
+          } else {
+            return downloadFromUrl(options)
+          }
+        })
     })
 }
 
