@@ -449,8 +449,7 @@ jobs:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $NEXT_DEV_VERSION \
-              --hash $CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
+              --version $NEXT_DEV_VERSION
       - run: cat binary-url.json
       - run: mkdir /tmp/urls
       - run: cp binary-url.json /tmp/urls
@@ -492,7 +491,6 @@ jobs:
             node scripts/binary.js upload-npm-package \
               --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
               --version $NEXT_DEV_VERSION \
-              --hash $CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
       - run: cat npm-package-url.json
       - run: mkdir /tmp/urls
       - run: cp npm-package-url.json /tmp/urls
