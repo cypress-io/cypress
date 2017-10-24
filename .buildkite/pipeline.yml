@@ -40,12 +40,12 @@ steps:
       - "npm run binary-zip -- --platform mac"
       - "ls -l *.zip"
 
-  # - "wait"
+  - "wait"
 
-  # - label: "binary-upload"
-  #   branches: "develop"
-  #   artifact_paths: "binary-url.json"
-  #   command: "node scripts/binary.js upload-unique-binary --file cypress.zip --version $NEXT_DEV_VERSION"
+  - label: "binary-upload"
+    branches: "develop"
+    artifact_paths: "binary-url.json"
+    command: "node scripts/binary.js upload-unique-binary --file cypress.zip --version $NEXT_DEV_VERSION"
 
   # - "wait"
 
