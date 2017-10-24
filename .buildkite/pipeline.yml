@@ -28,17 +28,17 @@ steps:
   - label: "build"
     command: "npm run build"
 
-  # - "wait"
+  - "wait"
 
-  # - label: "binary-build"
-  #   command: "npm run binary-build -- --platform mac --version $NEXT_DEV_VERSION"
+  - label: "binary-build"
+    command: "npm run binary-build -- --platform mac --version $NEXT_DEV_VERSION"
 
-  # - "wait"
+  - "wait"
 
-  # - label: "binary-zip"
-  #   command:
-  #     - "npm run binary-zip -- --platform mac"
-  #     - "ls -l *.zip"
+  - label: "binary-zip"
+    command:
+      - "npm run binary-zip -- --platform mac"
+      - "ls -l *.zip"
 
   # - "wait"
 
