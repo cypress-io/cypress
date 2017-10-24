@@ -37,7 +37,6 @@ localStorage.debug = "cypress:driver"
 Event | From | To | Description
 --- | --- | --- | ---
 restart:test:run | Runner | Anyone | when cypress has been told to 're-run' and before iframes have been loaded. typically seen after a test change or the 'restart tests' button has been clicked
-<!-- before:run | Runner | Anyone | before run has started but after iframes have loaded -->
 before:add | Runner | Anyone | before any tests have been added to the UI
 suite:add | Runner | Anyone | when a suite should be added to the UI
 test:add | Runner | Anyone | when a test should be added to the UI
