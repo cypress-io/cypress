@@ -10,6 +10,17 @@ Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 konfig  = require("../../../packages/server/lib/konfig")
 
+formHashFromEnvironment = () ->
+  env = process.env
+  if env.BUILDKITE
+    return "buildkite-#{env.BUILDKITE_BRANCH}-#{env.BUILDKITE_COMMIT}-#{env.BUILDKITE_BUILD_NUMBER}"
+  if env.CIRCLECI
+    return "circle-#{env.CIRCLE_BRANCH}-#{env.CIRCLE_SHA1}-#{env.CIRCLE_BUILD_NUM}"
+  if env.APPVEYOR
+    return "appveyor-#{env.APPVEYOR_REPO_BRANCH}-#{env.APPVEYOR_REPO_COMMIT}-#{env.APPVEYOR_BUILD_ID}"
+
+  throw new Error("Do not know how to form unique build hash on this CI")
+
 getS3Credentials = () ->
   ## gleb: fix this plzzzzzz
   old = process.cwd()
@@ -123,8 +134,12 @@ getUploadNameByOs = (osName = os.platform()) ->
   name
 
 saveUrl = (filename) -> (url) ->
+  la(check.unemptyString(filename), "missing filename", filename)
+  la(check.url(url), "invalid url to save", url)
   s = JSON.stringify({url})
   fs.writeFileSync(filename, s)
+  console.log("saved url", url)
+  console.log("into file", filename)
 
 module.exports = {
   getS3Credentials,
@@ -133,5 +148,6 @@ module.exports = {
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
   getUploadNameByOs,
-  saveUrl
+  saveUrl,
+  formHashFromEnvironment
 }

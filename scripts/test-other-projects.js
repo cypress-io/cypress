@@ -48,7 +48,7 @@ bump.version(npm, binary, platform, cliOptions.provider)
     const shortNpmVersion = getJustVersion(result.versionName)
     console.log('short NPM version', shortNpmVersion)
 
-    let subject = `Testing new Cypress version ${shortNpmVersion}`
+    let subject = `Testing new ${os.platform()} Cypress version ${shortNpmVersion}`
     const shortSha = getShortCommit()
     if (shortSha) {
       subject += ` ${shortSha}`
