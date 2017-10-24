@@ -47,22 +47,22 @@ steps:
     artifact_paths: "binary-url.json"
     command: "node scripts/binary.js upload-unique-binary --file cypress.zip --version $NEXT_DEV_VERSION"
 
-  # - "wait"
+  - "wait"
 
-  # - label: "upload NPM"
-  #   command:
-  #     - "npm --no-git-tag-version version $NEXT_DEV_VERSION"
-  #     - "cd cli"
-  #     - "npm run build"
-  #     - "cd build"
-  #     - "npm run size"
-  #     - "npm pack"
-  #     - "cd ../.."
-  #     - "node scripts/binary.js upload-npm-package --file cli/build/cypress-$NEXT_DEV_VERSION.tgz --version $NEXT_DEV_VERSION"
-  #     - "cat npm-package-url.json"
-  #     - "ls -l *.json"
-  #   branches: "develop"
-  #   artifact_paths: "npm-package-url.json"
+  - label: "upload NPM"
+    command:
+      - "npm --no-git-tag-version version $NEXT_DEV_VERSION"
+      - "cd cli"
+      - "npm run build"
+      - "cd build"
+      - "npm run size"
+      - "npm pack"
+      - "cd ../.."
+      - "node scripts/binary.js upload-npm-package --file cli/build/cypress-$NEXT_DEV_VERSION.tgz --version $NEXT_DEV_VERSION"
+      - "cat npm-package-url.json"
+      - "ls -l *.json"
+    branches: "develop"
+    artifact_paths: "npm-package-url.json"
 
   # - "wait"
 
