@@ -68,9 +68,9 @@ steps:
 
   - label: "show JSON files"
   - command:
-      - "buildkite-agent artifact download binary-url.json"
+      - "buildkite-agent artifact download binary-url.json ."
       - "cat binary-url.json"
-      - "buildkite-agent artifact download npm-package-url.json"
+      - "buildkite-agent artifact download npm-package-url.json ."
       - "cat npm-package-url.json"
     branches: "develop"
 
@@ -78,7 +78,7 @@ steps:
 
   - label: "kick off test projects"
     command:
-      - "buildkite-agent artifact download binary-url.json"
-      - "buildkite-agent artifact download npm-package-url.json"
+      - "buildkite-agent artifact download binary-url.json ."
+      - "buildkite-agent artifact download npm-package-url.json ."
       - "node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider buildkite"
     branches: "develop"
