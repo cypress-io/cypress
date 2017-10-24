@@ -31,7 +31,9 @@ const shorten = (s) =>
   s.substr(0, 7)
 
 const getShortCommit = () => {
-  const sha = process.env.APPVEYOR_REPO_COMMIT || process.env.CIRCLE_SHA1
+  const sha = process.env.APPVEYOR_REPO_COMMIT ||
+    process.env.CIRCLE_SHA1 ||
+    process.env.BUILDKITE_COMMIT
   if (sha) {
     return shorten(sha)
   }
