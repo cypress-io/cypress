@@ -14,71 +14,71 @@ steps:
       - "print-arch"
       - "print-env BUILDKITE"
 
-  - "wait"
+  # - "wait"
 
-  - label: "install"
-    command:
-      - "npm install --ignore-scripts"
-      - "npm ls --depth=0 || true"
-      - "npm run link"
-      - "npm run all install -- --serial"
+  # - label: "install"
+  #   command:
+  #     - "npm install --ignore-scripts"
+  #     - "npm ls --depth=0 || true"
+  #     - "npm run link"
+  #     - "npm run all install -- --serial"
 
-  - "wait"
+  # - "wait"
 
-  - label: "build"
-    command: "npm run build"
+  # - label: "build"
+  #   command: "npm run build"
 
-  - "wait"
+  # - "wait"
 
-  - label: "binary-build"
-    command: "npm run binary-build -- --platform mac --version $NEXT_DEV_VERSION"
+  # - label: "binary-build"
+  #   command: "npm run binary-build -- --platform mac --version $NEXT_DEV_VERSION"
 
-  - "wait"
+  # - "wait"
 
-  - label: "binary-zip"
-    command:
-      - "npm run binary-zip -- --platform mac"
-      - "ls -l *.zip"
+  # - label: "binary-zip"
+  #   command:
+  #     - "npm run binary-zip -- --platform mac"
+  #     - "ls -l *.zip"
 
-  - "wait"
+  # - "wait"
 
-  - label: "binary-upload"
-    branches: "develop"
-    artifact_paths: "binary-url.json"
-    command: "node scripts/binary.js upload-unique-binary --file cypress.zip --version $NEXT_DEV_VERSION"
+  # - label: "binary-upload"
+  #   branches: "develop"
+  #   artifact_paths: "binary-url.json"
+  #   command: "node scripts/binary.js upload-unique-binary --file cypress.zip --version $NEXT_DEV_VERSION"
 
-  - "wait"
+  # - "wait"
 
-  - label: "upload NPM"
-    command:
-      - "npm --no-git-tag-version version $NEXT_DEV_VERSION"
-      - "cd cli"
-      - "npm run build"
-      - "cd build"
-      - "npm run size"
-      - "npm pack"
-      - "cd ../.."
-      - "node scripts/binary.js upload-npm-package --file cli/build/cypress-$NEXT_DEV_VERSION.tgz --version $NEXT_DEV_VERSION"
-      - "cat npm-package-url.json"
-      - "ls -l *.json"
-    branches: "develop"
-    artifact_paths: "npm-package-url.json"
+  # - label: "upload NPM"
+  #   command:
+  #     - "npm --no-git-tag-version version $NEXT_DEV_VERSION"
+  #     - "cd cli"
+  #     - "npm run build"
+  #     - "cd build"
+  #     - "npm run size"
+  #     - "npm pack"
+  #     - "cd ../.."
+  #     - "node scripts/binary.js upload-npm-package --file cli/build/cypress-$NEXT_DEV_VERSION.tgz --version $NEXT_DEV_VERSION"
+  #     - "cat npm-package-url.json"
+  #     - "ls -l *.json"
+  #   branches: "develop"
+  #   artifact_paths: "npm-package-url.json"
 
-  - "wait"
+  # - "wait"
 
-  - label: "show JSON files"
-  - command:
-      - "buildkite-agent artifact download binary-url.json ."
-      - "cat binary-url.json"
-      - "buildkite-agent artifact download npm-package-url.json ."
-      - "cat npm-package-url.json"
-    branches: "develop"
+  # - label: "show JSON files"
+  # - command:
+  #     - "buildkite-agent artifact download binary-url.json ."
+  #     - "cat binary-url.json"
+  #     - "buildkite-agent artifact download npm-package-url.json ."
+  #     - "cat npm-package-url.json"
+  #   branches: "develop"
 
-  - "wait"
+  # - "wait"
 
-  - label: "kick off test projects"
-    command:
-      - "buildkite-agent artifact download binary-url.json ."
-      - "buildkite-agent artifact download npm-package-url.json ."
-      - "node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider buildkite"
-    branches: "develop"
+  # - label: "kick off test projects"
+  #   command:
+  #     - "buildkite-agent artifact download binary-url.json ."
+  #     - "buildkite-agent artifact download npm-package-url.json ."
+  #     - "node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider buildkite"
+  #   branches: "develop"
