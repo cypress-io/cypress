@@ -658,7 +658,7 @@ module.exports = {
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
 
   spread:
-    invalid_type: "#{cmd('spread')} requires the existing subject be an array."
+    invalid_type: "#{cmd('spread')} requires the existing subject be array-like."
 
   subject:
     not_dom: (obj) ->

@@ -17,6 +17,14 @@ car = null
 
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
+  buildkite: {
+    main: "cypress-io/cypress"
+    others: [
+      "cypress-io/cypress-test-tiny"
+      "cypress-io/cypress-example-kitchensink"
+    ]
+  }
+
   appVeyor: {
     main: "cypress-io/cypress"
     others: [
@@ -108,25 +116,30 @@ getCiConfig = ->
 
 awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
   creds = getCiConfig()
-  # TODO only check tokens for providers we really going to use
-  la(check.unemptyString(creds.githubToken), "missing githubToken")
-  la(check.unemptyString(creds.circleToken), "missing circleToken")
-  la(check.unemptyString(creds.appVeyorToken), "missing appVeyorToken")
 
   ## configure a new Bumpercar
-  car = bumpercar.create({
-    providers: {
-      travis: {
-        githubToken: creds.githubToken
-      }
-      circle: {
-        circleToken: creds.circleToken
-      }
-      appVeyor: {
-        appVeyorToken: creds.appVeyorToken
-      }
+  providers = {}
+  if check.unemptyString(creds.githubToken)
+    providers.travis = {
+      githubToken: creds.githubToken
     }
-  })
+  if check.unemptyString(creds.circleToken)
+    providers.circle = {
+      circleToken: creds.circleToken
+    }
+  if check.unemptyString(creds.appVeyorToken)
+    providers.appVeyor = {
+      appVeyorToken: creds.appVeyorToken
+    }
+  if check.unemptyString(creds.buildkiteToken)
+    providers.buildkite = {
+      buildkiteToken: creds.buildkiteToken
+    }
+  providerNames = Object.keys(providers)
+  console.log("configured providers", providerNames)
+  la(check.not.empty(providerNames), "empty list of providers")
+
+  car = bumpercar.create({providers})
 
   filteredProjects = R.filter(filter, projects)
   if check.empty(filteredProjects)
@@ -153,7 +166,7 @@ module.exports = {
       "missing next version to set", version)
 
     updateProject = (project, provider) ->
-      console.log("setting environment variables in", project)
+      console.log("setting %s environment variables in project %s", provider, project)
       car.updateProjectEnv(project, provider, {
         NEXT_DEV_VERSION: version,
       })

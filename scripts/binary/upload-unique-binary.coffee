@@ -76,6 +76,9 @@ uploadUniqueBinary = (args = []) ->
   la(isBinaryFile(options.file),
     "invalid file to upload extension", options.file)
 
+  if not options.hash
+    options.hash = uploadUtils.formHashFromEnvironment()
+
   la(check.unemptyString(options.hash), "missing hash to give", options)
   la(check.unemptyString(options.version), "missing version", options)
 

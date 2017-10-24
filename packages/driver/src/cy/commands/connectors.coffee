@@ -42,7 +42,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     remoteSubject = cy.getRemotejQueryInstance(subject)
 
     args = remoteSubject or subject
-    args = if args?._spreadArray then args else [args]
+    args = if subject?._spreadArray then args else [args]
 
     ## name could be invoke or its!
     name = state("current").get("name")
@@ -264,8 +264,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: true }, {
     spread: (subject, options, fn) ->
-      ## if this isnt an array blow up right here
-      if not _.isArray(subject)
+      ## if this isnt an array-like blow up right here
+      if not _.isArrayLike(subject)
         $utils.throwErrByPath("spread.invalid_type")
 
       subject._spreadArray = true

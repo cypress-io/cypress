@@ -80,6 +80,9 @@ jobs:
       # only installs the root dependencies, without going into packages
       # via postinstall script
       - run: npm install --ignore-scripts
+      - run:
+          name: Top level packages
+          command: npm ls --depth=0 || true
 
       ## symlink all of our sub packages in node_modules
       - run: npm run link
@@ -446,8 +449,7 @@ jobs:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $NEXT_DEV_VERSION \
-              --hash $CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
+              --version $NEXT_DEV_VERSION
       - run: cat binary-url.json
       - run: mkdir /tmp/urls
       - run: cp binary-url.json /tmp/urls
@@ -457,6 +459,7 @@ jobs:
           root: /tmp/urls
           paths:
             - binary-url.json
+            - cypress.zip
 
   "build-npm-package":
     <<: *defaults
@@ -488,8 +491,7 @@ jobs:
           command: |
             node scripts/binary.js upload-npm-package \
               --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
-              --version $NEXT_DEV_VERSION \
-              --hash $CIRCLE_BRANCH-$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
+              --version $NEXT_DEV_VERSION
       - run: cat npm-package-url.json
       - run: mkdir /tmp/urls
       - run: cp npm-package-url.json /tmp/urls
@@ -642,28 +644,15 @@ workflows:
             branches:
               only:
                 - develop
-                - bump-via-commit-537
           requires:
             - build-npm-package
             - build-binary
-      # enable once we can point CYPRESS_BINARY_VERSION at an existing file
-      # - test-next-version-locally:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - develop
-      #           - bump-via-commit-537
-      #     requires:
-      #       - build-npm-package
-      #       - build-binary
-
-#
-# things to run in the 4th CI container
-#
-# - run:
-#     name: Example e2e tests
-#     command: |
-#       if [ $CIRCLE_NODE_INDEX == 3 ]; then
-#         # ./bin/cypress --project=./packages/example --path-to-cypress
-#         # npm start -- --project=./packages/example
-#       fi
+      - test-next-version-locally:
+          filters:
+            branches:
+              only:
+                - develop
+                - binary-path-701
+          requires:
+            - build-npm-package
+            - build-binary
