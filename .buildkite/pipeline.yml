@@ -14,19 +14,19 @@ steps:
       - "print-arch"
       - "print-env BUILDKITE"
 
-  # - "wait"
+  - "wait"
 
-  # - label: "install"
-  #   command:
-  #     - "npm install --ignore-scripts"
-  #     - "npm ls --depth=0 || true"
-  #     - "npm run link"
-  #     - "npm run all install -- --serial"
+  - label: "install"
+    command:
+      - "npm install --ignore-scripts"
+      - "npm ls --depth=0 || true"
+      - "npm run link"
+      - "npm run all install -- --serial"
 
-  # - "wait"
+  - "wait"
 
-  # - label: "build"
-  #   command: "npm run build"
+  - label: "build"
+    command: "npm run build"
 
   # - "wait"
 
