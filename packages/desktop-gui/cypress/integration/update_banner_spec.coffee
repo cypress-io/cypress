@@ -94,3 +94,16 @@ describe "Update Banner", ->
     it "opens changelog when new version is clicked", ->
       cy.get(".modal").contains(NEW_VERSION).click().then =>
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/changelog")
+
+  describe "in specs list", ->
+    beforeEach ->
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectPath: "/foo/bar"})
+      cy.stub(@ipc, "openProject").resolves(@config)
+      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      @start()
+      @updaterCheck.resolve(NEW_VERSION)
+      cy.get("#updates-available").should("exist")
+
+    it "displays all folders/specs within visible area", ->
+      cy.get(".folder-display-name")
+        .last().should("be.visible")
