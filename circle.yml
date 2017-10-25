@@ -461,6 +461,22 @@ jobs:
             - binary-url.json
             - cypress.zip
 
+  "test-against-staging":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Cloning test project
+          command: git clone git@github.com:cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - run:
+          name: Run test project
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
+            npm start -- --run-project /tmp/cypress-test-tiny \
+            --record --key $STAGING_RECORD_ID
+
   "build-npm-package":
     <<: *defaults
     steps:
@@ -621,6 +637,9 @@ workflows:
           requires:
             - build
       - run-launcher:
+          requires:
+            - build
+      - test-against-staging:
           requires:
             - build
       - build-npm-package:
