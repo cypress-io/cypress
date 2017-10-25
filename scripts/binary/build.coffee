@@ -138,7 +138,7 @@ buildCypressApp = (platform, version, options = {}) ->
     })
     .then =>
       str = """
-      process.env.CYPRESS_ENV = 'production'
+      process.env.CYPRESS_ENV = process.env.CYPRESS_ENV || 'production'
       require('./packages/server')
       """
 
