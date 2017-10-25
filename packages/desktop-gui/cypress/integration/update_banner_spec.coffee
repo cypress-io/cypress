@@ -102,7 +102,7 @@ describe "Update Banner", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       @start()
       @updaterCheck.resolve(NEW_VERSION)
-      cy.get("#updates-available").should("exist")
+      cy.get("#updates-available")
 
     it "displays all folders/specs within visible area", ->
       cy.get(".folder-display-name")
