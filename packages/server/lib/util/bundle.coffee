@@ -7,6 +7,8 @@ Promise                = require("bluebird")
 babelify               = require("babelify")
 watchify               = require("watchify")
 browserify             = require("browserify")
+replaceExt             = require("replace-ext")
+writeJSONSync          = require('jsonfile').writeFileSync;
 presetReact            = require("babel-preset-react")
 presetLatest           = require("babel-preset-latest")
 stringStream           = require("string-to-stream")
@@ -31,6 +33,18 @@ module.exports = {
   outputPath: (projectRoot = "", filePath) ->
     appData.projectsPath(toHashName(projectRoot), "bundles", filePath)
 
+  getCache: (file) ->
+    try
+      return require(file)
+    catch err
+      return {}
+
+  getStats: (file) ->
+    try
+      return fs.statSync(file)
+    catch err
+      return false
+
   build: (filePath, config) ->
     if config.isTextTerminal and built = builtFiles[filePath]
       return built
@@ -43,16 +57,41 @@ module.exports = {
     log "input absolute path #{absolutePath}"
 
     outputPath = @outputPath(config.projectRoot, filePath)
-    log "output path #{absolutePath}"
+    log "output path #{outputPath}"
+
+    cachePath = replaceExt(outputPath, '.json')
+    log "cache path #{cachePath}"
+
+    cache = {}
+
+    cachedFiles = [];
+    ## we check if any of the files in the cache has been modified or deleted and if so we remove it from the cache
+    cacheStats = @getStats(cachePath)
+    if cacheStats
+      cacheModTime = cacheStats.mtime.getTime()
+      cache = @getCache(cachePath)
+      Object.keys(cache).forEach (file) =>
+        invalid = true
+        stats = @getStats(file)
+        if stats
+          fileModTime = stats.mtime.getTime()
+          if fileModTime <= cacheModTime
+            invalid = false
+
+        if invalid
+          log("browserify: File #{file} cache invalid. Removing from cache")
+          delete cache[file]
+        else
+          cachedFiles.push(file)
 
     bundler = browserify({
       entries:      [absolutePath]
       extensions:   [".js", ".jsx", ".coffee", ".cjsx"]
-      cache:        {}
+      cache: cache,
       packageCache: {}
     })
 
-    if not config.isTextTerminal
+    if not config.isTextTerminal and config.watchForFileChanges
       @_watching = true ## for testing purposes
 
       bundler.plugin(watchify, {
@@ -65,6 +104,10 @@ module.exports = {
           "**/node_modules/**"
         ]
       })
+
+      ## cached files are not read so no 'file' event is emitted for them. We emit it now manually so that watchify watches them
+      cachedFiles.forEach (file) ->
+        bundler.emit('file', file)
 
     bundle = =>
       new Promise (resolve, reject) =>
@@ -92,6 +135,12 @@ module.exports = {
         ws = fs.createWriteStream(outputPath)
         ws.on "finish", ->
           log("browserify: finished bundling #{outputPath}")
+          try
+            writeJSONSync(cachePath, bundler._options.cache)
+            log("browserify: saved cache #{cachePath}")
+          catch err
+            log("browserify: error saving cache file #{cachePath}")
+
           resolve()
         ws.on("error", onError)
 

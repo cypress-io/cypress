@@ -21,6 +21,7 @@ describe "lib/util/bundle", ->
         on: -> bundlerApi
         bundle: -> streamApi
         close: ->
+        emit: sinon.stub()
         plugin: sinon.stub()
       }
 
@@ -48,8 +49,66 @@ describe "lib/util/bundle", ->
       it "specifies extensions", ->
         expect(browserify.lastCall.args[0].extensions).to.eql([".js", ".jsx", ".coffee", ".cjsx"])
 
+      it "does not use the cache", ->
+        expect(browserify.lastCall.args[0].cache).to.eql({})
+
       it "watches", ->
         expect(@bundlerApi.plugin).to.be.calledWith(watchify)
+
+    describe "watchForFileChanges is false", ->
+      beforeEach ->
+        @config.watchForFileChanges = false
+        bundle.build("file.js", @config)
+
+      it "does not watch", ->
+        expect(@bundlerApi.plugin).not.to.be.called
+
+    describe "cache file exists", ->
+      beforeEach ->
+
+        ## we mock reading a cache file
+        bundle.getCache = ->
+          return {
+            '/path/to/root/file.js': {
+              source: '',
+              deps: {
+                './dependency': '/path/to/root/dependency.js'
+              }
+            },
+            '/path/to/root/dependency.js': {
+              source: '',
+              deps: {}
+            }
+          }
+
+        ## we mock reading the stats of files so that the dependency file shows as non-existent
+        ## and the bundled file and the cache file show as existent with the same modification time
+        bundle.getStats = (file) ->
+          if file == '/path/to/root/dependency.js'
+            return false
+          else
+            return  {
+              mtime: {
+                getTime: ->
+                  return 1
+              }
+            }
+
+        bundle.build("file.js", @config)
+
+      it "partially uses the cache", ->
+        ## the non existent file is removed from the cache but the other file is used
+        expect(browserify.lastCall.args[0].cache).to.eql({
+          '/path/to/root/file.js': {
+            source: '',
+            deps: {
+              './dependency': '/path/to/root/dependency.js'
+            }
+          }
+        })
+
+      it "the cached file is watched", ->
+        expect(@bundlerApi.emit).to.be.calledWith('file', '/path/to/root/file.js')
 
     describe "headless mode", ->
       beforeEach ->
