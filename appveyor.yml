@@ -27,6 +27,8 @@ install:
   - node --version
   - npm --version
   - print-env APPVEYOR
+  # clean cache to prevent install permission issues
+  - npm cache clean --force
   # install root modules only
   - npm install --ignore-scripts
   - .\node_modules\.bin\print-arch
