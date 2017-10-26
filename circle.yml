@@ -514,12 +514,14 @@ jobs:
               --version $NEXT_DEV_VERSION
       - run: cat npm-package-url.json
       - run: mkdir /tmp/urls
+      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: cp npm-package-url.json /tmp/urls
       - run: ls /tmp/urls
       - persist_to_workspace:
           root: /tmp/urls
           paths:
             - npm-package-url.json
+            - cypress.tgz
 
   "test-next-version":
     <<: *defaults
@@ -592,12 +594,10 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
-      # make sure we have cypress.zip received
+      # make sure we have the binary
       - run: ls -l /tmp/urls/cypress.zip
-      # build NPM package
-      - run:
-          command: npm run build
-          working_directory: cli
+      # make sure we have the NPM package
+      - run: ls -l /tmp/urls/cypress.tgz
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
@@ -606,12 +606,10 @@ jobs:
           command: npm i cypress-io/xvfb-maybe
           working_directory: /tmp/cypress-test-tiny
       - run:
-          # install from the built NPM package folder
-          # and from binary zip
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /home/person/cypress-monorepo/cli/build
+          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
