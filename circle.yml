@@ -461,6 +461,26 @@ jobs:
             - binary-url.json
             - cypress.zip
 
+  "test-against-staging":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Installing xvfb-maybe
+          command: npm i cypress-io/xvfb-maybe
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - run:
+          name: Run test project
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/cypress-test-tiny \
+            --record
+
   "build-npm-package":
     <<: *defaults
     steps:
@@ -494,12 +514,14 @@ jobs:
               --version $NEXT_DEV_VERSION
       - run: cat npm-package-url.json
       - run: mkdir /tmp/urls
+      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: cp npm-package-url.json /tmp/urls
       - run: ls /tmp/urls
       - persist_to_workspace:
           root: /tmp/urls
           paths:
             - npm-package-url.json
+            - cypress.tgz
 
   "test-next-version":
     <<: *defaults
@@ -564,6 +586,35 @@ jobs:
           working_directory: test-binary
           command: $(npm bin)/cypress verify
 
+  # install NPM + binary zip and run against staging API
+  "test-binary-against-staging":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: /tmp/urls
+      # make sure we have the binary
+      - run: ls -l /tmp/urls/cypress.zip
+      # make sure we have the NPM package
+      - run: ls -l /tmp/urls/cypress.tgz
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/cypress-test-tiny
+          # force installing the freshly built binary
+          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+      - run:
+          name: Run test project
+          working_directory: /tmp/cypress-test-tiny
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            $(npm bin)/cypress run --record
+
 workflows:
   version: 2
   build_and_test:
@@ -623,12 +674,15 @@ workflows:
       - run-launcher:
           requires:
             - build
+      - test-against-staging:
+          requires:
+            - build
       - build-npm-package:
           filters:
             branches:
               only:
                 - develop
-                - bump-via-commit-537
+                - staging-813
           requires:
             - build
       - build-binary:
@@ -636,7 +690,7 @@ workflows:
             branches:
               only:
                 - develop
-                - bump-via-commit-537
+                - staging-813
           requires:
             - build
       - test-next-version:
@@ -652,7 +706,15 @@ workflows:
             branches:
               only:
                 - develop
-                - binary-path-701
+          requires:
+            - build-npm-package
+            - build-binary
+      - test-binary-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+                - staging-813
           requires:
             - build-npm-package
             - build-binary
