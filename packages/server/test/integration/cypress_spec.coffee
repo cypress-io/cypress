@@ -703,6 +703,7 @@ describe "lib/cypress", ->
   context "--record or --ci", ->
     afterEach ->
       delete process.env.CYPRESS_PROJECT_ID
+      delete process.env.CYPRESS_RECORD_KEY
 
     beforeEach ->
       @setup = =>
@@ -821,13 +822,26 @@ describe "lib/cypress", ->
       @setup()
 
       ## set the projectId to be todos even though
-      ## we are running the prisine project
+      ## we are running the pristine project
       process.env.CYPRESS_PROJECT_ID = @projectId
 
       @createRun.resolves()
       @sandbox.stub(api, "createInstance").resolves()
 
       cypress.start(["--run-project=#{@pristinePath}", "--record", "--key=token-123"])
+      .then =>
+        expect(errors.warning).not.to.be.called
+        @expectExitWith(3)
+
+    it "uses process.env.CYPRESS_RECORD_KEY", ->
+      @setup()
+
+      process.env.CYPRESS_RECORD_KEY = "token-123"
+
+      @createRun.resolves()
+      @sandbox.stub(api, "createInstance").resolves()
+
+      cypress.start(["--run-project=#{@todosPath}", "--record"])
       .then =>
         expect(errors.warning).not.to.be.called
         @expectExitWith(3)
