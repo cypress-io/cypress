@@ -584,6 +584,43 @@ jobs:
           working_directory: test-binary
           command: $(npm bin)/cypress verify
 
+  # install NPM + binary zip and run against staging API
+  "test-binary-against-staging":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: /tmp/urls
+      # make sure we have cypress.zip received
+      - run: ls -l /tmp/urls/cypress.zip
+      # build NPM package
+      - run:
+          command: npm run build
+          working_directory: cli
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - run:
+          name: Installing xvfb-maybe
+          command: npm i cypress-io/xvfb-maybe
+          working_directory: /tmp/cypress-test-tiny
+      - run:
+          # install from the built NPM package folder
+          # and from binary zip
+          name: Install Cypress
+          working_directory: /tmp/cypress-test-tiny
+          # force installing the freshly built binary
+          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /home/person/cypress-monorepo/cli/build
+      - run:
+          name: Run test project
+          working_directory: /tmp/cypress-test-tiny
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            $(npm bin)/xvfb-maybe node_modules/.bin/cypress run --record
+
 workflows:
   version: 2
   build_and_test:
@@ -651,7 +688,7 @@ workflows:
             branches:
               only:
                 - develop
-                - bump-via-commit-537
+                - staging-813
           requires:
             - build
       - build-binary:
@@ -659,7 +696,7 @@ workflows:
             branches:
               only:
                 - develop
-                - bump-via-commit-537
+                - staging-813
           requires:
             - build
       - test-next-version:
@@ -675,7 +712,15 @@ workflows:
             branches:
               only:
                 - develop
-                - binary-path-701
+          requires:
+            - build-npm-package
+            - build-binary
+      - test-binary-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+                - staging-813
           requires:
             - build-npm-package
             - build-binary
