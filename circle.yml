@@ -602,10 +602,6 @@ jobs:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
       - run:
-          name: Installing xvfb-maybe
-          command: npm i cypress-io/xvfb-maybe
-          working_directory: /tmp/cypress-test-tiny
-      - run:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
@@ -617,7 +613,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
             CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
-            $(npm bin)/xvfb-maybe node_modules/.bin/cypress run --record
+            $(npm bin)/cypress run --record
 
 workflows:
   version: 2
