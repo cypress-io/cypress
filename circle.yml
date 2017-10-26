@@ -468,7 +468,7 @@ jobs:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Installing xvfb-maybe
-          command: npm i -g cypress-io/xvfb-maybe
+          command: npm i cypress-io/xvfb-maybe
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
@@ -479,7 +479,7 @@ jobs:
             CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
             CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
             DEBUG=cypress:* \
-            xvfb-maybe npm start -- --run-project /tmp/cypress-test-tiny \
+            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/cypress-test-tiny \
             --record
 
   "build-npm-package":
