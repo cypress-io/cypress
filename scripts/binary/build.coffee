@@ -45,6 +45,8 @@ logBuiltAllJs = () ->
 # for example
 #   skipClean - do not delete "dist" folder before build
 buildCypressApp = (platform, version, options = {}) ->
+  la(check.unemptyString(version), "missing version to build", version)
+
   distDir = _.partial(meta.distDir, platform)
   buildDir = _.partial(meta.buildDir, platform)
   buildAppDir = _.partial(meta.buildAppDir, platform)
@@ -58,8 +60,10 @@ buildCypressApp = (platform, version, options = {}) ->
     execa("node", ["index.js", "--version"], {
       cwd: dir
     }).then (result) ->
-      # TODO validate version string
-      console.log(result.stdout)
+      console.log('built version', result.stdout)
+      la(check.unemptyString(result.stdout), 'missing output', result)
+      la(result.stdout == version, "different version reported",
+        result.stdout, "from input version to build", version)
 
   canBuildInDocker = ->
     platform is "linux" and os.platform() is "darwin"

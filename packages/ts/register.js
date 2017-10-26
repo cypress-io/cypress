@@ -3,11 +3,8 @@ let tsNode
 
 // in development we should have TypeScript hook installed
 // in production or staging we are likely to be running
-// built Electron app without ts-node hook
-function likelyToHaveTypeScript (env) {
-  return env !== 'production' &&
-    env !== 'staging'
-}
+// built Electron app without ts-node hook. Assume the
+// build has been done correctly
 
 try {
   tsNode = require('ts-node')
@@ -30,10 +27,6 @@ try {
   // do we need to prevent any other TypeScript hooks?
   // like @packages/coffee/register.js does?
 } catch (e) {
-  if (likelyToHaveTypeScript(process.env.CYPRESS_ENV)) {
-    log('Could not require ts-node in environment %s', process.env.CYPRESS_ENV)
-    throw e
-  }
   // continue running without TypeScript require hook
-  log('Running without ts-node hook in environment %s', process.env.CYPRESS_ENV)
+  log('Running without ts-node hook in environment "%s"', process.env.CYPRESS_ENV)
 }
