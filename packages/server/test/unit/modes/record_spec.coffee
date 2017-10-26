@@ -75,6 +75,7 @@ describe "lib/modes/record", ->
       @sandbox.stub(git, "_getSha").resolves("sha-123")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(api, "createRun")
+      @sandbox.spy(console, "log")
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()
@@ -89,6 +90,14 @@ describe "lib/modes/record", ->
       groupId = "gr123"
       record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
         snapshot(api.createRun.firstCall.args)
+
+    it "warns group flag is missing if only groupId is passed", ->
+      api.createRun.resolves()
+
+      groupId = "gr123"
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", false, groupId).then ->
+        msg = "Warning: you passed group-id but no group flag"
+        expect(console.log).to.have.been.calledWith(msg)
 
     it "figures out groupId from CI environment variables", ->
       @sandbox.stub(ciProvider, "groupId").returns("ci-group-123")

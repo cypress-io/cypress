@@ -32,6 +32,8 @@ module.exports = {
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
+    if groupId and not group
+      console.log("Warning: you passed group-id but no group flag")
 
     repo = git.init(projectPath)
 
