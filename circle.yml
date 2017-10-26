@@ -474,8 +474,10 @@ jobs:
           command: |
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            DEBUG=cypress:* \
             npm start -- --run-project /tmp/cypress-test-tiny \
-            --record --key $STAGING_RECORD_ID
+            --record
 
   "build-npm-package":
     <<: *defaults
