@@ -2188,6 +2188,11 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get(":text:first").type("")
 
+      it "allows typing spaces", ->
+        cy
+          .get(":text:first").type(" ")
+          .should("have.value", " ")
+
       _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
         it "throws when trying to type: #{val}", (done) ->
           logs = []
