@@ -90,6 +90,16 @@ describe "lib/modes/record", ->
       record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
         snapshot(api.createRun.firstCall.args)
 
+    it "warns group flag is missing if only groupId is passed", ->
+      @sandbox.spy(console, "log")
+
+      api.createRun.resolves()
+
+      groupId = "gr123"
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", false, groupId).then ->
+        msg = "Warning: you passed group-id but no group flag"
+        expect(console.log).to.have.been.calledWith(msg)
+
     it "figures out groupId from CI environment variables", ->
       @sandbox.stub(ciProvider, "groupId").returns("ci-group-123")
 
