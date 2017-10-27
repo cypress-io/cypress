@@ -1,18 +1,3 @@
-exports['cli version no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-`
-
-exports['cli --version no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-`
-
-exports['cli -v no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-`
-
 exports['cli help command shows help 1'] = `
 
   command: bin/cypress help
@@ -167,4 +152,19 @@ Cypress binary version: X.Y.Z
 exports['cli version and binary version 2'] = `
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
+`
+
+exports['cli version no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
+`
+
+exports['cli --version no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
+`
+
+exports['cli -v no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
 `
