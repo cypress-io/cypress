@@ -15,54 +15,47 @@ gitCommandIn = (pathToRepo, gitCommand) ->
   .tap chdir.back
   .catch emptyString
 
+# previous library gift returns "" for detached checkouts
+# and our current command returns "HEAD"
+# so we must imitate old behavior
+checkIfDetached = (branch) ->
+  if branch == "HEAD"
+    ""
+  else
+    branch
+
 # See "git show" formats in
 # https://git-scm.com/docs/git-show
 module.exports = {
   _getBranch: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git rev-parse --abbrev-ref HEAD")
+    .then checkIfDetached
     .tap (branch) ->
       debug("got git branch %s", branch)
-    # repo.branchAsync()
-    # .get("name")
-    # .catch -> ""
 
+  # returns subject and body as single string
   _getMessage: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%B")
-    # repo.current_commitAsync()
-    # .get("message")
-    # .catch -> ""
 
   _getEmail: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%ae")
     .tap (email) ->
       debug("got git email %s", email)
-    # repo.current_commitAsync()
-    # .get("author")
-    # .get("email")
-    # .catch -> ""
 
   _getAuthor: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%an")
-    # repo.current_commitAsync()
-    # .get("author")
-    # .get("name")
-    # .catch -> ""
+    .tap (authorName) ->
+      debug("got git author name %s", authorName)
 
   _getSha: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%H")
-    # repo.current_commitAsync()
-    # .get("id")
-    # .catch -> ""
 
   _getRemoteOrigin: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git config --get remote.origin.url")
-    # repo.configAsync()
-    # .get("items")
-    # .get("remote.origin.url")
-    # .catch -> ""
+    .tap (remote) ->
+      debug("got git remote %s", remote)
 
   init: (pathToRepo) ->
-    # repo ?= Promise.promisifyAll git(pathToRepo)
 
     return {
       getBranch: @_getBranch.bind(@, pathToRepo)
