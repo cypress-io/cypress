@@ -3,10 +3,16 @@ chdir = require("chdir-promise")
 execa = require("execa")
 {prop} = require("ramda")
 debug = require("debug")("cypress:server")
+la = require("lazy-ass")
+check = require("check-more-types")
 
 emptyString = -> ""
 
 gitCommandIn = (pathToRepo, gitCommand) ->
+  la(check.unemptyString(pathToRepo), "missing repo path", pathToRepo)
+  la(check.unemptyString(gitCommand), "missing git command", gitCommand)
+  la(gitCommand.startsWith("git"), "invalid git command", gitCommand)
+
   chdir.to(pathToRepo)
   .then () ->
     debug("running git command: %s", gitCommand)
@@ -55,7 +61,7 @@ module.exports = {
     .tap (remote) ->
       debug("got git remote %s", remote)
 
-  init: (pathToRepo) ->
+  init: (pathToRepo = process.cwd()) ->
 
     return {
       getBranch: @_getBranch.bind(@, pathToRepo)
