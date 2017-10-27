@@ -1,13 +1,17 @@
 Promise = require("bluebird")
 chdir = require("chdir-promise")
 execa = require("execa")
+{prop} = require("ramda")
+debug = require("debug")("cypress:server")
 
 emptyString = -> ""
 
 gitCommandIn = (pathToRepo, gitCommand) ->
   chdir.to(pathToRepo)
   .then () ->
+    debug("running git command: %s", gitCommand)
     execa.shell(gitCommand)
+    .then prop("stdout")
   .tap chdir.back
   .catch emptyString
 
@@ -16,37 +20,41 @@ gitCommandIn = (pathToRepo, gitCommand) ->
 module.exports = {
   _getBranch: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git rev-parse --abbrev-ref HEAD")
+    .tap (branch) ->
+      debug("got git branch %s", branch)
     # repo.branchAsync()
     # .get("name")
     # .catch -> ""
 
-  _getMessage: (repo) ->
-    gitCommandIn(pathToRepo, "git show -s --pretty=%m")
+  _getMessage: (pathToRepo) ->
+    gitCommandIn(pathToRepo, "git show -s --pretty=%B")
     # repo.current_commitAsync()
     # .get("message")
     # .catch -> ""
 
-  _getEmail: (repo) ->
+  _getEmail: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%ae")
+    .tap (email) ->
+      debug("got git email %s", email)
     # repo.current_commitAsync()
     # .get("author")
     # .get("email")
     # .catch -> ""
 
-  _getAuthor: (repo) ->
+  _getAuthor: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%an")
     # repo.current_commitAsync()
     # .get("author")
     # .get("name")
     # .catch -> ""
 
-  _getSha: (repo) ->
+  _getSha: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git show -s --pretty=%H")
     # repo.current_commitAsync()
     # .get("id")
     # .catch -> ""
 
-  _getRemoteOrigin: (repo) ->
+  _getRemoteOrigin: (pathToRepo) ->
     gitCommandIn(pathToRepo, "git config --get remote.origin.url")
     # repo.configAsync()
     # .get("items")

@@ -12,6 +12,7 @@ Project    = require("../project")
 git        = require("../util/git")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
+debug      = require("debug")("cypress:server")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -46,6 +47,9 @@ module.exports = {
       message: repo.getMessage()
     })
     .then (git) ->
+      debug("git information")
+      debug(git)
+
       # only send groupId if group option is true
       if group
         groupId ?= ciProvider.groupId()
