@@ -57,6 +57,23 @@ const text = (description) => {
   return descriptions[description]
 }
 
+function includesVersion (args) {
+  return _.includes(args, 'version') ||
+    _.includes(args, '--version') ||
+    _.includes(args, '-v')
+}
+
+function showVersions () {
+  debug('printing Cypress version')
+  return require('./exec/versions')
+  .getVersions()
+  .then((versions = {}) => {
+    logger.log('Cypress package version:', versions.package)
+    logger.log('Cypress binary version:', versions.binary)
+    process.exit(0)
+  })
+}
+
 module.exports = {
   init (args) {
     if (!args) {
@@ -80,15 +97,7 @@ module.exports = {
       .option('-v, --version', text('version'))
       .command('version')
       .description(text('version'))
-      .action(() => {
-        return require('./exec/versions')
-        .getVersions()
-        .then((versions = {}) => {
-          logger.log('Cypress package version:', versions.package)
-          logger.log('Cypress binary version:', versions.binary)
-          process.exit(0)
-        })
-      })
+      .action(showVersions)
 
     program
       .command('run')
@@ -153,18 +162,27 @@ module.exports = {
 
     // if there are no arguments
     if (args.length <= 2) {
-      // then display the help
+      debug('printing help')
       program.help()
       // exits
     }
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
+      debug('unknwon command %s', firstCommand)
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()
       return util.exit(1)
     }
 
+    if (includesVersion(args)) {
+      // commander 2.11.0 changes behavior
+      // and now does not understand top level options
+      // .option('-v, --version').command('version')
+      // so we have to manually catch '-v, --version'
+      return showVersions()
+    }
+    debug('program parsing arguments')
     return program.parse(args)
   },
 }

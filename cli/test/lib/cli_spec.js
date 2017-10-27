@@ -64,13 +64,35 @@ describe('cli', function () {
       })
     })
 
-    it('handles non-existent binary', function (done) {
+    it('handles non-existent binary version', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        snapshot('cli version no binary version', logger.print())
+        done()
+      })
+    })
+
+    it('handles non-existent binary --version', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
       this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
-        snapshot('cli version no binary version', logger.print())
+        snapshot('cli --version no binary version', logger.print())
+        done()
+      })
+    })
+
+    it('handles non-existent binary -v', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+
+      this.exec('-v')
+      process.exit.callsFake(() => {
+        snapshot('cli -v no binary version', logger.print())
         done()
       })
     })
