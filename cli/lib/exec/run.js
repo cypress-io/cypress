@@ -3,6 +3,8 @@ const debug = require('debug')('cypress:cli')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 
+// maps options collected by the CLI
+// and forms list of CLI arguments to the server
 const processRunOptions = (options = {}) => {
   debug('processing run options')
   const args = ['--run-project', options.project]
@@ -69,6 +71,14 @@ const processRunOptions = (options = {}) => {
 
   if (options.headed) {
     args.push('--headed', options.headed)
+  }
+
+  if (options.group != null) {
+    args.push('--group', options.group)
+  }
+
+  if (options.groupId) {
+    args.push('--group-id', options.groupId)
   }
 
   return args
