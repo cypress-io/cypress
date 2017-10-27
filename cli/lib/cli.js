@@ -13,7 +13,9 @@ const coerceFalse = (arg) => {
 const parseOpts = (opts) =>  {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-    'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached', 'headed')
+    'port', 'env', 'cypressVersion', 'config', 'record', 'key',
+    'browser', 'detached', 'headed',
+    'group', 'groupId')
 
   if (opts.project) {
     opts.project = path.resolve(opts.project)
@@ -41,6 +43,8 @@ const descriptions = {
   project: 'path to the project',
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
+  group: 'flag to group individual runs by using common --group-id',
+  groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -51,6 +55,23 @@ const text = (description) => {
   }
 
   return descriptions[description]
+}
+
+function includesVersion (args) {
+  return _.includes(args, 'version') ||
+    _.includes(args, '--version') ||
+    _.includes(args, '-v')
+}
+
+function showVersions () {
+  debug('printing Cypress version')
+  return require('./exec/versions')
+  .getVersions()
+  .then((versions = {}) => {
+    logger.log('Cypress package version:', versions.package)
+    logger.log('Cypress binary version:', versions.binary)
+    process.exit(0)
+  })
 }
 
 module.exports = {
@@ -76,15 +97,7 @@ module.exports = {
       .option('-v, --version', text('version'))
       .command('version')
       .description(text('version'))
-      .action(() => {
-        return require('./exec/versions')
-        .getVersions()
-        .then((versions = {}) => {
-          logger.log('Cypress package version:', versions.package)
-          logger.log('Cypress binary version:', versions.binary)
-          process.exit(0)
-        })
-      })
+      .action(showVersions)
 
     program
       .command('run')
@@ -101,7 +114,10 @@ module.exports = {
       .option('-c, --config <config>',                     text('config'))
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
+      .option('--group',                                   text('group'), coerceFalse)
+      .option('--group-id <group-id>',                     text('groupId'))
       .action((opts) => {
+        debug('running Cypress')
         require('./exec/run')
         .start(parseOpts(opts))
         .then(util.exit)
@@ -118,6 +134,7 @@ module.exports = {
       .option('-d, --detached [bool]',     text('detached'), coerceFalse)
       .option('-P, --project <project path>', text('project'))
       .action((opts) => {
+        debug('opening Cypress')
         require('./exec/open')
         .start(parseOpts(opts))
         .catch(util.logErrorExit1)
@@ -145,18 +162,27 @@ module.exports = {
 
     // if there are no arguments
     if (args.length <= 2) {
-      // then display the help
+      debug('printing help')
       program.help()
       // exits
     }
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
+      debug('unknwon command %s', firstCommand)
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()
       return util.exit(1)
     }
 
+    if (includesVersion(args)) {
+      // commander 2.11.0 changes behavior
+      // and now does not understand top level options
+      // .option('-v, --version').command('version')
+      // so we have to manually catch '-v, --version'
+      return showVersions()
+    }
+    debug('program parsing arguments')
     return program.parse(args)
   },
 }
