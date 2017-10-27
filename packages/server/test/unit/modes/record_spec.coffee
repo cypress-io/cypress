@@ -75,7 +75,6 @@ describe "lib/modes/record", ->
       @sandbox.stub(git, "_getSha").resolves("sha-123")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(api, "createRun")
-      @sandbox.spy(console, "log")
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()
@@ -92,6 +91,8 @@ describe "lib/modes/record", ->
         snapshot(api.createRun.firstCall.args)
 
     it "warns group flag is missing if only groupId is passed", ->
+      @sandbox.spy(console, "log")
+
       api.createRun.resolves()
 
       groupId = "gr123"
