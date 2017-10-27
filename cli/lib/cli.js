@@ -13,7 +13,9 @@ const coerceFalse = (arg) => {
 const parseOpts = (opts) =>  {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-    'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'browser', 'detached', 'headed')
+    'port', 'env', 'cypressVersion', 'config', 'record', 'key',
+    'browser', 'detached', 'headed',
+    'group', 'groupId')
 
   if (opts.project) {
     opts.project = path.resolve(opts.project)
@@ -41,6 +43,8 @@ const descriptions = {
   project: 'path to the project',
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
+  group: 'flag to group individual runs by using common --group-id',
+  groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -101,6 +105,8 @@ module.exports = {
       .option('-c, --config <config>',                     text('config'))
       .option('-b, --browser <browser-name>',              text('browser'))
       .option('-P, --project <project-path>',              text('project'))
+      .option('--group',                                   text('group'), coerceFalse)
+      .option('--group-id <group-id>',                     text('groupId'))
       .action((opts) => {
         require('./exec/run')
         .start(parseOpts(opts))
