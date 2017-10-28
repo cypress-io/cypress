@@ -4,7 +4,7 @@ EE          = require("events")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
-{getRemoteOrigin} = require("@cypress/commit-info")
+commitInfo  = require("@cypress/commit-info")
 cwd         = require("./cwd")
 ids         = require("./ids")
 api         = require("./api")
@@ -377,7 +377,7 @@ class Project extends EE
   createCiProject: (projectDetails) ->
     user.ensureAuthToken()
     .then (authToken) =>
-      getRemoteOrigin(@projectRoot)
+      commitInfo.getRemoteOrigin(@projectRoot)
       .then (remoteOrigin) ->
         api.createProject(projectDetails, remoteOrigin, authToken)
     .then (newProject) =>
