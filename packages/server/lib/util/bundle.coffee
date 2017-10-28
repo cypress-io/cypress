@@ -2,13 +2,11 @@ _                      = require("lodash")
 fs                     = require("fs-extra")
 EE                     = require("events")
 path                   = require("path")
-through                = require("through")
 Promise                = require("bluebird")
 babelify               = require("babelify")
 watchify               = require("watchify")
 browserify             = require("browserify")
 replaceExt             = require("replace-ext")
-writeJSONSync          = require('jsonfile').writeFileSync;
 presetReact            = require("babel-preset-react")
 presetLatest           = require("babel-preset-latest")
 stringStream           = require("string-to-stream")
@@ -135,13 +133,14 @@ module.exports = {
         ws = fs.createWriteStream(outputPath)
         ws.on "finish", ->
           log("browserify: finished bundling #{outputPath}")
-          try
-            writeJSONSync(cachePath, bundler._options.cache)
-            log("browserify: saved cache #{cachePath}")
-          catch err
-            log("browserify: error saving cache file #{cachePath}")
+          fs.outputJsonAsync(cachePath, bundler._options.cache)
+            .then ->
+              log("browserify: saved cache #{cachePath}")
+            .catch ->
+              log("browserify: error saving cache file #{cachePath}")
+            .finally ->
+              resolve()
 
-          resolve()
         ws.on("error", onError)
 
         bundler
