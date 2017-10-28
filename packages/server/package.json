@@ -33,7 +33,6 @@
     "@cypress/sinon-chai": "^1.0.0",
     "bin-up": "^1.1.0",
     "body-parser": "1.12.4",
-    "chdir-promise": "^0.4.1",
     "chokidar-cli": "^1.2.0",
     "codecov": "^1.0.1",
     "coffee-coverage": "^1.0.1",
@@ -67,6 +66,7 @@
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
   "dependencies": {
+    "@cypress/commit-info": "^1.1.0",
     "@cypress/icons": "0.5.4",
     "@cypress/mocha-teamcity-reporter": "^1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.3",
