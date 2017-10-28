@@ -8,10 +8,10 @@ path       = require("path")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
+commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
 extension  = require("@packages/extension")
 pkg        = require("@packages/root")
-git        = require("#{root}lib/util/git")
 bundle     = require("#{root}lib/util/bundle")
 connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
@@ -226,7 +226,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
       @sandbox.stub(browsers, "open")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+      @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
     it "runs project headlessly and exits with exit code 0", ->
       cypress.start(["--run-project=#{@todosPath}"])
@@ -734,12 +734,14 @@ describe "lib/cypress", ->
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(git, "_getSha").resolves("sha-123")
-      @sandbox.stub(git, "_getAuthor").resolves("brian")
-      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(git, "_getMessage").resolves("foo")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
-      @sandbox.stub(record, "getBranch").resolves("bem/ci")
+      @sandbox.stub(commitInfo, "commitInfo").resolves({
+        branch: "bem/ci",
+        sha: "sha-123",
+        author: "brian",
+        email: "brian@cypress.io",
+        message: "foo",
+        remote: "https://github.com/foo/bar.git"
+      })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
