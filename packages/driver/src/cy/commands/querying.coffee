@@ -285,7 +285,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if subject and not $dom.isElement(subject)
         subject = null
 
-
       switch
         when _.isRegExp(text)
           text = text
