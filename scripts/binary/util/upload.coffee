@@ -23,6 +23,7 @@ formHashFromEnvironment = () ->
 
 getS3Credentials = () ->
   ## gleb: fix this plzzzzzz
+  ## https://github.com/cypress-io/env-or-json-file/issues/3
   old = process.cwd()
 
   process.chdir(path.resolve(__dirname, '..'))

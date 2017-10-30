@@ -21,7 +21,7 @@ _PROVIDERS = {
     main: "cypress-io/cypress"
     others: [
       "cypress-io/cypress-test-tiny"
-      # "cypress-io/cypress-test-example-repos" ## @GLEB plz add this
+      "cypress-io/cypress-test-example-repos"
     ]
   }
 
@@ -94,6 +94,7 @@ MAIN_PROJECTS = remapMain(_PROVIDERS)
 
 getCiConfig = ->
   ## gleb: fix this plzzzzzz
+  ## https://github.com/cypress-io/env-or-json-file/issues/3
   old = process.cwd()
 
   process.chdir(__dirname)
