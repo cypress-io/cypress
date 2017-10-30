@@ -21,7 +21,7 @@ _PROVIDERS = {
     main: "cypress-io/cypress"
     others: [
       "cypress-io/cypress-test-tiny"
-      "cypress-io/cypress-test-example-repos"
+      # "cypress-io/cypress-test-example-repos" ## @GLEB plz add this
     ]
   }
 
