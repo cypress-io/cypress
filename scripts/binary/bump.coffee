@@ -93,17 +93,8 @@ PROJECTS = remapProjects(_PROVIDERS)
 MAIN_PROJECTS = remapMain(_PROVIDERS)
 
 getCiConfig = ->
-  ## gleb: fix this plzzzzzz
-  ## https://github.com/cypress-io/env-or-json-file/issues/3
-  old = process.cwd()
-
-  process.chdir(__dirname)
-
-  key = "support/.ci.json"
-
+  key = path.join("scripts", "support", ".ci.json")
   config = configFromEnvOrJsonFile(key)
-
-  process.chdir(old)
 
   if !config
     console.error('⛔️  Cannot find CI credentials')

@@ -22,17 +22,8 @@ formHashFromEnvironment = () ->
   throw new Error("Do not know how to form unique build hash on this CI")
 
 getS3Credentials = () ->
-  ## gleb: fix this plzzzzzz
-  ## https://github.com/cypress-io/env-or-json-file/issues/3
-  old = process.cwd()
-
-  process.chdir(path.resolve(__dirname, '..'))
-
-  key = path.join('support', '.aws-credentials.json')
-
+  key = path.join('scripts', 'support', '.aws-credentials.json')
   config = configFromEnvOrJsonFile(key)
-
-  process.chdir(old)
 
   if !config
     console.error('⛔️  Cannot find AWS credentials')
