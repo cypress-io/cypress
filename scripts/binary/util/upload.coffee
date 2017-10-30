@@ -39,6 +39,8 @@ getS3Credentials = () ->
     console.error('Using @cypress/env-or-json-file module')
     console.error('and filename', key)
     console.error('which is environment variable', filenameToShellVariable(key))
+    console.error('available environment variable keys')
+    console.error(Object.keys(process.env))
     throw new Error('AWS config not found')
 
   la(check.unemptyString(config.bucket), 'missing AWS config bucket')
