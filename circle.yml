@@ -477,7 +477,7 @@ jobs:
           command: |
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            CYPRESS_RECORD_KEY=$STAGING_RECORD_KEY \
             $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/cypress-test-tiny \
             --record
 
@@ -612,7 +612,7 @@ jobs:
           command: |
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            CYPRESS_RECORD_KEY=$STAGING_RECORD_KEY \
             $(npm bin)/cypress run --record
 
 workflows:
