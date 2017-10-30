@@ -1296,7 +1296,7 @@ describe "src/cy/commands/querying", ->
     it "finds text by regexp when second parameter is a regexp and restores contains", ->
       contains = Cypress.$Cypress.$.expr[":"].contains
 
-      cy.contains("ul#asdf", /asdf 1/).then ($li) ->
+      cy.contains("#asdf>li:first", /asdf 1/).then ($li) ->
         expect($li).to.have.text("asdf 1")
         expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
 
