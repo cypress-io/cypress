@@ -215,7 +215,9 @@ module.exports = {
       .then (cfg) =>
         { projectName } = cfg
 
-        @generateProjectBuildId(projectId, projectPath, projectName, options.key, options.group, options.groupId)
+        key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+
+        @generateProjectBuildId(projectId, projectPath, projectName, key, options.group, options.groupId)
         .then (buildId) =>
           ## bail if we dont have a buildId
           return if not buildId

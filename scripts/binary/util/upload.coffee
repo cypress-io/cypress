@@ -22,22 +22,16 @@ formHashFromEnvironment = () ->
   throw new Error("Do not know how to form unique build hash on this CI")
 
 getS3Credentials = () ->
-  ## gleb: fix this plzzzzzz
-  old = process.cwd()
-
-  process.chdir(path.resolve(__dirname, '..'))
-
-  key = path.join('support', '.aws-credentials.json')
-
+  key = path.join('scripts', 'support', '.aws-credentials.json')
   config = configFromEnvOrJsonFile(key)
-
-  process.chdir(old)
 
   if !config
     console.error('⛔️  Cannot find AWS credentials')
     console.error('Using @cypress/env-or-json-file module')
     console.error('and filename', key)
     console.error('which is environment variable', filenameToShellVariable(key))
+    console.error('available environment variable keys')
+    console.error(Object.keys(process.env))
     throw new Error('AWS config not found')
 
   la(check.unemptyString(config.bucket), 'missing AWS config bucket')

@@ -21,7 +21,7 @@ _PROVIDERS = {
     main: "cypress-io/cypress"
     others: [
       "cypress-io/cypress-test-tiny"
-      # "cypress-io/cypress-test-example-repos" ## @GLEB plz add this
+      "cypress-io/cypress-test-example-repos"
     ]
   }
 
@@ -93,16 +93,8 @@ PROJECTS = remapProjects(_PROVIDERS)
 MAIN_PROJECTS = remapMain(_PROVIDERS)
 
 getCiConfig = ->
-  ## gleb: fix this plzzzzzz
-  old = process.cwd()
-
-  process.chdir(__dirname)
-
-  key = "support/.ci.json"
-
+  key = path.join("scripts", "support", ".ci.json")
   config = configFromEnvOrJsonFile(key)
-
-  process.chdir(old)
 
   if !config
     console.error('⛔️  Cannot find CI credentials')

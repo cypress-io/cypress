@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@cypress/bumpercar": "^1.3.0",
-    "@cypress/env-or-json-file": "^1.2.0",
+    "@cypress/env-or-json-file": "^2.0.0",
     "@cypress/npm-run-all": "^4.0.4",
     "@cypress/questions-remain": "^1.0.1",
     "ansi-styles": "^3.1.0",
