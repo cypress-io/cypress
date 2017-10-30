@@ -9,9 +9,10 @@ errors     = require("../errors")
 stdout     = require("../stdout")
 upload     = require("../upload")
 Project    = require("../project")
-git        = require("../util/git")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
+debug      = require("debug")("cypress:server")
+commitInfo = require("@cypress/commit-info")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -22,30 +23,17 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  getBranch: (repo) ->
-    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "BUILDKITE_BRANCH", "CI_BRANCH"]
-      if b = process.env[branch]
-        return Promise.resolve(b)
-
-    repo.getBranch()
-
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
       console.log("Warning: you passed group-id but no group flag")
 
-    repo = git.init(projectPath)
-
-    Promise.props({
-      sha:     repo.getSha()
-      email:   repo.getEmail()
-      author:  repo.getAuthor()
-      remote:  repo.getRemoteOrigin()
-      branch:  @getBranch(repo)
-      message: repo.getMessage()
-    })
+    commitInfo.commitInfo(projectPath)
     .then (git) ->
+      debug("git information")
+      debug(git)
+
       # only send groupId if group option is true
       if group
         groupId ?= ciProvider.groupId()

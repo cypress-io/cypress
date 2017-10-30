@@ -16,7 +16,7 @@ Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
-git          = require("#{root}lib/util/git")
+commitInfo   = require("@cypress/commit-info")
 
 describe "lib/project", ->
   beforeEach ->
@@ -508,7 +508,7 @@ describe "lib/project", ->
 
       @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+      @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
       @sandbox.stub(api, "createProject")
       .withArgs({foo: "bar"}, "remoteOrigin", "auth-token-123")
       .resolves(@newProject)
