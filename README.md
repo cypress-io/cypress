@@ -17,8 +17,8 @@ In your project's [plugins file](https://on.cypress.io/guides/guides/plugins.htm
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
 
-module.exports = (on, config) => {
-  on('file:preprocessor', webpack(config))
+module.exports = (on) => {
+  on('file:preprocessor', webpack())
 }
 ```
 
@@ -28,7 +28,7 @@ Pass in options as the second argument to `webpack`:
 
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
-module.exports = (on, config) => {
+module.exports = (on) => {
   const options = {
     // send in the options from your webpack.config.js, so it works the same
     // as your app's code
@@ -36,7 +36,7 @@ module.exports = (on, config) => {
     watchOptions: {},
   }
 
-  on('file:preprocessor', webpack(config, options))
+  on('file:preprocessor', webpack(options))
 }
 ```
 
@@ -83,12 +83,26 @@ If, for example, you want to update the options for the `babel-loader` to add th
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
 
-module.exports = (on, config) => {
+module.exports = (on) => {
   const options = webpack.defaultOptions
   options.webpackOptions.module.rules[0].use.options.presets.push('babel-preset-stage-3')
 
-  on('file:preprocessor', webpack(config, options))
+  on('file:preprocessor', webpack(options))
 }
+```
+
+## Contributing
+
+Run all tests once:
+
+```shell
+npm test
+```
+
+Run tests in watch mode:
+
+```shell
+npm run test-watch
 ```
 
 ## License

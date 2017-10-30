@@ -36,11 +36,13 @@ describe('webpack preprocessor', function () {
     }
 
     this.config = {
-      isTextTerminal: true,
+      filePath: 'path/to/file.js',
+      outputPath: 'output/output.js',
+      shouldWatch: false,
+      on: sandbox.stub(),
+      emit: sandbox.spy(),
     }
-    this.userOptions = {}
-    this.filePath = 'path/to/file.js'
-    this.outputPath = 'output/output.js'
+    this.options = {}
     this.util = {
       getOutputPath: sandbox.stub().returns(this.outputPath),
       fileUpdated: sandbox.spy(),
@@ -48,17 +50,13 @@ describe('webpack preprocessor', function () {
     }
 
     this.run = () => {
-      return preprocessor(this.config, this.userOptions)(this.filePath, this.util)
+      return preprocessor(this.options)(this.config)
     }
   })
 
   describe('exported function', function () {
     it('receives user options and returns a preprocessor function', function () {
-      expect(preprocessor(this.config, this.userOptions)).to.be.a('function')
-    })
-
-    it('throws error if config is not the first argument', function () {
-      expect(preprocessor).to.throw('must be called with the Cypress config')
+      expect(preprocessor(this.options)).to.be.a('function')
     })
 
     it('has defaultOptions attached to it', function () {
@@ -69,7 +67,7 @@ describe('webpack preprocessor', function () {
 
   describe('preprocessor function', function () {
     afterEach(function () {
-      this.util.onClose.yield() // resets the cached bundles
+      this.config.on.withArgs('close').yield() // resets the cached bundles
     })
 
     describe('when it finishes cleanly', function () {
@@ -87,15 +85,15 @@ describe('webpack preprocessor', function () {
         webpack.reset()
         webpack.returns(this.compilerApi)
 
-        const run = preprocessor(this.config, this.userOptions)
-        run(this.filePath, this.util)
-        run(this.filePath, this.util)
+        const run = preprocessor(this.options)
+        run(this.config)
+        run(this.config)
         expect(webpack).to.be.calledOnce
       })
 
       it('specifies the entry file', function () {
         return this.run().then(() => {
-          expect(webpack.lastCall.args[0].entry).to.equal(this.filePath)
+          expect(webpack.lastCall.args[0].entry).to.equal(this.config.filePath)
         })
       })
 
@@ -108,14 +106,14 @@ describe('webpack preprocessor', function () {
         })
       })
 
-      it('runs when isTextTerminal is true', function () {
+      it('runs when shouldWatch is false', function () {
         return this.run().then(() => {
           expect(this.compilerApi.run).to.be.called
         })
       })
 
-      it('watches when isTextTerminal is false', function () {
-        this.config.isTextTerminal = false
+      it('watches when shouldWatch is true', function () {
+        this.config.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
         return this.run().then(() => {
           expect(this.compilerApi.watch).to.be.called
@@ -123,9 +121,9 @@ describe('webpack preprocessor', function () {
       })
 
       it('includes watchOptions if provided', function () {
-        this.config.isTextTerminal = false
+        this.config.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
-        this.userOptions.watchOptions = { poll: true }
+        this.options.watchOptions = { poll: true }
         return this.run().then(() => {
           expect(this.compilerApi.watch.lastCall.args[0]).to.eql({
             poll: true,
@@ -135,37 +133,29 @@ describe('webpack preprocessor', function () {
 
       it('resolves with the output path', function () {
         return this.run().then((outputPath) => {
-          expect(this.util.getOutputPath).to.be.calledWith(this.filePath)
-          expect(outputPath).to.be.equal(this.outputPath)
+          expect(outputPath).to.be.equal(this.config.outputPath)
         })
       })
 
-      it('calls util.fileUpdated when there is an update', function () {
+      it('emits `rerun` when there is an update', function () {
         this.compilerApi.plugin.withArgs('compile').yields()
         return this.run().then(() => {
-          expect(this.util.fileUpdated).to.be.calledWith(this.filePath)
+          expect(this.config.emit).to.be.calledWith('rerun')
         })
       })
 
-      it('registers onClose callback', function () {
-        return this.run().then(() => {
-          expect(this.util.onClose).to.be.called
-          expect(this.util.onClose.lastCall.args[0]).to.be.a('function')
-        })
-      })
-
-      it('closes bundler when isTextTerminal is false and onClose callback is called', function () {
-        this.config.isTextTerminal = false
+      it('closes bundler when shouldWatch is true and `close` is emitted', function () {
+        this.config.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
         return this.run().then(() => {
-          this.util.onClose.lastCall.args[0]()
+          this.config.on.withArgs('close').yield()
           expect(this.watchApi.close).to.be.called
         })
       })
 
-      it('does not close bundler when isTextTerminal is true and onClose callback is called', function () {
+      it('does not close bundler when shouldWatch is false and `close` is emitted', function () {
         return this.run().then(() => {
-          this.util.onClose.lastCall.args[0]()
+          this.config.on.withArgs('close').yield()
           expect(this.watchApi.close).not.to.be.called
         })
       })
