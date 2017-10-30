@@ -33,28 +33,24 @@ const defaultOptions = {
 // export a function that returns another function, making it easy for users
 // to configure like so:
 //
-// on('file:preprocessor', webpack(config, userOptions))
+// on('file:preprocessor', webpack(config, options))
 //
-const preprocessor = (config, userOptions = {}) => {
-  if (!config || typeof config.isTextTerminal !== 'boolean') {
-    throw new Error(`Cypress Webpack Preprocessor must be called with the Cypress config as its first argument. You passed: ${JSON.stringify(config, null, 2)}`)
-  }
-
-  log('user options:', userOptions)
-
+const preprocessor = (options = {}) => {
+  log('user options:', options)
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
   //
   // this function will get called for the support file when a project is loaded
   // (if the support file is not disabled)
-  // it will also get calledfor a spec file when that spec is requested by
+  // it will also get called for a spec file when that spec is requested by
   // the Cypress runner
   //
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (filePath, util) => {
+  return (config) => {
+    const filePath = config.filePath
     log('get', filePath)
 
     // since this function can get called multiple times with the same
@@ -65,17 +61,14 @@ const preprocessor = (config, userOptions = {}) => {
       return bundles[filePath]
     }
 
-    // if we're in a text terminal, this is a one-time run, probably in CI
-    // so we don't need to watch
-    const shouldWatch = !config.isTextTerminal
-    // util.getOutputPath returns a path alongside Cypress's other app data
-    // files so we don't have to worry about where to put the bundled
-    // file on disk
-    const outputPath = util.getOutputPath(filePath)
-
     // user can override the default options
-    let webpackOptions = Object.assign({}, defaultOptions.webpackOptions, userOptions.webpackOptions)
-    let watchOptions = Object.assign({}, defaultOptions.watchOptions, userOptions.watchOptions)
+    let webpackOptions = Object.assign({}, defaultOptions.webpackOptions, options.webpackOptions)
+    let watchOptions = Object.assign({}, defaultOptions.watchOptions, options.watchOptions)
+
+    // we're provided a default output path that lives alongside Cypress's
+    // app data files so we don't have to worry about where to put the bundled
+    // file on disk
+    const outputPath = config.outputPath
 
     // we need to set entry and output
     webpackOptions = Object.assign(webpackOptions, {
@@ -139,25 +132,25 @@ const preprocessor = (config, userOptions = {}) => {
         log('- compile finished for', filePath)
         // when the bundling is finished, we call `util.fileUpdated`
         // to let Cypress know to re-run the spec
-        util.fileUpdated(filePath)
+        config.emit('rerun')
       })
     })
 
-    if (shouldWatch) {
+    if (config.shouldWatch) {
       log('watching')
     }
 
-    const bundler = shouldWatch ?
+    const bundler = config.shouldWatch ?
       compiler.watch(watchOptions, handle) :
       compiler.run(handle)
 
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
-    util.onClose(() => {
+    config.on('close', () => {
       log('close', filePath)
       delete bundles[filePath]
 
-      if (shouldWatch) {
+      if (config.shouldWatch) {
         bundler.close()
       }
     })
