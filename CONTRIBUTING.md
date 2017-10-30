@@ -15,6 +15,27 @@ Thanks for taking the time to contribute! :smile:
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - Write Code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
 
+## Table of Contents
+
+- [CI Status](#ci-status)
+- [Code of Conduct](#code-of-conduct)
+- [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
+  - [Bug Reports](#bug-reports)
+  - [Feature Requests](#feature-requests)
+- [Writing Code](#writing-code)
+  - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
+  - [Requirements](#requirements)
+  - [Getting Started](#getting-started)
+  - [Coding Style](#coding-style)
+  - [Tests](#tests)
+  - [Working in a specific package](#packages)
+    - [Desktop-Gui](#desktop-gui)
+    - [Driver](#driver)
+- [Writing Documentation](#writing-documentation)
+- [Committing Code](#committing-code)
+  - [Pull Requests](#pull-requests)
+- [Deployment](#deployment)
+
 ## CI status
 
 Build status | Description
@@ -28,24 +49,6 @@ Build status | Description
 [![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper) | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)
 [![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/) | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)
 [![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress) | Windows CI
-
-## Table of Contents
-
-- [Code of Conduct](#code-of-conduct)
-- [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
-  - [Bug Reports](#bug-reports)
-  - [Feature Requests](#feature-requests)
-- [Writing Code](#writing-code)
-  - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
-  - [Requirements](#requirements)
-  - [Getting Started](#getting-started)
-  - [Coding Style](#coding-style)
-  - [Tests](#tests)
-  - [Packages](#packages)
-- [Writing Documentation](#writing-documentation)
-- [Committing Code](#committing-code)
-  - [Pull Requests](#pull-requests)
-- [Deployment](#deployment)
 
 ## Code of Conduct
 
@@ -110,9 +113,9 @@ Have a feature you'd like to see in Cypress? This describes how to file an effec
 - Align your expectations around timelines and priorities
 - Describe your problem, not your solution
 
-### Understand our Roadmap
+### Understand our roadmap
 
-We have a cohesive vision for Cypress in the long term and a general roadmap that extends into the future. While the specifics of how we get there are flexible, many milestones are well-established.
+We have a cohesive vision for Cypress in the long term and a general [roadmap](https://on.cypress.io/roadmap) that extends into the future. While the specifics of how we get there are flexible, many milestones are well-established.
 
 Feature requests are an important part of what we plan in our roadmap, but we ultimately build only features which make sense as part of the long term plan.
 
@@ -166,9 +169,11 @@ Here is a list of the core packages in this repository with a short description,
 [static]() | Serves static assets used in the Cypress GUI.
 [ts]() | A centralized version of typescript.
 
+We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
+
 ### Requirements
 
-You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project. We use [avn](https://github.com/wbyoung/avn) utility to switch to the right version in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
+You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project. We use [avn](https://github.com/wbyoung/avn), a utility to switch to the right npm version, in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
 
 ### Getting Started
 
@@ -199,16 +204,15 @@ Each package is responsible for building itself and testing itself and can do so
 Task | Purpose
 ---- | -------
 `build` | Build the package
-`build-dev` | Build all assets for development (if makes sense)
 `build-prod` | Build all assets for production (if makes sense)
-`watch-dev` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 `start` | Run a server for serving files
 `clean` | Remove any assets created by `build-dev` or `build-prod`
-`clean-deps` | Remove any dependencies installed (usually by npm or bower)
+`clean-deps` | Remove any dependencies installed (usually by `npm`)
 `test` | Runs all tests once
 `test-watch` | Run all tests in watch mode
+`watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 
-Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run. For most packages, there are unit, integration and e2e tests, which can be triggered by `npm run test-unit`, `npm run test-integration` and `npm run test-e2e` respectively.
+Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
 
 You can run `npm run all <script name>` from the root directory to run a script in every package that utilizes that script. Many times, you may only be working on one or two packages at a time, so it won't be necessary or desirable to run a script for every package. You can use the `--packages` option to specify in which package(s) to run the script.
 
@@ -268,13 +272,11 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 
 ### Tests
 
-TODO: switch this from saying to run all the tests, and instead run the test for a given package.
+ For most packages, there are unit, integration and e2e tests, which can be triggered by `npm run test-unit`, `npm run test-integration` and `npm run test-e2e` respectively.
 
-Our true e2e tests are in packages/server, which test the full stack all together. To run those - do XYZ.
+Our true e2e tests are in `packages/server`, which test the full stack all together.
 
-Mention difference in packages for unit, integration, and e2e tests.
-
-Make a note these are really long, and we spin up like 16 instances to do it all.
+The best source of truth in figuring out how to run tests for each package is our [`circle.yml`](.circle.yml) file found in the root `cypress` directory. The tasks defined in our [`circle.yml`](.circle.yml) are all run before anything is deployed.
 
 Since it is generally best to do single runs of tests serially instead of in parallel, this repo has some convenience scripts to run all the tests for all the packages sequentially:
 
@@ -294,14 +296,13 @@ have pulled the image `cypress/internal:chrome61` (see
 [circle.yml](circle.yml) for the current image name).
 
 The image will start and will map the root of the repository to
-`/cypress-monorepo` inside the image. Now you can modify the files using your
+`/cypress` inside the image. Now you can modify the files using your
 favorite environment and rerun tests inside the docker environment.
 
-**hint** sometimes building inside the image has problems with `node-sass`
-library
+**hint** sometimes building inside the image has problems with `node-sass` library
 
 ```text
-Error: Missing binding /cypress-monorepo/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
+Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
 Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
 
 Found bindings for the following environments:
@@ -319,15 +320,40 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
-### Packages
+### Working in a specific package
 
 #### Desktop-Gui
 
-##### Connecting to the API
+##### Developing
 
 Currently, if you want to work on the code around logging in, viewing runs, and setting up new projects to record, this requires connecting to a locally running API server.
 
 Our API server is only accessible to cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
+
+#### Driver
+
+##### Developing
+
+It should be noted that for developing in the `driver`, you need to watch the files using one of the following methods:
+
+- In the `cypress` root directory run `npm run watch`: This will run the watch task for all packages that have one.
+- In the `cypress/packages/runner` directory run `npm run watch`: This will run the watch task for the runner, which bundles the driver.
+
+##### Testing
+
+###### From the Cypress Test Runner:
+
+- In the `cypress` root directory, run `npm install` & `npm start`.
+- When the Cypress Test Runner opens, manually add the directory `cypress/packages/driver/test`.
+- In the `cypress/packages/driver` directory, run `npm start`.
+- Click into the `test` directory from the Cypress Test Runner.
+- Select any test file you want to run.
+
+###### From the terminal:
+
+- In the `cypress` directory: run `npm install`.
+- In the `cypress/packages/driver` directory, run `npm start` & `npm run test-integration`.
+- The Cypress Test Runner should spawn and run through each test file individually.
 
 
 ## Writing Documentation
@@ -346,13 +372,14 @@ The repository is setup with two main (protected) branches.
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please use the `address #[issue number]` or `closes #[issue number]` syntax in the pull request description.
-- Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need. 
+- When opening a PR for a specific issue already open, please name the branch you are working on using convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. 
+- Please use the `address #[issue number]` or `closes #[issue number]` syntax in the pull request description.
+- Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 
 ### Testing
 
-This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress-monorepo). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
+This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
 
 ## Deployment
 

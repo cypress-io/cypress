@@ -702,7 +702,15 @@ NothingRange.prototype._nativeGetText = function (rng){
 };
 NothingRange.prototype._nativeSetText = function (text, rng){
   var val = this._el[this._textProp];
-  this._el[this._textProp] = val.substring(0, rng[0]) + text + val.substring(rng[1]);
+
+  var newVal = val.substring(0, rng[0]) + text + val.substring(rng[1])
+
+  if (this._textProp === "value") {
+    setValue(this._el, newVal)
+  } else {
+    this._el[this._textProp] = newVal
+  }
+
 };
 NothingRange.prototype._nativeEOL = function(){
   this.text('\n');

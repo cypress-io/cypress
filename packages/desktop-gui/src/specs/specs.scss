@@ -64,6 +64,7 @@
   }
 
   .folder {
+    cursor: pointer;
     font-weight: 500;
     font-size: 15px;
     color: #636363;
@@ -73,8 +74,18 @@
       font-size: 13px;
     }
 
+    i.folder-collapse-icon {
+      display: inline-block;
+      margin-right: 0px;
+    }
+    
     &>div>div {
       padding-bottom: 0;
+    }
+
+    .folder-display-name {
+      display: inline-block;
+      margin-right: 5px;
     }
   }
 
@@ -85,7 +96,6 @@
     font-family: $font-sans;
     color: #637eb9;
     font-size: 15px;
-
 
     i {
       font-size: 13px;
@@ -164,6 +174,10 @@
       i {
         display: none;
         margin-right: 0;
+      }
+      
+      i.folder-collapse-icon {
+        display: inline-block;
       }
 
       &:after {

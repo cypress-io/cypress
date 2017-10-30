@@ -31,7 +31,9 @@ const shorten = (s) =>
   s.substr(0, 7)
 
 const getShortCommit = () => {
-  const sha = process.env.APPVEYOR_REPO_COMMIT || process.env.CIRCLE_SHA1
+  const sha = process.env.APPVEYOR_REPO_COMMIT ||
+    process.env.CIRCLE_SHA1 ||
+    process.env.BUILDKITE_COMMIT
   if (sha) {
     return shorten(sha)
   }
@@ -48,7 +50,7 @@ bump.version(npm, binary, platform, cliOptions.provider)
     const shortNpmVersion = getJustVersion(result.versionName)
     console.log('short NPM version', shortNpmVersion)
 
-    let subject = `Testing new Cypress version ${shortNpmVersion}`
+    let subject = `Testing new ${os.platform()} Cypress version ${shortNpmVersion}`
     const shortSha = getShortCommit()
     if (shortSha) {
       subject += ` ${shortSha}`

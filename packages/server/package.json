@@ -66,6 +66,7 @@
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
   "dependencies": {
+    "@cypress/commit-info": "^1.2.2",
     "@cypress/icons": "0.5.4",
     "@cypress/mocha-teamcity-reporter": "^1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.3",
@@ -98,7 +99,6 @@
     "fluent-ffmpeg": "^2.1.0",
     "fs-extra": "4.0.1",
     "getos": "^2.8.2",
-    "gift": "0.9.0",
     "glob": "7.1.2",
     "graceful-fs": "^4.1.11",
     "gulp-util": "^3.0.6",

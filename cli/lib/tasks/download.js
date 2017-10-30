@@ -49,11 +49,21 @@ const prettyDownloadErr = (err, version) => {
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
-const download = (options = {}) => {
-  if (!options.version) {
-    debug('empty Cypress version to download')
+// attention:
+// when passing relative path to NPM post install hook, the current working
+// directory is set to the `node_modules/cypress` folder
+// the user is probably passing relative path with respect to root package folder
+function formAbsolutePath (filename) {
+  if (path.isAbsolute(filename)) {
+    return filename
   }
+  return path.join(process.cwd(), '..', '..', filename)
+}
 
+// downloads from given url
+// return an object with
+// {filename: ..., downloaded: true}
+const downloadFromUrl = (options) => {
   return new Promise((resolve, reject) => {
     const url = getUrl(options.version)
 
@@ -120,9 +130,52 @@ const download = (options = {}) => {
     .on('finish', () => {
       debug('downloading finished')
 
-      resolve(options.downloadDestination)
+      resolve({
+        filename: options.downloadDestination,
+        downloaded: true,
+      })
     })
   })
+}
+
+// returns an object with zip filename
+// and a flag if the file was really downloaded
+// or not. Maybe it was already there!
+// {filename: ..., downloaded: true|false}
+const download = (options = {}) => {
+  if (!options.version) {
+    debug('empty Cypress version to download, will try latest')
+    return downloadFromUrl(options)
+  }
+
+  debug('need to download Cypress version %s', options.version)
+  // first check the original filename
+  return fs.pathExists(options.version)
+    .then((exists) => {
+      if (exists) {
+        debug('found file right away', options.version)
+        return {
+          filename: options.version,
+          downloaded: false,
+        }
+      }
+
+      const possibleFile = formAbsolutePath(options.version)
+      debug('checking local file', possibleFile, 'cwd', process.cwd())
+      return fs.pathExists(possibleFile)
+        .then((exists) => {
+          if (exists) {
+            debug('found local file', possibleFile)
+            debug('skipping download')
+            return {
+              filename: possibleFile,
+              downloaded: false,
+            }
+          } else {
+            return downloadFromUrl(options)
+          }
+        })
+    })
 }
 
 const start = (options) => {
