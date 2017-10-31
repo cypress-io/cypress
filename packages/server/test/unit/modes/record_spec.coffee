@@ -65,6 +65,7 @@ describe "lib/modes/record", ->
       # this is tested inside @cypress/commit-info
 
   context ".generateProjectBuildId", ->
+    projectSpecs = ["spec.js"]
     beforeEach ->
       @sandbox.stub(commitInfo, "commitInfo").resolves({
         branch: "master",
@@ -75,6 +76,13 @@ describe "lib/modes/record", ->
         remote: "https://github.com/foo/bar.git"
       })
       @sandbox.stub(api, "createRun")
+      @sandbox.stub(Project, "findSpecs").resolves(projectSpecs)
+
+    it "passes list of found specs", ->
+      api.createRun.resolves()
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+        specs = api.createRun.firstCall.args[0].specs
+        expect(specs).to.eq(projectSpecs)
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()

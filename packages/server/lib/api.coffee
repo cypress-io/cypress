@@ -1,4 +1,5 @@
 _          = require("lodash")
+R          = require("ramda")
 os         = require("os")
 nmi        = require("node-machine-id")
 request    = require("request-promise")
@@ -92,6 +93,9 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
+    debugReturnedBuild = (info) ->
+      debug("received API response with buildId %s", info.buildId)
+      debug("and list of specs to run", info.specs)
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -120,9 +124,7 @@ module.exports = {
       body: body
     })
     .promise()
-    .tap (info) ->
-      debug("received API response with buildId %s", info.buildId)
-      debug("and list of specs to run", info.specs)
+    .then(R.tap(debugReturnedBuild))
     .get("buildId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)

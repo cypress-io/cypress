@@ -203,8 +203,9 @@ describe "lib/api", ->
         commitMessage:     "such hax"
         remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
-        ciBuildNumber:      "987"
+        ciBuildNumber:     "987"
         ciParams:          { foo: "bar" }
+        specs:             ["foo.js", "bar.js"]
       }
 
     it "POST /builds + returns buildId", ->
@@ -292,16 +293,7 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: -> {
-          get: -> {
-            catch: -> {
-              catch: -> {
-                then: (fn) -> fn()
-              }
-              then: (fn) -> fn()
-            }
-          }
-        }
+        promise: () -> Promise.resolve({buildId: 'foo'})
       })
 
       api.createRun({})
