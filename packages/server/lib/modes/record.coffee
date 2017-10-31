@@ -51,7 +51,7 @@ module.exports = {
         groupId ?= ciProvider.groupId()
       else
         groupId = null
-      api.createRun({
+      createRunOptions = {
         projectId:         projectId
         recordKey:         recordKey
         commitSha:         git.sha
@@ -66,7 +66,8 @@ module.exports = {
         groupId:           groupId
         specs:             specs
         specPattern:       specPattern
-      })
+      }
+      api.createRun(createRunOptions)
       .catch (err) ->
         switch err.statusCode
           when 401

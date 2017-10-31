@@ -706,7 +706,8 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_RECORD_KEY
 
     beforeEach ->
-      @setup = =>
+      specFiles = ["a-spec.js", "b-spec.js"]
+      @setup = (specPattern) =>
         createRunArgs = {
           projectId:    @projectId
           recordKey:    "token-123"
@@ -720,6 +721,8 @@ describe "lib/cypress", ->
           ciBuildNumber: "987"
           ciParams: null
           groupId: null
+          specs: specFiles
+          specPattern: specPattern
         }
         @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
 
@@ -728,6 +731,7 @@ describe "lib/cypress", ->
         toString: -> "foobarbaz"
       })
 
+      @sandbox.stub(Project, "findSpecs").resolves(specFiles)
       @sandbox.stub(ciProvider, "name").returns("travis")
       @sandbox.stub(ciProvider, "buildNum").returns("987")
       @sandbox.stub(ciProvider, "params").returns(null)
@@ -804,7 +808,8 @@ describe "lib/cypress", ->
         @expectExitWith(3)
 
     it "runs project by specific absolute spec and exits with status 3", ->
-      @setup()
+      spec = "#{@todosPath}/tests/test2.coffee"
+      @setup(spec)
 
       @createRun.resolves("build-id-123")
 
@@ -815,7 +820,7 @@ describe "lib/cypress", ->
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
+      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(3)
