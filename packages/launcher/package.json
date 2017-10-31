@@ -42,7 +42,7 @@
     "sinon-chai": "^2.8.0",
     "tslint": "5.7.0",
     "tslint-config-standard": "6.0.1",
-    "typescript": "^2.5.2",
+    "typescript": "2.5.2",
     "@types/ramda": "0.24.14"
   },
   "dependencies": {
