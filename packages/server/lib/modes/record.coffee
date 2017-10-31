@@ -13,6 +13,8 @@ terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
 debug      = require("debug")("cypress:server")
 commitInfo = require("@cypress/commit-info")
+la         = require("lazy-ass")
+check      = require("check-more-types")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -23,18 +25,27 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId) ->
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
       console.log("Warning: you passed group-id but no group flag")
 
+    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+
     debug("generating build id for project %s at %s", projectId, projectPath)
-    commitInfo.commitInfo(projectPath)
-    .then (git) ->
+    Promise.all([
+      commitInfo.commitInfo(projectPath),
+      Project.findSpecs(projectPath, specPattern)
+    ])
+    .spread (git, specs) ->
       debug("git information")
       debug(git)
-
+      if specPattern
+        debug("spec pattern", specPattern)
+      debug("project specs")
+      debug(specs)
+      la(check.maybe.strings(specs), "invalid list of specs to run", specs)
       # only send groupId if group option is true
       if group
         groupId ?= ciProvider.groupId()
@@ -53,6 +64,8 @@ module.exports = {
         ciProvider:        ciProvider.name()
         ciBuildNumber:     ciProvider.buildNum()
         groupId:           groupId
+        specs:             specs
+        specPattern:       specPattern
       })
       .catch (err) ->
         switch err.statusCode
@@ -218,10 +231,13 @@ module.exports = {
 
         key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
-        @generateProjectBuildId(projectId, projectPath, projectName, key, options.group, options.groupId)
+        @generateProjectBuildId(projectId, projectPath, projectName, key,
+          options.group, options.groupId, options.spec)
         .then (buildId) =>
           ## bail if we dont have a buildId
           return if not buildId
+
+          process.exit(0)
 
           @createInstance(buildId, options.spec)
         .then (instanceId) =>

@@ -1,10 +1,13 @@
 _           = require("lodash")
+R           = require("ramda")
 fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
+la          = require("lazy-ass")
+check       = require("check-more-types")
 cwd         = require("./cwd")
 ids         = require("./ids")
 api         = require("./api")
@@ -21,6 +24,7 @@ Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
 settings    = require("./util/settings")
+{getTestFiles} = require("./controllers/files")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 log         = require("debug")("cypress:server:project")
 
@@ -38,6 +42,8 @@ class Project extends EE
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
+    if not check.unemptyString(projectRoot)
+      throw new Error("Expected project root path, not #{projectRoot}")
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
@@ -523,5 +529,18 @@ class Project extends EE
         api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
+
+  # Given a path to the project, finds all specs
+  # returns list of specs with respect to the project root
+  @findSpecs = (projectPath, specPattern) ->
+    log("finding specs for project %s", projectPath)
+    la(check.unemptyString(projectPath), "missing project path", projectPath)
+    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+    Project(projectPath)
+    .getConfig()
+    # TODO: handle wild card pattern or spec filename
+    .then getTestFiles
+    .then R.prop("integration")
+    .then R.map(R.prop("path"))
 
 module.exports = Project

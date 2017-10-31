@@ -104,7 +104,9 @@ module.exports = {
       "ciParams"
       "ciProvider"
       "ciBuildNumber",
-      "groupId"
+      "groupId",
+      "specs",
+      "specPattern"
     ])
     debug("creating project run")
     debug("project '%s' group id '%s'", body.projectId, body.groupId)
@@ -120,6 +122,7 @@ module.exports = {
     .promise()
     .tap (info) ->
       debug("received API response with buildId %s", info.buildId)
+      debug("and list of specs to run", info.specs)
     .get("buildId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
