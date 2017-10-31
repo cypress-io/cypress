@@ -29,6 +29,7 @@ module.exports = {
     if groupId and not group
       console.log("Warning: you passed group-id but no group flag")
 
+    debug("generating build id for project %s at %s", projectId, projectPath)
     commitInfo.commitInfo(projectPath)
     .then (git) ->
       debug("git information")
