@@ -23,8 +23,8 @@ Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
+files       = require("./controllers/files")
 settings    = require("./util/settings")
-{getTestFiles} = require("./controllers/files")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 log         = require("debug")("cypress:server:project")
 
@@ -536,11 +536,20 @@ class Project extends EE
     log("finding specs for project %s", projectPath)
     la(check.unemptyString(projectPath), "missing project path", projectPath)
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+
+    ## if we have a spec pattern
+    if specPattern
+      ## then normalize to create an absolute
+      ## file path from projectRoot
+      ## ie: **/* turns into /Users/bmann/dev/project/**/*
+      specPattern = path.resolve(projectPath, specPattern)
+
     Project(projectPath)
     .getConfig()
     # TODO: handle wild card pattern or spec filename
-    .then getTestFiles
+    .then (cfg) ->
+      files.getTestFiles(cfg, specPattern)
     .then R.prop("integration")
-    .then R.map(R.prop("path"))
+    .then R.map(R.prop("name"))
 
 module.exports = Project

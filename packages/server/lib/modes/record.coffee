@@ -67,6 +67,7 @@ module.exports = {
         specs:             specs
         specPattern:       specPattern
       }
+
       api.createRun(createRunOptions)
       .catch (err) ->
         switch err.statusCode
@@ -237,8 +238,6 @@ module.exports = {
         .then (buildId) =>
           ## bail if we dont have a buildId
           return if not buildId
-
-          process.exit(0)
 
           @createInstance(buildId, options.spec)
         .then (instanceId) =>
