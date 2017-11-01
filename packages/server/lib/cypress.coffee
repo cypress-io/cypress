@@ -149,9 +149,6 @@ module.exports = {
         ## enable old CLI tools to record
         when options.record or options.ci
           options.mode = "record"
-          if not options.key
-            log("trying to read option key from environment")
-            options.key = process.env.CYPRESS_RECORD_KEY || process.env.CYPRESS_CI_KEY
 
         when options.runProject
           ## go into headless mode when told to run

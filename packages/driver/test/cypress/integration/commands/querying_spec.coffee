@@ -1293,6 +1293,13 @@ describe "src/cy/commands/querying", ->
         expect($li).to.have.text("asdf 1")
         expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
 
+    it "finds text by regexp when second parameter is a regexp and restores contains", ->
+      contains = Cypress.$Cypress.$.expr[":"].contains
+
+      cy.contains("#asdf>li:first", /asdf 1/).then ($li) ->
+        expect($li).to.have.text("asdf 1")
+        expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
+
     it "returns elements found first when multiple siblings found", ->
       cy.contains("li", "asdf").then ($li) ->
         expect($li).to.have.text("asdf 1")

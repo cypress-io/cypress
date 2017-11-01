@@ -4,6 +4,7 @@ EE          = require("events")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
+commitInfo  = require("@cypress/commit-info")
 cwd         = require("./cwd")
 ids         = require("./ids")
 api         = require("./api")
@@ -19,7 +20,6 @@ Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
-git         = require("./util/git")
 settings    = require("./util/settings")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 log         = require("debug")("cypress:server:project")
@@ -377,9 +377,7 @@ class Project extends EE
   createCiProject: (projectDetails) ->
     user.ensureAuthToken()
     .then (authToken) =>
-      git
-      .init(@projectRoot)
-      .getRemoteOrigin()
+      commitInfo.getRemoteOrigin(@projectRoot)
       .then (remoteOrigin) ->
         api.createProject(projectDetails, remoteOrigin, authToken)
     .then (newProject) =>
