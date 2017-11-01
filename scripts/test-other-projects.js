@@ -56,11 +56,26 @@ bump.version(npm, binary, platform, cliOptions.provider)
       subject += ` ${shortSha}`
     }
 
+    // instructions for installing this binary
+    // using https://github.com/bahmutov/commit-message-install
+    const commitMessageInstructions = {
+      platform: os.platform(),
+      env: {
+        CYPRESS_BINARY_VERSION: result.binary,
+      },
+      packages: result.versionName,
+    }
+    const jsonBlock = `\`\`\`json\n${
+      JSON.stringify(commitMessageInstructions, null, 2)}\n`
+      + '```'
+
+    const footer = 'Use tool `commit-message-install` to install from above block'
     let message = stripIndent`
       ${subject}
 
-      NPM package: ${result.versionName}
-      Binary: ${result.binary}
+      ${jsonBlock}
+
+      ${footer}
     `
     if (process.env.CIRCLE_BUILD_URL) {
       message += '\n'
