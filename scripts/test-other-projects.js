@@ -39,6 +39,26 @@ const getShortCommit = () => {
   }
 }
 
+/**
+ * Returns given string surrounded by ```json + ``` quotes
+ * @param {string} s
+ */
+const toJsonCodeBlock = (s) => {
+  const start = '```json'
+  const finish = '```'
+  return `${start}\n${s}\n${finish}\n`
+}
+
+/**
+ * Converts given JSON object into markdown text block
+ * @param {object} object
+ */
+const toMarkdownJsonBlock = (object) => {
+  la(object, 'expected an object to convert to JSON', object)
+  const str = JSON.stringify(object, null, 2)
+  return toJsonCodeBlock(str)
+}
+
 bump.version(npm, binary, platform, cliOptions.provider)
   .then((result) => {
     console.log('bumped all test projects with new env variables')
@@ -56,12 +76,18 @@ bump.version(npm, binary, platform, cliOptions.provider)
       subject += ` ${shortSha}`
     }
 
-    let message = stripIndent`
-      ${subject}
-
-      NPM package: ${result.versionName}
-      Binary: ${result.binary}
-    `
+    // instructions for installing this binary
+    // using https://github.com/bahmutov/commit-message-install
+    const commitMessageInstructions = {
+      platform: os.platform(),
+      env: {
+        CYPRESS_BINARY_VERSION: result.binary,
+      },
+      packages: result.versionName,
+    }
+    const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
+    const footer = 'Use tool `commit-message-install` to install from above block'
+    let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
     if (process.env.CIRCLE_BUILD_URL) {
       message += '\n'
       message += stripIndent`
