@@ -3,17 +3,11 @@ EE = require("events")
 path = require("path")
 log = require("debug")("cypress:server:preprocessor")
 Promise = require("bluebird")
-babelify = require("babelify")
-cjsxify = require("./util/cjsxify")
 
-presetReact = require("babel-preset-react")
-presetLatest = require("babel-preset-latest")
-pluginAddModuleExports = require("babel-plugin-add-module-exports")
-
-appData = require("./util/app_data")
-cwd = require("./cwd")
-plugins = require("./plugins")
-{ toHashName } = require("./util/saved_state")
+appData = require("../util/app_data")
+cwd = require("../cwd")
+plugins = require("../plugins")
+savedState = require("../util/saved_state")
 
 PrettyError = require("pretty-error")
 pe = new PrettyError()
@@ -46,45 +40,27 @@ clientSideError = (err) ->
   """
 
 getOutputPath = (config, filePath) ->
-  appData.projectsPath(toHashName(config.projectRoot), "bundles", filePath)
+  appData.projectsPath(savedState.toHashName(config.projectRoot), "bundles", filePath)
 
-emitter = new EE()
+baseEmitter = new EE()
 fileProcessors = {}
+configs = {}
 
-setDefaultPreprocessor = (config) ->
+setDefaultPreprocessor = ->
   log("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  plugins.register "file:preprocessor", browserify(config, {
-    extensions: [".js", ".jsx", ".coffee", ".cjsx"]
-    watchifyOptions: {
-      ignoreWatch: [
-        "**/.git/**"
-        "**/.nyc_output/**"
-        "**/.sass-cache/**"
-        "**/bower_components/**"
-        "**/coverage/**"
-        "**/node_modules/**"
-      ]
-    }
-    transforms: [
-      {
-        transform: cjsxify
-        options: {}
-      }
-      {
-        transform: babelify
-        options: {
-          ast: false
-          babelrc: false
-          plugins: [pluginAddModuleExports]
-          presets: [presetLatest, presetReact]
-        }
-      }
-    ]
-  })
+  plugins.register("file:preprocessor", browserify())
+
+plugins.registerHandler (ipc) ->
+  ipc.on "preprocessor:rerun", (filePath) ->
+    baseEmitter.emit("file:updated", filePath)
+
+  baseEmitter.on "close", (filePath) ->
+    ipc.send("preprocessor:close", filePath)
 
 module.exports = {
+  emitter: baseEmitter
   errorMessage: errorMessage
   clientSideError: clientSideError
 
@@ -93,17 +69,17 @@ module.exports = {
 
     log("getFile #{filePath}")
 
-    util = {
-      fileUpdated: (changedFilePath) ->
-        log("file updated: #{filePath}")
-        if _.isFunction(options.onChange) and changedFilePath is filePath
-          options.onChange(changedFilePath)
-      getOutputPath: _.partial(getOutputPath, config)
-      onClose: (cb) ->
-        emitter.on("close:#{filePath}", cb)
-        emitter.on("close", cb)
-    }
-
+    if not preprocessorConfig = configs[filePath]
+      preprocessorConfig = configs[filePath] = _.extend(new EE(), {
+        filePath: filePath
+        outputPath: getOutputPath(config, filePath.replace(config.projectRoot, ""))
+        shouldWatch: not config.isTextTerminal
+      })
+      preprocessorConfig.on "rerun", ->
+        baseEmitter.emit("file:updated", filePath)
+      baseEmitter.once "close", ->
+        preprocessorConfig.emit("close")
+ 
     if not plugins.has("file:preprocessor")
       setDefaultPreprocessor(config)
 
@@ -111,11 +87,8 @@ module.exports = {
       log("headless and already processed")
       return fileProcessor
 
-    preprocessor = Promise.resolve(
-      plugins.execute("file:preprocessor", filePath, util)
-    )
-
-    fileProcessors[filePath] = preprocessor
+    preprocessor = fileProcessors[filePath] = Promise.try ->
+      plugins.execute("file:preprocessor", preprocessorConfig)
 
     return preprocessor
 
@@ -123,15 +96,18 @@ module.exports = {
     return if not fileProcessors[filePath]
 
     log("removeFile #{filePath}")
-    emitter.emit("close:#{filePath}")
+    baseEmitter.emit("close", filePath)
+    if config = configs[filePath]
+      config.emit("close")
+    delete configs[filePath]
     delete fileProcessors[filePath]
 
   close: ->
     log("close preprocessor")
 
-    preprocessor = null
+    configs = {}
     fileProcessors = {}
-    emitter.emit("close")
-    emitter.removeAllListeners()
+    baseEmitter.emit("close")
+    baseEmitter.removeAllListeners()
 
 }

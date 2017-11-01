@@ -17,7 +17,7 @@ Automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/test/support/helpers/fixtures")
 exec         = require("#{root}lib/exec")
 savedState   = require("#{root}lib/saved_state")
-preprocessor = require("#{root}lib/preprocessor")
+preprocessor = require("#{root}lib/plugins/preprocessor")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -447,25 +447,28 @@ describe "lib/socket", ->
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
         expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
 
-      it "sends onChange option to preprocessor", ->
+      it "listens for 'file:updated' on preprocessor", ->
         @cfg.watchForFileChanges = true
+        @sandbox.stub(preprocessor.emitter, "on")
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.getFile.lastCall.args[2].onChange).to.be.a("function")
+        expect(preprocessor.emitter.on).to.be.calledWith("file:updated")
 
-      it "triggers watched:file:changed event when preprocessor onChange is called", (done) ->
+      it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
         @sandbox.stub(fs, "statAsync").resolves()
         @cfg.watchForFileChanges = true
+        @sandbox.stub(preprocessor.emitter, "on")
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        preprocessor.getFile.lastCall.args[2].onChange("integration/test2.coffee")
+        preprocessor.emitter.on.withArgs("file:updated").yield("integration/test2.coffee")
         setTimeout =>
           expect(@io.emit).to.be.calledWith("watched:file:changed")
           done()
         , 200
 
-      it "sends onChange option to preprocessor if config.watchForFileChanges is false", ->
+      it "does not listen for 'file:updated' if config.watchForFileChanges is false", ->
         @cfg.watchForFileChanges = false
+        @sandbox.stub(preprocessor.emitter, "on")
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.getFile.lastCall.args[2]).to.be.undefined
+        expect(preprocessor.emitter.on).not.to.be.called
 
     context "#startListening", ->
       it "sets #testsDir", ->

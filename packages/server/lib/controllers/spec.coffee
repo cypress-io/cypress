@@ -1,6 +1,6 @@
 log = require('debug')('cypress:server:controllers:spec')
 errors = require("../errors")
-preprocessor = require("../preprocessor")
+preprocessor = require("../plugins/preprocessor")
 
 module.exports = {
   handle: (spec, req, res, config, next, project) ->

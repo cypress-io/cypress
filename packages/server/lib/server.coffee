@@ -505,9 +505,12 @@ class Server
       ## since we don't know how to proxy it!
       socket.end() if socket.writable
 
-  _close: ->
+  reset: ->
     buffers.reset()
 
+  _close: ->
+    @reset()
+ 
     logger.unsetSettings()
 
     evilDns.clear()

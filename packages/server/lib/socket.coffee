@@ -12,9 +12,8 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 logger        = require("./logger")
-browsers      = require("./browsers")
 automation    = require("./automation")
-preprocessor  = require("./preprocessor")
+preprocessor  = require("./plugins/preprocessor")
 log           = require('debug')('cypress:server:socket')
 
 runnerEvents = [
@@ -51,6 +50,8 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket
 
+    @onTestFileChange = @onTestFileChange.bind(@)
+
   onTestFileChange: (filePath) ->
     log("test file changed: #{filePath}")
 
@@ -86,9 +87,7 @@ class Socket
     log("will watch test file path #{filePath}")
 
     if config.watchForFileChanges
-      options = {
-        onChange: @onTestFileChange.bind(@)
-      }
+      preprocessor.emitter.on("file:updated", @onTestFileChange)
 
     preprocessor.getFile(filePath, config, options)
     ## ignore errors b/c we're just setting up the watching. errors
@@ -342,6 +341,7 @@ class Socket
     @toRunner("change:to:url", url)
 
   close: ->
+    preprocessor.emitter.removeListener("file:updated", @onTestFileChange)
     @io?.close()
 
 module.exports = Socket

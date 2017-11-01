@@ -16,7 +16,7 @@ Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
-preprocessor = require("#{root}lib/preprocessor")
+preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
 git          = require("#{root}lib/util/git")
 

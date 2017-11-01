@@ -19,7 +19,7 @@ Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
 plugins     = require("./plugins")
-preprocessor = require("./preprocessor")
+preprocessor = require("./plugins/preprocessor")
 git         = require("./util/git")
 settings    = require("./util/settings")
 scaffoldLog = require("debug")("cypress:server:scaffold")
@@ -99,7 +99,7 @@ class Project extends EE
             @watchPluginsFile(cfg, options)
           )
         .then ->
-          plugins.init(cfg)
+          plugins.init(cfg, options)
 
     # return our project instance
     .return(@)
@@ -111,9 +111,16 @@ class Project extends EE
     ])
     .spread (projectId, authToken) ->
       api.getProjectRuns(projectId, authToken)
+  
+  reset: ->
+    log("resetting project instance %s", @projectRoot)
+
+    Promise.try =>
+      @server?.reset()
 
   close: ->
     log("closing project instance %s", @projectRoot)
+
     if @memoryCheck
       clearInterval(@memoryCheck)
 
@@ -160,11 +167,12 @@ class Project extends EE
       log("watch plugins file")
       @watchers.watch(config.pluginsFile, {
         onChange: =>
+          ## TODO: completely re-open project instead?
           log("plugins file changed")
           ## re-init plugins after a change
           Promise
           .try ->
-            plugins.init(config)
+            plugins.init(config, options)
           .catch (err) ->
             options.onError(err)
       })

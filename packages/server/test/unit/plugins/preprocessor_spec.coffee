@@ -1,20 +1,23 @@
-require("../spec_helper")
+require("../../spec_helper")
 
 EE = require("events")
-Fixtures = require("../support/helpers/fixtures")
+Fixtures = require("../../support/helpers/fixtures")
 fs = require("fs-extra")
 path = require("path")
 snapshot = require("snap-shot-it")
-appData = require("#{root}lib/util/app_data")
-{ toHashName } = require("#{root}lib/util/saved_state")
+appData = require("#{root}../lib/util/app_data")
+{ toHashName } = require("#{root}../lib/util/saved_state")
 
-plugins = require("#{root}lib/plugins")
-preprocessor = require("#{root}lib/preprocessor")
+plugins = require("#{root}../lib/plugins")
+preprocessor = require("#{root}../lib/plugins/preprocessor")
 
-describe "lib/preprocessor", ->
+describe "lib/plugins/preprocessor", ->
   beforeEach ->
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
+
+    @filePath = "/path/to/test.coffee"
+    @fullFilePath = path.join(@todosPath, @filePath)
 
     @testPath = path.join(@todosPath, "test.coffee")
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
@@ -30,49 +33,37 @@ describe "lib/preprocessor", ->
     }
 
   context "#getFile", ->
-    it "executes the plugin with the file path", ->
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(@plugin).to.be.calledWith(path.join(@todosPath, "/path/to/test.coffee"))
+    it "executes the plugin with file path", ->
+      preprocessor.getFile(@filePath, @config)
+      expect(@plugin).to.be.called
+      expect(@plugin.lastCall.args[0].filePath).to.equal(@fullFilePath)
 
-    it "executes the plugin with util to get output path", ->
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(@plugin.lastCall.args[1].getOutputPath).to.be.a("function")
-      actualPath = @plugin.lastCall.args[1].getOutputPath("/output/path.js")
-      expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", "/output/path.js")
-      expect(actualPath).to.equal(expectedPath)
+    it "executes the plugin with output path", ->
+      preprocessor.getFile(@filePath, @config)
+      expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
+      expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
 
     it "returns a promise resolved with the plugin's outputPath", ->
-      preprocessor.getFile("/path/to/test.coffee", @config).then (filePath) ->
+      preprocessor.getFile(@filePath, @config).then (filePath) ->
         expect(filePath).to.equal("/path/to/output.js")
 
-    it "calls provides util.fileUpdated", ->
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      expect(=>
-        @plugin.lastCall.args[1].fileUpdated()
-      ).not.to.throw()
-
-    it "calls onChange option when util.fileUpdated is called with same file path", ->
-      onChange = @sandbox.spy()
-      preprocessor.getFile("/path/to/test.coffee", @config, { onChange })
-      @plugin.lastCall.args[1].fileUpdated(path.join(@todosPath, "/path/to/test.coffee"))
-      expect(onChange).to.be.calledWith(path.join(@todosPath, "/path/to/test.coffee"))
-
-    it "does not onChange option when util.fileUpdated is called with different file path", ->
-      onChange = @sandbox.spy()
-      preprocessor.getFile("/path/to/test.coffee", @config, { onChange })
-      @plugin.lastCall.args[1].fileUpdated(path.join(@todosPath, "/path/to/other.coffee"))
-      expect(onChange).not.to.be.called
+    it "emits 'file:updated' with filePath when 'rerun' is emitted", ->
+      fileUpdated = @sandbox.spy()
+      preprocessor.emitter.on("file:updated", fileUpdated)
+      preprocessor.getFile(@filePath, @config)
+      @plugin.lastCall.args[0].emit("rerun")
+      expect(fileUpdated).to.be.calledWith(@fullFilePath)
 
     it "invokes plugin again when isTextTerminal: false", ->
       @config.isTextTerminal = false
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      preprocessor.getFile("/path/to/test.coffee", @config)
+      preprocessor.getFile(@filePath, @config)
+      preprocessor.getFile(@filePath, @config)
       expect(@plugin).to.be.calledTwice
 
     it "does not invoke plugin again when isTextTerminal: true", ->
       @config.isTextTerminal = true
-      preprocessor.getFile("/path/to/test.coffee", @config)
-      preprocessor.getFile("/path/to/test.coffee", @config)
+      preprocessor.getFile(@filePath, @config)
+      preprocessor.getFile(@filePath, @config)
       expect(@plugin).to.be.calledOnce
 
     it "uses default preprocessor if none registered", ->
@@ -82,26 +73,37 @@ describe "lib/preprocessor", ->
       browserifyFn = ->
       browserify = @sandbox.stub().returns(browserifyFn)
       mockery.registerMock("@cypress/browserify-preprocessor", browserify)
-      preprocessor.getFile("/path/to/test.coffee", @config)
+      preprocessor.getFile(@filePath, @config)
       expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn)
-      expect(browserify).to.be.calledWith(@config)
-      snapshot(browserify.lastCall.args[1])
+      expect(browserify).to.be.called
 
   context "#removeFile", ->
-    it "calls plugin's onClose callback", ->
-      preprocessor.getFile("/path/to/test.coffee", @config)
+    it "emits 'close'", ->
+      preprocessor.getFile(@filePath, @config)
       onClose = @sandbox.spy()
-      @plugin.lastCall.args[1].onClose(onClose)
-      fullPath = path.join(@todosPath, "/path/to/test.coffee")
-      preprocessor.removeFile(fullPath)
+      @plugin.lastCall.args[0].on("close", onClose)
+      preprocessor.removeFile(@fullFilePath)
       expect(onClose).to.be.called
 
-  context "#close", ->
-    it "calls plugin's onClose callback", ->
-      preprocessor.getFile("/path/to/test.coffee", @config)
+    it "emits 'close' with file path on base emitter", ->
       onClose = @sandbox.spy()
-      @plugin.lastCall.args[1].onClose(onClose)
-      fullPath = path.join(@todosPath, "/path/to/test.coffee")
+      preprocessor.emitter.on "close", onClose
+      preprocessor.getFile(@filePath, @config)
+      preprocessor.removeFile(@fullFilePath)
+      expect(onClose).to.be.calledWith(@fullFilePath)
+
+  context "#close", ->
+    it "emits 'close' on config emitter", ->
+      preprocessor.getFile(@filePath, @config)
+      onClose = @sandbox.spy()
+      @plugin.lastCall.args[0].on("close", onClose)
+      preprocessor.close()
+      expect(onClose).to.be.called
+
+    it "emits 'close' on base emitter", ->
+      onClose = @sandbox.spy()
+      preprocessor.emitter.on "close", onClose
+      preprocessor.getFile(@filePath, @config)
       preprocessor.close()
       expect(onClose).to.be.called
 

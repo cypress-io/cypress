@@ -3,7 +3,7 @@ require("../spec_helper")
 _ = require("lodash")
 path = require("path")
 spec = require("#{root}lib/controllers/spec")
-preprocessor = require("#{root}lib/preprocessor")
+preprocessor = require("#{root}lib/plugins/preprocessor")
 errors = require("#{root}lib/errors")
 
 describe "lib/controllers/spec", ->

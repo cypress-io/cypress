@@ -25,7 +25,7 @@ files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
-preprocessor  = require("#{root}lib/preprocessor")
+preprocessor  = require("#{root}lib/plugins/preprocessor")
 
 fs = Promise.promisifyAll(fs)
 
