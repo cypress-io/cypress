@@ -1,5 +1,4 @@
 _          = require("lodash")
-R          = require("ramda")
 os         = require("os")
 nmi        = require("node-machine-id")
 request    = require("request-promise")
@@ -96,6 +95,7 @@ module.exports = {
     debugReturnedBuild = (info) ->
       debug("received API response with buildId %s", info.buildId)
       debug("and list of specs to run", info.specs)
+      
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -112,8 +112,10 @@ module.exports = {
       "specs",
       "specPattern"
     ])
+    
     debug("creating project run")
     debug("project '%s' group id '%s'", body.projectId, body.groupId)
+    
     rp.post({
       url: Routes.runs()
       json: true
@@ -124,7 +126,7 @@ module.exports = {
       body: body
     })
     .promise()
-    .then(R.tap(debugReturnedBuild))
+    .tap(debugReturnedBuild)
     .get("buildId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
