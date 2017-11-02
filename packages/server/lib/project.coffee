@@ -1,9 +1,13 @@
 _           = require("lodash")
+R           = require("ramda")
 fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
+commitInfo  = require("@cypress/commit-info")
+la          = require("lazy-ass")
+check       = require("check-more-types")
 cwd         = require("./cwd")
 ids         = require("./ids")
 api         = require("./api")
@@ -18,6 +22,7 @@ Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
+files       = require("./controllers/files")
 plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
 git         = require("./util/git")
@@ -39,6 +44,8 @@ class Project extends EE
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
+    if not check.unemptyString(projectRoot)
+      throw new Error("Expected project root path, not #{projectRoot}")
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
@@ -416,9 +423,7 @@ class Project extends EE
   createCiProject: (projectDetails) ->
     user.ensureAuthToken()
     .then (authToken) =>
-      git
-      .init(@projectRoot)
-      .getRemoteOrigin()
+      commitInfo.getRemoteOrigin(@projectRoot)
       .then (remoteOrigin) ->
         api.createProject(projectDetails, remoteOrigin, authToken)
     .then (newProject) =>
@@ -564,5 +569,27 @@ class Project extends EE
         api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
+
+  # Given a path to the project, finds all specs
+  # returns list of specs with respect to the project root
+  @findSpecs = (projectPath, specPattern) ->
+    log("finding specs for project %s", projectPath)
+    la(check.unemptyString(projectPath), "missing project path", projectPath)
+    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+
+    ## if we have a spec pattern
+    if specPattern
+      ## then normalize to create an absolute
+      ## file path from projectRoot
+      ## ie: **/* turns into /Users/bmann/dev/project/**/*
+      specPattern = path.resolve(projectPath, specPattern)
+
+    Project(projectPath)
+    .getConfig()
+    # TODO: handle wild card pattern or spec filename
+    .then (cfg) ->
+      files.getTestFiles(cfg, specPattern)
+    .then R.prop("integration")
+    .then R.map(R.prop("name"))
 
 module.exports = Project

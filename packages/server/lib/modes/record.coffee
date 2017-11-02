@@ -9,9 +9,12 @@ errors     = require("../errors")
 stdout     = require("../stdout")
 upload     = require("../upload")
 Project    = require("../project")
-git        = require("../util/git")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
+debug      = require("debug")("cypress:server")
+commitInfo = require("@cypress/commit-info")
+la         = require("lazy-ass")
+check      = require("check-more-types")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -22,34 +25,33 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  getBranch: (repo) ->
-    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
-      if b = process.env[branch]
-        return Promise.resolve(b)
-
-    repo.getBranch()
-
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId) ->
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
+    if groupId and not group
+      console.log("Warning: you passed group-id but no group flag")
 
-    repo = git.init(projectPath)
+    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 
-    Promise.props({
-      sha:     repo.getSha()
-      email:   repo.getEmail()
-      author:  repo.getAuthor()
-      remote:  repo.getRemoteOrigin()
-      branch:  @getBranch(repo)
-      message: repo.getMessage()
-    })
-    .then (git) ->
+    debug("generating build id for project %s at %s", projectId, projectPath)
+    Promise.all([
+      commitInfo.commitInfo(projectPath),
+      Project.findSpecs(projectPath, specPattern)
+    ])
+    .spread (git, specs) ->
+      debug("git information")
+      debug(git)
+      if specPattern
+        debug("spec pattern", specPattern)
+      debug("project specs")
+      debug(specs)
+      la(check.maybe.strings(specs), "invalid list of specs to run", specs)
       # only send groupId if group option is true
       if group
         groupId ?= ciProvider.groupId()
       else
         groupId = null
-      api.createRun({
+      createRunOptions = {
         projectId:         projectId
         recordKey:         recordKey
         commitSha:         git.sha
@@ -62,7 +64,11 @@ module.exports = {
         ciProvider:        ciProvider.name()
         ciBuildNumber:     ciProvider.buildNum()
         groupId:           groupId
-      })
+        specs:             specs
+        specPattern:       specPattern
+      }
+
+      api.createRun(createRunOptions)
       .catch (err) ->
         switch err.statusCode
           when 401
@@ -225,7 +231,10 @@ module.exports = {
       .then (cfg) =>
         { projectName } = cfg
 
-        @generateProjectBuildId(projectId, projectPath, projectName, options.key, options.group, options.groupId)
+        key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+
+        @generateProjectBuildId(projectId, projectPath, projectName, key,
+          options.group, options.groupId, options.spec)
         .then (buildId) =>
           ## bail if we dont have a buildId
           return if not buildId

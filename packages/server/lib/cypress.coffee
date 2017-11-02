@@ -108,6 +108,7 @@ module.exports = {
 
   start: (argv = []) ->
     require("./logger").info("starting desktop app", args: argv)
+    log("starting cypress server")
 
     ## make sure we have the appData folder
     require("./util/app_data").ensure()

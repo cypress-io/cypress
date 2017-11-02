@@ -101,10 +101,12 @@ module.exports = {
     .map (filePath) =>
       @prepareForBrowser(filePath, projectRoot)
 
-  getTestFiles: (config) ->
+  getTestFiles: (config, specPattern) ->
     integrationFolderPath = config.integrationFolder
     log("looking for test files in the integration folder %s",
       integrationFolderPath)
+
+    log("specPattern for test files is", specPattern)
 
     ## support files are not automatically
     ## ignored because only _fixtures are hard
@@ -172,12 +174,20 @@ module.exports = {
       _.every ignorePatterns, (pattern) ->
         not minimatch(file, pattern, {dot: true, matchBase: true})
 
+    matchesSpecPattern = (file) ->
+      if not specPattern
+        return true
+
+      minimatch(file, specPattern, { dot: true, matchBase: true })
+
     ## grab all the files
     glob(config.testFiles, options)
+
 
     ## filter out anything that matches our
     ## ignored test files glob
     .filter(doesNotMatchAllIgnoredPatterns)
+    .filter(matchesSpecPattern)
     .map(setNameParts)
     .then (files) ->
       log("found %d spec files", files.length)

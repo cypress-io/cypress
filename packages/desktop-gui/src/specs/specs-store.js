@@ -27,6 +27,10 @@ export class SpecsStore {
     this.chosenSpecPath = specPath
   }
 
+  @action setExpandSpecFolder (spec) {
+    spec.setExpanded(!spec.isExpanded);
+  }
+
   isChosenSpec (spec) {
     return spec.name === this.chosenSpecPath || spec.path === this.chosenSpecPath
   }

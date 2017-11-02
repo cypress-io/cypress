@@ -109,7 +109,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { chars }
         })
 
-      if _.isBlank(chars)
+      if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       if isDate and (

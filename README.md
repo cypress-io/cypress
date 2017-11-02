@@ -1,30 +1,59 @@
-Build status | Description
-:--- | :---
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) | `develop` branch
+<p align="center">
+  <img src="https://cloud.githubusercontent.com/assets/1268976/20607953/d7ae489c-b24a-11e6-9cc4-91c6c74c5e88.png"/>
+</p>
+<p align="center">
+  <a href="https://on.cypress.io">Documentation</a> |
+  <a href="https://on.cypress.io/changelog">Changelog</a> |
+  <a href="https://github.com/cypress-io/cypress/projects">Roadmap</a>
+</p>
 
-# Cypress
+<h3 align="center">
+  The web has evolved. Finally, testing has too.
+</h3>
 
-This is the Cypress monorepo, containing all packages that make up the Cypress app. See [Issue #256](https://github.com/cypress-io/cypress/issues/256) for details.
+<p align="center">
+  Fast, easy and reliable testing for anything that runs in a browser.
+</p>
 
-This monorepo is made up of various packages, all of which are found under the `packages` directory. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app.
+<p align="center">
+  <a href="https://www.npmjs.com/package/cypress">
+    <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
+  </a>
+  <a href="https://gitter.im/cypress-io/cypress">
+    <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
+  </a>
+</p>
 
-Some, like `https-proxy` and `launcher`, run solely in node and support the Cypress server. Others, like `desktop-gui` and `runner`, create the GUI parts of the Cypress app. All packages can require each other using `const server = require('@packages/server')` syntax.
+## What is Cypress?
 
-## Documentation
+<p align="center">
+  <a href="https://player.vimeo.com/video/237527670">
+    <img alt="Why Cypress Video" src="https://user-images.githubusercontent.com/1271364/31739717-dbdff0ee-b41c-11e7-9b16-bfa1b6ac1814.png" width="75%" height="75%" />
+  </a>
+</p>
 
-- [Main Docs](https://on.cypress.io)
-- [Roadmap](https://on.cypress.io/roadmap)
-- [Changelog](https://on.cypress.io/changelog)
+## Installing
 
-## Development
+[![npm version](https://badge.fury.io/js/cypress.svg)](https://badge.fury.io/js/cypress)
+
+Install Cypress for Mac, Linux, or Windows, then [get started](https://docs.cypress.io/guides/getting-started/installing-cypress.html).
+
+```bash
+npm install cypress --save-dev
+```
+
+![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
+
+
+## Contributing
+
+ [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/master) - `master` branch
 
 Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
-## Deployment
-
-Please see out [deployment document](DEPLOY.md).
-
 ## License
+
+[![license](https://img.shields.io/github/license/cypress-io/cypress.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
 
 This project is licensed under the terms of the [MIT license](/LICENSE.md).
 

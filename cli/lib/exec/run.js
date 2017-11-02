@@ -3,11 +3,15 @@ const debug = require('debug')('cypress:cli')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 
+// maps options collected by the CLI
+// and forms list of CLI arguments to the server
 const processRunOptions = (options = {}) => {
+  debug('processing run options')
   const args = ['--run-project', options.project]
 
   //// if key is set use that - else attempt to find it by env var
   if (options.key == null) {
+    debug('--key is not set, looking up environment variable CYPRESS_RECORD_KEY')
     options.key = process.env.CYPRESS_RECORD_KEY || process.env.CYPRESS_CI_KEY
   }
 
@@ -67,6 +71,14 @@ const processRunOptions = (options = {}) => {
 
   if (options.headed) {
     args.push('--headed', options.headed)
+  }
+
+  if (options.group != null) {
+    args.push('--group', options.group)
+  }
+
+  if (options.groupId) {
+    args.push('--group-id', options.groupId)
   }
 
   return args

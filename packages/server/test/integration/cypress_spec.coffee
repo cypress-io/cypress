@@ -8,10 +8,10 @@ path       = require("path")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
+commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
 extension  = require("@packages/extension")
 pkg        = require("@packages/root")
-git        = require("#{root}lib/util/git")
 connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -225,7 +225,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
       @sandbox.stub(browsers, "open")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+      @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
     it "runs project headlessly and exits with exit code 0", ->
       cypress.start(["--run-project=#{@todosPath}"])
@@ -687,9 +687,15 @@ describe "lib/cypress", ->
   context "--record or --ci", ->
     afterEach ->
       delete process.env.CYPRESS_PROJECT_ID
+      delete process.env.CYPRESS_RECORD_KEY
 
     beforeEach ->
-      @setup = =>
+      @setup = (specPattern, specFiles) =>
+        if not specFiles
+          specFiles = ["a-spec.js", "b-spec.js"]
+
+          @sandbox.stub(Project, "findSpecs").resolves(specFiles)
+
         createRunArgs = {
           projectId:    @projectId
           recordKey:    "token-123"
@@ -703,7 +709,10 @@ describe "lib/cypress", ->
           ciBuildNumber: "987"
           ciParams: null
           groupId: null
+          specs: specFiles
+          specPattern: specPattern
         }
+
         @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
 
       @sandbox.stub(upload, "send").resolves()
@@ -717,12 +726,14 @@ describe "lib/cypress", ->
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(git, "_getSha").resolves("sha-123")
-      @sandbox.stub(git, "_getAuthor").resolves("brian")
-      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(git, "_getMessage").resolves("foo")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
-      @sandbox.stub(record, "getBranch").resolves("bem/ci")
+      @sandbox.stub(commitInfo, "commitInfo").resolves({
+        branch: "bem/ci",
+        sha: "sha-123",
+        author: "brian",
+        email: "brian@cypress.io",
+        message: "foo",
+        remote: "https://github.com/foo/bar.git"
+      })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
@@ -784,34 +795,57 @@ describe "lib/cypress", ->
 
         @expectExitWith(3)
 
-    it "runs project by specific absolute spec and exits with status 3", ->
-      @setup()
+    it "sends specs and runs project by specific absolute spec and exits with status 3", ->
+      spec = "#{@todosPath}/tests/*"
+
+      @setup(spec, [
+        "test1.js"
+        "test2.coffee"
+      ])
+
+      ## TODO: fix this once we implement proper globbing
+      ## per spec. currently just hacking this and forcing
+      ## it to return something we specify
+      @sandbox.stub(Project.prototype, "ensureSpecExists").resolves("#{@todosPath}/test2.coffee")
 
       @createRun.resolves("build-id-123")
 
       @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
-        spec: "#{@todosPath}/tests/test2.coffee"
+        spec: spec
       }).resolves("instance-id-123")
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
+      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
       @setup()
 
       ## set the projectId to be todos even though
-      ## we are running the prisine project
+      ## we are running the pristine project
       process.env.CYPRESS_PROJECT_ID = @projectId
 
       @createRun.resolves()
       @sandbox.stub(api, "createInstance").resolves()
 
       cypress.start(["--run-project=#{@pristinePath}", "--record", "--key=token-123"])
+      .then =>
+        expect(errors.warning).not.to.be.called
+        @expectExitWith(3)
+
+    it "uses process.env.CYPRESS_RECORD_KEY", ->
+      @setup()
+
+      process.env.CYPRESS_RECORD_KEY = "token-123"
+
+      @createRun.resolves()
+      @sandbox.stub(api, "createInstance").resolves()
+
+      cypress.start(["--run-project=#{@todosPath}", "--record"])
       .then =>
         expect(errors.warning).not.to.be.called
         @expectExitWith(3)

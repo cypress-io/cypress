@@ -16,9 +16,10 @@ Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
+git          = require("#{root}lib/util/git")
+commitInfo   = require("@cypress/commit-info")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
-git          = require("#{root}lib/util/git")
 
 describe "lib/project", ->
   beforeEach ->
@@ -568,7 +569,7 @@ describe "lib/project", ->
 
       @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+      @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
       @sandbox.stub(api, "createProject")
       .withArgs({foo: "bar"}, "remoteOrigin", "auth-token-123")
       .resolves(@newProject)
@@ -902,3 +903,22 @@ describe "lib/project", ->
         throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN")
+
+  context ".findSpecs", ->
+    it "returns all the specs without a specPattern", ->
+      Project.findSpecs(@todosPath)
+      .then (specs = []) ->
+        expect(specs).to.deep.eq([
+          "etc/etc.js"
+          "sub/sub_test.coffee"
+          "test1.js"
+          "test2.coffee"
+        ])
+
+    it "returns glob subset matching specPattern", ->
+      Project.findSpecs(@todosPath, "tests/*")
+      .then (specs = []) ->
+        expect(specs).to.deep.eq([
+          "test1.js"
+          "test2.coffee"
+        ])

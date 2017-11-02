@@ -7,6 +7,7 @@ const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
 const minimist = require('minimist')
+const { getInstallJson } = require('commit-message-install')
 
 /* eslint-disable no-console */
 
@@ -31,10 +32,32 @@ const shorten = (s) =>
   s.substr(0, 7)
 
 const getShortCommit = () => {
-  const sha = process.env.APPVEYOR_REPO_COMMIT || process.env.CIRCLE_SHA1
+  const sha = process.env.APPVEYOR_REPO_COMMIT ||
+    process.env.CIRCLE_SHA1 ||
+    process.env.BUILDKITE_COMMIT
   if (sha) {
     return shorten(sha)
   }
+}
+
+/**
+ * Returns given string surrounded by ```json + ``` quotes
+ * @param {string} s
+ */
+const toJsonCodeBlock = (s) => {
+  const start = '```json'
+  const finish = '```'
+  return `${start}\n${s}\n${finish}\n`
+}
+
+/**
+ * Converts given JSON object into markdown text block
+ * @param {object} object
+ */
+const toMarkdownJsonBlock = (object) => {
+  la(object, 'expected an object to convert to JSON', object)
+  const str = JSON.stringify(object, null, 2)
+  return toJsonCodeBlock(str)
 }
 
 bump.version(npm, binary, platform, cliOptions.provider)
@@ -48,18 +71,22 @@ bump.version(npm, binary, platform, cliOptions.provider)
     const shortNpmVersion = getJustVersion(result.versionName)
     console.log('short NPM version', shortNpmVersion)
 
-    let subject = `Testing new Cypress version ${shortNpmVersion}`
+    let subject = `Testing new ${os.platform()} Cypress version ${shortNpmVersion}`
     const shortSha = getShortCommit()
     if (shortSha) {
       subject += ` ${shortSha}`
     }
 
-    let message = stripIndent`
-      ${subject}
-
-      NPM package: ${result.versionName}
-      Binary: ${result.binary}
-    `
+    // instructions for installing this binary
+    // using https://github.com/bahmutov/commit-message-install
+    const env = {
+      CYPRESS_BINARY_VERSION: result.binary,
+    }
+    const commitMessageInstructions = getInstallJson(
+      result.versionName, env, os.platform())
+    const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
+    const footer = 'Use tool `commit-message-install` to install from above block'
+    let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
     if (process.env.CIRCLE_BUILD_URL) {
       message += '\n'
       message += stripIndent`

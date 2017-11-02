@@ -43,6 +43,35 @@ describe('exec run', function () {
       this.sandbox.stub(verify, 'start').resolves()
     })
 
+    describe('group and group-id', () => {
+      it('spawns with --group true', function () {
+        return run.start({ group: true })
+        .then(() => {
+          expect(spawn.start).to.be.calledWith(
+            ['--run-project', process.cwd(), '--group', true]
+          )
+        })
+      })
+
+      it('spawns with group false', function () {
+        return run.start({ group: false })
+        .then(() => {
+          expect(spawn.start).to.be.calledWith(
+            ['--run-project', process.cwd(), '--group', false]
+          )
+        })
+      })
+
+      it('spawns with group and group-id', function () {
+        return run.start({ group: false, groupId: 'foo' })
+        .then(() => {
+          expect(spawn.start).to.be.calledWith(
+            ['--run-project', process.cwd(), '--group', false, '--group-id', 'foo']
+          )
+        })
+      })
+    })
+
     it('verifies cypress', function () {
       return run.start()
       .then(() => {

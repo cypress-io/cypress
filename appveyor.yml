@@ -8,6 +8,20 @@ branches:
 # Test against the latest version of this Node.js version
 environment:
   nodejs_version: "6"
+  # encode secure variables which will NOT be used
+  # in pull requests
+  # https://www.appveyor.com/docs/build-configuration/#secure-variables
+  # the variables can be encrypted at
+  # https://ci.appveyor.com/tools/encrypt
+  _ci_json:
+    secure: tf3fK5S5Gh5HGUcDo3eGw7nqdcFU/4A+2s3JJovmn/eA0p9dEspjPFp7G1I9BxdUc4OoCeJ3dSSrCQ1BPIzb/bzK6aQqAZQWNcJ1sanoIiF0QUPbiW40Js3xpWylIh8qutVoaWtZz5a1ygg9sJmAYR7qB5+aQqQNA55TBKkUCydXpnDBfWuagb6d/7cblULsXasvvji3RIoxWTKd8HmaD/xxqONjPAJ3IJsiDTaWc5S9bAgV8/IYa7YZaQm5vpTTsWU5IGwkA1l9yMu7j+7BSNK9esvAYyKsx7kUV9jiVFo=
+  _aws_credentials_json:
+    secure: ttGzd2/rW+i8H+pozcFxzZKU07B5INL8+LjD4vCOKes+tI6EaKhrLvAQ9xT7r+e1oTWbC8olZQ96ZZ8P5Ve8pIpG8oe1ITMs5f50iXaKULfwIcJOm+G8a3pkMRZOWa0wGs7/sKtRSyIpMFRfCOIl8TePBKEgeRtVzixBqSuyYLn/u2dz0z8uHeJDq/H1kJlI
+  CF_DOMAIN: "cypress.io"
+  CF_EMAIL:
+    secure: +kZOcImCZVZJv/e/hQc3gvJ6xXSH88qg46cMwKn8mRo=
+  CF_TOKEN:
+    secure: d8SQfJ2r6qrKDjYWoFg3AzgY7aL6hTuE5OIlRr0TXkcXkZzdmYCujfzIYcCQfpZg
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem
@@ -22,18 +36,21 @@ install:
   - ps: Install-Product node $env:nodejs_version
   # NPM v3 has flaky permission issues on Windows
   - npm install -g npm@5
+  - npm install -g @bahmutov/print-env
   # Output useful info for debugging.
   - node --version
   - npm --version
-  - node -e "console.log(process.platform)"
-  - node -e "console.log(process.arch)"
+  - print-env APPVEYOR
+  # clean cache to prevent install permission issues
+  - npm cache clean --force
   # install root modules only
   - npm install --ignore-scripts
+  - .\node_modules\.bin\print-arch
   # because we skipped scripts, we need to do
   # everything from "postinstall" script as commands
   - npm run link
   # install every package one by one
-  - npm run all install -- --serial
+  - npm run all install -- --serial || npm run all install -- --serial
   # - npm prune
   # - npm run all prune -- --serial
   - npm run all build -- --serial
@@ -59,34 +76,10 @@ test_script:
   - cd cli
   - npm run build
   - cd build
-  # - npm run size
   - npm pack
   - cd ../..
-  - echo Uploading NPM windows package
-  - node scripts/binary.js upload-npm-package --file cli/build/cypress-%NEXT_DEV_VERSION%.tgz --version %NEXT_DEV_VERSION% --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID%
-  - cat npm-package-url.json
 
-  - echo Building binary %NEXT_DEV_VERSION%
-  - npm run binary-build -- --platform windows --version %NEXT_DEV_VERSION%
-  - npm run binary-zip
-  - ls -l *.zip
-  - node scripts/binary.js upload-unique-binary --file cypress.zip --version %NEXT_DEV_VERSION% --hash %APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT%-%APPVEYOR_BUILD_ID%
-  - cat binary-url.json
-  # - npm run binary-upload -- --version 0.20.2-win --zip cypress.zip
-  # build CLI NPM package
-  # - cd cli && npm run build && cd ..
-  # # start new projet
-  # - mkdir test-win-binary
-  # - cd test-win-binary
-  # - npm init -y
-  # # # will install fresh binary because CYPRESS_BINARY_VERSION variable
-  # - npm install ../cli/build
-  # - .\node_modules\.bin\cypress verify
-
-  # - cd packages/server && npm run test-unit
-  # - npm test
-  - echo Running other test projects with new NPM package and binary
-  - node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor
+  - node ./scripts/win-appveyor-build.js
 
 # Don't actually build.
 build: off

@@ -64,13 +64,35 @@ describe('cli', function () {
       })
     })
 
-    it('handles non-existent binary', function (done) {
+    it('handles non-existent binary version', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        snapshot('cli version no binary version', logger.print())
+        done()
+      })
+    })
+
+    it('handles non-existent binary --version', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
       this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
-        snapshot('cli version no binary version', logger.print())
+        snapshot('cli --version no binary version', logger.print())
+        done()
+      })
+    })
+
+    it('handles non-existent binary -v', function (done) {
+      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
+      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+
+      this.exec('-v')
+      process.exit.callsFake(() => {
+        snapshot('cli -v no binary version', logger.print())
         done()
       })
     })
@@ -100,6 +122,21 @@ describe('cli', function () {
         expect(e).to.eq(err)
         done()
       })
+    })
+
+    it('calls run without group flag', function () {
+      this.exec('run')
+      expect(run.start).to.be.calledWith({})
+    })
+
+    it('calls run with group flag', function () {
+      this.exec('run --group')
+      expect(run.start).to.be.calledWith({ group: true })
+    })
+
+    it('calls run with groupId', function () {
+      this.exec('run --group-id foo')
+      expect(run.start).to.be.calledWith({ groupId: 'foo' })
     })
 
     it('calls run with port', function () {

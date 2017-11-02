@@ -1,6 +1,7 @@
 require("../../spec_helper")
 
 os         = require("os")
+R          = require("ramda")
 api        = require("#{root}../lib/api")
 stdout     = require("#{root}../lib/stdout")
 errors     = require("#{root}../lib/errors")
@@ -10,9 +11,11 @@ Project    = require("#{root}../lib/project")
 terminal   = require("#{root}../lib/util/terminal")
 record     = require("#{root}../lib/modes/record")
 headless   = require("#{root}../lib/modes/headless")
-git        = require("#{root}../lib/util/git")
 ciProvider = require("#{root}../lib/util/ci_provider")
+commitInfo = require("@cypress/commit-info")
 snapshot   = require("snap-shot-it")
+
+initialEnv = R.clone(process.env)
 
 describe "lib/modes/record", ->
   beforeEach ->
@@ -20,53 +23,66 @@ describe "lib/modes/record", ->
     @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
     @sandbox.stub(ciProvider, "buildNum").returns("build-123")
 
-  context ".getBranch", ->
+  context "commitInfo.getBranch", ->
     beforeEach ->
-      @repo = @sandbox.stub({
-        getBranch: ->
-      })
-
-    afterEach ->
       delete process.env.CIRCLE_BRANCH
       delete process.env.TRAVIS_BRANCH
+      delete process.env.BUILDKITE_BRANCH
       delete process.env.CI_BRANCH
+
+    afterEach ->
+      process.env = R.clone(initialEnv)
 
     it "gets branch from process.env.CIRCLE_BRANCH", ->
       process.env.CIRCLE_BRANCH = "bem/circle"
       process.env.TRAVIS_BRANCH = "bem/travis"
       process.env.CI_BRANCH     = "bem/ci"
 
-      record.getBranch(@repo).then (ret) ->
+      commitInfo.getBranch().then (ret) ->
         expect(ret).to.eq("bem/circle")
 
     it "gets branch from process.env.TRAVIS_BRANCH", ->
       process.env.TRAVIS_BRANCH = "bem/travis"
       process.env.CI_BRANCH     = "bem/ci"
 
-      record.getBranch(@repo).then (ret) ->
+      commitInfo.getBranch().then (ret) ->
         expect(ret).to.eq("bem/travis")
+
+    it "gets branch from process.env.BUILDKITE_BRANCH", ->
+      process.env.BUILDKITE_BRANCH = "bem/buildkite"
+      process.env.CI_BRANCH     = "bem/ci"
+
+      commitInfo.getBranch().then (ret) ->
+        expect(ret).to.eq("bem/buildkite")
 
     it "gets branch from process.env.CI_BRANCH", ->
       process.env.CI_BRANCH     = "bem/ci"
 
-      record.getBranch(@repo).then (ret) ->
+      commitInfo.getBranch().then (ret) ->
         expect(ret).to.eq("bem/ci")
 
     it "gets branch from git", ->
-      @repo.getBranch.resolves("regular-branch")
-
-      record.getBranch(@repo).then (ret) ->
-        expect(ret).to.eq("regular-branch")
+      # this is tested inside @cypress/commit-info
 
   context ".generateProjectBuildId", ->
+    projectSpecs = ["spec.js"]
     beforeEach ->
-      @sandbox.stub(git, "_getBranch").resolves("master")
-      @sandbox.stub(git, "_getAuthor").resolves("brian")
-      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(git, "_getMessage").resolves("such hax")
-      @sandbox.stub(git, "_getSha").resolves("sha-123")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
+      @sandbox.stub(commitInfo, "commitInfo").resolves({
+        branch: "master",
+        author: "brian",
+        email: "brian@cypress.io",
+        message: "such hax",
+        sha: "sha-123",
+        remote: "https://github.com/foo/bar.git"
+      })
       @sandbox.stub(api, "createRun")
+      @sandbox.stub(Project, "findSpecs").resolves(projectSpecs)
+
+    it "passes list of found specs", ->
+      api.createRun.resolves()
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+        specs = api.createRun.firstCall.args[0].specs
+        expect(specs).to.eq(projectSpecs)
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()
@@ -81,6 +97,16 @@ describe "lib/modes/record", ->
       groupId = "gr123"
       record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
         snapshot(api.createRun.firstCall.args)
+
+    it "warns group flag is missing if only groupId is passed", ->
+      @sandbox.spy(console, "log")
+
+      api.createRun.resolves()
+
+      groupId = "gr123"
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", false, groupId).then ->
+        msg = "Warning: you passed group-id but no group flag"
+        expect(console.log).to.have.been.calledWith(msg)
 
     it "figures out groupId from CI environment variables", ->
       @sandbox.stub(ciProvider, "groupId").returns("ci-group-123")
