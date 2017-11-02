@@ -32,7 +32,7 @@ configKeys = """
   reporter                        videosFolder
   reporterOptions
   screenshotOnHeadlessFailure     defaultCommandTimeout
-  specsGlob                       execTimeout
+  testFiles                       execTimeout
   trashAssetsBeforeHeadlessRuns   pageLoadTimeout
   viewportWidth                   requestTimeout
   viewportHeight                  responseTimeout
@@ -61,7 +61,7 @@ defaults = {
   socketIoCookie:                "__socket.io"
   reporterRoute:                 "/__cypress/reporter"
   ignoreTestFiles:               "*.hot-update.js"
-  specsGlob:                     "**/*.*"
+  testFiles:                     "**/*.*"
   defaultCommandTimeout:         4000
   requestTimeout:                5000
   responseTimeout:               30000
@@ -111,7 +111,7 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  specsGlob: v.isString
+  testFiles: v.isString
   screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   trashAssetsBeforeHeadlessRuns: v.isBoolean

@@ -173,7 +173,7 @@ module.exports = {
         not minimatch(file, pattern, {dot: true, matchBase: true})
 
     ## grab all the files
-    glob(config.specsGlob, options)
+    glob(config.testFiles, options)
 
     ## filter out anything that matches our
     ## ignored test files glob

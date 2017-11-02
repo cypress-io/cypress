@@ -50,10 +50,10 @@ describe "lib/controllers/files", ->
         expect(files.integration[1].name).to.equal("js_spec.js")
         expect(files.integration[2].name).to.equal("ts_spec.ts")
 
-    it "returns files matching config.specsGlob", ->
+    it "returns files matching config.testFiles", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->
-        cfg.specsGlob = "**/*.coffee"
+        cfg.testFiles = "**/*.coffee"
         filesController.getTestFiles(cfg)
       .then (files) ->
         expect(files.integration.length).to.equal(1)
