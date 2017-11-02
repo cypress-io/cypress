@@ -59,6 +59,7 @@
     "check-more-types": "^2.24.0",
     "cloudflare-cli": "^2.1.0",
     "coffeelint": "^1.16.0",
+    "commit-message-install": "^1.4.0",
     "common-tags": "^1.4.0",
     "console.table": "^0.9.1",
     "debug": "^2.6.8",

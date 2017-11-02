@@ -7,6 +7,7 @@ const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
 const minimist = require('minimist')
+const { getInstallJson } = require('commit-message-install')
 
 /* eslint-disable no-console */
 
@@ -78,13 +79,11 @@ bump.version(npm, binary, platform, cliOptions.provider)
 
     // instructions for installing this binary
     // using https://github.com/bahmutov/commit-message-install
-    const commitMessageInstructions = {
-      platform: os.platform(),
-      env: {
-        CYPRESS_BINARY_VERSION: result.binary,
-      },
-      packages: result.versionName,
+    const env = {
+      CYPRESS_BINARY_VERSION: result.binary,
     }
+    const commitMessageInstructions = getInstallJson(
+      result.versionName, env, os.platform())
     const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
     const footer = 'Use tool `commit-message-install` to install from above block'
     let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
