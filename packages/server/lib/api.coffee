@@ -7,6 +7,7 @@ Promise    = require("bluebird")
 pkg        = require("@packages/root")
 Routes     = require("./util/routes")
 system     = require("./util/system")
+debug      = require("debug")("cypress:server:api")
 
 rp = request.defaults (params = {}, callback) ->
   headers = params.headers ?= {}
@@ -91,6 +92,10 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
+    debugReturnedBuild = (info) ->
+      debug("received API response with buildId %s", info.buildId)
+      debug("and list of specs to run", info.specs)
+      
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -103,8 +108,14 @@ module.exports = {
       "ciParams"
       "ciProvider"
       "ciBuildNumber",
-      "groupId"
+      "groupId",
+      "specs",
+      "specPattern"
     ])
+    
+    debug("creating project run")
+    debug("project '%s' group id '%s'", body.projectId, body.groupId)
+    
     rp.post({
       url: Routes.runs()
       json: true
@@ -115,6 +126,7 @@ module.exports = {
       body: body
     })
     .promise()
+    .tap(debugReturnedBuild)
     .get("buildId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)

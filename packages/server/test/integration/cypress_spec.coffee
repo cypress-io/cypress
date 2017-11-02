@@ -706,7 +706,12 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_RECORD_KEY
 
     beforeEach ->
-      @setup = =>
+      @setup = (specPattern, specFiles) =>
+        if not specFiles
+          specFiles = ["a-spec.js", "b-spec.js"]
+
+          @sandbox.stub(Project, "findSpecs").resolves(specFiles)
+
         createRunArgs = {
           projectId:    @projectId
           recordKey:    "token-123"
@@ -720,7 +725,10 @@ describe "lib/cypress", ->
           ciBuildNumber: "987"
           ciParams: null
           groupId: null
+          specs: specFiles
+          specPattern: specPattern
         }
+
         @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
 
       @sandbox.stub(upload, "send").resolves()
@@ -803,21 +811,31 @@ describe "lib/cypress", ->
 
         @expectExitWith(3)
 
-    it "runs project by specific absolute spec and exits with status 3", ->
-      @setup()
+    it "sends specs and runs project by specific absolute spec and exits with status 3", ->
+      spec = "#{@todosPath}/tests/*"
+
+      @setup(spec, [
+        "test1.js"
+        "test2.coffee"
+      ])
+
+      ## TODO: fix this once we implement proper globbing
+      ## per spec. currently just hacking this and forcing
+      ## it to return something we specify
+      @sandbox.stub(Project.prototype, "ensureSpecExists").resolves("#{@todosPath}/test2.coffee")
 
       @createRun.resolves("build-id-123")
 
       @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
-        spec: "#{@todosPath}/tests/test2.coffee"
+        spec: spec
       }).resolves("instance-id-123")
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
+      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
