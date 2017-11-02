@@ -25,7 +25,7 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
@@ -34,11 +34,8 @@ module.exports = {
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 
     debug("generating build id for project %s at %s", projectId, projectPath)
-    Promise.all([
-      commitInfo.commitInfo(projectPath),
-      Project.findSpecs(projectPath, specPattern)
-    ])
-    .spread (git, specs) ->
+    commitInfo.commitInfo(projectPath)
+    .then (git) ->
       debug("git information")
       debug(git)
       if specPattern
@@ -231,42 +228,46 @@ module.exports = {
       .then (cfg) =>
         { projectName } = cfg
 
-        key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+        specPattern = options.spec
+        Project.findSpecs(cfg, specPattern)
+        .then (specs) =>
+          la(check.strings(specs), "could not discover list of specs", specs)
+          key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
-        @generateProjectBuildId(projectId, projectPath, projectName, key,
-          options.group, options.groupId, options.spec)
-        .then (buildId) =>
-          ## bail if we dont have a buildId
-          return if not buildId
+          @generateProjectBuildId(projectId, projectPath, projectName, key,
+            options.group, options.groupId, specPattern, specs)
+          .then (buildId) =>
+            ## bail if we dont have a buildId
+            return if not buildId
 
-          @createInstance(buildId, options.spec)
-        .then (instanceId) =>
-          ## dont check that the user is logged in
-          options.ensureAuthToken = false
+            @createInstance(buildId, options.spec)
+          .then (instanceId) =>
+            ## dont check that the user is logged in
+            options.ensureAuthToken = false
 
-          ## dont let headless say its all done
-          options.allDone       = false
+            ## dont let headless say its all done
+            options.allDone       = false
 
-          didUploadAssets       = false
+            didUploadAssets       = false
 
-          headless.run(options)
-          .then (stats = {}) =>
-            ## if we got a instanceId then attempt to
-            ## upload these assets
-            if instanceId
-              @uploadAssets(instanceId, stats, captured.toString())
-              .then (ret) ->
-                didUploadAssets = ret isnt null
-              .return(stats)
-              .finally =>
+            headless.run(options)
+            .then (stats = {}) =>
+              ## if we got a instanceId then attempt to
+              ## upload these assets
+              if instanceId
+                @uploadAssets(instanceId, stats, captured.toString())
+                .then (ret) ->
+                  didUploadAssets = ret isnt null
+                .return(stats)
+                .finally =>
+                  headless.allDone()
+
+                  if didUploadAssets
+                    stdout.restore()
+                    @uploadStdout(instanceId, captured.toString())
+
+              else
+                stdout.restore()
                 headless.allDone()
-
-                if didUploadAssets
-                  stdout.restore()
-                  @uploadStdout(instanceId, captured.toString())
-
-            else
-              stdout.restore()
-              headless.allDone()
-              return stats
-}
+                return stats
+  }
