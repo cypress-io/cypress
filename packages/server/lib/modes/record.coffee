@@ -1,5 +1,7 @@
 _          = require("lodash")
+R          = require("ramda")
 os         = require("os")
+path       = require("path")
 chalk      = require("chalk")
 Promise    = require("bluebird")
 headless   = require("./headless")
@@ -9,12 +11,14 @@ errors     = require("../errors")
 stdout     = require("../stdout")
 upload     = require("../upload")
 Project    = require("../project")
+Stats      = require("../stats")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
 debug      = require("debug")("cypress:server")
 commitInfo = require("@cypress/commit-info")
 la         = require("lazy-ass")
 check      = require("check-more-types")
+listToFunction = require("list-to-function")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -232,42 +236,89 @@ module.exports = {
         Project.findSpecs(cfg, specPattern)
         .then (specs) =>
           la(check.strings(specs), "could not discover list of specs", specs)
+          if check.empty(specs)
+            console.log("⚠️  cannot find any specs")
+            if specPattern
+              console.log("matching spec pattern", specPattern)
+            # should we exit with error?
+
           key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+
+          # TODO combine inidividual stats if we need to
+          specStats = []
+
+          combineStats = ->
+            Stats.combine(specStats.map(R.prop("stats")))
 
           @generateProjectBuildId(projectId, projectPath, projectName, key,
             options.group, options.groupId, specPattern, specs)
           .then (buildId) =>
-            ## bail if we dont have a buildId
-            return if not buildId
+            # iterate over specs ourselves
+            getNextSpec = listToFunction(specs)
 
-            @createInstance(buildId, options.spec)
-          .then (instanceId) =>
-            ## dont check that the user is logged in
-            options.ensureAuthToken = false
+            startNextSpecIfNeeded = ->
+              nextSpec = getNextSpec()
+              if nextSpec
+                testNextSpec(nextSpec)
 
-            ## dont let headless say its all done
-            options.allDone       = false
+            # specName wrt project integration folder
+            testNextSpec = (specName) =>
+              la(check.unemptyString(specName), "missing spec name to test", specName)
+              # TODO print name of the spec about to run
 
-            didUploadAssets       = false
+              saveSpecStats = (stats) ->
+                specStats.push({
+                  spec: specName,
+                  stats
+                })
 
-            headless.run(options)
-            .then (stats = {}) =>
-              ## if we got a instanceId then attempt to
-              ## upload these assets
-              if instanceId
-                @uploadAssets(instanceId, stats, captured.toString())
-                .then (ret) ->
-                  didUploadAssets = ret isnt null
-                .return(stats)
-                .finally =>
-                  headless.allDone()
+              getInstanceId = () =>
+                ## bail if we dont have a buildId
+                if not buildId
+                  Promise.resolve()
+                else
+                  @createInstance(buildId, specName)
 
-                  if didUploadAssets
+              getInstanceId()
+              .then (instanceId) =>
+                ## dont check that the user is logged in
+                options.ensureAuthToken = false
+
+                ## dont let headless say its all done
+                options.allDone       = false
+
+                didUploadAssets       = false
+
+                specNameInProject = path.join(cfg.integrationFolder, specName)
+                options.spec = specNameInProject
+                headless.run(options)
+                .then (stats = {}) =>
+                  ## if we got a instanceId then attempt to
+                  ## upload these assets
+                  if instanceId
+                    @uploadAssets(instanceId, stats, captured.toString())
+                    .then (ret) ->
+                      didUploadAssets = ret isnt null
+                    .return(stats)
+                    .finally =>
+                      headless.allDone()
+
+                      if didUploadAssets
+                        stdout.restore()
+                        @uploadStdout(instanceId, captured.toString())
+
+                  else
                     stdout.restore()
-                    @uploadStdout(instanceId, captured.toString())
+                    headless.allDone()
+                    return stats
+              .then saveSpecStats
+              .then startNextSpecIfNeeded
 
-              else
-                stdout.restore()
-                headless.allDone()
-                return stats
+            # kick off testing specs
+            startNextSpecIfNeeded()
+          .then combineStats
+          .tap (stats) ->
+            debug('combined stats')
+            debug('after running specs', specs)
+            debug(stats)
   }

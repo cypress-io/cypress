@@ -113,6 +113,7 @@
     "jsonlint": "^1.6.2",
     "konfig": "^0.2.0",
     "lazy-ass": "^1.6.0",
+    "list-to-function": "^1.0.0",
     "lockfile": "^1.0.3",
     "lodash": "4.17.4",
     "md5": "^2.2.1",

@@ -1,5 +1,7 @@
 _     = require("lodash")
 chalk = require("chalk")
+la    = require("lazy-ass")
+check = require("check-more-types")
 
 TRANSLATION = {
   tests:        "Tests"
@@ -30,4 +32,37 @@ module.exports = {
     _.each stats, (val, key) =>
       console.log(@format(color, val, key))
 
+  # returns new stats object with default properties
+  create: () ->
+    stats = {
+      error:        null  # TODO should it be a list of errors?
+      failures:     0
+      tests:        0
+      passes:       0
+      pending:      0
+      duration:     0     # TODO should it be ms?
+      failingTests: []
+    }
+    stats
+
+  # given a list of stats objects returns a combined
+  # single stats object where all stats are added
+  combine: (listOfStats) ->
+    la(check.array(listOfStats), "expected a list of stats", listOfStats)
+    # how do we form "default" stats object?
+    if check.empty(listOfStats)
+      return @create()
+
+    combineStats = (a, b) ->
+      {
+        error: a.error || b.error
+        failures: a.failures + b.failures
+        tests: a.tests + b.tests
+        passes: a.passes + b.passes
+        pending: a.pending + b.pending
+        duration: a.duration + b.duration
+        failingTests: a.failingTests.concat(b.failingTests)
+      }
+
+    listOfStats.reduce(combineStats, @create())
 }
