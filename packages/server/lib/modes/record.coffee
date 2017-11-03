@@ -86,10 +86,17 @@ module.exports = {
             logException(err)
             .return(null)
 
-  createInstance: (buildId, spec) ->
+  createInstance: (buildId, spec, machineId) ->
+    debug("creating instance for build %s", buildId)
+    if spec
+      debug("for specific spec", spec)
+    if machineId
+      debug("with existing machine id", machineId)
+
     api.createInstance({
-      buildId: buildId
-      spec:    spec
+      buildId
+      spec
+      machineId
     })
     .catch (err) ->
       errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
@@ -253,6 +260,10 @@ module.exports = {
           @generateProjectBuildId(projectId, projectPath, projectName, key,
             options.group, options.groupId, specPattern, specs)
           .then (buildId) =>
+            # the common machineId will be initialized by the
+            # first created instance
+            commonMachineId = null
+
             # iterate over specs ourselves
             getNextSpec = listToFunction(specs)
 
@@ -272,15 +283,19 @@ module.exports = {
                   stats
                 })
 
-              getInstanceId = () =>
+              newInstance = () =>
                 ## bail if we dont have a buildId
                 if not buildId
                   Promise.resolve()
                 else
-                  @createInstance(buildId, specName)
+                  @createInstance(buildId, specName, commonMachineId)
 
-              getInstanceId()
-              .then (instanceId) =>
+              newInstance()
+              .then ({instanceId, machineId}) =>
+                if not commonMachineId and machineId
+                  commonMachineId = machineId
+                  debug("remembering common machine %s id for instance", machineId)
+
                 ## dont check that the user is logged in
                 options.ensureAuthToken = false
 

@@ -1,4 +1,5 @@
 _          = require("lodash")
+R          = require("ramda")
 os         = require("os")
 nmi        = require("node-machine-id")
 request    = require("request-promise")
@@ -95,7 +96,7 @@ module.exports = {
     debugReturnedBuild = (info) ->
       debug("received API response with buildId %s", info.buildId)
       debug("and list of specs to run", info.specs)
-      
+
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -112,10 +113,10 @@ module.exports = {
       "specs",
       "specPattern"
     ])
-    
+
     debug("creating project run")
     debug("project '%s' group id '%s'", body.projectId, body.groupId)
-    
+
     rp.post({
       url: Routes.runs()
       json: true
@@ -132,8 +133,21 @@ module.exports = {
     .catch(tagError)
 
   createInstance: (options = {}) ->
+    debugInstanceCreate = (instance) ->
+      debug("created new instance for spec", options.spec)
+      debug("returned object")
+      debug(instance)
+
     system.info()
     .then (systemInfo) ->
+      instanceOptions = {
+        spec:           options.spec
+        ## TODO remove hardcoded browser name
+        ## https://github.com/cypress-io/cypress/issues/854
+        browserName:    "Electron"
+        machineId: options.machineId
+      }
+      debug("creating instance with options", options)
       rp.post({
         url: Routes.instances(options.buildId)
         json: true
@@ -141,13 +155,11 @@ module.exports = {
         headers: {
           "x-route-version": "3"
         }
-        body: _.extend({
-          spec:           options.spec
-          browserName:    "Electron"
-        }, systemInfo)
+        body: _.extend(instanceOptions, systemInfo)
       })
       .promise()
-      .get("instanceId")
+      .tap(debugInstanceCreate)
+      .then(R.pick(["instanceId", "machineId"]))
       .catch(errors.StatusCodeError, formatResponseBody)
       .catch(tagError)
 
