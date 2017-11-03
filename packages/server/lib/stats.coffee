@@ -1,7 +1,9 @@
 _     = require("lodash")
+R     = require("ramda")
 chalk = require("chalk")
 la    = require("lazy-ass")
 check = require("check-more-types")
+addObjects = require("add-objects")
 
 TRANSLATION = {
   tests:        "Tests"
@@ -53,16 +55,15 @@ module.exports = {
     if check.empty(listOfStats)
       return @create()
 
-    combineStats = (a, b) ->
-      {
-        error: a.error || b.error
-        failures: a.failures + b.failures
-        tests: a.tests + b.tests
-        passes: a.passes + b.passes
-        pending: a.pending + b.pending
-        duration: a.duration + b.duration
-        failingTests: a.failingTests.concat(b.failingTests)
-      }
+    combineStats = addObjects({
+      error: R.or
+      failures: R.add
+      tests: R.add
+      passes: R.add
+      pending: R.add
+      duration: R.add
+      failingTests: R.concat
+    })
 
     listOfStats.reduce(combineStats, @create())
 }
