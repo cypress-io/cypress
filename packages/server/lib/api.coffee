@@ -148,16 +148,20 @@ module.exports = {
         machineId: options.machineId
       }
       debug("creating instance with options", options)
-      rp.post({
-        url: Routes.instances(options.buildId)
-        json: true
-        timeout: options.timeout ? 10000
-        headers: {
-          "x-route-version": "3"
-        }
-        body: _.extend(instanceOptions, systemInfo)
-      })
-      .promise()
+
+      # always have Bluebird promise
+      Promise.resolve(
+        rp.post({
+          url: Routes.instances(options.buildId)
+          json: true
+          timeout: options.timeout ? 10000
+          headers: {
+            "x-route-version": "3"
+          }
+          body: _.extend(instanceOptions, systemInfo)
+        })
+        .promise()
+      )
       .tap(debugInstanceCreate)
       .then(R.pick(["instanceId", "machineId"]))
       .catch(errors.StatusCodeError, formatResponseBody)

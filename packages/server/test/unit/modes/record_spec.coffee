@@ -17,7 +17,7 @@ snapshot   = require("snap-shot-it")
 
 initialEnv = R.clone(process.env)
 
-describe "lib/modes/record", ->
+describe.only "lib/modes/record", ->
   beforeEach ->
     @sandbox.stub(ciProvider, "name").returns("circle")
     @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
@@ -80,14 +80,14 @@ describe "lib/modes/record", ->
 
     it "passes list of found specs", ->
       api.createRun.resolves()
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", null, null, null, projectSpecs).then ->
         specs = api.createRun.firstCall.args[0].specs
         expect(specs).to.eq(projectSpecs)
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()
 
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", null, null, null, projectSpecs).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "passes groupId", ->
@@ -95,7 +95,7 @@ describe "lib/modes/record", ->
 
       group = true
       groupId = "gr123"
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId, null, projectSpecs).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "warns group flag is missing if only groupId is passed", ->
@@ -114,7 +114,7 @@ describe "lib/modes/record", ->
       api.createRun.resolves()
 
       group = true
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group).then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, null, null, projectSpecs).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "handles status code errors of 401", ->
@@ -353,6 +353,7 @@ describe "lib/modes/record", ->
       expect(api.createInstance).to.be.calledWith({
         buildId: "id-123"
         spec: "cypress/integration/app_spec.coffee"
+        machineId: undefined
       })
 
     it "logs warning on error", ->
