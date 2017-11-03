@@ -38,15 +38,24 @@ getParentTitle = (runnable, titles) ->
   else
     titles
 
-createSuite = (obj, parent) ->
+parseOptions = (obj, slowTestThreshold) ->
+  _.extend(obj, {
+    _slow: slowTestThreshold
+  })
+  return obj
+
+createSuite = (obj, parent, slowTestThreshold) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
   if obj.file
     console.log('has file:', obj.file)
   suite.file = obj.file
+
+  suite = parseOptions(suite, slowTestThreshold)
+
   return suite
 
-createRunnable = (obj, parent) ->
+createRunnable = (obj, parent, slowTestThreshold) ->
   {body} = obj
 
   if body
@@ -62,6 +71,8 @@ createRunnable = (obj, parent) ->
   runnable.body     ?= body
 
   runnable.parent = parent if parent
+
+  runnable = parseOptions(runnable, slowTestThreshold)
 
   return runnable
 
@@ -133,13 +144,14 @@ reporters = {
 }
 
 class Reporter
-  constructor: (reporterName = "spec", reporterOptions = {}, projectRoot) ->
+  constructor: (reporterName = "spec", reporterOptions = {}, projectRoot, slowTestThreshold) ->
     if not (@ instanceof Reporter)
       return new Reporter(reporterName)
 
     @reporterName = reporterName
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
+    @slowTestThreshold = slowTestThreshold
 
   setRunnables: (rootRunnable = {}) ->
     ## manage stats ourselves
@@ -159,14 +171,14 @@ class Reporter
   _createRunnable: (runnableProps, type, parent) ->
     runnable = switch type
       when "suite"
-        suite = createSuite(runnableProps, parent)
+        suite = createSuite(runnableProps, parent, @slowTestThreshold)
         suite.tests = _.map runnableProps.tests, (testProps) =>
           @_createRunnable(testProps, "test", suite)
         suite.suites = _.map runnableProps.suites, (suiteProps) =>
           @_createRunnable(suiteProps, "suite", suite)
         suite
       when "test"
-        createRunnable(runnableProps, parent)
+        createRunnable(runnableProps, parent, @slowTestThreshold)
       else
         throw new Error("Unknown runnable type: '#{type}'")
 
@@ -294,8 +306,8 @@ class Reporter
         test.videoTimestamp = test.wallClockStartedAt - videoStart
       test
 
-  @create = (reporterName, reporterOptions, projectRoot) ->
-    new Reporter(reporterName, reporterOptions, projectRoot)
+  @create = (reporterName, reporterOptions, projectRoot, slowTestThreshold) ->
+    new Reporter(reporterName, reporterOptions, projectRoot, slowTestThreshold)
 
   @loadReporter = (reporterName, projectRoot) ->
     debug("trying to load reporter:", reporterName)

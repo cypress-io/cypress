@@ -47,7 +47,7 @@ configKeys = toWords """
   userAgent                       requestTimeout
   viewportWidth                   responseTimeout
   viewportHeight                  taskTimeout
-  video
+  video                           slowTestThreshold
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
@@ -84,6 +84,7 @@ defaults = {
   pageLoadTimeout:               60000
   execTimeout:                   60000
   taskTimeout:                   60000
+  slowTestThreshold:             5000
   video:                         true
   videoCompression:              32
   videoUploadOnPasses:           true
@@ -132,6 +133,7 @@ validationRules = {
   responseTimeout: v.isNumber
   testFiles: v.isString
   supportFile: v.isStringOrFalse
+  slowTestThreshold: v.isNumber
   taskTimeout: v.isNumber
   trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString

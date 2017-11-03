@@ -236,6 +236,8 @@ class Project extends EE
       catch err
         paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
+        reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot, config.slowTestThreshold)
+
         ## only include the message if this is the standard MODULE_NOT_FOUND
         ## else include the whole stack
         errorMsg = if err.code is "MODULE_NOT_FOUND" then err.message else err.stack

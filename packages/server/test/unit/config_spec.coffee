@@ -742,6 +742,7 @@ describe "lib/config", ->
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
+            slowTestThreshold:          { value: 5000, from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
           })
 
@@ -802,6 +803,7 @@ describe "lib/config", ->
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
+            slowTestThreshold:          { value: 5000, from: "default" },
             env: {
               foo: {
                 value: "foo"
