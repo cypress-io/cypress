@@ -25,7 +25,6 @@ Automation  = require("./automation")
 files       = require("./controllers/files")
 plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
-git         = require("./util/git")
 settings    = require("./util/settings")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 log         = require("debug")("cypress:server:project")
@@ -118,7 +117,7 @@ class Project extends EE
     ])
     .spread (projectId, authToken) ->
       api.getProjectRuns(projectId, authToken)
-  
+
   reset: ->
     log("resetting project instance %s", @projectRoot)
 
