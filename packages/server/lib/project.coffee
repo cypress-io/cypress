@@ -532,6 +532,7 @@ class Project extends EE
 
   @findSpecsFromProjectConfig = (config, specPattern) ->
     la(check.unemptyString(config.projectRoot), "config is missing project path", config)
+
     ## if we have a spec pattern
     if specPattern
       ## then normalize to create an absolute

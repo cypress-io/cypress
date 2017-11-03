@@ -3,6 +3,7 @@ require("../../spec_helper")
 os         = require("os")
 R          = require("ramda")
 api        = require("#{root}../lib/api")
+stats      = require("#{root}../lib/stats")
 stdout     = require("#{root}../lib/stdout")
 errors     = require("#{root}../lib/errors")
 logger     = require("#{root}../lib/logger")
@@ -17,7 +18,7 @@ snapshot   = require("snap-shot-it")
 
 initialEnv = R.clone(process.env)
 
-describe.only "lib/modes/record", ->
+describe "lib/modes/record", ->
   beforeEach ->
     @sandbox.stub(ciProvider, "name").returns("circle")
     @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
@@ -387,14 +388,20 @@ describe.only "lib/modes/record", ->
         expect(logger.createException).not.to.be.called
 
   context ".run", ->
+    mockStats = stats.create({tests: 2, passes: 1})
     beforeEach ->
       @sandbox.stub(record, "generateProjectBuildId").resolves("build-id-123")
       @sandbox.stub(record, "createInstance").resolves("instance-id-123")
       @sandbox.stub(record, "uploadAssets").resolves()
       @sandbox.stub(record, "uploadStdout").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
-      @sandbox.stub(Project, "config").resolves({projectName: "projectName"})
-      @sandbox.stub(headless, "run").resolves({tests: 2, passes: 1})
+      @sandbox.stub(Project, "findSpecsFromProjectConfig").resolves(["spec.js"])
+      @sandbox.stub(Project, "config").resolves({
+        projectName: "projectName"
+        projectRoot: "/foo/bar",
+        integrationFolder: "/foo/bar/cypress/integration"
+      })
+      @sandbox.stub(headless, "run").resolves(mockStats)
       @sandbox.spy(Project, "add")
 
     it "ensures id", ->
@@ -425,10 +432,7 @@ describe.only "lib/modes/record", ->
         expect(record.createInstance).not.to.be.called
         expect(record.uploadAssets).not.to.be.called
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "calls headless.run + ensureAuthToken + allDone into options", ->
       opts = {foo: "bar"}
@@ -453,10 +457,7 @@ describe.only "lib/modes/record", ->
       .then (stats) ->
         expect(record.uploadAssets).not.to.be.called
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "does not call uploadStdout with no instanceId", ->
       record.createInstance.resolves(null)
@@ -507,10 +508,7 @@ describe.only "lib/modes/record", ->
       .then (stats) ->
         expect(terminal.header).to.be.calledWith("All Done")
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "calls headless.allDone on uploadAssets failure", ->
       @sandbox.spy(terminal, "header")
@@ -521,10 +519,7 @@ describe.only "lib/modes/record", ->
       .then (stats) ->
         expect(terminal.header).to.be.calledWith("All Done")
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "calls headless.allDone on createInstance failure", ->
       @sandbox.spy(terminal, "header")
@@ -534,7 +529,4 @@ describe.only "lib/modes/record", ->
       .then (stats) ->
         expect(terminal.header).to.be.calledWith("All Done")
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)

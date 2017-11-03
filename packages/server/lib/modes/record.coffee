@@ -236,8 +236,12 @@ module.exports = {
       options.projectId = projectId
 
       Project.config(projectPath)
-      .then (cfg) =>
-        { projectName } = cfg
+      .then (cfg = {}) =>
+        { projectName, integrationFolder } = cfg
+        la(check.unemptyString(projectName),
+          "missing project name in project config", cfg)
+        la(check.unemptyString(integrationFolder),
+          "missing integration folder in project config", cfg)
 
         specPattern = options.spec
         Project.findSpecs(cfg, specPattern)
@@ -291,7 +295,8 @@ module.exports = {
                   @createInstance(buildId, specName, commonMachineId)
 
               newInstance()
-              .then ({instanceId, machineId}) =>
+              .then (instance = {}) =>
+                {instanceId, machineId} = instance
                 if not commonMachineId and machineId
                   commonMachineId = machineId
                   debug("remembering common machine %s id for instance", machineId)
@@ -304,7 +309,7 @@ module.exports = {
 
                 didUploadAssets       = false
 
-                specNameInProject = path.join(cfg.integrationFolder, specName)
+                specNameInProject = path.join(integrationFolder, specName)
                 options.spec = specNameInProject
                 headless.run(options)
                 .then (stats = {}) =>

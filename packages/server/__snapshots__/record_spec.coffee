@@ -14,6 +14,7 @@ exports['lib/modes/record .generateProjectBuildId calls api.createRun with args 
     "ciProvider": "circle",
     "ciBuildNumber": "build-123",
     "groupId": null,
+    "specPattern": null,
     "specs": [
       "spec.js"
     ]
@@ -36,6 +37,7 @@ exports['lib/modes/record .generateProjectBuildId passes groupId 1'] = [
     "ciProvider": "circle",
     "ciBuildNumber": "build-123",
     "groupId": "gr123",
+    "specPattern": null,
     "specs": [
       "spec.js"
     ]
@@ -58,6 +60,7 @@ exports['lib/modes/record .generateProjectBuildId figures out groupId from CI en
     "ciProvider": "circle",
     "ciBuildNumber": "build-123",
     "groupId": "ci-group-123",
+    "specPattern": null,
     "specs": [
       "spec.js"
     ]
