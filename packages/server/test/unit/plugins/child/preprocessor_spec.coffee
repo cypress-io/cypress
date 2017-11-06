@@ -10,7 +10,7 @@ describe "lib/plugins/child/preprocessor", ->
     @ipc = {
       send: @sandbox.spy()
       on: @sandbox.stub()
-      removeEventListener: @sandbox.spy()
+      removeListener: @sandbox.spy()
     }
     @invoke = @sandbox.spy()
     @ids = {}

@@ -14,7 +14,7 @@ describe "lib/plugins/child/run_plugins", ->
     @ipc = {
       send: @sandbox.spy()
       on: @sandbox.stub()
-      removeEventListener: @sandbox.spy()
+      removeListener: @sandbox.spy()
     }
 
   afterEach ->

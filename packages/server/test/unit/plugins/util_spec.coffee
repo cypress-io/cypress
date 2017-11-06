@@ -11,7 +11,7 @@ describe "lib/plugins/util", ->
       @ipc = {
         send: @sandbox.spy()
         on: @sandbox.stub()
-        removeEventListener: @sandbox.spy()
+        removeListener: @sandbox.spy()
       }
       @callback = @sandbox.spy()
 
@@ -48,4 +48,4 @@ describe "lib/plugins/util", ->
       promise = util.wrapPromise(@ipc, 0, @callback)
       invocationId = @callback.lastCall.args[0]
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "value")
-      expect(@ipc.removeEventListener).to.be.calledWith("promise:fulfilled:#{invocationId}")
+      expect(@ipc.removeListener).to.be.calledWith("promise:fulfilled:#{invocationId}")
