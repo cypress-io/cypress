@@ -448,7 +448,8 @@ describe "lib/modes/record", ->
 
       record.run({})
       .then ->
-        expect(record.uploadAssets).to.be.calledWith("instance-id-123", {tests: 2, passes: 1}, "foobarbaz")
+        expect(record.uploadAssets).to.be.calledWith(
+          "instance-id-123", stats.create({tests: 2, passes: 1}), "foobarbaz")
 
     it "does not call uploadAssets with no instanceId", ->
       record.createInstance.resolves(null)
@@ -489,7 +490,7 @@ describe "lib/modes/record", ->
         console.log("bar")
         process.stdout.write("baz")
 
-        Promise.resolve({failures: 0})
+        Promise.resolve(stats.create({failures: 0}))
 
       headless.run.restore()
       @sandbox.stub(headless, "run", fn)
