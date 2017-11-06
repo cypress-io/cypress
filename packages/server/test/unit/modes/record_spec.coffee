@@ -391,7 +391,7 @@ describe "lib/modes/record", ->
     mockStats = stats.create({tests: 2, passes: 1})
     beforeEach ->
       @sandbox.stub(record, "generateProjectBuildId").resolves("build-id-123")
-      @sandbox.stub(record, "createInstance").resolves("instance-id-123")
+      @sandbox.stub(record, "createInstance").resolves({instanceId: "instance-id-123"})
       @sandbox.stub(record, "uploadAssets").resolves()
       @sandbox.stub(record, "uploadStdout").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
@@ -422,7 +422,7 @@ describe "lib/modes/record", ->
     it "passes buildId + options.spec to createInstance", ->
       record.run({spec: "foo/bar/spec"})
       .then ->
-        expect(record.createInstance).to.be.calledWith("build-id-123", "foo/bar/spec")
+        expect(record.createInstance).to.be.calledWith("build-id-123", "spec.js", null)
 
     it "does not call record.createInstance or record.uploadAssets when no buildId", ->
       record.generateProjectBuildId.resolves(null)
@@ -439,7 +439,13 @@ describe "lib/modes/record", ->
 
       record.run(opts)
       .then ->
-        expect(headless.run).to.be.calledWith({projectId: "id-123", foo: "bar", ensureAuthToken: false, allDone: false})
+        expect(headless.run).to.be.calledWith({
+          projectId: "id-123",
+          foo: "bar",
+          ensureAuthToken: false,
+          allDone: false,
+          spec: "/foo/bar/cypress/integration/spec.js"
+        })
 
     it "calls uploadAssets with instanceId, stats, and stdout", ->
       @sandbox.stub(stdout, "capture").returns({
@@ -497,6 +503,9 @@ describe "lib/modes/record", ->
 
       record.run({})
       .then (stats) ->
+        console.log('stats')
+        console.log(stats)
+        expect(record.uploadStdout).to.have.been.called
         str = record.uploadStdout.getCall(0).args[1]
 
         expect(str).to.include("foo\nbar\nbaz")

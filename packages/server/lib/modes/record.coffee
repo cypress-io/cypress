@@ -4,6 +4,7 @@ os         = require("os")
 path       = require("path")
 chalk      = require("chalk")
 Promise    = require("bluebird")
+pluralize  = require("pluralize")
 headless   = require("./headless")
 api        = require("../api")
 logger     = require("../logger")
@@ -252,6 +253,9 @@ module.exports = {
             if specPattern
               console.log("matching spec pattern", specPattern)
             # should we exit with error?
+          else
+            debug("found %s for pattern %s", pluralize("spec", specs.length, true), specPattern)
+            debug(specs)
 
           key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
@@ -290,13 +294,14 @@ module.exports = {
               newInstance = () =>
                 ## bail if we dont have a buildId
                 if not buildId
-                  Promise.resolve()
+                  Promise.resolve({})
                 else
                   @createInstance(buildId, specName, commonMachineId)
 
               newInstance()
               .then (instance = {}) =>
                 {instanceId, machineId} = instance
+                debug("new instance id %s machine id %s", instanceId, machineId)
                 if not commonMachineId and machineId
                   commonMachineId = machineId
                   debug("remembering common machine %s id for instance", machineId)
@@ -316,6 +321,7 @@ module.exports = {
                   ## if we got a instanceId then attempt to
                   ## upload these assets
                   if instanceId
+                    debug("uploading asserts for instance", instanceId)
                     @uploadAssets(instanceId, stats, captured.toString())
                     .then (ret) ->
                       didUploadAssets = ret isnt null
@@ -325,6 +331,7 @@ module.exports = {
 
                       if didUploadAssets
                         stdout.restore()
+                        debug("uploading stdout for instance", instanceId)
                         @uploadStdout(instanceId, captured.toString())
 
                   else
