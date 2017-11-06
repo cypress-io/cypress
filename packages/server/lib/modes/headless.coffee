@@ -486,6 +486,9 @@ module.exports = {
 
   ready: (options = {}) ->
     log("headless mode ready with options %j", Object.keys(options))
+    if options.spec
+      log("spec", options.spec)
+
     id = @getId()
 
     ## let's first make sure this project exists

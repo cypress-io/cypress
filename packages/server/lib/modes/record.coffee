@@ -29,6 +29,11 @@ logException = (err) ->
   .catch ->
     ## dont yell about any errors either
 
+isInstanceInfo = (x) ->
+  _.isPlainObject(x) &&
+  check.maybe.unemptyString(x.instanceId) &&
+  check.maybe.unemptyString(x.machineId)
+
 module.exports = {
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs) ->
     if not recordKey
@@ -69,6 +74,8 @@ module.exports = {
         specs:             specs
         specPattern:       specPattern
       }
+      # console.log('createRunOptions')
+      # console.log(createRunOptions)
 
       api.createRun(createRunOptions)
       .catch (err) ->
@@ -94,11 +101,12 @@ module.exports = {
     if machineId
       debug("with existing machine id", machineId)
 
-    api.createInstance({
+    options = {
       buildId
       spec
       machineId
-    })
+    }
+    api.createInstance(options)
     .catch (err) ->
       errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
@@ -166,7 +174,7 @@ module.exports = {
     screenshots = _.map stats.screenshots, (screenshot) ->
       _.omit(screenshot, "path")
 
-    api.updateInstance({
+    options = {
       instanceId:   instanceId
       tests:        stats.tests
       passes:       stats.passes
@@ -180,7 +188,8 @@ module.exports = {
       cypressConfig: stats.config
       ciProvider:    ciProvider.name()
       stdout:       stdout
-    })
+    }
+    api.updateInstance(options)
     .then (resp = {}) =>
       @upload({
         video:          stats.video
@@ -300,6 +309,8 @@ module.exports = {
 
               newInstance()
               .then (instance = {}) =>
+                la(isInstanceInfo(instance), "invalid new instance info", instance)
+
                 {instanceId, machineId} = instance
                 debug("new instance id %s machine id %s", instanceId, machineId)
                 if not commonMachineId and machineId
@@ -317,7 +328,12 @@ module.exports = {
                 specNameInProject = path.join(integrationFolder, specName)
                 options.spec = specNameInProject
                 headless.run(options)
+                .tapCatch (e) ->
+                  debug("headless run error")
+                  debug(e)
                 .then (stats = {}) =>
+                  debug("finished headless run with %d failed %s",
+                    stats.failures, pluralize("test", stats.failures, true))
                   ## if we got a instanceId then attempt to
                   ## upload these assets
                   if instanceId

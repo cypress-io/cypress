@@ -76,7 +76,7 @@
     "babel-preset-latest": "^6.16.0",
     "babel-preset-react": "^6.16.0",
     "babelify": "^7.3.0",
-    "bluebird": "3.4.7",
+    "bluebird": "3.5.1",
     "browserify": "^13.1.1",
     "bytes": "^2.4.0",
     "chai": "^1.9.2",
