@@ -25,13 +25,20 @@ describe "lib/plugins/util", ->
       promise.then (value) ->
         expect(value).to.equal("value")
 
-    it "resolves the promise when 'promise:fulfilled:{invocationId}' event is received without error", ->
+    it "rejects the promise when 'promise:fulfilled:{invocationId}' event is received with error", ->
       promise = util.wrapPromise(@ipc, 0, @callback)
       invocationId = @callback.lastCall.args[0]
-      err = new Error("fail")
+      err = {
+        name: "the name"
+        message: "the message"
+        stack: "the stack"
+      }
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(err)
       promise.catch (actualErr) ->
-        expect(actualErr).to.equal(err)
+        expect(actualErr).to.be.an.instanceOf(Error)
+        expect(actualErr.name).to.equal(err.name)
+        expect(actualErr.message).to.equal(err.message)
+        expect(actualErr.stack).to.equal(err.stack)
 
     it "invokes callback with unique invocation id", ->
       firstCall = util.wrapPromise(@ipc, 0, @callback)

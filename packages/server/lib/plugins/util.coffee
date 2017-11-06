@@ -8,10 +8,10 @@ module.exports = {
 
     new Promise (resolve, reject) ->
       handler = (err, value) ->
-        ipc.removeEventListener("promise:fulfilled:#{invocationId}", handler)
+        ipc.removeListener("promise:fulfilled:#{invocationId}", handler)
         if err
           log("promise rejected for id", invocationId, ":", err)
-          reject(err)
+          reject(_.extend(new Error(err.message), err))
           return
 
         log("promise resolved for id", invocationId)

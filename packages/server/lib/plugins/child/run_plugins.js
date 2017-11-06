@@ -1,6 +1,6 @@
-const _ = require('lodash')
 const log = require('debug')('cypress:server:plugins:child')
 const preprocessor = require('./preprocessor')
+const util = require('./util')
 
 const callbacks = {}
 
@@ -14,10 +14,8 @@ const invoke = (callbackId, args = []) => {
   return callback(...args)
 }
 
-const serializeError = (err) => _.pick(err, 'name', 'message', 'stack', 'code')
-
 const sendError = (ipc, err) => {
-  ipc.send('error', serializeError(err))
+  ipc.send('error', util.serializeError(err))
 }
 
 let plugins
@@ -46,7 +44,7 @@ const load = (ipc, config) => {
     plugins(register, config)
     ipc.send('loaded', registrations)
   } catch (err) {
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', serializeError(err))
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', util.serializeError(err))
   }
 }
 
@@ -71,7 +69,7 @@ module.exports = (ipc, pluginsFile) => {
     plugins = require(pluginsFile)
   } catch (err) {
     log('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', serializeError(err))
+    ipc.send('load:error', 'PLUGINS_FILE_ERROR', util.serializeError(err))
     return
   }
 

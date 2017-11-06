@@ -6,12 +6,30 @@ util = require("#{root}../../lib/plugins/child/util")
 
 describe "lib/plugins/child/util", ->
 
+  context "#serializeError", ->
+    it "sends error with name, message, stack, code, and annotated properties", ->
+      err = {
+        name: "the name"
+        message: "the message"
+        stack: "the stack"
+        code: "the code"
+        annotated: "the annotated version"
+        extra: "this is extra"
+      }
+      expect(util.serializeError(err)).to.eql({
+        name: "the name"
+        message: "the message"
+        stack: "the stack"
+        code: "the code"
+        annotated: "the annotated version"
+      })
+
   context "#wrapPromise", ->
     beforeEach ->
       @ipc = {
         send: @sandbox.spy()
         on: @sandbox.stub()
-        removeEventListener: @sandbox.spy()
+        removeListener: @sandbox.spy()
       }
       @invoke = @sandbox.stub()
       @ids = {
@@ -36,6 +54,7 @@ describe "lib/plugins/child/util", ->
     it "sends 'promise:fulfilled:{invocatationId}' with error when promise rejects", ->
       err = new Error("fail")
       err.code = "ERM_DUN_FAILED"
+      err.annotated = "annotated error"
       @invoke.rejects(err)
       util.wrapPromise(@ipc, @invoke, @ids).then =>
         expect(@ipc.send).to.be.calledWith("promise:fulfilled:00")
@@ -44,3 +63,4 @@ describe "lib/plugins/child/util", ->
         expect(actualError.message).to.equal(err.message)
         expect(actualError.stack).to.equal(err.stack)
         expect(actualError.code).to.equal(err.code)
+        expect(actualError.annotated).to.equal(err.annotated)
