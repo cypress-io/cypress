@@ -531,7 +531,7 @@ class Project extends EE
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 
   @findSpecsFromProjectConfig = (config, specPattern) ->
-    la(check.unemptyString(config.projectRoot), "config is missing project path", config)
+    la(check.unemptyString(config.projectRoot), "config is missing project root", config)
 
     ## if we have a spec pattern
     if specPattern
@@ -551,7 +551,7 @@ class Project extends EE
 
     if check.unemptyString(projectPathOrConfig)
       getConfig = () ->
-        Project(projectPath)
+        Project(projectPathOrConfig)
         .getConfig()
     else
       getConfig = () ->
