@@ -143,7 +143,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(Server.prototype, "open").resolves([])
-      @sandbox.stub(plugins, "init")
+      @sandbox.stub(plugins, "init").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -167,6 +167,18 @@ describe "lib/project", ->
     it "initializes the plugins", ->
       @project.open({}).then =>
         expect(plugins.init).to.be.calledWith(@config)
+
+    it "calls options.onError with plugins error when there is a plugins error", ->
+      onError = @sandbox.spy()
+      err = {
+        name: "plugin error name"
+        message: "plugin error message"
+      }
+      @project.open({ onError: onError }).then =>
+        pluginsOnError = plugins.init.lastCall.args[1].onError
+        expect(pluginsOnError).to.be.a("function")
+        pluginsOnError(err)
+        expect(onError).to.be.calledWith(err)
 
     it "updates config.state when saved state changes", ->
       @sandbox.spy(@project, "saveState")
@@ -345,7 +357,7 @@ describe "lib/project", ->
       @sandbox.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
       @project.watchers = { watch: @sandbox.spy() }
-      @sandbox.stub(plugins, "init")
+      @sandbox.stub(plugins, "init").resolves()
       @config = {
         pluginsFile: "/path/to/plugins-file"
       }
@@ -373,7 +385,7 @@ describe "lib/project", ->
 
     it "handles errors from calling plugins.init", (done) ->
       error = {name: "foo", message: "foo"}
-      plugins.init.throws(error)
+      plugins.init.rejects(error)
       @project.watchPluginsFile(@config, {
         onError: (err) ->
           expect(err).to.eql(error)

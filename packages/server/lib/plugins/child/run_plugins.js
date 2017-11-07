@@ -1,6 +1,6 @@
 const log = require('debug')('cypress:server:plugins:child')
 const preprocessor = require('./preprocessor')
-const util = require('./util')
+const util = require('../util')
 
 const callbacks = {}
 
@@ -64,6 +64,19 @@ const execute = (ipc, event, ids, args = []) => {
 module.exports = (ipc, pluginsFile) => {
   log('pluginsFile:', pluginsFile)
 
+  process.on('uncaughtException', (err) => {
+    log('uncaught exception:', util.serializeError(err))
+    ipc.send('error', util.serializeError(err))
+    return false
+  })
+
+  process.on('unhandledRejection', (event) => {
+    const err = (event && event.reason) || event
+    log('unhandled rejection:', util.serializeError(err))
+    ipc.send('error', util.serializeError(err))
+    return false
+  })
+
   try {
     log('require pluginsFile')
     plugins = require(pluginsFile)
@@ -86,6 +99,4 @@ module.exports = (ipc, pluginsFile) => {
   ipc.on('execute', (event, ids, args) => {
     execute(ipc, event, ids, args)
   })
-
-  // TODO: listen to uncaughtException, maybe unhandleRejection and send error to parent process
 }

@@ -93,3 +93,26 @@ describe "lib/plugins/child/run_plugins", ->
         args = ["one", "two"]
         preprocessor.wrap.lastCall.args[1](0, args)
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
+
+  describe "errors", ->
+    beforeEach ->
+      mockery.registerMock("plugins-file", ->)
+      @sandbox.stub(process, "on")
+
+      @err = {
+        name: "error name"
+        message: "error message"
+      }
+      runPlugins(@ipc, "plugins-file")
+
+    it "sends the serialized error via ipc on process uncaughtException", ->
+      process.on.withArgs("uncaughtException").yield(@err)
+      expect(@ipc.send).to.be.calledWith("error", @err)
+
+    it "sends the serialized error via ipc on process unhandledRejection", ->
+      process.on.withArgs("unhandledRejection").yield(@err)
+      expect(@ipc.send).to.be.calledWith("error", @err)
+
+    it "sends the serialized reason via ipc on process unhandledRejection", ->
+      process.on.withArgs("unhandledRejection").yield({ reason: @err })
+      expect(@ipc.send).to.be.calledWith("error", @err)

@@ -16,9 +16,15 @@ describe "lib/plugins/index", ->
     }
     @sandbox.stub(cp, "fork").returns(@pluginsProcess)
 
+    @ipc = {
+      send: @sandbox.spy()
+      on: @sandbox.stub()
+    }
+    @sandbox.stub(util, "wrapIpc").returns(@ipc)
+
   context "#init", ->
     it "is noop if no pluginsFile", ->
-      plugins.init({}) ## doesn't reject
+      plugins.init({}) ## doesn't reject or time out
 
     it "forks child process", ->
       plugins.init({ pluginsFile: "cypress-plugin" })
@@ -35,71 +41,76 @@ describe "lib/plugins/index", ->
       expect(handler.lastCall.args[0].on).to.be.a("function")
 
     it "sends config via ipc", ->
+      @ipc.on.withArgs("loaded").yields([])
       config = { pluginsFile: "cypress-plugin" }
-      plugins.init(config)
-      expect(@pluginsProcess.send).to.be.calledWith({
-        event: "load"
-        args: [config]
-      })
+      plugins.init(config).then =>
+        expect(@ipc.send).to.be.calledWith("load", config)
 
     it "resolves once it receives 'loaded' message", ->
-      promise = plugins.init({ pluginsFile: "cypress-plugin" })
-      @pluginsProcess.on.yield({
-        event: "loaded"
-        args: [[]]
-      })
+      @ipc.on.withArgs("loaded").yields([])
       ## should resolve and not time out
-      return promise
+      plugins.init({ pluginsFile: "cypress-plugin" })
 
     it "kills child process if it already exists", ->
-      promise = plugins.init({ pluginsFile: "cypress-plugin" })
+      @ipc.on.withArgs("loaded").yields([])
+      plugins.init({ pluginsFile: "cypress-plugin" })
       .then =>
-        p = plugins.init({ pluginsFile: "cypress-plugin" })
-
-        @pluginsProcess.on.yield({
-          event: "loaded"
-          args: [[]]
-        })
-
-        return p
+        plugins.init({ pluginsFile: "cypress-plugin" })
       .then =>
         expect(@pluginsProcess.kill).to.be.calledOnce
 
-      @pluginsProcess.on.yield({
-        event: "loaded"
-        args: [[]]
-      })
-
-      return promise
-
     describe "loaded message", ->
       beforeEach ->
-        promise = plugins.init({ pluginsFile: "cypress-plugin" })
-
-        @pluginsProcess.on.yield({
-          event: "loaded"
-          args: [[{
-            event: "some:event"
-            callbackId: 0
-          }]]
-        })
-
-        return promise
+        @ipc.on.withArgs("loaded").yields([{
+          event: "some:event"
+          callbackId: 0
+        }])
+        plugins.init({ pluginsFile: "cypress-plugin" })
 
       it "sends 'execute' message when event is executed, wrapped in promise", ->
-        @sandbox.stub(util, "wrapPromise").resolves("value").yields("00")
+        @sandbox.stub(util, "wrapParentPromise").resolves("value").yields("00")
 
         plugins.execute("some:event", "foo", "bar").then (value) =>
-          expect(util.wrapPromise).to.be.called
-          expect(@pluginsProcess.send).to.be.calledWith({
-            event: "execute"
-            args: [
-              "some:event"
-              { callbackId: 0, invocationId: "00" }
-              ["foo", "bar"]
-            ]
-          })
+          expect(util.wrapParentPromise).to.be.called
+          expect(@ipc.send).to.be.calledWith(
+            "execute",
+            "some:event",
+            { callbackId: 0, invocationId: "00" }
+            ["foo", "bar"]
+          )
           expect(value).to.equal("value")
+
+    describe "error message", ->
+      beforeEach ->
+        @err = {
+          name: "error name"
+          message: "error message"
+        }
+        @onError = @sandbox.spy()
+        @ipc.on.withArgs("loaded").yields([])
+        plugins.init({ pluginsFile: "cypress-plugin" }, { onError: @onError })
+
+      it "kills the plugins process when plugins process errors", ->
+        @pluginsProcess.on.withArgs("error").yield(@err)
+        expect(@pluginsProcess.kill).to.be.called
+
+      it "kills the plugins process when ipc sends error", ->
+        @ipc.on.withArgs("error").yield(@err)
+        expect(@pluginsProcess.kill).to.be.called
+
+      it "calls onError when plugins process errors", ->
+        @pluginsProcess.on.withArgs("error").yield(@err)
+        expect(@onError).to.be.called
+        expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
+        expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
+        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+
+      it "calls onError when ipc sends error", ->
+        @ipc.on.withArgs("error").yield(@err)
+        expect(@onError).to.be.called
+        expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
+        expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
+        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
 
   context "#register", ->
     it "registers callback for event", ->

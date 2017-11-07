@@ -26,6 +26,7 @@ files       = require("./controllers/files")
 plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
 settings    = require("./util/settings")
+browsers    = require("./browsers")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 log         = require("debug")("cypress:server:project")
 
@@ -61,6 +62,7 @@ class Project extends EE
     _.defaults options, {
       report:       false
       onFocusTests: ->
+      onError: ->
       onSettingsChanged: false
     }
 
@@ -104,11 +106,18 @@ class Project extends EE
             @watchSupportFile(cfg)
             @watchPluginsFile(cfg, options)
           )
-        .then ->
-          plugins.init(cfg, options)
+        .then =>
+          @_initPlugins(cfg, options)
 
     # return our project instance
     .return(@)
+
+  _initPlugins: (config, options) ->
+    plugins.init(config, {
+      onError: (err) ->
+        browsers.close()
+        options.onError(err)
+    })
 
   getRuns: ->
     Promise.all([
@@ -176,9 +185,7 @@ class Project extends EE
           ## TODO: completely re-open project instead?
           log("plugins file changed")
           ## re-init plugins after a change
-          Promise
-          .try ->
-            plugins.init(config, options)
+          @_initPlugins(config, options)
           .catch (err) ->
             options.onError(err)
       })

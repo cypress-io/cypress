@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const EE = require('events')
-const util = require('./util')
+const util = require('../util')
 
 const configs = {}
 
@@ -20,7 +20,7 @@ const wrap = (ipc, invoke, ids, args) => {
       }
     })
   }
-  util.wrapPromise(ipc, invoke, ids, [enhancedConfig])
+  util.wrapChildPromise(ipc, invoke, ids, [enhancedConfig])
 }
 
 module.exports = {

@@ -8,6 +8,8 @@ module.exports = (aProcess) ->
 
   return {
     send: (event, args...) ->
+      return if aProcess.killed
+
       aProcess.send({
         event: event
         args

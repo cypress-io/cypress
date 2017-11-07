@@ -277,6 +277,12 @@ API = {
 
         #{chalk.yellow(arg2)}
         """.trim()
+      when "PLUGINS_ERROR"
+        """
+        The following error was thrown by a plugin. We've stopped running your tests because this likely interrupts behavior critical to them.
+
+        #{chalk.yellow(arg1)}
+        """.trim()
       when "BUNDLE_ERROR"
         ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
         ## THE ERROR MESSAGE IN THE RUNNER TOO

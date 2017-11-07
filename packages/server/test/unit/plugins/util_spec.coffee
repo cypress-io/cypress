@@ -6,7 +6,88 @@ util = require("#{root}../lib/plugins/util")
 
 describe "lib/plugins/util", ->
 
-  context "#wrapPromise", ->
+  context "#wrapIpc", ->
+    beforeEach ->
+      @theProcess = {
+        send: @sandbox.spy()
+        on: @sandbox.stub()
+      }
+
+      @ipc = util.wrapIpc(@theProcess)
+
+    it "#send sends event through the process", ->
+      @ipc.send("event-name", "arg1", "arg2")
+      expect(@theProcess.send).to.be.calledWith({
+        event: "event-name"
+        args: ["arg1", "arg2"]
+      })
+
+    it "#send does not send if process has been killed", ->
+      @theProcess.killed = true
+      @ipc.send("event-name")
+      expect(@theProcess.send).not.to.be.called
+
+    it "#on listens for process messages that match event", ->
+      handler = @sandbox.spy()
+      @ipc.on("event-name", handler)
+      @theProcess.on.yield({
+        event: "event-name"
+        args: ["arg1", "arg2"]
+      })
+      expect(handler).to.be.calledWith("arg1", "arg2")
+
+    it "#removeListener emoves handler", ->
+      handler = @sandbox.spy()
+      @ipc.on("event-name", handler)
+      @ipc.removeListener("event-name", handler)
+      @theProcess.on.yield({
+        event: "event-name"
+        args: ["arg1", "arg2"]
+      })
+      expect(handler).not.to.be.called
+
+  context "#wrapChildPromise", ->
+    beforeEach ->
+      @ipc = {
+        send: @sandbox.spy()
+        on: @sandbox.stub()
+        removeListener: @sandbox.spy()
+      }
+      @invoke = @sandbox.stub()
+      @ids = {
+        callbackId: 0
+        invocationId: "00"
+      }
+      @args = []
+
+    it "calls the invoke function with the callback id and args", ->
+      util.wrapChildPromise(@ipc, @invoke, @ids).then =>
+        expect(@invoke).to.be.calledWith(0, @args)
+
+    it "wraps the invocation in a promise", ->
+      @invoke.throws("some error") ## test that we're Promise.try-ing invoke
+      expect(util.wrapChildPromise(@ipc, @invoke, @ids)).to.be.an.instanceOf(Promise)
+
+    it "sends 'promise:fulfilled:{invocatationId}' with value when promise resolves", ->
+      @invoke.resolves("value")
+      util.wrapChildPromise(@ipc, @invoke, @ids).then =>
+        expect(@ipc.send).to.be.calledWith("promise:fulfilled:00", null, "value")
+
+    it "sends 'promise:fulfilled:{invocatationId}' with error when promise rejects", ->
+      err = new Error("fail")
+      err.code = "ERM_DUN_FAILED"
+      err.annotated = "annotated error"
+      @invoke.rejects(err)
+      util.wrapChildPromise(@ipc, @invoke, @ids).then =>
+        expect(@ipc.send).to.be.calledWith("promise:fulfilled:00")
+        actualError = @ipc.send.lastCall.args[1]
+        expect(actualError.name).to.equal(err.name)
+        expect(actualError.message).to.equal(err.message)
+        expect(actualError.stack).to.equal(err.stack)
+        expect(actualError.code).to.equal(err.code)
+        expect(actualError.annotated).to.equal(err.annotated)
+
+  context "#wrapParentPromise", ->
     beforeEach ->
       @ipc = {
         send: @sandbox.spy()
@@ -16,17 +97,17 @@ describe "lib/plugins/util", ->
       @callback = @sandbox.spy()
 
     it "returns a promise", ->
-      expect(util.wrapPromise(@ipc, 0, @callback)).to.be.an.instanceOf(Promise)
+      expect(util.wrapParentPromise(@ipc, 0, @callback)).to.be.an.instanceOf(Promise)
 
     it "resolves the promise when 'promise:fulfilled:{invocationId}' event is received without error", ->
-      promise = util.wrapPromise(@ipc, 0, @callback)
+      promise = util.wrapParentPromise(@ipc, 0, @callback)
       invocationId = @callback.lastCall.args[0]
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "value")
       promise.then (value) ->
         expect(value).to.equal("value")
 
     it "rejects the promise when 'promise:fulfilled:{invocationId}' event is received with error", ->
-      promise = util.wrapPromise(@ipc, 0, @callback)
+      promise = util.wrapParentPromise(@ipc, 0, @callback)
       invocationId = @callback.lastCall.args[0]
       err = {
         name: "the name"
@@ -41,18 +122,36 @@ describe "lib/plugins/util", ->
         expect(actualErr.stack).to.equal(err.stack)
 
     it "invokes callback with unique invocation id", ->
-      firstCall = util.wrapPromise(@ipc, 0, @callback)
+      firstCall = util.wrapParentPromise(@ipc, 0, @callback)
       invocationId = @callback.lastCall.args[0]
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield()
       firstCall.then =>
         expect(@callback).to.be.called
         firstId = @callback.lastCall.args[0]
-        util.wrapPromise(@ipc, 0, @callback)
+        util.wrapParentPromise(@ipc, 0, @callback)
         secondId = @callback.lastCall.args[0]
         expect(firstId).not.to.equal(secondId)
 
     it "removes event listener once promise is fulfilled", ->
-      promise = util.wrapPromise(@ipc, 0, @callback)
+      promise = util.wrapParentPromise(@ipc, 0, @callback)
       invocationId = @callback.lastCall.args[0]
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "value")
       expect(@ipc.removeListener).to.be.calledWith("promise:fulfilled:#{invocationId}")
+
+  context "#serializeError", ->
+    it "sends error with name, message, stack, code, and annotated properties", ->
+      err = {
+        name: "the name"
+        message: "the message"
+        stack: "the stack"
+        code: "the code"
+        annotated: "the annotated version"
+        extra: "this is extra"
+      }
+      expect(util.serializeError(err)).to.eql({
+        name: "the name"
+        message: "the message"
+        stack: "the stack"
+        code: "the code"
+        annotated: "the annotated version"
+      })
