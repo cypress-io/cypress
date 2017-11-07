@@ -327,7 +327,10 @@ module.exports = {
 
                 specNameInProject = path.join(integrationFolder, specName)
                 options.spec = specNameInProject
-                headless.run(options)
+
+                # makes sure we have Bluebird promise all the way
+                Promise.resolve()
+                .then () -> headless.run(options)
                 .tapCatch (e) ->
                   debug("headless run error")
                   debug(e)
