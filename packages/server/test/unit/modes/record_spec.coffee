@@ -18,7 +18,7 @@ snapshot   = require("snap-shot-it")
 
 initialEnv = R.clone(process.env)
 
-describe.only "lib/modes/record", ->
+describe "lib/modes/record", ->
   beforeEach ->
     @sandbox.stub(ciProvider, "name").returns("circle")
     @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
