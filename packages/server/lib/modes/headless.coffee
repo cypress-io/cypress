@@ -75,6 +75,8 @@ module.exports = {
       socketId:     id
       report:       true
       isTextTerminal:   options.isTextTerminal ? true
+      onError: (err) ->
+        openProject.emit("exitEarlyWithErr", err.message)
     })
     .catch {portInUse: true}, (err) ->
       ## TODO: this needs to move to emit exitEarly

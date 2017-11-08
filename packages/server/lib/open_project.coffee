@@ -24,7 +24,7 @@ create = ->
 
   return {
     reset: tryToCall("reset")
-    
+
     getConfig: tryToCall("getConfig")
 
     createCiProject: tryToCall("createCiProject")
@@ -34,6 +34,8 @@ create = ->
     getRuns: tryToCall("getRuns")
 
     requestAccess: tryToCall("requestAccess")
+
+    emit: tryToCall("emit")
 
     getProject: -> openProject
 
