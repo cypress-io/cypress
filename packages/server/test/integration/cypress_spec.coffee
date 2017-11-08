@@ -84,6 +84,7 @@ describe "lib/cypress", ->
     @sandbox.stub(extension, "setHostAndPath").resolves()
     @sandbox.stub(browsers, "get").resolves(TYPICAL_BROWSERS)
     @sandbox.stub(process, "exit")
+    @sandbox.stub(Server.prototype, "reset")
     @sandbox.spy(errors, "log")
     @sandbox.spy(errors, "warning")
     @sandbox.spy(console, "log")

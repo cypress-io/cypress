@@ -53,6 +53,7 @@ browserifyFile = (filePath) ->
 describe "Routes", ->
   beforeEach ->
     @sandbox.stub(CacheBuster, "get").returns("-123")
+    @sandbox.stub(Server.prototype, "reset")
 
     nock.enableNetConnect()
 
