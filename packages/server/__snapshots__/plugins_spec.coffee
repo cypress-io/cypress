@@ -3,6 +3,25 @@ Started video recording: /foo/bar/.projects/plugins-async-error/cypress/videos/a
 
   (Tests Starting)
 
+Error: The following error was thrown by a plugin. We've stopped running your tests because this likely interrupts behavior critical to them.
+
+Error: Async error from plugins file
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+
   (Tests Finished)
 
   - Tests:           0
@@ -29,9 +48,6 @@ exports['e2e plugins passes 1'] = `
 Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/abc123.mp4
 
   (Tests Starting)
----
-/foo/bar/.projects/working-preprocessor/cypress/integration/another_spec.js
----
 
 
   ✓ is another spec
@@ -60,4 +76,3 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
   (All Done)
 
 `
-

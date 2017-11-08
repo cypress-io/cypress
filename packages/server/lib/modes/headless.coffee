@@ -76,6 +76,8 @@ module.exports = {
       report:       true
       isTextTerminal:   options.isTextTerminal ? true
       onError: (err) ->
+        console.log()
+        console.log(err.stack)
         openProject.emit("exitEarlyWithErr", err.message)
     })
     .catch {portInUse: true}, (err) ->
