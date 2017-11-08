@@ -54,6 +54,7 @@ class Server
     @_middleware = null
     @_server     = null
     @_socket     = null
+    @_baseUrl    = null
     @_wsProxy    = null
     @_fileServer = null
     @_httpsProxy = null
@@ -201,6 +202,8 @@ class Server
           ## if we have a baseUrl let's go ahead
           ## and make sure the server is connectable!
           if baseUrl
+            @_baseUrl = baseUrl
+
             connect.ensureUrl(baseUrl)
             .return(null)
             .catch (err) =>
@@ -508,9 +511,11 @@ class Server
   reset: ->
     buffers.reset()
 
+    @_onDomainSet(@_baseUrl ? "<root>")
+
   _close: ->
     @reset()
- 
+
     logger.unsetSettings()
 
     evilDns.clear()

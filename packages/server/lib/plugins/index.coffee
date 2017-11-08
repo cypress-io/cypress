@@ -60,8 +60,6 @@ module.exports = {
       ipc.on "load:error", (type, args...) ->
         reject(errors.get(type, args...))
 
-      ## TODO: on error, close browser and focus gui
-
       killPluginsProcess = ->
         pluginsProcess and pluginsProcess.kill()
         pluginsProcess = null

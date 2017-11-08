@@ -143,6 +143,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(Server.prototype, "open").resolves([])
+      @sandbox.stub(Server.prototype, "reset")
       @sandbox.stub(plugins, "init").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
