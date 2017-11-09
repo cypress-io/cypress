@@ -48,14 +48,14 @@ describe('util', function () {
       const options = {
         foo: 'bar',
       }
-      snapshot(normalizeModuleOptions(options))
+      snapshot('others_unchanged', normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
       const options = {
         env: 'foo=bar',
       }
-      snapshot(normalizeModuleOptions(options))
+      snapshot('env_as_string', normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -66,7 +66,7 @@ describe('util', function () {
           host: 'kevin.dev.local',
         },
       }
-      snapshot(normalizeModuleOptions(options))
+      snapshot('env_as_object', normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -76,7 +76,17 @@ describe('util', function () {
           watchForFileChanges: false,
         },
       }
-      snapshot(normalizeModuleOptions(options))
+      snapshot('config_as_object', normalizeModuleOptions(options))
+    })
+
+    it('converts reporterOptions object', () => {
+      const options = {
+        reporterOptions: {
+          mochaFile: 'results/my-test-output.xml',
+          toConsole: true,
+        },
+      }
+      snapshot('reporter_options_as_object', normalizeModuleOptions(options))
     })
   })
 
