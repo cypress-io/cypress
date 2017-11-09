@@ -21,6 +21,7 @@ function normalizeModuleOptions (options = {}) {
   return R.evolve({
     env: normalizeObject,
     config: normalizeObject,
+    reporterOptions: normalizeObject,
   })(options)
 }
 
