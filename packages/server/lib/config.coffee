@@ -16,12 +16,14 @@ pathHelpers = require("./util/path_helpers")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = """
+toWords = (str) -> str.trim().split(/\s+/)
+
+folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
   supportFile        supportFolder    unitFolder          videosFolder
-""".trim().split(/\s+/)
+"""
 
-configKeys = """
+configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
   chromeWebSecurity               integrationFolder
@@ -41,7 +43,7 @@ configKeys = """
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
-""".trim().split(/\s+/)
+"""
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
