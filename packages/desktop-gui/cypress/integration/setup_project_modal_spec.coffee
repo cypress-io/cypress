@@ -97,47 +97,67 @@ describe "Set Up Project", ->
             .get(".privacy-radio").should("be.visible")
               .find("input").should("not.be.checked")
 
-    describe "selecting an organization", ->
-      context "with organizations", ->
+    describe "selecting an org", ->
+      context "with orgs", ->
         beforeEach ->
           @getOrgs.resolve(@orgs)
-          cy
-            .get(".btn").contains("Set Up Project").click()
-            .get(".modal-content")
-              .contains(".btn", "An Organization").click()
+          cy.get(".btn").contains("Set Up Project").click()
+          cy.get(".modal-content")
+            .contains(".btn", "An Organization").click()
 
         it "lists organizations to assign to project", ->
-          cy
-            .get("#organizations-select").find("option")
-              .should("have.length", @orgs.length)
+          cy.get("#organizations-select").find("option")
+            .should("have.length", @orgs.length)
 
         it "selects none by default", ->
-          cy
-            .get("#organizations-select").should("have.value", "")
+          cy.get("#organizations-select").should("have.value", "")
 
         it "opens external link on click of manage", ->
-          cy
-            .get(".manage-orgs-btn").click().then ->
-               expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
+          cy.get(".manage-orgs-btn").click().then ->
+             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
 
-        it "displays public & private radios on select", ->
-          cy
-            .get(".privacy-radio").should("not.be.visible")
-            .get("select").select("Acme Developers")
-            .get(".privacy-radio").should("be.visible")
-              .find("input").should("not.be.checked")
+        describe "select org w/in projects limit", ->
+          beforeEach ->
+            cy.get(".privacy-radio").should("not.be.visible")
+            cy.get("select").select("Acme Developers")
 
-        it "clears selections when switching back to Me", ->
-          cy
-            .get("select").select("Acme Developers")
-            .get(".privacy-radio")
-              .find("input").first().check()
-            .get(".btn").contains("Me").click()
-            .get(".privacy-radio").find("input").should("not.be.checked")
-            .get(".btn").contains("An Organization").click()
-            .get("#organizations-select").should("have.value", "")
+          it "displays public/private radios as enabled", ->
+            cy.get(".privacy-radio").should("be.visible")
+              .find("input")
+                .should("not.be.checked")
+                .and("not.be.disabled")
 
-      context "without organizations", ->
+          it.only "does not display msg about private projects", ->
+            cy.get(".privacy-radio")
+              .contains("upgrade your account")
+                .should("not.be.visible")
+
+          it "clears selections when switching back to Me", ->
+            cy.get(".privacy-radio")
+                .find("input").first().check()
+            cy.get(".btn").contains("Me").click()
+            cy.get(".privacy-radio").find("input").should("not.be.checked")
+            cy.get(".btn").contains("An Organization").click()
+            cy.get("#organizations-select").should("have.value", "")
+
+        describe "select org w/ reached projects limit", ->
+          beforeEach ->
+            cy.get(".privacy-radio").should("not.be.visible")
+            cy.get("select").select("Osato Devs")
+
+          it "displays private radio as disabled", ->
+            cy.get(".privacy-radio").should("be.visible")
+              .find("input")
+                .should("not.be.checked")
+                .and("be.disabled")
+
+          it "displays msg w/ link about private projects", ->
+            cy.get(".privacy-radio")
+              .contains("upgrade your account")
+              .click().then ->
+                 expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations/999/billing")
+
+      context "without orgs", ->
         beforeEach ->
           @getOrgs.resolve([])
           cy
@@ -149,7 +169,7 @@ describe "Set Up Project", ->
           cy
             .get(".empty-select-orgs").should("be.visible")
 
-        it "opens dashboard organizations when 'create organizatoin' is clicked", ->
+        it "opens dashboard organizations when 'create organization' is clicked", ->
           cy.contains("Create Organization").click().then ->
              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
 

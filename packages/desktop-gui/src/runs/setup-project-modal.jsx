@@ -30,6 +30,7 @@ class SetupProject extends Component {
       public: null,
       owner: null,
       orgId: null,
+      org: {},
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -289,13 +290,14 @@ class SetupProject extends Component {
             </p>
           </label>
         </div>
-        <div className='radio privacy-radio'>
+        <div className={`radio privacy-radio ${this.state.org.overPrivateProjectsLimit ? 'disabled' : ''}`}>
           <label>
             <input
               type='radio'
               name='privacy-radio'
               value='false'
               checked={(this.state.public === false)}
+              disabled={this.state.org.overPrivateProjectsLimit}
               onChange={this._updateAccess}
             />
             <p>
@@ -303,7 +305,11 @@ class SetupProject extends Component {
               <strong>Private:</strong>{' '}
               Only invited users have access.
               <br/>
-              <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
+              {
+                this.state.org.overPrivateProjectsLimit ?
+                  <small className='help-block'>In order to make this project private, you will need to <a href="" onClick={this._upgradeAccount}>upgrade your account</a>.</small> :
+                  null
+              }
             </p>
           </label>
         </div>
@@ -326,6 +332,11 @@ class SetupProject extends Component {
     ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
   }
 
+  _upgradeAccount = (e) => {
+    e.preventDefault()
+    ipc.externalOpen(`https://on.cypress.io/dashboard/organizations/${this.state.orgId ? this.state.orgId + '/billing' : ''}`)
+  }
+
   _formNotFilled () {
     return _.isNull(this.state.public) || !this.state.projectName
   }
@@ -342,6 +353,10 @@ class SetupProject extends Component {
     )
   }
 
+  _getOrgById = (id) => {
+    return _.find(orgsStore.orgs, {'id': id})
+  }
+
   _updateOrgId = () => {
     const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
 
@@ -349,10 +364,11 @@ class SetupProject extends Component {
 
     this.setState({
       orgId,
+      org: this._getOrgById(orgId)
     })
 
     // deselect their choice for access
-    // if they didn'tselect anything
+    // if they didn't select anything
     if (orgIsNotSelected) {
       this.setState({
         public: null,

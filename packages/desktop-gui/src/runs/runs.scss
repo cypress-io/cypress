@@ -295,12 +295,25 @@
     overflow: auto;
   }
 
-  .radio label {
-    padding-left: 21px;
-    overflow: auto;
+  .radio {
+    label {
+      padding-left: 21px;
+      overflow: auto;
 
-    input[type='radio'] {
-      margin-top: 2px;
+      input[type='radio'] {
+        margin-top: 2px;
+      }
+    }
+
+    &.disabled {
+      label {
+        color: #868e96;
+      }
+
+      small {
+        cursor: pointer;
+        color: #333;
+      }
     }
   }
 
