@@ -127,7 +127,7 @@ describe "Set Up Project", ->
                 .should("not.be.checked")
                 .and("not.be.disabled")
 
-          it.only "does not display msg about private projects", ->
+          it "does not display msg about private projects", ->
             cy.get(".privacy-radio")
               .contains("upgrade your account")
                 .should("not.be.visible")
