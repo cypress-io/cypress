@@ -3,24 +3,24 @@
     "id": "777",
     "name": "Acme Developers",
     "default": false,
-    "overUserLimit": false,
-    "overPrivateProjectsLimit": false,
-    "overRecordedUnitsLimit": false
+    "reachedUserLimit": false,
+    "reachedPrivateProjectsLimit": false,
+    "reachedRecordedUnitsLimit": false
   },
   {
     "id": "000",
     "name": "Jane Lane",
     "default": true,
-    "overUserLimit": false,
-    "overPrivateProjectsLimit": false,
-    "overRecordedUnitsLimit": false
+    "reachedUserLimit": false,
+    "reachedPrivateProjectsLimit": false,
+    "reachedRecordedUnitsLimit": false
   },
   {
     "id": "999",
     "name": "Osato Devs",
     "default": false,
-    "overUserLimit": true,
-    "overPrivateProjectsLimit": true,
-    "overRecordedUnitsLimit": true
+    "reachedUserLimit": true,
+    "reachedPrivateProjectsLimit": true,
+    "reachedRecordedUnitsLimit": true
   }
 ]

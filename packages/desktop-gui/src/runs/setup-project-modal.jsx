@@ -290,14 +290,14 @@ class SetupProject extends Component {
             </p>
           </label>
         </div>
-        <div className={`radio privacy-radio ${this.state.org.overPrivateProjectsLimit ? 'disabled' : ''}`}>
+        <div className={`radio privacy-radio ${this.state.org.reachedPrivateProjectsLimit ? 'disabled' : ''}`}>
           <label>
             <input
               type='radio'
               name='privacy-radio'
               value='false'
               checked={(this.state.public === false)}
-              disabled={this.state.org.overPrivateProjectsLimit}
+              disabled={this.state.org.reachedPrivateProjectsLimit}
               onChange={this._updateAccess}
             />
             <p>
@@ -306,7 +306,7 @@ class SetupProject extends Component {
               Only invited users have access.
               <br/>
               {
-                this.state.org.overPrivateProjectsLimit ?
+                this.state.org.reachedPrivateProjectsLimit ?
                   <small className='help-block'>In order to make this project private, you will need to <a href="" onClick={this._upgradeAccount}>upgrade your account</a>.</small> :
                   null
               }

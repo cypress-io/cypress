@@ -5,7 +5,7 @@ export default class Org {
   @observable id
   @observable name
   @observable default
-  @observable overPrivateProjectsLimit
+  @observable reachedPrivateProjectsLimit
 
   constructor (org) {
     assign(this, org)
