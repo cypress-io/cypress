@@ -46,7 +46,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     state(viewport)
 
     new Promise (resolve) ->
-      if currentViewport.viewportWidth is width and currentViewport.viewportHeight
+      if currentViewport.viewportWidth is width and currentViewport.viewportHeight is height
         ## noop if viewport won't change
         return resolve(currentViewport)
 
