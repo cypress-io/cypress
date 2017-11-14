@@ -457,7 +457,7 @@ describe "src/cy/commands/window", ->
 
       Cypress.prependListener("viewport:changed", fn)
 
-      cy.viewport(1000, 600).then ->
+      cy.viewport(1000, 660).then ->
         Cypress.removeListener("viewport:changed", fn)
 
     it "does not trigger 'viewport:changed' when changing to the same viewport", ->
@@ -472,6 +472,40 @@ describe "src/cy/commands/window", ->
       cy.viewport(800, 600)
       cy.viewport(800, 600).then ->
         Cypress.removeListener("viewport:changed", fn)
+
+    it "triggers 'viewport:changed' if width changes", (done) ->
+      finished = false
+      setTimeout ->
+        if not finished
+          done("Timed out before 'viewport:changed'")
+      , 1000
+      triggeredOnce = false
+      cy.on "viewport:changed", (viewport) ->
+        if triggeredOnce
+          expect(viewport).to.eql({ viewportWidth: 900, viewportHeight: 600 })
+          finished = true
+          done()
+        triggeredOnce = true
+
+      cy.viewport(800, 600)
+      cy.viewport(900, 600)
+
+    it "triggers 'viewport:changed' if height changes", (done) ->
+      finished = false
+      setTimeout ->
+        if not finished
+          done("Timed out before 'viewport:changed'")
+      , 1000
+      triggeredOnce = false
+      cy.on "viewport:changed", (viewport) ->
+        if triggeredOnce
+          expect(viewport).to.eql({ viewportWidth: 800, viewportHeight: 700 })
+          finished = true
+          done()
+        triggeredOnce = true
+
+      cy.viewport(800, 600)
+      cy.viewport(800, 700)
 
     it "sets subject to null", ->
       cy.viewport("ipad-2").then (subject) ->
