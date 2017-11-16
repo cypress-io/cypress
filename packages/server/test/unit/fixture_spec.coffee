@@ -137,16 +137,10 @@ describe.only "lib/fixture", ->
           posts: []
         }
 
-    it "rewrites file as a formated valid JS object", ->
+    it "does not rewrite file as a formated valid JS object", ->
       fixture.get(@fixturesFolder, "no_format.js").then (obj) =>
         fs.readFileAsync(@fixturesFolder + "/no_format.js", "utf8").then (str) ->
-          expect(str).to.eq """
-            {
-              foo: "bar",
-              baz: "quux"
-            }
-
-          """
+          expect(str).to.eq '{foo: "bar", baz: "quux"}'
 
     it "throws on a bad JS object", ->
       e =
@@ -332,11 +326,7 @@ describe.only "lib/fixture", ->
     it "does not remove trailing new lines on .js", ->
       fixture.get(@fixturesFolder, "trailing_new_line.js").then (str) =>
         fs.readFileAsync(@fixturesFolder + "/trailing_new_line.js", "utf8").then (str2) ->
-          expect(str2).to.eq """
-            {
-              foo: "bar"
-            }\n
-          """
+          expect(str2).to.eq '{foo: "bar"}\n'
 
     it "does not remove trailing new lines on .coffee", ->
       fixture.get(@fixturesFolder, "trailing_new_line.coffee").then (str) =>
