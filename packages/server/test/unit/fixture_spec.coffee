@@ -14,7 +14,7 @@ isWindows = () ->
 
 fs = Promise.promisifyAll(fs)
 
-describe.only "lib/fixture", ->
+describe "lib/fixture", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
