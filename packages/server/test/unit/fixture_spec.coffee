@@ -200,25 +200,25 @@ describe.only "lib/fixture", ->
           <!doctype html>
           <html>
           <head>
-            <title>index.html</title>
+          <title>index.html</title>
           </head>
           <body>
-            index
+          index
           </body>
           </html>
         """
 
-    it "rewrites file as formatted html", ->
+    it "does not rewrite file as formatted html", ->
       fixture.get(@fixturesFolder, "index.html").then =>
         fs.readFileAsync(@fixturesFolder + "/index.html", "utf8").then (str) ->
           expect(str).to.eq """
           <!doctype html>
           <html>
           <head>
-            <title>index.html</title>
+          <title>index.html</title>
           </head>
           <body>
-            index
+          index
           </body>
           </html>
         """
@@ -346,8 +346,4 @@ describe.only "lib/fixture", ->
     it "does not remove trailing new lines on .html", ->
       fixture.get(@fixturesFolder, "trailing_new_line.html").then (str) =>
         fs.readFileAsync(@fixturesFolder + "/trailing_new_line.html", "utf8").then (str2) ->
-          expect(str2).to.eq """
-            <html>
-            <body>foo</body>
-            </html>\n
-          """
+          expect(str2).to.eq '<html><body>foo</body></html>\n'

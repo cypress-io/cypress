@@ -5,8 +5,6 @@ check     = require("syntax-error")
 coffee    = require("../../../packages/coffee")
 Promise   = require("bluebird")
 jsonlint  = require("jsonlint")
-beautify  = require("js-beautify").html
-pretty    = require("js-object-pretty-print").pretty
 cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
@@ -105,9 +103,6 @@ module.exports = {
         throw e
 
       return obj
-    .then (obj) ->
-      str = pretty(obj, 2)
-      fs.writeFileAsync(p, str).return(obj)
     .catch (err) ->
       throw new Error("'#{fixture}' is not a valid JavaScript object.#{err.toString()}")
 
@@ -129,16 +124,6 @@ module.exports = {
   parseHtml: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
     .bind(@)
-    .then (str) ->
-      html = beautify str, {
-        indent_size: 2
-        extra_liners: []
-      }
-
-      if lastCharacterIsNewLine(str)
-        html += "\n"
-
-      fs.writeFileAsync(p, html).return(html)
 
   parse: (p, fixture, encoding = "utf8") ->
     fs.readFileAsync(p, encoding)
