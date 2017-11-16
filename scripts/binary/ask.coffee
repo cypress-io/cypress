@@ -5,6 +5,7 @@ Promise  = require("bluebird")
 inquirer = require("inquirer")
 la       = require("lazy-ass")
 check    = require("check-more-types")
+path     = require("path")
 
 glob = Promise.promisify(glob)
 
@@ -77,17 +78,16 @@ getReleases = (releases) ->
   }]
 
 getNextVersion = ({ version } = {}) ->
-  if check.unemptyString(version)
-    message = "Bump next version to...? (currently: #{version})"
-    defaultVersion = () ->
-      a = version.split(".")
-      v = a[a.length - 1]
-      v = Number(v) + 1
-      a.splice(a.length - 1, 1, v)
-      a.join(".")
-  else
-    message ="Bump next version to ...?"
-    defaultVersion = () -> "1.0.0"
+  if not version
+    version = require(path.join(__dirname, "..", "..", "package.json")).version
+
+  message = "Bump next version to...? (currently: #{version})"
+  defaultVersion = () ->
+    a = version.split(".")
+    v = a[a.length - 1]
+    v = Number(v) + 1
+    a.splice(a.length - 1, 1, v)
+    a.join(".")
 
   [{
     name: "nextVersion"
