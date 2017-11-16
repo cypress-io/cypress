@@ -92,7 +92,7 @@ remapMain = (projectsByProvider) ->
 PROJECTS = remapProjects(_PROVIDERS)
 
 getCiConfig = ->
-  key = path.join("scripts", "support", ".ci.json")
+  key = path.join("scripts", "support", "ci.json")
   config = configFromEnvOrJsonFile(key)
 
   if !config
