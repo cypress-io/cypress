@@ -110,7 +110,7 @@ describe.only "lib/fixture", ->
           }
         ]
 
-    it.only "does not reformat empty objects", ->
+    it "does not reformat empty objects", ->
       fn = =>
         fixture.get(@fixturesFolder, "empty_objects")
 
@@ -171,19 +171,14 @@ describe.only "lib/fixture", ->
           users: []
         }
 
-    it "rewrites file as formatted valid coffee object", ->
+    it "does not rewrite coffee files", ->
       fixture.get(@fixturesFolder, "no_format.coffee").then =>
         fs.readFileAsync(@fixturesFolder + "/no_format.coffee", "utf8").then (str) ->
           expect(str).to.eq """
             [
-              {
-                id: 1
-              },
-              {
-                id: 2
-              }
+              {id: 1}
+              {id: 2}
             ]
-
           """
 
     it "throws on bad coffee object", ->
@@ -346,11 +341,7 @@ describe.only "lib/fixture", ->
     it "does not remove trailing new lines on .coffee", ->
       fixture.get(@fixturesFolder, "trailing_new_line.coffee").then (str) =>
         fs.readFileAsync(@fixturesFolder + "/trailing_new_line.coffee", "utf8").then (str2) ->
-          expect(str2).to.eq """
-            {
-              foo: "bar"
-            }\n
-          """
+          expect(str2).to.eq '{ foo: "bar" }\n'
 
     it "does not remove trailing new lines on .html", ->
       fixture.get(@fixturesFolder, "trailing_new_line.html").then (str) =>

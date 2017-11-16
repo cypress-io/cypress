@@ -121,9 +121,6 @@ module.exports = {
     .then (str) ->
       str = coffee.compile(str, {bare: true})
       eval(str)
-    .then (obj) ->
-      str = pretty(obj, 2)
-      fs.writeFileAsync(p, str).return(obj)
     .catch (err) ->
       throw new Error("'#{fixture} is not a valid CoffeeScript object.\n#{err.toString()}")
     .finally ->
