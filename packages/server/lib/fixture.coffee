@@ -7,7 +7,6 @@ Promise   = require("bluebird")
 jsonlint  = require("jsonlint")
 beautify  = require("js-beautify").html
 pretty    = require("js-object-pretty-print").pretty
-formatter = require("jsonlint/lib/formatter").formatter
 cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
@@ -90,21 +89,6 @@ module.exports = {
   parseJson: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
     .bind(@)
-    .then (str) ->
-      ## format the json
-      formatted = formatter.formatJson(str, "  ")
-
-      ## if we didnt change then return the str
-      if formatted is str
-        return str
-      else
-        ## if last character is a new line
-        ## then append this to the formatted str
-        if lastCharacterIsNewLine(str)
-          formatted += "\n"
-        ## write the file back even if there were errors
-        ## so we write back the formatted version of the str
-        fs.writeFileAsync(p, formatted).return(formatted)
     .then(jsonlint.parse)
     .catch (err) ->
       throw new Error("'#{fixture}' is not valid JSON.\n#{err.message}")

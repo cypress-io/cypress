@@ -14,7 +14,7 @@ isWindows = () ->
 
 fs = Promise.promisifyAll(fs)
 
-describe "lib/fixture", ->
+describe.only "lib/fixture", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
@@ -50,8 +50,8 @@ describe "lib/fixture", ->
         """
         'bad_json.json' is not valid JSON.
         Parse error on line 2:
-        {  "bad": "json""should": "not parse
-        ----------------^
+        {  "bad": "json"  "should": "not parse
+        ------------------^
         Expecting 'EOF', '}', ':', ',', ']', got 'STRING'
         """
 
@@ -69,28 +69,24 @@ describe "lib/fixture", ->
           # on other platforms can match the error directly
           expect(eol.auto(err.message)).to.eq eol.auto(e)
 
-    it "reformats json and writes back even on parse error", ->
+    it "does not reformat json on parse error", ->
       fixture.get(@fixturesFolder, "bad_json.json")
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) =>
-        ## ensure the bad_json file was rewritten even though there was a parse error
+        ## ensure the bad_json file was kept as before
         fs.readFileAsync(@fixturesFolder + "/bad_json.json", "utf8").then (str) ->
           expect(str).to.eq """
             {
-              "bad": "json""should": "not parse"
+              "bad": "json"
+              "should": "not parse"
             }
             """
 
-    it "reformats json and writes this back", ->
+    it "does not reformat json or write fixture file", ->
       fixture.get(@fixturesFolder, "no_format.json").then (obj) =>
         fs.readFileAsync(@fixturesFolder + "/no_format.json", "utf8").then (json) ->
-          expect(json).to.eq """
-            {
-              "id": 1,
-              "name": "brian"
-            }
-          """
+          expect(json).to.eq '{"id": 1, "name": "brian"}'
 
     it "does not remove string whitespace", ->
       fixture.get(@fixturesFolder, "words.json").then (obj) =>
@@ -114,7 +110,7 @@ describe "lib/fixture", ->
           }
         ]
 
-    it "reformats empty objects", ->
+    it.only "does not reformat empty objects", ->
       fn = =>
         fixture.get(@fixturesFolder, "empty_objects")
 
@@ -123,10 +119,10 @@ describe "lib/fixture", ->
           expect(str).to.eq """
             {
               "empty": {
-                "object": {\n      \n    },
-                "array": [\n      \n    ],
-                "object2": {\n      \n    },
-                "array2": [\n      \n    ]
+                "object": {},
+                "array": [],
+                "object2": {\n\n    },
+                "array2": [\n\n    ]
               }
             }
           """
@@ -336,11 +332,7 @@ describe "lib/fixture", ->
     it "does not remove trailing new lines on .json", ->
       fixture.get(@fixturesFolder, "trailing_new_line.json").then (str) =>
         fs.readFileAsync(@fixturesFolder + "/trailing_new_line.json", "utf8").then (str2) ->
-          expect(str2).to.eq """
-            {
-              "foo": "bar"
-            }\n
-          """
+          expect(str2).to.eq '{"foo": "bar"}\n'
 
     it "does not remove trailing new lines on .js", ->
       fixture.get(@fixturesFolder, "trailing_new_line.js").then (str) =>
