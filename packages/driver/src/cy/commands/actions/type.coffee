@@ -112,6 +112,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
+      if options.$el.attr("maxlength") and chars.length > options.$el.attr("maxlength")
+        chars = chars.slice(0, options.$el.attr("maxlength"))
+
       if isDate and (
         not _.isString(chars) or
         not dateRegex.test(chars) or
