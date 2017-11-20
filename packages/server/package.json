@@ -66,6 +66,7 @@
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
   "dependencies": {
+    "@cypress/browserify-preprocessor": "^1.0.0",
     "@cypress/commit-info": "^1.2.2",
     "@cypress/icons": "0.5.4",
     "@cypress/mocha-teamcity-reporter": "^1.0.0",
@@ -83,6 +84,7 @@
     "check-more-types": "^2.24.0",
     "chokidar": "1.6.0",
     "cjsxify": "^0.3.0",
+    "clear-module": "^2.1.0",
     "compression": "1.1.0",
     "concat-stream": "^1.5.1",
     "content-type": "^1.0.2",

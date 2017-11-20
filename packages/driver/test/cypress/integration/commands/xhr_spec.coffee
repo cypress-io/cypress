@@ -1668,7 +1668,7 @@ describe "src/cy/commands/xhr", ->
           .window().then (win) ->
             win.$.get("/fixtures/app.js")
           .then (resp) ->
-            expect(resp).to.eq "{foo: \"bar\"}\n"
+            expect(resp).to.eq "{ 'bar' }\n"
 
     describe "route setup", ->
       beforeEach ->
