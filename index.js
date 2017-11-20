@@ -33,7 +33,7 @@ const defaultOptions = {
 // export a function that returns another function, making it easy for users
 // to configure like so:
 //
-// on('file:preprocessor', webpack(config, options))
+// on('file:preprocessor', webpack(options))
 //
 const preprocessor = (options = {}) => {
   log('user options:', options)
@@ -49,8 +49,8 @@ const preprocessor = (options = {}) => {
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (config) => {
-    const filePath = config.filePath
+  return (file) => {
+    const filePath = file.filePath
     log('get', filePath)
 
     // since this function can get called multiple times with the same
@@ -68,7 +68,7 @@ const preprocessor = (options = {}) => {
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
     // file on disk
-    const outputPath = config.outputPath
+    const outputPath = file.outputPath
 
     // we need to set entry and output
     webpackOptions = Object.assign(webpackOptions, {
@@ -132,25 +132,25 @@ const preprocessor = (options = {}) => {
         log('- compile finished for', filePath)
         // when the bundling is finished, we call `util.fileUpdated`
         // to let Cypress know to re-run the spec
-        config.emit('rerun')
+        file.emit('rerun')
       })
     })
 
-    if (config.shouldWatch) {
+    if (file.shouldWatch) {
       log('watching')
     }
 
-    const bundler = config.shouldWatch ?
+    const bundler = file.shouldWatch ?
       compiler.watch(watchOptions, handle) :
       compiler.run(handle)
 
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
-    config.on('close', () => {
+    file.on('close', () => {
       log('close', filePath)
       delete bundles[filePath]
 
-      if (config.shouldWatch) {
+      if (file.shouldWatch) {
         bundler.close()
       }
     })
