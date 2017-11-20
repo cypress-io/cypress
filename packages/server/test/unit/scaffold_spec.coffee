@@ -201,6 +201,16 @@ describe "lib/scaffold", ->
         {@pluginsFile} = @cfg
         @pluginsFolder = path.dirname(@pluginsFile)
 
+    it "creates pluginsFile when pluginsFolder does not exist", ->
+      ## first remove it
+      fs.removeAsync(@pluginsFolder)
+      .then =>
+        scaffold.plugins(@pluginsFolder, @cfg)
+      .then =>
+        fs.readFileAsync(@pluginsFolder + "/index.js", "utf8")
+      .then (str) ->
+        snapshot(str.split('`').join('<backtick>'))
+
     it "does not create any files if pluginsFile directory already exists", ->
       ## first remove it
       fs.removeAsync(@pluginsFolder)
@@ -218,7 +228,6 @@ describe "lib/scaffold", ->
 
     it "does not create any files if pluginsFile is not default", ->
       @cfg.resolved.pluginsFile.from = "config"
-
 
     it "does not create any files if pluginsFile is false", ->
       @cfg.pluginsFile = false

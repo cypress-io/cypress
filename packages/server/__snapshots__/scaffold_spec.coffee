@@ -1,40 +1,3 @@
-exports['lib/scaffold .plugins creates plugins/index.js when pluginsFolder does not exist 1'] = `// ***********************************************************
-// This example plugins/index.js can be used to load plugins
-//
-// Currently,
-// behavior that modifies Cypress.
-//
-// You can change the location of this file or turn off loading
-// the plugins file with the 'pluginsFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/guides/plugins
-// https://on.cypress.io/guides/configuration#section-global
-// ***********************************************************
-
-/**
-*  This function is called when a project is opened or re-opened (e.g. due to
-*  the project's config changing)
-*/
-module.exports = (register, config) => {
-  /**
-  *  <backtick>register<backtick> is used to hook into various events in the Cypress lifecycle
-  *  <backtick>config<backtick> is the resolved Cypress config
-  */
-
-  /**
-  * Registering 'file:preprocessor' will override the default
-  * preprocessing. This includes watching the spec file, so the plugin
-  * you register needs to handle that too.
-  *
-  * TODO: add link to doc with preprocessor plugin details
-  */
-  // register('file:preprocessor', (filePath, options, util) => {
-  //   return filePath
-  // })
-}
-`
-
 exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = [
   {
     "name": "tests",
@@ -224,3 +187,21 @@ exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = 
   }
 ]
 
+exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not exist 1'] = `// ***********************************************************
+// This example plugins/index.js can be used to load plugins
+//
+// You can change the location of this file or turn off loading
+// the plugins file with the 'pluginsFile' configuration option.
+//
+// You can read more here:
+// https://on.cypress.io/plugins-guide
+// ***********************************************************
+
+// This function is called when a project is opened or re-opened (e.g. due to
+// the project's config changing)
+
+module.exports = (on, config) => {
+  // <backtick>on<backtick> is used to hook into various events Cypress emits
+  // <backtick>config<backtick> is the resolved Cypress config
+}
+`

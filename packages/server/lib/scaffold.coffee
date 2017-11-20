@@ -108,7 +108,8 @@ module.exports = {
     log("plugins folder #{folder}")
 
     ## skip if user has explicitly set pluginsFile
-    return Promise.resolve() if not config.pluginsFile or not isDefault(config, "pluginsFile")
+    if not config.pluginsFile or not isDefault(config, "pluginsFile")
+      return Promise.resolve()
 
     @verifyScaffolding folder, =>
       log("copying index.js into #{folder}")
