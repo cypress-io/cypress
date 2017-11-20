@@ -3,6 +3,9 @@ fs       = require("fs-extra")
 glob     = require("glob")
 Promise  = require("bluebird")
 inquirer = require("inquirer")
+la       = require("lazy-ass")
+check    = require("check-more-types")
+path     = require("path")
 
 glob = Promise.promisify(glob)
 
@@ -74,17 +77,23 @@ getReleases = (releases) ->
       }
   }]
 
-getNextVersion = ({ version }) ->
+getNextVersion = ({ version } = {}) ->
+  if not version
+    version = require(path.join(__dirname, "..", "..", "package.json")).version
+
+  message = "Bump next version to...? (currently: #{version})"
+  defaultVersion = () ->
+    a = version.split(".")
+    v = a[a.length - 1]
+    v = Number(v) + 1
+    a.splice(a.length - 1, 1, v)
+    a.join(".")
+
   [{
     name: "nextVersion"
     type: "input"
-    message: "Bump next version to...? (currently: #{version})"
-    default: ->
-      a = version.split(".")
-      v = a[a.length - 1]
-      v = Number(v) + 1
-      a.splice(a.length - 1, 1, v)
-      a.join(".")
+    message: message
+    default: defaultVersion
   }]
 
 getVersions = (releases) ->
@@ -177,6 +186,7 @@ whichBumpTask = ->
   .get("task")
 
 nextVersion = (version) ->
+
   prompt(getNextVersion(version))
   .get("nextVersion")
 

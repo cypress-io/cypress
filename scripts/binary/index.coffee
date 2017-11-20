@@ -47,7 +47,8 @@ askMissingOptions = (properties = []) ->
     nextVersion: ask.nextVersion
     commit: ask.toCommit
   }
-  return questionsRemain(_.pick(questions, properties))
+  pickedQuestions = _.pick(questions, properties)
+  questionsRemain(pickedQuestions)
 
 ## hack for @packages/server modifying cwd
 process.chdir(cwd)
@@ -104,6 +105,15 @@ deploy = {
           ask.whichVersion(meta.distDir(""))
           .then (v) ->
             bump.version(v)
+
+  ## sets environment variable on each CI provider
+  ## to NEXT version to build
+  setNextVersion: ->
+    options = @parseOptions(process.argv)
+
+    askMissingOptions(['nextVersion'])(options)
+    .then ({nextVersion}) ->
+      bump.nextVersion(nextVersion)
 
   release: ->
     ## read off the argv
