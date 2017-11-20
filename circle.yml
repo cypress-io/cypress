@@ -476,8 +476,8 @@ jobs:
           name: Run test project
           command: |
             CYPRESS_ENV=staging \
-            CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/cypress-test-tiny \
             --record
 
@@ -611,8 +611,8 @@ jobs:
           working_directory: /tmp/cypress-test-tiny
           command: |
             CYPRESS_ENV=staging \
-            CYPRESS_PROJECT_ID=$STAGING_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$STAGING_RECORD_ID \
+            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             $(npm bin)/cypress run --record
 
 workflows:
@@ -675,6 +675,10 @@ workflows:
           requires:
             - build
       - test-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
           requires:
             - build
       - build-npm-package:
@@ -682,7 +686,6 @@ workflows:
             branches:
               only:
                 - develop
-                - staging-813
           requires:
             - build
       - build-binary:
@@ -690,7 +693,6 @@ workflows:
             branches:
               only:
                 - develop
-                - staging-813
           requires:
             - build
       - test-next-version:
@@ -714,7 +716,6 @@ workflows:
             branches:
               only:
                 - develop
-                - staging-813
           requires:
             - build-npm-package
             - build-binary

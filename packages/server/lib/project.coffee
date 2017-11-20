@@ -1,10 +1,13 @@
 _           = require("lodash")
+R           = require("ramda")
 fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
+la          = require("lazy-ass")
+check       = require("check-more-types")
 cwd         = require("./cwd")
 ids         = require("./ids")
 api         = require("./api")
@@ -12,7 +15,6 @@ user        = require("./user")
 cache       = require("./cache")
 config      = require("./config")
 logger      = require("./logger")
-debug       = require("./log")
 errors      = require("./errors")
 Server      = require("./server")
 scaffold    = require("./scaffold")
@@ -20,7 +22,11 @@ Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
+files       = require("./controllers/files")
+plugins     = require("./plugins")
+preprocessor = require("./plugins/preprocessor")
 settings    = require("./util/settings")
+browsers    = require("./browsers")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 log         = require("debug")("cypress:server:project")
 
@@ -38,6 +44,8 @@ class Project extends EE
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
+    if not check.unemptyString(projectRoot)
+      throw new Error("Expected project root path, not #{projectRoot}")
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
@@ -45,15 +53,16 @@ class Project extends EE
     @cfg         = null
     @memoryCheck = null
     @automation  = null
-    debug("Project created %s", @projectRoot)
+    log("Project created %s", @projectRoot)
 
   open: (options = {}) ->
-    debug("opening project instance %s", @projectRoot)
-    @server = Server(@watchers)
+    log("opening project instance %s", @projectRoot)
+    @server = Server()
 
     _.defaults options, {
       report:       false
       onFocusTests: ->
+      onError: ->
       onSettingsChanged: false
     }
 
@@ -93,10 +102,22 @@ class Project extends EE
           @scaffold(cfg)
         )
         .then =>
-          @watchSupportFile(cfg)
+          Promise.join(
+            @watchSupportFile(cfg)
+            @watchPluginsFile(cfg, options)
+          )
+        .then =>
+          @_initPlugins(cfg, options)
 
     # return our project instance
     .return(@)
+
+  _initPlugins: (config, options) ->
+    plugins.init(config, {
+      onError: (err) ->
+        browsers.close()
+        options.onError(err)
+    })
 
   getRuns: ->
     Promise.all([
@@ -106,8 +127,15 @@ class Project extends EE
     .spread (projectId, authToken) ->
       api.getProjectRuns(projectId, authToken)
 
+  reset: ->
+    log("resetting project instance %s", @projectRoot)
+
+    Promise.try =>
+      @server?.reset()
+
   close: ->
-    debug("closing project instance %s", @projectRoot)
+    log("closing project instance %s", @projectRoot)
+
     if @memoryCheck
       clearInterval(@memoryCheck)
 
@@ -115,7 +143,8 @@ class Project extends EE
 
     Promise.join(
       @server?.close(),
-      @watchers?.close()
+      @watchers?.close(),
+      preprocessor.close()
     )
     .then ->
       process.chdir(localCwd)
@@ -132,12 +161,34 @@ class Project extends EE
           options = {
             onChange: _.bind(@server.onTestFileChange, @server, relativePath)
           }
-        @watchers.watchBundle(relativePath, config, options)
+        preprocessor.getFile(relativePath, config, options)
         ## ignore errors b/c we're just setting up the watching. errors
         ## are handled by the spec controller
         .catch ->
     else
       Promise.resolve()
+
+  watchPluginsFile: (config, options) ->
+    log("attempt watch plugins file: #{config.pluginsFile}")
+    if not config.pluginsFile
+      return Promise.resolve()
+
+    fs.pathExists(config.pluginsFile)
+    .then (found) =>
+      log("plugins file found? #{found}")
+      ## ignore if not found. plugins#init will throw the right error
+      return if not found
+
+      log("watch plugins file")
+      @watchers.watch(config.pluginsFile, {
+        onChange: =>
+          ## TODO: completely re-open project instead?
+          log("plugins file changed")
+          ## re-init plugins after a change
+          @_initPlugins(config, options)
+          .catch (err) ->
+            options.onError(err)
+      })
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
@@ -172,7 +223,7 @@ class Project extends EE
 
     @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
 
-    @server.startWebsockets(@watchers, @automation, config, {
+    @server.startWebsockets(@automation, config, {
       onReloadBrowser: options.onReloadBrowser
 
       onFocusTests: options.onFocusTests
@@ -185,12 +236,12 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("onSetRunnables")
-        debug("runnables", runnables)
+        log("onSetRunnables")
+        log("runnables", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
-        debug("onMocha", event)
+        log("onMocha", event)
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
@@ -315,7 +366,7 @@ class Project extends EE
     [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
-    debug("scaffolding project %s", @projectRoot)
+    log("scaffolding project %s", @projectRoot)
 
     scaffolds = []
 
@@ -331,15 +382,16 @@ class Project extends EE
     ## and example support file if dir doesnt exist
     push(scaffold.support(config.supportFolder, config))
 
+    ## TODO: we currently always scaffold the plugins file
+    ## even when headlessly or else it will cause an error when
+    ## we try to load it and it's not there
+    if config.pluginsFile
+      push(scaffold.plugins(path.dirname(config.pluginsFile), config))
+
     ## if we're in headed mode add these other scaffolding
     ## tasks
     if not config.isTextTerminal
-      ## ensure integration folder is created
-      ## and example spec if dir doesnt exit
       push(scaffold.integration(config.integrationFolder, config))
-
-      ## ensure fixtures dir is created
-      ## and example fixture if dir doesnt exist
       push(scaffold.fixture(config.fixturesFolder, config))
 
     Promise.all(scaffolds)
@@ -523,5 +575,27 @@ class Project extends EE
         api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
+
+  # Given a path to the project, finds all specs
+  # returns list of specs with respect to the project root
+  @findSpecs = (projectPath, specPattern) ->
+    log("finding specs for project %s", projectPath)
+    la(check.unemptyString(projectPath), "missing project path", projectPath)
+    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+
+    ## if we have a spec pattern
+    if specPattern
+      ## then normalize to create an absolute
+      ## file path from projectRoot
+      ## ie: **/* turns into /Users/bmann/dev/project/**/*
+      specPattern = path.resolve(projectPath, specPattern)
+
+    Project(projectPath)
+    .getConfig()
+    # TODO: handle wild card pattern or spec filename
+    .then (cfg) ->
+      files.getTestFiles(cfg, specPattern)
+    .then R.prop("integration")
+    .then R.map(R.prop("name"))
 
 module.exports = Project

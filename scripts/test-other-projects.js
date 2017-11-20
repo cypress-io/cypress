@@ -7,6 +7,7 @@ const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
 const minimist = require('minimist')
+const { getInstallJson } = require('commit-message-install')
 
 /* eslint-disable no-console */
 
@@ -39,49 +40,65 @@ const getShortCommit = () => {
   }
 }
 
-bump.version(npm, binary, platform, cliOptions.provider)
-  .then((result) => {
-    console.log('bumped all test projects with new env variables')
-    console.log(result)
-    console.log('starting each test projects')
-    la(is.unemptyString(result.versionName), 'missing versionName', result)
-    la(is.unemptyString(result.binary), 'missing binary', result)
+/**
+ * Returns given string surrounded by ```json + ``` quotes
+ * @param {string} s
+ */
+const toJsonCodeBlock = (s) => {
+  const start = '```json'
+  const finish = '```'
+  return `${start}\n${s}\n${finish}\n`
+}
 
-    const shortNpmVersion = getJustVersion(result.versionName)
-    console.log('short NPM version', shortNpmVersion)
+/**
+ * Converts given JSON object into markdown text block
+ * @param {object} object
+ */
+const toMarkdownJsonBlock = (object) => {
+  la(object, 'expected an object to convert to JSON', object)
+  const str = JSON.stringify(object, null, 2)
+  return toJsonCodeBlock(str)
+}
 
-    let subject = `Testing new ${os.platform()} Cypress version ${shortNpmVersion}`
-    const shortSha = getShortCommit()
-    if (shortSha) {
-      subject += ` ${shortSha}`
-    }
+console.log('starting each test projects')
 
-    let message = stripIndent`
-      ${subject}
+const shortNpmVersion = getJustVersion(npm)
+console.log('short NPM version', shortNpmVersion)
 
-      NPM package: ${result.versionName}
-      Binary: ${result.binary}
-    `
-    if (process.env.CIRCLE_BUILD_URL) {
-      message += '\n'
-      message += stripIndent`
-        CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
-      `
-    }
-    if (process.env.APPVEYOR) {
-      const account = process.env.APPVEYOR_ACCOUNT_NAME
-      const slug = process.env.APPVEYOR_PROJECT_SLUG
-      const build = process.env.APPVEYOR_BUILD_NUMBER
-      message += '\n'
-      message += stripIndent`
-        AppVeyor: ${account}/${slug} ${build}
-      `
-    }
+let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
+const shortSha = getShortCommit()
+if (shortSha) {
+  subject += ` ${shortSha}`
+}
 
-    console.log('commit message')
-    console.log(message)
-    return bump.run(message, cliOptions.provider)
-  })
+// instructions for installing this binary
+// using https://github.com/bahmutov/commit-message-install
+const env = {
+  CYPRESS_BINARY_VERSION: binary,
+}
+const commitMessageInstructions = getInstallJson(npm, env, platform)
+const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
+const footer = 'Use tool `commit-message-install` to install from above block'
+let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
+if (process.env.CIRCLE_BUILD_URL) {
+  message += '\n'
+  message += stripIndent`
+    CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
+  `
+}
+if (process.env.APPVEYOR) {
+  const account = process.env.APPVEYOR_ACCOUNT_NAME
+  const slug = process.env.APPVEYOR_PROJECT_SLUG
+  const build = process.env.APPVEYOR_BUILD_NUMBER
+  message += '\n'
+  message += stripIndent`
+    AppVeyor: ${account}/${slug} ${build}
+  `
+}
+
+console.log('commit message')
+console.log(message)
+bump.run(message, cliOptions.provider)
   .catch((e) => {
     console.error('could not bump test projects')
     console.error(e)

@@ -1,4 +1,7 @@
+/* global describe, it, context */
+
 const fs     = require('fs')
+const path   = require('path')
 const server = require('socket.io')
 const client = require('socket.io-client')
 const expect = require('chai').expect
@@ -16,11 +19,11 @@ describe('Socket', function () {
 
   context('.getPathToClientSource', function () {
     it('returns path to socket.io.js', function () {
-      const p = process.cwd() + '/node_modules/socket.io-client/dist/socket.io.js'
-      expect(lib.getPathToClientSource()).to.eq(p)
+      const clientPath = path.join(process.cwd(), 'node_modules', 'socket.io-client', 'dist', 'socket.io.js')
+      expect(lib.getPathToClientSource()).to.eq(clientPath)
     })
 
-    it('makes sure socket.io.js actually exists', function(done){
+    it('makes sure socket.io.js actually exists', function (done) {
       fs.stat(lib.getPathToClientSource(), done)
     })
   })
@@ -32,10 +35,10 @@ describe('Socket', function () {
   })
 
   context('.getClientSource', function () {
-    it('returns client source as a string', function(done) {
-      const p = process.cwd() + '/node_modules/socket.io-client/dist/socket.io.js'
+    it('returns client source as a string', function (done) {
+      const clientPath = path.join(process.cwd(), 'node_modules', 'socket.io-client', 'dist', 'socket.io.js')
 
-      fs.readFile(p, 'utf8', function(err, str){
+      fs.readFile(clientPath, 'utf8', function (err, str) {
         if (err) done(err)
 
         expect(lib.getClientSource()).to.eq(str)

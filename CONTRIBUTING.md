@@ -52,7 +52,7 @@ Build status | Description
 
 ## Code of Conduct
 
-All contributors are expecting to abide by our [Code of Conduct](https://github.com/cypress-io/cypress/wiki/code-of-conduct).
+All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Contributing Bug Reports & Feature Requests
 
@@ -372,7 +372,7 @@ The repository is setup with two main (protected) branches.
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please name the branch you are working on using convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. 
+- When opening a PR for a specific issue already open, please name the branch you are working on using convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`.
 - Please use the `address #[issue number]` or `closes #[issue number]` syntax in the pull request description.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)

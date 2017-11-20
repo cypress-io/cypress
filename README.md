@@ -53,7 +53,7 @@ Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo or
 
 ## License
 
-[![license](https://img.shields.io/github/license/cypress-io/cypress.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE.md)
 
 This project is licensed under the terms of the [MIT license](/LICENSE.md).
 

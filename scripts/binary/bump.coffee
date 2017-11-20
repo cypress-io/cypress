@@ -21,7 +21,7 @@ _PROVIDERS = {
     main: "cypress-io/cypress"
     others: [
       "cypress-io/cypress-test-tiny"
-      # "cypress-io/cypress-test-example-repos" ## @GLEB plz add this
+      "cypress-io/cypress-test-example-repos"
     ]
   }
 
@@ -90,19 +90,10 @@ remapMain = (projectsByProvider) ->
 # make flat list of objects
 # {repo, provider}
 PROJECTS = remapProjects(_PROVIDERS)
-MAIN_PROJECTS = remapMain(_PROVIDERS)
 
 getCiConfig = ->
-  ## gleb: fix this plzzzzzz
-  old = process.cwd()
-
-  process.chdir(__dirname)
-
-  key = "support/.ci.json"
-
+  key = path.join("scripts", "support", "ci.json")
   config = configFromEnvOrJsonFile(key)
-
-  process.chdir(old)
 
   if !config
     console.error('⛔️  Cannot find CI credentials')
@@ -158,18 +149,21 @@ getFilterByProvider = (providerName) ->
 
 module.exports = {
   nextVersion: (version) ->
-    console.table("All possible projects", MAIN_PROJECTS)
+    MAIN_PROJECTS = remapMain(_PROVIDERS)
+    console.log("Setting next version to build", version)
+    console.table("In these projects", MAIN_PROJECTS)
 
     la(check.unemptyString(version),
       "missing next version to set", version)
 
-    updateProject = (project, provider) ->
-      console.log("setting %s environment variables in project %s", provider, project)
+    setNextDevVersion = (project, provider) ->
+      console.log("setting env var NEXT_DEV_VERSION to %s on %s in project %s",
+        version, provider, project)
       car.updateProjectEnv(project, provider, {
         NEXT_DEV_VERSION: version,
       })
 
-    awaitEachProjectAndProvider(MAIN_PROJECTS, updateProject)
+    awaitEachProjectAndProvider(MAIN_PROJECTS, setNextDevVersion)
 
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform, providerName) ->

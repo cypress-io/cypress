@@ -286,6 +286,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         subject = null
 
       switch
+        when _.isRegExp(text)
+          text = text
+          filter = filter
         when _.isObject(text)
           options = text
           text = filter

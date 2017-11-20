@@ -1,15 +1,19 @@
-exports['util normalizeModuleOptions passes string env unchanged 1'] = {
+exports['env_as_string 1'] = {
   "env": "foo=bar"
 }
 
-exports['util normalizeModuleOptions does not change other properties 1'] = {
-  "foo": "bar"
-}
-
-exports['util normalizeModuleOptions converts environment object 1'] = {
+exports['env_as_object 1'] = {
   "env": "foo=bar,magicNumber=1234,host=kevin.dev.local"
 }
 
-exports['util normalizeModuleOptions converts config object 1'] = {
+exports['config_as_object 1'] = {
   "config": "baseUrl=http://localhost:2000,watchForFileChanges=false"
+}
+
+exports['reporter_options_as_object 1'] = {
+  "reporterOptions": "mochaFile=results/my-test-output.xml,toConsole=true"
+}
+
+exports['others_unchanged 1'] = {
+  "foo": "bar"
 }

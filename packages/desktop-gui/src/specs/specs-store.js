@@ -22,7 +22,7 @@ export class SpecsStore {
 
     this.isLoading = false
   }
-  
+
   @action setChosenSpec (specPath) {
     this.chosenSpecPath = specPath
   }

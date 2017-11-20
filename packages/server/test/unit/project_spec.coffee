@@ -17,6 +17,8 @@ Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
 commitInfo   = require("@cypress/commit-info")
+preprocessor = require("#{root}lib/plugins/preprocessor")
+plugins      = require("#{root}lib/plugins")
 
 describe "lib/project", ->
   beforeEach ->
@@ -141,6 +143,8 @@ describe "lib/project", ->
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(Server.prototype, "open").resolves([])
+      @sandbox.stub(Server.prototype, "reset")
+      @sandbox.stub(plugins, "init").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -160,6 +164,22 @@ describe "lib/project", ->
       opts = {}
       @project.open(opts).then =>
         expect(@project.getConfig).to.be.calledWith(opts)
+
+    it "initializes the plugins", ->
+      @project.open({}).then =>
+        expect(plugins.init).to.be.calledWith(@config)
+
+    it "calls options.onError with plugins error when there is a plugins error", ->
+      onError = @sandbox.spy()
+      err = {
+        name: "plugin error name"
+        message: "plugin error message"
+      }
+      @project.open({ onError: onError }).then =>
+        pluginsOnError = plugins.init.lastCall.args[1].onError
+        expect(pluginsOnError).to.be.a("function")
+        pluginsOnError(err)
+        expect(onError).to.be.calledWith(err)
 
     it "updates config.state when saved state changes", ->
       @sandbox.spy(@project, "saveState")
@@ -227,8 +247,9 @@ describe "lib/project", ->
       @sandbox.stub(scaffold, "integration").resolves()
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
+      @sandbox.stub(scaffold, "plugins").resolves()
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", pluginsFile: "pf/index.js"}
 
     it "calls scaffold.integration with integrationFolder", ->
       @project.scaffold(@obj).then =>
@@ -241,6 +262,15 @@ describe "lib/project", ->
     it "calls support.scaffold with supportFolder", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
+
+    it "calls support.plugins with pluginsFile directory", ->
+      @project.scaffold(@obj).then =>
+        expect(scaffold.plugins).to.be.calledWith("pf")
+
+    it "does not call support.plugins if config.pluginsFile is falsey", ->
+      @obj.pluginsFile = false
+      @project.scaffold(@obj).then =>
+        expect(scaffold.plugins).not.to.be.called
 
   context "#watchSettings", ->
     beforeEach ->
@@ -289,7 +319,7 @@ describe "lib/project", ->
       @sandbox.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: @sandbox.spy()}
-      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").resolves()
+      @sandbox.stub(preprocessor, "getFile").resolves()
       @config = {
         projectRoot: "/path/to/root/"
         supportFile: "/path/to/root/foo/bar.js"
@@ -298,30 +328,73 @@ describe "lib/project", ->
     it "does nothing when {supportFile: false}", ->
       @project.watchSupportFile({supportFile: false})
 
-      expect(@watchBundle).not.to.be.called
+      expect(preprocessor.getFile).not.to.be.called
 
-    it "calls watchers.watchBundle with relative path to file", ->
+    it "calls preprocessor.getFile with relative path to file", ->
       @project.watchSupportFile(@config)
       .then () =>
-        expect(@watchBundle).to.be.calledWith("foo/bar.js", @config)
+        expect(preprocessor.getFile).to.be.calledWith("foo/bar.js", @config)
 
     it "calls server.onTestFileChange when file changes", ->
       @project.watchSupportFile(@config)
       .then () =>
-        @watchBundle.firstCall.args[2].onChange()
+        preprocessor.getFile.firstCall.args[2].onChange()
         expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
 
     it "does not add change listener when {watchForFileChanges: false}", ->
       @config.watchForFileChanges = false
       @project.watchSupportFile(@config)
       .then () =>
-        expect(@watchBundle.firstCall.args[2]).to.be.undefined
+        expect(preprocessor.getFile.firstCall.args[2]).to.be.undefined
 
     it "throws when support file does not exist", ->
       fs.pathExists.resolves(false)
       @project.watchSupportFile(@config)
       .catch (e) ->
-        expect(e.message).to.include("Support file missing or invalid.")
+        expect(e.message).to.include("The support file is missing or invalid.")
+
+  context "#watchPluginsFile", ->
+    beforeEach ->
+      @sandbox.stub(fs, "pathExists").resolves(true)
+      @project = Project("/_test-output/path/to/project")
+      @project.watchers = { watch: @sandbox.spy() }
+      @sandbox.stub(plugins, "init").resolves()
+      @config = {
+        pluginsFile: "/path/to/plugins-file"
+      }
+
+    it "does nothing when {pluginsFile: false}", ->
+      @config.pluginsFile = false
+      @project.watchPluginsFile(@config).then =>
+        expect(@project.watchers.watch).not.to.be.called
+
+    it "does nothing if pluginsFile does not exist", ->
+      fs.pathExists.resolves(false)
+      @project.watchPluginsFile(@config).then =>
+        expect(@project.watchers.watch).not.to.be.called
+
+    it "watches the pluginsFile", ->
+      @project.watchPluginsFile(@config).then =>
+        expect(@project.watchers.watch).to.be.calledWith(@config.pluginsFile)
+        expect(@project.watchers.watch.lastCall.args[1]).to.be.an("object")
+        expect(@project.watchers.watch.lastCall.args[1].onChange).to.be.a("function")
+
+    it "calls plugins.init when file changes", ->
+      @project.watchPluginsFile(@config).then =>
+        @project.watchers.watch.firstCall.args[1].onChange()
+        expect(plugins.init).to.be.calledWith(@config)
+
+    it "handles errors from calling plugins.init", (done) ->
+      error = {name: "foo", message: "foo"}
+      plugins.init.rejects(error)
+      @project.watchPluginsFile(@config, {
+        onError: (err) ->
+          expect(err).to.eql(error)
+          done()
+      })
+      .then =>
+        @project.watchers.watch.firstCall.args[1].onChange()
+      return
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
@@ -331,12 +404,12 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSettings")
       @sandbox.stub(Automation, "create").returns("automation")
 
-    it "calls server.startWebsockets with watchers, automation + config", ->
+    it "calls server.startWebsockets with automation + config", ->
       c = {}
 
       @project.watchSettingsAndStartWebsockets({}, c)
 
-      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, "automation", c)
+      expect(@project.server.startWebsockets).to.be.calledWith("automation", c)
 
     it "passes onReloadBrowser callback", ->
       fn = @sandbox.stub()
@@ -842,3 +915,22 @@ describe "lib/project", ->
         throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN")
+
+  context ".findSpecs", ->
+    it "returns all the specs without a specPattern", ->
+      Project.findSpecs(@todosPath)
+      .then (specs = []) ->
+        expect(specs).to.deep.eq([
+          "etc/etc.js"
+          "sub/sub_test.coffee"
+          "test1.js"
+          "test2.coffee"
+        ])
+
+    it "returns glob subset matching specPattern", ->
+      Project.findSpecs(@todosPath, "tests/*")
+      .then (specs = []) ->
+        expect(specs).to.deep.eq([
+          "test1.js"
+          "test2.coffee"
+        ])
