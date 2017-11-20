@@ -35,7 +35,7 @@ describe('webpack preprocessor', function () {
       toJson () { return { warnings: [], errors: [] } },
     }
 
-    this.config = {
+    this.file = {
       filePath: 'path/to/file.js',
       outputPath: 'output/output.js',
       shouldWatch: false,
@@ -50,7 +50,7 @@ describe('webpack preprocessor', function () {
     }
 
     this.run = () => {
-      return preprocessor(this.options)(this.config)
+      return preprocessor(this.options)(this.file)
     }
   })
 
@@ -67,7 +67,7 @@ describe('webpack preprocessor', function () {
 
   describe('preprocessor function', function () {
     afterEach(function () {
-      this.config.on.withArgs('close').yield() // resets the cached bundles
+      this.file.on.withArgs('close').yield() // resets the cached bundles
     })
 
     describe('when it finishes cleanly', function () {
@@ -86,14 +86,14 @@ describe('webpack preprocessor', function () {
         webpack.returns(this.compilerApi)
 
         const run = preprocessor(this.options)
-        run(this.config)
-        run(this.config)
+        run(this.file)
+        run(this.file)
         expect(webpack).to.be.calledOnce
       })
 
       it('specifies the entry file', function () {
         return this.run().then(() => {
-          expect(webpack.lastCall.args[0].entry).to.equal(this.config.filePath)
+          expect(webpack.lastCall.args[0].entry).to.equal(this.file.filePath)
         })
       })
 
@@ -113,7 +113,7 @@ describe('webpack preprocessor', function () {
       })
 
       it('watches when shouldWatch is true', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
         return this.run().then(() => {
           expect(this.compilerApi.watch).to.be.called
@@ -121,7 +121,7 @@ describe('webpack preprocessor', function () {
       })
 
       it('includes watchOptions if provided', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
         this.options.watchOptions = { poll: true }
         return this.run().then(() => {
@@ -133,29 +133,29 @@ describe('webpack preprocessor', function () {
 
       it('resolves with the output path', function () {
         return this.run().then((outputPath) => {
-          expect(outputPath).to.be.equal(this.config.outputPath)
+          expect(outputPath).to.be.equal(this.file.outputPath)
         })
       })
 
       it('emits `rerun` when there is an update', function () {
         this.compilerApi.plugin.withArgs('compile').yields()
         return this.run().then(() => {
-          expect(this.config.emit).to.be.calledWith('rerun')
+          expect(this.file.emit).to.be.calledWith('rerun')
         })
       })
 
       it('closes bundler when shouldWatch is true and `close` is emitted', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
         return this.run().then(() => {
-          this.config.on.withArgs('close').yield()
+          this.file.on.withArgs('close').yield()
           expect(this.watchApi.close).to.be.called
         })
       })
 
       it('does not close bundler when shouldWatch is false and `close` is emitted', function () {
         return this.run().then(() => {
-          this.config.on.withArgs('close').yield()
+          this.file.on.withArgs('close').yield()
           expect(this.watchApi.close).not.to.be.called
         })
       })
