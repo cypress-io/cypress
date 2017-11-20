@@ -65,7 +65,7 @@ console.log('starting each test projects')
 const shortNpmVersion = getJustVersion(npm)
 console.log('short NPM version', shortNpmVersion)
 
-let subject = `Testing new ${os.platform()} Cypress version ${shortNpmVersion}`
+let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
 const shortSha = getShortCommit()
 if (shortSha) {
   subject += ` ${shortSha}`
@@ -76,7 +76,7 @@ if (shortSha) {
 const env = {
   CYPRESS_BINARY_VERSION: binary,
 }
-const commitMessageInstructions = getInstallJson(npm, env, os.platform())
+const commitMessageInstructions = getInstallJson(npm, env, platform)
 const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
 const footer = 'Use tool `commit-message-install` to install from above block'
 let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
