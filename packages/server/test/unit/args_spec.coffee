@@ -114,9 +114,9 @@ describe "lib/util/args", ->
         "--getKey=true"
         "--config=requestTimeout=1234,responseTimeout=9876"
         "--hosts=*.foobar.com=127.0.0.1"
+        "--environmentVariables=foo=bar,baz=quux,bar=foo=quz"
         "--requestTimeout=1234"
         "--responseTimeout=9876"
-        "--environmentVariables=foo=bar,baz=quux,bar=foo=quz"
       ])
 
   context "--updating", ->
