@@ -79,12 +79,21 @@ describe "src/cy/commands/actions/type", ->
 
     it "limits text entered to the maxlength attribute of a text input", ->
       $input = cy.$$(":text:first")
-      $input.attr('maxlength', 5)
+      $input.attr("maxlength", 5)
 
       cy.get(":text:first")
         .type("1234567890")
         .then (input) ->
           expect(input).to.have.value("12345")
+
+    it "ignores an invalid maxlength attribute", ->
+      $input = cy.$$(":text:first")
+      $input.attr("maxlength", "five")
+
+      cy.get(":text:first")
+        .type("1234567890")
+        .then (input) ->
+          expect(input).to.have.value("1234567890")
 
     it "can type into contenteditable", ->
       oldText = cy.$$("#contenteditable").text()

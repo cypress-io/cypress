@@ -113,7 +113,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       if options.$el.attr("maxlength")
-        maxLength = parseInt(options.$el.attr("maxlength"))
+        maxLength = parseInt(options.$el.attr("maxlength"), 10)
         if chars.length > maxLength
           chars = chars.slice(0, maxLength)
 
