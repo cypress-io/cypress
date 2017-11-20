@@ -23,6 +23,8 @@ create = ->
         Promise.resolve(null)
 
   return {
+    reset: tryToCall("reset")
+
     getConfig: tryToCall("getConfig")
 
     createCiProject: tryToCall("createCiProject")
@@ -33,11 +35,15 @@ create = ->
 
     requestAccess: tryToCall("requestAccess")
 
+    emit: tryToCall("emit")
+
     getProject: -> openProject
 
     launch: (browserName, spec, options = {}) ->
       log("launching browser %s spec %s", browserName, spec)
-      @reboot()
+      ## reset to reset server and socket state because
+      ## of potential domain changes, request buffers, etc
+      @reset()
       .then ->
         openProject.ensureSpecUrl(spec)
       .then (url) ->
@@ -119,8 +125,6 @@ create = ->
       @clearSpecInterval()
       @closeOpenProjectAndBrowsers()
 
-    reboot: -> Promise.resolve()
-
     create: (path, args = {}, options = {}) ->
       ## store the currently open project
       openProject = Project(path)
@@ -131,23 +135,16 @@ create = ->
             relaunchBrowser()
       })
 
-      open = ->
-        ## open the project and return
-        ## the config for the project instance
-        log("opening project %s", path)
-        openProject.open(options)
-
-      @reboot = ->
-        openProject.close()
-        .then(open)
-
       options = _.extend {}, config.whitelist(args), options
 
       browsers.get()
       .then (b = []) ->
         options.browsers = b
 
-        open()
+        ## open the project and return
+        ## the config for the project instance
+        log("opening project %s", path)
+        openProject.open(options)
       .return(@)
   }
 

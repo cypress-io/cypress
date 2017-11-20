@@ -1,6 +1,5 @@
 _           = require("lodash")
 chokidar    = require("chokidar")
-bundle      = require("./util/bundle")
 pathHelpers = require("./util/path_helpers")
 
 class Watchers
@@ -9,13 +8,10 @@ class Watchers
       return new Watchers
 
     @watchers = {}
-    @bundleWatchers = {}
 
   close: ->
     for filePath of @watchers
       @_remove(filePath)
-    for filePath of @bundleWatchers
-      @removeBundle(filePath)
 
   watch: (filePath, options = {}) ->
     _.defaults options,
@@ -52,28 +48,5 @@ class Watchers
 
     watcher.close()
     delete @watchers[filePath]
-
-  watchBundle: (filePath, config, options = {}) ->
-    _.defaults options,
-      onChange: null
-      onReady: null
-
-    if not watcher = @bundleWatchers[filePath]
-      watcher = bundle.build(filePath, config)
-      @_addBundle(filePath, watcher)
-
-    if _.isFunction(options.onChange)
-      watcher.addChangeListener(options.onChange)
-
-    return watcher.getLatestBundle()
-
-  _addBundle: (filePath, watcher) ->
-    @bundleWatchers[filePath] = watcher
-
-  removeBundle: (filePath) ->
-    return if not watcher = @bundleWatchers[filePath]
-
-    watcher.close()
-    delete @bundleWatchers[filePath]
 
 module.exports = Watchers
