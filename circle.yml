@@ -478,7 +478,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
-            CYPRES_videoRecording=false \
+            CYPRESS_videoRecording=false \
             $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
             --record
 
