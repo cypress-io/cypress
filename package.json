@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-cypress-dev",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Common ESLint rules shared by Cypress packages",
   "main": "index.js",
   "author": "Chris Breiding (chris@cypress.io)",
