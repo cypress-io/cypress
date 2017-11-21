@@ -471,7 +471,7 @@ jobs:
           command: npm i cypress-io/xvfb-maybe
       - run:
           name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchsensink.git /tmp/repo
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
           name: Run Kitchensink example project
           command: |
