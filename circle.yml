@@ -461,6 +461,26 @@ jobs:
             - binary-url.json
             - cypress.zip
 
+  "test-kitchensink-against-staging":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Installing xvfb-maybe
+          command: npm i cypress-io/xvfb-maybe
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-example-kitchsensink.git /tmp/repo
+      - run:
+          name: Run Kitchensink example project
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
+            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
+            --record
+
   "test-against-staging":
     <<: *defaults
     steps:
@@ -471,14 +491,14 @@ jobs:
           command: npm i cypress-io/xvfb-maybe
       - run:
           name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
       - run:
           name: Run test project
           command: |
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
-            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/cypress-test-tiny \
+            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
             --record
 
   "build-npm-package":
@@ -675,6 +695,13 @@ workflows:
           requires:
             - build
       - test-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build
+      - test-kitchensink-against-staging:
           filters:
             branches:
               only:
