@@ -28,7 +28,7 @@ describe "lib/modes/headless", ->
       })
 
   context ".openProject", ->
-    it "calls openProject.create with projectPath + options", ->
+    beforeEach ->
       @sandbox.stub(openProject, "create").resolves()
 
       options = {
@@ -38,17 +38,24 @@ describe "lib/modes/headless", ->
       }
 
       headless.openProject(1234, options)
-      .then ->
-        expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
-          port: 8080
-          projectPath: "/_test-output/path/to/project/foo"
-          environmentVariables: {foo: "bar"}
-        }, {
-          morgan: false
-          socketId: 1234
-          report: true
-          isTextTerminal: true
-        })
+
+    it "calls openProject.create with projectPath + options", ->
+      expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
+        port: 8080
+        projectPath: "/_test-output/path/to/project/foo"
+        environmentVariables: {foo: "bar"}
+      }, {
+        morgan: false
+        socketId: 1234
+        report: true
+        isTextTerminal: true
+      })
+
+    it "emits 'exitEarlyWithErr' with error message onError", ->
+      @sandbox.stub(openProject, "emit")
+      expect(openProject.create.lastCall.args[2].onError).to.be.a("function")
+      openProject.create.lastCall.args[2].onError({ message: "the message" })
+      expect(openProject.emit).to.be.calledWith("exitEarlyWithErr", "the message")
 
   context ".getElectronProps", ->
     it "sets width and height", ->

@@ -22,7 +22,7 @@ formHashFromEnvironment = () ->
   throw new Error("Do not know how to form unique build hash on this CI")
 
 getS3Credentials = () ->
-  key = path.join('scripts', 'support', '.aws-credentials.json')
+  key = path.join('scripts', 'support', 'aws-credentials.json')
   config = configFromEnvOrJsonFile(key)
 
   if !config

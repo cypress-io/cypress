@@ -12,8 +12,8 @@ export default class Spec {
     this.displayName = displayName
     this.isExpanded = true
   }
-  
-  hasChildren() {
+
+  hasChildren () {
     return this.children.specs && this.children.specs.length;
   }
 

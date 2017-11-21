@@ -25,6 +25,7 @@ files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
+preprocessor  = require("#{root}lib/plugins/preprocessor")
 
 fs = Promise.promisifyAll(fs)
 
@@ -52,6 +53,7 @@ browserifyFile = (filePath) ->
 describe "Routes", ->
   beforeEach ->
     @sandbox.stub(CacheBuster, "get").returns("-123")
+    @sandbox.stub(Server.prototype, "reset")
 
     nock.enableNetConnect()
 
@@ -124,6 +126,7 @@ describe "Routes", ->
     nock.cleanAll()
     Fixtures.remove()
     @session.destroy()
+    preprocessor.close()
 
     Promise.join(
       @server.close()

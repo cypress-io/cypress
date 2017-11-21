@@ -7,7 +7,6 @@ CacheBuster = require("./util/cache_buster")
 cwd         = require("./cwd")
 logger      = require("./logger")
 spec        = require("./controllers/spec")
-errors      = require("./controllers/errors")
 reporter    = require("./controllers/reporter")
 runner      = require("./controllers/runner")
 xhrs        = require("./controllers/xhrs")
@@ -17,17 +16,14 @@ proxy       = require("./controllers/proxy")
 driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, request, getRemoteState, watchers, project) ->
+module.exports = (app, config, request, getRemoteState, project) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
     ## slice out the cache buster
     test = CacheBuster.strip(req.query.p)
 
-    spec.handle(test, req, res, config, next, watchers, project)
-
-  app.get "/__cypress/errors/:error", (req, res) ->
-    errors.handle(req, res, config)
+    spec.handle(test, req, res, config, next, project)
 
   app.get "/__cypress/socket.io.js", (req, res) ->
     client.handle(req, res)

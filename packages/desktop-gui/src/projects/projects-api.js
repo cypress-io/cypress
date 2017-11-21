@@ -158,6 +158,10 @@ const openProject = (project) => {
     reopenProject(project)
   })
 
+  ipc.onProjectError((__, error) => {
+    project.setError(error)
+  })
+
   ipc.onProjectWarning((__, warning) => {
     project.setWarning(warning)
   })
