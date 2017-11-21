@@ -57,6 +57,7 @@ module.exports = {
         'no-redeclare': 'error',
         'no-regex-spaces': 'error',
         'no-self-assign': 'error',
+        'no-semi': ['error', 'never'],
         'no-spaced-func': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
