@@ -473,6 +473,15 @@ jobs:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
+          name: Install prod dependencies
+          command: npm install --production
+          working_directory: /tmp/repo
+      - run:
+          name: Example server
+          command: npm start
+          working_directory: /tmp/repo
+          background: true
+      - run:
           name: Run Kitchensink example project
           command: |
             CYPRESS_ENV=staging \
