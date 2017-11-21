@@ -28,7 +28,7 @@ module.exports = {
   init: (config, options) ->
     log("plugins.init", config.pluginsFile)
 
-    new Promise (resolve) ->
+    new Promise (resolve, reject) ->
       return resolve() if not config.pluginsFile
 
       if pluginsProcess
