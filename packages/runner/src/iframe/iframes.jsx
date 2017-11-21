@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
 import cs from 'classnames'
-import { action } from 'mobx'
+import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
@@ -52,6 +52,10 @@ export default class Iframes extends Component {
     // may need to not display reporter if more than 200 tests
     eventManager.on('restart', () => {
       this._run(this.props.config, specPath)
+    })
+
+    this._disposeAutorun = autorun(() => {
+      this.autIframe.toggleSelectorHelper(this.props.state.isSelectorHelperEnabled)
     })
 
     eventManager.start(this.props.config, specPath)
@@ -154,5 +158,6 @@ export default class Iframes extends Component {
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)
     eventManager.stop()
+    this._disposeAutorun()
   }
 }

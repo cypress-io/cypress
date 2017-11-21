@@ -6,7 +6,8 @@ body {
   height: 100%;
 }
 
-.runner {
+.runner,
+.reporter-wrap footer {
   * {
     box-sizing: border-box;
   }

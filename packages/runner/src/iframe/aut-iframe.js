@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
 import blankContents from './blank-contents'
-import { addElementBoxModelLayers, addHitBoxLayer, getOuterSize } from '../lib/dimensions'
+import { addElementBoxModelLayers, addHitBoxLayer, addSimpleHighlight, getBestSelector, getOuterSize } from '../lib/dom'
 import visitFailure from './visit-failure'
-
 
 export default class AutIframe {
   constructor (config) {
@@ -27,11 +26,19 @@ export default class AutIframe {
   }
 
   _showContents (contents) {
-    this._contents().find('body').html(contents)
+    this._body().html(contents)
   }
 
   _contents () {
     return this.$iframe.contents()
+  }
+
+  _document () {
+    return this.$iframe.prop('contentDocument')
+  }
+
+  _body () {
+    return this._contents().find('body')
   }
 
   detachDom = (Cypress) => {
@@ -61,7 +68,7 @@ export default class AutIframe {
     this._replaceHeadStyles(headStyles)
 
     // remove the old body and replace with restored one
-    contents.find('body').remove()
+    this._body().remove()
     this._insertBodyStyles(body, bodyStyles)
     $html.append(body)
   }
@@ -149,7 +156,7 @@ export default class AutIframe {
     if (body) {
       $el = body.find(`[${highlightAttr}]`)
     } else {
-      body = this._contents().find('body')
+      body = this._body()
     }
 
     // scroll the top of the element into view
@@ -186,6 +193,52 @@ export default class AutIframe {
   }
 
   removeHighlights = () => {
-    this._contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
+    this._contents().find('.__cypress-highlight').remove()
+  }
+
+  toggleSelectorHelper = (isEnabled) => {
+    const body = this._body()
+
+    if (isEnabled) {
+      $(body).on('mousemove', this._onMouseMove)
+      $(body).on('mouseleave', this._clearHighlight)
+    } else {
+      $(body).off('mousemove', this._onMouseMove)
+      $(body).off('mouseleave', this._clearHighlight)
+      if (this._highlightedEl) {
+        this._clearHighlight()
+      }
+    }
+  }
+
+  _onMouseMove = (e) => {
+    let el = e.target
+    let $el = $(el)
+
+    if ($el.hasClass('__cypress-highlight')) {
+      const $highlight = $el
+      $highlight.css('display', 'none')
+      $highlight.offsetLeft
+      el = this._document().elementFromPoint(e.clientX, e.clientY)
+      $el = $(el)
+      $highlight.css('display', 'block')
+    }
+
+    if (this._highlightedEl === el) return
+
+    this._highlightedEl = el
+
+    this.removeHighlights()
+    addSimpleHighlight($el, this._body()).on('click', () => {
+      console.log(getBestSelector($el, this._body())) // eslint-disable-line no-console
+    })
+  }
+
+  _clearHighlight = () => {
+    this.removeHighlights()
+    if (this._highlightedEl) {
+      this._highlightedEl = null
+      this._previousBoxShadow = null
+    }
   }
 }

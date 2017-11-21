@@ -2,9 +2,9 @@ import _ from 'lodash'
 import { $ } from '@packages/driver'
 
 const resetStyles = `
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  border: none !important
+  margin: 0 !important
+  padding: 0 !important
 `
 
 function addHitBoxLayer (coords, body) {
@@ -24,46 +24,46 @@ function addHitBoxLayer (coords, body) {
   const dotTop  = height / 2 - dotHeight / 2
   const dotLeft = width / 2 - dotWidth / 2
 
-  const box = $('<div>', {
+  const box = $('<div class="__cypress-highlight">', {
     style: `
       ${resetStyles}
-      position: absolute;
-      top: ${top}px;
-      left: ${left}px;
-      width: ${width}px;
-      height: ${height}px;
-      background-color: red;
-      border-radius: 5px;
-      box-shadow: 0 0 5px #333;
-      z-index: 2147483647;
+      position: absolute
+      top: ${top}px
+      left: ${left}px
+      width: ${width}px
+      height: ${height}px
+      background-color: red
+      border-radius: 5px
+      box-shadow: 0 0 5px #333
+      z-index: 2147483647
     `,
   })
   const wrapper = $('<div>', { style: `${resetStyles} position: relative` }).appendTo(box)
   $('<div>', {
     style: `
       ${resetStyles}
-      position: absolute;
-      top: ${dotTop}px;
-      left: ${dotLeft}px;
-      height: ${dotHeight}px;
-      width: ${dotWidth}px;
-      height: ${dotHeight}px;
-      background-color: pink;
-      border-radius: 5px;
+      position: absolute
+      top: ${dotTop}px
+      left: ${dotLeft}px
+      height: ${dotHeight}px
+      width: ${dotWidth}px
+      height: ${dotHeight}px
+      background-color: pink
+      border-radius: 5px
   `,
   }).appendTo(wrapper)
 
   return box.appendTo(body)
 }
 
-function addElementBoxModelLayers (el, body) {
+function addElementBoxModelLayers ($el, body) {
   if (body == null) {
     body = $('body')
   }
 
-  const dimensions = getElementDimensions(el)
+  const dimensions = getElementDimensions($el)
 
-  const container = $('<div>')
+  const container = $('<div class="__cypress-highlight">')
 
   const layers = {
     Content: '#9FC4E7',
@@ -97,7 +97,7 @@ function addElementBoxModelLayers (el, body) {
 
     // if attr is margin then we need to additional
     // subtract what the actual marginTop + marginLeft
-    // values are, since offset disregards margin compconstely
+    // values are, since offset disregards margin completely
     if (attr === 'Margin') {
       obj.top -= dimensions.marginTop
       obj.left -= dimensions.marginLeft
@@ -107,7 +107,7 @@ function addElementBoxModelLayers (el, body) {
     // so we dont create unnecessary layers
     if (dimensionsMatchPreviousLayer(obj, container)) return
 
-    return createLayer(el, attr, color, container, obj)
+    return createLayer($el, attr, color, container, obj)
   })
 
   container.appendTo(body)
@@ -125,15 +125,34 @@ function addElementBoxModelLayers (el, body) {
   return container
 }
 
-function createLayer (el, attr, color, container, dimensions) {
-  const transform = el.css('transform')
+function addSimpleHighlight ($el, body) {
+  const offset = $el.offset()
+  const borderSize = 2
+
+  return $('<div class="__cypress-highlight" />')
+    .css({
+      backgroundColor: 'rgba(159, 196, 231, 0.6)',
+      border: `solid ${borderSize}px #9FC4E7`,
+      position: 'absolute',
+      width: $el.outerWidth(),
+      height: $el.outerHeight(),
+      top: offset.top - borderSize,
+      left: offset.left - borderSize,
+      transform: $el.css('transform'),
+      zIndex: getZIndex($el),
+    })
+    .appendTo(body)
+}
+
+function createLayer ($el, attr, color, container, dimensions) {
+  const transform = $el.css('transform')
 
   const css = {
     transform,
     width: dimensions.width,
     height: dimensions.height,
     position: 'absolute',
-    zIndex: getZIndex(el),
+    zIndex: getZIndex($el),
     backgroundColor: color,
     opacity: 0.6,
   }
@@ -242,8 +261,58 @@ function getOuterSize (el) {
   }
 }
 
+// use this: https://github.com/indix/css-optimum-selector
+// or  this: https://gist.github.com/colllin/5409954
+
+// worst case selector
+function getBestSelector ($el, $body) {
+  let selector
+
+  if ($el.attr('id')) {
+    return `#${$el.attr('id')}`
+  }
+
+  let className = $el.attr('class')
+  if (className) {
+    className = `.${className.trim().replace(/\s+/, '.')}`
+    if ($body.find(className).length === 1) {
+      return className
+    }
+  }
+
+  while ($el.length) {
+    const el = $el[0]
+    let name = (el.localName || '').toLowerCase()
+    if (!name) break
+
+    const parent = $el.parent()
+
+    const sameTagSiblings = parent.children(name)
+    if (sameTagSiblings.length > 1) {
+      const allSiblings = parent.children()
+      const index = allSiblings.index(el) + 1
+      if (index > 1) {
+        name += `:nth-child(${index})`
+      }
+    }
+
+    selector = name + (selector ? ` > ${selector}` : '')
+    $el = parent
+  }
+
+  return selector
+}
+
+// id, narrow down if somehow not unique
+// classname if only one, else narrow down
+// go up tree, look for id, narrow down with nth-child
+
+// at each step, check if unique, move on if not
+
 export {
   addElementBoxModelLayers,
   addHitBoxLayer,
+  addSimpleHighlight,
+  getBestSelector,
   getOuterSize,
 }

@@ -12,6 +12,7 @@ import windowUtil from '../lib/window-util'
 import State from '../lib/state'
 
 import Header from '../header/header'
+import Footer from '../footer/footer'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
@@ -40,6 +41,7 @@ class App extends Component {
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
           />
+          <Footer state={this.props.state} />
         </div>
         <RunnerWrap
           className='container'
