@@ -20,7 +20,7 @@ module.exports = {
         'default-case': 'error',
         'eol-last': 'error',
         'eqeqeq': ['error', 'allow-null'],
-        'indent': ['error', 2, { 'SwitchCase': 1, 'MemberExpression': 'off' }],
+        'indent': ['error', 2, { 'SwitchCase': 1, 'MemberExpression': 0 }],
         'key-spacing': 'error',
         'keyword-spacing': 'error',
         'no-case-declarations': 'error',
@@ -50,6 +50,7 @@ module.exports = {
         'no-irregular-whitespace': 'error',
         'no-mixed-spaces-and-tabs': 'error',
         'no-multiple-empty-lines': ['error', { 'max': 2 }],
+        'no-multi-spaces': 'error'
         'no-negated-in-lhs': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
