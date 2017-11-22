@@ -21,7 +21,7 @@
     "ban": "ban",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "prettier-eslint --write '*.js'",
+    "lint": "eslint --fix *.js",
     "pretest": "npm run lint",
     "secure": "nsp check",
     "size":
@@ -40,7 +40,7 @@
     "deps-ok": "1.2.1",
     "dont-crack": "1.2.1",
     "eslint": "4.6.1",
-    "eslint-plugin-cypress-dev": "1.0.2",
+    "eslint-plugin-cypress-dev": "1.1.1",
     "eslint-plugin-mocha": "4.11.0",
     "github-post-release": "1.13.1",
     "license-checker": "13.0.3",

@@ -18,9 +18,7 @@ const defaultOptions = {
             {
               loader: require.resolve('babel-loader'),
               options: {
-                presets: ['babel-preset-env', 'babel-preset-react'].map(
-                  require.resolve
-                ),
+                presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
               },
             },
           ],
@@ -63,16 +61,8 @@ const preprocessor = (options = {}) => {
     }
 
     // user can override the default options
-    let webpackOptions = Object.assign(
-      {},
-      defaultOptions.webpackOptions,
-      options.webpackOptions
-    )
-    let watchOptions = Object.assign(
-      {},
-      defaultOptions.watchOptions,
-      options.watchOptions
-    )
+    let webpackOptions = Object.assign({}, defaultOptions.webpackOptions, options.webpackOptions)
+    let watchOptions = Object.assign({}, defaultOptions.watchOptions, options.watchOptions)
 
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
