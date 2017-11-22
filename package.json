@@ -25,6 +25,7 @@
     "eslint-plugin-react": "^7.2.1"
   },
   "devDependencies": {
+    "condition-circle": "1.5.0",
     "github-post-release": "1.13.1",
     "simple-commit-message": "3.3.1",
     "semantic-release": "8.2.0"
@@ -33,9 +34,8 @@
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "release": {
-    "release": {
-      "analyzeCommits": "simple-commit-message",
-      "generateNotes": "github-post-release"
-    }
+    "verifyConditions": "condition-circle",
+    "analyzeCommits": "simple-commit-message",
+    "generateNotes": "github-post-release"
   }
 }
