@@ -50,7 +50,7 @@ module.exports = {
         'no-irregular-whitespace': 'error',
         'no-mixed-spaces-and-tabs': 'error',
         'no-multiple-empty-lines': ['error', { 'max': 2 }],
-        'no-multi-spaces': 'error'
+        'no-multi-spaces': 'error',
         'no-negated-in-lhs': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
