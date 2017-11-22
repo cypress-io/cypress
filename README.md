@@ -48,3 +48,7 @@ If using the `react` preset:
 ```bash
 npm install --save-dev babel-eslint eslint-plugin-react
 ```
+
+## License
+
+This project is licensed under the terms of the [MIT license](/LICENSE.md).
