@@ -1,63 +1,63 @@
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile is missing 1'] = `Error: Cannot find module '/does/not/exist.coffee'
-    at Function.Module._resolveFilename (<path>)
-    at Module._load (<path>)
-    at Function.hookedLoader [as _load] (<path>)
-    at Module.require (<path>)
-    at require (<path>)
-    at module.exports.err (<path>)
-    at Context.<anonymous> (<path>)
-    at callFn (<path>)
-    at Test.Runnable.run (<path>)
-    at Runner.runTest (<path>)
-    at(<path>)
-    at next (<path>)
-    at(<path>)
-    at next (<path>)
-    at(<path>)
-    at done (<path>)
-    at callFn (<path>)
-    at Hook.Runnable.run (<path>)
-    at next (<path>)
-    at Immediate.<anonymous> (<path>)
-    at runCallback (<path>)
-    at tryOnImmediate (<path>)
-    at processImmediate [as _immediateCallback] (<path>)
+    at Function.Module._resolveFilename <path>module.js
+    at Module._load <path>module.js
+    at Function.hookedLoader [as _load] <path>mockery.js
+    at Module.require <path>module.js
+    at require <path>module.js
+    at module.exports.err <path>run_plugins.js
+    at Context.<anonymous> <path>run_plugins_spec.coffee
+    at callFn <path>runnable.js
+    at Test.Runnable.run <path>runnable.js
+    at Runner.runTest <path>runner.js
+    at <path>runner.js
+    at next <path>runner.js
+    at <path>runner.js
+    at next <path>runner.js
+    at <path>runner.js
+    at done <path>runnable.js
+    at callFn <path>runnable.js
+    at Hook.Runnable.run <path>runnable.js
+    at next <path>runner.js
+    at Immediate.<anonymous> <path>runner.js
+    at runCallback <path>timers.js
+    at tryOnImmediate <path>timers.js
+    at processImmediate [as _immediateCallback] <path>timers.js
 `
 
 exports['lib/plugins/child/run_plugins sends error message if requiring pluginsFile errors 1'] = `Error: error thrown by pluginsFile
-    at Object.<anonymous> (<path>)
-    at Object.<anonymous> (<path>)
-    at Module._compile (<path>)
-    at Object.loadFile (<path>)
-    at Module.load (<path>)
-    at tryModuleLoad (<path>)
-    at Module._load (<path>)
-    at Function.hookedLoader [as _load] (<path>)
-    at Module.require (<path>)
-    at require (<path>)
-    at module.exports.err (<path>)
-    at Context.<anonymous> (<path>)
-    at callFn (<path>)
-    at Test.Runnable.run (<path>)
-    at Runner.runTest (<path>)
-    at(<path>)
-    at next (<path>)
-    at(<path>)
-    at next (<path>)
-    at(<path>)
-    at done (<path>)
-    at callFn (<path>)
-    at Hook.Runnable.run (<path>)
-    at next (<path>)
-    at Immediate.<anonymous> (<path>)
-    at runCallback (<path>)
-    at tryOnImmediate (<path>)
-    at processImmediate [as _immediateCallback] (<path>)
+    at Object.<anonymous> <path>throws_error.coffee
+    at Object.<anonymous> <path>throws_error.coffee
+    at Module._compile <path>module.js
+    at Object.loadFile <path>register.js
+    at Module.load <path>register.js
+    at tryModuleLoad <path>module.js
+    at Module._load <path>module.js
+    at Function.hookedLoader [as _load] <path>mockery.js
+    at Module.require <path>module.js
+    at require <path>module.js
+    at module.exports.err <path>run_plugins.js
+    at Context.<anonymous> <path>run_plugins_spec.coffee
+    at callFn <path>runnable.js
+    at Test.Runnable.run <path>runnable.js
+    at Runner.runTest <path>runner.js
+    at <path>runner.js
+    at next <path>runner.js
+    at <path>runner.js
+    at next <path>runner.js
+    at <path>runner.js
+    at done <path>runnable.js
+    at callFn <path>runnable.js
+    at Hook.Runnable.run <path>runnable.js
+    at next <path>runner.js
+    at Immediate.<anonymous> <path>runner.js
+    at runCallback <path>timers.js
+    at tryOnImmediate <path>timers.js
+    at processImmediate [as _immediateCallback] <path>timers.js
 `
 
-exports['lib/plugins/child/run_plugins sends error message if pluginsFile has syntax error 1'] = `/Users/chrisbreiding/Dev/cypress/cypress/packages/server/test/fixtures/syntax_error.coffee:1:1: error: missing }
-[1;31m{[0m
-[1;31m^[0m`
+exports['lib/plugins/child/run_plugins sends error message if pluginsFile has syntax error 1'] = `<path>syntax_error.coffee) error: missing }
+<color-code>{<color-code>
+<color-code>^<color-code>`
 
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile does not export a function 1'] = `null`
 
