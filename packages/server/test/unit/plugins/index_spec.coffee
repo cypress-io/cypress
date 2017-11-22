@@ -80,6 +80,18 @@ describe "lib/plugins/index", ->
           )
           expect(value).to.equal("value")
 
+    describe "load:error message", ->
+      beforeEach ->
+        @ipc.on.withArgs("load:error").yields("PLUGINS_FILE_ERROR", "path/to/pluginsFile.js", "error message")
+
+      it "rejects plugins.init", ->
+        plugins.init({ pluginsFile: "cypress-plugin" })
+        .catch (err) =>
+          expect(err.message).to.contain("The plugins file is missing or invalid")
+          expect(err.message).to.contain("path/to/pluginsFile.js")
+          expect(err.message).to.contain("The following error was thrown")
+          expect(err.message).to.contain("error message")
+
     describe "error message", ->
       beforeEach ->
         @err = {
