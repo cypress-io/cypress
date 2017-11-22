@@ -7,17 +7,11 @@
   "engines": {
     "node": ">=6.5"
   },
-  "files": [
-    "*.js"
-  ],
+  "files": ["*.js"],
   "private": false,
-  "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
-  "keywords": [
-    "cypress",
-    "cypress-plugin",
-    "cypress-preprocessor",
-    "webpack"
-  ],
+  "homepage":
+    "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
+  "keywords": ["cypress", "cypress-plugin", "cypress-preprocessor", "webpack"],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,10 +24,12 @@
     "lint": "prettier-eslint --write '*.js'",
     "pretest": "npm run lint",
     "secure": "nsp check",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "size":
+      "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "mocha",
     "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'",
-    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+    "semantic-release":
+      "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "devDependencies": {
     "ban-sensitive-files": "1.9.0",
