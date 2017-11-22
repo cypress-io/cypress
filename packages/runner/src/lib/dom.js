@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
+import getUniqueSelector from 'unique-selector'
 
 const resetStyles = `
   border: none !important
@@ -261,53 +262,9 @@ function getOuterSize (el) {
   }
 }
 
-// use this: https://github.com/indix/css-optimum-selector
-// or  this: https://gist.github.com/colllin/5409954
-
-// worst case selector
-function getBestSelector ($el, $body) {
-  let selector
-
-  if ($el.attr('id')) {
-    return `#${$el.attr('id')}`
-  }
-
-  let className = $el.attr('class')
-  if (className) {
-    className = `.${className.trim().replace(/\s+/, '.')}`
-    if ($body.find(className).length === 1) {
-      return className
-    }
-  }
-
-  while ($el.length) {
-    const el = $el[0]
-    let name = (el.localName || '').toLowerCase()
-    if (!name) break
-
-    const parent = $el.parent()
-
-    const sameTagSiblings = parent.children(name)
-    if (sameTagSiblings.length > 1) {
-      const allSiblings = parent.children()
-      const index = allSiblings.index(el) + 1
-      if (index > 1) {
-        name += `:nth-child(${index})`
-      }
-    }
-
-    selector = name + (selector ? ` > ${selector}` : '')
-    $el = parent
-  }
-
-  return selector
+function getBestSelector (el) {
+  return getUniqueSelector(el)
 }
-
-// id, narrow down if somehow not unique
-// classname if only one, else narrow down
-// go up tree, look for id, narrow down with nth-child
-
-// at each step, check if unique, move on if not
 
 export {
   addElementBoxModelLayers,

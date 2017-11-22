@@ -230,7 +230,7 @@ export default class AutIframe {
 
     this.removeHighlights()
     addSimpleHighlight($el, this._body()).on('click', () => {
-      console.log(getBestSelector($el, this._body())) // eslint-disable-line no-console
+      console.log(getBestSelector(el)) // eslint-disable-line no-console
     })
   }
 
