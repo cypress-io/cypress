@@ -1,0 +1,7 @@
+machine:
+  node:
+    # need Node 8 for latest semantic release
+    version: 8
+test:
+  override:
+    - npm run semantic-release || true

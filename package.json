@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-cypress-dev",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "Common ESLint rules shared by Cypress packages",
   "main": "index.js",
   "author": "Chris Breiding (chris@cypress.io)",
@@ -23,5 +23,19 @@
     "eslint": ">= 3.2.1",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1"
+  },
+  "devDependencies": {
+    "github-post-release": "1.13.1",
+    "simple-commit-message": "3.3.1",
+    "semantic-release": "8.2.0"
+  },
+  "scripts": {
+    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+  },
+  "release": {
+    "release": {
+      "analyzeCommits": "simple-commit-message",
+      "generateNotes": "github-post-release"
+    }
   }
 }
