@@ -202,7 +202,7 @@ module.exports = {
 
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect
-        res.redirect(statusCode, newUrl)
+        if res.headersSent then res else res.redirect(statusCode, newUrl)
       else
         if headers["x-cypress-file-server-error"]
           filePath = headers["x-cypress-file-path"]
