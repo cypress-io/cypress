@@ -1,10 +1,16 @@
 {
   "name": "semantic-release-monorepo",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"No test specified\" && exit 0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "semantic-release": "https://github.com/Updater/semantic-release#get-commits-plugin"
+  },
+  "devDependencies": {
+    "semantic-release": "https://github.com/Updater/semantic-release#get-commits-plugin"
+  }
 }
