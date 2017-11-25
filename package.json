@@ -10,6 +10,9 @@
   "peerDependencies": {
     "semantic-release": "https://github.com/Updater/semantic-release#get-commits-plugin"
   },
+  "dependencies": {
+    "read-pkg": "^3.0.0"
+  },
   "devDependencies": {
     "semantic-release": "https://github.com/Updater/semantic-release#get-commits-plugin"
   }
