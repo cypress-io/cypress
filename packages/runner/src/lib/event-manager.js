@@ -62,7 +62,7 @@ const eventManager = {
     })
 
     _.each(socketRerunEvents, (event) => {
-      channel.on(event,  this._reRun.bind(this))
+      channel.on(event, this._reRun.bind(this))
     })
 
     reporterBus.on('runner:console:error', (testId) => {

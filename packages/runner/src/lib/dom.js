@@ -19,10 +19,10 @@ function addHitBoxLayer (coords, body) {
   const dotHeight = 4
   const dotWidth = 4
 
-  const top  = coords.y - height / 2
+  const top = coords.y - height / 2
   const left = coords.x - width / 2
 
-  const dotTop  = height / 2 - dotHeight / 2
+  const dotTop = height / 2 - dotHeight / 2
   const dotLeft = width / 2 - dotWidth / 2
 
   const box = $('<div class="__cypress-highlight">', {
@@ -131,18 +131,18 @@ function addSimpleHighlight ($el, body) {
   const borderSize = 2
 
   return $('<div class="__cypress-highlight" />')
-    .css({
-      backgroundColor: 'rgba(159, 196, 231, 0.6)',
-      border: `solid ${borderSize}px #9FC4E7`,
-      position: 'absolute',
-      width: $el.outerWidth(),
-      height: $el.outerHeight(),
-      top: offset.top - borderSize,
-      left: offset.left - borderSize,
-      transform: $el.css('transform'),
-      zIndex: getZIndex($el),
-    })
-    .appendTo(body)
+  .css({
+    backgroundColor: 'rgba(159, 196, 231, 0.6)',
+    border: `solid ${borderSize}px #9FC4E7`,
+    position: 'absolute',
+    width: $el.outerWidth(),
+    height: $el.outerHeight(),
+    top: offset.top - borderSize,
+    left: offset.left - borderSize,
+    transform: $el.css('transform'),
+    zIndex: getZIndex($el),
+  })
+  .appendTo(body)
 }
 
 function createLayer ($el, attr, color, container, dimensions) {
@@ -159,11 +159,11 @@ function createLayer ($el, attr, color, container, dimensions) {
   }
 
   return $('<div>')
-    .css(css)
-    .attr('data-top', dimensions.top)
-    .attr('data-left', dimensions.left)
-    .attr('data-layer', attr)
-    .prependTo(container)
+  .css(css)
+  .attr('data-top', dimensions.top)
+  .attr('data-left', dimensions.left)
+  .attr('data-layer', attr)
+  .prependTo(container)
 }
 
 function dimensionsMatchPreviousLayer (obj, container) {
