@@ -190,9 +190,12 @@ module.exports = {
 
       ## always proxy the cookies coming from the incomingRes
       if cookies = headers["set-cookie"]
-        for cookie in cookies
-          try res.append("Set-Cookie", cookie)
-          catch e then logger.warn "not proxying invalid cookie", cookie: cookie
+        ## normalize into array
+        for c in [].concat(cookies)
+          try
+            res.append("Set-Cookie", c)
+          catch err
+            ## noop
 
       if redirectRe.test(statusCode)
         newUrl = headers.location
