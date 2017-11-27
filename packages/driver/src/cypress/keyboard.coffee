@@ -254,7 +254,7 @@ $Keyboard = {
     bounds[0] is bounds[1]
 
   type: (options = {}) ->
-    _.defaults options,
+    _.defaults(options, {
       delay: 10
       onEvent: ->
       onBeforeEvent: ->
@@ -263,6 +263,7 @@ $Keyboard = {
       onEnterPressed: ->
       onNoMatchingSpecialChars: ->
       onBeforeSpecialCharAction: ->
+    })
 
     el = options.$el.get(0)
 
@@ -522,15 +523,29 @@ $Keyboard = {
     options.id        = _.uniqueId("char")
     options.beforeKey = options.rng.all()
 
+    maybeUpdateValueAndFireInput = =>
+      ## only call this function if we haven't been told not to
+      if fn and options.onBeforeSpecialCharAction(options.id, options.key) isnt false
+        fn.call(@)
+
+      @simulateKey(el, "input", key, options)
+
     if @simulateKey(el, "keydown", key, options)
       if @simulateKey(el, "keypress", key, options)
         if @simulateKey(el, "textInput", key, options)
 
-          ## only call this function if we haven't been told not to
-          if fn and options.onBeforeSpecialCharAction.call(@, options.id, options.key) isnt false
-            fn.call(@)
+          ml = el.maxLength
 
-          @simulateKey(el, "input", key, options)
+          ## maxlength is -1 by default when omitted
+          ## but could also be null or undefined :-/
+          if ml is 0 or ml > 0
+            ## check if we should update the value
+            ## and fire the input event
+            ## as long as we're under maxlength
+            if el.value.length < ml
+              maybeUpdateValueAndFireInput()
+          else
+            maybeUpdateValueAndFireInput()
 
           ## store the afterKey value so we know
           ## if something mutates the value between typing keys
