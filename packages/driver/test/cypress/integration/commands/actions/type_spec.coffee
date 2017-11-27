@@ -512,7 +512,7 @@ describe "src/cy/commands/actions/type", ->
 
       it "fires events for each key stroke"
 
-    describe.only "maxlength", ->
+    describe "maxlength", ->
       it "limits text entered to the maxlength attribute of a text input", ->
         $input = cy.$$(":text:first")
         $input.attr("maxlength", 5)
