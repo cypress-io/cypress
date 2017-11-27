@@ -1,7 +1,7 @@
 EE = require("events")
 _ = require("lodash")
 Promise = require("bluebird")
-log = require("debug")("cypress:server:plugins:child")
+log = require("debug")("cypress:server:plugins")
 
 serializeError = (err) ->
   _.pick(err, "name", "message", "stack", "code", "annotated")

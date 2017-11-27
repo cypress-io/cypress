@@ -7,7 +7,14 @@ snapshot = require("snap-shot-it")
 preprocessor = require("#{root}../../lib/plugins/child/preprocessor")
 runPlugins = require("#{root}../../lib/plugins/child/run_plugins")
 
+colorCodeRe = /\[[0-9;]+m/gm
+pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
+stackPathRe = /\(?\/?([a-z0-9_-]+\/)*([a-z0-9_-]+\.\w+)[:0-9]+\)?/gmi
+
 withoutStack = (err) -> _.omit(err, "stack")
+withoutColorCodes = (str) -> str.replace(colorCodeRe, "<color-code>")
+withoutPath = (str) -> str.replace(pathRe, '<path>$2)')
+withoutStackPaths = (stack) -> stack.replace(stackPathRe, '<path>$2')
 
 describe "lib/plugins/child/run_plugins", ->
   beforeEach ->
@@ -24,28 +31,28 @@ describe "lib/plugins/child/run_plugins", ->
   it "sends error message if pluginsFile is missing", ->
     mockery.registerSubstitute("plugins-file", "/does/not/exist.coffee")
     runPlugins(@ipc, "plugins-file")
-    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR")
-    snapshot(withoutStack(@ipc.send.lastCall.args[2]))
+    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
+    snapshot(withoutStackPaths(@ipc.send.lastCall.args[3]))
 
   it "sends error message if requiring pluginsFile errors", ->
     ## path for substitute is relative to lib/plugins/child/plugins_child.js
     mockery.registerSubstitute("plugins-file", "../../../test/fixtures/throws_error.coffee")
     runPlugins(@ipc, "plugins-file")
-    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR")
-    snapshot(withoutStack(@ipc.send.lastCall.args[2]))
+    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
+    snapshot(withoutStackPaths(@ipc.send.lastCall.args[3]))
 
   it "sends error message if pluginsFile has syntax error", ->
     ## path for substitute is relative to lib/plugins/child/plugins_child.js
     mockery.registerSubstitute("plugins-file", "../../../test/fixtures/syntax_error.coffee")
     runPlugins(@ipc, "plugins-file")
-    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR")
-    snapshot(withoutStack(@ipc.send.lastCall.args[2]))
+    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
+    snapshot(withoutColorCodes(withoutPath(@ipc.send.lastCall.args[3])))
 
   it "sends error message if pluginsFile does not export a function", ->
     mockery.registerMock("plugins-file", null)
     runPlugins(@ipc, "plugins-file")
-    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_DIDNT_EXPORT_FUNCTION")
-    snapshot(@ipc.send.lastCall.args[0])
+    expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_DIDNT_EXPORT_FUNCTION", "plugins-file")
+    snapshot(JSON.stringify(@ipc.send.lastCall.args[3]))
 
   describe "on 'load' message", ->
     it "calls function exported by pluginsFile with register function and config", ->
