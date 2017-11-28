@@ -33,6 +33,7 @@ class SetupProject extends Component {
       org: {},
       showNameMissingError: false,
       isSubmitting: false,
+      usage: null,
     }
   }
 
@@ -290,14 +291,14 @@ class SetupProject extends Component {
             </p>
           </label>
         </div>
-        <div className={`radio privacy-radio ${this.state.org.reachedPrivateProjectsLimit ? 'disabled' : ''}`}>
+        <div className={`radio privacy-radio ${this._reachedPrivateProjectsLimit() ? 'disabled' : ''}`}>
           <label>
             <input
               type='radio'
               name='privacy-radio'
               value='false'
               checked={(this.state.public === false)}
-              disabled={this.state.org.reachedPrivateProjectsLimit}
+              disabled={this._reachedPrivateProjectsLimit()}
               onChange={this._updateAccess}
             />
             <p>
@@ -306,7 +307,7 @@ class SetupProject extends Component {
               Only invited users have access.
               <br/>
               {
-                this.state.org.reachedPrivateProjectsLimit ?
+                this._reachedPrivateProjectsLimit() ?
                   <small className='help-block'>In order to make this project private, you will need to <a href="" onClick={this._upgradeAccount}>upgrade your account</a>.</small> :
                   null
               }
@@ -332,9 +333,17 @@ class SetupProject extends Component {
     ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
   }
 
+  _reachedPrivateProjectsLimit = () => {
+    let usage = this.state.usage
+
+    if (!usage) return
+
+    return usage.used.privateProjects >= usage.plan.limits.privateProjects
+  }
+
   _upgradeAccount = (e) => {
     e.preventDefault()
-    ipc.externalOpen(`https://on.cypress.io/dashboard/organizations/${this.state.orgId ? this.state.orgId + '/billing' : ''}`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/organizations/${this.state.orgId ? `${this.state.orgId}/billing` : ''}`)
   }
 
   _formNotFilled () {
@@ -353,8 +362,18 @@ class SetupProject extends Component {
     )
   }
 
+  _updateProjectName = () => {
+    this.setState({
+      projectName: this.refs.projectName.value,
+    })
+  }
+
+  _hasValidProjectName () {
+    return _.trim(this.state.projectName)
+  }
+
   _getOrgById = (id) => {
-    return _.find(orgsStore.orgs, {'id': id})
+    return _.find(orgsStore.orgs, { id })
   }
 
   _updateOrgId = () => {
@@ -362,9 +381,13 @@ class SetupProject extends Component {
 
     const orgId = orgIsNotSelected ? null : this.refs.orgId.value
 
+    // we need to fetch the usage of the selected org
+    // to restrict them from going over private projects
+    this._getUsageByOrgId(orgId)
+
     this.setState({
       orgId,
-      org: this._getOrgById(orgId)
+      org: this._getOrgById(orgId),
     })
 
     // deselect their choice for access
@@ -376,16 +399,6 @@ class SetupProject extends Component {
     }
   }
 
-  _updateProjectName = () => {
-    this.setState({
-      projectName: this.refs.projectName.value,
-    })
-  }
-
-  _hasValidProjectName () {
-    return _.trim(this.state.projectName)
-  }
-
   _updateOwner = (e) => {
     let owner = e.target.value
 
@@ -395,15 +408,24 @@ class SetupProject extends Component {
 
     const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
-    let chosenOrgId = owner === 'me' ? defaultOrg.id : null
+    let orgId = owner === 'me' ? defaultOrg.id : null
+
+    // we need to fetch the usage of the default org
+    // to restrict them from going over private projects
+    this._getUsageByOrgId(orgId)
 
     // we want to clear all selects below the radio buttons
     // otherwise it looks jarring to already have selects
     this.setState({
       owner,
-      orgId: chosenOrgId,
+      orgId,
       public: null,
     })
+  }
+
+  _getUsageByOrgId = (id) => {
+    // this needs to GET /organizations/:id/usage
+    // and set usage on the state
   }
 
   _updateAccess = (e) => {

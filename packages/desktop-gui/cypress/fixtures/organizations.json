@@ -2,25 +2,16 @@
   {
     "id": "777",
     "name": "Acme Developers",
-    "default": false,
-    "reachedUserLimit": false,
-    "reachedPrivateProjectsLimit": false,
-    "reachedRecordedUnitsLimit": false
+    "default": false
   },
   {
     "id": "000",
     "name": "Jane Lane",
-    "default": true,
-    "reachedUserLimit": false,
-    "reachedPrivateProjectsLimit": false,
-    "reachedRecordedUnitsLimit": false
+    "default": true
   },
   {
     "id": "999",
     "name": "Osato Devs",
-    "default": false,
-    "reachedUserLimit": true,
-    "reachedPrivateProjectsLimit": true,
-    "reachedRecordedUnitsLimit": true
+    "default": false
   }
 ]
