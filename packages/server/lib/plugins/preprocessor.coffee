@@ -81,7 +81,7 @@ module.exports = {
         log("file object rerun event")
         baseEmitter.emit("file:updated", filePath)
       baseEmitter.once "close", ->
-        log("base emitter close event")
+        log("base emitter native close event")
         fileObject.emit("close")
  
     if not plugins.has("file:preprocessor")
@@ -96,7 +96,9 @@ module.exports = {
 
     return preprocessor
 
-  removeFile: (filePath) ->
+  removeFile: (filePath, config) ->
+    filePath = path.join(config.projectRoot, filePath)
+
     return if not fileProcessors[filePath]
 
     log("removeFile #{filePath}")

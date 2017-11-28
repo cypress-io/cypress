@@ -80,7 +80,7 @@ class Socket
 
     ## remove the existing file by its path
     if @testFilePath
-      preprocessor.removeFile(@testFilePath)
+      preprocessor.removeFile(@testFilePath, config)
 
     ## store this location
     @testFilePath = filePath

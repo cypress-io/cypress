@@ -430,10 +430,10 @@ describe "lib/socket", ->
         expect(result).to.be.undefined
 
       it "closes existing watched test file", ->
-        remove = @sandbox.stub(preprocessor, "removeFile")
+        @sandbox.stub(preprocessor, "removeFile")
         @socket.testFilePath = "tests/test1.js"
-        @socket.watchTestFileByPath(@cfg, "test2.js").then ->
-          expect(remove).to.be.calledWithMatch("test1.js")
+        @socket.watchTestFileByPath(@cfg, "test2.js").then =>
+          expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
         @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
