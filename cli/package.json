@@ -18,6 +18,7 @@
     "lint": "bin-up eslint --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
+    "postbuild": "cp index.d.ts build",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
@@ -70,6 +71,7 @@
   "files": [
     "bin",
     "lib",
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ]
 }
