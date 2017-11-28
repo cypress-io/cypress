@@ -1502,9 +1502,9 @@ safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@~5.1.0, 
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
 
-"semantic-release@https://github.com/Updater/semantic-release#get-commits-plugin":
-  version "0.0.0-development"
-  resolved "https://github.com/Updater/semantic-release#5d60fb072cff5383238b91825eb0bba55b6eab80"
+semantic-release@^11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-11.0.0.tgz#388228a7f8fe59681634c6be01880c1fa3e8fef4"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/condition-travis" "^7.0.0"

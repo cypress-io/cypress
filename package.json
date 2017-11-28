@@ -8,12 +8,12 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "semantic-release": "https://github.com/Updater/semantic-release#get-commits-plugin"
+    "semantic-release": "^11.0.0"
   },
   "dependencies": {
     "read-pkg": "^3.0.0"
   },
   "devDependencies": {
-    "semantic-release": "https://github.com/Updater/semantic-release#get-commits-plugin"
+    "semantic-release": "^11.0.0"
   }
 }
