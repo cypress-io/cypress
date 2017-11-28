@@ -180,8 +180,9 @@ module.exports = {
 
       minimatch(file, specPattern, { dot: true, matchBase: true })
 
-    ## grab all the js and coffee files
-    glob("**/*.+(js|jsx|coffee|cjsx)", options)
+    ## grab all the files
+    glob(config.testFiles, options)
+
 
     ## filter out anything that matches our
     ## ignored test files glob

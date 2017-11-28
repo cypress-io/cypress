@@ -9,17 +9,27 @@ config        = require("#{root}lib/config")
 logger        = require("#{root}lib/logger")
 Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
+fileServer    = require("#{root}lib/file_server")
 connect       = require("#{root}lib/util/connect")
+buffers       = require("#{root}lib/util/buffers")
 
 morganFn = ->
 mockery.registerMock("morgan", -> morganFn)
 
 describe "lib/server", ->
   beforeEach ->
+    @fileServer = {
+      close: ->
+      port: -> 1111
+    }
+    @sandbox.stub(fileServer, "create").returns(@fileServer)
+
     config.set({projectRoot: "/foo/bar/"})
     .then (cfg) =>
       @config = cfg
       @server = Server()
+
+      @server._fileServer = @fileServer
 
   afterEach ->
     @server and @server.close()
@@ -147,6 +157,23 @@ describe "lib/server", ->
         @server.startWebsockets(1, 2, 3)
 
         expect(@startListening).to.be.calledWith(@server.getHttpServer(), 1, 2, 3)
+
+  context "#reset", ->
+    beforeEach ->
+      @sandbox.stub(buffers, "reset")
+
+    it "resets the buffers", ->
+      @server.reset()
+      expect(buffers.reset).to.be.called
+
+    it "sets the domain to the previous base url if set", ->
+      @server._baseUrl = "http://localhost:3000"
+      @server.reset()
+      expect(@server._remoteStrategy).to.equal("http")
+
+    it "sets the domain to <root> if not set", ->
+      @server.reset()
+      expect(@server._remoteStrategy).to.equal("file")
 
   context "#close", ->
     it "returns a promise", ->

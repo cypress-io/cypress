@@ -25,6 +25,7 @@ files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
+preprocessor  = require("#{root}lib/plugins/preprocessor")
 
 fs = Promise.promisifyAll(fs)
 
@@ -52,6 +53,7 @@ browserifyFile = (filePath) ->
 describe "Routes", ->
   beforeEach ->
     @sandbox.stub(CacheBuster, "get").returns("-123")
+    @sandbox.stub(Server.prototype, "reset")
 
     nock.enableNetConnect()
 
@@ -124,6 +126,7 @@ describe "Routes", ->
     nock.cleanAll()
     Fixtures.remove()
     @session.destroy()
+    preprocessor.close()
 
     Promise.join(
       @server.close()
@@ -1473,6 +1476,25 @@ describe "Routes", ->
           expect(res.headers["set-cookie"]).to.deep.eq [
             "userId=123; Path=/"
             "__cypress.initial=true; Domain=localhost; Path=/"
+          ]
+
+      it "ignores invalid cookies", ->
+        nock(@server._remoteOrigin)
+        .get("/invalid")
+        .reply 200, "OK", {
+          "set-cookie": [
+            "foo=bar; Path=/"
+             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900" ## this is okay
+             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900" ## should ignore this
+           ]
+        }
+
+        @rp("http://localhost:8080/invalid")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers["set-cookie"]).to.deep.eq [
+            "foo=bar; Path=/"
+             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
           ]
 
       it "forwards other headers from incoming responses", ->

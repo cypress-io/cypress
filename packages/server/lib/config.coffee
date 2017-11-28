@@ -16,8 +16,34 @@ pathHelpers = require("./util/path_helpers")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder videosFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFile".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges trashAssetsBeforeHeadlessRuns chromeWebSecurity videoRecording videoCompression videoUploadOnPasses viewportWidth viewportHeight supportFile fileServerFolder supportFolder fixturesFolder integrationFolder videosFolder screenshotsFolder environmentVariables hosts".split(" ")
+toWords = (str) -> str.trim().split(/\s+/)
+
+folders = toWords """
+  fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
+  supportFile        supportFolder    unitFolder          videosFolder
+"""
+
+configKeys = toWords """
+  animationDistanceThreshold      fileServerFolder
+  baseUrl                         fixturesFolder
+  chromeWebSecurity               integrationFolder
+  environmentVariables            pluginsFile
+  hosts                           screenshotsFolder
+  numTestsKeptInMemory            supportFile
+  port                            supportFolder
+  reporter                        videosFolder
+  reporterOptions
+  screenshotOnHeadlessFailure     defaultCommandTimeout
+  testFiles                       execTimeout
+  trashAssetsBeforeHeadlessRuns   pageLoadTimeout
+  viewportWidth                   requestTimeout
+  viewportHeight                  responseTimeout
+  videoRecording
+  videoCompression
+  videoUploadOnPasses
+  watchForFileChanges
+  waitForAnimations
+"""
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -37,6 +63,7 @@ defaults = {
   socketIoCookie:                "__socket.io"
   reporterRoute:                 "/__cypress/reporter"
   ignoreTestFiles:               "*.hot-update.js"
+  testFiles:                     "**/*.*"
   defaultCommandTimeout:         4000
   requestTimeout:                5000
   responseTimeout:               30000
@@ -62,6 +89,7 @@ defaults = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
+  pluginsFile:                    "cypress/plugins"
 
   ## deprecated
   javascripts:                   []
@@ -80,10 +108,12 @@ validationRules = {
   integrationFolder: v.isString
   numTestsKeptInMemory: v.isNumber
   pageLoadTimeout: v.isNumber
+  pluginsFile: v.isStringOrFalse
   port: v.isNumber
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
+  testFiles: v.isString
   screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   trashAssetsBeforeHeadlessRuns: v.isBoolean
@@ -190,7 +220,8 @@ module.exports = {
     config = @setParentTestsPaths(config)
 
     @setSupportFileAndFolder(config)
-    .then @setScaffoldPaths
+    .then(@setPluginsFile)
+    .then(@setScaffoldPaths)
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -249,7 +280,7 @@ module.exports = {
     .try ->
       ## resolve full path with extension
       obj.supportFile = require.resolve(sf)
-    .then () ->
+    .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
         log("require.resolve switched support folder from %s to %s",
           sf, obj.supportFile)
@@ -270,7 +301,7 @@ module.exports = {
         log("support file is default, check if #{path.dirname(sf)} exists")
         return fs.pathExists(sf)
         .then (found) ->
-          if (found)
+          if found
             log("support folder exists, set supportFile to false")
             ## if the directory exists, set it to false so it's ignored
             obj.supportFile = false
@@ -284,12 +315,61 @@ module.exports = {
         ## they have it explicitly set, so it should be there
         errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
     )
-    .then () ->
+    .then ->
       if obj.supportFile
         ## set config.supportFolder to its directory
         obj.supportFolder = path.dirname(obj.supportFile)
         log "set support folder #{obj.supportFolder}"
       obj
+
+  ## set pluginsFile to an absolute path with the following rules:
+  ## - do nothing if pluginsFile is falsey
+  ## - look up the absolute path via node, so 'cypress/plugins' can resolve
+  ##   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
+  ## - if not found
+  ##   * and the pluginsFile is set to the default
+  ##     - and the path to the pluginsFile directory exists
+  ##       * assume the user doesn't need a pluginsFile, set it to false
+  ##         so it's ignored down the pipeline
+  ##     - and the path to the pluginsFile directory does not exist
+  ##       * set it to cypress/plugins/index.js, it will get scaffolded
+  ##   * and the pluginsFile is NOT set to the default
+  ##     - throw an error, because it should be there if the user
+  ##       explicitly set it
+  setPluginsFile: (obj) ->
+    return Promise.resolve(obj) if not obj.pluginsFile
+
+    obj = _.clone(obj)
+
+    pluginsFile = path.join(obj.projectRoot, obj.pluginsFile)
+    log("setting plugins file #{pluginsFile}")
+    log("for project root #{obj.projectRoot}")
+
+    Promise
+    .try ->
+      ## resolve full path with extension
+      obj.pluginsFile = require.resolve(pluginsFile)
+      log("set pluginsFile to #{obj.pluginsFile}")
+    .catch {code: "MODULE_NOT_FOUND"}, ->
+      log("plugins file does not exist")
+      if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
+        log("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
+        fs.pathExists(pluginsFile)
+        .then (found) ->
+          if found
+            log("plugins folder exists, set pluginsFile to false")
+            ## if the directory exists, set it to false so it's ignored
+            obj.pluginsFile = false
+          else
+            log("plugins folder does not exist, set to default index.js")
+            ## otherwise, set it up to be scaffolded later
+            obj.pluginsFile = path.join(pluginsFile, "index.js")
+          return obj
+      else
+        log("plugins file is not default")
+        ## they have it explicitly set, so it should be there
+        errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
+    .return(obj)
 
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"

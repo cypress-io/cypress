@@ -87,7 +87,7 @@ class Project extends Component {
       <div className='full-alert alert alert-danger error'>
         <p>
           <i className='fa fa-warning'></i>{' '}
-          <strong>Can't start server</strong>
+          <strong>{err.title || 'Can\'t start server'}</strong>
         </p>
         <p dangerouslySetInnerHTML={{
           __html: err.message.split('\n').join('<br />'),
