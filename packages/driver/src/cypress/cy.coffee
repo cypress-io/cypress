@@ -1,6 +1,9 @@
 _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
+la = require("lazy-ass")
+check = require("check-more-types")
+debug = require("debug")("cypress:driver")
 
 $dom = require("../dom")
 $utils = require("./utils")
@@ -913,6 +916,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       snapshots.getStyles()
 
     setRunnable: (runnable, hookName) ->
+      debug("setting runnable for", hookName)
+
+      la(check.fn(runnable.fn),
+        "trying to use undefined function as a hook", hookName)
+
       ## when we're setting a new runnable
       ## prepare to run again!
       stopped = false
