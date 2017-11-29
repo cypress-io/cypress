@@ -291,7 +291,9 @@ class Socket
               existingState = args[0]
               null
             when "resolve:url"
-              options.onResolveUrl(args[0], headers, automationRequest)
+              url = args[0]
+              onResolveUrlOptions = args[1]
+              options.onResolveUrl(url, headers, automationRequest, onResolveUrlOptions)
             when "http:request"
               options.onRequest(headers, automationRequest, args[0])
             when "get:fixture"
