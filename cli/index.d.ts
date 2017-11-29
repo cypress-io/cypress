@@ -579,19 +579,38 @@ declare namespace Cypress {
     timeout?: number;
   }
 
+  /**
+   * Union of Loggable and Timeoutable interfaces
+   *
+   * @interface LoggableTimeoutable
+   * @extends {Loggable}
+   * @extends {Timeoutable}
+   */
   interface LoggableTimeoutable extends Loggable, Timeoutable { }
 
-  interface BlurOptions extends Loggable {
+  /**
+   * Options to force an event, skipping Actionability check
+   * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
+   * @interface Forceable
+   */
+  interface Forceable {
+    /**
+     * Forces the action, disables waiting for actionability
+     *
+     * @type {boolean}
+     * @default false
+     * @memberof Forceable
+     */
     force?: boolean;
   }
 
-  interface CheckOptions extends Loggable, Timeoutable {
+  interface BlurOptions extends Loggable, Forceable { }
+
+  interface CheckOptions extends LoggableTimeoutable, Forceable {
     interval?: number;
-    force?: boolean;
   }
 
-  interface ClearOptions extends Loggable, Timeoutable {
-    force?: boolean;
+  interface ClearOptions extends LoggableTimeoutable, Forceable {
     interval?: number;
   }
 
@@ -762,12 +781,28 @@ declare namespace Cypress {
     onLoad?(window: Window): void;
   }
 
-  interface TriggerOptions {
-    log?: boolean;
-    force?: boolean;
+  /**
+   * Options to change the default behavior of .trigger()
+   *
+   * @interface TriggerOptions
+   */
+  interface TriggerOptions extends LoggableTimeoutable, Forceable {
+    /**
+     * Whether the event bubbles
+     *
+     * @type {boolean}
+     * @default true
+     * @memberof TriggerOptions
+     */
     bubbles?: boolean;
+    /**
+     * Whether the event is cancelable
+     *
+     * @type {boolean}
+     * @default true
+     * @memberof TriggerOptions
+     */
     cancable?: boolean;
-    timeout?: number;
   }
 
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight";
