@@ -83,6 +83,17 @@ app.get "/basic_auth", (req, res) ->
     .set("WWW-Authenticate", "Basic")
     .sendStatus(401)
 
+app.get "/not-found", (req, res) ->
+  res.status 404
+  res.send "<html><body>not found</body></html>"
+
+app.get "/server-error", (req, res) ->
+  res.status 500
+  res.send "<html><body>server error</body></html>"
+
+app.get "/not-found-status-only", (req, res) ->
+  res.sendStatus 404
+
 app.use(express.static(path.join(__dirname, "..", "cypress")))
 
 app.use(require("errorhandler")())
