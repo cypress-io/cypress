@@ -197,6 +197,11 @@ declare namespace Cypress {
     fixture(path: string, encoding: string, options?: Timeoutable): Chainable; // no log?
 
     /**
+     * Get the DOM element that is currently focused.
+     *
+     * @param {Loggable} [options]
+     * @returns {Chainable}
+     * @memberof Chainable
      * @see https://on.cypress.io/api/focus
      */
     focus(options?: Loggable): Chainable;
@@ -384,7 +389,17 @@ declare namespace Cypress {
     trigger(eventName: string, position?: PositionType, x?: number, y?: number, options?: TriggerOptions): Chainable;
 
     /**
+     * Type into a DOM element.
+     *
+     * @param {string} text The text to be typed into the DOM element.
+     * @param {TypeOptions} [options]
+     * @returns {Chainable}
+     * @memberof Chainable
      * @see https://on.cypress.io/api/type
+     * @example
+     *
+     *    cy.get('input').type('Hello, World')
+     *    // Type 'Hello, World' into the 'input'
      */
     type(text: string, options?: TypeOptions): Chainable;
 
@@ -406,7 +421,7 @@ declare namespace Cypress {
     viewport(preset: string, orientation: ViewportOrientation, options?: Loggable): Chainable;
 
     /**
-     * Visit this url
+     * Visit the given url
      *
      * @param {string} url The URL to visit. If relative uses `baseUrl`
      * @param {VisitOptions} [options] Pass in an options object to change the default behavior of `cy.visit()`
@@ -544,11 +559,39 @@ declare namespace Cypress {
     expiry?: number;
   }
 
+  /**
+   * Options that control `cy.type` command
+   *
+   * @interface TypeOptions
+   * @extends {Loggable}
+   * @extends {Timeoutable}
+   * @see https://on.cypress.io/api/type
+   */
   interface TypeOptions extends Loggable, Timeoutable {
+    /**
+     * Delay after each keypress (ms)
+     *
+     * @type {number}
+     * @default 10
+     * @memberof TypeOptions
+     */
     delay?: number;
+    /**
+     * Forces the action, disables waiting for actionability
+     *
+     * @type {boolean}
+     * @default false
+     * @memberof TypeOptions
+     */
     force?: boolean;
+    /**
+     * Keep a modifier activated between commands
+     *
+     * @type {boolean}
+     * @default true
+     * @memberof TypeOptions
+     */
     release?: boolean;
-    interval?: number;
   }
 
   /**
@@ -560,19 +603,19 @@ declare namespace Cypress {
    */
   interface VisitOptions extends Loggable, Timeoutable {
     /**
-     * Callback for modifying "window" instance before loading the document
+     * Called before your page has loaded all of its resources.
      *
-     * @param {any[]} args
+     * @param {Window} contentWindow the remote page's window object
      * @memberof VisitOptions
      */
-    onBeforeLoad?(args: any[]): void;
+    onBeforeLoad?(window: Window): void;
     /**
      * Called once your page has fired its load event.
      *
-     * @param {any[]} args
+     * @param {Window} contentWindow the remote page's window object
      * @memberof VisitOptions
      */
-    onLoad?(args: any[]): void;
+    onLoad?(window: Window): void;
   }
 
   interface TriggerOptions {
