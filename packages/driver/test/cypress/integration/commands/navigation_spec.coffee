@@ -505,6 +505,11 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html?email=briancypress.io")
 
+    it "can visit pages with non-2xx status codes when option failOnStatusCode is false", ->
+      cy
+        .visit("localhost:3500/not-found", { failOnStatusCode: false })
+        .visit("localhost:3500/server-error", { failOnStatusCode: false })
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0
