@@ -560,7 +560,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## before telling our backend to resolve this url
           url = url.replace(existingHash, "")
 
-        requestUrl(url)
+        requestUrl(url, _.pick(options, "failOnStatusCode"))
         .then (resp = {}) =>
           {url, originalUrl, cookies, redirects, filePath} = resp
 
