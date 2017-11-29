@@ -393,9 +393,65 @@ declare namespace Cypress {
 
     /**
      * @description Trigger an event on a DOM element.
-     * @see https://docs.cypress.io/api/commands/trigger.html
+     * @param {string} eventName
+     * @returns {Chainable}
+     * @memberof Chainable
+     * @see https://on.cypress.io/api/trigger
+     * @example:
+     *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, position?: PositionType, x?: number, y?: number, options?: TriggerOptions): Chainable;
+    trigger(eventName: string): Chainable;
+    /**
+     * @description Trigger an event on a DOM element at a named position.
+     * @param {string} eventName
+     * @param {PositionType} position
+     * @returns {Chainable}
+     * @memberof Chainable
+     * @see https://on.cypress.io/api/trigger
+     */
+    trigger(eventName: string, position: PositionType): Chainable;
+    /**
+     * @description Trigger an event on a DOM element with options.
+     * @param {string} eventName
+     * @param {TriggerOptions} options
+     * @returns {Chainable}
+     * @memberof Chainable
+     * @see https://on.cypress.io/api/trigger
+     */
+    trigger(eventName: string, options: TriggerOptions): Chainable;
+    /**
+     * @description Trigger an event on a DOM element at specific coordinates (from top left corner)
+     * @param {string} eventName
+     * @param {number} x The distance in pixels from element’s left to trigger the event.
+     * @param {number} y The distance in pixels from element’s top to trigger the event.
+     * @returns {Chainable}
+     * @memberof Chainable
+     * @see https://on.cypress.io/api/trigger
+     */
+    trigger(eventName: string, x: number, y: number): Chainable;
+    /**
+     * @description Trigger an event on a DOM element
+     *
+     * @param {string} eventName
+     * @param {PositionType} position
+     * @param {TriggerOptions} options
+     * @returns {Chainable}
+     * @memberof Chainable
+     * @see https://on.cypress.io/api/trigger
+     */
+    trigger(eventName: string, position: PositionType, options: TriggerOptions): Chainable;
+    /**
+     * @description Trigger an event on a DOM element
+     *
+     * @param {string} eventName
+     * @param {number} x The distance in pixels from element’s left to trigger the event.
+     * @param {number} y The distance in pixels from element’s top to trigger the event.
+     * @param {TriggerOptions} options
+     * @returns {Chainable}
+     * @memberof Chainable
+     * @see https://on.cypress.io/api/trigger
+     */
+    trigger(eventName: string, x: number, y: number, options: TriggerOptions): Chainable;
 
     /**
      * Type into a DOM element.
@@ -539,14 +595,57 @@ declare namespace Cypress {
     interval?: number;
   }
 
+  /**
+   * Object to change the default behavior of .click().
+   *
+   * @interface ClickOptions
+   * @extends {Loggable}
+   * @extends {Timeoutable}
+   */
   interface ClickOptions extends Loggable, Timeoutable {
+    /**
+     * Forces the action, disables waiting for actionability
+     *
+     * @type {boolean}
+     * @default false
+     * @memberof ClickOptions
+     */
     force?: boolean;
+    /**
+     * Serially click multiple elements
+     *
+     * @type {boolean}
+     * @default false
+     * @memberof ClickOptions
+     */
     multiple?: boolean;
-    interval?: number;
   }
 
+  /**
+   * Options object to change the default behavior of cy.exec().
+   *
+   * @interface ExecOptions
+   * @extends {Loggable}
+   * @extends {Timeoutable}
+   */
   interface ExecOptions extends Loggable, Timeoutable {
+    /**
+     * Whether to fail if the command exits with a non-zero code
+     *
+     * @type {boolean}
+     * @default true
+     * @memberof ExecOptions
+     */
     failOnNonZeroExit?: boolean;
+    /**
+     * Object of environment variables to set before the command executes
+     * (e.g. {USERNAME: 'johndoe'}). Will be merged with existing
+     * system environment variables
+     *
+     * @type {object}
+     * @default {}
+     * @memberof ExecOptions
+     */
     env?: object;
   }
 
