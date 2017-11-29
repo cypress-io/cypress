@@ -15,6 +15,7 @@ routes = {
   instance:      "instances/:id"
   instanceStdout:"instances/:id/stdout"
   orgs:          "organizations"
+  orgUsage:      "organizations/:id/usage"
   projects:      "projects"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"

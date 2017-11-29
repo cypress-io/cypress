@@ -37,6 +37,31 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.isApiError).to.be.true
 
+  context ".getUsage", ->
+    it "GET /organizations/:id/usage + returns usage", ->
+      usage = {}
+
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/organizations/org-id-123/usage")
+      .reply(200, usage)
+
+      api.getUsage("org-id-123", "auth-token-123")
+      .then (ret) ->
+        expect(ret).to.eql(usage)
+
+    it "tags errors", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/organizations")
+      .reply(500, {})
+
+      api.getUsage("org-id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.isApiError).to.be.true
+
   context ".getProjects", ->
     it "GET /projects + returns projects", ->
       projects = []

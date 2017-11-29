@@ -95,7 +95,7 @@ module.exports = {
     debugReturnedBuild = (info) ->
       debug("received API response with buildId %s", info.buildId)
       debug("and list of specs to run", info.specs)
-      
+
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -112,10 +112,10 @@ module.exports = {
       "specs",
       "specPattern"
     ])
-    
+
     debug("creating project run")
     debug("project '%s' group id '%s'", body.projectId, body.groupId)
-    
+
     rp.post({
       url: Routes.runs()
       json: true
@@ -274,6 +274,16 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
+
+  getUsage: (orgId, authToken) ->
+    rp.get({
+      url: Routes.orgUsage(orgId)
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
     .catch(tagError)
 
   getLoginUrl: ->
