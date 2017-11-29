@@ -449,7 +449,18 @@ declare namespace Cypress {
     wait(alias: string, options?: LoggableTimeoutable): Chainable;
 
     /**
+     * Get the window object of the page that is currently active.
+     *
+     * @param {Loggable} [options]
+     * @returns {Chainable}
+     * @memberof Chainable
      * @see https://on.cypress.io/api/window
+     * @example
+     *    cy.visit('http://localhost:8080/app')
+     *    cy.window().then(function(win){
+     *      // win is the remote window
+     *      // of the page at: http://localhost:8080/app
+     *    })
      */
     window(options?: Loggable): Chainable;
 
