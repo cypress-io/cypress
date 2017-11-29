@@ -276,7 +276,7 @@ class Server
   _onRequest: (headers, automationRequest, options) ->
     @_request.send(headers, automationRequest, options)
 
-  _onResolveUrl: (urlStr, headers, automationRequest) ->
+  _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     request = @_request
 
     handlingLocalFile = false
