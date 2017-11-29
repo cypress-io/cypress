@@ -279,6 +279,7 @@ class Server
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     request = @_request
 
+    failOnStatusCode = options.failOnStatusCode
     handlingLocalFile = false
     previousState = _.clone @_getRemoteState()
 
@@ -351,6 +352,7 @@ class Server
               isOk        = statusCode.isOk(incomingRes.statusCode)
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
+              isVisitable = !failOnStatusCode or isOk
 
               details = {
                 isOkStatusCode: isOk
@@ -369,7 +371,7 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
-              if isOk and isHtml
+              if isHtml and isVisitable
                 ## reset the domain to the new url if we're not
                 ## handling a local file
                 @_onDomainSet(newUrl) if not handlingLocalFile
