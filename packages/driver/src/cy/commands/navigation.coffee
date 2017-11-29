@@ -455,6 +455,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
       _.defaults options,
+        failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
