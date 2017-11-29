@@ -256,8 +256,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     fn()
 
-  requestUrl = (url) ->
-    Cypress.backend("resolve:url", url)
+  requestUrl = (url, options = {}) ->
+    Cypress.backend("resolve:url", url, _.pick(options, "failOnStatusCode"))
     .then (resp = {}) ->
       switch
         ## if we didn't even get an OK response
