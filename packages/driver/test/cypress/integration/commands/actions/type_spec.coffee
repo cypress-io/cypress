@@ -77,24 +77,6 @@ describe "src/cy/commands/actions/type", ->
         .then ->
           expect(blurred).to.be.true
 
-    it "limits text entered to the maxlength attribute of a text input", ->
-      $input = cy.$$(":text:first")
-      $input.attr("maxlength", 5)
-
-      cy.get(":text:first")
-        .type("1234567890")
-        .then (input) ->
-          expect(input).to.have.value("12345")
-
-    it "ignores an invalid maxlength attribute", ->
-      $input = cy.$$(":text:first")
-      $input.attr("maxlength", "five")
-
-      cy.get(":text:first")
-        .type("1234567890")
-        .then (input) ->
-          expect(input).to.have.value("1234567890")
-
     it "can type into contenteditable", ->
       oldText = cy.$$("#contenteditable").text()
 
@@ -529,6 +511,81 @@ describe "src/cy/commands/actions/type", ->
       it "fires events in the correct order"
 
       it "fires events for each key stroke"
+
+    describe "maxlength", ->
+      it "limits text entered to the maxlength attribute of a text input", ->
+        $input = cy.$$(":text:first")
+        $input.attr("maxlength", 5)
+
+        cy.get(":text:first")
+          .type("1234567890")
+          .then (input) ->
+            expect(input).to.have.value("12345")
+
+      it "ignores an invalid maxlength attribute", ->
+        $input = cy.$$(":text:first")
+        $input.attr("maxlength", "five")
+
+        cy.get(":text:first")
+          .type("1234567890")
+          .then (input) ->
+            expect(input).to.have.value("1234567890")
+
+      it "handles special characters", ->
+        $input = cy.$$(":text:first")
+        $input.attr("maxlength", 5)
+
+        cy.get(":text:first")
+          .type("12{selectall}")
+          .then (input) ->
+            expect(input).to.have.value("12")
+
+      it "maxlength=0 events", ->
+        events = []
+
+        push = (evt) ->
+          return ->
+            events.push(evt)
+
+        cy
+        .$$(":text:first")
+        .attr("maxlength", 0)
+        .on("keydown", push("keydown"))
+        .on("keypress", push("keypress"))
+        .on("textInput", push("textInput"))
+        .on("input", push("input"))
+        .on("keyup", push("keyup"))
+
+        cy.get(":text:first")
+          .type("1")
+          .then ->
+            expect(events).to.deep.eq([
+              "keydown", "keypress", "textInput", "keyup"
+            ])
+
+      it "maxlength=1 events", ->
+        events = []
+
+        push = (evt) ->
+          return ->
+            events.push(evt)
+
+        cy
+        .$$(":text:first")
+        .attr("maxlength", 1)
+        .on("keydown", push("keydown"))
+        .on("keypress", push("keypress"))
+        .on("textInput", push("textInput"))
+        .on("input", push("input"))
+        .on("keyup", push("keyup"))
+
+        cy.get(":text:first")
+          .type("12")
+          .then ->
+            expect(events).to.deep.eq([
+              "keydown", "keypress", "textInput", "input", "keyup"
+              "keydown", "keypress", "textInput", "keyup"
+            ])
 
     describe "value changing", ->
       it "changes the elements value", ->

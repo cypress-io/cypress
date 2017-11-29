@@ -82,7 +82,7 @@ module.exports = (ipc, pluginsFile) => {
     plugins = require(pluginsFile)
   } catch (err) {
     log('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', util.serializeError(err))
+    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
     return
   }
 
