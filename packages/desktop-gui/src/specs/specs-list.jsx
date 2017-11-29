@@ -19,7 +19,7 @@ class Specs extends Component {
 
     return (
       <div id='tests-list-page'>
-        <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
+        <a onClick={this._selectSpec('__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
           <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
           Run All Tests
         </a>
@@ -56,7 +56,7 @@ class Specs extends Component {
     }
   }
 
-  _selectSpec (specPath, e) {
+  _selectSpec = (specPath) => (e) => {
     e.preventDefault()
 
     specsStore.setChosenSpec(specPath)
@@ -66,19 +66,19 @@ class Specs extends Component {
     projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
   }
 
-  _selectSpecFolder (specFolderPath, e) {
+  _selectSpecFolder = (specFolderPath) => (e) => {
     e.preventDefault()
 
     specsStore.setExpandSpecFolder(specFolderPath)
   }
 
-  _folderContent(spec) {
+  _folderContent (spec) {
     const isExpanded = spec.isExpanded
 
     return (
       <li key={spec.path} className={`folder  ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
-          <div onClick={this._selectSpecFolder.bind(this, spec)}>
+          <div onClick={this._selectSpecFolder(spec)}>
             <i className={`folder-collapse-icon fa fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
             <i className={`fa fa-fw ${isExpanded ? 'fa-folder-open-o' : 'fa-folder-o'}`}></i>
             <div className='folder-display-name'>{spec.displayName}{' '}</div>
@@ -99,11 +99,11 @@ class Specs extends Component {
     )
   }
 
-  _specContent(spec) {
+  _specContent (spec) {
     const isChosen = specsStore.isChosenSpec(spec)
     return (
       <li key={spec.path} className='file'>
-        <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
+        <a href='#' onClick={this._selectSpec(spec.path)} className={cs({ active: isChosen })}>
           <div>
             <div>
               <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
@@ -124,7 +124,7 @@ class Specs extends Component {
         <div className='empty-well'>
           <h5>
             No files found in
-            <code onClick={this._openIntegrationFolder.bind(this)}>
+            <code onClick={this._openIntegrationFolder}>
               {this.props.project.integrationFolder}
             </code>
           </h5>
@@ -137,7 +137,7 @@ class Specs extends Component {
     )
   }
 
-  _openIntegrationFolder () {
+  _openIntegrationFolder = () => {
     ipc.openFinder(this.props.project.integrationFolder)
   }
 
