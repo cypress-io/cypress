@@ -46,15 +46,15 @@ setProxiedUrl = (req) ->
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
-  constructor: (watchers) ->
+  constructor:  ->
     if not (@ instanceof Server)
-      return new Server(watchers)
+      return new Server()
 
-    @watchers = watchers
     @_request    = null
     @_middleware = null
     @_server     = null
     @_socket     = null
+    @_baseUrl    = null
     @_wsProxy    = null
     @_fileServer = null
     @_httpsProxy = null
@@ -123,7 +123,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, @watchers, project)
+      @createRoutes(app, config, @_request, getRemoteState, project)
 
       @createServer(app, config, @_request)
 
@@ -202,6 +202,8 @@ class Server
           ## if we have a baseUrl let's go ahead
           ## and make sure the server is connectable!
           if baseUrl
+            @_baseUrl = baseUrl
+
             connect.ensureUrl(baseUrl)
             .return(null)
             .catch (err) =>
@@ -508,8 +510,13 @@ class Server
       ## since we don't know how to proxy it!
       socket.end() if socket.writable
 
-  _close: ->
+  reset: ->
     buffers.reset()
+
+    @_onDomainSet(@_baseUrl ? "<root>")
+
+  _close: ->
+    @reset()
 
     logger.unsetSettings()
 
@@ -552,12 +559,12 @@ class Server
 
       @_middleware = null
 
-  startWebsockets: (watchers, automation, config, options = {}) ->
+  startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
-    @_socket = Socket()
-    @_socket.startListening(@_server, watchers, automation, config, options)
+    @_socket = Socket(config)
+    @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
 

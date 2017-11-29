@@ -11,6 +11,9 @@ Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 describe "Server", ->
+  beforeEach ->
+    @sandbox.stub(Server.prototype, "reset")
+
   context "resolving url", ->
     beforeEach ->
       nock.enableNetConnect()

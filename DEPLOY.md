@@ -6,6 +6,14 @@ and publish NPM module `cypress` if you are a member of `cypress` NPM organizati
 **important** see the [publishing](#publishing) section for how to build, test and publish a 
 new official version of the binary and `cypress` NPM package.
 
+### Set next version on CIs
+
+We build NPM package and binary on all major platforms (Linux, Mac, Windows) on different CI
+providers. In order to set the version while building we have to set the environment variable
+with the new version on each CI provider *before starting the build*.
+
+Use script command `npm run set-next-ci-version` to do this.
+
 ### Building the NPM package
 
 Building a new NPM package is very quick. 

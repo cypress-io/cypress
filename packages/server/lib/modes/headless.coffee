@@ -14,7 +14,6 @@ video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
-browsers   = require("../browsers")
 openProject = require("../open_project")
 progress   = require("../util/progress_bar")
 trash      = require("../util/trash")
@@ -76,6 +75,10 @@ module.exports = {
       socketId:     id
       report:       true
       isTextTerminal:   options.isTextTerminal ? true
+      onError: (err) ->
+        console.log()
+        console.log(err.stack)
+        openProject.emit("exitEarlyWithErr", err.message)
     })
     .catch {portInUse: true}, (err) ->
       ## TODO: this needs to move to emit exitEarly

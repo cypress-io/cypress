@@ -15,7 +15,7 @@ const parseOpts = (opts) =>  {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed',
-    'group', 'groupId')
+    'group', 'groupId', 'global')
 
   if (opts.project) {
     opts.project = path.resolve(opts.project)
@@ -41,6 +41,7 @@ const descriptions = {
   `,
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
+  global: 'force Cypress into global mode as if its globally installed',
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
   group: 'flag to group individual runs by using common --group-id',
@@ -133,6 +134,7 @@ module.exports = {
       .option('-c, --config <config>',     text('config'))
       .option('-d, --detached [bool]',     text('detached'), coerceFalse)
       .option('-P, --project <project path>', text('project'))
+      .option('--global',                  text('global'))
       .action((opts) => {
         debug('opening Cypress')
         require('./exec/open')

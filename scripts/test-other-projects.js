@@ -60,53 +60,45 @@ const toMarkdownJsonBlock = (object) => {
   return toJsonCodeBlock(str)
 }
 
-bump.version(npm, binary, platform, cliOptions.provider)
-  .then((result) => {
-    console.log('bumped all test projects with new env variables')
-    console.log(result)
-    console.log('starting each test projects')
-    la(is.unemptyString(result.versionName), 'missing versionName', result)
-    la(is.unemptyString(result.binary), 'missing binary', result)
+console.log('starting each test projects')
 
-    const shortNpmVersion = getJustVersion(result.versionName)
-    console.log('short NPM version', shortNpmVersion)
+const shortNpmVersion = getJustVersion(npm)
+console.log('short NPM version', shortNpmVersion)
 
-    let subject = `Testing new ${os.platform()} Cypress version ${shortNpmVersion}`
-    const shortSha = getShortCommit()
-    if (shortSha) {
-      subject += ` ${shortSha}`
-    }
+let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
+const shortSha = getShortCommit()
+if (shortSha) {
+  subject += ` ${shortSha}`
+}
 
-    // instructions for installing this binary
-    // using https://github.com/bahmutov/commit-message-install
-    const env = {
-      CYPRESS_BINARY_VERSION: result.binary,
-    }
-    const commitMessageInstructions = getInstallJson(
-      result.versionName, env, os.platform())
-    const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
-    const footer = 'Use tool `commit-message-install` to install from above block'
-    let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
-    if (process.env.CIRCLE_BUILD_URL) {
-      message += '\n'
-      message += stripIndent`
-        CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
-      `
-    }
-    if (process.env.APPVEYOR) {
-      const account = process.env.APPVEYOR_ACCOUNT_NAME
-      const slug = process.env.APPVEYOR_PROJECT_SLUG
-      const build = process.env.APPVEYOR_BUILD_NUMBER
-      message += '\n'
-      message += stripIndent`
-        AppVeyor: ${account}/${slug} ${build}
-      `
-    }
+// instructions for installing this binary
+// using https://github.com/bahmutov/commit-message-install
+const env = {
+  CYPRESS_BINARY_VERSION: binary,
+}
+const commitMessageInstructions = getInstallJson(npm, env, platform)
+const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
+const footer = 'Use tool `commit-message-install` to install from above block'
+let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
+if (process.env.CIRCLE_BUILD_URL) {
+  message += '\n'
+  message += stripIndent`
+    CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
+  `
+}
+if (process.env.APPVEYOR) {
+  const account = process.env.APPVEYOR_ACCOUNT_NAME
+  const slug = process.env.APPVEYOR_PROJECT_SLUG
+  const build = process.env.APPVEYOR_BUILD_NUMBER
+  message += '\n'
+  message += stripIndent`
+    AppVeyor: ${account}/${slug} ${build}
+  `
+}
 
-    console.log('commit message')
-    console.log(message)
-    return bump.run(message, cliOptions.provider)
-  })
+console.log('commit message')
+console.log(message)
+bump.run(message, cliOptions.provider)
   .catch((e) => {
     console.error('could not bump test projects')
     console.error(e)

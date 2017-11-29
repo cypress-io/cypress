@@ -37,6 +37,6 @@ packages/server/support
 cli/build
 
 # Building app binary
-scripts/binary/support
+scripts/support
 package-lock.json
 binary-url.json

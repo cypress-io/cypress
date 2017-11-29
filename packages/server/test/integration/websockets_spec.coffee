@@ -151,7 +151,7 @@ describe "Web Sockets", ->
     beforeEach ->
       @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
 
-      @server.startWebsockets({}, @automation, @cfg, {})
+      @server.startWebsockets(@automation, @cfg, {})
 
     context "http", ->
       beforeEach (done) ->

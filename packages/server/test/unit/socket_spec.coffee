@@ -13,11 +13,11 @@ errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
-Watchers     = require("#{root}lib/watchers")
 Automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/test/support/helpers/fixtures")
 exec         = require("#{root}lib/exec")
 savedState   = require("#{root}lib/saved_state")
+preprocessor = require("#{root}lib/plugins/preprocessor")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -43,13 +43,9 @@ describe "lib/socket", ->
           onSavedStateChanged: @sandbox.spy()
         }
 
-        @watchers = {
-          watch: ->
-        }
-
         @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
 
-        @server.startWebsockets(@watchers, @automation, @cfg, @options)
+        @server.startWebsockets(@automation, @cfg, @options)
         @socket = @server._socket
 
         done = _.once(done)
@@ -308,11 +304,11 @@ describe "lib/socket", ->
           done()
 
     context "on(watch:test:file)", ->
-      it "calls socket#watchTestFileByPath with config, filePath, watchers", (done) ->
+      it "calls socket#watchTestFileByPath with config, filePath", (done) ->
         @sandbox.stub(@socket, "watchTestFileByPath")
 
         @client.emit "watch:test:file", "path/to/file", =>
-          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file", @watchers)
+          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file")
           done()
 
     context "on(app:connect)", ->
@@ -400,14 +396,27 @@ describe "lib/socket", ->
       }
 
       @sandbox.stub(Socket.prototype, "createIo").returns(@io)
+      @sandbox.stub(preprocessor.emitter, "on")
 
       @server.open(@cfg)
       .then =>
         @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
 
-        @server.startWebsockets({}, @automation, @cfg, {})
+        @server.startWebsockets(@automation, @cfg, {})
 
         @socket = @server._socket
+
+    context "constructor", ->
+      it "listens for 'file:updated' on preprocessor", ->
+        @cfg.watchForFileChanges = true
+        socket = Socket(@cfg)
+        expect(preprocessor.emitter.on).to.be.calledWith("file:updated")
+
+      it "does not listen for 'file:updated' if config.watchForFileChanges is false", ->
+        preprocessor.emitter.on.reset()
+        @cfg.watchForFileChanges = false
+        socket = Socket(@cfg)
+        expect(preprocessor.emitter.on).not.to.be.called
 
     context "#close", ->
       it "calls close on #io", ->
@@ -421,74 +430,69 @@ describe "lib/socket", ->
       beforeEach ->
         @socket.testsDir = Fixtures.project "todos/tests"
         @filePath        = @socket.testsDir + "/test1.js"
-        @watchers        = Watchers()
 
-        @sandbox.stub(@watchers, "watchBundle").resolves()
+        @sandbox.stub(preprocessor, "getFile").resolves()
 
       it "returns undefined if trying to watch special path __all", ->
-        result = @socket.watchTestFileByPath(@cfg, "integration/__all", @watchers)
-        expect(result).to.be.undefined
-
-      it "returns undefined if config.watchForFileChanges is false", ->
-        @cfg.watchForFileChanges = false
-        result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
+        result = @socket.watchTestFileByPath(@cfg, "integration/__all")
         expect(result).to.be.undefined
 
       it "returns undefined if #testFilePath matches arguments", ->
         @socket.testFilePath = path.join("tests", "test1.js")
-        result = @socket.watchTestFileByPath(@cfg, path.join("integration", "test1.js"), @watchers)
+        result = @socket.watchTestFileByPath(@cfg, path.join("integration", "test1.js"))
         expect(result).to.be.undefined
 
       it "closes existing watched test file", ->
-        remove = @sandbox.stub(@watchers, "removeBundle")
+        @sandbox.stub(preprocessor, "removeFile")
         @socket.testFilePath = "tests/test1.js"
-        @socket.watchTestFileByPath(@cfg, "test2.js", @watchers).then ->
-          expect(remove).to.be.calledWithMatch("test1.js")
+        @socket.watchTestFileByPath(@cfg, "test2.js").then =>
+          expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers).then =>
+        @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
           expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath(@cfg, "/integration/test1.js", @watchers).then =>
+        @socket.watchTestFileByPath(@cfg, "/integration/test1.js").then =>
           expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "watches file by path", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee", @watchers)
-        expect(@watchers.watchBundle).to.be.calledWith("tests/test2.coffee", @cfg)
+        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
+        expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
+
+      it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
+        @sandbox.stub(fs, "statAsync").resolves()
+        @cfg.watchForFileChanges = true
+        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
+        preprocessor.emitter.on.withArgs("file:updated").yield("integration/test2.coffee")
+        setTimeout =>
+          expect(@io.emit).to.be.calledWith("watched:file:changed")
+          done()
+        , 200
 
     context "#startListening", ->
       it "sets #testsDir", ->
         @cfg.integrationFolder = path.join(@todosPath, "does-not-exist")
 
-        @socket.startListening(@server.getHttpServer(), {}, @automation, @cfg, {})
+        @socket.startListening(@server.getHttpServer(), @automation, @cfg, {})
         expect(@socket.testsDir).to.eq @cfg.integrationFolder
 
       describe "watch:test:file", ->
         it "listens for watch:test:file event", ->
-          @socket.startListening(@server.getHttpServer(), {}, @automation, @cfg, {})
+          @socket.startListening(@server.getHttpServer(), @automation, @cfg, {})
           expect(@mockClient.on).to.be.calledWith("watch:test:file")
 
         it "passes filePath to #watchTestFileByPath", ->
-          watchers = {}
           watchTestFileByPath = @sandbox.stub(@socket, "watchTestFileByPath")
 
           @mockClient.on.withArgs("watch:test:file").yields("foo/bar/baz")
 
-          @socket.startListening(@server.getHttpServer(), watchers, @automation, @cfg, {})
-          expect(watchTestFileByPath).to.be.calledWith @cfg, "foo/bar/baz", watchers
+          @socket.startListening(@server.getHttpServer(), @automation, @cfg, {})
+          expect(watchTestFileByPath).to.be.calledWith(@cfg, "foo/bar/baz")
 
       describe "#onTestFileChange", ->
         beforeEach ->
           @sandbox.spy(fs, "statAsync")
-
-        it "does not emit if not a js or coffee files", ->
-          @socket.onTestFileChange("foo/bar")
-          expect(fs.statAsync).not.to.be.called
-
-        it "does not emit if a tmp file", ->
-          @socket.onTestFileChange("foo/subl-123.js.tmp")
-          expect(fs.statAsync).not.to.be.called
 
         it "calls statAsync on .js file", ->
           @socket.onTestFileChange("foo/bar.js").catch(->).then =>

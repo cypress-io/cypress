@@ -12,8 +12,8 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 logger        = require("./logger")
-browsers      = require("./browsers")
 automation    = require("./automation")
+preprocessor  = require("./plugins/preprocessor")
 log           = require('debug')('cypress:server:socket')
 
 runnerEvents = [
@@ -46,52 +46,48 @@ isSpecialSpec = (name) ->
   name.endsWith("__all")
 
 class Socket
-  constructor: ->
+  constructor: (config) ->
     if not (@ instanceof Socket)
-      return new Socket
+      return new Socket(config)
+
+    @onTestFileChange = @onTestFileChange.bind(@)
+
+    if config.watchForFileChanges
+      preprocessor.emitter.on("file:updated", @onTestFileChange)
 
   onTestFileChange: (filePath) ->
-    logger.info "onTestFileChange", filePath: filePath
-
-    ## return if we're not a js or coffee file.
-    ## this will weed out directories as well
-    return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
+    log("test file changed: #{filePath}")
 
     fs.statAsync(filePath)
     .then =>
       @io.emit("watched:file:changed")
     .catch ->
+      log("could not find test file that changed: #{filePath}")
 
-  watchTestFileByPath: (config, originalFilePath, watchers, options) ->
+  watchTestFileByPath: (config, originalFilePath, options) ->
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
     log("watch test file #{originalFilePath}")
     filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
-    filePath = filePath.replace("#{config.projectRoot}/", "")
+    filePath = path.relative(config.projectRoot, filePath)
 
     ## bail if this is special path like "__all"
     ## maybe the client should not ask to watch non-spec files?
     return if isSpecialSpec(filePath)
 
-    ## bail if we're already watching this
-    ## exact file or we've turned off watching
-    ## for file changes
-    return if (filePath is @testFilePath) or (config.watchForFileChanges is false)
-
-    logger.info "watching test file", {path: filePath}
+    ## bail if we're already watching this exact file
+    return if filePath is @testFilePath
 
     ## remove the existing file by its path
     if @testFilePath
-      watchers.removeBundle(@testFilePath)
+      preprocessor.removeFile(@testFilePath, config)
 
     ## store this location
     @testFilePath = filePath
     log("will watch test file path #{filePath}")
 
-    watchers.watchBundle(filePath, config, {
-      onChange: @onTestFileChange.bind(@)
-    })
+    preprocessor.getFile(filePath, config, options)
     ## ignore errors b/c we're just setting up the watching. errors
     ## are handled by the spec controller
     .catch ->
@@ -127,7 +123,7 @@ class Socket
       cookie: cookie
     })
 
-  startListening: (server, watchers, automation, config, options) ->
+  startListening: (server, automation, config, options) ->
     existingState = null
 
     _.defaults options,
@@ -235,7 +231,7 @@ class Socket
         options.onSpecChanged(spec)
 
       socket.on "watch:test:file", (filePath, cb = ->) =>
-        @watchTestFileByPath(config, filePath, watchers, options)
+        @watchTestFileByPath(config, filePath, options)
         ## callback is only for testing purposes
         cb()
 
@@ -345,6 +341,7 @@ class Socket
     @toRunner("change:to:url", url)
 
   close: ->
+    preprocessor.emitter.removeListener("file:updated", @onTestFileChange)
     @io?.close()
 
 module.exports = Socket

@@ -220,6 +220,12 @@ describe('cli', function () {
       expect(open.start).to.be.calledWith({ port: '7878' })
     })
 
+    it('calls open.start with global', function () {
+      // this.sandbox.stub(open, 'start').resolves()
+      this.exec('open --port 7878 --global')
+      expect(open.start).to.be.calledWith({ port: '7878', global: true })
+    })
+
     it('calls open.start + catches errors', function (done) {
       const err = new Error('foo')
 
