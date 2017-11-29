@@ -16,6 +16,10 @@ queue = {}
 lastCharacterIsNewLine = (str) ->
   str[str.length - 1] is "\n"
 
+friendlyJsonParse = (s) ->
+  jsonlint.parse(s) # might throw good error
+  JSON.parse(s) # actually parses correctly all the edge cases
+
 module.exports = {
   get: (fixturesFolder, filePath, options = {}) ->
     p       = path.join(fixturesFolder, filePath)
@@ -87,7 +91,7 @@ module.exports = {
   parseJson: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
     .bind(@)
-    .then(jsonlint.parse)
+    .then(friendlyJsonParse)
     .catch (err) ->
       throw new Error("'#{fixture}' is not valid JSON.\n#{err.message}")
 
