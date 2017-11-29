@@ -14,6 +14,78 @@ declare namespace Cypress {
   type RequestBody = string | object;
   type ViewportOrientation = "portrait" | "landscape";
 
+  /**
+   * Several libraries are bundled with Cypress by default.
+   *
+   * @interface Cypress
+   * @see https://on.cypress.io/api
+   */
+  interface Cypress {
+    /**
+     * Lodash library
+     *
+     * @type {*}
+     * @memberof Cypress
+     * @see https://on.cypress.io/_
+     * @example Cypress._.keys(obj)
+     */
+    _: any,
+    /**
+     * jQuery library
+     *
+     * @type {*}
+     * @memberof Cypress
+     * @see https://on.cypress.io/$
+     * @example Cypress.$('p')
+     */
+    $: any,
+    /**
+     * Cypress automatically includes a Blob library and exposes it as Cypress.Blob.
+     *
+     * @type {*}
+     * @memberof Cypress
+     * @see https://on.cypress.io/blob
+     * @see https://github.com/nolanlawson/blob-util
+     * @example Cypress.Blob.method()
+     */
+    Blob: any,
+    /**
+     * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
+     *
+     * @type {Function}
+     * @memberof Cypress
+     * @see https://on.cypress.io/minimatch
+     */
+    minimatch: Function,
+    /**
+     * Cypress automatically includes moment.js and exposes it as Cypress.moment.
+     *
+     * @type {Function}
+     * @memberof Cypress
+     * @see https://on.cypress.io/moment
+     * @see http://momentjs.com/
+     * @example const todaysDate = Cypress.moment().format("MMM DD, YYYY")
+     */
+    moment: Function,
+    /**
+     * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
+     *
+     * @type {*}
+     * @memberof Cypress
+     * @see https://on.cypress.io/promise
+     * @see https://github.com/petkaantonov/bluebird
+     * @example new Cypress.Promise((resolve, reject) => { ... })
+     */
+    Promise: any,
+    /**
+     * Cypress version string. i.e. "1.1.2"
+     *
+     * @type {string}
+     * @memberof Cypress
+     */
+    version: string
+  }
+
   interface Core {
     /**
      * @see https://on.cypress.io/api/config
@@ -808,4 +880,6 @@ declare namespace Cypress {
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight";
 }
 
+// global variables added by Cypress when it runs
 declare const cy: Cypress.Chainable;
+declare const Cypress: Cypress.Cypress;
