@@ -151,7 +151,16 @@ declare namespace Cypress {
     debug(options?: Loggable): Chainable;
 
     /**
+     * Get the window.document of the page that is currently active.
+     *
+     * @param {Loggable} [options]
+     * @returns {Chainable}
+     * @memberof Chainable
      * @see https://on.cypress.io/api/document
+     * @example
+     *    cy.document()
+     *      .its('contentType')
+     *      .should('eq', 'text/html')
      */
     document(options?: Loggable): Chainable;
 
@@ -470,11 +479,36 @@ declare namespace Cypress {
     whitelist?: string | string[] | RegExp | ((cookie: any) => boolean);
   }
 
+  /**
+   * Options that control how a command is logged in the Reporter
+   *
+   * @interface Loggable
+   */
   interface Loggable {
+    /**
+     * Displays the command in the Command Log
+     *
+     * @type {boolean}
+     * @default true
+     * @memberof Loggable
+     */
     log?: boolean;
   }
 
+  /**
+   * Options that control how long Test Runner is waiting for command to succeed
+   *
+   * @interface Timeoutable
+   */
   interface Timeoutable {
+    /**
+     * Time to wait (ms)
+     *
+     * @type {number} milliseconds
+     * @default defaultCommandTimeout
+     * @memberof Timeoutable
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
     timeout?: number;
   }
 
