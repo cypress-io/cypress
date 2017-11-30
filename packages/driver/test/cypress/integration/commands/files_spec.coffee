@@ -201,7 +201,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("""Timed out retrying: cy.readFile(\"foo.json\") failed because the file does not exist at the following path:
+          expect(err.message).to.eq("""cy.readFile(\"foo.json\") failed because the file does not exist at the following path:
 
             /path/to/foo.json
           """)
@@ -219,7 +219,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("""
-          Timed out retrying: cy.readFile(\"foo.json\") failed because the file exists when expected not to exist at the following path:
+          cy.readFile(\"foo.json\") failed because the file exists when expected not to exist at the following path:
 
           /path/to/foo.json
           """)
@@ -238,7 +238,7 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("Timed out retrying: expected 'foo' to equal 'contents'")
+          expect(err.message).to.eq("expected 'foo' to equal 'contents'")
           done()
 
         cy.readFile("foo.json").should("equal", "contents")

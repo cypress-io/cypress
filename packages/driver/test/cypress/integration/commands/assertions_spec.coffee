@@ -330,7 +330,7 @@ describe "src/cy/commands/assertions", ->
 
       it "throws when eventually times out", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "Timed out retrying: expected '<button>' to have class 'does-not-have-class'"
+          expect(err.message).to.eq "expected '<button>' to have class 'does-not-have-class'"
           done()
 
         cy.get("button:first").should("have.class", "does-not-have-class")
