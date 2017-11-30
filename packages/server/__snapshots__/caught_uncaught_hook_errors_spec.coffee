@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 failing
 
   1) s1a "before each" hook for "t2a":
-     CypressError: Timed out retrying: Expected to find element: '.does-not-exist', but never found it.
+     CypressError: Expected to find element: '.does-not-exist', but never found it.
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 's1a'
       at stack trace line
