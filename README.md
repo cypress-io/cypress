@@ -2,7 +2,13 @@
 
 Common ESLint rules shared by Cypress packages.
 
-Note that this is meant for packages that are part of Cypress and not necessarily for a project that uses Cypress.
+**Note that this is meant for packages that are part of Cypress and not necessarily for a project that uses Cypress.**
+
+## Installation
+
+```
+npm install --save-dev eslint-plugin-cypress-dev
+```
 
 ## Usage
 
