@@ -83,7 +83,27 @@ declare namespace Cypress {
      * @type {string}
      * @memberof Cypress
      */
-    version: string
+    version: string,
+
+    /**
+     * OS platform name, from Node `os.platform()`
+     *
+     * @type {string}
+     * @memberof Cypress
+     * @see https://nodejs.org/api/os.html#os_os_platform
+     * @example Cypress.platform // "darwin"
+     */
+    platform: string,
+
+    /**
+     * CPU architecture, from Node `os.arch()`
+     *
+     * @type {string}
+     * @memberof Cypress
+     * @see https://nodejs.org/api/os.html#os_os_arch
+     * @example Cypress.arch // "x64"
+     */
+    arch: string
   }
 
   interface Core {

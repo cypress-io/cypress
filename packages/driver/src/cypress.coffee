@@ -94,7 +94,11 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
+    ## Cypress package version
     @version = config.version
+    ## a few constants describing server environment
+    @platform = config.platform
+    @arch = config.arch
 
     ## normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
@@ -305,7 +309,7 @@ class $Cypress
 
       when "cy:command:end"
         @emit("command:end", args...)
-        
+
       when "cy:command:retry"
         @emit("command:retry", args...)
 
