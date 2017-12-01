@@ -155,6 +155,16 @@ API = {
 
         #{arg1}
         """
+      when "DASHBOARD_CANNOT_GRAB_NEXT_SPEC"
+        """
+        Warning: We encountered an error talking to our servers.
+
+        We could not lock next spec to run.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
       when "RECORD_KEY_NOT_VALID"
         """
         We failed trying to authenticate this project.

@@ -70,14 +70,6 @@ module.exports = {
       else
         groupId = null
 
-      if parallel
-        parallelId ?= ciProvider.parallelId()
-        debug("ci provider parallel id", parallelId)
-        if not parallelId
-          warn("could not generate parallel id for this CI provider")
-      else
-        parallelId = null
-
       createRunOptions = {
         projectId
         recordKey
@@ -114,6 +106,20 @@ module.exports = {
             ## and return null
             logException(err)
             .return(null)
+
+  # hmm, is this a good name for a function that locks next spec to run
+  grabNextSpec: (buildId) ->
+    debug("asking to lock next spec for build %s", buildId)
+    api.grabNextSpecForBuild({buildId})
+    .catch (err) ->
+      errors.warning("DASHBOARD_CANNOT_GRAB_NEXT_SPEC", err)
+
+      ## dont log exceptions if we have a 503 status code
+      if err.statusCode isnt 503
+        logException(err)
+        .return(null)
+      else
+        null
 
   createInstance: (buildId, spec, machineId) ->
     debug("creating instance for build %s", buildId)
@@ -257,6 +263,18 @@ module.exports = {
 
       errors.warning(type)
 
+    # determine parallel settings right away so we
+    # can use them in our logic
+    if options.parallel
+      options.parallelId ?= ciProvider.parallelId()
+      debug("ci provider parallel id", options.parallelId)
+      if not options.parallelId
+        warn("could not generate parallel id for this CI provider")
+    else
+      options.parallelId = null
+
+    isParallelRun = options.parallel and options.parallelId
+
     Project.add(projectPath)
     .then ->
       Project.id(projectPath)
@@ -304,11 +322,16 @@ module.exports = {
             # first created instance
             commonMachineId = null
 
-            # iterate over specs ourselves using async function
-            getNextItem = listToFunction(specs)
+            if isParallelRun and buildId
+              getNextSpec = () =>
+                debug("asking API for next spec for build %s", buildId)
+                @grabNextSpec(buildId)
+            else
+              # iterate over specs ourselves using async function
+              getNextItem = listToFunction(specs)
 
-            getNextSpec = () ->
-              Promise.resolve(getNextItem())
+              getNextSpec = () ->
+                Promise.resolve(getNextItem())
 
             startNextSpecIfNeeded = ->
               getNextSpec()
@@ -319,7 +342,7 @@ module.exports = {
             # specName wrt project integration folder
             testNextSpec = (specName) =>
               la(check.unemptyString(specName), "missing spec name to test", specName)
-              # TODO print name of the spec about to run
+              debug("starting testing spec: %s", specName)
 
               saveSpecStats = (stats) ->
                 specStats.push({

@@ -203,6 +203,17 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
+  grabNextSpecForBuild: (options = {}) ->
+    rp.put({
+      url: Routes.grabNextSpecForBuild(options.buildId)
+      json: true
+      timeout: options.timeout ? 10000
+    })
+    .promise()
+    .get("spec")
+    .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
+
   createRaygunException: (body, authToken, timeout = 3000) ->
     rp.post({
       url: Routes.exceptions()
