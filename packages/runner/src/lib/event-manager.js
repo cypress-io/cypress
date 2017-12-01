@@ -166,7 +166,29 @@ const eventManager = {
 
   setup (config, specPath) {
     Cypress = $Cypress.create(
-      _.pick(config, 'isTextTerminal', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote', 'version', 'fixturesFolder')
+      _.pick(config,
+        'isTextTerminal',
+        'numTestsKeptInMemory',
+        'waitForAnimations',
+        'animationDistanceThreshold',
+        'defaultCommandTimeout',
+        'pageLoadTimeout',
+        'requestTimeout',
+        'responseTimeout',
+        'environmentVariables',
+        'xhrUrl',
+        'baseUrl',
+        'viewportWidth',
+        'viewportHeight',
+        'execTimeout',
+        'screenshotOnHeadlessFailure',
+        'namespace',
+        'remote',
+        'version',
+        'fixturesFolder',
+        'platform',
+        'arch'
+      )
     )
 
     // expose Cypress globally

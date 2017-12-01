@@ -46,11 +46,14 @@ isSpecialSpec = (name) ->
   name.endsWith("__all")
 
 class Socket
-  constructor: ->
+  constructor: (config) ->
     if not (@ instanceof Socket)
-      return new Socket
+      return new Socket(config)
 
     @onTestFileChange = @onTestFileChange.bind(@)
+
+    if config.watchForFileChanges
+      preprocessor.emitter.on("file:updated", @onTestFileChange)
 
   onTestFileChange: (filePath) ->
     log("test file changed: #{filePath}")
@@ -67,27 +70,22 @@ class Socket
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
     log("watch test file #{originalFilePath}")
     filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
-    filePath = filePath.replace("#{config.projectRoot}/", "")
+    filePath = path.relative(config.projectRoot, filePath)
 
     ## bail if this is special path like "__all"
     ## maybe the client should not ask to watch non-spec files?
     return if isSpecialSpec(filePath)
 
-    ## bail if we're already watching this
-    ## exact file or we've turned off watching
-    ## for file changes
+    ## bail if we're already watching this exact file
     return if filePath is @testFilePath
 
     ## remove the existing file by its path
     if @testFilePath
-      preprocessor.removeFile(@testFilePath)
+      preprocessor.removeFile(@testFilePath, config)
 
     ## store this location
     @testFilePath = filePath
     log("will watch test file path #{filePath}")
-
-    if config.watchForFileChanges
-      preprocessor.emitter.on("file:updated", @onTestFileChange)
 
     preprocessor.getFile(filePath, config, options)
     ## ignore errors b/c we're just setting up the watching. errors

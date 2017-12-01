@@ -43,8 +43,8 @@ getOutputPath = (config, filePath) ->
   appData.projectsPath(savedState.toHashName(config.projectRoot), "bundles", filePath)
 
 baseEmitter = new EE()
+fileObjects = {}
 fileProcessors = {}
-configs = {}
 
 setDefaultPreprocessor = ->
   log("set default preprocessor")
@@ -54,9 +54,11 @@ setDefaultPreprocessor = ->
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
+    log("ipc preprocessor:rerun event")
     baseEmitter.emit("file:updated", filePath)
 
   baseEmitter.on "close", (filePath) ->
+    log("base emitter plugin close event")
     ipc.send("preprocessor:close", filePath)
 
 module.exports = {
@@ -69,16 +71,18 @@ module.exports = {
 
     log("getFile #{filePath}")
 
-    if not preprocessorConfig = configs[filePath]
-      preprocessorConfig = configs[filePath] = _.extend(new EE(), {
+    if not fileObject = fileObjects[filePath]
+      fileObject = fileObjects[filePath] = _.extend(new EE(), {
         filePath: filePath
         outputPath: getOutputPath(config, filePath.replace(config.projectRoot, ""))
         shouldWatch: not config.isTextTerminal
       })
-      preprocessorConfig.on "rerun", ->
+      fileObject.on "rerun", ->
+        log("file object rerun event")
         baseEmitter.emit("file:updated", filePath)
       baseEmitter.once "close", ->
-        preprocessorConfig.emit("close")
+        log("base emitter native close event")
+        fileObject.emit("close")
  
     if not plugins.has("file:preprocessor")
       setDefaultPreprocessor(config)
@@ -88,24 +92,26 @@ module.exports = {
       return fileProcessor
 
     preprocessor = fileProcessors[filePath] = Promise.try ->
-      plugins.execute("file:preprocessor", preprocessorConfig)
+      plugins.execute("file:preprocessor", fileObject)
 
     return preprocessor
 
-  removeFile: (filePath) ->
+  removeFile: (filePath, config) ->
+    filePath = path.join(config.projectRoot, filePath)
+
     return if not fileProcessors[filePath]
 
     log("removeFile #{filePath}")
     baseEmitter.emit("close", filePath)
-    if config = configs[filePath]
-      config.emit("close")
-    delete configs[filePath]
+    if fileObject = fileObjects[filePath]
+      fileObject.emit("close")
+    delete fileObjects[filePath]
     delete fileProcessors[filePath]
 
   close: ->
     log("close preprocessor")
 
-    configs = {}
+    fileObjects = {}
     fileProcessors = {}
     baseEmitter.emit("close")
     baseEmitter.removeAllListeners()

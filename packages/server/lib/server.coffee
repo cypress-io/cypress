@@ -561,7 +561,7 @@ class Server
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
-    @_socket = Socket()
+    @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
