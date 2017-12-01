@@ -304,13 +304,17 @@ module.exports = {
             # first created instance
             commonMachineId = null
 
-            # iterate over specs ourselves
-            getNextSpec = listToFunction(specs)
+            # iterate over specs ourselves using async function
+            getNextItem = listToFunction(specs)
+
+            getNextSpec = () ->
+              Promise.resolve(getNextItem())
 
             startNextSpecIfNeeded = ->
-              nextSpec = getNextSpec()
-              if nextSpec
-                testNextSpec(nextSpec)
+              getNextSpec()
+              .then (nextSpec) ->
+                if nextSpec
+                  testNextSpec(nextSpec)
 
             # specName wrt project integration folder
             testNextSpec = (specName) =>
@@ -385,6 +389,7 @@ module.exports = {
 
             # kick off testing specs
             startNextSpecIfNeeded()
+
           .then combineStats
           .tap (stats) ->
             debug('combined stats')
