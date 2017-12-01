@@ -6,11 +6,11 @@ const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
 
-const coerceFalse = arg => {
+const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = opts => {
+const parseOpts = (opts) => {
   opts = _.pick(
     opts,
     'project',
@@ -63,7 +63,7 @@ const descriptions = {
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
   group: 'flag to group individual runs by using common --group-id',
-  groupId: 'optional common id to group runs by, extracted from CI environment variables by default'
+  groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
 }
 
 const knownCommands = [
@@ -76,10 +76,10 @@ const knownCommands = [
   '--version',
   'help',
   '-h',
-  '--help'
+  '--help',
 ]
 
-const text = description => {
+const text = (description) => {
   if (!descriptions[description]) {
     throw new Error(`Could not find description for: ${description}`)
   }
@@ -151,7 +151,7 @@ module.exports = {
       .option('--group-id <group-id>', text('groupId'))
       .option('--parallel', text('parallel'), coerceFalse)
       .option('--parallel-id <parallel-id>', text('parallelId'))
-      .action(opts => {
+      .action((opts) => {
         debug('running Cypress')
         require('./exec/run')
           .start(parseOpts(opts))
@@ -169,7 +169,7 @@ module.exports = {
       .option('-d, --detached [bool]', text('detached'), coerceFalse)
       .option('-P, --project <project path>', text('project'))
       .option('--global', text('global'))
-      .action(opts => {
+      .action((opts) => {
         debug('opening Cypress')
         require('./exec/open').start(parseOpts(opts)).catch(util.logErrorExit1)
       })
@@ -177,7 +177,7 @@ module.exports = {
     program
       .command('install')
       .description(
-        "Installs the Cypress executable matching this package's version"
+        'Installs the Cypress executable matching this package\'s version'
       )
       .action(() => {
         require('./tasks/install')
@@ -222,7 +222,7 @@ module.exports = {
     }
     debug('program parsing arguments')
     return program.parse(args)
-  }
+  },
 }
 
 if (!module.parent) {

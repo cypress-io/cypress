@@ -94,7 +94,7 @@ const processRunOptions = (options = {}) => {
   return args
 }
 
-const run = options => () => {
+const run = (options) => () => {
   const args = processRunOptions(options)
   debug('run to spawn.start args %j', args)
   return spawn.start(args)
@@ -109,9 +109,9 @@ module.exports = {
       spec: null,
       reporter: null,
       reporterOptions: null,
-      project: process.cwd()
+      project: process.cwd(),
     })
 
     return verify.start().then(run(options))
-  }
+  },
 }
