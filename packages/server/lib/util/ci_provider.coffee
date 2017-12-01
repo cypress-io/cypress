@@ -42,6 +42,12 @@ groupIds = (provider) -> {
   circle:   process.env.CIRCLE_WORKFLOW_ID
 }[provider]
 
+parallelIds = (provider) -> {
+  # for CircleCI v1 use build id
+  # and parallelize using project configuration UI
+  circle:   process.env.CIRCLE_BUILD_NUM
+}[provider]
+
 params = (provider) -> {
   appveyor: {
     accountName:  process.env.APPVEYOR_ACCOUNT_NAME
@@ -130,4 +136,7 @@ module.exports = {
 
   groupId: ->
     groupIds(getProviderName()) ? null
+
+  parallelId: ->
+    parallelIds(getProviderName()) ? null
 }

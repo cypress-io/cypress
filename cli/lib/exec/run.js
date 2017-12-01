@@ -9,9 +9,11 @@ const processRunOptions = (options = {}) => {
   debug('processing run options')
   const args = ['--run-project', options.project]
 
-  //// if key is set use that - else attempt to find it by env var
+  /// / if key is set use that - else attempt to find it by env var
   if (options.key == null) {
-    debug('--key is not set, looking up environment variable CYPRESS_RECORD_KEY')
+    debug(
+      '--key is not set, looking up environment variable CYPRESS_RECORD_KEY'
+    )
     options.key = process.env.CYPRESS_RECORD_KEY || process.env.CYPRESS_CI_KEY
   }
 
@@ -27,36 +29,36 @@ const processRunOptions = (options = {}) => {
     args.push('--port', options.port)
   }
 
-  //// if we have a specific spec push that into the args
+  /// / if we have a specific spec push that into the args
   if (options.spec) {
     args.push('--spec', options.spec)
   }
 
-  //// if we have a specific reporter push that into the args
+  /// / if we have a specific reporter push that into the args
   if (options.reporter) {
     args.push('--reporter', options.reporter)
   }
 
-  //// if we have a specific reporter push that into the args
+  /// / if we have a specific reporter push that into the args
   if (options.reporterOptions) {
     args.push('--reporter-options', options.reporterOptions)
   }
 
   if (options.ci) {
-    //// push to display the deprecation message
+    /// / push to display the deprecation message
     args.push('--ci')
 
-    //// also automatically record
+    /// / also automatically record
     args.push('--record', true)
   }
 
-  //// if we have a key assume we're in record mode
+  /// / if we have a key assume we're in record mode
   if (options.key) {
     args.push('--key', options.key)
   }
 
-  //// if record is defined and we're not
-  //// already in ci mode, then send it up
+  /// / if record is defined and we're not
+  /// / already in ci mode, then send it up
   if (options.record != null && !options.ci) {
     args.push('--record', options.record)
   }
@@ -81,10 +83,18 @@ const processRunOptions = (options = {}) => {
     args.push('--group-id', options.groupId)
   }
 
+  if (options.parallel != null) {
+    args.push('--parallel', options.parallel)
+  }
+
+  if (options.parallelId) {
+    args.push('--parallel-id', options.parallelId)
+  }
+
   return args
 }
 
-const run = (options) => () => {
+const run = options => () => {
   const args = processRunOptions(options)
   debug('run to spawn.start args %j', args)
   return spawn.start(args)
@@ -99,10 +109,9 @@ module.exports = {
       spec: null,
       reporter: null,
       reporterOptions: null,
-      project: process.cwd(),
+      project: process.cwd()
     })
 
-    return verify.start()
-    .then(run(options))
-  },
+    return verify.start().then(run(options))
+  }
 }

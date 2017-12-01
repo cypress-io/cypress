@@ -34,12 +34,19 @@ isInstanceInfo = (x) ->
   check.maybe.unemptyString(x.instanceId) &&
   check.maybe.unemptyString(x.machineId)
 
+warn = (message) ->
+  la(check.unemptyString(message), "missing warning message", message)
+  console.log("Warning:", message)
+
 module.exports = {
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs) ->
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs,
+  parallel, parallelId) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
-      console.log("Warning: you passed group-id but no group flag")
+      warn("you passed group-id but no group flag")
+    if parallelId and not parallel
+      warn("you passed parallel-id but no parallel flag")
 
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 
@@ -53,14 +60,27 @@ module.exports = {
       debug("project specs")
       debug(specs)
       la(check.maybe.strings(specs), "invalid list of specs to run", specs)
+
       # only send groupId if group option is true
       if group
         groupId ?= ciProvider.groupId()
+        debug("ci provider group id", groupId)
+        if not groupId
+          warn("could not generate group id for this CI provider")
       else
         groupId = null
+
+      if parallel
+        parallelId ?= ciProvider.parallelId()
+        debug("ci provider parallel id", parallelId)
+        if not parallelId
+          warn("could not generate parallel id for this CI provider")
+      else
+        parallelId = null
+
       createRunOptions = {
-        projectId:         projectId
-        recordKey:         recordKey
+        projectId
+        recordKey
         commitSha:         git.sha
         commitBranch:      git.branch
         commitAuthorName:  git.author
@@ -70,12 +90,13 @@ module.exports = {
         ciParams:          ciProvider.params()
         ciProvider:        ciProvider.name()
         ciBuildNumber:     ciProvider.buildNum()
-        groupId:           groupId
-        specs:             specs
-        specPattern:       specPattern
+        groupId
+        specs
+        specPattern
+        parallelId
       }
       # console.log('createRunOptions')
-      # console.log(createRunOptions)
+      console.log(createRunOptions)
 
       api.createRun(createRunOptions)
       .catch (err) ->
@@ -275,7 +296,9 @@ module.exports = {
             Stats.combine(specStats.map(R.prop("stats")))
 
           @generateProjectBuildId(projectId, projectPath, projectName, key,
-            options.group, options.groupId, specPattern, specs)
+            options.group, options.groupId,
+            specPattern, specs,
+            options.parallel, options.parallelId)
           .then (buildId) =>
             # the common machineId will be initialized by the
             # first created instance

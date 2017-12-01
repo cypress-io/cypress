@@ -111,7 +111,8 @@ module.exports = {
       "ciBuildNumber",
       "groupId",
       "specs",
-      "specPattern"
+      "specPattern",
+      "parallelId"
     ])
 
     debug("creating project run")
