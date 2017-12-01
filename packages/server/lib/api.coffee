@@ -9,6 +9,8 @@ pkg        = require("@packages/root")
 Routes     = require("./util/routes")
 system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
+la         = require("lazy-ass")
+check      = require("check-more-types")
 
 rp = request.defaults (params = {}, callback) ->
   headers = params.headers ?= {}
@@ -204,10 +206,15 @@ module.exports = {
     .catch(tagError)
 
   grabNextSpecForBuild: (options = {}) ->
+    la(check.unemptyString(options.parallelId), "missing parallelId", options)
+
     rp.put({
       url: Routes.grabNextSpecForBuild(options.buildId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? 10000,
+      body: {
+        parallelId: options.parallelId
+      }
     })
     .promise()
     .get("spec")

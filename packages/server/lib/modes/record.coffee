@@ -108,9 +108,9 @@ module.exports = {
             .return(null)
 
   # hmm, is this a good name for a function that locks next spec to run
-  grabNextSpec: (buildId) ->
+  grabNextSpec: (buildId, parallelId) ->
     debug("asking to lock next spec for build %s", buildId)
-    api.grabNextSpecForBuild({buildId})
+    api.grabNextSpecForBuild({buildId, parallelId})
     .catch (err) ->
       errors.warning("DASHBOARD_CANNOT_GRAB_NEXT_SPEC", err)
 
@@ -325,7 +325,7 @@ module.exports = {
             if isParallelRun and buildId
               getNextSpec = () =>
                 debug("asking API for next spec for build %s", buildId)
-                @grabNextSpec(buildId)
+                @grabNextSpec(buildId, options.parallelId)
             else
               # iterate over specs ourselves using async function
               getNextItem = listToFunction(specs)
