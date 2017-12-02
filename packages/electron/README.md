@@ -1,14 +1,22 @@
-# Cypress Core Electron
+# Electron
 
-This is a shared lib for Cypress which manages installing + building the Cypress Electron application.
+This is the lib responsible for installing + building Electron. This enables us to develop with the Electron shell that will match how the final compiled Cypress binary looks 1:1.
 
-It is a simple wrapper that `symlinks` while in development.
+It does this by using `symlinks` while in development.
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
+The Desktop GUI's dependencies can be installed with:
 
-* `npm install`
-* `npm run build`
+```bash
+cd packages/desktop-gui
+npm install
+```
 
-Note: `npm run build` just installs Electron binary for this platform
+## Building
+
+```bash
+npm run build
+```
+
+Note: `npm run build` just installs Electron binary for your OS specific platform

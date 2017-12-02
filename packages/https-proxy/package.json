@@ -8,8 +8,7 @@
     "clean-deps": "rm -rf node_modules",
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
-    "https": "node https.js",
-    "release": "releaser"
+    "https": "node https.js"
   },
   "files": [
     "lib"
