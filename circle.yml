@@ -387,7 +387,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run test-integration -- --parallel 3 --index 0
+          command: npm run cypress:run -- --parallel 3 --index 0
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -403,7 +403,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run test-integration -- --parallel 3 --index 1
+          command: npm run cypress:run -- --parallel 3 --index 1
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -419,7 +419,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run test-integration -- --parallel 3 --index 2
+          command: npm run cypress:run -- --parallel 3 --index 2
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
