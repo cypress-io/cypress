@@ -153,21 +153,21 @@ Here is a list of the core packages in this repository with a short description,
 
  Folder Name | Purpose
  ----------- | -------
-[coffee]() | A centralized version of CoffeeScript used for other packages.
-[desktop-gui]() | The front-end code for the Cypress Desktop GUI.
-[driver]() | The code that is used to drive the behavior of the API commands.
-[electron]() | The Cypress implementation of Electron.
-[example]() | Our example kitchen-sink application.
-[extension]() | The Cypress Chrome browser extension
-[https-proxy]() | This does https proxy for handling http certs and traffic.
-[launcher]() | Finds and launches browsers installed on your system.
-[reporter]() | The reporter shows the running results of the tests (The Command Log UI).
-[root]() | Dummy package pointing at the root of the repository.
-[runner]() | The runner is the minimal "chrome" around the user's application under test.
-[server]() | The <3 of Cypress. This orchestrates everything. The entire backend.
-[socket]() | A wrapper around socket.io to provide common libraries.
-[static]() | Serves static assets used in the Cypress GUI.
-[ts]() | A centralized version of typescript.
+[coffee](./packages/coffee) | A centralized version of CoffeeScript used for other packages.
+[desktop-gui](./packages/desktop-gui) | The front-end code for the Cypress Desktop GUI.
+[driver](./packages/driver) | The code that is used to drive the behavior of the API commands.
+[electron](./packages/electron) | The Cypress implementation of Electron.
+[example](./packages/example) | Our example kitchen-sink application.
+[extension](./packages/extension) | The Cypress Chrome browser extension
+[https-proxy](./packages/https-proxy) | This does https proxy for handling http certs and traffic.
+[launcher](./packages/launcher) | Finds and launches browsers installed on your system.
+[reporter](./packages/reporter) | The reporter shows the running results of the tests (The Command Log UI).
+[root](./packages/root) | Dummy package pointing at the root of the repository.
+[runner](./packages/runner) | The runner is the minimal "chrome" around the user's application under test.
+[server](./packages/server) | The <3 of Cypress. This orchestrates everything. The backend node process.
+[socket](./packages/socket) | A wrapper around socket.io to provide common libraries.
+[static](./packages/static) | Serves static assets used in the Cypress GUI.
+[ts](./packages/ts) | A centralized version of typescript.
 
 We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
 
@@ -206,11 +206,11 @@ Task | Purpose
 `build` | Build the package
 `build-prod` | Build all assets for production (if makes sense)
 `start` | Run a server for serving files
+`watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 `clean` | Remove any assets created by `build-dev` or `build-prod`
 `clean-deps` | Remove any dependencies installed (usually by `npm`)
 `test` | Runs all tests once
 `test-watch` | Run all tests in watch mode
-`watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 
 Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
 
@@ -276,16 +276,9 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 
 Our true e2e tests are in `packages/server`, which test the full stack all together.
 
-The best source of truth in figuring out how to run tests for each package is our [`circle.yml`](.circle.yml) file found in the root `cypress` directory. The tasks defined in our [`circle.yml`](.circle.yml) are all run before anything is deployed.
+Please refer to each packages `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together - as each package may contain its own unit, integration, and e2e tests.
 
-Since it is generally best to do single runs of tests serially instead of in parallel, this repo has some convenience scripts to run all the tests for all the packages sequentially:
-
-```bash
-npm run test ## same as 'npm run all test -- --serial'
-npm run test-unit ## same as 'npm run all test-unit -- --serial'
-npm run test-integration ## same as 'npm run all test-integration -- --serial'
-npm run test-e2e ## same as 'npm run all test-e2e -- --serial'
-```
+If you're curious how we manage all of these tests in CI check out our [`circle.yml`](.circle.yml) file found in the root `cypress` directory.
 
 #### Docker
 
@@ -320,41 +313,13 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
-### Working in a specific package
+### Developing and Testing a specific package
 
-#### Desktop-Gui
+Generally when making contributions, you are typically making it to a small number of packages. Most of your local development work will be inside a single package at a time.
 
-##### Developing
+Each package documents how to best work with it, so simple consult the `README.md` of each package.
 
-Currently, if you want to work on the code around logging in, viewing runs, and setting up new projects to record, this requires connecting to a locally running API server.
-
-Our API server is only accessible to cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
-
-#### Driver
-
-##### Developing
-
-It should be noted that for developing in the `driver`, you need to watch the files using one of the following methods:
-
-- In the `cypress` root directory run `npm run watch`: This will run the watch task for all packages that have one.
-- In the `cypress/packages/runner` directory run `npm run watch`: This will run the watch task for the runner, which bundles the driver.
-
-##### Testing
-
-###### From the Cypress Test Runner:
-
-- In the `cypress` root directory, run `npm install` & `npm start`.
-- When the Cypress Test Runner opens, manually add the directory `cypress/packages/driver/test`.
-- In the `cypress/packages/driver` directory, run `npm start`.
-- Click into the `test` directory from the Cypress Test Runner.
-- Select any test file you want to run.
-
-###### From the terminal:
-
-- In the `cypress` directory: run `npm install`.
-- In the `cypress/packages/driver` directory, run `npm start` & `npm run test-integration`.
-- The Cypress Test Runner should spawn and run through each test file individually.
-
+They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
 ## Writing Documentation
 
@@ -380,6 +345,8 @@ The repository is setup with two main (protected) branches.
 ### Testing
 
 This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
+
+To run local tests, consult the `README.md` of each package.
 
 ## Deployment
 
