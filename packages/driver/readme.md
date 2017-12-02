@@ -35,7 +35,7 @@ npm start
 
 ### Developing
 
-If you're developing for the driver, you'll want to run in the normal GUI mode, like you would when you're writing tests for your own projects.
+If you're developing on the driver, you'll want to run in the normal Cypress GUI mode, like you would when you're writing tests for your own Cypress projects.
 
 ```bash
 ## run in cypress GUI mode
@@ -44,7 +44,7 @@ npm run cypress:open
 
 ### Running
 
-You can also run all of the driver's tests locally. We don't really recommend this because it takes a really long time, and we have this process optimized by load balancing the tests across multiple workers in CI.
+You can also run all of the driver's tests locally. We don't really recommend this because it takes a long time, and we have this process optimized by load balancing the tests across multiple workers in CI.
 
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
