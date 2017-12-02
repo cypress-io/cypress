@@ -40,6 +40,6 @@
     "rebuild-node-sass": "^1.1.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "zunder": "^5.1.0"
+    "zunder": "^5.5.0"
   }
 }
