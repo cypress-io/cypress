@@ -1,28 +1,31 @@
-# Cypress packages/extension
+# Extension
 
-> Chrome Extension for loading our testing code into the browser
+This is the Chrome Extension responsible for automating Chrome
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
-
-* `npm install`
-* `npm run build
-## Developing
-
-### Building
+The reporters's dependencies can be installed with:
 
 ```bash
-npm run build-prod
+cd packages/extension
+npm install
 ```
+
+## Developing
 
 ### Watching
 
 ```bash
-npm run watch-dev
+npm run watch
 ```
 
-### Testing
+### One Time Building
+
+```bash
+npm run build
+```
+
+## Testing
 
 ```bash
 npm run test
@@ -32,6 +35,6 @@ npm run test
 2. Go into Extensions
 3. Check **Developer Mode**
 4. Click **Load unpacked extension...**
-5. Choose **cypress-core-extension/dist** directory
+5. Choose **packages/extension/dist** directory
 6. Click **background page** to debug `background.js`
 7. Click **Reload (⌘R)** to pull in changes to `manifest.json`
