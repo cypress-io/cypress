@@ -28,9 +28,7 @@ Thanks for taking the time to contribute! :smile:
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
   - [Tests](#tests)
-  - [Working in a specific package](#packages)
-    - [Desktop-Gui](#desktop-gui)
-    - [Driver](#driver)
+  - [Packages](#packages)
 - [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
   - [Pull Requests](#pull-requests)
@@ -272,13 +270,13 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 
 ### Tests
 
- For most packages, there are unit, integration and e2e tests, which can be triggered by `npm run test-unit`, `npm run test-integration` and `npm run test-e2e` respectively.
+For most packages there are typically unit and some integration tests.
 
 Our true e2e tests are in `packages/server`, which test the full stack all together.
 
-Please refer to each packages `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together - as each package may contain its own unit, integration, and e2e tests.
+Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
-If you're curious how we manage all of these tests in CI check out our [`circle.yml`](.circle.yml) file found in the root `cypress` directory.
+If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
 
 #### Docker
 
@@ -313,7 +311,7 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
-### Developing and Testing a specific package
+### Packages
 
 Generally when making contributions, you are typically making it to a small number of packages. Most of your local development work will be inside a single package at a time.
 
