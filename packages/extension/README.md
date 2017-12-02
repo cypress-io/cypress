@@ -4,7 +4,7 @@ This is the Chrome Extension responsible for automating Chrome
 
 ## Install
 
-The reporters's dependencies can be installed with:
+The extension's dependencies can be installed with:
 
 ```bash
 cd packages/extension
@@ -30,6 +30,8 @@ npm run build
 ```bash
 npm run test
 ```
+
+## Debugging
 
 1. Open Chrome
 2. Go into Extensions

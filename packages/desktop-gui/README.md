@@ -16,7 +16,7 @@ The Desktop GUI has the following responsibilities:
 
 ## Install
 
-The driver's dependencies can be installed with:
+The Desktop GUI's dependencies can be installed with:
 
 ```bash
 cd packages/desktop-gui

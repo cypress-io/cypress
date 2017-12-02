@@ -17,7 +17,7 @@ The Driver and the Server are the two most complex areas of the Cypress.
 
 ## Install
 
-The servers's dependencies can be installed with:
+The server's dependencies can be installed with:
 
 ```bash
 cd packages/server
