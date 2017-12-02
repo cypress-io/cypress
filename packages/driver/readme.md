@@ -1,28 +1,59 @@
-# Cypress Driver
+# Driver
 
-> JavaScript library that is loaded inside the browser that helps execute the tests
+This is the core JavaScript library that is loaded inside the browser that is responsible for executing Cypress commands and managing the test runtime.
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
+The driver's dependencies can be installed with:
 
-* `npm install`
-* `npm run build`
+```bash
+cd packages/driver
+npm install
+```
+
+## Building
+
+The driver is actually consumed by the [`runner`](../runner) like any other npm module. To develop the driver and see changes reflected you need to run the `watch` task inside of the runner.
+
+```bash
+cd packages/runner
+npm run watch
+```
+
+Read the runner's [`README.md`](../runner/README.md) for more information.
 
 ## Testing
 
-This project is not tested, the existing test commands are obsolete and will be removed
-in the future; all tests have been moved to other packages.
+This project is tested with Cypress itself. It acts exactly like any other Cypress project (really we're not kidding!).
 
-## Debugging
-
-To see logs of what the driver is doing from command line:
+The driver uses a node server to test all of its edge cases, so first start that.
 
 ```bash
-DEBUG=cypress:driver npm start
-
-DEBUG=cypress:driver npm run build
+## boot the driver's server
+npm start
 ```
+
+### Developing
+
+If you're developing for the driver, you'll want to run in the normal GUI mode, like you would when you're writing tests for your own projects.
+
+```bash
+## run in cypress GUI mode
+npm run cypress:open
+```
+
+### Running
+
+You can also run all of the driver's tests locally. We don't really recommend this because it takes a really long time, and we have this process optimized by load balancing the tests across multiple workers in CI.
+
+It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
+
+```bash
+## run all the tests
+npm run cypress:run
+```
+
+## Debugging
 
 In the browser
 
@@ -30,7 +61,9 @@ In the browser
 localStorage.debug = "cypress:driver"
 ```
 
-## Catalog of Events
+<!-- ## Catalog of Events
+
+TODO: this data is accurate but also somewhat out of date.
 
 ### Order of Runnable Events
 
@@ -112,4 +145,4 @@ describe('parent', () => {
 The Driver would emit the following events:
 
 Event |
---- |
+--- | -->
