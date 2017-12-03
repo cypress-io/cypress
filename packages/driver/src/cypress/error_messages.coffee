@@ -147,7 +147,7 @@ module.exports = {
         - Passing {force: true} which disables all error checking
         - Passing {waitForAnimations: false} which disables waiting on animations
         - Passing {animationDistanceThreshold: 20} which decreases the sensitivity
-        
+
       https://on.cypress.io/element-is-animating
     """
     animation_check_failed: "Not enough coord points provided to calculate distance."
@@ -862,6 +862,8 @@ module.exports = {
         This was considered a failure because the status code was not '2xx'.
 
         #{getRedirects(obj, "This http request was redirected")}
+
+        If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
       """
     loading_invalid_content_type: (obj) ->
       phrase = if obj.path then "this local file" else "your web server"
