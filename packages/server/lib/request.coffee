@@ -331,11 +331,11 @@ module.exports = (options = {}) ->
       if options.jar is true
         options.jar = newCookieJar()
 
-      _.extend options, {
+      _.extend(options, {
         strictSSL: false
         simple: false
         resolveWithFullResponse: true
-      }
+      })
 
       ## https://github.com/cypress-io/cypress/issues/322
       ## either turn these both on or off

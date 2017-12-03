@@ -591,7 +591,7 @@ describe "Server", ->
         @server._onResolveUrl("http://google.com/foo", headers, @automationRequest, { failOnStatusCode: false })
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
-            isOkStatusCode: false
+            isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
             url: "http://google.com/foo"

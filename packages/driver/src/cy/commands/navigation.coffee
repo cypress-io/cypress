@@ -259,25 +259,26 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   requestUrl = (url, options = {}) ->
     Cypress.backend("resolve:url", url, _.pick(options, "failOnStatusCode"))
     .then (resp = {}) ->
-      ## immediately die when not OK response
-      ## and failOnStatusCode is true
-      if options.failOnStatusCode and resp.isOkStatusCode isnt true
-        err = new Error
-        err.gotResponse = true
-        _.extend(err, resp)
+      switch
+        ## if we didn't even get an OK response
+        ## then immediately die
+        when not resp.isOkStatusCode
+          err = new Error
+          err.gotResponse = true
+          _.extend(err, resp)
 
-        throw err
+          throw err
 
-      else if not resp.isHtml
-        ## throw invalid contentType error
-        err = new Error
-        err.invalidContentType = true
-        _.extend(err, resp)
+        when not resp.isHtml
+          ## throw invalid contentType error
+          err = new Error
+          err.invalidContentType = true
+          _.extend(err, resp)
 
-        throw err
+          throw err
 
-      else
-        return resp
+        else
+          resp
 
   Cypress.on "window:before:load", (contentWindow) ->
     ## TODO: just use a closure here
@@ -454,12 +455,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
-      _.defaults options,
+      _.defaults(options, {
         failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
+      })
 
       consoleProps = {}
 

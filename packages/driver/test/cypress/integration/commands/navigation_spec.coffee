@@ -1283,52 +1283,6 @@ describe "src/cy/commands/navigation", ->
 
         cy.visit("https://google.com/foo")
 
-      describe "when failOnStatusCode option is false ", ->
-        it "displays loading_invalid_content_type when both isOkStatusCode and isHtml are false on http requests", (done) ->
-          obj = {
-            isOkStatusCode: false
-            isHtml: false
-            contentType: "text/plain"
-            originalUrl: "http://localhost:3500/not-found-status-only"
-            status: 404
-            statusText: "Not Found"
-          }
-
-          visitErrObj = _.clone(obj)
-          obj.url = obj.originalUrl
-
-          cy.stub(Cypress, "backend")
-          .withArgs("resolve:url", "http://localhost:3500/not-found-status-only")
-          .resolves(obj)
-
-          ## dont log else we create an endless loop!
-          emit = cy.spy(Cypress, "emit").log(false)
-
-          cy.on "fail", (err) =>
-            lastLog = @lastLog
-
-            expect(err.message).to.include("""
-              cy.visit() failed trying to load:
-
-              http://localhost:3500/not-found-status-only
-
-              The content-type of the response we received from your web server was:
-
-                > text/plain
-
-              This was considered a failure because responses must have content-type: 'text/html'
-
-              However, you can likely use cy.request() instead of cy.visit().
-
-              cy.request() will automatically get and set cookies and enable you to parse responses.
-            """)
-            expect(emit).to.be.calledWithMatch("visit:failed", obj)
-            expect(@logs.length).to.eq(1)
-            expect(lastLog.get("error")).to.eq(err)
-            done()
-
-          cy.visit("localhost:3500/not-found-status-only", { failOnStatusCode: false })
-
   context "#page load", ->
     it "sets initial=true and then removes", ->
       Cookie.remove("__cypress.initial")
