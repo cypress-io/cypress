@@ -1134,6 +1134,8 @@ describe "src/cy/commands/navigation", ->
               > 500: Server Error
 
             This was considered a failure because the status code was not '2xx'.
+
+            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)
@@ -1184,6 +1186,8 @@ describe "src/cy/commands/navigation", ->
 
               - 302: https://google.com/bar/
               - 301: https://gmail.com/
+
+            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)
