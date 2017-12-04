@@ -12,6 +12,10 @@ Started video recording: /foo/bar/.projects/uncaught-support-file/cypress/videos
   1)  An uncaught error was detected outside of a test:
      Uncaught Error: bar
 
+This error originated from *your* test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
