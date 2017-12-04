@@ -32,7 +32,8 @@
     "simple-commit-message": "3.3.1"
   },
   "scripts": {
-    "precommit": "eslint *.js",
+    "lint": "eslint --fix *.js",
+    "precommit": "npm run lint",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "release": {
