@@ -2,25 +2,25 @@ module.exports = {
   configs: {
     general: {
       env: {
-        commonjs: true,
+        commonjs: true
       },
       parserOptions: {
-        ecmaVersion: 6,
+        ecmaVersion: 6
       },
       rules: {
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
         'arrow-spacing': 'error',
         'block-spacing': 'error',
-        'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
+        'brace-style': ['error', '1tbs', { allowSingleLine: true }],
         'comma-dangle': ['error', 'always-multiline'],
         'comma-spacing': 'error',
-        'curly': ['error', 'multi-line', 'consistent'],
+        curly: ['error', 'multi-line', 'consistent'],
         'constructor-super': 'error',
         'default-case': 'error',
         'eol-last': 'error',
-        'eqeqeq': ['error', 'allow-null'],
-        'indent': ['error', 2, { 'SwitchCase': 1, 'MemberExpression': 0 }],
+        eqeqeq: ['error', 'allow-null'],
+        indent: ['error', 2, { SwitchCase: 1, MemberExpression: 0 }],
         'key-spacing': 'error',
         'keyword-spacing': 'error',
         'no-case-declarations': 'error',
@@ -49,7 +49,7 @@ module.exports = {
         'no-invalid-regexp': 'error',
         'no-irregular-whitespace': 'error',
         'no-mixed-spaces-and-tabs': 'error',
-        'no-multiple-empty-lines': ['error', { 'max': 2 }],
+        'no-multiple-empty-lines': ['error', { max: 2 }],
         'no-multi-spaces': 'error',
         'no-negated-in-lhs': 'error',
         'no-new-symbol': 'error',
@@ -77,8 +77,8 @@ module.exports = {
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
         'prefer-template': 'error',
-        'quotes': ['error', 'single'],
-        'semi': ['error', 'never'],
+        quotes: ['error', 'single'],
+        semi: ['error', 'never'],
         'semi-spacing': 'error',
         'space-before-blocks': 'error',
         'space-before-function-paren': 'error',
@@ -87,42 +87,38 @@ module.exports = {
         'space-unary-ops': 'error',
         'template-curly-spacing': 'error',
         'use-isnan': 'error',
-        'valid-typeof': 'error',
-      },
+        'valid-typeof': 'error'
+      }
     },
 
     tests: {
       env: {
-        mocha: true,
+        mocha: true
       },
       globals: {
-        expect: true,
+        expect: true
       },
-      plugins: [
-        'mocha'
-      ],
+      plugins: ['mocha'],
       rules: {
         'mocha/handle-done-callback': 'error',
         'mocha/no-exclusive-tests': 'error',
         'mocha/no-global-tests': 'error'
-      },
+      }
     },
 
     react: {
       env: {
-        browser: true,
+        browser: true
       },
       parser: 'babel-eslint',
       parserOptions: {
         ecmaVersion: 6,
         sourceType: 'module',
         ecmaFeatures: {
-          jsx: true,
-        },
+          jsx: true
+        }
       },
-      plugins: [
-        'react'
-      ],
+      plugins: ['react'],
       rules: {
         'react/jsx-curly-spacing': 'error',
         'react/jsx-equals-spacing': 'error',
@@ -137,8 +133,8 @@ module.exports = {
         'react/no-unknown-property': 'error',
         'react/prefer-es6-class': 'error',
         'react/react-in-jsx-scope': 'error',
-        'react/require-render-return': 'error',
-      },
-    },
-  },
+        'react/require-render-return': 'error'
+      }
+    }
+  }
 }

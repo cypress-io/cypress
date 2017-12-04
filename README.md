@@ -55,6 +55,30 @@ If using the `react` preset:
 npm install --save-dev babel-eslint eslint-plugin-react
 ```
 
+## Editors
+
+### VSCode
+
+Use plugin [ESLint by Dirk Baeumer](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) to lint and auto fix JS files using ESLint. This repository includes example [.vscode/settings.json](.vscode/settings.json) file.
+
+### Atom
+
+Install package [linter-eslint](https://atom.io/packages/linter-eslint)
+(and its dependencies) to enable linting. Go into the settings for this package
+and enable "Fix on save" option to auto-fix white space issues and other things.
+
+### Sublime Text
+
+Install [ESLint-Formatter](https://packagecontrol.io/packages/ESLint-Formatter),
+then set the following settings:
+
+```json
+{
+  "format_on_save": true,
+  "debug": true
+}
+```
+
 ## License
 
 This project is licensed under the terms of the [MIT license](/LICENSE.md).
