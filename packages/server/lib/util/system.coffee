@@ -15,9 +15,9 @@ getOsVersion = ->
 
 module.exports = {
   info: ->
-    getOsVersion().then (osVersion) ->
+    getOsVersion()
+    .then (osVersion) ->
       {
-        browserVersion: process.versions.chrome
         osName: os.platform()
         osVersion: osVersion
         osCpus: os.cpus()
