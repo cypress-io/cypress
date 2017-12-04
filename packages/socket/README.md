@@ -1,7 +1,6 @@
-# Cypress Core Socket
+# Socket
 
-> This is a shared lib for holding both the `socket.io` server and client.
-
+This is a shared lib for holding both the `socket.io` server and client.
 
 ## Usage
 
@@ -12,7 +11,7 @@ var socket = require("packages/core-socket")
 {
   server: require("socket.io"),
   client: require("socket.io-client"),
-  getPathToClientSource: function(){
+  getPathToClientSource: function () {
     // returns path to the client 'socket.io.js' file
     // for use in the browser
   }
@@ -40,19 +39,14 @@ socket.getPathToClientSource()
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
-
-* `npm install`
-
-## Development
-
-### Watching
+The sockets's dependencies can be installed with:
 
 ```bash
-npm run test-watch
+cd packages/socket
+npm install
 ```
 
-### Testing
+## Testing
 
 ```bash
 npm test

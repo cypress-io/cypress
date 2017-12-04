@@ -147,7 +147,7 @@ module.exports = {
         - Passing {force: true} which disables all error checking
         - Passing {waitForAnimations: false} which disables waiting on animations
         - Passing {animationDistanceThreshold: 20} which decreases the sensitivity
-        
+
       https://on.cypress.io/element-is-animating
     """
     animation_check_failed: "Not enough coord points provided to calculate distance."
@@ -788,6 +788,22 @@ module.exports = {
 
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
+    fromApp: """
+      This error originated from *your* application code, not from Cypress.
+
+      When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+      This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
+
+      https://on.cypress.io/uncaught-exception-from-application
+    """
+
+    fromSpec: """
+      This error originated from *your* test code, not from Cypress.
+
+      When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+    """
+
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
     dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."
@@ -862,6 +878,8 @@ module.exports = {
         This was considered a failure because the status code was not '2xx'.
 
         #{getRedirects(obj, "This http request was redirected")}
+
+        If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
       """
     loading_invalid_content_type: (obj) ->
       phrase = if obj.path then "this local file" else "your web server"

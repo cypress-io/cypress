@@ -396,6 +396,7 @@ describe "lib/socket", ->
       }
 
       @sandbox.stub(Socket.prototype, "createIo").returns(@io)
+      @sandbox.stub(preprocessor.emitter, "on")
 
       @server.open(@cfg)
       .then =>
@@ -404,6 +405,18 @@ describe "lib/socket", ->
         @server.startWebsockets(@automation, @cfg, {})
 
         @socket = @server._socket
+
+    context "constructor", ->
+      it "listens for 'file:updated' on preprocessor", ->
+        @cfg.watchForFileChanges = true
+        socket = Socket(@cfg)
+        expect(preprocessor.emitter.on).to.be.calledWith("file:updated")
+
+      it "does not listen for 'file:updated' if config.watchForFileChanges is false", ->
+        preprocessor.emitter.on.reset()
+        @cfg.watchForFileChanges = false
+        socket = Socket(@cfg)
+        expect(preprocessor.emitter.on).not.to.be.called
 
     context "#close", ->
       it "calls close on #io", ->
@@ -430,10 +443,10 @@ describe "lib/socket", ->
         expect(result).to.be.undefined
 
       it "closes existing watched test file", ->
-        remove = @sandbox.stub(preprocessor, "removeFile")
+        @sandbox.stub(preprocessor, "removeFile")
         @socket.testFilePath = "tests/test1.js"
-        @socket.watchTestFileByPath(@cfg, "test2.js").then ->
-          expect(remove).to.be.calledWithMatch("test1.js")
+        @socket.watchTestFileByPath(@cfg, "test2.js").then =>
+          expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
         @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
@@ -447,28 +460,15 @@ describe "lib/socket", ->
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
         expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
 
-      it "listens for 'file:updated' on preprocessor", ->
-        @cfg.watchForFileChanges = true
-        @sandbox.stub(preprocessor.emitter, "on")
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.emitter.on).to.be.calledWith("file:updated")
-
       it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
         @sandbox.stub(fs, "statAsync").resolves()
         @cfg.watchForFileChanges = true
-        @sandbox.stub(preprocessor.emitter, "on")
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
         preprocessor.emitter.on.withArgs("file:updated").yield("integration/test2.coffee")
         setTimeout =>
           expect(@io.emit).to.be.calledWith("watched:file:changed")
           done()
         , 200
-
-      it "does not listen for 'file:updated' if config.watchForFileChanges is false", ->
-        @cfg.watchForFileChanges = false
-        @sandbox.stub(preprocessor.emitter, "on")
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.emitter.on).not.to.be.called
 
     context "#startListening", ->
       it "sets #testsDir", ->

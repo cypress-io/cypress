@@ -1,17 +1,19 @@
-# Cypress Core Extension
+# HTTPS Proxy
 
-> Intercepts requests from the website under test
+This package is responsible for acting as a CA authority and generating dynamic certificates on the fly for outbound HTTPS connections.
+
+This package enables Cypress to inspect and modify bytes coming in and out of the browser.
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
+The proxy's dependencies can be installed with:
 
-* `npm install`
-* `npm run build`
+```bash
+cd packages/https-proxy
+npm install
+```
 
-## Developing
-
-**Testing**
+## Testing
 
 ```bash
 npm test
