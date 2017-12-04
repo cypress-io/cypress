@@ -105,14 +105,14 @@ describe('install', function () {
         this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
 
         return install.start()
-          .then(() => {
-            expect(unzip.start).calledWith({
-              zipDestination: version,
-              destination: info.getInstallationDir(),
-              executable: info.getPathToUserExecutableDir(),
-            })
-            expect(info.writeInstalledVersion).calledWith('unknown')
+        .then(() => {
+          expect(unzip.start).calledWith({
+            zipDestination: version,
+            destination: info.getInstallationDir(),
+            executable: info.getPathToUserExecutableDir(),
           })
+          expect(info.writeInstalledVersion).calledWith('unknown')
+        })
       })
     })
 
