@@ -74,7 +74,7 @@ describe('download', function () {
       .query(true)
       .reply(302, undefined, {
         Location: 'https://aws.amazon.com/some.zip',
-        'x-version': '0.11.1'
+        'x-version': '0.11.1',
       })
 
     return download.start(this.options).then(() => {
@@ -94,7 +94,7 @@ describe('download', function () {
       .query(true)
       .reply(302, undefined, {
         Location: 'https://aws.amazon.com/some.zip',
-        'x-version': '0.13.0'
+        'x-version': '0.13.0',
       })
 
     return download.start(this.options).then(() => {
@@ -118,7 +118,7 @@ describe('download', function () {
       .then(() => {
         throw new Error('should have caught')
       })
-      .catch(err => {
+      .catch((err) => {
         logger.error(err)
 
         snapshot('download status errors', normalize(ctx.stdout.toString()))

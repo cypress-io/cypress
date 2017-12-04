@@ -16,14 +16,14 @@ const info = require('./info')
 
 const baseUrl = 'https://download.cypress.io/'
 
-const prepend = urlPath => {
+const prepend = (urlPath) => {
   const endpoint = url.resolve(baseUrl, urlPath)
   const platform = os.platform()
   const arch = os.arch()
   return `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
-const getUrl = version => {
+const getUrl = (version) => {
   if (is.url(version)) {
     debug('version is already an url', version)
     return version
@@ -31,7 +31,7 @@ const getUrl = version => {
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
-const statusMessage = err =>
+const statusMessage = (err) =>
   (err.statusCode
     ? [err.statusCode, err.statusMessage].join(' - ')
     : err.toString())
@@ -60,7 +60,7 @@ function formAbsolutePath (filename) {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = options => {
+const downloadFromUrl = (options) => {
   return new Promise((resolve, reject) => {
     const url = getUrl(options.version)
 
@@ -80,16 +80,16 @@ const downloadFromUrl = options => {
 
         // yes redirect
         return true
-      }
+      },
     })
 
     // closure
     let started = null
 
     progress(req, {
-      throttle: options.throttle
+      throttle: options.throttle,
     })
-      .on('response', response => {
+      .on('response', (response) => {
         // start counting now once we've gotten
         // response headers
         started = new Date()
@@ -110,7 +110,7 @@ const downloadFromUrl = options => {
         }
       })
       .on('error', reject)
-      .on('progress', state => {
+      .on('progress', (state) => {
         // total time we've elapsed
         // starting on our first progress notification
         const elapsed = new Date() - started
@@ -127,7 +127,7 @@ const downloadFromUrl = options => {
 
         resolve({
           filename: options.downloadDestination,
-          downloaded: true
+          downloaded: true,
         })
       })
   })
@@ -145,24 +145,24 @@ const download = (options = {}) => {
 
   debug('need to download Cypress version %s', options.version)
   // first check the original filename
-  return fs.pathExists(options.version).then(exists => {
+  return fs.pathExists(options.version).then((exists) => {
     if (exists) {
       debug('found file right away', options.version)
       return {
         filename: options.version,
-        downloaded: false
+        downloaded: false,
       }
     }
 
     const possibleFile = formAbsolutePath(options.version)
     debug('checking local file', possibleFile, 'cwd', process.cwd())
-    return fs.pathExists(possibleFile).then(exists => {
+    return fs.pathExists(possibleFile).then((exists) => {
       if (exists) {
         debug('found local file', possibleFile)
         debug('skipping download')
         return {
           filename: possibleFile,
-          downloaded: false
+          downloaded: false,
         }
       } else {
         return downloadFromUrl(options)
@@ -171,12 +171,12 @@ const download = (options = {}) => {
   })
 }
 
-const start = options => {
+const start = (options) => {
   _.defaults(options, {
     version: null,
     throttle: 100,
     onProgress: () => {},
-    downloadDestination: path.join(info.getInstallationDir(), 'cypress.zip')
+    downloadDestination: path.join(info.getInstallationDir(), 'cypress.zip'),
   })
 
   // make sure our 'dist' installation dir exists
@@ -185,12 +185,12 @@ const start = options => {
     .then(() => {
       return download(options)
     })
-    .catch(err => {
+    .catch((err) => {
       return prettyDownloadErr(err, options.version)
     })
 }
 
 module.exports = {
   start,
-  getUrl
+  getUrl,
 }
