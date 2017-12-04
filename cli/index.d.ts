@@ -760,6 +760,13 @@ declare namespace Cypress {
     env?: object;
   }
 
+  /**
+   *
+   *
+   * @interface RequestOptions
+   * @extends {Loggable}
+   * @extends {Timeoutable}
+   */
   interface RequestOptions extends Loggable, Timeoutable {
     auth?: object;
     body?: RequestBody;
@@ -855,6 +862,7 @@ declare namespace Cypress {
    * @interface VisitOptions
    * @extends {Loggable}
    * @extends {Timeoutable}
+   * @see https://on.cypress.io/visit
    */
   interface VisitOptions extends Loggable, Timeoutable {
     /**
@@ -863,14 +871,24 @@ declare namespace Cypress {
      * @param {Window} contentWindow the remote page's window object
      * @memberof VisitOptions
      */
-    onBeforeLoad?(window: Window): void;
+    onBeforeLoad?(win: Window): void;
+
     /**
      * Called once your page has fired its load event.
      *
      * @param {Window} contentWindow the remote page's window object
      * @memberof VisitOptions
      */
-    onLoad?(window: Window): void;
+    onLoad?(win: Window): void;
+
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @type {boolean}
+     * @default {true}
+     * @memberof VisitOptions
+     */
+    failOnStatusCode?: boolean;
   }
 
   /**
