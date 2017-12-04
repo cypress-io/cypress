@@ -19,7 +19,7 @@ const isString = (s) =>
   typeof s === 'string'
 
 const isUrl = (s) =>
-  isString(s) && /^https:/.test(s)
+  isString(s) && /^https?:/.test(s)
 
 const prepend = (urlPath) => {
   const endpoint = url.resolve(baseUrl, urlPath)
