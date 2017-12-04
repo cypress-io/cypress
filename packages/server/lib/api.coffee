@@ -140,12 +140,12 @@ module.exports = {
       ## get the formatted browserName
       ## and version of the browser we're
       ## about to be running on
-      { browserName, version } = browser
+      { displayName, version } = browser
 
       system.info()
       .then (systemInfo) ->
         systemInfo.spec = spec
-        systemInfo.browserName = browserName
+        systemInfo.browserName = displayName
         systemInfo.browserVersion = version
 
         rp.post({

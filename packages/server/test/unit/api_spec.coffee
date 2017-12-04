@@ -344,7 +344,7 @@ describe "lib/api", ->
       @sandbox.stub(os, "freemem").returns(1000)
       @sandbox.stub(os, "totalmem").returns(2000)
       @sandbox.stub(browsers, "getByName").resolves({
-        browserName: "Foo"
+        displayName: "Foo"
         version: "1.2.3"
       })
 
