@@ -145,8 +145,8 @@ module.exports = {
       system.info()
       .then (systemInfo) ->
         systemInfo.spec = spec
-        systemInfo.version = version
         systemInfo.browserName = browserName
+        systemInfo.browserVersion = version
 
         rp.post({
           url: Routes.instances(buildId)

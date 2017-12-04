@@ -46,7 +46,7 @@ module.exports = {
   getByName: (browser) ->
     utils.getBrowsers()
     .then (browsers = []) ->
-      _.find(browsers, { name: options.browser })
+      _.find(browsers, { name: browser })
 
   open: (name, options = {}, automation) ->
     kill(true)
