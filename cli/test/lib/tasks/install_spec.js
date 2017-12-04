@@ -53,6 +53,26 @@ describe('install', function () {
       this.sandbox.stub(info, 'clearVersionState').resolves()
     })
 
+    describe('skips install', function () {
+      afterEach(function () {
+        delete process.env.CYPRESS_SKIP_BINARY_INSTALL
+      })
+
+      it('when environment variable is set', function () {
+        process.env.CYPRESS_SKIP_BINARY_INSTALL = true
+
+        return install.start()
+        .then(() => {
+          expect(download.start).not.to.be.called
+
+          snapshot(
+            'skip installation',
+            normalize(this.stdout.toString())
+          )
+        })
+      })
+    })
+
     describe('override version', function () {
       afterEach(function () {
         delete process.env.CYPRESS_BINARY_VERSION

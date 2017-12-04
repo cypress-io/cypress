@@ -113,3 +113,8 @@ You can now open Cypress by running: node_modules/.bin/cypress open
 https://on.cypress.io/installing-cypress
 
 `
+
+exports['skip installation 1'] = `
+Skipping binary install.
+
+`
