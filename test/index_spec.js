@@ -32,6 +32,7 @@ describe('webpack preprocessor', function () {
     webpack.returns(this.compilerApi)
 
     this.statsApi = {
+      hasErrors () { return false },
       toJson () { return { warnings: [], errors: [] } },
     }
 
@@ -168,10 +169,22 @@ describe('webpack preprocessor', function () {
         }
       })
 
-      it('it rejects with error', function () {
+      it('it rejects with error when an err', function () {
         this.compilerApi.run.yields(this.err)
         return this.run().catch((err) => {
           expect(err.stack).to.equal(this.err.stack)
+        })
+      })
+
+      it('it rejects with joined errors when a stats err', function () {
+        const errs = ['foo', 'bar', 'baz']
+        this.statsApi = {
+          hasErrors () { return true },
+          toJson () { return { errors: errs } },
+        }
+        this.compilerApi.run.yields(null, this.statsApi)
+        return this.run().catch((err) => {
+          expect(err.stack).to.equal(errs.join('\n\n'))
         })
       })
 
