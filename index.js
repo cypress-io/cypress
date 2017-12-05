@@ -92,24 +92,30 @@ const preprocessor = (options = {}) => {
     // is invoked again with the same filePath
     bundles[filePath] = latestBundle.promise
 
+    const rejectWithErr = (err) => {
+      err.filePath = filePath
+      // backup the original stack before it's potentially modified by bluebird
+      err.originalStack = err.stack
+      log(`errored bundling ${outputPath}`, err)
+      latestBundle.reject(err)
+    }
+
     // this function is called when bundling is finished, once at the start
     // and, if watching, each time watching triggers a re-bundle
     const handle = (err, stats) => {
       if (err) {
-        err.filePath = filePath
-        // backup the original stack before it's
-        // potentially modified from bluebird
-        err.originalStack = err.stack
-        log(`errored bundling ${outputPath}`, err)
-        return latestBundle.reject(err)
+        return rejectWithErr(err)
+      }
+
+      const jsonStats = stats.toJson()
+
+      if (stats.hasErrors()) {
+        err = new Error('Webpack Compilation Error')
+        err.stack = jsonStats.errors.join('\n\n')
+        return rejectWithErr(err)
       }
 
       // these stats are really only useful for debugging
-      const jsonStats = stats.toJson()
-      if (jsonStats.errors.length > 0) {
-        log(`soft errors for ${outputPath}`)
-        log(jsonStats.errors)
-      }
       if (jsonStats.warnings.length > 0) {
         log(`warnings for ${outputPath}`)
         log(jsonStats.warnings)
