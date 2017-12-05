@@ -13,6 +13,8 @@ declare namespace Cypress {
   type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT";
   type RequestBody = string | object;
   type ViewportOrientation = "portrait" | "landscape";
+  type PrevSubject = "optional" | "element" | "document" | "window";
+  type CommandOptions = {prevSubject: boolean | PrevSubject | PrevSubject[]};
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -104,11 +106,9 @@ declare namespace Cypress {
      * @example Cypress.arch // "x64"
      */
     arch: string
-  }
 
-  interface Core {
     /**
-     * @see https://on.cypress.io/api/config
+     * @see https://on.cypress.io/config
      */
     config(): object;
     config(key: string): any;
@@ -116,7 +116,7 @@ declare namespace Cypress {
     config(Object: object): void;
 
     /**
-     * @see https://on.cypress.io/api/env
+     * @see https://on.cypress.io/env
      */
     env(): object;
     env(key: string): any;
@@ -126,20 +126,15 @@ declare namespace Cypress {
     /**
      * @see https://on.cypress.io/api/commands
      */
-    addChildCommand(name: string, fn: (...args: any[]) => void): void;
-    addDualCommand(name: string, fn: (...args: any[]) => void): void;
-    addParentCommand(name: string, fn: (...args: any[]) => void): void;
-
-    _: any;
-    $: any;
-    minimatch: any;
-    moment: any;
-    Blob: any;
-    Promise: any;
-    Log: any;
+    Commands: {
+      add(name: string, fn: (...args: any[]) => void): void;
+      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void;
+      overwrite(name: string, fn: (...args: any[]) => void): void;
+      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void;
+    }
 
     /**
-     * @see https://on.cypress.io/api/cookies
+     * @see https://on.cypress.io/cookies
      */
     Cookies: {
       debug(enabled: boolean, options?: DebugOptions): void;
@@ -148,9 +143,9 @@ declare namespace Cypress {
     };
 
     /**
-     * @see https://on.cypress.io/api/dom
+     * @see https://on.cypress.io/dom
      */
-    Dom: {
+    dom: {
       isHidden(element: object): boolean;
     };
 
