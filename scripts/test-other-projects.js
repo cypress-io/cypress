@@ -99,8 +99,8 @@ if (process.env.APPVEYOR) {
 console.log('commit message')
 console.log(message)
 bump.run(message, cliOptions.provider)
-  .catch((e) => {
-    console.error('could not bump test projects')
-    console.error(e)
-    process.exit(1)
-  })
+.catch((e) => {
+  console.error('could not bump test projects')
+  console.error(e)
+  process.exit(1)
+})

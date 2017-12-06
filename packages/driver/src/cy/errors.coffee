@@ -26,7 +26,9 @@ create = (state, config, log) ->
           obj
     })
 
-  createUncaughtException = (msg, source, lineno, colno, err) ->
+  createUncaughtException = (type, args) ->
+    [msg, source, lineno, colno, err] = args
+
     current = state("current")
 
     ## reset the msg on a cross origin script error
@@ -42,6 +44,12 @@ create = (state, config, log) ->
     err ?= createErrFromMsg()
 
     err.name = "Uncaught " + err.name
+
+    suffixMsg = switch type
+      when "app" then "uncaught.fromApp"
+      when "spec" then "uncaught.fromSpec"
+
+    err = $utils.appendErrMsg(err, $utils.errMessageByPath(suffixMsg))
 
     err.onFail = ->
       if l = current and current.getLastLog()

@@ -82,14 +82,14 @@ describe "lib/plugins/preprocessor", ->
       preprocessor.getFile(@filePath, @config)
       onClose = @sandbox.spy()
       @plugin.lastCall.args[0].on("close", onClose)
-      preprocessor.removeFile(@fullFilePath)
+      preprocessor.removeFile(@filePath, @config)
       expect(onClose).to.be.called
 
     it "emits 'close' with file path on base emitter", ->
       onClose = @sandbox.spy()
-      preprocessor.emitter.on "close", onClose
+      preprocessor.emitter.on("close", onClose)
       preprocessor.getFile(@filePath, @config)
-      preprocessor.removeFile(@fullFilePath)
+      preprocessor.removeFile(@filePath, @config)
       expect(onClose).to.be.calledWith(@fullFilePath)
 
   context "#close", ->

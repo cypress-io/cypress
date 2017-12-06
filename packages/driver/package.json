@@ -6,10 +6,8 @@
   "browser": "src/main",
   "scripts": {
     "start": "coffee test/support/server.coffee",
-    "test-unit": "mocha",
-    "test-unit-watch": "./test/support/watch",
-    "test-unit-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
-    "test-integration": "node ../../scripts/run-cypress-tests.js --browser chrome --dir test",
+    "cypress:open": "node ../../scripts/start.js --project ./test",
+    "cypress:run": "node ../../scripts/run-cypress-tests.js --browser chrome --dir test",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [

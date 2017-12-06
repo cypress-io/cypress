@@ -256,8 +256,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     fn()
 
-  requestUrl = (url) ->
-    Cypress.backend("resolve:url", url)
+  requestUrl = (url, options = {}) ->
+    Cypress.backend("resolve:url", url, _.pick(options, "failOnStatusCode"))
     .then (resp = {}) ->
       switch
         ## if we didn't even get an OK response
@@ -455,11 +455,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
-      _.defaults options,
+      _.defaults(options, {
+        failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
+      })
 
       consoleProps = {}
 
@@ -560,7 +562,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## before telling our backend to resolve this url
           url = url.replace(existingHash, "")
 
-        requestUrl(url)
+        requestUrl(url, _.pick(options, "failOnStatusCode"))
         .then (resp = {}) =>
           {url, originalUrl, cookies, redirects, filePath} = resp
 
