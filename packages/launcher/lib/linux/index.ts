@@ -1,5 +1,5 @@
 import { log } from '../log'
-import { prop, trim, tap } from 'ramda'
+import { trim, tap } from 'ramda'
 import { FoundBrowser, Browser, NotInstalledError } from '../types'
 import * as execa from 'execa'
 
@@ -38,11 +38,11 @@ function getLinuxBrowser(
   log('looking using command "%s"', cmd)
   return execa
     .shell(cmd)
-    .then(prop('stdout'))
+    .then(result => result.stdout)
     .then(trim)
     .then(tap(log))
     .then(getVersion)
-    .then(version => {
+    .then((version: string) => {
       return {
         name,
         version,
