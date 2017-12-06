@@ -33,6 +33,9 @@ getBrowser = (name) ->
       require("./chrome")
     when "electron"
       require("./electron")
+    else
+      log("will run browser %s as Chrome", name)
+      require("./chrome")
 
 process.once "exit", kill
 
@@ -58,6 +61,7 @@ module.exports = {
       })
 
       if not browser = getBrowser(name)
+        log("could not find browser by name", name)
         names = _.map(options.browsers, "name").join(", ")
         return errors.throw("BROWSER_NOT_FOUND", name, names)
 
