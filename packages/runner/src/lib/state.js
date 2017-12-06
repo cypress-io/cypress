@@ -21,7 +21,6 @@ export default class State {
   defaults = _defaults
 
   @observable isRunning = false
-  @observable isSelectorHelperEnabled = false
 
   @observable messageTitle = _defaults.messageTitle
   @observable messageDescription = _defaults.messageDescription

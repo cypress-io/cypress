@@ -2,6 +2,8 @@ import _ from 'lodash'
 import { $ } from '@packages/driver'
 import getUniqueSelector from 'unique-selector'
 
+import selectorHelperHighlight from '../selector-helper/highlight'
+
 const resetStyles = `
   border: none !important
   margin: 0 !important
@@ -126,23 +128,50 @@ function addElementBoxModelLayers ($el, body) {
   return container
 }
 
-function addSimpleHighlight ($el, body) {
+function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
+  let $container = $body.find('.__cypress-selector-helper')
+  let $reactContainer
+
+  if ($container.length) {
+    $reactContainer = $container.find('.__cypress-highlight-react-container')
+  } else {
+    $container = $('<div />')
+    .addClass('__cypress-selector-helper')
+    .appendTo($body)
+
+    $('<link rel="stylesheet" href="/__cypress/runner/cypress_selector_helper.css" />').
+    appendTo($container)
+
+    $reactContainer = $('<div />')
+    .addClass('__cypress-highlight-react-container')
+    .appendTo($container)
+  }
+
+  if (!$el && !window.keepHighlights) {
+    selectorHelperHighlight.unmount($reactContainer[0])
+    $container.remove()
+    return
+  }
+
   const offset = $el.offset()
   const borderSize = 2
 
-  return $('<div class="__cypress-highlight" />')
-  .css({
-    backgroundColor: 'rgba(159, 196, 231, 0.6)',
-    border: `solid ${borderSize}px #9FC4E7`,
-    position: 'absolute',
-    width: $el.outerWidth(),
-    height: $el.outerHeight(),
-    top: offset.top - borderSize,
-    left: offset.left - borderSize,
-    transform: $el.css('transform'),
-    zIndex: getZIndex($el),
+  selectorHelperHighlight.render($reactContainer[0], {
+    selector,
+    appendTo: $container[0],
+    boundary: $body[0],
+    onClick,
+    style: {
+      width: $el.outerWidth(),
+      height: $el.outerHeight(),
+      top: offset.top - borderSize,
+      left: offset.left - borderSize,
+      transform: $el.css('transform'),
+      zIndex: getZIndex($el),
+    },
   })
-  .appendTo(body)
+
+  return $container
 }
 
 function createLayer ($el, attr, color, container, dimensions) {
@@ -269,7 +298,7 @@ function getBestSelector (el) {
 export {
   addElementBoxModelLayers,
   addHitBoxLayer,
-  addSimpleHighlight,
+  addOrUpdateSelectorHelperHighlight,
   getBestSelector,
   getOuterSize,
 }

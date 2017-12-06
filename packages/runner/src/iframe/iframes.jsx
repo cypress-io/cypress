@@ -9,13 +9,16 @@ import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
+import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
-import eventManager from '../lib/event-manager'
+import selectorHelperModel from '../selector-helper/selector-helper-model'
 import windowUtil from '../lib/window-util'
 
 @observer
 export default class Iframes extends Component {
+  _disposers = []
+
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
@@ -54,9 +57,13 @@ export default class Iframes extends Component {
       this._run(this.props.config, specPath)
     })
 
-    this._disposeAutorun = autorun(() => {
-      this.autIframe.toggleSelectorHelper(this.props.state.isSelectorHelperEnabled)
-    })
+    this._disposers.push(autorun(() => {
+      this.autIframe.toggleSelectorHelper(selectorHelperModel.isEnabled)
+    }))
+
+    this._disposers.push(autorun(() => {
+      this.autIframe.toggleSelectorHighlight(selectorHelperModel.isShowingHighlight)
+    }))
 
     eventManager.start(this.props.config, specPath)
 
@@ -158,6 +165,8 @@ export default class Iframes extends Component {
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)
     eventManager.stop()
-    this._disposeAutorun()
+    this._disposers.forEach((dispose) => {
+      dispose()
+    })
   }
 }

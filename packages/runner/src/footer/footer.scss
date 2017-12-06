@@ -7,6 +7,36 @@
       padding: 6px 8px;
       position: relative;
 
+      .selector {
+        align-items: center;
+        display: flex;
+        position: relative;
+      }
+
+      input {
+        font-size: 1px;
+        left: 6px;
+        position: absolute;
+        top: 6px;
+        z-index: -1;
+      }
+
+      code {
+        background: #e3e3e3;
+        border: solid 1px #d3d3d3;
+        color: #333;
+        flex-grow: 0;
+      }
+
+      .copy-to-clipboard {
+        background: #e3e3e3;
+        border: solid 1px #d3d3d3;
+        color: #333;
+        flex-grow: 0;
+        margin-left: 5px;
+        padding: 4px 8px;
+      }
+
       .close {
         background: none;
         border: none;

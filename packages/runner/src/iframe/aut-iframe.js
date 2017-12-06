@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
 import blankContents from './blank-contents'
-import { addElementBoxModelLayers, addHitBoxLayer, addSimpleHighlight, getBestSelector, getOuterSize } from '../lib/dom'
+import { addElementBoxModelLayers, addHitBoxLayer, addOrUpdateSelectorHelperHighlight, getBestSelector, getOuterSize } from '../lib/dom'
 import visitFailure from './visit-failure'
+import selectorHelperModel from '../selector-helper/selector-helper-model'
 
 export default class AutIframe {
   constructor (config) {
@@ -200,10 +201,10 @@ export default class AutIframe {
     const body = this._body()
 
     if (isEnabled) {
-      $(body).on('mousemove', this._onMouseMove)
+      $(body).on('mousemove', this._onSelectorMouseMove)
       $(body).on('mouseleave', this._clearHighlight)
     } else {
-      $(body).off('mousemove', this._onMouseMove)
+      $(body).off('mousemove', this._onSelectorMouseMove)
       $(body).off('mouseleave', this._clearHighlight)
       if (this._highlightedEl) {
         this._clearHighlight()
@@ -211,14 +212,18 @@ export default class AutIframe {
     }
   }
 
-  _onMouseMove = (e) => {
+  _onSelectorMouseMove = (e) => {
     let el = e.target
     let $el = $(el)
 
-    if ($el.hasClass('__cypress-highlight')) {
+    const $ancestorHighlight = $el.closest('.__cypress-selector-helper')
+    if ($ancestorHighlight.length) {
+      $el = $ancestorHighlight
+    }
+
+    if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-helper')) {
       const $highlight = $el
       $highlight.css('display', 'none')
-      $highlight.offsetLeft
       el = this._document().elementFromPoint(e.clientX, e.clientY)
       $el = $(el)
       $highlight.css('display', 'block')
@@ -228,17 +233,35 @@ export default class AutIframe {
 
     this._highlightedEl = el
 
-    this.removeHighlights()
-    addSimpleHighlight($el, this._body()).on('click', () => {
-      console.log(getBestSelector(el)) // eslint-disable-line no-console
+    const selector = getBestSelector(el)
+
+    addOrUpdateSelectorHelperHighlight($el, this._body(), selector, () => {
+      this._selectorLocked = true
+      selectorHelperModel.setCssSelector(selector)
     })
   }
 
   _clearHighlight = () => {
-    this.removeHighlights()
+    addOrUpdateSelectorHelperHighlight(null, this._body())
     if (this._highlightedEl) {
       this._highlightedEl = null
-      this._previousBoxShadow = null
+      if (!this._selectorLocked) {
+        selectorHelperModel.setCssSelector(null)
+      }
+    }
+  }
+
+  toggleSelectorHighlight (isShowingHighlight) {
+    if (isShowingHighlight) {
+      const selector = selectorHelperModel.cssSelector
+      const $el = this._body().find(selector)
+
+      addOrUpdateSelectorHelperHighlight($el, this._body(), selector, () => {
+        this._selectorLocked = true
+        selectorHelperModel.setCssSelector(selector)
+      })
+    } else {
+      this._clearHighlight()
     }
   }
 }
