@@ -41,6 +41,6 @@
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "unique-selector": "^0.3.6",
-    "zunder": "^5.1.0"
+    "zunder": "5.5.1"
   }
 }
