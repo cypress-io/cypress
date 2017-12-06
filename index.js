@@ -2,7 +2,8 @@ const { compose } = require('ramda');
 
 const commitAnalyzer = require('@semantic-release/commit-analyzer');
 const releaseNotesGenerator = require('@semantic-release/release-notes-generator');
-const { publish } = require('@semantic-release/github');
+const { publish: publishGithub } = require('@semantic-release/github');
+const { publish: publishNpm } = require('@semantic-release/npm');
 
 const gitTag = require('./src/git-tag');
 
@@ -24,5 +25,5 @@ const withGitTag = overrideOption('nextRelease', async nextRelease =>
 module.exports = {
   analyzeCommits: withPackageCommits(commitAnalyzer),
   generateNotes: compose(withGitTag, withVersion, withPackageCommits)(releaseNotesGenerator),
-  publish: withGitTag(publish),
+  publish: [withGitTag(publishNpm), withGitTag(publishGithub)],
 };
