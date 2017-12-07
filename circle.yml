@@ -644,6 +644,14 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             $(npm bin)/cypress run --record
+      - run:
+          name: Run test project in Chrome
+          working_directory: /tmp/cypress-test-tiny
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            $(npm bin)/cypress run --record --browser chrome
 
 workflows:
   version: 2
