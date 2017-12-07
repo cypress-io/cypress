@@ -46,5 +46,5 @@ module.exports = {
     .then (detectedBrowser) ->
       if not detectedBrowser
         throw new Error("Cannot find browser #{name}")
-        detectedBrowser.launch(name, url, args)
+      detectedBrowser.launch(name, url, args)
 }

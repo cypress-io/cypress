@@ -55,6 +55,7 @@ module.exports = {
 
     utils.getBrowsers(browser)
     .then (browsers = []) ->
+      log("utils returned browsers", browsers)
       _.find(browsers, { name: browser })
 
   open: (name, options = {}, automation) ->
@@ -80,6 +81,9 @@ module.exports = {
       log("open browser %s", name)
       browser.open(name, url, options, automation)
       .then (i) ->
+        if not i
+          return errors.throw("BROWSER_DID_NOT_OPEN", name)
+
         log("browser opened")
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder

@@ -3,7 +3,7 @@ import { detectBrowserDarwin } from './darwin'
 import { detectBrowserWindows } from './windows'
 import { log } from './log'
 import { Browser, NotInstalledError } from './types'
-import { browsers } from './browsers'
+import { browsers, chromeVersionRegex } from './browsers'
 import * as Bluebird from 'bluebird'
 import { merge, pick, tap, uniqBy, prop } from 'ramda'
 import * as _ from 'lodash'
@@ -73,7 +73,21 @@ function checkOneBrowser(browser: Browser) {
 }
 
 /** returns list of detected browsers */
-function detectBrowsers(): Bluebird<Browser[]> {
+function detectBrowsers(browserName?: string): Bluebird<Browser[]> {
+  if (browserName) {
+    log('detecting single browser', browserName)
+    const browser: Browser = {
+      name: browserName,
+      displayName: browserName,
+      versionRegex: chromeVersionRegex,
+      profile: true,
+      binary: browserName
+    }
+    return Bluebird.all([
+      checkOneBrowser(browser)
+    ]) as Bluebird<Browser[]>
+  }
+
   log('detecting all available browsers')
   // we can detect same browser under different aliases
   // tell them apart by the full version property

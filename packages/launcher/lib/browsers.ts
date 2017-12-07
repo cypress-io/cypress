@@ -54,10 +54,12 @@ export function launch(
   const browser = find(browsers, { name })
 
   if (!browser) {
+    log('cannot find browser with name %s', name)
     throw browserNotFoundErr(browsers, name)
   }
 
   if (!browser.path) {
+    log('browser %s is missing path', name)
     throw new Error(`Found browser ${name} is missing path`)
   }
 

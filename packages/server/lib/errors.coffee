@@ -37,6 +37,10 @@ API = {
 
         #{arg1}
         """
+      when "BROWSER_DID_NOT_OPEN"
+        """
+        Browser: '#{arg1}' could not be opened.
+        """
       when "BROWSER_NOT_FOUND"
         """
         Browser: '#{arg1}' was not found on your system.

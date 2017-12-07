@@ -19,17 +19,14 @@ const wrap = (all: Browser[]) => {
 const init = (browsers: Browser[] | string) => {
   if (typeof browsers === 'string') {
     log('setting to just single browser', browsers)
-    browsers = [{
-      name: browsers,
-      displayName: browsers,
-      versionRegex: chromeVersionRegex,
-      profile: true,
-      binary: browsers
-    }]
-  } else {
-    log('init OS browsers')
+    return detect(browsers).then(wrap)
   }
-  browsers ? Promise.resolve(wrap(browsers)) : detect().then(wrap)
+  log('init OS browsers')
+  if (browsers.length) {
+    return wrap(browsers)
+  } else {
+    return detect().then(wrap)
+  }
 }
 
 const api: LauncherApi = (init as any) as LauncherApi
