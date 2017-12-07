@@ -7,7 +7,7 @@ export type Browser = {
   /** short browser name */
   name: MacBrowserName
   /** Optional display name */
-  displayName?: string
+  displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
   versionRegex: RegExp
   profile: boolean
