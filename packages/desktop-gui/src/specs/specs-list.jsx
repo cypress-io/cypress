@@ -10,6 +10,12 @@ import specsStore from './specs-store'
 
 @observer
 class Specs extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      search: ""
+    };
+  }
   render () {
     if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
@@ -17,19 +23,65 @@ class Specs extends Component {
 
     let allActiveClass = specsStore.allSpecsChosen ? 'active' : ''
 
+    const shouldShowClearSearch = this.state.search !== "";
+
     return (
       <div id='tests-list-page'>
+        <header>
+        <div className="search">
+          <label htmlFor="search-input">
+            <i className="fa fa-search"></i>
+          </label>
+          <input 
+            id="search-input"
+            type="text"
+            placeholder="Search here"
+            value={this.state.search}
+            onChange={this.updateSearchTerms.bind(this)}
+            onKeyUp={this.executeSearchAction.bind(this)} />
+          {
+             shouldShowClearSearch 
+                ? <a id="clear" className="fa fa-times" onClick={this.clearSearch.bind(this)}/>
+                : null 
+          }
+        </div>
         <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
           <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
           Run All Tests
         </a>
+        </header>
         <ul className='outer-files-container list-as-table'>
-          {_.map(specsStore.specs, (spec) => (
-            this._specItem(spec)
-          ))}
+          {_.map(specsStore.specs, spec => this._specItem(spec))}
         </ul>
       </div>
     )
+  }
+
+  clearSearch() {
+    this.setState(state => ({
+      ...state,
+      search: ""
+    }));
+  }
+
+  updateSearchTerms(e) {
+    e.preventDefault();
+
+    const target = e.target;
+    const value = target.value;
+
+    this.setState((state) => {
+      return {
+        ...state, 
+        search: value
+      };
+    })
+  }
+
+  executeSearchAction(e) {
+    if (e.key === "Escape") {
+      this.clearSearch();
+    }
   }
 
   _specItem (spec) {
@@ -87,9 +139,7 @@ class Specs extends Component {
             isExpanded ?
               <div>
                 <ul className='list-as-table'>
-                  {_.map(spec.children.specs, (spec) => (
-                    this._specItem(spec)
-                  ))}
+                  {_.map(spec.children.specs, spec => this._specItem(spec))}
                 </ul>
               </div> :
               null
@@ -101,21 +151,23 @@ class Specs extends Component {
 
   _specContent(spec) {
     const isChosen = specsStore.isChosenSpec(spec)
+    if (!spec.displayName.toLowerCase().includes(this.state.search.toLowerCase())) return null
+
     return (
-      <li key={spec.path} className='file'>
-        <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
-          <div>
-            <div>
-              <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
-              {spec.displayName}
-            </div>
+     <li key={spec.path} className='file'>
+      <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
+        <div>
+          <div>  
+            <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
+            {spec.displayName}
           </div>
-          <div>
-            <div></div>
-          </div>
-        </a>
-      </li>
-    )
+        </div>
+        <div>
+          <div></div>
+        </div>
+      </a>
+    </li>
+    );
   }
 
   _empty () {
