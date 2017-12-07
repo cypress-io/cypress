@@ -87,7 +87,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1) s1b "before each" hook for "t2b":
      Uncaught ReferenceError: foo is not defined
 
-This error originated from *your* application code, not from Cypress.
+This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -142,7 +142,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1)  "before each" hook for "t1c":
      Uncaught ReferenceError: foo is not defined
 
-This error originated from *your* application code, not from Cypress.
+This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -203,7 +203,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":
      Uncaught ReferenceError: foo is not defined
 
-This error originated from *your* application code, not from Cypress.
+This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 

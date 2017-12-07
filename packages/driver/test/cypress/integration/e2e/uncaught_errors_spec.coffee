@@ -37,7 +37,7 @@ describe "uncaught errors", ->
     cy.on "uncaught:exception", (err, runnable) ->
       expect(err.name).to.eq("Uncaught ReferenceError")
       expect(err.message).to.include("foo is not defined")
-      expect(err.message).to.include("This error originated from *your* application code, not from Cypress.")
+      expect(err.message).to.include("This error originated from your application code, not from Cypress.")
       expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
       expect(runnable is r).to.be.true
 

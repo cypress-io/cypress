@@ -23,7 +23,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1) s1 without an afterEach hook t1:
      Uncaught ReferenceError: foo is not defined
 
-This error originated from *your* application code, not from Cypress.
+This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -45,7 +45,7 @@ https://on.cypress.io/uncaught-exception-from-application
   3) s1 with an afterEach hook t4:
      Uncaught ReferenceError: foo is not defined
 
-This error originated from *your* application code, not from Cypress.
+This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -73,7 +73,7 @@ It's possible to enable debugging these scripts by adding the 'crossorigin' attr
 
 https://on.cypress.io/cross-origin-script-error
 
-This error originated from *your* application code, not from Cypress.
+This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
