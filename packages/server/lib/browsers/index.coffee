@@ -31,9 +31,22 @@ kill = (unbind) ->
       resolve(x)
     )
 
-    la(check.number(instance.pid), "browser instance without PID", instance)
-    log("sending kill signal to the instance", instance.pid)
-    treeKill(instance.pid)
+    if instance.pid
+      # normal browsers are child processes
+      # so they will always have a PID.
+
+      # we must kill the process we launched
+      # and any child process it has spawned
+      # because user could have declared a shell
+      # wrapper around the actual browser
+      la(check.number(instance.pid), "browser instance without PID", instance)
+      log("sending kill signal to the instance", instance.pid)
+      treeKill(instance.pid)
+    else
+      # during testing we often get mock child process
+      # where we should just call a method
+      instance.kill()
+
     cleanup()
 
 cleanup = ->
