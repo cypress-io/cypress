@@ -7,6 +7,11 @@ class SelectorHelperModel {
 
   @action toggleEnabled () {
     this.isEnabled = !this.isEnabled
+
+    if (!this.isEnabled) {
+      this.cssSelector = null
+      this.isShowingHighlight = false
+    }
   }
 
   @action setShowingHighlight (isShowingHighlight) {
