@@ -23,7 +23,11 @@ cd packages/desktop-gui
 npm install
 ```
 
-## Development
+## Developing
+
+**NOTE:** Currently, if you want to work on the code around **logging in**, **viewing runs**, or **setting up new projects to record**, this requires connecting to a locally running API server.
+
+Our API server is only accessible to Cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
 
 ### Watching
 
@@ -33,6 +37,7 @@ This watches and compiles all changes as you make them.
 - Compiles `*.scss` files into `dist`
 
 ```bash
+## from 'cypress/packages/desktop-gui' dir
 npm run watch
 ```
 
@@ -41,12 +46,14 @@ npm run watch
 #### For development
 
 ```bash
+## from 'cypress/packages/desktop-gui' dir
 npm run build
 ```
 
 #### For production
 
 ```bash
+## from 'cypress/packages/desktop-gui' dir
 npm run build-prod
 ```
 
@@ -54,22 +61,22 @@ npm run build-prod
 
 This project is tested with Cypress itself. It acts exactly like any other Cypress project.
 
-### Developing
-
-If you're developing on the Desktop GUI, you'll want to run in the normal Cypress GUI mode, like you would when you're writing tests for your own Cypress projects.
-
 ```bash
-## run in cypress GUI mode
+## from 'cypress/packages/desktop-gui' dir
 npm run cypress:open
 ```
 
+From here, you can drag in the `desktop-gui` dir from your local fork of `cypress`. Click into the project and run the tests~
+
 ### Running
+
 
 You can also run all of the Desktop GUI's tests locally. We don't really recommend this because it takes a long time, and we have this process optimized by load balancing the tests across multiple workers in CI.
 
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
 ```bash
-## run all the tests
+## run all the tests 
+## from 'cypress/packages/desktop-gui' dir
 npm run cypress:run
 ```
