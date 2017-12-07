@@ -130,25 +130,43 @@ function addElementBoxModelLayers ($el, body) {
 
 function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
   let $container = $body.find('.__cypress-selector-helper')
+  let $shadowRootContainer
+  let shadowRoot
   let $reactContainer
+  let $cover
 
   if ($container.length) {
-    $reactContainer = $container.find('.__cypress-selector-helper-react-container')
+    shadowRoot = $container.find('.__cypress-selector-helper-shadow-root-container')[0].shadowRoot
+    $reactContainer = $(shadowRoot).find('.react-container')
+    $cover = $container.find('.__cypress-selector-helper-cover')
   } else {
     $container = $('<div />')
     .addClass('__cypress-selector-helper')
+    .css({ position: 'static' })
     .appendTo($body)
 
+    $shadowRootContainer = $('<div />')
+    .addClass('__cypress-selector-helper-shadow-root-container')
+    .css({ position: 'static' })
+    .appendTo($container)
+
+    shadowRoot = $shadowRootContainer[0].attachShadow({ mode: 'open' })
+
     $('<link rel="stylesheet" href="/__cypress/runner/cypress_selector_helper.css" />').
-    appendTo($container)
+    appendTo(shadowRoot)
 
     $reactContainer = $('<div />')
-    .addClass('__cypress-selector-helper-react-container')
+    .addClass('react-container')
+    .appendTo(shadowRoot)
+
+    $cover = $('<div />')
+    .addClass('__cypress-selector-helper-cover')
     .appendTo($container)
   }
 
   if (!$el) {
     selectorHelperHighlight.unmount($reactContainer[0])
+    $cover.off('click')
     $container.remove()
     return
   }
@@ -156,19 +174,28 @@ function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
   const offset = $el.offset()
   const borderSize = 2
 
+  const style = {
+    position: 'absolute',
+    margin: 0,
+    padding: 0,
+    width: $el.outerWidth(),
+    height: $el.outerHeight(),
+    top: offset.top - borderSize,
+    left: offset.left - borderSize,
+    transform: $el.css('transform'),
+    zIndex: getZIndex($el),
+  }
+
+  $cover
+  .css(style)
+  .off('click')
+  .on('click', onClick)
+
   selectorHelperHighlight.render($reactContainer[0], {
     selector,
-    appendTo: $container[0],
+    appendTo: shadowRoot,
     boundary: $body[0],
-    onClick,
-    style: {
-      width: $el.outerWidth(),
-      height: $el.outerHeight(),
-      top: offset.top - borderSize,
-      left: offset.left - borderSize,
-      transform: $el.css('transform'),
-      zIndex: getZIndex($el),
-    },
+    style,
   })
 
   return $container
