@@ -60,6 +60,7 @@ TYPICAL_BROWSERS = [
     majorVersion: '62'
   }, {
     name: 'electron',
+    displayName: 'Electron',
     version: '',
     path: '',
     majorVersion: '',

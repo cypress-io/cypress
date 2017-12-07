@@ -84,17 +84,28 @@ module.exports = {
         onBrowserClose: ->
       })
 
-      if not browser = getBrowser(name)
+      throwNotFoundError = () ->
         log("could not find browser by name", name)
+        log("options.browsers has")
+        log(options.browsers)
         names = _.map(options.browsers, "name").join(", ")
         return errors.throw("BROWSER_NOT_FOUND", name, names)
+
+      if not browser = getBrowser(name)
+        throwNotFoundError()
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
       log("open browser %s", name)
-      browser.open(name, url, options, automation)
-      .then (i) ->
+
+      onBrowserFailedToLaunch = (e) ->
+        # we assume that the browser launch failed because it was not found
+        log("browser failed to launch")
+        log(e)
+        throwNotFoundError()
+
+      onBrowserLaunched = (i) ->
         if not i
           log("did not get an instance of browser", name)
           return errors.throw("BROWSER_DID_NOT_OPEN", name)
@@ -128,5 +139,8 @@ module.exports = {
           options.onBrowserOpen()
 
           return instance
+
+      browser.open(name, url, options, automation)
+      .then onBrowserLaunched, onBrowserFailedToLaunch
 
 }
