@@ -9,13 +9,54 @@ $cy-tooltip-color: #e3e3e3;
 $cy-tooltip-border-color: #333;
 @import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 
+// there are a lot of reset styles in case the user has generic styles
+// that might apply to these elements
+
 .__cypress-selector-helper-tooltip {
+  bottom: auto;
+  box-shadow: none;
   font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  line-height: auto;
+  margin: 0;
+  right: auto;
+  transform: none;
+  transition: none;
+  width: auto;
   max-width: 100%;
+
+  > span {
+    display: inline;
+    line-height: auto;
+    margin: 0;
+    padding: 0;
+    position: static;
+  }
+
+  .__cypress-selector-helper-tooltip-arrow {
+    svg {
+      display: block;
+      margin: 0;
+      width: auto;
+    }
+  }
 }
 
-.__cypress-selector-helper-highlight {
-  background: rgba(159, 196, 231, 0.6);
-  border: solid 2px #9FC4E7;
-  position: absolute;
+.__cypress-selector-helper-react-container {
+  &,
+  & > span {
+    margin: 0;
+    padding: 0;
+    position: static;
+  }
+
+  .__cypress-selector-helper-highlight {
+    background: rgba(159, 196, 231, 0.6);
+    border: solid 2px #9FC4E7;
+    bottom: auto;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: auto;
+    transition: none;
+  }
 }
