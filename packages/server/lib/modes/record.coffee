@@ -85,10 +85,11 @@ module.exports = {
             logException(err)
             .return(null)
 
-  createInstance: (buildId, spec) ->
+  createInstance: (buildId, spec, browser) ->
     api.createInstance({
-      buildId: buildId
-      spec:    spec
+      buildId
+      spec
+      browser
     })
     .catch (err) ->
       errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
@@ -169,7 +170,7 @@ module.exports = {
       screenshots:  screenshots
       failingTests: stats.failingTests
       cypressConfig: stats.config
-      ciProvider:    ciProvider.name()
+      ciProvider:    ciProvider.name() ## TODO: don't send this (no reason to)
       stdout:       stdout
     })
     .then (resp = {}) =>
@@ -202,7 +203,10 @@ module.exports = {
       logException(err) unless err.statusCode is 503
 
   run: (options) ->
-    {projectPath} = options
+    { projectPath, browser } = options
+
+    ## default browser
+    browser ?= "electron"
 
     captured = stdout.capture()
 
@@ -239,7 +243,7 @@ module.exports = {
           ## bail if we dont have a buildId
           return if not buildId
 
-          @createInstance(buildId, options.spec)
+          @createInstance(buildId, options.spec, browser)
         .then (instanceId) =>
           ## dont check that the user is logged in
           options.ensureAuthToken = false

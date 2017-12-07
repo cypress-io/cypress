@@ -5,6 +5,7 @@ request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
+browsers   = require('./browsers')
 Routes     = require("./util/routes")
 system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
@@ -95,7 +96,7 @@ module.exports = {
     debugReturnedBuild = (info) ->
       debug("received API response with buildId %s", info.buildId)
       debug("and list of specs to run", info.specs)
-      
+
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -112,10 +113,10 @@ module.exports = {
       "specs",
       "specPattern"
     ])
-    
+
     debug("creating project run")
     debug("project '%s' group id '%s'", body.projectId, body.groupId)
-    
+
     rp.post({
       url: Routes.runs()
       json: true
@@ -132,24 +133,34 @@ module.exports = {
     .catch(tagError)
 
   createInstance: (options = {}) ->
-    system.info()
-    .then (systemInfo) ->
-      rp.post({
-        url: Routes.instances(options.buildId)
-        json: true
-        timeout: options.timeout ? 10000
-        headers: {
-          "x-route-version": "3"
-        }
-        body: _.extend({
-          spec:           options.spec
-          browserName:    "Electron"
-        }, systemInfo)
-      })
-      .promise()
-      .get("instanceId")
-      .catch(errors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
+    { buildId, spec, timeout } = options
+
+    browsers.getByName(options.browser)
+    .then (browser = {}) ->
+      ## get the formatted browserName
+      ## and version of the browser we're
+      ## about to be running on
+      { displayName, version } = browser
+
+      system.info()
+      .then (systemInfo) ->
+        systemInfo.spec = spec
+        systemInfo.browserName = displayName
+        systemInfo.browserVersion = version
+
+        rp.post({
+          url: Routes.instances(buildId)
+          json: true
+          timeout: timeout ? 10000
+          headers: {
+            "x-route-version": "3"
+          }
+          body: systemInfo
+        })
+        .promise()
+        .get("instanceId")
+        .catch(errors.StatusCodeError, formatResponseBody)
+        .catch(tagError)
 
   updateInstanceStdout: (options = {}) ->
     rp.put({
@@ -178,7 +189,7 @@ module.exports = {
         "video"
         "screenshots"
         "failingTests"
-        "ciProvider"
+        "ciProvider" ## TODO: don't send this (no reason to)
         "cypressConfig"
         "stdout"
       ])

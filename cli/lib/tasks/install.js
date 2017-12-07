@@ -172,6 +172,13 @@ const downloadAndUnzip = (version) => {
 }
 
 const start = (options = {}) => {
+  if (process.env.CYPRESS_SKIP_BINARY_INSTALL) {
+    logger.log(
+      chalk.yellow('Skipping binary installation. Env var \'CYPRESS_SKIP_BINARY_INSTALL\' was found.')
+    )
+    return Promise.resolve()
+  }
+
   debug('installing with options %j', options)
 
   _.defaults(options, {

@@ -26,6 +26,7 @@ module.exports = {
 
       browsers.concat({
         name: "electron"
+        displayName: "Electron"
         version: version
         path: ""
         majorVersion: version.split(".")[0]

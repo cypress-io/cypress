@@ -1,3 +1,4 @@
+os        = require("os")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
@@ -70,8 +71,17 @@ module.exports = {
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
 
+  _getArgs: (browserArgs = []) ->
+    args = defaultArgs.concat(browserArgs)
+
+    if os.platform() is "linux"
+      args.push("--disable-gpu")
+      args.push("--no-sandbox")
+
+    args
+
   open: (browserName, url, options = {}, automation) ->
-    args = defaultArgs.concat(options.browserArgs)
+    args = @_getArgs(options.browserArgs)
 
     Promise.all([
       ## ensure that we have a chrome profile dir

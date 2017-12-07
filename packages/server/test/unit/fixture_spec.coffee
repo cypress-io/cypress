@@ -37,6 +37,13 @@ describe "lib/fixture", ->
         expect(err.message).to.include "No fixture exists at:"
         expect(err.message).to.include p
 
+  context "unicode escape syntax", ->
+    it "can parse unicode escape in JSON", ->
+      fixture.get(@fixturesFolder, "unicode_escape.json").then (obj) ->
+        expect(obj).to.deep.eq {
+          name: "\u2665"
+        }
+
   context "nested fixtures", ->
     it "can pass path to nested fixture", ->
       fixture.get(@fixturesFolder, "nested/fixture.js").then (obj) ->

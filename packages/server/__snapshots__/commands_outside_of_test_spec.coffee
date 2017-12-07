@@ -1,4 +1,4 @@
-exports['e2e commands outside of test passes 1'] = `
+exports['e2e commands outside of test fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -19,6 +19,10 @@ If that is the case, just move these commands inside an it(...) test.
 Check your test file for errors.
 
 https://on.cypress.io/cannot-execute-commands-outside-test
+
+This error originated from *your* test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
@@ -60,4 +64,3 @@ We dynamically generated a new test to display this failure.
   (All Done)
 
 `
-

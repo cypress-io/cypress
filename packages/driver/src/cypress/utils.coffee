@@ -9,6 +9,7 @@ $errorMessages = require("./error_messages")
 tagOpen     = /\[([a-z\s='"-]+)\]/g
 tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
+twoOrMoreNewLinesRe = /\n{2,}/
 
 defaultOptions = {
   delay: 10
@@ -35,7 +36,7 @@ module.exports = {
     ## this is the critical part
     ## because the browser has a cached
     ## dynamic stack getter that will
-    ## not be evaluated letare
+    ## not be evaluated later
     stack = err.stack
 
     ## preserve message
@@ -104,15 +105,25 @@ module.exports = {
     err
 
   errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath $errorMessages, errPath
+    if not errMessage = @getObjValueByPath($errorMessages, errPath)
       throw new Error "Error message path '#{errPath}' does not exist"
 
-    if _.isFunction(errMessage)
-      errMessage(args)
-    else
-      _.reduce args, (message, argValue, argKey) ->
-        message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
-      , errMessage
+    getMsg = ->
+      if _.isFunction(errMessage)
+        errMessage(args)
+      else
+        _.reduce args, (message, argValue, argKey) ->
+          message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
+        , errMessage
+
+    ## normalize two or more new lines
+    ## into only exactly two new lines
+    _
+    .chain(getMsg())
+    .split(twoOrMoreNewLinesRe)
+    .compact()
+    .join('\n\n')
+    .value()
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'

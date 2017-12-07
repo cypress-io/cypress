@@ -574,6 +574,44 @@ describe "Server", ->
 
             expect(buffers.keys()).to.deep.eq([])
 
+      it "can serve non 2xx status code requests when option set", ->
+        nock("http://google.com")
+        .matchHeader("user-agent", "foobarbaz")
+        .matchHeader("accept", "text/html,*/*")
+        .get("/foo")
+        .reply(404, "<html>content</html>", {
+          "X-Foo-Bar": "true"
+          "Content-Type": "text/html"
+          "Cache-Control": "public, max-age=3600"
+        })
+
+        headers = {}
+        headers["user-agent"] = "foobarbaz"
+
+        @server._onResolveUrl("http://google.com/foo", headers, @automationRequest, { failOnStatusCode: false })
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            isOkStatusCode: true
+            isHtml: true
+            contentType: "text/html"
+            url: "http://google.com/foo"
+            originalUrl: "http://google.com/foo"
+            status: 404
+            statusText: "Not Found"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp("http://google.com/foo")
+          .then (res) ->
+            expect(res.statusCode).to.eq(404)
+            expect(res.headers["set-cookie"]).not.to.match(/initial=;/)
+            expect(res.headers["x-foo-bar"]).to.eq("true")
+            expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
+            expect(res.body).to.include("content")
+            expect(res.body).to.include("document.domain = 'google.com'")
+            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
+
     describe "both", ->
       beforeEach ->
         Fixtures.scaffold("no-server")
