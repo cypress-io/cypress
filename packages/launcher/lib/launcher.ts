@@ -1,5 +1,5 @@
 import { writeJson } from 'fs-extra'
-import { launch, chromeVersionRegex } from './browsers'
+import { launch } from './browsers'
 import detect from './detect'
 import { Browser, LauncherApi } from './types'
 import { log } from './log'
@@ -12,7 +12,8 @@ const missingConfig = () =>
 const wrap = (all: Browser[]) => {
   log('wrapping all browsers', all)
   return {
-    launch: (name: string, url: string, args = []) => launch(all, name, url, args)
+    launch: (name: string, url: string, args = []) =>
+      launch(all, name, url, args)
   }
 }
 

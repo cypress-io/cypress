@@ -83,9 +83,7 @@ function detectBrowsers(browserName?: string): Bluebird<Browser[]> {
       profile: true,
       binary: browserName
     }
-    return Bluebird.all([
-      checkOneBrowser(browser)
-    ]) as Bluebird<Browser[]>
+    return Bluebird.all([checkOneBrowser(browser)]) as Bluebird<Browser[]>
   }
 
   log('detecting all available browsers')
