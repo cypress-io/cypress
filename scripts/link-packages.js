@@ -20,8 +20,8 @@ function deleteOutputFolder () {
   const wildcard = `${pathToPackages}/*`
   console.log('deleting all', wildcard)
   return glob(wildcard)
-    .map((filename) => fs.unlinkAsync(filename))
-    .catch(_.noop)
+  .map((filename) => fs.unlinkAsync(filename))
+  .catch(_.noop)
 }
 
 function proxyModule (name, pathToMain, pathToBrowser) {
@@ -88,12 +88,12 @@ function makeProxies () {
     console.log(path.dirname(destPackageFilename), '->', relativePathToMain)
 
     return fs.outputJsonAsync(destPackageFilename, proxy)
-      .then(() => {
-        if (needsRegister(json.name)) {
-          console.log('adding register file', registerPath)
-          return fs.outputFileAsync(registerPath, proxyRegister(bareName), 'utf8')
-        }
-      })
+    .then(() => {
+      if (needsRegister(json.name)) {
+        console.log('adding register file', registerPath)
+        return fs.outputFileAsync(registerPath, proxyRegister(bareName), 'utf8')
+      }
+    })
   })
 }
 
