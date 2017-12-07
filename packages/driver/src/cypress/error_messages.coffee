@@ -789,7 +789,7 @@ module.exports = {
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
     fromApp: """
-      This error originated from *your* application code, not from Cypress.
+      This error originated from your application code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -799,7 +799,7 @@ module.exports = {
     """
 
     fromSpec: """
-      This error originated from *your* test code, not from Cypress.
+      This error originated from your test code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
     """
