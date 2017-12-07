@@ -50,8 +50,11 @@ module.exports = {
   close: kill
 
   getByName: (browser) ->
-    la(check.unemptyString(name), "missing browser name", name)
-    log("getting browser by name", name)
+    if not browser
+      return Promise.resolve()
+
+    la(check.unemptyString(browser), "missing browser name", browser)
+    log("getting browser by name", browser)
 
     utils.getBrowsers(browser)
     .then (browsers = []) ->
