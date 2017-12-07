@@ -1,8 +1,9 @@
 import { writeJson } from 'fs-extra'
-import { launch } from './browsers'
+import { launchBrowser, SpawnFunction } from './browsers'
 import detect from './detect'
 import { Browser, LauncherApi } from './types'
 import { log } from './log'
+import * as cp from 'child_process'
 
 const Promise = require('bluebird')
 
@@ -12,20 +13,26 @@ const missingConfig = () =>
 const wrap = (all: Browser[]) => {
   log('wrapping all browsers', all)
   return {
-    launch: (name: string, url: string, args = []) =>
-      launch(all, name, url, args)
+    launch: (
+      name: string,
+      url: string,
+      args = [],
+      spawn: SpawnFunction = cp.spawn
+    ) => launchBrowser(all, name, url, args, spawn)
   }
 }
 
-const init = (browsers: Browser[] | string) => {
+const init = (browsers?: Browser[] | string) => {
   if (typeof browsers === 'string') {
     log('setting to just single browser', browsers)
     return detect(browsers).then(wrap)
   }
-  log('init OS browsers')
-  if (browsers.length) {
+
+  if (Array.isArray(browsers) && browsers.length) {
+    log('init OS browsers')
     return wrap(browsers)
   } else {
+    log('finding browsers first')
     return detect().then(wrap)
   }
 }

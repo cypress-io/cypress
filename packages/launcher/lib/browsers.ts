@@ -43,14 +43,36 @@ export const browsers: Browser[] = [
   }
 ]
 
-/** starts a browser by name and opens URL if given one */
-export function launch(
+export type SpawnFunction = (
+  programName: string,
+  args?: string[] | undefined,
+  options?: cp.SpawnOptions | undefined
+) => cp.ChildProcess
+
+/**
+ * Starts a browser by name and opens URL if given one
+ *
+ * @export
+ * @param {FoundBrowser[]} browsers List of discovered browsers
+ * @param {string} name Name of the browser to launch
+ * @param {string} [url] Url to launch
+ * @param {string[]} [args=[]] Additional browser CLI arguments
+ * @param {SpawnFunction} [spawn=cp.spawn] Spawn function (for mocking)
+ * @returns {cp.ChildProcess}
+ */
+export function launchBrowser(
   browsers: FoundBrowser[],
   name: string,
   url?: string,
-  args: string[] = []
+  args: string[] = [],
+  spawn: SpawnFunction = cp.spawn
 ) {
-  log('launching browser %s to open %s', name, url)
+  log('launching browser %s', name)
+  if (url) {
+    log('to open url %s', url)
+  } else {
+    log('without an url')
+  }
   const browser = find(browsers, { name })
 
   if (!browser) {
@@ -67,6 +89,11 @@ export function launch(
     args = [url].concat(args)
   }
 
-  log('spawning browser %s with args %s', browser.path, args.join(' '))
-  return cp.spawn(browser.path, args, { stdio: 'ignore' })
+  log(
+    'spawning browser %s with %d args "%s"',
+    browser.path,
+    args.length,
+    args.join(' ')
+  )
+  return spawn(browser.path, args, { stdio: 'ignore' })
 }
