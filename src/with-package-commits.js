@@ -1,5 +1,6 @@
 const pkgUp = require('pkg-up');
 const { getCommitFiles, getGitRoot } = require('./git-utils');
+const overrideOption = require('./override-option');
 
 const getPackagePath = async () => {
   const path = await pkgUp();
@@ -23,4 +24,4 @@ const withPackageCommits = async commits => {
   );
 };
 
-module.exports = withPackageCommits;
+module.exports = overrideOption('commits', withPackageCommits);
