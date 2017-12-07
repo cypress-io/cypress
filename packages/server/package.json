@@ -153,6 +153,7 @@
     "through": "2.3.6",
     "tough-cookie": "2.3.0",
     "trash": "4.0.0",
+    "tree-kill": "^1.2.0",
     "underscore": "^1.8.3",
     "underscore.string": "3.3.4",
     "url-parse": "^1.1.7",

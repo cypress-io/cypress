@@ -7,22 +7,33 @@ utils         = require("./utils")
 errors        = require("../errors")
 la            = require("lazy-ass")
 check         = require("check-more-types")
+treeKill      = require("tree-kill")
 
 fs              = Promise.promisifyAll(fs)
 instance        = null
 
 kill = (unbind) ->
+  log("killing browser instance")
+
   ## cleanup our running browser
   ## instance
-  return Promise.resolve() if not instance
+  if not instance
+    log("there is no browser instance")
+    return Promise.resolve()
 
   new Promise (resolve) ->
     if unbind
+      log("removing all listeners")
       instance.removeAllListeners()
 
-    instance.once("exit", resolve)
+    instance.once("exit", (x) ->
+      log("browser instance on exit in kill")
+      resolve(x)
+    )
 
-    instance.kill()
+    la(check.number(instance.pid), "browser instance without PID", instance)
+    log("sending kill signal to the instance", instance.pid)
+    treeKill(instance.pid)
     cleanup()
 
 cleanup = ->
@@ -85,18 +96,19 @@ module.exports = {
       browser.open(name, url, options, automation)
       .then (i) ->
         if not i
+          log("did not get an instance of browser", name)
           return errors.throw("BROWSER_DID_NOT_OPEN", name)
 
-        log("browser opened")
+        log("browser opened", i)
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
-
         instance = i
 
         ## TODO: normalizing opening and closing / exiting
         ## so that there is a default for each browser but
         ## enable the browser to configure the interface
         instance.once "exit", ->
+          log("browser instance on exit")
           options.onBrowserClose()
           cleanup()
 

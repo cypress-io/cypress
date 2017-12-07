@@ -45,8 +45,8 @@ export const browsers: Browser[] = [
 
 export type SpawnFunction = (
   programName: string,
-  args?: string[] | undefined,
-  options?: cp.SpawnOptions | undefined
+  args?: string[],
+  options?: cp.SpawnOptions
 ) => cp.ChildProcess
 
 /**
@@ -95,5 +95,6 @@ export function launchBrowser(
     args.length,
     args.join(' ')
   )
+  // TODO grab the output in order to better diagnose possible errors
   return spawn(browser.path, args, { stdio: 'ignore' })
 }
