@@ -17,6 +17,7 @@
     "read-pkg": "^3.0.0"
   },
   "devDependencies": {
-    "semantic-release": "^11.0.0"
+    "semantic-release": "^11.0.0",
+    "semantic-release-github-pr": "^1.1.1"
   }
 }
