@@ -5,6 +5,7 @@ const releaseNotesGenerator = require('@semantic-release/release-notes-generator
 const { publish: publishGithub } = require('@semantic-release/github');
 const { publish: publishNpm } = require('@semantic-release/npm');
 
+const pipeline = require('semantic-release/lib/plugins/pipeline');
 const gitTag = require('./src/git-tag');
 
 const overrideOption = (key, wrapperFn) => pluginFn => async (pluginConfig, options) => {
@@ -25,5 +26,5 @@ const withGitTag = overrideOption('nextRelease', async nextRelease =>
 module.exports = {
   analyzeCommits: withPackageCommits(commitAnalyzer),
   generateNotes: compose(withGitTag, withVersion, withPackageCommits)(releaseNotesGenerator),
-  publish: [withGitTag(publishNpm), withGitTag(publishGithub)],
+  publish: pipeline([withGitTag(publishNpm), withGitTag(publishGithub)]),
 };
