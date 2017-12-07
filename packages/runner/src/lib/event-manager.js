@@ -38,6 +38,8 @@ const eventManager = {
   },
 
   addGlobalListeners (state, connectionInfo) {
+    const rerun = () => this._reRun(state)
+
     channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {
@@ -62,7 +64,7 @@ const eventManager = {
     })
 
     _.each(socketRerunEvents, (event) => {
-      channel.on(event, this._reRun.bind(this))
+      channel.on(event, rerun)
     })
 
     reporterBus.on('runner:console:error', (testId) => {
@@ -87,7 +89,7 @@ const eventManager = {
 
     reporterBus.on('focus:tests', this.focusTests)
 
-    reporterBus.on('runner:restart', this._reRun.bind(this))
+    reporterBus.on('runner:restart', rerun)
 
     function sendEventIfSnapshotProps (logId, event) {
       if (!Cypress) return
@@ -135,7 +137,7 @@ const eventManager = {
 
     const $window = $(window)
 
-    $window.on('hashchange', this._reRun.bind(this))
+    $window.on('hashchange', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
@@ -305,8 +307,10 @@ const eventManager = {
     channel.off()
   },
 
-  _reRun () {
+  _reRun (state) {
     if (!Cypress) return
+
+    state.setIsLoading(true)
 
     // when we are re-running we first
     // need to stop cypress always

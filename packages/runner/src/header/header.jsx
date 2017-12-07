@@ -11,14 +11,14 @@ export default class Header extends Component {
   }
 
   render () {
-    const { width, height, displayScale, defaults, isLoading, url, highlightUrl } = this.props.state
+    const { width, height, displayScale, defaults, isLoadingUrl, url, highlightUrl } = this.props.state
     const { showingViewportMenu } = this.state
 
     return (
       <header>
         <div
           className={cs('url-container', {
-            loading: isLoading,
+            loading: isLoadingUrl,
             highlighted: highlightUrl,
           })}
         >

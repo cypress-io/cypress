@@ -1,4 +1,4 @@
-import { computed, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import automation from './automation'
 
 const _defaults = {
@@ -14,12 +14,13 @@ const _defaults = {
 
   url: '',
   highlightUrl: false,
-  isLoading: false,
+  isLoadingUrl: false,
 }
 
 export default class State {
   defaults = _defaults
 
+  @observable isLoading = true
   @observable isRunning = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -34,7 +35,7 @@ export default class State {
 
   @observable url = _defaults.url
   @observable highlightUrl = _defaults.highlightUrl
-  @observable isLoading = _defaults.isLoading
+  @observable isLoadingUrl = _defaults.isLoadingUrl
 
   @observable width = _defaults.width
   @observable height = _defaults.height
@@ -97,6 +98,10 @@ export default class State {
     }
   }
 
+  @action setIsLoading (isLoading) {
+    this.isLoading = isLoading
+  }
+
   updateDimensions (width, height) {
     this.width = width
     this.height = height
@@ -123,9 +128,9 @@ export default class State {
     }
   }
 
-  reset () {
+  resetUrl () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
-    this.isLoading = _defaults.isLoading
+    this.isLoadingUrl = _defaults.isLoadingUrl
   }
 }

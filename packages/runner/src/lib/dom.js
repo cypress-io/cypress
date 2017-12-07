@@ -133,7 +133,7 @@ function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
   let $reactContainer
 
   if ($container.length) {
-    $reactContainer = $container.find('.__cypress-highlight-react-container')
+    $reactContainer = $container.find('.__cypress-selector-helper-react-container')
   } else {
     $container = $('<div />')
     .addClass('__cypress-selector-helper')
@@ -143,11 +143,11 @@ function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
     appendTo($container)
 
     $reactContainer = $('<div />')
-    .addClass('__cypress-highlight-react-container')
+    .addClass('__cypress-selector-helper-react-container')
     .appendTo($container)
   }
 
-  if (!$el && !window.keepHighlights) {
+  if (!$el) {
     selectorHelperHighlight.unmount($reactContainer[0])
     $container.remove()
     return
