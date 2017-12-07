@@ -3,15 +3,17 @@ import { detectBrowserDarwin } from './darwin'
 import { detectBrowserWindows } from './windows'
 import { log } from './log'
 import { Browser, NotInstalledError } from './types'
-import { browsers, chromeVersionRegex } from './browsers'
+import { browsers, chromeLikeVersionRegex } from './browsers'
 import * as Bluebird from 'bluebird'
 import { merge, pick, tap, uniqBy, prop } from 'ramda'
 import * as _ from 'lodash'
 import * as os from 'os'
 
+const extractMajorVersion = (version: string) => version.split('.')[0]
+
 const setMajorVersion = (obj: Browser) => {
   if (obj.version) {
-    obj.majorVersion = obj.version.split('.')[0]
+    obj.majorVersion = extractMajorVersion(obj.version)
     log(
       'browser %s version %s major version %s',
       obj.name,
@@ -20,6 +22,39 @@ const setMajorVersion = (obj: Browser) => {
     )
   }
   return obj
+}
+
+type BrowserVersion = {
+  version: string
+  majorVersion: string
+}
+
+/**
+ * Finds version number in the typical output from "chrome --version" command.
+ * If cannot parse the output and detect major version, throws an exception.
+ *
+ * @export
+ * @param {RegExp} versionRegex
+ * @param {string} stdout
+ * @returns {BrowserVersion}
+ */
+export function parseVersion(
+  versionRegex: RegExp,
+  stdout: string
+): BrowserVersion {
+  const m = versionRegex.exec(stdout)
+  if (!m) {
+    throw new Error(`Cannot find browser version in string ${stdout}`)
+  }
+  const version = m[1]
+  const majorVersion = extractMajorVersion(version)
+  if (!majorVersion) {
+    throw new Error(`Cannot find major version in ${version}`)
+  }
+  return {
+    version,
+    majorVersion
+  }
 }
 
 type BrowserDetector = (browser: Browser) => Promise<Object>
@@ -73,13 +108,13 @@ function checkOneBrowser(browser: Browser) {
 }
 
 /** returns list of detected browsers */
-function detectBrowsers(browserName?: string): Bluebird<Browser[]> {
+export function detectBrowsers(browserName?: string): Bluebird<Browser[]> {
   if (browserName) {
     log('detecting single browser', browserName)
     const browser: Browser = {
       name: browserName,
       displayName: browserName,
-      versionRegex: chromeVersionRegex,
+      versionRegex: chromeLikeVersionRegex,
       profile: true,
       binary: browserName
     }

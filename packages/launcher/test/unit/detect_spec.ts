@@ -1,7 +1,8 @@
-const detect = require('../../lib/detect').default
+import { detectBrowsers } from '../../lib/detect'
+import { project } from 'ramda'
+
 const log = require('debug')('cypress:launcher:test')
 const os = require('os')
-import {project} from 'ramda'
 
 const isWindows = () =>
   os.platform() === 'win32'
@@ -9,6 +10,7 @@ const isWindows = () =>
 describe('browser detection', () => {
   // making simple to debug tests
   // using DEBUG=... flag
+
   const checkBrowsers = browsers => {
     log('detected browsers %j', browsers)
     expect(browsers).to.be.an.array
@@ -24,10 +26,14 @@ describe('browser detection', () => {
     }
   }
 
+  it('is a function', () => {
+    expect(detectBrowsers).to.be.a('function')
+  })
+
   // we are only going to run tests on platforms with at least
   // one browser. This test, is really E2E because it finds
   // real browsers
   it('detects available browsers', () => {
-    return detect().then(checkBrowsers)
+    return detectBrowsers().then(checkBrowsers)
   })
 })

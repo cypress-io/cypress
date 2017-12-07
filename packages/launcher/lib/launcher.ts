@@ -1,6 +1,6 @@
 import { writeJson } from 'fs-extra'
 import { launchBrowser, SpawnFunction } from './browsers'
-import detect from './detect'
+import { detectBrowsers } from './detect'
 import { Browser, LauncherApi } from './types'
 import { log } from './log'
 import * as cp from 'child_process'
@@ -25,7 +25,7 @@ const wrap = (all: Browser[]) => {
 const init = (browsers?: Browser[] | string) => {
   if (typeof browsers === 'string') {
     log('setting to just single browser', browsers)
-    return detect(browsers).then(wrap)
+    return detectBrowsers(browsers).then(wrap)
   }
 
   if (Array.isArray(browsers) && browsers.length) {
@@ -33,7 +33,7 @@ const init = (browsers?: Browser[] | string) => {
     return wrap(browsers)
   } else {
     log('finding browsers first')
-    return detect().then(wrap)
+    return detectBrowsers().then(wrap)
   }
 }
 
@@ -48,11 +48,11 @@ const update = (pathToConfig?: string) => {
   const saveBrowsers = (browsers: Browser[]) =>
     writeJson(pathToConfig, browsers, { spaces: 2 })
 
-  return detect().then(saveBrowsers)
+  return detectBrowsers().then(saveBrowsers)
 }
 
 // extend "api" with a few utility methods for convenience
 api.update = update
-api.detect = detect
+api.detect = detectBrowsers
 
 module.exports = api

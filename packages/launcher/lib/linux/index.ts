@@ -1,4 +1,5 @@
 import { log } from '../log'
+import { parseVersion } from '../detect'
 import { trim, tap } from 'ramda'
 import { FoundBrowser, Browser, NotInstalledError } from '../types'
 import * as execa from 'execa'
@@ -17,16 +18,17 @@ function getLinuxBrowser(
   versionRegex: RegExp
 ): Promise<FoundBrowser> {
   const getVersion = (stdout: string) => {
-    const m = versionRegex.exec(stdout)
-    if (m) {
-      return m[1]
+    try {
+      const info = parseVersion(versionRegex, stdout)
+      return info.version
+    } catch {
+      log(
+        'Could not extract version from %s using regex %s',
+        stdout,
+        versionRegex
+      )
+      return notInstalledErr(binary)
     }
-    log(
-      'Could not extract version from %s using regex %s',
-      stdout,
-      versionRegex
-    )
-    return notInstalledErr(binary)
   }
 
   const returnError = (err: Error) => {

@@ -16,14 +16,16 @@ const browserNotFoundErr = (
   return err
 }
 
-/** list of the browsers we can detect and use by default */
-export const chromeVersionRegex: RegExp = /Google Chrome (\S+)/
+// since we are limited to Chrome-like browsers we can probably
+// extract its version from <name --version> call
+export const chromeLikeVersionRegex: RegExp = /([\d\.]+)/
 
+/** list of the browsers we can detect and use by default */
 export const browsers: Browser[] = [
   {
     name: 'chrome',
     displayName: 'Chrome',
-    versionRegex: chromeVersionRegex,
+    versionRegex: /Google Chrome (\S+)/,
     profile: true,
     binary: 'google-chrome'
   },
