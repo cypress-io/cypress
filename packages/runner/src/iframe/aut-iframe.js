@@ -31,7 +31,7 @@ export default class AutIframe {
   }
 
   _contents () {
-    return this.$iframe.contents()
+    return this.$iframe && this.$iframe.contents()
   }
 
   _document () {
@@ -39,7 +39,7 @@ export default class AutIframe {
   }
 
   _body () {
-    return this._contents().find('body')
+    return this._contents() && this._contents().find('body')
   }
 
   detachDom = (Cypress) => {
@@ -194,20 +194,24 @@ export default class AutIframe {
   }
 
   removeHighlights = () => {
-    this._contents().find('.__cypress-highlight').remove()
+    this._contents() && this._contents().find('.__cypress-highlight').remove()
   }
 
   toggleSelectorHelper = (isEnabled) => {
     const body = this._body()
 
+    if (!body) return
+
+    const clearHighlight = this._clearHighlight.bind(this, false)
+
     if (isEnabled) {
       $(body).on('mousemove', this._onSelectorMouseMove)
-      $(body).on('mouseleave', this._clearHighlight)
+      $(body).on('mouseleave', clearHighlight)
     } else {
       $(body).off('mousemove', this._onSelectorMouseMove)
-      $(body).off('mouseleave', this._clearHighlight)
+      $(body).off('mouseleave', clearHighlight)
       if (this._highlightedEl) {
-        this._clearHighlight()
+        this._clearHighlight(true)
       }
     }
   }
@@ -241,11 +245,14 @@ export default class AutIframe {
     })
   }
 
-  _clearHighlight = () => {
-    addOrUpdateSelectorHelperHighlight(null, this._body())
+  _clearHighlight = (force = false) => {
+    const body = this._body()
+    if (!body) return
+
+    addOrUpdateSelectorHelperHighlight(null, body)
     if (this._highlightedEl) {
       this._highlightedEl = null
-      if (!this._selectorLocked) {
+      if (force || !this._selectorLocked) {
         selectorHelperModel.setCssSelector(null)
       }
     }
@@ -254,14 +261,14 @@ export default class AutIframe {
   toggleSelectorHighlight (isShowingHighlight) {
     if (isShowingHighlight) {
       const selector = selectorHelperModel.cssSelector
-      const $el = this._body().find(selector)
+      const contents = this._contents()
+      if (!contents) return
 
-      addOrUpdateSelectorHelperHighlight($el, this._body(), selector, () => {
-        this._selectorLocked = true
-        selectorHelperModel.setCssSelector(selector)
-      })
+      const $el = contents.find(selector)
+
+      addOrUpdateSelectorHelperHighlight($el, this._body(), selector)
     } else {
-      this._clearHighlight()
+      this._clearHighlight(false)
     }
   }
 }
