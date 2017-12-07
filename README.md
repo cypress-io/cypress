@@ -30,6 +30,7 @@ In `package.json`:
   "release": {
     "analyzeCommits": "semantic-release-monorepo",
     "generateNotes": "semantic-release-monorepo",
+    "getLastRelease": "semantic-release-monorepo",
     "publish": ["semantic-release-monorepo/npm", "semantic-release-monorepo/github"]
   }
 }
