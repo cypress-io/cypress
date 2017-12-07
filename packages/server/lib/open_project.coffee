@@ -137,7 +137,7 @@ create = ->
 
       options = _.extend {}, config.whitelist(args), options
 
-      browsers.get()
+      browsers.get(args.browser)
       .then (b = []) ->
         options.browsers = b
 

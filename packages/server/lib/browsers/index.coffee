@@ -5,6 +5,8 @@ Promise       = require("bluebird")
 log           = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
+la            = require("lazy-ass")
+check         = require("check-more-types")
 
 fs              = Promise.promisifyAll(fs)
 instance        = null
@@ -27,6 +29,7 @@ cleanup = ->
   instance = null
 
 getBrowser = (name) ->
+  la(check.unemptyString(name), "missing browser name", name)
   switch name
     ## normalize all the chrome* browsers
     when "chrome", "chromium", "canary"
@@ -47,11 +50,17 @@ module.exports = {
   close: kill
 
   getByName: (browser) ->
-    utils.getBrowsers()
+    la(check.unemptyString(name), "missing browser name", name)
+    log("getting browser by name", name)
+
+    utils.getBrowsers(browser)
     .then (browsers = []) ->
       _.find(browsers, { name: browser })
 
   open: (name, options = {}, automation) ->
+    log("open browser by name", name)
+    la(check.unemptyString(name), "missing browser name", name)
+
     kill(true)
     .then ->
       _.defaults(options, {

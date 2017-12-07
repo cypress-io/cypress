@@ -74,6 +74,7 @@ function checkOneBrowser(browser: Browser) {
 
 /** returns list of detected browsers */
 function detectBrowsers(): Bluebird<Browser[]> {
+  log('detecting all available browsers')
   // we can detect same browser under different aliases
   // tell them apart by the full version property
   const removeDuplicates = uniqBy(prop('version'))

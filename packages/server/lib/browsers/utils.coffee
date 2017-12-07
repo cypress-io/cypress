@@ -1,6 +1,9 @@
 fs       = require("fs-extra")
 path     = require("path")
 Promise  = require("bluebird")
+la       = require("lazy-ass")
+check    = require("check-more-types")
+log      = require("debug")("cypress:server:browsers")
 launcher = require("@packages/launcher")
 appData  = require("../util/app_data")
 
@@ -17,10 +20,14 @@ module.exports = {
   copyExtension: (src, dest) ->
     fs.copyAsync(src, dest)
 
-  getBrowsers: ->
+  getBrowsers: (browserName) ->
+    la(check.maybe.unemptyString(browserName), "invalid browser name", browserName)
+    if browserName
+      log("getBrowsers for specific browser name", browserName)
+
     ## TODO: accept an options object which
     ## turns off getting electron browser?
-    launcher.detect()
+    launcher.detect(browserName)
     .then (browsers = []) ->
       version = process.versions.chrome or ""
 
@@ -34,6 +41,10 @@ module.exports = {
       })
 
   launch: (name, url, args) ->
-    launcher()
-    .call("launch", name, url, args)
+    log("launching %s to open %s", name, url)
+    launcher(name)
+    .then (detectedBrowser) ->
+      if not detectedBrowser
+        throw new Error("Cannot find browser #{name}")
+        detectedBrowser.launch(name, url, args)
 }

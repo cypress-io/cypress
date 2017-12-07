@@ -17,11 +17,13 @@ const browserNotFoundErr = (
 }
 
 /** list of the browsers we can detect and use by default */
+export const chromeVersionRegex: RegExp = /Google Chrome (\S+)/
+
 export const browsers: Browser[] = [
   {
     name: 'chrome',
     displayName: 'Chrome',
-    versionRegex: /Google Chrome (\S+)/,
+    versionRegex: chromeVersionRegex,
     profile: true,
     binary: 'google-chrome'
   },
