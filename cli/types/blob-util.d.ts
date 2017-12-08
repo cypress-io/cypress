@@ -6,7 +6,7 @@
 import * as blobUtil from 'blob-util'
 
 export = BlobUtil
-export as namespace BlobUtil;
+export as namespace BlobUtil
 
 declare namespace BlobUtil {
   type BlobUtilStatic = typeof blobUtil

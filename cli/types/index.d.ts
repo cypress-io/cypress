@@ -144,33 +144,33 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => void): void;
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void;
-      overwrite(name: string, fn: (...args: any[]) => void): void;
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void;
+      add(name: string, fn: (...args: any[]) => void): void
+      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
+      overwrite(name: string, fn: (...args: any[]) => void): void
+      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
      * @see https://on.cypress.io/cookies
      */
     Cookies: {
-      debug(enabled: boolean, options?: Partial<DebugOptions>): void;
-      preserveOnce(...names: string[]): void;
-      defaults(options: Partial<CookieDefaults>): void;
+      debug(enabled: boolean, options?: Partial<DebugOptions>): void
+      preserveOnce(...names: string[]): void
+      defaults(options: Partial<CookieDefaults>): void
     }
 
     /**
      * @see https://on.cypress.io/dom
      */
     dom: {
-      isHidden(element: JQuery | HTMLElement): boolean;
+      isHidden(element: JQuery | HTMLElement): boolean
     }
 
     /**
      * @see https://on.cypress.io/api/api-server
      */
     Server: {
-      defaults(options: Partial<ServerOptions>): void;
+      defaults(options: Partial<ServerOptions>): void
     }
   }
 

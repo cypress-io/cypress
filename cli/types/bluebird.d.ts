@@ -4,7 +4,7 @@
 import * as BluebirdStatic from 'bluebird'
 
 export = Bluebird
-export as namespace Bluebird;
+export as namespace Bluebird
 
 declare namespace Bluebird {
   type BluebirdStatic = typeof BluebirdStatic

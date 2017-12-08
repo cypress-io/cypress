@@ -5,7 +5,7 @@
 import * as mimimatch from 'minimatch'
 
 export = Mimimatch
-export as namespace Mimimatch;
+export as namespace Mimimatch
 
 declare namespace Mimimatch {
   type MimimatchStatic = mimimatch.IMinimatchStatic
