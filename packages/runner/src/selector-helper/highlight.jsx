@@ -3,14 +3,14 @@ import React from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
 import Tooltip from '@cypress/react-tooltip'
 
-const Highlight = ({ selector, appendTo, boundary, style }) => {
+const Highlight = ({ selector, appendTo, boundary, showTooltip = true, style }) => {
   // indicates that tooltip should change if one of these props change
   const updateCue = _.values(_.pick(style, 'width', 'height', 'top', 'left', 'transform')).join()
 
   return (
     <Tooltip
       title={selector}
-      visible={true}
+      visible={showTooltip}
       placement='top-start'
       appendTo={appendTo}
       boundary={boundary}

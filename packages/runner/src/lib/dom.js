@@ -128,7 +128,7 @@ function addElementBoxModelLayers ($el, body) {
   return container
 }
 
-function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
+function addOrUpdateSelectorHelperHighlight ({ $el, $body, selector, showTooltip, onClick }) {
   let $container = $body.find('.__cypress-selector-helper')
   let $shadowRootContainer
   let shadowRoot
@@ -195,6 +195,7 @@ function addOrUpdateSelectorHelperHighlight ($el, $body, selector, onClick) {
     selector,
     appendTo: shadowRoot,
     boundary: $body[0],
+    showTooltip,
     style,
   })
 

@@ -203,17 +203,17 @@ export default class AutIframe {
   toggleSelectorHelper = (isEnabled) => {
     selectorHelperModel.setCssSelector(null)
 
-    const body = this._body()
-    if (!body) return
+    const $body = this._body()
+    if (!$body) return
 
     const clearHighlight = this._clearHighlight.bind(this, false)
 
     if (isEnabled) {
-      $(body).on('mousemove', this._onSelectorMouseMove)
-      $(body).on('mouseleave', clearHighlight)
+      $body.on('mousemove', this._onSelectorMouseMove)
+      $body.on('mouseleave', clearHighlight)
     } else {
-      $(body).off('mousemove', this._onSelectorMouseMove)
-      $(body).off('mouseleave', clearHighlight)
+      $body.off('mousemove', this._onSelectorMouseMove)
+      $body.off('mouseleave', clearHighlight)
       if (this._highlightedEl) {
         this._clearHighlight(true)
       }
@@ -221,6 +221,9 @@ export default class AutIframe {
   }
 
   _onSelectorMouseMove = (e) => {
+    const $body = this._body()
+    if (!$body) return
+
     let el = e.target
     let $el = $(el)
 
@@ -243,17 +246,23 @@ export default class AutIframe {
 
     const selector = getBestSelector(el)
 
-    addOrUpdateSelectorHelperHighlight($el, this._body(), selector, () => {
-      this._selectorLocked = true
-      selectorHelperModel.setCssSelector(selector)
+    addOrUpdateSelectorHelperHighlight({
+      $el,
+      selector,
+      $body,
+      showTooltip: true,
+      onClick: () => {
+        this._selectorLocked = true
+        selectorHelperModel.setCssSelector(selector)
+      },
     })
   }
 
   _clearHighlight = (force = false) => {
-    const body = this._body()
-    if (!body) return
+    const $body = this._body()
+    if (!$body) return
 
-    addOrUpdateSelectorHelperHighlight(null, body)
+    addOrUpdateSelectorHelperHighlight({ $el: null, $body })
     if (this._highlightedEl) {
       this._highlightedEl = null
       if (force || !this._selectorLocked) {
@@ -270,7 +279,12 @@ export default class AutIframe {
 
       const $el = contents.find(selector)
 
-      addOrUpdateSelectorHelperHighlight($el, this._body(), selector)
+      addOrUpdateSelectorHelperHighlight({
+        $el,
+        selector,
+        $body: this._body(),
+        showTooltip: false,
+      })
     } else {
       this._clearHighlight(false)
     }
