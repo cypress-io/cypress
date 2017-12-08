@@ -10,9 +10,10 @@ Promise    = require("bluebird")
 electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
-extension  = require("@packages/extension")
 pkg        = require("@packages/root")
 stats      = require("#{root}lib/stats")
+launcher   = require("@packages/launcher")
+extension  = require("@packages/extension")
 connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -83,7 +84,7 @@ describe "lib/cypress", ->
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(browsers, "get").resolves(TYPICAL_BROWSERS)
+    @sandbox.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     @sandbox.stub(process, "exit")
     @sandbox.stub(Server.prototype, "reset")
     @sandbox.spy(errors, "log")
@@ -772,6 +773,7 @@ describe "lib/cypress", ->
         buildId: "build-id-123"
         spec: "sub/sub_test.coffee"
         machineId: null
+        browser: "electron"
       }).resolves({instanceId: "instance-id-123"})
 
       updateArgs = {
@@ -819,14 +821,15 @@ describe "lib/cypress", ->
 
       @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
+        browser: "chrome"
         spec: spec
       }).resolves("instance-id-123")
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}"])
+      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}", "--browser=chrome"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
+        expect(browsers.open).to.be.calledWithMatch("chrome", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->

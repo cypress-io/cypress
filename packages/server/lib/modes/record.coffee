@@ -121,7 +121,7 @@ module.exports = {
       else
         null
 
-  createInstance: (buildId, spec, machineId) ->
+  createInstance: (buildId, spec, machineId, browser) ->
     debug("creating instance for build %s", buildId)
     if spec
       debug("for specific spec", spec)
@@ -132,6 +132,7 @@ module.exports = {
       buildId
       spec
       machineId
+      browser
     }
     api.createInstance(options)
     .catch (err) ->
@@ -213,7 +214,7 @@ module.exports = {
       screenshots:  screenshots
       failingTests: stats.failingTests
       cypressConfig: stats.config
-      ciProvider:    ciProvider.name()
+      ciProvider:    ciProvider.name() ## TODO: don't send this (no reason to)
       stdout:       stdout
     }
     api.updateInstance(options)
@@ -247,7 +248,10 @@ module.exports = {
       logException(err) unless err.statusCode is 503
 
   run: (options) ->
-    {projectPath} = options
+    { projectPath, browser } = options
+
+    ## default browser
+    browser ?= "electron"
 
     captured = stdout.capture()
 

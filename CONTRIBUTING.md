@@ -19,21 +19,20 @@ Thanks for taking the time to contribute! :smile:
 
 - [CI Status](#ci-status)
 - [Code of Conduct](#code-of-conduct)
-- [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
-  - [Bug Reports](#bug-reports)
-  - [Feature Requests](#feature-requests)
+- [Bug Reports](#bug-reports)
+- [Feature Requests](#feature-requests)
 - [Writing Code](#writing-code)
   - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
   - [Tests](#tests)
-  - [Working in a specific package](#packages)
-    - [Desktop-Gui](#desktop-gui)
-    - [Driver](#driver)
+  - [Packages](#packages)
 - [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
+  - [Branches](#branches)
   - [Pull Requests](#pull-requests)
+  - [Testing](#testing)
 - [Deployment](#deployment)
 
 ## CI status
@@ -54,19 +53,17 @@ Build status | Description
 
 All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Contributing Bug Reports & Feature Requests
-
-### Bug Reports
-
-This article describes how to open an effective bug report so we can get your issue fixed or help you work around it.
+## Bug Reports
 
 **The most important things to do are:**
 
-- Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem
-- Check the list of common fixes below
-- Make sure we support your setup
-- Gather debugging information
-- Explain how to reproduce the issue
+- Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem.
+- Check the list of [common fixes](#common-fixes) below.
+- Make sure we [support your setup](#supported-issues).
+- [Gather debugging information](#getting-more-information).
+- [Explain how to reproduce the issue](#reproducibility).
+
+Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
 
 If you have a feature request (not a bug), see [Feature Requests](#feature-requests).
 
@@ -78,16 +75,16 @@ Before filing a bug, make sure you are up to date. Your issue may have already b
 
 ### Supported Issues
 
-Before filing a bug, make sure you're filing an issue against something we support. See our [System Requirements](https://on.cypress.io/installing-cypress#system-requirements).
+Before filing a bug, make sure you are filing an issue against something we support. See our [System Requirements](https://on.cypress.io/installing-cypress#system-requirements).
 
-### Getting More Information
+### Getting more information
 
-For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it doesn't, this information can help us figure out and resolve an issue.
+For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it does not, this information can help us figure out and resolve an issue.
 
-- For issues in the web browser, check the JavaScript console and your Network tab in your DevTools
+- For issues in the web browser, check the JavaScript console and your Network tab in your DevTools.
 - Click on any command in the Command Log where the failure occurred, this will log more information about the error to the JavaScript console.
-- Use Cypress' [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
-- Ask other Cypress users for help in our [gitter channel](https://gitter.im/cypress-io/cypress).
+- Use Cypress [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
+- Ask other Cypress users for help in our [chat](https://on.cypress.io/chat).
 
 ### Reproducibility
 
@@ -98,44 +95,30 @@ The most important part of your issue is instructions on how to reproduce the is
 
 **It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
 
-### Open an Issue
-
-If you're up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you're ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
-
 ## Feature Requests
-
-Have a feature you'd like to see in Cypress? This describes how to file an effective feature request.
 
 **The most important things to do are:**
 
-- Understand our [roadmap](https://on.cypress.io/roadmap)
-- Make sure your feature makes sense in the project
-- Align your expectations around timelines and priorities
-- Describe your problem, not your solution
+- Understand our [roadmap](https://on.cypress.io/roadmap).
+- Make sure your feature makes sense in the project.
+- [Align your expectations around timelines and priorities.](#setting-expectations)
+- [Describe your problem, not your solution](#describe-problems)
 
-### Understand our roadmap
-
-We have a cohesive vision for Cypress in the long term and a general [roadmap](https://on.cypress.io/roadmap) that extends into the future. While the specifics of how we get there are flexible, many milestones are well-established.
-
-Feature requests are an important part of what we plan in our roadmap, but we ultimately build only features which make sense as part of the long term plan.
+If you think your feature might be a good fit for our roadmap, has reasonable expectations about it, and has a good description of the problem you are trying to solve, you are ready to [open a feature request](https://github.com/cypress-io/cypress/issues/new).
 
 ### Setting Expectations
 
-We have a lot of users and a small team. Even if your feature is something we're interested in and a good fit for where we want the product to go, it may take us a long time to get around to building it.
+We have a lot of users and a small team. Even if your feature is something we are interested in and a good fit for where we want the product to go, it may take us a long time to get around to building it.
 
-If you want a concrete timeline, you can [contact us](mailto:support@cypress.io) to pay for some control over our roadmap.
+If you want a concrete timeline, you can [contact us](mailto:support@cypress.io) to pay for some control over our [roadmap](https://on.cypress.io/roadmap).
 
 ### Describe Problems
 
-When you file a feature request, we need you to **describe the problem you're facing first**, not just your desired solution.
+When you file a feature request, we need you to **describe the problem you are facing first**, not just your desired solution.
 
 Often, your problem may have a lot in common with other similar problems. If we understand your use case we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
 
 Also, your proposed solution may not be compatible with the direction we want to take the product, but we may be able to come up with another solution which has approximately the same effect and does fit into the product direction.
-
-### Open an Issue
-
-If you think your feature might be a good fit for our roadmap, has reasonable expectations about it, and has a good description of the problem you're trying to solve, you're ready to [open a feature request](https://github.com/cypress-io/cypress/issues/new).
 
 ## Writing code
 
@@ -153,21 +136,21 @@ Here is a list of the core packages in this repository with a short description,
 
  Folder Name | Purpose
  ----------- | -------
-[coffee]() | A centralized version of CoffeeScript used for other packages.
-[desktop-gui]() | The front-end code for the Cypress Desktop GUI.
-[driver]() | The code that is used to drive the behavior of the API commands.
-[electron]() | The Cypress implementation of Electron.
-[example]() | Our example kitchen-sink application.
-[extension]() | The Cypress Chrome browser extension
-[https-proxy]() | This does https proxy for handling http certs and traffic.
-[launcher]() | Finds and launches browsers installed on your system.
-[reporter]() | The reporter shows the running results of the tests (The Command Log UI).
-[root]() | Dummy package pointing at the root of the repository.
-[runner]() | The runner is the minimal "chrome" around the user's application under test.
-[server]() | The <3 of Cypress. This orchestrates everything. The entire backend.
-[socket]() | A wrapper around socket.io to provide common libraries.
-[static]() | Serves static assets used in the Cypress GUI.
-[ts]() | A centralized version of typescript.
+[coffee](./packages/coffee) | A centralized version of CoffeeScript used for other packages.
+[desktop-gui](./packages/desktop-gui) | The front-end code for the Cypress Desktop GUI.
+[driver](./packages/driver) | The code that is used to drive the behavior of the API commands.
+[electron](./packages/electron) | The Cypress implementation of Electron.
+[example](./packages/example) | Our example kitchen-sink application.
+[extension](./packages/extension) | The Cypress Chrome browser extension
+[https-proxy](./packages/https-proxy) | This does https proxy for handling http certs and traffic.
+[launcher](./packages/launcher) | Finds and launches browsers installed on your system.
+[reporter](./packages/reporter) | The reporter shows the running results of the tests (The Command Log UI).
+[root](./packages/root) | Dummy package pointing at the root of the repository.
+[runner](./packages/runner) | The runner is the minimal "chrome" around the user's application under test.
+[server](./packages/server) | The <3 of Cypress. This orchestrates everything. The backend node process.
+[socket](./packages/socket) | A wrapper around socket.io to provide common libraries.
+[static](./packages/static) | Serves static assets used in the Cypress GUI.
+[ts](./packages/ts) | A centralized version of typescript.
 
 We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
 
@@ -206,11 +189,11 @@ Task | Purpose
 `build` | Build the package
 `build-prod` | Build all assets for production (if makes sense)
 `start` | Run a server for serving files
+`watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 `clean` | Remove any assets created by `build-dev` or `build-prod`
 `clean-deps` | Remove any dependencies installed (usually by `npm`)
 `test` | Runs all tests once
 `test-watch` | Run all tests in watch mode
-`watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
 
 Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
 
@@ -272,20 +255,13 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 
 ### Tests
 
- For most packages, there are unit, integration and e2e tests, which can be triggered by `npm run test-unit`, `npm run test-integration` and `npm run test-e2e` respectively.
+For most packages there are typically unit and some integration tests.
 
 Our true e2e tests are in `packages/server`, which test the full stack all together.
 
-The best source of truth in figuring out how to run tests for each package is our [`circle.yml`](.circle.yml) file found in the root `cypress` directory. The tasks defined in our [`circle.yml`](.circle.yml) are all run before anything is deployed.
+Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
-Since it is generally best to do single runs of tests serially instead of in parallel, this repo has some convenience scripts to run all the tests for all the packages sequentially:
-
-```bash
-npm run test ## same as 'npm run all test -- --serial'
-npm run test-unit ## same as 'npm run all test-unit -- --serial'
-npm run test-integration ## same as 'npm run all test-integration -- --serial'
-npm run test-e2e ## same as 'npm run all test-e2e -- --serial'
-```
+If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
 
 #### Docker
 
@@ -320,41 +296,13 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
-### Working in a specific package
+### Packages
 
-#### Desktop-Gui
+Generally when making contributions, you are typically making it to a small number of packages. Most of your local development work will be inside a single package at a time.
 
-##### Developing
+Each package documents how to best work with it, so simple consult the `README.md` of each package.
 
-Currently, if you want to work on the code around logging in, viewing runs, and setting up new projects to record, this requires connecting to a locally running API server.
-
-Our API server is only accessible to cypress employees at the moment. If you want to work with the code, we recommend working within the Cypress tests for the Desktop-Gui. There are lots of tests mocking our API server around logging in, seeing runs, and setting up projects.
-
-#### Driver
-
-##### Developing
-
-It should be noted that for developing in the `driver`, you need to watch the files using one of the following methods:
-
-- In the `cypress` root directory run `npm run watch`: This will run the watch task for all packages that have one.
-- In the `cypress/packages/runner` directory run `npm run watch`: This will run the watch task for the runner, which bundles the driver.
-
-##### Testing
-
-###### From the Cypress Test Runner:
-
-- In the `cypress` root directory, run `npm install` & `npm start`.
-- When the Cypress Test Runner opens, manually add the directory `cypress/packages/driver/test`.
-- In the `cypress/packages/driver` directory, run `npm start`.
-- Click into the `test` directory from the Cypress Test Runner.
-- Select any test file you want to run.
-
-###### From the terminal:
-
-- In the `cypress` directory: run `npm install`.
-- In the `cypress/packages/driver` directory, run `npm start` & `npm run test-integration`.
-- The Cypress Test Runner should spawn and run through each test file individually.
-
+They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
 ## Writing Documentation
 
@@ -380,6 +328,8 @@ The repository is setup with two main (protected) branches.
 ### Testing
 
 This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
+
+To run local tests, consult the `README.md` of each package.
 
 ## Deployment
 

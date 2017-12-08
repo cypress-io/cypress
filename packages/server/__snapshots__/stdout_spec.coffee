@@ -34,8 +34,6 @@ The internal Cypress web server responded with:
 
   > 404: Not Found
 
-
-
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
       at stack trace line
       at stack trace line
@@ -64,8 +62,6 @@ We failed looking for this file at stack trace line
 The internal Cypress web server responded with:
 
   > 404: Not Found
-
-
       at stack trace line
       at stack trace line
       at stack trace line
@@ -202,4 +198,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

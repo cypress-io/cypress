@@ -47,7 +47,7 @@ export function mdfind(id: string): Promise<string> {
 
   return execa
     .shell(cmd)
-    .then(prop('stdout'))
+    .then(result => result.stdout)
     .then(tap(logFound))
     .catch(failedToFind)
 }

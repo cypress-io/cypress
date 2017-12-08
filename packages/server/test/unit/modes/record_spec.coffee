@@ -349,10 +349,11 @@ describe "lib/modes/record", ->
     it "calls api.createInstance", ->
       api.createInstance.resolves()
 
-      record.createInstance("id-123", "cypress/integration/app_spec.coffee")
+      record.createInstance("id-123", "cypress/integration/app_spec.coffee", "FooBrowser")
 
       expect(api.createInstance).to.be.calledWith({
         buildId: "id-123"
+        browser: "FooBrowser"
         spec: "cypress/integration/app_spec.coffee"
         machineId: undefined
       })

@@ -7,6 +7,7 @@ const request = require('request')
 const url = require('url')
 const debug = require('debug')('cypress:cli')
 const { stripIndent } = require('common-tags')
+const is = require('check-more-types')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -14,12 +15,6 @@ const util = require('../util')
 const info = require('./info')
 
 const baseUrl = 'https://download.cypress.io/'
-
-const isString = (s) =>
-  typeof s === 'string'
-
-const isUrl = (s) =>
-  isString(s) && /^https:/.test(s)
 
 const prepend = (urlPath) => {
   const endpoint = url.resolve(baseUrl, urlPath)
@@ -29,7 +24,7 @@ const prepend = (urlPath) => {
 }
 
 const getUrl = (version) => {
-  if (isUrl(version)) {
+  if (is.url(version)) {
     debug('version is already an url', version)
     return version
   }
@@ -37,7 +32,9 @@ const getUrl = (version) => {
 }
 
 const statusMessage = (err) =>
-  err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
+  (err.statusCode
+    ? [err.statusCode, err.statusMessage].join(' - ')
+    : err.toString())
 
 const prettyDownloadErr = (err, version) => {
   const msg = stripIndent`
@@ -92,49 +89,47 @@ const downloadFromUrl = (options) => {
     progress(req, {
       throttle: options.throttle,
     })
-    .on('response', (response) => {
-      // start counting now once we've gotten
-      // response headers
-      started = new Date
+      .on('response', (response) => {
+        // start counting now once we've gotten
+        // response headers
+        started = new Date()
 
-      // if our status code does not start with 200
-      if (!(/^2/.test(response.statusCode))) {
-        debug('response code %d', response.statusCode)
+        // if our status code does not start with 200
+        if (!/^2/.test(response.statusCode)) {
+          debug('response code %d', response.statusCode)
 
-        const err = new Error(stripIndent`
+          const err = new Error(
+            stripIndent`
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
-        `)
+        `
+          )
 
-        reject(err)
-      }
-    })
-
-    .on('error', reject)
-
-    .on('progress', (state) => {
-      // total time we've elapsed
-      // starting on our first progress notification
-      const elapsed = new Date() - started
-
-      const eta = util.calculateEta(state.percent, elapsed)
-
-      // send up our percent and seconds remaining
-      options.onProgress(state.percent, util.secsRemaining(eta))
-    })
-
-    // save this download here
-    .pipe(fs.createWriteStream(options.downloadDestination))
-
-    .on('finish', () => {
-      debug('downloading finished')
-
-      resolve({
-        filename: options.downloadDestination,
-        downloaded: true,
+          reject(err)
+        }
       })
-    })
+      .on('error', reject)
+      .on('progress', (state) => {
+        // total time we've elapsed
+        // starting on our first progress notification
+        const elapsed = new Date() - started
+
+        const eta = util.calculateEta(state.percent, elapsed)
+
+        // send up our percent and seconds remaining
+        options.onProgress(state.percent, util.secsRemaining(eta))
+      })
+      // save this download here
+      .pipe(fs.createWriteStream(options.downloadDestination))
+      .on('finish', () => {
+        debug('downloading finished')
+
+        resolve({
+          filename: options.downloadDestination,
+          downloaded: true,
+        })
+      })
   })
 }
 
@@ -150,32 +145,30 @@ const download = (options = {}) => {
 
   debug('need to download Cypress version %s', options.version)
   // first check the original filename
-  return fs.pathExists(options.version)
-    .then((exists) => {
+  return fs.pathExists(options.version).then((exists) => {
+    if (exists) {
+      debug('found file right away', options.version)
+      return {
+        filename: options.version,
+        downloaded: false,
+      }
+    }
+
+    const possibleFile = formAbsolutePath(options.version)
+    debug('checking local file', possibleFile, 'cwd', process.cwd())
+    return fs.pathExists(possibleFile).then((exists) => {
       if (exists) {
-        debug('found file right away', options.version)
+        debug('found local file', possibleFile)
+        debug('skipping download')
         return {
-          filename: options.version,
+          filename: possibleFile,
           downloaded: false,
         }
+      } else {
+        return downloadFromUrl(options)
       }
-
-      const possibleFile = formAbsolutePath(options.version)
-      debug('checking local file', possibleFile, 'cwd', process.cwd())
-      return fs.pathExists(possibleFile)
-        .then((exists) => {
-          if (exists) {
-            debug('found local file', possibleFile)
-            debug('skipping download')
-            return {
-              filename: possibleFile,
-              downloaded: false,
-            }
-          } else {
-            return downloadFromUrl(options)
-          }
-        })
     })
+  })
 }
 
 const start = (options) => {
@@ -187,13 +180,14 @@ const start = (options) => {
   })
 
   // make sure our 'dist' installation dir exists
-  return info.ensureInstallationDir()
-  .then(() => {
-    return download(options)
-  })
-  .catch((err) => {
-    return prettyDownloadErr(err, options.version)
-  })
+  return info
+    .ensureInstallationDir()
+    .then(() => {
+      return download(options)
+    })
+    .catch((err) => {
+      return prettyDownloadErr(err, options.version)
+    })
 }
 
 module.exports = {

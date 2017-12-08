@@ -2,7 +2,7 @@ import { log } from '../log'
 import { FoundBrowser, Browser, NotInstalledError } from '../types'
 import * as execa from 'execa'
 import { normalize, join } from 'path'
-import { prop, trim, tap } from 'ramda'
+import { trim, tap } from 'ramda'
 import { pathExists } from 'fs-extra'
 import { homedir } from 'os'
 
@@ -92,7 +92,7 @@ function getWindowsBrowser(
         '/value'
       ]
       return execa('wmic', args)
-        .then(prop('stdout'))
+        .then(result => result.stdout)
         .then(trim)
         .then(tap(log))
         .then(getVersion)

@@ -6,8 +6,8 @@ global.expect = require('chai').expect
 global.lib = path.join(__dirname, '..', 'lib')
 
 require('chai')
-  .use(require('@cypress/sinon-chai'))
-  .use(require('chai-string'))
+.use(require('@cypress/sinon-chai'))
+.use(require('chai-string'))
 
 beforeEach(function () {
   this.sandbox = sinon.sandbox.create().usingPromise(Promise)

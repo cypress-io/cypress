@@ -156,7 +156,7 @@ The response we received from your web server was:
 
 This was considered a failure because the status code was not '2xx'.
 
-
+If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
       at stack trace line
       at stack trace line
       at stack trace line
@@ -227,8 +227,6 @@ We failed looking for this file at stack trace line
 The internal Cypress web server responded with:
 
   > 404: Not Found
-
-
       at stack trace line
       at stack trace line
       at stack trace line
@@ -442,4 +440,3 @@ When this 'load' event occurs, Cypress will continue running commands.
   (All Done)
 
 `
-

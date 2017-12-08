@@ -12,6 +12,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1)  An uncaught error was detected outside of a test:
      Uncaught ReferenceError: foo is not defined
 
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
@@ -63,6 +67,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1)  An uncaught error was detected outside of a test:
      Uncaught ReferenceError: foo is not defined
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
@@ -118,6 +126,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) foo bar:
      Uncaught ReferenceError: foo is not defined
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       at stack trace line
 
 
@@ -168,6 +180,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) foo "before all" hook for "does not run":
      Uncaught ReferenceError: foo is not defined
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
       at stack trace line

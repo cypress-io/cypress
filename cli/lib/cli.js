@@ -117,17 +117,17 @@ module.exports = {
     program._name = 'cypress'
 
     program
-      .command('help')
-      .description('Shows CLI help and exits')
-      .action(() => {
-        program.help()
-      })
+    .command('help')
+    .description('Shows CLI help and exits')
+    .action(() => {
+      program.help()
+    })
 
     program
-      .option('-v, --version', text('version'))
-      .command('version')
-      .description(text('version'))
-      .action(showVersions)
+    .option('-v, --version', text('version'))
+    .command('version')
+    .description(text('version'))
+    .action(showVersions)
 
     program
       .command('run')

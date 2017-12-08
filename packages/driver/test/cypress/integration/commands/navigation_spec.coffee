@@ -505,6 +505,11 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html?email=briancypress.io")
 
+    it "can visit pages with non-2xx status codes when option failOnStatusCode is false", ->
+      cy
+        .visit("localhost:3500/status-404", { failOnStatusCode: false })
+        .visit("localhost:3500/status-500", { failOnStatusCode: false })
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0
@@ -1129,6 +1134,8 @@ describe "src/cy/commands/navigation", ->
               > 500: Server Error
 
             This was considered a failure because the status code was not '2xx'.
+
+            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)
@@ -1179,6 +1186,8 @@ describe "src/cy/commands/navigation", ->
 
               - 302: https://google.com/bar/
               - 301: https://gmail.com/
+
+            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)

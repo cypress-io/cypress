@@ -3,8 +3,19 @@ require("../../spec_helper")
 Promise = require("bluebird")
 Windows = require("#{root}../lib/gui/windows")
 browsers = require("#{root}../lib/browsers")
+utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
+  context ".getByName", ->
+    it "returns browser by name", ->
+      @sandbox.stub(utils, "getBrowsers").resolves([
+        { name: "foo" }
+        { name: "bar" }
+      ])
+
+      browsers.getByName("foo").then (browser) ->
+        expect(browser).to.deep.eq({ name: "foo" })
+
   context ".open", ->
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = @sandbox.stub()

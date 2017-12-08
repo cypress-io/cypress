@@ -278,7 +278,7 @@ class Server
   _onRequest: (headers, automationRequest, options) ->
     @_request.send(headers, automationRequest, options)
 
-  _onResolveUrl: (urlStr, headers, automationRequest) ->
+  _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     request = @_request
 
     handlingLocalFile = false
@@ -350,7 +350,12 @@ class Server
 
               newUrl ?= urlStr
 
-              isOk        = statusCode.isOk(incomingRes.statusCode)
+              statusIs2xxOrAllowedFailure = ->
+                ## is our status code in the 2xx range, or have we disabled failing
+                ## on status code?
+                statusCode.isOk(incomingRes.statusCode) or (options.failOnStatusCode is false)
+
+              isOk        = statusIs2xxOrAllowedFailure()
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 

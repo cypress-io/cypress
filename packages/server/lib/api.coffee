@@ -6,6 +6,7 @@ request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
+browsers   = require('./browsers')
 Routes     = require("./util/routes")
 system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
@@ -141,34 +142,43 @@ module.exports = {
       debug("returned object")
       debug(instance)
 
-    system.info()
-    .then (systemInfo) ->
-      instanceOptions = {
-        spec:           options.spec
-        ## TODO remove hardcoded browser name
-        ## https://github.com/cypress-io/cypress/issues/854
-        browserName:    "Electron"
-        machineId: options.machineId
-      }
-      debug("creating instance with options", options)
+    { buildId, spec, timeout } = options
 
-      # always have Bluebird promise
-      Promise.resolve(
-        rp.post({
-          url: Routes.instances(options.buildId)
-          json: true
-          timeout: options.timeout ? 10000
-          headers: {
-            "x-route-version": "3"
-          }
-          body: _.extend(instanceOptions, systemInfo)
-        })
-        .promise()
-      )
-      .tap(debugInstanceCreate)
-      .then(R.pick(["instanceId", "machineId"]))
-      .catch(errors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
+    browsers.getByName(options.browser)
+    .then (browser = {}) ->
+      ## get the formatted browserName
+      ## and version of the browser we're
+      ## about to be running on
+      { displayName, version } = browser
+      
+      system.info()
+      .then (systemInfo) ->        
+        instanceOptions = {
+          spec:           options.spec
+          browserName:    displayName
+          browserVersion: version
+          machineId: options.machineId
+        }
+        allOptions = _.extend(instanceOptions, systemInfo)
+        debug("creating instance with options", allOptions)
+
+        # always have Bluebird promise
+        Promise.resolve(
+          rp.post({
+            url: Routes.instances(options.buildId)
+            json: true
+            timeout: options.timeout ? 10000
+            headers: {
+              "x-route-version": "3"
+            }
+            body: allOptions
+          })
+          .promise()
+        )
+        .tap(debugInstanceCreate)
+        .then(R.pick(["instanceId", "machineId"]))
+        .catch(errors.StatusCodeError, formatResponseBody)
+        .catch(tagError)
 
   updateInstanceStdout: (options = {}) ->
     rp.put({
@@ -197,7 +207,7 @@ module.exports = {
         "video"
         "screenshots"
         "failingTests"
-        "ciProvider"
+        "ciProvider" ## TODO: don't send this (no reason to)
         "cypressConfig"
         "stdout"
       ])
