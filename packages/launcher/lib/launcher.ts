@@ -1,6 +1,7 @@
 import { writeJson } from 'fs-extra'
 import { launchBrowser, SpawnFunction } from './browsers'
 import { detectBrowsers } from './detect'
+import { printDetectedBrowsers } from './print'
 import { Browser, LauncherApi } from './types'
 import { log } from './log'
 import * as cp from 'child_process'
@@ -54,5 +55,6 @@ const update = (pathToConfig?: string) => {
 // extend "api" with a few utility methods for convenience
 api.update = update
 api.detect = detectBrowsers
+api.printDetectedBrowsers = printDetectedBrowsers
 
 module.exports = api

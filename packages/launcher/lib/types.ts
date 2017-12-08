@@ -14,7 +14,7 @@ export type Browser = {
   binary: string
   version?: string
   majorVersion?: string
-  page?: string
+  path?: string
 }
 
 export type FoundBrowser = {
@@ -25,6 +25,7 @@ export type FoundBrowser = {
 interface ExtraLauncherMethods {
   update: Function
   detect: Function
+  printDetectedBrowsers: Function
 }
 
 type LauncherLaunch = (browsers?: any[]) => Promise<any>

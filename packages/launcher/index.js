@@ -15,10 +15,6 @@ if (!module.parent) {
   console.log(launcher)
   console.log('⛔️ please use it as a module, not from CLI')
 
-  const pluralize = require('pluralize')
-  launcher.detect().then((browsers) => {
-    console.log('detected %s', pluralize('browser', browsers.length, true))
-    console.log(browsers)
-  }, console.error)
+  launcher.printDetectedBrowsers().catch(console.error)
   /* eslint-enable no-console */
 }
