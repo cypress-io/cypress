@@ -359,7 +359,7 @@ module.exports = {
                 if not buildId
                   Promise.resolve({})
                 else
-                  @createInstance(buildId, specName, commonMachineId)
+                  @createInstance(buildId, specName, commonMachineId, browser)
 
               newInstance()
               .then (instance = {}) =>
