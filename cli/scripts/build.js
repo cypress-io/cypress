@@ -33,7 +33,7 @@ function preparePackageForNpmRelease (json) {
     bugs,
     repository,
     engines,
-    types: 'index.d.ts', // typescript types
+    types: 'types', // typescript types
     scripts: {
       postinstall: 'node index.js --exec install',
       size: 't=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";',
