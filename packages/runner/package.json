@@ -36,6 +36,7 @@
     "react": "15.6.2",
     "react-addons-test-utils": "15.6.2",
     "react-dom": "15.6.2",
+    "react-input-autosize": "^2.1.2",
     "react-test-renderer": "15.6.2",
     "rebuild-node-sass": "^1.1.0",
     "sinon": "^1.17.5",

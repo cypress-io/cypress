@@ -7,13 +7,50 @@
       padding: 6px 8px;
       position: relative;
 
+      p {
+        font-size: 12px;
+        padding-right: 20px;
+      }
+
       .selector {
         align-items: center;
         display: flex;
         position: relative;
       }
 
-      input {
+      .selector,
+      .selector-input,
+      .info .spacer {
+        font-family: Consolas, Monaco, 'Andale Mono', monospace;
+      }
+
+      .wrap {
+        align-items: center;
+         // needs a background to hide the copy-to-clipboard backer input
+        background: #f6f6f6;
+        display: flex;
+        padding: 4px 6px;
+      }
+
+      .syntax-object { color: #e45649; }
+      .syntax-operator { color: #383a42; }
+      .syntax-method { color: #6478f2; }
+      .syntax-string { color: #50a160; }
+
+      .selector-input {
+        input {
+          border: solid 1px #d3d3d3;;
+          color: #50a160;
+          min-width: 26px;
+          outline: none;
+          padding: 2px 4px;
+
+          // https://github.com/JedWatson/react-input-autosize#csp-and-the-ie-clear-indicator
+          &::-ms-clear { display: none; }
+        }
+      }
+
+      .copy-backer {
         font-size: 1px;
         left: 6px;
         position: absolute;
@@ -29,12 +66,16 @@
       }
 
       .copy-to-clipboard {
-        background: #e3e3e3;
-        border: solid 1px #d3d3d3;
+        background: #d3d3d3;
+        border: solid 1px #c7c7c7;
+        border-radius: 3px;
         color: #333;
-        flex-grow: 0;
-        margin-left: 5px;
-        padding: 4px 8px;
+        margin-left: 4px;
+        padding: 3px 6px;
+
+        &:hover {
+          background: #c7c7c7;
+        }
       }
 
       .close {
@@ -49,6 +90,22 @@
         &:hover,
         &:focus {
           color: #111;
+        }
+      }
+
+      .info {
+        color: #50a160;
+        display: flex;
+        font-size: 12px;
+        margin-top: 4px;
+
+        &.is-invalid {
+          color: $error;
+        }
+
+        .spacer {
+          margin-right: 11px;
+          visibility: hidden;
         }
       }
     }

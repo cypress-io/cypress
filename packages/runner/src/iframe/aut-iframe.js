@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
 import blankContents from './blank-contents'
-import { addElementBoxModelLayers, addHitBoxLayer, addOrUpdateSelectorHelperHighlight, getBestSelector, getOuterSize } from '../lib/dom'
+import dom from '../lib/dom'
 import visitFailure from './visit-failure'
 import selectorHelperModel from '../selector-helper/selector-helper-model'
+
+const sizzleRe = /sizzle/i
 
 export default class AutIframe {
   constructor (config) {
@@ -33,6 +35,10 @@ export default class AutIframe {
 
   _contents () {
     return this.$iframe && this.$iframe.contents()
+  }
+
+  _window () {
+    return this.$iframe.prop('contentWindow')
   }
 
   _document () {
@@ -182,16 +188,16 @@ export default class AutIframe {
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = getOuterSize(el)
+      const dimensions = dom.getOuterSize(el)
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || el.css('display') === 'none') return
 
-      addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
+      dom.addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
     })
 
     if (coords) {
       requestAnimationFrame(() => {
-        addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
+        dom.addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
       })
     }
   }
@@ -201,7 +207,7 @@ export default class AutIframe {
   }
 
   toggleSelectorHelper = (isEnabled) => {
-    selectorHelperModel.setCssSelector(null)
+    selectorHelperModel.clearSelectors()
 
     const $body = this._body()
     if (!$body) return
@@ -244,16 +250,17 @@ export default class AutIframe {
 
     this._highlightedEl = el
 
-    const selector = getBestSelector(el)
+    const selector = dom.getBestSelector(el)
 
-    addOrUpdateSelectorHelperHighlight({
+    dom.addOrUpdateSelectorHelperHighlight({
       $el,
       selector,
       $body,
       showTooltip: true,
       onClick: () => {
         this._selectorLocked = true
-        selectorHelperModel.setCssSelector(selector)
+        selectorHelperModel.setNumElements(1)
+        selectorHelperModel.setSelector(selector)
       },
     })
   }
@@ -262,24 +269,40 @@ export default class AutIframe {
     const $body = this._body()
     if (!$body) return
 
-    addOrUpdateSelectorHelperHighlight({ $el: null, $body })
+    dom.addOrUpdateSelectorHelperHighlight({ $el: null, $body })
     if (this._highlightedEl) {
       this._highlightedEl = null
       if (force || !this._selectorLocked) {
-        selectorHelperModel.setCssSelector(null)
+        selectorHelperModel.clearSelectors()
       }
     }
   }
 
   toggleSelectorHighlight (isShowingHighlight) {
     if (isShowingHighlight) {
-      const selector = selectorHelperModel.cssSelector
+      const selector = selectorHelperModel.selector
       const contents = this._contents()
       if (!contents) return
 
-      const $el = contents.find(selector)
+      let $el
 
-      addOrUpdateSelectorHelperHighlight({
+      try {
+        $el = contents.find(selector)
+        selectorHelperModel.setValidity(true)
+        selectorHelperModel.setNumElements($el.length)
+        if ($el.length) {
+          dom.scrollIntoView(this._window(), $el[0])
+        }
+      } catch (err) {
+        if (!sizzleRe.test(err.stack)) throw err
+        selectorHelperModel.setValidity(false)
+      }
+
+      if (!$el || !$el.length) {
+        $el = null
+      }
+
+      dom.addOrUpdateSelectorHelperHighlight({
         $el,
         selector,
         $body: this._body(),

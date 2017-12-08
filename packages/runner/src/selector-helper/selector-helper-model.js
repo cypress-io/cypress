@@ -1,15 +1,27 @@
-import { action, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 
 class SelectorHelperModel {
-  @observable cssSelector = null
+  @observable selector = ''
   @observable isEnabled = false
   @observable isShowingHighlight = false
+  @observable isValid = true
+  @observable numElements = 0
+
+  @computed get playgroundInfo () {
+    if (!this.isValid) {
+      return 'Invalid selector'
+    }
+
+    if (!this.selector) return ''
+
+    return this.numElements === 1 ? '1 element' : `${this.numElements} elements`
+  }
 
   @action toggleEnabled () {
     this.isEnabled = !this.isEnabled
 
     if (!this.isEnabled) {
-      this.cssSelector = null
+      this.selector = null
       this.isShowingHighlight = false
     }
   }
@@ -18,8 +30,21 @@ class SelectorHelperModel {
     this.isShowingHighlight = isShowingHighlight
   }
 
-  @action setCssSelector (selector) {
-    this.cssSelector = selector
+  @action setSelector (selector) {
+    this.selector = selector
+  }
+
+  @action clearSelectors () {
+    this.selector = ''
+    this.numElements = 0
+  }
+
+  @action setNumElements (numElements) {
+    this.numElements = numElements
+  }
+
+  @action setValidity (isValid) {
+    this.isValid = isValid
   }
 }
 

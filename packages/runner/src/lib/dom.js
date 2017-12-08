@@ -171,32 +171,38 @@ function addOrUpdateSelectorHelperHighlight ({ $el, $body, selector, showTooltip
     return
   }
 
-  const offset = $el.offset()
   const borderSize = 2
 
-  const style = {
-    position: 'absolute',
-    margin: 0,
-    padding: 0,
-    width: $el.outerWidth(),
-    height: $el.outerHeight(),
-    top: offset.top - borderSize,
-    left: offset.left - borderSize,
-    transform: $el.css('transform'),
-    zIndex: getZIndex($el),
-  }
+  const styles = $el.map((__, el) => {
+    const $el = $(el)
+    const offset = $el.offset()
 
-  $cover
-  .css(style)
-  .off('click')
-  .on('click', onClick)
+    return {
+      position: 'absolute',
+      margin: 0,
+      padding: 0,
+      width: $el.outerWidth(),
+      height: $el.outerHeight(),
+      top: offset.top - borderSize,
+      left: offset.left - borderSize,
+      transform: $el.css('transform'),
+      zIndex: getZIndex($el),
+    }
+  }).get()
+
+  if (styles.length === 1) {
+    $cover
+    .css(styles[0])
+    .off('click')
+    .on('click', onClick)
+  }
 
   selectorHelperHighlight.render($reactContainer[0], {
     selector,
     appendTo: shadowRoot,
     boundary: $body[0],
     showTooltip,
-    style,
+    styles,
   })
 
   return $container
@@ -323,10 +329,28 @@ function getBestSelector (el) {
   return getUniqueSelector(el)
 }
 
-export {
+function isInViewport (win, el) {
+  let rect = el.getBoundingClientRect()
+
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= $(win).height() &&
+    rect.right <= $(win).width()
+  )
+}
+
+function scrollIntoView (win, el) {
+  if (!el || isInViewport(win, el)) return
+
+  el.scrollIntoView()
+}
+
+export default {
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorHelperHighlight,
   getBestSelector,
   getOuterSize,
+  scrollIntoView,
 }
