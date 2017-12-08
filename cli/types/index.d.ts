@@ -7,12 +7,20 @@
 // TypeScript Version: 2.5
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="lodash" />
-/// <reference types="jquery" />
 /// <reference types="blob-util" />
-/// <reference types="minimatch" />
 /// <reference types="bluebird" />
+/// <reference types="chai" />
+/// <reference types="chai-jquery" />
+/// <reference types="jquery" />
+/// <reference types="lodash" />
+/// <reference types="minimatch" />
+/// <reference types="mocha" />
 /// <reference types="sinon" />
+/// <reference types="sinon-chai" />
+
+// Cypress adds chai expect and assert to global
+declare const expect: Chai.ExpectStatic
+declare const assert: Chai.AssertStatic
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -196,7 +204,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/check
      */
     check(options?: CheckOptions): Chainable
-    check(value: string | string[]): Chainable // no options
+    check(value: string | string[], options?: CheckOptions): Chainable // no options
 
     /**
      * @see https://on.cypress.io/children
@@ -231,6 +239,14 @@ declare namespace Cypress {
     click(options?: ClickOptions): Chainable
     click(position: string, options?: ClickOptions): Chainable
     click(x: number, y: number, options?: ClickOptions): Chainable
+
+    /**
+     * @see https://on.cypress.io/clock
+     */
+    clock(): Chainable
+    clock(now: number, options?: Loggable): Chainable
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable
+    clock(options: Loggable): Chainable
 
     /**
      * @see https://on.cypress.io/closest
@@ -368,18 +384,32 @@ declare namespace Cypress {
     /**
      * @see https://on.cypress.io/location
      */
-    location(options?: Loggable): Chainable
+    location(options?: Partial<Loggable & Timeoutable>): Chainable
+    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable
 
     /**
      * @see https://on.cypress.io/log
      */
-    log(message: string, args: any): Chainable
+    log(message: string, ...args: any[]): Chainable
 
     /**
      * @see https://on.cypress.io/next
      */
     next(options?: LoggableTimeoutable): Chainable
     next(selector: string, options?: LoggableTimeoutable): Chainable
+
+    /**
+     * @see https://on.cypress.io/nextall
+     */
+    nextAll(options?: Loggable & Timeoutable): Chainable
+    nextAll(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable
+
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil(options?: Loggable & Timeoutable): Chainable
+    nextUntil(selector: string, options?: Loggable & Timeoutable): Chainable
 
     /**
      * @see https://on.cypress.io/not
@@ -399,6 +429,12 @@ declare namespace Cypress {
     parents(selector: string, options?: LoggableTimeoutable): Chainable
 
     /**
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable
+    parentsUntil(element: HTMLElement | JQuery, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable
+
+    /**
      * @see https://on.cypress.io/pause
      */
     pause(options?: Loggable): Chainable
@@ -408,6 +444,18 @@ declare namespace Cypress {
      */
     prev(options?: LoggableTimeoutable): Chainable
     prev(selector: string, options?: LoggableTimeoutable): Chainable
+
+    /**
+     * @see https://on.cypress.io/prevall
+     */
+    prevAll(options?: Loggable & Timeoutable): Chainable
+    prevAll(selector: string, options?: Loggable & Timeoutable): Chainable
+
+    /**
+     * @see https://on.cypress.io/prevall
+     */
+    prevUntil(selector: string, filter?: string, options?: Loggable & Timeoutable): Chainable
+    prevUntil(element: HTMLElement | JQuery, filter?: string, options?: Loggable & Timeoutable): Chainable
 
     /**
      * @see https://on.cypress.io/readfile
@@ -436,15 +484,27 @@ declare namespace Cypress {
     /**
      * @see https://on.cypress.io/route
      */
-    route(url: string, response?: any): Chainable
-    route(method: string, url: string, response?: any): Chainable
-    route(fn: () => RouteOptions | RouteOptions): Chainable
+    route(url: string | RegExp, response?: string | Response): Chainable
+    route(method: string, url: string | RegExp, response?: string | Response): Chainable
+    route(fn: () => RouteOptions): Chainable
+    route(options: Partial<RouteOptions>): Chainable
 
     /**
      * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: LoggableTimeoutable): Chainable
     screenshot(fileName: string, options?: LoggableTimeoutable): Chainable
+
+    /**
+     * @see https://on.cypress.io/scrollintoview
+     */
+    scrollIntoView(options?: ScrollIntoViewOptions): Chainable
+
+    /**
+     * @see https://on.cypress.io/scrollto
+     */
+    scrollTo(position: PositionType, options?: Partial<ScrollToOptions>): Chainable
+    scrollTo(x: number | string, y: number | string, options?: Partial<ScrollToOptions>): Chainable
 
     /**
      * @see https://on.cypress.io/select
@@ -481,6 +541,21 @@ declare namespace Cypress {
     spread(fn: (...args: any[]) => any): Chainable
 
     /**
+     * @see https://on.cypress.io/spy
+     */
+    spy(): sinon.SinonSpy & Chainable
+    spy(func: (...args: any[]) => any): sinon.SinonSpy & Chainable
+    spy<T>(obj: T, method: keyof T): sinon.SinonSpy & Chainable
+
+    /**
+     * @see https://on.cypress.io/stub
+     */
+    stub(): sinon.SinonStub & Chainable
+    stub(obj: any): sinon.SinonStub & Chainable
+    stub<T>(obj: T, method: keyof T): sinon.SinonStub & Chainable
+    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): sinon.SinonStub & Chainable
+
+    /**
      * @see https://on.cypress.io/submit
      */
     submit(options?: Loggable): Chainable
@@ -489,6 +564,11 @@ declare namespace Cypress {
      * @see https://on.cypress.io/then
      */
     then(fn: (currentSubject: any) => any, options?: Timeoutable): Chainable
+
+    /**
+     * @see https://on.cypress.io/clock
+     */
+    tick(milliseconds: number): Chainable
 
     /**
      * @see https://on.cypress.io/title
@@ -576,7 +656,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/uncheck
      */
     uncheck(options?: CheckOptions): Chainable
-    uncheck(values: string[]): Chainable // no options? missing single value variant
+    uncheck(values: string | string[], options?: CheckOptions): Chainable
 
     /**
      * @see https://on.cypress.io/url
@@ -586,8 +666,8 @@ declare namespace Cypress {
     /**
      * @see https://on.cypress.io/viewport
      */
+    viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Loggable): Chainable
     viewport(width: number, height: number, options?: Loggable): Chainable
-    viewport(preset: string, orientation: ViewportOrientation, options?: Loggable): Chainable
 
     /**
      * Visit the given url
@@ -803,6 +883,19 @@ declare namespace Cypress {
     onRequest?(...args: any[]): void
     onResponse?(...args: any[]): void
     onAbort?(...args: any[]): void
+  }
+
+  interface ScrollToOptions extends Loggable, Timeoutable {
+    /**
+     * Scrolls over the duration (in ms)
+     * @default 0
+     */
+    duration: number
+    /**
+     * Will scroll with the easing animation
+     * @default 'swing'
+     */
+    easing: 'swing' | 'linear'
   }
 
   interface SelectOptions extends Loggable, Timeoutable {
@@ -1085,6 +1178,8 @@ declare namespace Cypress {
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): any
   }
+
+  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
 
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
 }
