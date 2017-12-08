@@ -28,7 +28,7 @@ preprocessor = require("./plugins/preprocessor")
 settings    = require("./util/settings")
 browsers    = require("./browsers")
 scaffoldLog = require("debug")("cypress:server:scaffold")
-log         = require("debug")("cypress:server:project")
+debug       = require("debug")("cypress:server:project")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -53,10 +53,10 @@ class Project extends EE
     @cfg         = null
     @memoryCheck = null
     @automation  = null
-    log("Project created %s", @projectRoot)
+    debug("Project created %s", @projectRoot)
 
   open: (options = {}) ->
-    log("opening project instance %s", @projectRoot)
+    debug("opening project instance %s", @projectRoot)
     @server = Server()
 
     _.defaults options, {
@@ -68,7 +68,7 @@ class Project extends EE
 
     if process.env.CYPRESS_MEMORY
       logMemory = ->
-        console.log("memory info", process.memoryUsage())
+        console.debug("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
 
@@ -76,6 +76,18 @@ class Project extends EE
     .then (cfg) =>
       process.chdir(@projectRoot)
 
+      ## TODO: move plugins config up here
+      @_initPlugins(cfg, options)
+      .then (modifiedCfg) ->
+        ## TODO merge in modifiedCfg into cfg
+        cfg = config.resolvePluginValues(cfg, modifiedCfg)
+        # if _.isObject(modifiedCfg)
+        #   _.extend(cfg, modifiedCfg)
+
+        debug("plugin config yielded", modifiedCfg)
+
+        return cfg
+    .then (cfg) =>
       @server.open(cfg, @)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
@@ -128,13 +140,13 @@ class Project extends EE
       api.getProjectRuns(projectId, authToken)
 
   reset: ->
-    log("resetting project instance %s", @projectRoot)
+    debug("resetting project instance %s", @projectRoot)
 
     Promise.try =>
       @server?.reset()
 
   close: ->
-    log("closing project instance %s", @projectRoot)
+    debug("closing project instance %s", @projectRoot)
 
     if @memoryCheck
       clearInterval(@memoryCheck)
@@ -169,21 +181,21 @@ class Project extends EE
       Promise.resolve()
 
   watchPluginsFile: (config, options) ->
-    log("attempt watch plugins file: #{config.pluginsFile}")
+    debug("attempt watch plugins file: #{config.pluginsFile}")
     if not config.pluginsFile
       return Promise.resolve()
 
     fs.pathExists(config.pluginsFile)
     .then (found) =>
-      log("plugins file found? #{found}")
+      debug("plugins file found? #{found}")
       ## ignore if not found. plugins#init will throw the right error
       return if not found
 
-      log("watch plugins file")
+      debug("watch plugins file")
       @watchers.watch(config.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
-          log("plugins file changed")
+          debug("plugins file changed")
           ## re-init plugins after a change
           @_initPlugins(config, options)
           .catch (err) ->
@@ -236,12 +248,12 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        log("onSetRunnables")
-        log("runnables", runnables)
+        debug("onSetRunnables")
+        debug("runnables", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
-        log("onMocha", event)
+        debug("onMocha", event)
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
@@ -366,7 +378,7 @@ class Project extends EE
     [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
-    log("scaffolding project %s", @projectRoot)
+    debug("scaffolding project %s", @projectRoot)
 
     scaffolds = []
 
@@ -472,13 +484,13 @@ class Project extends EE
     _.extend({}, clientProject, {state: state})
 
   @_getProject = (clientProject, authToken) ->
-    log("get project from api", clientProject.id, clientProject.path)
+    debug("get project from api", clientProject.id, clientProject.path)
     api.getProject(clientProject.id, authToken)
     .then (project) ->
-      log("got project from api")
+      debug("got project from api")
       Project._mergeDetails(clientProject, project)
     .catch (err) ->
-      log("failed to get project from api", err.statusCode)
+      debug("failed to get project from api", err.statusCode)
       switch err.statusCode
         when 404
           ## project doesn't exist
@@ -490,40 +502,40 @@ class Project extends EE
           throw err
 
   @getProjectStatuses = (clientProjects = []) ->
-    log("get project statuses for #{clientProjects.length} projects")
+    debug("get project statuses for #{clientProjects.length} projects")
     user.ensureAuthToken()
     .then (authToken) ->
-      log("got auth token #{authToken}")
+      debug("got auth token #{authToken}")
       api.getProjects(authToken).then (projects = []) ->
-        log("got #{projects.length} projects")
+        debug("got #{projects.length} projects")
         projectsIndex = _.keyBy(projects, "id")
         Promise.all(_.map clientProjects, (clientProject) ->
-          log("looking at", clientProject.path)
+          debug("looking at", clientProject.path)
           ## not a CI project, just mark as valid and return
           if not clientProject.id
-            log("no project id")
+            debug("no project id")
             return Project._mergeState(clientProject, "VALID")
 
           if project = projectsIndex[clientProject.id]
-            log("found matching:", project)
+            debug("found matching:", project)
             ## merge in details for matching project
             Project._mergeDetails(clientProject, project)
           else
-            log("did not find matching:", project)
+            debug("did not find matching:", project)
             ## project has id, but no matching project found
             ## check if it doesn't exist or if user isn't authorized
             Project._getProject(clientProject, authToken)
         )
 
   @getProjectStatus = (clientProject) ->
-    log("get project status for", clientProject.id, clientProject.path)
+    debug("get project status for", clientProject.id, clientProject.path)
 
     if not clientProject.id
-      log("no project id")
+      debug("no project id")
       return Promise.resolve(Project._mergeState(clientProject, "VALID"))
 
     user.ensureAuthToken().then (authToken) ->
-      log("got auth token #{authToken}")
+      debug("got auth token #{authToken}")
       Project._getProject(clientProject, authToken)
 
   @remove = (path) ->
@@ -579,7 +591,7 @@ class Project extends EE
   # Given a path to the project, finds all specs
   # returns list of specs with respect to the project root
   @findSpecs = (projectPath, specPattern) ->
-    log("finding specs for project %s", projectPath)
+    debug("finding specs for project %s", projectPath)
     la(check.unemptyString(projectPath), "missing project path", projectPath)
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 

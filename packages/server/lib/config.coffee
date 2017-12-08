@@ -12,11 +12,16 @@ v        = require("./util/validation")
 log      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
-## cypress following by _
+## cypress followed by _
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
+oneOrMoreSpacesRe = /\s+/
 
-toWords = (str) -> str.trim().split(/\s+/)
+toWords = (str) ->
+  str.trim().split(oneOrMoreSpacesRe)
+
+isCypressEnvLike = (key) ->
+  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
@@ -27,7 +32,7 @@ configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
   chromeWebSecurity               integrationFolder
-  environmentVariables            pluginsFile
+  env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
@@ -44,9 +49,6 @@ configKeys = toWords """
   watchForFileChanges
   waitForAnimations
 """
-
-isCypressEnvLike = (key) ->
-  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 defaults = {
   port:                          null
@@ -197,8 +199,8 @@ module.exports = {
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
-    config.environmentVariables = @parseEnv(config, resolved)
-    config.env = process.env["CYPRESS_ENV"]
+    config.env = @parseEnv(config, resolved)
+    # config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
 
     ## when headless
@@ -229,6 +231,13 @@ module.exports = {
     obj.resolved = @resolveConfigValues(config, defaults, resolved)
 
     return obj
+
+  resolvePluginValues: (cfg, overrides = {}) ->
+    ## TODO: for each override go through
+    ## and change the resolved values of cfg
+    ## to point to the plugin
+
+    _.defaultsDeep(overrides, cfg)
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
     ## pick out only the keys found in configKeys
@@ -419,7 +428,7 @@ module.exports = {
     return obj
 
   parseEnv: (cfg, resolved = {}) ->
-    envVars = resolved.environmentVariables = {}
+    envVars = resolved.env = {}
 
     resolveFrom = (from, obj = {}) ->
       _.each obj, (val, key) ->
@@ -431,7 +440,7 @@ module.exports = {
     envCfg  = cfg.env ? {}
     envFile = cfg.envFile ? {}
     envProc = @getProcessEnvVars(process.env) ? {}
-    envCLI  = cfg.environmentVariables ? {}
+    envCLI  = cfg.env ? {}
 
     matchesConfigKey = (key) ->
       if _.has(cfg, key)

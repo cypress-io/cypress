@@ -44,7 +44,7 @@ module.exports = {
 
       ipc.send("load", config)
 
-      ipc.on "loaded", (registrations) ->
+      ipc.on "loaded", (config, registrations) ->
         _.each registrations, (registration) ->
           log("register plugins process event", registration.event, "with id", registration.callbackId)
           register registration.event, (args...) ->
@@ -55,7 +55,8 @@ module.exports = {
                 invocationId: invocationId
               }
               ipc.send("execute", registration.event, ids, args)
-        resolve()
+
+        resolve(config)
 
       ipc.on "load:error", (type, args...) ->
         reject(errors.get(type, args...))
