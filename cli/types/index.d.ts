@@ -176,81 +176,81 @@ declare namespace Cypress {
 
   interface Chainable {
     /**
-     * @see https://on.cypress.io/api/and
+     * @see https://on.cypress.io/and
      */
     and(chainers: string, value?: any): Chainable;
     and(chainers: string, method: string, value: any): Chainable;
     and(fn: (currentSubject?: any) => void): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/as
+     * @see https://on.cypress.io/as
      */
     as(alias: string): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/blur
+     * @see https://on.cypress.io/blur
      */
     blur(options?: BlurOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/check
+     * @see https://on.cypress.io/check
      */
     check(options?: CheckOptions): Chainable;
     check(value: string | string[]): Chainable; // no options
 
     /**
-     * @see https://on.cypress.io/api/children
+     * @see https://on.cypress.io/children
      */
     children(options?: LoggableTimeoutable): Chainable;
     children(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/clear
+     * @see https://on.cypress.io/clear
      */
     clear(options?: ClearOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/clearcookie
+     * @see https://on.cypress.io/clearcookie
      */
     clearCookie(name: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/clearcookies
+     * @see https://on.cypress.io/clearcookies
      */
     clearCookies(options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/clearlocalstorage
+     * @see https://on.cypress.io/clearlocalstorage
      */
     clearLocalStorage(key?: string): Chainable;
     clearLocalStorage(re: RegExp): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/click
+     * @see https://on.cypress.io/click
      */
     click(options?: ClickOptions): Chainable;
     click(position: string, options?: ClickOptions): Chainable;
     click(x: number, y: number, options?: ClickOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/closest
+     * @see https://on.cypress.io/closest
      */
     closest(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/contains
+     * @see https://on.cypress.io/contains
      */
     contains(text: string, options?: LoggableTimeoutable): Chainable;
     contains(num: number | RegExp): Chainable;
     contains(selector: string, text: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/dblclick
+     * @see https://on.cypress.io/dblclick
      */
     dblclick(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/debug
+     * @see https://on.cypress.io/debug
      */
     debug(options?: Loggable): Chainable;
 
@@ -260,7 +260,7 @@ declare namespace Cypress {
      * @param {Loggable} [options]
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/document
+     * @see https://on.cypress.io/document
      * @example
      *    cy.document()
      *      .its('contentType')
@@ -269,42 +269,42 @@ declare namespace Cypress {
     document(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/each
+     * @see https://on.cypress.io/each
      */
     each(fn: (element?: any, index?: number, $list?: any) => void): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/end
+     * @see https://on.cypress.io/end
      */
     end(): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/eq
+     * @see https://on.cypress.io/eq
      */
     eq(index: number, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/exec
+     * @see https://on.cypress.io/exec
      */
     exec(command: string, options?: ExecOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/filter
+     * @see https://on.cypress.io/filter
      */
     filter(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/find
+     * @see https://on.cypress.io/find
      */
     find(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/first
+     * @see https://on.cypress.io/first
      */
     first(options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/fixture
+     * @see https://on.cypress.io/fixture
      */
     fixture(path: string, options?: Timeoutable): Chainable; // no log?
     fixture(path: string, encoding: string, options?: Timeoutable): Chainable; // no log?
@@ -315,183 +315,183 @@ declare namespace Cypress {
      * @param {Loggable} [options]
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/focus
+     * @see https://on.cypress.io/focus
      */
     focus(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/focused
+     * @see https://on.cypress.io/focused
      */
     focused(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/get
+     * @see https://on.cypress.io/get
      */
     get(selector: string, options?: LoggableTimeoutable): Chainable;
     get(alias: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/getcookie
+     * @see https://on.cypress.io/getcookie
      */
     getCookie(name: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/getcookies
+     * @see https://on.cypress.io/getcookies
      */
     getCookies(options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/go
+     * @see https://on.cypress.io/go
      */
     go(direction: HistoryDirection | number, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/hash
+     * @see https://on.cypress.io/hash
      */
     hash(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/invoke
+     * @see https://on.cypress.io/invoke
      */
     invoke(functionName: string, ...args: any[]): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/its
+     * @see https://on.cypress.io/its
      */
     its(propertyName: string): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/last
+     * @see https://on.cypress.io/last
      */
     last(options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/location
+     * @see https://on.cypress.io/location
      */
     location(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/log
+     * @see https://on.cypress.io/log
      */
     log(message: string, args: any): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/next
+     * @see https://on.cypress.io/next
      */
     next(options?: LoggableTimeoutable): Chainable;
     next(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/not
+     * @see https://on.cypress.io/not
      */
     not(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/parent
+     * @see https://on.cypress.io/parent
      */
     parent(options?: LoggableTimeoutable): Chainable;
     parent(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/parents
+     * @see https://on.cypress.io/parents
      */
     parents(options?: LoggableTimeoutable): Chainable;
     parents(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/pause
+     * @see https://on.cypress.io/pause
      */
     pause(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/prev
+     * @see https://on.cypress.io/prev
      */
     prev(options?: LoggableTimeoutable): Chainable;
     prev(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/readfile
+     * @see https://on.cypress.io/readfile
      */
     readFile(filePath: string, options?: Timeoutable): Chainable; // no log?
     readFile(filePath: string, encoding: string, options?: Timeoutable): Chainable; // no log?
 
     /**
-     * @see https://on.cypress.io/api/reload
+     * @see https://on.cypress.io/reload
      */
     reload(options?: LoggableTimeoutable): Chainable;
     reload(forceReload: boolean): Chainable; // no options?
 
     /**
-     * @see https://on.cypress.io/api/request
+     * @see https://on.cypress.io/request
      */
     request(url: string, body?: RequestBody): Chainable;
     request(method: HttpMethod, url: string, body?: RequestBody): Chainable;
     request(options: RequestOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/root
+     * @see https://on.cypress.io/root
      */
     root(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/route
+     * @see https://on.cypress.io/route
      */
     route(url: string, response?: any): Chainable;
     route(method: string, url: string, response?: any): Chainable;
     route(fn: () => RouteOptions | RouteOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/screenshot
+     * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: LoggableTimeoutable): Chainable;
     screenshot(fileName: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/select
+     * @see https://on.cypress.io/select
      */
     select(text: string | string[], options?: SelectOptions): Chainable;
     select(value: string | string[], options?: SelectOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/server
+     * @see https://on.cypress.io/server
      */
     server(options?: ServerOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/setcookie
+     * @see https://on.cypress.io/setcookie
      */
     setCookie(name: string, value: string, options?: SetCookieOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/should
+     * @see https://on.cypress.io/should
      */
     should(chainers: string, value?: any): Chainable;
     should(chainers: string, method: string, value: any): Chainable;
     should(fn: (currentSubject?: any) => void): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/siblings
+     * @see https://on.cypress.io/siblings
      */
     siblings(options?: LoggableTimeoutable): Chainable;
     siblings(selector: string, options?: LoggableTimeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/spread
+     * @see https://on.cypress.io/spread
      */
     spread(fn: (...args: any[]) => any): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/submit
+     * @see https://on.cypress.io/submit
      */
     submit(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/then
+     * @see https://on.cypress.io/then
      */
     then(fn: (currentSubject: any) => any, options?: Timeoutable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/title
+     * @see https://on.cypress.io/title
      */
     title(options?: Loggable): Chainable;
 
@@ -500,7 +500,7 @@ declare namespace Cypress {
      * @param {string} eventName
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/trigger
+     * @see https://on.cypress.io/trigger
      * @example:
      *    cy.get('a').trigger('mousedown')
      */
@@ -511,7 +511,7 @@ declare namespace Cypress {
      * @param {PositionType} position
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/trigger
+     * @see https://on.cypress.io/trigger
      */
     trigger(eventName: string, position: PositionType): Chainable;
     /**
@@ -520,7 +520,7 @@ declare namespace Cypress {
      * @param {TriggerOptions} options
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/trigger
+     * @see https://on.cypress.io/trigger
      */
     trigger(eventName: string, options: TriggerOptions): Chainable;
     /**
@@ -530,7 +530,7 @@ declare namespace Cypress {
      * @param {number} y The distance in pixels from element’s top to trigger the event.
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/trigger
+     * @see https://on.cypress.io/trigger
      */
     trigger(eventName: string, x: number, y: number): Chainable;
     /**
@@ -541,7 +541,7 @@ declare namespace Cypress {
      * @param {TriggerOptions} options
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/trigger
+     * @see https://on.cypress.io/trigger
      */
     trigger(eventName: string, position: PositionType, options: TriggerOptions): Chainable;
     /**
@@ -553,7 +553,7 @@ declare namespace Cypress {
      * @param {TriggerOptions} options
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/trigger
+     * @see https://on.cypress.io/trigger
      */
     trigger(eventName: string, x: number, y: number, options: TriggerOptions): Chainable;
 
@@ -564,7 +564,7 @@ declare namespace Cypress {
      * @param {TypeOptions} [options]
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/type
+     * @see https://on.cypress.io/type
      * @example
      *
      *    cy.get('input').type('Hello, World')
@@ -573,18 +573,18 @@ declare namespace Cypress {
     type(text: string, options?: TypeOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/uncheck
+     * @see https://on.cypress.io/uncheck
      */
     uncheck(options?: CheckOptions): Chainable;
     uncheck(values: string[]): Chainable; // no options? missing single value variant
 
     /**
-     * @see https://on.cypress.io/api/url
+     * @see https://on.cypress.io/url
      */
     url(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/viewport
+     * @see https://on.cypress.io/viewport
      */
     viewport(width: number, height: number, options?: Loggable): Chainable;
     viewport(preset: string, orientation: ViewportOrientation, options?: Loggable): Chainable;
@@ -596,14 +596,14 @@ declare namespace Cypress {
      * @param {VisitOptions} [options] Pass in an options object to change the default behavior of `cy.visit()`
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/visit
+     * @see https://on.cypress.io/visit
      * @example
      *    cy.visit('http://localhost:3000')
      */
     visit(url: string, options?: VisitOptions): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/wait
+     * @see https://on.cypress.io/wait
      */
     wait(ms: number | string[]): Chainable; // no options?
     wait(alias: string, options?: LoggableTimeoutable): Chainable;
@@ -614,7 +614,7 @@ declare namespace Cypress {
      * @param {Loggable} [options]
      * @returns {Chainable}
      * @memberof Chainable
-     * @see https://on.cypress.io/api/window
+     * @see https://on.cypress.io/window
      * @example
      *    cy.visit('http://localhost:8080/app')
      *    cy.window().then(function(win){
@@ -625,18 +625,18 @@ declare namespace Cypress {
     window(options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/within
+     * @see https://on.cypress.io/within
      */
     within(fn: (currentSubject?: any) => void): Chainable;
     within(options: Loggable, fn: (currentSubject?: any) => void): Chainable; // inconsistent argument order
 
     /**
-     * @see https://on.cypress.io/api/wrap
+     * @see https://on.cypress.io/wrap
      */
     wrap(Object: object, options?: Loggable): Chainable;
 
     /**
-     * @see https://on.cypress.io/api/writefile
+     * @see https://on.cypress.io/writefile
      */
     writeFile(filePath: string, contents: FileContents, options?: Timeoutable): Chainable;
     writeFile(filePath: string, contents: FileContents, encoding: string, options?: Timeoutable): Chainable;
@@ -839,7 +839,7 @@ declare namespace Cypress {
    * @interface TypeOptions
    * @extends {Loggable}
    * @extends {Timeoutable}
-   * @see https://on.cypress.io/api/type
+   * @see https://on.cypress.io/type
    */
   interface TypeOptions extends Loggable, Timeoutable {
     /**
@@ -929,7 +929,7 @@ declare namespace Cypress {
 
   interface ConfigOptions {
     /**
-     * Url used as prefix for [cy.visit()](https://on.cypress.io/api/visit) or [cy.request()](https://on.cypress.io/api/request) command’s url
+     * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
      * @default null
      */
     baseUrl: string | null;
@@ -974,22 +974,22 @@ declare namespace Cypress {
      */
     defaultCommandTimeout: number;
     /**
-     * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/api/exec) command
+     * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
      * @default 60000
      */
     execTimeout: number;
     /**
-     * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/api/visit), [cy.go()](https://on.cypress.io/api/go), [cy.reload()](https://on.cypress.io/api/reload) commands to fire their page load events
+     * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
      * @default 60000
      */
     pageLoadTimeout: number;
     /**
-     * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/api/wait) command
+     * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
     requestTimeout: number;
     /**
-     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/api/request), [cy.wait()](https://on.cypress.io/api/wait), [cy.fixture()](https://on.cypress.io/api/fixture), [cy.getCookie()](https://on.cypress.io/api/getcookie), [cy.getCookies()](https://on.cypress.io/api/getcookies), [cy.setCookie()](https://on.cypress.io/api/setcookie), [cy.clearCookie()](https://on.cypress.io/api/clearcookie), [cy.clearCookies()](https://on.cypress.io/api/clearcookies), and [cy.screenshot()](https://on.cypress.io/api/screenshot) commands
+     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
      * @default 30000
      */
     responseTimeout: number;
@@ -1014,7 +1014,7 @@ declare namespace Cypress {
      */
     pluginsFile: string;
     /**
-     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/api/screenshot) command or after a headless or CI run’s test failure
+     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
      */
     screenshotsFolder: string;
@@ -1054,12 +1054,12 @@ declare namespace Cypress {
      */
     chromeWebSecurity: boolean;
     /**
-     * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/api/viewport) command)
+     * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
      * @default 660
      */
     viewportHeight: number;
     /**
-     * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/api/viewport) command)
+     * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
      * @default 1000
      */
     viewportWidth: number;
