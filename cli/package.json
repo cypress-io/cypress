@@ -80,6 +80,6 @@
     "bin",
     "lib",
     "index.js",
-    "index.d.ts"
+    "types/*.d.ts"
   ]
 }
