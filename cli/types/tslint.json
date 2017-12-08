@@ -1,0 +1,13 @@
+{
+  "extends": "dtslint/dtslint.json",
+  "rules": {
+    "no-namespace": false,
+    "max-line-length": false,
+    "void-return": false,
+    "no-redundant-jsdoc": false,
+    "unified-signatures": false,
+    "only-arrow-functions": false,
+    "no-unnecessary-generics": false,
+    "export-just-namespace": false
+  }
+}

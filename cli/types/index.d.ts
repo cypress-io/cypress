@@ -1,11 +1,18 @@
-// Type definitions for Cypress test runner
 // Project: https://www.cypress.io
 // GitHub:  https://github.com/cypress-io/cypress
 // Definitions by: Gert Hengeveld <https://github.com/ghengeveld>
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
-// TypeScript Version: 2.x
+//                 Nicholas Boll <https://github.com/nicholasboll>
+// TypeScript Version: 2.5
 // Updated by the Cypress team: https://www.cypress.io/about/
+
+/// <reference types="lodash" />
+/// <reference types="jquery" />
+/// <reference types="blob-util" />
+/// <reference types="minimatch" />
+/// <reference types="bluebird" />
+/// <reference types="sinon" />
 
 declare namespace Cypress {
   type FileContents = string | any[] | object;
@@ -14,114 +21,124 @@ declare namespace Cypress {
   type RequestBody = string | object;
   type ViewportOrientation = "portrait" | "landscape";
   type PrevSubject = "optional" | "element" | "document" | "window";
-  type CommandOptions = {prevSubject: boolean | PrevSubject | PrevSubject[]};
+
+  interface   CommandOptions {
+    prevSubject: boolean | PrevSubject | PrevSubject[];
+  }
+  interface ObjectLike {
+    [key: string]: any;
+  }
 
   /**
    * Several libraries are bundled with Cypress by default.
    *
-   * @interface Cypress
    * @see https://on.cypress.io/api
    */
   interface Cypress {
     /**
      * Lodash library
      *
-     * @type {*}
-     * @memberof Cypress
      * @see https://on.cypress.io/_
-     * @example Cypress._.keys(obj)
+     * @example _
+     * ```ts
+     * Cypress._.keys(obj)
+     * ```
      */
-    _: any,
+    _: _.LoDashStatic;
     /**
      * jQuery library
      *
-     * @type {*}
-     * @memberof Cypress
      * @see https://on.cypress.io/$
-     * @example Cypress.$('p')
+     * @example $
+     * ```ts
+     * Cypress.$('p')
+     * ```
      */
-    $: any,
+    $: JQueryStatic;
     /**
      * Cypress automatically includes a Blob library and exposes it as Cypress.Blob.
      *
-     * @type {*}
-     * @memberof Cypress
      * @see https://on.cypress.io/blob
      * @see https://github.com/nolanlawson/blob-util
-     * @example Cypress.Blob.method()
+     * @example Blob
+     * ```ts
+     * Cypress.Blob.method()
+     * ```
      */
-    Blob: any,
+    Blob: BlobUtil.BlobUtilStatic;
     /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
-     * @type {Function}
-     * @memberof Cypress
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: Function,
+    minimatch: Mimimatch.MimimatchStatic;
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
-     * @type {Function}
-     * @memberof Cypress
      * @see https://on.cypress.io/moment
      * @see http://momentjs.com/
-     * @example const todaysDate = Cypress.moment().format("MMM DD, YYYY")
+     * @example moment
+     * ```ts
+     * const todaysDate = Cypress.moment().format("MMM DD, YYYY")
+     * ```
      */
-    moment: Function,
+    moment: (...args: any[]) => any; // perhaps we want to add moment as a dependency for types?
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
-     * @type {*}
-     * @memberof Cypress
      * @see https://on.cypress.io/promise
      * @see https://github.com/petkaantonov/bluebird
-     * @example new Cypress.Promise((resolve, reject) => { ... })
+     * @example Promise
+     * ```ts
+     * new Cypress.Promise((resolve, reject) => { ... })
+     * ```
      */
-    Promise: any,
+    Promise: Bluebird.BluebirdStatic;
     /**
      * Cypress version string. i.e. "1.1.2"
-     *
-     * @type {string}
-     * @memberof Cypress
      */
-    version: string,
+    version: string;
 
     /**
      * OS platform name, from Node `os.platform()`
      *
-     * @type {string}
-     * @memberof Cypress
      * @see https://nodejs.org/api/os.html#os_os_platform
-     * @example Cypress.platform // "darwin"
+     * @example platform
+     * ```ts
+     * Cypress.platform // "darwin"
+     * ```
      */
-    platform: string,
+    platform: string;
 
     /**
      * CPU architecture, from Node `os.arch()`
      *
-     * @type {string}
-     * @memberof Cypress
      * @see https://nodejs.org/api/os.html#os_os_arch
-     * @example Cypress.arch // "x64"
+     * @example arch
+     * ```ts
+     * Cypress.arch // "x64"
+     * ```
      */
-    arch: string
+    arch: string;
 
     /**
      * @see https://on.cypress.io/config
      */
-    config(): object;
-    config(key: string): any;
-    config(key: string, value: any): void;
-    config(Object: object): void;
+    config(): ConfigOptions;
+    config<K extends keyof ConfigOptions>(key: K): ConfigOptions[K];
+    config<K extends keyof ConfigOptions>(key: K, value: ConfigOptions[K]): void;
+    config(Object: Partial<ConfigOptions>): void;
 
+    // no real way to type without generics
     /**
      * @see https://on.cypress.io/env
      */
-    env(): object;
+    env(): ObjectLike;
     env(key: string): any;
     env(key: string, value: any): void;
-    env(Object: object): void;
+    env(object: ObjectLike): void;
+
+    log(options: Partial<Log>): void;
 
     /**
      * @see https://on.cypress.io/api/commands
@@ -131,29 +148,29 @@ declare namespace Cypress {
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void;
       overwrite(name: string, fn: (...args: any[]) => void): void;
       overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void;
-    }
+    };
 
     /**
      * @see https://on.cypress.io/cookies
      */
     Cookies: {
-      debug(enabled: boolean, options?: DebugOptions): void;
+      debug(enabled: boolean, options?: Partial<DebugOptions>): void;
       preserveOnce(...names: string[]): void;
-      defaults(options: CookieDefaults): void;
+      defaults(options: Partial<CookieDefaults>): void;
     };
 
     /**
      * @see https://on.cypress.io/dom
      */
     dom: {
-      isHidden(element: object): boolean;
+      isHidden(element: JQuery | HTMLElement): boolean;
     };
 
     /**
      * @see https://on.cypress.io/api/api-server
      */
     Server: {
-      defaults(options: ServerOptions): void;
+      defaults(options: Partial<ServerOptions>): void;
     };
   }
 
@@ -908,6 +925,165 @@ declare namespace Cypress {
      * @memberof TriggerOptions
      */
     cancable?: boolean;
+  }
+
+  interface ConfigOptions {
+    /**
+     * Url used as prefix for [cy.visit()](https://on.cypress.io/api/visit) or [cy.request()](https://on.cypress.io/api/request) command’s url
+     * @default null
+     */
+    baseUrl: string | null;
+    /**
+     * Any values to be set as [environment variables](https://docs.cypress.io/guides/guides/environment-variables.html)
+     * @default {}
+     */
+    env: { [key: string]: any };
+    /**
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * @default "*.hot-update.js"
+     */
+    ignoreTestFiles: string | string[];
+    /**
+     * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
+     * @default 50
+     */
+    numTestsKeptInMemory: number;
+    /**
+     * Port used to host Cypress. Normally this is a randomly generated port
+     * @default null
+     */
+    port: number | null;
+    /**
+     * The [reporter](https://docs.cypress.io/guides/guides/reporters.html) used when running headlessly or in CI
+     * @default "spec"
+     */
+    reporter: string;
+    /**
+     * Whether to take a screenshot on test failure when running headlessly or in CI
+     * @default true
+     */
+    screenshotOnHeadlessFailure: boolean;
+    /**
+     * Whether Cypress will watch and restart tests on test file changes
+     * @default true
+     */
+    watchForFileChanges: boolean;
+    /**
+     * Time, in milliseconds, to wait until most DOM based commands are considered timed out
+     * @default 4000
+     */
+    defaultCommandTimeout: number;
+    /**
+     * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/api/exec) command
+     * @default 60000
+     */
+    execTimeout: number;
+    /**
+     * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/api/visit), [cy.go()](https://on.cypress.io/api/go), [cy.reload()](https://on.cypress.io/api/reload) commands to fire their page load events
+     * @default 60000
+     */
+    pageLoadTimeout: number;
+    /**
+     * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/api/wait) command
+     * @default 5000
+     */
+    requestTimeout: number;
+    /**
+     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/api/request), [cy.wait()](https://on.cypress.io/api/wait), [cy.fixture()](https://on.cypress.io/api/fixture), [cy.getCookie()](https://on.cypress.io/api/getcookie), [cy.getCookies()](https://on.cypress.io/api/getcookies), [cy.setCookie()](https://on.cypress.io/api/setcookie), [cy.clearCookie()](https://on.cypress.io/api/clearcookie), [cy.clearCookies()](https://on.cypress.io/api/clearcookies), and [cy.screenshot()](https://on.cypress.io/api/screenshot) commands
+     * @default 30000
+     */
+    responseTimeout: number;
+    /**
+     * Path to folder where application files will attempt to be served from
+     * @default root project folder
+     */
+    fileServerFolder: string;
+    /**
+     * Path to folder containing fixture files (Pass false to disable)
+     * @default "cypress/fixtures"
+     */
+    fixturesFolder: string;
+    /**
+     * Path to folder containing integration test files
+     * @default "cypress/integration"
+     */
+    integrationFolder: string;
+    /**
+     * Path to plugins file. (Pass false to disable)
+     * @default "cypress/plugins/index.js"
+     */
+    pluginsFile: string;
+    /**
+     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/api/screenshot) command or after a headless or CI run’s test failure
+     * @default "cypress/screenshots"
+     */
+    screenshotsFolder: string;
+    /**
+     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
+     * @default "cypress/support/index.js"
+     */
+    supportFile: string;
+    /**
+     * Path to folder where videos will be saved after a headless or CI run
+     * @default "cypress/videos"
+     */
+    videosFolder: string;
+    /**
+     * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
+     * @default true
+     */
+    trashAssetsBeforeHeadlessRuns: boolean;
+    /**
+     * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
+     * @default 32
+     */
+    videoCompression: number;
+    /**
+     * Whether Cypress will record a video of the test run when running headlessly.
+     * @default true
+     */
+    videoRecording: boolean;
+    /**
+     * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
+     * @default true
+     */
+    videoUploadOnPasses: boolean;
+    /**
+     * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this here
+     * @default true
+     */
+    chromeWebSecurity: boolean;
+    /**
+     * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/api/viewport) command)
+     * @default 660
+     */
+    viewportHeight: number;
+    /**
+     * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/api/viewport) command)
+     * @default 1000
+     */
+    viewportWidth: number;
+    /**
+     * The distance in pixels an element must exceed over time to be considered animating
+     * @default 5
+     */
+    animationDistanceThreshold: number;
+    /**
+     * Whether to wait for elements to finish animating before executing commands
+     * @default true
+     */
+    waitForAnimations: boolean;
+  }
+
+  interface Log {
+    $el: any;
+    /** Allows the name of the command to be overwritten */
+    name: string;
+    /** Override *name* for display purposes only */
+    displayName: string;
+    message: any;
+    /** Return an object that will be printed in the dev tools console */
+    consoleProps(): any;
   }
 
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight";
