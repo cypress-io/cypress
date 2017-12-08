@@ -8,6 +8,7 @@ import selectorHelperModel from '../selector-helper/selector-helper-model'
 export default class AutIframe {
   constructor (config) {
     this.config = config
+    this.debouncedToggleSelectorHelper = _.debounce(this.toggleSelectorHelper, 300)
   }
 
   create () {
@@ -72,6 +73,8 @@ export default class AutIframe {
     this._body().remove()
     this._insertBodyStyles(body, bodyStyles)
     $html.append(body)
+
+    this.debouncedToggleSelectorHelper(selectorHelperModel.isEnabled)
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
@@ -198,8 +201,9 @@ export default class AutIframe {
   }
 
   toggleSelectorHelper = (isEnabled) => {
-    const body = this._body()
+    selectorHelperModel.setCssSelector(null)
 
+    const body = this._body()
     if (!body) return
 
     const clearHighlight = this._clearHighlight.bind(this, false)
