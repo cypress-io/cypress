@@ -182,842 +182,735 @@ declare namespace Cypress {
     }
   }
 
-  interface Chainable {
+  interface Chainable<Subject = any> {
     /**
+     * Create an assertion. Assertions are automatically retried until they pass or time out.
+     *
+     * @alias should
      * @see https://on.cypress.io/and
      */
-    and(chainers: string, value?: any): Chainable
-    and(chainers: string, method: string, value: any): Chainable
-    and(fn: (currentSubject?: any) => void): Chainable
+    and: Chainer<Subject>
 
     /**
+     * Assign an alias for later use. Reference the alias later within a
+     * [cy.get()](https://on.cypress.io/get) or
+     * [cy.wait()](https://on.cypress.io/wait) command with a `@` prefix.
+     *
      * @see https://on.cypress.io/as
      */
-    as(alias: string): Chainable
+    as(alias: string): Chainable<Subject>
 
     /**
+     * Blur a focused element. This element must currently be in focus. If you want to ensure an element is focused before blurring, try using .focus() before .blur().
+     *
      * @see https://on.cypress.io/blur
      */
-    blur(options?: BlurOptions): Chainable
+    blur(options?: Partial<BlurOptions>): Chainable<Subject>
 
     /**
+     * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
+     *
      * @see https://on.cypress.io/check
      */
-    check(options?: CheckOptions): Chainable
-    check(value: string | string[], options?: CheckOptions): Chainable // no options
+    check(options?: Partial<CheckOptions>): Chainable<Subject>
+    check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
 
     /**
+     * Get the children of each DOM element within a set of DOM elements.
+     *
      * @see https://on.cypress.io/children
      */
-    children(options?: LoggableTimeoutable): Chainable
-    children(selector: string, options?: LoggableTimeoutable): Chainable
+    children<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    children<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Clear the value of an `input` or `textarea`.
+     * An alias for `.type({selectall}{backspace})`
+     *
      * @see https://on.cypress.io/clear
      */
-    clear(options?: ClearOptions): Chainable
+    clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
+     * Clear a specific browser cookie.
+     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear a specific cookie inside a single test.
+     *
      * @see https://on.cypress.io/clearcookie
      */
-    clearCookie(name: string, options?: LoggableTimeoutable): Chainable
+    clearCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
+     * Clear all browser cookies.
+     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear a specific cookie inside a single test.
+     *
      * @see https://on.cypress.io/clearcookies
      */
-    clearCookies(options?: LoggableTimeoutable): Chainable
+    clearCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear localStorage inside a single test.
+     *
      * @see https://on.cypress.io/clearlocalstorage
      */
-    clearLocalStorage(key?: string): Chainable
-    clearLocalStorage(re: RegExp): Chainable
+    clearLocalStorage(key?: string): Chainable<null>
+    clearLocalStorage(re: RegExp): Chainable<null>
 
     /**
+     * Click a DOM element.
+     *
      * @see https://on.cypress.io/click
      */
-    click(options?: ClickOptions): Chainable
-    click(position: string, options?: ClickOptions): Chainable
-    click(x: number, y: number, options?: ClickOptions): Chainable
+    click(options?: Partial<ClickOptions>): Chainable<Subject>
+    click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    click(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
+     * `cy.clock()` overrides native global functions related to time allowing them to be controlled
+     * synchronously via [cy.tick()](https://on.cypress.io/tick) or the yielded clock object.
+     * This includes controlling:
+     * * `setTimeout`
+     * * `clearTimeout`
+     * * `setInterval`
+     * * `clearInterval`
+     * * `Date` Objects
+     *
+     * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
+     *
      * @see https://on.cypress.io/clock
      */
-    clock(): Chainable
-    clock(now: number, options?: Loggable): Chainable
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable
-    clock(options: Loggable): Chainable
+    clock(): Chainable<Clock>
+    clock(now: number, options?: Loggable): Chainable<Clock>
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    clock(options: Loggable): Chainable<Clock>
 
     /**
+     * Get the first DOM element that matches the selector (whether it be itself or one of its ancestors).
+     *
      * @see https://on.cypress.io/closest
      */
-    closest(selector: string, options?: LoggableTimeoutable): Chainable
+    closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get the DOM element containing the text. DOM elements can contain more than the desired text and still match. Additionally, Cypress prefers some DOM elements over the deepest element found.
+     *
      * @see https://on.cypress.io/contains
      */
-    contains(text: string, options?: LoggableTimeoutable): Chainable
-    contains(num: number | RegExp): Chainable
-    contains(selector: string, text: string, options?: LoggableTimeoutable): Chainable
+    contains(content: string | number | RegExp): Chainable<Subject>
+    contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Double-click a DOM element.
+     *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Loggable): Chainable
+    dblclick(options?: Partial<Loggable>): Chainable
 
     /**
+     * Set a debugger and log what the previous command yields.
+     *
      * @see https://on.cypress.io/debug
      */
-    debug(options?: Loggable): Chainable
+    debug(options?: Partial<Loggable>): Chainable<Subject>
 
     /**
      * Get the window.document of the page that is currently active.
      *
-     * @param {Loggable} [options]
-     * @returns {Chainable}
-     * @memberof Chainable
      * @see https://on.cypress.io/document
-     * @example
-     *    cy.document()
-     *      .its('contentType')
-     *      .should('eq', 'text/html')
+     * @example document
+     * ```ts
+     * cy.document()
+     *   .its('contentType')
+     *   .should('eq', 'text/html')
+     * ```
      */
-    document(options?: Loggable): Chainable
+    document(options?: Partial<Loggable>): Chainable<Document>
 
     /**
+     * Iterate through an array like structure (arrays or objects with a length property).
+     *
      * @see https://on.cypress.io/each
      */
-    each(fn: (element?: any, index?: number, $list?: any) => void): Chainable
+    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
 
     /**
+     * End a chain of commands
+     *
      * @see https://on.cypress.io/end
      */
-    end(): Chainable
+    end(): Chainable<null>
 
     /**
+     * Get A DOM element at a specific index in an array of elements.
+     *
      * @see https://on.cypress.io/eq
      */
-    eq(index: number, options?: LoggableTimeoutable): Chainable
+    eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Execute a system command.
      * @see https://on.cypress.io/exec
      */
-    exec(command: string, options?: ExecOptions): Chainable
+    exec(command: string, options?: Partial<ExecOptions>): Chainable<Exec>
 
     /**
+     * Get the DOM elements that match a specific selector. Opposite of `.not()`
+     *
      * @see https://on.cypress.io/filter
      */
-    filter(selector: string, options?: LoggableTimeoutable): Chainable
+    filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
+    filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get the descendent DOM elements of a specific selector.
+     *
      * @see https://on.cypress.io/find
      */
-    find(selector: string, options?: LoggableTimeoutable): Chainable
+    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get the first DOM element within a set of DOM elements.
+     *
      * @see https://on.cypress.io/first
      */
-    first(options?: LoggableTimeoutable): Chainable
+    first(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
+     * Load a fixed set of data located in a file.
+     *
      * @see https://on.cypress.io/fixture
      */
-    fixture(path: string, options?: Timeoutable): Chainable // no log?
-    fixture(path: string, encoding: string, options?: Timeoutable): Chainable // no log?
+    fixture<Contents = any>(path: string, options?: Partial<Timeoutable>): Chainable<Contents> // no log?
+    fixture<Contents = any>(path: string, encoding: Encodings, options?: Partial<Timeoutable>): Chainable<Contents> // no log?
 
     /**
      * Get the DOM element that is currently focused.
      *
-     * @param {Loggable} [options]
-     * @returns {Chainable}
-     * @memberof Chainable
      * @see https://on.cypress.io/focus
      */
-    focus(options?: Loggable): Chainable
+    focus(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
+     * Get the DOM element that is currently focused.
+     *
      * @see https://on.cypress.io/focused
      */
-    focused(options?: Loggable): Chainable
+    focused(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
 
     /**
+     * Get one or more DOM elements by selector or alias.
      * @see https://on.cypress.io/get
      */
-    get(selector: string, options?: LoggableTimeoutable): Chainable
-    get(alias: string, options?: LoggableTimeoutable): Chainable
+    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
+     * Get a browser cookie by its name.
+     *
      * @see https://on.cypress.io/getcookie
      */
-    getCookie(name: string, options?: LoggableTimeoutable): Chainable
+    getCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<Cookie | null>
 
     /**
+     * Get all of the browser cookies.
+     *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: LoggableTimeoutable): Chainable
+    getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
+     * Navigate back or forward to the previous or next URL in the browser’s history.
+     *
      * @see https://on.cypress.io/go
      */
-    go(direction: HistoryDirection | number, options?: LoggableTimeoutable): Chainable
+    go(direction: HistoryDirection | number, options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
     /**
+     * Get the current URL hash of the page that is currently active.
+     *
      * @see https://on.cypress.io/hash
      */
-    hash(options?: Loggable): Chainable
+    hash(options?: Partial<Loggable>): Chainable<string>
 
     /**
+     * Invoke a function on the previously yielded subject.
+     * This isn't possible to strongly type without generic override yet.
+     * If called on an object you can do this instead: `.then(s => s.show())`.
+     * If called on an array you can do this instead: `.each(s => s.show())`.
+     * From there the subject will be properly typed.
+     *
      * @see https://on.cypress.io/invoke
      */
-    invoke(functionName: string, ...args: any[]): Chainable
+    invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
 
     /**
+     * Get a property’s value on the previously yielded subject.
+     *
      * @see https://on.cypress.io/its
      */
-    its(propertyName: string): Chainable
+    its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
 
     /**
+     * Get the last DOM element within a set of DOM elements.
+     *
      * @see https://on.cypress.io/last
      */
-    last(options?: LoggableTimeoutable): Chainable
+    last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get the global `window.location` object of the page that is currently active.
+     *
      * @see https://on.cypress.io/location
      */
-    location(options?: Partial<Loggable & Timeoutable>): Chainable
-    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable
+    location(options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
 
     /**
+     * Print a message to the Cypress Command Log.
+     *
      * @see https://on.cypress.io/log
      */
-    log(message: string, ...args: any[]): Chainable
+    log(message: string, ...args: any[]): Chainable<null>
 
     /**
+     * Get the immediately following sibling of each DOM element within a set of DOM elements.
+     *
      * @see https://on.cypress.io/next
      */
-    next(options?: LoggableTimeoutable): Chainable
-    next(selector: string, options?: LoggableTimeoutable): Chainable
+    next<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    next<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements.
+     *
      * @see https://on.cypress.io/nextall
      */
-    nextAll(options?: Loggable & Timeoutable): Chainable
-    nextAll(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable
+    nextAll<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextAll<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextAll<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
+     *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil(options?: Loggable & Timeoutable): Chainable
-    nextUntil(selector: string, options?: Loggable & Timeoutable): Chainable
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextUntil<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
+     *
      * @see https://on.cypress.io/not
      */
-    not(selector: string, options?: LoggableTimeoutable): Chainable
+    not<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get the parent DOM element of a set of DOM elements.
+     *
      * @see https://on.cypress.io/parent
      */
-    parent(options?: LoggableTimeoutable): Chainable
-    parent(selector: string, options?: LoggableTimeoutable): Chainable
+    parent<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    parent<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parent<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get the parent DOM elements of a set of DOM elements.
+     *
      * @see https://on.cypress.io/parents
      */
-    parents(options?: LoggableTimeoutable): Chainable
-    parents(selector: string, options?: LoggableTimeoutable): Chainable
+    parents<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    parents<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parents<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
+     *
      * @see https://on.cypress.io/parentsuntil
      */
-    parentsUntil(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable
-    parentsUntil(element: HTMLElement | JQuery, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable
+    parentsUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    parentsUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Stop cy commands from running and allow interaction with the application under test. You can then “resume” running all commands or choose to step through the “next” commands from the Command Log.
+     * This does not set a `debugger` in your code, unlike `.debug()`
+     *
      * @see https://on.cypress.io/pause
      */
-    pause(options?: Loggable): Chainable
+    pause(options?: Partial<Loggable>): Chainable<Subject>
 
     /**
+     * Get the immediately preceding sibling of each element in a set of the elements.
+     *
      * @see https://on.cypress.io/prev
      */
-    prev(options?: LoggableTimeoutable): Chainable
-    prev(selector: string, options?: LoggableTimeoutable): Chainable
+    prev<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    prev<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prev<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements.
+     * > The querying behavior of this command matches exactly how [.prevAll()](http://api.jquery.com/prevAll) works in jQuery.
+     *
      * @see https://on.cypress.io/prevall
      */
-    prevAll(options?: Loggable & Timeoutable): Chainable
-    prevAll(selector: string, options?: Loggable & Timeoutable): Chainable
+    prevAll<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    prevAll<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prevAll<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
+     * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
+     *
      * @see https://on.cypress.io/prevall
      */
-    prevUntil(selector: string, filter?: string, options?: Loggable & Timeoutable): Chainable
-    prevUntil(element: HTMLElement | JQuery, filter?: string, options?: Loggable & Timeoutable): Chainable
+    prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    prevUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Read a file and yield its contents.
+     *
      * @see https://on.cypress.io/readfile
      */
-    readFile(filePath: string, options?: Timeoutable): Chainable // no log?
-    readFile(filePath: string, encoding: string, options?: Timeoutable): Chainable // no log?
+    readFile<Contents = any>(filePath: string, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
+    readFile<Contents = any>(filePath: string, encoding: Encodings, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
 
     /**
+     * Reload the page.
+     *
      * @see https://on.cypress.io/reload
      */
-    reload(options?: LoggableTimeoutable): Chainable
-    reload(forceReload: boolean): Chainable // no options?
+    reload(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    reload(forceReload: boolean): Chainable<Window>
 
     /**
+     * Make an HTTP request.
+     *
      * @see https://on.cypress.io/request
      */
-    request(url: string, body?: RequestBody): Chainable
-    request(method: HttpMethod, url: string, body?: RequestBody): Chainable
-    request(options: RequestOptions): Chainable
+    request(url: string, body?: RequestBody): Chainable<Response>
+    request(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response>
+    request(options: Partial<RequestOptions>): Chainable<Response>
 
     /**
+     * Get the root DOM element.
+     * The root element yielded is `<html>` by default. However, when calling `.root()` from a `.within()` command, the root element will point to the element you are “within”.
+     *
      * @see https://on.cypress.io/root
      */
-    root(options?: Loggable): Chainable
+    root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
+     * Use `cy.route()` to manage the behavior of network requests.
+     *
      * @see https://on.cypress.io/route
      */
-    route(url: string | RegExp, response?: string | Response): Chainable
-    route(method: string, url: string | RegExp, response?: string | Response): Chainable
-    route(fn: () => RouteOptions): Chainable
-    route(options: Partial<RouteOptions>): Chainable
+    route(url: string | RegExp, response?: string | Response): Chainable<null>
+    route(method: string, url: string | RegExp, response?: string | Response): Chainable<null>
+    route(fn: () => RouteOptions): Chainable<null>
+    route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
+     * Take a screenshot of the application under test and the Cypress Command Log.
+     *
      * @see https://on.cypress.io/screenshot
      */
-    screenshot(options?: LoggableTimeoutable): Chainable
-    screenshot(fileName: string, options?: LoggableTimeoutable): Chainable
+    screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
+     * Scroll an element into view.
+     *
      * @see https://on.cypress.io/scrollintoview
      */
-    scrollIntoView(options?: ScrollIntoViewOptions): Chainable
+    scrollIntoView(options?: Partial<ScrollIntoViewOptions>): Chainable<Subject>
 
     /**
+     * Scroll to a specific position.
+     *
      * @see https://on.cypress.io/scrollto
      */
-    scrollTo(position: PositionType, options?: Partial<ScrollToOptions>): Chainable
-    scrollTo(x: number | string, y: number | string, options?: Partial<ScrollToOptions>): Chainable
+    scrollTo(position: PositionType, options?: Partial<ScrollToOptions>): Chainable<Subject>
+    scrollTo(x: number | string, y: number | string, options?: Partial<ScrollToOptions>): Chainable<Subject>
 
     /**
+     * Select an `<option>` within a `<select>`.
+     *
      * @see https://on.cypress.io/select
      */
-    select(text: string | string[], options?: SelectOptions): Chainable
-    select(value: string | string[], options?: SelectOptions): Chainable
+    select(text: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
+    select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
+     * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
+     *
      * @see https://on.cypress.io/server
      */
-    server(options?: ServerOptions): Chainable
+    server(options?: Partial<ServerOptions>): Chainable<null>
 
     /**
+     * Set a browser cookie.
+     *
      * @see https://on.cypress.io/setcookie
      */
-    setCookie(name: string, value: string, options?: SetCookieOptions): Chainable
+    setCookie(name: string, value: string, options?: Partial<SetCookieOptions>): Chainable<Cookie>
 
     /**
+     * Create an assertion. Assertions are automatically retried until they pass or time out.
+     *
      * @see https://on.cypress.io/should
      */
-    should(chainers: string, value?: any): Chainable
-    should(chainers: string, method: string, value: any): Chainable
-    should(fn: (currentSubject?: any) => void): Chainable
+    should: Chainer<Subject>
 
     /**
+     * Get sibling DOM elements.
+     *
      * @see https://on.cypress.io/siblings
      */
-    siblings(options?: LoggableTimeoutable): Chainable
-    siblings(selector: string, options?: LoggableTimeoutable): Chainable
+    siblings<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    siblings<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
+     * Expand an array into multiple arguments.
+     * Identical to `.then()`, but always expects an array-like structure as its subject.
+     *
      * @see https://on.cypress.io/spread
      */
-    spread(fn: (...args: any[]) => any): Chainable
+    spread(fn: (...args: any[]) => void): Chainable<Subject> // Can't type this any better without breaking up Chainable
+    spread(options: Partial<Timeoutable>, fn: (...args: any[]) => void): Chainable<Subject>
+    spread<S>(fn: (...args: any[]) => S): Chainable<S>
+    spread<S>(options: Partial<Timeoutable>, fn: (...args: any[]) => S): Chainable<S>
 
     /**
+     * Wrap a method in a spy in order to record calls to and arguments of the function.
+     * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
+     *
      * @see https://on.cypress.io/spy
      */
-    spy(): sinon.SinonSpy & Chainable
-    spy(func: (...args: any[]) => any): sinon.SinonSpy & Chainable
-    spy<T>(obj: T, method: keyof T): sinon.SinonSpy & Chainable
+    spy(): sinon.SinonSpy & Chainable<sinon.SinonSpy>
+    spy(func: (...args: any[]) => any): sinon.SinonSpy & Chainable<sinon.SinonSpy>
+    spy<T>(obj: T, method: keyof T): sinon.SinonSpy & Chainable<sinon.SinonSpy>
 
     /**
+     * Replace a function, record its usage and control its behavior.
+     * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
+     *
      * @see https://on.cypress.io/stub
      */
-    stub(): sinon.SinonStub & Chainable
-    stub(obj: any): sinon.SinonStub & Chainable
-    stub<T>(obj: T, method: keyof T): sinon.SinonStub & Chainable
-    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): sinon.SinonStub & Chainable
+    stub(): sinon.SinonStub & Chainable<sinon.SinonStub>
+    stub(obj: any): sinon.SinonStub & Chainable<sinon.SinonStub>
+    stub<T>(obj: T, method: keyof T): sinon.SinonStub & Chainable<sinon.SinonStub>
+    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): sinon.SinonStub & Chainable<sinon.SinonStub>
 
     /**
+     * Submit a form.
+     *
      * @see https://on.cypress.io/submit
      */
-    submit(options?: Loggable): Chainable
+    submit(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
      * @see https://on.cypress.io/then
      */
-    then(fn: (currentSubject: any) => any, options?: Timeoutable): Chainable
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
 
     /**
+     * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
+     * `cy.clock()` must be called before `cy.tick()`
+     *
      * @see https://on.cypress.io/clock
      */
-    tick(milliseconds: number): Chainable
+    tick(milliseconds: number): Chainable<Clock>
 
     /**
+     * Get the `document.title` property of the page that is currently active.
+     *
      * @see https://on.cypress.io/title
      */
-    title(options?: Loggable): Chainable
+    title(options?: Partial<Loggable>): Chainable<string>
 
     /**
-     * @description Trigger an event on a DOM element.
-     * @param {string} eventName
-     * @returns {Chainable}
-     * @memberof Chainable
-     * @see https://on.cypress.io/trigger
-     * @example:
-     *    cy.get('a').trigger('mousedown')
-     */
-    trigger(eventName: string): Chainable
-    /**
-     * @description Trigger an event on a DOM element at a named position.
-     * @param {string} eventName
-     * @param {PositionType} position
-     * @returns {Chainable}
-     * @memberof Chainable
-     * @see https://on.cypress.io/trigger
-     */
-    trigger(eventName: string, position: PositionType): Chainable
-    /**
-     * @description Trigger an event on a DOM element with options.
-     * @param {string} eventName
-     * @param {TriggerOptions} options
-     * @returns {Chainable}
-     * @memberof Chainable
-     * @see https://on.cypress.io/trigger
-     */
-    trigger(eventName: string, options: TriggerOptions): Chainable
-    /**
-     * @description Trigger an event on a DOM element at specific coordinates (from top left corner)
-     * @param {string} eventName
-     * @param {number} x The distance in pixels from element’s left to trigger the event.
-     * @param {number} y The distance in pixels from element’s top to trigger the event.
-     * @returns {Chainable}
-     * @memberof Chainable
-     * @see https://on.cypress.io/trigger
-     */
-    trigger(eventName: string, x: number, y: number): Chainable
-    /**
-     * @description Trigger an event on a DOM element
+     * Trigger an event on a DOM element.
      *
-     * @param {string} eventName
-     * @param {PositionType} position
-     * @param {TriggerOptions} options
-     * @returns {Chainable}
-     * @memberof Chainable
      * @see https://on.cypress.io/trigger
      */
-    trigger(eventName: string, position: PositionType, options: TriggerOptions): Chainable
-    /**
-     * @description Trigger an event on a DOM element
-     *
-     * @param {string} eventName
-     * @param {number} x The distance in pixels from element’s left to trigger the event.
-     * @param {number} y The distance in pixels from element’s top to trigger the event.
-     * @param {TriggerOptions} options
-     * @returns {Chainable}
-     * @memberof Chainable
-     * @see https://on.cypress.io/trigger
-     */
-    trigger(eventName: string, x: number, y: number, options: TriggerOptions): Chainable
+    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    // custom events... If the following were `.triggerCustom`, `.trigger` strongly typed with event data
+    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
+    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions>): Chainable<Subject>
 
     /**
      * Type into a DOM element.
      *
-     * @param {string} text The text to be typed into the DOM element.
-     * @param {TypeOptions} [options]
-     * @returns {Chainable}
-     * @memberof Chainable
      * @see https://on.cypress.io/type
-     * @example
-     *
-     *    cy.get('input').type('Hello, World')
-     *    // Type 'Hello, World' into the 'input'
+     * @example type
+     * ```ts
+     * cy.get('input').type('Hello, World')
+     * ```
      */
-    type(text: string, options?: TypeOptions): Chainable
+    type(text: string, options?: Partial<TypeOptions>): Chainable<Subject>
 
     /**
+     * Uncheck checkbox(es).
+     *
      * @see https://on.cypress.io/uncheck
      */
-    uncheck(options?: CheckOptions): Chainable
-    uncheck(values: string | string[], options?: CheckOptions): Chainable
+    uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(values: string[], options?: Partial<CheckOptions>): Chainable<Subject>
 
     /**
+     * Get the current URL of the page that is currently active.
+     *
+     * @alias cy.location('href')
      * @see https://on.cypress.io/url
      */
-    url(options?: Loggable): Chainable
+    url(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Control the size and orientation of the screen for your application.
+     *
      * @see https://on.cypress.io/viewport
      */
-    viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Loggable): Chainable
-    viewport(width: number, height: number, options?: Loggable): Chainable
+    viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
+    viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
 
     /**
      * Visit the given url
      *
      * @param {string} url The URL to visit. If relative uses `baseUrl`
      * @param {VisitOptions} [options] Pass in an options object to change the default behavior of `cy.visit()`
-     * @returns {Chainable}
-     * @memberof Chainable
      * @see https://on.cypress.io/visit
-     * @example
-     *    cy.visit('http://localhost:3000')
+     * @example visit
+     * ```ts
+     * cy.visit('http://localhost:3000')
+     * ```
      */
-    visit(url: string, options?: VisitOptions): Chainable
+    visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
 
     /**
+     * Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
+     *
      * @see https://on.cypress.io/wait
      */
-    wait(ms: number | string[]): Chainable // no options?
-    wait(alias: string, options?: LoggableTimeoutable): Chainable
+    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
+    wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
      *
-     * @param {Loggable} [options]
-     * @returns {Chainable}
-     * @memberof Chainable
      * @see https://on.cypress.io/window
-     * @example
-     *    cy.visit('http://localhost:8080/app')
-     *    cy.window().then(function(win){
-     *      // win is the remote window
-     *      // of the page at: http://localhost:8080/app
-     *    })
+     * @example window
+     * ```ts
+     * cy.visit('http://localhost:8080/app')
+     * cy.window().then(function(win){
+     *   // win is the remote window
+     *   // of the page at: http://localhost:8080/app
+     * })
+     * ```
      */
-    window(options?: Loggable): Chainable
+    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
     /**
+     * Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
      */
-    within(fn: (currentSubject?: any) => void): Chainable
-    within(options: Loggable, fn: (currentSubject?: any) => void): Chainable // inconsistent argument order
+    within<R>(fn: (currentSubject: Subject) => void): Chainable<Subject>
+    within(options: Partial<Loggable>, fn: (currentSubject?: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
+     * Yield the object passed into `.wrap()`.
+     *
      * @see https://on.cypress.io/wrap
      */
-    wrap(Object: object, options?: Loggable): Chainable
+    wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    wrap<S extends object | string | number | boolean>(objects: S[], options?: Partial<Loggable & Timeoutable>): Chainable<S[]>
+    wrap<S extends object | string | number | boolean>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
+     * Write to a file with the specified contents.
+     *
      * @see https://on.cypress.io/writefile
      */
-    writeFile(filePath: string, contents: FileContents, options?: Timeoutable): Chainable
-    writeFile(filePath: string, contents: FileContents, encoding: string, options?: Timeoutable): Chainable
-  }
-
-  interface DebugOptions {
-    verbose?: boolean
+    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
   }
 
   interface CookieDefaults {
-    whitelist?: string | string[] | RegExp | ((cookie: any) => boolean)
+    whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
   /**
    * Options that control how a command is logged in the Reporter
-   *
-   * @interface Loggable
    */
   interface Loggable {
     /**
      * Displays the command in the Command Log
      *
-     * @type {boolean}
      * @default true
-     * @memberof Loggable
      */
-    log?: boolean
+    log: boolean
   }
 
   /**
    * Options that control how long Test Runner is waiting for command to succeed
-   *
-   * @interface Timeoutable
    */
   interface Timeoutable {
     /**
      * Time to wait (ms)
      *
-     * @type {number} milliseconds
      * @default defaultCommandTimeout
-     * @memberof Timeoutable
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
-    timeout?: number
+    timeout: number
   }
-
-  /**
-   * Union of Loggable and Timeoutable interfaces
-   *
-   * @interface LoggableTimeoutable
-   * @extends {Loggable}
-   * @extends {Timeoutable}
-   */
-  interface LoggableTimeoutable extends Loggable, Timeoutable { }
 
   /**
    * Options to force an event, skipping Actionability check
    * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
-   * @interface Forceable
    */
   interface Forceable {
     /**
      * Forces the action, disables waiting for actionability
      *
-     * @type {boolean}
      * @default false
-     * @memberof Forceable
      */
-    force?: boolean
+    force: boolean
   }
 
   interface BlurOptions extends Loggable, Forceable { }
 
-  interface CheckOptions extends LoggableTimeoutable, Forceable {
-    interval?: number
+  interface CheckOptions extends Loggable, Timeoutable, Forceable {
+    interval: number
   }
 
-  interface ClearOptions extends LoggableTimeoutable, Forceable {
-    interval?: number
+  interface ClearOptions extends Loggable, Timeoutable, Forceable {
+    interval: number
   }
 
   /**
    * Object to change the default behavior of .click().
-   *
-   * @interface ClickOptions
-   * @extends {Loggable}
-   * @extends {Timeoutable}
    */
-  interface ClickOptions extends Loggable, Timeoutable {
-    /**
-     * Forces the action, disables waiting for actionability
-     *
-     * @type {boolean}
-     * @default false
-     * @memberof ClickOptions
-     */
-    force?: boolean
+  interface ClickOptions extends Loggable, Timeoutable, Forceable {
     /**
      * Serially click multiple elements
      *
-     * @type {boolean}
      * @default false
-     * @memberof ClickOptions
      */
-    multiple?: boolean
-  }
-
-  /**
-   * Options object to change the default behavior of cy.exec().
-   *
-   * @interface ExecOptions
-   * @extends {Loggable}
-   * @extends {Timeoutable}
-   */
-  interface ExecOptions extends Loggable, Timeoutable {
-    /**
-     * Whether to fail if the command exits with a non-zero code
-     *
-     * @type {boolean}
-     * @default true
-     * @memberof ExecOptions
-     */
-    failOnNonZeroExit?: boolean
-    /**
-     * Object of environment variables to set before the command executes
-     * (e.g. {USERNAME: 'johndoe'}). Will be merged with existing
-     * system environment variables
-     *
-     * @type {object}
-     * @default {}
-     * @memberof ExecOptions
-     */
-    env?: object
-  }
-
-  /**
-   *
-   *
-   * @interface RequestOptions
-   * @extends {Loggable}
-   * @extends {Timeoutable}
-   */
-  interface RequestOptions extends Loggable, Timeoutable {
-    auth?: object
-    body?: RequestBody
-    failOnStatusCode?: boolean
-    followRedirect?: boolean
-    form?: boolean
-    gzip?: boolean
-    headers?: object
-    method?: HttpMethod
-    qs?: string
-    url: string
-  }
-
-  interface RouteOptions {
-    method?: HttpMethod
-    url?: string | RegExp
-    response?: any
-    status?: number
-    delay?: number
-    headers?: object
-    force404?: boolean
-    onRequest?(...args: any[]): void
-    onResponse?(...args: any[]): void
-    onAbort?(...args: any[]): void
-  }
-
-  interface ScrollToOptions extends Loggable, Timeoutable {
-    /**
-     * Scrolls over the duration (in ms)
-     * @default 0
-     */
-    duration: number
-    /**
-     * Will scroll with the easing animation
-     * @default 'swing'
-     */
-    easing: 'swing' | 'linear'
-  }
-
-  interface SelectOptions extends Loggable, Timeoutable {
-    force?: boolean
-    interval?: number
-  }
-
-  interface ServerOptions {
-    delay?: number
-    method?: HttpMethod
-    status?: number
-    headers?: object
-    response?: any
-    onRequest?(...args: any[]): void
-    onResponse?(...args: any[]): void
-    onAbort?(...args: any[]): void
-    enable?: boolean
-    force404?: boolean
-    urlMatchingOptions?: object
-    whitelist?(...args: any[]): void
-  }
-
-  interface SetCookieOptions extends Loggable, Timeoutable {
-    path?: string
-    domain?: string
-    secure?: boolean
-    httpOnly?: boolean
-    expiry?: number
-  }
-
-  /**
-   * Options that control `cy.type` command
-   *
-   * @interface TypeOptions
-   * @extends {Loggable}
-   * @extends {Timeoutable}
-   * @see https://on.cypress.io/type
-   */
-  interface TypeOptions extends Loggable, Timeoutable {
-    /**
-     * Delay after each keypress (ms)
-     *
-     * @type {number}
-     * @default 10
-     * @memberof TypeOptions
-     */
-    delay?: number
-    /**
-     * Forces the action, disables waiting for actionability
-     *
-     * @type {boolean}
-     * @default false
-     * @memberof TypeOptions
-     */
-    force?: boolean
-    /**
-     * Keep a modifier activated between commands
-     *
-     * @type {boolean}
-     * @default true
-     * @memberof TypeOptions
-     */
-    release?: boolean
-  }
-
-  /**
-   * Visit website options
-   *
-   * @interface VisitOptions
-   * @extends {Loggable}
-   * @extends {Timeoutable}
-   * @see https://on.cypress.io/visit
-   */
-  interface VisitOptions extends Loggable, Timeoutable {
-    /**
-     * Called before your page has loaded all of its resources.
-     *
-     * @param {Window} contentWindow the remote page's window object
-     * @memberof VisitOptions
-     */
-    onBeforeLoad?(win: Window): void
-
-    /**
-     * Called once your page has fired its load event.
-     *
-     * @param {Window} contentWindow the remote page's window object
-     * @memberof VisitOptions
-     */
-    onLoad?(win: Window): void
-
-    /**
-     * Whether to fail on response codes other than 2xx and 3xx
-     *
-     * @type {boolean}
-     * @default {true}
-     * @memberof VisitOptions
-     */
-    failOnStatusCode?: boolean
-  }
-
-  /**
-   * Options to change the default behavior of .trigger()
-   *
-   * @interface TriggerOptions
-   */
-  interface TriggerOptions extends LoggableTimeoutable, Forceable {
-    /**
-     * Whether the event bubbles
-     *
-     * @type {boolean}
-     * @default true
-     * @memberof TriggerOptions
-     */
-    bubbles?: boolean
-    /**
-     * Whether the event is cancelable
-     *
-     * @type {boolean}
-     * @default true
-     * @memberof TriggerOptions
-     */
-    cancable?: boolean
+    multiple: boolean
   }
 
   interface ConfigOptions {
@@ -1168,6 +1061,208 @@ declare namespace Cypress {
     waitForAnimations: boolean
   }
 
+  interface DebugOptions {
+    verbose: boolean
+  }
+
+  /**
+   * Options object to change the default behavior of cy.exec().
+   */
+  interface ExecOptions extends Loggable, Timeoutable {
+    /**
+     * Whether to fail if the command exits with a non-zero code
+     *
+     * @default true
+     */
+    failOnNonZeroExit: boolean
+    /**
+     * Object of environment variables to set before the command executes
+     * (e.g. {USERNAME: 'johndoe'}). Will be merged with existing
+     * system environment variables
+     *
+     * @default {}
+     */
+    env: object
+  }
+
+  interface RequestOptions extends Loggable, Timeoutable {
+    auth: object
+    body: RequestBody
+    failOnStatusCode: boolean
+    followRedirect: boolean
+    form: boolean
+    gzip: boolean
+    headers: object
+    method: HttpMethod
+    qs: string
+    url: string
+  }
+
+  interface RouteOptions {
+    method: HttpMethod
+    url: string | RegExp
+    response: any
+    status: number
+    delay: number
+    headers: object | null
+    force404: boolean
+    onRequest(...args: any[]): void
+    onResponse(...args: any[]): void
+    onAbort(...args: any[]): void
+  }
+
+  interface ScrollToOptions extends Loggable, Timeoutable {
+    /**
+     * Scrolls over the duration (in ms)
+     *
+     * @default 0
+     */
+    duration: number
+    /**
+     * Will scroll with the easing animation
+     *
+     * @default 'swing'
+     */
+    easing: 'swing' | 'linear'
+  }
+
+  interface SelectOptions extends Loggable, Timeoutable, Forceable {
+    interval: number
+  }
+
+  interface ServerOptions {
+    delay: number
+    method: HttpMethod
+    status: number
+    headers: object
+    response: any
+    onRequest(...args: any[]): void
+    onResponse(...args: any[]): void
+    onAbort(...args: any[]): void
+    enable: boolean
+    force404: boolean
+    urlMatchingOptions: object
+    whitelist(...args: any[]): void
+  }
+
+  interface SetCookieOptions extends Loggable, Timeoutable {
+    path: string
+    domain: string
+    secure: boolean
+    httpOnly: boolean
+    expiry: number
+  }
+
+  /**
+   * Options that control `cy.type` command
+   *
+   * @see https://on.cypress.io/type
+   */
+  interface TypeOptions extends Loggable, Timeoutable {
+    /**
+     * Delay after each keypress (ms)
+     *
+     * @default 10
+     */
+    delay: number
+    /**
+     * Forces the action, disables waiting for actionability
+     *
+     * @default false
+     */
+    force: boolean
+    /**
+     * Keep a modifier activated between commands
+     *
+     * @default true
+     */
+    release: boolean
+  }
+
+  /**
+   * Visit website options
+   *
+   * @see https://on.cypress.io/visit
+   */
+  interface VisitOptions extends Loggable, Timeoutable {
+    /**
+     * Called before your page has loaded all of its resources.
+     *
+     * @param {Window} contentWindow the remote page's window object
+     */
+    onBeforeLoad(win: Window): void
+
+    /**
+     * Called once your page has fired its load event.
+     *
+     * @param {Window} contentWindow the remote page's window object
+     */
+    onLoad(win: Window): void
+
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @default {true}
+     */
+    failOnStatusCode: boolean
+  }
+
+  /**
+   * Options to change the default behavior of .trigger()
+   */
+  interface TriggerOptions extends Loggable, Timeoutable, Forceable {
+    /**
+     * Whether the event bubbles
+     *
+     * @default true
+     */
+    bubbles: boolean
+    /**
+     * Whether the event is cancelable
+     *
+     * @default true
+     */
+    cancable: boolean
+  }
+
+  interface Chainer<Subject> {
+    (chainers: string, value?: any): Chainable<Subject>
+    (chainers: string, method: string, value: any): Chainable<Subject>
+    (fn: (currentSubject: Subject) => void): Chainable<Subject>
+  }
+
+  /**
+   * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
+   */
+  interface Clock {
+    /**
+     * Move the clock the specified number of `milliseconds`.
+     * Any timers within the affected range of time will be called.
+     * @param time Number in ms to advance the clock
+     */
+    tick(time: number): void
+    /**
+     * Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+     */
+    restore(): void
+  }
+
+  interface Cookie {
+    name: string
+    value: string
+    path: string
+    domain: string
+    httpOnly: boolean
+    secure: boolean
+    expiry?: string
+  }
+
+  interface Exec {
+    code: number
+    stdout: string
+    stderr: string
+  }
+
   interface Log {
     $el: any
     /** Allows the name of the command to be overwritten */
@@ -1179,11 +1274,50 @@ declare namespace Cypress {
     consoleProps(): any
   }
 
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  interface Response {
+    allRequestResponses: any[]
+    body: any
+    duration: number
+    headers: { [key: string]: string }
+    isOkStatusCode: boolean
+    redirectedToUrl: string
+    requestHeaders: { [key: string]: string }
+    status: number
+    statusText: string
+  }
 
+  interface Server extends RouteOptions {
+    enable: boolean
+    whitelist: (xhr: any) => boolean
+  }
+
+  interface WaitXHR {
+    duration: number
+    id: string
+    method: HttpMethod
+    request: {
+      body: string | ObjectLike;
+      headers: ObjectLike
+    }
+    requestBody: WaitXHR['request']['body']
+    requestHeaders: WaitXHR['request']['headers']
+    response: {
+      body: string | ObjectLike;
+      headers: ObjectLike;
+    }
+    responseBody: WaitXHR['response']['body']
+    responseHeaders: WaitXHR['response']['headers']
+    status: number
+    statusMessage: string
+    url: string
+    xhr: XMLHttpRequest
+  }
+
+  type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
+  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
 }
 
 // global variables added by Cypress when it runs
-declare const cy: Cypress.Chainable
+declare const cy: Cypress.Chainable<undefined>
 declare const Cypress: Cypress.Cypress

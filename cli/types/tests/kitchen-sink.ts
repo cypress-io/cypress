@@ -695,7 +695,7 @@ describe('Kitchen Sink', function() {
         // Pass a function to should that can have any number
         // of explicit assertions within it.
         cy.get('.assertions-p').find('p')
-        .should(function($p: JQuery) { // TODO - remove when we update the Cupress chainable interface
+        .should(function($p) {
           // return an array of texts from all of the p's
           const texts = $p.map(function(i, el) {
             // https://on.cypress.io/$
