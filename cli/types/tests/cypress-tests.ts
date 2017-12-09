@@ -57,3 +57,16 @@ namespace CypressLogsTest {
     message: ['foo', 'bar'],
   })
 }
+
+cy.wrap({ foo: 'bar' })
+.then(s => {
+  s // $ExpectType { foo: string }
+  return s
+})
+.then(s => {
+  s // $ExpectType { foo: string }
+})
+.its('foo')
+.then(s => {
+  s // $ExpectType string
+})

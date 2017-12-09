@@ -721,6 +721,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
     then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
 
     /**
