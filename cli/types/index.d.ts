@@ -221,6 +221,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/children
      */
     children<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    children<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>    
     children<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -289,6 +290,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/closest
      */
+    closest<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>    
     closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -298,6 +300,7 @@ declare namespace Cypress {
      */
     contains(content: string | number | RegExp): Chainable<Subject>
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>    
     contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
