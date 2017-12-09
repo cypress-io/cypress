@@ -510,7 +510,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/not
      */
-    not<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    not(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
 
     /**
      * Get the parent DOM element of a set of DOM elements.
