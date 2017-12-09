@@ -182,6 +182,9 @@ declare namespace Cypress {
     }
   }
 
+  /**
+   * Chainable interface for non-array Subjects
+   */
   interface Chainable<Subject = any> {
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
@@ -221,7 +224,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/children
      */
     children<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-    children<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>    
+    children<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     children<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -290,7 +293,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/closest
      */
-    closest<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>    
+    closest<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -300,7 +303,7 @@ declare namespace Cypress {
      */
     contains(content: string | number | RegExp): Chainable<Subject>
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>    
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -422,7 +425,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
+    getCookies(options?: Partial<Loggable & Timeoutable>): ChainableArray<Cookie>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser’s history.
@@ -681,17 +684,6 @@ declare namespace Cypress {
     siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Expand an array into multiple arguments.
-     * Identical to `.then()`, but always expects an array-like structure as its subject.
-     *
-     * @see https://on.cypress.io/spread
-     */
-    spread(fn: (...args: any[]) => void): Chainable<Subject> // Can't type this any better without breaking up Chainable
-    spread(options: Partial<Timeoutable>, fn: (...args: any[]) => void): Chainable<Subject>
-    spread<S>(fn: (...args: any[]) => S): Chainable<S>
-    spread<S>(options: Partial<Timeoutable>, fn: (...args: any[]) => S): Chainable<S>
-
-    /**
      * Wrap a method in a spy in order to record calls to and arguments of the function.
      * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
      *
@@ -724,8 +716,9 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S extends any[]>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): ChainableArray<S>
+    then<S extends object | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
     then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
 
     /**
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
@@ -811,7 +804,7 @@ declare namespace Cypress {
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
     wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): ChainableArray<WaitXHR>
 
     /**
      * Get the window object of the page that is currently active.
@@ -832,7 +825,7 @@ declare namespace Cypress {
      * Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
      */
-    within<R>(fn: (currentSubject: Subject) => void): Chainable<Subject>
+    within(fn: (currentSubject: Subject) => void): Chainable<Subject>
     within(options: Partial<Loggable>, fn: (currentSubject?: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
@@ -841,8 +834,8 @@ declare namespace Cypress {
      * @see https://on.cypress.io/wrap
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-    wrap<S extends object | string | number | boolean>(objects: S[], options?: Partial<Loggable & Timeoutable>): Chainable<S[]>
-    wrap<S extends object | string | number | boolean>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
+    wrap<S>(objects: S[], options?: Partial<Loggable & Timeoutable>): ChainableArray<S>
+    wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
      * Write to a file with the specified contents.
@@ -851,6 +844,37 @@ declare namespace Cypress {
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
+  }
+
+  /**
+   * Chainable interface with stronger typing for array subjects
+   */
+  interface ChainableArray<Subject> extends Omit<Chainable<Subject[]>, 'as' | 'each' | 'then'> {
+    as(alias: string): ChainableArray<Subject>
+
+    /**
+     * Iterate through an array like structure (arrays or objects with a length property).
+     * @see https://on.cypress.io/api/each
+     */
+    each<S extends Subject>(fn: (element: S, index: number, $list: Subject[]) => void): ChainableArray<S>
+
+    /**
+     * Expand an array into multiple arguments.
+     * Identical to `.then()`, but always expects an array-like structure as its subject.
+     *
+     * @see https://on.cypress.io/spread
+     */
+    spread<S extends object | string | number | boolean>(fn: (...args: Subject[]) => S): Chainable<S>
+    spread(fn: (...args: Subject[]) => void): ChainableArray<Subject>
+
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends any[]>(fn: (this: ObjectLike, currentSubject: Subject[]) => S, options?: Partial<Timeoutable>): ChainableArray<S>
+    then<S extends object | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject[]) => S, options?: Partial<Timeoutable>): Chainable<S>
+    then(fn: (this: ObjectLike, currentSubject: Subject[]) => void, options?: Partial<Timeoutable>): ChainableArray<Subject>
   }
 
   interface CookieDefaults {
@@ -1300,14 +1324,14 @@ declare namespace Cypress {
     id: string
     method: HttpMethod
     request: {
-      body: string | ObjectLike;
+      body: string | ObjectLike
       headers: ObjectLike
     }
     requestBody: WaitXHR['request']['body']
     requestHeaders: WaitXHR['request']['headers']
     response: {
-      body: string | ObjectLike;
-      headers: ObjectLike;
+      body: string | ObjectLike
+      headers: ObjectLike
     }
     responseBody: WaitXHR['response']['body']
     responseHeaders: WaitXHR['response']['headers']
@@ -1320,6 +1344,10 @@ declare namespace Cypress {
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+
+  // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
+  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
+  type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>
 }
 
 // global variables added by Cypress when it runs

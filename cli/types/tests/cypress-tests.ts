@@ -59,14 +59,44 @@ namespace CypressLogsTest {
 }
 
 cy.wrap({ foo: 'bar' })
-.then(s => {
-  s // $ExpectType { foo: string }
-  return s
-})
-.then(s => {
-  s // $ExpectType { foo: string }
-})
-.its('foo')
-.then(s => {
-  s // $ExpectType string
-})
+  .then(s => {
+    s // $ExpectType { foo: string; }
+    return s
+  })
+  .then(s => {
+    s // $ExpectType { foo: string; }
+  })
+  .then(s => s.foo)
+  .then(s => {
+    s // $ExpectType string
+  })
+
+cy.wait(['@foo', '@bar'])
+  .spread((first, second) => {
+    first // $ExpectType WaitXHR
+  })
+
+cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
+  .then(subject => {
+    subject // $ExpectType { foo: string; }[]
+  })
+  .spread((first, second) => {
+    first // $ExpectType { foo: string; }
+  })
+  .then(subject => {
+    subject // $ExpectType { foo: string; }[]
+  })
+  .spread((first, second) => {
+    return first.foo + second.foo
+  })
+  .then(subject => {
+    subject // $ExpectType string
+  })
+
+  cy.wrap([1, 2, 3]).each((num, i, array) => {
+    return new Cypress.Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, num * 100)
+    })
+  })
