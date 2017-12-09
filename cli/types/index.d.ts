@@ -849,7 +849,22 @@ declare namespace Cypress {
   /**
    * Chainable interface with stronger typing for array subjects
    */
-  interface ChainableArray<Subject> extends Omit<Chainable<Subject[]>, 'as' | 'each' | 'then'> {
+  interface ChainableArray<Subject> extends Omit<Chainable<Subject[]>, 'and' | 'as' | 'each' | 'should' | 'then'> {
+    /**
+     * Create an assertion. Assertions are automatically retried until they pass or time out.
+     *
+     * @alias should
+     * @see https://on.cypress.io/and
+     */
+    and: ChainerArray<Subject>
+
+    /**
+     * Assign an alias for later use. Reference the alias later within a
+     * [cy.get()](https://on.cypress.io/get) or
+     * [cy.wait()](https://on.cypress.io/wait) command with a `@` prefix.
+     *
+     * @see https://on.cypress.io/as
+     */
     as(alias: string): ChainableArray<Subject>
 
     /**
@@ -866,6 +881,13 @@ declare namespace Cypress {
      */
     spread<S extends object | string | number | boolean>(fn: (...args: Subject[]) => S): Chainable<S>
     spread(fn: (...args: Subject[]) => void): ChainableArray<Subject>
+
+    /**
+     * Create an assertion. Assertions are automatically retried until they pass or time out.
+     *
+     * @see https://on.cypress.io/should
+     */
+    should: ChainerArray<Subject>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -1257,6 +1279,12 @@ declare namespace Cypress {
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, method: string, value: any): Chainable<Subject>
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
+  }
+
+  interface ChainerArray<Subject> {
+    (chainers: string, value?: any): ChainableArray<Subject>
+    (chainers: string, method: string, value: any): ChainableArray<Subject>
+    (fn: (currentSubject: Subject[]) => void): ChainableArray<Subject>
   }
 
   /**
