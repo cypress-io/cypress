@@ -339,6 +339,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/each
      */
     each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
 
     /**
      * End a chain of commands
@@ -425,7 +426,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: Partial<Loggable & Timeoutable>): ChainableArray<Cookie>
+    getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser’s history.
@@ -711,13 +712,15 @@ declare namespace Cypress {
      */
     submit(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
+    spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
+    spread(fn: (...args: any[]) => void): Chainable<Subject>
+
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends any[]>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): ChainableArray<S>
-    then<S extends object | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
     then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
 
     /**
@@ -804,7 +807,7 @@ declare namespace Cypress {
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
     wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): ChainableArray<WaitXHR>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
@@ -834,7 +837,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/wrap
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-    wrap<S>(objects: S[], options?: Partial<Loggable & Timeoutable>): ChainableArray<S>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
@@ -844,59 +846,6 @@ declare namespace Cypress {
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
-  }
-
-  /**
-   * Chainable interface with stronger typing for array subjects
-   */
-  interface ChainableArray<Subject> extends Omit<Chainable<Subject[]>, 'and' | 'as' | 'each' | 'should' | 'then'> {
-    /**
-     * Create an assertion. Assertions are automatically retried until they pass or time out.
-     *
-     * @alias should
-     * @see https://on.cypress.io/and
-     */
-    and: ChainerArray<Subject>
-
-    /**
-     * Assign an alias for later use. Reference the alias later within a
-     * [cy.get()](https://on.cypress.io/get) or
-     * [cy.wait()](https://on.cypress.io/wait) command with a `@` prefix.
-     *
-     * @see https://on.cypress.io/as
-     */
-    as(alias: string): ChainableArray<Subject>
-
-    /**
-     * Iterate through an array like structure (arrays or objects with a length property).
-     * @see https://on.cypress.io/api/each
-     */
-    each<S extends Subject>(fn: (element: S, index: number, $list: Subject[]) => void): ChainableArray<S>
-
-    /**
-     * Expand an array into multiple arguments.
-     * Identical to `.then()`, but always expects an array-like structure as its subject.
-     *
-     * @see https://on.cypress.io/spread
-     */
-    spread<S extends object | string | number | boolean>(fn: (...args: Subject[]) => S): Chainable<S>
-    spread(fn: (...args: Subject[]) => void): ChainableArray<Subject>
-
-    /**
-     * Create an assertion. Assertions are automatically retried until they pass or time out.
-     *
-     * @see https://on.cypress.io/should
-     */
-    should: ChainerArray<Subject>
-
-    /**
-     * Enables you to work with the subject yielded from the previous command.
-     *
-     * @see https://on.cypress.io/then
-     */
-    then<S extends any[]>(fn: (this: ObjectLike, currentSubject: Subject[]) => S, options?: Partial<Timeoutable>): ChainableArray<S>
-    then<S extends object | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject[]) => S, options?: Partial<Timeoutable>): Chainable<S>
-    then(fn: (this: ObjectLike, currentSubject: Subject[]) => void, options?: Partial<Timeoutable>): ChainableArray<Subject>
   }
 
   interface CookieDefaults {
@@ -1279,12 +1228,6 @@ declare namespace Cypress {
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, method: string, value: any): Chainable<Subject>
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
-  }
-
-  interface ChainerArray<Subject> {
-    (chainers: string, value?: any): ChainableArray<Subject>
-    (chainers: string, method: string, value: any): ChainableArray<Subject>
-    (fn: (currentSubject: Subject[]) => void): ChainableArray<Subject>
   }
 
   /**
