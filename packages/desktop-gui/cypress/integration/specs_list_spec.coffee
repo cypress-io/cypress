@@ -136,18 +136,18 @@ describe "Specs List", ->
     context "collapsing specs", ->
       it "sets folder collapsed when clicked", ->
         cy.get(".folder:first").should("have.class", "folder-expanded")
-        cy.get(".folder .folder-display-name:first").click()
+        cy.get(".folder .folder-display-name:first").click({ force: true })
         cy.get(".folder:first").should("have.class", "folder-collapsed")
 
       it "hides children when folder clicked", ->
         cy.get(".file").should("have.length", 7)
-        cy.get(".folder .folder-display-name:first").click()
+        cy.get(".folder .folder-display-name:first").click({ force: true })
         cy.get(".file").should("have.length", 2)
 
       it "sets folder expanded when clicked twice", ->
-        cy.get(".folder .folder-display-name:first").click()
+        cy.get(".folder .folder-display-name:first").click({ force: true })
         cy.get(".folder:first").should("have.class", "folder-collapsed")
-        cy.get(".folder .folder-display-name:first").click()
+        cy.get(".folder .folder-display-name:first").click({ force: true })
         cy.get(".folder:first").should("have.class", "folder-expanded")
 
       it "hides children for every folder collapsed", ->
@@ -185,6 +185,24 @@ describe "Specs List", ->
         cy.get(lastExpandedFolderSelector).click()
         cy.get(".file").should("have.length", 0)
 
+    context "Filtering specs", ->
+      beforeEach ->
+        cy.get("#search-input").type("new")
+      
+      it "should display only one spec", -> 
+        cy.get(".list-as-table .file")
+          .should("have.length", 1)
+          .and("contain", "account_new_spec.coffee")
+
+      it "should display the same number of open folders", ->
+        cy.get(".list-as-table .folder")
+          .should("have.length", 10)
+
+      it "should clear the search if the user press ESC key", ->
+        cy.get("#search-input").type("{esc}")
+          .should("have.value", "")
+        cy.get(".list-as-table .file")
+          .should("have.length", 7)
 
     context "click on spec", ->
       beforeEach ->
