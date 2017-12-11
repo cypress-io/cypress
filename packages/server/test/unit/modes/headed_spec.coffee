@@ -99,17 +99,13 @@ describe "gui/headed", ->
       @sandbox.stub(state, "get").resolves(@state)
 
     it "calls Events.start with options, adding env, onFocusTests, and os", ->
-      env = process.env["CYPRESS_ENV"]
-      process.env["CYPRESS_ENV"] = "development"
       @sandbox.stub(os, "platform").returns("someOs")
       opts = {}
 
       headed.ready(opts).then ->
         expect(Events.start).to.be.called
-        expect(Events.start.lastCall.args[0].env).to.equal("development")
         expect(Events.start.lastCall.args[0].onFocusTests).to.be.a("function")
         expect(Events.start.lastCall.args[0].os).to.equal("someOs")
-        process.env["CYPRESS_ENV"] = env
 
     it "calls menu.set", ->
       headed.ready({}).then ->

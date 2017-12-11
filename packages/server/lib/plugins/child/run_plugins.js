@@ -21,7 +21,7 @@ const sendError = (ipc, err) => {
 
 let plugins
 
-const load = (ipc, config) => {
+const load = (ipc, config, pluginsFile) => {
   log('run plugins function')
 
   let callbackIdCount = 0
@@ -49,7 +49,7 @@ const load = (ipc, config) => {
     ipc.send('loaded', modifiedCfg, registrations)
   })
   .catch((err) => {
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', util.serializeError(err))
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
   })
 }
 
@@ -98,7 +98,7 @@ module.exports = (ipc, pluginsFile) => {
   }
 
   ipc.on('load', (config) => {
-    load(ipc, config)
+    load(ipc, config, pluginsFile)
   })
 
   ipc.on('execute', (event, ids, args) => {

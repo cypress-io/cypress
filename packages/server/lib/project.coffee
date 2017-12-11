@@ -87,9 +87,7 @@ class Project extends EE
       .then (modifiedCfg) ->
         debug("plugin config yielded", modifiedCfg)
 
-        cfg = config.updateWithPluginValues(cfg, modifiedCfg)
-
-        return cfg
+        return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
       @server.open(cfg, @)
       .spread (port, warning) =>
@@ -134,6 +132,8 @@ class Project extends EE
 
     plugins.init(cfg, {
       onError: (err) ->
+        debug('got plugins error', err.stack)
+
         browsers.close()
         options.onError(err)
     })

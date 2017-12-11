@@ -273,7 +273,7 @@ API = {
 
         We invoked the function exported by '#{arg1}', but it threw an error.
 
-        This is likely an error in the code of the plugins file itself.
+        The following error was thrown:
 
         #{chalk.yellow(arg2)}
         """.trim()

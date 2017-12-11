@@ -144,6 +144,8 @@ describe "lib/project", ->
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(Server.prototype, "open").resolves([])
       @sandbox.stub(Server.prototype, "reset")
+      @sandbox.stub(config, "updateWithPluginValues").returns(@config)
+      @sandbox.stub(scaffold, "plugins").resolves()
       @sandbox.stub(plugins, "init").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
@@ -167,7 +169,11 @@ describe "lib/project", ->
 
     it "initializes the plugins", ->
       @project.open({}).then =>
-        expect(plugins.init).to.be.calledWith(@config)
+        expect(plugins.init).to.be.called
+
+    it "calls support.plugins with pluginsFile directory", ->
+      @project.open({}).then =>
+        expect(scaffold.plugins).to.be.calledWith(path.dirname(@config.pluginsFile))
 
     it "calls options.onError with plugins error when there is a plugins error", ->
       onError = @sandbox.spy()
@@ -262,10 +268,6 @@ describe "lib/project", ->
     it "calls support.scaffold with supportFolder", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
-
-    it "calls support.plugins with pluginsFile directory", ->
-      @project.scaffold(@obj).then =>
-        expect(scaffold.plugins).to.be.calledWith("pf")
 
     it "does not call support.plugins if config.pluginsFile is falsey", ->
       @obj.pluginsFile = false

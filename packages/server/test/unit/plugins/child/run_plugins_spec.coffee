@@ -55,6 +55,21 @@ describe "lib/plugins/child/run_plugins", ->
     snapshot(JSON.stringify(@ipc.send.lastCall.args[3]))
 
   describe "on 'load' message", ->
+    it "sends error if pluginsFile function rejects the promise", (done) ->
+      err = new Error('foo')
+      pluginsFn = @sandbox.stub().rejects(err)
+
+      mockery.registerMock("plugins-file", pluginsFn)
+      @ipc.on.withArgs("load").yields({})
+      runPlugins(@ipc, "plugins-file")
+
+      @ipc.send = (event, errorType, pluginsFile, stack) ->
+        expect(event).to.eq("load:error")
+        expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR")
+        expect(pluginsFile).to.eq("plugins-file")
+        expect(stack).to.eq(err.stack)
+        done()
+
     it "calls function exported by pluginsFile with register function and config", ->
       pluginsFn = @sandbox.spy()
       mockery.registerMock("plugins-file", pluginsFn)
@@ -65,12 +80,19 @@ describe "lib/plugins/child/run_plugins", ->
       expect(pluginsFn.lastCall.args[0]).to.be.a("function")
       expect(pluginsFn.lastCall.args[1]).to.equal(config)
 
-    it "sends error if pluginsFile function throws an error", ->
-      mockery.registerMock("plugins-file", -> foo.bar())
+    it "sends error if pluginsFile function throws an error", (done) ->
+      err = new Error('foo')
+
+      mockery.registerMock "plugins-file", -> throw err
       runPlugins(@ipc, "plugins-file")
       @ipc.on.withArgs("load").yield()
-      expect(@ipc.send).to.be.called
-      snapshot(withoutStack(@ipc.send.lastCall.args[2]))
+
+      @ipc.send = (event, errorType, pluginsFile, stack) ->
+        expect(event).to.eq("load:error")
+        expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR")
+        expect(pluginsFile).to.eq("plugins-file")
+        expect(stack).to.eq(err.stack)
+        done()
 
   describe "on 'execute' message", ->
     beforeEach ->
