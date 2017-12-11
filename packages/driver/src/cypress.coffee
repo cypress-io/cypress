@@ -121,7 +121,7 @@ class $Cypress
 
     {env, remote} = config
 
-    config = _.omit(config, "env", "remote")
+    config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
