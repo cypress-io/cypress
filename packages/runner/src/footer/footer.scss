@@ -12,6 +12,10 @@
         padding-right: 20px;
       }
 
+      .selector-scroll-wrap {
+        overflow-x: auto;
+      }
+
       .selector {
         align-items: center;
         display: flex;

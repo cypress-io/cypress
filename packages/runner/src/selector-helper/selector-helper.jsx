@@ -31,44 +31,46 @@ class Footer extends Component {
     return (
       <div className='selector-helper'>
         <p>Click on an element to view its selector or type in a selector to view the elements it matches</p>
-        <div className='selector'>
-          <div
-            ref={(node) => this._selectorWrap = node}
-            className='wrap'
-            onMouseOver={this._setHighlight(true)}
-            onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
-          >
-            <span className='syntax-object'>cy</span>
-            <span className='syntax-operator'>.</span>
-            <span className='syntax-method'>get</span>
-            <span className='syntax-operator'>(</span>
-            <span className='syntax-string'>{'\''}</span>
-            <AutosizeInput
-              className='selector-input'
-              value={selectorHelperModel.selector}
-              onChange={this._updateSelector}
-              placeholder='.foo'
-            />
-            <span className='syntax-string'>{'\''}</span>
-            <span className='syntax-operator'>)</span>
-          </div>
-          <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-          <Tooltip placement='top' title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
-            <button
-              ref={(node) => this._copyButton = node}
-              className='copy-to-clipboard'
-              onClick={this._copyToClipboard}
-              onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
+        <div className='selector-scroll-wrap'>
+          <div className='selector'>
+            <div
+              ref={(node) => this._selectorWrap = node}
+              className='wrap'
+              onMouseOver={this._setHighlight(true)}
+              onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
             >
-              <i className='fa fa-copy' />
-            </button>
-          </Tooltip>
-        </div>
-        <div className={cs('info', {
-          'is-invalid': !selectorHelperModel.isValid || !selectorHelperModel.numElements,
-        })}>
-          <div className='spacer'>cy.get({'\''}</div>
-          {selectorHelperModel.playgroundInfo}
+              <span className='syntax-object'>cy</span>
+              <span className='syntax-operator'>.</span>
+              <span className='syntax-method'>get</span>
+              <span className='syntax-operator'>(</span>
+              <span className='syntax-string'>{'\''}</span>
+              <AutosizeInput
+                className='selector-input'
+                value={selectorHelperModel.selector}
+                onChange={this._updateSelector}
+                placeholder='.foo'
+              />
+              <span className='syntax-string'>{'\''}</span>
+              <span className='syntax-operator'>)</span>
+            </div>
+            <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
+            <Tooltip placement='top' title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
+              <button
+                ref={(node) => this._copyButton = node}
+                className='copy-to-clipboard'
+                onClick={this._copyToClipboard}
+                onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
+              >
+                <i className='fa fa-copy' />
+              </button>
+            </Tooltip>
+          </div>
+          <div className={cs('info', {
+            'is-invalid': !selectorHelperModel.isValid || !selectorHelperModel.numElements,
+          })}>
+            <div className='spacer'>cy.get({'\''}</div>
+            {selectorHelperModel.playgroundInfo}
+          </div>
         </div>
         <button className='close' onClick={this._toggleSelectorHelper}>
           <i className='fa fa-remove' />
