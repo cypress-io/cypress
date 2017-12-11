@@ -9,6 +9,18 @@ import selectorHelperModel from './selector-helper-model'
 
 const defaultCopyText = 'Copy to clipboard'
 
+// mouseleave fires when entering a child element, so make sure we're
+// actually leaving the button and not just hovering over a child
+const fixMouseOut = (fn, getTarget) => (e) => {
+  if (
+    !e.relatedTarget
+    || e.relatedTarget.parentNode === getTarget()
+    || e.relatedTarget === getTarget()
+  ) return
+
+  fn(e)
+}
+
 @observer
 class Footer extends Component {
   @observable copyText = defaultCopyText
@@ -21,9 +33,10 @@ class Footer extends Component {
         <p>Click on an element to view its selector or type in a selector to view the elements it matches</p>
         <div className='selector'>
           <div
+            ref={(node) => this._selectorWrap = node}
             className='wrap'
-            onMouseOver={selectorHelperModel.setShowingHighlight.bind(selectorHelperModel, true)}
-            onMouseOut={selectorHelperModel.setShowingHighlight.bind(selectorHelperModel, false)}
+            onMouseOver={this._setHighlight(true)}
+            onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
           >
             <span className='syntax-object'>cy</span>
             <span className='syntax-operator'>.</span>
@@ -45,7 +58,7 @@ class Footer extends Component {
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
               onClick={this._copyToClipboard}
-              onMouseOut={this._resetCopyText}
+              onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
             >
               <i className='fa fa-copy' />
             </button>
@@ -64,6 +77,10 @@ class Footer extends Component {
     )
   }
 
+  _setHighlight = (isShowing) => () => {
+    selectorHelperModel.setShowingHighlight(isShowing)
+  }
+
   _copyToClipboard = () => {
     try {
       this.refs.copyText.select()
@@ -78,15 +95,7 @@ class Footer extends Component {
     this.copyText = text
   }
 
-  _resetCopyText = (e) => {
-    // mouseleave fires when entering a child element, so make sure we're
-    // actually leaving the button and not just hovering over a child
-    if (
-      !e.relatedTarget
-      || e.relatedTarget.parentNode === this._copyButton
-      || e.relatedTarget === this._copyButton
-    ) return
-
+  _resetCopyText = () => {
     this._setCopyText(defaultCopyText)
   }
 
