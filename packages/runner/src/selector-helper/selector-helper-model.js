@@ -34,7 +34,7 @@ class SelectorHelperModel {
     this.selector = selector
   }
 
-  @action clearSelectors () {
+  @action clearSelector () {
     this.selector = ''
     this.numElements = 0
   }

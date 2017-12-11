@@ -207,7 +207,7 @@ export default class AutIframe {
   }
 
   toggleSelectorHelper = (isEnabled) => {
-    selectorHelperModel.clearSelectors()
+    selectorHelperModel.clearSelector()
 
     const $body = this._body()
     if (!$body) return
@@ -221,7 +221,7 @@ export default class AutIframe {
       $body.off('mousemove', this._onSelectorMouseMove)
       $body.off('mouseleave', clearHighlight)
       if (this._highlightedEl) {
-        this._clearHighlight(true)
+        this._clearHighlight()
       }
     }
   }
@@ -258,23 +258,19 @@ export default class AutIframe {
       $body,
       showTooltip: true,
       onClick: () => {
-        this._selectorLocked = true
         selectorHelperModel.setNumElements(1)
         selectorHelperModel.setSelector(selector)
       },
     })
   }
 
-  _clearHighlight = (force = false) => {
+  _clearHighlight = () => {
     const $body = this._body()
     if (!$body) return
 
     dom.addOrUpdateSelectorHelperHighlight({ $el: null, $body })
     if (this._highlightedEl) {
       this._highlightedEl = null
-      if (force || !this._selectorLocked) {
-        selectorHelperModel.clearSelectors()
-      }
     }
   }
 
@@ -309,7 +305,7 @@ export default class AutIframe {
         showTooltip: false,
       })
     } else {
-      this._clearHighlight(false)
+      this._clearHighlight()
     }
   }
 }
