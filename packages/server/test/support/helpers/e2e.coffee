@@ -150,7 +150,7 @@ module.exports = {
       args.push("--hosts=#{options.hosts}")
 
     if options.debug
-      args.push("--show-headless-gui")
+      args.push("--headed")
 
     if options.reporter
       args.push("--reporter=#{options.reporter}")
@@ -160,6 +160,12 @@ module.exports = {
 
     if browser = (env.BROWSER or options.browser)
       args.push("--browser=#{browser}")
+
+    if options.config
+      args.push("--config", options.config)
+
+    if options.env
+      args.push("--env", options.env)
 
     return args
 

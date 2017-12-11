@@ -76,3 +76,38 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
   (All Done)
 
 `
+
+exports['e2e plugins can modify config from plugins 1'] = `
+Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.mp4
+
+  (Tests Starting)
+
+
+  ✓ overrides config
+  ✓ overrides env
+
+  2 passing
+
+
+  (Tests Finished)
+
+  - Tests:           2
+  - Passes:          2
+  - Failures:        0
+  - Pending:         0
+  - Duration:        10 seconds
+  - Screenshots:     0
+  - Video Recorded:  true
+  - Cypress Version: 1.2.3
+
+
+  (Video)
+
+  - Started processing:   Compressing to 20 CRF
+  - Finished processing:  /foo/bar/.projects/plugin-config/cypress/videos/abc123.mp4 (0 seconds)
+
+
+  (All Done)
+
+`
+

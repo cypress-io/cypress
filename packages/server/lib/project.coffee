@@ -73,18 +73,21 @@ class Project extends EE
       @memoryCheck = setInterval(logMemory, 1000)
 
     @getConfig(options)
-    .then (cfg) =>
+    .tap (cfg) =>
       process.chdir(@projectRoot)
 
-      ## TODO: move plugins config up here
+      ## TODO: we currently always scaffold the plugins file
+      ## even when headlessly or else it will cause an error when
+      ## we try to load it and it's not there. We must do this here
+      ## else initialing the plugins will instantly fail.
+      if cfg.pluginsFile
+        scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
+    .then (cfg) =>
       @_initPlugins(cfg, options)
       .then (modifiedCfg) ->
-        ## TODO merge in modifiedCfg into cfg
-        cfg = config.resolvePluginValues(cfg, modifiedCfg)
-        # if _.isObject(modifiedCfg)
-        #   _.extend(cfg, modifiedCfg)
-
         debug("plugin config yielded", modifiedCfg)
+
+        cfg = config.updateWithPluginValues(cfg, modifiedCfg)
 
         return cfg
     .then (cfg) =>
@@ -118,14 +121,18 @@ class Project extends EE
             @watchSupportFile(cfg)
             @watchPluginsFile(cfg, options)
           )
-        .then =>
-          @_initPlugins(cfg, options)
 
     # return our project instance
     .return(@)
 
-  _initPlugins: (config, options) ->
-    plugins.init(config, {
+  _initPlugins: (cfg, options) ->
+    ## only init plugins with the
+    ## whitelisted config values to
+    ## prevent tampering with the
+    ## internals and breaking cypress
+    cfg = config.whitelist(cfg)
+
+    plugins.init(cfg, {
       onError: (err) ->
         browsers.close()
         options.onError(err)
@@ -161,43 +168,43 @@ class Project extends EE
     .then ->
       process.chdir(localCwd)
 
-  watchSupportFile: (config) ->
-    if supportFile = config.supportFile
+  watchSupportFile: (cfg) ->
+    if supportFile = cfg.supportFile
       fs.pathExists(supportFile)
       .then (found) =>
         if not found
           errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
 
-        relativePath = path.relative(config.projectRoot, config.supportFile)
-        if config.watchForFileChanges isnt false
+        relativePath = path.relative(cfg.projectRoot, cfg.supportFile)
+        if cfg.watchForFileChanges isnt false
           options = {
             onChange: _.bind(@server.onTestFileChange, @server, relativePath)
           }
-        preprocessor.getFile(relativePath, config, options)
+        preprocessor.getFile(relativePath, cfg, options)
         ## ignore errors b/c we're just setting up the watching. errors
         ## are handled by the spec controller
         .catch ->
     else
       Promise.resolve()
 
-  watchPluginsFile: (config, options) ->
-    debug("attempt watch plugins file: #{config.pluginsFile}")
-    if not config.pluginsFile
+  watchPluginsFile: (cfg, options) ->
+    debug("attempt watch plugins file: #{cfg.pluginsFile}")
+    if not cfg.pluginsFile
       return Promise.resolve()
 
-    fs.pathExists(config.pluginsFile)
+    fs.pathExists(cfg.pluginsFile)
     .then (found) =>
       debug("plugins file found? #{found}")
       ## ignore if not found. plugins#init will throw the right error
       return if not found
 
       debug("watch plugins file")
-      @watchers.watch(config.pluginsFile, {
+      @watchers.watch(cfg.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
           ## re-init plugins after a change
-          @_initPlugins(config, options)
+          @_initPlugins(cfg, options)
           .catch (err) ->
             options.onError(err)
       })
@@ -221,21 +228,21 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
+  watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
     @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
-    if config.report
-      if not Reporter.isValidReporterName(config.reporter, config.projectRoot)
-        paths = Reporter.getSearchPathsForReporter(config.reporter, config.projectRoot)
-        errors.throw("INVALID_REPORTER_NAME", config.reporter, paths)
+    if cfg.report
+      if not Reporter.isValidReporterName(cfg.reporter, cfg.projectRoot)
+        paths = Reporter.getSearchPathsForReporter(cfg.reporter, cfg.projectRoot)
+        errors.throw("INVALID_REPORTER_NAME", cfg.reporter, paths)
 
-      reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
+      reporter = Reporter.create(cfg.reporter, cfg.reporterOptions, cfg.projectRoot)
 
-    @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
+    @automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
-    @server.startWebsockets(@automation, config, {
+    @server.startWebsockets(@automation, cfg, {
       onReloadBrowser: options.onReloadBrowser
 
       onFocusTests: options.onFocusTests
@@ -377,7 +384,7 @@ class Project extends EE
 
     [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
-  scaffold: (config) ->
+  scaffold: (cfg) ->
     debug("scaffolding project %s", @projectRoot)
 
     scaffolds = []
@@ -392,19 +399,13 @@ class Project extends EE
     ##
     ## ensure support dir is created
     ## and example support file if dir doesnt exist
-    push(scaffold.support(config.supportFolder, config))
-
-    ## TODO: we currently always scaffold the plugins file
-    ## even when headlessly or else it will cause an error when
-    ## we try to load it and it's not there
-    if config.pluginsFile
-      push(scaffold.plugins(path.dirname(config.pluginsFile), config))
+    push(scaffold.support(cfg.supportFolder, cfg))
 
     ## if we're in headed mode add these other scaffolding
     ## tasks
-    if not config.isTextTerminal
-      push(scaffold.integration(config.integrationFolder, config))
-      push(scaffold.fixture(config.fixturesFolder, config))
+    if not cfg.isTextTerminal
+      push(scaffold.integration(cfg.integrationFolder, cfg))
+      push(scaffold.fixture(cfg.fixturesFolder, cfg))
 
     Promise.all(scaffolds)
 

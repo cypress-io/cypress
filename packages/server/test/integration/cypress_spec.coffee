@@ -77,6 +77,7 @@ describe "lib/cypress", ->
     @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
     @noScaffolding = Fixtures.projectPath("no-scaffolding")
+    @pluginConfig = Fixtures.projectPath("plugin-config")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
@@ -625,6 +626,40 @@ describe "lib/cypress", ->
           })
           expect(cfg.resolved.requestTimeout).to.deep.eq({
             value: 1234
+            from: "cli"
+          })
+
+          @expectExitWith(0)
+
+      it "can override values in plugins", ->
+        cypress.start([
+          "--run-project=#{@pluginConfig}", "--config=requestTimeout=1234,videoCompression=false"
+          "--env=foo=foo,bar=bar"
+        ])
+        .then =>
+          cfg = openProject.getProject().cfg
+
+          expect(cfg.videoCompression).to.eq(20)
+          expect(cfg.defaultCommandTimeout).to.eq(500)
+          expect(cfg.env).to.deep.eq({
+            foo: "bar"
+            bar: "bar"
+          })
+
+          expect(cfg.resolved.videoCompression).to.deep.eq({
+            value: 20
+            from: "plugin"
+          })
+          expect(cfg.resolved.requestTimeout).to.deep.eq({
+            value: 1234
+            from: "cli"
+          })
+          expect(cfg.resolved.env.foo).to.deep.eq({
+            value: "bar"
+            from: "plugin"
+          })
+          expect(cfg.resolved.env.bar).to.deep.eq({
+            value: "bar"
             from: "cli"
           })
 

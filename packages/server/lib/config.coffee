@@ -2,6 +2,7 @@ _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
 fs       = require("fs-extra")
+deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
@@ -236,12 +237,31 @@ module.exports = {
 
     return obj
 
-  resolvePluginValues: (cfg, overrides = {}) ->
-    ## TODO: for each override go through
+  updateWithPluginValues: (cfg, overrides = {}) ->
+    ## diff the overrides with cfg
+    ## including nested objects (env)
+    diffs = deepDiff(cfg, overrides, true)
+
+    setResolvedOn = (resolvedObj, obj) ->
+      _.each obj, (val, key) ->
+        if _.isObject(val)
+          ## recurse setting overrides
+          ## inside of this nested objected
+          setResolvedOn(resolvedObj[key], val)
+        else
+          ## override the resolved value
+          resolvedObj[key] = {
+            value: val
+            from: "plugin"
+          }
+
+    ## for each override go through
     ## and change the resolved values of cfg
     ## to point to the plugin
+    setResolvedOn(cfg.resolved, diffs)
 
-    _.defaultsDeep(overrides, cfg)
+    ## merge cfg into overrides
+    _.defaultsDeep(diffs, cfg)
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
     ## pick out only the keys found in configKeys
