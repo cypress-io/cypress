@@ -102,6 +102,10 @@ const Configuration = observer(({ project }) => (
           <td><span className='cli'>CLI</span></td>
           <td>set from CLI arguments</td>
         </tr>
+        <tr className='config-keys'>
+          <td><span className='plugin'>plugin</span></td>
+          <td>set from plugin file</td>
+        </tr>
       </tbody>
     </table>
     <pre className='config-vars'>
