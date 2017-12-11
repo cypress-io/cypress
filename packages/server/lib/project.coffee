@@ -6,6 +6,8 @@ path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
+featureMaybe = require('feature-maybe')
+
 la          = require("lazy-ass")
 check       = require("check-more-types")
 cwd         = require("./cwd")
@@ -74,6 +76,12 @@ class Project extends EE
 
     @getConfig(options)
     .then (cfg) =>
+      @feature = featureMaybe(cfg.experimentalFeatures)
+      # use feature flags based on the project
+      @feature('browsers')
+        .map () ->
+          console.log('experimental feature "browsers" enabled')
+
       process.chdir(@projectRoot)
 
       @server.open(cfg, @)

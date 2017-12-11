@@ -28,6 +28,7 @@ configKeys = toWords """
   baseUrl                         fixturesFolder
   chromeWebSecurity               integrationFolder
   environmentVariables            pluginsFile
+  experimentalFeatures
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
@@ -90,6 +91,7 @@ defaults = {
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
   pluginsFile:                    "cypress/plugins"
+  experimentalFeatures:          {}
 
   ## deprecated
   javascripts:                   []
@@ -101,6 +103,7 @@ validationRules = {
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
+  experimentalFeatures: v.isPlainObject
   execTimeout: v.isNumber
   fileServerFolder: v.isString
   fixturesFolder: v.isStringOrFalse
