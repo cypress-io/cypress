@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
+import _ from 'lodash'
+import featureMaybe from 'feature-maybe'
 
 import projectsApi from '../projects/projects-api'
 
@@ -10,10 +12,15 @@ export default class Browsers extends Component {
   render () {
     const project = this.props.project
 
+    // not sure how to observe resolvedConfig better
+    const experimentalFeatures = _.get(project, 'resolvedConfig.experimentalFeatures.value', {})
+    this.feature = featureMaybe(experimentalFeatures)
+
     if (!project.browsers.length) return null
 
     return (
       <ul className='browsers nav navbar-nav navbar-right'>
+        {this._browsersFeature()}
         {this._closeBrowserBtn()}
         <Dropdown
           className='browsers-list'
@@ -27,6 +34,12 @@ export default class Browsers extends Component {
         />
       </ul>
     )
+  }
+
+  _browsersFeature () {
+    return this.feature('browsers')
+    .map(() => (<div>Browsers:</div>))
+    .getOrElse()
   }
 
   _closeBrowserBtn () {
