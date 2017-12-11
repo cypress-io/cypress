@@ -3,7 +3,7 @@ Started video recording: /foo/bar/.projects/plugins-async-error/cypress/videos/a
 
   (Tests Starting)
 
-Error: The following error was thrown by a plugin. We've stopped running your tests because this likely interrupts behavior critical to them.
+Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
 Error: Async error from plugins file
     at stack trace line
@@ -110,4 +110,3 @@ Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.
   (All Done)
 
 `
-

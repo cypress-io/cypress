@@ -279,7 +279,7 @@ API = {
         """.trim()
       when "PLUGINS_ERROR"
         """
-        The following error was thrown by a plugin. We've stopped running your tests because this likely interrupts behavior critical to them.
+        The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
         #{chalk.yellow(arg1)}
         """.trim()
