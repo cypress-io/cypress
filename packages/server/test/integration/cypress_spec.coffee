@@ -675,7 +675,7 @@ describe "lib/cypress", ->
           "version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor"
         ])
         .then =>
-          expect(openProject.getProject().cfg.environmentVariables).to.deep.eq({
+          expect(openProject.getProject().cfg.env).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
             host: "http://localhost:8888"
@@ -1070,7 +1070,7 @@ describe "lib/cypress", ->
           port: 2121
           pageLoadTimeout: 1000
           report: false
-          environmentVariables: { baz: "baz" }
+          env: { baz: "baz" }
         })
 
         cfg = open.getCall(0).args[0]
@@ -1081,12 +1081,12 @@ describe "lib/cypress", ->
         expect(cfg.baseUrl).to.eq("localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
-        expect(cfg.environmentVariables.baz).to.eq("baz")
-        expect(cfg.environmentVariables).not.to.have.property("fileServerFolder")
-        expect(cfg.environmentVariables).not.to.have.property("port")
-        expect(cfg.environmentVariables).not.to.have.property("BASE_URL")
-        expect(cfg.environmentVariables).not.to.have.property("watchForFileChanges")
-        expect(cfg.environmentVariables).not.to.have.property("responseTimeout")
+        expect(cfg.env.baz).to.eq("baz")
+        expect(cfg.env).not.to.have.property("fileServerFolder")
+        expect(cfg.env).not.to.have.property("port")
+        expect(cfg.env).not.to.have.property("BASE_URL")
+        expect(cfg.env).not.to.have.property("watchForFileChanges")
+        expect(cfg.env).not.to.have.property("responseTimeout")
 
         expect(cfg.resolved.fileServerFolder).to.deep.eq({
           value: "foo"
@@ -1112,7 +1112,7 @@ describe "lib/cypress", ->
           value: 5555
           from: "env"
         })
-        expect(cfg.resolved.environmentVariables.baz).to.deep.eq({
+        expect(cfg.resolved.env.baz).to.deep.eq({
           value: "baz"
           from: "cli"
         })

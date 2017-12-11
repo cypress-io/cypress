@@ -88,7 +88,6 @@ module.exports = {
       Windows.open(@getWindowArgs(state, options))
       .then (win) =>
         Events.start(_.extend({}, options, {
-          env: process.env["CYPRESS_ENV"]
           onFocusTests: -> win.focus()
           os: os.platform()
         }), bus)
