@@ -29,7 +29,7 @@ describe "lib/config", ->
       config.get(@projectPath)
       .then (obj) =>
         expect(obj.projectRoot).to.eq(@projectPath)
-        expect(obj.environmentVariables).to.deep.eq({foo: "bar"})
+        expect(obj.env).to.deep.eq({foo: "bar"})
 
     it "sets projectName", ->
       @setup({}, {foo: "bar"})
@@ -481,9 +481,6 @@ describe "lib/config", ->
     it "baseUrl=null", ->
       @defaults "baseUrl", null
 
-    it "env=CYPRESS_ENV", ->
-      @defaults "env", process.env["CYPRESS_ENV"]
-
     it "defaultCommandTimeout=4000", ->
       @defaults "defaultCommandTimeout", 4000
 
@@ -581,12 +578,12 @@ describe "lib/config", ->
 
       config.mergeDefaults(obj)
       .then (cfg) ->
-        expect(cfg.environmentVariables).to.deep.eq({
+        expect(cfg.env).to.deep.eq({
           foo: "bar"
           bar: "baz"
           version: "1.0.1"
         })
-        expect(cfg.env).to.eq(process.env["CYPRESS_ENV"])
+        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_ENV"])
         expect(cfg).not.to.have.property("envFile")
 
     it "merges env into @config.env", ->
@@ -600,7 +597,7 @@ describe "lib/config", ->
       }
 
       options = {
-        environmentVariables: {
+        env: {
           version: "0.13.1"
           foo: "bar"
         }
@@ -608,7 +605,7 @@ describe "lib/config", ->
 
       config.mergeDefaults(obj, options)
       .then (cfg) ->
-        expect(cfg.environmentVariables).to.deep.eq({
+        expect(cfg.env).to.deep.eq({
           host: "localhost"
           user: "brian"
           version: "0.13.1"
@@ -629,6 +626,7 @@ describe "lib/config", ->
         config.mergeDefaults(obj, options)
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
+            env:                        { }
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
@@ -651,14 +649,13 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             videoRecording:             { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            videoUploadOnPasses:       { value: true, from: "default" }
+            videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            environmentVariables:       { }
             testFiles:                  { value: "**/*.*", from: "default" }
           })
 
@@ -675,12 +672,13 @@ describe "lib/config", ->
           envFile: {
             bar: "bar"
           }
-          environmentVariables: {
+        }
+
+        options = {
+          env: {
             baz: "baz"
           }
         }
-
-        options = {}
 
         config.mergeDefaults(obj, options)
         .then (cfg) ->
@@ -715,7 +713,7 @@ describe "lib/config", ->
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
-            environmentVariables:       {
+            env: {
               foo: {
                 value: "foo"
                 from: "config"
@@ -735,6 +733,61 @@ describe "lib/config", ->
             }
           })
 
+  context ".updateWithPluginValues", ->
+    it "is noop when no overrides", ->
+      expect(config.updateWithPluginValues({foo: 'bar'}, null)).to.deep.eq({
+        foo: 'bar'
+      })
+
+    it "updates resolved config values and returns config with overrides", ->
+      cfg = {
+        foo: "bar"
+        baz: "quux"
+        lol: 1234
+        env: {
+          a: "a"
+          b: "b"
+        }
+        resolved: {
+          foo: { value: "bar", from: "default" }
+          baz: { value: "quux", from: "cli" }
+          lol: { value: 1234,  from: "env" }
+          env: {
+            a: { value: "a", from: "config" }
+            b: { value: "b", from: "config" }
+          }
+        }
+      }
+
+      overrides = {
+        baz: "baz"
+        env: {
+          b: "bb"
+          c: "c"
+        }
+      }
+
+      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+        foo: "bar"
+        baz: "baz"
+        lol: 1234
+        env: {
+          a: "a"
+          b: "bb"
+          c: "c"
+        }
+        resolved: {
+          foo: { value: "bar", from: "default" }
+          baz: { value: "baz", from: "plugin" }
+          lol: { value: 1234,  from: "env" }
+          env: {
+            a: { value: "a", from: "config" }
+            b: { value: "bb", from: "plugin" }
+            c: { value: "c", from: "plugin" }
+          }
+        }
+      })
+
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
       @sandbox.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
@@ -752,14 +805,14 @@ describe "lib/config", ->
           user: "brian"
           foo: "bar"
         }
-
-        environmentVariables: {
-          version: "0.14.0"
-          project: "pie"
-        }
       }
 
-      expect(config.parseEnv(obj)).to.deep.eq({
+      envCLI = {
+        version: "0.14.0"
+        project: "pie"
+      }
+
+      expect(config.parseEnv(obj, envCLI)).to.deep.eq({
         version: "0.14.0"
         project: "pie"
         host: "http://localhost:8888"

@@ -75,7 +75,6 @@ module.exports = {
         "run-project": "runProject"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
-        # "env":         "environmentVariables"
         "headless":    "isTextTerminal"
         "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
@@ -89,7 +88,6 @@ module.exports = {
     options = _
     .chain(options)
     .defaults(whitelisted)
-    .extend({env: process.env["CYPRESS_ENV"]})
     .mapValues(coerce)
     .value()
 

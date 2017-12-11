@@ -56,7 +56,7 @@ defaults = {
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
-  isTextTerminal:                    false
+  isTextTerminal:                false
   reporter:                      "spec"
   reporterOptions:               null
   clientRoute:                   "/__/"
@@ -186,21 +186,25 @@ module.exports = {
 
     _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
-    _.each @whitelist(options), (val, key) ->
+    _
+    .chain(@whitelist(options))
+    .omit("env")
+    .each (val, key) ->
       resolved[key] = "cli"
       config[key] = val
       return
+    .value()
 
     if url = config.baseUrl
       ## always strip trailing slashes
       config.baseUrl = _.trimEnd(url, "/")
 
-    _.defaults config, defaults
+    _.defaults(config, defaults)
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
-    config.env = @parseEnv(config, resolved)
-    # config.env = process.env["CYPRESS_ENV"]
+    config.env = @parseEnv(config, options.env, resolved)
+    config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
 
     ## when headless
@@ -427,7 +431,7 @@ module.exports = {
 
     return obj
 
-  parseEnv: (cfg, resolved = {}) ->
+  parseEnv: (cfg, envCLI, resolved = {}) ->
     envVars = resolved.env = {}
 
     resolveFrom = (from, obj = {}) ->
@@ -440,7 +444,7 @@ module.exports = {
     envCfg  = cfg.env ? {}
     envFile = cfg.envFile ? {}
     envProc = @getProcessEnvVars(process.env) ? {}
-    envCLI  = cfg.env ? {}
+    envCLI  = envCLI ? {}
 
     matchesConfigKey = (key) ->
       if _.has(cfg, key)

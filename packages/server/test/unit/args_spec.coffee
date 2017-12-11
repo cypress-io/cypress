@@ -43,7 +43,7 @@ describe "lib/util/args", ->
   context "--env", ->
     it "converts to object literal", ->
       options = @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888,bar=qux=")
-      expect(options.environmentVariables).to.deep.eq({
+      expect(options.env).to.deep.eq({
         foo: "bar"
         version: "0.12.1"
         host: "localhost:8888"
@@ -86,16 +86,15 @@ describe "lib/util/args", ->
       expect(@setup("--no-record").record).to.be.false
       expect(@setup("--record=false").record).to.be.false
 
-    it "backs up hosts + environmentVariables", ->
+    it "backs up hosts + env", ->
       expect(@obj).to.deep.eq({
         _: []
-        env: process.env.NODE_ENV
         "get-key": true
         getKey: true
         _hosts: "*.foobar.com=127.0.0.1"
         hosts: {"*.foobar.com": "127.0.0.1"}
-        _environmentVariables: "foo=bar,baz=quux,bar=foo=quz"
-        environmentVariables: {
+        _env: "foo=bar,baz=quux,bar=foo=quz"
+        env: {
           foo: "bar"
           baz: "quux"
           bar: "foo=quz"
@@ -114,7 +113,7 @@ describe "lib/util/args", ->
         "--getKey=true"
         "--config=requestTimeout=1234,responseTimeout=9876"
         "--hosts=*.foobar.com=127.0.0.1"
-        "--environmentVariables=foo=bar,baz=quux,bar=foo=quz"
+        "--env=foo=bar,baz=quux,bar=foo=quz"
         "--requestTimeout=1234"
         "--responseTimeout=9876"
       ])
@@ -137,7 +136,6 @@ describe "lib/util/args", ->
           "/Applications/Cypress.app"
           "/Applications/Cypress.app"
         ]
-        env: process.env.NODE_ENV
         appPath: "/Applications/Cypress.app"
         execPath: "/Applications/Cypress.app"
         updating: true
@@ -159,7 +157,6 @@ describe "lib/util/args", ->
           "/Applications/Cypress.app1"
           "/Applications/Cypress.app2"
         ]
-        env: process.env.NODE_ENV
         appPath: "a"
         execPath: "e"
         "app-path": "a"
