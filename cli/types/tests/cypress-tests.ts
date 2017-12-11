@@ -80,6 +80,13 @@ cy.wrap({ foo: ['bar', 'baz'] })
     s // $ExpectType string[]
   })
 
+cy.get('.someSelector')
+  .each(($el, index, list) => {
+    $el // $ExpectType JQuery<HTMLElement>
+    index // $ExpectType number
+    list // $ExpectType HTMLElement[]
+  })
+
 cy.wrap(['bar', 'baz'])
   .spread((first, second) => {
     first // $ExpectType any
@@ -127,3 +134,7 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
       }, num * 100)
     })
   })
+
+cy.stub().withArgs('').log(false).as('foo')
+
+cy.spy().withArgs('').log(false).as('foo')

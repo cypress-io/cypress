@@ -690,20 +690,20 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/spy
      */
-    spy(): sinon.SinonSpy & Chainable<sinon.SinonSpy>
-    spy(func: (...args: any[]) => any): sinon.SinonSpy & Chainable<sinon.SinonSpy>
-    spy<T>(obj: T, method: keyof T): sinon.SinonSpy & Chainable<sinon.SinonSpy>
+    spy(): Agent<sinon.SinonSpy>
+    spy(func: (...args: any[]) => any): Agent<sinon.SinonSpy>
+    spy<T>(obj: T, method: keyof T): Agent<sinon.SinonSpy>
 
     /**
      * Replace a function, record its usage and control its behavior.
-     * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
+     * > Note: `.stub()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
      *
      * @see https://on.cypress.io/stub
      */
-    stub(): sinon.SinonStub & Chainable<sinon.SinonStub>
-    stub(obj: any): sinon.SinonStub & Chainable<sinon.SinonStub>
-    stub<T>(obj: T, method: keyof T): sinon.SinonStub & Chainable<sinon.SinonStub>
-    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): sinon.SinonStub & Chainable<sinon.SinonStub>
+    stub(): Agent<sinon.SinonStub>
+    stub(obj: any): Agent<sinon.SinonStub>
+    stub<T>(obj: T, method: keyof T): Agent<sinon.SinonStub>
+    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): Agent<sinon.SinonStub>
 
     /**
      * Submit a form.
@@ -846,6 +846,14 @@ declare namespace Cypress {
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
+  }
+
+  interface Agent<A extends sinon.SinonSpy> {
+    log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
+
+    as(alias: string): Omit<A, 'withArgs'> & Agent<A>
+
+    withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
 
   interface CookieDefaults {
