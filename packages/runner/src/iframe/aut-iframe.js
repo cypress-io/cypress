@@ -278,46 +278,47 @@ export default class AutIframe {
   }
 
   toggleSelectorHighlight (isShowingHighlight) {
-    if (isShowingHighlight) {
-      const contents = this._contents()
-      let selector = selectorHelperModel.selector
-
-      if (!contents || !selector) return
-
-      let $el
-
-      try {
-        if (selectorHelperModel.method.name === 'contains') {
-          const Cypress = eventManager.getCypress()
-          $el = contents.find(Cypress.dom.getContainsSelector(selector))
-          if ($el.length) {
-            $el = Cypress.dom.getFirstDeepestElement($el)
-          }
-        } else {
-          $el = contents.find(selector)
-        }
-        selectorHelperModel.setValidity(true)
-        selectorHelperModel.setNumElements($el.length)
-        if ($el.length) {
-          dom.scrollIntoView(this._window(), $el[0])
-        }
-      } catch (err) {
-        if (!sizzleRe.test(err.stack)) throw err
-        selectorHelperModel.setValidity(false)
-      }
-
-      if (!$el || !$el.length) {
-        $el = null
-      }
-
-      dom.addOrUpdateSelectorHelperHighlight({
-        $el,
-        selector,
-        $body: this._body(),
-        showTooltip: false,
-      })
-    } else {
+    if (!isShowingHighlight) {
       this._clearHighlight()
+      return
     }
+
+    const contents = this._contents()
+    let selector = selectorHelperModel.selector
+
+    if (!contents || !selector) return
+
+    let $el
+
+    try {
+      if (selectorHelperModel.method.name === 'contains') {
+        const Cypress = eventManager.getCypress()
+        $el = contents.find(Cypress.dom.getContainsSelector(selector))
+        if ($el.length) {
+          $el = Cypress.dom.getFirstDeepestElement($el)
+        }
+      } else {
+        $el = contents.find(selector)
+      }
+      selectorHelperModel.setValidity(true)
+      selectorHelperModel.setNumElements($el.length)
+      if ($el.length) {
+        dom.scrollIntoView(this._window(), $el[0])
+      }
+    } catch (err) {
+      if (!sizzleRe.test(err.stack)) throw err
+      selectorHelperModel.setValidity(false)
+    }
+
+    if (!$el || !$el.length) {
+      $el = null
+    }
+
+    dom.addOrUpdateSelectorHelperHighlight({
+      $el,
+      selector,
+      $body: this._body(),
+      showTooltip: false,
+    })
   }
 }
