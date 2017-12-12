@@ -91,6 +91,23 @@ getNextSpecFn = ({buildId, parallel, parallelId, specs}) ->
 
   getNextSpec
 
+# Collects options for headless runner to run single spec
+getHeadlessRunOptions = (options, integrationFolder, specName) ->
+  la(check.unemptyString(specName), "missing spec name")
+
+  opts = {
+    ## dont check that the user is logged in
+    ensureAuthToken: false
+
+    ## dont let headless say its all done
+    allDone: false
+
+    ## use relative name for reporting
+    spec: path.join(integrationFolder, specName)
+  }
+
+  _.merge({}, options, opts)
+
 module.exports = {
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs,
   parallel, parallelId) ->
@@ -400,25 +417,19 @@ module.exports = {
 
                 {instanceId, machineId} = instance
                 debug("new instance id %s machine id %s", instanceId, machineId)
+
                 if not commonMachineId and machineId
                   commonMachineId = machineId
                   debug("remembering common machine %s id for instance", machineId)
 
-                ## dont check that the user is logged in
-                options.ensureAuthToken = false
-
-                ## dont let headless say its all done
-                options.allDone       = false
-
                 didUploadAssets       = false
 
-                specNameInProject = path.join(integrationFolder, specName)
-                options.spec = specNameInProject
+                headlessRunOptions = getHeadlessRunOptions(options, integrationFolder, specName)
 
                 # makes sure we have Bluebird promise all the way
                 Promise.resolve()
                 .then () ->
-                  headless.run(options)
+                  headless.run(headlessRunOptions)
                 .tapCatch (e) ->
                   debug("headless run error")
                   debug(e)
