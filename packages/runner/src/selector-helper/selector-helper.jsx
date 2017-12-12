@@ -56,7 +56,7 @@ class Footer extends Component {
               <span className='syntax-operator'>)</span>
             </div>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip placement='top' title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
+            <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
               <button
                 ref={(node) => this._copyButton = node}
                 className='copy-to-clipboard'

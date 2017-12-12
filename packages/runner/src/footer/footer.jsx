@@ -1,6 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import SelectorHelper from '../selector-helper/selector-helper'
 import selectorHelperModel from '../selector-helper/selector-helper-model'
@@ -18,9 +19,13 @@ const Footer = observer(({ state }) => {
     })}>
       <SelectorHelper />
       <div className='controls'>
-        <button onClick={toggleSelectorHelper}>
-          <i className='fa fa-mouse-pointer' />
-        </button>
+        <Tooltip
+          title={selectorHelperModel.isEnabled ? 'Close Selector Helper' : 'Open Selector Helper'}
+        >
+          <button onClick={toggleSelectorHelper}>
+            <i className='fa fa-mouse-pointer' />
+          </button>
+        </Tooltip>
       </div>
     </footer>
   )
