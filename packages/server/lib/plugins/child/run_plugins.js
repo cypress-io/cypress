@@ -1,4 +1,5 @@
 const log = require('debug')('cypress:server:plugins:child')
+const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const util = require('../util')
 
@@ -20,7 +21,7 @@ const sendError = (ipc, err) => {
 
 let plugins
 
-const load = (ipc, config) => {
+const load = (ipc, config, pluginsFile) => {
   log('run plugins function')
 
   let callbackIdCount = 0
@@ -40,12 +41,16 @@ const load = (ipc, config) => {
     })
   }
 
-  try {
-    plugins(register, config)
-    ipc.send('loaded', registrations)
-  } catch (err) {
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', util.serializeError(err))
-  }
+  Promise
+  .try(() => {
+    return plugins(register, config)
+  })
+  .then((modifiedCfg) => {
+    ipc.send('loaded', modifiedCfg, registrations)
+  })
+  .catch((err) => {
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+  })
 }
 
 const execute = (ipc, event, ids, args = []) => {
@@ -93,7 +98,7 @@ module.exports = (ipc, pluginsFile) => {
   }
 
   ipc.on('load', (config) => {
-    load(ipc, config)
+    load(ipc, config, pluginsFile)
   })
 
   ipc.on('execute', (event, ids, args) => {

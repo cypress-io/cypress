@@ -439,7 +439,7 @@ class Server
     if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
       @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_port()}"
       @_remoteStrategy = "file"
-      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer.port()}"
+      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer?.port()}"
       @_remoteDomainName = DEFAULT_DOMAIN_NAME
       @_remoteProps = null
 

@@ -75,7 +75,6 @@ module.exports = {
         "run-project": "runProject"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
-        "env":         "environmentVariables"
         "headless":    "isTextTerminal"
         "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
@@ -90,7 +89,6 @@ module.exports = {
     options = _
     .chain(options)
     .defaults(whitelisted)
-    .extend({env: process.env["CYPRESS_ENV"]})
     .mapValues(coerce)
     .value()
 
@@ -108,9 +106,9 @@ module.exports = {
       backup("hosts", options)
       options.hosts = parseNestedValues(hosts)
 
-    if envs = options.environmentVariables
-      backup("environmentVariables", options)
-      options.environmentVariables = parseNestedValues(envs)
+    if envs = options.env
+      backup("env", options)
+      options.env = parseNestedValues(envs)
 
     if ro = options.reporterOptions
       backup("reporterOptions", options)

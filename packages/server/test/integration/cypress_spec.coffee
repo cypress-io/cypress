@@ -78,6 +78,7 @@ describe "lib/cypress", ->
     @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
     @noScaffolding = Fixtures.projectPath("no-scaffolding")
+    @pluginConfig = Fixtures.projectPath("plugin-config")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
@@ -631,6 +632,40 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
+      it "can override values in plugins", ->
+        cypress.start([
+          "--run-project=#{@pluginConfig}", "--config=requestTimeout=1234,videoCompression=false"
+          "--env=foo=foo,bar=bar"
+        ])
+        .then =>
+          cfg = openProject.getProject().cfg
+
+          expect(cfg.videoCompression).to.eq(20)
+          expect(cfg.defaultCommandTimeout).to.eq(500)
+          expect(cfg.env).to.deep.eq({
+            foo: "bar"
+            bar: "bar"
+          })
+
+          expect(cfg.resolved.videoCompression).to.deep.eq({
+            value: 20
+            from: "plugin"
+          })
+          expect(cfg.resolved.requestTimeout).to.deep.eq({
+            value: 1234
+            from: "cli"
+          })
+          expect(cfg.resolved.env.foo).to.deep.eq({
+            value: "bar"
+            from: "plugin"
+          })
+          expect(cfg.resolved.env.bar).to.deep.eq({
+            value: "bar"
+            from: "cli"
+          })
+
+          @expectExitWith(0)
+
     describe "--port", ->
       beforeEach ->
         headless.listenForProjectEnd.resolves({failures: 0})
@@ -676,7 +711,7 @@ describe "lib/cypress", ->
           "version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor"
         ])
         .then =>
-          expect(openProject.getProject().cfg.environmentVariables).to.deep.eq({
+          expect(openProject.getProject().cfg.env).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
             host: "http://localhost:8888"
@@ -1090,7 +1125,7 @@ describe "lib/cypress", ->
           port: 2121
           pageLoadTimeout: 1000
           report: false
-          environmentVariables: { baz: "baz" }
+          env: { baz: "baz" }
         })
 
         cfg = open.getCall(0).args[0]
@@ -1101,12 +1136,12 @@ describe "lib/cypress", ->
         expect(cfg.baseUrl).to.eq("localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
-        expect(cfg.environmentVariables.baz).to.eq("baz")
-        expect(cfg.environmentVariables).not.to.have.property("fileServerFolder")
-        expect(cfg.environmentVariables).not.to.have.property("port")
-        expect(cfg.environmentVariables).not.to.have.property("BASE_URL")
-        expect(cfg.environmentVariables).not.to.have.property("watchForFileChanges")
-        expect(cfg.environmentVariables).not.to.have.property("responseTimeout")
+        expect(cfg.env.baz).to.eq("baz")
+        expect(cfg.env).not.to.have.property("fileServerFolder")
+        expect(cfg.env).not.to.have.property("port")
+        expect(cfg.env).not.to.have.property("BASE_URL")
+        expect(cfg.env).not.to.have.property("watchForFileChanges")
+        expect(cfg.env).not.to.have.property("responseTimeout")
 
         expect(cfg.resolved.fileServerFolder).to.deep.eq({
           value: "foo"
@@ -1132,7 +1167,7 @@ describe "lib/cypress", ->
           value: 5555
           from: "env"
         })
-        expect(cfg.resolved.environmentVariables.baz).to.deep.eq({
+        expect(cfg.resolved.env.baz).to.deep.eq({
           value: "baz"
           from: "cli"
         })
