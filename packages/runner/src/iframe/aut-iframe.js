@@ -1,7 +1,9 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
+
 import blankContents from './blank-contents'
 import dom from '../lib/dom'
+import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
 import selectorHelperModel from '../selector-helper/selector-helper-model'
 
@@ -259,6 +261,7 @@ export default class AutIframe {
       showTooltip: true,
       onClick: () => {
         selectorHelperModel.setNumElements(1)
+        selectorHelperModel.resetMethod()
         selectorHelperModel.setSelector(selector)
       },
     })
@@ -276,14 +279,23 @@ export default class AutIframe {
 
   toggleSelectorHighlight (isShowingHighlight) {
     if (isShowingHighlight) {
-      const selector = selectorHelperModel.selector
       const contents = this._contents()
-      if (!contents) return
+      let selector = selectorHelperModel.selector
+
+      if (!contents || !selector) return
 
       let $el
 
       try {
-        $el = contents.find(selector)
+        if (selectorHelperModel.method.name === 'contains') {
+          const Cypress = eventManager.getCypress()
+          $el = contents.find(Cypress.dom.getContainsSelector(selector))
+          if ($el.length) {
+            $el = Cypress.dom.getFirstDeepestElement($el)
+          }
+        } else {
+          $el = contents.find(selector)
+        }
         selectorHelperModel.setValidity(true)
         selectorHelperModel.setNumElements($el.length)
         if ($el.length) {

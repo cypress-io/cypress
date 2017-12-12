@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
@@ -24,9 +25,10 @@ const fixMouseOut = (fn, getTarget) => (e) => {
 @observer
 class Footer extends Component {
   @observable copyText = defaultCopyText
+  @observable showingMethodPicker = false
 
   render () {
-    const selectorText = `cy.get('${selectorHelperModel.selector}')`
+    const selectorText = `cy.${selectorHelperModel.method.name}('${selectorHelperModel.selector || selectorHelperModel.method.example}')`
 
     return (
       <div className='selector-helper'>
@@ -41,14 +43,14 @@ class Footer extends Component {
             >
               <span className='syntax-object'>cy</span>
               <span className='syntax-operator'>.</span>
-              <span className='syntax-method'>get</span>
+              {this._methodSelector()}
               <span className='syntax-operator'>(</span>
               <span className='syntax-string'>{'\''}</span>
               <AutosizeInput
                 className='selector-input'
                 value={selectorHelperModel.selector}
                 onChange={this._updateSelector}
-                placeholder='.foo'
+                placeholder={selectorHelperModel.method.example}
               />
               <span className='syntax-string'>{'\''}</span>
               <span className='syntax-operator'>)</span>
@@ -68,7 +70,7 @@ class Footer extends Component {
           <div className={cs('info', {
             'is-invalid': !selectorHelperModel.isValid || !selectorHelperModel.numElements,
           })}>
-            <div className='spacer'>cy.get({'\''}</div>
+            <div className='spacer'>cy.{selectorHelperModel.method.name}({'\''}</div>
             {selectorHelperModel.playgroundInfo}
           </div>
         </div>
@@ -77,6 +79,41 @@ class Footer extends Component {
         </button>
       </div>
     )
+  }
+
+  _methodSelector () {
+    return (
+      <span className={cs('method', {
+        'is-showing': this.showingMethodPicker,
+      })}>
+        <span className='syntax-method' onClick={this._toggleMethodPicker}>{selectorHelperModel.method.name}</span>
+        <div className='method-picker'>
+          {_.map(selectorHelperModel.methods, (method) => (
+            <div
+              key={method.name}
+              className={cs({ 'is-chosen': selectorHelperModel.method.name === method.name })}
+              onClick={() => this._setMethod(method)}
+            >{method.name}</div>
+          ))}
+        </div>
+      </span>
+    )
+  }
+
+  _toggleMethodPicker = () => {
+    this._setShowingMethodPicker(!this.showingMethodPicker)
+  }
+
+  @action _setShowingMethodPicker (isShowing) {
+    this.showingMethodPicker = isShowing
+  }
+
+  @action _setMethod (method) {
+    if (method.name !== selectorHelperModel.method.name) {
+      selectorHelperModel.clearSelector()
+      selectorHelperModel.setMethod(method)
+    }
+    this._setShowingMethodPicker(false)
   }
 
   _setHighlight = (isShowing) => () => {

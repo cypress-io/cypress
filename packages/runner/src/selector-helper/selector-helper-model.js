@@ -1,11 +1,19 @@
 import { action, computed, observable } from 'mobx'
 
+const methods = [
+  { name: 'get', example: '.foo' },
+  { name: 'contains', example: 'Lorem ipsum' },
+]
+
 class SelectorHelperModel {
+  methods = methods
+
   @observable selector = ''
   @observable isEnabled = false
   @observable isShowingHighlight = false
   @observable isValid = true
   @observable numElements = 0
+  @observable method = methods[0]
 
   @computed get playgroundInfo () {
     if (!this.isValid) {
@@ -23,6 +31,7 @@ class SelectorHelperModel {
     if (!this.isEnabled) {
       this.selector = null
       this.isShowingHighlight = false
+      this.resetMethod()
     }
   }
 
@@ -45,6 +54,14 @@ class SelectorHelperModel {
 
   @action setValidity (isValid) {
     this.isValid = isValid
+  }
+
+  @action setMethod (method) {
+    this.method = method
+  }
+
+  @action resetMethod () {
+    this.method = methods[0]
   }
 }
 

@@ -12,10 +12,6 @@
         padding-right: 20px;
       }
 
-      .selector-scroll-wrap {
-        overflow-x: auto;
-      }
-
       .selector {
         align-items: center;
         display: flex;
@@ -45,6 +41,7 @@
         input {
           border: solid 1px #d3d3d3;;
           color: #50a160;
+          max-width: 160px;
           min-width: 26px;
           outline: none;
           padding: 2px 4px;
@@ -62,23 +59,63 @@
         z-index: -1;
       }
 
-      code {
-        background: #e3e3e3;
-        border: solid 1px #d3d3d3;
-        color: #333;
-        flex-grow: 0;
+      .method {
+        position: relative;
+
+        .syntax-method {
+          cursor: pointer;
+          border-bottom: dotted 1px #6478f2;
+        }
+
+        .method-picker {
+          background: #fff;
+          border: solid 1px #d3d3d3;
+          border-radius: 3px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+          display: none;
+          font-size: 12px;
+          padding: 3px;
+          position: absolute;
+          left: 100%;
+          top: -3px;
+
+          div {
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 2px;
+            padding: 3px 6px;
+
+            &:first-child {
+              margin-top: 0;
+            }
+
+            &:hover {
+              background: #e3e3e3;
+            }
+
+            &.is-chosen {
+              background: #6478f2;
+              color: #f8f8f8;
+            }
+          }
+
+        }
+
+        &.is-showing .method-picker {
+          display: block;
+        }
       }
 
       .copy-to-clipboard {
-        background: #d3d3d3;
-        border: solid 1px #c7c7c7;
+        background: #e3e3e3;
+        border: solid 1px #d3d3d3;
         border-radius: 3px;
         color: #333;
         margin-left: 4px;
         padding: 3px 6px;
 
         &:hover {
-          background: #c7c7c7;
+          background: #d3d3d3;
         }
       }
 
